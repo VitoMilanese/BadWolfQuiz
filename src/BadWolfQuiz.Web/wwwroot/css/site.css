@@ -1495,3 +1495,34 @@ textarea {
 .join-code-close:hover {
     border-color: var(--red-bright);
 }
+
+/* Quiz editor: random wager settings */
+
+.round-wager-settings {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+    align-items: end;
+    gap: 24px;
+    margin-bottom: 18px;
+}
+
+.round-wager-settings .checkbox-row {
+    margin: 0;
+}
+
+.round-wager-settings .checkbox-row span,
+#random-wager-count-setting {
+    display: grid;
+    gap: 5px;
+}
+
+.round-wager-settings small {
+    color: var(--muted);
+    font-weight: 500;
+}
+
+@media (max-width: 700px) {
+    .round-wager-settings {
+        grid-template-columns: 1fr;
+    }
+}
