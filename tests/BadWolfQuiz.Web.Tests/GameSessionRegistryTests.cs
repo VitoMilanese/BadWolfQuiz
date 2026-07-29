@@ -65,6 +65,45 @@ public sealed class GameSessionRegistryTests
         Assert.Equal(PlayerJoinStatus.GameNotFound, result.Status);
     }
 
+    [Fact]
+    public void JoinPlayer_returns_access_token_for_presence_connection()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        var connected = registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-1",
+            true);
+
+        Assert.NotNull(joined.AccessToken);
+        Assert.NotNull(connected);
+        Assert.Equal(
+            PlayerPresenceStatus.Active,
+            registry.GetPlayerLobbyEntries(joined.Game!).Single().Presence);
+    }
+
+    [Fact]
+    public void Presence_changes_when_page_becomes_inactive_or_disconnects()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer("ABC123", joined.AccessToken!, "connection-1", true);
+
+        registry.SetPlayerVisibility("connection-1", false);
+        var inactive = registry.GetPlayerLobbyEntries(joined.Game!).Single();
+
+        registry.DisconnectPlayer("connection-1");
+        var disconnected = registry.GetPlayerLobbyEntries(joined.Game!).Single();
+
+        Assert.Equal(PlayerPresenceStatus.Inactive, inactive.Presence);
+        Assert.Equal(PlayerPresenceStatus.Disconnected, disconnected.Presence);
+        Assert.Equal(0, disconnected.Score);
+    }
+
     private static GameSessionRegistry CreateRegistry(params string[] codes)
     {
         return new GameSessionRegistry(new StubGameCodeGenerator(codes));
