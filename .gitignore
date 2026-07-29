@@ -427,3 +427,12 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# SQLite databases and temporary files
+*.db
+*.db-shm
+*.db-wal
+
+# Bad Wolf Quiz local data
+src/BadWolfQuiz.Web/App_Data/*
+!src/BadWolfQuiz.Web/App_Data/.gitkeep
