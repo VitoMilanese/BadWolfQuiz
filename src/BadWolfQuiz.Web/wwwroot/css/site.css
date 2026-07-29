@@ -1526,3 +1526,58 @@ textarea {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* Host question wager */
+
+.current-question-summary {
+    display: grid;
+}
+
+.current-question-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.question-wager-form {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(140px, 220px) auto;
+    align-items: end;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.question-wager-form label {
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 750;
+}
+
+.question-wager-form select,
+.question-wager-form input {
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--text);
+    background: var(--panel);
+}
+
+.accepted-wager {
+    margin: 12px 0 0;
+    color: var(--gold);
+    font-weight: 850;
+}
+
+@media (max-width: 700px) {
+    .current-question-heading {
+        flex-direction: column;
+    }
+
+    .question-wager-form {
+        grid-template-columns: 1fr;
+    }
+}
