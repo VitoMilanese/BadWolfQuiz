@@ -11,19 +11,51 @@ public sealed class GameBoard
     {
         _questions = quiz.Rounds
             .OrderBy(round => round.SortOrder)
-            .SelectMany(round => round.Questions.Select(question => new RuntimeQuestion(
-                round.SourceRoundId,
-                question.SourceQuestionId,
-                question.SourceCategoryId,
-                question.CategoryTitle,
-                question.RowIndex,
-                question.Points,
-                question.IsSpecial)))
+            .SelectMany(CreateRoundQuestions)
             .ToList()
             .AsReadOnly();
     }
 
     public IReadOnlyList<RuntimeQuestion> Questions => _questions;
+
+    private static IEnumerable<RuntimeQuestion> CreateRoundQuestions(
+        QuizRoundSnapshot round)
+    {
+        var randomWagerQuestionIds = round.UseRandomWagerQuestions
+            ? SelectRandomWagerQuestions(round)
+            : new HashSet<int>();
+
+        return round.Questions.Select(question => new RuntimeQuestion(
+            round.SourceRoundId,
+            question.SourceQuestionId,
+            question.SourceCategoryId,
+            question.CategoryTitle,
+            question.RowIndex,
+            question.Points,
+            round.UseRandomWagerQuestions
+                ? randomWagerQuestionIds.Contains(question.SourceQuestionId)
+                : question.IsSpecial));
+    }
+
+    private static HashSet<int> SelectRandomWagerQuestions(
+        QuizRoundSnapshot round)
+    {
+        var candidates = round.Questions
+            .Where(question => !question.ExcludeFromRandomWagerSelection)
+            .ToList();
+
+        for (var index = candidates.Count - 1; index > 0; index--)
+        {
+            var swapIndex = Random.Shared.Next(index + 1);
+            (candidates[index], candidates[swapIndex]) =
+                (candidates[swapIndex], candidates[index]);
+        }
+
+        return candidates
+            .Take(round.RandomWagerQuestionCount)
+            .Select(question => question.SourceQuestionId)
+            .ToHashSet();
+    }
 }
 
 public sealed class RuntimeQuestion

@@ -67,6 +67,8 @@ public sealed class QuizRound
     public int SortOrder { get; set; }
     public int DefaultTimeLimitSeconds { get; set; } = 30;
     public BuzzActivationMode DefaultBuzzMode { get; set; } = BuzzActivationMode.Manual;
+    public bool UseRandomWagerQuestions { get; set; }
+    public int RandomWagerQuestionCount { get; set; }
 
     public Quiz Quiz { get; set; } = null!;
     public ICollection<QuizRoundRow> Rows { get; set; } = new List<QuizRoundRow>();
@@ -106,6 +108,7 @@ public sealed class QuizQuestion
     public BuzzActivationMode BuzzModeOverride { get; set; } = BuzzActivationMode.UseRoundDefault;
     public int BuzzDelaySeconds { get; set; }
     public bool IsSpecial { get; set; }
+    public bool ExcludeFromRandomWagerSelection { get; set; }
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public QuizCategory Category { get; set; } = null!;

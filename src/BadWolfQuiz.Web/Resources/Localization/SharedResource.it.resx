@@ -342,6 +342,8 @@
   <data name="Label_WagerQuestion" xml:space="preserve">
     <value>Puntata</value>
   </data>
+  <data name="Label_ExcludeFromRandomWagerSelection" xml:space="preserve"><value>Escludi dalla selezione casuale delle puntate</value></data>
+  <data name="Hint_ExcludeFromRandomWagerSelection" xml:space="preserve"><value>Questa domanda non verrà mai scelta come domanda con puntata casuale.</value></data>
   <data name="Label_Created" xml:space="preserve">
     <value>Creato</value>
   </data>
@@ -675,6 +677,12 @@
   <data name="QuizEditor_CannotDeleteOnlyRound" xml:space="preserve">
     <value>Non è possibile eliminare l’unico round.</value>
   </data>
+  <data name="QuizEditor_UseRandomWagerQuestions" xml:space="preserve"><value>Domande con puntata casuali</value></data>
+  <data name="QuizEditor_RandomWagerDescription" xml:space="preserve"><value>Ignora le domande contrassegnate manualmente e scegli posizioni casuali alla creazione di ogni partita.</value></data>
+  <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve"><value>Numero di domande con puntata</value></data>
+  <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Domande disponibili: {0}</value></data>
+  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Scegli tra 1 e {0} domande con puntata casuali.</value></data>
+  <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Impostazioni del round salvate.</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Valore delle domande</value>
   </data>

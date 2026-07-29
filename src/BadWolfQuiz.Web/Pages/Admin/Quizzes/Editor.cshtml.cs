@@ -80,6 +80,10 @@ public sealed class EditorModel(
 
         public int RoundId { get; set; }
 
+        public bool UseRandomWagerQuestions { get; set; }
+
+        public int RandomWagerQuestionCount { get; set; }
+
         public List<RoundRowInputModel> Rows { get; set; } = new();
     }
 
@@ -157,6 +161,9 @@ public sealed class EditorModel(
         {
             QuizId = quiz.Id,
             RoundId = selectedRound.Id,
+            UseRandomWagerQuestions = selectedRound.UseRandomWagerQuestions,
+            RandomWagerQuestionCount =
+                selectedRound.RandomWagerQuestionCount,
             Rows = selectedRound.Rows
                 .OrderBy(x => x.RowIndex)
                 .Select(x => new RoundRowInputModel
@@ -511,6 +518,9 @@ public sealed class EditorModel(
         var quiz = await db.Quizzes
             .Include(x => x.Rounds)
                 .ThenInclude(x => x.Rows)
+            .Include(x => x.Rounds)
+                .ThenInclude(x => x.Categories)
+                    .ThenInclude(x => x.Questions)
             .SingleOrDefaultAsync(x => x.Id == RoundRows.QuizId);
 
         if (quiz is null)
@@ -544,6 +554,30 @@ public sealed class EditorModel(
                 selectedRoundId = round.Id
             });
         }
+
+        var eligibleQuestionCount = round.Categories
+            .SelectMany(category => category.Questions)
+            .Count(question => !question.ExcludeFromRandomWagerSelection);
+
+        if (RoundRows.UseRandomWagerQuestions &&
+            (RoundRows.RandomWagerQuestionCount <= 0 ||
+             RoundRows.RandomWagerQuestionCount > eligibleQuestionCount))
+        {
+            TempData["ErrorMessage"] = localizer[
+                "QuizEditor_InvalidRandomWagerCount",
+                eligibleQuestionCount].Value;
+
+            return RedirectToPage(new
+            {
+                id = quiz.Id,
+                selectedRoundId = round.Id
+            });
+        }
+
+        round.UseRandomWagerQuestions =
+            RoundRows.UseRandomWagerQuestions;
+        round.RandomWagerQuestionCount =
+            Math.Max(0, RoundRows.RandomWagerQuestionCount);
 
         foreach (var submittedRow in submittedRows)
         {

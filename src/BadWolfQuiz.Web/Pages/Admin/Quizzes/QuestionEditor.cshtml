@@ -60,6 +60,14 @@
             </span>
         </label>
 
+        <label class="checkbox-row wager-question-setting">
+            <input asp-for="Input.ExcludeFromRandomWagerSelection" />
+            <span>
+                <strong>@Localizer["Label_ExcludeFromRandomWagerSelection"]</strong>
+                <small>@Localizer["Hint_ExcludeFromRandomWagerSelection"]</small>
+            </span>
+        </label>
+
         <div id="buzz-mode-setting">
             <label asp-for="Input.BuzzModeOverride">
                 @Localizer["Label_BuzzMode"]

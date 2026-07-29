@@ -16,6 +16,10 @@
     var categories = round.Categories
         .OrderBy(x => x.SortOrder)
         .ToList();
+
+    var eligibleRandomWagerQuestionCount = categories
+        .SelectMany(category => category.Questions)
+        .Count(question => !question.ExcludeFromRandomWagerSelection);
 }
 
 @if (TempData["SuccessMessage"] is string successMessage)
@@ -99,6 +103,30 @@
     <input asp-for="RoundRows.RoundId"
            type="hidden"
            value="@round.Id" />
+
+    <section class="content-panel round-wager-settings">
+        <label class="checkbox-row">
+            <input asp-for="RoundRows.UseRandomWagerQuestions" />
+            <span>
+                <strong>@Localizer["QuizEditor_UseRandomWagerQuestions"]</strong>
+                <small>@Localizer["QuizEditor_RandomWagerDescription"]</small>
+            </span>
+        </label>
+
+        <div id="random-wager-count-setting">
+            <label asp-for="RoundRows.RandomWagerQuestionCount">
+                @Localizer["QuizEditor_RandomWagerQuestionCount"]
+            </label>
+            <input asp-for="RoundRows.RandomWagerQuestionCount"
+                   type="number"
+                   min="1"
+                   max="@eligibleRandomWagerQuestionCount" />
+            <small>
+                @Localizer["QuizEditor_EligibleRandomWagerQuestions",
+                    eligibleRandomWagerQuestionCount]
+            </small>
+        </div>
+    </section>
 
     <div class="quiz-board-scroll">
         <div class="quiz-board" style="--row-count:@roundRows.Count;">
@@ -469,6 +497,25 @@
 @section Scripts
 {
     <script>
+        const randomWagerCheckbox =
+            document.getElementById("RoundRows_UseRandomWagerQuestions");
+
+        const randomWagerCountSetting =
+            document.getElementById("random-wager-count-setting");
+
+        function updateRandomWagerSettings() {
+            if (randomWagerCountSetting) {
+                randomWagerCountSetting.hidden =
+                    !(randomWagerCheckbox?.checked ?? false);
+            }
+        }
+
+        randomWagerCheckbox?.addEventListener(
+            "change",
+            updateRandomWagerSettings);
+
+        updateRandomWagerSettings();
+
         const exchangeCategoryRounds = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
             rounds.Select(roundItem => new
             {

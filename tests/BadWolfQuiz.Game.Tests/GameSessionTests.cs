@@ -137,6 +137,58 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void Create_selects_configured_number_of_random_wager_questions()
+    {
+        var quiz = new QuizSnapshot(
+            1,
+            "Random wagers",
+            [
+                new QuizRoundSnapshot(
+                    1,
+                    "Round 1",
+                    0,
+                    [
+                        new QuizQuestionSnapshot(
+                            100, 10, 0, 100, true, "Science", true),
+                        new QuizQuestionSnapshot(
+                            101, 10, 1, 200, false, "Science"),
+                        new QuizQuestionSnapshot(
+                            102, 10, 2, 300, false, "Science"),
+                        new QuizQuestionSnapshot(
+                            103, 10, 3, 400, false, "Science")
+                    ],
+                    useRandomWagerQuestions: true,
+                    randomWagerQuestionCount: 2)
+            ]);
+
+        var session = GameSession.Create(quiz);
+
+        Assert.Equal(
+            2,
+            session.Board.Questions.Count(question => question.IsSpecial));
+        Assert.False(
+            session.Board.Questions
+                .Single(question => question.SourceQuestionId == 100)
+                .IsSpecial);
+    }
+
+    [Fact]
+    public void QuizSnapshot_rejects_random_wager_count_above_eligible_questions()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new QuizRoundSnapshot(
+                1,
+                "Round 1",
+                0,
+                [
+                    new QuizQuestionSnapshot(
+                        100, 10, 0, 100, false, "Science", true)
+                ],
+                useRandomWagerQuestions: true,
+                randomWagerQuestionCount: 1));
+    }
+
+    [Fact]
     public void QuizSnapshot_copies_source_collections()
     {
         var questions = new List<QuizQuestionSnapshot>

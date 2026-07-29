@@ -44,7 +44,9 @@ public sealed class QuizRoundSnapshot
         int sourceRoundId,
         string title,
         int sortOrder,
-        IEnumerable<QuizQuestionSnapshot> questions)
+        IEnumerable<QuizQuestionSnapshot> questions,
+        bool useRandomWagerQuestions = false,
+        int randomWagerQuestionCount = 0)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceRoundId);
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
@@ -63,9 +65,25 @@ public sealed class QuizRoundSnapshot
             throw new ArgumentException("Question identifiers must be unique within a round.", nameof(questions));
         }
 
+        ArgumentOutOfRangeException.ThrowIfNegative(randomWagerQuestionCount);
+
+        var eligibleQuestionCount = questionList.Count(question =>
+            !question.ExcludeFromRandomWagerSelection);
+
+        if (useRandomWagerQuestions &&
+            (randomWagerQuestionCount == 0 ||
+             randomWagerQuestionCount > eligibleQuestionCount))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(randomWagerQuestionCount),
+                "Random wager question count must be between one and the number of eligible questions.");
+        }
+
         SourceRoundId = sourceRoundId;
         Title = title.Trim();
         SortOrder = sortOrder;
+        UseRandomWagerQuestions = useRandomWagerQuestions;
+        RandomWagerQuestionCount = randomWagerQuestionCount;
         _questions = questionList.AsReadOnly();
     }
 
@@ -74,6 +92,10 @@ public sealed class QuizRoundSnapshot
     public string Title { get; }
 
     public int SortOrder { get; }
+
+    public bool UseRandomWagerQuestions { get; }
+
+    public int RandomWagerQuestionCount { get; }
 
     public IReadOnlyList<QuizQuestionSnapshot> Questions => _questions;
 }
@@ -86,7 +108,8 @@ public sealed class QuizQuestionSnapshot
         int rowIndex,
         int points,
         bool isSpecial,
-        string? categoryTitle = null)
+        string? categoryTitle = null,
+        bool excludeFromRandomWagerSelection = false)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceQuestionId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceCategoryId);
@@ -98,6 +121,7 @@ public sealed class QuizQuestionSnapshot
         RowIndex = rowIndex;
         Points = points;
         IsSpecial = isSpecial;
+        ExcludeFromRandomWagerSelection = excludeFromRandomWagerSelection;
         CategoryTitle = string.IsNullOrWhiteSpace(categoryTitle)
             ? sourceCategoryId.ToString()
             : categoryTitle.Trim();
@@ -112,6 +136,8 @@ public sealed class QuizQuestionSnapshot
     public int Points { get; }
 
     public bool IsSpecial { get; }
+
+    public bool ExcludeFromRandomWagerSelection { get; }
 
     public string CategoryTitle { get; }
 }

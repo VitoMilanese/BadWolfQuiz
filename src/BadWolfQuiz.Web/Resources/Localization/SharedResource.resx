@@ -342,6 +342,8 @@
   <data name="Label_WagerQuestion" xml:space="preserve">
     <value>Wager</value>
   </data>
+  <data name="Label_ExcludeFromRandomWagerSelection" xml:space="preserve"><value>Exclude from random wager selection</value></data>
+  <data name="Hint_ExcludeFromRandomWagerSelection" xml:space="preserve"><value>This question will never be chosen as a random wager question.</value></data>
   <data name="Label_Created" xml:space="preserve">
     <value>Created</value>
   </data>
@@ -675,6 +677,12 @@
   <data name="QuizEditor_CannotDeleteOnlyRound" xml:space="preserve">
     <value>The only round cannot be deleted.</value>
   </data>
+  <data name="QuizEditor_UseRandomWagerQuestions" xml:space="preserve"><value>Random wager questions</value></data>
+  <data name="QuizEditor_RandomWagerDescription" xml:space="preserve"><value>Ignore manually marked wager questions and choose random positions when each game is created.</value></data>
+  <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve"><value>Number of wager questions</value></data>
+  <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Eligible questions: {0}</value></data>
+  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Choose between 1 and {0} random wager questions.</value></data>
+  <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Round settings saved.</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Question values</value>
   </data>
