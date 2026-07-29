@@ -1,13 +1,13 @@
 @page "{id:guid}"
 @model BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel
 @{
-    ViewData["Title"] = Model.Session.Quiz.Title;
+    ViewData["Title"] = Model.Game.Session.Quiz.Title;
 }
 
 <div class="page-heading">
     <div>
         <p class="eyebrow">@Localizer["GameLobby_Eyebrow"]</p>
-        <h1>@Model.Session.Quiz.Title</h1>
+        <h1>@Model.Game.Session.Quiz.Title</h1>
     </div>
 
     <a class="button button-secondary" asp-page="/Admin/Quizzes/Index">
@@ -17,22 +17,35 @@
 
 <section class="content-panel narrow">
     <div class="stack-form">
+        <div class="game-code-panel">
+            <span>@Localizer["Label_GameCode"]</span>
+            <strong>@Model.Game.PublicCode</strong>
+            <small>@Localizer["Message_WaitingPlayers"]</small>
+        </div>
         <p>
             <strong>@Localizer["GameLobby_StatusLabel"]:</strong>
             @Localizer["GameLobby_StatusLobby"]
         </p>
         <p>
             <strong>@Localizer["GameLobby_PlayerCount"]:</strong>
-            @Model.Session.Players.Count
+            @Model.Players.Count
         </p>
         <p>
             <strong>@Localizer["GameLobby_QuestionCount"]:</strong>
-            @Model.Session.Board.Questions.Count
+            @Model.Game.Session.Board.Questions.Count
         </p>
-        <p>
-            <strong>@Localizer["GameLobby_SessionId"]:</strong>
-            <code>@Model.Session.Id</code>
-        </p>
+        @if (Model.Players.Count > 0)
+        {
+            <ul class="player-list">
+                @foreach (var player in Model.Players)
+                {
+                    <li>
+                        <strong>@player.Name</strong>
+                        <span>@player.Score</span>
+                    </li>
+                }
+            </ul>
+        }
         <p class="dialog-warning">@Localizer["GameLobby_TransientNotice"]</p>
     </div>
 </section>
