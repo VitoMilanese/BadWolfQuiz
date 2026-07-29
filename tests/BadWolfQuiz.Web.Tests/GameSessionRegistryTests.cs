@@ -188,6 +188,30 @@ public sealed class GameSessionRegistryTests
             question);
     }
 
+    [Fact]
+    public void SubmitQuestionWager_routes_command_to_runtime_session()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateWagerQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.StartGame("ABC123");
+        registry.SelectQuestion("ABC123", 1);
+
+        var question = registry.SubmitQuestionWager(
+            "ABC123",
+            1,
+            joined.Player!.Id,
+            250);
+
+        Assert.NotNull(question);
+        Assert.Equal(
+            BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active,
+            question.Status);
+        Assert.Equal(joined.Player.Id, question.Wager!.PlayerId);
+        Assert.Equal(250, question.Wager.Amount);
+        Assert.Same(game.Session.Board.Questions.Single(), question);
+    }
+
     private static GameSessionRegistry CreateRegistry(params string[] codes)
     {
         return new GameSessionRegistry(new StubGameCodeGenerator(codes));
@@ -204,6 +228,20 @@ public sealed class GameSessionRegistryTests
                     "Round 1",
                     0,
                     [new QuizQuestionSnapshot(1, 1, 0, 100, false)])
+            ]);
+    }
+
+    private static QuizSnapshot CreateWagerQuiz()
+    {
+        return new QuizSnapshot(
+            1,
+            "Wager Quiz",
+            [
+                new QuizRoundSnapshot(
+                    1,
+                    "Round 1",
+                    0,
+                    [new QuizQuestionSnapshot(1, 1, 0, 100, true)])
             ]);
     }
 
