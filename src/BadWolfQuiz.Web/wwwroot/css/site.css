@@ -1708,7 +1708,9 @@ textarea {
 /* Focused wager entry */
 
 .current-question-summary.wager-mode {
+    width: 100%;
     min-height: min(680px, calc(100vh - 210px));
+    grid-template-columns: minmax(0, 1fr);
     place-items: center;
     align-content: center;
     padding: clamp(20px, 4vw, 48px);
