@@ -60,6 +60,8 @@ public sealed class GameBoard
 
 public sealed class RuntimeQuestion
 {
+    private readonly List<QuestionAnswerAttempt> _answerAttempts = [];
+    private readonly IReadOnlyList<QuestionAnswerAttempt> _readOnlyAnswerAttempts;
     internal RuntimeQuestion(
         int sourceRoundId,
         int sourceQuestionId,
@@ -76,6 +78,7 @@ public sealed class RuntimeQuestion
         RowIndex = rowIndex;
         Points = points;
         IsSpecial = isSpecial;
+        _readOnlyAnswerAttempts = _answerAttempts.AsReadOnly();
     }
 
     public int SourceRoundId { get; }
@@ -97,6 +100,8 @@ public sealed class RuntimeQuestion
     public GamePlayerId? SelectedByPlayerId { get; private set; }
 
     public Wager? Wager { get; private set; }
+
+    public IReadOnlyList<QuestionAnswerAttempt> AnswerAttempts => _readOnlyAnswerAttempts;
 
     internal void Select(GamePlayerId selectedByPlayerId)
     {
@@ -124,6 +129,63 @@ public sealed class RuntimeQuestion
 
         Wager = new Wager(playerId, amount, submittedAtUtc);
         Status = RuntimeQuestionStatus.Active;
+    }
+    internal QuestionAnswerAttempt JudgeAnswer(
+        GamePlayerId playerId,
+        bool isCorrect,
+        DateTimeOffset judgedAtUtc)
+    {
+        if (Status is not RuntimeQuestionStatus.Selected and
+            not RuntimeQuestionStatus.Active)
+        {
+            throw new GameRuleViolationException(
+                "Only an active question can have an answer judged.");
+        }
+
+        if (_answerAttempts.Any(attempt => attempt.PlayerId == playerId))
+        {
+            throw new GameRuleViolationException(
+                "This player has already answered the current question.");
+        }
+
+        if (IsSpecial && Wager?.PlayerId != playerId)
+        {
+            throw new GameRuleViolationException(
+                "Only the wager player can answer a wager question.");
+        }
+
+        var value = IsSpecial
+            ? Wager?.Amount ?? throw new GameRuleViolationException(
+                "A wager question cannot be judged before its wager is accepted.")
+            : Points;
+        var scoreDelta = isCorrect ? value : -value;
+        var attempt = new QuestionAnswerAttempt(
+            playerId,
+            isCorrect,
+            scoreDelta,
+            judgedAtUtc);
+
+        _answerAttempts.Add(attempt);
+
+        if (isCorrect || IsSpecial)
+        {
+            Status = RuntimeQuestionStatus.Resolved;
+        }
+
+        return attempt;
+    }
+
+    internal void ResolveWithoutCorrectAnswer()
+    {
+        if (IsSpecial ||
+            Status is not RuntimeQuestionStatus.Selected and
+                not RuntimeQuestionStatus.Active)
+        {
+            throw new GameRuleViolationException(
+                "Only an active regular question can be closed without a correct answer.");
+        }
+
+        Status = RuntimeQuestionStatus.Resolved;
     }
 }
 
