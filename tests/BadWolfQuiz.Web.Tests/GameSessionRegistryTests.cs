@@ -200,16 +200,37 @@ public sealed class GameSessionRegistryTests
         var question = registry.SubmitQuestionWager(
             "ABC123",
             1,
-            joined.Player!.Id,
-            250);
+            100);
 
         Assert.NotNull(question);
         Assert.Equal(
             BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active,
             question.Status);
         Assert.Equal(joined.Player.Id, question.Wager!.PlayerId);
-        Assert.Equal(250, question.Wager.Amount);
+        Assert.Equal(100, question.Wager.Amount);
         Assert.Same(game.Session.Board.Questions.Single(), question);
+    }
+
+    [Fact]
+    public void ActivePlayer_commands_route_to_runtime_session()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        var rose = registry.JoinPlayer("ABC123", "Rose").Player!;
+        var mickey = registry.JoinPlayer("ABC123", "Mickey").Player!;
+
+        Assert.Equal(rose.Id, game.Session.ActivePlayerId);
+
+        registry.SetActivePlayer("ABC123", mickey.Id);
+
+        Assert.Equal(mickey.Id, game.Session.ActivePlayerId);
+
+        var selected = registry.SelectRandomActivePlayer("ABC123");
+
+        Assert.Contains(
+            selected!.Id,
+            new[] { rose.Id, mickey.Id });
+        Assert.Equal(selected.Id, game.Session.ActivePlayerId);
     }
 
     private static GameSessionRegistry CreateRegistry(params string[] codes)
