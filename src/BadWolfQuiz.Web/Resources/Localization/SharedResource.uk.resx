@@ -702,4 +702,15 @@
   <data name="QuizEditor_CategoryRenamed" xml:space="preserve">
     <value>Категорію успішно перейменовано.</value>
   </data>
+
+  <data name="Button_CreateGame" xml:space="preserve"><value>Створити гру</value></data>
+  <data name="Button_BackToQuizzes" xml:space="preserve"><value>Назад до квізів</value></data>
+  <data name="GameLobby_Eyebrow" xml:space="preserve"><value>Лобі ведучого</value></data>
+  <data name="GameLobby_StatusLabel" xml:space="preserve"><value>Статус</value></data>
+  <data name="GameLobby_StatusLobby" xml:space="preserve"><value>Лобі</value></data>
+  <data name="GameLobby_PlayerCount" xml:space="preserve"><value>Гравці</value></data>
+  <data name="GameLobby_QuestionCount" xml:space="preserve"><value>Питання</value></data>
+  <data name="GameLobby_SessionId" xml:space="preserve"><value>ID сесії</value></data>
+  <data name="GameLobby_TransientNotice" xml:space="preserve"><value>Ця сесія зберігається в пам’яті й буде втрачена після перезапуску застосунку.</value></data>
+  <data name="Error_QuizCannotStart" xml:space="preserve"><value>Цей квіз неможливо використати для створення гри. Перевірте раунди, питання та рядки балів.</value></data>
 </root>
