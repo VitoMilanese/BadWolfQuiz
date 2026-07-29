@@ -726,4 +726,9 @@
   <data name="GameLobby_StartGame" xml:space="preserve"><value>Avvia partita</value></data>
   <data name="GameLobby_StatusRunning" xml:space="preserve"><value>In corso</value></data>
   <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Aggiungi almeno un giocatore prima di iniziare la partita.</value></data>
+
+  <data name="GameBoard_Eyebrow" xml:space="preserve"><value>TABELLONE DI GIOCO</value></data>
+  <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Domanda selezionata</value></data>
+  <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>In attesa della puntata</value></data>
+  <data name="GameBoard_SelectionRejected" xml:space="preserve"><value>Questa domanda non può essere selezionata in questo momento.</value></data>
 </root>
