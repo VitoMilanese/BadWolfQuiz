@@ -5,9 +5,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 ## Contents
 
 - [Product vision](vision.md)
-- [Game engine architecture](architecture/game-engine.md)
-- [Wagering and final question](features/wagering-and-final-question.md)
-- [ADR-0001: Separate runtime game model](decisions/ADR-0001-runtime-game-model.md)
+- [Runtime model](architecture/runtime-model.md)
 
 ## Documentation principles
 
