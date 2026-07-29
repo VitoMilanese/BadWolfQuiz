@@ -3,10 +3,24 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace BadWolfQuiz.Web.Hubs;
 
-public sealed class GameHub(BuzzCoordinator buzzCoordinator) : Hub
+public sealed class GameHub(
+    BuzzCoordinator buzzCoordinator,
+    GameSessionRegistry sessionRegistry) : Hub
 {
-    public Task JoinSession(string publicCode)
-        => Groups.AddToGroupAsync(Context.ConnectionId, GroupName(publicCode));
+    public async Task JoinSession(string publicCode)
+    {
+        var normalizedCode = GameSessionRegistry.NormalizeCode(publicCode);
+        await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(normalizedCode));
+
+        var game = sessionRegistry.Find(normalizedCode);
+
+        if (game is not null)
+        {
+            await Clients.Caller.SendAsync(
+                "PlayersChanged",
+                CreatePlayersUpdate(sessionRegistry, game));
+        }
+    }
 
     public async Task Buzz(string publicCode, int gameQuestionId, int playerId, string playerName)
     {
@@ -32,6 +46,24 @@ public sealed class GameHub(BuzzCoordinator buzzCoordinator) : Hub
         await Clients.Group(GroupName(publicCode)).SendAsync("BuzzReset", new { gameQuestionId });
     }
 
-    private static string GroupName(string publicCode)
-        => $"game:{publicCode.Trim().ToUpperInvariant()}";
+    public static object CreatePlayersUpdate(
+        GameSessionRegistry sessionRegistry,
+        GameSessionRegistration game)
+    {
+        var players = sessionRegistry.GetPlayers(game);
+
+        return new
+        {
+            playerCount = players.Count,
+            players = players.Select(player => new
+            {
+                id = player.Id.Value,
+                player.Name,
+                player.Score
+            })
+        };
+    }
+
+    public static string GroupName(string publicCode)
+        => $"game:{GameSessionRegistry.NormalizeCode(publicCode)}";
 }
