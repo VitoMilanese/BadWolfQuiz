@@ -189,6 +189,28 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public RuntimeQuestion? SubmitQuestionWager(
+        string publicCode,
+        int sourceQuestionId,
+        GamePlayerId playerId,
+        int amount)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.SubmitQuestionWager(
+                sourceQuestionId,
+                playerId,
+                amount);
+        }
+    }
+
     public PlayerRejoinApproval? ApprovePlayerRejoin(
         string publicCode,
         GamePlayerId playerId)
