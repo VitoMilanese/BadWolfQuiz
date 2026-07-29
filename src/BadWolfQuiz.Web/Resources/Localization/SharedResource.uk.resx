@@ -334,7 +334,13 @@
     <value>Затримка кнопки</value>
   </data>
   <data name="Label_SpecialQuestion" xml:space="preserve">
-    <value>Спеціальне питання</value>
+    <value>Питання зі ставкою</value>
+  </data>
+  <data name="Hint_WagerQuestion" xml:space="preserve">
+    <value>Перед відкриттям цього питання гравець повинен зробити ставку.</value>
+  </data>
+  <data name="Label_WagerQuestion" xml:space="preserve">
+    <value>Ставка</value>
   </data>
   <data name="Label_Created" xml:space="preserve">
     <value>Створено</value>
