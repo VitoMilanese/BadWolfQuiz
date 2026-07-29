@@ -54,7 +54,7 @@ A correct regular answer adds the question's point value. An incorrect regular a
 
 For a wager question, a correct answer adds the wager and an incorrect answer subtracts the wager. Scores may be negative.
 
-Score changes must be performed through game-engine commands. A future judging workflow will apply these rules and prevent the same answer from being scored twice.
+Score changes are performed through game-engine judging commands. Every judgment records an immutable answer attempt, and repeated judging of the same player or a resolved question is rejected so a score delta cannot be applied twice.
 
 The host also requires an explicit administrative score-correction tool. Corrections must not mutate UI state directly and should eventually be recorded as auditable score transactions.
 
