@@ -1208,3 +1208,40 @@ textarea {
 .player-lobby h2 {
     margin-top: 22px;
 }
+
+
+/* Player presence */
+
+.player-presence {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.presence-badge {
+    min-width: 96px;
+    padding: 5px 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 850;
+}
+
+.presence-active {
+    color: #7ee787;
+    border-color: rgba(63, 185, 80, 0.55);
+    background: rgba(63, 185, 80, 0.12);
+}
+
+.presence-inactive {
+    color: var(--gold);
+    border-color: rgba(242, 177, 52, 0.55);
+    background: rgba(242, 177, 52, 0.12);
+}
+
+.presence-disconnected {
+    color: #ff8d8d;
+    border-color: rgba(239, 35, 60, 0.55);
+    background: rgba(239, 35, 60, 0.12);
+}
