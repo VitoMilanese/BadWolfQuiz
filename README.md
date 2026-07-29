@@ -1,8 +1,15 @@
-# BAD WOLF QUIZ
+# 🐺 BAD WOLF QUIZ
 
-Початковий Visual Studio solution для real-time квіз-платформи.
+**Bad Wolf Quiz** — це сучасна real-time платформа для проведення квізів, написана на **ASP.NET Core 8**.
 
-## Технології
+Проєкт складається з двох основних частин:
+
+- потужного редактора квізів;
+- майбутньої ігрової платформи для ведучого та гравців.
+
+---
+
+# Technologies
 
 - ASP.NET Core 8 Razor Pages
 - Entity Framework Core 8
@@ -10,32 +17,164 @@
 - SignalR
 - QRCoder
 
-## Що вже є
+---
 
-- SQLite-модель квізів, раундів, категорій, питань, сесій, гравців і результатів.
-- Автоматичне створення локальної бази при першому запуску.
-- Демонстраційний квіз із полем 6 × 5.
-- Сторінка списку квізів.
-- Створення нового квізу.
-- Візуальний редактор поля квізу.
-- Початковий редактор питання та правильної відповіді.
-- SignalR hub і серверний координатор першого натискання.
+# Current Features
 
-## Запуск
+## Quiz Management
 
-1. Відкрий `BadWolfQuiz.sln` у Visual Studio 2022.
-2. Дочекайся відновлення NuGet-пакетів.
-3. Встанови `BadWolfQuiz.Web` як Startup Project.
-4. Запусти профіль `https` або `http`.
+- Create quizzes
+- Quiz list
+- SQLite database created automatically on first launch
+- Automatic demo quiz generation
 
-База буде створена в:
+---
 
-`src/BadWolfQuiz.Web/App_Data/badwolfquiz.db`
+## Round Management
 
-## Наступний логічний етап
+- Create rounds
+- Rename rounds
+- Delete rounds
+- Drag & Drop round reordering
+- Individual point values for every row
+- Automatic creation of questions for newly created rounds
+- Automatic category cloning when creating new rounds
 
-- реальне завантаження зображень, аудіо та відео;
-- вибір і збереження типу контенту;
-- повноекранний Preview;
-- створення ігрової сесії, QR-код і лобі;
-- сторінка гравця з real-time кнопкою.
+---
+
+## Category Management
+
+- Rename categories
+- Exchange categories between rounds
+- Drag & Drop category reordering inside a round
+
+---
+
+## Quiz Board Editor
+
+- Visual Jeopardy-style board
+- Sticky row header
+- Sticky category header
+- Responsive board layout
+- Automatic row point editor
+- Category toolbar
+- Visual feedback during Drag & Drop
+
+---
+
+## Question Editor
+
+Supports multiple content blocks.
+
+Currently implemented:
+
+- Text
+- Image
+- Audio
+- Video
+- YouTube
+
+Each question contains independent:
+
+- Question blocks
+- Answer blocks
+
+Content blocks can be:
+
+- reordered using Drag & Drop;
+- removed;
+- added dynamically.
+
+---
+
+## Media
+
+Implemented:
+
+- Image upload
+- Audio upload
+- Video upload
+- Local file storage
+- Preview inside editor
+- Caption support
+- Stored file preview
+
+---
+
+## Architecture
+
+- Entity Framework Core data model
+- Separate Quiz / Round / Category / Question hierarchy
+- Content blocks stored independently
+- Database indexes
+- Server-side validation
+- Localized UI
+- Razor Pages architecture
+
+---
+
+# Project Structure
+
+```
+Quiz
+ ├── Round
+ │     ├── Rows
+ │     ├── Categories
+ │     │      ├── Questions
+ │     │      │      ├── Question Blocks
+ │     │      │      └── Answer Blocks
+ │     │      └── ...
+ │     └── ...
+ └── ...
+```
+
+---
+
+# Run
+
+1. Open `BadWolfQuiz.sln`
+2. Restore NuGet packages
+3. Set **BadWolfQuiz.Web** as Startup Project
+4. Run using **https** or **http**
+
+SQLite database is automatically created in:
+
+```
+src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
+```
+
+---
+
+# Planned Features
+
+## Game Session
+
+- Create live game
+- Lobby
+- QR code
+- Join by code
+- Player reconnect
+- Team mode
+
+## Game
+
+- Real-time board
+- Question presentation
+- Timers
+- Buzz system
+- Automatic scoring
+- Host controls
+
+## Media
+
+- Full-screen presentation mode
+- Advanced transitions
+- Multiple monitor support
+
+## Administration
+
+- Import / Export quizzes
+- Backup
+- Version history
+- Search
+- Category templates
