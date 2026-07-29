@@ -136,6 +136,25 @@ public sealed class GameSessionRegistryTests
         Assert.Equal(joined.Player.Score, restored.Score);
     }
 
+    [Fact]
+    public void SelectQuestion_routes_command_to_runtime_session()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        registry.JoinPlayer("ABC123", "Rose");
+        registry.StartGame("ABC123");
+
+        var question = registry.SelectQuestion("ABC123", 1);
+
+        Assert.NotNull(question);
+        Assert.Equal(
+            BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Selected,
+            question.Status);
+        Assert.Same(
+            game.Session.Board.Questions.Single(),
+            question);
+    }
+
     private static GameSessionRegistry CreateRegistry(params string[] codes)
     {
         return new GameSessionRegistry(new StubGameCodeGenerator(codes));
