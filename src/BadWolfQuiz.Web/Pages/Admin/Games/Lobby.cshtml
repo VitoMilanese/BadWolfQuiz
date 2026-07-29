@@ -26,6 +26,7 @@
              data-approve-label="@Localizer["GameLobby_ApproveRejoin"]"
              data-active-player-label="@Localizer["GameBoard_ActivePlayer"]"
              data-make-active-label="@Localizer["GameBoard_MakeActivePlayer"]"
+             data-active-player-locked="@Model.Game.Session.IsActivePlayerChangeLocked.ToString().ToLowerInvariant()"
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
              data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
              data-running-label="@Localizer["GameLobby_StatusRunning"]">
@@ -88,7 +89,8 @@
                             {
                                 <button class="button button-secondary"
                                         type="button"
-                                        data-make-active-player="@player.Id.Value">
+                                        data-make-active-player="@player.Id.Value"
+                                        disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
                                     @Localizer["GameBoard_MakeActivePlayer"]
                                 </button>
                             }
@@ -114,6 +116,7 @@
              data-approve-label="@Localizer["GameLobby_ApproveRejoin"]"
              data-active-player-label="@Localizer["GameBoard_ActivePlayer"]"
              data-make-active-label="@Localizer["GameBoard_MakeActivePlayer"]"
+             data-active-player-locked="@Model.Game.Session.IsActivePlayerChangeLocked.ToString().ToLowerInvariant()"
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
              data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
              data-running-label="@Localizer["GameLobby_StatusRunning"]">
@@ -130,7 +133,9 @@
 
             <div class="form-actions">
                 <form method="post" asp-page-handler="RandomActivePlayer">
-                    <button class="button button-secondary" type="submit">
+                    <button class="button button-secondary"
+                            type="submit"
+                            disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
                         @Localizer["GameBoard_RandomActivePlayer"]
                     </button>
                 </form>
@@ -441,7 +446,11 @@
             document.addEventListener("click", event => {
                 const button = event.target.closest("[data-make-active-player]");
 
-                if (!button || !activePlayerForm || !activePlayerId) {
+                if (!button ||
+                    button.disabled ||
+                    lobby?.dataset.activePlayerLocked === "true" ||
+                    !activePlayerForm ||
+                    !activePlayerId) {
                     return;
                 }
 
@@ -496,6 +505,8 @@
                         makeActive.className = "button button-secondary";
                         makeActive.dataset.makeActivePlayer = player.id;
                         makeActive.textContent = lobby.dataset.makeActiveLabel;
+                        makeActive.disabled =
+                            lobby.dataset.activePlayerLocked === "true";
                         details.append(makeActive);
                     }
 
