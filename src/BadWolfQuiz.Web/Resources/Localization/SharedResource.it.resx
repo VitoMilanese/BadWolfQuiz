@@ -765,4 +765,5 @@
   <data name="GameBoard_DeleteWagerDigit" xml:space="preserve"><value>Elimina l'ultima cifra</value></data>
   <data name="GameBoard_WagerValid" xml:space="preserve"><value>La puntata è valida.</value></data>
   <data name="GameBoard_WagerOutsideLimits" xml:space="preserve"><value>Inserisci un importo da {0} a {1}.</value></data>
+  <data name="GameBoard_MaximumWager" xml:space="preserve"><value>Puntata massima</value></data>
 </root>
