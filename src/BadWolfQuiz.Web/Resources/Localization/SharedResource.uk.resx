@@ -490,7 +490,7 @@
     <value>Лобі та QR-підключення буде додано наступним кроком.</value>
   </data>
   <data name="Placeholder_GameCode" xml:space="preserve">
-    <value>Наприклад: WOLF123</value>
+    <value>Наприклад: ABC123</value>
   </data>
   <data name="Label_PlayerName" xml:space="preserve">
     <value>Ім’я гравця</value>
