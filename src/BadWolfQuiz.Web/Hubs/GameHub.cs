@@ -22,6 +22,53 @@ public sealed class GameHub(
         }
     }
 
+    public async Task JoinPlayerSession(
+        string publicCode,
+        string accessToken,
+        bool isVisible)
+    {
+        var connection = sessionRegistry.ConnectPlayer(
+            publicCode,
+            accessToken,
+            Context.ConnectionId,
+            isVisible);
+
+        if (connection is null)
+        {
+            await Clients.Caller.SendAsync("PlayerAccessRejected");
+            return;
+        }
+
+        await Groups.AddToGroupAsync(
+            Context.ConnectionId,
+            GroupName(connection.Game.PublicCode));
+        await BroadcastPlayers(connection.Game);
+    }
+
+    public async Task SetPlayerVisibility(bool isVisible)
+    {
+        var connection = sessionRegistry.SetPlayerVisibility(
+            Context.ConnectionId,
+            isVisible);
+
+        if (connection is not null)
+        {
+            await BroadcastPlayers(connection.Game);
+        }
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var connection = sessionRegistry.DisconnectPlayer(Context.ConnectionId);
+
+        if (connection is not null)
+        {
+            await BroadcastPlayers(connection.Game);
+        }
+
+        await base.OnDisconnectedAsync(exception);
+    }
+
     public async Task Buzz(string publicCode, int gameQuestionId, int playerId, string playerName)
     {
         var accepted = buzzCoordinator.TryBuzz(gameQuestionId, playerId);
@@ -50,7 +97,7 @@ public sealed class GameHub(
         GameSessionRegistry sessionRegistry,
         GameSessionRegistration game)
     {
-        var players = sessionRegistry.GetPlayers(game);
+        var players = sessionRegistry.GetPlayerLobbyEntries(game);
 
         return new
         {
@@ -59,11 +106,19 @@ public sealed class GameHub(
             {
                 id = player.Id.Value,
                 player.Name,
-                player.Score
+                player.Score,
+                presence = player.Presence.ToString().ToLowerInvariant()
             })
         };
     }
 
     public static string GroupName(string publicCode)
         => $"game:{GameSessionRegistry.NormalizeCode(publicCode)}";
+
+    private Task BroadcastPlayers(GameSessionRegistration game)
+    {
+        return Clients
+            .Group(GroupName(game.PublicCode))
+            .SendAsync("PlayersChanged", CreatePlayersUpdate(sessionRegistry, game));
+    }
 }
