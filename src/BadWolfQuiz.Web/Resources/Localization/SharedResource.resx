@@ -682,6 +682,7 @@
   <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve"><value>Number of wager questions</value></data>
   <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Eligible questions: {0}</value></data>
   <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Choose between 1 and {0} random wager questions.</value></data>
+  <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Round settings saved.</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Question values</value>
   </data>
