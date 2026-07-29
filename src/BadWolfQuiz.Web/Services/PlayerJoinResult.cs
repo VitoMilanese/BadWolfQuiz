@@ -5,12 +5,14 @@ namespace BadWolfQuiz.Web.Services;
 public sealed record PlayerJoinResult(
     PlayerJoinStatus Status,
     GameSessionRegistration? Game = null,
-    GamePlayer? Player = null)
+    GamePlayer? Player = null,
+    string? AccessToken = null)
 {
     public static PlayerJoinResult Succeeded(
         GameSessionRegistration game,
-        GamePlayer player) =>
-        new(PlayerJoinStatus.Success, game, player);
+        GamePlayer player,
+        string accessToken) =>
+        new(PlayerJoinStatus.Success, game, player, accessToken);
 
     public static PlayerJoinResult Failed(PlayerJoinStatus status) => new(status);
 }
