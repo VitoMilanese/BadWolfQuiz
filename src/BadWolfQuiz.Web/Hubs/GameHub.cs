@@ -3,10 +3,71 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace BadWolfQuiz.Web.Hubs;
 
-public sealed class GameHub(BuzzCoordinator buzzCoordinator) : Hub
+public sealed class GameHub(
+    BuzzCoordinator buzzCoordinator,
+    GameSessionRegistry sessionRegistry) : Hub
 {
-    public Task JoinSession(string publicCode)
-        => Groups.AddToGroupAsync(Context.ConnectionId, GroupName(publicCode));
+    public async Task JoinSession(string publicCode)
+    {
+        var normalizedCode = GameSessionRegistry.NormalizeCode(publicCode);
+        await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(normalizedCode));
+
+        var game = sessionRegistry.Find(normalizedCode);
+
+        if (game is not null)
+        {
+            await Clients.Caller.SendAsync(
+                "PlayersChanged",
+                CreatePlayersUpdate(sessionRegistry, game));
+        }
+    }
+
+    public async Task JoinPlayerSession(
+        string publicCode,
+        string accessToken,
+        bool isVisible)
+    {
+        var connection = sessionRegistry.ConnectPlayer(
+            publicCode,
+            accessToken,
+            Context.ConnectionId,
+            isVisible);
+
+        if (connection is null)
+        {
+            await Clients.Caller.SendAsync("PlayerAccessRejected");
+            return;
+        }
+
+        await Groups.AddToGroupAsync(
+            Context.ConnectionId,
+            GroupName(connection.Game.PublicCode));
+        await BroadcastPlayers(connection.Game);
+    }
+
+    public async Task SetPlayerVisibility(bool isVisible)
+    {
+        var connection = sessionRegistry.SetPlayerVisibility(
+            Context.ConnectionId,
+            isVisible);
+
+        if (connection is not null)
+        {
+            await BroadcastPlayers(connection.Game);
+        }
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var connection = sessionRegistry.DisconnectPlayer(Context.ConnectionId);
+
+        if (connection is not null)
+        {
+            await BroadcastPlayers(connection.Game);
+        }
+
+        await base.OnDisconnectedAsync(exception);
+    }
 
     public async Task Buzz(string publicCode, int gameQuestionId, int playerId, string playerName)
     {
@@ -32,6 +93,32 @@ public sealed class GameHub(BuzzCoordinator buzzCoordinator) : Hub
         await Clients.Group(GroupName(publicCode)).SendAsync("BuzzReset", new { gameQuestionId });
     }
 
-    private static string GroupName(string publicCode)
-        => $"game:{publicCode.Trim().ToUpperInvariant()}";
+    public static object CreatePlayersUpdate(
+        GameSessionRegistry sessionRegistry,
+        GameSessionRegistration game)
+    {
+        var players = sessionRegistry.GetPlayerLobbyEntries(game);
+
+        return new
+        {
+            playerCount = players.Count,
+            players = players.Select(player => new
+            {
+                id = player.Id.Value,
+                player.Name,
+                player.Score,
+                presence = player.Presence.ToString().ToLowerInvariant()
+            })
+        };
+    }
+
+    public static string GroupName(string publicCode)
+        => $"game:{GameSessionRegistry.NormalizeCode(publicCode)}";
+
+    private Task BroadcastPlayers(GameSessionRegistration game)
+    {
+        return Clients
+            .Group(GroupName(game.PublicCode))
+            .SendAsync("PlayersChanged", CreatePlayersUpdate(sessionRegistry, game));
+    }
 }

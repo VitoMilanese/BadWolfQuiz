@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
+using System.Text;
 using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
 
@@ -6,25 +8,228 @@ namespace BadWolfQuiz.Web.Services;
 
 public sealed class GameSessionRegistry
 {
-    private readonly ConcurrentDictionary<GameSessionId, GameSession> _sessions = new();
+    private const int MaxCodeGenerationAttempts = 20;
+    private readonly IGameCodeGenerator _gameCodeGenerator;
+    private readonly ConcurrentDictionary<GameSessionId, GameSessionRegistration> _sessionsById = new();
+    private readonly ConcurrentDictionary<string, GameSessionRegistration> _sessionsByCode =
+        new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, PlayerAccess> _playerAccessByTokenHash = new();
+    private readonly Dictionary<string, PlayerConnection> _playerConnections = new();
+    private readonly object _presenceSync = new();
 
-    public GameSession Create(QuizSnapshot quiz)
+    public GameSessionRegistry(IGameCodeGenerator gameCodeGenerator)
+    {
+        _gameCodeGenerator = gameCodeGenerator;
+    }
+
+    public GameSessionRegistration Create(QuizSnapshot quiz)
     {
         ArgumentNullException.ThrowIfNull(quiz);
 
         var session = GameSession.Create(quiz);
 
-        if (!_sessions.TryAdd(session.Id, session))
+        for (var attempt = 0; attempt < MaxCodeGenerationAttempts; attempt++)
         {
+            var code = NormalizeCode(_gameCodeGenerator.Create());
+            EnsureValidCode(code);
+
+            var registration = new GameSessionRegistration(code, session);
+
+            if (!_sessionsByCode.TryAdd(code, registration))
+            {
+                continue;
+            }
+
+            if (_sessionsById.TryAdd(session.Id, registration))
+            {
+                return registration;
+            }
+
+            _sessionsByCode.TryRemove(code, out _);
             throw new InvalidOperationException(
                 $"A game session with identifier {session.Id} already exists.");
         }
 
-        return session;
+        throw new InvalidOperationException("Could not generate a unique public game code.");
     }
 
-    public GameSession? Find(GameSessionId id)
+    public GameSessionRegistration? Find(GameSessionId id)
     {
-        return _sessions.GetValueOrDefault(id);
+        return _sessionsById.GetValueOrDefault(id);
     }
+
+    public GameSessionRegistration? Find(string publicCode)
+    {
+        if (string.IsNullOrWhiteSpace(publicCode))
+        {
+            return null;
+        }
+
+        return _sessionsByCode.GetValueOrDefault(NormalizeCode(publicCode));
+    }
+
+    public PlayerJoinResult JoinPlayer(string publicCode, string playerName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(playerName);
+
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return PlayerJoinResult.Failed(PlayerJoinStatus.GameNotFound);
+        }
+
+        lock (game)
+        {
+            if (game.Session.Status != GameSessionStatus.Lobby)
+            {
+                return PlayerJoinResult.Failed(PlayerJoinStatus.GameAlreadyStarted);
+            }
+
+            if (game.Session.Players.Any(player =>
+                    string.Equals(player.Name, playerName.Trim(), StringComparison.OrdinalIgnoreCase)))
+            {
+                return PlayerJoinResult.Failed(PlayerJoinStatus.NameAlreadyUsed);
+            }
+
+            var player = game.Session.AddPlayer(playerName);
+            var accessToken = CreatePlayerAccess(game, player);
+            return PlayerJoinResult.Succeeded(game, player, accessToken);
+        }
+    }
+
+    public PlayerConnectionResult? ConnectPlayer(
+        string publicCode,
+        string accessToken,
+        string connectionId,
+        bool isVisible)
+    {
+        if (string.IsNullOrWhiteSpace(accessToken) ||
+            !_playerAccessByTokenHash.TryGetValue(HashToken(accessToken), out var access) ||
+            !string.Equals(
+                access.Game.PublicCode,
+                NormalizeCode(publicCode),
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        lock (_presenceSync)
+        {
+            _playerConnections[connectionId] = new PlayerConnection(access, isVisible);
+        }
+
+        return new PlayerConnectionResult(access.Game, access.Player);
+    }
+
+    public PlayerConnectionResult? SetPlayerVisibility(string connectionId, bool isVisible)
+    {
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(connectionId, out var connection))
+            {
+                return null;
+            }
+
+            _playerConnections[connectionId] = connection with { IsVisible = isVisible };
+            return new PlayerConnectionResult(connection.Access.Game, connection.Access.Player);
+        }
+    }
+
+    public PlayerConnectionResult? DisconnectPlayer(string connectionId)
+    {
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.Remove(connectionId, out var connection))
+            {
+                return null;
+            }
+
+            return new PlayerConnectionResult(connection.Access.Game, connection.Access.Player);
+        }
+    }
+
+    public IReadOnlyList<GamePlayer> GetPlayers(GameSessionRegistration game)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+
+        lock (game)
+        {
+            return game.Session.Players.ToArray();
+        }
+    }
+
+    public IReadOnlyList<PlayerLobbyEntry> GetPlayerLobbyEntries(GameSessionRegistration game)
+    {
+        var players = GetPlayers(game);
+
+        lock (_presenceSync)
+        {
+            return players
+                .Select(player => new PlayerLobbyEntry(
+                    player.Id,
+                    player.Name,
+                    player.Score,
+                    GetPresence(player.Id)))
+                .ToArray();
+        }
+    }
+
+    public static string NormalizeCode(string publicCode)
+    {
+        return publicCode.Trim().ToUpperInvariant();
+    }
+
+    private string CreatePlayerAccess(GameSessionRegistration game, GamePlayer player)
+    {
+        while (true)
+        {
+            var accessToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+            var access = new PlayerAccess(game, player);
+
+            if (_playerAccessByTokenHash.TryAdd(HashToken(accessToken), access))
+            {
+                return accessToken;
+            }
+        }
+    }
+
+    private PlayerPresenceStatus GetPresence(GamePlayerId playerId)
+    {
+        var connections = _playerConnections.Values
+            .Where(connection => connection.Access.Player.Id == playerId)
+            .ToArray();
+
+        if (connections.Length == 0)
+        {
+            return PlayerPresenceStatus.Disconnected;
+        }
+
+        return connections.Any(connection => connection.IsVisible)
+            ? PlayerPresenceStatus.Active
+            : PlayerPresenceStatus.Inactive;
+    }
+
+    private static string HashToken(string accessToken)
+    {
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(accessToken)));
+    }
+
+    private static void EnsureValidCode(string code)
+    {
+        if (code.Length != GameCodeGenerator.CodeLength ||
+            code.Any(character => !char.IsAsciiLetterOrDigit(character)))
+        {
+            throw new InvalidOperationException(
+                $"The game code generator returned an invalid code: '{code}'.");
+        }
+    }
+
+    private sealed record PlayerAccess(
+        GameSessionRegistration Game,
+        GamePlayer Player);
+
+    private sealed record PlayerConnection(
+        PlayerAccess Access,
+        bool IsVisible);
 }

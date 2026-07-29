@@ -490,7 +490,7 @@
     <value>La lobby e l’accesso tramite QR verranno aggiunti nel prossimo passaggio.</value>
   </data>
   <data name="Placeholder_GameCode" xml:space="preserve">
-    <value>Ad esempio: WOLF123</value>
+    <value>Ad esempio: ABC123</value>
   </data>
   <data name="Label_PlayerName" xml:space="preserve">
     <value>Nome del giocatore</value>
@@ -713,4 +713,10 @@
   <data name="GameLobby_SessionId" xml:space="preserve"><value>ID sessione</value></data>
   <data name="GameLobby_TransientNotice" xml:space="preserve"><value>Questa sessione è memorizzata in memoria e verrà persa al riavvio dell'applicazione.</value></data>
   <data name="Error_QuizCannotStart" xml:space="preserve"><value>Questo quiz non può essere usato per creare una partita. Controlla round, domande e righe dei punti.</value></data>
+
+  <data name="PlayerPresence_Active" xml:space="preserve"><value>Attivo</value></data>
+  <data name="PlayerPresence_Inactive" xml:space="preserve"><value>Inattivo</value></data>
+  <data name="PlayerPresence_Disconnected" xml:space="preserve"><value>Disconnesso</value></data>
+  <data name="PlayerPresence_MonitoringNotice" xml:space="preserve"><value>Durante la partita mantieni questa pagina aperta e attiva. Il presentatore può vedere lo stato della pagina.</value></data>
+  <data name="PlayerPresence_InactiveWarning" xml:space="preserve"><value>Torna alla pagina della partita. Il presentatore vede che la pagina è inattiva o disconnessa.</value></data>
 </root>

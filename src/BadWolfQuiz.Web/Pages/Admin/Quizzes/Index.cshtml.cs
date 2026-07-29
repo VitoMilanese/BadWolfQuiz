@@ -36,7 +36,7 @@ public sealed class IndexModel(
 
             return RedirectToPage(
                 "/Admin/Games/Lobby",
-                new { id = session.Id.Value });
+                new { id = session.Session.Id.Value });
         }
         catch (ArgumentException)
         {

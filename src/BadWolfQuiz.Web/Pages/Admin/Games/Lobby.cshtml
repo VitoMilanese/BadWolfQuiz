@@ -1,13 +1,13 @@
 @page "{id:guid}"
 @model BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel
 @{
-    ViewData["Title"] = Model.Session.Quiz.Title;
+    ViewData["Title"] = Model.Game.Session.Quiz.Title;
 }
 
 <div class="page-heading">
     <div>
         <p class="eyebrow">@Localizer["GameLobby_Eyebrow"]</p>
-        <h1>@Model.Session.Quiz.Title</h1>
+        <h1>@Model.Game.Session.Quiz.Title</h1>
     </div>
 
     <a class="button button-secondary" asp-page="/Admin/Quizzes/Index">
@@ -15,24 +15,95 @@
     </a>
 </div>
 
-<section class="content-panel narrow">
+<section class="content-panel narrow"
+         data-game-code="@Model.Game.PublicCode"
+         data-status-active="@Localizer["PlayerPresence_Active"]"
+         data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
+         data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]">
     <div class="stack-form">
+        <div class="game-code-panel">
+            <span>@Localizer["Label_GameCode"]</span>
+            <strong>@Model.Game.PublicCode</strong>
+            <small>@Localizer["Message_WaitingPlayers"]</small>
+        </div>
         <p>
             <strong>@Localizer["GameLobby_StatusLabel"]:</strong>
             @Localizer["GameLobby_StatusLobby"]
         </p>
         <p>
             <strong>@Localizer["GameLobby_PlayerCount"]:</strong>
-            @Model.Session.Players.Count
+            <span id="player-count">@Model.Players.Count</span>
         </p>
         <p>
             <strong>@Localizer["GameLobby_QuestionCount"]:</strong>
-            @Model.Session.Board.Questions.Count
+            @Model.Game.Session.Board.Questions.Count
         </p>
-        <p>
-            <strong>@Localizer["GameLobby_SessionId"]:</strong>
-            <code>@Model.Session.Id</code>
-        </p>
+        <ul id="player-list" class="player-list">
+            @foreach (var player in Model.Players)
+            {
+                <li data-player-id="@player.Id.Value">
+                    <strong>@player.Name</strong>
+                    <span>@player.Score</span>
+                </li>
+            }
+        </ul>
         <p class="dialog-warning">@Localizer["GameLobby_TransientNotice"]</p>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const lobby = document.querySelector("[data-game-code]");
+            const playerCount = document.getElementById("player-count");
+            const playerList = document.getElementById("player-list");
+
+            if (!lobby || !playerCount || !playerList || typeof signalR === "undefined") {
+                return;
+            }
+
+            const gameCode = lobby.dataset.gameCode;
+            const statusLabels = {
+                active: lobby.dataset.statusActive,
+                inactive: lobby.dataset.statusInactive,
+                disconnected: lobby.dataset.statusDisconnected
+            };
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/game")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("PlayersChanged", update => {
+                playerCount.textContent = update.playerCount.toString();
+                playerList.replaceChildren();
+
+                for (const player of update.players) {
+                    const item = document.createElement("li");
+                    item.dataset.playerId = player.id;
+
+                    const name = document.createElement("strong");
+                    name.textContent = player.name;
+
+                    const details = document.createElement("span");
+                    details.className = "player-presence";
+
+                    const score = document.createElement("span");
+                    score.textContent = player.score.toString();
+
+                    const presence = document.createElement("span");
+                    presence.className = `presence-badge presence-${player.presence}`;
+                    presence.textContent = statusLabels[player.presence] || player.presence;
+
+                    details.append(score, presence);
+                    item.append(name, details);
+                    playerList.append(item);
+                }
+            });
+
+            const joinSession = () => connection.invoke("JoinSession", gameCode);
+
+            connection.onreconnected(joinSession);
+            connection.start().then(joinSession).catch(console.error);
+        })();
+    </script>
+}

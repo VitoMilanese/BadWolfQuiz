@@ -1,17 +1,70 @@
-﻿@page
+@page "{code?}"
 @model BadWolfQuiz.Web.Pages.Join.IndexModel
 @{
     ViewData["Title"] = Localizer["Button_Join"];
-    var lobbyComingSoon = JavaScriptEncoder.Default.Encode(Localizer["Message_LobbyComingSoon"]);
 }
+
 <div class="form-card narrow">
     <p class="eyebrow">@Localizer["Join_Eyebrow"]</p>
     <h1>@Localizer["Title_JoinGame"]</h1>
-    <form class="stack-form" onsubmit="event.preventDefault(); alert('@lobbyComingSoon');">
-        <label>@Localizer["Label_GameCode"]</label>
-        <input maxlength="12" placeholder="@Localizer["Placeholder_GameCode"]" />
-        <label>@Localizer["Label_PlayerName"]</label>
-        <input maxlength="60" placeholder="@Localizer["Placeholder_PlayerName"]" />
-        <button class="button button-primary" type="submit">@Localizer["Button_Join"]</button>
+
+    <form id="join-game-form" method="post" class="stack-form">
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+        <label asp-for="Input.GameCode">@Localizer["Label_GameCode"]</label>
+        <input asp-for="Input.GameCode"
+               maxlength="6"
+               autocomplete="off"
+               autocapitalize="characters"
+               placeholder="@Localizer["Placeholder_GameCode"]" />
+        <span asp-validation-for="Input.GameCode"></span>
+
+        <label asp-for="Input.PlayerName">@Localizer["Label_PlayerName"]</label>
+        <input asp-for="Input.PlayerName"
+               maxlength="60"
+               autocomplete="nickname"
+               placeholder="@Localizer["Placeholder_PlayerName"]" />
+        <span asp-validation-for="Input.PlayerName"></span>
+
+        <button class="button button-primary" type="submit">
+            @Localizer["Button_Join"]
+        </button>
     </form>
 </div>
+
+
+@section Scripts {
+    <script>
+        (() => {
+            const form = document.getElementById("join-game-form");
+            const codeInput = document.getElementById("Input_GameCode");
+
+            form?.addEventListener("submit", event => {
+                const gameCode = codeInput?.value.trim().toUpperCase();
+
+                if (!gameCode) {
+                    return;
+                }
+
+                const storedIdentity = localStorage.getItem(
+                    `badwolfquiz:${gameCode}:current-player`);
+
+                if (!storedIdentity) {
+                    return;
+                }
+
+                try {
+                    const identity = JSON.parse(storedIdentity);
+
+                    if (identity.accessToken && identity.playerId && identity.path) {
+                        event.preventDefault();
+                        window.location.assign(identity.path);
+                    }
+                } catch {
+                    localStorage.removeItem(
+                        `badwolfquiz:${gameCode}:current-player`);
+                }
+            });
+        })();
+    </script>
+}

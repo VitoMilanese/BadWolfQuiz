@@ -490,7 +490,7 @@
     <value>Лобі та QR-підключення буде додано наступним кроком.</value>
   </data>
   <data name="Placeholder_GameCode" xml:space="preserve">
-    <value>Наприклад: WOLF123</value>
+    <value>Наприклад: ABC123</value>
   </data>
   <data name="Label_PlayerName" xml:space="preserve">
     <value>Ім’я гравця</value>
@@ -713,4 +713,10 @@
   <data name="GameLobby_SessionId" xml:space="preserve"><value>ID сесії</value></data>
   <data name="GameLobby_TransientNotice" xml:space="preserve"><value>Ця сесія зберігається в пам’яті й буде втрачена після перезапуску застосунку.</value></data>
   <data name="Error_QuizCannotStart" xml:space="preserve"><value>Цей квіз неможливо використати для створення гри. Перевірте раунди, питання та рядки балів.</value></data>
+
+  <data name="PlayerPresence_Active" xml:space="preserve"><value>Активний</value></data>
+  <data name="PlayerPresence_Inactive" xml:space="preserve"><value>Неактивний</value></data>
+  <data name="PlayerPresence_Disconnected" xml:space="preserve"><value>Відключений</value></data>
+  <data name="PlayerPresence_MonitoringNotice" xml:space="preserve"><value>Під час гри тримайте цю сторінку відкритою й активною. Ведучий бачить стан сторінки.</value></data>
+  <data name="PlayerPresence_InactiveWarning" xml:space="preserve"><value>Поверніться на сторінку гри. Ведучий бачить, що сторінка неактивна або відключена.</value></data>
 </root>
