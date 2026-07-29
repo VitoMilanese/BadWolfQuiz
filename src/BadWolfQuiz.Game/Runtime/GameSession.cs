@@ -107,6 +107,38 @@ public sealed class GameSession
         return question;
     }
 
+    public RuntimeQuestion SubmitQuestionWager(
+        int sourceQuestionId,
+        GamePlayerId playerId,
+        int amount)
+    {
+        if (Status != GameSessionStatus.Running)
+        {
+            throw new GameRuleViolationException(
+                "Question wagers can only be submitted while the game is running.");
+        }
+
+        if (amount <= 0)
+        {
+            throw new GameRuleViolationException(
+                "A question wager must be greater than zero.");
+        }
+
+        if (_players.All(player => player.Id != playerId))
+        {
+            throw new GameRuleViolationException(
+                "The selected player does not belong to this game.");
+        }
+
+        var question = Board.Questions.SingleOrDefault(
+            item => item.SourceQuestionId == sourceQuestionId)
+            ?? throw new GameRuleViolationException(
+                $"Question {sourceQuestionId} does not belong to this game.");
+
+        question.SubmitWager(playerId, amount, _timeProvider.GetUtcNow());
+        return question;
+    }
+
     private void EnsureAcceptingPlayers()
     {
         if (Status is not GameSessionStatus.Lobby and not GameSessionStatus.Running)
