@@ -766,4 +766,7 @@
   <data name="GameBoard_WagerValid" xml:space="preserve"><value>La puntata è valida.</value></data>
   <data name="GameBoard_WagerOutsideLimits" xml:space="preserve"><value>Inserisci un importo da {0} a {1}.</value></data>
   <data name="GameBoard_MaximumWager" xml:space="preserve"><value>Puntata massima</value></data>
+  <data name="GameBoard_JudgeAnswer" xml:space="preserve"><value>Valuta la risposta</value></data>
+  <data name="GameBoard_NoCorrectAnswer" xml:space="preserve"><value>Nessuna risposta corretta</value></data>
+  <data name="GameBoard_JudgmentRejected" xml:space="preserve"><value>Questa risposta non può essere valutata nello stato attuale della domanda.</value></data>
 </root>
