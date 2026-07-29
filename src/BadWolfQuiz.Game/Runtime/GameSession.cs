@@ -162,6 +162,18 @@ public sealed class GameSession
         return question;
     }
 
+    public GamePlayer AdjustPlayerScore(
+        GamePlayerId playerId,
+        int points)
+    {
+        var player = _players.SingleOrDefault(item => item.Id == playerId)
+            ?? throw new GameRuleViolationException(
+                "The selected player does not belong to this game.");
+
+        player.ApplyScore(points);
+        return player;
+    }
+
     public GamePlayer SetActivePlayer(GamePlayerId playerId)
     {
         var player = _players.SingleOrDefault(item => item.Id == playerId)
