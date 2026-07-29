@@ -75,7 +75,7 @@ app.MapHub<GameHub>("/hubs/game");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<QuizDbContext>();
-    await db.Database.EnsureCreatedAsync();
+    await DatabaseMigrationService.MigrateAsync(db);
 
     var seed = scope.ServiceProvider.GetRequiredService<QuizSeedService>();
     await seed.SeedAsync();
