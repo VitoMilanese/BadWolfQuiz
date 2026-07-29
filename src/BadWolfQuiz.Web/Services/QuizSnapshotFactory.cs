@@ -50,6 +50,7 @@ public sealed class QuizSnapshotFactory
             question.QuizCategoryId,
             question.RowIndex,
             points,
-            question.IsSpecial);
+            question.IsSpecial,
+            question.Category.Title);
     }
 }
