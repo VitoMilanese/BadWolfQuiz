@@ -76,6 +76,55 @@
     </div>
 </section>
 
+
+@if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
+{
+    <section class="host-game-board">
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow">@Localizer["GameBoard_Eyebrow"]</p>
+                <h2>@Model.Game.Session.Quiz.Rounds.OrderBy(round => round.SortOrder).First().Title</h2>
+            </div>
+        </div>
+
+        @if (Model.CurrentQuestion is not null)
+        {
+            <div class="content-panel current-question-summary">
+                <strong>@Model.CurrentQuestion.CategoryTitle — @Model.CurrentQuestion.Points</strong>
+                <span>
+                    @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager
+                        ? Localizer["GameBoard_AwaitingWager"]
+                        : Localizer["GameBoard_QuestionSelected"])
+                </span>
+            </div>
+        }
+
+        <div class="host-board-grid"
+             style="--board-columns: @Model.BoardCategories.Count">
+            @foreach (var category in Model.BoardCategories)
+            {
+                <section class="host-board-column">
+                    <h3>@category.Title</h3>
+
+                    @foreach (var question in category.Questions)
+                    {
+                        <form method="post" asp-page-handler="SelectQuestion">
+                            <input name="sourceQuestionId"
+                                   type="hidden"
+                                   value="@question.SourceQuestionId" />
+                            <button class="host-board-question status-@question.Status.ToString().ToLowerInvariant()"
+                                    type="submit"
+                                    disabled="@(question.Status != BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Available || Model.CurrentQuestion is not null ? "disabled" : null)">
+                                @question.Points
+                            </button>
+                        </form>
+                    }
+                </section>
+            }
+        </div>
+    </section>
+}
+
 @section Scripts {
     <script>
         (() => {
