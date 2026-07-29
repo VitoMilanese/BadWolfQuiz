@@ -192,7 +192,6 @@ public sealed class GameSessionRegistry
     public RuntimeQuestion? SubmitQuestionWager(
         string publicCode,
         int sourceQuestionId,
-        GamePlayerId playerId,
         int amount)
     {
         var game = Find(publicCode);
@@ -206,8 +205,39 @@ public sealed class GameSessionRegistry
         {
             return game.Session.SubmitQuestionWager(
                 sourceQuestionId,
-                playerId,
                 amount);
+        }
+    }
+
+    public GamePlayer? SetActivePlayer(
+        string publicCode,
+        GamePlayerId playerId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.SetActivePlayer(playerId);
+        }
+    }
+
+    public GamePlayer? SelectRandomActivePlayer(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.SelectRandomActivePlayer();
         }
     }
 
