@@ -719,4 +719,11 @@
   <data name="PlayerPresence_Disconnected" xml:space="preserve"><value>Disconnected</value></data>
   <data name="PlayerPresence_MonitoringNotice" xml:space="preserve"><value>Keep this page open and active during the game. Page activity is visible to the host.</value></data>
   <data name="PlayerPresence_InactiveWarning" xml:space="preserve"><value>Return to the game page. The host can see that this page is inactive or disconnected.</value></data>
+
+  <data name="PlayerPresence_RejoinPending" xml:space="preserve"><value>Awaiting approval</value></data>
+  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve"><value>The game is already running. Wait for the host to approve your return.</value></data>
+  <data name="GameLobby_ApproveRejoin" xml:space="preserve"><value>Allow return</value></data>
+  <data name="GameLobby_StartGame" xml:space="preserve"><value>Start game</value></data>
+  <data name="GameLobby_StatusRunning" xml:space="preserve"><value>Running</value></data>
+  <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Add at least one player before starting the game.</value></data>
 </root>
