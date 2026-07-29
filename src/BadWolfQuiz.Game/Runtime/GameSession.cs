@@ -167,13 +167,45 @@ public sealed class GameSession
         return question;
     }
 
+    public QuestionAnswerAttempt JudgeQuestionAnswer(
+        int sourceQuestionId,
+        GamePlayerId playerId,
+        bool isCorrect)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        var player = FindPlayer(playerId);
+        var attempt = question.JudgeAnswer(
+            player.Id,
+            isCorrect,
+            _timeProvider.GetUtcNow());
+
+        player.ApplyScore(attempt.ScoreDelta);
+
+        if (isCorrect)
+        {
+            ActivePlayerId = player.Id;
+        }
+
+        return attempt;
+    }
+
+    public RuntimeQuestion ResolveQuestionWithoutCorrectAnswer(
+        int sourceQuestionId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        question.ResolveWithoutCorrectAnswer();
+        return question;
+    }
+
     public GamePlayer AdjustPlayerScore(
         GamePlayerId playerId,
         int points)
     {
-        var player = _players.SingleOrDefault(item => item.Id == playerId)
-            ?? throw new GameRuleViolationException(
-                "The selected player does not belong to this game.");
+        var player = FindPlayer(playerId);
 
         player.ApplyScore(points);
         return player;
@@ -183,9 +215,7 @@ public sealed class GameSession
     {
         EnsureActivePlayerChangeAllowed();
 
-        var player = _players.SingleOrDefault(item => item.Id == playerId)
-            ?? throw new GameRuleViolationException(
-                "The selected player does not belong to this game.");
+        var player = FindPlayer(playerId);
 
         ActivePlayerId = player.Id;
         return player;
@@ -210,6 +240,22 @@ public sealed class GameSession
         {
             throw new GameRuleViolationException(
                 "The active player cannot change while a wager question is in progress.");
+        }
+    }
+
+    private GamePlayer FindPlayer(GamePlayerId playerId)
+    {
+        return _players.SingleOrDefault(player => player.Id == playerId)
+            ?? throw new GameRuleViolationException(
+                "The selected player does not belong to this game.");
+    }
+
+    private void EnsureRunning()
+    {
+        if (Status != GameSessionStatus.Running)
+        {
+            throw new GameRuleViolationException(
+                "Questions can only be judged while the game is running.");
         }
     }
 
