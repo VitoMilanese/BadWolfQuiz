@@ -334,7 +334,13 @@
     <value>Buzzer delay</value>
   </data>
   <data name="Label_SpecialQuestion" xml:space="preserve">
-    <value>Special question</value>
+    <value>Question with wager</value>
+  </data>
+  <data name="Hint_WagerQuestion" xml:space="preserve">
+    <value>The player must submit a wager before this question is opened.</value>
+  </data>
+  <data name="Label_WagerQuestion" xml:space="preserve">
+    <value>Wager</value>
   </data>
   <data name="Label_Created" xml:space="preserve">
     <value>Created</value>
