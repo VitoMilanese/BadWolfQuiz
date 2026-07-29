@@ -1350,3 +1350,83 @@ textarea {
     font-weight: 850;
     text-transform: uppercase;
 }
+
+/* In-game player scoreboard */
+
+.game-scoreboard {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 10px;
+    margin: 18px 0 0;
+    padding: 0 6px 6px;
+    overflow-x: auto;
+    list-style: none;
+}
+
+.scoreboard-player {
+    min-width: 150px;
+    max-width: 240px;
+    flex: 1 1 170px;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 8px;
+    padding: 14px 16px;
+    border: 2px solid #31314a;
+    border-radius: 10px 10px 0 0;
+    background: linear-gradient(145deg, #171735, #0d0d20);
+    text-align: center;
+}
+
+.scoreboard-player > strong {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 1.05rem;
+}
+
+.scoreboard-details {
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+}
+
+.scoreboard-score {
+    color: var(--gold);
+    font-size: 1.45rem;
+    font-weight: 950;
+    font-variant-numeric: tabular-nums;
+}
+
+.scoreboard-score.score-negative {
+    color: #ff5d68;
+}
+
+.scoreboard-details .presence-badge {
+    min-width: 0;
+    font-size: 0.68rem;
+}
+
+.scoreboard-details .button {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+}
+
+.presence-rejoinpending {
+    color: #ffb3ba;
+    border-color: rgba(239, 35, 60, 0.7);
+    background: rgba(239, 35, 60, 0.16);
+}
+
+@media (max-width: 700px) {
+    .game-scoreboard {
+        justify-content: flex-start;
+    }
+
+    .scoreboard-player {
+        min-width: 135px;
+    }
+}
