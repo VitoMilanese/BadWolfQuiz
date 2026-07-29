@@ -111,6 +111,66 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostJudgeQuestionAnswerAsync(
+        Guid id,
+        int sourceQuestionId,
+        Guid playerId,
+        bool isCorrect,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.JudgeQuestionAnswer(
+                game.PublicCode,
+                sourceQuestionId,
+                new GamePlayerId(playerId),
+                isCorrect);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_JudgmentRejected"].Value;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostResolveQuestionAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.ResolveQuestionWithoutCorrectAnswer(
+                game.PublicCode,
+                sourceQuestionId);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_JudgmentRejected"].Value;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostSetActivePlayerAsync(
         Guid id,
         Guid playerId,
