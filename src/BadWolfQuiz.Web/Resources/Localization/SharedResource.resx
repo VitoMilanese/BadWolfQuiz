@@ -765,4 +765,5 @@
   <data name="GameBoard_DeleteWagerDigit" xml:space="preserve"><value>Delete last digit</value></data>
   <data name="GameBoard_WagerValid" xml:space="preserve"><value>The wager is valid.</value></data>
   <data name="GameBoard_WagerOutsideLimits" xml:space="preserve"><value>Enter an amount from {0} to {1}.</value></data>
+  <data name="GameBoard_MaximumWager" xml:space="preserve"><value>Maximum wager</value></data>
 </root>
