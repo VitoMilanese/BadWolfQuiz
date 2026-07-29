@@ -173,6 +173,7 @@ p {
 
 .quiz-card {
     display: flex;
+    align-items: center;
     justify-content: space-between;
     gap: 20px;
     padding: 22px;
@@ -992,7 +993,17 @@ textarea {
 
 @media (max-width: 700px) {
     .quiz-card {
+        align-items: stretch;
         flex-direction: column;
+    }
+
+    .card-actions form {
+        display: flex;
+        flex: 1 1 auto;
+    }
+
+    .card-actions form .button {
+        width: 100%;
     }
 
     .card-actions .button {
