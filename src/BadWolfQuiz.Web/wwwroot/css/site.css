@@ -1526,3 +1526,244 @@ textarea {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* Host question wager */
+
+.current-question-summary {
+    display: grid;
+}
+
+.current-question-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.question-wager-form {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(140px, 220px) auto;
+    align-items: end;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.question-wager-form label {
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 750;
+}
+
+.question-wager-form select,
+.question-wager-form input {
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--text);
+    background: var(--panel);
+}
+
+.accepted-wager {
+    margin: 12px 0 0;
+    color: var(--gold);
+    font-weight: 850;
+}
+
+@media (max-width: 700px) {
+    .current-question-heading {
+        flex-direction: column;
+    }
+
+    .question-wager-form {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Active player and wager keypad */
+
+.active-player {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 1px rgba(242, 177, 52, 0.32);
+}
+
+.active-player-badge {
+    padding: 4px 8px;
+    border: 1px solid rgba(242, 177, 52, 0.65);
+    border-radius: 999px;
+    color: var(--gold);
+    background: rgba(242, 177, 52, 0.12);
+    font-size: 0.7rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.player-management {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.player-management .button,
+.scoreboard-player .button {
+    min-height: 32px;
+    padding: 5px 9px;
+    font-size: 0.72rem;
+}
+
+.wager-entry-panel {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(260px, 360px);
+    gap: 24px;
+    margin-top: 16px;
+}
+
+.wager-player-summary {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+}
+
+.wager-player-summary span,
+.wager-player-summary small {
+    color: var(--muted);
+}
+
+.wager-player-summary strong {
+    color: var(--gold);
+    font-size: 1.5rem;
+}
+
+.question-wager-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 0;
+}
+
+.wager-display-label {
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 750;
+}
+
+.wager-display {
+    width: 100%;
+    min-height: 64px !important;
+    padding: 8px 14px !important;
+    color: var(--gold) !important;
+    font-size: 2rem !important;
+    font-weight: 950;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.wager-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.wager-keypad button {
+    min-height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--text);
+    background: var(--panel-2);
+    cursor: pointer;
+    font-size: 1.25rem;
+    font-weight: 900;
+}
+
+.wager-keypad button:hover {
+    border-color: var(--gold);
+    background: rgba(242, 177, 52, 0.12);
+}
+
+.wager-validation {
+    min-height: 1.25em;
+    margin: 0;
+    color: #ff8d8d;
+    font-size: 0.82rem;
+}
+
+.wager-validation.wager-valid {
+    color: #7ee787;
+}
+
+@media (max-width: 700px) {
+    .wager-entry-panel {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Focused wager entry */
+
+.current-question-summary.wager-mode {
+    width: 100%;
+    min-height: min(680px, calc(100vh - 210px));
+    grid-template-columns: minmax(0, 1fr);
+    place-items: center;
+    align-content: center;
+    padding: clamp(20px, 4vw, 48px);
+}
+
+.current-question-summary.wager-mode .current-question-heading {
+    width: min(720px, 100%);
+}
+
+.current-question-summary.wager-mode .wager-entry-panel {
+    width: 100%;
+    justify-self: stretch;
+    grid-template-columns: 160px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 24px;
+}
+
+.current-question-summary.wager-mode .wager-player-summary {
+    grid-column: 1;
+    width: 100%;
+    justify-self: stretch;
+    text-align: left;
+}
+
+.current-question-summary.wager-mode .question-wager-form {
+    grid-column: 2;
+    width: min(360px, 100%);
+    justify-self: center;
+}
+
+.wager-keypad-max {
+    grid-column: 1 / -1;
+    color: var(--gold) !important;
+    border-color: rgba(242, 177, 52, 0.65) !important;
+    letter-spacing: 0.08em;
+}
+
+@media (max-width: 700px) {
+    .current-question-summary.wager-mode {
+        min-height: auto;
+    }
+
+    .current-question-summary.wager-mode .wager-entry-panel {
+        width: min(360px, 100%);
+        grid-template-columns: 1fr;
+        justify-self: center;
+    }
+
+    .current-question-summary.wager-mode .wager-player-summary,
+    .current-question-summary.wager-mode .question-wager-form {
+        grid-column: 1;
+        width: 100%;
+        justify-self: stretch;
+        text-align: left;
+    }
+}

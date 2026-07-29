@@ -188,6 +188,51 @@ public sealed class GameSessionRegistryTests
             question);
     }
 
+    [Fact]
+    public void SubmitQuestionWager_routes_command_to_runtime_session()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateWagerQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.StartGame("ABC123");
+        registry.SelectQuestion("ABC123", 1);
+
+        var question = registry.SubmitQuestionWager(
+            "ABC123",
+            1,
+            100);
+
+        Assert.NotNull(question);
+        Assert.Equal(
+            BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active,
+            question.Status);
+        Assert.Equal(joined.Player.Id, question.Wager!.PlayerId);
+        Assert.Equal(100, question.Wager.Amount);
+        Assert.Same(game.Session.Board.Questions.Single(), question);
+    }
+
+    [Fact]
+    public void ActivePlayer_commands_route_to_runtime_session()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        var rose = registry.JoinPlayer("ABC123", "Rose").Player!;
+        var mickey = registry.JoinPlayer("ABC123", "Mickey").Player!;
+
+        Assert.Equal(rose.Id, game.Session.ActivePlayerId);
+
+        registry.SetActivePlayer("ABC123", mickey.Id);
+
+        Assert.Equal(mickey.Id, game.Session.ActivePlayerId);
+
+        var selected = registry.SelectRandomActivePlayer("ABC123");
+
+        Assert.Contains(
+            selected!.Id,
+            new[] { rose.Id, mickey.Id });
+        Assert.Equal(selected.Id, game.Session.ActivePlayerId);
+    }
+
     private static GameSessionRegistry CreateRegistry(params string[] codes)
     {
         return new GameSessionRegistry(new StubGameCodeGenerator(codes));
@@ -204,6 +249,20 @@ public sealed class GameSessionRegistryTests
                     "Round 1",
                     0,
                     [new QuizQuestionSnapshot(1, 1, 0, 100, false)])
+            ]);
+    }
+
+    private static QuizSnapshot CreateWagerQuiz()
+    {
+        return new QuizSnapshot(
+            1,
+            "Wager Quiz",
+            [
+                new QuizRoundSnapshot(
+                    1,
+                    "Round 1",
+                    0,
+                    [new QuizQuestionSnapshot(1, 1, 0, 100, true)])
             ]);
     }
 

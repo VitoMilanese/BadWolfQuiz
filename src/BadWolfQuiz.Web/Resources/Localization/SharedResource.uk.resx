@@ -748,4 +748,22 @@
   <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Питання вибрано</value></data>
   <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>Очікується ставка</value></data>
   <data name="GameBoard_SelectionRejected" xml:space="preserve"><value>Зараз це питання не можна вибрати.</value></data>
+  <data name="GameBoard_SelectWagerPlayer" xml:space="preserve"><value>Оберіть гравця</value></data>
+  <data name="GameBoard_WagerAmount" xml:space="preserve"><value>Сума ставки</value></data>
+  <data name="GameBoard_AcceptWager" xml:space="preserve"><value>Прийняти ставку</value></data>
+  <data name="GameBoard_WagerAccepted" xml:space="preserve"><value>Ставку прийнято</value></data>
+  <data name="GameBoard_AcceptedWagerSummary" xml:space="preserve"><value>{0} — {1} балів</value></data>
+  <data name="GameBoard_WagerRejected" xml:space="preserve"><value>Не вдалося прийняти ставку. Перевірте активного гравця та допустимі межі ставки.</value></data>
+  <data name="GameBoard_ActivePlayer" xml:space="preserve"><value>Обирає питання</value></data>
+  <data name="GameBoard_MakeActivePlayer" xml:space="preserve"><value>Передати вибір</value></data>
+  <data name="GameBoard_RandomActivePlayer" xml:space="preserve"><value>Обрати гравця випадково</value></data>
+  <data name="GameBoard_ActivePlayerRejected" xml:space="preserve"><value>Не вдалося змінити активного гравця.</value></data>
+  <data name="GameBoard_WagerPlayer" xml:space="preserve"><value>Відповідає на питання</value></data>
+  <data name="GameBoard_WagerLimits" xml:space="preserve"><value>Допустима ставка: {0}–{1}</value></data>
+  <data name="GameBoard_WagerKeypad" xml:space="preserve"><value>Цифрова панель ставки</value></data>
+  <data name="GameBoard_ClearWager" xml:space="preserve"><value>Очистити ставку</value></data>
+  <data name="GameBoard_DeleteWagerDigit" xml:space="preserve"><value>Видалити останню цифру</value></data>
+  <data name="GameBoard_WagerValid" xml:space="preserve"><value>Ставка допустима.</value></data>
+  <data name="GameBoard_WagerOutsideLimits" xml:space="preserve"><value>Введіть суму від {0} до {1}.</value></data>
+  <data name="GameBoard_MaximumWager" xml:space="preserve"><value>Максимальна ставка</value></data>
 </root>

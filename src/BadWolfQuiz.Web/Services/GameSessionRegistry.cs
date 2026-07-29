@@ -189,6 +189,76 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public RuntimeQuestion? SubmitQuestionWager(
+        string publicCode,
+        int sourceQuestionId,
+        int amount)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.SubmitQuestionWager(
+                sourceQuestionId,
+                amount);
+        }
+    }
+
+    public GamePlayer? AdjustPlayerScore(
+        string publicCode,
+        GamePlayerId playerId,
+        int points)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.AdjustPlayerScore(playerId, points);
+        }
+    }
+
+    public GamePlayer? SetActivePlayer(
+        string publicCode,
+        GamePlayerId playerId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.SetActivePlayer(playerId);
+        }
+    }
+
+    public GamePlayer? SelectRandomActivePlayer(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.SelectRandomActivePlayer();
+        }
+    }
+
     public PlayerRejoinApproval? ApprovePlayerRejoin(
         string publicCode,
         GamePlayerId playerId)

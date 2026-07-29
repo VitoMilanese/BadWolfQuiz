@@ -748,4 +748,22 @@
   <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Question selected</value></data>
   <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>Waiting for wager</value></data>
   <data name="GameBoard_SelectionRejected" xml:space="preserve"><value>This question cannot be selected right now.</value></data>
+  <data name="GameBoard_SelectWagerPlayer" xml:space="preserve"><value>Select a player</value></data>
+  <data name="GameBoard_WagerAmount" xml:space="preserve"><value>Wager amount</value></data>
+  <data name="GameBoard_AcceptWager" xml:space="preserve"><value>Accept wager</value></data>
+  <data name="GameBoard_WagerAccepted" xml:space="preserve"><value>Wager accepted</value></data>
+  <data name="GameBoard_AcceptedWagerSummary" xml:space="preserve"><value>{0} — {1} points</value></data>
+  <data name="GameBoard_WagerRejected" xml:space="preserve"><value>The wager could not be accepted. Check the active player and the allowed wager range.</value></data>
+  <data name="GameBoard_ActivePlayer" xml:space="preserve"><value>Chooses the question</value></data>
+  <data name="GameBoard_MakeActivePlayer" xml:space="preserve"><value>Give selection</value></data>
+  <data name="GameBoard_RandomActivePlayer" xml:space="preserve"><value>Choose player randomly</value></data>
+  <data name="GameBoard_ActivePlayerRejected" xml:space="preserve"><value>The active player could not be changed.</value></data>
+  <data name="GameBoard_WagerPlayer" xml:space="preserve"><value>Answering player</value></data>
+  <data name="GameBoard_WagerLimits" xml:space="preserve"><value>Allowed wager: {0}–{1}</value></data>
+  <data name="GameBoard_WagerKeypad" xml:space="preserve"><value>Wager keypad</value></data>
+  <data name="GameBoard_ClearWager" xml:space="preserve"><value>Clear wager</value></data>
+  <data name="GameBoard_DeleteWagerDigit" xml:space="preserve"><value>Delete last digit</value></data>
+  <data name="GameBoard_WagerValid" xml:space="preserve"><value>The wager is valid.</value></data>
+  <data name="GameBoard_WagerOutsideLimits" xml:space="preserve"><value>Enter an amount from {0} to {1}.</value></data>
+  <data name="GameBoard_MaximumWager" xml:space="preserve"><value>Maximum wager</value></data>
 </root>

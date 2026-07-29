@@ -748,4 +748,22 @@
   <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Domanda selezionata</value></data>
   <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>In attesa della puntata</value></data>
   <data name="GameBoard_SelectionRejected" xml:space="preserve"><value>Questa domanda non può essere selezionata in questo momento.</value></data>
+  <data name="GameBoard_SelectWagerPlayer" xml:space="preserve"><value>Seleziona un giocatore</value></data>
+  <data name="GameBoard_WagerAmount" xml:space="preserve"><value>Importo della puntata</value></data>
+  <data name="GameBoard_AcceptWager" xml:space="preserve"><value>Accetta puntata</value></data>
+  <data name="GameBoard_WagerAccepted" xml:space="preserve"><value>Puntata accettata</value></data>
+  <data name="GameBoard_AcceptedWagerSummary" xml:space="preserve"><value>{0} — {1} punti</value></data>
+  <data name="GameBoard_WagerRejected" xml:space="preserve"><value>Impossibile accettare la puntata. Controlla il giocatore attivo e i limiti consentiti.</value></data>
+  <data name="GameBoard_ActivePlayer" xml:space="preserve"><value>Sceglie la domanda</value></data>
+  <data name="GameBoard_MakeActivePlayer" xml:space="preserve"><value>Assegna la scelta</value></data>
+  <data name="GameBoard_RandomActivePlayer" xml:space="preserve"><value>Scegli giocatore casualmente</value></data>
+  <data name="GameBoard_ActivePlayerRejected" xml:space="preserve"><value>Impossibile cambiare il giocatore attivo.</value></data>
+  <data name="GameBoard_WagerPlayer" xml:space="preserve"><value>Giocatore che risponde</value></data>
+  <data name="GameBoard_WagerLimits" xml:space="preserve"><value>Puntata consentita: {0}–{1}</value></data>
+  <data name="GameBoard_WagerKeypad" xml:space="preserve"><value>Tastierino della puntata</value></data>
+  <data name="GameBoard_ClearWager" xml:space="preserve"><value>Cancella puntata</value></data>
+  <data name="GameBoard_DeleteWagerDigit" xml:space="preserve"><value>Elimina l'ultima cifra</value></data>
+  <data name="GameBoard_WagerValid" xml:space="preserve"><value>La puntata è valida.</value></data>
+  <data name="GameBoard_WagerOutsideLimits" xml:space="preserve"><value>Inserisci un importo da {0} a {1}.</value></data>
+  <data name="GameBoard_MaximumWager" xml:space="preserve"><value>Puntata massima</value></data>
 </root>
