@@ -4,7 +4,10 @@
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
 }
 
-<div class="form-card narrow player-lobby">
+<div class="form-card narrow player-lobby"
+     data-game-code="@Model.Game.PublicCode"
+     data-player-id="@Model.CurrentPlayer.Id.Value"
+     data-access-token="@Model.AccessToken">
     <p class="eyebrow">@Localizer["Message_WaitingHost"]</p>
     <h1>@Model.Game.Session.Quiz.Title</h1>
 
@@ -17,6 +20,12 @@
         <strong>@Localizer["Label_PlayerName"]:</strong>
         @Model.CurrentPlayer.Name
     </p>
+
+    <div id="activity-warning" class="message message-error" hidden>
+        @Localizer["PlayerPresence_InactiveWarning"]
+    </div>
+
+    <p class="dialog-warning">@Localizer["PlayerPresence_MonitoringNotice"]</p>
 
     <h2>@Localizer["Label_Players"] (@Model.Players.Count)</h2>
     <ul class="player-list">
@@ -31,3 +40,86 @@
 
     <p class="dialog-warning">@Localizer["Message_WaitingHost"]</p>
 </div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const lobby = document.querySelector(".player-lobby");
+            const warning = document.getElementById("activity-warning");
+
+            if (!lobby || !warning || typeof signalR === "undefined") {
+                return;
+            }
+
+            const gameCode = lobby.dataset.gameCode;
+            const playerId = lobby.dataset.playerId;
+            const storageKey = `badwolfquiz:${gameCode}:player:${playerId}`;
+            const bootstrapToken = lobby.dataset.accessToken;
+
+            if (bootstrapToken) {
+                localStorage.setItem(storageKey, bootstrapToken);
+                history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            const accessToken = bootstrapToken || localStorage.getItem(storageKey);
+
+            if (!accessToken) {
+                warning.hidden = false;
+                return;
+            }
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/game")
+                .withAutomaticReconnect()
+                .build();
+
+            const isPageActive = () =>
+                document.visibilityState === "visible" && document.hasFocus();
+
+            const updateWarning = () => {
+                warning.hidden = isPageActive();
+            };
+
+            const joinPlayerSession = () => connection.invoke(
+                "JoinPlayerSession",
+                gameCode,
+                accessToken,
+                isPageActive());
+
+            connection.on("PlayerAccessRejected", () => {
+                warning.hidden = false;
+            });
+
+            connection.onreconnected(joinPlayerSession);
+
+            document.addEventListener("visibilitychange", () => {
+                updateWarning();
+
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    connection.invoke("SetPlayerVisibility", isPageActive()).catch(console.error);
+                }
+            });
+
+            window.addEventListener("focus", () => {
+                updateWarning();
+
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    connection.invoke("SetPlayerVisibility", true).catch(console.error);
+                }
+            });
+
+            window.addEventListener("blur", () => {
+                updateWarning();
+
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    connection.invoke("SetPlayerVisibility", false).catch(console.error);
+                }
+            });
+
+            updateWarning();
+            connection.start().then(joinPlayerSession).catch(() => {
+                warning.hidden = false;
+            });
+        })();
+    </script>
+}
