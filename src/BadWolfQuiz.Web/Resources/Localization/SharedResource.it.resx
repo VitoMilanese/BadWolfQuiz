@@ -490,7 +490,7 @@
     <value>La lobby e l’accesso tramite QR verranno aggiunti nel prossimo passaggio.</value>
   </data>
   <data name="Placeholder_GameCode" xml:space="preserve">
-    <value>Ad esempio: WOLF123</value>
+    <value>Ad esempio: ABC123</value>
   </data>
   <data name="Label_PlayerName" xml:space="preserve">
     <value>Nome del giocatore</value>
