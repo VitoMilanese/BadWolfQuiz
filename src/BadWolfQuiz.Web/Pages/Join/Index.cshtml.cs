@@ -54,7 +54,8 @@ public sealed class IndexModel(
                     new
                     {
                         code = result.Game.PublicCode,
-                        playerId = result.Player!.Id.Value
+                        playerId = result.Player!.Id.Value,
+                        accessToken = result.AccessToken
                     });
 
             case PlayerJoinStatus.GameNotFound:
