@@ -15,66 +15,145 @@
     </a>
 </div>
 
-<section class="content-panel narrow"
-         data-game-code="@Model.Game.PublicCode"
-         data-status-active="@Localizer["PlayerPresence_Active"]"
-         data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
-         data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
-         data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
-         data-approve-label="@Localizer["GameLobby_ApproveRejoin"]"
-         data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
-         data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
-         data-running-label="@Localizer["GameLobby_StatusRunning"]">
-    @if (TempData["ErrorMessage"] is string errorMessage)
-    {
-        <div class="message message-error">@errorMessage</div>
-    }
+@if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby)
+{
+    <section class="content-panel narrow"
+             data-game-code="@Model.Game.PublicCode"
+             data-status-active="@Localizer["PlayerPresence_Active"]"
+             data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
+             data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
+             data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
+             data-approve-label="@Localizer["GameLobby_ApproveRejoin"]"
+             data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
+             data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
+             data-running-label="@Localizer["GameLobby_StatusRunning"]">
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="message message-error">@errorMessage</div>
+        }
 
-    <div class="stack-form">
-        <div class="game-code-panel">
-            <span>@Localizer["Label_GameCode"]</span>
-            <strong>@Model.Game.PublicCode</strong>
-            <small>@Localizer["Message_WaitingPlayers"]</small>
+        <div class="stack-form">
+            <div class="game-code-panel">
+                <span>@Localizer["Label_GameCode"]</span>
+                <strong>@Model.Game.PublicCode</strong>
+                <small>@Localizer["Message_WaitingPlayers"]</small>
+            </div>
+
+            <p>
+                <strong>@Localizer["GameLobby_StatusLabel"]:</strong>
+                <span id="game-status">@Localizer["GameLobby_StatusLobby"]</span>
+            </p>
+
+            <form id="start-game-form" method="post" asp-page-handler="Start">
+                <button class="button button-primary" type="submit">
+                    @Localizer["GameLobby_StartGame"]
+                </button>
+            </form>
+
+            <p>
+                <strong>@Localizer["GameLobby_PlayerCount"]:</strong>
+                <span id="player-count">@Model.Players.Count</span>
+            </p>
+
+            <p>
+                <strong>@Localizer["GameLobby_QuestionCount"]:</strong>
+                @Model.Game.Session.Board.Questions.Count
+            </p>
+
+            <ul id="player-list" class="player-list">
+                @foreach (var player in Model.Players)
+                {
+                    <li data-player-id="@player.Id.Value">
+                        <strong>@player.Name</strong>
+                        <span>@player.Score</span>
+                    </li>
+                }
+            </ul>
+
+            <p class="dialog-warning">@Localizer["GameLobby_TransientNotice"]</p>
         </div>
-        <p>
-            <strong>@Localizer["GameLobby_StatusLabel"]:</strong>
-            <span id="game-status">
-                @(Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby
-                    ? Localizer["GameLobby_StatusLobby"]
-                    : Localizer["GameLobby_StatusRunning"])
-            </span>
-        </p>
+    </section>
+}
 
-        <form id="start-game-form" method="post" asp-page-handler="Start"
-              hidden="@(Model.Game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby ? "hidden" : null)">
-            <button class="button button-primary" type="submit">
-                @Localizer["GameLobby_StartGame"]
-            </button>
-        </form>
 
-        <form id="approve-rejoin-form" method="post" asp-page-handler="ApproveRejoin">
-            <input id="approve-player-id" name="playerId" type="hidden" />
-        </form>
-        <p>
-            <strong>@Localizer["GameLobby_PlayerCount"]:</strong>
-            <span id="player-count">@Model.Players.Count</span>
-        </p>
-        <p>
-            <strong>@Localizer["GameLobby_QuestionCount"]:</strong>
-            @Model.Game.Session.Board.Questions.Count
-        </p>
-        <ul id="player-list" class="player-list">
+@if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
+{
+    <section class="host-game-board"
+             data-game-code="@Model.Game.PublicCode"
+             data-status-active="@Localizer["PlayerPresence_Active"]"
+             data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
+             data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
+             data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
+             data-approve-label="@Localizer["GameLobby_ApproveRejoin"]"
+             data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
+             data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
+             data-running-label="@Localizer["GameLobby_StatusRunning"]">
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="message message-error">@errorMessage</div>
+        }
+
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow">@Localizer["GameBoard_Eyebrow"]</p>
+                <h2>@Model.Game.Session.Quiz.Rounds.OrderBy(round => round.SortOrder).First().Title</h2>
+            </div>
+        </div>
+
+        @if (Model.CurrentQuestion is not null)
+        {
+            <div class="content-panel current-question-summary">
+                <strong>@Model.CurrentQuestion.CategoryTitle — @Model.CurrentQuestion.Points</strong>
+                <span>
+                    @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager
+                        ? Localizer["GameBoard_AwaitingWager"]
+                        : Localizer["GameBoard_QuestionSelected"])
+                </span>
+            </div>
+        }
+
+        <div class="host-board-grid"
+             style="--board-columns: @Model.BoardCategories.Count">
+            @foreach (var category in Model.BoardCategories)
+            {
+                <section class="host-board-column">
+                    <h3>@category.Title</h3>
+
+                    @foreach (var question in category.Questions)
+                    {
+                        <form method="post" asp-page-handler="SelectQuestion">
+                            <input name="sourceQuestionId"
+                                   type="hidden"
+                                   value="@question.SourceQuestionId" />
+                            <button class="host-board-question status-@question.Status.ToString().ToLowerInvariant()"
+                                    type="submit"
+                                    disabled="@(question.Status != BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Available || Model.CurrentQuestion is not null ? "disabled" : null)">
+                                @question.Points
+                            </button>
+                        </form>
+                    }
+                </section>
+            }
+        </div>
+
+        <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
             @foreach (var player in Model.Players)
             {
-                <li data-player-id="@player.Id.Value">
+                <li class="scoreboard-player"
+                    data-player-id="@player.Id.Value">
                     <strong>@player.Name</strong>
-                    <span>@player.Score</span>
+                    <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
+                        @player.Score
+                    </span>
                 </li>
             }
         </ul>
-        <p class="dialog-warning">@Localizer["GameLobby_TransientNotice"]</p>
-    </div>
-</section>
+    </section>
+}
+
+<form id="approve-rejoin-form" method="post" asp-page-handler="ApproveRejoin">
+    <input id="approve-player-id" name="playerId" type="hidden" />
+</form>
 
 @section Scripts {
     <script>
@@ -83,7 +162,7 @@
             const playerCount = document.getElementById("player-count");
             const playerList = document.getElementById("player-list");
 
-            if (!lobby || !playerCount || !playerList || typeof signalR === "undefined") {
+            if (!lobby || !playerList || typeof signalR === "undefined") {
                 return;
             }
 
@@ -104,27 +183,43 @@
                 .build();
 
             connection.on("PlayersChanged", update => {
-                playerCount.textContent = update.playerCount.toString();
+                if (playerCount) {
+                    playerCount.textContent = update.playerCount.toString();
+                }
+
                 playerList.replaceChildren();
+                const isRunning = lobby.dataset.gameStatus === "running";
 
                 for (const player of update.players) {
                     const item = document.createElement("li");
                     item.dataset.playerId = player.id;
+                    item.className = isRunning
+                        ? "scoreboard-player"
+                        : "";
 
                     const name = document.createElement("strong");
                     name.textContent = player.name;
 
                     const details = document.createElement("span");
-                    details.className = "player-presence";
+                    details.className = isRunning
+                        ? "scoreboard-details"
+                        : "player-presence";
 
                     const score = document.createElement("span");
                     score.textContent = player.score.toString();
+                    score.className = isRunning
+                        ? `scoreboard-score ${player.score < 0 ? "score-negative" : ""}`
+                        : "";
 
-                    const presence = document.createElement("span");
-                    presence.className = `presence-badge presence-${player.presence}`;
-                    presence.textContent = statusLabels[player.presence] || player.presence;
+                    details.append(score);
 
-                    details.append(score, presence);
+                    if (player.presence !== "active") {
+                        const presence = document.createElement("span");
+                        presence.className = `presence-badge presence-${player.presence}`;
+                        presence.textContent =
+                            statusLabels[player.presence] || player.presence;
+                        details.append(presence);
+                    }
 
                     if (player.presence === "rejoinpending") {
                         const approve = document.createElement("button");
@@ -145,10 +240,15 @@
 
             connection.on("GameStatusChanged", update => {
                 lobby.dataset.gameStatus = update.status;
-                gameStatus.textContent = update.status === "running"
-                    ? lobby.dataset.runningLabel
-                    : lobby.dataset.lobbyLabel;
-                startGameForm.hidden = update.status !== "lobby";
+                if (gameStatus) {
+                    gameStatus.textContent = update.status === "running"
+                        ? lobby.dataset.runningLabel
+                        : lobby.dataset.lobbyLabel;
+                }
+
+                if (startGameForm) {
+                    startGameForm.hidden = update.status !== "lobby";
+                }
             });
 
             const joinSession = () => connection.invoke("JoinSession", gameCode);

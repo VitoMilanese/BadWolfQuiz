@@ -334,7 +334,13 @@
     <value>Buzzer delay</value>
   </data>
   <data name="Label_SpecialQuestion" xml:space="preserve">
-    <value>Special question</value>
+    <value>Question with wager</value>
+  </data>
+  <data name="Hint_WagerQuestion" xml:space="preserve">
+    <value>The player must submit a wager before this question is opened. Only that player answers; the answer button is not used.</value>
+  </data>
+  <data name="Label_WagerQuestion" xml:space="preserve">
+    <value>Wager</value>
   </data>
   <data name="Label_Created" xml:space="preserve">
     <value>Created</value>
@@ -726,4 +732,9 @@
   <data name="GameLobby_StartGame" xml:space="preserve"><value>Start game</value></data>
   <data name="GameLobby_StatusRunning" xml:space="preserve"><value>Running</value></data>
   <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Add at least one player before starting the game.</value></data>
+
+  <data name="GameBoard_Eyebrow" xml:space="preserve"><value>GAME BOARD</value></data>
+  <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Question selected</value></data>
+  <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>Waiting for wager</value></data>
+  <data name="GameBoard_SelectionRejected" xml:space="preserve"><value>This question cannot be selected right now.</value></data>
 </root>

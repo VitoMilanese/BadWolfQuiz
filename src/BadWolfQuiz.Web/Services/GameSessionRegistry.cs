@@ -177,6 +177,23 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public RuntimeQuestion? SelectQuestion(
+        string publicCode,
+        int sourceQuestionId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.SelectQuestion(sourceQuestionId);
+        }
+    }
+
     public PlayerRejoinApproval? ApprovePlayerRejoin(
         string publicCode,
         GamePlayerId playerId)

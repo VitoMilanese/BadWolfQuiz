@@ -334,7 +334,13 @@
     <value>Ritardo pulsante</value>
   </data>
   <data name="Label_SpecialQuestion" xml:space="preserve">
-    <value>Domanda speciale</value>
+    <value>Domanda con puntata</value>
+  </data>
+  <data name="Hint_WagerQuestion" xml:space="preserve">
+    <value>Il giocatore deve inviare una puntata prima che la domanda venga aperta. Risponde solo quel giocatore; il pulsante di risposta non viene utilizzato.</value>
+  </data>
+  <data name="Label_WagerQuestion" xml:space="preserve">
+    <value>Puntata</value>
   </data>
   <data name="Label_Created" xml:space="preserve">
     <value>Creato</value>
@@ -726,4 +732,9 @@
   <data name="GameLobby_StartGame" xml:space="preserve"><value>Avvia partita</value></data>
   <data name="GameLobby_StatusRunning" xml:space="preserve"><value>In corso</value></data>
   <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Aggiungi almeno un giocatore prima di iniziare la partita.</value></data>
+
+  <data name="GameBoard_Eyebrow" xml:space="preserve"><value>TABELLONE DI GIOCO</value></data>
+  <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Domanda selezionata</value></data>
+  <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>In attesa della puntata</value></data>
+  <data name="GameBoard_SelectionRejected" xml:space="preserve"><value>Questa domanda non può essere selezionata in questo momento.</value></data>
 </root>

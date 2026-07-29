@@ -110,7 +110,9 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
         }
 
         question.IsSpecial = Input.IsSpecial;
-        question.BuzzModeOverride = Input.BuzzModeOverride;
+        question.BuzzModeOverride = Input.IsSpecial
+            ? BuzzActivationMode.Disabled
+            : Input.BuzzModeOverride;
         question.UpdatedAtUtc = DateTime.UtcNow;
 
         var submittedQuestionBlockIds = Input.QuestionBlocks

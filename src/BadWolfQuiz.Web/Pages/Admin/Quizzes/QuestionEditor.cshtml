@@ -52,23 +52,28 @@
     <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
     <section class="content-panel question-settings">
-        <label class="checkbox-row">
+        <label class="checkbox-row wager-question-setting">
             <input asp-for="Input.IsSpecial" />
-            @Localizer["Label_SpecialQuestion"]
+            <span>
+                <strong>@Localizer["Label_SpecialQuestion"]</strong>
+                <small>@Localizer["Hint_WagerQuestion"]</small>
+            </span>
         </label>
 
-        <label asp-for="Input.BuzzModeOverride">
-            @Localizer["Label_BuzzMode"]
-        </label>
+        <div id="buzz-mode-setting">
+            <label asp-for="Input.BuzzModeOverride">
+                @Localizer["Label_BuzzMode"]
+            </label>
 
-        <select asp-for="Input.BuzzModeOverride">
-            <option value="0">@Localizer["BuzzMode_UseRoundDefault"]</option>
-            <option value="1">@Localizer["BuzzMode_Manual"]</option>
-            <option value="2">@Localizer["BuzzMode_Immediately"]</option>
-            <option value="3">@Localizer["BuzzMode_AfterMedia"]</option>
-            <option value="4">@Localizer["BuzzMode_AfterDelay"]</option>
-            <option value="5">@Localizer["BuzzMode_Disabled"]</option>
-        </select>
+            <select asp-for="Input.BuzzModeOverride">
+                <option value="0">@Localizer["BuzzMode_UseRoundDefault"]</option>
+                <option value="1">@Localizer["BuzzMode_Manual"]</option>
+                <option value="2">@Localizer["BuzzMode_Immediately"]</option>
+                <option value="3">@Localizer["BuzzMode_AfterMedia"]</option>
+                <option value="4">@Localizer["BuzzMode_AfterDelay"]</option>
+                <option value="5">@Localizer["BuzzMode_Disabled"]</option>
+            </select>
+        </div>
     </section>
 
     <div class="editor-actions">
@@ -92,6 +97,34 @@
 
 @section Scripts {
     <script>
+        const wagerQuestionCheckbox =
+            document.getElementById("Input_IsSpecial");
+
+        const buzzModeSetting =
+            document.getElementById("buzz-mode-setting");
+
+        const buzzModeSelect =
+            document.getElementById("Input_BuzzModeOverride");
+
+        function updateBuzzModeVisibility() {
+            const isWagerQuestion =
+                wagerQuestionCheckbox?.checked ?? false;
+
+            if (buzzModeSetting) {
+                buzzModeSetting.hidden = isWagerQuestion;
+            }
+
+            if (buzzModeSelect) {
+                buzzModeSelect.disabled = isWagerQuestion;
+            }
+        }
+
+        wagerQuestionCheckbox?.addEventListener(
+            "change",
+            updateBuzzModeVisibility);
+
+        updateBuzzModeVisibility();
+
         const questionPreviewModal =
             document.getElementById("question-preview-modal");
 

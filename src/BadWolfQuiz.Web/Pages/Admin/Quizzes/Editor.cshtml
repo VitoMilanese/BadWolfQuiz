@@ -177,9 +177,16 @@
                                 !string.IsNullOrWhiteSpace(x.MediaPath) ||
                                 !string.IsNullOrWhiteSpace(x.ExternalUrl));
 
-                            <a class="question-cell @(hasContent ? "filled" : null)"
+                            <a class="question-cell @(hasContent ? "filled" : null) @(question.IsSpecial ? "wager-question" : null)"
                                asp-page="QuestionEditor"
                                asp-route-id="@question.Id">
+                                @if (question.IsSpecial)
+                                {
+                                    <span class="question-wager-badge">
+                                        @Localizer["Label_WagerQuestion"]
+                                    </span>
+                                }
+
                                 @if (hasContent)
                                 {
                                     <small>@Localizer["Status_Ready"]</small>
