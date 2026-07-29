@@ -109,12 +109,63 @@
         @if (Model.CurrentQuestion is not null)
         {
             <div class="content-panel current-question-summary">
-                <strong>@Model.CurrentQuestion.CategoryTitle — @Model.CurrentQuestion.Points</strong>
-                <span>
-                    @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager
-                        ? Localizer["GameBoard_AwaitingWager"]
-                        : Localizer["GameBoard_QuestionSelected"])
-                </span>
+                <div class="current-question-heading">
+                    <strong>@Model.CurrentQuestion.CategoryTitle — @Model.CurrentQuestion.Points</strong>
+                    <span>
+                        @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager
+                            ? Localizer["GameBoard_AwaitingWager"]
+                            : Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active
+                                ? Localizer["GameBoard_WagerAccepted"]
+                                : Localizer["GameBoard_QuestionSelected"])
+                    </span>
+                </div>
+
+                @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
+                {
+                    <form class="question-wager-form"
+                          method="post"
+                          asp-page-handler="SubmitQuestionWager">
+                        <input name="sourceQuestionId"
+                               type="hidden"
+                               value="@Model.CurrentQuestion.SourceQuestionId" />
+
+                        <label>
+                            <span>@Localizer["Label_Player"]</span>
+                            <select name="playerId" required>
+                                <option value="">@Localizer["GameBoard_SelectWagerPlayer"]</option>
+                                @foreach (var player in Model.Players)
+                                {
+                                    <option value="@player.Id.Value">@player.Name</option>
+                                }
+                            </select>
+                        </label>
+
+                        <label>
+                            <span>@Localizer["GameBoard_WagerAmount"]</span>
+                            <input name="amount"
+                                   type="number"
+                                   min="1"
+                                   step="1"
+                                   required />
+                        </label>
+
+                        <button class="button button-primary" type="submit">
+                            @Localizer["GameBoard_AcceptWager"]
+                        </button>
+                    </form>
+                }
+                else if (Model.CurrentQuestion.Wager is not null)
+                {
+                    var wagerPlayer = Model.Players.First(
+                        player => player.Id == Model.CurrentQuestion.Wager.PlayerId);
+
+                    <p class="accepted-wager">
+                        @Localizer[
+                            "GameBoard_AcceptedWagerSummary",
+                            wagerPlayer.Name,
+                            Model.CurrentQuestion.Wager.Amount]
+                    </p>
+                }
             </div>
         }
 
