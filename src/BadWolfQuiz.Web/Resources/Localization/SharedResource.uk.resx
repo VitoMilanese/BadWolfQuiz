@@ -726,4 +726,9 @@
   <data name="GameLobby_StartGame" xml:space="preserve"><value>Почати гру</value></data>
   <data name="GameLobby_StatusRunning" xml:space="preserve"><value>Триває</value></data>
   <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Перед початком гри додайте хоча б одного гравця.</value></data>
+
+  <data name="GameBoard_Eyebrow" xml:space="preserve"><value>ІГРОВЕ ПОЛЕ</value></data>
+  <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Питання вибрано</value></data>
+  <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>Очікується ставка</value></data>
+  <data name="GameBoard_SelectionRejected" xml:space="preserve"><value>Зараз це питання не можна вибрати.</value></data>
 </root>
