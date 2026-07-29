@@ -727,12 +727,15 @@
   <data name="PlayerPresence_InactiveWarning" xml:space="preserve"><value>Torna alla pagina della partita. Il presentatore vede che la pagina è inattiva o disconnessa.</value></data>
 
   <data name="PlayerPresence_RejoinPending" xml:space="preserve"><value>In attesa di approvazione</value></data>
-  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve"><value>La partita è già iniziata. Attendi che il presentatore approvi il tuo rientro.</value></data>
-  <data name="GameLobby_ApproveRejoin" xml:space="preserve"><value>Consenti rientro</value></data>
+  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve"><value>Attendi che il presentatore approvi il tuo accesso alla partita in corso.</value></data>
+  <data name="GameLobby_ApproveRejoin" xml:space="preserve"><value>Approva accesso</value></data>
   <data name="GameLobby_StartGame" xml:space="preserve"><value>Avvia partita</value></data>
   <data name="GameLobby_StatusRunning" xml:space="preserve"><value>In corso</value></data>
   <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Aggiungi almeno un giocatore prima di iniziare la partita.</value></data>
 
+  <data name="GameBoard_ShowJoinCode" xml:space="preserve"><value>Mostra codice di accesso</value></data>
+  <data name="GameBoard_JoinOverlayTitle" xml:space="preserve"><value>Partecipa alla partita</value></data>
+  <data name="GameBoard_JoinOverlayHint" xml:space="preserve"><value>I nuovi giocatori possono partecipare con questo codice.</value></data>
   <data name="GameBoard_Eyebrow" xml:space="preserve"><value>TABELLONE DI GIOCO</value></data>
   <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Domanda selezionata</value></data>
   <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>In attesa della puntata</value></data>

@@ -45,7 +45,7 @@ public sealed class GameSession
 
     public GamePlayer AddPlayer(string name)
     {
-        EnsureLobby();
+        EnsureAcceptingPlayers();
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
         var normalizedName = name.Trim();
@@ -105,6 +105,15 @@ public sealed class GameSession
 
         question.Select();
         return question;
+    }
+
+    private void EnsureAcceptingPlayers()
+    {
+        if (Status is not GameSessionStatus.Lobby and not GameSessionStatus.Running)
+        {
+            throw new GameRuleViolationException(
+                "Players cannot join a completed game.");
+        }
     }
 
     private void EnsureLobby()

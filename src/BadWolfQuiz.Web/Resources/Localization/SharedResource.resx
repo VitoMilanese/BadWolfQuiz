@@ -727,12 +727,15 @@
   <data name="PlayerPresence_InactiveWarning" xml:space="preserve"><value>Return to the game page. The host can see that this page is inactive or disconnected.</value></data>
 
   <data name="PlayerPresence_RejoinPending" xml:space="preserve"><value>Awaiting approval</value></data>
-  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve"><value>The game is already running. Wait for the host to approve your return.</value></data>
-  <data name="GameLobby_ApproveRejoin" xml:space="preserve"><value>Allow return</value></data>
+  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve"><value>Wait for the host to approve your access to the running game.</value></data>
+  <data name="GameLobby_ApproveRejoin" xml:space="preserve"><value>Approve access</value></data>
   <data name="GameLobby_StartGame" xml:space="preserve"><value>Start game</value></data>
   <data name="GameLobby_StatusRunning" xml:space="preserve"><value>Running</value></data>
   <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Add at least one player before starting the game.</value></data>
 
+  <data name="GameBoard_ShowJoinCode" xml:space="preserve"><value>Show join code</value></data>
+  <data name="GameBoard_JoinOverlayTitle" xml:space="preserve"><value>Join the game</value></data>
+  <data name="GameBoard_JoinOverlayHint" xml:space="preserve"><value>New players can join with this code.</value></data>
   <data name="GameBoard_Eyebrow" xml:space="preserve"><value>GAME BOARD</value></data>
   <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Question selected</value></data>
   <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>Waiting for wager</value></data>
