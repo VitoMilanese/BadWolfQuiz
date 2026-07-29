@@ -342,6 +342,8 @@
   <data name="Label_WagerQuestion" xml:space="preserve">
     <value>Ставка</value>
   </data>
+  <data name="Label_ExcludeFromRandomWagerSelection" xml:space="preserve"><value>Виключити з випадкового вибору ставки</value></data>
+  <data name="Hint_ExcludeFromRandomWagerSelection" xml:space="preserve"><value>Це питання ніколи не буде вибране як випадкове питання зі ставкою.</value></data>
   <data name="Label_Created" xml:space="preserve">
     <value>Створено</value>
   </data>
@@ -675,6 +677,11 @@
   <data name="QuizEditor_CannotDeleteOnlyRound" xml:space="preserve">
     <value>Неможливо видалити єдиний раунд.</value>
   </data>
+  <data name="QuizEditor_UseRandomWagerQuestions" xml:space="preserve"><value>Випадкові питання зі ставкою</value></data>
+  <data name="QuizEditor_RandomWagerDescription" xml:space="preserve"><value>Ігнорувати вручну позначені питання та вибирати випадкові позиції під час створення кожної гри.</value></data>
+  <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve"><value>Кількість питань зі ставкою</value></data>
+  <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Доступних питань: {0}</value></data>
+  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Вкажіть від 1 до {0} випадкових питань зі ставкою.</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Вартість запитань</value>
   </data>
