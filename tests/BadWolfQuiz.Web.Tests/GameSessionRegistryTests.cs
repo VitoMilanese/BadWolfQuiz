@@ -105,6 +105,39 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void Running_game_accepts_new_player_pending_host_approval()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        registry.JoinPlayer("ABC123", "Rose");
+        registry.StartGame("ABC123");
+
+        var joined = registry.JoinPlayer("ABC123", "Mickey");
+        var connected = registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-2",
+            true);
+
+        Assert.Equal(PlayerJoinStatus.Success, joined.Status);
+        Assert.Equal(0, joined.Player!.Score);
+        Assert.True(connected!.RequiresApproval);
+
+        var pending = registry.GetPlayerLobbyEntries(game)
+            .Single(player => player.Id == joined.Player.Id);
+
+        Assert.Equal(PlayerPresenceStatus.RejoinPending, pending.Presence);
+
+        registry.ApprovePlayerRejoin("ABC123", joined.Player.Id);
+
+        var approved = registry.GetPlayerLobbyEntries(game)
+            .Single(player => player.Id == joined.Player.Id);
+
+        Assert.Equal(PlayerPresenceStatus.Active, approved.Presence);
+        Assert.Equal(0, approved.Score);
+    }
+
+    [Fact]
     public void Running_game_requires_host_approval_before_player_rejoins()
     {
         var registry = CreateRegistry("ABC123");
