@@ -94,6 +94,8 @@ public sealed class RuntimeQuestion
 
     public RuntimeQuestionStatus Status { get; private set; } = RuntimeQuestionStatus.Available;
 
+    public Wager? Wager { get; private set; }
+
     internal void Select()
     {
         if (Status != RuntimeQuestionStatus.Available)
@@ -104,6 +106,21 @@ public sealed class RuntimeQuestion
         Status = IsSpecial
             ? RuntimeQuestionStatus.AwaitingWager
             : RuntimeQuestionStatus.Selected;
+    }
+
+    internal void SubmitWager(
+        GamePlayerId playerId,
+        int amount,
+        DateTimeOffset submittedAtUtc)
+    {
+        if (!IsSpecial || Status != RuntimeQuestionStatus.AwaitingWager)
+        {
+            throw new GameRuleViolationException(
+                "A wager can only be submitted for a wager question awaiting a wager.");
+        }
+
+        Wager = new Wager(playerId, amount, submittedAtUtc);
+        Status = RuntimeQuestionStatus.Active;
     }
 }
 
