@@ -98,6 +98,12 @@
                 <p class="eyebrow">@Localizer["GameBoard_Eyebrow"]</p>
                 <h2>@Model.Game.Session.Quiz.Rounds.OrderBy(round => round.SortOrder).First().Title</h2>
             </div>
+
+            <button class="button button-secondary"
+                    type="button"
+                    data-open-join-code>
+                @Localizer["GameBoard_ShowJoinCode"]
+            </button>
         </div>
 
         @if (Model.CurrentQuestion is not null)
@@ -148,6 +154,23 @@
                 </li>
             }
         </ul>
+
+        <dialog id="join-code-dialog"
+                class="join-code-dialog"
+                aria-labelledby="join-code-title">
+            <div class="join-code-card">
+                <button class="join-code-close"
+                        type="button"
+                        data-close-join-code
+                        aria-label="@Localizer["Button_Close"]">
+                    ×
+                </button>
+
+                <p class="eyebrow">@Localizer["GameBoard_JoinOverlayHint"]</p>
+                <h2 id="join-code-title">@Localizer["GameBoard_JoinOverlayTitle"]</h2>
+                <strong class="join-code-value">@Model.Game.PublicCode</strong>
+            </div>
+        </dialog>
     </section>
 }
 
@@ -157,6 +180,21 @@
 
 @section Scripts {
     <script>
+        (() => {
+            const dialog = document.getElementById("join-code-dialog");
+            const openButton = document.querySelector("[data-open-join-code]");
+            const closeButton = document.querySelector("[data-close-join-code]");
+
+            openButton?.addEventListener("click", () => dialog?.showModal());
+            closeButton?.addEventListener("click", () => dialog?.close());
+
+            dialog?.addEventListener("click", event => {
+                if (event.target === dialog) {
+                    dialog.close();
+                }
+            });
+        })();
+
         (() => {
             const lobby = document.querySelector("[data-game-code]");
             const playerCount = document.getElementById("player-count");
