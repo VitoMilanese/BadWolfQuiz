@@ -114,12 +114,18 @@ public sealed class GameSessionRegistry
             return null;
         }
 
+        bool requiresApproval;
+
         lock (_presenceSync)
         {
-            _playerConnections[connectionId] = new PlayerConnection(access, isVisible);
+            requiresApproval = access.Game.Session.Status != GameSessionStatus.Lobby;
+            _playerConnections[connectionId] = new PlayerConnection(
+                access,
+                isVisible,
+                !requiresApproval);
         }
 
-        return new PlayerConnectionResult(access.Game, access.Player);
+        return new PlayerConnectionResult(access.Game, access.Player, requiresApproval);
     }
 
     public PlayerConnectionResult? SetPlayerVisibility(string connectionId, bool isVisible)
@@ -132,7 +138,10 @@ public sealed class GameSessionRegistry
             }
 
             _playerConnections[connectionId] = connection with { IsVisible = isVisible };
-            return new PlayerConnectionResult(connection.Access.Game, connection.Access.Player);
+            return new PlayerConnectionResult(
+                connection.Access.Game,
+                connection.Access.Player,
+                !connection.IsApproved);
         }
     }
 
@@ -145,7 +154,57 @@ public sealed class GameSessionRegistry
                 return null;
             }
 
-            return new PlayerConnectionResult(connection.Access.Game, connection.Access.Player);
+            return new PlayerConnectionResult(
+                connection.Access.Game,
+                connection.Access.Player,
+                !connection.IsApproved);
+        }
+    }
+
+    public GameSessionRegistration? StartGame(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            game.Session.Start();
+            return game;
+        }
+    }
+
+    public PlayerRejoinApproval? ApprovePlayerRejoin(
+        string publicCode,
+        GamePlayerId playerId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (_presenceSync)
+        {
+            var connectionIds = _playerConnections
+                .Where(item =>
+                    item.Value.Access.Game == game &&
+                    item.Value.Access.Player.Id == playerId &&
+                    !item.Value.IsApproved)
+                .Select(item => item.Key)
+                .ToArray();
+
+            foreach (var connectionId in connectionIds)
+            {
+                var connection = _playerConnections[connectionId];
+                _playerConnections[connectionId] = connection with { IsApproved = true };
+            }
+
+            return new PlayerRejoinApproval(game, connectionIds);
         }
     }
 
@@ -205,7 +264,12 @@ public sealed class GameSessionRegistry
             return PlayerPresenceStatus.Disconnected;
         }
 
-        return connections.Any(connection => connection.IsVisible)
+        if (connections.All(connection => !connection.IsApproved))
+        {
+            return PlayerPresenceStatus.RejoinPending;
+        }
+
+        return connections.Any(connection => connection.IsApproved && connection.IsVisible)
             ? PlayerPresenceStatus.Active
             : PlayerPresenceStatus.Inactive;
     }
@@ -231,5 +295,6 @@ public sealed class GameSessionRegistry
 
     private sealed record PlayerConnection(
         PlayerAccess Access,
-        bool IsVisible);
+        bool IsVisible,
+        bool IsApproved);
 }

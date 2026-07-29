@@ -19,7 +19,17 @@
          data-game-code="@Model.Game.PublicCode"
          data-status-active="@Localizer["PlayerPresence_Active"]"
          data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
-         data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]">
+         data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
+         data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
+         data-approve-label="@Localizer["GameLobby_ApproveRejoin"]"
+         data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
+         data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
+         data-running-label="@Localizer["GameLobby_StatusRunning"]">
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="message message-error">@errorMessage</div>
+    }
+
     <div class="stack-form">
         <div class="game-code-panel">
             <span>@Localizer["Label_GameCode"]</span>
@@ -28,8 +38,23 @@
         </div>
         <p>
             <strong>@Localizer["GameLobby_StatusLabel"]:</strong>
-            @Localizer["GameLobby_StatusLobby"]
+            <span id="game-status">
+                @(Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby
+                    ? Localizer["GameLobby_StatusLobby"]
+                    : Localizer["GameLobby_StatusRunning"])
+            </span>
         </p>
+
+        <form id="start-game-form" method="post" asp-page-handler="Start"
+              hidden="@(Model.Game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby ? "hidden" : null)">
+            <button class="button button-primary" type="submit">
+                @Localizer["GameLobby_StartGame"]
+            </button>
+        </form>
+
+        <form id="approve-rejoin-form" method="post" asp-page-handler="ApproveRejoin">
+            <input id="approve-player-id" name="playerId" type="hidden" />
+        </form>
         <p>
             <strong>@Localizer["GameLobby_PlayerCount"]:</strong>
             <span id="player-count">@Model.Players.Count</span>
@@ -66,8 +91,13 @@
             const statusLabels = {
                 active: lobby.dataset.statusActive,
                 inactive: lobby.dataset.statusInactive,
-                disconnected: lobby.dataset.statusDisconnected
+                disconnected: lobby.dataset.statusDisconnected,
+                rejoinpending: lobby.dataset.statusRejoinpending
             };
+            const gameStatus = document.getElementById("game-status");
+            const startGameForm = document.getElementById("start-game-form");
+            const approveForm = document.getElementById("approve-rejoin-form");
+            const approvePlayerId = document.getElementById("approve-player-id");
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
@@ -95,9 +125,30 @@
                     presence.textContent = statusLabels[player.presence] || player.presence;
 
                     details.append(score, presence);
+
+                    if (player.presence === "rejoinpending") {
+                        const approve = document.createElement("button");
+                        approve.type = "button";
+                        approve.className = "button button-secondary";
+                        approve.textContent = lobby.dataset.approveLabel;
+                        approve.addEventListener("click", () => {
+                            approvePlayerId.value = player.id;
+                            approveForm.submit();
+                        });
+                        details.append(approve);
+                    }
+
                     item.append(name, details);
                     playerList.append(item);
                 }
+            });
+
+            connection.on("GameStatusChanged", update => {
+                lobby.dataset.gameStatus = update.status;
+                gameStatus.textContent = update.status === "running"
+                    ? lobby.dataset.runningLabel
+                    : lobby.dataset.lobbyLabel;
+                startGameForm.hidden = update.status !== "lobby";
             });
 
             const joinSession = () => connection.invoke("JoinSession", gameCode);

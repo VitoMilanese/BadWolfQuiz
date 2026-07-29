@@ -24,6 +24,9 @@
     <div id="activity-warning" class="message message-error" hidden>
         @Localizer["PlayerPresence_InactiveWarning"]
     </div>
+    <div id="rejoin-warning" class="message message-error" hidden>
+        @Localizer["PlayerPresence_RejoinApprovalRequired"]
+    </div>
 
     <p class="dialog-warning">@Localizer["PlayerPresence_MonitoringNotice"]</p>
 
@@ -46,6 +49,7 @@
         (() => {
             const lobby = document.querySelector(".player-lobby");
             const warning = document.getElementById("activity-warning");
+            const rejoinWarning = document.getElementById("rejoin-warning");
 
             if (!lobby || !warning || typeof signalR === "undefined") {
                 return;
@@ -98,6 +102,15 @@
 
             connection.on("PlayerAccessRejected", () => {
                 warning.hidden = false;
+            });
+
+            connection.on("RejoinApprovalRequired", () => {
+                rejoinWarning.hidden = false;
+            });
+
+            connection.on("RejoinApproved", () => {
+                rejoinWarning.hidden = true;
+                updateWarning();
             });
 
             connection.onreconnected(joinPlayerSession);

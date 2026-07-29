@@ -10,11 +10,17 @@ public sealed record PlayerLobbyEntry(
 
 public sealed record PlayerConnectionResult(
     GameSessionRegistration Game,
-    GamePlayer Player);
+    GamePlayer Player,
+    bool RequiresApproval);
+
+public sealed record PlayerRejoinApproval(
+    GameSessionRegistration Game,
+    IReadOnlyList<string> ConnectionIds);
 
 public enum PlayerPresenceStatus
 {
     Disconnected = 1,
-    Inactive = 2,
-    Active = 3
+    RejoinPending = 2,
+    Inactive = 3,
+    Active = 4
 }

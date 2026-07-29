@@ -17,6 +17,9 @@ public sealed class GameHub(
         if (game is not null)
         {
             await Clients.Caller.SendAsync(
+                "GameStatusChanged",
+                CreateStatusUpdate(game));
+            await Clients.Caller.SendAsync(
                 "PlayersChanged",
                 CreatePlayersUpdate(sessionRegistry, game));
         }
@@ -42,6 +45,15 @@ public sealed class GameHub(
         await Groups.AddToGroupAsync(
             Context.ConnectionId,
             GroupName(connection.Game.PublicCode));
+
+        if (connection.RequiresApproval)
+        {
+            await Clients.Caller.SendAsync("RejoinApprovalRequired");
+        }
+
+        await Clients.Caller.SendAsync(
+            "GameStatusChanged",
+            CreateStatusUpdate(connection.Game));
         await BroadcastPlayers(connection.Game);
     }
 
@@ -111,6 +123,9 @@ public sealed class GameHub(
             })
         };
     }
+
+    public static object CreateStatusUpdate(GameSessionRegistration game)
+        => new { status = game.Session.Status.ToString().ToLowerInvariant() };
 
     public static string GroupName(string publicCode)
         => $"game:{GameSessionRegistry.NormalizeCode(publicCode)}";

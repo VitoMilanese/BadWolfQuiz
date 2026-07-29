@@ -104,6 +104,38 @@ public sealed class GameSessionRegistryTests
         Assert.Equal(0, disconnected.Score);
     }
 
+    [Fact]
+    public void Running_game_requires_host_approval_before_player_rejoins()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer("ABC123", joined.AccessToken!, "connection-1", true);
+        registry.StartGame("ABC123");
+        registry.DisconnectPlayer("connection-1");
+
+        var reconnect = registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-2",
+            true);
+
+        Assert.True(reconnect!.RequiresApproval);
+        Assert.Equal(
+            PlayerPresenceStatus.RejoinPending,
+            registry.GetPlayerLobbyEntries(game).Single().Presence);
+
+        var approval = registry.ApprovePlayerRejoin(
+            "ABC123",
+            joined.Player!.Id);
+
+        Assert.Equal("connection-2", Assert.Single(approval!.ConnectionIds));
+        var restored = Assert.Single(registry.GetPlayerLobbyEntries(game));
+        Assert.Equal(PlayerPresenceStatus.Active, restored.Presence);
+        Assert.Equal(joined.Player.Id, restored.Id);
+        Assert.Equal(joined.Player.Score, restored.Score);
+    }
+
     private static GameSessionRegistry CreateRegistry(params string[] codes)
     {
         return new GameSessionRegistry(new StubGameCodeGenerator(codes));
