@@ -119,6 +119,7 @@ public sealed class GameHub(
                 id = player.Id.Value,
                 player.Name,
                 player.Score,
+                isActive = game.Session.ActivePlayerId == player.Id,
                 presence = player.Presence.ToString().ToLowerInvariant()
             })
         };
