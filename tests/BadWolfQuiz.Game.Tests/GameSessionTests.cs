@@ -88,6 +88,51 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void SelectQuestion_marks_regular_question_as_selected()
+    {
+        var session = CreateSession();
+        session.AddPlayer("Rose");
+        session.Start();
+
+        var question = session.SelectQuestion(100);
+
+        Assert.Equal(RuntimeQuestionStatus.Selected, question.Status);
+    }
+
+    [Fact]
+    public void SelectQuestion_moves_special_question_to_wager()
+    {
+        var session = CreateSession();
+        session.AddPlayer("Rose");
+        session.Start();
+
+        var question = session.SelectQuestion(101);
+
+        Assert.Equal(RuntimeQuestionStatus.AwaitingWager, question.Status);
+    }
+
+    [Fact]
+    public void SelectQuestion_rejects_selection_before_game_starts()
+    {
+        var session = CreateSession();
+
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SelectQuestion(100));
+    }
+
+    [Fact]
+    public void SelectQuestion_rejects_another_question_until_current_is_resolved()
+    {
+        var session = CreateSession();
+        session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SelectQuestion(101));
+    }
+
+    [Fact]
     public void QuizSnapshot_copies_source_collections()
     {
         var questions = new List<QuizQuestionSnapshot>
@@ -116,8 +161,8 @@ public sealed class GameSessionTests
                     "Round 1",
                     0,
                     [
-                        new QuizQuestionSnapshot(100, 10, 0, 100, false),
-                        new QuizQuestionSnapshot(101, 10, 1, 200, true)
+                        new QuizQuestionSnapshot(100, 10, 0, 100, false, "Science"),
+                        new QuizQuestionSnapshot(101, 10, 1, 200, true, "Science")
                     ])
             ]);
 

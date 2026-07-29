@@ -82,6 +82,31 @@ public sealed class GameSession
         StartedAtUtc = _timeProvider.GetUtcNow();
     }
 
+    public RuntimeQuestion SelectQuestion(int sourceQuestionId)
+    {
+        if (Status != GameSessionStatus.Running)
+        {
+            throw new GameRuleViolationException(
+                "Questions can only be selected while the game is running.");
+        }
+
+        if (Board.Questions.Any(question =>
+                question.Status is not RuntimeQuestionStatus.Available and
+                    not RuntimeQuestionStatus.Resolved))
+        {
+            throw new GameRuleViolationException(
+                "Resolve the current question before selecting another one.");
+        }
+
+        var question = Board.Questions.SingleOrDefault(
+            item => item.SourceQuestionId == sourceQuestionId)
+            ?? throw new GameRuleViolationException(
+                $"Question {sourceQuestionId} does not belong to this game.");
+
+        question.Select();
+        return question;
+    }
+
     private void EnsureLobby()
     {
         if (Status != GameSessionStatus.Lobby)

@@ -85,7 +85,8 @@ public sealed class QuizQuestionSnapshot
         int sourceCategoryId,
         int rowIndex,
         int points,
-        bool isSpecial)
+        bool isSpecial,
+        string? categoryTitle = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceQuestionId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceCategoryId);
@@ -97,6 +98,9 @@ public sealed class QuizQuestionSnapshot
         RowIndex = rowIndex;
         Points = points;
         IsSpecial = isSpecial;
+        CategoryTitle = string.IsNullOrWhiteSpace(categoryTitle)
+            ? sourceCategoryId.ToString()
+            : categoryTitle.Trim();
     }
 
     public int SourceQuestionId { get; }
@@ -108,4 +112,6 @@ public sealed class QuizQuestionSnapshot
     public int Points { get; }
 
     public bool IsSpecial { get; }
+
+    public string CategoryTitle { get; }
 }

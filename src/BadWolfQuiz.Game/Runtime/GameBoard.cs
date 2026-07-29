@@ -15,6 +15,7 @@ public sealed class GameBoard
                 round.SourceRoundId,
                 question.SourceQuestionId,
                 question.SourceCategoryId,
+                question.CategoryTitle,
                 question.RowIndex,
                 question.Points,
                 question.IsSpecial)))
@@ -31,6 +32,7 @@ public sealed class RuntimeQuestion
         int sourceRoundId,
         int sourceQuestionId,
         int sourceCategoryId,
+        string categoryTitle,
         int rowIndex,
         int points,
         bool isSpecial)
@@ -38,6 +40,7 @@ public sealed class RuntimeQuestion
         SourceRoundId = sourceRoundId;
         SourceQuestionId = sourceQuestionId;
         SourceCategoryId = sourceCategoryId;
+        CategoryTitle = categoryTitle;
         RowIndex = rowIndex;
         Points = points;
         IsSpecial = isSpecial;
@@ -49,6 +52,8 @@ public sealed class RuntimeQuestion
 
     public int SourceCategoryId { get; }
 
+    public string CategoryTitle { get; }
+
     public int RowIndex { get; }
 
     public int Points { get; }
@@ -56,6 +61,18 @@ public sealed class RuntimeQuestion
     public bool IsSpecial { get; }
 
     public RuntimeQuestionStatus Status { get; private set; } = RuntimeQuestionStatus.Available;
+
+    internal void Select()
+    {
+        if (Status != RuntimeQuestionStatus.Available)
+        {
+            throw new GameRuleViolationException("Only an available question can be selected.");
+        }
+
+        Status = IsSpecial
+            ? RuntimeQuestionStatus.AwaitingWager
+            : RuntimeQuestionStatus.Selected;
+    }
 }
 
 public enum RuntimeQuestionStatus

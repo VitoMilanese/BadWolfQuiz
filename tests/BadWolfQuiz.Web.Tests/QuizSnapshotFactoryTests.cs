@@ -26,6 +26,9 @@ public sealed class QuizSnapshotFactoryTests
             new[] { 200, 100 },
             round.Questions.Select(question => question.Points));
         Assert.True(round.Questions[0].IsSpecial);
+        Assert.Equal(
+            new[] { "First", "Second" },
+            round.Questions.Select(question => question.CategoryTitle));
     }
 
     [Fact]
