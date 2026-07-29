@@ -682,6 +682,7 @@
   <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve"><value>Кількість питань зі ставкою</value></data>
   <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Доступних питань: {0}</value></data>
   <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Вкажіть від 1 до {0} випадкових питань зі ставкою.</value></data>
+  <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Налаштування раунду збережено.</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Вартість запитань</value>
   </data>
