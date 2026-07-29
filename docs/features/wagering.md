@@ -65,8 +65,17 @@ The intended host controls also include selecting the active player with the hig
 This requires functionality that is not yet implemented:
 
 - persistent completed-game results;
-- a stable way to identify the same participant across games;
 - aggregation of final net scores, including negative results;
 - a date-range query and host control.
 
-Until those capabilities exist, the available active-player strategies are first joined, manual selection, and random selection.
+### Persistent player identity
+
+Players should not be required to create an account before joining a game. The intended persistent identity is a `PlayerProfile` identified by a globally unique normalized nickname.
+
+Joining remains a one-action flow after the nickname is entered. A game participation record references the persistent player profile and stores the game, date, and score result. This data supports history and aggregate-score queries.
+
+Before account registration exists, a nickname is an unprotected identity: possession is not verified and another person could use it. A future optional registration flow will allow a player to reserve an existing nickname by attaching authentication credentials. Registration must enhance identity protection without making accounts mandatory for ordinary play.
+
+Nickname normalization, profile claiming, conflicts across devices, and recovery rules require a separate product and security decision before registration is implemented.
+
+Until persistent history exists, the available active-player strategies are first joined, manual selection, and random selection.
