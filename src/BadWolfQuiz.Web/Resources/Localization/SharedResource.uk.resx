@@ -765,4 +765,5 @@
   <data name="GameBoard_DeleteWagerDigit" xml:space="preserve"><value>Видалити останню цифру</value></data>
   <data name="GameBoard_WagerValid" xml:space="preserve"><value>Ставка допустима.</value></data>
   <data name="GameBoard_WagerOutsideLimits" xml:space="preserve"><value>Введіть суму від {0} до {1}.</value></data>
+  <data name="GameBoard_MaximumWager" xml:space="preserve"><value>Максимальна ставка</value></data>
 </root>
