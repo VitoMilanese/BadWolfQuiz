@@ -1719,10 +1719,19 @@ textarea {
 }
 
 .current-question-summary.wager-mode .wager-entry-panel {
-    width: min(720px, 100%);
-    grid-template-columns: minmax(160px, 240px) minmax(260px, 360px);
+    width: min(360px, 100%);
+    grid-template-columns: 1fr;
+    justify-self: center;
     align-items: center;
-    justify-content: center;
+}
+
+.current-question-summary.wager-mode .wager-player-summary {
+    justify-items: center;
+    text-align: center;
+}
+
+.current-question-summary.wager-mode .question-wager-form {
+    width: 100%;
 }
 
 .wager-keypad-max {
