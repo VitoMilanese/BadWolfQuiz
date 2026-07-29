@@ -337,7 +337,7 @@
     <value>Question with wager</value>
   </data>
   <data name="Hint_WagerQuestion" xml:space="preserve">
-    <value>The player must submit a wager before this question is opened.</value>
+    <value>The player must submit a wager before this question is opened. Only that player answers; the answer button is not used.</value>
   </data>
   <data name="Label_WagerQuestion" xml:space="preserve">
     <value>Wager</value>
