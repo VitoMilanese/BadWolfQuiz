@@ -63,6 +63,16 @@
 
             const accessToken = bootstrapToken || localStorage.getItem(storageKey);
 
+            if (accessToken) {
+                localStorage.setItem(
+                    `badwolfquiz:${gameCode}:current-player`,
+                    JSON.stringify({
+                        playerId,
+                        accessToken,
+                        path: window.location.pathname
+                    }));
+            }
+
             if (!accessToken) {
                 warning.hidden = false;
                 return;
