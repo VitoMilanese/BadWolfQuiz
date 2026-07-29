@@ -22,6 +22,8 @@ public sealed class LobbyModel(
 
     public RuntimeQuestion? CurrentQuestion { get; private set; }
 
+    public WagerLimits? QuestionWagerLimits { get; private set; }
+
     public IActionResult OnGet(Guid id)
     {
         return LoadPage(id);
@@ -84,7 +86,6 @@ public sealed class LobbyModel(
     public IActionResult OnPostSubmitQuestionWager(
         Guid id,
         int sourceQuestionId,
-        Guid playerId,
         int amount)
     {
         var game = sessionRegistry.Find(new GameSessionId(id));
@@ -99,7 +100,6 @@ public sealed class LobbyModel(
             sessionRegistry.SubmitQuestionWager(
                 game.PublicCode,
                 sourceQuestionId,
-                new GamePlayerId(playerId),
                 amount);
         }
         catch (GameRuleViolationException)
@@ -108,6 +108,59 @@ public sealed class LobbyModel(
                 localizer["GameBoard_WagerRejected"].Value;
         }
 
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostSetActivePlayerAsync(
+        Guid id,
+        Guid playerId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.SetActivePlayer(
+                game.PublicCode,
+                new GamePlayerId(playerId));
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_ActivePlayerRejected"].Value;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostRandomActivePlayerAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.SelectRandomActivePlayer(game.PublicCode);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_ActivePlayerRejected"].Value;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
         return RedirectToPage(new { id });
     }
 
@@ -149,6 +202,18 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    private Task BroadcastPlayersAsync(
+        GameSessionRegistration game,
+        CancellationToken cancellationToken)
+    {
+        return gameHub.Clients
+            .Group(GameHub.GroupName(game.PublicCode))
+            .SendAsync(
+                "PlayersChanged",
+                GameHub.CreatePlayersUpdate(sessionRegistry, game),
+                cancellationToken);
+    }
+
     private IActionResult LoadPage(Guid id)
     {
         var game = sessionRegistry.Find(new GameSessionId(id));
@@ -184,6 +249,12 @@ public sealed class LobbyModel(
         CurrentQuestion = roundQuestions.FirstOrDefault(question =>
             question.Status is not RuntimeQuestionStatus.Available and
                 not RuntimeQuestionStatus.Resolved);
+
+        if (CurrentQuestion?.Status == RuntimeQuestionStatus.AwaitingWager)
+        {
+            QuestionWagerLimits = game.Session.GetQuestionWagerLimits(
+                CurrentQuestion.SourceQuestionId);
+        }
 
         return Page();
     }
