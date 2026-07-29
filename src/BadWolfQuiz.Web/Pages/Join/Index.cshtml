@@ -8,7 +8,7 @@
     <p class="eyebrow">@Localizer["Join_Eyebrow"]</p>
     <h1>@Localizer["Title_JoinGame"]</h1>
 
-    <form method="post" class="stack-form">
+    <form id="join-game-form" method="post" class="stack-form">
         <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
         <label asp-for="Input.GameCode">@Localizer["Label_GameCode"]</label>
@@ -31,3 +31,40 @@
         </button>
     </form>
 </div>
+
+
+@section Scripts {
+    <script>
+        (() => {
+            const form = document.getElementById("join-game-form");
+            const codeInput = document.getElementById("Input_GameCode");
+
+            form?.addEventListener("submit", event => {
+                const gameCode = codeInput?.value.trim().toUpperCase();
+
+                if (!gameCode) {
+                    return;
+                }
+
+                const storedIdentity = localStorage.getItem(
+                    `badwolfquiz:${gameCode}:current-player`);
+
+                if (!storedIdentity) {
+                    return;
+                }
+
+                try {
+                    const identity = JSON.parse(storedIdentity);
+
+                    if (identity.accessToken && identity.playerId && identity.path) {
+                        event.preventDefault();
+                        window.location.assign(identity.path);
+                    }
+                } catch {
+                    localStorage.removeItem(
+                        `badwolfquiz:${gameCode}:current-player`);
+                }
+            });
+        })();
+    </script>
+}
