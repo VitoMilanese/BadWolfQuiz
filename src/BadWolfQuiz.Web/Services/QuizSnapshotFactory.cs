@@ -32,7 +32,9 @@ public sealed class QuizSnapshotFactory
             round.Id,
             round.Title,
             round.SortOrder,
-            questions);
+            questions,
+            round.UseRandomWagerQuestions,
+            round.RandomWagerQuestionCount);
     }
 
     private static QuizQuestionSnapshot CreateQuestion(
@@ -51,6 +53,7 @@ public sealed class QuizSnapshotFactory
             question.RowIndex,
             points,
             question.IsSpecial,
-            question.Category.Title);
+            question.Category.Title,
+            question.ExcludeFromRandomWagerSelection);
     }
 }
