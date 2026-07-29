@@ -337,7 +337,7 @@
     <value>Питання зі ставкою</value>
   </data>
   <data name="Hint_WagerQuestion" xml:space="preserve">
-    <value>Перед відкриттям цього питання гравець повинен зробити ставку.</value>
+    <value>Перед відкриттям цього питання гравець повинен зробити ставку. Відповідає лише цей гравець; кнопка відповіді не використовується.</value>
   </data>
   <data name="Label_WagerQuestion" xml:space="preserve">
     <value>Ставка</value>
