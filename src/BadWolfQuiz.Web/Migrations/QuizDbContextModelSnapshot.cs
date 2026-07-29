@@ -304,6 +304,9 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("UseRandomWagerQuestions")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(160)
@@ -354,6 +357,9 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Property<int>("BuzzModeOverride")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ExcludeFromRandomWagerSelection")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsSpecial")
                         .HasColumnType("INTEGER");
 
@@ -387,6 +393,9 @@ namespace BadWolfQuiz.Web.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("DefaultTimeLimitSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RandomWagerQuestionCount")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("QuizId")
