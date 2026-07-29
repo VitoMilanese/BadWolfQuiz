@@ -719,4 +719,11 @@
   <data name="PlayerPresence_Disconnected" xml:space="preserve"><value>Відключений</value></data>
   <data name="PlayerPresence_MonitoringNotice" xml:space="preserve"><value>Під час гри тримайте цю сторінку відкритою й активною. Ведучий бачить стан сторінки.</value></data>
   <data name="PlayerPresence_InactiveWarning" xml:space="preserve"><value>Поверніться на сторінку гри. Ведучий бачить, що сторінка неактивна або відключена.</value></data>
+
+  <data name="PlayerPresence_RejoinPending" xml:space="preserve"><value>Очікує дозволу</value></data>
+  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve"><value>Гра вже почалася. Зачекайте, доки ведучий дозволить повернення.</value></data>
+  <data name="GameLobby_ApproveRejoin" xml:space="preserve"><value>Дозволити повернення</value></data>
+  <data name="GameLobby_StartGame" xml:space="preserve"><value>Почати гру</value></data>
+  <data name="GameLobby_StatusRunning" xml:space="preserve"><value>Триває</value></data>
+  <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Перед початком гри додайте хоча б одного гравця.</value></data>
 </root>
