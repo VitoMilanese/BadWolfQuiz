@@ -1151,3 +1151,60 @@ textarea {
         grid-template-rows: 100px repeat(var(--row-count, 5), 100px);
     }
 }
+
+
+/* Game lobby and player joining */
+
+.game-code-panel {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 24px;
+    border: 1px solid rgba(242, 177, 52, 0.5);
+    border-radius: 12px;
+    background: rgba(242, 177, 52, 0.08);
+    text-align: center;
+}
+
+.game-code-panel span,
+.game-code-panel small {
+    color: var(--muted);
+}
+
+.game-code-panel strong {
+    color: var(--gold);
+    font-size: clamp(2.4rem, 10vw, 4.5rem);
+    letter-spacing: 0.16em;
+    line-height: 1;
+}
+
+.game-code-panel.compact strong {
+    font-size: clamp(2rem, 9vw, 3.2rem);
+}
+
+.player-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.player-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--panel-2);
+}
+
+.player-list li.current-player {
+    border-color: var(--gold);
+}
+
+.player-lobby h2 {
+    margin-top: 22px;
+}
