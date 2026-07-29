@@ -46,7 +46,7 @@
         </p>
 
         <form id="start-game-form" method="post" asp-page-handler="Start"
-              hidden="@(Model.Game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby)">
+              hidden="@(Model.Game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby ? "hidden" : null)">
             <button class="button button-primary" type="submit">
                 @Localizer["GameLobby_StartGame"]
             </button>
