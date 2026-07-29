@@ -15,7 +15,11 @@
     </a>
 </div>
 
-<section class="content-panel narrow" data-game-code="@Model.Game.PublicCode">
+<section class="content-panel narrow"
+         data-game-code="@Model.Game.PublicCode"
+         data-status-active="@Localizer["PlayerPresence_Active"]"
+         data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
+         data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]">
     <div class="stack-form">
         <div class="game-code-panel">
             <span>@Localizer["Label_GameCode"]</span>
@@ -59,6 +63,11 @@
             }
 
             const gameCode = lobby.dataset.gameCode;
+            const statusLabels = {
+                active: lobby.dataset.statusActive,
+                inactive: lobby.dataset.statusInactive,
+                disconnected: lobby.dataset.statusDisconnected
+            };
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
@@ -75,10 +84,18 @@
                     const name = document.createElement("strong");
                     name.textContent = player.name;
 
+                    const details = document.createElement("span");
+                    details.className = "player-presence";
+
                     const score = document.createElement("span");
                     score.textContent = player.score.toString();
 
-                    item.append(name, score);
+                    const presence = document.createElement("span");
+                    presence.className = `presence-badge presence-${player.presence}`;
+                    presence.textContent = statusLabels[player.presence] || player.presence;
+
+                    details.append(score, presence);
+                    item.append(name, details);
                     playerList.append(item);
                 }
             });
