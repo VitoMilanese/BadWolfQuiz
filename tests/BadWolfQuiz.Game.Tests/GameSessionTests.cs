@@ -182,22 +182,40 @@ public sealed class GameSessionTests
     }
 
     [Fact]
-    public void ActivePlayer_can_be_changed_without_changing_question_selector()
+    public void ActivePlayer_can_be_changed_without_changing_regular_question_selector()
     {
         var session = CreateSession();
         var rose = session.AddPlayer("Rose");
         var mickey = session.AddPlayer("Mickey");
         session.Start();
-        var question = session.SelectQuestion(101);
+        var question = session.SelectQuestion(100);
 
         session.SetActivePlayer(mickey.Id);
 
         Assert.Equal(mickey.Id, session.ActivePlayerId);
         Assert.Equal(rose.Id, question.SelectedByPlayerId);
+    }
+
+    [Fact]
+    public void ActivePlayer_cannot_change_while_wager_question_is_in_progress()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(101);
+
+        Assert.True(session.IsActivePlayerChangeLocked);
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SetActivePlayer(mickey.Id));
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SelectRandomActivePlayer());
 
         session.SubmitQuestionWager(101, 100);
 
-        Assert.Equal(rose.Id, question.Wager!.PlayerId);
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SetActivePlayer(mickey.Id));
+        Assert.Equal(rose.Id, session.ActivePlayerId);
     }
 
     [Fact]
