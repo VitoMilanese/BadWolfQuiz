@@ -5,6 +5,7 @@ namespace BadWolfQuiz.Game.Runtime;
 
 public sealed class GameSession
 {
+    public const int MinimumQuestionWager = 5;
     private const int MaxPlayerNameLength = 60;
     private readonly List<GamePlayer> _players = [];
     private readonly ReadOnlyCollection<GamePlayer> _readOnlyPlayers;
@@ -28,6 +29,12 @@ public sealed class GameSession
     public GameSessionStatus Status { get; private set; } = GameSessionStatus.Lobby;
 
     public IReadOnlyList<GamePlayer> Players => _readOnlyPlayers;
+
+    public GamePlayerId? ActivePlayerId { get; private set; }
+
+    public GamePlayer? ActivePlayer => ActivePlayerId is { } activePlayerId
+        ? _players.Single(player => player.Id == activePlayerId)
+        : null;
 
     public GameBoard Board { get; }
 
@@ -66,6 +73,7 @@ public sealed class GameSession
 
         var player = new GamePlayer(GamePlayerId.New(), normalizedName, _timeProvider.GetUtcNow());
         _players.Add(player);
+        ActivePlayerId ??= player.Id;
         return player;
     }
 
@@ -103,13 +111,32 @@ public sealed class GameSession
             ?? throw new GameRuleViolationException(
                 $"Question {sourceQuestionId} does not belong to this game.");
 
-        question.Select();
+        var activePlayerId = ActivePlayerId
+            ?? throw new GameRuleViolationException(
+                "A question cannot be selected without an active player.");
+
+        question.Select(activePlayerId);
         return question;
+    }
+
+    public WagerLimits GetQuestionWagerLimits(int sourceQuestionId)
+    {
+        var question = FindQuestion(sourceQuestionId);
+        var playerId = question.SelectedByPlayerId ?? ActivePlayerId
+            ?? throw new GameRuleViolationException(
+                "A wager cannot be calculated without an active player.");
+        var player = _players.Single(item => item.Id == playerId);
+        var highestQuestionValue = Board.Questions
+            .Where(item => item.SourceRoundId == question.SourceRoundId)
+            .Max(item => item.Points);
+
+        return new WagerLimits(
+            MinimumQuestionWager,
+            Math.Max(player.Score, highestQuestionValue));
     }
 
     public RuntimeQuestion SubmitQuestionWager(
         int sourceQuestionId,
-        GamePlayerId playerId,
         int amount)
     {
         if (Status != GameSessionStatus.Running)
@@ -118,25 +145,50 @@ public sealed class GameSession
                 "Question wagers can only be submitted while the game is running.");
         }
 
-        if (amount <= 0)
+        var question = FindQuestion(sourceQuestionId);
+        var limits = GetQuestionWagerLimits(sourceQuestionId);
+
+        if (!limits.Contains(amount))
         {
             throw new GameRuleViolationException(
-                "A question wager must be greater than zero.");
+                $"A question wager must be between {limits.Minimum} and {limits.Maximum}.");
         }
 
-        if (_players.All(player => player.Id != playerId))
-        {
-            throw new GameRuleViolationException(
-                "The selected player does not belong to this game.");
-        }
-
-        var question = Board.Questions.SingleOrDefault(
-            item => item.SourceQuestionId == sourceQuestionId)
+        var playerId = question.SelectedByPlayerId
             ?? throw new GameRuleViolationException(
-                $"Question {sourceQuestionId} does not belong to this game.");
+                "The wager question does not have a selecting player.");
 
         question.SubmitWager(playerId, amount, _timeProvider.GetUtcNow());
         return question;
+    }
+
+    public GamePlayer SetActivePlayer(GamePlayerId playerId)
+    {
+        var player = _players.SingleOrDefault(item => item.Id == playerId)
+            ?? throw new GameRuleViolationException(
+                "The selected player does not belong to this game.");
+
+        ActivePlayerId = player.Id;
+        return player;
+    }
+
+    public GamePlayer SelectRandomActivePlayer()
+    {
+        if (_players.Count == 0)
+        {
+            throw new GameRuleViolationException(
+                "An active player cannot be selected before a player joins.");
+        }
+
+        return SetActivePlayer(_players[Random.Shared.Next(_players.Count)].Id);
+    }
+
+    private RuntimeQuestion FindQuestion(int sourceQuestionId)
+    {
+        return Board.Questions.SingleOrDefault(
+            item => item.SourceQuestionId == sourceQuestionId)
+            ?? throw new GameRuleViolationException(
+                $"Question {sourceQuestionId} does not belong to this game.");
     }
 
     private void EnsureAcceptingPlayers()
