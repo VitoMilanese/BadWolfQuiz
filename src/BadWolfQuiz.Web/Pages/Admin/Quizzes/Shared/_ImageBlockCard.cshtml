@@ -1,0 +1,96 @@
+﻿@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> localizer
+@model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
+
+@{
+    var hasStoredFile =
+        Model.Id.HasValue &&
+        !string.IsNullOrWhiteSpace(Model.FileName);
+
+    string? imageUrl = null;
+
+    if (hasStoredFile)
+    {
+        imageUrl = Model.IsAnswerBlock
+            ? Url.Page(
+                "/Admin/Quizzes/QuestionEditor",
+                "AnswerBlockFile",
+                new { id = Model.Id!.Value })
+            : Url.Page(
+                "/Admin/Quizzes/QuestionEditor",
+                "QuestionBlockFile",
+                new { id = Model.Id!.Value });
+    }
+}
+
+<div class="image-block-editor">
+
+    <div class="stored-file-preview stored-image-preview unified-file-preview"
+         hidden="@(!hasStoredFile)"
+         data-has-original="@hasStoredFile.ToString().ToLowerInvariant()"
+         data-original-src="@imageUrl"
+         data-original-name="@Model.FileName"
+         data-original-label="@localizer["Message_StoredFile"]"
+         data-pending-label="@localizer["Label_File"]">
+
+        <img src="@imageUrl"
+             alt="@(hasStoredFile ? Model.FileName : string.Empty)"
+             class="stored-image-preview-element unified-image-preview-element" />
+
+        <div class="stored-file-info">
+            <strong class="file-preview-label">
+                @(hasStoredFile
+                    ? localizer["Message_StoredFile"]
+                    : localizer["Label_File"])
+            </strong>
+
+            <span class="file-preview-name">
+                @(hasStoredFile ? Model.FileName : string.Empty)
+            </span>
+        </div>
+
+        @if (hasStoredFile)
+        {
+            <button type="button"
+                    class="button secondary-button remove-stored-file-button">
+                @localizer["Button_RemoveFile"]
+            </button>
+        }
+        else
+        {
+            <button type="button"
+                    class="button secondary-button remove-stored-file-button"
+                    hidden>
+                @localizer["Button_RemoveFile"]
+            </button>
+        }
+
+    </div>
+
+    <button type="button"
+            class="button secondary-button cancel-file-change-button"
+            style="display: none !important;
+                   width: fit-content;
+                   align-self: flex-start;">
+        @localizer["Button_Cancel"]
+    </button>
+
+    <input asp-for="RemoveFile"
+           type="hidden"
+           value="false"
+           class="remove-file-value" />
+
+    <input asp-for="UploadedFile"
+           class="form-control image-block-file uploaded-file-input"
+           type="file"
+           accept="image/*" />
+
+    <input asp-for="TopCaption"
+           class="form-control"
+           placeholder="Top caption" />
+
+    <input asp-for="BottomCaption"
+           class="form-control"
+           placeholder="Bottom caption" />
+
+</div>

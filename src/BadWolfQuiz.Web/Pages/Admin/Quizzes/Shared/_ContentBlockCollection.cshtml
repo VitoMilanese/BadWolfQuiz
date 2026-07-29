@@ -1,0 +1,59 @@
+﻿@model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockCollectionViewModel
+
+<section id="@Model.CollectionId"
+         class="content-panel content-block-section"
+         data-block-collection="@Model.FieldPrefix">
+
+    <div class="content-block-section-header">
+        <h2>@Model.Title</h2>
+
+        <div class="content-block-add-menu">
+            <button type="button"
+                    class="button secondary-button content-block-add-button">
+                + Додати блок
+            </button>
+
+            <div class="content-block-type-menu" hidden>
+                <button type="button"
+                        class="content-block-type-option"
+                        data-block-type="Text">
+                    Текст
+                </button>
+
+                <button type="button"
+                        class="content-block-type-option"
+                        data-block-type="Image">
+                    Зображення
+                </button>
+
+                <button type="button"
+                        class="content-block-type-option"
+                        data-block-type="Audio">
+                    Аудіо
+                </button>
+
+                <button type="button"
+                        class="content-block-type-option"
+                        data-block-type="YouTube">
+                    YouTube
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-block-list"
+         data-content-block-list>
+        @for (var i = 0; i < Model.Blocks.Count; i++)
+        {
+            var blockViewData =
+            new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary(ViewData);
+
+            blockViewData.TemplateInfo.HtmlFieldPrefix =
+            $"{Model.FieldPrefix}[{i}]";
+
+            <partial name="Shared/_ContentBlockCard"
+                     model="Model.Blocks[i]"
+                     view-data="blockViewData" />
+        }
+    </div>
+</section>

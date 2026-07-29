@@ -1,0 +1,223 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace BadWolfQuiz.Web.Models;
+
+public enum ContentBlockType
+{
+    Text = 1,
+    Image = 2,
+    Audio = 3,
+    Video = 4,
+    YouTube = 5
+}
+
+public enum BuzzActivationMode
+{
+    UseRoundDefault = 0,
+    Manual = 1,
+    Immediately = 2,
+    AfterMedia = 3,
+    AfterDelay = 4,
+    Disabled = 5
+}
+
+public enum GameSessionStatus
+{
+    Lobby = 1,
+    Running = 2,
+    Finished = 3
+}
+
+public enum GameQuestionStatus
+{
+    Pending = 1,
+    ShowingQuestion = 2,
+    BuzzOpen = 3,
+    Locked = 4,
+    ShowingAnswer = 5,
+    Finished = 6
+}
+
+public sealed class Quiz
+{
+    public int Id { get; set; }
+
+    [Required, MaxLength(160)]
+    public string Title { get; set; } = string.Empty;
+
+    [MaxLength(1000)]
+    public string? Description { get; set; }
+
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+    public bool IsArchived { get; set; }
+
+    public ICollection<QuizRound> Rounds { get; set; } = new List<QuizRound>();
+    public ICollection<GameSession> Sessions { get; set; } = new List<GameSession>();
+}
+
+public sealed class QuizRound
+{
+    public int Id { get; set; }
+    public int QuizId { get; set; }
+
+    [Required, MaxLength(100)]
+    public string Title { get; set; } = string.Empty;
+
+    public int SortOrder { get; set; }
+    public int DefaultTimeLimitSeconds { get; set; } = 30;
+    public BuzzActivationMode DefaultBuzzMode { get; set; } = BuzzActivationMode.Manual;
+
+    public Quiz Quiz { get; set; } = null!;
+    public ICollection<QuizRoundRow> Rows { get; set; } = new List<QuizRoundRow>();
+    public ICollection<QuizCategory> Categories { get; set; } = new List<QuizCategory>();
+}
+
+public sealed class QuizRoundRow
+{
+    public int Id { get; set; }
+    public int QuizRoundId { get; set; }
+    public int RowIndex { get; set; }
+    public int Points { get; set; }
+
+    public QuizRound Round { get; set; } = null!;
+}
+
+public sealed class QuizCategory
+{
+    public int Id { get; set; }
+    public int QuizRoundId { get; set; }
+
+    [Required, MaxLength(100)]
+    public string Title { get; set; } = string.Empty;
+
+    public int SortOrder { get; set; }
+
+    public QuizRound Round { get; set; } = null!;
+    public ICollection<QuizQuestion> Questions { get; set; } = new List<QuizQuestion>();
+}
+
+public sealed class QuizQuestion
+{
+    public int Id { get; set; }
+    public int QuizCategoryId { get; set; }
+    public int RowIndex { get; set; }
+    public int? TimeLimitSecondsOverride { get; set; }
+    public BuzzActivationMode BuzzModeOverride { get; set; } = BuzzActivationMode.UseRoundDefault;
+    public int BuzzDelaySeconds { get; set; }
+    public bool IsSpecial { get; set; }
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    public QuizCategory Category { get; set; } = null!;
+    public ICollection<QuestionContentBlock> QuestionBlocks { get; set; } = new List<QuestionContentBlock>();
+    public ICollection<AnswerContentBlock> AnswerBlocks { get; set; } = new List<AnswerContentBlock>();
+}
+
+public abstract class ContentBlockBase
+{
+    public int Id { get; set; }
+    public ContentBlockType BlockType { get; set; }
+    public string? TextContent { get; set; }
+    public string? TopCaption { get; set; }
+    public string? BottomCaption { get; set; }
+    public string? MediaPath { get; set; }
+    public string? ExternalUrl { get; set; }
+    public int SortOrder { get; set; }
+    public bool AudioOnly { get; set; }
+    public byte[]? FileData { get; set; }
+    public string? FileContentType { get; set; }
+    public string? FileName { get; set; }
+}
+
+public sealed class QuestionContentBlock : ContentBlockBase
+{
+    public int QuizQuestionId { get; set; }
+    public QuizQuestion Question { get; set; } = null!;
+}
+
+public sealed class AnswerContentBlock : ContentBlockBase
+{
+    public int QuizQuestionId { get; set; }
+    public QuizQuestion Question { get; set; } = null!;
+}
+
+public sealed class GameSession
+{
+    public int Id { get; set; }
+    public int QuizId { get; set; }
+
+    [Required, MaxLength(12)]
+    public string PublicCode { get; set; } = string.Empty;
+
+    public GameSessionStatus Status { get; set; } = GameSessionStatus.Lobby;
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? StartedAtUtc { get; set; }
+    public DateTime? FinishedAtUtc { get; set; }
+
+    public Quiz Quiz { get; set; } = null!;
+    public ICollection<GamePlayer> Players { get; set; } = new List<GamePlayer>();
+    public ICollection<GameQuestion> Questions { get; set; } = new List<GameQuestion>();
+}
+
+public sealed class GamePlayer
+{
+    public int Id { get; set; }
+    public int GameSessionId { get; set; }
+
+    [Required, MaxLength(60)]
+    public string Name { get; set; } = string.Empty;
+
+    [Required, MaxLength(80)]
+    public string ReconnectToken { get; set; } = string.Empty;
+
+    public int TotalScore { get; set; }
+    public DateTime JoinedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? LastSeenAtUtc { get; set; }
+    public bool IsActive { get; set; } = true;
+
+    public GameSession Session { get; set; } = null!;
+    public ICollection<PlayerQuestionResult> Results { get; set; } = new List<PlayerQuestionResult>();
+}
+
+public sealed class GameQuestion
+{
+    public int Id { get; set; }
+    public int GameSessionId { get; set; }
+    public int QuizQuestionId { get; set; }
+    public GameQuestionStatus Status { get; set; } = GameQuestionStatus.Pending;
+    public DateTime? StartedAtUtc { get; set; }
+    public DateTime? BuzzOpenedAtUtc { get; set; }
+    public DateTime? FinishedAtUtc { get; set; }
+    public int? FirstBuzzPlayerId { get; set; }
+
+    public GameSession Session { get; set; } = null!;
+    public QuizQuestion QuizQuestion { get; set; } = null!;
+    public ICollection<PlayerBuzz> Buzzes { get; set; } = new List<PlayerBuzz>();
+    public ICollection<PlayerQuestionResult> Results { get; set; } = new List<PlayerQuestionResult>();
+}
+
+public sealed class PlayerBuzz
+{
+    public int Id { get; set; }
+    public int GameQuestionId { get; set; }
+    public int GamePlayerId { get; set; }
+    public DateTime ServerReceivedAtUtc { get; set; } = DateTime.UtcNow;
+    public int BuzzOrder { get; set; }
+    public bool WasFirst { get; set; }
+
+    public GameQuestion GameQuestion { get; set; } = null!;
+    public GamePlayer Player { get; set; } = null!;
+}
+
+public sealed class PlayerQuestionResult
+{
+    public int Id { get; set; }
+    public int GameQuestionId { get; set; }
+    public int GamePlayerId { get; set; }
+    public bool? IsCorrect { get; set; }
+    public int PointsAwarded { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    public GameQuestion GameQuestion { get; set; } = null!;
+    public GamePlayer Player { get; set; } = null!;
+}

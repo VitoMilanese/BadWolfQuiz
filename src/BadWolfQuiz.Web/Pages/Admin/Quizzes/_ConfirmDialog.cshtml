@@ -1,0 +1,29 @@
+<dialog id="confirmDeleteDialog" class="app-dialog">
+    <form method="post" asp-page-handler="Delete" class="dialog-card dialog-card-danger">
+        <input id="deleteQuizId" name="quizId" type="hidden" />
+
+        <div class="dialog-heading">
+            <div>
+                <h2>@Localizer["Dialog_DeleteQuiz_Title"]</h2>
+            </div>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <p class="dialog-target" id="deleteQuizTitle"></p>
+        <p class="dialog-warning">@Localizer["Dialog_DeleteQuiz_Text"]</p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-danger" type="submit">
+                @Localizer["Button_Delete"]
+            </button>
+        </div>
+    </form>
+</dialog>

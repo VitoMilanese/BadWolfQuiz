@@ -1,0 +1,705 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Label_Category" xml:space="preserve">
+    <value>Категорія</value>
+  </data>
+  <data name="Label_CorrectAnswer" xml:space="preserve">
+    <value>Правильна відповідь</value>
+  </data>
+  <data name="Button_CreateQuiz" xml:space="preserve">
+    <value>Створити квіз</value>
+  </data>
+  <data name="Label_Players" xml:space="preserve">
+    <value>Гравці</value>
+  </data>
+  <data name="Menu_Preview" xml:space="preserve">
+    <value>Попередній перегляд</value>
+  </data>
+  <data name="Label_Quiz" xml:space="preserve">
+    <value>Квіз</value>
+  </data>
+  <data name="Menu_Quizzes" xml:space="preserve">
+    <value>Квізи</value>
+  </data>
+  <data name="Label_Round" xml:space="preserve">
+    <value>Раунд</value>
+  </data>
+  <data name="Button_Save" xml:space="preserve">
+    <value>Зберегти</value>
+  </data>
+  <data name="Label_Score" xml:space="preserve">
+    <value>Бали</value>
+  </data>
+  <data name="Button_Add" xml:space="preserve">
+    <value>Додати</value>
+  </data>
+  <data name="Button_Edit" xml:space="preserve">
+    <value>Редагувати</value>
+  </data>
+  <data name="Button_Delete" xml:space="preserve">
+    <value>Видалити</value>
+  </data>
+  <data name="Button_Cancel" xml:space="preserve">
+    <value>Скасувати</value>
+  </data>
+  <data name="Button_Close" xml:space="preserve">
+    <value>Закрити</value>
+  </data>
+  <data name="Button_Back" xml:space="preserve">
+    <value>Назад</value>
+  </data>
+  <data name="Button_Create" xml:space="preserve">
+    <value>Створити</value>
+  </data>
+  <data name="Button_CreateCategory" xml:space="preserve">
+    <value>Створити категорію</value>
+  </data>
+  <data name="Button_CreateQuestion" xml:space="preserve">
+    <value>Створити питання</value>
+  </data>
+  <data name="Button_Preview" xml:space="preserve">
+    <value>Попередній перегляд</value>
+  </data>
+  <data name="Button_Start" xml:space="preserve">
+    <value>Почати</value>
+  </data>
+  <data name="Button_Stop" xml:space="preserve">
+    <value>Зупинити</value>
+  </data>
+  <data name="Button_Finish" xml:space="preserve">
+    <value>Завершити</value>
+  </data>
+  <data name="Button_Reset" xml:space="preserve">
+    <value>Скинути</value>
+  </data>
+  <data name="Button_Duplicate" xml:space="preserve">
+    <value>Дублювати</value>
+  </data>
+  <data name="Button_Copy" xml:space="preserve">
+    <value>Копіювати</value>
+  </data>
+  <data name="Button_Move" xml:space="preserve">
+    <value>Перемістити</value>
+  </data>
+  <data name="Button_Import" xml:space="preserve">
+    <value>Імпортувати</value>
+  </data>
+  <data name="Button_Export" xml:space="preserve">
+    <value>Експортувати</value>
+  </data>
+  <data name="Button_Upload" xml:space="preserve">
+    <value>Завантажити</value>
+  </data>
+  <data name="Button_Remove" xml:space="preserve">
+    <value>Прибрати</value>
+  </data>
+  <data name="Button_Join" xml:space="preserve">
+    <value>Приєднатися</value>
+  </data>
+  <data name="Button_Play" xml:space="preserve">
+    <value>Грати</value>
+  </data>
+  <data name="Button_ShowAnswer" xml:space="preserve">
+    <value>Показати відповідь</value>
+  </data>
+  <data name="Button_OpenBuzz" xml:space="preserve">
+    <value>Активувати кнопку</value>
+  </data>
+  <data name="Button_CloseBuzz" xml:space="preserve">
+    <value>Деактивувати кнопку</value>
+  </data>
+  <data name="Menu_Home" xml:space="preserve">
+    <value>Головна</value>
+  </data>
+  <data name="Menu_Games" xml:space="preserve">
+    <value>Ігри</value>
+  </data>
+  <data name="Menu_History" xml:space="preserve">
+    <value>Історія</value>
+  </data>
+  <data name="Menu_Settings" xml:space="preserve">
+    <value>Налаштування</value>
+  </data>
+  <data name="Menu_Players" xml:space="preserve">
+    <value>Гравці</value>
+  </data>
+  <data name="Menu_Statistics" xml:space="preserve">
+    <value>Статистика</value>
+  </data>
+  <data name="Menu_Help" xml:space="preserve">
+    <value>Допомога</value>
+  </data>
+  <data name="Title_QuizEditor" xml:space="preserve">
+    <value>Редактор квізу</value>
+  </data>
+  <data name="Title_QuestionEditor" xml:space="preserve">
+    <value>Редактор питання</value>
+  </data>
+  <data name="Title_GameControl" xml:space="preserve">
+    <value>Керування грою</value>
+  </data>
+  <data name="Title_NewQuiz" xml:space="preserve">
+    <value>Новий квіз</value>
+  </data>
+  <data name="Title_EditQuiz" xml:space="preserve">
+    <value>Редагування квізу</value>
+  </data>
+  <data name="Title_Settings" xml:space="preserve">
+    <value>Налаштування</value>
+  </data>
+  <data name="Label_QuizName" xml:space="preserve">
+    <value>Назва квізу</value>
+  </data>
+  <data name="Label_Description" xml:space="preserve">
+    <value>Опис</value>
+  </data>
+  <data name="Label_CategoryName" xml:space="preserve">
+    <value>Назва категорії</value>
+  </data>
+  <data name="Label_Question" xml:space="preserve">
+    <value>Питання</value>
+  </data>
+  <data name="Label_Points" xml:space="preserve">
+    <value>Бали</value>
+  </data>
+  <data name="Label_Timer" xml:space="preserve">
+    <value>Таймер</value>
+  </data>
+  <data name="Label_TimeLimit" xml:space="preserve">
+    <value>Обмеження часу</value>
+  </data>
+  <data name="Label_Player" xml:space="preserve">
+    <value>Гравець</value>
+  </data>
+  <data name="Label_Status" xml:space="preserve">
+    <value>Статус</value>
+  </data>
+  <data name="Label_Game" xml:space="preserve">
+    <value>Гра</value>
+  </data>
+  <data name="Label_GameCode" xml:space="preserve">
+    <value>Код гри</value>
+  </data>
+  <data name="Label_QrCode" xml:space="preserve">
+    <value>QR-код</value>
+  </data>
+  <data name="Label_Media" xml:space="preserve">
+    <value>Медіа</value>
+  </data>
+  <data name="Label_Image" xml:space="preserve">
+    <value>Зображення</value>
+  </data>
+  <data name="Label_Audio" xml:space="preserve">
+    <value>Аудіо</value>
+  </data>
+  <data name="Label_Video" xml:space="preserve">
+    <value>Відео</value>
+  </data>
+  <data name="Label_YouTube" xml:space="preserve">
+    <value>YouTube</value>
+  </data>
+  <data name="Label_File" xml:space="preserve">
+    <value>Файл</value>
+  </data>
+  <data name="Label_FileName" xml:space="preserve">
+    <value>Назва файлу</value>
+  </data>
+  <data name="Label_TopCaption" xml:space="preserve">
+    <value>Верхній підпис</value>
+  </data>
+  <data name="Label_BottomCaption" xml:space="preserve">
+    <value>Нижній підпис</value>
+  </data>
+  <data name="Label_BuzzMode" xml:space="preserve">
+    <value>Режим кнопки</value>
+  </data>
+  <data name="Label_BuzzDelay" xml:space="preserve">
+    <value>Затримка кнопки</value>
+  </data>
+  <data name="Label_SpecialQuestion" xml:space="preserve">
+    <value>Спеціальне питання</value>
+  </data>
+  <data name="Label_Created" xml:space="preserve">
+    <value>Створено</value>
+  </data>
+  <data name="Label_Modified" xml:space="preserve">
+    <value>Змінено</value>
+  </data>
+  <data name="Message_Saved" xml:space="preserve">
+    <value>Успішно збережено</value>
+  </data>
+  <data name="Message_Deleted" xml:space="preserve">
+    <value>Успішно видалено</value>
+  </data>
+  <data name="Message_Created" xml:space="preserve">
+    <value>Успішно створено</value>
+  </data>
+  <data name="Message_Updated" xml:space="preserve">
+    <value>Успішно оновлено</value>
+  </data>
+  <data name="Message_GameStarted" xml:space="preserve">
+    <value>Гру розпочато</value>
+  </data>
+  <data name="Message_GameFinished" xml:space="preserve">
+    <value>Гру завершено</value>
+  </data>
+  <data name="Message_PlayerJoined" xml:space="preserve">
+    <value>Гравець приєднався</value>
+  </data>
+  <data name="Message_PlayerLeft" xml:space="preserve">
+    <value>Гравець вийшов</value>
+  </data>
+  <data name="Message_WaitingPlayers" xml:space="preserve">
+    <value>Очікування гравців</value>
+  </data>
+  <data name="Message_WaitingHost" xml:space="preserve">
+    <value>Очікування ведучого</value>
+  </data>
+  <data name="Message_Correct" xml:space="preserve">
+    <value>Правильно</value>
+  </data>
+  <data name="Message_Wrong" xml:space="preserve">
+    <value>Неправильно</value>
+  </data>
+  <data name="Error_Required" xml:space="preserve">
+    <value>Це поле обов’язкове</value>
+  </data>
+  <data name="Error_InvalidFile" xml:space="preserve">
+    <value>Неприпустимий файл</value>
+  </data>
+  <data name="Error_InvalidImage" xml:space="preserve">
+    <value>Неприпустиме зображення</value>
+  </data>
+  <data name="Error_InvalidAudio" xml:space="preserve">
+    <value>Неприпустимий аудіофайл</value>
+  </data>
+  <data name="Error_InvalidVideo" xml:space="preserve">
+    <value>Неприпустимий відеофайл</value>
+  </data>
+  <data name="Error_QuizNotFound" xml:space="preserve">
+    <value>Квіз не знайдено</value>
+  </data>
+  <data name="Error_GameNotFound" xml:space="preserve">
+    <value>Гру не знайдено</value>
+  </data>
+  <data name="Error_PlayerExists" xml:space="preserve">
+    <value>Гравець із таким ім’ям уже існує</value>
+  </data>
+  <data name="Error_ConnectionLost" xml:space="preserve">
+    <value>З’єднання втрачено</value>
+  </data>
+  <data name="Dialog_DeleteQuiz_Title" xml:space="preserve">
+    <value>Видалити квіз</value>
+  </data>
+  <data name="Dialog_DeleteQuiz_Text" xml:space="preserve">
+    <value>Ви впевнені, що хочете видалити цей квіз?</value>
+  </data>
+  <data name="Dialog_DeleteQuestion_Title" xml:space="preserve">
+    <value>Видалити питання</value>
+  </data>
+  <data name="Dialog_DeleteQuestion_Text" xml:space="preserve">
+    <value>Ви впевнені, що хочете видалити це питання?</value>
+  </data>
+  <data name="Dialog_DeleteCategory_Title" xml:space="preserve">
+    <value>Видалити категорію</value>
+  </data>
+  <data name="Dialog_DeleteCategory_Text" xml:space="preserve">
+    <value>Ви впевнені, що хочете видалити цю категорію?</value>
+  </data>
+  <data name="Dialog_ExitGame_Title" xml:space="preserve">
+    <value>Вийти з гри</value>
+  </data>
+  <data name="Dialog_ExitGame_Text" xml:space="preserve">
+    <value>Ви впевнені, що хочете вийти з гри?</value>
+  </data>
+  <data name="Content_Text" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="Content_Image" xml:space="preserve">
+    <value>Зображення</value>
+  </data>
+  <data name="Content_Audio" xml:space="preserve">
+    <value>Аудіо</value>
+  </data>
+  <data name="Content_Video" xml:space="preserve">
+    <value>Відео</value>
+  </data>
+  <data name="Content_YouTube" xml:space="preserve">
+    <value>YouTube</value>
+  </data>
+  <data name="GameStatus_Waiting" xml:space="preserve">
+    <value>Очікування</value>
+  </data>
+  <data name="GameStatus_Paused" xml:space="preserve">
+    <value>Призупинено</value>
+  </data>
+  <data name="GameStatus_Finished" xml:space="preserve">
+    <value>Завершено</value>
+  </data>
+  <data name="Home_Eyebrow" xml:space="preserve">
+    <value>ПЛАТФОРМА ДЛЯ КВІЗІВ У РЕАЛЬНОМУ ЧАСІ</value>
+  </data>
+  <data name="Home_TitleLine1" xml:space="preserve">
+    <value>Створюй квізи.</value>
+  </data>
+  <data name="Home_TitleLine2" xml:space="preserve">
+    <value>Грай із друзями.</value>
+  </data>
+  <data name="Home_Description" xml:space="preserve">
+    <value>Редактор категорій, мультимедійні питання, QR-підключення гравців і кнопка першої відповіді.</value>
+  </data>
+  <data name="Button_OpenEditor" xml:space="preserve">
+    <value>Відкрити редактор</value>
+  </data>
+  <data name="Button_JoinGame" xml:space="preserve">
+    <value>Приєднатися до гри</value>
+  </data>
+  <data name="Title_Error" xml:space="preserve">
+    <value>Помилка</value>
+  </data>
+  <data name="Error_Unexpected" xml:space="preserve">
+    <value>Сталася помилка.</value>
+  </data>
+  <data name="Error_CheckLogsAndRetry" xml:space="preserve">
+    <value>Перевір журнали застосунку та повтори дію.</value>
+  </data>
+  <data name="Join_Eyebrow" xml:space="preserve">
+    <value>ПРИЄДНАТИСЯ ДО ГРИ</value>
+  </data>
+  <data name="Title_JoinGame" xml:space="preserve">
+    <value>Приєднатися до гри</value>
+  </data>
+  <data name="Message_LobbyComingSoon" xml:space="preserve">
+    <value>Лобі та QR-підключення буде додано наступним кроком.</value>
+  </data>
+  <data name="Placeholder_GameCode" xml:space="preserve">
+    <value>Наприклад: WOLF123</value>
+  </data>
+  <data name="Label_PlayerName" xml:space="preserve">
+    <value>Ім’я гравця</value>
+  </data>
+  <data name="Placeholder_PlayerName" xml:space="preserve">
+    <value>Твоє ім’я</value>
+  </data>
+  <data name="CreateQuiz_Eyebrow" xml:space="preserve">
+    <value>НОВИЙ КВІЗ</value>
+  </data>
+  <data name="Title_CreateQuiz" xml:space="preserve">
+    <value>Створення квізу</value>
+  </data>
+  <data name="Admin_Eyebrow" xml:space="preserve">
+    <value>АДМІНІСТРУВАННЯ</value>
+  </data>
+  <data name="Title_MyQuizzes" xml:space="preserve">
+    <value>Мої квізи</value>
+  </data>
+  <data name="Quiz_RoundCount" xml:space="preserve">
+    <value>{0} раунд(ів)</value>
+  </data>
+  <data name="Label_Final" xml:space="preserve">
+    <value>Фінал</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>готово</value>
+  </data>
+  <data name="Placeholder_QuestionText" xml:space="preserve">
+    <value>Текст питання</value>
+  </data>
+  <data name="DropZone_Image" xml:space="preserve">
+    <value>Перетягни зображення сюди</value>
+  </data>
+  <data name="Message_FileUploadComingSoon" xml:space="preserve">
+    <value>Завантаження файлів додамо наступним кроком</value>
+  </data>
+  <data name="DropZone_Audio" xml:space="preserve">
+    <value>Перетягни аудіофайл сюди</value>
+  </data>
+  <data name="Audio_SupportedFormats" xml:space="preserve">
+    <value>MP3, WAV, OGG</value>
+  </data>
+  <data name="Label_YouTubeLink" xml:space="preserve">
+    <value>YouTube-посилання</value>
+  </data>
+  <data name="Label_AudioOnly" xml:space="preserve">
+    <value>Лише аудіо</value>
+  </data>
+  <data name="BuzzMode_UseRoundDefault" xml:space="preserve">
+    <value>Використовувати налаштування раунду</value>
+  </data>
+  <data name="BuzzMode_Manual" xml:space="preserve">
+    <value>Вручну</value>
+  </data>
+  <data name="BuzzMode_Immediately" xml:space="preserve">
+    <value>Одразу</value>
+  </data>
+  <data name="BuzzMode_AfterMedia" xml:space="preserve">
+    <value>Після медіа</value>
+  </data>
+  <data name="BuzzMode_AfterDelay" xml:space="preserve">
+    <value>Після затримки</value>
+  </data>
+  <data name="BuzzMode_Disabled" xml:space="preserve">
+    <value>Вимкнено</value>
+  </data>
+  <data name="Message_PreviewComingSoon" xml:space="preserve">
+    <value>Попередній перегляд буде додано наступним кроком.</value>
+  </data>
+  <data name="Default_RoundTitle" xml:space="preserve">
+    <value>Раунд {0}</value>
+  </data>
+  <data name="Default_CategoryTitle" xml:space="preserve">
+    <value>Категорія {0}</value>
+  </data>
+  <data name="Error_QuizNameRequired" xml:space="preserve">
+    <value>Вкажи назву квізу.</value>
+  </data>
+  <data name="Seed_DemoQuizTitle" xml:space="preserve">
+    <value>Демонстраційний квіз</value>
+  </data>
+  <data name="Seed_DemoQuizDescription" xml:space="preserve">
+    <value>Початковий квіз для перевірки редактора.</value>
+  </data>
+  <data name="Seed_TestQuestion" xml:space="preserve">
+    <value>Тестове питання</value>
+  </data>
+  <data name="Seed_TestAnswer" xml:space="preserve">
+    <value>Тестова відповідь</value>
+  </data>
+  <data name="Message_QuizCreated" xml:space="preserve">
+    <value>Квіз успішно створено.</value>
+  </data>
+  <data name="Message_QuestionSaved" xml:space="preserve">
+    <value>Питання успішно збережено.</value>
+  </data>
+  <data name="Error_MaxLength" xml:space="preserve">
+    <value>Поле «{0}» не може містити більше ніж {1} символів.</value>
+  </data>
+  <data name="Error_InvalidUrl" xml:space="preserve">
+    <value>Введіть коректне посилання.</value>
+  </data>
+  <data name="QuestionBlocksRequired" xml:space="preserve">
+    <value>Додайте хоча б один блок питання.</value>
+  </data>
+  <data name="AnswerBlocksRequired" xml:space="preserve">
+    <value>Додайте хоча б один блок відповіді.</value>
+  </data>
+  <data name="FileSizeLimitExceeded" xml:space="preserve">
+    <value>Розмір файла не повинен перевищувати {0} МБ.</value>
+  </data>
+  <data name="InvalidImageFile" xml:space="preserve">
+    <value>Вибраний файл не є зображенням.</value>
+  </data>
+  <data name="InvalidAudioFile" xml:space="preserve">
+    <value>Вибраний файл не є аудіофайлом.</value>
+  </data>
+  <data name="Button_RemoveFile" xml:space="preserve">
+    <value>Видалити файл</value>
+  </data>
+  <data name="Message_StoredFile" xml:space="preserve">
+    <value>Збережений файл</value>
+  </data>
+  <data name="Button_Rename" xml:space="preserve">
+    <value>Перейменувати</value>
+  </data>
+  <data name="Dialog_RenameQuiz" xml:space="preserve">
+    <value>Перейменувати квіз</value>
+  </data>
+  <data name="Dialog_DeleteQuiz" xml:space="preserve">
+    <value>Видалити квіз</value>
+  </data>
+  <data name="Message_DeleteQuizConfirmation" xml:space="preserve">
+    <value>Ви дійсно бажаєте видалити цей квіз? Цю дію неможливо</value>
+  </data>
+  <data name="Message_QuizRenamed" xml:space="preserve">
+    <value>Квіз успішно перейменовано.</value>
+  </data>
+  <data name="Message_QuizDeleted" xml:space="preserve">
+    <value>Квіз успішно видалено.</value>
+  </data>
+  <data name="Round_DefaultTitle" xml:space="preserve">
+    <value>Раунд {0}</value>
+  </data>
+  <data name="QuizEditor_RoundCreated" xml:space="preserve">
+    <value>Раунд успішно створено.</value>
+  </data>
+  <data name="QuizEditor_AddRound" xml:space="preserve">
+    <value>Додати раунд</value>
+  </data>
+  <data name="QuizEditor_NewRound" xml:space="preserve">
+    <value>Новий раунд</value>
+  </data>
+  <data name="QuizEditor_RenameRound" xml:space="preserve">
+    <value>Перейменувати раунд</value>
+  </data>
+  <data name="QuizEditor_DeleteRound" xml:space="preserve">
+    <value>Видалити раунд</value>
+  </data>
+  <data name="QuizEditor_RoundTitle" xml:space="preserve">
+    <value>Назва раунду</value>
+  </data>
+  <data name="QuizEditor_DeleteRoundWarning" xml:space="preserve">
+    <value>Раунд, усі його категорії, питання та матеріали буде остаточно видалено.</value>
+  </data>
+  <data name="QuizEditor_RoundRenamed" xml:space="preserve">
+    <value>Раунд успішно перейменовано.</value>
+  </data>
+  <data name="QuizEditor_RoundDeleted" xml:space="preserve">
+    <value>Раунд успішно видалено.</value>
+  </data>
+  <data name="QuizEditor_RoundTitleRequired" xml:space="preserve">
+    <value>Вкажіть назву раунду.</value>
+  </data>
+  <data name="QuizEditor_CannotDeleteOnlyRound" xml:space="preserve">
+    <value>Неможливо видалити єдиний раунд.</value>
+  </data>
+  <data name="QuizEditor_RowPoints" xml:space="preserve">
+    <value>Вартість запитань</value>
+  </data>
+  <data name="QuizEditor_RowPointsDescription" xml:space="preserve">
+    <value>Встановіть кількість балів для кожного рівня запитань у цьому раунді.</value>
+  </data>
+  <data name="QuizEditor_RowNumber" xml:space="preserve">
+    <value>Рівень {0}</value>
+  </data>
+  <data name="QuizEditor_ExchangeCategory" xml:space="preserve">
+    <value>Обмін категорії</value>
+  </data>
+  <data name="QuizEditor_SelectedCategory" xml:space="preserve">
+    <value>Обрана категорія</value>
+  </data>
+  <data name="QuizEditor_TargetRound" xml:space="preserve">
+    <value>Цільовий раунд</value>
+  </data>
+  <data name="QuizEditor_TargetCategory" xml:space="preserve">
+    <value>Цільова категорія</value>
+  </data>
+  <data name="QuizEditor_Exchange" xml:space="preserve">
+    <value>Обміняти</value>
+  </data>
+  <data name="QuizEditor_RenameCategory" xml:space="preserve">
+    <value>Перейменувати категорію</value>
+  </data>
+  <data name="QuizEditor_CategoryTitle" xml:space="preserve">
+    <value>Назва категорії</value>
+  </data>
+  <data name="QuizEditor_CategoryRenamed" xml:space="preserve">
+    <value>Категорію успішно перейменовано.</value>
+  </data>
+</root>

@@ -1,0 +1,15 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = Localizer["Menu_Home"];
+}
+
+<section class="hero">
+    <p class="eyebrow">@Localizer["Home_Eyebrow"]</p>
+    <h1>@Localizer["Home_TitleLine1"]<br />@Localizer["Home_TitleLine2"]</h1>
+    <p class="hero-copy">@Localizer["Home_Description"]</p>
+    <div class="hero-actions">
+        <a class="button button-primary" asp-page="/Admin/Quizzes/Index">@Localizer["Button_OpenEditor"]</a>
+        <a class="button button-secondary" asp-page="/Join/Index">@Localizer["Button_JoinGame"]</a>
+    </div>
+</section>

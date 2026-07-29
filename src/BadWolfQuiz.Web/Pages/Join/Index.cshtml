@@ -1,0 +1,17 @@
+﻿@page
+@model BadWolfQuiz.Web.Pages.Join.IndexModel
+@{
+    ViewData["Title"] = Localizer["Button_Join"];
+    var lobbyComingSoon = JavaScriptEncoder.Default.Encode(Localizer["Message_LobbyComingSoon"]);
+}
+<div class="form-card narrow">
+    <p class="eyebrow">@Localizer["Join_Eyebrow"]</p>
+    <h1>@Localizer["Title_JoinGame"]</h1>
+    <form class="stack-form" onsubmit="event.preventDefault(); alert('@lobbyComingSoon');">
+        <label>@Localizer["Label_GameCode"]</label>
+        <input maxlength="12" placeholder="@Localizer["Placeholder_GameCode"]" />
+        <label>@Localizer["Label_PlayerName"]</label>
+        <input maxlength="60" placeholder="@Localizer["Placeholder_PlayerName"]" />
+        <button class="button button-primary" type="submit">@Localizer["Button_Join"]</button>
+    </form>
+</div>

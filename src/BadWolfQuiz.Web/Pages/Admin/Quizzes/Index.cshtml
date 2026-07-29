@@ -1,0 +1,163 @@
+@page
+@model BadWolfQuiz.Web.Pages.Admin.Quizzes.IndexModel
+@{
+    ViewData["Title"] = Localizer["Menu_Quizzes"];
+}
+
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">@Localizer["Admin_Eyebrow"]</p>
+        <h1>@Localizer["Title_MyQuizzes"]</h1>
+    </div>
+    <a class="button button-primary" asp-page="Create">@Localizer["Button_CreateQuiz"]</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="message message-success" role="status">@successMessage</div>
+}
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="message message-error" role="alert">@errorMessage</div>
+}
+
+<div class="quiz-list">
+@foreach (var quiz in Model.Quizzes)
+{
+    <article class="quiz-card">
+        <div class="quiz-card-content">
+            <h2>@quiz.Title</h2>
+
+            @if (!string.IsNullOrWhiteSpace(quiz.Description))
+            {
+                <p>@quiz.Description</p>
+            }
+
+            <small>@Localizer["Quiz_RoundCount", quiz.Rounds.Count]</small>
+        </div>
+
+        <div class="card-actions">
+            <a class="button button-secondary"
+               asp-page="Editor"
+               asp-route-id="@quiz.Id">
+                @Localizer["Button_Edit"]
+            </a>
+
+            <button class="button button-secondary"
+                    type="button"
+                    data-open-rename-dialog
+                    data-quiz-id="@quiz.Id"
+                    data-quiz-title="@quiz.Title"
+                    data-quiz-description="@(quiz.Description ?? string.Empty)">
+                @Localizer["Button_Rename"]
+            </button>
+
+            <button class="button button-danger-outline"
+                    type="button"
+                    data-open-delete-dialog
+                    data-quiz-id="@quiz.Id"
+                    data-quiz-title="@quiz.Title">
+                @Localizer["Button_Delete"]
+            </button>
+        </div>
+    </article>
+}
+</div>
+
+<dialog id="renameQuizDialog" class="app-dialog">
+    <form method="post" asp-page-handler="Rename" class="dialog-card">
+        <input id="renameQuizId" name="quizId" type="hidden" />
+
+        <div class="dialog-heading">
+            <div>
+                <p class="eyebrow">@Localizer["Dialog_EditQuizEyebrow"]</p>
+                <h2>@Localizer["Dialog_RenameQuizTitle"]</h2>
+            </div>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <div class="stack-form">
+            <label for="renameQuizTitle">@Localizer["Label_QuizName"]</label>
+            <input id="renameQuizTitle"
+                   name="title"
+                   maxlength="160"
+                   required />
+
+            <label for="renameQuizDescription">@Localizer["Label_Description"]</label>
+            <textarea id="renameQuizDescription"
+                      name="description"
+                      maxlength="1000"
+                      rows="4"></textarea>
+        </div>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-primary" type="submit">
+                @Localizer["Button_Save"]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<partial name="_ConfirmDialog" />
+
+@section Scripts {
+<script>
+(() => {
+    const renameDialog = document.getElementById('renameQuizDialog');
+    const deleteDialog = document.getElementById('confirmDeleteDialog');
+
+    const renameQuizId = document.getElementById('renameQuizId');
+    const renameQuizTitle = document.getElementById('renameQuizTitle');
+    const renameQuizDescription = document.getElementById('renameQuizDescription');
+
+    const deleteQuizId = document.getElementById('deleteQuizId');
+    const deleteQuizTitle = document.getElementById('deleteQuizTitle');
+
+    document.querySelectorAll('[data-open-rename-dialog]').forEach(button => {
+        button.addEventListener('click', () => {
+            renameQuizId.value = button.dataset.quizId ?? '';
+            renameQuizTitle.value = button.dataset.quizTitle ?? '';
+            renameQuizDescription.value = button.dataset.quizDescription ?? '';
+
+            renameDialog.showModal();
+
+            requestAnimationFrame(() => {
+                renameQuizTitle.focus();
+                renameQuizTitle.select();
+            });
+        });
+    });
+
+    document.querySelectorAll('[data-open-delete-dialog]').forEach(button => {
+        button.addEventListener('click', () => {
+            deleteQuizId.value = button.dataset.quizId ?? '';
+            deleteQuizTitle.textContent = button.dataset.quizTitle ?? '';
+            deleteDialog.showModal();
+        });
+    });
+
+    document.querySelectorAll('[data-close-dialog]').forEach(button => {
+        button.addEventListener('click', () => {
+            button.closest('dialog')?.close();
+        });
+    });
+
+    document.querySelectorAll('dialog.app-dialog').forEach(dialog => {
+        dialog.addEventListener('click', event => {
+            if (event.target === dialog) {
+                dialog.close();
+            }
+        });
+    });
+})();
+</script>
+}

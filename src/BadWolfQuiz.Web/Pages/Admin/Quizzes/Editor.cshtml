@@ -1,0 +1,786 @@
+@page "{id:int}"
+@model BadWolfQuiz.Web.Pages.Admin.Quizzes.EditorModel
+@{
+    ViewData["Title"] = Model.Quiz.Title;
+
+    var rounds = Model.Quiz.Rounds
+        .OrderBy(x => x.SortOrder)
+        .ToList();
+
+    var round = rounds.Single(x => x.Id == Model.SelectedRoundId);
+
+    var roundRows = round.Rows
+        .OrderBy(x => x.RowIndex)
+        .ToList();
+
+    var categories = round.Categories
+        .OrderBy(x => x.SortOrder)
+        .ToList();
+}
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div id="success-message"
+         class="alert alert-success"
+         role="status">
+        @successMessage
+    </div>
+}
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-error"
+         role="alert">
+        @errorMessage
+    </div>
+}
+
+<div class="editor-toolbar">
+    <div>
+        <p class="eyebrow">@Localizer["Title_QuizEditor"]</p>
+        <h1>@Model.Quiz.Title</h1>
+    </div>
+
+    <div class="round-navigation">
+        <div class="round-tabs" id="roundTabs">
+            @foreach (var item in rounds)
+            {
+                <div class="round-tab round-tab-item @(item.Id == Model.SelectedRoundId ? "active" : null)"
+                     data-round-id="@item.Id">
+
+                    <span class="round-drag-handle"
+                          title="Drag to reorder"
+                          aria-hidden="true">
+                        ⋮⋮
+                    </span>
+
+                    <a asp-page="Editor"
+                       asp-route-id="@Model.Quiz.Id"
+                       asp-route-selectedRoundId="@item.Id"
+                       class="round-tab-link">
+                        @item.Title
+                    </a>
+                </div>
+            }
+
+            <button type="button"
+                    class="round-tab round-add-button button button-secondary"
+                    onclick="openAddRoundDialog()">
+                + @Localizer["QuizEditor_AddRound"]
+            </button>
+        </div>
+
+        <div class="round-actions">
+            <button type="button"
+                    class="button button-secondary round-action-button"
+                    onclick="openRenameRoundDialog()">
+                @Localizer["QuizEditor_RenameRound"]
+            </button>
+
+            @if (rounds.Count > 1)
+            {
+                <button type="button"
+                        class="button button-danger-outline round-action-button"
+                        onclick="openDeleteRoundDialog()">
+                    @Localizer["QuizEditor_DeleteRound"]
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+<form method="post"
+      asp-page-handler="SaveRoundRows"
+      class="quiz-board-form">
+    <input asp-for="RoundRows.QuizId"
+           type="hidden"
+           value="@Model.Quiz.Id" />
+
+    <input asp-for="RoundRows.RoundId"
+           type="hidden"
+           value="@round.Id" />
+
+    <div class="quiz-board-scroll">
+        <div class="quiz-board" style="--row-count:@roundRows.Count;">
+            <div class="quiz-board-points-column">
+                <div class="quiz-board-corner" aria-hidden="true"></div>
+
+                @for (var rowIndex = 0; rowIndex < roundRows.Count; rowIndex++)
+                {
+                    <div class="question-points-cell">
+                        <input asp-for="RoundRows.Rows[rowIndex].RowIndex"
+                               type="hidden"
+                               value="@roundRows[rowIndex].RowIndex" />
+
+                        <label asp-for="RoundRows.Rows[rowIndex].Points"
+                               class="visually-hidden">
+                            @Localizer["QuizEditor_RowNumber", roundRows[rowIndex].RowIndex]
+                        </label>
+
+                        <input asp-for="RoundRows.Rows[rowIndex].Points"
+                               class="question-points-input"
+                               type="number"
+                               min="0"
+                               step="100"
+                               value="@roundRows[rowIndex].Points" />
+                    </div>
+                }
+            </div>
+
+            <div class="quiz-board-categories" id="categoryColumns">
+                @foreach (var category in categories)
+                {
+                    <div id="category-@category.Id"
+                         class="quiz-board-category-column"
+                         data-category-id="@category.Id">
+                        <div class="category-cell">
+                            <span class="category-drag-handle"
+                                  title="Drag to reorder"
+                                  aria-hidden="true">⋮⋮</span>
+
+                            <span class="category-title">@category.Title</span>
+
+                            <div class="category-actions">
+                                <button type="button"
+                                        class="js-category-rename button button-secondary icon-button"
+                                        data-category-id="@category.Id"
+                                        data-category-title="@category.Title">
+                                    ✏️
+                                </button>
+
+                                @if (Model.Quiz.Rounds.Count > 1)
+                                {
+                                    <button type="button"
+                                            class="js-category-exchange button button-secondary icon-button"
+                                            data-category-id="@category.Id"
+                                            data-category-title="@category.Title"
+                                            data-round-id="@round.Id">
+                                        ⇅
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        @foreach (var roundRow in roundRows)
+                        {
+                            var question = category.Questions
+                                .SingleOrDefault(x => x.RowIndex == roundRow.RowIndex);
+
+                            if (question is null)
+                            {
+                                <div class="question-cell"></div>
+                                continue;
+                            }
+
+                            var hasContent = question.QuestionBlocks.Any(x =>
+                                !string.IsNullOrWhiteSpace(x.TextContent) ||
+                                !string.IsNullOrWhiteSpace(x.MediaPath) ||
+                                !string.IsNullOrWhiteSpace(x.ExternalUrl));
+
+                            <a class="question-cell @(hasContent ? "filled" : null)"
+                               asp-page="QuestionEditor"
+                               asp-route-id="@question.Id">
+                                @if (hasContent)
+                                {
+                                    <small>@Localizer["Status_Ready"]</small>
+                                }
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="quiz-board-actions">
+        <button type="submit"
+                class="button button-primary">
+            @Localizer["Button_Save"]
+        </button>
+    </div>
+</form>
+
+<dialog id="add-round-dialog" class="app-dialog">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2>@Localizer["QuizEditor_NewRound"]</h2>
+
+            <button type="button"
+                    class="dialog-close"
+                    onclick="closeAddRoundDialog()">
+                ×
+            </button>
+        </div>
+
+        <form method="post" asp-page-handler="AddRound">
+            <input asp-for="AddRound.QuizId"
+                   type="hidden"
+                   value="@Model.Quiz.Id" />
+
+            <label asp-for="AddRound.Title">
+                @Localizer["QuizEditor_RoundTitle"]
+            </label>
+
+            <input asp-for="AddRound.Title"
+                   id="add-round-title"
+                   maxlength="100" />
+
+            <div class="dialog-actions form-actions">
+                <button type="button"
+                        class="button button-secondary"
+                        onclick="closeAddRoundDialog()">
+                    @Localizer["Button_Cancel"]
+                </button>
+
+                <button type="submit"
+                        class="button button-primary">
+                    @Localizer["QuizEditor_AddRound"]
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog id="rename-round-dialog" class="app-dialog">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2>@Localizer["QuizEditor_RenameRound"]</h2>
+
+            <button type="button"
+                    class="dialog-close"
+                    onclick="closeRenameRoundDialog()">
+                ×
+            </button>
+        </div>
+
+        <form method="post" asp-page-handler="RenameRound">
+            <input asp-for="RenameRound.QuizId"
+                   type="hidden"
+                   value="@Model.Quiz.Id" />
+
+            <input asp-for="RenameRound.RoundId"
+                   type="hidden"
+                   value="@round.Id" />
+
+            <label asp-for="RenameRound.Title">
+                @Localizer["QuizEditor_RoundTitle"]
+            </label>
+
+            <input asp-for="RenameRound.Title"
+                   id="rename-round-title"
+                   value="@round.Title"
+                   maxlength="100"
+                   required />
+
+            <div class="dialog-actions form-actions">
+                <button type="button"
+                        class="button button-secondary"
+                        onclick="closeRenameRoundDialog()">
+                    @Localizer["Button_Cancel"]
+                </button>
+
+                <button type="submit"
+                        class="button button-primary">
+                    @Localizer["Button_Save"]
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog id="rename-category-dialog" class="app-dialog">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2>@Localizer["QuizEditor_RenameCategory"]</h2>
+
+            <button type="button"
+                    class="dialog-close"
+                    onclick="closeRenameCategoryDialog()">
+                ×
+            </button>
+        </div>
+
+        <form method="post" asp-page-handler="RenameCategory">
+            <input asp-for="RenameCategory.QuizId"
+                   type="hidden"
+                   value="@Model.Quiz.Id" />
+
+            <input asp-for="RenameCategory.CategoryId"
+                   id="rename-category-id"
+                   type="hidden" />
+
+            <label asp-for="RenameCategory.Title">
+                @Localizer["QuizEditor_CategoryTitle"]
+            </label>
+
+            <input asp-for="RenameCategory.Title"
+                   id="rename-category-title"
+                   maxlength="100"
+                   required />
+
+            <div class="dialog-actions form-actions">
+                <button type="button"
+                        class="button button-secondary"
+                        onclick="closeRenameCategoryDialog()">
+                    @Localizer["Button_Cancel"]
+                </button>
+
+                <button type="submit"
+                        class="button button-primary">
+                    @Localizer["Button_Save"]
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog id="exchange-category-dialog" class="app-dialog">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2>@Localizer["QuizEditor_ExchangeCategory"]</h2>
+
+            <button type="button"
+                    class="dialog-close"
+                    onclick="closeExchangeCategoryDialog()">
+                ×
+            </button>
+        </div>
+
+        <form method="post"
+              asp-page-handler="ExchangeCategories">
+
+            <input asp-for="ExchangeCategories.QuizId"
+                   type="hidden"
+                   value="@Model.Quiz.Id" />
+
+            <input asp-for="ExchangeCategories.SourceCategoryId"
+                   id="exchange-category-source-id"
+                   type="hidden" />
+
+            <p class="dialog-warning">
+                @Localizer["QuizEditor_SelectedCategory"]
+            </p>
+
+            <div id="exchange-category-source-title"
+                 class="dialog-target">
+            </div>
+
+            <div style="margin-top: 20px;">
+                <label for="exchange-category-target-round">
+                    @Localizer["QuizEditor_TargetRound"]
+                </label>
+
+                <select id="exchange-category-target-round"
+                        onchange="refreshExchangeTargetCategories()">
+                </select>
+            </div>
+
+            <div style="margin-top: 16px;">
+                <label for="exchange-category-target-category">
+                    @Localizer["QuizEditor_TargetCategory"]
+                </label>
+
+                <select asp-for="ExchangeCategories.TargetCategoryId"
+                        id="exchange-category-target-category"
+                        onchange="updateExchangeButtonState()"
+                        required>
+                </select>
+            </div>
+
+            <p id="exchange-category-empty-message"
+               class="dialog-warning"
+               style="display: none; margin-top: 16px;">
+                There is no category available for exchange.
+            </p>
+
+            <div class="dialog-actions form-actions">
+                <button type="button"
+                        class="button button-secondary"
+                        onclick="closeExchangeCategoryDialog()">
+                    @Localizer["Button_Cancel"]
+                </button>
+
+                <button id="exchange-category-submit-button"
+                        type="submit"
+                        class="button button-primary"
+                        disabled>
+                    @Localizer["QuizEditor_Exchange"]
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+@if (rounds.Count > 1)
+{
+    <dialog id="delete-round-dialog" class="app-dialog">
+        <div class="dialog-card dialog-card-danger">
+            <div class="dialog-heading">
+                <h2>@Localizer["QuizEditor_DeleteRound"]</h2>
+
+                <button type="button"
+                        class="dialog-close"
+                        onclick="closeDeleteRoundDialog()">
+                    ×
+                </button>
+            </div>
+
+            <p class="dialog-warning">
+                @Localizer["QuizEditor_DeleteRoundWarning"]
+            </p>
+
+            <div class="dialog-target">
+                @round.Title
+            </div>
+
+            <form method="post" asp-page-handler="DeleteRound">
+                <input asp-for="DeleteRound.QuizId"
+                       type="hidden"
+                       value="@Model.Quiz.Id" />
+
+                <input asp-for="DeleteRound.RoundId"
+                       type="hidden"
+                       value="@round.Id" />
+
+                <div class="dialog-actions form-actions">
+                    <button type="button"
+                            class="button button-secondary"
+                            onclick="closeDeleteRoundDialog()">
+                        @Localizer["Button_Cancel"]
+                    </button>
+
+                    <button type="submit"
+                            class="button button-danger">
+                        @Localizer["Button_Delete"]
+                    </button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+}
+
+@section Scripts
+{
+    <script>
+        const exchangeCategoryRounds = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            rounds.Select(roundItem => new
+            {
+                id = roundItem.Id,
+                title = roundItem.Title,
+                categories = roundItem.Categories
+                    .OrderBy(categoryItem => categoryItem.SortOrder)
+                    .Select(categoryItem => new
+                    {
+                        id = categoryItem.Id,
+                        title = categoryItem.Title
+                    })
+            })));
+
+        function openExchangeCategoryDialog(categoryId, categoryTitle, sourceRoundId) {
+            const dialog = document.getElementById("exchange-category-dialog");
+            const sourceIdInput = document.getElementById("exchange-category-source-id");
+            const sourceTitle = document.getElementById("exchange-category-source-title");
+            const targetRoundSelect = document.getElementById("exchange-category-target-round");
+
+            sourceIdInput.value = categoryId;
+            sourceTitle.textContent = categoryTitle;
+            targetRoundSelect.innerHTML = "";
+
+            const availableRounds = exchangeCategoryRounds.filter(
+                roundItem => roundItem.id !== sourceRoundId &&
+                             roundItem.categories.length > 0
+            );
+
+            for (const roundItem of availableRounds) {
+                const option = document.createElement("option");
+                option.value = roundItem.id.toString();
+                option.textContent = roundItem.title;
+                targetRoundSelect.appendChild(option);
+            }
+
+            refreshExchangeTargetCategories();
+            dialog.showModal();
+        }
+
+        function refreshExchangeTargetCategories() {
+            const targetRoundSelect = document.getElementById("exchange-category-target-round");
+            const targetCategorySelect = document.getElementById("exchange-category-target-category");
+            const emptyMessage = document.getElementById("exchange-category-empty-message");
+
+            targetCategorySelect.innerHTML = "";
+
+            const selectedRoundId = Number(targetRoundSelect.value);
+            const selectedRound = exchangeCategoryRounds.find(
+                roundItem => roundItem.id === selectedRoundId
+            );
+
+            if (selectedRound) {
+                for (const categoryItem of selectedRound.categories) {
+                    const option = document.createElement("option");
+                    option.value = categoryItem.id.toString();
+                    option.textContent = categoryItem.title;
+                    targetCategorySelect.appendChild(option);
+                }
+            }
+
+            const hasAvailableTarget =
+                targetRoundSelect.options.length > 0 &&
+                targetCategorySelect.options.length > 0;
+
+            targetRoundSelect.disabled = targetRoundSelect.options.length === 0;
+            targetCategorySelect.disabled = !hasAvailableTarget;
+            emptyMessage.style.display = hasAvailableTarget ? "none" : "block";
+
+            updateExchangeButtonState();
+        }
+
+        function updateExchangeButtonState() {
+            const targetRoundSelect = document.getElementById("exchange-category-target-round");
+            const targetCategorySelect = document.getElementById("exchange-category-target-category");
+            const submitButton = document.getElementById("exchange-category-submit-button");
+
+            submitButton.disabled =
+                !targetRoundSelect.value ||
+                !targetCategorySelect.value;
+        }
+
+        function closeExchangeCategoryDialog() {
+            document.getElementById("exchange-category-dialog").close();
+        }
+
+        function openAddRoundDialog() {
+            const dialog = document.getElementById("add-round-dialog");
+            const input = document.getElementById("add-round-title");
+
+            input.value = "";
+            dialog.showModal();
+
+            requestAnimationFrame(() => {
+                input.focus();
+                input.select();
+            });
+        }
+
+        function closeAddRoundDialog() {
+            document.getElementById("add-round-dialog").close();
+        }
+
+        function openRenameRoundDialog() {
+            const dialog = document.getElementById("rename-round-dialog");
+            const input = document.getElementById("rename-round-title");
+
+            dialog.showModal();
+
+            requestAnimationFrame(() => {
+                input.focus();
+                input.select();
+            });
+        }
+
+        function closeRenameRoundDialog() {
+            document.getElementById("rename-round-dialog").close();
+        }
+
+        function openDeleteRoundDialog() {
+            document.getElementById("delete-round-dialog").showModal();
+        }
+
+        function closeDeleteRoundDialog() {
+            document.getElementById("delete-round-dialog").close();
+        }
+
+        const successMessage = document.getElementById("success-message");
+
+        if (successMessage) {
+            setTimeout(() => {
+                successMessage.classList.add("success-message-hidden");
+
+                setTimeout(() => successMessage.remove(), 300);
+            }, 3500);
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const roundTabs = document.getElementById("roundTabs");
+            const categoryColumns = document.getElementById("categoryColumns");
+
+            if (typeof Sortable === "undefined") {
+                return;
+            }
+
+            const getAntiforgeryToken = function () {
+                return document.querySelector(
+                    'input[name="__RequestVerificationToken"]'
+                );
+            };
+
+            if (roundTabs) {
+                new Sortable(roundTabs, {
+                    animation: 180,
+                    draggable: ".round-tab-item",
+                    handle: ".round-drag-handle",
+                    ghostClass: "round-tab-ghost",
+                    chosenClass: "round-tab-chosen",
+                    dragClass: "round-tab-dragging",
+
+                    onEnd: async function (event) {
+                        if (event.oldIndex === event.newIndex) {
+                            return;
+                        }
+
+                        const roundIds = Array.from(
+                            roundTabs.querySelectorAll(".round-tab-item")
+                        ).map(element => Number(element.dataset.roundId));
+
+                        const formData = new FormData();
+                        formData.append("ReorderRounds.QuizId", "@Model.Quiz.Id");
+
+                        for (const roundId of roundIds) {
+                            formData.append("ReorderRounds.RoundIds", roundId.toString());
+                        }
+
+                        const antiforgeryToken = getAntiforgeryToken();
+
+                        if (antiforgeryToken) {
+                            formData.append(
+                                "__RequestVerificationToken",
+                                antiforgeryToken.value
+                            );
+                        }
+
+                        try {
+                            const response = await fetch("?handler=ReorderRounds", {
+                                method: "POST",
+                                body: formData
+                            });
+
+                            if (!response.ok) {
+                                const responseText = await response.text();
+                                throw new Error(
+                                    `Round reordering failed. Status: ${response.status}. ${responseText}`
+                                );
+                            }
+                        }
+                        catch (error) {
+                            console.error("Round reorder error:", error);
+                            alert(error.message);
+                            window.location.reload();
+                        }
+                    }
+                });
+            }
+
+            if (categoryColumns) {
+                new Sortable(categoryColumns, {
+                    animation: 180,
+                    draggable: ".quiz-board-category-column",
+                    handle: ".category-drag-handle",
+                    ghostClass: "category-column-ghost",
+                    chosenClass: "category-column-chosen",
+                    dragClass: "category-column-dragging",
+
+                    onEnd: async function (event) {
+                        if (event.oldIndex === event.newIndex) {
+                            return;
+                        }
+
+                        const categoryIds = Array.from(
+                            categoryColumns.querySelectorAll(".quiz-board-category-column")
+                        ).map(element => Number(element.dataset.categoryId));
+
+                        const formData = new FormData();
+                        formData.append("ReorderCategories.QuizId", "@Model.Quiz.Id");
+                        formData.append("ReorderCategories.RoundId", "@round.Id");
+
+                        for (const categoryId of categoryIds) {
+                            formData.append(
+                                "ReorderCategories.CategoryIds",
+                                categoryId.toString()
+                            );
+                        }
+
+                        const antiforgeryToken = getAntiforgeryToken();
+
+                        if (antiforgeryToken) {
+                            formData.append(
+                                "__RequestVerificationToken",
+                                antiforgeryToken.value
+                            );
+                        }
+
+                        try {
+                            const response = await fetch("?handler=ReorderCategories", {
+                                method: "POST",
+                                body: formData
+                            });
+
+                            if (!response.ok) {
+                                const responseText = await response.text();
+                                throw new Error(
+                                    `Category reordering failed. Status: ${response.status}. ${responseText}`
+                                );
+                            }
+                        }
+                        catch (error) {
+                            console.error("Category reorder error:", error);
+                            alert(error.message);
+                            window.location.reload();
+                        }
+                    }
+                });
+            }
+        });
+
+        document.addEventListener("click", function (event) {
+            const button = event.target.closest(".js-category-exchange");
+
+            if (!button) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            openExchangeCategoryDialog(
+                Number(button.dataset.categoryId),
+                button.dataset.categoryTitle,
+                Number(button.dataset.roundId)
+            );
+        });
+
+        document.querySelectorAll('.js-category-rename').forEach(button => {
+            button.addEventListener('click', () => {
+                const categoryId = button.dataset.categoryId;
+                const categoryTitle = button.dataset.categoryTitle;
+
+                openRenameCategoryDialog(categoryId, categoryTitle);
+            });
+        });
+
+        function openRenameCategoryDialog(categoryId, categoryTitle) {
+            document.getElementById("rename-category-id").value = categoryId;
+
+            const input = document.getElementById("rename-category-title");
+            input.value = categoryTitle;
+
+            const dialog = document.getElementById("rename-category-dialog");
+            dialog.showModal();
+
+            requestAnimationFrame(() => {
+                input.focus();
+                input.select();
+            });
+        }
+
+        function closeRenameCategoryDialog() {
+            const dialog = document.getElementById("rename-category-dialog");
+
+            if (dialog?.open) {
+                dialog.close();
+            }
+        }
+    </script>
+}

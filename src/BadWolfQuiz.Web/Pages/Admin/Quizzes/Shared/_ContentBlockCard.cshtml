@@ -1,0 +1,57 @@
+﻿@model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
+
+<div class="content-panel content-block-card"
+     data-block-type="@Model.BlockType"
+     style="margin-bottom:16px;">
+
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="SortOrder" type="hidden" />
+    <input asp-for="BlockType" type="hidden" />
+
+    <div class="content-block-toolbar">
+
+        <button type="button"
+                class="content-block-drag-handle"
+                draggable="true"
+                title="Перемістити блок"
+                aria-label="Перемістити блок">
+            ☰
+        </button>
+
+        <button type="button"
+                class="content-block-remove-button"
+                title="Видалити блок"
+                aria-label="Видалити блок">
+            ×
+        </button>
+
+    </div>
+
+    <div style="margin-bottom:12px;">
+        <strong>@Model.BlockType</strong>
+    </div>
+
+    @switch (Model.BlockType)
+    {
+        case ContentBlockType.Text:
+            <partial name="Shared/_TextBlockCard"
+                     model="Model" />
+            break;
+
+        case ContentBlockType.Image:
+            <partial name="Shared/_ImageBlockCard"
+                     model="Model" />
+            break;
+
+        case ContentBlockType.Audio:
+            <partial name="Shared/_AudioBlockCard"
+                     model="Model" />
+            break;
+
+        case ContentBlockType.Video:
+            <partial name="Shared/_VideoBlockCard"
+                     model="Model" />
+            break;
+    }
+
+</div>

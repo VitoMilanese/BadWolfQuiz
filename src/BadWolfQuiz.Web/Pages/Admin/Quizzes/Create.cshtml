@@ -1,0 +1,24 @@
+﻿@page
+@model BadWolfQuiz.Web.Pages.Admin.Quizzes.CreateModel
+@{
+    ViewData["Title"] = Localizer["Title_NewQuiz"];
+}
+
+<div class="form-card narrow">
+    <p class="eyebrow">@Localizer["CreateQuiz_Eyebrow"]</p>
+    <h1>@Localizer["Title_CreateQuiz"]</h1>
+
+    <form method="post" class="stack-form">
+        <label asp-for="Input.Title">@Localizer["Label_QuizName"]</label>
+        <input asp-for="Input.Title" autofocus />
+        <span asp-validation-for="Input.Title"></span>
+
+        <label asp-for="Input.Description">@Localizer["Label_Description"]</label>
+        <textarea asp-for="Input.Description" rows="4"></textarea>
+
+        <div class="form-actions">
+            <a class="button button-secondary" asp-page="Index">@Localizer["Button_Cancel"]</a>
+            <button class="button button-primary" type="submit">@Localizer["Button_Create"]</button>
+        </div>
+    </form>
+</div>

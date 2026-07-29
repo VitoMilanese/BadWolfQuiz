@@ -1,0 +1,99 @@
+﻿@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> localizer
+@model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
+
+@{
+    var hasStoredFile =
+        Model.Id.HasValue &&
+        !string.IsNullOrWhiteSpace(Model.FileName);
+
+    string? audioUrl = null;
+
+    if (hasStoredFile)
+    {
+        audioUrl = Model.IsAnswerBlock
+            ? Url.Page(
+                "/Admin/Quizzes/QuestionEditor",
+                "AnswerBlockAudio",
+                new { id = Model.Id!.Value })
+            : Url.Page(
+                "/Admin/Quizzes/QuestionEditor",
+                "QuestionBlockAudio",
+                new { id = Model.Id!.Value });
+    }
+}
+
+<div class="audio-block-editor">
+
+    <div class="stored-file-preview stored-audio-preview unified-file-preview"
+         hidden="@(!hasStoredFile)"
+         data-has-original="@hasStoredFile.ToString().ToLowerInvariant()"
+         data-original-src="@audioUrl"
+         data-original-name="@Model.FileName"
+         data-original-label="@localizer["Message_StoredFile"]"
+         data-pending-label="@localizer["Label_File"]">
+
+        <audio controls
+               preload="metadata"
+               src="@audioUrl"
+               class="stored-audio-preview-element unified-audio-preview-element">
+            Your browser does not support audio playback.
+        </audio>
+
+        <div class="stored-file-info">
+            <strong class="file-preview-label">
+                @(hasStoredFile
+                    ? localizer["Message_StoredFile"]
+                    : localizer["Label_File"])
+            </strong>
+
+            <span class="file-preview-name">
+                @(hasStoredFile ? Model.FileName : string.Empty)
+            </span>
+        </div>
+
+        @if (hasStoredFile)
+        {
+            <button type="button"
+                    class="button secondary-button remove-stored-file-button">
+                @localizer["Button_RemoveFile"]
+            </button>
+        }
+        else
+        {
+            <button type="button"
+                    class="button secondary-button remove-stored-file-button"
+                    hidden>
+                @localizer["Button_RemoveFile"]
+            </button>
+        }
+
+    </div>
+
+    <button type="button"
+            class="button secondary-button cancel-file-change-button"
+            style="display: none !important;
+                   width: fit-content;
+                   align-self: flex-start;">
+        @localizer["Button_Cancel"]
+    </button>
+
+    <input asp-for="RemoveFile"
+           type="hidden"
+           value="false"
+           class="remove-file-value" />
+
+    <input asp-for="UploadedFile"
+           class="form-control audio-block-file uploaded-file-input"
+           type="file"
+           accept="audio/*" />
+
+    <input asp-for="TopCaption"
+           class="form-control"
+           placeholder="Top caption" />
+
+    <input asp-for="BottomCaption"
+           class="form-control"
+           placeholder="Bottom caption" />
+
+</div>

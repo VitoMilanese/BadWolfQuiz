@@ -1,0 +1,109 @@
+﻿@using System.Globalization
+
+@{
+    var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+
+    var currentFlag = currentCulture switch
+    {
+        "uk" => "🇺🇦",
+        "it" => "🇮🇹",
+        _ => "🇬🇧"
+    };
+
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<!DOCTYPE html>
+<html lang="@currentCulture">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BAD WOLF QUIZ</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" asp-page="/Index">
+            BAD WOLF <span>QUIZ</span>
+        </a>
+
+        <nav>
+            <a asp-page="/Admin/Quizzes/Index">
+                @Localizer["Menu_Quizzes"]
+            </a>
+
+            <a asp-page="/Join/Index">
+                @Localizer["Button_Join"]
+            </a>
+        </nav>
+
+        <div class="language-selector">
+            <button id="languageButton"
+                    class="language-button"
+                    type="button"
+                    aria-label="Language"
+                    aria-expanded="false">
+                @currentFlag
+            </button>
+
+            <div id="languageMenu" class="language-menu">
+                <a asp-page="/SetLanguage"
+                   asp-route-culture="uk"
+                   asp-route-returnUrl="@returnUrl"
+                   class="@(currentCulture == "uk" ? "active" : null)">
+                    🇺🇦 Українська
+                </a>
+                <a asp-page="/SetLanguage"
+                   asp-route-culture="en"
+                   asp-route-returnUrl="@returnUrl"
+                   class="@(currentCulture == "en" ? "active" : null)">
+                    🇬🇧 English
+                </a>
+                <a asp-page="/SetLanguage"
+                   asp-route-culture="it"
+                   asp-route-returnUrl="@returnUrl"
+                   class="@(currentCulture == "it" ? "active" : null)">
+                    🇮🇹 Italiano
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        @RenderBody()
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        const languageButton = document.getElementById("languageButton");
+        const languageMenu = document.getElementById("languageMenu");
+
+        languageButton?.addEventListener("click", function (event) {
+            event.stopPropagation();
+
+            const isOpen = languageMenu.classList.toggle("open");
+            languageButton.setAttribute("aria-expanded", isOpen.toString());
+        });
+
+        document.addEventListener("click", function () {
+            languageMenu?.classList.remove("open");
+            languageButton?.setAttribute("aria-expanded", "false");
+        });
+
+        languageMenu?.addEventListener("click", function (event) {
+            event.stopPropagation();
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                languageMenu?.classList.remove("open");
+                languageButton?.setAttribute("aria-expanded", "false");
+            }
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

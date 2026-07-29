@@ -1,0 +1,705 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Label_Category" xml:space="preserve">
+    <value>Categoria</value>
+  </data>
+  <data name="Label_CorrectAnswer" xml:space="preserve">
+    <value>Risposta corretta</value>
+  </data>
+  <data name="Button_CreateQuiz" xml:space="preserve">
+    <value>Crea quiz</value>
+  </data>
+  <data name="Label_Players" xml:space="preserve">
+    <value>Giocatori</value>
+  </data>
+  <data name="Menu_Preview" xml:space="preserve">
+    <value>Anteprima</value>
+  </data>
+  <data name="Label_Quiz" xml:space="preserve">
+    <value>Quiz</value>
+  </data>
+  <data name="Menu_Quizzes" xml:space="preserve">
+    <value>Quiz</value>
+  </data>
+  <data name="Label_Round" xml:space="preserve">
+    <value>Round</value>
+  </data>
+  <data name="Button_Save" xml:space="preserve">
+    <value>Salva</value>
+  </data>
+  <data name="Label_Score" xml:space="preserve">
+    <value>Punti</value>
+  </data>
+  <data name="Button_Add" xml:space="preserve">
+    <value>Aggiungi</value>
+  </data>
+  <data name="Button_Edit" xml:space="preserve">
+    <value>Modifica</value>
+  </data>
+  <data name="Button_Delete" xml:space="preserve">
+    <value>Elimina</value>
+  </data>
+  <data name="Button_Cancel" xml:space="preserve">
+    <value>Annulla</value>
+  </data>
+  <data name="Button_Close" xml:space="preserve">
+    <value>Chiudi</value>
+  </data>
+  <data name="Button_Back" xml:space="preserve">
+    <value>Indietro</value>
+  </data>
+  <data name="Button_Create" xml:space="preserve">
+    <value>Crea</value>
+  </data>
+  <data name="Button_CreateCategory" xml:space="preserve">
+    <value>Crea categoria</value>
+  </data>
+  <data name="Button_CreateQuestion" xml:space="preserve">
+    <value>Crea domanda</value>
+  </data>
+  <data name="Button_Preview" xml:space="preserve">
+    <value>Anteprima</value>
+  </data>
+  <data name="Button_Start" xml:space="preserve">
+    <value>Avvia</value>
+  </data>
+  <data name="Button_Stop" xml:space="preserve">
+    <value>Interrompi</value>
+  </data>
+  <data name="Button_Finish" xml:space="preserve">
+    <value>Termina</value>
+  </data>
+  <data name="Button_Reset" xml:space="preserve">
+    <value>Reimposta</value>
+  </data>
+  <data name="Button_Duplicate" xml:space="preserve">
+    <value>Duplica</value>
+  </data>
+  <data name="Button_Copy" xml:space="preserve">
+    <value>Copia</value>
+  </data>
+  <data name="Button_Move" xml:space="preserve">
+    <value>Sposta</value>
+  </data>
+  <data name="Button_Import" xml:space="preserve">
+    <value>Importa</value>
+  </data>
+  <data name="Button_Export" xml:space="preserve">
+    <value>Esporta</value>
+  </data>
+  <data name="Button_Upload" xml:space="preserve">
+    <value>Carica</value>
+  </data>
+  <data name="Button_Remove" xml:space="preserve">
+    <value>Rimuovi</value>
+  </data>
+  <data name="Button_Join" xml:space="preserve">
+    <value>Partecipa</value>
+  </data>
+  <data name="Button_Play" xml:space="preserve">
+    <value>Gioca</value>
+  </data>
+  <data name="Button_ShowAnswer" xml:space="preserve">
+    <value>Mostra risposta</value>
+  </data>
+  <data name="Button_OpenBuzz" xml:space="preserve">
+    <value>Attiva pulsante</value>
+  </data>
+  <data name="Button_CloseBuzz" xml:space="preserve">
+    <value>Disattiva pulsante</value>
+  </data>
+  <data name="Menu_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Menu_Games" xml:space="preserve">
+    <value>Partite</value>
+  </data>
+  <data name="Menu_History" xml:space="preserve">
+    <value>Cronologia</value>
+  </data>
+  <data name="Menu_Settings" xml:space="preserve">
+    <value>Impostazioni</value>
+  </data>
+  <data name="Menu_Players" xml:space="preserve">
+    <value>Giocatori</value>
+  </data>
+  <data name="Menu_Statistics" xml:space="preserve">
+    <value>Statistiche</value>
+  </data>
+  <data name="Menu_Help" xml:space="preserve">
+    <value>Aiuto</value>
+  </data>
+  <data name="Title_QuizEditor" xml:space="preserve">
+    <value>Editor del quiz</value>
+  </data>
+  <data name="Title_QuestionEditor" xml:space="preserve">
+    <value>Editor della domanda</value>
+  </data>
+  <data name="Title_GameControl" xml:space="preserve">
+    <value>Controllo partita</value>
+  </data>
+  <data name="Title_NewQuiz" xml:space="preserve">
+    <value>Nuovo quiz</value>
+  </data>
+  <data name="Title_EditQuiz" xml:space="preserve">
+    <value>Modifica quiz</value>
+  </data>
+  <data name="Title_Settings" xml:space="preserve">
+    <value>Impostazioni</value>
+  </data>
+  <data name="Label_QuizName" xml:space="preserve">
+    <value>Nome del quiz</value>
+  </data>
+  <data name="Label_Description" xml:space="preserve">
+    <value>Descrizione</value>
+  </data>
+  <data name="Label_CategoryName" xml:space="preserve">
+    <value>Nome della categoria</value>
+  </data>
+  <data name="Label_Question" xml:space="preserve">
+    <value>Domanda</value>
+  </data>
+  <data name="Label_Points" xml:space="preserve">
+    <value>Punti</value>
+  </data>
+  <data name="Label_Timer" xml:space="preserve">
+    <value>Timer</value>
+  </data>
+  <data name="Label_TimeLimit" xml:space="preserve">
+    <value>Limite di tempo</value>
+  </data>
+  <data name="Label_Player" xml:space="preserve">
+    <value>Giocatore</value>
+  </data>
+  <data name="Label_Status" xml:space="preserve">
+    <value>Stato</value>
+  </data>
+  <data name="Label_Game" xml:space="preserve">
+    <value>Partita</value>
+  </data>
+  <data name="Label_GameCode" xml:space="preserve">
+    <value>Codice partita</value>
+  </data>
+  <data name="Label_QrCode" xml:space="preserve">
+    <value>Codice QR</value>
+  </data>
+  <data name="Label_Media" xml:space="preserve">
+    <value>Contenuto multimediale</value>
+  </data>
+  <data name="Label_Image" xml:space="preserve">
+    <value>Immagine</value>
+  </data>
+  <data name="Label_Audio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+  <data name="Label_Video" xml:space="preserve">
+    <value>Video</value>
+  </data>
+  <data name="Label_YouTube" xml:space="preserve">
+    <value>YouTube</value>
+  </data>
+  <data name="Label_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Label_FileName" xml:space="preserve">
+    <value>Nome file</value>
+  </data>
+  <data name="Label_TopCaption" xml:space="preserve">
+    <value>Didascalia superiore</value>
+  </data>
+  <data name="Label_BottomCaption" xml:space="preserve">
+    <value>Didascalia inferiore</value>
+  </data>
+  <data name="Label_BuzzMode" xml:space="preserve">
+    <value>Modalità pulsante</value>
+  </data>
+  <data name="Label_BuzzDelay" xml:space="preserve">
+    <value>Ritardo pulsante</value>
+  </data>
+  <data name="Label_SpecialQuestion" xml:space="preserve">
+    <value>Domanda speciale</value>
+  </data>
+  <data name="Label_Created" xml:space="preserve">
+    <value>Creato</value>
+  </data>
+  <data name="Label_Modified" xml:space="preserve">
+    <value>Modificato</value>
+  </data>
+  <data name="Message_Saved" xml:space="preserve">
+    <value>Salvato correttamente</value>
+  </data>
+  <data name="Message_Deleted" xml:space="preserve">
+    <value>Eliminato correttamente</value>
+  </data>
+  <data name="Message_Created" xml:space="preserve">
+    <value>Creato correttamente</value>
+  </data>
+  <data name="Message_Updated" xml:space="preserve">
+    <value>Aggiornato correttamente</value>
+  </data>
+  <data name="Message_GameStarted" xml:space="preserve">
+    <value>La partita è iniziata</value>
+  </data>
+  <data name="Message_GameFinished" xml:space="preserve">
+    <value>La partita è terminata</value>
+  </data>
+  <data name="Message_PlayerJoined" xml:space="preserve">
+    <value>Un giocatore si è unito</value>
+  </data>
+  <data name="Message_PlayerLeft" xml:space="preserve">
+    <value>Un giocatore ha abbandonato</value>
+  </data>
+  <data name="Message_WaitingPlayers" xml:space="preserve">
+    <value>In attesa dei giocatori</value>
+  </data>
+  <data name="Message_WaitingHost" xml:space="preserve">
+    <value>In attesa del presentatore</value>
+  </data>
+  <data name="Message_Correct" xml:space="preserve">
+    <value>Corretto</value>
+  </data>
+  <data name="Message_Wrong" xml:space="preserve">
+    <value>Errato</value>
+  </data>
+  <data name="Error_Required" xml:space="preserve">
+    <value>Questo campo è obbligatorio</value>
+  </data>
+  <data name="Error_InvalidFile" xml:space="preserve">
+    <value>File non valido</value>
+  </data>
+  <data name="Error_InvalidImage" xml:space="preserve">
+    <value>Immagine non valida</value>
+  </data>
+  <data name="Error_InvalidAudio" xml:space="preserve">
+    <value>File audio non valido</value>
+  </data>
+  <data name="Error_InvalidVideo" xml:space="preserve">
+    <value>File video non valido</value>
+  </data>
+  <data name="Error_QuizNotFound" xml:space="preserve">
+    <value>Quiz non trovato</value>
+  </data>
+  <data name="Error_GameNotFound" xml:space="preserve">
+    <value>Partita non trovata</value>
+  </data>
+  <data name="Error_PlayerExists" xml:space="preserve">
+    <value>Esiste già un giocatore con questo nome</value>
+  </data>
+  <data name="Error_ConnectionLost" xml:space="preserve">
+    <value>Connessione persa</value>
+  </data>
+  <data name="Dialog_DeleteQuiz_Title" xml:space="preserve">
+    <value>Elimina quiz</value>
+  </data>
+  <data name="Dialog_DeleteQuiz_Text" xml:space="preserve">
+    <value>Vuoi davvero eliminare questo quiz?</value>
+  </data>
+  <data name="Dialog_DeleteQuestion_Title" xml:space="preserve">
+    <value>Elimina domanda</value>
+  </data>
+  <data name="Dialog_DeleteQuestion_Text" xml:space="preserve">
+    <value>Vuoi davvero eliminare questa domanda?</value>
+  </data>
+  <data name="Dialog_DeleteCategory_Title" xml:space="preserve">
+    <value>Elimina categoria</value>
+  </data>
+  <data name="Dialog_DeleteCategory_Text" xml:space="preserve">
+    <value>Vuoi davvero eliminare questa categoria?</value>
+  </data>
+  <data name="Dialog_ExitGame_Title" xml:space="preserve">
+    <value>Esci dalla partita</value>
+  </data>
+  <data name="Dialog_ExitGame_Text" xml:space="preserve">
+    <value>Vuoi davvero uscire dalla partita?</value>
+  </data>
+  <data name="Content_Text" xml:space="preserve">
+    <value>Testo</value>
+  </data>
+  <data name="Content_Image" xml:space="preserve">
+    <value>Immagine</value>
+  </data>
+  <data name="Content_Audio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+  <data name="Content_Video" xml:space="preserve">
+    <value>Video</value>
+  </data>
+  <data name="Content_YouTube" xml:space="preserve">
+    <value>YouTube</value>
+  </data>
+  <data name="GameStatus_Waiting" xml:space="preserve">
+    <value>In attesa</value>
+  </data>
+  <data name="GameStatus_Paused" xml:space="preserve">
+    <value>In pausa</value>
+  </data>
+  <data name="GameStatus_Finished" xml:space="preserve">
+    <value>Terminata</value>
+  </data>
+  <data name="Home_Eyebrow" xml:space="preserve">
+    <value>PIATTAFORMA QUIZ IN TEMPO REALE</value>
+  </data>
+  <data name="Home_TitleLine1" xml:space="preserve">
+    <value>Crea quiz.</value>
+  </data>
+  <data name="Home_TitleLine2" xml:space="preserve">
+    <value>Gioca con gli amici.</value>
+  </data>
+  <data name="Home_Description" xml:space="preserve">
+    <value>Editor delle categorie, domande multimediali, accesso tramite QR e pulsante per la prima risposta.</value>
+  </data>
+  <data name="Button_OpenEditor" xml:space="preserve">
+    <value>Apri editor</value>
+  </data>
+  <data name="Button_JoinGame" xml:space="preserve">
+    <value>Partecipa alla partita</value>
+  </data>
+  <data name="Title_Error" xml:space="preserve">
+    <value>Errore</value>
+  </data>
+  <data name="Error_Unexpected" xml:space="preserve">
+    <value>Si è verificato un errore.</value>
+  </data>
+  <data name="Error_CheckLogsAndRetry" xml:space="preserve">
+    <value>Controlla i log dell’applicazione e riprova.</value>
+  </data>
+  <data name="Join_Eyebrow" xml:space="preserve">
+    <value>PARTECIPA ALLA PARTITA</value>
+  </data>
+  <data name="Title_JoinGame" xml:space="preserve">
+    <value>Partecipa alla partita</value>
+  </data>
+  <data name="Message_LobbyComingSoon" xml:space="preserve">
+    <value>La lobby e l’accesso tramite QR verranno aggiunti nel prossimo passaggio.</value>
+  </data>
+  <data name="Placeholder_GameCode" xml:space="preserve">
+    <value>Ad esempio: WOLF123</value>
+  </data>
+  <data name="Label_PlayerName" xml:space="preserve">
+    <value>Nome del giocatore</value>
+  </data>
+  <data name="Placeholder_PlayerName" xml:space="preserve">
+    <value>Il tuo nome</value>
+  </data>
+  <data name="CreateQuiz_Eyebrow" xml:space="preserve">
+    <value>NUOVO QUIZ</value>
+  </data>
+  <data name="Title_CreateQuiz" xml:space="preserve">
+    <value>Crea quiz</value>
+  </data>
+  <data name="Admin_Eyebrow" xml:space="preserve">
+    <value>AMMINISTRAZIONE</value>
+  </data>
+  <data name="Title_MyQuizzes" xml:space="preserve">
+    <value>I miei quiz</value>
+  </data>
+  <data name="Quiz_RoundCount" xml:space="preserve">
+    <value>{0} round</value>
+  </data>
+  <data name="Label_Final" xml:space="preserve">
+    <value>Finale</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>pronto</value>
+  </data>
+  <data name="Placeholder_QuestionText" xml:space="preserve">
+    <value>Testo della domanda</value>
+  </data>
+  <data name="DropZone_Image" xml:space="preserve">
+    <value>Trascina qui un’immagine</value>
+  </data>
+  <data name="Message_FileUploadComingSoon" xml:space="preserve">
+    <value>Il caricamento dei file verrà aggiunto nel prossimo passaggio</value>
+  </data>
+  <data name="DropZone_Audio" xml:space="preserve">
+    <value>Trascina qui un file audio</value>
+  </data>
+  <data name="Audio_SupportedFormats" xml:space="preserve">
+    <value>MP3, WAV, OGG</value>
+  </data>
+  <data name="Label_YouTubeLink" xml:space="preserve">
+    <value>Link YouTube</value>
+  </data>
+  <data name="Label_AudioOnly" xml:space="preserve">
+    <value>Solo audio</value>
+  </data>
+  <data name="BuzzMode_UseRoundDefault" xml:space="preserve">
+    <value>Usa impostazione predefinita del round</value>
+  </data>
+  <data name="BuzzMode_Manual" xml:space="preserve">
+    <value>Manuale</value>
+  </data>
+  <data name="BuzzMode_Immediately" xml:space="preserve">
+    <value>Immediatamente</value>
+  </data>
+  <data name="BuzzMode_AfterMedia" xml:space="preserve">
+    <value>Dopo il contenuto multimediale</value>
+  </data>
+  <data name="BuzzMode_AfterDelay" xml:space="preserve">
+    <value>Dopo un ritardo</value>
+  </data>
+  <data name="BuzzMode_Disabled" xml:space="preserve">
+    <value>Disattivato</value>
+  </data>
+  <data name="Message_PreviewComingSoon" xml:space="preserve">
+    <value>L’anteprima verrà aggiunta nel prossimo passaggio.</value>
+  </data>
+  <data name="Default_RoundTitle" xml:space="preserve">
+    <value>Round {0}</value>
+  </data>
+  <data name="Default_CategoryTitle" xml:space="preserve">
+    <value>Categoria {0}</value>
+  </data>
+  <data name="Error_QuizNameRequired" xml:space="preserve">
+    <value>Inserisci il nome del quiz.</value>
+  </data>
+  <data name="Seed_DemoQuizTitle" xml:space="preserve">
+    <value>Quiz dimostrativo</value>
+  </data>
+  <data name="Seed_DemoQuizDescription" xml:space="preserve">
+    <value>Quiz iniziale per provare l’editor.</value>
+  </data>
+  <data name="Seed_TestQuestion" xml:space="preserve">
+    <value>Domanda di prova</value>
+  </data>
+  <data name="Seed_TestAnswer" xml:space="preserve">
+    <value>Risposta di prova</value>
+  </data>
+  <data name="Message_QuizCreated" xml:space="preserve">
+    <value>Quiz creato correttamente.</value>
+  </data>
+  <data name="Message_QuestionSaved" xml:space="preserve">
+    <value>Domanda salvata correttamente.</value>
+  </data>
+  <data name="Error_MaxLength" xml:space="preserve">
+    <value>Il campo {0} non può superare {1} caratteri.</value>
+  </data>
+  <data name="Error_InvalidUrl" xml:space="preserve">
+    <value>Inserisci un URL valido.</value>
+  </data>
+  <data name="QuestionBlocksRequired" xml:space="preserve">
+    <value>Aggiungi almeno un blocco della domanda.</value>
+  </data>
+  <data name="AnswerBlocksRequired" xml:space="preserve">
+    <value>Aggiungi almeno un blocco della risposta.</value>
+  </data>
+  <data name="FileSizeLimitExceeded" xml:space="preserve">
+    <value>La dimensione del file non deve superare {0} MB.</value>
+  </data>
+  <data name="InvalidImageFile" xml:space="preserve">
+    <value>Il file selezionato non è un'immagine.</value>
+  </data>
+  <data name="InvalidAudioFile" xml:space="preserve">
+    <value>Il file selezionato non è un file audio.</value>
+  </data>
+  <data name="Button_RemoveFile" xml:space="preserve">
+    <value>Rimuovi file</value>
+  </data>
+  <data name="Message_StoredFile" xml:space="preserve">
+    <value>File salvato</value>
+  </data>
+  <data name="Button_Rename" xml:space="preserve">
+    <value>Rinomina</value>
+  </data>
+  <data name="Dialog_RenameQuiz" xml:space="preserve">
+    <value>Rinomina quiz</value>
+  </data>
+  <data name="Dialog_DeleteQuiz" xml:space="preserve">
+    <value>Elimina quiz</value>
+  </data>
+  <data name="Message_DeleteQuizConfirmation" xml:space="preserve">
+    <value>Sei sicuro di voler eliminare questo quiz? Questa operazione non può essere annullata.</value>
+  </data>
+  <data name="Message_QuizRenamed" xml:space="preserve">
+    <value>Quiz rinominato con successo.</value>
+  </data>
+  <data name="Message_QuizDeleted" xml:space="preserve">
+    <value>Quiz eliminato con successo.</value>
+  </data>
+  <data name="Round_DefaultTitle" xml:space="preserve">
+    <value>Round {0}</value>
+  </data>
+  <data name="QuizEditor_RoundCreated" xml:space="preserve">
+    <value>Round creato correttamente.</value>
+  </data>
+  <data name="QuizEditor_AddRound" xml:space="preserve">
+    <value>Aggiungi round</value>
+  </data>
+  <data name="QuizEditor_NewRound" xml:space="preserve">
+    <value>Nuovo round</value>
+  </data>
+  <data name="QuizEditor_RenameRound" xml:space="preserve">
+    <value>Rinomina round</value>
+  </data>
+  <data name="QuizEditor_DeleteRound" xml:space="preserve">
+    <value>Elimina round</value>
+  </data>
+  <data name="QuizEditor_RoundTitle" xml:space="preserve">
+    <value>Titolo del round</value>
+  </data>
+  <data name="QuizEditor_DeleteRoundWarning" xml:space="preserve">
+    <value>Il round e tutte le sue categorie, domande e contenuti verranno eliminati definitivamente.</value>
+  </data>
+  <data name="QuizEditor_RoundRenamed" xml:space="preserve">
+    <value>Round rinominato correttamente.</value>
+  </data>
+  <data name="QuizEditor_RoundDeleted" xml:space="preserve">
+    <value>Round eliminato correttamente.</value>
+  </data>
+  <data name="QuizEditor_RoundTitleRequired" xml:space="preserve">
+    <value>Inserisci il titolo del round.</value>
+  </data>
+  <data name="QuizEditor_CannotDeleteOnlyRound" xml:space="preserve">
+    <value>Non è possibile eliminare l’unico round.</value>
+  </data>
+  <data name="QuizEditor_RowPoints" xml:space="preserve">
+    <value>Valore delle domande</value>
+  </data>
+  <data name="QuizEditor_RowPointsDescription" xml:space="preserve">
+    <value>Imposta il punteggio per ogni livello di domanda di questo round.</value>
+  </data>
+  <data name="QuizEditor_RowNumber" xml:space="preserve">
+    <value>Livello {0}</value>
+  </data>
+  <data name="QuizEditor_ExchangeCategory" xml:space="preserve">
+    <value>Scambia categoria</value>
+  </data>
+  <data name="QuizEditor_SelectedCategory" xml:space="preserve">
+    <value>Categoria selezionata</value>
+  </data>
+  <data name="QuizEditor_TargetRound" xml:space="preserve">
+    <value>Round di destinazione</value>
+  </data>
+  <data name="QuizEditor_TargetCategory" xml:space="preserve">
+    <value>Categoria di destinazione</value>
+  </data>
+  <data name="QuizEditor_Exchange" xml:space="preserve">
+    <value>Scambia</value>
+  </data>
+  <data name="QuizEditor_RenameCategory" xml:space="preserve">
+    <value>Rinomina categoria</value>
+  </data>
+  <data name="QuizEditor_CategoryTitle" xml:space="preserve">
+    <value>Titolo della categoria</value>
+  </data>
+  <data name="QuizEditor_CategoryRenamed" xml:space="preserve">
+    <value>Categoria rinominata con successo</value>
+  </data>
+</root>
