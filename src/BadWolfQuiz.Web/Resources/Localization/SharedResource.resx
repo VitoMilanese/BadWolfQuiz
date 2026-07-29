@@ -713,4 +713,10 @@
   <data name="GameLobby_SessionId" xml:space="preserve"><value>Session ID</value></data>
   <data name="GameLobby_TransientNotice" xml:space="preserve"><value>This session is stored in memory and will be lost when the application restarts.</value></data>
   <data name="Error_QuizCannotStart" xml:space="preserve"><value>This quiz cannot be used to create a game. Check its rounds, questions, and point rows.</value></data>
+
+  <data name="PlayerPresence_Active" xml:space="preserve"><value>Active</value></data>
+  <data name="PlayerPresence_Inactive" xml:space="preserve"><value>Inactive</value></data>
+  <data name="PlayerPresence_Disconnected" xml:space="preserve"><value>Disconnected</value></data>
+  <data name="PlayerPresence_MonitoringNotice" xml:space="preserve"><value>Keep this page open and active during the game. Page activity is visible to the host.</value></data>
+  <data name="PlayerPresence_InactiveWarning" xml:space="preserve"><value>Return to the game page. The host can see that this page is inactive or disconnected.</value></data>
 </root>
