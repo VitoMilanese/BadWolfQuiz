@@ -81,6 +81,36 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public IActionResult OnPostSubmitQuestionWager(
+        Guid id,
+        int sourceQuestionId,
+        Guid playerId,
+        int amount)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.SubmitQuestionWager(
+                game.PublicCode,
+                sourceQuestionId,
+                new GamePlayerId(playerId),
+                amount);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_WagerRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostApproveRejoinAsync(
         Guid id,
         Guid playerId,
