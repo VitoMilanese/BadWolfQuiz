@@ -81,11 +81,6 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            if (game.Session.Status != GameSessionStatus.Lobby)
-            {
-                return PlayerJoinResult.Failed(PlayerJoinStatus.GameAlreadyStarted);
-            }
-
             if (game.Session.Players.Any(player =>
                     string.Equals(player.Name, playerName.Trim(), StringComparison.OrdinalIgnoreCase)))
             {
