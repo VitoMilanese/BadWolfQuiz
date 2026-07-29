@@ -1,14 +1,17 @@
 using System.ComponentModel.DataAnnotations;
+using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Localization;
 
 namespace BadWolfQuiz.Web.Pages.Join;
 
 public sealed class IndexModel(
     GameSessionRegistry sessionRegistry,
+    IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty]
@@ -22,7 +25,7 @@ public sealed class IndexModel(
         }
     }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
         Input.GameCode = GameSessionRegistry.NormalizeCode(Input.GameCode ?? string.Empty);
         Input.PlayerName = Input.PlayerName?.Trim() ?? string.Empty;
@@ -39,11 +42,18 @@ public sealed class IndexModel(
         switch (result.Status)
         {
             case PlayerJoinStatus.Success:
+                await gameHub.Clients
+                    .Group(GameHub.GroupName(result.Game!.PublicCode))
+                    .SendAsync(
+                        "PlayersChanged",
+                        GameHub.CreatePlayersUpdate(sessionRegistry, result.Game),
+                        cancellationToken);
+
                 return RedirectToPage(
                     "/Player/Lobby",
                     new
                     {
-                        code = result.Game!.PublicCode,
+                        code = result.Game.PublicCode,
                         playerId = result.Player!.Id.Value
                     });
 
