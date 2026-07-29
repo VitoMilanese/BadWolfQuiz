@@ -36,6 +36,11 @@ public sealed class GameSession
         ? _players.Single(player => player.Id == activePlayerId)
         : null;
 
+    public bool IsActivePlayerChangeLocked => Board.Questions.Any(question =>
+        question.IsSpecial &&
+        question.Status is not RuntimeQuestionStatus.Available and
+            not RuntimeQuestionStatus.Resolved);
+
     public GameBoard Board { get; }
 
     public GameTimer Timer { get; }
@@ -176,6 +181,8 @@ public sealed class GameSession
 
     public GamePlayer SetActivePlayer(GamePlayerId playerId)
     {
+        EnsureActivePlayerChangeAllowed();
+
         var player = _players.SingleOrDefault(item => item.Id == playerId)
             ?? throw new GameRuleViolationException(
                 "The selected player does not belong to this game.");
@@ -186,6 +193,8 @@ public sealed class GameSession
 
     public GamePlayer SelectRandomActivePlayer()
     {
+        EnsureActivePlayerChangeAllowed();
+
         if (_players.Count == 0)
         {
             throw new GameRuleViolationException(
@@ -193,6 +202,15 @@ public sealed class GameSession
         }
 
         return SetActivePlayer(_players[Random.Shared.Next(_players.Count)].Id);
+    }
+
+    private void EnsureActivePlayerChangeAllowed()
+    {
+        if (IsActivePlayerChangeLocked)
+        {
+            throw new GameRuleViolationException(
+                "The active player cannot change while a wager question is in progress.");
+        }
     }
 
     private RuntimeQuestion FindQuestion(int sourceQuestionId)
