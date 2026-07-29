@@ -145,7 +145,7 @@
 
         @if (Model.CurrentQuestion is not null)
         {
-            <div class="content-panel current-question-summary">
+            <div class="content-panel current-question-summary @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager ? "wager-mode" : null)">
                 <div class="current-question-heading">
                     <strong>@Model.CurrentQuestion.CategoryTitle — @Model.CurrentQuestion.Points</strong>
                     <span>
@@ -212,6 +212,12 @@
                                         aria-label="@Localizer["GameBoard_DeleteWagerDigit"]">
                                     ⌫
                                 </button>
+                                <button class="wager-keypad-max"
+                                        type="button"
+                                        data-wager-max
+                                        aria-label="@Localizer["GameBoard_MaximumWager"]">
+                                    MAX
+                                </button>
                             </div>
 
                             <p class="wager-validation"
@@ -251,8 +257,10 @@
             </div>
         }
 
-        <div class="host-board-grid"
-             style="--board-columns: @Model.BoardCategories.Count">
+        @if (Model.CurrentQuestion?.Status != BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
+        {
+            <div class="host-board-grid"
+                 style="--board-columns: @Model.BoardCategories.Count">
             @foreach (var category in Model.BoardCategories)
             {
                 <section class="host-board-column">
@@ -273,7 +281,8 @@
                     }
                 </section>
             }
-        </div>
+            </div>
+        }
 
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
             @foreach (var player in Model.Players)
@@ -377,13 +386,19 @@
                     const nextValue = (display.value + button.dataset.wagerDigit)
                         .replace(/^0+(?=\d)/, "");
 
-                    if (Number(nextValue) <= maximum) {
-                        display.value = nextValue;
-                    }
+                    display.value = Math.min(
+                        Number(nextValue),
+                        maximum).toString();
 
                     refresh();
                 });
             });
+
+            form.querySelector("[data-wager-max]")
+                ?.addEventListener("click", () => {
+                    display.value = maximum.toString();
+                    refresh();
+                });
 
             form.querySelector("[data-wager-clear]")
                 ?.addEventListener("click", () => {
