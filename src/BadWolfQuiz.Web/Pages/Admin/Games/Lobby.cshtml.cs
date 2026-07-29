@@ -2,24 +2,26 @@ using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using RuntimeGameSession = BadWolfQuiz.Game.Runtime.GameSession;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Games;
 
 public sealed class LobbyModel(GameSessionRegistry sessionRegistry) : PageModel
 {
-    public RuntimeGameSession Session { get; private set; } = null!;
+    public GameSessionRegistration Game { get; private set; } = null!;
+
+    public IReadOnlyList<GamePlayer> Players { get; private set; } = [];
 
     public IActionResult OnGet(Guid id)
     {
-        var session = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.Find(new GameSessionId(id));
 
-        if (session is null)
+        if (game is null)
         {
             return NotFound();
         }
 
-        Session = session;
+        Game = game;
+        Players = sessionRegistry.GetPlayers(game);
         return Page();
     }
 }
