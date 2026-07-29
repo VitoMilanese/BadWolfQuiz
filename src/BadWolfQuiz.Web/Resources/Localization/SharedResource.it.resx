@@ -748,4 +748,10 @@
   <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Domanda selezionata</value></data>
   <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>In attesa della puntata</value></data>
   <data name="GameBoard_SelectionRejected" xml:space="preserve"><value>Questa domanda non può essere selezionata in questo momento.</value></data>
+  <data name="GameBoard_SelectWagerPlayer" xml:space="preserve"><value>Seleziona un giocatore</value></data>
+  <data name="GameBoard_WagerAmount" xml:space="preserve"><value>Importo della puntata</value></data>
+  <data name="GameBoard_AcceptWager" xml:space="preserve"><value>Accetta puntata</value></data>
+  <data name="GameBoard_WagerAccepted" xml:space="preserve"><value>Puntata accettata</value></data>
+  <data name="GameBoard_AcceptedWagerSummary" xml:space="preserve"><value>{0} — {1} punti</value></data>
+  <data name="GameBoard_WagerRejected" xml:space="preserve"><value>Impossibile accettare la puntata. Seleziona un giocatore e inserisci un importo positivo.</value></data>
 </root>
