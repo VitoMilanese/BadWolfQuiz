@@ -15,7 +15,7 @@
     </a>
 </div>
 
-<section class="content-panel narrow">
+<section class="content-panel narrow" data-game-code="@Model.Game.PublicCode">
     <div class="stack-form">
         <div class="game-code-panel">
             <span>@Localizer["Label_GameCode"]</span>
@@ -28,24 +28,65 @@
         </p>
         <p>
             <strong>@Localizer["GameLobby_PlayerCount"]:</strong>
-            @Model.Players.Count
+            <span id="player-count">@Model.Players.Count</span>
         </p>
         <p>
             <strong>@Localizer["GameLobby_QuestionCount"]:</strong>
             @Model.Game.Session.Board.Questions.Count
         </p>
-        @if (Model.Players.Count > 0)
-        {
-            <ul class="player-list">
-                @foreach (var player in Model.Players)
-                {
-                    <li>
-                        <strong>@player.Name</strong>
-                        <span>@player.Score</span>
-                    </li>
-                }
-            </ul>
-        }
+        <ul id="player-list" class="player-list">
+            @foreach (var player in Model.Players)
+            {
+                <li data-player-id="@player.Id.Value">
+                    <strong>@player.Name</strong>
+                    <span>@player.Score</span>
+                </li>
+            }
+        </ul>
         <p class="dialog-warning">@Localizer["GameLobby_TransientNotice"]</p>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const lobby = document.querySelector("[data-game-code]");
+            const playerCount = document.getElementById("player-count");
+            const playerList = document.getElementById("player-list");
+
+            if (!lobby || !playerCount || !playerList || typeof signalR === "undefined") {
+                return;
+            }
+
+            const gameCode = lobby.dataset.gameCode;
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/game")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("PlayersChanged", update => {
+                playerCount.textContent = update.playerCount.toString();
+                playerList.replaceChildren();
+
+                for (const player of update.players) {
+                    const item = document.createElement("li");
+                    item.dataset.playerId = player.id;
+
+                    const name = document.createElement("strong");
+                    name.textContent = player.name;
+
+                    const score = document.createElement("span");
+                    score.textContent = player.score.toString();
+
+                    item.append(name, score);
+                    playerList.append(item);
+                }
+            });
+
+            const joinSession = () => connection.invoke("JoinSession", gameCode);
+
+            connection.onreconnected(joinSession);
+            connection.start().then(joinSession).catch(console.error);
+        })();
+    </script>
+}
