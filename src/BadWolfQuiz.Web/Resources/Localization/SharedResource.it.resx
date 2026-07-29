@@ -682,6 +682,7 @@
   <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve"><value>Numero di domande con puntata</value></data>
   <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Domande disponibili: {0}</value></data>
   <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Scegli tra 1 e {0} domande con puntata casuali.</value></data>
+  <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Impostazioni del round salvate.</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Valore delle domande</value>
   </data>
