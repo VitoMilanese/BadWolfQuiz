@@ -31,10 +31,11 @@
     <p class="dialog-warning">@Localizer["PlayerPresence_MonitoringNotice"]</p>
 
     <h2>@Localizer["Label_Players"] (@Model.Players.Count)</h2>
-    <ul class="player-list">
+    <ul id="player-score-list" class="player-list">
         @foreach (var player in Model.Players)
         {
-            <li class="@(player.Id == Model.CurrentPlayer.Id ? "current-player" : null)">
+            <li class="@(player.Id == Model.CurrentPlayer.Id ? "current-player" : null)"
+                data-player-id="@player.Id.Value">
                 <strong>@player.Name</strong>
                 <span>@player.Score</span>
             </li>
@@ -50,6 +51,7 @@
             const lobby = document.querySelector(".player-lobby");
             const warning = document.getElementById("activity-warning");
             const rejoinWarning = document.getElementById("rejoin-warning");
+            const playerScoreList = document.getElementById("player-score-list");
 
             if (!lobby || !warning || typeof signalR === "undefined") {
                 return;
@@ -99,6 +101,31 @@
                 gameCode,
                 accessToken,
                 isPageActive());
+
+            connection.on("PlayersChanged", update => {
+                if (!playerScoreList) {
+                    return;
+                }
+
+                playerScoreList.replaceChildren();
+
+                for (const player of update.players) {
+                    const item = document.createElement("li");
+                    item.dataset.playerId = player.id;
+                    item.className = player.id === playerId
+                        ? "current-player"
+                        : "";
+
+                    const name = document.createElement("strong");
+                    name.textContent = player.name;
+
+                    const score = document.createElement("span");
+                    score.textContent = player.score.toString();
+
+                    item.append(name, score);
+                    playerScoreList.append(item);
+                }
+            });
 
             connection.on("PlayerAccessRejected", () => {
                 warning.hidden = false;
