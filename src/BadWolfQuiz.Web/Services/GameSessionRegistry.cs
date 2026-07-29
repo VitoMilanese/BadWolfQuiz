@@ -209,6 +209,24 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public GamePlayer? AdjustPlayerScore(
+        string publicCode,
+        GamePlayerId playerId,
+        int points)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.AdjustPlayerScore(playerId, points);
+        }
+    }
+
     public GamePlayer? SetActivePlayer(
         string publicCode,
         GamePlayerId playerId)
