@@ -36,6 +36,8 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
             Id = question.Id,
             QuizId = question.Category.Round.QuizId,
             IsSpecial = question.IsSpecial,
+            ExcludeFromRandomWagerSelection =
+                question.ExcludeFromRandomWagerSelection,
             BuzzModeOverride = question.BuzzModeOverride
         };
 
@@ -110,6 +112,8 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
         }
 
         question.IsSpecial = Input.IsSpecial;
+        question.ExcludeFromRandomWagerSelection =
+            Input.ExcludeFromRandomWagerSelection;
         question.BuzzModeOverride = Input.IsSpecial
             ? BuzzActivationMode.Disabled
             : Input.BuzzModeOverride;
@@ -406,6 +410,9 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
 
         [Display(Name = "Label_SpecialQuestion")]
         public bool IsSpecial { get; set; }
+
+        [Display(Name = "Label_ExcludeFromRandomWagerSelection")]
+        public bool ExcludeFromRandomWagerSelection { get; set; }
 
         [Display(Name = "Label_BuzzMode")]
         public BuzzActivationMode BuzzModeOverride { get; set; }
