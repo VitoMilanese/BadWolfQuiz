@@ -337,7 +337,7 @@
     <value>Domanda con puntata</value>
   </data>
   <data name="Hint_WagerQuestion" xml:space="preserve">
-    <value>Il giocatore deve inviare una puntata prima che la domanda venga aperta.</value>
+    <value>Il giocatore deve inviare una puntata prima che la domanda venga aperta. Risponde solo quel giocatore; il pulsante di risposta non viene utilizzato.</value>
   </data>
   <data name="Label_WagerQuestion" xml:space="preserve">
     <value>Puntata</value>
