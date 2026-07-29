@@ -24,6 +24,8 @@
              data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
              data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
              data-approve-label="@Localizer["GameLobby_ApproveRejoin"]"
+             data-active-player-label="@Localizer["GameBoard_ActivePlayer"]"
+             data-make-active-label="@Localizer["GameBoard_MakeActivePlayer"]"
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
              data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
              data-running-label="@Localizer["GameLobby_StatusRunning"]">
@@ -44,11 +46,19 @@
                 <span id="game-status">@Localizer["GameLobby_StatusLobby"]</span>
             </p>
 
-            <form id="start-game-form" method="post" asp-page-handler="Start">
-                <button class="button button-primary" type="submit">
-                    @Localizer["GameLobby_StartGame"]
-                </button>
-            </form>
+            <div class="form-actions">
+                <form id="start-game-form" method="post" asp-page-handler="Start">
+                    <button class="button button-primary" type="submit">
+                        @Localizer["GameLobby_StartGame"]
+                    </button>
+                </form>
+
+                <form method="post" asp-page-handler="RandomActivePlayer">
+                    <button class="button button-secondary" type="submit">
+                        @Localizer["GameBoard_RandomActivePlayer"]
+                    </button>
+                </form>
+            </div>
 
             <p>
                 <strong>@Localizer["GameLobby_PlayerCount"]:</strong>
@@ -63,9 +73,26 @@
             <ul id="player-list" class="player-list">
                 @foreach (var player in Model.Players)
                 {
-                    <li data-player-id="@player.Id.Value">
+                    <li class="@(Model.Game.Session.ActivePlayerId == player.Id ? "active-player" : null)"
+                        data-player-id="@player.Id.Value">
                         <strong>@player.Name</strong>
-                        <span>@player.Score</span>
+                        <span class="player-management">
+                            <span>@player.Score</span>
+                            @if (Model.Game.Session.ActivePlayerId == player.Id)
+                            {
+                                <span class="active-player-badge">
+                                    @Localizer["GameBoard_ActivePlayer"]
+                                </span>
+                            }
+                            else
+                            {
+                                <button class="button button-secondary"
+                                        type="button"
+                                        data-make-active-player="@player.Id.Value">
+                                    @Localizer["GameBoard_MakeActivePlayer"]
+                                </button>
+                            }
+                        </span>
                     </li>
                 }
             </ul>
@@ -85,6 +112,8 @@
              data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
              data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
              data-approve-label="@Localizer["GameLobby_ApproveRejoin"]"
+             data-active-player-label="@Localizer["GameBoard_ActivePlayer"]"
+             data-make-active-label="@Localizer["GameBoard_MakeActivePlayer"]"
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
              data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
              data-running-label="@Localizer["GameLobby_StatusRunning"]">
@@ -99,11 +128,19 @@
                 <h2>@Model.Game.Session.Quiz.Rounds.OrderBy(round => round.SortOrder).First().Title</h2>
             </div>
 
-            <button class="button button-secondary"
-                    type="button"
-                    data-open-join-code>
-                @Localizer["GameBoard_ShowJoinCode"]
-            </button>
+            <div class="form-actions">
+                <form method="post" asp-page-handler="RandomActivePlayer">
+                    <button class="button button-secondary" type="submit">
+                        @Localizer["GameBoard_RandomActivePlayer"]
+                    </button>
+                </form>
+
+                <button class="button button-secondary"
+                        type="button"
+                        data-open-join-code>
+                    @Localizer["GameBoard_ShowJoinCode"]
+                </button>
+            </div>
         </div>
 
         @if (Model.CurrentQuestion is not null)
@@ -122,37 +159,82 @@
 
                 @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
                 {
-                    <form class="question-wager-form"
-                          method="post"
-                          asp-page-handler="SubmitQuestionWager">
-                        <input name="sourceQuestionId"
-                               type="hidden"
-                               value="@Model.CurrentQuestion.SourceQuestionId" />
+                    var wagerPlayer = Model.Players.First(
+                        player => player.Id == Model.CurrentQuestion.SelectedByPlayerId);
+                    var wagerLimits = Model.QuestionWagerLimits!.Value;
 
-                        <label>
-                            <span>@Localizer["Label_Player"]</span>
-                            <select name="playerId" required>
-                                <option value="">@Localizer["GameBoard_SelectWagerPlayer"]</option>
-                                @foreach (var player in Model.Players)
+                    <div class="wager-entry-panel">
+                        <div class="wager-player-summary">
+                            <span>@Localizer["GameBoard_WagerPlayer"]</span>
+                            <strong>@wagerPlayer.Name</strong>
+                            <small>
+                                @Localizer[
+                                    "GameBoard_WagerLimits",
+                                    wagerLimits.Minimum,
+                                    wagerLimits.Maximum]
+                            </small>
+                        </div>
+
+                        <form class="question-wager-form"
+                              method="post"
+                              asp-page-handler="SubmitQuestionWager"
+                              data-wager-form
+                              data-minimum="@wagerLimits.Minimum"
+                              data-maximum="@wagerLimits.Maximum">
+                            <input name="sourceQuestionId"
+                                   type="hidden"
+                                   value="@Model.CurrentQuestion.SourceQuestionId" />
+
+                            <label class="wager-display-label">
+                                <span>@Localizer["GameBoard_WagerAmount"]</span>
+                                <input class="wager-display"
+                                       name="amount"
+                                       type="text"
+                                       inputmode="none"
+                                       readonly
+                                       required
+                                       aria-live="polite" />
+                            </label>
+
+                            <div class="wager-keypad" aria-label="@Localizer["GameBoard_WagerKeypad"]">
+                                @foreach (var digit in new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 })
                                 {
-                                    <option value="@player.Id.Value">@player.Name</option>
+                                    <button type="button" data-wager-digit="@digit">@digit</button>
                                 }
-                            </select>
-                        </label>
+                                <button type="button"
+                                        data-wager-clear
+                                        aria-label="@Localizer["GameBoard_ClearWager"]">
+                                    C
+                                </button>
+                                <button type="button" data-wager-digit="0">0</button>
+                                <button type="button"
+                                        data-wager-backspace
+                                        aria-label="@Localizer["GameBoard_DeleteWagerDigit"]">
+                                    ⌫
+                                </button>
+                            </div>
 
-                        <label>
-                            <span>@Localizer["GameBoard_WagerAmount"]</span>
-                            <input name="amount"
-                                   type="number"
-                                   min="1"
-                                   step="1"
-                                   required />
-                        </label>
+                            <p class="wager-validation"
+                               data-wager-validation
+                               data-valid-label="@Localizer["GameBoard_WagerValid"]"
+                               data-invalid-label="@Localizer[
+                                   "GameBoard_WagerOutsideLimits",
+                                   wagerLimits.Minimum,
+                                   wagerLimits.Maximum]">
+                                @Localizer[
+                                    "GameBoard_WagerOutsideLimits",
+                                    wagerLimits.Minimum,
+                                    wagerLimits.Maximum]
+                            </p>
 
-                        <button class="button button-primary" type="submit">
-                            @Localizer["GameBoard_AcceptWager"]
-                        </button>
-                    </form>
+                            <button class="button button-primary"
+                                    type="submit"
+                                    data-wager-submit
+                                    disabled>
+                                @Localizer["GameBoard_AcceptWager"]
+                            </button>
+                        </form>
+                    </div>
                 }
                 else if (Model.CurrentQuestion.Wager is not null)
                 {
@@ -196,12 +278,26 @@
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
             @foreach (var player in Model.Players)
             {
-                <li class="scoreboard-player"
+                <li class="scoreboard-player @(Model.Game.Session.ActivePlayerId == player.Id ? "active-player" : null)"
                     data-player-id="@player.Id.Value">
                     <strong>@player.Name</strong>
                     <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
                         @player.Score
                     </span>
+                    @if (Model.Game.Session.ActivePlayerId == player.Id)
+                    {
+                        <span class="active-player-badge">
+                            @Localizer["GameBoard_ActivePlayer"]
+                        </span>
+                    }
+                    else
+                    {
+                        <button class="button button-secondary"
+                                type="button"
+                                data-make-active-player="@player.Id.Value">
+                            @Localizer["GameBoard_MakeActivePlayer"]
+                        </button>
+                    }
                 </li>
             }
         </ul>
@@ -229,6 +325,10 @@
     <input id="approve-player-id" name="playerId" type="hidden" />
 </form>
 
+<form id="set-active-player-form" method="post" asp-page-handler="SetActivePlayer">
+    <input id="active-player-id" name="playerId" type="hidden" />
+</form>
+
 @section Scripts {
     <script>
         (() => {
@@ -244,6 +344,60 @@
                     dialog.close();
                 }
             });
+        })();
+
+        (() => {
+            const form = document.querySelector("[data-wager-form]");
+
+            if (!form) {
+                return;
+            }
+
+            const display = form.querySelector(".wager-display");
+            const validation = form.querySelector("[data-wager-validation]");
+            const submit = form.querySelector("[data-wager-submit]");
+            const minimum = Number(form.dataset.minimum);
+            const maximum = Number(form.dataset.maximum);
+
+            const refresh = () => {
+                const amount = Number(display.value);
+                const isValid = display.value !== "" &&
+                    amount >= minimum &&
+                    amount <= maximum;
+
+                submit.disabled = !isValid;
+                validation.textContent = isValid
+                    ? validation.dataset.validLabel
+                    : validation.dataset.invalidLabel;
+                validation.classList.toggle("wager-valid", isValid);
+            };
+
+            form.querySelectorAll("[data-wager-digit]").forEach(button => {
+                button.addEventListener("click", () => {
+                    const nextValue = (display.value + button.dataset.wagerDigit)
+                        .replace(/^0+(?=\d)/, "");
+
+                    if (Number(nextValue) <= maximum) {
+                        display.value = nextValue;
+                    }
+
+                    refresh();
+                });
+            });
+
+            form.querySelector("[data-wager-clear]")
+                ?.addEventListener("click", () => {
+                    display.value = "";
+                    refresh();
+                });
+
+            form.querySelector("[data-wager-backspace]")
+                ?.addEventListener("click", () => {
+                    display.value = display.value.slice(0, -1);
+                    refresh();
+                });
+
+            refresh();
         })();
 
         (() => {
@@ -266,6 +420,20 @@
             const startGameForm = document.getElementById("start-game-form");
             const approveForm = document.getElementById("approve-rejoin-form");
             const approvePlayerId = document.getElementById("approve-player-id");
+            const activePlayerForm = document.getElementById("set-active-player-form");
+            const activePlayerId = document.getElementById("active-player-id");
+
+            document.addEventListener("click", event => {
+                const button = event.target.closest("[data-make-active-player]");
+
+                if (!button || !activePlayerForm || !activePlayerId) {
+                    return;
+                }
+
+                activePlayerId.value = button.dataset.makeActivePlayer;
+                activePlayerForm.submit();
+            });
+
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
@@ -283,8 +451,8 @@
                     const item = document.createElement("li");
                     item.dataset.playerId = player.id;
                     item.className = isRunning
-                        ? "scoreboard-player"
-                        : "";
+                        ? `scoreboard-player ${player.isActive ? "active-player" : ""}`
+                        : player.isActive ? "active-player" : "";
 
                     const name = document.createElement("strong");
                     name.textContent = player.name;
@@ -301,6 +469,20 @@
                         : "";
 
                     details.append(score);
+
+                    if (player.isActive) {
+                        const activeBadge = document.createElement("span");
+                        activeBadge.className = "active-player-badge";
+                        activeBadge.textContent = lobby.dataset.activePlayerLabel;
+                        details.append(activeBadge);
+                    } else {
+                        const makeActive = document.createElement("button");
+                        makeActive.type = "button";
+                        makeActive.className = "button button-secondary";
+                        makeActive.dataset.makeActivePlayer = player.id;
+                        makeActive.textContent = lobby.dataset.makeActiveLabel;
+                        details.append(makeActive);
+                    }
 
                     if (player.presence !== "active") {
                         const presence = document.createElement("span");
