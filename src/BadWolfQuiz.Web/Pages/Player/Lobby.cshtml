@@ -1,0 +1,33 @@
+@page "{code}/{playerId:guid}"
+@model BadWolfQuiz.Web.Pages.Player.LobbyModel
+@{
+    ViewData["Title"] = Model.Game.Session.Quiz.Title;
+}
+
+<div class="form-card narrow player-lobby">
+    <p class="eyebrow">@Localizer["Message_WaitingHost"]</p>
+    <h1>@Model.Game.Session.Quiz.Title</h1>
+
+    <div class="game-code-panel compact">
+        <span>@Localizer["Label_GameCode"]</span>
+        <strong>@Model.Game.PublicCode</strong>
+    </div>
+
+    <p>
+        <strong>@Localizer["Label_PlayerName"]:</strong>
+        @Model.CurrentPlayer.Name
+    </p>
+
+    <h2>@Localizer["Label_Players"] (@Model.Players.Count)</h2>
+    <ul class="player-list">
+        @foreach (var player in Model.Players)
+        {
+            <li class="@(player.Id == Model.CurrentPlayer.Id ? "current-player" : null)">
+                <strong>@player.Name</strong>
+                <span>@player.Score</span>
+            </li>
+        }
+    </ul>
+
+    <p class="dialog-warning">@Localizer["Message_WaitingHost"]</p>
+</div>
