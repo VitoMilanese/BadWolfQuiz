@@ -31,6 +31,7 @@ public sealed class GameSessionTests
         Assert.Equal("Rose", player.Name);
         Assert.Equal(InitialTime, player.JoinedAtUtc);
         Assert.Same(player, Assert.Single(session.Players));
+        Assert.Equal(player.Id, session.ActivePlayerId);
     }
 
     [Fact]
@@ -125,11 +126,12 @@ public sealed class GameSessionTests
         session.SelectQuestion(101);
         timeProvider.Advance(TimeSpan.FromSeconds(7));
 
-        var question = session.SubmitQuestionWager(101, player.Id, 350);
+        var question = session.SubmitQuestionWager(101, 150);
 
         Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
+        Assert.Equal(player.Id, question.SelectedByPlayerId);
         Assert.Equal(player.Id, question.Wager!.PlayerId);
-        Assert.Equal(350, question.Wager.Amount);
+        Assert.Equal(150, question.Wager.Amount);
         Assert.Equal(InitialTime.AddSeconds(7), question.Wager.SubmittedAtUtc);
     }
 
@@ -142,27 +144,71 @@ public sealed class GameSessionTests
         session.SelectQuestion(100);
 
         Assert.Throws<GameRuleViolationException>(
-            () => session.SubmitQuestionWager(100, player.Id, 100));
+            () => session.SubmitQuestionWager(100, 100));
     }
 
     [Fact]
-    public void SubmitQuestionWager_rejects_unknown_player_and_nonpositive_amount()
+    public void SubmitQuestionWager_enforces_board_based_limits()
     {
         var session = CreateSession();
-        session.AddPlayer("Rose");
+        var player = session.AddPlayer("Rose");
         session.Start();
         session.SelectQuestion(101);
 
+        var limits = session.GetQuestionWagerLimits(101);
+
+        Assert.Equal(5, limits.Minimum);
+        Assert.Equal(200, limits.Maximum);
         Assert.Throws<GameRuleViolationException>(
-            () => session.SubmitQuestionWager(
-                101,
-                GamePlayerId.New(),
-                100));
+            () => session.SubmitQuestionWager(101, 4));
         Assert.Throws<GameRuleViolationException>(
-            () => session.SubmitQuestionWager(
-                101,
-                session.Players.Single().Id,
-                0));
+            () => session.SubmitQuestionWager(101, 201));
+    }
+
+    [Fact]
+    public void QuestionWager_maximum_uses_player_score_when_it_is_higher()
+    {
+        var session = CreateSession();
+        var player = session.AddPlayer("Rose");
+        session.AdjustPlayerScore(player.Id, 2700);
+        session.Start();
+        session.SelectQuestion(101);
+
+        var limits = session.GetQuestionWagerLimits(101);
+        var question = session.SubmitQuestionWager(101, 2700);
+
+        Assert.Equal(2700, limits.Maximum);
+        Assert.Equal(2700, question.Wager!.Amount);
+    }
+
+    [Fact]
+    public void ActivePlayer_can_be_changed_without_changing_question_selector()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        var question = session.SelectQuestion(101);
+
+        session.SetActivePlayer(mickey.Id);
+
+        Assert.Equal(mickey.Id, session.ActivePlayerId);
+        Assert.Equal(rose.Id, question.SelectedByPlayerId);
+
+        session.SubmitQuestionWager(101, 100);
+
+        Assert.Equal(rose.Id, question.Wager!.PlayerId);
+    }
+
+    [Fact]
+    public void AdjustPlayerScore_allows_negative_scores()
+    {
+        var session = CreateSession();
+        var player = session.AddPlayer("Rose");
+
+        session.AdjustPlayerScore(player.Id, -250);
+
+        Assert.Equal(-250, player.Score);
     }
 
     [Fact]
