@@ -212,6 +212,32 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void JudgeQuestionAnswer_routes_score_and_resolution()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        var player = registry.JoinPlayer("ABC123", "Rose").Player!;
+        registry.StartGame("ABC123");
+        registry.SelectQuestion("ABC123", 1);
+
+        var attempt = registry.JudgeQuestionAnswer(
+            "ABC123",
+            1,
+            player.Id,
+            false);
+        var question = registry.ResolveQuestionWithoutCorrectAnswer(
+            "ABC123",
+            1);
+
+        Assert.Equal(-100, attempt!.ScoreDelta);
+        Assert.Equal(-100, player.Score);
+        Assert.Equal(
+            BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Resolved,
+            question!.Status);
+        Assert.Same(game.Session.Board.Questions.Single(), question);
+    }
+
+    [Fact]
     public void ActivePlayer_commands_route_to_runtime_session()
     {
         var registry = CreateRegistry("ABC123");
