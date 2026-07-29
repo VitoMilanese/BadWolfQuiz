@@ -88,6 +88,11 @@
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
              data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
              data-running-label="@Localizer["GameLobby_StatusRunning"]">
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="message message-error">@errorMessage</div>
+        }
+
         <div class="page-heading">
             <div>
                 <p class="eyebrow">@Localizer["GameBoard_Eyebrow"]</p>
@@ -189,7 +194,7 @@
                     const item = document.createElement("li");
                     item.dataset.playerId = player.id;
                     item.className = isRunning
-                        ? `scoreboard-player presence-${player.presence}`
+                        ? "scoreboard-player"
                         : "";
 
                     const name = document.createElement("strong");
