@@ -766,4 +766,7 @@
   <data name="GameBoard_WagerValid" xml:space="preserve"><value>Ставка допустима.</value></data>
   <data name="GameBoard_WagerOutsideLimits" xml:space="preserve"><value>Введіть суму від {0} до {1}.</value></data>
   <data name="GameBoard_MaximumWager" xml:space="preserve"><value>Максимальна ставка</value></data>
+  <data name="GameBoard_JudgeAnswer" xml:space="preserve"><value>Оцінити відповідь</value></data>
+  <data name="GameBoard_NoCorrectAnswer" xml:space="preserve"><value>Правильної відповіді немає</value></data>
+  <data name="GameBoard_JudgmentRejected" xml:space="preserve"><value>Цю відповідь не можна оцінити в поточному стані питання.</value></data>
 </root>
