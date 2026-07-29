@@ -52,9 +52,12 @@
     <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
     <section class="content-panel question-settings">
-        <label class="checkbox-row">
+        <label class="checkbox-row wager-question-setting">
             <input asp-for="Input.IsSpecial" />
-            @Localizer["Label_SpecialQuestion"]
+            <span>
+                <strong>@Localizer["Label_SpecialQuestion"]</strong>
+                <small>@Localizer["Hint_WagerQuestion"]</small>
+            </span>
         </label>
 
         <label asp-for="Input.BuzzModeOverride">
