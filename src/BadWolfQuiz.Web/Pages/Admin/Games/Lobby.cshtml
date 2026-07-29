@@ -260,6 +260,90 @@
                     </p>
                 }
             </div>
+
+            @if (Model.CurrentQuestion.Status is BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Selected or
+                BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active)
+            {
+                var attemptedPlayerIds = Model.CurrentQuestion.AnswerAttempts
+                    .Select(attempt => attempt.PlayerId)
+                    .ToHashSet();
+                var eligiblePlayers = Model.CurrentQuestion.IsSpecial
+                    ? Model.Players.Where(player =>
+                        player.Id == Model.CurrentQuestion.Wager!.PlayerId)
+                    : Model.Players.Where(player =>
+                        !attemptedPlayerIds.Contains(player.Id));
+
+                <section class="question-judgment-panel">
+                    <h3>@Localizer["GameBoard_JudgeAnswer"]</h3>
+
+                    @if (Model.CurrentQuestion.AnswerAttempts.Count > 0)
+                    {
+                        <ul class="question-attempts">
+                            @foreach (var attempt in Model.CurrentQuestion.AnswerAttempts)
+                            {
+                                var attemptPlayer = Model.Players.First(
+                                    player => player.Id == attempt.PlayerId);
+
+                                <li>
+                                    <span>@attemptPlayer.Name</span>
+                                    <strong class="@(attempt.IsCorrect ? "judgment-correct" : "judgment-incorrect")">
+                                        @(attempt.IsCorrect
+                                            ? Localizer["Message_Correct"]
+                                            : Localizer["Message_Wrong"])
+                                        (@(attempt.ScoreDelta > 0 ? "+" : null)@attempt.ScoreDelta)
+                                    </strong>
+                                </li>
+                            }
+                        </ul>
+                    }
+
+                    <div class="judgment-player-list">
+                        @foreach (var player in eligiblePlayers)
+                        {
+                            <form class="judgment-player"
+                                  method="post"
+                                  asp-page-handler="JudgeQuestionAnswer">
+                                <input name="sourceQuestionId"
+                                       type="hidden"
+                                       value="@Model.CurrentQuestion.SourceQuestionId" />
+                                <input name="playerId"
+                                       type="hidden"
+                                       value="@player.Id.Value" />
+
+                                <strong>@player.Name</strong>
+                                <span>@player.Score</span>
+
+                                <div class="form-actions">
+                                    <button class="button judgment-correct-button"
+                                            name="isCorrect"
+                                            type="submit"
+                                            value="true">
+                                        @Localizer["Message_Correct"]
+                                    </button>
+                                    <button class="button judgment-incorrect-button"
+                                            name="isCorrect"
+                                            type="submit"
+                                            value="false">
+                                        @Localizer["Message_Wrong"]
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+
+                    @if (!Model.CurrentQuestion.IsSpecial)
+                    {
+                        <form method="post" asp-page-handler="ResolveQuestion">
+                            <input name="sourceQuestionId"
+                                   type="hidden"
+                                   value="@Model.CurrentQuestion.SourceQuestionId" />
+                            <button class="button button-secondary" type="submit">
+                                @Localizer["GameBoard_NoCorrectAnswer"]
+                            </button>
+                        </form>
+                    }
+                </section>
+            }
         }
 
         @if (Model.CurrentQuestion?.Status != BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
@@ -308,7 +392,8 @@
                     {
                         <button class="button button-secondary"
                                 type="button"
-                                data-make-active-player="@player.Id.Value">
+                                data-make-active-player="@player.Id.Value"
+                                disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
                             @Localizer["GameBoard_MakeActivePlayer"]
                         </button>
                     }
