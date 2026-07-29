@@ -23,7 +23,7 @@ public sealed class GameBoard
     {
         var randomWagerQuestionIds = round.UseRandomWagerQuestions
             ? SelectRandomWagerQuestions(round)
-            : [];
+            : new HashSet<int>();
 
         return round.Questions.Select(question => new RuntimeQuestion(
             round.SourceRoundId,
