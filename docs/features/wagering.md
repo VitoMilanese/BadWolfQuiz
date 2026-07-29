@@ -17,9 +17,9 @@ After a regular question is judged:
 - if nobody answers correctly, the existing active player remains active;
 - incorrect answers alone never transfer the right to choose.
 
-The host may override the active player at any time by selecting a participant manually. The host may also ask the engine to select a random current participant.
+The host may override the active player by selecting a participant manually or ask the engine to select a random current participant. Both operations are forbidden while a wager question is in progress.
 
-A question records the player who selected it. Changing the active player after the question was selected does not change the selecting player for that question.
+A question records the player who selected it. Once a wager question is selected, the active player is locked until that question is resolved. This guarantees that the answering player and score-dependent wager limits cannot be changed after wager entry begins.
 
 ## Wager questions
 
