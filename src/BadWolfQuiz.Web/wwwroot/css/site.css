@@ -1720,24 +1720,23 @@ textarea {
 
 .current-question-summary.wager-mode .wager-entry-panel {
     width: 100%;
-    grid-template-columns:
-        minmax(0, 1fr)
-        minmax(260px, 360px)
-        minmax(0, 1fr);
+    justify-self: stretch;
+    grid-template-columns: 160px minmax(0, 1fr);
     align-items: center;
     column-gap: 24px;
 }
 
 .current-question-summary.wager-mode .wager-player-summary {
     grid-column: 1;
-    width: min(240px, 100%);
-    justify-self: end;
+    width: 100%;
+    justify-self: stretch;
     text-align: left;
 }
 
 .current-question-summary.wager-mode .question-wager-form {
     grid-column: 2;
-    width: 100%;
+    width: min(360px, 100%);
+    justify-self: center;
 }
 
 .wager-keypad-max {
