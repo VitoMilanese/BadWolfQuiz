@@ -13,7 +13,9 @@ public sealed class LobbyModel(GameSessionRegistry sessionRegistry) : PageModel
 
     public IReadOnlyList<GamePlayer> Players { get; private set; } = [];
 
-    public IActionResult OnGet(string code, Guid playerId)
+    public string? AccessToken { get; private set; }
+
+    public IActionResult OnGet(string code, Guid playerId, string? accessToken)
     {
         var game = sessionRegistry.Find(code);
 
@@ -34,6 +36,7 @@ public sealed class LobbyModel(GameSessionRegistry sessionRegistry) : PageModel
         Game = game;
         CurrentPlayer = currentPlayer;
         Players = players;
+        AccessToken = accessToken;
         return Page();
     }
 }
