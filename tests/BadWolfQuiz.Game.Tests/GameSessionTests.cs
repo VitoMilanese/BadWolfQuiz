@@ -230,6 +230,96 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void JudgeQuestionAnswer_applies_regular_scores_and_transfers_selection()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        var question = session.SelectQuestion(100);
+
+        var wrong = session.JudgeQuestionAnswer(100, rose.Id, false);
+        var correct = session.JudgeQuestionAnswer(100, mickey.Id, true);
+
+        Assert.Equal(-100, wrong.ScoreDelta);
+        Assert.Equal(100, correct.ScoreDelta);
+        Assert.Equal(-100, rose.Score);
+        Assert.Equal(100, mickey.Score);
+        Assert.Equal(mickey.Id, session.ActivePlayerId);
+        Assert.Equal(RuntimeQuestionStatus.Resolved, question.Status);
+        Assert.Equal(2, question.AnswerAttempts.Count);
+    }
+
+    [Fact]
+    public void JudgeQuestionAnswer_rejects_duplicate_regular_attempt()
+    {
+        var session = CreateSession();
+        var player = session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, player.Id, false);
+
+        Assert.Throws<GameRuleViolationException>(
+            () => session.JudgeQuestionAnswer(100, player.Id, false));
+        Assert.Equal(-100, player.Score);
+    }
+
+    [Fact]
+    public void ResolveQuestionWithoutCorrectAnswer_keeps_active_player()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        session.AddPlayer("Mickey");
+        session.Start();
+        var question = session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, rose.Id, false);
+
+        session.ResolveQuestionWithoutCorrectAnswer(100);
+
+        Assert.Equal(RuntimeQuestionStatus.Resolved, question.Status);
+        Assert.Equal(rose.Id, session.ActivePlayerId);
+    }
+
+    [Theory]
+    [InlineData(true, 150)]
+    [InlineData(false, -150)]
+    public void JudgeQuestionAnswer_applies_wager_and_resolves(
+        bool isCorrect,
+        int expectedScore)
+    {
+        var session = CreateSession();
+        var player = session.AddPlayer("Rose");
+        session.Start();
+        var question = session.SelectQuestion(101);
+        session.SubmitQuestionWager(101, 150);
+
+        var attempt = session.JudgeQuestionAnswer(
+            101,
+            player.Id,
+            isCorrect);
+
+        Assert.Equal(expectedScore, attempt.ScoreDelta);
+        Assert.Equal(expectedScore, player.Score);
+        Assert.Equal(RuntimeQuestionStatus.Resolved, question.Status);
+        Assert.False(session.IsActivePlayerChangeLocked);
+    }
+
+    [Fact]
+    public void JudgeQuestionAnswer_rejects_other_player_for_wager_question()
+    {
+        var session = CreateSession();
+        session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(101);
+        session.SubmitQuestionWager(101, 100);
+
+        Assert.Throws<GameRuleViolationException>(
+            () => session.JudgeQuestionAnswer(101, mickey.Id, true));
+        Assert.Equal(0, mickey.Score);
+    }
+
+    [Fact]
     public void SelectQuestion_rejects_selection_before_game_starts()
     {
         var session = CreateSession();
