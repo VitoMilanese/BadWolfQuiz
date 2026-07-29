@@ -1703,3 +1703,41 @@ textarea {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* Focused wager entry */
+
+.current-question-summary.wager-mode {
+    min-height: min(680px, calc(100vh - 210px));
+    place-items: center;
+    align-content: center;
+    padding: clamp(20px, 4vw, 48px);
+}
+
+.current-question-summary.wager-mode .current-question-heading {
+    width: min(720px, 100%);
+}
+
+.current-question-summary.wager-mode .wager-entry-panel {
+    width: min(720px, 100%);
+    grid-template-columns: minmax(160px, 240px) minmax(260px, 360px);
+    align-items: center;
+    justify-content: center;
+}
+
+.wager-keypad-max {
+    grid-column: 1 / -1;
+    color: var(--gold) !important;
+    border-color: rgba(242, 177, 52, 0.65) !important;
+    letter-spacing: 0.08em;
+}
+
+@media (max-width: 700px) {
+    .current-question-summary.wager-mode {
+        min-height: auto;
+    }
+
+    .current-question-summary.wager-mode .wager-entry-panel {
+        grid-template-columns: 1fr;
+    }
+}
