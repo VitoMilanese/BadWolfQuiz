@@ -18,6 +18,10 @@ public sealed class LobbyModel(
 
     public IReadOnlyList<GamePlayer> Players { get; private set; } = [];
 
+    public IReadOnlyList<GameBoardCategory> BoardCategories { get; private set; } = [];
+
+    public RuntimeQuestion? CurrentQuestion { get; private set; }
+
     public IActionResult OnGet(Guid id)
     {
         return LoadPage(id);
@@ -50,6 +54,29 @@ public sealed class LobbyModel(
                 "GameStatusChanged",
                 GameHub.CreateStatusUpdate(game),
                 cancellationToken);
+
+        return RedirectToPage(new { id });
+    }
+
+    public IActionResult OnPostSelectQuestion(
+        Guid id,
+        int sourceQuestionId)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.SelectQuestion(game.PublicCode, sourceQuestionId);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] = localizer["GameBoard_SelectionRejected"].Value;
+        }
 
         return RedirectToPage(new { id });
     }
@@ -103,6 +130,37 @@ public sealed class LobbyModel(
 
         Game = game;
         Players = sessionRegistry.GetPlayers(game);
+
+        var currentRound = game.Session.Quiz.Rounds
+            .OrderBy(round => round.SortOrder)
+            .First();
+
+        var roundQuestions = game.Session.Board.Questions
+            .Where(question => question.SourceRoundId == currentRound.SourceRoundId)
+            .ToArray();
+
+        BoardCategories = roundQuestions
+            .GroupBy(question => new
+            {
+                question.SourceCategoryId,
+                question.CategoryTitle
+            })
+            .Select(group => new GameBoardCategory(
+                group.Key.SourceCategoryId,
+                group.Key.CategoryTitle,
+                group.OrderBy(question => question.RowIndex).ToArray()))
+            .ToArray();
+
+        CurrentQuestion = roundQuestions.FirstOrDefault(question =>
+            question.Status is not RuntimeQuestionStatus.Available and
+                not RuntimeQuestionStatus.Resolved);
+
         return Page();
     }
 }
+
+
+public sealed record GameBoardCategory(
+    int SourceCategoryId,
+    string Title,
+    IReadOnlyList<RuntimeQuestion> Questions);
