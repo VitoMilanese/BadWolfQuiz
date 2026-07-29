@@ -27,7 +27,7 @@ A wager is required only for a question marked as a wager question, either expli
 
 The player who selected the wager question is the only player who answers it. The host must not choose an answering player separately.
 
-Before revealing the question, the player states a wager verbally and the host enters it with an on-screen numeric keypad. The keypad is a presentation aid; the game engine remains responsible for validating the submitted amount.
+Before revealing the question, the player states a wager verbally and the host enters it with an on-screen numeric keypad. While wager entry is active, the question board is hidden and the keypad is centered so the host view focuses on the wager. A `MAX` key enters the allowed maximum immediately. If digit entry would exceed the maximum, the UI replaces the value with the maximum. The keypad is a presentation aid; the game engine remains responsible for validating the submitted amount.
 
 The minimum question wager is 5 points.
 
