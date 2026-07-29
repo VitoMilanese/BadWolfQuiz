@@ -727,12 +727,15 @@
   <data name="PlayerPresence_InactiveWarning" xml:space="preserve"><value>Поверніться на сторінку гри. Ведучий бачить, що сторінка неактивна або відключена.</value></data>
 
   <data name="PlayerPresence_RejoinPending" xml:space="preserve"><value>Очікує дозволу</value></data>
-  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve"><value>Гра вже почалася. Зачекайте, доки ведучий дозволить повернення.</value></data>
-  <data name="GameLobby_ApproveRejoin" xml:space="preserve"><value>Дозволити повернення</value></data>
+  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve"><value>Очікуйте, доки ведучий підтвердить ваш вхід у поточну гру.</value></data>
+  <data name="GameLobby_ApproveRejoin" xml:space="preserve"><value>Підтвердити вхід</value></data>
   <data name="GameLobby_StartGame" xml:space="preserve"><value>Почати гру</value></data>
   <data name="GameLobby_StatusRunning" xml:space="preserve"><value>Триває</value></data>
   <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Перед початком гри додайте хоча б одного гравця.</value></data>
 
+  <data name="GameBoard_ShowJoinCode" xml:space="preserve"><value>Показати код приєднання</value></data>
+  <data name="GameBoard_JoinOverlayTitle" xml:space="preserve"><value>Приєднуйтеся до гри</value></data>
+  <data name="GameBoard_JoinOverlayHint" xml:space="preserve"><value>Нові гравці можуть приєднатися за цим кодом.</value></data>
   <data name="GameBoard_Eyebrow" xml:space="preserve"><value>ІГРОВЕ ПОЛЕ</value></data>
   <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Питання вибрано</value></data>
   <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>Очікується ставка</value></data>
