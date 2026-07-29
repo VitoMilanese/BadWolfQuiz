@@ -748,4 +748,10 @@
   <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Question selected</value></data>
   <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>Waiting for wager</value></data>
   <data name="GameBoard_SelectionRejected" xml:space="preserve"><value>This question cannot be selected right now.</value></data>
+  <data name="GameBoard_SelectWagerPlayer" xml:space="preserve"><value>Select a player</value></data>
+  <data name="GameBoard_WagerAmount" xml:space="preserve"><value>Wager amount</value></data>
+  <data name="GameBoard_AcceptWager" xml:space="preserve"><value>Accept wager</value></data>
+  <data name="GameBoard_WagerAccepted" xml:space="preserve"><value>Wager accepted</value></data>
+  <data name="GameBoard_AcceptedWagerSummary" xml:space="preserve"><value>{0} — {1} points</value></data>
+  <data name="GameBoard_WagerRejected" xml:space="preserve"><value>The wager could not be accepted. Select a player and enter a positive amount.</value></data>
 </root>
