@@ -719,4 +719,11 @@
   <data name="PlayerPresence_Disconnected" xml:space="preserve"><value>Disconnesso</value></data>
   <data name="PlayerPresence_MonitoringNotice" xml:space="preserve"><value>Durante la partita mantieni questa pagina aperta e attiva. Il presentatore può vedere lo stato della pagina.</value></data>
   <data name="PlayerPresence_InactiveWarning" xml:space="preserve"><value>Torna alla pagina della partita. Il presentatore vede che la pagina è inattiva o disconnessa.</value></data>
+
+  <data name="PlayerPresence_RejoinPending" xml:space="preserve"><value>In attesa di approvazione</value></data>
+  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve"><value>La partita è già iniziata. Attendi che il presentatore approvi il tuo rientro.</value></data>
+  <data name="GameLobby_ApproveRejoin" xml:space="preserve"><value>Consenti rientro</value></data>
+  <data name="GameLobby_StartGame" xml:space="preserve"><value>Avvia partita</value></data>
+  <data name="GameLobby_StatusRunning" xml:space="preserve"><value>In corso</value></data>
+  <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Aggiungi almeno un giocatore prima di iniziare la partita.</value></data>
 </root>
