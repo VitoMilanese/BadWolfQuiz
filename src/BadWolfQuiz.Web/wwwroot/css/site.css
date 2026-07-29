@@ -1245,3 +1245,78 @@ textarea {
     border-color: rgba(239, 35, 60, 0.55);
     background: rgba(239, 35, 60, 0.12);
 }
+
+
+/* Host runtime game board */
+
+.host-game-board {
+    margin-top: 32px;
+}
+
+.host-board-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--board-columns), minmax(150px, 1fr));
+    gap: 6px;
+    overflow-x: auto;
+    padding: 6px;
+    border-radius: 14px;
+    background: #000;
+}
+
+.host-board-column {
+    display: grid;
+    gap: 6px;
+    min-width: 150px;
+}
+
+.host-board-column h3 {
+    min-height: 92px;
+    margin: 0;
+    padding: 14px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #2c2c39;
+    background: linear-gradient(145deg, #2b050a, #111116);
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.host-board-column form {
+    display: flex;
+}
+
+.host-board-question {
+    width: 100%;
+    min-height: 92px;
+    border: 1px solid #2c2c39;
+    background: linear-gradient(145deg, #17171e, #0c0c10);
+    color: var(--gold);
+    font-size: 1.65rem;
+    font-weight: 950;
+    cursor: pointer;
+}
+
+.host-board-question:hover:not(:disabled) {
+    border-color: var(--red-bright);
+    transform: translateY(-1px);
+}
+
+.host-board-question:disabled {
+    cursor: default;
+    opacity: 0.48;
+}
+
+.host-board-question.status-selected,
+.host-board-question.status-awaitingwager {
+    border-color: var(--gold);
+    background: rgba(242, 177, 52, 0.14);
+    opacity: 1;
+}
+
+.current-question-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+    border-color: rgba(242, 177, 52, 0.55);
+}
