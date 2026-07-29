@@ -490,7 +490,7 @@
     <value>Lobby and QR connection will be added in the next step.</value>
   </data>
   <data name="Placeholder_GameCode" xml:space="preserve">
-    <value>For example: WOLF123</value>
+    <value>For example: ABC123</value>
   </data>
   <data name="Label_PlayerName" xml:space="preserve">
     <value>Player name</value>
