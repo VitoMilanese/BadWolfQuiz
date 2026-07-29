@@ -1,0 +1,2 @@
+src/BadWolfQuiz.Web/App_Data/*
+!src/BadWolfQuiz.Web/App_Data/.gitkeep
