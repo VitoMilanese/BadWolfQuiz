@@ -94,15 +94,18 @@ public sealed class RuntimeQuestion
 
     public RuntimeQuestionStatus Status { get; private set; } = RuntimeQuestionStatus.Available;
 
+    public GamePlayerId? SelectedByPlayerId { get; private set; }
+
     public Wager? Wager { get; private set; }
 
-    internal void Select()
+    internal void Select(GamePlayerId selectedByPlayerId)
     {
         if (Status != RuntimeQuestionStatus.Available)
         {
             throw new GameRuleViolationException("Only an available question can be selected.");
         }
 
+        SelectedByPlayerId = selectedByPlayerId;
         Status = IsSpecial
             ? RuntimeQuestionStatus.AwaitingWager
             : RuntimeQuestionStatus.Selected;
