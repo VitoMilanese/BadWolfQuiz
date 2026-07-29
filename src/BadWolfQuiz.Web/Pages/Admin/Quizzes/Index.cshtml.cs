@@ -1,6 +1,7 @@
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Models;
+using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace BadWolfQuiz.Web.Pages.Admin.Quizzes;
 
 public sealed class IndexModel(
     QuizDbContext db,
+    GameSessionLauncher gameSessionLauncher,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     public IReadOnlyList<Quiz> Quizzes { get; private set; } = [];
@@ -17,6 +19,35 @@ public sealed class IndexModel(
     public async Task OnGetAsync()
     {
         await LoadQuizzesAsync();
+    }
+
+    public async Task<IActionResult> OnPostCreateGameAsync(
+        int quizId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var session = await gameSessionLauncher.CreateAsync(quizId, cancellationToken);
+
+            if (session is null)
+            {
+                return NotFound();
+            }
+
+            return RedirectToPage(
+                "/Admin/Games/Lobby",
+                new { id = session.Id.Value });
+        }
+        catch (ArgumentException)
+        {
+            TempData["ErrorMessage"] = localizer["Error_QuizCannotStart"].Value;
+            return RedirectToPage();
+        }
+        catch (InvalidOperationException)
+        {
+            TempData["ErrorMessage"] = localizer["Error_QuizCannotStart"].Value;
+            return RedirectToPage();
+        }
     }
 
     public async Task<IActionResult> OnPostRenameAsync(

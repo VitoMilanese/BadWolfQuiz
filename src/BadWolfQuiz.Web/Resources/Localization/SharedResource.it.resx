@@ -702,4 +702,15 @@
   <data name="QuizEditor_CategoryRenamed" xml:space="preserve">
     <value>Categoria rinominata con successo</value>
   </data>
+
+  <data name="Button_CreateGame" xml:space="preserve"><value>Crea partita</value></data>
+  <data name="Button_BackToQuizzes" xml:space="preserve"><value>Torna ai quiz</value></data>
+  <data name="GameLobby_Eyebrow" xml:space="preserve"><value>Lobby del conduttore</value></data>
+  <data name="GameLobby_StatusLabel" xml:space="preserve"><value>Stato</value></data>
+  <data name="GameLobby_StatusLobby" xml:space="preserve"><value>Lobby</value></data>
+  <data name="GameLobby_PlayerCount" xml:space="preserve"><value>Giocatori</value></data>
+  <data name="GameLobby_QuestionCount" xml:space="preserve"><value>Domande</value></data>
+  <data name="GameLobby_SessionId" xml:space="preserve"><value>ID sessione</value></data>
+  <data name="GameLobby_TransientNotice" xml:space="preserve"><value>Questa sessione è memorizzata in memoria e verrà persa al riavvio dell'applicazione.</value></data>
+  <data name="Error_QuizCannotStart" xml:space="preserve"><value>Questo quiz non può essere usato per creare una partita. Controlla round, domande e righe dei punti.</value></data>
 </root>

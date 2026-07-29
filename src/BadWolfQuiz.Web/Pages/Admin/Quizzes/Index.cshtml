@@ -38,6 +38,13 @@
         </div>
 
         <div class="card-actions">
+            <form method="post" asp-page-handler="CreateGame">
+                <input name="quizId" type="hidden" value="@quiz.Id" />
+                <button class="button button-primary" type="submit">
+                    @Localizer["Button_CreateGame"]
+                </button>
+            </form>
+
             <a class="button button-secondary"
                asp-page="Editor"
                asp-route-id="@quiz.Id">

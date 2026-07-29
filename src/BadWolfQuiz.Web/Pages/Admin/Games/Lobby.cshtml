@@ -1,0 +1,38 @@
+@page "{id:guid}"
+@model BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel
+@{
+    ViewData["Title"] = Model.Session.Quiz.Title;
+}
+
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">@Localizer["GameLobby_Eyebrow"]</p>
+        <h1>@Model.Session.Quiz.Title</h1>
+    </div>
+
+    <a class="button button-secondary" asp-page="/Admin/Quizzes/Index">
+        @Localizer["Button_BackToQuizzes"]
+    </a>
+</div>
+
+<section class="content-panel narrow">
+    <div class="stack-form">
+        <p>
+            <strong>@Localizer["GameLobby_StatusLabel"]:</strong>
+            @Localizer["GameLobby_StatusLobby"]
+        </p>
+        <p>
+            <strong>@Localizer["GameLobby_PlayerCount"]:</strong>
+            @Model.Session.Players.Count
+        </p>
+        <p>
+            <strong>@Localizer["GameLobby_QuestionCount"]:</strong>
+            @Model.Session.Board.Questions.Count
+        </p>
+        <p>
+            <strong>@Localizer["GameLobby_SessionId"]:</strong>
+            <code>@Model.Session.Id</code>
+        </p>
+        <p class="dialog-warning">@Localizer["GameLobby_TransientNotice"]</p>
+    </div>
+</section>
