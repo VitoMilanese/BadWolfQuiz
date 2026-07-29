@@ -68,13 +68,17 @@ public sealed class GameSessionTests
     }
 
     [Fact]
-    public void AddPlayer_rejects_join_after_game_has_started()
+    public void AddPlayer_accepts_new_player_after_game_has_started()
     {
         var session = CreateSession();
         session.AddPlayer("Rose");
         session.Start();
 
-        Assert.Throws<GameRuleViolationException>(() => session.AddPlayer("Mickey"));
+        var player = session.AddPlayer("Mickey");
+
+        Assert.Equal("Mickey", player.Name);
+        Assert.Equal(0, player.Score);
+        Assert.Equal(2, session.Players.Count);
     }
 
     [Fact]
