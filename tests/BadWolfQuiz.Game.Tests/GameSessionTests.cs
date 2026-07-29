@@ -116,6 +116,56 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void SubmitQuestionWager_activates_question_and_records_wager()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateSession(timeProvider);
+        var player = session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(101);
+        timeProvider.Advance(TimeSpan.FromSeconds(7));
+
+        var question = session.SubmitQuestionWager(101, player.Id, 350);
+
+        Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
+        Assert.Equal(player.Id, question.Wager!.PlayerId);
+        Assert.Equal(350, question.Wager.Amount);
+        Assert.Equal(InitialTime.AddSeconds(7), question.Wager.SubmittedAtUtc);
+    }
+
+    [Fact]
+    public void SubmitQuestionWager_rejects_regular_question()
+    {
+        var session = CreateSession();
+        var player = session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SubmitQuestionWager(100, player.Id, 100));
+    }
+
+    [Fact]
+    public void SubmitQuestionWager_rejects_unknown_player_and_nonpositive_amount()
+    {
+        var session = CreateSession();
+        session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(101);
+
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SubmitQuestionWager(
+                101,
+                GamePlayerId.New(),
+                100));
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SubmitQuestionWager(
+                101,
+                session.Players.Single().Id,
+                0));
+    }
+
+    [Fact]
     public void SelectQuestion_rejects_selection_before_game_starts()
     {
         var session = CreateSession();
