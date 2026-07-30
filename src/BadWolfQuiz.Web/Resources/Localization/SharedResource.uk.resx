@@ -835,4 +835,22 @@
   <data name="GameBoard_AdvanceRoundRejected" xml:space="preserve">
     <value>Не вдалося почати наступний раунд.</value>
   </data>
+  <data name="GameTimer_Buzzer" xml:space="preserve">
+    <value>Час для буззера</value>
+  </data>
+  <data name="GameTimer_Answer" xml:space="preserve">
+    <value>Час на відповідь</value>
+  </data>
+  <data name="GameTimer_Pause" xml:space="preserve">
+    <value>Призупинити таймер</value>
+  </data>
+  <data name="GameTimer_Resume" xml:space="preserve">
+    <value>Продовжити таймер</value>
+  </data>
+  <data name="GameTimer_PauseRejected" xml:space="preserve">
+    <value>Не вдалося призупинити таймер.</value>
+  </data>
+  <data name="GameTimer_ResumeRejected" xml:space="preserve">
+    <value>Не вдалося продовжити таймер.</value>
+  </data>
 </root>

@@ -835,4 +835,22 @@
   <data name="GameBoard_AdvanceRoundRejected" xml:space="preserve">
     <value>Impossibile avviare il round successivo.</value>
   </data>
+  <data name="GameTimer_Buzzer" xml:space="preserve">
+    <value>Tempo per il buzzer</value>
+  </data>
+  <data name="GameTimer_Answer" xml:space="preserve">
+    <value>Tempo per rispondere</value>
+  </data>
+  <data name="GameTimer_Pause" xml:space="preserve">
+    <value>Metti in pausa il timer</value>
+  </data>
+  <data name="GameTimer_Resume" xml:space="preserve">
+    <value>Riprendi il timer</value>
+  </data>
+  <data name="GameTimer_PauseRejected" xml:space="preserve">
+    <value>Impossibile mettere in pausa il timer.</value>
+  </data>
+  <data name="GameTimer_ResumeRejected" xml:space="preserve">
+    <value>Impossibile riprendere il timer.</value>
+  </data>
 </root>

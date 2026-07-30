@@ -131,6 +131,56 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostPauseQuestionTimerAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.PauseQuestionTimer(game.PublicCode);
+            await BroadcastTimerAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameTimer_PauseRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostResumeQuestionTimerAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.ResumeQuestionTimer(game.PublicCode);
+            await BroadcastTimerAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameTimer_ResumeRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostAdvanceRoundAsync(
         Guid id,
         CancellationToken cancellationToken)
@@ -413,6 +463,18 @@ public sealed class LobbyModel(
                 cancellationToken);
 
         return RedirectToPage(new { id });
+    }
+
+    private Task BroadcastTimerAsync(
+        GameSessionRegistration game,
+        CancellationToken cancellationToken)
+    {
+        return gameHub.Clients
+            .Group(GameHub.GroupName(game.PublicCode))
+            .SendAsync(
+                "TimerStateChanged",
+                GameHub.CreateTimerUpdate(game),
+                cancellationToken);
     }
 
     private Task BroadcastBuzzerAsync(

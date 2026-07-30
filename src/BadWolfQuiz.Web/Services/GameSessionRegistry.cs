@@ -230,6 +230,58 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public GameTimer? PauseQuestionTimer(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.PauseQuestionTimer();
+        }
+    }
+
+    public GameTimer? ResumeQuestionTimer(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.ResumeQuestionTimer();
+        }
+    }
+
+    public QuestionTimerTickResult? ProcessQuestionTimers(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            var outcome = game.Session.ProcessQuestionTimers();
+
+            if (outcome != QuestionTimerOutcome.None)
+            {
+                game.BuzzerRace = null;
+            }
+
+            return new QuestionTimerTickResult(game, outcome);
+        }
+    }
+
     public RuntimeQuestion? ActivateQuestionBuzzer(
         string publicCode,
         int sourceQuestionId)
@@ -557,3 +609,8 @@ public sealed record BuzzerClaimResult(
     RuntimeQuestion Question,
     GamePlayer Player,
     bool IsWinner);
+
+
+public sealed record QuestionTimerTickResult(
+    GameSessionRegistration Game,
+    QuestionTimerOutcome Outcome);

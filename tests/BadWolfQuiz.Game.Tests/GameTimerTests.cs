@@ -32,6 +32,24 @@ public sealed class GameTimerTests
     }
 
     [Fact]
+    public void Restart_and_stop_reset_timer_from_any_state()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var timer = new GameTimer(TimeSpan.FromSeconds(10), timeProvider);
+        timer.Start();
+        timeProvider.Advance(TimeSpan.FromSeconds(4));
+
+        timer.Restart();
+
+        Assert.Equal(TimeSpan.FromSeconds(10), timer.Remaining);
+
+        timer.Stop();
+
+        Assert.Equal(GameTimerStatus.Stopped, timer.Status);
+        Assert.Equal(TimeSpan.FromSeconds(10), timer.Remaining);
+    }
+
+    [Fact]
     public void Remaining_marks_elapsed_timer_as_expired()
     {
         var timeProvider = new ManualTimeProvider(InitialTime);

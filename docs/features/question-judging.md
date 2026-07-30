@@ -117,3 +117,14 @@ After the wager answer is judged correct or incorrect, the correct answer is dis
 The first round starts with the first player who joined the lobby as the active player.
 
 At the beginning of every later round, the Engine transfers the right to select the first question to the player with the lowest current score. A deterministic tie-breaker must be used when multiple players share the lowest score; the exact tie-breaker will be defined together with multi-round progression.
+
+
+## Runtime timer orchestration
+
+The initial Engine defaults are 30 seconds for the buzzer window and 10 seconds for an individual answer. These constants will be replaced by global and per-game settings.
+
+Activating the buzzer starts the buzzer timer. A valid buzzer claim pauses that timer and starts the answer timer. If the answer timer expires, the Engine records an incorrect answer and resumes the buzzer timer with the exact time that remained when the player claimed the buzzer.
+
+If the buzzer timer expires while no player is answering, the Engine resolves the question without a correct answer and moves to the answer presentation.
+
+The Engine exposes timer processing as an explicit command. Real-time scheduling, SignalR broadcasts, and visible countdown controls are connected in the Web layer separately.

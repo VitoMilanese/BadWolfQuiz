@@ -28,6 +28,10 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
             {
                 await Clients.Caller.SendAsync("BuzzerStateChanged", buzzerUpdate);
             }
+
+            await Clients.Caller.SendAsync(
+                "TimerStateChanged",
+                CreateTimerUpdate(game));
         }
     }
 
@@ -68,6 +72,10 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
             await Clients.Caller.SendAsync("BuzzerStateChanged", buzzerUpdate);
         }
 
+        await Clients.Caller.SendAsync(
+            "TimerStateChanged",
+            CreateTimerUpdate(connection.Game));
+
         await BroadcastPlayers(connection.Game);
     }
 
@@ -93,6 +101,34 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
         }
 
         await base.OnDisconnectedAsync(exception);
+    }
+
+    public async Task PollQuestionTimer(string publicCode)
+    {
+        var tick = sessionRegistry.ProcessQuestionTimers(publicCode);
+
+        if (tick is null)
+        {
+            return;
+        }
+
+        var group = Clients.Group(GroupName(tick.Game.PublicCode));
+
+        await group.SendAsync(
+            "TimerStateChanged",
+            CreateTimerUpdate(tick.Game));
+
+        if (tick.Outcome == QuestionTimerOutcome.None)
+        {
+            return;
+        }
+
+        await group.SendAsync(
+            "BuzzerStateChanged",
+            CreateBuzzerUpdate(tick.Game));
+        await group.SendAsync(
+            "PlayersChanged",
+            CreatePlayersUpdate(sessionRegistry, tick.Game));
     }
 
     public async Task Buzz(int sourceQuestionId)
@@ -154,6 +190,28 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
 
     public static object CreateStatusUpdate(GameSessionRegistration game)
         => new { status = game.Session.Status.ToString().ToLowerInvariant() };
+
+    public static object CreateTimerUpdate(GameSessionRegistration game)
+    {
+        var answerTimer = game.Session.AnswerTimer;
+        var buzzerTimer = game.Session.Timer;
+        var isAnswerTimerActive = answerTimer.Status is
+            GameTimerStatus.Running or GameTimerStatus.Paused;
+        var timer = isAnswerTimerActive ? answerTimer : buzzerTimer;
+        var isVisible = timer.Status is
+            GameTimerStatus.Running or GameTimerStatus.Paused;
+
+        return new
+        {
+            mode = isAnswerTimerActive ? "answer" : "buzzer",
+            status = timer.Status.ToString().ToLowerInvariant(),
+            remainingMilliseconds = isVisible
+                ? Math.Max(0, (int)Math.Ceiling(timer.Remaining.TotalMilliseconds))
+                : 0,
+            durationMilliseconds = (int)timer.Duration.TotalMilliseconds,
+            isVisible
+        };
+    }
 
     public static object CreateBuzzerUpdate(GameSessionRegistration game)
     {
