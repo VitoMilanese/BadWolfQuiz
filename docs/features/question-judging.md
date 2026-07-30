@@ -128,3 +128,10 @@ Activating the buzzer starts the buzzer timer. A valid buzzer claim pauses that 
 If the buzzer timer expires while no player is answering, the Engine resolves the question without a correct answer and moves to the answer presentation.
 
 The Engine exposes timer processing as an explicit command. Real-time scheduling, SignalR broadcasts, and visible countdown controls are connected in the Web layer separately.
+
+
+### Wager question answer timer
+
+Accepting a wager immediately starts the individual answer timer for the wager player. The buzzer timer is not used because no other player may claim the question.
+
+If the answer timer expires, the Engine records the wager answer as incorrect, subtracts the wager amount, and moves directly to the answer presentation.
