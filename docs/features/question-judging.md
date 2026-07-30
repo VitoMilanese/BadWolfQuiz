@@ -64,7 +64,14 @@ The correct answer is always displayed after the question and before the board r
 
 A regular question uses two independent timers.
 
-The **buzzer window timer** is the total time available for eligible players to claim an answer attempt. The host does not start this timer separately: activating the buzzer starts it automatically.
+The **buzzer window timer** is the total time available for eligible players to claim an answer attempt. Activating the buzzer starts this timer automatically.
+
+Buzzer activation has its own configurable start mode:
+
+- in `Automatic` mode, revealing a regular question activates the buzzer and starts the buzzer window timer immediately;
+- in `Manual` mode, revealing a regular question shows a host **Activate buzzer** control; using it activates the buzzer and starts the buzzer window timer.
+
+This setting controls when the buzzer phase begins. It is independent from the wager-question answer timer start mode.
 
 When a player wins the buzzer:
 
