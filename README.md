@@ -4,8 +4,10 @@
 
 Проєкт складається з двох основних частин:
 
-- потужного редактора квізів;
-- майбутньої ігрової платформи для ведучого та гравців.
+- редактора квізів;
+- real-time ігрової платформи для ведучого та гравців.
+
+Детальні специфікації та архітектурні рішення зберігаються в [docs](docs/README.md).
 
 ---
 
@@ -87,6 +89,24 @@ Content blocks can be:
 
 ---
 
+## Live Game
+
+Currently implemented:
+
+- Create a game from an immutable quiz snapshot
+- Lobby and join code
+- Join and reconnect flows with host approval
+- Real-time player presence and score updates
+- Active player selection
+- Random wager questions
+- Wager keypad and validation
+- Correct and incorrect answer judging
+- Positive and negative scoring
+- Focused question and answer presentation
+- Player scoreboard during gameplay
+
+---
+
 ## Media
 
 Implemented:
@@ -149,21 +169,17 @@ src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
 
 ## Game Session
 
-- Create live game
-- Lobby
-- QR code
-- Join by code
-- Player reconnect
+- Persistent game history
+- Reserved player nicknames
 - Team mode
 
 ## Game
 
-- Real-time board
-- Question presentation
-- Timers
-- Buzz system
-- Automatic scoring
-- Host controls
+- Configurable buzzer and answer timers
+- Player buzzer input
+- Automatic timer-based judging
+- Global and per-game settings
+- Final question flow
 
 ## Media
 
