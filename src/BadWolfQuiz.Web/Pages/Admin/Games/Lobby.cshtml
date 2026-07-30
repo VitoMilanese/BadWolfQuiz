@@ -259,6 +259,89 @@
                             Model.CurrentQuestion.Wager.Amount]
                     </p>
                 }
+
+                @if (Model.CurrentQuestion.Status != BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
+                {
+                    var isShowingAnswer =
+                        Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.ShowingAnswer;
+                    var contentBlocks = isShowingAnswer
+                        ? Model.CurrentQuestion.AnswerBlocks
+                        : Model.CurrentQuestion.QuestionBlocks;
+
+                    <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation")">
+                        <p class="eyebrow">
+                            @(isShowingAnswer
+                                ? Localizer["GameBoard_Answer"]
+                                : Localizer["GameBoard_Question"])
+                        </p>
+
+                        <div class="game-content-blocks">
+                            @foreach (var block in contentBlocks)
+                            {
+                                <article class="game-content-block">
+                                    @if (!string.IsNullOrWhiteSpace(block.TopCaption))
+                                    {
+                                        <p class="game-content-caption">@block.TopCaption</p>
+                                    }
+
+                                    @switch (block.Kind)
+                                    {
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Text:
+                                            <p class="game-content-text">@block.TextContent</p>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Image:
+                                            <img class="game-content-image"
+                                                 src="@Url.Page(
+                                                     "/Admin/Quizzes/QuestionEditor",
+                                                     isShowingAnswer ? "AnswerBlockFile" : "QuestionBlockFile",
+                                                     new { id = block.SourceContentBlockId })"
+                                                 alt="@block.FileName" />
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
+                                            <audio class="game-content-audio"
+                                                   controls
+                                                   src="@Url.Page(
+                                                       "/Admin/Quizzes/QuestionEditor",
+                                                       isShowingAnswer ? "AnswerBlockAudio" : "QuestionBlockAudio",
+                                                       new { id = block.SourceContentBlockId })">
+                                            </audio>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
+                                            <video class="game-content-video"
+                                                   controls
+                                                   src="@block.ExternalUrl">
+                                            </video>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
+                                            <iframe class="game-content-video"
+                                                    src="@block.ExternalUrl"
+                                                    title="@Localizer["GameBoard_MediaContent"]"
+                                                    allowfullscreen>
+                                            </iframe>
+                                            break;
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
+                                    {
+                                        <p class="game-content-caption">@block.BottomCaption</p>
+                                    }
+                                </article>
+                            }
+                        </div>
+
+                        @if (isShowingAnswer)
+                        {
+                            <form method="post" asp-page-handler="CloseAnswer">
+                                <input name="sourceQuestionId"
+                                       type="hidden"
+                                       value="@Model.CurrentQuestion.SourceQuestionId" />
+                                <button class="button button-primary" type="submit">
+                                    @Localizer["GameBoard_ReturnToBoard"]
+                                </button>
+                            </form>
+                        }
+                    </section>
+                }
             </div>
 
             @if (Model.CurrentQuestion.Status is BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Selected or
@@ -346,7 +429,7 @@
             }
         }
 
-        @if (Model.CurrentQuestion?.Status != BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
+        @if (Model.CurrentQuestion is null)
         {
             <div class="host-board-grid"
                  style="--board-columns: @Model.BoardCategories.Count">
