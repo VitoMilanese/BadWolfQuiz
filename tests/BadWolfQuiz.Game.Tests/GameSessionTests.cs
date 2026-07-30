@@ -133,6 +133,29 @@ public sealed class GameSessionTests
         Assert.Equal(player.Id, question.Wager!.PlayerId);
         Assert.Equal(150, question.Wager.Amount);
         Assert.Equal(InitialTime.AddSeconds(7), question.Wager.SubmittedAtUtc);
+        Assert.Equal(GameTimerStatus.Running, session.AnswerTimer.Status);
+        Assert.Equal(
+            GameSession.DefaultAnswerDuration,
+            session.AnswerTimer.Remaining);
+    }
+
+    [Fact]
+    public void Wager_answer_timer_expiration_records_incorrect_answer()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateSession(timeProvider);
+        var player = session.AddPlayer("Rose");
+        session.Start();
+        var question = session.SelectQuestion(101);
+        session.SubmitQuestionWager(101, 150);
+        timeProvider.Advance(GameSession.DefaultAnswerDuration);
+
+        var outcome = session.ProcessQuestionTimers();
+
+        Assert.Equal(QuestionTimerOutcome.AnswerExpired, outcome);
+        Assert.Equal(-150, player.Score);
+        Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
+        Assert.Equal(GameTimerStatus.Stopped, session.AnswerTimer.Status);
     }
 
     [Fact]

@@ -102,6 +102,9 @@ Currently implemented:
 - Wager keypad and validation
 - Player buzzer with server-authoritative winner selection
 - Near-simultaneous buzzer results with millisecond differences
+- Synchronized buzzer and answer countdown timers
+- Timer pause and resume controls for the host
+- Automatic timer-based judging for regular and wager questions
 - Correct and incorrect answer judging
 - Positive and negative scoring
 - Focused question and answer presentation

@@ -189,6 +189,8 @@ public sealed class GameSession
                 "The wager question does not have a selecting player.");
 
         question.SubmitWager(playerId, amount, _timeProvider.GetUtcNow());
+        Timer.Stop();
+        AnswerTimer.Restart();
         return question;
     }
 
