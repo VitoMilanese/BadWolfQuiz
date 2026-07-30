@@ -38,8 +38,8 @@ public sealed class GameSession
 
     public bool IsActivePlayerChangeLocked => Board.Questions.Any(question =>
         question.IsSpecial &&
-        question.Status is not RuntimeQuestionStatus.Available and
-            not RuntimeQuestionStatus.Resolved);
+        question.Status is RuntimeQuestionStatus.AwaitingWager or
+            RuntimeQuestionStatus.Active);
 
     public GameBoard Board { get; }
 
