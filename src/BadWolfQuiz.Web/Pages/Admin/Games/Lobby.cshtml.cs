@@ -542,25 +542,14 @@ public sealed class LobbyModel(
 
         if (IsRoundSummaryVisible)
         {
-            RoundLeaders = game.Session.HasNextRound
-                ? Players
-                    .OrderByDescending(player => player.Score)
-                    .ThenBy(player => player.JoinedAtUtc)
-                    .Take(3)
-                    .Select((player, index) => new RoundLeaderboardEntry(
-                        index + 1,
-                        player.Id,
-                        player.Name,
-                        player.Score))
-                    .ToArray()
-                : game.Session.GetFinalStandings()
-                    .Take(3)
-                    .Select(standing => new RoundLeaderboardEntry(
-                        standing.Position,
-                        standing.PlayerId,
-                        standing.PlayerName,
-                        standing.Score))
-                    .ToArray();
+            RoundLeaders = game.Session.GetCurrentRoundStandings()
+                .Take(3)
+                .Select(standing => new RoundLeaderboardEntry(
+                    standing.Position,
+                    standing.PlayerId,
+                    standing.PlayerName,
+                    standing.Score))
+                .ToArray();
         }
 
         if (CurrentQuestion?.Status == RuntimeQuestionStatus.AwaitingWager)

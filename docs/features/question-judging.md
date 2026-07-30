@@ -116,7 +116,7 @@ After the wager answer is judged correct or incorrect, the correct answer is dis
 
 The first round starts with the first player who joined the lobby as the active player.
 
-At the beginning of every later round, the Engine transfers the right to select the first question to the player with the lowest current score. A deterministic tie-breaker must be used when multiple players share the lowest score; the exact tie-breaker will be defined together with multi-round progression.
+At the beginning of every later round, the Engine transfers the right to select the first question to the weakest player. It applies the standings criteria in reverse: lowest total score, lowest score gain in the completed round, fewest correct answers overall and by round from newest to oldest, then fewest attempts overall and by round from newest to oldest. If every gameplay metric is identical, the player who joined first receives the selection right.
 
 
 ## Runtime timer orchestration
@@ -137,9 +137,9 @@ Accepting a wager immediately starts the individual answer timer for the wager p
 If the answer timer expires, the Engine records the wager answer as incorrect, subtracts the wager amount, and moves directly to the answer presentation.
 
 
-## Final standings tie-breaking
+## Round and final standings tie-breaking
 
-After the last round is complete, final standings are ordered by these criteria:
+The leaderboard shown after every completed round, including the final round, is ordered by these criteria:
 
 1. total score;
 2. score gain during the last round;
@@ -149,3 +149,5 @@ After the last round is complete, final standings are ordered by these criteria:
 6. answer attempts in each round, starting with the latest round and moving backward.
 
 Correct answers are therefore exhausted as tie-breakers before total attempts are considered. Players whose metrics remain identical after every criterion share the same position and are co-winners when that position is first.
+
+The same metrics are reversed when the Engine selects the weakest player to open the next round.

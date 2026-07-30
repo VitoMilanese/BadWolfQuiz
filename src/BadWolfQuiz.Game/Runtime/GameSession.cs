@@ -381,15 +381,26 @@ public sealed class GameSession
                 "The game does not have another round.");
         }
 
+        var nextActivePlayerId = GetWeakestCurrentRoundPlayerId();
+
         CurrentRoundIndex++;
         CaptureRoundStartScores();
-        ActivePlayerId = _players
-            .OrderBy(player => player.Score)
-            .ThenBy(player => player.JoinedAtUtc)
-            .First()
-            .Id;
+        ActivePlayerId = nextActivePlayerId;
 
         return CurrentRound;
+    }
+
+    public IReadOnlyList<GameResultStanding> GetCurrentRoundStandings()
+    {
+        EnsureRunning();
+
+        if (!IsCurrentRoundComplete)
+        {
+            throw new GameRuleViolationException(
+                "Round standings are only available after the current round is complete.");
+        }
+
+        return CreateStandings(CreateCurrentResultMetrics());
     }
 
     public IReadOnlyList<GameResultStanding> GetFinalStandings()
@@ -402,38 +413,7 @@ public sealed class GameSession
                 "Final standings are only available after the last round is complete.");
         }
 
-        var roundIdsDescending = Quiz.Rounds
-            .OrderByDescending(round => round.SortOrder)
-            .Select(round => round.SourceRoundId)
-            .ToArray();
-        var metrics = _players
-            .Select(player => CreateResultMetrics(player, roundIdsDescending))
-            .ToList();
-
-        metrics.Sort(CompareResultMetrics);
-
-        var standings = new List<GameResultStanding>(metrics.Count);
-
-        for (var index = 0; index < metrics.Count; index++)
-        {
-            var position = index == 0 ||
-                CompareResultMetrics(metrics[index - 1], metrics[index]) != 0
-                    ? index + 1
-                    : standings[index - 1].Position;
-            var item = metrics[index];
-
-            standings.Add(new GameResultStanding(
-                position,
-                item.Player.Id,
-                item.Player.Name,
-                item.Player.Score,
-                item.ScoreGain,
-                item.TotalCorrectAnswers,
-                item.TotalAttempts,
-                position == 1));
-        }
-
-        return standings;
+        return CreateStandings(CreateCurrentResultMetrics());
     }
 
     public GamePlayer AdjustPlayerScore(
@@ -477,6 +457,64 @@ public sealed class GameSession
         {
             _currentRoundStartScores[player.Id] = player.Score;
         }
+    }
+
+    private List<ResultMetrics> CreateCurrentResultMetrics()
+    {
+        var roundIdsDescending = Quiz.Rounds
+            .OrderBy(round => round.SortOrder)
+            .Take(CurrentRoundIndex + 1)
+            .Reverse()
+            .Select(round => round.SourceRoundId)
+            .ToArray();
+
+        return _players
+            .Select(player => CreateResultMetrics(player, roundIdsDescending))
+            .ToList();
+    }
+
+    private GamePlayerId GetWeakestCurrentRoundPlayerId()
+    {
+        var metrics = CreateCurrentResultMetrics();
+        metrics.Sort((left, right) => CompareResultMetrics(right, left));
+
+        var weakest = metrics[0];
+
+        return metrics
+            .Where(item => CompareResultMetrics(item, weakest) == 0)
+            .OrderBy(item => item.Player.JoinedAtUtc)
+            .First()
+            .Player
+            .Id;
+    }
+
+    private static IReadOnlyList<GameResultStanding> CreateStandings(
+        List<ResultMetrics> metrics)
+    {
+        metrics.Sort(CompareResultMetrics);
+
+        var standings = new List<GameResultStanding>(metrics.Count);
+
+        for (var index = 0; index < metrics.Count; index++)
+        {
+            var position = index == 0 ||
+                CompareResultMetrics(metrics[index - 1], metrics[index]) != 0
+                    ? index + 1
+                    : standings[index - 1].Position;
+            var item = metrics[index];
+
+            standings.Add(new GameResultStanding(
+                position,
+                item.Player.Id,
+                item.Player.Name,
+                item.Player.Score,
+                item.ScoreGain,
+                item.TotalCorrectAnswers,
+                item.TotalAttempts,
+                position == 1));
+        }
+
+        return standings;
     }
 
     private ResultMetrics CreateResultMetrics(

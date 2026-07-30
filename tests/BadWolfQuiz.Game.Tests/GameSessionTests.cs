@@ -619,7 +619,7 @@ public sealed class GameSessionTests
     }
 
     [Fact]
-    public void AdvanceToNextRound_breaks_score_tie_by_join_order()
+    public void AdvanceToNextRound_breaks_score_tie_by_weakest_round_results()
     {
         var timeProvider = new ManualTimeProvider(InitialTime);
         var session = CreateMultiRoundSession(timeProvider);
@@ -634,7 +634,27 @@ public sealed class GameSessionTests
 
         session.AdvanceToNextRound();
 
-        Assert.Equal(rose.Id, session.ActivePlayerId);
+        Assert.Equal(mickey.Id, session.ActivePlayerId);
+    }
+
+    [Fact]
+    public void Current_round_standings_use_full_tie_breaking_before_last_round()
+    {
+        var session = CreateMultiRoundSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, rose.Id, true);
+        session.CloseQuestionAnswer(100);
+        session.AdjustPlayerScore(rose.Id, -100);
+
+        var standings = session.GetCurrentRoundStandings();
+
+        Assert.True(session.HasNextRound);
+        Assert.Equal(rose.Id, standings[0].PlayerId);
+        Assert.Equal(1, standings[0].TotalCorrectAnswers);
+        Assert.Equal(mickey.Id, standings[1].PlayerId);
     }
 
     [Fact]
