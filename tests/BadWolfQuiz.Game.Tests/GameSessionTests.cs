@@ -437,6 +437,26 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void QuizSnapshot_allows_zero_random_wager_questions()
+    {
+        var round = new QuizRoundSnapshot(
+            1,
+            "Round 1",
+            0,
+            [
+                new QuizQuestionSnapshot(
+                    100, 10, 0, 100, false, "Science")
+            ],
+            useRandomWagerQuestions: true,
+            randomWagerQuestionCount: 0);
+
+        var session = GameSession.Create(
+            new QuizSnapshot(1, "No wagers", [round]));
+
+        Assert.Empty(session.Board.Questions.Where(question => question.IsSpecial));
+    }
+
+    [Fact]
     public void QuizSnapshot_rejects_random_wager_count_above_eligible_questions()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
@@ -468,6 +488,85 @@ public sealed class GameSessionTests
 
         Assert.Single(quiz.Rounds);
         Assert.Single(quiz.Rounds[0].Questions);
+    }
+
+    [Fact]
+    public void AdvanceToNextRound_requires_completed_current_round()
+    {
+        var session = CreateMultiRoundSession();
+        session.AddPlayer("Rose");
+        session.Start();
+
+        Assert.Throws<GameRuleViolationException>(
+            session.AdvanceToNextRound);
+    }
+
+    [Fact]
+    public void AdvanceToNextRound_selects_lowest_score_player()
+    {
+        var session = CreateMultiRoundSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.AdjustPlayerScore(rose.Id, 300);
+        session.AdjustPlayerScore(mickey.Id, -100);
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, rose.Id, true);
+        session.CloseQuestionAnswer(100);
+
+        var round = session.AdvanceToNextRound();
+
+        Assert.Equal(2, session.CurrentRoundNumber);
+        Assert.Equal(2, round.SourceRoundId);
+        Assert.Equal(mickey.Id, session.ActivePlayerId);
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SelectQuestion(100));
+        Assert.Equal(
+            RuntimeQuestionStatus.Selected,
+            session.SelectQuestion(200).Status);
+    }
+
+    [Fact]
+    public void AdvanceToNextRound_breaks_score_tie_by_join_order()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateMultiRoundSession(timeProvider);
+        var rose = session.AddPlayer("Rose");
+        timeProvider.Advance(TimeSpan.FromSeconds(1));
+        session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, rose.Id, true);
+        session.CloseQuestionAnswer(100);
+        session.AdjustPlayerScore(rose.Id, -100);
+
+        session.AdvanceToNextRound();
+
+        Assert.Equal(rose.Id, session.ActivePlayerId);
+    }
+
+    private static GameSession CreateMultiRoundSession(
+        ManualTimeProvider? timeProvider = null)
+    {
+        var quiz = new QuizSnapshot(
+            1,
+            "Multi-round Quiz",
+            [
+                new QuizRoundSnapshot(
+                    1,
+                    "Round 1",
+                    0,
+                    [new QuizQuestionSnapshot(100, 10, 0, 100, false, "Science")]),
+                new QuizRoundSnapshot(
+                    2,
+                    "Round 2",
+                    1,
+                    [new QuizQuestionSnapshot(200, 20, 0, 200, false, "History")])
+            ]);
+
+        return GameSession.Create(
+            quiz,
+            timeProvider ?? new ManualTimeProvider(InitialTime));
     }
 
     private static GameSession CreateSession(ManualTimeProvider? timeProvider = null)

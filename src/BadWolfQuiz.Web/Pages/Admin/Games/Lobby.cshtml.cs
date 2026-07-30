@@ -24,6 +24,10 @@ public sealed class LobbyModel(
 
     public WagerLimits? QuestionWagerLimits { get; private set; }
 
+    public bool IsRoundSummaryVisible { get; private set; }
+
+    public IReadOnlyList<RoundLeaderboardEntry> RoundLeaders { get; private set; } = [];
+
     public IActionResult OnGet(Guid id)
     {
         return LoadPage(id);
@@ -124,6 +128,31 @@ public sealed class LobbyModel(
                 GameHub.CreateStatusUpdate(game),
                 cancellationToken);
 
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostAdvanceRoundAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.AdvanceToNextRound(game.PublicCode);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_AdvanceRoundRejected"].Value;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
         return RedirectToPage(new { id });
     }
 
@@ -423,9 +452,7 @@ public sealed class LobbyModel(
         Game = game;
         Players = sessionRegistry.GetPlayers(game);
 
-        var currentRound = game.Session.Quiz.Rounds
-            .OrderBy(round => round.SortOrder)
-            .First();
+        var currentRound = game.Session.CurrentRound;
 
         var roundQuestions = game.Session.Board.Questions
             .Where(question => question.SourceRoundId == currentRound.SourceRoundId)
@@ -447,6 +474,24 @@ public sealed class LobbyModel(
             question.Status is not RuntimeQuestionStatus.Available and
                 not RuntimeQuestionStatus.Resolved);
 
+        IsRoundSummaryVisible =
+            CurrentQuestion is null &&
+            game.Session.IsCurrentRoundComplete;
+
+        if (IsRoundSummaryVisible)
+        {
+            RoundLeaders = Players
+                .OrderByDescending(player => player.Score)
+                .ThenBy(player => player.JoinedAtUtc)
+                .Take(3)
+                .Select((player, index) => new RoundLeaderboardEntry(
+                    index + 1,
+                    player.Id,
+                    player.Name,
+                    player.Score))
+                .ToArray();
+        }
+
         if (CurrentQuestion?.Status == RuntimeQuestionStatus.AwaitingWager)
         {
             QuestionWagerLimits = game.Session.GetQuestionWagerLimits(
@@ -462,3 +507,10 @@ public sealed record GameBoardCategory(
     int SourceCategoryId,
     string Title,
     IReadOnlyList<RuntimeQuestion> Questions);
+
+
+public sealed record RoundLeaderboardEntry(
+    int Position,
+    GamePlayerId PlayerId,
+    string PlayerName,
+    int Score);
