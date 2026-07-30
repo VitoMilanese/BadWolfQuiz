@@ -4,7 +4,10 @@
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
 }
 
-<div class="page-heading">
+@if (Model.Game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Running ||
+    Model.CurrentQuestion is null)
+{
+    <div class="page-heading">
     <div>
         <p class="eyebrow">@Localizer["GameLobby_Eyebrow"]</p>
         <h1>@Model.Game.Session.Quiz.Title</h1>
@@ -14,6 +17,7 @@
         @Localizer["Button_BackToQuizzes"]
     </a>
 </div>
+}
 
 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby)
 {
@@ -125,6 +129,8 @@
             <div class="message message-error">@errorMessage</div>
         }
 
+        @if (Model.CurrentQuestion is null)
+        {
         <div class="page-heading">
             <div>
                 <p class="eyebrow">@Localizer["GameBoard_Eyebrow"]</p>
@@ -147,10 +153,13 @@
                 </button>
             </div>
         </div>
+        }
 
         @if (Model.CurrentQuestion is not null)
         {
             <div class="content-panel current-question-summary @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager ? "wager-mode" : null)">
+                @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
+                {
                 <div class="current-question-heading">
                     <strong>@Model.CurrentQuestion.CategoryTitle — @Model.CurrentQuestion.Points</strong>
                     <span>
@@ -161,6 +170,7 @@
                                 : Localizer["GameBoard_QuestionSelected"])
                     </span>
                 </div>
+                }
 
                 @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
                 {
