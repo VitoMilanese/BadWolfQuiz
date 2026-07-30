@@ -209,6 +209,46 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public QuestionAnswerAttempt? JudgeQuestionAnswer(
+        string publicCode,
+        int sourceQuestionId,
+        GamePlayerId playerId,
+        bool isCorrect)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.JudgeQuestionAnswer(
+                sourceQuestionId,
+                playerId,
+                isCorrect);
+        }
+    }
+
+    public RuntimeQuestion? ResolveQuestionWithoutCorrectAnswer(
+        string publicCode,
+        int sourceQuestionId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.ResolveQuestionWithoutCorrectAnswer(
+                sourceQuestionId);
+        }
+    }
+
     public GamePlayer? AdjustPlayerScore(
         string publicCode,
         GamePlayerId playerId,
