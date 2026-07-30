@@ -817,4 +817,10 @@
   <data name="PlayerGame_BuzzRejected" xml:space="preserve">
     <value>Your buzz was not accepted.</value>
   </data>
+  <data name="GameBoard_BuzzerRaceWinner" xml:space="preserve">
+    <value>{0} buzzed first</value>
+  </data>
+  <data name="GameBoard_BuzzerRaceLatePlayer" xml:space="preserve">
+    <value>{0} was {1} ms later</value>
+  </data>
 </root>

@@ -817,4 +817,10 @@
   <data name="PlayerGame_BuzzRejected" xml:space="preserve">
     <value>Il tuo tentativo non è stato accettato.</value>
   </data>
+  <data name="GameBoard_BuzzerRaceWinner" xml:space="preserve">
+    <value>{0} ha premuto per primo</value>
+  </data>
+  <data name="GameBoard_BuzzerRaceLatePlayer" xml:space="preserve">
+    <value>{0} ha premuto {1} ms dopo</value>
+  </data>
 </root>

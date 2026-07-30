@@ -9,7 +9,9 @@ namespace BadWolfQuiz.Web.Services;
 public sealed class GameSessionRegistry
 {
     private const int MaxCodeGenerationAttempts = 20;
+    private static readonly TimeSpan BuzzerRaceWindow = TimeSpan.FromSeconds(1);
     private readonly IGameCodeGenerator _gameCodeGenerator;
+    private readonly TimeProvider _timeProvider;
     private readonly ConcurrentDictionary<GameSessionId, GameSessionRegistration> _sessionsById = new();
     private readonly ConcurrentDictionary<string, GameSessionRegistration> _sessionsByCode =
         new(StringComparer.OrdinalIgnoreCase);
@@ -17,9 +19,12 @@ public sealed class GameSessionRegistry
     private readonly Dictionary<string, PlayerConnection> _playerConnections = new();
     private readonly object _presenceSync = new();
 
-    public GameSessionRegistry(IGameCodeGenerator gameCodeGenerator)
+    public GameSessionRegistry(
+        IGameCodeGenerator gameCodeGenerator,
+        TimeProvider? timeProvider = null)
     {
         _gameCodeGenerator = gameCodeGenerator;
+        _timeProvider = timeProvider ?? TimeProvider.System;
     }
 
     public GameSessionRegistration Create(QuizSnapshot quiz)
@@ -222,7 +227,9 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.ActivateQuestionBuzzer(sourceQuestionId);
+            var question = game.Session.ActivateQuestionBuzzer(sourceQuestionId);
+            game.BuzzerRace = null;
+            return question;
         }
     }
 
@@ -237,8 +244,7 @@ public sealed class GameSessionRegistry
             if (!_playerConnections.TryGetValue(
                     connectionId,
                     out var currentConnection) ||
-                !currentConnection.IsApproved ||
-                !currentConnection.IsVisible)
+                !currentConnection.IsApproved)
             {
                 return null;
             }
@@ -248,14 +254,60 @@ public sealed class GameSessionRegistry
 
         lock (connection.Access.Game)
         {
-            var question = connection.Access.Game.Session.ClaimQuestionBuzzer(
-                sourceQuestionId,
-                connection.Access.Player.Id);
+            var game = connection.Access.Game;
+            var player = connection.Access.Player;
+            var question = game.Session.Board.Questions.SingleOrDefault(
+                item => item.SourceQuestionId == sourceQuestionId);
 
-            return new BuzzerClaimResult(
-                connection.Access.Game,
-                question,
-                connection.Access.Player);
+            if (question is null)
+            {
+                return null;
+            }
+
+            var pressedAt = _timeProvider.GetUtcNow();
+
+            if (question.BuzzerStatus == QuestionBuzzerStatus.Open)
+            {
+                question = game.Session.ClaimQuestionBuzzer(
+                    sourceQuestionId,
+                    player.Id);
+                game.BuzzerRace = new BuzzerRaceSnapshot(
+                    sourceQuestionId,
+                    pressedAt,
+                    player.Id,
+                    player.Name,
+                    []);
+
+                return new BuzzerClaimResult(game, question, player, true);
+            }
+
+            var race = game.BuzzerRace;
+            var delay = race is null
+                ? TimeSpan.MaxValue
+                : pressedAt - race.WinnerPressedAt;
+
+            if (question.BuzzerStatus != QuestionBuzzerStatus.Claimed ||
+                race is null ||
+                race.SourceQuestionId != sourceQuestionId ||
+                player.Id == race.WinnerPlayerId ||
+                race.LatePlayers.Any(item => item.PlayerId == player.Id) ||
+                delay < TimeSpan.Zero ||
+                delay > BuzzerRaceWindow)
+            {
+                return null;
+            }
+
+            var latePlayer = new BuzzerRaceLatePlayer(
+                player.Id,
+                player.Name,
+                checked((int)Math.Round(delay.TotalMilliseconds)));
+
+            game.BuzzerRace = race with
+            {
+                LatePlayers = [.. race.LatePlayers, latePlayer]
+            };
+
+            return new BuzzerClaimResult(game, question, player, false);
         }
     }
 
@@ -274,10 +326,12 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.JudgeQuestionAnswer(
+            var attempt = game.Session.JudgeQuestionAnswer(
                 sourceQuestionId,
                 playerId,
                 isCorrect);
+            game.BuzzerRace = null;
+            return attempt;
         }
     }
 
@@ -294,8 +348,10 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.ResolveQuestionWithoutCorrectAnswer(
+            var question = game.Session.ResolveQuestionWithoutCorrectAnswer(
                 sourceQuestionId);
+            game.BuzzerRace = null;
+            return question;
         }
     }
 
@@ -483,4 +539,5 @@ public sealed class GameSessionRegistry
 public sealed record BuzzerClaimResult(
     GameSessionRegistration Game,
     RuntimeQuestion Question,
-    GamePlayer Player);
+    GamePlayer Player,
+    bool IsWinner);
