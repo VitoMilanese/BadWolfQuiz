@@ -171,6 +171,32 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public IActionResult OnPostCloseAnswer(
+        Guid id,
+        int sourceQuestionId)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.CloseQuestionAnswer(
+                game.PublicCode,
+                sourceQuestionId);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_CloseAnswerRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostSetActivePlayerAsync(
         Guid id,
         Guid playerId,
