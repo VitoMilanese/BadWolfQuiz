@@ -36,6 +36,10 @@
 
     <p class="dialog-warning">@Localizer["PlayerPresence_MonitoringNotice"]</p>
 
+    <div id="game-timer" class="game-timer player-game-timer" hidden>
+        <strong id="game-timer-value">0.0</strong>
+    </div>
+
     <section class="player-buzzer-panel">
         <button id="player-buzzer"
                 class="player-buzzer"
@@ -72,6 +76,8 @@
             const playerScoreList = document.getElementById("player-score-list");
             const buzzerButton = document.getElementById("player-buzzer");
             const buzzerStatus = document.getElementById("player-buzzer-status");
+            const timerPanel = document.getElementById("game-timer");
+            const timerValue = document.getElementById("game-timer-value");
             let buzzerQuestionId = null;
 
             if (!lobby || !warning || typeof signalR === "undefined") {
@@ -122,6 +128,19 @@
                 gameCode,
                 accessToken,
                 isPageActive());
+
+            connection.on("TimerStateChanged", update => {
+                if (!timerPanel || !timerValue) {
+                    return;
+                }
+
+                timerPanel.hidden = !update.isVisible;
+                timerPanel.classList.toggle(
+                    "answer-timer",
+                    update.mode === "answer");
+                timerValue.textContent =
+                    (update.remainingMilliseconds / 1000).toFixed(1);
+            });
 
             connection.on("BuzzerStateChanged", update => {
                 const hasAlreadyAnswered =

@@ -157,6 +157,23 @@
         @if (Model.CurrentQuestion is not null)
         {
             <div class="content-panel current-question-summary @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager ? "wager-mode" : null)">
+                <div id="game-timer" class="game-timer host-game-timer" hidden>
+                    <strong id="game-timer-value">0.0</strong>
+                    <form class="game-timer-control game-timer-pause"
+                          method="post"
+                          asp-page-handler="PauseQuestionTimer">
+                        <button type="submit"
+                                title="@Localizer["GameTimer_Pause"]"
+                                aria-label="@Localizer["GameTimer_Pause"]">⏸</button>
+                    </form>
+                    <form class="game-timer-control game-timer-resume"
+                          method="post"
+                          asp-page-handler="ResumeQuestionTimer">
+                        <button type="submit"
+                                title="@Localizer["GameTimer_Resume"]"
+                                aria-label="@Localizer["GameTimer_Resume"]">▶</button>
+                    </form>
+                </div>
                 @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
                 {
                 <div class="current-question-heading">
@@ -705,6 +722,31 @@
 
             let hasReceivedInitialBuzzerState = false;
             let buzzerState = null;
+            const timerPanel = document.getElementById("game-timer");
+            const timerValue = document.getElementById("game-timer-value");
+            const timerPause = document.querySelector(".game-timer-pause");
+            const timerResume = document.querySelector(".game-timer-resume");
+
+            connection.on("TimerStateChanged", update => {
+                if (!timerPanel || !timerValue) {
+                    return;
+                }
+
+                timerPanel.hidden = !update.isVisible;
+                timerPanel.classList.toggle(
+                    "answer-timer",
+                    update.mode === "answer");
+                timerValue.textContent =
+                    (update.remainingMilliseconds / 1000).toFixed(1);
+
+                if (timerPause) {
+                    timerPause.hidden = update.status !== "running";
+                }
+
+                if (timerResume) {
+                    timerResume.hidden = update.status !== "paused";
+                }
+            });
 
             const applyBuzzerPlayerStates = () => {
                 playerList.querySelectorAll("[data-player-id]").forEach(item => {
@@ -826,8 +868,31 @@
 
             const joinSession = () => connection.invoke("JoinSession", gameCode);
 
-            connection.onreconnected(joinSession);
-            connection.start().then(joinSession).catch(console.error);
+            let timerPollHandle = null;
+            const startTimerPolling = () => {
+                if (timerPollHandle !== null) {
+                    clearInterval(timerPollHandle);
+                }
+
+                timerPollHandle = window.setInterval(() => {
+                    if (connection.state === signalR.HubConnectionState.Connected &&
+                        lobby.dataset.gameStatus === "running") {
+                        connection.invoke("PollQuestionTimer", gameCode)
+                            .catch(console.error);
+                    }
+                }, 250);
+            };
+
+            connection.onreconnected(async () => {
+                await joinSession();
+                startTimerPolling();
+            });
+            connection.start()
+                .then(async () => {
+                    await joinSession();
+                    startTimerPolling();
+                })
+                .catch(console.error);
         })();
     </script>
 }

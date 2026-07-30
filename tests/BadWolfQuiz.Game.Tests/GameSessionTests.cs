@@ -265,6 +265,75 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void Buzzer_and_answer_timers_preserve_the_buzzer_window()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateSession(timeProvider);
+        var rose = session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+
+        session.ActivateQuestionBuzzer(100);
+        timeProvider.Advance(TimeSpan.FromSeconds(7));
+        session.ClaimQuestionBuzzer(100, rose.Id);
+
+        Assert.True(session.Timer.IsPaused);
+        Assert.Equal(TimeSpan.FromSeconds(23), session.Timer.Remaining);
+        Assert.Equal(GameTimerStatus.Running, session.AnswerTimer.Status);
+
+        timeProvider.Advance(GameSession.DefaultAnswerDuration);
+
+        Assert.Equal(
+            QuestionTimerOutcome.AnswerExpired,
+            session.ProcessQuestionTimers());
+        Assert.Equal(-100, rose.Score);
+        Assert.Equal(GameTimerStatus.Running, session.Timer.Status);
+        Assert.Equal(TimeSpan.FromSeconds(23), session.Timer.Remaining);
+    }
+
+    [Fact]
+    public void Active_question_timer_can_be_paused_and_resumed()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateSession(timeProvider);
+        session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        timeProvider.Advance(TimeSpan.FromSeconds(4));
+
+        var paused = session.PauseQuestionTimer();
+        timeProvider.Advance(TimeSpan.FromSeconds(5));
+
+        Assert.Same(session.Timer, paused);
+        Assert.Equal(TimeSpan.FromSeconds(26), session.Timer.Remaining);
+
+        var resumed = session.ResumeQuestionTimer();
+        timeProvider.Advance(TimeSpan.FromSeconds(1));
+
+        Assert.Same(session.Timer, resumed);
+        Assert.Equal(TimeSpan.FromSeconds(25), session.Timer.Remaining);
+    }
+
+    [Fact]
+    public void Buzzer_timer_expiration_shows_the_answer()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateSession(timeProvider);
+        session.AddPlayer("Rose");
+        session.Start();
+        var question = session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        timeProvider.Advance(GameSession.DefaultBuzzerDuration);
+
+        var outcome = session.ProcessQuestionTimers();
+
+        Assert.Equal(QuestionTimerOutcome.BuzzerExpired, outcome);
+        Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
+        Assert.Equal(GameTimerStatus.Stopped, session.Timer.Status);
+    }
+
+    [Fact]
     public void AdjustPlayerScore_allows_negative_scores()
     {
         var session = CreateSession();

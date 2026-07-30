@@ -6,6 +6,8 @@ namespace BadWolfQuiz.Game.Runtime;
 public sealed class GameSession
 {
     public const int MinimumQuestionWager = 5;
+    public static readonly TimeSpan DefaultBuzzerDuration = TimeSpan.FromSeconds(30);
+    public static readonly TimeSpan DefaultAnswerDuration = TimeSpan.FromSeconds(10);
     private const int MaxPlayerNameLength = 60;
     private readonly List<GamePlayer> _players = [];
     private readonly ReadOnlyCollection<GamePlayer> _readOnlyPlayers;
@@ -16,7 +18,8 @@ public sealed class GameSession
         Id = GameSessionId.New();
         Quiz = quiz;
         Board = new GameBoard(quiz);
-        Timer = new GameTimer(TimeSpan.FromSeconds(30), timeProvider);
+        Timer = new GameTimer(DefaultBuzzerDuration, timeProvider);
+        AnswerTimer = new GameTimer(DefaultAnswerDuration, timeProvider);
         CreatedAtUtc = timeProvider.GetUtcNow();
         _timeProvider = timeProvider;
         _readOnlyPlayers = _players.AsReadOnly();
@@ -58,6 +61,8 @@ public sealed class GameSession
     public GameBoard Board { get; }
 
     public GameTimer Timer { get; }
+
+    public GameTimer AnswerTimer { get; }
 
     public DateTimeOffset CreatedAtUtc { get; }
 
@@ -193,6 +198,17 @@ public sealed class GameSession
 
         var question = FindQuestion(sourceQuestionId);
         question.ActivateBuzzer();
+
+        if (Timer.IsPaused)
+        {
+            Timer.Resume();
+        }
+        else
+        {
+            Timer.Restart();
+        }
+
+        AnswerTimer.Stop();
         return question;
     }
 
@@ -205,6 +221,13 @@ public sealed class GameSession
         var question = FindQuestion(sourceQuestionId);
         var player = FindPlayer(playerId);
         question.ClaimBuzzer(player.Id);
+
+        if (Timer.Status == GameTimerStatus.Running)
+        {
+            Timer.Pause();
+        }
+
+        AnswerTimer.Restart();
         return question;
     }
 
@@ -223,10 +246,20 @@ public sealed class GameSession
             _timeProvider.GetUtcNow());
 
         player.ApplyScore(attempt.ScoreDelta);
+        AnswerTimer.Stop();
 
         if (isCorrect)
         {
             ActivePlayerId = player.Id;
+            Timer.Stop();
+        }
+        else if (question.IsSpecial)
+        {
+            Timer.Stop();
+        }
+        else if (Timer.IsPaused)
+        {
+            Timer.Resume();
         }
 
         return attempt;
@@ -239,6 +272,8 @@ public sealed class GameSession
 
         var question = FindQuestion(sourceQuestionId);
         question.ResolveWithoutCorrectAnswer();
+        Timer.Stop();
+        AnswerTimer.Stop();
         return question;
     }
 
@@ -248,7 +283,76 @@ public sealed class GameSession
 
         var question = FindQuestion(sourceQuestionId);
         question.CloseAnswer();
+        Timer.Stop();
+        AnswerTimer.Stop();
         return question;
+    }
+
+    public GameTimer PauseQuestionTimer()
+    {
+        EnsureRunning();
+
+        var timer = AnswerTimer.Status == GameTimerStatus.Running
+            ? AnswerTimer
+            : Timer.Status == GameTimerStatus.Running
+                ? Timer
+                : throw new GameRuleViolationException(
+                    "There is no running question timer to pause.");
+
+        timer.Pause();
+        return timer;
+    }
+
+    public GameTimer ResumeQuestionTimer()
+    {
+        EnsureRunning();
+
+        var timer = AnswerTimer.IsPaused
+            ? AnswerTimer
+            : Timer.IsPaused
+                ? Timer
+                : throw new GameRuleViolationException(
+                    "There is no paused question timer to resume.");
+
+        timer.Resume();
+        return timer;
+    }
+
+    public QuestionTimerOutcome ProcessQuestionTimers()
+    {
+        EnsureRunning();
+
+        var question = Board.Questions.FirstOrDefault(item =>
+            item.Status is RuntimeQuestionStatus.Selected or
+                RuntimeQuestionStatus.Active);
+
+        if (question is null)
+        {
+            return QuestionTimerOutcome.None;
+        }
+
+        _ = AnswerTimer.Remaining;
+
+        if (AnswerTimer.Status == GameTimerStatus.Expired &&
+            question.AnsweringPlayerId is { } answeringPlayerId)
+        {
+            JudgeQuestionAnswer(
+                question.SourceQuestionId,
+                answeringPlayerId,
+                false);
+            return QuestionTimerOutcome.AnswerExpired;
+        }
+
+        _ = Timer.Remaining;
+
+        if (Timer.Status == GameTimerStatus.Expired &&
+            question.AnsweringPlayerId is null)
+        {
+            ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
+            return QuestionTimerOutcome.BuzzerExpired;
+        }
+
+        return QuestionTimerOutcome.None;
     }
 
     public QuizRoundSnapshot AdvanceToNextRound()
@@ -366,4 +470,12 @@ public enum GameSessionStatus
     Lobby = 1,
     Running = 2,
     Completed = 3
+}
+
+
+public enum QuestionTimerOutcome
+{
+    None = 0,
+    BuzzerExpired = 1,
+    AnswerExpired = 2
 }

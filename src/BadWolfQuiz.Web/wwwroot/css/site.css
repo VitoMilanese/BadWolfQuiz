@@ -2420,3 +2420,99 @@ iframe.game-content-video {
     color: #b87333;
     background: #111;
 }
+
+
+/* Synchronized question timers */
+
+.game-timer {
+    position: absolute;
+    z-index: 6;
+    top: 18px;
+    right: 18px;
+    min-width: 132px;
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    padding: 10px 16px;
+    border: 2px solid var(--gold);
+    border-radius: 14px;
+    color: var(--gold);
+    background: rgba(10, 10, 15, 0.94);
+    box-shadow: 0 0 24px rgba(220, 169, 0, 0.22);
+}
+
+.game-timer[hidden] {
+    display: none;
+}
+
+.game-timer span {
+    font-size: 0.78rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.game-timer strong {
+    font-variant-numeric: tabular-nums;
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.game-timer.answer-timer {
+    color: #ff697a;
+    border-color: #ff697a;
+    box-shadow: 0 0 24px rgba(255, 105, 122, 0.24);
+}
+
+.current-question-summary {
+    position: relative;
+}
+
+.player-game-timer {
+    position: static;
+    width: min(240px, 100%);
+    margin: 18px auto;
+}
+
+
+/* Compact timer controls */
+
+.game-timer {
+    min-width: 0;
+    grid-auto-flow: column;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 11px;
+}
+
+.game-timer strong {
+    min-width: 68px;
+    text-align: center;
+}
+
+.game-timer-control {
+    display: block;
+    margin: 0;
+}
+
+.game-timer-control[hidden] {
+    display: none;
+}
+
+.game-timer-control button {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    color: inherit;
+    background: transparent;
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.game-timer-control button:hover {
+    background: rgba(255, 255, 255, 0.12);
+}

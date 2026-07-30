@@ -40,9 +40,21 @@ public sealed class GameTimer
             throw new GameRuleViolationException("Only a stopped timer can be started.");
         }
 
+        Restart();
+    }
+
+    public void Restart()
+    {
         _remaining = Duration;
         _lastStartedAtUtc = _timeProvider.GetUtcNow();
         Status = GameTimerStatus.Running;
+    }
+
+    public void Stop()
+    {
+        _remaining = Duration;
+        _lastStartedAtUtc = null;
+        Status = GameTimerStatus.Stopped;
     }
 
     public void Pause()
