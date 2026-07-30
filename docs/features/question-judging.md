@@ -135,3 +135,17 @@ The Engine exposes timer processing as an explicit command. Real-time scheduling
 Accepting a wager immediately starts the individual answer timer for the wager player. The buzzer timer is not used because no other player may claim the question.
 
 If the answer timer expires, the Engine records the wager answer as incorrect, subtracts the wager amount, and moves directly to the answer presentation.
+
+
+## Final standings tie-breaking
+
+After the last round is complete, final standings are ordered by these criteria:
+
+1. total score;
+2. score gain during the last round;
+3. total correct answers;
+4. correct answers in each round, starting with the latest round and moving backward;
+5. total answer attempts;
+6. answer attempts in each round, starting with the latest round and moving backward.
+
+Correct answers are therefore exhausted as tie-breakers before total attempts are considered. Players whose metrics remain identical after every criterion share the same position and are co-winners when that position is first.

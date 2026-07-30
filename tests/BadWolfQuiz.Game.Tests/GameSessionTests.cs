@@ -637,6 +637,58 @@ public sealed class GameSessionTests
         Assert.Equal(rose.Id, session.ActivePlayerId);
     }
 
+    [Fact]
+    public void Final_standings_use_last_round_score_gain_after_score()
+    {
+        var session = CreateMultiRoundSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, rose.Id, true);
+        session.CloseQuestionAnswer(100);
+        session.AdvanceToNextRound();
+        session.SelectQuestion(200);
+        session.JudgeQuestionAnswer(200, mickey.Id, true);
+        session.CloseQuestionAnswer(200);
+        session.AdjustPlayerScore(rose.Id, 0);
+        session.AdjustPlayerScore(mickey.Id, -100);
+
+        var standings = session.GetFinalStandings();
+
+        Assert.Equal(100, rose.Score);
+        Assert.Equal(100, mickey.Score);
+        Assert.Equal(mickey.Id, standings[0].PlayerId);
+        Assert.Equal(100, standings[0].ScoreGain);
+        Assert.True(standings[0].IsWinner);
+    }
+
+    [Fact]
+    public void Final_standings_use_correct_answers_before_attempts()
+    {
+        var session = CreateMultiRoundSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, rose.Id, true);
+        session.CloseQuestionAnswer(100);
+        session.AdjustPlayerScore(rose.Id, -100);
+        session.AdvanceToNextRound();
+        session.SelectQuestion(200);
+        session.JudgeQuestionAnswer(200, rose.Id, true);
+        session.CloseQuestionAnswer(200);
+        session.AdjustPlayerScore(rose.Id, -200);
+
+        var standings = session.GetFinalStandings();
+
+        Assert.Equal(0, rose.Score);
+        Assert.Equal(0, mickey.Score);
+        Assert.Equal(rose.Id, standings[0].PlayerId);
+        Assert.Equal(2, standings[0].TotalCorrectAnswers);
+        Assert.Equal(mickey.Id, standings[1].PlayerId);
+    }
+
     private static GameSession CreateMultiRoundSession(
         ManualTimeProvider? timeProvider = null)
     {

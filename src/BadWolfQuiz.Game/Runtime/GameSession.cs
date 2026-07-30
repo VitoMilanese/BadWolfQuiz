@@ -10,6 +10,7 @@ public sealed class GameSession
     public static readonly TimeSpan DefaultAnswerDuration = TimeSpan.FromSeconds(10);
     private const int MaxPlayerNameLength = 60;
     private readonly List<GamePlayer> _players = [];
+    private readonly Dictionary<GamePlayerId, int> _currentRoundStartScores = [];
     private readonly ReadOnlyCollection<GamePlayer> _readOnlyPlayers;
     private readonly TimeProvider _timeProvider;
 
@@ -97,6 +98,12 @@ public sealed class GameSession
 
         var player = new GamePlayer(GamePlayerId.New(), normalizedName, _timeProvider.GetUtcNow());
         _players.Add(player);
+
+        if (Status == GameSessionStatus.Running)
+        {
+            _currentRoundStartScores[player.Id] = player.Score;
+        }
+
         ActivePlayerId ??= player.Id;
         return player;
     }
@@ -112,6 +119,7 @@ public sealed class GameSession
 
         Status = GameSessionStatus.Running;
         StartedAtUtc = _timeProvider.GetUtcNow();
+        CaptureRoundStartScores();
     }
 
     public RuntimeQuestion SelectQuestion(int sourceQuestionId)
@@ -374,6 +382,7 @@ public sealed class GameSession
         }
 
         CurrentRoundIndex++;
+        CaptureRoundStartScores();
         ActivePlayerId = _players
             .OrderBy(player => player.Score)
             .ThenBy(player => player.JoinedAtUtc)
@@ -381,6 +390,50 @@ public sealed class GameSession
             .Id;
 
         return CurrentRound;
+    }
+
+    public IReadOnlyList<GameResultStanding> GetFinalStandings()
+    {
+        EnsureRunning();
+
+        if (HasNextRound || !IsCurrentRoundComplete)
+        {
+            throw new GameRuleViolationException(
+                "Final standings are only available after the last round is complete.");
+        }
+
+        var roundIdsDescending = Quiz.Rounds
+            .OrderByDescending(round => round.SortOrder)
+            .Select(round => round.SourceRoundId)
+            .ToArray();
+        var metrics = _players
+            .Select(player => CreateResultMetrics(player, roundIdsDescending))
+            .ToList();
+
+        metrics.Sort(CompareResultMetrics);
+
+        var standings = new List<GameResultStanding>(metrics.Count);
+
+        for (var index = 0; index < metrics.Count; index++)
+        {
+            var position = index == 0 ||
+                CompareResultMetrics(metrics[index - 1], metrics[index]) != 0
+                    ? index + 1
+                    : standings[index - 1].Position;
+            var item = metrics[index];
+
+            standings.Add(new GameResultStanding(
+                position,
+                item.Player.Id,
+                item.Player.Name,
+                item.Player.Score,
+                item.ScoreGain,
+                item.TotalCorrectAnswers,
+                item.TotalAttempts,
+                position == 1));
+        }
+
+        return standings;
     }
 
     public GamePlayer AdjustPlayerScore(
@@ -415,6 +468,107 @@ public sealed class GameSession
 
         return SetActivePlayer(_players[Random.Shared.Next(_players.Count)].Id);
     }
+
+    private void CaptureRoundStartScores()
+    {
+        _currentRoundStartScores.Clear();
+
+        foreach (var player in _players)
+        {
+            _currentRoundStartScores[player.Id] = player.Score;
+        }
+    }
+
+    private ResultMetrics CreateResultMetrics(
+        GamePlayer player,
+        IReadOnlyList<int> roundIdsDescending)
+    {
+        var attemptsByRound = roundIdsDescending
+            .Select(roundId => Board.Questions
+                .Where(question => question.SourceRoundId == roundId)
+                .SelectMany(question => question.AnswerAttempts)
+                .Where(attempt => attempt.PlayerId == player.Id)
+                .ToArray())
+            .ToArray();
+        var correctByRound = attemptsByRound
+            .Select(attempts => attempts.Count(attempt => attempt.IsCorrect))
+            .ToArray();
+        var totalAttemptsByRound = attemptsByRound
+            .Select(attempts => attempts.Length)
+            .ToArray();
+
+        return new ResultMetrics(
+            player,
+            player.Score - _currentRoundStartScores.GetValueOrDefault(player.Id),
+            correctByRound.Sum(),
+            correctByRound,
+            totalAttemptsByRound.Sum(),
+            totalAttemptsByRound);
+    }
+
+    private static int CompareResultMetrics(ResultMetrics left, ResultMetrics right)
+    {
+        var comparison = right.Player.Score.CompareTo(left.Player.Score);
+
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+
+        comparison = right.ScoreGain.CompareTo(left.ScoreGain);
+
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+
+        comparison = right.TotalCorrectAnswers.CompareTo(left.TotalCorrectAnswers);
+
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+
+        comparison = CompareRoundCounts(
+            left.CorrectAnswersByRound,
+            right.CorrectAnswersByRound);
+
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+
+        comparison = right.TotalAttempts.CompareTo(left.TotalAttempts);
+
+        return comparison != 0
+            ? comparison
+            : CompareRoundCounts(left.AttemptsByRound, right.AttemptsByRound);
+    }
+
+    private static int CompareRoundCounts(
+        IReadOnlyList<int> left,
+        IReadOnlyList<int> right)
+    {
+        for (var index = 0; index < left.Count; index++)
+        {
+            var comparison = right[index].CompareTo(left[index]);
+
+            if (comparison != 0)
+            {
+                return comparison;
+            }
+        }
+
+        return 0;
+    }
+
+    private sealed record ResultMetrics(
+        GamePlayer Player,
+        int ScoreGain,
+        int TotalCorrectAnswers,
+        IReadOnlyList<int> CorrectAnswersByRound,
+        int TotalAttempts,
+        IReadOnlyList<int> AttemptsByRound);
 
     private void EnsureActivePlayerChangeAllowed()
     {
@@ -481,3 +635,14 @@ public enum QuestionTimerOutcome
     BuzzerExpired = 1,
     AnswerExpired = 2
 }
+
+
+public sealed record GameResultStanding(
+    int Position,
+    GamePlayerId PlayerId,
+    string PlayerName,
+    int Score,
+    int ScoreGain,
+    int TotalCorrectAnswers,
+    int TotalAttempts,
+    bool IsWinner);
