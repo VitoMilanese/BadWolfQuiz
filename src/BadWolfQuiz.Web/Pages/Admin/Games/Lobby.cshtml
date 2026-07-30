@@ -262,7 +262,7 @@
                     var wagerPlayer = Model.Players.First(
                         player => player.Id == Model.CurrentQuestion.Wager.PlayerId);
 
-                    <p class="accepted-wager">
+                    <p class="accepted-wager answering-player-header">
                         @Localizer[
                             "GameBoard_AcceptedWagerSummary",
                             wagerPlayer.Name,
@@ -364,7 +364,6 @@
                         }
                     </section>
                 }
-            </div>
 
             @if (Model.CurrentQuestion.Status is BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Selected or
                 BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active)
@@ -449,6 +448,7 @@
                     }
                 </section>
             }
+            </div>
         }
 
         @if (Model.CurrentQuestion is null)
