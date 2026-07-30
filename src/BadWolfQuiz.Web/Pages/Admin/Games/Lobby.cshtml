@@ -292,18 +292,30 @@
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Image:
                                             <img class="game-content-image"
                                                  src="@Url.Page(
-                                                     "/Admin/Quizzes/QuestionEditor",
-                                                     isShowingAnswer ? "AnswerBlockFile" : "QuestionBlockFile",
-                                                     new { id = block.SourceContentBlockId })"
+                                                     "/Admin/Games/Lobby",
+                                                     "ContentBlock",
+                                                     new
+                                                     {
+                                                         id = Model.Game.Session.Id.Value,
+                                                         sourceQuestionId = Model.CurrentQuestion.SourceQuestionId,
+                                                         sourceContentBlockId = block.SourceContentBlockId,
+                                                         answer = isShowingAnswer
+                                                     })"
                                                  alt="@block.FileName" />
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
                                             <audio class="game-content-audio"
                                                    controls
                                                    src="@Url.Page(
-                                                       "/Admin/Quizzes/QuestionEditor",
-                                                       isShowingAnswer ? "AnswerBlockAudio" : "QuestionBlockAudio",
-                                                       new { id = block.SourceContentBlockId })">
+                                                       "/Admin/Games/Lobby",
+                                                       "ContentBlock",
+                                                       new
+                                                       {
+                                                           id = Model.Game.Session.Id.Value,
+                                                           sourceQuestionId = Model.CurrentQuestion.SourceQuestionId,
+                                                           sourceContentBlockId = block.SourceContentBlockId,
+                                                           answer = isShowingAnswer
+                                                       })">
                                             </audio>
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
@@ -314,7 +326,7 @@
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
                                             <iframe class="game-content-video"
-                                                    src="@block.ExternalUrl"
+                                                    src="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
                                                     title="@Localizer["GameBoard_MediaContent"]"
                                                     allowfullscreen>
                                             </iframe>
