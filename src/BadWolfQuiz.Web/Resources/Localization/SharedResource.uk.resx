@@ -769,4 +769,19 @@
   <data name="GameBoard_JudgeAnswer" xml:space="preserve"><value>Оцінити відповідь</value></data>
   <data name="GameBoard_NoCorrectAnswer" xml:space="preserve"><value>Правильної відповіді немає</value></data>
   <data name="GameBoard_JudgmentRejected" xml:space="preserve"><value>Цю відповідь не можна оцінити в поточному стані питання.</value></data>
+  <data name="GameBoard_Question" xml:space="preserve">
+    <value>Питання</value>
+  </data>
+  <data name="GameBoard_Answer" xml:space="preserve">
+    <value>Відповідь</value>
+  </data>
+  <data name="GameBoard_ReturnToBoard" xml:space="preserve">
+    <value>Повернутися до дошки</value>
+  </data>
+  <data name="GameBoard_MediaContent" xml:space="preserve">
+    <value>Медіа питання</value>
+  </data>
+  <data name="GameBoard_CloseAnswerRejected" xml:space="preserve">
+    <value>Не вдалося закрити показ відповіді.</value>
+  </data>
 </root>
