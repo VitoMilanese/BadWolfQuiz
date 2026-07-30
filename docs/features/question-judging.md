@@ -46,3 +46,51 @@ Attempts remain attached to the runtime question. Repeated judging of the same p
 The current host UI allows the host to choose an eligible player and judge that player's answer. Player score lists receive real-time updates.
 
 A future integration will connect the Runtime Engine to the buzzer winner and render complete immutable question content. Until that integration exists, the host manually identifies the answering player.
+
+## Target question presentation flow
+
+The final host experience replaces the temporary player-selection panel with a full question presentation state.
+
+After a question is selected:
+
+- the board is hidden;
+- the question occupies the main presentation area;
+- the player scoreboard remains visible at the bottom;
+- contextual host controls appear below the question.
+
+The correct answer is always displayed after the question and before the board returns. The host decides when to close the answer presentation and return to the board.
+
+### Regular question timers
+
+A regular question uses two independent timers.
+
+The **buzzer window timer** is the total time available for eligible players to claim an answer attempt. The host does not start this timer separately: activating the buzzer starts it automatically.
+
+When a player wins the buzzer:
+
+- the buzzer closes;
+- the buzzer window timer pauses and preserves its remaining duration;
+- the host view highlights the answering player;
+- a separate **answer timer** starts for that player.
+
+The host may judge the answer before the answer timer expires. If the answer timer expires before the player gives a correct answer, the Engine records an incorrect answer automatically.
+
+After an incorrect answer:
+
+- the question remains visible;
+- the player is excluded from further attempts for that question;
+- the buzzer becomes available to the remaining eligible players;
+- the buzzer window timer resumes from the exact duration that remained when the previous player buzzed.
+
+The question moves to answer presentation when any of the following occurs:
+
+- a player answers correctly;
+- the host chooses **No correct answer**;
+- the buzzer window timer expires without another eligible player buzzing;
+- no eligible players remain.
+
+### Wager question flow
+
+A wager question does not use the buzzer. The player who selected the question and submitted the wager is immediately the answering player. The host view highlights that player while the question is visible.
+
+After the wager answer is judged correct or incorrect, the correct answer is displayed. The host then closes the answer presentation to return to the board.
