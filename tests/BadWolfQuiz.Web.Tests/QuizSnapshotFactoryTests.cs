@@ -49,6 +49,49 @@ public sealed class QuizSnapshotFactoryTests
     }
 
     [Fact]
+    public void Create_copies_question_and_answer_content()
+    {
+        var quiz = CreateQuiz();
+        var question = quiz.Rounds
+            .Single()
+            .Categories
+            .SelectMany(category => category.Questions)
+            .Single(item => item.Id == 101);
+        var fileData = new byte[] { 1, 2, 3 };
+
+        question.QuestionBlocks.Add(new QuestionContentBlock
+        {
+            Id = 501,
+            BlockType = ContentBlockType.Text,
+            TextContent = "Question text",
+            SortOrder = 0
+        });
+        question.AnswerBlocks.Add(new AnswerContentBlock
+        {
+            Id = 502,
+            BlockType = ContentBlockType.Image,
+            FileData = fileData,
+            FileContentType = "image/png",
+            FileName = "answer.png",
+            SortOrder = 0
+        });
+
+        var snapshot = _factory.Create(quiz);
+        fileData[0] = 9;
+        question.QuestionBlocks.Clear();
+
+        var snapshotQuestion = snapshot.Rounds.Single().Questions
+            .Single(item => item.SourceQuestionId == 101);
+        var questionBlock = Assert.Single(snapshotQuestion.QuestionBlocks);
+        var answerBlock = Assert.Single(snapshotQuestion.AnswerBlocks);
+
+        Assert.Equal("Question text", questionBlock.TextContent);
+        Assert.Equal(501, questionBlock.SourceContentBlockId);
+        Assert.Equal(new byte[] { 1, 2, 3 }, answerBlock.FileData);
+        Assert.Equal("answer.png", answerBlock.FileName);
+    }
+
+    [Fact]
     public void Create_rejects_question_without_matching_point_row()
     {
         var quiz = CreateQuiz();
