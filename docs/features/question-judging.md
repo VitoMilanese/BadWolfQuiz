@@ -93,4 +93,13 @@ The question moves to answer presentation when any of the following occurs:
 
 A wager question does not use the buzzer. The player who selected the question and submitted the wager is immediately the answering player. The host view highlights that player while the question is visible.
 
+The wager answer timer start mode is configurable:
+
+- in `Automatic` mode, revealing the question starts the answer timer immediately;
+- in `Manual` mode, revealing the question shows a host **Start timer** control and the host decides when the answer phase begins.
+
+The **Correct** and **Incorrect** judgment controls become available when the answer phase starts. In automatic mode they appear with the running timer. In manual mode they appear after the host starts the timer.
+
+If the wager answer timer expires before a correct answer is accepted, the Engine records an incorrect answer automatically.
+
 After the wager answer is judged correct or incorrect, the correct answer is displayed. The host then closes the answer presentation to return to the board.
