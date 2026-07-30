@@ -34,7 +34,9 @@ public sealed class GameBoard
             question.Points,
             round.UseRandomWagerQuestions
                 ? randomWagerQuestionIds.Contains(question.SourceQuestionId)
-                : question.IsSpecial));
+                : question.IsSpecial,
+            question.QuestionBlocks,
+            question.AnswerBlocks));
     }
 
     private static HashSet<int> SelectRandomWagerQuestions(
@@ -69,7 +71,9 @@ public sealed class RuntimeQuestion
         string categoryTitle,
         int rowIndex,
         int points,
-        bool isSpecial)
+        bool isSpecial,
+        IReadOnlyList<ContentBlockSnapshot> questionBlocks,
+        IReadOnlyList<ContentBlockSnapshot> answerBlocks)
     {
         SourceRoundId = sourceRoundId;
         SourceQuestionId = sourceQuestionId;
@@ -78,6 +82,8 @@ public sealed class RuntimeQuestion
         RowIndex = rowIndex;
         Points = points;
         IsSpecial = isSpecial;
+        QuestionBlocks = questionBlocks;
+        AnswerBlocks = answerBlocks;
         _readOnlyAnswerAttempts = _answerAttempts.AsReadOnly();
     }
 
@@ -94,6 +100,10 @@ public sealed class RuntimeQuestion
     public int Points { get; }
 
     public bool IsSpecial { get; }
+
+    public IReadOnlyList<ContentBlockSnapshot> QuestionBlocks { get; }
+
+    public IReadOnlyList<ContentBlockSnapshot> AnswerBlocks { get; }
 
     public RuntimeQuestionStatus Status { get; private set; } = RuntimeQuestionStatus.Available;
 
@@ -169,7 +179,7 @@ public sealed class RuntimeQuestion
 
         if (isCorrect || IsSpecial)
         {
-            Status = RuntimeQuestionStatus.Resolved;
+            Status = RuntimeQuestionStatus.ShowingAnswer;
         }
 
         return attempt;
@@ -185,6 +195,17 @@ public sealed class RuntimeQuestion
                 "Only an active regular question can be closed without a correct answer.");
         }
 
+        Status = RuntimeQuestionStatus.ShowingAnswer;
+    }
+
+    internal void CloseAnswer()
+    {
+        if (Status != RuntimeQuestionStatus.ShowingAnswer)
+        {
+            throw new GameRuleViolationException(
+                "Only a displayed answer can be closed.");
+        }
+
         Status = RuntimeQuestionStatus.Resolved;
     }
 }
@@ -196,5 +217,6 @@ public enum RuntimeQuestionStatus
     AwaitingWager = 3,
     Active = 4,
     AwaitingJudgment = 5,
-    Resolved = 6
+    ShowingAnswer = 6,
+    Resolved = 7
 }
