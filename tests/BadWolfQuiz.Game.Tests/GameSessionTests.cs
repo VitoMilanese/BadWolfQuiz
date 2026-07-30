@@ -625,7 +625,7 @@ public sealed class GameSessionTests
         var session = CreateMultiRoundSession(timeProvider);
         var rose = session.AddPlayer("Rose");
         timeProvider.Advance(TimeSpan.FromSeconds(1));
-        session.AddPlayer("Mickey");
+        var mickey = session.AddPlayer("Mickey");
         session.Start();
         session.SelectQuestion(100);
         session.JudgeQuestionAnswer(100, rose.Id, true);
