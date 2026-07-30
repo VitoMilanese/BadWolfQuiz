@@ -20,6 +20,11 @@ public sealed class GameSessionLauncher(
             .Include(item => item.Rounds)
                 .ThenInclude(round => round.Categories)
                     .ThenInclude(category => category.Questions)
+                        .ThenInclude(question => question.QuestionBlocks)
+            .Include(item => item.Rounds)
+                .ThenInclude(round => round.Categories)
+                    .ThenInclude(category => category.Questions)
+                        .ThenInclude(question => question.AnswerBlocks)
             .SingleOrDefaultAsync(
                 item => item.Id == quizId && !item.IsArchived,
                 cancellationToken);
