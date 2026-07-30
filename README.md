@@ -111,6 +111,7 @@ Currently implemented:
 - Player scoreboard with answering and ineligible states
 - Multi-round progression
 - Animated top-three inter-round leaderboard
+- Deterministic final standings with score-growth, correct-answer, and attempt tie-breakers
 
 ---
 
@@ -185,7 +186,7 @@ src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
 - Automatic timer-based judging
 - Global and per-game settings
 - Final question flow
-- Final result and deterministic winner tie-breaking
+- Final question flow
 - Per-round and lifetime correct-answer and attempt statistics
 - Team mode
 
