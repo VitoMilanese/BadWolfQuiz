@@ -158,6 +158,7 @@ public sealed record ContentBlockSnapshot(
     string? BottomCaption,
     string? MediaPath,
     string? ExternalUrl,
+    byte[]? FileData,
     string? FileContentType,
     string? FileName,
     int SortOrder,
