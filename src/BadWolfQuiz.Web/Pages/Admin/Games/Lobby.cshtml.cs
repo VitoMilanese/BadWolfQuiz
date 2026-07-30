@@ -29,6 +29,73 @@ public sealed class LobbyModel(
         return LoadPage(id);
     }
 
+    public IActionResult OnGetContentBlock(
+        Guid id,
+        int sourceQuestionId,
+        int sourceContentBlockId,
+        bool answer)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var question = game.Session.Board.Questions.SingleOrDefault(
+            item => item.SourceQuestionId == sourceQuestionId);
+        var blocks = answer
+            ? question?.AnswerBlocks
+            : question?.QuestionBlocks;
+        var block = blocks?.SingleOrDefault(
+            item => item.SourceContentBlockId == sourceContentBlockId);
+
+        if (block?.FileData is null ||
+            string.IsNullOrWhiteSpace(block.FileContentType))
+        {
+            return NotFound();
+        }
+
+        return string.IsNullOrWhiteSpace(block.FileName)
+            ? File(block.FileData, block.FileContentType)
+            : File(block.FileData, block.FileContentType, block.FileName);
+    }
+
+    public static string? GetYouTubeEmbedUrl(string? value)
+    {
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri))
+        {
+            return value;
+        }
+
+        if (uri.AbsolutePath.StartsWith("/embed/", StringComparison.OrdinalIgnoreCase))
+        {
+            return value;
+        }
+
+        string? videoId = null;
+
+        if (uri.Host.EndsWith("youtu.be", StringComparison.OrdinalIgnoreCase))
+        {
+            videoId = uri.AbsolutePath.Trim('/');
+        }
+        else if (uri.Host.Contains("youtube.com", StringComparison.OrdinalIgnoreCase))
+        {
+            videoId = uri.Query
+                .TrimStart('?')
+                .Split('&', StringSplitOptions.RemoveEmptyEntries)
+                .Select(item => item.Split('=', 2))
+                .FirstOrDefault(item =>
+                    item.Length == 2 &&
+                    string.Equals(item[0], "v", StringComparison.OrdinalIgnoreCase))?
+                .ElementAtOrDefault(1);
+        }
+
+        return string.IsNullOrWhiteSpace(videoId)
+            ? value
+            : $"https://www.youtube.com/embed/{Uri.EscapeDataString(videoId)}";
+    }
+
     public async Task<IActionResult> OnPostStartAsync(
         Guid id,
         CancellationToken cancellationToken)
