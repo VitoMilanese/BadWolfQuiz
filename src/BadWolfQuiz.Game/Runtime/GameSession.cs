@@ -14,13 +14,17 @@ public sealed class GameSession
     private readonly ReadOnlyCollection<GamePlayer> _readOnlyPlayers;
     private readonly TimeProvider _timeProvider;
 
-    private GameSession(QuizSnapshot quiz, TimeProvider timeProvider)
+    private GameSession(
+        QuizSnapshot quiz,
+        GameSessionSettings settings,
+        TimeProvider timeProvider)
     {
         Id = GameSessionId.New();
         Quiz = quiz;
+        Settings = settings;
         Board = new GameBoard(quiz);
-        Timer = new GameTimer(DefaultBuzzerDuration, timeProvider);
-        AnswerTimer = new GameTimer(DefaultAnswerDuration, timeProvider);
+        Timer = new GameTimer(settings.BuzzerDuration, timeProvider);
+        AnswerTimer = new GameTimer(settings.AnswerDuration, timeProvider);
         CreatedAtUtc = timeProvider.GetUtcNow();
         _timeProvider = timeProvider;
         _readOnlyPlayers = _players.AsReadOnly();
@@ -29,6 +33,8 @@ public sealed class GameSession
     public GameSessionId Id { get; }
 
     public QuizSnapshot Quiz { get; }
+
+    public GameSessionSettings Settings { get; }
 
     public GameSessionStatus Status { get; private set; } = GameSessionStatus.Lobby;
 
@@ -69,10 +75,24 @@ public sealed class GameSession
 
     public DateTimeOffset? StartedAtUtc { get; private set; }
 
-    public static GameSession Create(QuizSnapshot quiz, TimeProvider? timeProvider = null)
+    public static GameSession Create(
+        QuizSnapshot quiz,
+        TimeProvider? timeProvider = null)
+    {
+        return Create(quiz, GameSessionSettings.Default, timeProvider);
+    }
+
+    public static GameSession Create(
+        QuizSnapshot quiz,
+        GameSessionSettings settings,
+        TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(quiz);
-        return new GameSession(quiz, timeProvider ?? TimeProvider.System);
+        ArgumentNullException.ThrowIfNull(settings);
+        return new GameSession(
+            quiz,
+            settings,
+            timeProvider ?? TimeProvider.System);
     }
 
     public GamePlayer AddPlayer(string name)
@@ -154,6 +174,13 @@ public sealed class GameSession
                 "A question cannot be selected without an active player.");
 
         question.Select(activePlayerId);
+
+        if (!question.IsSpecial &&
+            Settings.RegularQuestionBuzzerStartMode == GamePhaseStartMode.Automatic)
+        {
+            ActivateQuestionBuzzer(sourceQuestionId);
+        }
+
         return question;
     }
 
@@ -198,8 +225,36 @@ public sealed class GameSession
 
         question.SubmitWager(playerId, amount, _timeProvider.GetUtcNow());
         Timer.Stop();
-        AnswerTimer.Restart();
+
+        if (Settings.WagerQuestionAnswerTimerStartMode ==
+            GamePhaseStartMode.Automatic)
+        {
+            AnswerTimer.Restart();
+        }
+        else
+        {
+            AnswerTimer.Stop();
+        }
+
         return question;
+    }
+
+    public GameTimer StartWagerAnswerTimer(int sourceQuestionId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+
+        if (!question.IsSpecial ||
+            question.Status != RuntimeQuestionStatus.Active ||
+            question.Wager is null)
+        {
+            throw new GameRuleViolationException(
+                "A wager answer timer can only start for an active wager question.");
+        }
+
+        AnswerTimer.Start();
+        return AnswerTimer;
     }
 
     public RuntimeQuestion ActivateQuestionBuzzer(int sourceQuestionId)

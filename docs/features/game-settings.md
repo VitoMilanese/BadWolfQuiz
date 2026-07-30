@@ -49,7 +49,7 @@ For a wager question, `Automatic` starts the answering player's timer when the q
 
 ## Ownership and enforcement
 
-The game-specific settings snapshot is part of the runtime session configuration.
+The game-specific settings snapshot is part of the runtime session configuration. The Engine currently accepts an immutable `GameSessionSettings` snapshot containing both timer durations and both phase start modes.
 
 The Game Engine interprets and enforces gameplay settings. The host and player UIs render the resulting state and submit permitted commands; they are not authoritative sources for settings or timing rules.
 
@@ -66,3 +66,10 @@ The administration experience provides:
 - a clear way to distinguish inherited values from game-specific overrides.
 
 A future settings implementation may add a reset action that restores a game setting to the current inherited default before the game starts.
+
+
+## Implementation status
+
+The Engine-level settings snapshot is implemented. It configures buzzer and answer durations, automatically opens the regular-question buzzer when requested, and supports explicit start of a wager answer timer in manual mode.
+
+Persistence of global defaults and the global/per-game administration UI remain separate Web-layer work.
