@@ -62,6 +62,7 @@ public sealed class QuizSnapshotFactory
     private static ContentBlockSnapshot CreateContentBlock(ContentBlockBase block)
     {
         return new ContentBlockSnapshot(
+            block.Id,
             (ContentBlockKind)(int)block.BlockType,
             block.TextContent,
             block.TopCaption,
