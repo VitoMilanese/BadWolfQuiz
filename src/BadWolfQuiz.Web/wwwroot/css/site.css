@@ -1932,3 +1932,90 @@ iframe.game-content-video {
         padding: 20px;
     }
 }
+
+
+/* Viewport-anchored gameplay layout */
+
+.host-game-board {
+    --game-scoreboard-space: 184px;
+    min-height: calc(100dvh - 72px);
+    padding-bottom: var(--game-scoreboard-space);
+}
+
+.game-scoreboard {
+    position: fixed;
+    z-index: 18;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    min-height: 154px;
+    max-height: var(--game-scoreboard-space);
+    margin: 0;
+    padding: 12px max(12px, calc((100vw - 1800px) / 2 + 34px)) 0;
+    border-top: 1px solid var(--line);
+    background: rgba(7, 7, 9, 0.97);
+    box-shadow: 0 -16px 36px rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(14px);
+}
+
+.current-question-summary:not(.wager-mode) {
+    min-height: calc(100dvh - 72px - var(--game-scoreboard-space) - 24px);
+    max-height: calc(100dvh - 72px - var(--game-scoreboard-space) - 24px);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-content: stretch;
+    overflow: auto;
+}
+
+.answering-player-header {
+    align-self: start;
+    justify-self: center;
+    margin: 0;
+    text-align: center;
+}
+
+.game-content-presentation {
+    min-height: 0;
+    height: 100%;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-content: stretch;
+}
+
+.game-content-blocks {
+    align-self: center;
+    place-items: center;
+}
+
+.game-content-presentation > form {
+    align-self: end;
+    justify-self: center;
+}
+
+.current-question-summary:not(.wager-mode) > .question-judgment-panel {
+    align-self: end;
+    width: 100%;
+    margin: 0;
+}
+
+.current-question-summary:not(.wager-mode) .judgment-player {
+    grid-template-rows: auto auto 1fr;
+}
+
+.current-question-summary:not(.wager-mode) .judgment-player .form-actions {
+    align-self: end;
+}
+
+@media (max-width: 700px) {
+    .host-game-board {
+        --game-scoreboard-space: 170px;
+    }
+
+    .game-scoreboard {
+        min-height: 140px;
+        padding-inline: 12px;
+    }
+
+    .current-question-summary:not(.wager-mode) {
+        min-height: calc(100dvh - 72px - var(--game-scoreboard-space) - 16px);
+        max-height: none;
+    }
+}
