@@ -209,6 +209,56 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public RuntimeQuestion? ActivateQuestionBuzzer(
+        string publicCode,
+        int sourceQuestionId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.ActivateQuestionBuzzer(sourceQuestionId);
+        }
+    }
+
+    public BuzzerClaimResult? ClaimQuestionBuzzer(
+        string connectionId,
+        int sourceQuestionId)
+    {
+        PlayerConnection connection;
+
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(
+                    connectionId,
+                    out var currentConnection) ||
+                !currentConnection.IsApproved ||
+                !currentConnection.IsVisible)
+            {
+                return null;
+            }
+
+            connection = currentConnection;
+        }
+
+        lock (connection.Access.Game)
+        {
+            var question = connection.Access.Game.Session.ClaimQuestionBuzzer(
+                sourceQuestionId,
+                connection.Access.Player.Id);
+
+            return new BuzzerClaimResult(
+                connection.Access.Game,
+                question,
+                connection.Access.Player);
+        }
+    }
+
     public QuestionAnswerAttempt? JudgeQuestionAnswer(
         string publicCode,
         int sourceQuestionId,
@@ -428,3 +478,9 @@ public sealed class GameSessionRegistry
         bool IsVisible,
         bool IsApproved);
 }
+
+
+public sealed record BuzzerClaimResult(
+    GameSessionRegistration Game,
+    RuntimeQuestion Question,
+    GamePlayer Player);

@@ -7,7 +7,13 @@
 <div class="form-card narrow player-lobby"
      data-game-code="@Model.Game.PublicCode"
      data-player-id="@Model.CurrentPlayer.Id.Value"
-     data-access-token="@Model.AccessToken">
+     data-access-token="@Model.AccessToken"
+     data-buzzer-open-label="@Localizer["PlayerGame_BuzzerOpen"]"
+     data-buzzer-claimed-label="@Localizer["PlayerGame_BuzzerClaimed"]"
+     data-buzzer-claimed-by-you-label="@Localizer["PlayerGame_BuzzerClaimedByYou"]"
+     data-buzzer-already-answered-label="@Localizer["PlayerGame_BuzzerAlreadyAnswered"]"
+     data-buzzer-closed-label="@Localizer["PlayerGame_BuzzerClosed"]"
+     data-buzz-rejected-label="@Localizer["PlayerGame_BuzzRejected"]">
     <p class="eyebrow">@Localizer["Message_WaitingHost"]</p>
     <h1>@Model.Game.Session.Quiz.Title</h1>
 
@@ -29,6 +35,18 @@
     </div>
 
     <p class="dialog-warning">@Localizer["PlayerPresence_MonitoringNotice"]</p>
+
+    <section class="player-buzzer-panel">
+        <button id="player-buzzer"
+                class="player-buzzer"
+                type="button"
+                disabled>
+            @Localizer["PlayerGame_Buzz"]
+        </button>
+        <p id="player-buzzer-status" class="dialog-warning">
+            @Localizer["PlayerGame_BuzzerClosed"]
+        </p>
+    </section>
 
     <h2>@Localizer["Label_Players"] (@Model.Players.Count)</h2>
     <ul id="player-score-list" class="player-list">
@@ -52,6 +70,9 @@
             const warning = document.getElementById("activity-warning");
             const rejoinWarning = document.getElementById("rejoin-warning");
             const playerScoreList = document.getElementById("player-score-list");
+            const buzzerButton = document.getElementById("player-buzzer");
+            const buzzerStatus = document.getElementById("player-buzzer-status");
+            let buzzerQuestionId = null;
 
             if (!lobby || !warning || typeof signalR === "undefined") {
                 return;
@@ -101,6 +122,53 @@
                 gameCode,
                 accessToken,
                 isPageActive());
+
+            connection.on("BuzzerStateChanged", update => {
+                const hasAlreadyAnswered =
+                    update.ineligiblePlayerIds?.includes(playerId) ?? false;
+                const isOpen = update.status === "open";
+                const canBuzz = isOpen && !hasAlreadyAnswered;
+                buzzerQuestionId = canBuzz
+                    ? update.sourceQuestionId
+                    : null;
+
+                if (buzzerButton) {
+                    buzzerButton.disabled = !canBuzz;
+                    buzzerButton.classList.toggle("player-buzzer-open", canBuzz);
+                }
+
+                if (buzzerStatus) {
+                    const isClaimedByCurrentPlayer =
+                        update.status === "claimed" &&
+                        update.answeringPlayerId === playerId;
+
+                    buzzerStatus.textContent = hasAlreadyAnswered
+                        ? lobby.dataset.buzzerAlreadyAnsweredLabel
+                        : isOpen
+                            ? lobby.dataset.buzzerOpenLabel
+                            : isClaimedByCurrentPlayer
+                                ? lobby.dataset.buzzerClaimedByYouLabel
+                                : update.status === "claimed"
+                                    ? lobby.dataset.buzzerClaimedLabel
+                                    : lobby.dataset.buzzerClosedLabel;
+                }
+            });
+
+            buzzerButton?.addEventListener("click", () => {
+                if (buzzerQuestionId === null ||
+                    connection.state !== signalR.HubConnectionState.Connected) {
+                    return;
+                }
+
+                buzzerButton.disabled = true;
+                connection.invoke("Buzz", buzzerQuestionId).catch(console.error);
+            });
+
+            connection.on("BuzzRejected", () => {
+                if (buzzerStatus) {
+                    buzzerStatus.textContent = lobby.dataset.buzzRejectedLabel;
+                }
+            });
 
             connection.on("PlayersChanged", update => {
                 if (!playerScoreList) {

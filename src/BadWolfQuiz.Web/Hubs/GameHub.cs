@@ -1,11 +1,10 @@
+using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BadWolfQuiz.Web.Hubs;
 
-public sealed class GameHub(
-    BuzzCoordinator buzzCoordinator,
-    GameSessionRegistry sessionRegistry) : Hub
+public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
 {
     public async Task JoinSession(string publicCode)
     {
@@ -22,6 +21,13 @@ public sealed class GameHub(
             await Clients.Caller.SendAsync(
                 "PlayersChanged",
                 CreatePlayersUpdate(sessionRegistry, game));
+
+            var buzzerUpdate = CreateBuzzerUpdate(game);
+
+            if (buzzerUpdate is not null)
+            {
+                await Clients.Caller.SendAsync("BuzzerStateChanged", buzzerUpdate);
+            }
         }
     }
 
@@ -54,6 +60,14 @@ public sealed class GameHub(
         await Clients.Caller.SendAsync(
             "GameStatusChanged",
             CreateStatusUpdate(connection.Game));
+
+        var buzzerUpdate = CreateBuzzerUpdate(connection.Game);
+
+        if (buzzerUpdate is not null)
+        {
+            await Clients.Caller.SendAsync("BuzzerStateChanged", buzzerUpdate);
+        }
+
         await BroadcastPlayers(connection.Game);
     }
 
@@ -81,28 +95,32 @@ public sealed class GameHub(
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task Buzz(string publicCode, int gameQuestionId, int playerId, string playerName)
+    public async Task Buzz(int sourceQuestionId)
     {
-        var accepted = buzzCoordinator.TryBuzz(gameQuestionId, playerId);
+        BuzzerClaimResult? claim;
 
-        if (accepted)
+        try
         {
-            await Clients.Group(GroupName(publicCode)).SendAsync(
-                "BuzzAccepted",
-                new { gameQuestionId, playerId, playerName });
+            claim = sessionRegistry.ClaimQuestionBuzzer(
+                Context.ConnectionId,
+                sourceQuestionId);
         }
-        else
+        catch (GameRuleViolationException)
+        {
+            claim = null;
+        }
+
+        if (claim is null)
         {
             await Clients.Caller.SendAsync(
                 "BuzzRejected",
-                new { gameQuestionId, winnerPlayerId = buzzCoordinator.GetWinner(gameQuestionId) });
+                new { sourceQuestionId });
+            return;
         }
-    }
 
-    public async Task ResetBuzz(string publicCode, int gameQuestionId)
-    {
-        buzzCoordinator.Reset(gameQuestionId);
-        await Clients.Group(GroupName(publicCode)).SendAsync("BuzzReset", new { gameQuestionId });
+        await Clients
+            .Group(GroupName(claim.Game.PublicCode))
+            .SendAsync("BuzzerStateChanged", CreateBuzzerUpdate(claim.Game));
     }
 
     public static object CreatePlayersUpdate(
@@ -127,6 +145,43 @@ public sealed class GameHub(
 
     public static object CreateStatusUpdate(GameSessionRegistration game)
         => new { status = game.Session.Status.ToString().ToLowerInvariant() };
+
+    public static object CreateBuzzerUpdate(GameSessionRegistration game)
+    {
+        var question = game.Session.Board.Questions.FirstOrDefault(item =>
+            item.Status is not RuntimeQuestionStatus.Available and
+                not RuntimeQuestionStatus.Resolved and
+                not RuntimeQuestionStatus.ShowingAnswer);
+
+        if (question is null)
+        {
+            return new
+            {
+                sourceQuestionId = (int?)null,
+                status = QuestionBuzzerStatus.Closed
+                    .ToString()
+                    .ToLowerInvariant(),
+                answeringPlayerId = (Guid?)null,
+                answeringPlayerName = (string?)null,
+                ineligiblePlayerIds = Array.Empty<Guid>()
+            };
+        }
+
+        var answeringPlayer = question.AnsweringPlayerId is { } playerId
+            ? game.Session.Players.Single(player => player.Id == playerId)
+            : null;
+
+        return new
+        {
+            sourceQuestionId = question.SourceQuestionId,
+            status = question.BuzzerStatus.ToString().ToLowerInvariant(),
+            answeringPlayerId = answeringPlayer?.Id.Value,
+            answeringPlayerName = answeringPlayer?.Name,
+            ineligiblePlayerIds = question.AnswerAttempts
+                .Select(attempt => attempt.PlayerId.Value)
+                .ToArray()
+        };
+    }
 
     public static string GroupName(string publicCode)
         => $"game:{GameSessionRegistry.NormalizeCode(publicCode)}";

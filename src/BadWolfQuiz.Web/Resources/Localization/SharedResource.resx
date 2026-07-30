@@ -784,4 +784,37 @@
   <data name="GameBoard_CloseAnswerRejected" xml:space="preserve">
     <value>The answer presentation could not be closed.</value>
   </data>
+  <data name="GameBoard_ActivateBuzzer" xml:space="preserve">
+    <value>Activate buzzer</value>
+  </data>
+  <data name="GameBoard_WaitingForBuzz" xml:space="preserve">
+    <value>Waiting for a player to buzz.</value>
+  </data>
+  <data name="GameBoard_AnsweringPlayer" xml:space="preserve">
+    <value>Answering: {0}</value>
+  </data>
+  <data name="GameBoard_BuzzerActivationRejected" xml:space="preserve">
+    <value>The buzzer could not be activated.</value>
+  </data>
+  <data name="PlayerGame_Buzz" xml:space="preserve">
+    <value>BUZZ</value>
+  </data>
+  <data name="PlayerGame_BuzzerOpen" xml:space="preserve">
+    <value>The buzzer is open.</value>
+  </data>
+  <data name="PlayerGame_BuzzerAlreadyAnswered" xml:space="preserve">
+    <value>You have already answered this question.</value>
+  </data>
+  <data name="PlayerGame_BuzzerClaimedByYou" xml:space="preserve">
+    <value>You buzzed first. You are answering.</value>
+  </data>
+  <data name="PlayerGame_BuzzerClaimed" xml:space="preserve">
+    <value>Another player claimed the buzzer.</value>
+  </data>
+  <data name="PlayerGame_BuzzerClosed" xml:space="preserve">
+    <value>Wait for the host to activate the buzzer.</value>
+  </data>
+  <data name="PlayerGame_BuzzRejected" xml:space="preserve">
+    <value>Your buzz was not accepted.</value>
+  </data>
 </root>

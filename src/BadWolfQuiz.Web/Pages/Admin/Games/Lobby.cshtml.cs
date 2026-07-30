@@ -178,6 +178,35 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostActivateBuzzerAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.ActivateQuestionBuzzer(
+                game.PublicCode,
+                sourceQuestionId);
+
+            await BroadcastBuzzerAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_BuzzerActivationRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostJudgeQuestionAnswerAsync(
         Guid id,
         int sourceQuestionId,
@@ -207,6 +236,7 @@ public sealed class LobbyModel(
         }
 
         await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
         return RedirectToPage(new { id });
     }
 
@@ -235,6 +265,7 @@ public sealed class LobbyModel(
         }
 
         await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
         return RedirectToPage(new { id });
     }
 
@@ -353,6 +384,19 @@ public sealed class LobbyModel(
                 cancellationToken);
 
         return RedirectToPage(new { id });
+    }
+
+    private Task BroadcastBuzzerAsync(
+        GameSessionRegistration game,
+        CancellationToken cancellationToken)
+    {
+        var update = GameHub.CreateBuzzerUpdate(game);
+
+        return update is null
+            ? Task.CompletedTask
+            : gameHub.Clients
+                .Group(GameHub.GroupName(game.PublicCode))
+                .SendAsync("BuzzerStateChanged", update, cancellationToken);
     }
 
     private Task BroadcastPlayersAsync(
