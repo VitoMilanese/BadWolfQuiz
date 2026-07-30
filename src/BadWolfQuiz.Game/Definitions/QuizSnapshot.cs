@@ -71,12 +71,11 @@ public sealed class QuizRoundSnapshot
             !question.ExcludeFromRandomWagerSelection);
 
         if (useRandomWagerQuestions &&
-            (randomWagerQuestionCount == 0 ||
-             randomWagerQuestionCount > eligibleQuestionCount))
+            randomWagerQuestionCount > eligibleQuestionCount)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(randomWagerQuestionCount),
-                "Random wager question count must be between one and the number of eligible questions.");
+                "Random wager question count must be between zero and the number of eligible questions.");
         }
 
         SourceRoundId = sourceRoundId;

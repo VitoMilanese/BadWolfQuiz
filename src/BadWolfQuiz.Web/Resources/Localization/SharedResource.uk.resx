@@ -681,7 +681,7 @@
   <data name="QuizEditor_RandomWagerDescription" xml:space="preserve"><value>Ігнорувати вручну позначені питання та вибирати випадкові позиції під час створення кожної гри.</value></data>
   <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve"><value>Кількість питань зі ставкою</value></data>
   <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Доступних питань: {0}</value></data>
-  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Вкажіть від 1 до {0} випадкових питань зі ставкою.</value></data>
+  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Кількість випадкових питань зі ставкою має бути від 0 до {0}.</value></data>
   <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Налаштування раунду збережено.</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Вартість запитань</value>
@@ -822,5 +822,17 @@
   </data>
   <data name="GameBoard_BuzzerRaceLatePlayer" xml:space="preserve">
     <value>{0} — на {1} мс пізніше</value>
+  </data>
+  <data name="GameBoard_RoundComplete" xml:space="preserve">
+    <value>Раунд завершено</value>
+  </data>
+  <data name="GameBoard_StartNextRound" xml:space="preserve">
+    <value>Почати наступний раунд</value>
+  </data>
+  <data name="GameBoard_AllRoundsComplete" xml:space="preserve">
+    <value>Усі раунди завершено.</value>
+  </data>
+  <data name="GameBoard_AdvanceRoundRejected" xml:space="preserve">
+    <value>Не вдалося почати наступний раунд.</value>
   </data>
 </root>

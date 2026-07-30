@@ -560,7 +560,7 @@ public sealed class EditorModel(
             .Count(question => !question.ExcludeFromRandomWagerSelection);
 
         if (RoundRows.UseRandomWagerQuestions &&
-            (RoundRows.RandomWagerQuestionCount <= 0 ||
+            (RoundRows.RandomWagerQuestionCount < 0 ||
              RoundRows.RandomWagerQuestionCount > eligibleQuestionCount))
         {
             TempData["ErrorMessage"] = localizer[
