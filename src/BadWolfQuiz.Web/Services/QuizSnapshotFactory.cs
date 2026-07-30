@@ -69,6 +69,7 @@ public sealed class QuizSnapshotFactory
             block.BottomCaption,
             block.MediaPath,
             block.ExternalUrl,
+            block.FileData?.ToArray(),
             block.FileContentType,
             block.FileName,
             block.SortOrder,
