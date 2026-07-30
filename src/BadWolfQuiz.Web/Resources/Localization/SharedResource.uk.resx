@@ -784,4 +784,37 @@
   <data name="GameBoard_CloseAnswerRejected" xml:space="preserve">
     <value>Не вдалося закрити показ відповіді.</value>
   </data>
+  <data name="GameBoard_ActivateBuzzer" xml:space="preserve">
+    <value>Активувати буззер</value>
+  </data>
+  <data name="GameBoard_WaitingForBuzz" xml:space="preserve">
+    <value>Очікується натискання гравця.</value>
+  </data>
+  <data name="GameBoard_AnsweringPlayer" xml:space="preserve">
+    <value>Відповідає: {0}</value>
+  </data>
+  <data name="GameBoard_BuzzerActivationRejected" xml:space="preserve">
+    <value>Не вдалося активувати буззер.</value>
+  </data>
+  <data name="PlayerGame_Buzz" xml:space="preserve">
+    <value>БУЗЗЕР</value>
+  </data>
+  <data name="PlayerGame_BuzzerOpen" xml:space="preserve">
+    <value>Буззер активний.</value>
+  </data>
+  <data name="PlayerGame_BuzzerAlreadyAnswered" xml:space="preserve">
+    <value>Ви вже відповідали на це питання.</value>
+  </data>
+  <data name="PlayerGame_BuzzerClaimedByYou" xml:space="preserve">
+    <value>Ви натиснули першим. Ви відповідаєте.</value>
+  </data>
+  <data name="PlayerGame_BuzzerClaimed" xml:space="preserve">
+    <value>Інший гравець натиснув першим.</value>
+  </data>
+  <data name="PlayerGame_BuzzerClosed" xml:space="preserve">
+    <value>Очікуйте, поки ведучий активує буззер.</value>
+  </data>
+  <data name="PlayerGame_BuzzRejected" xml:space="preserve">
+    <value>Ваше натискання не зараховано.</value>
+  </data>
 </root>

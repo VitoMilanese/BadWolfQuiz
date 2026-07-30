@@ -110,3 +110,10 @@ The **Correct** and **Incorrect** judgment controls become available when the an
 If the wager answer timer expires before a correct answer is accepted, the Engine records an incorrect answer automatically.
 
 After the wager answer is judged correct or incorrect, the correct answer is displayed. The host then closes the answer presentation to return to the board.
+
+
+## Round opening selection
+
+The first round starts with the first player who joined the lobby as the active player.
+
+At the beginning of every later round, the Engine transfers the right to select the first question to the player with the lowest current score. A deterministic tie-breaker must be used when multiple players share the lowest score; the exact tie-breaker will be defined together with multi-round progression.
