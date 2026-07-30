@@ -1,3 +1,4 @@
+using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,8 +9,19 @@ public sealed class GameSessionLauncher(
     QuizSnapshotFactory snapshotFactory,
     GameSessionRegistry sessionRegistry)
 {
+    public Task<GameSessionRegistration?> CreateAsync(
+        int quizId,
+        CancellationToken cancellationToken = default)
+    {
+        return CreateAsync(
+            quizId,
+            GameSessionSettings.Default,
+            cancellationToken);
+    }
+
     public async Task<GameSessionRegistration?> CreateAsync(
         int quizId,
+        GameSessionSettings settings,
         CancellationToken cancellationToken = default)
     {
         var quiz = await db.Quizzes
@@ -35,6 +47,6 @@ public sealed class GameSessionLauncher(
         }
 
         var snapshot = snapshotFactory.Create(quiz);
-        return sessionRegistry.Create(snapshot);
+        return sessionRegistry.Create(snapshot, settings);
     }
 }

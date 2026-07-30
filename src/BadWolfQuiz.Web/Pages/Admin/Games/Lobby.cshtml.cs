@@ -131,6 +131,34 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostStartWagerAnswerTimerAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.StartWagerAnswerTimer(
+                game.PublicCode,
+                sourceQuestionId);
+            await BroadcastTimerAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameTimer_StartRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostPauseQuestionTimerAsync(
         Guid id,
         CancellationToken cancellationToken)

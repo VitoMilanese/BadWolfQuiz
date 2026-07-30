@@ -853,4 +853,20 @@
   <data name="GameTimer_ResumeRejected" xml:space="preserve">
     <value>Не вдалося продовжити таймер.</value>
   </data>
+  <data name="Menu_Settings" xml:space="preserve"><value>Налаштування</value></data>
+  <data name="GameSettings_Eyebrow" xml:space="preserve"><value>НАЛАШТУВАННЯ ГРИ</value></data>
+  <data name="GameSettings_Title" xml:space="preserve"><value>Глобальні налаштування гри</value></data>
+  <data name="GameSettings_GlobalDescription" xml:space="preserve"><value>Ці значення копіюються в кожну нову гру. Вже створені ігри не змінюються.</value></data>
+  <data name="GameSettings_BuzzerDuration" xml:space="preserve"><value>Час для натискання буззера</value></data>
+  <data name="GameSettings_AnswerDuration" xml:space="preserve"><value>Час на відповідь</value></data>
+  <data name="GameSettings_SecondsHint" xml:space="preserve"><value>Секунди (1–3600)</value></data>
+  <data name="GameSettings_RegularStartMode" xml:space="preserve"><value>Запуск буззера у звичайному питанні</value></data>
+  <data name="GameSettings_WagerStartMode" xml:space="preserve"><value>Запуск таймера у питанні зі ставкою</value></data>
+  <data name="GameSettings_InvalidDuration" xml:space="preserve"><value>Тривалість таймерів повинна бути від 1 до 3600 секунд.</value></data>
+  <data name="GameSettings_GlobalSaved" xml:space="preserve"><value>Глобальні налаштування гри збережено.</value></data>
+  <data name="GameSettings_CreateGameTitle" xml:space="preserve"><value>Створити гру</value></data>
+  <data name="GameSettings_GameEyebrow" xml:space="preserve"><value>НОВА ГРА</value></data>
+  <data name="GameSettings_GameDescription" xml:space="preserve"><value>Ці значення успадковані з глобальних налаштувань. Зміни застосуються лише до цієї гри.</value></data>
+  <data name="GameBoard_StartAnswerTimer" xml:space="preserve"><value>Запустити таймер</value></data>
+  <data name="GameTimer_StartRejected" xml:space="preserve"><value>Не вдалося запустити таймер відповіді.</value></data>
 </root>

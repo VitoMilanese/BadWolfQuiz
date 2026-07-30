@@ -103,7 +103,7 @@ Currently implemented:
 - Player buzzer with server-authoritative winner selection
 - Near-simultaneous buzzer results with millisecond differences
 - Synchronized buzzer and answer countdown timers
-- Immutable per-session timer and phase-start settings
+- Persistent global game defaults and editable per-game settings snapshots
 - Timer pause and resume controls for the host
 - Automatic timer-based judging for regular and wager questions
 - Correct and incorrect answer judging

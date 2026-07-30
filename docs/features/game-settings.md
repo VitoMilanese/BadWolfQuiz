@@ -72,4 +72,4 @@ A future settings implementation may add a reset action that restores a game set
 
 The Engine-level settings snapshot is implemented. It configures buzzer and answer durations, automatically opens the regular-question buzzer when requested, and supports explicit start of a wager answer timer in manual mode.
 
-Persistence of global defaults and the global/per-game administration UI remain separate Web-layer work.
+Global defaults are persisted in `App_Data/game-settings.json`. The administration menu edits these defaults, and the create-game page copies them into editable per-game values before constructing the runtime session. Existing lobbies and running games retain their own immutable snapshots.

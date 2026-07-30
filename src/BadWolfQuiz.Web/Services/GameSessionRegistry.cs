@@ -29,9 +29,17 @@ public sealed class GameSessionRegistry
 
     public GameSessionRegistration Create(QuizSnapshot quiz)
     {
-        ArgumentNullException.ThrowIfNull(quiz);
+        return Create(quiz, GameSessionSettings.Default);
+    }
 
-        var session = GameSession.Create(quiz);
+    public GameSessionRegistration Create(
+        QuizSnapshot quiz,
+        GameSessionSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(quiz);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var session = GameSession.Create(quiz, settings);
 
         for (var attempt = 0; attempt < MaxCodeGenerationAttempts; attempt++)
         {
@@ -227,6 +235,23 @@ public sealed class GameSessionRegistry
             return game.Session.SubmitQuestionWager(
                 sourceQuestionId,
                 amount);
+        }
+    }
+
+    public GameTimer? StartWagerAnswerTimer(
+        string publicCode,
+        int sourceQuestionId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.StartWagerAnswerTimer(sourceQuestionId);
         }
     }
 

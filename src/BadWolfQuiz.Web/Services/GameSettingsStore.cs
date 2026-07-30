@@ -1,0 +1,125 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using BadWolfQuiz.Game.Runtime;
+
+namespace BadWolfQuiz.Web.Services;
+
+public sealed class GameSettingsStore(IWebHostEnvironment environment)
+{
+    private readonly SemaphoreSlim _sync = new(1, 1);
+    private readonly string _path = Path.Combine(
+        environment.ContentRootPath,
+        "App_Data",
+        "game-settings.json");
+    private readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        WriteIndented = true,
+        Converters = { new JsonStringEnumConverter() }
+    };
+
+    public async Task<GameSessionSettings> LoadAsync(
+        CancellationToken cancellationToken = default)
+    {
+        await _sync.WaitAsync(cancellationToken);
+
+        try
+        {
+            if (!File.Exists(_path))
+            {
+                return GameSessionSettings.Default;
+            }
+
+            await using var stream = File.OpenRead(_path);
+            return await JsonSerializer.DeserializeAsync<GameSessionSettings>(
+                stream,
+                _jsonOptions,
+                cancellationToken)
+                ?? GameSessionSettings.Default;
+        }
+        catch (JsonException)
+        {
+            return GameSessionSettings.Default;
+        }
+        finally
+        {
+            _sync.Release();
+        }
+    }
+
+    public async Task SaveAsync(
+        GameSessionSettings settings,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        await _sync.WaitAsync(cancellationToken);
+
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
+            var temporaryPath = _path + ".tmp";
+
+            await using (var stream = File.Create(temporaryPath))
+            {
+                await JsonSerializer.SerializeAsync(
+                    stream,
+                    settings,
+                    _jsonOptions,
+                    cancellationToken);
+            }
+
+            File.Move(temporaryPath, _path, true);
+        }
+        finally
+        {
+            _sync.Release();
+        }
+    }
+}
+
+public sealed class GameSettingsInput
+{
+    public int BuzzerDurationSeconds { get; set; } = 30;
+
+    public int AnswerDurationSeconds { get; set; } = 10;
+
+    public GamePhaseStartMode RegularQuestionBuzzerStartMode { get; set; } =
+        GamePhaseStartMode.Manual;
+
+    public GamePhaseStartMode WagerQuestionAnswerTimerStartMode { get; set; } =
+        GamePhaseStartMode.Automatic;
+
+    public bool IsValid =>
+        BuzzerDurationSeconds is >= 1 and <= 3600 &&
+        AnswerDurationSeconds is >= 1 and <= 3600 &&
+        Enum.IsDefined(RegularQuestionBuzzerStartMode) &&
+        Enum.IsDefined(WagerQuestionAnswerTimerStartMode);
+
+    public GameSessionSettings ToRuntimeSettings()
+    {
+        if (!IsValid)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(GameSettingsInput),
+                "Timer durations must be between 1 and 3600 seconds.");
+        }
+
+        return new GameSessionSettings(
+            TimeSpan.FromSeconds(BuzzerDurationSeconds),
+            TimeSpan.FromSeconds(AnswerDurationSeconds),
+            RegularQuestionBuzzerStartMode,
+            WagerQuestionAnswerTimerStartMode);
+    }
+
+    public static GameSettingsInput From(GameSessionSettings settings)
+    {
+        return new GameSettingsInput
+        {
+            BuzzerDurationSeconds = checked((int)settings.BuzzerDuration.TotalSeconds),
+            AnswerDurationSeconds = checked((int)settings.AnswerDuration.TotalSeconds),
+            RegularQuestionBuzzerStartMode =
+                settings.RegularQuestionBuzzerStartMode,
+            WagerQuestionAnswerTimerStartMode =
+                settings.WagerQuestionAnswerTimerStartMode
+        };
+    }
+}
