@@ -2516,3 +2516,61 @@ iframe.game-content-video {
 .game-timer-control button:hover {
     background: rgba(255, 255, 255, 0.12);
 }
+
+
+/* Timer and quiz editor layout refinements */
+
+.host-game-timer {
+    grid-template-columns: 68px 30px;
+    grid-template-rows: 30px;
+    grid-auto-flow: initial;
+    gap: 6px;
+    padding: 7px 9px;
+}
+
+.host-game-timer > strong {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.host-game-timer > .game-timer-control {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.round-wager-settings {
+    align-items: center;
+}
+
+.category-cell {
+    display: flex;
+    min-width: 0;
+    padding: 10px 46px 10px 28px;
+    overflow: hidden;
+}
+
+.category-cell .category-drag-handle {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.category-cell .category-actions {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.category-cell .category-title {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: auto;
+    font-size: clamp(0.78rem, 1.15vw, 1.25rem);
+    line-height: 1.12;
+}
