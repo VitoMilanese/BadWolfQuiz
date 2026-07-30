@@ -4,8 +4,7 @@
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
 }
 
-@if (Model.Game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Running ||
-    Model.CurrentQuestion is null)
+@if (Model.Game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
 {
     <div class="page-heading">
     <div>
