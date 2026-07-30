@@ -246,7 +246,7 @@ public sealed class GameSessionTests
         Assert.Equal(-100, rose.Score);
         Assert.Equal(100, mickey.Score);
         Assert.Equal(mickey.Id, session.ActivePlayerId);
-        Assert.Equal(RuntimeQuestionStatus.Resolved, question.Status);
+        Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
         Assert.Equal(2, question.AnswerAttempts.Count);
     }
 
@@ -276,7 +276,7 @@ public sealed class GameSessionTests
 
         session.ResolveQuestionWithoutCorrectAnswer(100);
 
-        Assert.Equal(RuntimeQuestionStatus.Resolved, question.Status);
+        Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
         Assert.Equal(rose.Id, session.ActivePlayerId);
     }
 
@@ -300,7 +300,7 @@ public sealed class GameSessionTests
 
         Assert.Equal(expectedScore, attempt.ScoreDelta);
         Assert.Equal(expectedScore, player.Score);
-        Assert.Equal(RuntimeQuestionStatus.Resolved, question.Status);
+        Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
         Assert.False(session.IsActivePlayerChangeLocked);
     }
 
@@ -317,6 +317,20 @@ public sealed class GameSessionTests
         Assert.Throws<GameRuleViolationException>(
             () => session.JudgeQuestionAnswer(101, mickey.Id, true));
         Assert.Equal(0, mickey.Score);
+    }
+
+    [Fact]
+    public void CloseQuestionAnswer_returns_to_resolved_board_state()
+    {
+        var session = CreateSession();
+        var player = session.AddPlayer("Rose");
+        session.Start();
+        var question = session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, player.Id, true);
+
+        session.CloseQuestionAnswer(100);
+
+        Assert.Equal(RuntimeQuestionStatus.Resolved, question.Status);
     }
 
     [Fact]

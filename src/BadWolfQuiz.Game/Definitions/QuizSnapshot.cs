@@ -109,7 +109,9 @@ public sealed class QuizQuestionSnapshot
         int points,
         bool isSpecial,
         string? categoryTitle = null,
-        bool excludeFromRandomWagerSelection = false)
+        bool excludeFromRandomWagerSelection = false,
+        IEnumerable<ContentBlockSnapshot>? questionBlocks = null,
+        IEnumerable<ContentBlockSnapshot>? answerBlocks = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceQuestionId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceCategoryId);
@@ -125,6 +127,8 @@ public sealed class QuizQuestionSnapshot
         CategoryTitle = string.IsNullOrWhiteSpace(categoryTitle)
             ? sourceCategoryId.ToString()
             : categoryTitle.Trim();
+        QuestionBlocks = (questionBlocks ?? []).OrderBy(block => block.SortOrder).ToArray();
+        AnswerBlocks = (answerBlocks ?? []).OrderBy(block => block.SortOrder).ToArray();
     }
 
     public int SourceQuestionId { get; }
@@ -140,4 +144,31 @@ public sealed class QuizQuestionSnapshot
     public bool ExcludeFromRandomWagerSelection { get; }
 
     public string CategoryTitle { get; }
+
+    public IReadOnlyList<ContentBlockSnapshot> QuestionBlocks { get; }
+
+    public IReadOnlyList<ContentBlockSnapshot> AnswerBlocks { get; }
+}
+
+public sealed record ContentBlockSnapshot(
+    int SourceContentBlockId,
+    ContentBlockKind Kind,
+    string? TextContent,
+    string? TopCaption,
+    string? BottomCaption,
+    string? MediaPath,
+    string? ExternalUrl,
+    byte[]? FileData,
+    string? FileContentType,
+    string? FileName,
+    int SortOrder,
+    bool AudioOnly);
+
+public enum ContentBlockKind
+{
+    Text = 1,
+    Image = 2,
+    Audio = 3,
+    Video = 4,
+    YouTube = 5
 }

@@ -43,9 +43,9 @@ Attempts remain attached to the runtime question. Repeated judging of the same p
 
 ## Current integration boundary
 
-The current host UI allows the host to choose an eligible player and judge that player's answer. Player score lists receive real-time updates.
+The current host UI presents immutable question content while a question is active and immutable answer content after the question is resolved. The board remains hidden until the host closes the answer presentation. Player score lists remain visible and receive real-time updates.
 
-A future integration will connect the Runtime Engine to the buzzer winner and render complete immutable question content. Until that integration exists, the host manually identifies the answering player.
+The host still chooses an eligible player and judges that player's answer. A future integration will replace this temporary player selection with the buzzer winner and timed answer phases.
 
 ## Target question presentation flow
 

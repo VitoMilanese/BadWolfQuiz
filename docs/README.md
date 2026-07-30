@@ -1,15 +1,25 @@
 # BadWolfQuiz Documentation
 
-This directory contains product vision, gameplay architecture, feature specifications, and architecture decision records for BadWolfQuiz.
+This directory contains product vision, gameplay architecture, feature specifications, and architecture decisions for BadWolfQuiz.
 
-## Contents
+## Product
 
 - [Product vision](vision.md)
+
+## Architecture
+
 - [Runtime model](architecture/runtime-model.md)
+
+## Features
+
+- [Wagering and active player rules](features/wagering.md)
+- [Question judging](features/question-judging.md)
+- [Game settings](features/game-settings.md)
 
 ## Documentation principles
 
 - Product behavior is documented before implementation.
 - Runtime gameplay rules are kept independent from UI and persistence concerns.
 - Important architectural decisions are recorded as ADRs.
-- Documentation should be updated together with the code that changes the documented behavior.
+- Documentation is updated together with code that changes documented behavior.
+- Links are added only after the referenced document exists.

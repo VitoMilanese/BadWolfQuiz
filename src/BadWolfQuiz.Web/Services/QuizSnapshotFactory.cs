@@ -54,6 +54,25 @@ public sealed class QuizSnapshotFactory
             points,
             question.IsSpecial,
             question.Category.Title,
-            question.ExcludeFromRandomWagerSelection);
+            question.ExcludeFromRandomWagerSelection,
+            question.QuestionBlocks.Select(CreateContentBlock),
+            question.AnswerBlocks.Select(CreateContentBlock));
+    }
+
+    private static ContentBlockSnapshot CreateContentBlock(ContentBlockBase block)
+    {
+        return new ContentBlockSnapshot(
+            block.Id,
+            (ContentBlockKind)(int)block.BlockType,
+            block.TextContent,
+            block.TopCaption,
+            block.BottomCaption,
+            block.MediaPath,
+            block.ExternalUrl,
+            block.FileData?.ToArray(),
+            block.FileContentType,
+            block.FileName,
+            block.SortOrder,
+            block.AudioOnly);
     }
 }

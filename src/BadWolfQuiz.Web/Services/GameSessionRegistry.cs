@@ -267,6 +267,14 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public RuntimeQuestion? CloseQuestionAnswer(
+        string publicCode,
+        int sourceQuestionId)
+    {
+        var game = Find(publicCode);
+        return game?.Session.CloseQuestionAnswer(sourceQuestionId);
+    }
+
     public GamePlayer? SetActivePlayer(
         string publicCode,
         GamePlayerId playerId)

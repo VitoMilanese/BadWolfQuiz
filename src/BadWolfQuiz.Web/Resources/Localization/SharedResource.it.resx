@@ -769,4 +769,19 @@
   <data name="GameBoard_JudgeAnswer" xml:space="preserve"><value>Valuta la risposta</value></data>
   <data name="GameBoard_NoCorrectAnswer" xml:space="preserve"><value>Nessuna risposta corretta</value></data>
   <data name="GameBoard_JudgmentRejected" xml:space="preserve"><value>Questa risposta non può essere valutata nello stato attuale della domanda.</value></data>
+  <data name="GameBoard_Question" xml:space="preserve">
+    <value>Domanda</value>
+  </data>
+  <data name="GameBoard_Answer" xml:space="preserve">
+    <value>Risposta</value>
+  </data>
+  <data name="GameBoard_ReturnToBoard" xml:space="preserve">
+    <value>Torna al tabellone</value>
+  </data>
+  <data name="GameBoard_MediaContent" xml:space="preserve">
+    <value>Contenuto multimediale della domanda</value>
+  </data>
+  <data name="GameBoard_CloseAnswerRejected" xml:space="preserve">
+    <value>Non è stato possibile chiudere la risposta.</value>
+  </data>
 </root>

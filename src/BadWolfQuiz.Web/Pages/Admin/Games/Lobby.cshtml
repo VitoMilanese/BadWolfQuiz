@@ -4,7 +4,10 @@
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
 }
 
-<div class="page-heading">
+@if (Model.Game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Running ||
+    Model.CurrentQuestion is null)
+{
+    <div class="page-heading">
     <div>
         <p class="eyebrow">@Localizer["GameLobby_Eyebrow"]</p>
         <h1>@Model.Game.Session.Quiz.Title</h1>
@@ -14,6 +17,7 @@
         @Localizer["Button_BackToQuizzes"]
     </a>
 </div>
+}
 
 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby)
 {
@@ -125,6 +129,8 @@
             <div class="message message-error">@errorMessage</div>
         }
 
+        @if (Model.CurrentQuestion is null)
+        {
         <div class="page-heading">
             <div>
                 <p class="eyebrow">@Localizer["GameBoard_Eyebrow"]</p>
@@ -147,10 +153,13 @@
                 </button>
             </div>
         </div>
+        }
 
         @if (Model.CurrentQuestion is not null)
         {
             <div class="content-panel current-question-summary @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager ? "wager-mode" : null)">
+                @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
+                {
                 <div class="current-question-heading">
                     <strong>@Model.CurrentQuestion.CategoryTitle — @Model.CurrentQuestion.Points</strong>
                     <span>
@@ -161,6 +170,7 @@
                                 : Localizer["GameBoard_QuestionSelected"])
                     </span>
                 </div>
+                }
 
                 @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
                 {
@@ -252,14 +262,108 @@
                     var wagerPlayer = Model.Players.First(
                         player => player.Id == Model.CurrentQuestion.Wager.PlayerId);
 
-                    <p class="accepted-wager">
+                    <p class="accepted-wager answering-player-header">
                         @Localizer[
                             "GameBoard_AcceptedWagerSummary",
                             wagerPlayer.Name,
                             Model.CurrentQuestion.Wager.Amount]
                     </p>
                 }
-            </div>
+
+                @if (Model.CurrentQuestion.Status != BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
+                {
+                    var isShowingAnswer =
+                        Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.ShowingAnswer;
+                    var contentBlocks = isShowingAnswer
+                        ? Model.CurrentQuestion.AnswerBlocks
+                        : Model.CurrentQuestion.QuestionBlocks;
+
+                    <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation")">
+                        <p class="eyebrow">
+                            @(isShowingAnswer
+                                ? Localizer["GameBoard_Answer"]
+                                : Localizer["GameBoard_Question"])
+                        </p>
+
+                        <div class="game-content-blocks">
+                            @foreach (var block in contentBlocks)
+                            {
+                                <article class="game-content-block">
+                                    @if (!string.IsNullOrWhiteSpace(block.TopCaption))
+                                    {
+                                        <p class="game-content-caption">@block.TopCaption</p>
+                                    }
+
+                                    @switch (block.Kind)
+                                    {
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Text:
+                                            <p class="game-content-text">@block.TextContent</p>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Image:
+                                            <img class="game-content-image"
+                                                 src="@Url.Page(
+                                                     "/Admin/Games/Lobby",
+                                                     "ContentBlock",
+                                                     new
+                                                     {
+                                                         id = Model.Game.Session.Id.Value,
+                                                         sourceQuestionId = Model.CurrentQuestion.SourceQuestionId,
+                                                         sourceContentBlockId = block.SourceContentBlockId,
+                                                         answer = isShowingAnswer
+                                                     })"
+                                                 alt="@block.FileName" />
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
+                                            <audio class="game-content-audio"
+                                                   controls
+                                                   src="@Url.Page(
+                                                       "/Admin/Games/Lobby",
+                                                       "ContentBlock",
+                                                       new
+                                                       {
+                                                           id = Model.Game.Session.Id.Value,
+                                                           sourceQuestionId = Model.CurrentQuestion.SourceQuestionId,
+                                                           sourceContentBlockId = block.SourceContentBlockId,
+                                                           answer = isShowingAnswer
+                                                       })">
+                                            </audio>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
+                                            <video class="game-content-video"
+                                                   controls
+                                                   src="@block.ExternalUrl">
+                                            </video>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
+                                            <iframe class="game-content-video"
+                                                    src="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
+                                                    title="@Localizer["GameBoard_MediaContent"]"
+                                                    allowfullscreen>
+                                            </iframe>
+                                            break;
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
+                                    {
+                                        <p class="game-content-caption">@block.BottomCaption</p>
+                                    }
+                                </article>
+                            }
+                        </div>
+
+                        @if (isShowingAnswer)
+                        {
+                            <form method="post" asp-page-handler="CloseAnswer">
+                                <input name="sourceQuestionId"
+                                       type="hidden"
+                                       value="@Model.CurrentQuestion.SourceQuestionId" />
+                                <button class="button button-primary" type="submit">
+                                    @Localizer["GameBoard_ReturnToBoard"]
+                                </button>
+                            </form>
+                        }
+                    </section>
+                }
 
             @if (Model.CurrentQuestion.Status is BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Selected or
                 BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active)
@@ -333,7 +437,7 @@
 
                     @if (!Model.CurrentQuestion.IsSpecial)
                     {
-                        <form method="post" asp-page-handler="ResolveQuestion">
+                        <form class="judgment-general-actions" method="post" asp-page-handler="ResolveQuestion">
                             <input name="sourceQuestionId"
                                    type="hidden"
                                    value="@Model.CurrentQuestion.SourceQuestionId" />
@@ -344,9 +448,10 @@
                     }
                 </section>
             }
+            </div>
         }
 
-        @if (Model.CurrentQuestion?.Status != BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
+        @if (Model.CurrentQuestion is null)
         {
             <div class="host-board-grid"
                  style="--board-columns: @Model.BoardCategories.Count">
