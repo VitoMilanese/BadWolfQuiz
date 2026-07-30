@@ -232,9 +232,15 @@ public sealed class GameSessionRegistryTests
         Assert.Equal(-100, attempt!.ScoreDelta);
         Assert.Equal(-100, player.Score);
         Assert.Equal(
-            BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Resolved,
+            BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.ShowingAnswer,
             question!.Status);
-        Assert.Same(game.Session.Board.Questions.Single(), question);
+
+        var closed = registry.CloseQuestionAnswer("ABC123", 1);
+
+        Assert.Equal(
+            BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Resolved,
+            closed!.Status);
+        Assert.Same(game.Session.Board.Questions.Single(), closed);
     }
 
     [Fact]
