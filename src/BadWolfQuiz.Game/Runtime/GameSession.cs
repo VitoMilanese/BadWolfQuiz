@@ -36,6 +36,20 @@ public sealed class GameSession
         ? _players.Single(player => player.Id == activePlayerId)
         : null;
 
+    public int CurrentRoundIndex { get; private set; }
+
+    public int CurrentRoundNumber => CurrentRoundIndex + 1;
+
+    public QuizRoundSnapshot CurrentRound => Quiz.Rounds
+        .OrderBy(round => round.SortOrder)
+        .ElementAt(CurrentRoundIndex);
+
+    public bool IsCurrentRoundComplete => Board.Questions
+        .Where(question => question.SourceRoundId == CurrentRound.SourceRoundId)
+        .All(question => question.Status == RuntimeQuestionStatus.Resolved);
+
+    public bool HasNextRound => CurrentRoundIndex < Quiz.Rounds.Count - 1;
+
     public bool IsActivePlayerChangeLocked => Board.Questions.Any(question =>
         question.IsSpecial &&
         question.Status is RuntimeQuestionStatus.AwaitingWager or
@@ -115,6 +129,12 @@ public sealed class GameSession
             item => item.SourceQuestionId == sourceQuestionId)
             ?? throw new GameRuleViolationException(
                 $"Question {sourceQuestionId} does not belong to this game.");
+
+        if (question.SourceRoundId != CurrentRound.SourceRoundId)
+        {
+            throw new GameRuleViolationException(
+                "Only a question from the current round can be selected.");
+        }
 
         var activePlayerId = ActivePlayerId
             ?? throw new GameRuleViolationException(
@@ -229,6 +249,32 @@ public sealed class GameSession
         var question = FindQuestion(sourceQuestionId);
         question.CloseAnswer();
         return question;
+    }
+
+    public QuizRoundSnapshot AdvanceToNextRound()
+    {
+        EnsureRunning();
+
+        if (!IsCurrentRoundComplete)
+        {
+            throw new GameRuleViolationException(
+                "The current round must be completed before advancing.");
+        }
+
+        if (!HasNextRound)
+        {
+            throw new GameRuleViolationException(
+                "The game does not have another round.");
+        }
+
+        CurrentRoundIndex++;
+        ActivePlayerId = _players
+            .OrderBy(player => player.Score)
+            .ThenBy(player => player.JoinedAtUtc)
+            .First()
+            .Id;
+
+        return CurrentRound;
     }
 
     public GamePlayer AdjustPlayerScore(

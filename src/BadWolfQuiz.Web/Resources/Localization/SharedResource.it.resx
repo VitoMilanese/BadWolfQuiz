@@ -681,7 +681,7 @@
   <data name="QuizEditor_RandomWagerDescription" xml:space="preserve"><value>Ignora le domande contrassegnate manualmente e scegli posizioni casuali alla creazione di ogni partita.</value></data>
   <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve"><value>Numero di domande con puntata</value></data>
   <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Domande disponibili: {0}</value></data>
-  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Scegli tra 1 e {0} domande con puntata casuali.</value></data>
+  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Il numero di domande con puntata casuali deve essere compreso tra 0 e {0}.</value></data>
   <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Impostazioni del round salvate.</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Valore delle domande</value>
@@ -822,5 +822,17 @@
   </data>
   <data name="GameBoard_BuzzerRaceLatePlayer" xml:space="preserve">
     <value>{0} ha premuto {1} ms dopo</value>
+  </data>
+  <data name="GameBoard_RoundComplete" xml:space="preserve">
+    <value>Round completato</value>
+  </data>
+  <data name="GameBoard_StartNextRound" xml:space="preserve">
+    <value>Inizia il round successivo</value>
+  </data>
+  <data name="GameBoard_AllRoundsComplete" xml:space="preserve">
+    <value>Tutti i round sono completati.</value>
+  </data>
+  <data name="GameBoard_AdvanceRoundRejected" xml:space="preserve">
+    <value>Impossibile avviare il round successivo.</value>
   </data>
 </root>

@@ -177,6 +177,22 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public QuizRoundSnapshot? AdvanceToNextRound(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            return game.Session.AdvanceToNextRound();
+        }
+    }
+
     public RuntimeQuestion? SelectQuestion(
         string publicCode,
         int sourceQuestionId)

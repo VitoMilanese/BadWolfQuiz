@@ -97,13 +97,17 @@ Currently implemented:
 - Lobby and join code
 - Join and reconnect flows with host approval
 - Real-time player presence and score updates
-- Active player selection
-- Random wager questions
+- Active player selection and automatic lowest-score selection for later rounds
+- Random wager questions, including rounds configured with zero wager questions
 - Wager keypad and validation
+- Player buzzer with server-authoritative winner selection
+- Near-simultaneous buzzer results with millisecond differences
 - Correct and incorrect answer judging
 - Positive and negative scoring
 - Focused question and answer presentation
-- Player scoreboard during gameplay
+- Player scoreboard with answering and ineligible states
+- Multi-round progression
+- Animated top-three inter-round leaderboard
 
 ---
 
@@ -171,15 +175,24 @@ src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
 
 - Persistent game history
 - Reserved player nicknames
-- Team mode
 
 ## Game
 
 - Configurable buzzer and answer timers
-- Player buzzer input
 - Automatic timer-based judging
 - Global and per-game settings
 - Final question flow
+- Final result and deterministic winner tie-breaking
+- Per-round and lifetime correct-answer and attempt statistics
+- Team mode
+
+## Player and Host Cards
+
+- Compact icon-only card controls
+- Built-in and uploaded player avatars
+- Webcam or OBS feed in place of an avatar
+- Optional host card with an image, webcam, or OBS feed
+- Global defaults with per-game visibility overrides
 
 ## Media
 

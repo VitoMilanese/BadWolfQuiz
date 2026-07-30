@@ -128,12 +128,12 @@
             <div class="message message-error">@errorMessage</div>
         }
 
-        @if (Model.CurrentQuestion is null)
+        @if (Model.CurrentQuestion is null && !Model.IsRoundSummaryVisible)
         {
         <div class="page-heading">
             <div>
                 <p class="eyebrow">@Localizer["GameBoard_Eyebrow"]</p>
-                <h2>@Model.Game.Session.Quiz.Rounds.OrderBy(round => round.SortOrder).First().Title</h2>
+                <h2>@Model.Game.Session.CurrentRound.Title</h2>
             </div>
 
             <div class="form-actions">
@@ -459,7 +459,37 @@
             </div>
         }
 
-        @if (Model.CurrentQuestion is null)
+        @if (Model.IsRoundSummaryVisible)
+        {
+            <section class="round-summary" aria-labelledby="round-summary-title">
+                <p class="eyebrow">@Localizer["GameBoard_RoundComplete"]</p>
+                <h2 id="round-summary-title">@Model.Game.Session.CurrentRound.Title</h2>
+                <ol class="round-podium">
+                    @foreach (var leader in Model.RoundLeaders)
+                    {
+                        <li class="round-podium-player @(leader.Position == 1 ? "round-winner" : null)">
+                            <span class="round-podium-position">@leader.Position</span>
+                            <strong>@leader.PlayerName</strong>
+                            <span class="round-podium-score">@leader.Score</span>
+                        </li>
+                    }
+                </ol>
+                @if (Model.Game.Session.HasNextRound)
+                {
+                    <form method="post" asp-page-handler="AdvanceRound">
+                        <button class="button button-primary" type="submit">
+                            @Localizer["GameBoard_StartNextRound"]
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <p class="round-summary-finished">@Localizer["GameBoard_AllRoundsComplete"]</p>
+                }
+            </section>
+        }
+
+        @if (Model.CurrentQuestion is null && !Model.IsRoundSummaryVisible)
         {
             <div class="host-board-grid"
                  style="--board-columns: @Model.BoardCategories.Count">
