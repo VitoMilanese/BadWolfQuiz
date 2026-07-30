@@ -437,7 +437,7 @@
 
                     @if (!Model.CurrentQuestion.IsSpecial)
                     {
-                        <form method="post" asp-page-handler="ResolveQuestion">
+                        <form class="judgment-general-actions" method="post" asp-page-handler="ResolveQuestion">
                             <input name="sourceQuestionId"
                                    type="hidden"
                                    value="@Model.CurrentQuestion.SourceQuestionId" />
