@@ -2019,3 +2019,16 @@ iframe.game-content-video {
         max-height: none;
     }
 }
+
+
+.current-question-summary:not(.wager-mode) > .answering-player-header {
+    grid-row: 1;
+}
+
+.current-question-summary:not(.wager-mode) > .game-content-presentation {
+    grid-row: 2;
+}
+
+.current-question-summary:not(.wager-mode) > .question-judgment-panel {
+    grid-row: 3;
+}
