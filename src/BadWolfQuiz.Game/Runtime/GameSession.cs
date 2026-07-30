@@ -167,6 +167,27 @@ public sealed class GameSession
         return question;
     }
 
+    public RuntimeQuestion ActivateQuestionBuzzer(int sourceQuestionId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        question.ActivateBuzzer();
+        return question;
+    }
+
+    public RuntimeQuestion ClaimQuestionBuzzer(
+        int sourceQuestionId,
+        GamePlayerId playerId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        var player = FindPlayer(playerId);
+        question.ClaimBuzzer(player.Id);
+        return question;
+    }
+
     public QuestionAnswerAttempt JudgeQuestionAnswer(
         int sourceQuestionId,
         GamePlayerId playerId,

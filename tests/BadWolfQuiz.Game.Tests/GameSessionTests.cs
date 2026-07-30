@@ -218,6 +218,52 @@ public sealed class GameSessionTests
         Assert.Equal(rose.Id, session.ActivePlayerId);
     }
 
+
+    [Fact]
+    public void ActivateQuestionBuzzer_opens_regular_question_buzzer()
+    {
+        var session = CreateSession();
+        session.AddPlayer("Rose");
+        session.Start();
+        var question = session.SelectQuestion(100);
+
+        session.ActivateQuestionBuzzer(100);
+
+        Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
+        Assert.Equal(QuestionBuzzerStatus.Open, question.BuzzerStatus);
+        Assert.Null(question.AnsweringPlayerId);
+    }
+
+    [Fact]
+    public void ClaimQuestionBuzzer_accepts_first_eligible_player()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        var question = session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+
+        session.ClaimQuestionBuzzer(100, rose.Id);
+
+        Assert.Equal(QuestionBuzzerStatus.Claimed, question.BuzzerStatus);
+        Assert.Equal(rose.Id, question.AnsweringPlayerId);
+        Assert.Throws<GameRuleViolationException>(
+            () => session.ClaimQuestionBuzzer(100, mickey.Id));
+    }
+
+    [Fact]
+    public void Wager_question_rejects_buzzer_activation()
+    {
+        var session = CreateSession();
+        session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(101);
+
+        Assert.Throws<GameRuleViolationException>(
+            () => session.ActivateQuestionBuzzer(101));
+    }
+
     [Fact]
     public void AdjustPlayerScore_allows_negative_scores()
     {

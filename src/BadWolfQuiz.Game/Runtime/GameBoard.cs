@@ -111,6 +111,11 @@ public sealed class RuntimeQuestion
 
     public Wager? Wager { get; private set; }
 
+    public QuestionBuzzerStatus BuzzerStatus { get; private set; } =
+        QuestionBuzzerStatus.Inactive;
+
+    public GamePlayerId? AnsweringPlayerId { get; private set; }
+
     public IReadOnlyList<QuestionAnswerAttempt> AnswerAttempts => _readOnlyAnswerAttempts;
 
     internal void Select(GamePlayerId selectedByPlayerId)
@@ -138,8 +143,49 @@ public sealed class RuntimeQuestion
         }
 
         Wager = new Wager(playerId, amount, submittedAtUtc);
+        AnsweringPlayerId = playerId;
+        BuzzerStatus = QuestionBuzzerStatus.Closed;
         Status = RuntimeQuestionStatus.Active;
     }
+
+    internal void ActivateBuzzer()
+    {
+        if (IsSpecial || Status is not RuntimeQuestionStatus.Selected and
+            not RuntimeQuestionStatus.Active)
+        {
+            throw new GameRuleViolationException(
+                "The buzzer can only be activated for an active regular question.");
+        }
+
+        if (BuzzerStatus == QuestionBuzzerStatus.Claimed)
+        {
+            throw new GameRuleViolationException(
+                "The buzzer cannot be activated while a player is answering.");
+        }
+
+        BuzzerStatus = QuestionBuzzerStatus.Open;
+        AnsweringPlayerId = null;
+        Status = RuntimeQuestionStatus.Active;
+    }
+
+    internal void ClaimBuzzer(GamePlayerId playerId)
+    {
+        if (IsSpecial || BuzzerStatus != QuestionBuzzerStatus.Open)
+        {
+            throw new GameRuleViolationException(
+                "The buzzer is not open for the current question.");
+        }
+
+        if (_answerAttempts.Any(attempt => attempt.PlayerId == playerId))
+        {
+            throw new GameRuleViolationException(
+                "This player has already answered the current question.");
+        }
+
+        AnsweringPlayerId = playerId;
+        BuzzerStatus = QuestionBuzzerStatus.Claimed;
+    }
+
     internal QuestionAnswerAttempt JudgeAnswer(
         GamePlayerId playerId,
         bool isCorrect,
@@ -179,7 +225,14 @@ public sealed class RuntimeQuestion
 
         if (isCorrect || IsSpecial)
         {
+            BuzzerStatus = QuestionBuzzerStatus.Closed;
+            AnsweringPlayerId = null;
             Status = RuntimeQuestionStatus.ShowingAnswer;
+        }
+        else if (!IsSpecial)
+        {
+            BuzzerStatus = QuestionBuzzerStatus.Open;
+            AnsweringPlayerId = null;
         }
 
         return attempt;
@@ -195,6 +248,8 @@ public sealed class RuntimeQuestion
                 "Only an active regular question can be closed without a correct answer.");
         }
 
+        BuzzerStatus = QuestionBuzzerStatus.Closed;
+        AnsweringPlayerId = null;
         Status = RuntimeQuestionStatus.ShowingAnswer;
     }
 
@@ -219,4 +274,13 @@ public enum RuntimeQuestionStatus
     AwaitingJudgment = 5,
     ShowingAnswer = 6,
     Resolved = 7
+}
+
+
+public enum QuestionBuzzerStatus
+{
+    Inactive = 1,
+    Open = 2,
+    Claimed = 3,
+    Closed = 4
 }
