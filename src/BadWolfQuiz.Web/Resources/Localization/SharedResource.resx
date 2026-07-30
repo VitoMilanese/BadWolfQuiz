@@ -769,4 +769,19 @@
   <data name="GameBoard_JudgeAnswer" xml:space="preserve"><value>Judge answer</value></data>
   <data name="GameBoard_NoCorrectAnswer" xml:space="preserve"><value>No correct answer</value></data>
   <data name="GameBoard_JudgmentRejected" xml:space="preserve"><value>This answer cannot be judged in the current question state.</value></data>
+  <data name="GameBoard_Question" xml:space="preserve">
+    <value>Question</value>
+  </data>
+  <data name="GameBoard_Answer" xml:space="preserve">
+    <value>Answer</value>
+  </data>
+  <data name="GameBoard_ReturnToBoard" xml:space="preserve">
+    <value>Return to board</value>
+  </data>
+  <data name="GameBoard_MediaContent" xml:space="preserve">
+    <value>Question media</value>
+  </data>
+  <data name="GameBoard_CloseAnswerRejected" xml:space="preserve">
+    <value>The answer presentation could not be closed.</value>
+  </data>
 </root>
