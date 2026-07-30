@@ -169,6 +169,24 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public GameSessionRegistration? UpdateSettings(
+        string publicCode,
+        GameSessionSettings settings)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            game.Session.UpdateSettings(settings);
+            return game;
+        }
+    }
+
     public GameSessionRegistration? StartGame(string publicCode)
     {
         var game = Find(publicCode);

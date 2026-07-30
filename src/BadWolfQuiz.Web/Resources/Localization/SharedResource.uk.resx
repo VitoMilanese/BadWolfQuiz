@@ -869,4 +869,11 @@
   <data name="GameSettings_GameDescription" xml:space="preserve"><value>Ці значення успадковані з глобальних налаштувань. Зміни застосуються лише до цієї гри.</value></data>
   <data name="GameBoard_StartAnswerTimer" xml:space="preserve"><value>Запустити таймер</value></data>
   <data name="GameTimer_StartRejected" xml:space="preserve"><value>Не вдалося запустити таймер відповіді.</value></data>
+  <data name="GameSettings_LobbyTitle" xml:space="preserve"><value>Налаштування гри</value></data>
+  <data name="GameSettings_LobbyDescription" xml:space="preserve"><value>Ці налаштування застосовуються лише до цієї гри та можуть змінюватися до її запуску.</value></data>
+  <data name="GameSettings_Automatic" xml:space="preserve"><value>Автоматично</value></data>
+  <data name="GameSettings_Manual" xml:space="preserve"><value>Вручну</value></data>
+  <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Зберегти налаштування гри</value></data>
+  <data name="GameSettings_GameSaved" xml:space="preserve"><value>Налаштування гри збережено.</value></data>
+  <data name="GameSettings_GameLocked" xml:space="preserve"><value>Після запуску гри налаштування змінювати не можна.</value></data>
 </root>

@@ -60,7 +60,7 @@ Settings that affect an active phase should not silently change that phase after
 The administration experience provides:
 
 - a global settings menu for persistent host defaults;
-- a game settings menu during lobby creation;
+- a game settings panel in the lobby before the game starts;
 - inherited values preselected from the global settings;
 - the ability to personalize settings for the new game;
 - a clear way to distinguish inherited values from game-specific overrides.
@@ -72,4 +72,4 @@ A future settings implementation may add a reset action that restores a game set
 
 The Engine-level settings snapshot is implemented. It configures buzzer and answer durations, automatically opens the regular-question buzzer when requested, and supports explicit start of a wager answer timer in manual mode.
 
-Global defaults are persisted in `App_Data/game-settings.json`. The administration menu edits these defaults, and the create-game page copies them into editable per-game values before constructing the runtime session. Existing lobbies and running games retain their own immutable snapshots.
+Global defaults are persisted in `App_Data/game-settings.json`. Creating a game immediately copies those defaults into its runtime session. The host can edit the per-game values from the lobby until the game starts; updating them rebuilds the stopped timers. Once the game starts, the snapshot is locked.

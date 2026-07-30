@@ -91,6 +91,34 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void UpdateSettings_rebuilds_timers_before_game_starts()
+    {
+        var session = CreateSession();
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(55),
+            TimeSpan.FromSeconds(14),
+            GamePhaseStartMode.Automatic,
+            GamePhaseStartMode.Manual);
+
+        session.UpdateSettings(settings);
+
+        Assert.Same(settings, session.Settings);
+        Assert.Equal(TimeSpan.FromSeconds(55), session.Timer.Duration);
+        Assert.Equal(TimeSpan.FromSeconds(14), session.AnswerTimer.Duration);
+    }
+
+    [Fact]
+    public void UpdateSettings_rejects_changes_after_game_starts()
+    {
+        var session = CreateSession();
+        session.AddPlayer("Rose");
+        session.Start();
+
+        Assert.Throws<GameRuleViolationException>(
+            () => session.UpdateSettings(GameSessionSettings.Default));
+    }
+
+    [Fact]
     public void AddPlayer_trims_name_and_adds_player_to_lobby()
     {
         var session = CreateSession();

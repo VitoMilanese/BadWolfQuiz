@@ -50,6 +50,54 @@
                 <span id="game-status">@Localizer["GameLobby_StatusLobby"]</span>
             </p>
 
+            <details class="lobby-settings-panel">
+                <summary>@Localizer["GameSettings_LobbyTitle"]</summary>
+                <form method="post"
+                      asp-page-handler="UpdateSettings"
+                      class="stack-form">
+                    <p class="settings-description">
+                        @Localizer["GameSettings_LobbyDescription"]
+                    </p>
+                    <div class="settings-grid">
+                        <label>
+                            <span>@Localizer["GameSettings_BuzzerDuration"]</span>
+                            <input asp-for="SettingsInput.BuzzerDurationSeconds"
+                                   type="number"
+                                   min="1"
+                                   max="3600"
+                                   required />
+                        </label>
+                        <label>
+                            <span>@Localizer["GameSettings_AnswerDuration"]</span>
+                            <input asp-for="SettingsInput.AnswerDurationSeconds"
+                                   type="number"
+                                   min="1"
+                                   max="3600"
+                                   required />
+                        </label>
+                        <label>
+                            <span>@Localizer["GameSettings_RegularStartMode"]</span>
+                            <select asp-for="SettingsInput.RegularQuestionBuzzerStartMode">
+                                <option value="1">@Localizer["GameSettings_Automatic"]</option>
+                                <option value="2">@Localizer["GameSettings_Manual"]</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>@Localizer["GameSettings_WagerStartMode"]</span>
+                            <select asp-for="SettingsInput.WagerQuestionAnswerTimerStartMode">
+                                <option value="1">@Localizer["GameSettings_Automatic"]</option>
+                                <option value="2">@Localizer["GameSettings_Manual"]</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button class="button button-secondary" type="submit">
+                            @Localizer["GameSettings_SaveForGame"]
+                        </button>
+                    </div>
+                </form>
+            </details>
+
             <div class="form-actions">
                 <form id="start-game-form" method="post" asp-page-handler="Start">
                     <button class="button button-primary" type="submit">

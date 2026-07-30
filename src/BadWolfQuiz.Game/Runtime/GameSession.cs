@@ -34,7 +34,7 @@ public sealed class GameSession
 
     public QuizSnapshot Quiz { get; }
 
-    public GameSessionSettings Settings { get; }
+    public GameSessionSettings Settings { get; private set; }
 
     public GameSessionStatus Status { get; private set; } = GameSessionStatus.Lobby;
 
@@ -67,9 +67,9 @@ public sealed class GameSession
 
     public GameBoard Board { get; }
 
-    public GameTimer Timer { get; }
+    public GameTimer Timer { get; private set; }
 
-    public GameTimer AnswerTimer { get; }
+    public GameTimer AnswerTimer { get; private set; }
 
     public DateTimeOffset CreatedAtUtc { get; }
 
@@ -93,6 +93,16 @@ public sealed class GameSession
             quiz,
             settings,
             timeProvider ?? TimeProvider.System);
+    }
+
+    public void UpdateSettings(GameSessionSettings settings)
+    {
+        EnsureLobby();
+        ArgumentNullException.ThrowIfNull(settings);
+
+        Settings = settings;
+        Timer = new GameTimer(settings.BuzzerDuration, _timeProvider);
+        AnswerTimer = new GameTimer(settings.AnswerDuration, _timeProvider);
     }
 
     public GamePlayer AddPlayer(string name)

@@ -869,4 +869,11 @@
   <data name="GameSettings_GameDescription" xml:space="preserve"><value>Questi valori sono ereditati dalle impostazioni globali. Le modifiche valgono solo per questa partita.</value></data>
   <data name="GameBoard_StartAnswerTimer" xml:space="preserve"><value>Avvia timer</value></data>
   <data name="GameTimer_StartRejected" xml:space="preserve"><value>Impossibile avviare il timer della risposta.</value></data>
+  <data name="GameSettings_LobbyTitle" xml:space="preserve"><value>Impostazioni della partita</value></data>
+  <data name="GameSettings_LobbyDescription" xml:space="preserve"><value>Queste impostazioni valgono solo per questa partita e possono essere modificate fino all'avvio.</value></data>
+  <data name="GameSettings_Automatic" xml:space="preserve"><value>Automatico</value></data>
+  <data name="GameSettings_Manual" xml:space="preserve"><value>Manuale</value></data>
+  <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Salva impostazioni della partita</value></data>
+  <data name="GameSettings_GameSaved" xml:space="preserve"><value>Impostazioni della partita salvate.</value></data>
+  <data name="GameSettings_GameLocked" xml:space="preserve"><value>Le impostazioni non possono essere modificate dopo l'avvio della partita.</value></data>
 </root>

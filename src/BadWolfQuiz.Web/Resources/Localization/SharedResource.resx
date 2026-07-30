@@ -869,4 +869,11 @@
   <data name="GameSettings_GameDescription" xml:space="preserve"><value>These values were inherited from the global defaults. Changes apply only to this game.</value></data>
   <data name="GameBoard_StartAnswerTimer" xml:space="preserve"><value>Start timer</value></data>
   <data name="GameTimer_StartRejected" xml:space="preserve"><value>The answer timer could not be started.</value></data>
+  <data name="GameSettings_LobbyTitle" xml:space="preserve"><value>Game settings</value></data>
+  <data name="GameSettings_LobbyDescription" xml:space="preserve"><value>These settings apply only to this game and can be changed until the game starts.</value></data>
+  <data name="GameSettings_Automatic" xml:space="preserve"><value>Automatic</value></data>
+  <data name="GameSettings_Manual" xml:space="preserve"><value>Manual</value></data>
+  <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Save game settings</value></data>
+  <data name="GameSettings_GameSaved" xml:space="preserve"><value>Game settings saved.</value></data>
+  <data name="GameSettings_GameLocked" xml:space="preserve"><value>Settings cannot be changed after the game starts.</value></data>
 </root>

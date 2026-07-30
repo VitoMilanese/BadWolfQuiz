@@ -30,6 +30,23 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void UpdateSettings_routes_lobby_settings_to_runtime_session()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        var settings = new BadWolfQuiz.Game.Runtime.GameSessionSettings(
+            TimeSpan.FromSeconds(50),
+            TimeSpan.FromSeconds(11),
+            BadWolfQuiz.Game.Runtime.GamePhaseStartMode.Automatic,
+            BadWolfQuiz.Game.Runtime.GamePhaseStartMode.Manual);
+
+        registry.UpdateSettings("ABC123", settings);
+
+        Assert.Same(settings, game.Session.Settings);
+        Assert.Equal(TimeSpan.FromSeconds(50), game.Session.Timer.Duration);
+    }
+
+    [Fact]
     public void JoinPlayer_adds_player_to_matching_game()
     {
         var registry = CreateRegistry("ABC123");
