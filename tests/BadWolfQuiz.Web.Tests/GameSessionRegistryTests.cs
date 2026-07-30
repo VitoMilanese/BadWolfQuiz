@@ -212,6 +212,96 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void ClaimQuestionBuzzer_records_players_within_one_second_of_winner()
+    {
+        var timeProvider = new TestTimeProvider();
+        var registry = new GameSessionRegistry(
+            new StubGameCodeGenerator(["ABC123"]),
+            timeProvider);
+        registry.Create(CreateQuiz());
+        var rose = registry.JoinPlayer("ABC123", "Rose");
+        var mickey = registry.JoinPlayer("ABC123", "Mickey");
+        registry.ConnectPlayer("ABC123", rose.AccessToken!, "rose-connection", true);
+        registry.ConnectPlayer("ABC123", mickey.AccessToken!, "mickey-connection", true);
+        registry.StartGame("ABC123");
+        registry.SelectQuestion("ABC123", 1);
+        registry.ActivateQuestionBuzzer("ABC123", 1);
+
+        var winner = registry.ClaimQuestionBuzzer("rose-connection", 1);
+        timeProvider.Advance(TimeSpan.FromMilliseconds(275));
+        var late = registry.ClaimQuestionBuzzer("mickey-connection", 1);
+        var race = winner!.Game.BuzzerRace!;
+
+        Assert.True(winner.IsWinner);
+        Assert.False(late!.IsWinner);
+        Assert.Equal(rose.Player!.Id, race.WinnerPlayerId);
+        var latePlayer = Assert.Single(race.LatePlayers);
+        Assert.Equal(mickey.Player!.Id, latePlayer.PlayerId);
+        Assert.Equal(275, latePlayer.DelayMilliseconds);
+
+        registry.JudgeQuestionAnswer("ABC123", 1, rose.Player.Id, false);
+
+        Assert.Null(winner.Game.BuzzerRace);
+    }
+
+    [Fact]
+    public void ClaimQuestionBuzzer_ignores_players_after_one_second_window()
+    {
+        var timeProvider = new TestTimeProvider();
+        var registry = new GameSessionRegistry(
+            new StubGameCodeGenerator(["ABC123"]),
+            timeProvider);
+        registry.Create(CreateQuiz());
+        var rose = registry.JoinPlayer("ABC123", "Rose");
+        var mickey = registry.JoinPlayer("ABC123", "Mickey");
+        registry.ConnectPlayer("ABC123", rose.AccessToken!, "rose-connection", true);
+        registry.ConnectPlayer("ABC123", mickey.AccessToken!, "mickey-connection", true);
+        registry.StartGame("ABC123");
+        registry.SelectQuestion("ABC123", 1);
+        registry.ActivateQuestionBuzzer("ABC123", 1);
+        registry.ClaimQuestionBuzzer("rose-connection", 1);
+        timeProvider.Advance(TimeSpan.FromMilliseconds(1001));
+
+        var late = registry.ClaimQuestionBuzzer("mickey-connection", 1);
+
+        Assert.Null(late);
+        Assert.Empty(registry.Find("ABC123")!.BuzzerRace!.LatePlayers);
+    }
+
+    [Fact]
+    public void ClaimQuestionBuzzer_accepts_approved_player_on_next_question()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateTwoQuestionQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-1",
+            true);
+        registry.StartGame("ABC123");
+
+        registry.SelectQuestion("ABC123", 1);
+        registry.ActivateQuestionBuzzer("ABC123", 1);
+        var firstClaim = registry.ClaimQuestionBuzzer("connection-1", 1);
+        registry.JudgeQuestionAnswer(
+            "ABC123",
+            1,
+            joined.Player!.Id,
+            true);
+        registry.CloseQuestionAnswer("ABC123", 1);
+
+        registry.SelectQuestion("ABC123", 2);
+        registry.ActivateQuestionBuzzer("ABC123", 2);
+        registry.SetPlayerVisibility("connection-1", false);
+        var secondClaim = registry.ClaimQuestionBuzzer("connection-1", 2);
+
+        Assert.True(firstClaim!.IsWinner);
+        Assert.True(secondClaim!.IsWinner);
+        Assert.Equal(2, secondClaim.Question.SourceQuestionId);
+    }
+
+    [Fact]
     public void JudgeQuestionAnswer_routes_score_and_resolution()
     {
         var registry = CreateRegistry("ABC123");
@@ -284,6 +374,23 @@ public sealed class GameSessionRegistryTests
             ]);
     }
 
+    private static QuizSnapshot CreateTwoQuestionQuiz()
+    {
+        return new QuizSnapshot(
+            1,
+            "Two Question Quiz",
+            [
+                new QuizRoundSnapshot(
+                    1,
+                    "Round 1",
+                    0,
+                    [
+                        new QuizQuestionSnapshot(1, 1, 0, 100, false),
+                        new QuizQuestionSnapshot(2, 1, 1, 200, false)
+                    ])
+            ]);
+    }
+
     private static QuizSnapshot CreateWagerQuiz()
     {
         return new QuizSnapshot(
@@ -296,6 +403,18 @@ public sealed class GameSessionRegistryTests
                     0,
                     [new QuizQuestionSnapshot(1, 1, 0, 100, true)])
             ]);
+    }
+
+    private sealed class TestTimeProvider : TimeProvider
+    {
+        private DateTimeOffset _utcNow = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+        public override DateTimeOffset GetUtcNow() => _utcNow;
+
+        public void Advance(TimeSpan duration)
+        {
+            _utcNow += duration;
+        }
     }
 
     private sealed class StubGameCodeGenerator(IEnumerable<string> codes) : IGameCodeGenerator

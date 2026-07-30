@@ -118,6 +118,15 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
             return;
         }
 
+        if (!claim.IsWinner)
+        {
+            return;
+        }
+
+        // Keep the buzzer visually open while the server collects presses
+        // that arrive within the near-simultaneous one-second window.
+        await Task.Delay(TimeSpan.FromSeconds(1));
+
         await Clients
             .Group(GroupName(claim.Game.PublicCode))
             .SendAsync("BuzzerStateChanged", CreateBuzzerUpdate(claim.Game));
@@ -163,7 +172,8 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
                     .ToLowerInvariant(),
                 answeringPlayerId = (Guid?)null,
                 answeringPlayerName = (string?)null,
-                ineligiblePlayerIds = Array.Empty<Guid>()
+                ineligiblePlayerIds = Array.Empty<Guid>(),
+                buzzerRace = (object?)null
             };
         }
 
@@ -179,7 +189,21 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
             answeringPlayerName = answeringPlayer?.Name,
             ineligiblePlayerIds = question.AnswerAttempts
                 .Select(attempt => attempt.PlayerId.Value)
-                .ToArray()
+                .ToArray(),
+            buzzerRace = game.BuzzerRace is { LatePlayers.Count: > 0 } race &&
+                race.SourceQuestionId == question.SourceQuestionId
+                    ? new
+                    {
+                        winnerPlayerId = race.WinnerPlayerId.Value,
+                        winnerPlayerName = race.WinnerPlayerName,
+                        latePlayers = race.LatePlayers.Select(player => new
+                        {
+                            playerId = player.PlayerId.Value,
+                            playerName = player.PlayerName,
+                            delayMilliseconds = player.DelayMilliseconds
+                        })
+                    }
+                    : null
         };
     }
 

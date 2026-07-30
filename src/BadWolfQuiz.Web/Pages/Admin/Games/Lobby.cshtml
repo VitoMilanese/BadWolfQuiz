@@ -367,9 +367,6 @@
             @if (Model.CurrentQuestion.Status is BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Selected or
                 BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active)
             {
-                var attemptedPlayerIds = Model.CurrentQuestion.AnswerAttempts
-                    .Select(attempt => attempt.PlayerId)
-                    .ToHashSet();
                 var eligiblePlayers = Model.CurrentQuestion.IsSpecial
                     ? Model.Players.Where(player =>
                         player.Id == Model.CurrentQuestion.Wager!.PlayerId)
@@ -377,14 +374,34 @@
                         ? Model.Players.Where(player => player.Id == answeringPlayerId)
                         : Enumerable.Empty<BadWolfQuiz.Game.Runtime.GamePlayer>();
 
-                <section class="question-judgment-panel">
+                @if (!Model.CurrentQuestion.IsSpecial &&
+                    Model.Game.BuzzerRace is { } buzzerRace &&
+                    buzzerRace.SourceQuestionId == Model.CurrentQuestion.SourceQuestionId)
+                {
+                    <aside class="buzzer-race-overlay" role="status" aria-live="polite">
+                        <div class="buzzer-race-card">
+                            <p>@Localizer["GameBoard_BuzzerRaceWinner", buzzerRace.WinnerPlayerName]</p>
+                            <ul>
+                                @foreach (var latePlayer in buzzerRace.LatePlayers)
+                                {
+                                    <li>
+                                        @Localizer[
+                                            "GameBoard_BuzzerRaceLatePlayer",
+                                            latePlayer.PlayerName,
+                                            latePlayer.DelayMilliseconds]
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </aside>
+                }
+
+                <section class="question-controls">
                     @if (!Model.CurrentQuestion.IsSpecial &&
                         Model.CurrentQuestion.BuzzerStatus ==
                             BadWolfQuiz.Game.Runtime.QuestionBuzzerStatus.Inactive)
                     {
-                        <form class="judgment-general-actions"
-                              method="post"
-                              asp-page-handler="ActivateBuzzer">
+                        <form method="post" asp-page-handler="ActivateBuzzer">
                             <input name="sourceQuestionId"
                                    type="hidden"
                                    value="@Model.CurrentQuestion.SourceQuestionId" />
@@ -400,76 +417,35 @@
                         <p class="buzzer-status">@Localizer["GameBoard_WaitingForBuzz"]</p>
                     }
 
-                    @if (Model.CurrentQuestion.AnsweringPlayerId is { } currentAnsweringPlayerId)
+                    @foreach (var player in eligiblePlayers)
                     {
-                        var answeringPlayer = Model.Players.Single(
-                            player => player.Id == currentAnsweringPlayerId);
-
-                        <p class="answering-player-header">
-                            @Localizer["GameBoard_AnsweringPlayer", answeringPlayer.Name]
-                        </p>
+                        <form class="question-judge-actions"
+                              method="post"
+                              asp-page-handler="JudgeQuestionAnswer">
+                            <input name="sourceQuestionId"
+                                   type="hidden"
+                                   value="@Model.CurrentQuestion.SourceQuestionId" />
+                            <input name="playerId"
+                                   type="hidden"
+                                   value="@player.Id.Value" />
+                            <button class="button judgment-correct-button"
+                                    name="isCorrect"
+                                    type="submit"
+                                    value="true">
+                                @Localizer["Message_Correct"]
+                            </button>
+                            <button class="button judgment-incorrect-button"
+                                    name="isCorrect"
+                                    type="submit"
+                                    value="false">
+                                @Localizer["Message_Wrong"]
+                            </button>
+                        </form>
                     }
-
-                    <h3>@Localizer["GameBoard_JudgeAnswer"]</h3>
-
-                    @if (Model.CurrentQuestion.AnswerAttempts.Count > 0)
-                    {
-                        <ul class="question-attempts">
-                            @foreach (var attempt in Model.CurrentQuestion.AnswerAttempts)
-                            {
-                                var attemptPlayer = Model.Players.First(
-                                    player => player.Id == attempt.PlayerId);
-
-                                <li>
-                                    <span>@attemptPlayer.Name</span>
-                                    <strong class="@(attempt.IsCorrect ? "judgment-correct" : "judgment-incorrect")">
-                                        @(attempt.IsCorrect
-                                            ? Localizer["Message_Correct"]
-                                            : Localizer["Message_Wrong"])
-                                        (@(attempt.ScoreDelta > 0 ? "+" : null)@attempt.ScoreDelta)
-                                    </strong>
-                                </li>
-                            }
-                        </ul>
-                    }
-
-                    <div class="judgment-player-list">
-                        @foreach (var player in eligiblePlayers)
-                        {
-                            <form class="judgment-player"
-                                  method="post"
-                                  asp-page-handler="JudgeQuestionAnswer">
-                                <input name="sourceQuestionId"
-                                       type="hidden"
-                                       value="@Model.CurrentQuestion.SourceQuestionId" />
-                                <input name="playerId"
-                                       type="hidden"
-                                       value="@player.Id.Value" />
-
-                                <strong>@player.Name</strong>
-                                <span>@player.Score</span>
-
-                                <div class="form-actions">
-                                    <button class="button judgment-correct-button"
-                                            name="isCorrect"
-                                            type="submit"
-                                            value="true">
-                                        @Localizer["Message_Correct"]
-                                    </button>
-                                    <button class="button judgment-incorrect-button"
-                                            name="isCorrect"
-                                            type="submit"
-                                            value="false">
-                                        @Localizer["Message_Wrong"]
-                                    </button>
-                                </div>
-                            </form>
-                        }
-                    </div>
 
                     @if (!Model.CurrentQuestion.IsSpecial)
                     {
-                        <form class="judgment-general-actions" method="post" asp-page-handler="ResolveQuestion">
+                        <form method="post" asp-page-handler="ResolveQuestion">
                             <input name="sourceQuestionId"
                                    type="hidden"
                                    value="@Model.CurrentQuestion.SourceQuestionId" />
@@ -513,7 +489,19 @@
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
             @foreach (var player in Model.Players)
             {
-                <li class="scoreboard-player @(Model.Game.Session.ActivePlayerId == player.Id ? "active-player" : null)"
+                var questionIsActive = Model.CurrentQuestion?.Status is
+                    BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Selected or
+                    BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active;
+                var isAnswering = questionIsActive &&
+                    Model.CurrentQuestion?.AnsweringPlayerId == player.Id;
+                var hasAttempted = questionIsActive &&
+                    Model.CurrentQuestion?.AnswerAttempts.Any(
+                        attempt => attempt.PlayerId == player.Id) == true;
+
+                <li class="scoreboard-player
+                           @(Model.Game.Session.ActivePlayerId == player.Id ? "active-player" : null)
+                           @(isAnswering ? "question-answering-player" : null)
+                           @(hasAttempted ? "question-attempted-player" : null)"
                     data-player-id="@player.Id.Value">
                     <strong>@player.Name</strong>
                     <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
@@ -686,8 +674,29 @@
                 .build();
 
             let hasReceivedInitialBuzzerState = false;
+            let buzzerState = null;
 
-            connection.on("BuzzerStateChanged", () => {
+            const applyBuzzerPlayerStates = () => {
+                playerList.querySelectorAll("[data-player-id]").forEach(item => {
+                    const itemPlayerId = item.dataset.playerId;
+                    const isAnswering =
+                        buzzerState?.answeringPlayerId === itemPlayerId;
+                    const hasAttempted =
+                        buzzerState?.ineligiblePlayerIds?.includes(itemPlayerId) ?? false;
+
+                    item.classList.toggle(
+                        "question-answering-player",
+                        isAnswering);
+                    item.classList.toggle(
+                        "question-attempted-player",
+                        hasAttempted && !isAnswering);
+                });
+            };
+
+            connection.on("BuzzerStateChanged", update => {
+                buzzerState = update;
+                applyBuzzerPlayerStates();
+
                 if (!hasReceivedInitialBuzzerState) {
                     hasReceivedInitialBuzzerState = true;
                     return;
@@ -768,6 +777,8 @@
                     item.append(name, details);
                     playerList.append(item);
                 }
+
+                applyBuzzerPlayerStates();
             });
 
             connection.on("GameStatusChanged", update => {

@@ -160,8 +160,11 @@
                     return;
                 }
 
+                const sourceQuestionId = buzzerQuestionId;
+                buzzerQuestionId = null;
                 buzzerButton.disabled = true;
-                connection.invoke("Buzz", buzzerQuestionId).catch(console.error);
+                buzzerButton.classList.remove("player-buzzer-open");
+                connection.invoke("Buzz", sourceQuestionId).catch(console.error);
             });
 
             connection.on("BuzzRejected", () => {

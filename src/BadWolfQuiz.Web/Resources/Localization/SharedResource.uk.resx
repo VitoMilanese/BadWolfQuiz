@@ -817,4 +817,10 @@
   <data name="PlayerGame_BuzzRejected" xml:space="preserve">
     <value>Ваше натискання не зараховано.</value>
   </data>
+  <data name="GameBoard_BuzzerRaceWinner" xml:space="preserve">
+    <value>Перше натискання — {0}</value>
+  </data>
+  <data name="GameBoard_BuzzerRaceLatePlayer" xml:space="preserve">
+    <value>{0} — на {1} мс пізніше</value>
+  </data>
 </root>

@@ -1998,7 +1998,7 @@ iframe.game-content-video {
     justify-self: center;
 }
 
-.current-question-summary:not(.wager-mode) > .question-judgment-panel {
+.current-question-summary:not(.wager-mode) > .question-controls {
     align-self: end;
     width: 100%;
     margin: 0;
@@ -2037,7 +2037,7 @@ iframe.game-content-video {
     grid-row: 2;
 }
 
-.current-question-summary:not(.wager-mode) > .question-judgment-panel {
+.current-question-summary:not(.wager-mode) > .question-controls {
     grid-row: 3;
 }
 
@@ -2060,7 +2060,7 @@ iframe.game-content-video {
     justify-self: center;
 }
 
-.current-question-summary:not(.wager-mode) > .question-judgment-panel {
+.current-question-summary:not(.wager-mode) > .question-controls {
     width: min(960px, 100%);
     justify-self: center;
 }
@@ -2168,4 +2168,140 @@ iframe.game-content-video {
     box-shadow:
         0 0 22px rgba(239, 35, 60, 0.4),
         inset 0 -8px 0 rgba(0, 0, 0, 0.22);
+}
+
+
+/* Near-simultaneous buzzer result */
+
+.buzzer-race-overlay {
+    position: fixed;
+    z-index: 40;
+    inset: 72px 0 var(--game-scoreboard-space, 184px);
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    pointer-events: none;
+    animation: buzzer-race-overlay-life 5s ease forwards;
+}
+
+.buzzer-race-card {
+    width: min(680px, 92vw);
+    padding: clamp(24px, 4vw, 42px);
+    border: 2px solid var(--gold);
+    border-radius: 22px;
+    color: #fff;
+    background: rgba(10, 10, 15, 0.96);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.72);
+    text-align: center;
+}
+
+.buzzer-race-card p {
+    margin: 0 0 18px;
+    color: var(--gold);
+    font-size: clamp(1.5rem, 3vw, 2.6rem);
+    font-weight: 950;
+}
+
+.buzzer-race-card ul {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    font-weight: 800;
+}
+
+@keyframes buzzer-race-overlay-life {
+    0%, 82% {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+
+/* Compact host question controls */
+
+.question-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+    padding: 8px 0 0;
+}
+
+.question-controls form,
+.question-judge-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.question-controls .button {
+    min-height: 42px;
+}
+
+/* Current-question state in the fixed scoreboard */
+
+.scoreboard-player.question-answering-player {
+    border-color: var(--gold);
+    background:
+        linear-gradient(rgba(255, 184, 0, 0.3), rgba(255, 184, 0, 0.16)),
+        var(--panel-2);
+    box-shadow:
+        0 0 0 2px rgba(255, 184, 0, 0.35),
+        0 0 28px rgba(255, 184, 0, 0.24);
+}
+
+.scoreboard-player.question-attempted-player {
+    border-color: #555;
+    background: #25252a;
+    filter: grayscale(1);
+    opacity: 0.52;
+}
+
+
+/* Solid question-state colors override persistent active-player styling */
+
+.scoreboard-player.question-answering-player,
+.scoreboard-player.active-player.question-answering-player {
+    color: #111;
+    border-color: #ffd45a;
+    background: #dca900;
+    box-shadow: none;
+    filter: none;
+    opacity: 1;
+}
+
+.scoreboard-player.question-answering-player .scoreboard-score,
+.scoreboard-player.question-answering-player .active-player-badge {
+    color: #111;
+    border-color: rgba(17, 17, 17, 0.45);
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.scoreboard-player.question-attempted-player,
+.scoreboard-player.active-player.question-attempted-player {
+    color: #aaa;
+    border-color: #555;
+    background: #303035;
+    box-shadow: none;
+    filter: grayscale(1);
+    opacity: 0.58;
+}
+
+
+.scoreboard-player.question-answering-player .scoreboard-score {
+    border-color: #dca900;
+    background: #dca900;
+    box-shadow: none;
 }
