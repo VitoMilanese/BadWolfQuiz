@@ -201,6 +201,15 @@ public sealed class GameSession
         return question;
     }
 
+    public RuntimeQuestion CloseQuestionAnswer(int sourceQuestionId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        question.CloseAnswer();
+        return question;
+    }
+
     public GamePlayer AdjustPlayerScore(
         GamePlayerId playerId,
         int points)
