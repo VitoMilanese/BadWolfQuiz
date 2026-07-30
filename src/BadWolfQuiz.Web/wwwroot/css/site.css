@@ -1936,10 +1936,18 @@ iframe.game-content-video {
 
 /* Viewport-anchored gameplay layout */
 
+/* Viewport-anchored gameplay layout */
+
 .host-game-board {
     --game-scoreboard-space: 184px;
-    min-height: calc(100dvh - 72px);
+    min-height: calc(100dvh - 72px - 68px - 32px);
     padding-bottom: var(--game-scoreboard-space);
+}
+
+@media (max-width: 900px) {
+    .host-game-board {
+        min-height: calc(100dvh - 72px - 40px - 32px);
+    }
 }
 
 .game-scoreboard {
@@ -2062,4 +2070,59 @@ iframe.game-content-video {
     justify-content: center;
     gap: 12px;
     flex-wrap: wrap;
+}
+
+/* Keep gameplay content above the fixed player scoreboard */
+
+.host-game-board {
+    --game-scoreboard-space: 184px;
+    display: flex;
+    flex-direction: column;
+    /*
+     * 72px  — top navigation
+     * 34px  — top padding of .page-shell
+     * 32px  — existing margin-top of .host-game-board
+     */
+    height: calc(100dvh - 72px - 34px - 32px);
+    min-height: 0;
+    /*
+     * The scoreboard is position: fixed, so reserve its space
+     * inside the gameplay container.
+     */
+    padding-bottom: var(--game-scoreboard-space);
+    /*
+     * Cancel the bottom padding of .page-shell so the whole
+     * gameplay layout still fits exactly inside the viewport.
+     */
+    margin-bottom: -34px;
+    overflow-y: auto;
+}
+
+.current-question-summary:not(.wager-mode) {
+    flex: 1 1 auto;
+    /*
+     * Override the previous viewport-based min/max height.
+     * The panel now receives only the free space above the scoreboard.
+     */
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    margin-bottom: 0;
+    overflow-y: auto;
+}
+
+@media (max-width: 900px) {
+    .host-game-board {
+        /*
+         * .page-shell uses 20px padding below 900px.
+         */
+        height: calc(100dvh - 72px - 20px - 32px);
+        margin-bottom: -20px;
+    }
+}
+
+@media (max-width: 700px) {
+    .host-game-board {
+        --game-scoreboard-space: 170px;
+    }
 }
