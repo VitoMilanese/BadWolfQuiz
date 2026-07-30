@@ -151,6 +151,7 @@ public sealed class QuizQuestionSnapshot
 }
 
 public sealed record ContentBlockSnapshot(
+    int SourceContentBlockId,
     ContentBlockKind Kind,
     string? TextContent,
     string? TopCaption,
