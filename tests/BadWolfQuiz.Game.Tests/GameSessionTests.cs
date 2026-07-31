@@ -108,6 +108,28 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void Start_allows_host_card_with_name_only()
+    {
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(10),
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Automatic,
+            displayHostCard: true,
+            hostName: "Host");
+        var session = GameSession.Create(
+            CreateSession().Quiz,
+            settings,
+            new ManualTimeProvider(InitialTime));
+        session.AddPlayer("Rose");
+
+        session.Start();
+
+        Assert.Equal(GameSessionStatus.Running, session.Status);
+        Assert.True(session.Settings.HasHostCard);
+    }
+
+    [Fact]
     public void UpdateSettings_rejects_changes_after_game_starts()
     {
         var session = CreateSession();

@@ -66,7 +66,7 @@ public sealed class GameHistoryStore(QuizDbContext db)
         stored.StartedAtUtc = runtime.StartedAtUtc?.UtcDateTime;
         stored.FinishedAtUtc = DateTime.UtcNow;
 
-        var players = runtime.Players.ToDictionary(
+        var players = runtime.AllPlayers.ToDictionary(
             player => player.Id,
             player => new StoredGamePlayer
             {

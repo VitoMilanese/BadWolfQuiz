@@ -131,7 +131,7 @@
                                     data-delete-answer-history
                                     data-source-question-id="@question.SourceQuestionId"
                                     data-attempt-id="@attempt.Id"
-                                    data-player-name="@Model.Game.Session.Players.Single(player => player.Id == attempt.PlayerId).Name"
+                                    data-player-name="@Model.Game.Session.AllPlayers.Single(player => player.Id == attempt.PlayerId).Name"
                                     data-question-label="@question.RoundTitle — @question.CategoryTitle — @question.Points">
                                 @Localizer["AnswerHistory_Delete"]
                             </button>

@@ -1,4 +1,5 @@
 using BadWolfQuiz.Game.Definitions;
+using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Services;
 
 namespace BadWolfQuiz.Web.Tests;
@@ -152,6 +153,62 @@ public sealed class GameSessionRegistryTests
 
         Assert.Equal(PlayerPresenceStatus.Active, approved.Presence);
         Assert.Equal(0, approved.Score);
+    }
+
+    [Fact]
+    public void Running_game_rejects_new_player_when_late_joining_is_disabled()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        registry.JoinPlayer("ABC123", "Rose");
+        registry.StartGame("ABC123");
+        registry.ToggleNewPlayerJoining("ABC123");
+
+        var result = registry.JoinPlayer("ABC123", "Mickey");
+
+        Assert.Equal(PlayerJoinStatus.GameAlreadyStarted, result.Status);
+        Assert.DoesNotContain(game.Session.Players, player => player.Name == "Mickey");
+    }
+
+    [Fact]
+    public void Host_can_reopen_new_player_joining_during_a_running_game()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+        registry.JoinPlayer("ABC123", "Rose");
+        registry.StartGame("ABC123");
+        registry.ToggleNewPlayerJoining("ABC123");
+
+        var allowsNewPlayers = registry.ToggleNewPlayerJoining("ABC123");
+        var result = registry.JoinPlayer("ABC123", "Mickey");
+
+        Assert.True(allowsNewPlayers);
+        Assert.Equal(PlayerJoinStatus.Success, result.Status);
+    }
+
+    [Fact]
+    public void Removing_player_removes_card_and_revokes_access()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        var rose = registry.JoinPlayer("ABC123", "Rose");
+        var mickey = registry.JoinPlayer("ABC123", "Mickey");
+        registry.ConnectPlayer("ABC123", rose.AccessToken!, "rose-connection", true);
+        registry.ConnectPlayer("ABC123", mickey.AccessToken!, "mickey-connection", true);
+
+        var removal = registry.RemovePlayer("ABC123", rose.Player!.Id);
+
+        Assert.Equal("rose-connection", Assert.Single(removal!.ConnectionIds));
+        Assert.DoesNotContain(game.Session.Players, player => player.Id == rose.Player.Id);
+        Assert.DoesNotContain(
+            registry.GetPlayerLobbyEntries(game),
+            player => player.Id == rose.Player.Id);
+        Assert.Equal(mickey.Player!.Id, game.Session.ActivePlayerId);
+        Assert.Null(registry.ConnectPlayer(
+            "ABC123",
+            rose.AccessToken!,
+            "rose-reconnect",
+            true));
     }
 
     [Fact]

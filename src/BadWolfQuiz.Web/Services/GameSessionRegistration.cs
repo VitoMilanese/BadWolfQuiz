@@ -16,6 +16,8 @@ public sealed class GameSessionRegistration
     public GameSession Session { get; }
     public string? HostId { get; }
 
+    public bool AllowsNewPlayers { get; internal set; } = true;
+
     public BuzzerRaceSnapshot? BuzzerRace { get; internal set; }
 }
 

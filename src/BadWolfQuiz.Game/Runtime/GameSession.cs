@@ -10,6 +10,7 @@ public sealed class GameSession
     public static readonly TimeSpan DefaultAnswerDuration = TimeSpan.FromSeconds(10);
     private const int MaxPlayerNameLength = 60;
     private readonly List<GamePlayer> _players = [];
+    private readonly List<GamePlayer> _removedPlayers = [];
     private readonly Dictionary<GamePlayerId, int> _currentRoundStartScores = [];
     private readonly ReadOnlyCollection<GamePlayer> _readOnlyPlayers;
     private readonly TimeProvider _timeProvider;
@@ -39,6 +40,8 @@ public sealed class GameSession
     public GameSessionStatus Status { get; private set; } = GameSessionStatus.Lobby;
 
     public IReadOnlyList<GamePlayer> Players => _readOnlyPlayers;
+
+    public IReadOnlyList<GamePlayer> AllPlayers => [.. _players, .. _removedPlayers];
 
     public GamePlayerId? ActivePlayerId { get; private set; }
 
@@ -137,6 +140,40 @@ public sealed class GameSession
         }
 
         ActivePlayerId ??= player.Id;
+        return player;
+    }
+
+    public GamePlayer RemovePlayer(GamePlayerId playerId)
+    {
+        if (Status is not GameSessionStatus.Lobby and not GameSessionStatus.Running)
+        {
+            throw new GameRuleViolationException(
+                "Players cannot be removed during or after the final question.");
+        }
+
+        var player = FindPlayer(playerId);
+        var currentQuestion = Board.Questions.FirstOrDefault(question =>
+            question.Status is RuntimeQuestionStatus.Selected or
+                RuntimeQuestionStatus.AwaitingWager or
+                RuntimeQuestionStatus.Active);
+
+        if (currentQuestion?.SelectedByPlayerId == playerId ||
+            currentQuestion?.AnsweringPlayerId == playerId ||
+            currentQuestion?.Wager?.PlayerId == playerId)
+        {
+            throw new GameRuleViolationException(
+                "A player involved in the current question cannot be removed.");
+        }
+
+        _players.Remove(player);
+        _removedPlayers.Add(player);
+        _currentRoundStartScores.Remove(player.Id);
+
+        if (ActivePlayerId == player.Id)
+        {
+            ActivePlayerId = _players.FirstOrDefault()?.Id;
+        }
+
         return player;
     }
 
@@ -381,7 +418,7 @@ public sealed class GameSession
             newPlayer.Id,
             isCorrect,
             value);
-        var previousPlayer = FindPlayer(previous.PlayerId);
+        var previousPlayer = FindAnyPlayer(previous.PlayerId);
 
         previousPlayer.ApplyScore(-previous.ScoreDelta);
         newPlayer.ApplyScore(updated.ScoreDelta);
@@ -405,7 +442,7 @@ public sealed class GameSession
         var question = FindQuestion(sourceQuestionId);
         EnsureQuestionHasBeenPlayed(question);
         var removed = question.RemoveHistoricalAttempt(attemptId);
-        var player = FindPlayer(removed.PlayerId);
+        var player = FindAnyPlayer(removed.PlayerId);
 
         player.ApplyScore(-removed.ScoreDelta);
         ApplyHistoricalScoreCorrection(
@@ -890,6 +927,15 @@ public sealed class GameSession
     private GamePlayer FindPlayer(GamePlayerId playerId)
     {
         return _players.SingleOrDefault(player => player.Id == playerId)
+            ?? throw new GameRuleViolationException(
+                "The selected player does not belong to this game.");
+    }
+
+    private GamePlayer FindAnyPlayer(GamePlayerId playerId)
+    {
+        return _players
+            .Concat(_removedPlayers)
+            .SingleOrDefault(player => player.Id == playerId)
             ?? throw new GameRuleViolationException(
                 "The selected player does not belong to this game.");
     }

@@ -113,10 +113,83 @@ public sealed class GameSessionRegistry
                 return PlayerJoinResult.Failed(PlayerJoinStatus.NameAlreadyUsed);
             }
 
+            if (game.Session.Status != GameSessionStatus.Lobby &&
+                !game.AllowsNewPlayers)
+            {
+                return PlayerJoinResult.Failed(PlayerJoinStatus.GameAlreadyStarted);
+            }
+
             var player = game.Session.AddPlayer(playerName);
             var accessToken = CreatePlayerAccess(game, player);
             return PlayerJoinResult.Succeeded(game, player, accessToken);
         }
+    }
+
+    public bool ToggleNewPlayerJoining(string publicCode)
+    {
+        var game = Find(publicCode)
+            ?? throw new GameRuleViolationException("The game was not found.");
+
+        lock (game)
+        {
+            if (game.Session.Status != GameSessionStatus.Running)
+            {
+                throw new GameRuleViolationException(
+                    "Player joining can only be changed while the game is running.");
+            }
+
+            game.AllowsNewPlayers = !game.AllowsNewPlayers;
+            return game.AllowsNewPlayers;
+        }
+    }
+
+    public PlayerRemoval? RemovePlayer(string publicCode, GamePlayerId playerId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        GamePlayer player;
+
+        lock (game)
+        {
+            player = game.Session.RemovePlayer(playerId);
+        }
+
+        string[] connectionIds;
+
+        lock (_presenceSync)
+        {
+            connectionIds = _playerConnections
+                .Where(item =>
+                    item.Value.Access.Game == game &&
+                    item.Value.Access.Player.Id == playerId)
+                .Select(item => item.Key)
+                .ToArray();
+
+            foreach (var connectionId in connectionIds)
+            {
+                _playerConnections.Remove(connectionId);
+            }
+        }
+
+        foreach (var access in _playerAccessByTokenHash.Where(item =>
+                     item.Value.Game == game && item.Value.Player.Id == playerId).ToArray())
+        {
+            _playerAccessByTokenHash.TryRemove(access.Key, out _);
+        }
+
+        foreach (var transition in _playerTransitionAccessByTokenHash.Where(item =>
+                     item.Value.Access.Game == game &&
+                     item.Value.Access.Player.Id == playerId).ToArray())
+        {
+            _playerTransitionAccessByTokenHash.TryRemove(transition.Key, out _);
+        }
+
+        return new PlayerRemoval(game, player, connectionIds);
     }
 
     public PlayerConnectionResult? ConnectPlayer(
