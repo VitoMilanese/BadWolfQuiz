@@ -814,12 +814,6 @@
                     <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
                         @player.Score
                     </span>
-                    @if (Model.Game.Session.ActivePlayerId == player.Id)
-                    {
-                        <span class="active-player-badge">
-                            @Localizer["GameBoard_ActivePlayer"]
-                        </span>
-                    }
                     <span class="player-card-actions">
                         <button class="button button-danger icon-button player-action-button scoreboard-remove-player"
                                 type="button"
@@ -1521,12 +1515,7 @@
 
                     details.append(score);
 
-                    if (player.isActive) {
-                        const activeBadge = document.createElement("span");
-                        activeBadge.className = "active-player-badge";
-                        activeBadge.textContent = lobby.dataset.activePlayerLabel;
-                        details.append(activeBadge);
-                    } else {
+                    if (!player.isActive) {
                         const makeActive = document.createElement("button");
                         makeActive.type = "button";
                         makeActive.className =

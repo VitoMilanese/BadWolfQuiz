@@ -1256,15 +1256,21 @@ textarea {
 .host-board-grid {
     display: grid;
     grid-template-columns: repeat(var(--board-columns), minmax(150px, 1fr));
+    height: 100%;
+    min-height: 0;
     gap: 6px;
-    overflow-x: auto;
+    overflow: auto;
     padding: 6px;
     border-radius: 14px;
     background: #000;
 }
 
 .host-board-layout {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     min-width: 0;
+    min-height: 0;
 }
 
 .board-player-sidebar {
@@ -1334,9 +1340,8 @@ textarea {
 
 @media (min-width: 1500px) {
     .host-board-layout {
-        display: grid;
         grid-template-columns: minmax(0, 1fr) 250px;
-        align-items: start;
+        align-items: stretch;
         gap: 18px;
     }
 
@@ -1354,8 +1359,10 @@ textarea {
 
 .host-board-column {
     display: grid;
+    grid-auto-rows: minmax(92px, 1fr);
     gap: 6px;
     min-width: 150px;
+    min-height: 0;
 }
 
 .host-board-column h3 {
