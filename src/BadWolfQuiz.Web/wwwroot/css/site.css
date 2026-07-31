@@ -1579,9 +1579,9 @@ textarea {
 
 .scoreboard-player {
     position: relative;
-    min-width: 180px;
-    max-width: 270px;
-    flex: 1 1 200px;
+    min-width: 207px;
+    max-width: 311px;
+    flex: 1 1 230px;
     display: grid;
     align-content: center;
     justify-items: center;
@@ -1815,7 +1815,7 @@ video.host-card-media {
     }
 
     .scoreboard-player {
-        min-width: 135px;
+        min-width: 155px;
     }
 }
 
