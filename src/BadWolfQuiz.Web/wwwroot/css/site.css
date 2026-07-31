@@ -2809,6 +2809,62 @@ iframe.game-content-video {
     gap: 1rem;
 }
 
+.game-history-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.game-history-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.game-history-card h2,
+.game-history-card p {
+    margin-block: 0.35rem;
+}
+
+.game-history-player-list {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.game-history-player {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--panel-2);
+    font-size: 1.1rem;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+.game-history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.game-history-table th,
+.game-history-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+}
+
+@media (max-width: 700px) {
+    .game-history-card {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
 .answer-key-header {
     text-align: center;
 }

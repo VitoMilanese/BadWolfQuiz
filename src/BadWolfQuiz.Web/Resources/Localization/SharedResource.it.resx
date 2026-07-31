@@ -938,4 +938,22 @@
   <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve"><value>Visualizza la domanda chiusa da {0} punti</value></data>
   <data name="GameBoard_ShowQuestion" xml:space="preserve"><value>Mostra domanda</value></data>
   <data name="GameBoard_ShowAnswer" xml:space="preserve"><value>Mostra risposta</value></data>
+  <data name="Menu_GameHistory" xml:space="preserve"><value>Cronologia partite</value></data>
+  <data name="GameHistory_Title" xml:space="preserve"><value>Cronologia partite</value></data>
+  <data name="GameHistory_Description" xml:space="preserve"><value>Consulta le partite completate, i punteggi finali e le risposte registrate.</value></data>
+  <data name="GameHistory_Empty" xml:space="preserve"><value>Non è stata ancora salvata alcuna partita completata.</value></data>
+  <data name="GameHistory_FinishedAt" xml:space="preserve"><value>Terminata</value></data>
+  <data name="GameHistory_PlayerCount" xml:space="preserve"><value>Giocatori: {0}</value></data>
+  <data name="GameHistory_View" xml:space="preserve"><value>Visualizza dettagli</value></data>
+  <data name="GameHistory_DetailsTitle" xml:space="preserve"><value>Dettagli partita</value></data>
+  <data name="GameHistory_Back" xml:space="preserve"><value>Torna alla cronologia</value></data>
+  <data name="GameHistory_Players" xml:space="preserve"><value>Punteggi finali</value></data>
+  <data name="GameHistory_Answers" xml:space="preserve"><value>Risposte registrate</value></data>
+  <data name="GameHistory_NoAnswers" xml:space="preserve"><value>Non sono state registrate risposte alle domande normali.</value></data>
+  <data name="GameHistory_Question" xml:space="preserve"><value>Domanda</value></data>
+  <data name="GameHistory_Player" xml:space="preserve"><value>Giocatore</value></data>
+  <data name="GameHistory_Result" xml:space="preserve"><value>Risultato</value></data>
+  <data name="GameHistory_ScoreChange" xml:space="preserve"><value>Variazione punti</value></data>
+  <data name="GameHistory_Correct" xml:space="preserve"><value>Corretta</value></data>
+  <data name="GameHistory_Incorrect" xml:space="preserve"><value>Errata</value></data>
 </root>

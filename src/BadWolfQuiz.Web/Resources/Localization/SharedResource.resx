@@ -938,4 +938,22 @@
   <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve"><value>Preview closed question for {0} points</value></data>
   <data name="GameBoard_ShowQuestion" xml:space="preserve"><value>Show question</value></data>
   <data name="GameBoard_ShowAnswer" xml:space="preserve"><value>Show answer</value></data>
+  <data name="Menu_GameHistory" xml:space="preserve"><value>Game history</value></data>
+  <data name="GameHistory_Title" xml:space="preserve"><value>Game history</value></data>
+  <data name="GameHistory_Description" xml:space="preserve"><value>Review completed games, final scores, and recorded answers.</value></data>
+  <data name="GameHistory_Empty" xml:space="preserve"><value>No completed games have been saved yet.</value></data>
+  <data name="GameHistory_FinishedAt" xml:space="preserve"><value>Finished</value></data>
+  <data name="GameHistory_PlayerCount" xml:space="preserve"><value>{0} players</value></data>
+  <data name="GameHistory_View" xml:space="preserve"><value>View details</value></data>
+  <data name="GameHistory_DetailsTitle" xml:space="preserve"><value>Game details</value></data>
+  <data name="GameHistory_Back" xml:space="preserve"><value>Back to game history</value></data>
+  <data name="GameHistory_Players" xml:space="preserve"><value>Final scores</value></data>
+  <data name="GameHistory_Answers" xml:space="preserve"><value>Recorded answers</value></data>
+  <data name="GameHistory_NoAnswers" xml:space="preserve"><value>No regular-question answers were recorded.</value></data>
+  <data name="GameHistory_Question" xml:space="preserve"><value>Question</value></data>
+  <data name="GameHistory_Player" xml:space="preserve"><value>Player</value></data>
+  <data name="GameHistory_Result" xml:space="preserve"><value>Result</value></data>
+  <data name="GameHistory_ScoreChange" xml:space="preserve"><value>Score change</value></data>
+  <data name="GameHistory_Correct" xml:space="preserve"><value>Correct</value></data>
+  <data name="GameHistory_Incorrect" xml:space="preserve"><value>Incorrect</value></data>
 </root>

@@ -106,7 +106,8 @@ public sealed class IndexModel(
             return NotFound();
         }
 
-        db.Quizzes.Remove(quiz);
+        quiz.IsArchived = true;
+        quiz.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync();
 
         TempData["SuccessMessage"] = localizer["Message_QuizDeleted"].Value;

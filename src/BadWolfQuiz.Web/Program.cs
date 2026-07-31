@@ -48,6 +48,7 @@ builder.Services.AddSingleton<IGameCodeGenerator, GameCodeGenerator>();
 builder.Services.AddSingleton<GameSessionRegistry>();
 builder.Services.AddSingleton<GameSettingsStore>();
 builder.Services.AddScoped<GameSessionLauncher>();
+builder.Services.AddScoped<GameHistoryStore>();
 builder.Services.AddScoped<QuizSeedService>();
 
 var app = builder.Build();

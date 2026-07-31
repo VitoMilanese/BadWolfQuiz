@@ -938,4 +938,22 @@
   <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve"><value>Переглянути закрите питання за {0} балів</value></data>
   <data name="GameBoard_ShowQuestion" xml:space="preserve"><value>Показати питання</value></data>
   <data name="GameBoard_ShowAnswer" xml:space="preserve"><value>Показати відповідь</value></data>
+  <data name="Menu_GameHistory" xml:space="preserve"><value>Історія ігор</value></data>
+  <data name="GameHistory_Title" xml:space="preserve"><value>Історія ігор</value></data>
+  <data name="GameHistory_Description" xml:space="preserve"><value>Переглядайте завершені ігри, фінальні бали та записані відповіді.</value></data>
+  <data name="GameHistory_Empty" xml:space="preserve"><value>Ще не збережено жодної завершеної гри.</value></data>
+  <data name="GameHistory_FinishedAt" xml:space="preserve"><value>Завершено</value></data>
+  <data name="GameHistory_PlayerCount" xml:space="preserve"><value>Гравців: {0}</value></data>
+  <data name="GameHistory_View" xml:space="preserve"><value>Переглянути деталі</value></data>
+  <data name="GameHistory_DetailsTitle" xml:space="preserve"><value>Деталі гри</value></data>
+  <data name="GameHistory_Back" xml:space="preserve"><value>Повернутися до історії ігор</value></data>
+  <data name="GameHistory_Players" xml:space="preserve"><value>Фінальні бали</value></data>
+  <data name="GameHistory_Answers" xml:space="preserve"><value>Записані відповіді</value></data>
+  <data name="GameHistory_NoAnswers" xml:space="preserve"><value>Відповіді на звичайні питання не записані.</value></data>
+  <data name="GameHistory_Question" xml:space="preserve"><value>Питання</value></data>
+  <data name="GameHistory_Player" xml:space="preserve"><value>Гравець</value></data>
+  <data name="GameHistory_Result" xml:space="preserve"><value>Результат</value></data>
+  <data name="GameHistory_ScoreChange" xml:space="preserve"><value>Зміна балів</value></data>
+  <data name="GameHistory_Correct" xml:space="preserve"><value>Правильно</value></data>
+  <data name="GameHistory_Incorrect" xml:space="preserve"><value>Неправильно</value></data>
 </root>
