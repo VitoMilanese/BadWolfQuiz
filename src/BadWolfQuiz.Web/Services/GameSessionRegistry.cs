@@ -576,6 +576,56 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public QuestionAnswerAttempt? AddQuestionAnswerHistoryEntry(
+        string publicCode,
+        int sourceQuestionId,
+        GamePlayerId playerId,
+        bool isCorrect,
+        int value)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.AddQuestionAnswerHistoryEntry(
+                sourceQuestionId,
+                playerId,
+                isCorrect,
+                value);
+        }
+    }
+
+    public QuestionAnswerAttempt? UpdateQuestionAnswerHistoryEntry(
+        string publicCode,
+        int sourceQuestionId,
+        Guid attemptId,
+        GamePlayerId playerId,
+        bool isCorrect,
+        int value)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.UpdateQuestionAnswerHistoryEntry(
+                sourceQuestionId,
+                attemptId,
+                playerId,
+                isCorrect,
+                value);
+        }
+    }
+
     public RuntimeQuestion? ResolveQuestionWithoutCorrectAnswer(
         string publicCode,
         int sourceQuestionId)

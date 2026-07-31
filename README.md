@@ -118,6 +118,7 @@ Currently implemented:
 - Private final wagers and answers submitted from player devices
 - Host-controlled final question reveal, judging, and final results
 - Separate live answer-key screen for the host's second display
+- Host answer-history editing with immediate score and standings recalculation
 
 ---
 
@@ -186,7 +187,6 @@ src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
 ## Game Session
 
 - Persistent game history
-- Host editing of answer history with score and standings recalculation
 - Reserved player nicknames
 
 ## Game

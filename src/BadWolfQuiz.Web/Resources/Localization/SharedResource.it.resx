@@ -913,4 +913,18 @@
   <data name="AnswerKey_Eyebrow" xml:space="preserve"><value>Schermata privata del presentatore</value></data>
   <data name="AnswerKey_Open" xml:space="preserve"><value>Apri la risposta corretta</value></data>
   <data name="AnswerKey_Waiting" xml:space="preserve"><value>In attesa di una domanda.</value></data>
+  <data name="AnswerHistory_Open" xml:space="preserve"><value>Modifica cronologia</value></data>
+  <data name="AnswerHistory_Eyebrow" xml:space="preserve"><value>STRUMENTO DEL PRESENTATORE</value></data>
+  <data name="AnswerHistory_Title" xml:space="preserve"><value>Cronologia delle risposte</value></data>
+  <data name="AnswerHistory_Description" xml:space="preserve"><value>Correggi risposte e punteggi registrati. Le modifiche aggiornano subito la classifica e la scelta del primo giocatore del turno successivo.</value></data>
+  <data name="AnswerHistory_BackToGame" xml:space="preserve"><value>Torna alla partita</value></data>
+  <data name="AnswerHistory_AddEntry" xml:space="preserve"><value>Aggiungi una risposta mancante</value></data>
+  <data name="AnswerHistory_Question" xml:space="preserve"><value>Domanda</value></data>
+  <data name="AnswerHistory_Player" xml:space="preserve"><value>Giocatore</value></data>
+  <data name="AnswerHistory_Value" xml:space="preserve"><value>Valore del premio o della penalità</value></data>
+  <data name="AnswerHistory_Correct" xml:space="preserve"><value>Risposta corretta</value></data>
+  <data name="AnswerHistory_Add" xml:space="preserve"><value>Aggiungi voce</value></data>
+  <data name="AnswerHistory_Save" xml:space="preserve"><value>Salva modifiche</value></data>
+  <data name="AnswerHistory_NoEntries" xml:space="preserve"><value>Nessuna risposta registrata per questa domanda.</value></data>
+  <data name="AnswerHistory_Rejected" xml:space="preserve"><value>Impossibile applicare la modifica alla cronologia.</value></data>
 </root>

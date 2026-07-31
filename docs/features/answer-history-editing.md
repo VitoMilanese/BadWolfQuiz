@@ -6,6 +6,27 @@ The host must be able to correct the recorded answer history while a game is run
 
 Answer history is authoritative gameplay data. Leaderboards, final standings, and weakest-player selection must be derived from the corrected records.
 
+## Current implementation
+
+The host can open a separate answer-history screen from the live game. The
+implemented Engine commands support regular and wager-question attempts and
+allow the host to:
+
+- reassign an existing entry to another player;
+- change its correct/incorrect result;
+- replace its reward or penalty value;
+- add a missing entry to a question that has already been played.
+
+Each change reverses the previous score contribution and applies the corrected
+one atomically. Player score updates are broadcast to connected clients.
+Standings and weakest-player selection read the corrected runtime attempts.
+When a previous round is corrected, its score difference is also applied to the
+current round's starting-score snapshot so it is not misreported as current
+round score gain.
+
+Final-question history, persistent audit storage, deletion, filters, previews,
+and confirmation dialogs remain future extensions.
+
 ## Host capabilities
 
 The host can open the answer history and:

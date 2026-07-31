@@ -500,6 +500,88 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void UpdateQuestionAnswerHistoryEntry_recalculates_players_and_attempt()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(100);
+        var original = session.JudgeQuestionAnswer(100, rose.Id, false);
+
+        var updated = session.UpdateQuestionAnswerHistoryEntry(
+            100,
+            original.Id,
+            mickey.Id,
+            true,
+            350);
+
+        Assert.Equal(0, rose.Score);
+        Assert.Equal(350, mickey.Score);
+        Assert.Equal(mickey.Id, updated.PlayerId);
+        Assert.True(updated.IsCorrect);
+        Assert.Equal(350, updated.ScoreDelta);
+        Assert.Equal(original.Id, updated.Id);
+    }
+
+    [Fact]
+    public void AddQuestionAnswerHistoryEntry_updates_score_and_standings()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, rose.Id, false);
+        session.ResolveQuestionWithoutCorrectAnswer(100);
+        session.CloseQuestionAnswer(100);
+        session.SelectQuestion(101);
+        session.SubmitQuestionWager(101, 5);
+        session.JudgeQuestionAnswer(101, rose.Id, false);
+        session.CloseQuestionAnswer(101);
+
+        var added = session.AddQuestionAnswerHistoryEntry(
+            100,
+            mickey.Id,
+            true,
+            100);
+        var standings = session.GetFinalStandings();
+
+        Assert.Equal(100, mickey.Score);
+        Assert.Equal(100, added.ScoreDelta);
+        Assert.Equal(mickey.Id, standings[0].PlayerId);
+        Assert.Equal(1, standings[0].TotalCorrectAnswers);
+    }
+
+    [Fact]
+    public void Editing_previous_round_history_does_not_change_current_round_gain()
+    {
+        var session = CreateMultiRoundSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(100);
+        var attempt = session.JudgeQuestionAnswer(100, rose.Id, true);
+        session.CloseQuestionAnswer(100);
+        session.AdvanceToNextRound();
+        session.SelectQuestion(200);
+        session.JudgeQuestionAnswer(200, mickey.Id, true);
+        session.CloseQuestionAnswer(200);
+
+        session.UpdateQuestionAnswerHistoryEntry(
+            100,
+            attempt.Id,
+            rose.Id,
+            true,
+            500);
+        var standings = session.GetFinalStandings();
+        var roseStanding = standings.Single(item => item.PlayerId == rose.Id);
+
+        Assert.Equal(500, rose.Score);
+        Assert.Equal(0, roseStanding.ScoreGain);
+    }
+
+    [Fact]
     public void ResolveQuestionWithoutCorrectAnswer_keeps_active_player()
     {
         var session = CreateSession();

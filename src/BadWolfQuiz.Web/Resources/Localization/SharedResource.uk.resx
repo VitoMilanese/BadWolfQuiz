@@ -913,4 +913,18 @@
   <data name="AnswerKey_Eyebrow" xml:space="preserve"><value>Приватний екран ведучого</value></data>
   <data name="AnswerKey_Open" xml:space="preserve"><value>Відкрити правильну відповідь</value></data>
   <data name="AnswerKey_Waiting" xml:space="preserve"><value>Очікується вибір питання.</value></data>
+  <data name="AnswerHistory_Open" xml:space="preserve"><value>Редагувати історію</value></data>
+  <data name="AnswerHistory_Eyebrow" xml:space="preserve"><value>ІНСТРУМЕНТ ВЕДУЧОГО</value></data>
+  <data name="AnswerHistory_Title" xml:space="preserve"><value>Історія відповідей</value></data>
+  <data name="AnswerHistory_Description" xml:space="preserve"><value>Виправляйте записані відповіді та бали. Зміни відразу впливають на рейтинг і вибір першого гравця наступного раунду.</value></data>
+  <data name="AnswerHistory_BackToGame" xml:space="preserve"><value>Повернутися до гри</value></data>
+  <data name="AnswerHistory_AddEntry" xml:space="preserve"><value>Додати відсутню відповідь</value></data>
+  <data name="AnswerHistory_Question" xml:space="preserve"><value>Питання</value></data>
+  <data name="AnswerHistory_Player" xml:space="preserve"><value>Гравець</value></data>
+  <data name="AnswerHistory_Value" xml:space="preserve"><value>Розмір нагороди або штрафу</value></data>
+  <data name="AnswerHistory_Correct" xml:space="preserve"><value>Правильна відповідь</value></data>
+  <data name="AnswerHistory_Add" xml:space="preserve"><value>Додати запис</value></data>
+  <data name="AnswerHistory_Save" xml:space="preserve"><value>Зберегти зміни</value></data>
+  <data name="AnswerHistory_NoEntries" xml:space="preserve"><value>Для цього питання немає записаних відповідей.</value></data>
+  <data name="AnswerHistory_Rejected" xml:space="preserve"><value>Не вдалося застосувати зміну історії відповідей.</value></data>
 </root>
