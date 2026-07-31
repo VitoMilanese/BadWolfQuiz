@@ -932,5 +932,6 @@
   <data name="AnswerHistory_InvalidValue" xml:space="preserve"><value>Il valore del premio o della penalità non può essere negativo.</value></data>
   <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve"><value>Tutti i giocatori hanno già una voce per questa domanda.</value></data>
   <data name="AnswerHistory_Delete" xml:space="preserve"><value>Elimina voce</value></data>
+  <data name="AnswerHistory_DeleteTitle" xml:space="preserve"><value>Elimina risposta</value></data>
   <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Eliminare questa risposta e annullare la relativa modifica del punteggio?</value></data>
 </root>

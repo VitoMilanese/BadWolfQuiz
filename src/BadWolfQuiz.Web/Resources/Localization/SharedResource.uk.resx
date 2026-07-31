@@ -932,5 +932,6 @@
   <data name="AnswerHistory_InvalidValue" xml:space="preserve"><value>Розмір нагороди або штрафу не може бути від’ємним.</value></data>
   <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve"><value>Для цього питання вже є записи всіх гравців.</value></data>
   <data name="AnswerHistory_Delete" xml:space="preserve"><value>Видалити запис</value></data>
+  <data name="AnswerHistory_DeleteTitle" xml:space="preserve"><value>Видалити запис відповіді</value></data>
   <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Видалити цей запис і скасувати відповідну зміну балів?</value></data>
 </root>

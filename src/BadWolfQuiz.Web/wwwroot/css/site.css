@@ -2695,9 +2695,10 @@ iframe.game-content-video {
 .answer-history-correct {
     display: flex !important;
     align-items: center;
-    align-self: center;
+    align-self: end;
     justify-content: flex-start;
     width: max-content;
+    min-height: 46px;
     gap: 0.5rem !important;
 }
 

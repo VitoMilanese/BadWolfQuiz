@@ -4,8 +4,7 @@
     ViewData["Title"] = Localizer["AnswerHistory_Title"];
 }
 
-<section class="answer-history-page"
-         data-delete-confirmation="@Localizer["AnswerHistory_DeleteConfirmation"]">
+<section class="answer-history-page">
     <header class="page-heading">
         <div>
             <p class="eyebrow">@Localizer["AnswerHistory_Eyebrow"]</p>
@@ -128,12 +127,12 @@
                                 @Localizer["AnswerHistory_Save"]
                             </button>
                             <button class="button button-danger"
-                                    type="submit"
-                                    formaction="@Url.Page(
-                                        "/Admin/Games/AnswerHistory",
-                                        "Delete",
-                                        new { id = Model.Game.Session.Id.Value })"
-                                    data-delete-answer-history>
+                                    type="button"
+                                    data-delete-answer-history
+                                    data-source-question-id="@question.SourceQuestionId"
+                                    data-attempt-id="@attempt.Id"
+                                    data-player-name="@Model.Game.Session.Players.Single(player => player.Id == attempt.PlayerId).Name"
+                                    data-question-label="@question.RoundTitle — @question.CategoryTitle — @question.Points">
                                 @Localizer["AnswerHistory_Delete"]
                             </button>
                         </form>
@@ -143,6 +142,41 @@
         }
     </div>
 </section>
+
+<dialog id="delete-answer-history-dialog" class="app-dialog">
+    <form method="post"
+          asp-page-handler="Delete"
+          class="dialog-card dialog-card-danger">
+        <input id="delete-answer-history-question-id"
+               name="sourceQuestionId"
+               type="hidden" />
+        <input id="delete-answer-history-attempt-id"
+               name="attemptId"
+               type="hidden" />
+
+        <div class="dialog-heading">
+            <h2>@Localizer["AnswerHistory_DeleteTitle"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-answer-history-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <p id="delete-answer-history-target" class="dialog-target"></p>
+        <p class="dialog-warning">@Localizer["AnswerHistory_DeleteConfirmation"]</p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-answer-history-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-danger" type="submit">
+                @Localizer["AnswerHistory_Delete"]
+            </button>
+        </div>
+    </form>
+</dialog>
 
 @section Scripts {
     <script>
@@ -185,14 +219,23 @@
             question.addEventListener("change", updateAvailablePlayers);
             updateAvailablePlayers();
 
-            const page = document.querySelector(".answer-history-page");
+            const deleteDialog = document.getElementById("delete-answer-history-dialog");
+            const deleteQuestionId = document.getElementById("delete-answer-history-question-id");
+            const deleteAttemptId = document.getElementById("delete-answer-history-attempt-id");
+            const deleteTarget = document.getElementById("delete-answer-history-target");
 
             for (const button of document.querySelectorAll("[data-delete-answer-history]")) {
-                button.addEventListener("click", event => {
-                    if (!window.confirm(page.dataset.deleteConfirmation)) {
-                        event.preventDefault();
-                    }
+                button.addEventListener("click", () => {
+                    deleteQuestionId.value = button.dataset.sourceQuestionId;
+                    deleteAttemptId.value = button.dataset.attemptId;
+                    deleteTarget.textContent =
+                        `${button.dataset.playerName} — ${button.dataset.questionLabel}`;
+                    deleteDialog.showModal();
                 });
+            }
+
+            for (const button of document.querySelectorAll("[data-close-answer-history-dialog]")) {
+                button.addEventListener("click", () => deleteDialog.close());
             }
         })();
     </script>

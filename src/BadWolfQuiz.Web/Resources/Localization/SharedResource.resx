@@ -932,5 +932,6 @@
   <data name="AnswerHistory_InvalidValue" xml:space="preserve"><value>The reward or penalty value cannot be negative.</value></data>
   <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve"><value>Every player already has an entry for this question.</value></data>
   <data name="AnswerHistory_Delete" xml:space="preserve"><value>Delete entry</value></data>
+  <data name="AnswerHistory_DeleteTitle" xml:space="preserve"><value>Delete answer entry</value></data>
   <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Delete this answer entry and reverse its score change?</value></data>
 </root>
