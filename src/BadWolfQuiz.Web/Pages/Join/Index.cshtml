@@ -11,13 +11,22 @@
     <form id="join-game-form" method="post" class="stack-form">
         <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
-        <label asp-for="Input.GameCode">@Localizer["Label_GameCode"]</label>
-        <input asp-for="Input.GameCode"
-               maxlength="6"
-               autocomplete="off"
-               autocapitalize="characters"
-               placeholder="@Localizer["Placeholder_GameCode"]" />
-        <span asp-validation-for="Input.GameCode"></span>
+        @if (string.IsNullOrWhiteSpace(Model.Input.GameCode))
+        {
+            <label asp-for="Input.GameCode">@Localizer["Label_GameCode"]</label>
+            <input asp-for="Input.GameCode"
+                   maxlength="6"
+                   autocomplete="off"
+                   autocapitalize="characters"
+                   placeholder="@Localizer["Placeholder_GameCode"]" />
+            <span asp-validation-for="Input.GameCode"></span>
+        }
+        else
+        {
+            <input asp-for="Input.GameCode" type="hidden" />
+            <p class="join-selected-game">@Localizer["Join_SelectedGame", Model.Input.GameCode]</p>
+            <span asp-validation-for="Input.GameCode"></span>
+        }
 
         <label asp-for="Input.PlayerName">@Localizer["Label_PlayerName"]</label>
         <input asp-for="Input.PlayerName"

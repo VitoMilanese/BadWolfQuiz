@@ -33,23 +33,11 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             using var document = await JsonDocument.ParseAsync(
                 stream,
                 cancellationToken: cancellationToken);
-            var settings = document.RootElement.Deserialize<GameSessionSettings>(
+            var settings = document.RootElement.Deserialize<StoredGameSettings>(
                 _jsonOptions)
-                ?? GameSessionSettings.Default;
+                ?? StoredGameSettings.From(GameSessionSettings.Default);
 
-            if (document.RootElement.TryGetProperty(
-                nameof(GameSessionSettings.AllowNegativeScoreFinalPlayers),
-                out _))
-            {
-                return settings;
-            }
-
-            return new GameSessionSettings(
-                settings.BuzzerDuration,
-                settings.AnswerDuration,
-                settings.RegularQuestionBuzzerStartMode,
-                settings.WagerQuestionAnswerTimerStartMode,
-                allowNegativeScoreFinalPlayers: true);
+            return settings.ToRuntimeSettings();
         }
         catch (JsonException)
         {
@@ -77,7 +65,7 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             {
                 await JsonSerializer.SerializeAsync(
                     stream,
-                    settings,
+                    StoredGameSettings.From(settings),
                     _jsonOptions,
                     cancellationToken);
             }
@@ -88,6 +76,52 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
         {
             _sync.Release();
         }
+    }
+
+    private sealed class StoredGameSettings
+    {
+        public StoredGameSettings()
+        {
+        }
+
+        public TimeSpan BuzzerDuration { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan AnswerDuration { get; set; } = TimeSpan.FromSeconds(10);
+        public GamePhaseStartMode RegularQuestionBuzzerStartMode { get; set; } =
+            GamePhaseStartMode.Manual;
+        public GamePhaseStartMode WagerQuestionAnswerTimerStartMode { get; set; } =
+            GamePhaseStartMode.Automatic;
+        public bool AllowNegativeScoreFinalPlayers { get; set; } = true;
+        public bool DisplayHostCard { get; set; }
+        public string? HostName { get; set; }
+        public HostVisualSource HostVisualSource { get; set; }
+        public byte[]? HostImageData { get; set; }
+        public string? HostImageContentType { get; set; }
+
+        public GameSessionSettings ToRuntimeSettings() => new(
+            BuzzerDuration,
+            AnswerDuration,
+            RegularQuestionBuzzerStartMode,
+            WagerQuestionAnswerTimerStartMode,
+            AllowNegativeScoreFinalPlayers,
+            DisplayHostCard,
+            HostName,
+            HostVisualSource,
+            HostImageData,
+            HostImageContentType);
+
+        public static StoredGameSettings From(GameSessionSettings settings) => new()
+        {
+            BuzzerDuration = settings.BuzzerDuration,
+            AnswerDuration = settings.AnswerDuration,
+            RegularQuestionBuzzerStartMode = settings.RegularQuestionBuzzerStartMode,
+            WagerQuestionAnswerTimerStartMode = settings.WagerQuestionAnswerTimerStartMode,
+            AllowNegativeScoreFinalPlayers = settings.AllowNegativeScoreFinalPlayers,
+            DisplayHostCard = settings.DisplayHostCard,
+            HostName = settings.HostName,
+            HostVisualSource = settings.HostVisualSource,
+            HostImageData = settings.HostImageData,
+            HostImageContentType = settings.HostImageContentType
+        };
     }
 }
 
@@ -104,14 +138,20 @@ public sealed class GameSettingsInput
         GamePhaseStartMode.Automatic;
 
     public bool AllowNegativeScoreFinalPlayers { get; set; } = true;
+    public bool DisplayHostCard { get; set; }
+    public string? HostName { get; set; }
+    public HostVisualSource HostVisualSource { get; set; }
 
     public bool IsValid =>
         BuzzerDurationSeconds is >= 1 and <= 3600 &&
         AnswerDurationSeconds is >= 1 and <= 3600 &&
         Enum.IsDefined(RegularQuestionBuzzerStartMode) &&
-        Enum.IsDefined(WagerQuestionAnswerTimerStartMode);
+        Enum.IsDefined(WagerQuestionAnswerTimerStartMode) &&
+        Enum.IsDefined(HostVisualSource);
 
-    public GameSessionSettings ToRuntimeSettings()
+    public GameSessionSettings ToRuntimeSettings(
+        byte[]? hostImageData = null,
+        string? hostImageContentType = null)
     {
         if (!IsValid)
         {
@@ -125,7 +165,13 @@ public sealed class GameSettingsInput
             TimeSpan.FromSeconds(AnswerDurationSeconds),
             RegularQuestionBuzzerStartMode,
             WagerQuestionAnswerTimerStartMode,
-            AllowNegativeScoreFinalPlayers);
+            AllowNegativeScoreFinalPlayers,
+            !string.IsNullOrWhiteSpace(HostName) ||
+                HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.None,
+            HostName,
+            HostVisualSource,
+            hostImageData,
+            hostImageContentType);
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)
@@ -139,7 +185,10 @@ public sealed class GameSettingsInput
             WagerQuestionAnswerTimerStartMode =
                 settings.WagerQuestionAnswerTimerStartMode,
             AllowNegativeScoreFinalPlayers =
-                settings.AllowNegativeScoreFinalPlayers
+                settings.AllowNegativeScoreFinalPlayers,
+            DisplayHostCard = settings.DisplayHostCard,
+            HostName = settings.HostName,
+            HostVisualSource = settings.HostVisualSource
         };
     }
 }

@@ -14,7 +14,12 @@ public sealed record GameSessionSettings
         TimeSpan answerDuration,
         GamePhaseStartMode regularQuestionBuzzerStartMode,
         GamePhaseStartMode wagerQuestionAnswerTimerStartMode,
-        bool allowNegativeScoreFinalPlayers = true)
+        bool allowNegativeScoreFinalPlayers = true,
+        bool displayHostCard = false,
+        string? hostName = null,
+        HostVisualSource hostVisualSource = HostVisualSource.None,
+        byte[]? hostImageData = null,
+        string? hostImageContentType = null)
     {
         if (buzzerDuration <= TimeSpan.Zero)
         {
@@ -35,6 +40,11 @@ public sealed record GameSessionSettings
         RegularQuestionBuzzerStartMode = regularQuestionBuzzerStartMode;
         WagerQuestionAnswerTimerStartMode = wagerQuestionAnswerTimerStartMode;
         AllowNegativeScoreFinalPlayers = allowNegativeScoreFinalPlayers;
+        DisplayHostCard = displayHostCard;
+        HostName = hostName?.Trim();
+        HostVisualSource = hostVisualSource;
+        HostImageData = hostImageData;
+        HostImageContentType = hostImageContentType;
     }
 
     public TimeSpan BuzzerDuration { get; }
@@ -46,6 +56,23 @@ public sealed record GameSessionSettings
     public GamePhaseStartMode WagerQuestionAnswerTimerStartMode { get; }
 
     public bool AllowNegativeScoreFinalPlayers { get; }
+
+    public bool DisplayHostCard { get; }
+    public string? HostName { get; }
+    public HostVisualSource HostVisualSource { get; }
+    public byte[]? HostImageData { get; }
+    public string? HostImageContentType { get; }
+
+    public bool HasHostCard =>
+        !string.IsNullOrWhiteSpace(HostName) ||
+        HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.None;
+}
+
+public enum HostVisualSource
+{
+    None = 0,
+    Image = 1,
+    Webcam = 2
 }
 
 public enum GamePhaseStartMode
