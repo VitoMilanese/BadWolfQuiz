@@ -120,9 +120,18 @@
                                 <option value="2">@Localizer["HostCard_SourceWebcam"]</option>
                             </select>
                         </label>
-                        <label>
+                        <label class="host-image-field">
                             <span>@Localizer["HostCard_Image"]</span>
-                            <input asp-for="HostImage" type="file" accept="image/*" />
+                            <span class="host-image-input-row">
+                                <input asp-for="HostImage" type="file" accept="image/*" data-host-image-input />
+                                <img class="host-image-preview"
+                                     data-host-image-preview
+                                     src="@(Model.Game.Session.Settings.HostImageData is not null
+                                         ? Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })
+                                         : null)"
+                                     alt=""
+                                     hidden="@(Model.Game.Session.Settings.HostImageData is not null ? null : "hidden")" />
+                            </span>
                         </label>
                     </div>
                     <div class="form-actions">
@@ -1234,6 +1243,27 @@
                 });
 
             refresh();
+        })();
+
+        (() => {
+            const input = document.querySelector("[data-host-image-input]");
+            const preview = document.querySelector("[data-host-image-preview]");
+            let previewUrl;
+
+            input?.addEventListener("change", () => {
+                const file = input.files?.[0];
+                if (!file || !preview) {
+                    return;
+                }
+
+                if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                }
+
+                previewUrl = URL.createObjectURL(file);
+                preview.src = previewUrl;
+                preview.hidden = false;
+            });
         })();
 
         (() => {

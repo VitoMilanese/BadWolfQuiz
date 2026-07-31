@@ -16,10 +16,24 @@ public sealed class IndexModel(
     [BindProperty]
     public IFormFile? HostImage { get; set; }
 
+    public bool HasHostImage { get; private set; }
+
     public async Task OnGetAsync(CancellationToken cancellationToken)
     {
-        Input = GameSettingsInput.From(
-            await settingsStore.LoadAsync(cancellationToken));
+        var settings = await settingsStore.LoadAsync(cancellationToken);
+        Input = GameSettingsInput.From(settings);
+        HasHostImage = settings.HostImageData is not null;
+    }
+
+    public async Task<IActionResult> OnGetHostImageAsync(
+        CancellationToken cancellationToken)
+    {
+        var settings = await settingsStore.LoadAsync(cancellationToken);
+        Response.Headers.CacheControl = "no-store";
+        return settings.HostImageData is not null &&
+               !string.IsNullOrWhiteSpace(settings.HostImageContentType)
+            ? File(settings.HostImageData, settings.HostImageContentType)
+            : NotFound();
     }
 
     public async Task<IActionResult> OnPostAsync(
@@ -28,6 +42,7 @@ public sealed class IndexModel(
         var existing = await settingsStore.LoadAsync(cancellationToken);
         var imageData = existing.HostImageData;
         var imageContentType = existing.HostImageContentType;
+        HasHostImage = imageData is not null;
 
         if (HostImage is not null)
         {
@@ -42,6 +57,7 @@ public sealed class IndexModel(
             await HostImage.CopyToAsync(stream, cancellationToken);
             imageData = stream.ToArray();
             imageContentType = HostImage.ContentType;
+            HasHostImage = true;
             Input.HostVisualSource = BadWolfQuiz.Game.Runtime.HostVisualSource.Image;
         }
 

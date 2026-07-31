@@ -1599,6 +1599,35 @@ textarea {
     background: #050507;
 }
 
+.host-image-field {
+    grid-column: 1 / -1;
+}
+
+.host-image-input-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.host-image-input-row input[type="file"] {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.host-image-preview {
+    width: 88px;
+    height: 66px;
+    flex: 0 0 auto;
+    object-fit: contain;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #050507;
+}
+
+.host-image-preview[hidden] {
+    display: none;
+}
+
 .scoreboard-details {
     display: grid;
     justify-items: center;

@@ -131,6 +131,7 @@ public sealed class LobbyModel(
     {
         var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
         var settings = game?.Session.Settings;
+        Response.Headers.CacheControl = "no-store";
         return settings?.HostImageData is not null &&
                !string.IsNullOrWhiteSpace(settings.HostImageContentType)
             ? File(settings.HostImageData, settings.HostImageContentType)
