@@ -59,6 +59,37 @@ public sealed class HostAccountServiceTests
         Assert.Equal("Visible", (await fixture.Db.Quizzes.SingleAsync()).Title);
     }
 
+    [Fact]
+    public async Task Password_reset_token_is_single_use()
+    {
+        await using var fixture = await Fixture.CreateAsync();
+        await fixture.Accounts.RegisterAsync("host@example.com", "old-password");
+        var token = await fixture.Accounts.CreatePasswordResetTokenAsync("host@example.com");
+
+        Assert.NotNull(token);
+        Assert.True(await fixture.Accounts.ResetPasswordAsync(
+            "host@example.com", token!, "new-password"));
+        Assert.False(await fixture.Accounts.ResetPasswordAsync(
+            "host@example.com", token!, "another-password"));
+        Assert.NotNull(await fixture.Accounts.ValidateCredentialsAsync(
+            "host@example.com", "new-password"));
+    }
+
+    [Fact]
+    public async Task Change_password_requires_current_password()
+    {
+        await using var fixture = await Fixture.CreateAsync();
+        var registered = await fixture.Accounts.RegisterAsync(
+            "host@example.com", "old-password");
+
+        Assert.False(await fixture.Accounts.ChangePasswordAsync(
+            registered.Host!.Id, "wrong-password", "new-password"));
+        Assert.True(await fixture.Accounts.ChangePasswordAsync(
+            registered.Host.Id, "old-password", "new-password"));
+        Assert.NotNull(await fixture.Accounts.ValidateCredentialsAsync(
+            "host@example.com", "new-password"));
+    }
+
     private sealed class Fixture : IAsyncDisposable
     {
         private readonly SqliteConnection connection;

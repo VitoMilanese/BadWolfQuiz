@@ -973,4 +973,21 @@
   <data name="Account_InvalidEmail" xml:space="preserve"><value>Введіть правильну адресу електронної пошти.</value></data>
   <data name="Account_PasswordMinLength" xml:space="preserve"><value>Пароль має містити щонайменше 8 символів.</value></data>
   <data name="Account_PasswordMismatch" xml:space="preserve"><value>Паролі не збігаються.</value></data>
+  <data name="Account_ForgotPassword" xml:space="preserve"><value>Забули пароль?</value></data>
+  <data name="Account_ForgotPasswordDescription" xml:space="preserve"><value>Введіть електронну пошту акаунта хоста, і ми надішлемо посилання для відновлення.</value></data>
+  <data name="Account_SendResetLink" xml:space="preserve"><value>Надіслати посилання</value></data>
+  <data name="Account_CheckEmail" xml:space="preserve"><value>Перевірте електронну пошту</value></data>
+  <data name="Account_CheckEmailDescription" xml:space="preserve"><value>Якщо акаунт із такою адресою існує, на неї надіслано посилання для відновлення пароля.</value></data>
+  <data name="Account_EmailSendFailed" xml:space="preserve"><value>Не вдалося надіслати лист. Перевірте налаштування Resend і спробуйте ще раз.</value></data>
+  <data name="Account_ResetPassword" xml:space="preserve"><value>Відновити пароль</value></data>
+  <data name="Account_NewPassword" xml:space="preserve"><value>Новий пароль</value></data>
+  <data name="Account_InvalidResetLink" xml:space="preserve"><value>Це посилання недійсне, прострочене або вже використане.</value></data>
+  <data name="Account_PasswordResetComplete" xml:space="preserve"><value>Пароль відновлено</value></data>
+  <data name="Account_ChangePassword" xml:space="preserve"><value>Змінити пароль</value></data>
+  <data name="Account_CurrentPassword" xml:space="preserve"><value>Поточний пароль</value></data>
+  <data name="Account_PasswordChanged" xml:space="preserve"><value>Пароль успішно змінено.</value></data>
+  <data name="Account_CurrentPasswordInvalid" xml:space="preserve"><value>Поточний пароль неправильний.</value></data>
+  <data name="Account_EmailSubject" xml:space="preserve"><value>BAD WOLF QUIZ — відновлення пароля</value></data>
+  <data name="Account_EmailIntro" xml:space="preserve"><value>Для вашого акаунта хоста BAD WOLF QUIZ надійшов запит на відновлення пароля.</value></data>
+  <data name="Account_EmailExpiry" xml:space="preserve"><value>Посилання діє одну годину. Якщо ви не надсилали запит, просто проігноруйте цей лист.</value></data>
 </root>

@@ -52,6 +52,10 @@ public sealed class HostAccount
     [Required]
     public string PasswordHash { get; set; } = string.Empty;
 
+    [MaxLength(64)]
+    public string? PasswordResetTokenHash { get; set; }
+    public DateTime? PasswordResetTokenExpiresAtUtc { get; set; }
+
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
     public ICollection<GameSession> GameSessions { get; set; } = new List<GameSession>();

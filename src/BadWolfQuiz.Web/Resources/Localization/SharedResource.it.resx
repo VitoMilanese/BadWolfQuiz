@@ -973,4 +973,21 @@
   <data name="Account_InvalidEmail" xml:space="preserve"><value>Inserisci un indirizzo email valido.</value></data>
   <data name="Account_PasswordMinLength" xml:space="preserve"><value>La password deve contenere almeno 8 caratteri.</value></data>
   <data name="Account_PasswordMismatch" xml:space="preserve"><value>Le password non corrispondono.</value></data>
+  <data name="Account_ForgotPassword" xml:space="preserve"><value>Password dimenticata?</value></data>
+  <data name="Account_ForgotPasswordDescription" xml:space="preserve"><value>Inserisci l’email dell’account host e invieremo un link per reimpostare la password.</value></data>
+  <data name="Account_SendResetLink" xml:space="preserve"><value>Invia il link</value></data>
+  <data name="Account_CheckEmail" xml:space="preserve"><value>Controlla la tua email</value></data>
+  <data name="Account_CheckEmailDescription" xml:space="preserve"><value>Se esiste un account con questa email, è stato inviato un link per reimpostare la password.</value></data>
+  <data name="Account_EmailSendFailed" xml:space="preserve"><value>Impossibile inviare l’email. Controlla la configurazione di Resend e riprova.</value></data>
+  <data name="Account_ResetPassword" xml:space="preserve"><value>Reimposta password</value></data>
+  <data name="Account_NewPassword" xml:space="preserve"><value>Nuova password</value></data>
+  <data name="Account_InvalidResetLink" xml:space="preserve"><value>Questo link non è valido, è scaduto oppure è già stato utilizzato.</value></data>
+  <data name="Account_PasswordResetComplete" xml:space="preserve"><value>Password reimpostata</value></data>
+  <data name="Account_ChangePassword" xml:space="preserve"><value>Cambia password</value></data>
+  <data name="Account_CurrentPassword" xml:space="preserve"><value>Password attuale</value></data>
+  <data name="Account_PasswordChanged" xml:space="preserve"><value>La password è stata modificata.</value></data>
+  <data name="Account_CurrentPasswordInvalid" xml:space="preserve"><value>La password attuale non è corretta.</value></data>
+  <data name="Account_EmailSubject" xml:space="preserve"><value>BAD WOLF QUIZ — reimpostazione password</value></data>
+  <data name="Account_EmailIntro" xml:space="preserve"><value>È stata richiesta la reimpostazione della password per il tuo account host BAD WOLF QUIZ.</value></data>
+  <data name="Account_EmailExpiry" xml:space="preserve"><value>Il link scade tra un’ora. Se non hai effettuato la richiesta, ignora questa email.</value></data>
 </root>

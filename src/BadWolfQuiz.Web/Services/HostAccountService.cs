@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.WebUtilities;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -76,6 +78,69 @@ public sealed class HostAccountService(
         return host;
     }
 
+    public async Task<string?> CreatePasswordResetTokenAsync(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        var host = await db.Hosts.SingleOrDefaultAsync(
+            x => x.NormalizedEmail == NormalizeEmail(email),
+            cancellationToken);
+        if (host is null)
+        {
+            return null;
+        }
+
+        var token = WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(32));
+        host.PasswordResetTokenHash = HashToken(token);
+        host.PasswordResetTokenExpiresAtUtc = DateTime.UtcNow.AddHours(1);
+        await db.SaveChangesAsync(cancellationToken);
+        return token;
+    }
+
+    public async Task<bool> ResetPasswordAsync(
+        string email,
+        string token,
+        string newPassword,
+        CancellationToken cancellationToken = default)
+    {
+        var tokenHash = HashToken(token);
+        var host = await db.Hosts.SingleOrDefaultAsync(
+            x => x.NormalizedEmail == NormalizeEmail(email) &&
+                x.PasswordResetTokenHash == tokenHash &&
+                x.PasswordResetTokenExpiresAtUtc > DateTime.UtcNow,
+            cancellationToken);
+        if (host is null)
+        {
+            return false;
+        }
+
+        host.PasswordHash = passwordHasher.HashPassword(host, newPassword);
+        host.PasswordResetTokenHash = null;
+        host.PasswordResetTokenExpiresAtUtc = null;
+        await db.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<bool> ChangePasswordAsync(
+        string hostId,
+        string currentPassword,
+        string newPassword,
+        CancellationToken cancellationToken = default)
+    {
+        var host = await db.Hosts.SingleAsync(x => x.Id == hostId, cancellationToken);
+        if (passwordHasher.VerifyHashedPassword(host, host.PasswordHash, currentPassword) ==
+            PasswordVerificationResult.Failed)
+        {
+            return false;
+        }
+
+        host.PasswordHash = passwordHasher.HashPassword(host, newPassword);
+        host.PasswordResetTokenHash = null;
+        host.PasswordResetTokenExpiresAtUtc = null;
+        await db.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     public static ClaimsPrincipal CreatePrincipal(HostAccount host)
     {
         var identity = new ClaimsIdentity(
@@ -89,6 +154,8 @@ public sealed class HostAccountService(
     }
 
     private static string NormalizeEmail(string email) => email.Trim().ToUpperInvariant();
+    private static string HashToken(string token) =>
+        Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(token)));
 }
 
 public sealed record HostRegistrationResult

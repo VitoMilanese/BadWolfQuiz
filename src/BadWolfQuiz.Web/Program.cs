@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using BadWolfQuiz.Web.Models;
+using Resend;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -31,6 +32,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(options =>
+    options.ApiToken = builder.Configuration["Resend:ApiToken"] ?? string.Empty);
+builder.Services.AddTransient<IResend, ResendClient>();
 
 var supportedCultures = new[]
 {
@@ -64,6 +70,7 @@ builder.Services.AddScoped<GameSessionLauncher>();
 builder.Services.AddScoped<GameHistoryStore>();
 builder.Services.AddScoped<CurrentHost>();
 builder.Services.AddScoped<HostAccountService>();
+builder.Services.AddScoped<PasswordResetEmailSender>();
 builder.Services.AddScoped<IPasswordHasher<HostAccount>, PasswordHasher<HostAccount>>();
 builder.Services.AddScoped<QuizSeedService>();
 

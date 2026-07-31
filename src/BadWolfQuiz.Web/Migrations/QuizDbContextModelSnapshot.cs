@@ -290,6 +290,8 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Property<string>("Email").IsRequired().HasMaxLength(254).HasColumnType("TEXT");
                     b.Property<string>("NormalizedEmail").IsRequired().HasMaxLength(254).HasColumnType("TEXT");
                     b.Property<string>("PasswordHash").IsRequired().HasColumnType("TEXT");
+                    b.Property<DateTime?>("PasswordResetTokenExpiresAtUtc").HasColumnType("TEXT");
+                    b.Property<string>("PasswordResetTokenHash").HasMaxLength(64).HasColumnType("TEXT");
                     b.HasKey("Id");
                     b.HasIndex("NormalizedEmail").IsUnique();
                     b.ToTable("Hosts");

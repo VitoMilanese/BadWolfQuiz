@@ -6,6 +6,11 @@ Hosts create their own account with an email address and password. Authenticatio
 uses an encrypted application cookie. Passwords are stored only through ASP.NET
 Core's password hasher.
 
+Authenticated hosts can change their password after confirming the current one.
+Forgotten passwords use a cryptographically random, single-use token that expires
+after one hour. Only the token hash is stored. Resend delivers the reset link using
+the `Resend:ApiToken` and `Resend:From` values from application configuration.
+
 All Razor Pages below `/Admin` require an authenticated host. Player join and
 gameplay pages remain anonymous.
 

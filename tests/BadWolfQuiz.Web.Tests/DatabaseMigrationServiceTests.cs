@@ -74,6 +74,14 @@ public sealed class DatabaseMigrationServiceTests
             connection,
             "GameSessions",
             "HostId"));
+        Assert.True(await ColumnExistsAsync(
+            connection,
+            "Hosts",
+            "PasswordResetTokenHash"));
+        Assert.True(await ColumnExistsAsync(
+            connection,
+            "Hosts",
+            "PasswordResetTokenExpiresAtUtc"));
 
         await using var historyCommand = connection.CreateCommand();
         historyCommand.CommandText =
