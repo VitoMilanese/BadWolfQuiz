@@ -1,23 +1,23 @@
 @page
 @model BadWolfQuiz.Web.Pages.Account.RegisterModel
 @{
-    ViewData["Title"] = "Register host";
+    ViewData["Title"] = Localizer["Account_RegisterHost"];
 }
 <section class="auth-card content-panel">
     <p class="eyebrow">BAD WOLF QUIZ</p>
-    <h1>Register host</h1>
+    <h1>@Localizer["Account_RegisterHost"]</h1>
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
-        <label asp-for="Input.Email">Email</label>
+        <label asp-for="Input.Email">@Localizer["Account_Email"]</label>
         <input asp-for="Input.Email" autocomplete="email" />
         <span asp-validation-for="Input.Email"></span>
-        <label asp-for="Input.Password">Password</label>
+        <label asp-for="Input.Password">@Localizer["Account_Password"]</label>
         <input asp-for="Input.Password" autocomplete="new-password" />
         <span asp-validation-for="Input.Password"></span>
-        <label asp-for="Input.ConfirmPassword">Confirm password</label>
+        <label asp-for="Input.ConfirmPassword">@Localizer["Account_ConfirmPassword"]</label>
         <input asp-for="Input.ConfirmPassword" autocomplete="new-password" />
         <span asp-validation-for="Input.ConfirmPassword"></span>
-        <button class="button button-primary" type="submit">Register</button>
+        <button class="button button-primary" type="submit">@Localizer["Account_Register"]</button>
     </form>
-    <p>Already registered? <a asp-page="Login" asp-route-returnUrl="@Model.ReturnUrl">Sign in</a>.</p>
+    <p>@Localizer["Account_AlreadyRegistered"] <a asp-page="Login" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Account_SignIn"]</a>.</p>
 </section>

@@ -42,12 +42,12 @@
             @if (User.Identity?.IsAuthenticated == true)
             {
                 <form method="post" asp-page="/Account/Logout" class="nav-form">
-                    <button type="submit" class="nav-link-button">Sign out</button>
+                    <button type="submit" class="nav-link-button">@Localizer["Account_SignOut"]</button>
                 </form>
             }
             else
             {
-                <a asp-page="/Account/Login">Host sign in</a>
+                <a asp-page="/Account/Login">@Localizer["Account_HostSignIn"]</a>
             }
         </nav>
 

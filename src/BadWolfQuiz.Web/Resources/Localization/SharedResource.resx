@@ -956,4 +956,21 @@
   <data name="GameHistory_ScoreChange" xml:space="preserve"><value>Score change</value></data>
   <data name="GameHistory_Correct" xml:space="preserve"><value>Correct</value></data>
   <data name="GameHistory_Incorrect" xml:space="preserve"><value>Incorrect</value></data>
+  <data name="Account_HostSignIn" xml:space="preserve"><value>Host sign in</value></data>
+  <data name="Account_SignOut" xml:space="preserve"><value>Sign out</value></data>
+  <data name="Account_RegisterHost" xml:space="preserve"><value>Register host</value></data>
+  <data name="Account_Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Account_Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Account_ConfirmPassword" xml:space="preserve"><value>Confirm password</value></data>
+  <data name="Account_RememberMe" xml:space="preserve"><value>Remember me</value></data>
+  <data name="Account_SignIn" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Account_Register" xml:space="preserve"><value>Register</value></data>
+  <data name="Account_NoAccount" xml:space="preserve"><value>No account?</value></data>
+  <data name="Account_AlreadyRegistered" xml:space="preserve"><value>Already registered?</value></data>
+  <data name="Account_InvalidCredentials" xml:space="preserve"><value>Invalid email or password.</value></data>
+  <data name="Account_EmailAlreadyUsed" xml:space="preserve"><value>This email is already registered.</value></data>
+  <data name="Account_Required" xml:space="preserve"><value>This field is required.</value></data>
+  <data name="Account_InvalidEmail" xml:space="preserve"><value>Enter a valid email address.</value></data>
+  <data name="Account_PasswordMinLength" xml:space="preserve"><value>The password must contain at least 8 characters.</value></data>
+  <data name="Account_PasswordMismatch" xml:space="preserve"><value>The passwords do not match.</value></data>
 </root>

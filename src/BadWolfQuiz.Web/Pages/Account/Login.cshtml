@@ -1,21 +1,21 @@
 @page
 @model BadWolfQuiz.Web.Pages.Account.LoginModel
 @{
-    ViewData["Title"] = "Host sign in";
+    ViewData["Title"] = Localizer["Account_HostSignIn"];
 }
 <section class="auth-card content-panel">
     <p class="eyebrow">BAD WOLF QUIZ</p>
-    <h1>Host sign in</h1>
+    <h1>@Localizer["Account_HostSignIn"]</h1>
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
-        <label asp-for="Input.Email">Email</label>
+        <label asp-for="Input.Email">@Localizer["Account_Email"]</label>
         <input asp-for="Input.Email" autocomplete="email" />
         <span asp-validation-for="Input.Email"></span>
-        <label asp-for="Input.Password">Password</label>
+        <label asp-for="Input.Password">@Localizer["Account_Password"]</label>
         <input asp-for="Input.Password" autocomplete="current-password" />
         <span asp-validation-for="Input.Password"></span>
-        <label class="checkbox-row"><input asp-for="Input.RememberMe" /> Remember me</label>
-        <button class="button button-primary" type="submit">Sign in</button>
+        <label class="checkbox-row"><input asp-for="Input.RememberMe" /> @Localizer["Account_RememberMe"]</label>
+        <button class="button button-primary" type="submit">@Localizer["Account_SignIn"]</button>
     </form>
-    <p>No account? <a asp-page="Register" asp-route-returnUrl="@Model.ReturnUrl">Register</a>.</p>
+    <p>@Localizer["Account_NoAccount"] <a asp-page="Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Account_Register"]</a>.</p>
 </section>
