@@ -92,6 +92,73 @@ public sealed class QuizSnapshotFactoryTests
     }
 
     [Fact]
+    public void Create_maps_final_question_and_answer_content()
+    {
+        var quiz = CreateQuiz();
+        quiz.FinalQuestionBlocks.Add(new FinalQuestionContentBlock
+        {
+            Id = 601,
+            BlockType = ContentBlockType.Text,
+            TextContent = "Final question",
+            SortOrder = 0
+        });
+        quiz.FinalAnswerBlocks.Add(new FinalAnswerContentBlock
+        {
+            Id = 602,
+            BlockType = ContentBlockType.Text,
+            TextContent = "Final answer",
+            SortOrder = 0
+        });
+
+        var snapshot = _factory.Create(quiz);
+
+        Assert.NotNull(snapshot.FinalQuestion);
+        Assert.Equal(
+            "Final question",
+            Assert.Single(snapshot.FinalQuestion.QuestionBlocks).TextContent);
+        Assert.Equal(
+            "Final answer",
+            Assert.Single(snapshot.FinalQuestion.AnswerBlocks).TextContent);
+    }
+
+    [Fact]
+    public void Create_omits_final_question_when_no_final_content_exists()
+    {
+        var snapshot = _factory.Create(CreateQuiz());
+
+        Assert.Null(snapshot.FinalQuestion);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Create_omits_incomplete_final_question(bool hasQuestionBlock)
+    {
+        var quiz = CreateQuiz();
+
+        if (hasQuestionBlock)
+        {
+            quiz.FinalQuestionBlocks.Add(new FinalQuestionContentBlock
+            {
+                BlockType = ContentBlockType.Text,
+                TextContent = "Final question"
+            });
+        }
+        else
+        {
+            quiz.FinalAnswerBlocks.Add(new FinalAnswerContentBlock
+            {
+                BlockType = ContentBlockType.Text,
+                TextContent = "Final answer"
+            });
+        }
+
+        var snapshot = _factory.Create(quiz);
+
+        Assert.Null(snapshot.FinalQuestion);
+    }
+
+    [Fact]
     public void Create_rejects_question_without_matching_point_row()
     {
         var quiz = CreateQuiz();

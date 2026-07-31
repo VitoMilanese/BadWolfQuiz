@@ -879,4 +879,13 @@
   <data name="GameSettings_AllowNegativeFinalPlayers" xml:space="preserve">
     <value>Allow players with negative scores to participate in the final question</value>
   </data>
+  <data name="Title_FinalQuestionEditor" xml:space="preserve">
+    <value>Final question editor</value>
+  </data>
+  <data name="Button_EditFinalQuestion" xml:space="preserve">
+    <value>Edit final question</value>
+  </data>
+  <data name="Message_FinalQuestionSaved" xml:space="preserve">
+    <value>Final question saved.</value>
+  </data>
 </root>

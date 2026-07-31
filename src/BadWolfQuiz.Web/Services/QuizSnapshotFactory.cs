@@ -14,7 +14,14 @@ public sealed class QuizSnapshotFactory
             .Select(CreateRound)
             .ToList();
 
-        return new QuizSnapshot(quiz.Id, quiz.Title, rounds);
+        var finalQuestion = quiz.FinalQuestionBlocks.Count == 0 ||
+            quiz.FinalAnswerBlocks.Count == 0
+                ? null
+                : new FinalQuestionSnapshot(
+                    quiz.FinalQuestionBlocks.Select(CreateContentBlock),
+                    quiz.FinalAnswerBlocks.Select(CreateContentBlock));
+
+        return new QuizSnapshot(quiz.Id, quiz.Title, rounds, finalQuestion);
     }
 
     private static QuizRoundSnapshot CreateRound(QuizRound round)

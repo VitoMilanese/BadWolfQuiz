@@ -46,6 +46,12 @@
     </div>
 
     <div class="round-navigation">
+        <a class="button button-secondary"
+           asp-page="FinalQuestionEditor"
+           asp-route-id="@Model.Quiz.Id">
+            @Localizer["Button_EditFinalQuestion"]
+        </a>
+
         <div class="round-tabs" id="roundTabs">
             @foreach (var item in rounds)
             {

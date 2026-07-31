@@ -4,6 +4,12 @@
 
 The final question is a private, staged conclusion to a game. Each player confirms a wager and an answer from their own device before the host judges the submissions.
 
+## Editor and persistence
+
+The quiz editor provides a dedicated final-question editor. It uses the same ordered content-block model as regular questions, including text, image, audio, video, and YouTube blocks for both the question and correct answer.
+
+Final content is stored separately from round questions and copied into the immutable `FinalQuestionSnapshot` when a game lobby is created. A quiz without final content produces no final snapshot and keeps the existing non-final game flow.
+
 ## Runtime flow
 
 1. The host starts the final phase after the last board round is complete.

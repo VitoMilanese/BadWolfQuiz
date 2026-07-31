@@ -10,6 +10,10 @@ public sealed class QuizDbContext(DbContextOptions<QuizDbContext> options) : DbC
     public DbSet<QuizRoundRow> QuizRoundRows => Set<QuizRoundRow>();
     public DbSet<QuizCategory> QuizCategories => Set<QuizCategory>();
     public DbSet<QuizQuestion> QuizQuestions => Set<QuizQuestion>();
+    public DbSet<FinalQuestionContentBlock> FinalQuestionContentBlocks =>
+        Set<FinalQuestionContentBlock>();
+    public DbSet<FinalAnswerContentBlock> FinalAnswerContentBlocks =>
+        Set<FinalAnswerContentBlock>();
     public DbSet<QuestionContentBlock> QuestionContentBlocks => Set<QuestionContentBlock>();
     public DbSet<AnswerContentBlock> AnswerContentBlocks => Set<AnswerContentBlock>();
     public DbSet<GameSession> GameSessions => Set<GameSession>();

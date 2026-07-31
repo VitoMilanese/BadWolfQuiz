@@ -879,4 +879,13 @@
   <data name="GameSettings_AllowNegativeFinalPlayers" xml:space="preserve">
     <value>Дозволити гравцям із від’ємним рахунком брати участь у фінальному питанні</value>
   </data>
+  <data name="Title_FinalQuestionEditor" xml:space="preserve">
+    <value>Редактор фінального питання</value>
+  </data>
+  <data name="Button_EditFinalQuestion" xml:space="preserve">
+    <value>Редагувати фінальне питання</value>
+  </data>
+  <data name="Message_FinalQuestionSaved" xml:space="preserve">
+    <value>Фінальне питання збережено.</value>
+  </data>
 </root>

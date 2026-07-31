@@ -13,11 +13,11 @@
     {
         audioUrl = Model.IsAnswerBlock
             ? Url.Page(
-                "/Admin/Quizzes/QuestionEditor",
+                null,
                 "AnswerBlockAudio",
                 new { id = Model.Id!.Value })
             : Url.Page(
-                "/Admin/Quizzes/QuestionEditor",
+                null,
                 "QuestionBlockAudio",
                 new { id = Model.Id!.Value });
     }

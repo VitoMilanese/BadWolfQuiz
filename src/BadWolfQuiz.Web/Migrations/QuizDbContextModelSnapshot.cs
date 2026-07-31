@@ -66,6 +66,104 @@ namespace BadWolfQuiz.Web.Migrations
                     b.ToTable("AnswerContentBlocks");
                 });
 
+            modelBuilder.Entity("BadWolfQuiz.Web.Models.FinalAnswerContentBlock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("AudioOnly")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BlockType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BottomCaption")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExternalUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FileContentType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("FileData")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MediaPath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("QuizId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TextContent")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TopCaption")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuizId");
+
+                    b.ToTable("FinalAnswerContentBlocks");
+                });
+
+            modelBuilder.Entity("BadWolfQuiz.Web.Models.FinalQuestionContentBlock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("AudioOnly")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BlockType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BottomCaption")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExternalUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FileContentType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("FileData")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MediaPath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("QuizId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TextContent")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TopCaption")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuizId");
+
+                    b.ToTable("FinalQuestionContentBlocks");
+                });
+
             modelBuilder.Entity("BadWolfQuiz.Web.Models.GamePlayer", b =>
                 {
                     b.Property<int>("Id")
@@ -451,6 +549,28 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("BadWolfQuiz.Web.Models.FinalAnswerContentBlock", b =>
+                {
+                    b.HasOne("BadWolfQuiz.Web.Models.Quiz", "Quiz")
+                        .WithMany("FinalAnswerBlocks")
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("BadWolfQuiz.Web.Models.FinalQuestionContentBlock", b =>
+                {
+                    b.HasOne("BadWolfQuiz.Web.Models.Quiz", "Quiz")
+                        .WithMany("FinalQuestionBlocks")
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quiz");
+                });
+
             modelBuilder.Entity("BadWolfQuiz.Web.Models.GamePlayer", b =>
                 {
                     b.HasOne("BadWolfQuiz.Web.Models.GameSession", "Session")
@@ -606,6 +726,10 @@ namespace BadWolfQuiz.Web.Migrations
 
             modelBuilder.Entity("BadWolfQuiz.Web.Models.Quiz", b =>
                 {
+                    b.Navigation("FinalAnswerBlocks");
+
+                    b.Navigation("FinalQuestionBlocks");
+
                     b.Navigation("Rounds");
 
                     b.Navigation("Sessions");
