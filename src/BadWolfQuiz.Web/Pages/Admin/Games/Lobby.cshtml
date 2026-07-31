@@ -202,9 +202,7 @@
             <div class="form-actions host-game-actions">
                 <a class="button button-secondary"
                    asp-page="/Admin/Games/AnswerHistory"
-                   asp-route-id="@Model.Game.Session.Id.Value"
-                   target="_blank"
-                   rel="noopener">
+                   asp-route-id="@Model.Game.Session.Id.Value">
                     @Localizer["AnswerHistory_Open"]
                 </a>
 
@@ -241,11 +239,32 @@
                         <p class="eyebrow">@Localizer["GameBoard_QuestionPreview"]</p>
                         <h2>@previewQuestion.CategoryTitle — @previewQuestion.Points</h2>
                     </div>
-                    <a class="button button-secondary"
-                       asp-page="/Admin/Games/Lobby"
-                       asp-route-id="@Model.Game.Session.Id.Value">
-                        @Localizer["GameBoard_ReturnToBoard"]
-                    </a>
+                    <div class="form-actions question-review-actions">
+                        @if (Model.IsPreviewingAnswer)
+                        {
+                            <a class="button button-secondary"
+                               asp-page="/Admin/Games/Lobby"
+                               asp-route-id="@Model.Game.Session.Id.Value"
+                               asp-route-previewQuestionId="@previewQuestion.SourceQuestionId">
+                                @Localizer["GameBoard_ShowQuestion"]
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="button button-primary"
+                               asp-page="/Admin/Games/Lobby"
+                               asp-route-id="@Model.Game.Session.Id.Value"
+                               asp-route-previewQuestionId="@previewQuestion.SourceQuestionId"
+                               asp-route-previewAnswer="true">
+                                @Localizer["GameBoard_ShowAnswer"]
+                            </a>
+                        }
+                        <a class="button button-secondary"
+                           asp-page="/Admin/Games/Lobby"
+                           asp-route-id="@Model.Game.Session.Id.Value">
+                            @Localizer["GameBoard_ReturnToBoard"]
+                        </a>
+                    </div>
                 </header>
 
                 <div class="question-review-content">
@@ -253,14 +272,10 @@
                              model="@(new GameContentPreviewModel(
                                  Model.Game.Session.Id.Value,
                                  previewQuestion.SourceQuestionId,
-                                 false,
-                                 previewQuestion.QuestionBlocks))" />
-                    <partial name="_GameContentPreview"
-                             model="@(new GameContentPreviewModel(
-                                 Model.Game.Session.Id.Value,
-                                 previewQuestion.SourceQuestionId,
-                                 true,
-                                 previewQuestion.AnswerBlocks))" />
+                                 Model.IsPreviewingAnswer,
+                                 Model.IsPreviewingAnswer
+                                     ? previewQuestion.AnswerBlocks
+                                     : previewQuestion.QuestionBlocks))" />
                 </div>
             </section>
         }
@@ -771,9 +786,7 @@
         <div class="form-actions host-game-actions final-game-actions">
             <a class="button button-secondary"
                asp-page="/Admin/Games/AnswerHistory"
-               asp-route-id="@Model.Game.Session.Id.Value"
-               target="_blank"
-               rel="noopener">
+               asp-route-id="@Model.Game.Session.Id.Value">
                 @Localizer["AnswerHistory_Open"]
             </a>
             <a class="button button-secondary"

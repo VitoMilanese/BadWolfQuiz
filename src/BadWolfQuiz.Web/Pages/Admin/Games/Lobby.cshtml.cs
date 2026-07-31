@@ -25,6 +25,8 @@ public sealed class LobbyModel(
 
     public RuntimeQuestion? PreviewQuestion { get; private set; }
 
+    public bool IsPreviewingAnswer { get; private set; }
+
     public WagerLimits? QuestionWagerLimits { get; private set; }
 
     [BindProperty]
@@ -36,9 +38,12 @@ public sealed class LobbyModel(
 
     public IReadOnlyList<GameResultStanding> FinalStandings { get; private set; } = [];
 
-    public IActionResult OnGet(Guid id, int? previewQuestionId)
+    public IActionResult OnGet(
+        Guid id,
+        int? previewQuestionId,
+        bool previewAnswer = false)
     {
-        return LoadPage(id, previewQuestionId);
+        return LoadPage(id, previewQuestionId, previewAnswer);
     }
 
     public IActionResult OnGetContentBlock(
@@ -691,7 +696,10 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
-    private IActionResult LoadPage(Guid id, int? previewQuestionId = null)
+    private IActionResult LoadPage(
+        Guid id,
+        int? previewQuestionId = null,
+        bool previewAnswer = false)
     {
         var game = sessionRegistry.Find(new GameSessionId(id));
 
@@ -741,6 +749,7 @@ public sealed class LobbyModel(
             PreviewQuestion = roundQuestions.SingleOrDefault(question =>
                 question.SourceQuestionId == previewQuestionId.Value &&
                 question.Status == RuntimeQuestionStatus.Resolved);
+            IsPreviewingAnswer = PreviewQuestion is not null && previewAnswer;
         }
 
         IsRoundSummaryVisible =

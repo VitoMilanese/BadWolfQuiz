@@ -936,4 +936,6 @@
   <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Delete this answer entry and reverse its score change?</value></data>
   <data name="GameBoard_QuestionPreview" xml:space="preserve"><value>Closed question preview</value></data>
   <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve"><value>Preview closed question for {0} points</value></data>
+  <data name="GameBoard_ShowQuestion" xml:space="preserve"><value>Show question</value></data>
+  <data name="GameBoard_ShowAnswer" xml:space="preserve"><value>Show answer</value></data>
 </root>

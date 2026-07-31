@@ -1326,7 +1326,7 @@ textarea {
 
 .question-review-content {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
 }
 
@@ -1340,6 +1340,11 @@ textarea {
 
 .question-review-content .game-content-text {
     font-size: clamp(1.4rem, 3vw, 2.6rem);
+}
+
+.question-review-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 @media (max-width: 900px) {
@@ -2772,7 +2777,10 @@ iframe.game-content-video {
 }
 
 .answer-history-delta {
-    align-self: center;
+    display: flex;
+    align-items: center;
+    align-self: end;
+    min-height: 46px;
     color: var(--success);
     font-size: 1.15rem;
     font-weight: 900;
