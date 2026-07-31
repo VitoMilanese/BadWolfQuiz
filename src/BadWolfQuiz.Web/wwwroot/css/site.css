@@ -1596,7 +1596,7 @@ textarea {
     max-height: none;
     object-fit: contain;
     border-radius: 8px;
-    background: #050507;
+    background: transparent;
 }
 
 .host-image-field {
