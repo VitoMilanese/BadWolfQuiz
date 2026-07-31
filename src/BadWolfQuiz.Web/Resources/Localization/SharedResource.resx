@@ -1022,4 +1022,5 @@
   <data name="PlayerWebcam_Disable" xml:space="preserve"><value>Disable webcam</value></data>
   <data name="PlayerWebcam_RequiresHttps" xml:space="preserve"><value>Open the site over a secure HTTPS connection to access the camera.</value></data>
   <data name="PlayerWebcam_AccessFailed" xml:space="preserve"><value>Unable to access the camera. Check the browser permission.</value></data>
+  <data name="GameBoard_ResizeHostCard" xml:space="preserve"><value>Resize the host card width and height</value></data>
 </root>

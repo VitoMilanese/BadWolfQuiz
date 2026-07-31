@@ -1022,4 +1022,5 @@
   <data name="PlayerWebcam_Disable" xml:space="preserve"><value>Вимкнути вебкамеру</value></data>
   <data name="PlayerWebcam_RequiresHttps" xml:space="preserve"><value>Для доступу до камери відкрийте сайт через захищене HTTPS-з’єднання.</value></data>
   <data name="PlayerWebcam_AccessFailed" xml:space="preserve"><value>Не вдалося отримати доступ до камери. Перевірте дозвіл браузера.</value></data>
+  <data name="GameBoard_ResizeHostCard" xml:space="preserve"><value>Змінити ширину та висоту картки хоста</value></data>
 </root>

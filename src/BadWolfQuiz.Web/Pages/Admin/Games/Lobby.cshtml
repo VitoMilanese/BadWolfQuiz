@@ -728,6 +728,19 @@
             !Model.IsRoundSummaryVisible)
         {
             <div class="host-board-layout">
+            @if (Model.Game.Session.Settings.HasHostCard)
+            {
+                <aside class="board-host-sidebar"
+                       data-board-host-slot
+                       aria-label="@Model.Game.Session.Settings.HostName">
+                    <ul class="board-host-card-list" data-board-host-card-list></ul>
+                    <div class="board-host-card-resizer"
+                         data-board-host-card-resizer
+                         role="separator"
+                         aria-label="@Localizer["GameBoard_ResizeHostCard"]"
+                         tabindex="0"></div>
+                </aside>
+            }
             <div class="host-board-grid"
                  style="--board-columns: @Model.BoardCategories.Count">
             @foreach (var category in Model.BoardCategories)
@@ -1428,12 +1441,106 @@
             const playerList = document.getElementById("player-list");
             const boardPlayerList = document.getElementById("board-player-list");
             const hostCard = playerList?.querySelector("[data-host-card]");
+            const hostSlot = document.querySelector("[data-board-host-slot]");
+            const hostCardList = document.querySelector(
+                "[data-board-host-card-list]");
+            const hostCardResizer = document.querySelector(
+                "[data-board-host-card-resizer]");
+            const wideHostLayout = window.matchMedia("(min-width: 1750px)");
 
             if (!lobby || !playerList || typeof signalR === "undefined") {
                 return;
             }
 
             const gameCode = lobby.dataset.gameCode;
+            const hostCardSizeKey = `badwolfquiz:${gameCode}:host-card-size`;
+
+            const relocateHostCard = () => {
+                if (!hostCard) {
+                    return;
+                }
+
+                if (hostCardList && wideHostLayout.matches) {
+                    hostCardList.append(hostCard);
+                } else if (!playerList.contains(hostCard)) {
+                    playerList.prepend(hostCard);
+                }
+            };
+
+            const applyHostCardSize = (width, height) => {
+                if (!hostSlot) {
+                    return null;
+                }
+
+                const layout = hostSlot.closest(".host-board-layout");
+                const maxHeight = Math.max(180, Math.min(650, layout.clientHeight));
+                const size = {
+                    width: Math.max(190, Math.min(430, Math.round(width))),
+                    height: Math.max(180, Math.min(maxHeight, Math.round(height)))
+                };
+                layout.style.setProperty("--board-host-width", `${size.width}px`);
+                hostSlot.style.setProperty("--board-host-height", `${size.height}px`);
+                return size;
+            };
+
+            if (hostSlot && hostCardResizer) {
+                try {
+                    const storedSize = JSON.parse(localStorage.getItem(hostCardSizeKey));
+                    if (storedSize?.width && storedSize?.height) {
+                        applyHostCardSize(storedSize.width, storedSize.height);
+                    }
+                } catch {
+                    localStorage.removeItem(hostCardSizeKey);
+                }
+
+                hostCardResizer.addEventListener("pointerdown", event => {
+                    const startX = event.clientX;
+                    const startY = event.clientY;
+                    const startWidth = hostSlot.getBoundingClientRect().width;
+                    const startHeight = hostSlot.getBoundingClientRect().height;
+                    hostCardResizer.setPointerCapture(event.pointerId);
+                    document.body.classList.add("is-resizing-host-card");
+
+                    const move = moveEvent => {
+                        applyHostCardSize(
+                            startWidth + moveEvent.clientX - startX,
+                            startHeight + moveEvent.clientY - startY);
+                    };
+                    const stop = stopEvent => {
+                        hostCardResizer.releasePointerCapture(stopEvent.pointerId);
+                        hostCardResizer.removeEventListener("pointermove", move);
+                        hostCardResizer.removeEventListener("pointerup", stop);
+                        hostCardResizer.removeEventListener("pointercancel", stop);
+                        document.body.classList.remove("is-resizing-host-card");
+                        const bounds = hostSlot.getBoundingClientRect();
+                        const size = applyHostCardSize(bounds.width, bounds.height);
+                        localStorage.setItem(hostCardSizeKey, JSON.stringify(size));
+                    };
+
+                    hostCardResizer.addEventListener("pointermove", move);
+                    hostCardResizer.addEventListener("pointerup", stop);
+                    hostCardResizer.addEventListener("pointercancel", stop);
+                });
+
+                hostCardResizer.addEventListener("keydown", event => {
+                    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"]
+                        .includes(event.key)) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    const bounds = hostSlot.getBoundingClientRect();
+                    const size = applyHostCardSize(
+                        bounds.width + (event.key === "ArrowRight" ? 12 :
+                            event.key === "ArrowLeft" ? -12 : 0),
+                        bounds.height + (event.key === "ArrowDown" ? 12 :
+                            event.key === "ArrowUp" ? -12 : 0));
+                    localStorage.setItem(hostCardSizeKey, JSON.stringify(size));
+                });
+            }
+
+            wideHostLayout.addEventListener("change", relocateHostCard);
+            relocateHostCard();
             const statusLabels = {
                 active: lobby.dataset.statusActive,
                 inactive: lobby.dataset.statusInactive,
@@ -1700,6 +1807,7 @@
                     }
 
                     webcam.refresh(update.players);
+                    relocateHostCard();
 
                     return;
                 }
@@ -1823,6 +1931,7 @@
 
                 applyBuzzerPlayerStates();
                 webcam.refresh(update.players);
+                relocateHostCard();
             });
 
             connection.on("GameStatusChanged", update => {
