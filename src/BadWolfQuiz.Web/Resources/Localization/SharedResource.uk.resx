@@ -934,4 +934,6 @@
   <data name="AnswerHistory_Delete" xml:space="preserve"><value>Видалити запис</value></data>
   <data name="AnswerHistory_DeleteTitle" xml:space="preserve"><value>Видалити запис відповіді</value></data>
   <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Видалити цей запис і скасувати відповідну зміну балів?</value></data>
+  <data name="GameBoard_QuestionPreview" xml:space="preserve"><value>Перегляд закритого питання</value></data>
+  <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve"><value>Переглянути закрите питання за {0} балів</value></data>
 </root>

@@ -934,4 +934,6 @@
   <data name="AnswerHistory_Delete" xml:space="preserve"><value>Elimina voce</value></data>
   <data name="AnswerHistory_DeleteTitle" xml:space="preserve"><value>Elimina risposta</value></data>
   <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Eliminare questa risposta e annullare la relativa modifica del punteggio?</value></data>
+  <data name="GameBoard_QuestionPreview" xml:space="preserve"><value>Anteprima domanda chiusa</value></data>
+  <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve"><value>Visualizza la domanda chiusa da {0} punti</value></data>
 </root>

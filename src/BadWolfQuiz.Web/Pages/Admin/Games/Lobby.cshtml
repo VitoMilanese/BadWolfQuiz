@@ -233,6 +233,38 @@
         </div>
         }
 
+        @if (Model.PreviewQuestion is { } previewQuestion)
+        {
+            <section class="content-panel question-review-preview">
+                <header class="question-review-heading">
+                    <div>
+                        <p class="eyebrow">@Localizer["GameBoard_QuestionPreview"]</p>
+                        <h2>@previewQuestion.CategoryTitle — @previewQuestion.Points</h2>
+                    </div>
+                    <a class="button button-secondary"
+                       asp-page="/Admin/Games/Lobby"
+                       asp-route-id="@Model.Game.Session.Id.Value">
+                        @Localizer["GameBoard_ReturnToBoard"]
+                    </a>
+                </header>
+
+                <div class="question-review-content">
+                    <partial name="_GameContentPreview"
+                             model="@(new GameContentPreviewModel(
+                                 Model.Game.Session.Id.Value,
+                                 previewQuestion.SourceQuestionId,
+                                 false,
+                                 previewQuestion.QuestionBlocks))" />
+                    <partial name="_GameContentPreview"
+                             model="@(new GameContentPreviewModel(
+                                 Model.Game.Session.Id.Value,
+                                 previewQuestion.SourceQuestionId,
+                                 true,
+                                 previewQuestion.AnswerBlocks))" />
+                </div>
+            </section>
+        }
+
         @if (Model.CurrentQuestion is not null)
         {
             <div class="content-panel current-question-summary @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager ? "wager-mode" : null)">
@@ -615,7 +647,9 @@
             </section>
         }
 
-        @if (Model.CurrentQuestion is null && !Model.IsRoundSummaryVisible)
+        @if (Model.CurrentQuestion is null &&
+            Model.PreviewQuestion is null &&
+            !Model.IsRoundSummaryVisible)
         {
             <div class="host-board-grid"
                  style="--board-columns: @Model.BoardCategories.Count">
@@ -626,16 +660,28 @@
 
                     @foreach (var question in category.Questions)
                     {
-                        <form method="post" asp-page-handler="SelectQuestion">
-                            <input name="sourceQuestionId"
-                                   type="hidden"
-                                   value="@question.SourceQuestionId" />
-                            <button class="host-board-question status-@question.Status.ToString().ToLowerInvariant()"
-                                    type="submit"
-                                    disabled="@(question.Status != BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Available || Model.CurrentQuestion is not null ? "disabled" : null)">
+                        @if (question.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Available)
+                        {
+                            <form method="post" asp-page-handler="SelectQuestion">
+                                <input name="sourceQuestionId"
+                                       type="hidden"
+                                       value="@question.SourceQuestionId" />
+                                <button class="host-board-question status-available"
+                                        type="submit">
+                                    @question.Points
+                                </button>
+                            </form>
+                        }
+                        else if (question.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Resolved)
+                        {
+                            <a class="host-board-question status-resolved"
+                               asp-page="/Admin/Games/Lobby"
+                               asp-route-id="@Model.Game.Session.Id.Value"
+                               asp-route-previewQuestionId="@question.SourceQuestionId"
+                               aria-label="@Localizer["GameBoard_PreviewResolvedQuestion", question.Points]">
                                 @question.Points
-                            </button>
-                        </form>
+                            </a>
+                        }
                     }
                 </section>
             }

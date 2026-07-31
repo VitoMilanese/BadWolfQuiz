@@ -1,3 +1,4 @@
+using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
@@ -22,6 +23,8 @@ public sealed class LobbyModel(
 
     public RuntimeQuestion? CurrentQuestion { get; private set; }
 
+    public RuntimeQuestion? PreviewQuestion { get; private set; }
+
     public WagerLimits? QuestionWagerLimits { get; private set; }
 
     [BindProperty]
@@ -33,9 +36,9 @@ public sealed class LobbyModel(
 
     public IReadOnlyList<GameResultStanding> FinalStandings { get; private set; } = [];
 
-    public IActionResult OnGet(Guid id)
+    public IActionResult OnGet(Guid id, int? previewQuestionId)
     {
-        return LoadPage(id);
+        return LoadPage(id, previewQuestionId);
     }
 
     public IActionResult OnGetContentBlock(
@@ -688,7 +691,7 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
-    private IActionResult LoadPage(Guid id)
+    private IActionResult LoadPage(Guid id, int? previewQuestionId = null)
     {
         var game = sessionRegistry.Find(new GameSessionId(id));
 
@@ -733,8 +736,16 @@ public sealed class LobbyModel(
             question.Status is not RuntimeQuestionStatus.Available and
                 not RuntimeQuestionStatus.Resolved);
 
+        if (CurrentQuestion is null && previewQuestionId.HasValue)
+        {
+            PreviewQuestion = roundQuestions.SingleOrDefault(question =>
+                question.SourceQuestionId == previewQuestionId.Value &&
+                question.Status == RuntimeQuestionStatus.Resolved);
+        }
+
         IsRoundSummaryVisible =
             CurrentQuestion is null &&
+            PreviewQuestion is null &&
             game.Session.IsCurrentRoundComplete;
 
         if (IsRoundSummaryVisible)
@@ -771,3 +782,9 @@ public sealed record RoundLeaderboardEntry(
     GamePlayerId PlayerId,
     string PlayerName,
     int Score);
+
+public sealed record GameContentPreviewModel(
+    Guid GameSessionId,
+    int SourceQuestionId,
+    bool IsAnswer,
+    IReadOnlyList<ContentBlockSnapshot> Blocks);

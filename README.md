@@ -111,6 +111,7 @@ Currently implemented:
 - Correct and incorrect answer judging
 - Positive and negative scoring
 - Focused question and answer presentation
+- Read-only question and answer previews for resolved board cells
 - Player scoreboard with answering and ineligible states
 - Multi-round progression
 - Animated top-three inter-round leaderboard
