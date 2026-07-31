@@ -7,15 +7,18 @@ namespace BadWolfQuiz.Web.Services;
 public sealed class GameSessionLauncher(
     QuizDbContext db,
     QuizSnapshotFactory snapshotFactory,
-    GameSessionRegistry sessionRegistry)
+    GameSessionRegistry sessionRegistry,
+    GameSettingsStore settingsStore)
 {
-    public Task<GameSessionRegistration?> CreateAsync(
+    public async Task<GameSessionRegistration?> CreateAsync(
         int quizId,
         CancellationToken cancellationToken = default)
     {
-        return CreateAsync(
+        var settings = await settingsStore.LoadAsync(cancellationToken);
+
+        return await CreateAsync(
             quizId,
-            GameSessionSettings.Default,
+            settings,
             cancellationToken);
     }
 
