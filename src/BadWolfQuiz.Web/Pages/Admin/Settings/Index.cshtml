@@ -44,6 +44,10 @@
             <option value="2">@Localizer["GameSettings_Manual"]</option>
         </select>
     </label>
+    <label class="settings-checkbox">
+        <input asp-for="Input.AllowNegativeScoreFinalPlayers" type="checkbox" />
+        <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
+    </label>
 </div>
     <div class="form-actions">
         <button class="button button-primary" type="submit">@Localizer["Button_Save"]</button>

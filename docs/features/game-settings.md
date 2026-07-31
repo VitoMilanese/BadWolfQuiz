@@ -36,6 +36,12 @@ Each setting supports:
 
 They are intentionally independent even though both describe how a phase starts.
 
+Final-question eligibility has an additional boolean setting:
+
+- `AllowNegativeScoreFinalPlayers`.
+
+It defaults to `true`. When disabled, players whose score is below zero are excluded from the final question. Zero-score players remain eligible.
+
 | Regular question | Wager question | Result |
 | --- | --- | --- |
 | `Automatic` | `Automatic` | The buzzer and wager answer timer start automatically in their respective flows. |
@@ -70,6 +76,6 @@ A future settings implementation may add a reset action that restores a game set
 
 ## Implementation status
 
-The Engine-level settings snapshot is implemented. It configures buzzer and answer durations, automatically opens the regular-question buzzer when requested, and supports explicit start of a wager answer timer in manual mode.
+The Engine-level settings snapshot is implemented. It configures buzzer and answer durations, automatically opens the regular-question buzzer when requested, supports explicit start of a wager answer timer in manual mode, and controls whether negative-score players participate in the final question.
 
 Global defaults are persisted in `App_Data/game-settings.json`. Creating a game immediately copies those defaults into its runtime session. The host can edit the per-game values from the lobby until the game starts; updating them rebuilds the stopped timers. Once the game starts, the snapshot is locked.

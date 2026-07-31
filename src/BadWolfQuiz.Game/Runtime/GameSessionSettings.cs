@@ -6,13 +6,15 @@ public sealed record GameSessionSettings
         GameSession.DefaultBuzzerDuration,
         GameSession.DefaultAnswerDuration,
         GamePhaseStartMode.Manual,
-        GamePhaseStartMode.Automatic);
+        GamePhaseStartMode.Automatic,
+        allowNegativeScoreFinalPlayers: true);
 
     public GameSessionSettings(
         TimeSpan buzzerDuration,
         TimeSpan answerDuration,
         GamePhaseStartMode regularQuestionBuzzerStartMode,
-        GamePhaseStartMode wagerQuestionAnswerTimerStartMode)
+        GamePhaseStartMode wagerQuestionAnswerTimerStartMode,
+        bool allowNegativeScoreFinalPlayers = true)
     {
         if (buzzerDuration <= TimeSpan.Zero)
         {
@@ -32,6 +34,7 @@ public sealed record GameSessionSettings
         AnswerDuration = answerDuration;
         RegularQuestionBuzzerStartMode = regularQuestionBuzzerStartMode;
         WagerQuestionAnswerTimerStartMode = wagerQuestionAnswerTimerStartMode;
+        AllowNegativeScoreFinalPlayers = allowNegativeScoreFinalPlayers;
     }
 
     public TimeSpan BuzzerDuration { get; }
@@ -41,6 +44,8 @@ public sealed record GameSessionSettings
     public GamePhaseStartMode RegularQuestionBuzzerStartMode { get; }
 
     public GamePhaseStartMode WagerQuestionAnswerTimerStartMode { get; }
+
+    public bool AllowNegativeScoreFinalPlayers { get; }
 }
 
 public enum GamePhaseStartMode

@@ -876,4 +876,7 @@
   <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Salva impostazioni della partita</value></data>
   <data name="GameSettings_GameSaved" xml:space="preserve"><value>Impostazioni della partita salvate.</value></data>
   <data name="GameSettings_GameLocked" xml:space="preserve"><value>Le impostazioni non possono essere modificate dopo l'avvio della partita.</value></data>
+  <data name="GameSettings_AllowNegativeFinalPlayers" xml:space="preserve">
+    <value>Consenti ai giocatori con punteggio negativo di partecipare alla domanda finale</value>
+  </data>
 </root>

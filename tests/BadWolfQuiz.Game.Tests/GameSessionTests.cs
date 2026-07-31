@@ -806,6 +806,190 @@ public sealed class GameSessionTests
         Assert.Equal(mickey.Id, standings[1].PlayerId);
     }
 
+    [Fact]
+    public void Final_question_includes_negative_score_players_by_default()
+    {
+        var session = CreateFinalSession();
+        var positive = session.AddPlayer("Rose");
+        var negative = session.AddPlayer("Mickey");
+        session.AdjustPlayerScore(negative.Id, -100);
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, positive.Id, true);
+        session.CloseQuestionAnswer(100);
+
+        var final = session.StartFinalQuestion();
+
+        Assert.Contains(final.Submissions, item => item.PlayerId == negative.Id);
+    }
+
+    [Fact]
+    public void Final_question_can_exclude_negative_score_players()
+    {
+        var settings = new GameSessionSettings(
+            GameSession.DefaultBuzzerDuration,
+            GameSession.DefaultAnswerDuration,
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Automatic,
+            allowNegativeScoreFinalPlayers: false);
+        var session = CreateFinalSession(settings: settings);
+        var positive = session.AddPlayer("Rose");
+        var negative = session.AddPlayer("Mickey");
+        session.AdjustPlayerScore(negative.Id, -100);
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, positive.Id, true);
+        session.CloseQuestionAnswer(100);
+
+        var final = session.StartFinalQuestion();
+
+        Assert.DoesNotContain(
+            final.Submissions,
+            item => item.PlayerId == negative.Id);
+        Assert.Contains(
+            final.Submissions,
+            item => item.PlayerId == positive.Id);
+    }
+
+    [Fact]
+    public void Final_question_runs_private_wager_answer_and_judging_flow()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateFinalSession(timeProvider);
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.AdjustPlayerScore(rose.Id, 300);
+        session.AdjustPlayerScore(mickey.Id, 150);
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, rose.Id, true);
+        session.CloseQuestionAnswer(100);
+
+        var final = session.StartFinalQuestion();
+        session.SubmitFinalWager(rose.Id, 250);
+        session.SubmitFinalWager(mickey.Id, 100);
+        session.LockFinalWagers();
+        session.SubmitFinalAnswer(rose.Id, "Bad Wolf");
+        session.SubmitFinalAnswer(mickey.Id, "Torchwood");
+        session.LockFinalAnswers();
+        session.JudgeFinalAnswer(rose.Id, true);
+        session.JudgeFinalAnswer(mickey.Id, false);
+
+        Assert.Equal(FinalQuestionStatus.Completed, final.Status);
+        Assert.Equal(GameSessionStatus.Completed, session.Status);
+        Assert.Equal(650, rose.Score);
+        Assert.Equal(50, mickey.Score);
+        Assert.True(final.Submissions.Single(x => x.PlayerId == rose.Id).IsCorrect);
+        Assert.False(final.Submissions.Single(x => x.PlayerId == mickey.Id).IsCorrect);
+    }
+
+    [Fact]
+    public void Final_question_enforces_minimum_and_default_maximum_wager()
+    {
+        var session = CreateFinalSession();
+        var player = session.AddPlayer("Rose");
+        session.AdjustPlayerScore(player.Id, 200);
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, player.Id, true);
+        session.CloseQuestionAnswer(100);
+        var final = session.StartFinalQuestion();
+
+        Assert.Equal(
+            FinalQuestion.DefaultMaximumWager,
+            final.Submissions.Single().MaximumWager);
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SubmitFinalAnswer(player.Id, "Too early"));
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SubmitFinalWager(player.Id, 4));
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SubmitFinalWager(player.Id, 1001));
+
+        session.SubmitFinalWager(player.Id, 1000);
+
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SubmitFinalWager(player.Id, 100));
+        Assert.Throws<GameRuleViolationException>(
+            session.LockFinalAnswers);
+    }
+
+    [Fact]
+    public void Final_question_maximum_uses_player_score_above_default_maximum()
+    {
+        var session = CreateFinalSession();
+        var player = session.AddPlayer("Rose");
+        session.AdjustPlayerScore(player.Id, 2000);
+        session.Start();
+        session.SelectQuestion(100);
+        session.JudgeQuestionAnswer(100, player.Id, true);
+        session.CloseQuestionAnswer(100);
+
+        var final = session.StartFinalQuestion();
+
+        Assert.Equal(2100, final.Submissions.Single().MaximumWager);
+        Assert.Throws<GameRuleViolationException>(
+            () => session.SubmitFinalWager(player.Id, 2101));
+        Assert.Equal(
+            2100,
+            session.SubmitFinalWager(player.Id, 2100).Wager!.Amount);
+    }
+
+    private static GameSession CreateFinalSession(
+        ManualTimeProvider? timeProvider = null,
+        GameSessionSettings? settings = null)
+    {
+        var quiz = new QuizSnapshot(
+            1,
+            "Final Quiz",
+            [
+                new QuizRoundSnapshot(
+                    1,
+                    "Round 1",
+                    0,
+                    [new QuizQuestionSnapshot(100, 10, 0, 100, false, "Science")])
+            ],
+            new FinalQuestionSnapshot(
+                questionBlocks:
+                [
+                    new ContentBlockSnapshot(
+                        1,
+                        ContentBlockKind.Text,
+                        "Who is the Bad Wolf?",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        0,
+                        false)
+                ],
+                answerBlocks:
+                [
+                    new ContentBlockSnapshot(
+                        2,
+                        ContentBlockKind.Text,
+                        "Rose Tyler",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        0,
+                        false)
+                ]));
+
+        var effectiveTimeProvider =
+            timeProvider ?? new ManualTimeProvider(InitialTime);
+
+        return settings is null
+            ? GameSession.Create(quiz, effectiveTimeProvider)
+            : GameSession.Create(quiz, settings, effectiveTimeProvider);
+    }
+
     private static GameSession CreateMultiRoundSession(
         ManualTimeProvider? timeProvider = null)
     {

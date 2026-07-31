@@ -6,7 +6,11 @@ public sealed class QuizSnapshot
 {
     private readonly ReadOnlyCollection<QuizRoundSnapshot> _rounds;
 
-    public QuizSnapshot(int sourceQuizId, string title, IEnumerable<QuizRoundSnapshot> rounds)
+    public QuizSnapshot(
+        int sourceQuizId,
+        string title,
+        IEnumerable<QuizRoundSnapshot> rounds,
+        FinalQuestionSnapshot? finalQuestion = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceQuizId);
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
@@ -27,6 +31,7 @@ public sealed class QuizSnapshot
         SourceQuizId = sourceQuizId;
         Title = title.Trim();
         _rounds = roundList.AsReadOnly();
+        FinalQuestion = finalQuestion;
     }
 
     public int SourceQuizId { get; }
@@ -34,6 +39,27 @@ public sealed class QuizSnapshot
     public string Title { get; }
 
     public IReadOnlyList<QuizRoundSnapshot> Rounds => _rounds;
+
+    public FinalQuestionSnapshot? FinalQuestion { get; }
+}
+
+public sealed class FinalQuestionSnapshot
+{
+    public FinalQuestionSnapshot(
+        IEnumerable<ContentBlockSnapshot>? questionBlocks = null,
+        IEnumerable<ContentBlockSnapshot>? answerBlocks = null)
+    {
+        QuestionBlocks = (questionBlocks ?? [])
+            .OrderBy(block => block.SortOrder)
+            .ToArray();
+        AnswerBlocks = (answerBlocks ?? [])
+            .OrderBy(block => block.SortOrder)
+            .ToArray();
+    }
+
+    public IReadOnlyList<ContentBlockSnapshot> QuestionBlocks { get; }
+
+    public IReadOnlyList<ContentBlockSnapshot> AnswerBlocks { get; }
 }
 
 public sealed class QuizRoundSnapshot

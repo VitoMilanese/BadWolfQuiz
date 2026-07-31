@@ -876,4 +876,7 @@
   <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Save game settings</value></data>
   <data name="GameSettings_GameSaved" xml:space="preserve"><value>Game settings saved.</value></data>
   <data name="GameSettings_GameLocked" xml:space="preserve"><value>Settings cannot be changed after the game starts.</value></data>
+  <data name="GameSettings_AllowNegativeFinalPlayers" xml:space="preserve">
+    <value>Allow players with negative scores to participate in the final question</value>
+  </data>
 </root>
