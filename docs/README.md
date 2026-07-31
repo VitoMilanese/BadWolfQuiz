@@ -14,6 +14,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 
 - [Wagering and active player rules](features/wagering.md)
 - [Question judging](features/question-judging.md)
+- [Answer history editing](features/answer-history-editing.md)
 - [Game settings](features/game-settings.md)
 - [Player and host cards](features/player-and-host-cards.md)
 

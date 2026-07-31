@@ -179,6 +179,7 @@ src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
 ## Game Session
 
 - Persistent game history
+- Host editing of answer history with score and standings recalculation
 - Reserved player nicknames
 
 ## Game
