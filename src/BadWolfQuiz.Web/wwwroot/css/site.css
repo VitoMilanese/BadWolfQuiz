@@ -1548,6 +1548,10 @@ textarea {
     image-rendering: pixelated;
 }
 
+.lobby-join-qr {
+    width: min(280px, 68vw);
+}
+
 .join-selected-game {
     margin: 0;
     padding: 0.75rem 1rem;

@@ -46,6 +46,11 @@
         <div class="stack-form">
             <div class="game-code-panel">
                 <span>@Localizer["Label_GameCode"]</span>
+                <img class="join-qr-code lobby-join-qr"
+                     src="@Url.Page("/Admin/Games/Lobby", "JoinQrCode", new { id = Model.Game.Session.Id.Value })"
+                     width="280"
+                     height="280"
+                     alt="@Localizer["GameBoard_JoinQrAlt"]" />
                 <strong>@Model.Game.PublicCode</strong>
                 <small>@Localizer["Message_WaitingPlayers"]</small>
             </div>
