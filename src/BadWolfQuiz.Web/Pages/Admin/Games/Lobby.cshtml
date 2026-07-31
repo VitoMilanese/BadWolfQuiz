@@ -695,7 +695,12 @@
 
     <section class="host-game-board final-question-host"
              data-game-code="@Model.Game.PublicCode"
-             data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()">
+             data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
+             data-status-active="@Localizer["PlayerPresence_Active"]"
+             data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
+             data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
+             data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
+             data-approve-label="@Localizer["GameLobby_ApproveRejoin"]">
         @if (TempData["ErrorMessage"] is string errorMessage)
         {
             <div class="message message-error">@errorMessage</div>
@@ -1072,16 +1077,48 @@
                 }
 
                 if (lobby.classList.contains("final-question-host")) {
-                    for (const player of update.players) {
-                        const score = playerList.querySelector(
-                            `[data-player-id="${player.id}"] .scoreboard-score`);
+                    playerList.replaceChildren();
 
-                        if (score) {
-                            score.textContent = player.score.toString();
-                            score.classList.toggle(
-                                "score-negative",
-                                player.score < 0);
+                    for (const player of update.players) {
+                        const item = document.createElement("li");
+                        item.dataset.playerId = player.id;
+                        item.className = "scoreboard-player";
+
+                        const name = document.createElement("strong");
+                        name.textContent = player.name;
+
+                        const details = document.createElement("span");
+                        details.className = "scoreboard-details";
+
+                        const score = document.createElement("span");
+                        score.textContent = player.score.toString();
+                        score.className =
+                            `scoreboard-score ${player.score < 0 ? "score-negative" : ""}`;
+                        details.append(score);
+
+                        if (player.presence !== "active") {
+                            const presence = document.createElement("span");
+                            presence.className =
+                                `presence-badge presence-${player.presence}`;
+                            presence.textContent =
+                                statusLabels[player.presence] || player.presence;
+                            details.append(presence);
                         }
+
+                        if (player.presence === "rejoinpending") {
+                            const approve = document.createElement("button");
+                            approve.type = "button";
+                            approve.className = "button button-secondary";
+                            approve.textContent = lobby.dataset.approveLabel;
+                            approve.addEventListener("click", () => {
+                                approvePlayerId.value = player.id;
+                                approveForm.submit();
+                            });
+                            details.append(approve);
+                        }
+
+                        item.append(name, details);
+                        playerList.append(item);
                     }
 
                     return;
