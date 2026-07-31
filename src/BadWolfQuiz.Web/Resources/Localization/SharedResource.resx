@@ -853,4 +853,27 @@
   <data name="GameTimer_ResumeRejected" xml:space="preserve">
     <value>The timer could not be resumed.</value>
   </data>
+  <data name="Menu_Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="GameSettings_Eyebrow" xml:space="preserve"><value>GAME SETTINGS</value></data>
+  <data name="GameSettings_Title" xml:space="preserve"><value>Global game settings</value></data>
+  <data name="GameSettings_GlobalDescription" xml:space="preserve"><value>These defaults are copied into every new game. Existing games are not changed.</value></data>
+  <data name="GameSettings_BuzzerDuration" xml:space="preserve"><value>Buzzer window</value></data>
+  <data name="GameSettings_AnswerDuration" xml:space="preserve"><value>Answer time</value></data>
+  <data name="GameSettings_SecondsHint" xml:space="preserve"><value>Seconds (1–3600)</value></data>
+  <data name="GameSettings_RegularStartMode" xml:space="preserve"><value>Regular-question buzzer start</value></data>
+  <data name="GameSettings_WagerStartMode" xml:space="preserve"><value>Wager-question answer timer start</value></data>
+  <data name="GameSettings_InvalidDuration" xml:space="preserve"><value>Timer durations must be between 1 and 3600 seconds.</value></data>
+  <data name="GameSettings_GlobalSaved" xml:space="preserve"><value>Global game settings saved.</value></data>
+  <data name="GameSettings_CreateGameTitle" xml:space="preserve"><value>Create game</value></data>
+  <data name="GameSettings_GameEyebrow" xml:space="preserve"><value>NEW GAME</value></data>
+  <data name="GameSettings_GameDescription" xml:space="preserve"><value>These values were inherited from the global defaults. Changes apply only to this game.</value></data>
+  <data name="GameBoard_StartAnswerTimer" xml:space="preserve"><value>Start timer</value></data>
+  <data name="GameTimer_StartRejected" xml:space="preserve"><value>The answer timer could not be started.</value></data>
+  <data name="GameSettings_LobbyTitle" xml:space="preserve"><value>Game settings</value></data>
+  <data name="GameSettings_LobbyDescription" xml:space="preserve"><value>These settings apply only to this game and can be changed until the game starts.</value></data>
+  <data name="GameSettings_Automatic" xml:space="preserve"><value>Automatic</value></data>
+  <data name="GameSettings_Manual" xml:space="preserve"><value>Manual</value></data>
+  <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Save game settings</value></data>
+  <data name="GameSettings_GameSaved" xml:space="preserve"><value>Game settings saved.</value></data>
+  <data name="GameSettings_GameLocked" xml:space="preserve"><value>Settings cannot be changed after the game starts.</value></data>
 </root>

@@ -9,6 +9,75 @@ public sealed class GameSessionTests
         new(2026, 7, 29, 12, 0, 0, TimeSpan.Zero);
 
     [Fact]
+    public void Create_uses_game_specific_timer_settings()
+    {
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(45),
+            TimeSpan.FromSeconds(12),
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Automatic);
+
+        var session = GameSession.Create(
+            CreateSession().Quiz,
+            settings,
+            new ManualTimeProvider(InitialTime));
+
+        Assert.Same(settings, session.Settings);
+        Assert.Equal(TimeSpan.FromSeconds(45), session.Timer.Duration);
+        Assert.Equal(TimeSpan.FromSeconds(12), session.AnswerTimer.Duration);
+    }
+
+    [Fact]
+    public void SelectQuestion_automatically_opens_buzzer_when_configured()
+    {
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(40),
+            TimeSpan.FromSeconds(15),
+            GamePhaseStartMode.Automatic,
+            GamePhaseStartMode.Automatic);
+        var session = GameSession.Create(
+            CreateSession().Quiz,
+            settings,
+            new ManualTimeProvider(InitialTime));
+        session.AddPlayer("Rose");
+        session.Start();
+
+        var question = session.SelectQuestion(100);
+
+        Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
+        Assert.Equal(QuestionBuzzerStatus.Open, question.BuzzerStatus);
+        Assert.Equal(GameTimerStatus.Running, session.Timer.Status);
+        Assert.Equal(TimeSpan.FromSeconds(40), session.Timer.Remaining);
+    }
+
+    [Fact]
+    public void Manual_wager_timer_waits_for_explicit_start()
+    {
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(18),
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Manual);
+        var session = GameSession.Create(
+            CreateSession().Quiz,
+            settings,
+            new ManualTimeProvider(InitialTime));
+        session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(101);
+
+        session.SubmitQuestionWager(101, 100);
+
+        Assert.Equal(GameTimerStatus.Stopped, session.AnswerTimer.Status);
+
+        var timer = session.StartWagerAnswerTimer(101);
+
+        Assert.Same(session.AnswerTimer, timer);
+        Assert.Equal(GameTimerStatus.Running, timer.Status);
+        Assert.Equal(TimeSpan.FromSeconds(18), timer.Remaining);
+    }
+
+    [Fact]
     public void Create_builds_lobby_session_and_runtime_board()
     {
         var session = CreateSession();
@@ -19,6 +88,34 @@ public sealed class GameSessionTests
         Assert.All(
             session.Board.Questions,
             question => Assert.Equal(RuntimeQuestionStatus.Available, question.Status));
+    }
+
+    [Fact]
+    public void UpdateSettings_rebuilds_timers_before_game_starts()
+    {
+        var session = CreateSession();
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(55),
+            TimeSpan.FromSeconds(14),
+            GamePhaseStartMode.Automatic,
+            GamePhaseStartMode.Manual);
+
+        session.UpdateSettings(settings);
+
+        Assert.Same(settings, session.Settings);
+        Assert.Equal(TimeSpan.FromSeconds(55), session.Timer.Duration);
+        Assert.Equal(TimeSpan.FromSeconds(14), session.AnswerTimer.Duration);
+    }
+
+    [Fact]
+    public void UpdateSettings_rejects_changes_after_game_starts()
+    {
+        var session = CreateSession();
+        session.AddPlayer("Rose");
+        session.Start();
+
+        Assert.Throws<GameRuleViolationException>(
+            () => session.UpdateSettings(GameSessionSettings.Default));
     }
 
     [Fact]

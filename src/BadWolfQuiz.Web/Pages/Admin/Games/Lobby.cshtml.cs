@@ -24,6 +24,9 @@ public sealed class LobbyModel(
 
     public WagerLimits? QuestionWagerLimits { get; private set; }
 
+    [BindProperty]
+    public GameSettingsInput SettingsInput { get; set; } = new();
+
     public bool IsRoundSummaryVisible { get; private set; }
 
     public IReadOnlyList<RoundLeaderboardEntry> RoundLeaders { get; private set; } = [];
@@ -100,6 +103,40 @@ public sealed class LobbyModel(
             : $"https://www.youtube.com/embed/{Uri.EscapeDataString(videoId)}";
     }
 
+    public IActionResult OnPostUpdateSettings(
+        Guid id)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        if (!SettingsInput.IsValid)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameSettings_InvalidDuration"].Value;
+            return RedirectToPage(new { id });
+        }
+
+        try
+        {
+            sessionRegistry.UpdateSettings(
+                game.PublicCode,
+                SettingsInput.ToRuntimeSettings());
+            TempData["SuccessMessage"] =
+                localizer["GameSettings_GameSaved"].Value;
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameSettings_GameLocked"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostStartAsync(
         Guid id,
         CancellationToken cancellationToken)
@@ -127,6 +164,34 @@ public sealed class LobbyModel(
                 "GameStatusChanged",
                 GameHub.CreateStatusUpdate(game),
                 cancellationToken);
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostStartWagerAnswerTimerAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.StartWagerAnswerTimer(
+                game.PublicCode,
+                sourceQuestionId);
+            await BroadcastTimerAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameTimer_StartRejected"].Value;
+        }
 
         return RedirectToPage(new { id });
     }
@@ -206,9 +271,10 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
-    public IActionResult OnPostSelectQuestion(
+    public async Task<IActionResult> OnPostSelectQuestionAsync(
         Guid id,
-        int sourceQuestionId)
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
     {
         var game = sessionRegistry.Find(new GameSessionId(id));
 
@@ -220,6 +286,8 @@ public sealed class LobbyModel(
         try
         {
             sessionRegistry.SelectQuestion(game.PublicCode, sourceQuestionId);
+            await BroadcastBuzzerAsync(game, cancellationToken);
+            await BroadcastTimerAsync(game, cancellationToken);
         }
         catch (GameRuleViolationException)
         {
@@ -513,6 +581,7 @@ public sealed class LobbyModel(
 
         Game = game;
         Players = sessionRegistry.GetPlayers(game);
+        SettingsInput = GameSettingsInput.From(game.Session.Settings);
 
         var currentRound = game.Session.CurrentRound;
 

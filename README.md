@@ -103,6 +103,7 @@ Currently implemented:
 - Player buzzer with server-authoritative winner selection
 - Near-simultaneous buzzer results with millisecond differences
 - Synchronized buzzer and answer countdown timers
+- Persistent global game defaults and editable per-game settings snapshots
 - Timer pause and resume controls for the host
 - Automatic timer-based judging for regular and wager questions
 - Correct and incorrect answer judging
@@ -178,14 +179,12 @@ src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
 ## Game Session
 
 - Persistent game history
+- Host editing of answer history with score and standings recalculation
 - Reserved player nicknames
 
 ## Game
 
-- Configurable buzzer and answer timers
-- Automatic timer-based judging
-- Global and per-game settings
-- Final question flow
+- Persistent global settings and per-game settings UI
 - Final question flow
 - Per-round and lifetime correct-answer and attempt statistics
 - Team mode

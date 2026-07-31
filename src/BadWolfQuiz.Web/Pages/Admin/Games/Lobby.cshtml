@@ -33,6 +33,11 @@
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
              data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
              data-running-label="@Localizer["GameLobby_StatusRunning"]">
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="message message-success">@successMessage</div>
+        }
+
         @if (TempData["ErrorMessage"] is string errorMessage)
         {
             <div class="message message-error">@errorMessage</div>
@@ -49,6 +54,54 @@
                 <strong>@Localizer["GameLobby_StatusLabel"]:</strong>
                 <span id="game-status">@Localizer["GameLobby_StatusLobby"]</span>
             </p>
+
+            <details class="lobby-settings-panel">
+                <summary>@Localizer["GameSettings_LobbyTitle"]</summary>
+                <form method="post"
+                      asp-page-handler="UpdateSettings"
+                      class="stack-form">
+                    <p class="settings-description">
+                        @Localizer["GameSettings_LobbyDescription"]
+                    </p>
+                    <div class="settings-grid">
+                        <label>
+                            <span>@Localizer["GameSettings_BuzzerDuration"]</span>
+                            <input asp-for="SettingsInput.BuzzerDurationSeconds"
+                                   type="number"
+                                   min="1"
+                                   max="3600"
+                                   required />
+                        </label>
+                        <label>
+                            <span>@Localizer["GameSettings_AnswerDuration"]</span>
+                            <input asp-for="SettingsInput.AnswerDurationSeconds"
+                                   type="number"
+                                   min="1"
+                                   max="3600"
+                                   required />
+                        </label>
+                        <label>
+                            <span>@Localizer["GameSettings_RegularStartMode"]</span>
+                            <select asp-for="SettingsInput.RegularQuestionBuzzerStartMode">
+                                <option value="1">@Localizer["GameSettings_Automatic"]</option>
+                                <option value="2">@Localizer["GameSettings_Manual"]</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>@Localizer["GameSettings_WagerStartMode"]</span>
+                            <select asp-for="SettingsInput.WagerQuestionAnswerTimerStartMode">
+                                <option value="1">@Localizer["GameSettings_Automatic"]</option>
+                                <option value="2">@Localizer["GameSettings_Manual"]</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button class="button button-secondary" type="submit">
+                            @Localizer["GameSettings_SaveForGame"]
+                        </button>
+                    </div>
+                </form>
+            </details>
 
             <div class="form-actions">
                 <form id="start-game-form" method="post" asp-page-handler="Start">
@@ -385,8 +438,11 @@
                 BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active)
             {
                 var eligiblePlayers = Model.CurrentQuestion.IsSpecial
-                    ? Model.Players.Where(player =>
-                        player.Id == Model.CurrentQuestion.Wager!.PlayerId)
+                    ? Model.Game.Session.AnswerTimer.Status ==
+                            BadWolfQuiz.Game.Runtime.GameTimerStatus.Stopped
+                        ? Enumerable.Empty<BadWolfQuiz.Game.Runtime.GamePlayer>()
+                        : Model.Players.Where(player =>
+                            player.Id == Model.CurrentQuestion.Wager!.PlayerId)
                     : Model.CurrentQuestion.AnsweringPlayerId is { } answeringPlayerId
                         ? Model.Players.Where(player => player.Id == answeringPlayerId)
                         : Enumerable.Empty<BadWolfQuiz.Game.Runtime.GamePlayer>();
@@ -432,6 +488,22 @@
                             BadWolfQuiz.Game.Runtime.QuestionBuzzerStatus.Open)
                     {
                         <p class="buzzer-status">@Localizer["GameBoard_WaitingForBuzz"]</p>
+                    }
+
+                    @if (Model.CurrentQuestion.IsSpecial &&
+                        Model.Game.Session.Settings.WagerQuestionAnswerTimerStartMode ==
+                            BadWolfQuiz.Game.Runtime.GamePhaseStartMode.Manual &&
+                        Model.Game.Session.AnswerTimer.Status ==
+                            BadWolfQuiz.Game.Runtime.GameTimerStatus.Stopped)
+                    {
+                        <form method="post" asp-page-handler="StartWagerAnswerTimer">
+                            <input name="sourceQuestionId"
+                                   type="hidden"
+                                   value="@Model.CurrentQuestion.SourceQuestionId" />
+                            <button class="button button-primary" type="submit">
+                                @Localizer["GameBoard_StartAnswerTimer"]
+                            </button>
+                        </form>
                     }
 
                     @foreach (var player in eligiblePlayers)

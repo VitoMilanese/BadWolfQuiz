@@ -853,4 +853,27 @@
   <data name="GameTimer_ResumeRejected" xml:space="preserve">
     <value>Impossibile riprendere il timer.</value>
   </data>
+  <data name="Menu_Settings" xml:space="preserve"><value>Impostazioni</value></data>
+  <data name="GameSettings_Eyebrow" xml:space="preserve"><value>IMPOSTAZIONI DI GIOCO</value></data>
+  <data name="GameSettings_Title" xml:space="preserve"><value>Impostazioni globali di gioco</value></data>
+  <data name="GameSettings_GlobalDescription" xml:space="preserve"><value>Questi valori vengono copiati in ogni nuova partita. Le partite esistenti non vengono modificate.</value></data>
+  <data name="GameSettings_BuzzerDuration" xml:space="preserve"><value>Tempo per il buzzer</value></data>
+  <data name="GameSettings_AnswerDuration" xml:space="preserve"><value>Tempo per la risposta</value></data>
+  <data name="GameSettings_SecondsHint" xml:space="preserve"><value>Secondi (1–3600)</value></data>
+  <data name="GameSettings_RegularStartMode" xml:space="preserve"><value>Avvio del buzzer per le domande normali</value></data>
+  <data name="GameSettings_WagerStartMode" xml:space="preserve"><value>Avvio del timer per le domande con puntata</value></data>
+  <data name="GameSettings_InvalidDuration" xml:space="preserve"><value>La durata dei timer deve essere compresa tra 1 e 3600 secondi.</value></data>
+  <data name="GameSettings_GlobalSaved" xml:space="preserve"><value>Impostazioni globali salvate.</value></data>
+  <data name="GameSettings_CreateGameTitle" xml:space="preserve"><value>Crea partita</value></data>
+  <data name="GameSettings_GameEyebrow" xml:space="preserve"><value>NUOVA PARTITA</value></data>
+  <data name="GameSettings_GameDescription" xml:space="preserve"><value>Questi valori sono ereditati dalle impostazioni globali. Le modifiche valgono solo per questa partita.</value></data>
+  <data name="GameBoard_StartAnswerTimer" xml:space="preserve"><value>Avvia timer</value></data>
+  <data name="GameTimer_StartRejected" xml:space="preserve"><value>Impossibile avviare il timer della risposta.</value></data>
+  <data name="GameSettings_LobbyTitle" xml:space="preserve"><value>Impostazioni della partita</value></data>
+  <data name="GameSettings_LobbyDescription" xml:space="preserve"><value>Queste impostazioni valgono solo per questa partita e possono essere modificate fino all'avvio.</value></data>
+  <data name="GameSettings_Automatic" xml:space="preserve"><value>Automatico</value></data>
+  <data name="GameSettings_Manual" xml:space="preserve"><value>Manuale</value></data>
+  <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Salva impostazioni della partita</value></data>
+  <data name="GameSettings_GameSaved" xml:space="preserve"><value>Impostazioni della partita salvate.</value></data>
+  <data name="GameSettings_GameLocked" xml:space="preserve"><value>Le impostazioni non possono essere modificate dopo l'avvio della partita.</value></data>
 </root>
