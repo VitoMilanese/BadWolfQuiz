@@ -238,6 +238,95 @@ public sealed class RuntimeQuestion
         return attempt;
     }
 
+    internal QuestionAnswerAttempt AddHistoricalAttempt(
+        GamePlayerId playerId,
+        bool isCorrect,
+        int value,
+        DateTimeOffset judgedAtUtc)
+    {
+        EnsureHistoricalPlayerIsUnique(playerId);
+
+        if (value < 0)
+        {
+            throw new GameRuleViolationException(
+                "An answer history value cannot be negative.");
+        }
+
+        var attempt = new QuestionAnswerAttempt(
+            playerId,
+            isCorrect,
+            isCorrect ? value : -value,
+            judgedAtUtc);
+
+        _answerAttempts.Add(attempt);
+        return attempt;
+    }
+
+    internal (QuestionAnswerAttempt Previous, QuestionAnswerAttempt Updated)
+        UpdateHistoricalAttempt(
+            Guid attemptId,
+            GamePlayerId playerId,
+            bool isCorrect,
+            int value)
+    {
+        if (value < 0)
+        {
+            throw new GameRuleViolationException(
+                "An answer history value cannot be negative.");
+        }
+
+        var index = _answerAttempts.FindIndex(attempt => attempt.Id == attemptId);
+
+        if (index < 0)
+        {
+            throw new GameRuleViolationException(
+                "The selected answer history entry does not exist.");
+        }
+
+        if (_answerAttempts.Any(attempt =>
+                attempt.Id != attemptId &&
+                attempt.PlayerId == playerId))
+        {
+            throw new GameRuleViolationException(
+                "This player already has an answer entry for the selected question.");
+        }
+
+        var previous = _answerAttempts[index];
+        var updated = previous with
+        {
+            PlayerId = playerId,
+            IsCorrect = isCorrect,
+            ScoreDelta = isCorrect ? value : -value
+        };
+
+        _answerAttempts[index] = updated;
+        return (previous, updated);
+    }
+
+    internal QuestionAnswerAttempt RemoveHistoricalAttempt(Guid attemptId)
+    {
+        var index = _answerAttempts.FindIndex(attempt => attempt.Id == attemptId);
+
+        if (index < 0)
+        {
+            throw new GameRuleViolationException(
+                "The selected answer history entry does not exist.");
+        }
+
+        var removed = _answerAttempts[index];
+        _answerAttempts.RemoveAt(index);
+        return removed;
+    }
+
+    private void EnsureHistoricalPlayerIsUnique(GamePlayerId playerId)
+    {
+        if (_answerAttempts.Any(attempt => attempt.PlayerId == playerId))
+        {
+            throw new GameRuleViolationException(
+                "This player already has an answer entry for the selected question.");
+        }
+    }
+
     internal void ResolveWithoutCorrectAnswer()
     {
         if (IsSpecial ||

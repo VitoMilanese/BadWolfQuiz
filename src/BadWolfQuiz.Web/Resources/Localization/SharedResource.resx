@@ -913,4 +913,29 @@
   <data name="AnswerKey_Eyebrow" xml:space="preserve"><value>Private host screen</value></data>
   <data name="AnswerKey_Open" xml:space="preserve"><value>Open answer key</value></data>
   <data name="AnswerKey_Waiting" xml:space="preserve"><value>Waiting for a question.</value></data>
+  <data name="AnswerHistory_Open" xml:space="preserve"><value>Edit answer history</value></data>
+  <data name="AnswerHistory_Eyebrow" xml:space="preserve"><value>HOST TOOL</value></data>
+  <data name="AnswerHistory_Title" xml:space="preserve"><value>Answer history</value></data>
+  <data name="AnswerHistory_Description" xml:space="preserve"><value>Correct recorded answers and scores. Changes immediately affect standings and later-round starting-player selection.</value></data>
+  <data name="AnswerHistory_BackToGame" xml:space="preserve"><value>Back to game</value></data>
+  <data name="AnswerHistory_AddEntry" xml:space="preserve"><value>Add missing answer entry</value></data>
+  <data name="AnswerHistory_Question" xml:space="preserve"><value>Question</value></data>
+  <data name="AnswerHistory_Player" xml:space="preserve"><value>Player</value></data>
+  <data name="AnswerHistory_Value" xml:space="preserve"><value>Reward or penalty value</value></data>
+  <data name="AnswerHistory_Correct" xml:space="preserve"><value>Correct answer</value></data>
+  <data name="AnswerHistory_Add" xml:space="preserve"><value>Add entry</value></data>
+  <data name="AnswerHistory_Save" xml:space="preserve"><value>Save changes</value></data>
+  <data name="AnswerHistory_NoEntries" xml:space="preserve"><value>No answers were recorded for this question.</value></data>
+  <data name="AnswerHistory_Rejected" xml:space="preserve"><value>The answer-history change could not be applied.</value></data>
+  <data name="AnswerHistory_PlayerAlreadyRecorded" xml:space="preserve"><value>This player already has an answer recorded for the selected question. Edit the existing entry instead.</value></data>
+  <data name="AnswerHistory_QuestionNotPlayed" xml:space="preserve"><value>An answer can only be added after the question has been played.</value></data>
+  <data name="AnswerHistory_InvalidValue" xml:space="preserve"><value>The reward or penalty value cannot be negative.</value></data>
+  <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve"><value>Every player already has an entry for this question.</value></data>
+  <data name="AnswerHistory_Delete" xml:space="preserve"><value>Delete entry</value></data>
+  <data name="AnswerHistory_DeleteTitle" xml:space="preserve"><value>Delete answer entry</value></data>
+  <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Delete this answer entry and reverse its score change?</value></data>
+  <data name="GameBoard_QuestionPreview" xml:space="preserve"><value>Closed question preview</value></data>
+  <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve"><value>Preview closed question for {0} points</value></data>
+  <data name="GameBoard_ShowQuestion" xml:space="preserve"><value>Show question</value></data>
+  <data name="GameBoard_ShowAnswer" xml:space="preserve"><value>Show answer</value></data>
 </root>

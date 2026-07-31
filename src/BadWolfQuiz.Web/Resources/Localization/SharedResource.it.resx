@@ -913,4 +913,29 @@
   <data name="AnswerKey_Eyebrow" xml:space="preserve"><value>Schermata privata del presentatore</value></data>
   <data name="AnswerKey_Open" xml:space="preserve"><value>Apri la risposta corretta</value></data>
   <data name="AnswerKey_Waiting" xml:space="preserve"><value>In attesa di una domanda.</value></data>
+  <data name="AnswerHistory_Open" xml:space="preserve"><value>Modifica cronologia</value></data>
+  <data name="AnswerHistory_Eyebrow" xml:space="preserve"><value>STRUMENTO DEL PRESENTATORE</value></data>
+  <data name="AnswerHistory_Title" xml:space="preserve"><value>Cronologia delle risposte</value></data>
+  <data name="AnswerHistory_Description" xml:space="preserve"><value>Correggi risposte e punteggi registrati. Le modifiche aggiornano subito la classifica e la scelta del primo giocatore del turno successivo.</value></data>
+  <data name="AnswerHistory_BackToGame" xml:space="preserve"><value>Torna alla partita</value></data>
+  <data name="AnswerHistory_AddEntry" xml:space="preserve"><value>Aggiungi una risposta mancante</value></data>
+  <data name="AnswerHistory_Question" xml:space="preserve"><value>Domanda</value></data>
+  <data name="AnswerHistory_Player" xml:space="preserve"><value>Giocatore</value></data>
+  <data name="AnswerHistory_Value" xml:space="preserve"><value>Valore del premio o della penalità</value></data>
+  <data name="AnswerHistory_Correct" xml:space="preserve"><value>Risposta corretta</value></data>
+  <data name="AnswerHistory_Add" xml:space="preserve"><value>Aggiungi voce</value></data>
+  <data name="AnswerHistory_Save" xml:space="preserve"><value>Salva modifiche</value></data>
+  <data name="AnswerHistory_NoEntries" xml:space="preserve"><value>Nessuna risposta registrata per questa domanda.</value></data>
+  <data name="AnswerHistory_Rejected" xml:space="preserve"><value>Impossibile applicare la modifica alla cronologia.</value></data>
+  <data name="AnswerHistory_PlayerAlreadyRecorded" xml:space="preserve"><value>Questo giocatore ha già una risposta registrata per la domanda selezionata. Modifica la voce esistente.</value></data>
+  <data name="AnswerHistory_QuestionNotPlayed" xml:space="preserve"><value>È possibile aggiungere una risposta solo dopo che la domanda è stata giocata.</value></data>
+  <data name="AnswerHistory_InvalidValue" xml:space="preserve"><value>Il valore del premio o della penalità non può essere negativo.</value></data>
+  <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve"><value>Tutti i giocatori hanno già una voce per questa domanda.</value></data>
+  <data name="AnswerHistory_Delete" xml:space="preserve"><value>Elimina voce</value></data>
+  <data name="AnswerHistory_DeleteTitle" xml:space="preserve"><value>Elimina risposta</value></data>
+  <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Eliminare questa risposta e annullare la relativa modifica del punteggio?</value></data>
+  <data name="GameBoard_QuestionPreview" xml:space="preserve"><value>Anteprima domanda chiusa</value></data>
+  <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve"><value>Visualizza la domanda chiusa da {0} punti</value></data>
+  <data name="GameBoard_ShowQuestion" xml:space="preserve"><value>Mostra domanda</value></data>
+  <data name="GameBoard_ShowAnswer" xml:space="preserve"><value>Mostra risposta</value></data>
 </root>

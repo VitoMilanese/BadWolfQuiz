@@ -1,0 +1,242 @@
+@page "{id:guid}"
+@model BadWolfQuiz.Web.Pages.Admin.Games.AnswerHistoryModel
+@{
+    ViewData["Title"] = Localizer["AnswerHistory_Title"];
+}
+
+<section class="answer-history-page">
+    <header class="page-heading">
+        <div>
+            <p class="eyebrow">@Localizer["AnswerHistory_Eyebrow"]</p>
+            <h1>@Localizer["AnswerHistory_Title"]</h1>
+            <p>@Localizer["AnswerHistory_Description"]</p>
+        </div>
+        <a class="button button-secondary"
+           asp-page="/Admin/Games/Lobby"
+           asp-route-id="@Model.Game.Session.Id.Value">
+            @Localizer["AnswerHistory_BackToGame"]
+        </a>
+    </header>
+
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="message message-error">@errorMessage</div>
+    }
+
+    @if (Model.Questions.Count > 0)
+    {
+        <details class="content-panel answer-history-add">
+            <summary>@Localizer["AnswerHistory_AddEntry"]</summary>
+            <form class="answer-history-form answer-history-add-form"
+                  method="post"
+                  asp-page-handler="Add"
+                  data-no-eligible-players="@Localizer["AnswerHistory_NoEligiblePlayers"]">
+            <label>
+                <span>@Localizer["AnswerHistory_Question"]</span>
+                <select name="sourceQuestionId" required>
+                    @foreach (var question in Model.Questions)
+                    {
+                        <option value="@question.SourceQuestionId"
+                                data-attempted-player-ids="@string.Join(',', question.AnswerAttempts.Select(attempt => attempt.PlayerId.Value))">
+                            @question.RoundTitle — @question.CategoryTitle — @question.Points
+                        </option>
+                    }
+                </select>
+            </label>
+            <label>
+                <span>@Localizer["AnswerHistory_Player"]</span>
+                <select name="playerId" required>
+                    @foreach (var player in Model.Game.Session.Players)
+                    {
+                        <option value="@player.Id.Value">@player.Name</option>
+                    }
+                </select>
+            </label>
+            <label>
+                <span>@Localizer["AnswerHistory_Value"]</span>
+                <input name="value" type="number" min="0" value="0" required />
+            </label>
+            <label class="answer-history-correct">
+                <input name="isCorrect" type="checkbox" value="true" />
+                <span>@Localizer["AnswerHistory_Correct"]</span>
+            </label>
+            <button class="button button-primary" type="submit" data-add-answer-history>
+                @Localizer["AnswerHistory_Add"]
+            </button>
+            <p class="answer-history-add-warning" data-add-answer-history-warning hidden></p>
+            </form>
+        </details>
+    }
+
+    <div class="answer-history-list">
+        @foreach (var question in Model.Questions)
+        {
+            <section class="content-panel answer-history-question">
+                <header>
+                    <h2>@question.RoundTitle — @question.CategoryTitle — @question.Points</h2>
+                </header>
+
+                @if (question.AnswerAttempts.Count == 0)
+                {
+                    <p>@Localizer["AnswerHistory_NoEntries"]</p>
+                }
+                else
+                {
+                    @foreach (var attempt in question.AnswerAttempts)
+                    {
+                        <form class="answer-history-form answer-history-entry-form"
+                              method="post"
+                              asp-page-handler="Update">
+                            <input name="sourceQuestionId"
+                                   type="hidden"
+                                   value="@question.SourceQuestionId" />
+                            <input name="attemptId"
+                                   type="hidden"
+                                   value="@attempt.Id" />
+                            <label>
+                                <span>@Localizer["AnswerHistory_Player"]</span>
+                                <select name="playerId" required>
+                                    @foreach (var player in Model.Game.Session.Players)
+                                    {
+                                        <option value="@player.Id.Value"
+                                                selected="@(player.Id == attempt.PlayerId)">
+                                            @player.Name
+                                        </option>
+                                    }
+                                </select>
+                            </label>
+                            <label>
+                                <span>@Localizer["AnswerHistory_Value"]</span>
+                                <input name="value"
+                                       type="number"
+                                       min="0"
+                                       value="@Math.Abs(attempt.ScoreDelta)"
+                                       required />
+                            </label>
+                            <label class="answer-history-correct">
+                                <input name="isCorrect"
+                                       type="checkbox"
+                                       value="true"
+                                       checked="@(attempt.IsCorrect)" />
+                                <span>@Localizer["AnswerHistory_Correct"]</span>
+                            </label>
+                            <span class="answer-history-delta @(attempt.ScoreDelta < 0 ? "score-negative" : null)">
+                                @(attempt.ScoreDelta > 0 ? "+" : null)@attempt.ScoreDelta
+                            </span>
+                            <button class="button button-secondary" type="submit">
+                                @Localizer["AnswerHistory_Save"]
+                            </button>
+                            <button class="button button-danger"
+                                    type="button"
+                                    data-delete-answer-history
+                                    data-source-question-id="@question.SourceQuestionId"
+                                    data-attempt-id="@attempt.Id"
+                                    data-player-name="@Model.Game.Session.Players.Single(player => player.Id == attempt.PlayerId).Name"
+                                    data-question-label="@question.RoundTitle — @question.CategoryTitle — @question.Points">
+                                @Localizer["AnswerHistory_Delete"]
+                            </button>
+                        </form>
+                    }
+                }
+            </section>
+        }
+    </div>
+</section>
+
+<dialog id="delete-answer-history-dialog" class="app-dialog">
+    <form method="post"
+          asp-page-handler="Delete"
+          class="dialog-card dialog-card-danger">
+        <input id="delete-answer-history-question-id"
+               name="sourceQuestionId"
+               type="hidden" />
+        <input id="delete-answer-history-attempt-id"
+               name="attemptId"
+               type="hidden" />
+
+        <div class="dialog-heading">
+            <h2>@Localizer["AnswerHistory_DeleteTitle"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-answer-history-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <p id="delete-answer-history-target" class="dialog-target"></p>
+        <p class="dialog-warning">@Localizer["AnswerHistory_DeleteConfirmation"]</p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-answer-history-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-danger" type="submit">
+                @Localizer["AnswerHistory_Delete"]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+@section Scripts {
+    <script>
+        (() => {
+            const form = document.querySelector(".answer-history-add-form");
+
+            if (!form) {
+                return;
+            }
+
+            const question = form.querySelector('[name="sourceQuestionId"]');
+            const player = form.querySelector('[name="playerId"]');
+            const submit = form.querySelector("[data-add-answer-history]");
+            const warning = form.querySelector("[data-add-answer-history-warning]");
+
+            const updateAvailablePlayers = () => {
+                const attemptedIds = new Set(
+                    question.selectedOptions[0]?.dataset.attemptedPlayerIds
+                        ?.split(",")
+                        .filter(Boolean) ?? []);
+                let firstAvailable = null;
+
+                for (const option of player.options) {
+                    option.disabled = attemptedIds.has(option.value);
+                    firstAvailable ??= option.disabled ? null : option;
+                }
+
+                if (player.selectedOptions[0]?.disabled && firstAvailable) {
+                    player.value = firstAvailable.value;
+                }
+
+                const hasAvailablePlayer = firstAvailable !== null;
+                submit.disabled = !hasAvailablePlayer;
+                warning.hidden = hasAvailablePlayer;
+                warning.textContent = hasAvailablePlayer
+                    ? ""
+                    : form.dataset.noEligiblePlayers;
+            };
+
+            question.addEventListener("change", updateAvailablePlayers);
+            updateAvailablePlayers();
+
+            const deleteDialog = document.getElementById("delete-answer-history-dialog");
+            const deleteQuestionId = document.getElementById("delete-answer-history-question-id");
+            const deleteAttemptId = document.getElementById("delete-answer-history-attempt-id");
+            const deleteTarget = document.getElementById("delete-answer-history-target");
+
+            for (const button of document.querySelectorAll("[data-delete-answer-history]")) {
+                button.addEventListener("click", () => {
+                    deleteQuestionId.value = button.dataset.sourceQuestionId;
+                    deleteAttemptId.value = button.dataset.attemptId;
+                    deleteTarget.textContent =
+                        `${button.dataset.playerName} — ${button.dataset.questionLabel}`;
+                    deleteDialog.showModal();
+                });
+            }
+
+            for (const button of document.querySelectorAll("[data-close-answer-history-dialog]")) {
+                button.addEventListener("click", () => deleteDialog.close());
+            }
+        })();
+    </script>
+}

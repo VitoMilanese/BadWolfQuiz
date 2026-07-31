@@ -6,6 +6,28 @@ The host must be able to correct the recorded answer history while a game is run
 
 Answer history is authoritative gameplay data. Leaderboards, final standings, and weakest-player selection must be derived from the corrected records.
 
+## Current implementation
+
+The host can open a separate answer-history screen from the live game. The
+implemented Engine commands support regular and wager-question attempts and
+allow the host to:
+
+- reassign an existing entry to another player;
+- change its correct/incorrect result;
+- replace its reward or penalty value;
+- add a missing entry to a question that has already been played;
+- delete an erroneous entry after explicit host confirmation.
+
+Each change reverses the previous score contribution and applies the corrected
+one atomically. Player score updates are broadcast to connected clients.
+Standings and weakest-player selection read the corrected runtime attempts.
+When a previous round is corrected, its score difference is also applied to the
+current round's starting-score snapshot so it is not misreported as current
+round score gain.
+
+Final-question history, persistent audit storage, filters, score previews, and
+confirmation dialogs for non-destructive edits remain future extensions.
+
 ## Host capabilities
 
 The host can open the answer history and:
@@ -14,9 +36,8 @@ The host can open the answer history and:
 - change the awarded or deducted score value;
 - change whether the answer is marked correct or incorrect;
 - add a missing answer record for a player and question;
+- delete an erroneous answer record;
 - review the resulting score changes before confirming them.
-
-A future version may also support deleting an erroneous record. Until deletion semantics are specified, an invalid record can be corrected by changing its attribution, result, or score value.
 
 ## Record model
 
@@ -37,7 +58,7 @@ The signed score delta is stored explicitly because a corrected reward may diffe
 
 Editing a historical entry is an Engine command, not a direct database or UI mutation. The Engine validates that the referenced game, question, and player belong together.
 
-Changing an entry must reverse the previous contribution and apply the replacement contribution atomically. Adding an entry applies its contribution exactly once. Repeating the same command must not duplicate score changes.
+Changing an entry must reverse the previous contribution and apply the replacement contribution atomically. Adding an entry applies its contribution exactly once. Deleting an entry reverses its score contribution before removing it. Repeating the same command must not duplicate score changes.
 
 Manual corrections are allowed even when the player did not originally attempt the question. They do not reopen a resolved question or change the live question flow unless a separate command explicitly requests that behavior.
 

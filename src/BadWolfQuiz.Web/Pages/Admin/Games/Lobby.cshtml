@@ -186,13 +186,6 @@
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
              data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
              data-running-label="@Localizer["GameLobby_StatusRunning"]">
-        <a class="button button-secondary host-answer-key-launch"
-           asp-page="/Admin/Games/AnswerKey"
-           asp-route-id="@Model.Game.Session.Id.Value"
-           target="_blank"
-           rel="noopener">
-            @Localizer["AnswerKey_Open"]
-        </a>
         @if (TempData["ErrorMessage"] is string errorMessage)
         {
             <div class="message message-error">@errorMessage</div>
@@ -200,13 +193,19 @@
 
         @if (Model.CurrentQuestion is null && !Model.IsRoundSummaryVisible)
         {
-        <div class="page-heading">
+        <div class="page-heading host-game-heading">
             <div>
                 <p class="eyebrow">@Localizer["GameBoard_Eyebrow"]</p>
                 <h2>@Model.Game.Session.CurrentRound.Title</h2>
             </div>
 
-            <div class="form-actions">
+            <div class="form-actions host-game-actions">
+                <a class="button button-secondary"
+                   asp-page="/Admin/Games/AnswerHistory"
+                   asp-route-id="@Model.Game.Session.Id.Value">
+                    @Localizer["AnswerHistory_Open"]
+                </a>
+
                 <form method="post" asp-page-handler="RandomActivePlayer">
                     <button class="button button-secondary"
                             type="submit"
@@ -215,6 +214,14 @@
                     </button>
                 </form>
 
+                <a class="button button-secondary"
+                   asp-page="/Admin/Games/AnswerKey"
+                   asp-route-id="@Model.Game.Session.Id.Value"
+                   target="_blank"
+                   rel="noopener">
+                    @Localizer["AnswerKey_Open"]
+                </a>
+
                 <button class="button button-secondary"
                         type="button"
                         data-open-join-code>
@@ -222,6 +229,55 @@
                 </button>
             </div>
         </div>
+        }
+
+        @if (Model.PreviewQuestion is { } previewQuestion)
+        {
+            <section class="content-panel question-review-preview">
+                <header class="question-review-heading">
+                    <div>
+                        <p class="eyebrow">@Localizer["GameBoard_QuestionPreview"]</p>
+                        <h2>@previewQuestion.CategoryTitle — @previewQuestion.Points</h2>
+                    </div>
+                    <div class="form-actions question-review-actions">
+                        @if (Model.IsPreviewingAnswer)
+                        {
+                            <a class="button button-secondary"
+                               asp-page="/Admin/Games/Lobby"
+                               asp-route-id="@Model.Game.Session.Id.Value"
+                               asp-route-previewQuestionId="@previewQuestion.SourceQuestionId">
+                                @Localizer["GameBoard_ShowQuestion"]
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="button button-primary"
+                               asp-page="/Admin/Games/Lobby"
+                               asp-route-id="@Model.Game.Session.Id.Value"
+                               asp-route-previewQuestionId="@previewQuestion.SourceQuestionId"
+                               asp-route-previewAnswer="true">
+                                @Localizer["GameBoard_ShowAnswer"]
+                            </a>
+                        }
+                        <a class="button button-secondary"
+                           asp-page="/Admin/Games/Lobby"
+                           asp-route-id="@Model.Game.Session.Id.Value">
+                            @Localizer["GameBoard_ReturnToBoard"]
+                        </a>
+                    </div>
+                </header>
+
+                <div class="question-review-content">
+                    <partial name="_GameContentPreview"
+                             model="@(new GameContentPreviewModel(
+                                 Model.Game.Session.Id.Value,
+                                 previewQuestion.SourceQuestionId,
+                                 Model.IsPreviewingAnswer,
+                                 Model.IsPreviewingAnswer
+                                     ? previewQuestion.AnswerBlocks
+                                     : previewQuestion.QuestionBlocks))" />
+                </div>
+            </section>
         }
 
         @if (Model.CurrentQuestion is not null)
@@ -606,7 +662,9 @@
             </section>
         }
 
-        @if (Model.CurrentQuestion is null && !Model.IsRoundSummaryVisible)
+        @if (Model.CurrentQuestion is null &&
+            Model.PreviewQuestion is null &&
+            !Model.IsRoundSummaryVisible)
         {
             <div class="host-board-grid"
                  style="--board-columns: @Model.BoardCategories.Count">
@@ -617,16 +675,28 @@
 
                     @foreach (var question in category.Questions)
                     {
-                        <form method="post" asp-page-handler="SelectQuestion">
-                            <input name="sourceQuestionId"
-                                   type="hidden"
-                                   value="@question.SourceQuestionId" />
-                            <button class="host-board-question status-@question.Status.ToString().ToLowerInvariant()"
-                                    type="submit"
-                                    disabled="@(question.Status != BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Available || Model.CurrentQuestion is not null ? "disabled" : null)">
+                        @if (question.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Available)
+                        {
+                            <form method="post" asp-page-handler="SelectQuestion">
+                                <input name="sourceQuestionId"
+                                       type="hidden"
+                                       value="@question.SourceQuestionId" />
+                                <button class="host-board-question status-available"
+                                        type="submit">
+                                    @question.Points
+                                </button>
+                            </form>
+                        }
+                        else if (question.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Resolved)
+                        {
+                            <a class="host-board-question status-resolved"
+                               asp-page="/Admin/Games/Lobby"
+                               asp-route-id="@Model.Game.Session.Id.Value"
+                               asp-route-previewQuestionId="@question.SourceQuestionId"
+                               aria-label="@Localizer["GameBoard_PreviewResolvedQuestion", question.Points]">
                                 @question.Points
-                            </button>
-                        </form>
+                            </a>
+                        }
                     }
                 </section>
             }
@@ -713,13 +783,20 @@
              data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
              data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
              data-approve-label="@Localizer["GameLobby_ApproveRejoin"]">
-        <a class="button button-secondary host-answer-key-launch"
-           asp-page="/Admin/Games/AnswerKey"
-           asp-route-id="@Model.Game.Session.Id.Value"
-           target="_blank"
-           rel="noopener">
-            @Localizer["AnswerKey_Open"]
-        </a>
+        <div class="form-actions host-game-actions final-game-actions">
+            <a class="button button-secondary"
+               asp-page="/Admin/Games/AnswerHistory"
+               asp-route-id="@Model.Game.Session.Id.Value">
+                @Localizer["AnswerHistory_Open"]
+            </a>
+            <a class="button button-secondary"
+               asp-page="/Admin/Games/AnswerKey"
+               asp-route-id="@Model.Game.Session.Id.Value"
+               target="_blank"
+               rel="noopener">
+                @Localizer["AnswerKey_Open"]
+            </a>
+        </div>
         @if (TempData["ErrorMessage"] is string errorMessage)
         {
             <div class="message message-error">@errorMessage</div>

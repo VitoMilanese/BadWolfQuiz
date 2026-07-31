@@ -342,6 +342,79 @@ public sealed class GameSession
         return attempt;
     }
 
+    public QuestionAnswerAttempt AddQuestionAnswerHistoryEntry(
+        int sourceQuestionId,
+        GamePlayerId playerId,
+        bool isCorrect,
+        int value)
+    {
+        EnsureHistoryEditingAllowed();
+
+        var question = FindQuestion(sourceQuestionId);
+        EnsureQuestionHasBeenPlayed(question);
+        var player = FindPlayer(playerId);
+        var attempt = question.AddHistoricalAttempt(
+            player.Id,
+            isCorrect,
+            value,
+            _timeProvider.GetUtcNow());
+
+        player.ApplyScore(attempt.ScoreDelta);
+        ApplyHistoricalScoreCorrection(question, player.Id, attempt.ScoreDelta);
+        return attempt;
+    }
+
+    public QuestionAnswerAttempt UpdateQuestionAnswerHistoryEntry(
+        int sourceQuestionId,
+        Guid attemptId,
+        GamePlayerId playerId,
+        bool isCorrect,
+        int value)
+    {
+        EnsureHistoryEditingAllowed();
+
+        var question = FindQuestion(sourceQuestionId);
+        EnsureQuestionHasBeenPlayed(question);
+        var newPlayer = FindPlayer(playerId);
+        var (previous, updated) = question.UpdateHistoricalAttempt(
+            attemptId,
+            newPlayer.Id,
+            isCorrect,
+            value);
+        var previousPlayer = FindPlayer(previous.PlayerId);
+
+        previousPlayer.ApplyScore(-previous.ScoreDelta);
+        newPlayer.ApplyScore(updated.ScoreDelta);
+        ApplyHistoricalScoreCorrection(
+            question,
+            previousPlayer.Id,
+            -previous.ScoreDelta);
+        ApplyHistoricalScoreCorrection(
+            question,
+            newPlayer.Id,
+            updated.ScoreDelta);
+        return updated;
+    }
+
+    public QuestionAnswerAttempt RemoveQuestionAnswerHistoryEntry(
+        int sourceQuestionId,
+        Guid attemptId)
+    {
+        EnsureHistoryEditingAllowed();
+
+        var question = FindQuestion(sourceQuestionId);
+        EnsureQuestionHasBeenPlayed(question);
+        var removed = question.RemoveHistoricalAttempt(attemptId);
+        var player = FindPlayer(removed.PlayerId);
+
+        player.ApplyScore(-removed.ScoreDelta);
+        ApplyHistoricalScoreCorrection(
+            question,
+            player.Id,
+            -removed.ScoreDelta);
+        return removed;
+    }
+
     public RuntimeQuestion ResolveQuestionWithoutCorrectAnswer(
         int sourceQuestionId)
     {
@@ -621,6 +694,38 @@ public sealed class GameSession
         foreach (var player in _players)
         {
             _currentRoundStartScores[player.Id] = player.Score;
+        }
+    }
+
+    private void ApplyHistoricalScoreCorrection(
+        RuntimeQuestion question,
+        GamePlayerId playerId,
+        int scoreDelta)
+    {
+        if (question.SourceRoundId == CurrentRound.SourceRoundId)
+        {
+            return;
+        }
+
+        _currentRoundStartScores[playerId] =
+            checked(_currentRoundStartScores.GetValueOrDefault(playerId) + scoreDelta);
+    }
+
+    private void EnsureHistoryEditingAllowed()
+    {
+        if (Status == GameSessionStatus.Lobby)
+        {
+            throw new GameRuleViolationException(
+                "Answer history cannot be edited before the game starts.");
+        }
+    }
+
+    private static void EnsureQuestionHasBeenPlayed(RuntimeQuestion question)
+    {
+        if (question.Status == RuntimeQuestionStatus.Available)
+        {
+            throw new GameRuleViolationException(
+                "Answer history cannot be added to a question that has not been played.");
         }
     }
 
