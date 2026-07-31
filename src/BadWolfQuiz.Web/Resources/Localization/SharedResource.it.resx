@@ -1018,4 +1018,8 @@
   <data name="AvatarPicker_Male" xml:space="preserve"><value>Maschile</value></data>
   <data name="AvatarPicker_Choose" xml:space="preserve"><value>Scegli avatar</value></data>
   <data name="AvatarPicker_ChooseOrChange" xml:space="preserve"><value>Scegli o cambia avatar</value></data>
+  <data name="PlayerWebcam_Enable" xml:space="preserve"><value>Attiva webcam</value></data>
+  <data name="PlayerWebcam_Disable" xml:space="preserve"><value>Disattiva webcam</value></data>
+  <data name="PlayerWebcam_RequiresHttps" xml:space="preserve"><value>Apri il sito tramite una connessione HTTPS sicura per accedere alla fotocamera.</value></data>
+  <data name="PlayerWebcam_AccessFailed" xml:space="preserve"><value>Impossibile accedere alla fotocamera. Controlla l'autorizzazione del browser.</value></data>
 </root>

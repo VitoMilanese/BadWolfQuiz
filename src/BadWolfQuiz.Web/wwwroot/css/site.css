@@ -1667,6 +1667,17 @@ textarea {
     border-radius: 10px;
 }
 
+.player-webcam-preview,
+video.player-card-avatar,
+video.host-card-media {
+    object-fit: cover;
+}
+
+.player-webcam-preview,
+video.host-card-media {
+    transform: scaleX(-1);
+}
+
 .host-avatar-preview[hidden],
 .player-avatar-current[hidden] {
     display: none;

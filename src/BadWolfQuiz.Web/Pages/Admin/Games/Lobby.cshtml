@@ -825,7 +825,18 @@
                     }
                     else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
                     {
-                        <video class="host-card-media" data-host-webcam autoplay muted playsinline></video>
+                        @if (!string.IsNullOrWhiteSpace(Model.Game.Session.Settings.HostAvatarId))
+                        {
+                            <img class="host-card-media" data-host-webcam-fallback src="/avatars/@Model.Game.Session.Settings.HostAvatarId" alt="" />
+                        }
+                        else if (Model.Game.Session.Settings.HostImageData is not null)
+                        {
+                            <img class="host-card-media"
+                                 data-host-webcam-fallback
+                                 src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
+                                 alt="@Model.Game.Session.Settings.HostName" />
+                        }
+                        <video class="host-card-media" data-host-webcam autoplay muted playsinline hidden></video>
                     }
                 </li>
             }
@@ -1130,7 +1141,18 @@
                     }
                     else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
                     {
-                        <video class="host-card-media" data-host-webcam autoplay muted playsinline></video>
+                        @if (!string.IsNullOrWhiteSpace(Model.Game.Session.Settings.HostAvatarId))
+                        {
+                            <img class="host-card-media" data-host-webcam-fallback src="/avatars/@Model.Game.Session.Settings.HostAvatarId" alt="" />
+                        }
+                        else if (Model.Game.Session.Settings.HostImageData is not null)
+                        {
+                            <img class="host-card-media"
+                                 data-host-webcam-fallback
+                                 src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
+                                 alt="@Model.Game.Session.Settings.HostName" />
+                        }
+                        <video class="host-card-media" data-host-webcam autoplay muted playsinline hidden></video>
                     }
                 </li>
             }
@@ -1194,15 +1216,24 @@
 </dialog>
 
 @section Scripts {
+    <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
     <script>
         (() => {
-            const video = document.querySelector("[data-host-webcam]");
-            if (!video || !navigator.mediaDevices?.getUserMedia) {
+            const videos = document.querySelectorAll("[data-host-webcam]");
+            if (videos.length === 0 || !navigator.mediaDevices?.getUserMedia) {
                 return;
             }
 
             navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-                .then(stream => video.srcObject = stream)
+                .then(stream => videos.forEach(video => {
+                    video.srcObject = stream;
+                    video.hidden = false;
+                    const fallback = video.closest("[data-host-card]")
+                        ?.querySelector("[data-host-webcam-fallback]");
+                    if (fallback) {
+                        fallback.hidden = true;
+                    }
+                }))
                 .catch(console.error);
         })();
 
@@ -1479,6 +1510,11 @@
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
                 .build();
+            const webcam = window.BadWolfWebcam.createHost({
+                connection,
+                gameCode,
+                playerList
+            });
 
             let hasReceivedInitialBuzzerState = false;
             let buzzerState = null;
@@ -1602,7 +1638,24 @@
                         const name = document.createElement("strong");
                         name.textContent = player.name;
 
-                        if (player.avatarId) {
+                        if (player.webcamEnabled) {
+                            if (player.avatarId) {
+                                const fallback = document.createElement("img");
+                                fallback.className = "player-card-avatar";
+                                fallback.dataset.playerWebcamFallback = "";
+                                fallback.src = `/avatars/${player.avatarId}`;
+                                fallback.alt = "";
+                                item.append(fallback);
+                            }
+                            const video = document.createElement("video");
+                            video.className = "player-card-avatar";
+                            video.dataset.playerWebcam = "";
+                            video.autoplay = true;
+                            video.muted = true;
+                            video.playsInline = true;
+                            video.hidden = true;
+                            item.append(video);
+                        } else if (player.avatarId) {
                             const avatar = document.createElement("img");
                             avatar.className = "player-card-avatar";
                             avatar.src = `/avatars/${player.avatarId}`;
@@ -1647,6 +1700,8 @@
                         playerList.append(item);
                     }
 
+                    webcam.refresh(update.players);
+
                     return;
                 }
 
@@ -1666,7 +1721,28 @@
                     const name = document.createElement("strong");
                     name.textContent = player.name;
 
-                    if (player.avatarId) {
+                    if (player.webcamEnabled) {
+                        if (player.avatarId) {
+                            const fallback = document.createElement("img");
+                            fallback.className = isRunning
+                                ? "player-card-avatar"
+                                : "player-list-avatar";
+                            fallback.dataset.playerWebcamFallback = "";
+                            fallback.src = `/avatars/${player.avatarId}`;
+                            fallback.alt = "";
+                            item.append(fallback);
+                        }
+                        const video = document.createElement("video");
+                        video.className = isRunning
+                            ? "player-card-avatar"
+                            : "player-list-avatar";
+                        video.dataset.playerWebcam = "";
+                        video.autoplay = true;
+                        video.muted = true;
+                        video.playsInline = true;
+                        video.hidden = true;
+                        item.append(video);
+                    } else if (player.avatarId) {
                         const avatar = document.createElement("img");
                         avatar.className = isRunning
                             ? "player-card-avatar"
@@ -1747,6 +1823,7 @@
                 }
 
                 applyBuzzerPlayerStates();
+                webcam.refresh(update.players);
             });
 
             connection.on("GameStatusChanged", update => {
@@ -1808,12 +1885,14 @@
 
             connection.onreconnected(async () => {
                 await joinSession();
+                await webcam.register();
                 startPlayerPolling();
                 startTimerPolling();
             });
             connection.start()
                 .then(async () => {
                     await joinSession();
+                    await webcam.register();
                     startPlayerPolling();
                     startTimerPolling();
                 })

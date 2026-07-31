@@ -7,6 +7,7 @@ public sealed record PlayerLobbyEntry(
     string Name,
     int Score,
     string? AvatarId,
+    bool IsWebcamEnabled,
     PlayerPresenceStatus Presence);
 
 public sealed record PlayerConnectionResult(
