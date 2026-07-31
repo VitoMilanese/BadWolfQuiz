@@ -1464,14 +1464,15 @@ textarea {
 }
 
 .scoreboard-player {
-    min-width: 150px;
-    max-width: 240px;
-    flex: 1 1 170px;
+    position: relative;
+    min-width: 180px;
+    max-width: 270px;
+    flex: 1 1 200px;
     display: grid;
     align-content: center;
     justify-items: center;
     gap: 8px;
-    padding: 14px 16px;
+    padding: 14px 50px 14px 16px;
     border: 2px solid #31314a;
     border-radius: 10px 10px 0 0;
     background: linear-gradient(145deg, #171735, #0d0d20);
@@ -1484,6 +1485,19 @@ textarea {
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 1.05rem;
+}
+
+.scoreboard-player.host-card {
+    padding-right: 16px;
+}
+
+.host-card-media {
+    width: 100%;
+    min-height: 78px;
+    max-height: 112px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #050507;
 }
 
 .scoreboard-details {
@@ -1736,6 +1750,36 @@ textarea {
     min-height: 32px;
     padding: 5px 9px;
     font-size: 0.72rem;
+}
+
+.player-card-actions {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transform: translateY(-50%);
+}
+
+.player-list li:has(.player-card-actions) {
+    position: relative;
+    min-height: 88px;
+    padding-right: 52px;
+}
+
+.player-management .player-action-button,
+.scoreboard-player .player-action-button {
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    flex: 0 0 32px;
+    padding: 0;
+    border-radius: 8px;
+    font-size: 1rem;
+    line-height: 1;
 }
 
 .wager-entry-panel {

@@ -243,6 +243,28 @@
     <p class="dialog-warning">@Localizer["Message_WaitingHost"]</p>
 </div>
 
+<dialog id="removed-from-game-dialog"
+        class="app-dialog"
+        aria-labelledby="removed-from-game-dialog-title">
+    <div class="dialog-card dialog-card-danger">
+        <div class="dialog-heading">
+            <h2 id="removed-from-game-dialog-title">
+                @Localizer["PlayerGame_RemovedFromGameTitle"]
+            </h2>
+        </div>
+
+        <p class="dialog-warning">@Localizer["PlayerGame_RemovedFromGame"]</p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-primary"
+                    type="button"
+                    data-close-removed-from-game-dialog>
+                @Localizer["Button_Close"]
+            </button>
+        </div>
+    </div>
+</dialog>
+
 @section Scripts {
     <script>
         (() => {
@@ -265,6 +287,15 @@
             }
 
             const gameCode = lobby.dataset.gameCode;
+            const removedFromGameDialog =
+                document.getElementById("removed-from-game-dialog");
+            const removedFromGameRedirect = () => {
+                window.location.assign(`/Join?code=${encodeURIComponent(gameCode)}`);
+            };
+
+            document.querySelector("[data-close-removed-from-game-dialog]")
+                ?.addEventListener("click", () => removedFromGameDialog?.close());
+            removedFromGameDialog?.addEventListener("close", removedFromGameRedirect);
             const playerId = lobby.dataset.playerId;
             const storageKey = `badwolfquiz:${gameCode}:player:${playerId}`;
             const transitionStorageKey = `${storageKey}:transition`;
@@ -568,8 +599,12 @@
             });
 
             connection.on("RemovedFromGame", () => {
-                window.alert(lobby.dataset.removedFromGameLabel);
-                window.location.assign(`/Join?code=${encodeURIComponent(gameCode)}`);
+                if (removedFromGameDialog) {
+                    removedFromGameDialog.showModal();
+                    return;
+                }
+
+                removedFromGameRedirect();
             });
 
             connection.onreconnected(joinPlayerSession);

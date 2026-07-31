@@ -108,6 +108,25 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void Start_rejects_incomplete_visible_host_card()
+    {
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(10),
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Automatic,
+            displayHostCard: true,
+            hostName: "Host");
+        var session = GameSession.Create(
+            CreateSession().Quiz,
+            settings,
+            new ManualTimeProvider(InitialTime));
+        session.AddPlayer("Rose");
+
+        Assert.Throws<GameRuleViolationException>(() => session.Start());
+    }
+
+    [Fact]
     public void UpdateSettings_rejects_changes_after_game_starts()
     {
         var session = CreateSession();

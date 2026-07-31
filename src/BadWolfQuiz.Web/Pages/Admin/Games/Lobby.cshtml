@@ -66,6 +66,7 @@
                 <summary>@Localizer["GameSettings_LobbyTitle"]</summary>
                 <form id="start-game-form"
                       method="post"
+                      enctype="multipart/form-data"
                       asp-page-handler="UpdateSettings"
                       class="stack-form">
                     <p class="settings-description">
@@ -106,6 +107,26 @@
                             <input asp-for="SettingsInput.AllowNegativeScoreFinalPlayers"
                                    type="checkbox" />
                             <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
+                        </label>
+                        <label class="settings-checkbox">
+                            <input asp-for="SettingsInput.DisplayHostCard" type="checkbox" />
+                            <span>@Localizer["HostCard_Display"]</span>
+                        </label>
+                        <label>
+                            <span>@Localizer["HostCard_Name"]</span>
+                            <input asp-for="SettingsInput.HostName" maxlength="80" />
+                        </label>
+                        <label>
+                            <span>@Localizer["HostCard_Source"]</span>
+                            <select asp-for="SettingsInput.HostVisualSource">
+                                <option value="0">@Localizer["HostCard_SourceNone"]</option>
+                                <option value="1">@Localizer["HostCard_SourceImage"]</option>
+                                <option value="2">@Localizer["HostCard_SourceWebcam"]</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>@Localizer["HostCard_Image"]</span>
+                            <input asp-for="HostImage" type="file" accept="image/*" />
                         </label>
                     </div>
                     <div class="form-actions">
@@ -158,20 +179,26 @@
                                     @Localizer["GameBoard_ActivePlayer"]
                                 </span>
                             }
-                            else
-                            {
-                                <button class="button button-secondary"
+                            <span class="player-card-actions">
+                                <button class="button button-danger icon-button player-action-button"
                                         type="button"
-                                        data-make-active-player="@player.Id.Value"
-                                        disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
-                                    @Localizer["GameBoard_MakeActivePlayer"]
+                                        data-remove-player="@player.Id.Value"
+                                        title="@Localizer["GameBoard_RemovePlayer"]"
+                                        aria-label="@Localizer["GameBoard_RemovePlayer"]">
+                                    <span aria-hidden="true">✕</span>
                                 </button>
-                            }
-                            <button class="button button-danger"
-                                    type="button"
-                                    data-remove-player="@player.Id.Value">
-                                @Localizer["GameBoard_RemovePlayer"]
-                            </button>
+                                @if (Model.Game.Session.ActivePlayerId != player.Id)
+                                {
+                                    <button class="button button-secondary icon-button player-action-button"
+                                            type="button"
+                                            data-make-active-player="@player.Id.Value"
+                                            title="@Localizer["GameBoard_MakeActivePlayer"]"
+                                            aria-label="@Localizer["GameBoard_MakeActivePlayer"]"
+                                            disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
+                                        <span aria-hidden="true">★</span>
+                                    </button>
+                                }
+                            </span>
                         </span>
                     </li>
                 }
@@ -733,6 +760,22 @@
         </form>
 
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
+            @if (Model.Game.Session.Settings.DisplayHostCard)
+            {
+                <li class="scoreboard-player host-card" data-host-card>
+                    <strong>@Model.Game.Session.Settings.HostName</strong>
+                    @if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Image)
+                    {
+                        <img class="host-card-media"
+                             src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
+                             alt="@Model.Game.Session.Settings.HostName" />
+                    }
+                    else
+                    {
+                        <video class="host-card-media" data-host-webcam autoplay muted playsinline></video>
+                    }
+                </li>
+            }
             @foreach (var player in Model.Players)
             {
                 var questionIsActive = Model.CurrentQuestion?.Status is
@@ -759,20 +802,26 @@
                             @Localizer["GameBoard_ActivePlayer"]
                         </span>
                     }
-                    else
-                    {
-                        <button class="button button-secondary"
+                    <span class="player-card-actions">
+                        <button class="button button-danger icon-button player-action-button scoreboard-remove-player"
                                 type="button"
-                                data-make-active-player="@player.Id.Value"
-                                disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
-                            @Localizer["GameBoard_MakeActivePlayer"]
+                                data-remove-player="@player.Id.Value"
+                                title="@Localizer["GameBoard_RemovePlayer"]"
+                                aria-label="@Localizer["GameBoard_RemovePlayer"]">
+                            <span aria-hidden="true">✕</span>
                         </button>
-                    }
-                    <button class="button button-danger scoreboard-remove-player"
-                            type="button"
-                            data-remove-player="@player.Id.Value">
-                        @Localizer["GameBoard_RemovePlayer"]
-                    </button>
+                        @if (Model.Game.Session.ActivePlayerId != player.Id)
+                        {
+                            <button class="button button-secondary icon-button player-action-button"
+                                    type="button"
+                                    data-make-active-player="@player.Id.Value"
+                                    title="@Localizer["GameBoard_MakeActivePlayer"]"
+                                    aria-label="@Localizer["GameBoard_MakeActivePlayer"]"
+                                    disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
+                                <span aria-hidden="true">★</span>
+                            </button>
+                        }
+                    </span>
                 </li>
             }
         </ul>
@@ -1003,6 +1052,22 @@
         </div>
 
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
+            @if (Model.Game.Session.Settings.DisplayHostCard)
+            {
+                <li class="scoreboard-player host-card" data-host-card>
+                    <strong>@Model.Game.Session.Settings.HostName</strong>
+                    @if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Image)
+                    {
+                        <img class="host-card-media"
+                             src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
+                             alt="@Model.Game.Session.Settings.HostName" />
+                    }
+                    else
+                    {
+                        <video class="host-card-media" data-host-webcam autoplay muted playsinline></video>
+                    }
+                </li>
+            }
             @foreach (var player in Model.Players)
             {
                 <li class="scoreboard-player" data-player-id="@player.Id.Value">
@@ -1028,8 +1093,48 @@
     <input id="remove-player-id" name="playerId" type="hidden" />
 </form>
 
+<dialog id="remove-player-dialog"
+        class="app-dialog"
+        aria-labelledby="remove-player-dialog-title">
+    <div class="dialog-card dialog-card-danger">
+        <div class="dialog-heading">
+            <h2 id="remove-player-dialog-title">@Localizer["GameBoard_RemovePlayer"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-remove-player-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <p id="remove-player-dialog-target" class="dialog-target"></p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-remove-player-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-danger"
+                    type="button"
+                    data-confirm-remove-player>
+                @Localizer["GameBoard_RemovePlayer"]
+            </button>
+        </div>
+    </div>
+</dialog>
+
 @section Scripts {
     <script>
+        (() => {
+            const video = document.querySelector("[data-host-webcam]");
+            if (!video || !navigator.mediaDevices?.getUserMedia) {
+                return;
+            }
+
+            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+                .then(stream => video.srcObject = stream)
+                .catch(console.error);
+        })();
+
         (() => {
             const dialog = document.getElementById("join-code-dialog");
             const openButton = document.querySelector("[data-open-join-code]");
@@ -1109,6 +1214,7 @@
             const lobby = document.querySelector("[data-game-code]");
             const playerCount = document.getElementById("player-count");
             const playerList = document.getElementById("player-list");
+            const hostCard = playerList?.querySelector("[data-host-card]");
 
             if (!lobby || !playerList || typeof signalR === "undefined") {
                 return;
@@ -1129,18 +1235,38 @@
             const activePlayerId = document.getElementById("active-player-id");
             const removePlayerForm = document.getElementById("remove-player-form");
             const removePlayerId = document.getElementById("remove-player-id");
+            const removePlayerDialog = document.getElementById("remove-player-dialog");
+            const removePlayerDialogTarget = document.getElementById("remove-player-dialog-target");
+            const confirmRemovePlayer = document.querySelector("[data-confirm-remove-player]");
 
             const removePlayer = (playerId, playerName) => {
                 if (!removePlayerForm ||
                     !removePlayerId ||
-                    !window.confirm(
-                        lobby.dataset.removePlayerConfirm.replace("{0}", playerName))) {
+                    !removePlayerDialog ||
+                    !removePlayerDialogTarget) {
                     return;
                 }
 
                 removePlayerId.value = playerId;
-                removePlayerForm.submit();
+                removePlayerDialogTarget.textContent =
+                    lobby.dataset.removePlayerConfirm.replace("{0}", playerName);
+                removePlayerDialog.showModal();
             };
+
+            confirmRemovePlayer?.addEventListener("click", () => {
+                removePlayerDialog?.close();
+                removePlayerForm?.submit();
+            });
+
+            for (const button of document.querySelectorAll("[data-close-remove-player-dialog]")) {
+                button.addEventListener("click", () => removePlayerDialog?.close());
+            }
+
+            removePlayerDialog?.addEventListener("click", event => {
+                if (event.target === removePlayerDialog) {
+                    removePlayerDialog.close();
+                }
+            });
 
             document.addEventListener("click", event => {
                 const removeButton = event.target.closest("[data-remove-player]");
@@ -1237,6 +1363,9 @@
 
                 if (lobby.classList.contains("final-question-host")) {
                     playerList.replaceChildren();
+                    if (hostCard) {
+                        playerList.append(hostCard);
+                    }
 
                     for (const player of update.players) {
                         const item = document.createElement("li");
@@ -1267,8 +1396,11 @@
                         if (player.presence === "rejoinpending") {
                             const approve = document.createElement("button");
                             approve.type = "button";
-                            approve.className = "button button-secondary";
-                            approve.textContent = lobby.dataset.approveLabel;
+                            approve.className =
+                                "button button-secondary icon-button player-action-button";
+                            approve.title = lobby.dataset.approveLabel;
+                            approve.setAttribute("aria-label", lobby.dataset.approveLabel);
+                            approve.textContent = "✓";
                             approve.addEventListener("click", () => {
                                 approvePlayerId.value = player.id;
                                 approveForm.submit();
@@ -1284,6 +1416,9 @@
                 }
 
                 playerList.replaceChildren();
+                if (hostCard) {
+                    playerList.append(hostCard);
+                }
                 const isRunning = lobby.dataset.gameStatus === "running";
 
                 for (const player of update.players) {
@@ -1301,6 +1436,20 @@
                         ? "scoreboard-details"
                         : "player-presence";
 
+                    const actions = document.createElement("span");
+                    actions.className = "player-card-actions";
+
+                    const remove = document.createElement("button");
+                    remove.type = "button";
+                    remove.className = isRunning
+                        ? "button button-danger icon-button player-action-button scoreboard-remove-player"
+                        : "button button-danger icon-button player-action-button";
+                    remove.dataset.removePlayer = player.id;
+                    remove.title = lobby.dataset.removePlayerLabel;
+                    remove.setAttribute("aria-label", lobby.dataset.removePlayerLabel);
+                    remove.textContent = "✕";
+                    actions.append(remove);
+
                     const score = document.createElement("span");
                     score.textContent = player.score.toString();
                     score.className = isRunning
@@ -1317,12 +1466,15 @@
                     } else {
                         const makeActive = document.createElement("button");
                         makeActive.type = "button";
-                        makeActive.className = "button button-secondary";
+                        makeActive.className =
+                            "button button-secondary icon-button player-action-button";
                         makeActive.dataset.makeActivePlayer = player.id;
-                        makeActive.textContent = lobby.dataset.makeActiveLabel;
+                        makeActive.title = lobby.dataset.makeActiveLabel;
+                        makeActive.setAttribute("aria-label", lobby.dataset.makeActiveLabel);
+                        makeActive.textContent = "★";
                         makeActive.disabled =
                             lobby.dataset.activePlayerLocked === "true";
-                        details.append(makeActive);
+                        actions.append(makeActive);
                     }
 
                     if (player.presence !== "active") {
@@ -1336,23 +1488,19 @@
                     if (player.presence === "rejoinpending") {
                         const approve = document.createElement("button");
                         approve.type = "button";
-                        approve.className = "button button-secondary";
-                        approve.textContent = lobby.dataset.approveLabel;
+                        approve.className =
+                            "button button-secondary icon-button player-action-button";
+                        approve.title = lobby.dataset.approveLabel;
+                        approve.setAttribute("aria-label", lobby.dataset.approveLabel);
+                        approve.textContent = "✓";
                         approve.addEventListener("click", () => {
                             approvePlayerId.value = player.id;
                             approveForm.submit();
                         });
-                        details.append(approve);
+                        actions.append(approve);
                     }
 
-                    const remove = document.createElement("button");
-                    remove.type = "button";
-                    remove.className = isRunning
-                        ? "button button-danger scoreboard-remove-player"
-                        : "button button-danger";
-                    remove.dataset.removePlayer = player.id;
-                    remove.textContent = lobby.dataset.removePlayerLabel;
-                    details.append(remove);
+                    details.append(actions);
 
                     item.append(name, details);
                     playerList.append(item);

@@ -13,6 +13,9 @@ public sealed class IndexModel(
     [BindProperty]
     public GameSettingsInput Input { get; set; } = new();
 
+    [BindProperty]
+    public IFormFile? HostImage { get; set; }
+
     public async Task OnGetAsync(CancellationToken cancellationToken)
     {
         Input = GameSettingsInput.From(
@@ -22,6 +25,25 @@ public sealed class IndexModel(
     public async Task<IActionResult> OnPostAsync(
         CancellationToken cancellationToken)
     {
+        var existing = await settingsStore.LoadAsync(cancellationToken);
+        var imageData = existing.HostImageData;
+        var imageContentType = existing.HostImageContentType;
+
+        if (HostImage is not null)
+        {
+            if (!HostImage.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
+                HostImage.Length is <= 0 or > 5 * 1024 * 1024)
+            {
+                ModelState.AddModelError(string.Empty, localizer["HostCard_InvalidImage"].Value);
+                return Page();
+            }
+
+            await using var stream = new MemoryStream();
+            await HostImage.CopyToAsync(stream, cancellationToken);
+            imageData = stream.ToArray();
+            imageContentType = HostImage.ContentType;
+        }
+
         if (!Input.IsValid)
         {
             ModelState.AddModelError(
@@ -30,8 +52,16 @@ public sealed class IndexModel(
             return Page();
         }
 
+        if (!Input.IsHostCardValid(imageData is not null))
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                localizer["HostCard_InvalidSettings"].Value);
+            return Page();
+        }
+
         await settingsStore.SaveAsync(
-            Input.ToRuntimeSettings(),
+            Input.ToRuntimeSettings(imageData, imageContentType),
             cancellationToken);
         TempData["SuccessMessage"] =
             localizer["GameSettings_GlobalSaved"].Value;

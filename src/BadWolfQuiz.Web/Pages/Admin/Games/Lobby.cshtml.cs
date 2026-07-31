@@ -36,6 +36,9 @@ public sealed class LobbyModel(
     [BindProperty]
     public GameSettingsInput SettingsInput { get; set; } = new();
 
+    [BindProperty]
+    public IFormFile? HostImage { get; set; }
+
     public bool IsRoundSummaryVisible { get; private set; }
 
     public IReadOnlyList<RoundLeaderboardEntry> RoundLeaders { get; private set; } = [];
@@ -124,6 +127,16 @@ public sealed class LobbyModel(
         return File(qrCode.GetGraphic(16), "image/png");
     }
 
+    public IActionResult OnGetHostCardImage(Guid id)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+        var settings = game?.Session.Settings;
+        return settings?.HostImageData is not null &&
+               !string.IsNullOrWhiteSpace(settings.HostImageContentType)
+            ? File(settings.HostImageData, settings.HostImageContentType)
+            : NotFound();
+    }
+
     public static string? GetYouTubeEmbedUrl(string? value)
     {
         if (!Uri.TryCreate(value, UriKind.Absolute, out var uri))
@@ -159,8 +172,8 @@ public sealed class LobbyModel(
             : $"https://www.youtube.com/embed/{Uri.EscapeDataString(videoId)}";
     }
 
-    public IActionResult OnPostUpdateSettings(
-        Guid id)
+    public async Task<IActionResult> OnPostUpdateSettingsAsync(
+        Guid id, CancellationToken cancellationToken)
     {
         var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
@@ -169,10 +182,9 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
-        if (!SettingsInput.IsValid)
+        var settings = await BuildSettingsAsync(game.Session.Settings, cancellationToken);
+        if (settings is null)
         {
-            TempData["ErrorMessage"] =
-                localizer["GameSettings_InvalidDuration"].Value;
             return RedirectToPage(new { id });
         }
 
@@ -180,7 +192,7 @@ public sealed class LobbyModel(
         {
             sessionRegistry.UpdateSettings(
                 game.PublicCode,
-                SettingsInput.ToRuntimeSettings());
+                settings);
             TempData["SuccessMessage"] =
                 localizer["GameSettings_GameSaved"].Value;
         }
@@ -204,10 +216,9 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
-        if (!SettingsInput.IsValid)
+        var settings = await BuildSettingsAsync(game.Session.Settings, cancellationToken);
+        if (settings is null)
         {
-            TempData["ErrorMessage"] =
-                localizer["GameSettings_InvalidDuration"].Value;
             return RedirectToPage(new { id });
         }
 
@@ -215,7 +226,7 @@ public sealed class LobbyModel(
         {
             sessionRegistry.UpdateSettings(
                 game.PublicCode,
-                SettingsInput.ToRuntimeSettings());
+                settings);
             sessionRegistry.StartGame(game.PublicCode);
         }
         catch (GameRuleViolationException)
@@ -232,6 +243,43 @@ public sealed class LobbyModel(
                 cancellationToken);
 
         return RedirectToPage(new { id });
+    }
+
+    private async Task<GameSessionSettings?> BuildSettingsAsync(
+        GameSessionSettings existing,
+        CancellationToken cancellationToken)
+    {
+        var imageData = existing.HostImageData;
+        var imageContentType = existing.HostImageContentType;
+
+        if (HostImage is not null)
+        {
+            if (!HostImage.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
+                HostImage.Length is <= 0 or > 5 * 1024 * 1024)
+            {
+                TempData["ErrorMessage"] = localizer["HostCard_InvalidImage"].Value;
+                return null;
+            }
+
+            await using var stream = new MemoryStream();
+            await HostImage.CopyToAsync(stream, cancellationToken);
+            imageData = stream.ToArray();
+            imageContentType = HostImage.ContentType;
+        }
+
+        if (!SettingsInput.IsValid)
+        {
+            TempData["ErrorMessage"] = localizer["GameSettings_InvalidDuration"].Value;
+            return null;
+        }
+
+        if (!SettingsInput.IsHostCardValid(imageData is not null))
+        {
+            TempData["ErrorMessage"] = localizer["HostCard_InvalidSettings"].Value;
+            return null;
+        }
+
+        return SettingsInput.ToRuntimeSettings(imageData, imageContentType);
     }
 
     public async Task<IActionResult> OnPostStartWagerAnswerTimerAsync(

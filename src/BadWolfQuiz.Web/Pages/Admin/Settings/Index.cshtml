@@ -16,7 +16,7 @@
     <div class="message message-success" role="status">@successMessage</div>
 }
 
-<form method="post" class="form-card narrow stack-form">
+<form method="post" enctype="multipart/form-data" class="form-card narrow stack-form">
     <p class="settings-description">@Localizer["GameSettings_GlobalDescription"]</p>
     <div asp-validation-summary="ModelOnly" class="message message-error"></div>
     <div class="settings-grid">
@@ -47,6 +47,26 @@
     <label class="settings-checkbox">
         <input asp-for="Input.AllowNegativeScoreFinalPlayers" type="checkbox" />
         <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
+    </label>
+    <label class="settings-checkbox">
+        <input asp-for="Input.DisplayHostCard" type="checkbox" />
+        <span>@Localizer["HostCard_Display"]</span>
+    </label>
+    <label>
+        <span>@Localizer["HostCard_Name"]</span>
+        <input asp-for="Input.HostName" maxlength="80" />
+    </label>
+    <label>
+        <span>@Localizer["HostCard_Source"]</span>
+        <select asp-for="Input.HostVisualSource">
+            <option value="0">@Localizer["HostCard_SourceNone"]</option>
+            <option value="1">@Localizer["HostCard_SourceImage"]</option>
+            <option value="2">@Localizer["HostCard_SourceWebcam"]</option>
+        </select>
+    </label>
+    <label>
+        <span>@Localizer["HostCard_Image"]</span>
+        <input asp-for="HostImage" type="file" accept="image/*" />
     </label>
 </div>
     <div class="form-actions">

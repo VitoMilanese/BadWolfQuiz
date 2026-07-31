@@ -999,4 +999,14 @@
   <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve"><value>Espellere {0} dalla partita?</value></data>
   <data name="GameBoard_RemovePlayerRejected" xml:space="preserve"><value>Questo giocatore non può essere espulso nella fase attuale.</value></data>
   <data name="PlayerGame_RemovedFromGame" xml:space="preserve"><value>L’host ti ha espulso dalla partita.</value></data>
+  <data name="PlayerGame_RemovedFromGameTitle" xml:space="preserve"><value>Sei stato espulso dalla partita</value></data>
+  <data name="HostCard_Display" xml:space="preserve"><value>Mostra la scheda dell’host durante la partita</value></data>
+  <data name="HostCard_Name" xml:space="preserve"><value>Nome dell’host</value></data>
+  <data name="HostCard_Source" xml:space="preserve"><value>Immagine della scheda host</value></data>
+  <data name="HostCard_SourceNone" xml:space="preserve"><value>Non selezionato</value></data>
+  <data name="HostCard_SourceImage" xml:space="preserve"><value>Immagine</value></data>
+  <data name="HostCard_SourceWebcam" xml:space="preserve"><value>Webcam</value></data>
+  <data name="HostCard_Image" xml:space="preserve"><value>Immagine dell’host (fino a 5 MB)</value></data>
+  <data name="HostCard_InvalidImage" xml:space="preserve"><value>Seleziona un’immagine valida fino a 5 MB.</value></data>
+  <data name="HostCard_InvalidSettings" xml:space="preserve"><value>Per mostrare la scheda host, inserisci un nome e seleziona un’immagine o una webcam.</value></data>
 </root>

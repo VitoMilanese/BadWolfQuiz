@@ -45,7 +45,12 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
                 allowNegativeScoreFinalPlayers: document.RootElement.TryGetProperty(
                     nameof(GameSessionSettings.AllowNegativeScoreFinalPlayers), out _)
                         ? settings.AllowNegativeScoreFinalPlayers
-                        : true);
+                        : true,
+                settings.DisplayHostCard,
+                settings.HostName,
+                settings.HostVisualSource,
+                settings.HostImageData,
+                settings.HostImageContentType);
         }
         catch (JsonException)
         {
@@ -100,14 +105,26 @@ public sealed class GameSettingsInput
         GamePhaseStartMode.Automatic;
 
     public bool AllowNegativeScoreFinalPlayers { get; set; } = true;
+    public bool DisplayHostCard { get; set; }
+    public string? HostName { get; set; }
+    public HostVisualSource HostVisualSource { get; set; }
 
     public bool IsValid =>
         BuzzerDurationSeconds is >= 1 and <= 3600 &&
         AnswerDurationSeconds is >= 1 and <= 3600 &&
         Enum.IsDefined(RegularQuestionBuzzerStartMode) &&
-        Enum.IsDefined(WagerQuestionAnswerTimerStartMode);
+        Enum.IsDefined(WagerQuestionAnswerTimerStartMode) &&
+        Enum.IsDefined(HostVisualSource);
 
-    public GameSessionSettings ToRuntimeSettings()
+    public bool IsHostCardValid(bool hasImage) =>
+        !DisplayHostCard ||
+        (!string.IsNullOrWhiteSpace(HostName) &&
+         HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.None &&
+         (HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.Image || hasImage));
+
+    public GameSessionSettings ToRuntimeSettings(
+        byte[]? hostImageData = null,
+        string? hostImageContentType = null)
     {
         if (!IsValid)
         {
@@ -121,7 +138,12 @@ public sealed class GameSettingsInput
             TimeSpan.FromSeconds(AnswerDurationSeconds),
             RegularQuestionBuzzerStartMode,
             WagerQuestionAnswerTimerStartMode,
-            AllowNegativeScoreFinalPlayers);
+            AllowNegativeScoreFinalPlayers,
+            DisplayHostCard,
+            HostName,
+            HostVisualSource,
+            hostImageData,
+            hostImageContentType);
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)
@@ -135,7 +157,10 @@ public sealed class GameSettingsInput
             WagerQuestionAnswerTimerStartMode =
                 settings.WagerQuestionAnswerTimerStartMode,
             AllowNegativeScoreFinalPlayers =
-                settings.AllowNegativeScoreFinalPlayers
+                settings.AllowNegativeScoreFinalPlayers,
+            DisplayHostCard = settings.DisplayHostCard,
+            HostName = settings.HostName,
+            HostVisualSource = settings.HostVisualSource
         };
     }
 }

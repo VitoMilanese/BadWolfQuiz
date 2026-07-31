@@ -999,4 +999,14 @@
   <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve"><value>Remove {0} from the game?</value></data>
   <data name="GameBoard_RemovePlayerRejected" xml:space="preserve"><value>This player cannot be removed during the current game phase.</value></data>
   <data name="PlayerGame_RemovedFromGame" xml:space="preserve"><value>The host removed you from the game.</value></data>
+  <data name="PlayerGame_RemovedFromGameTitle" xml:space="preserve"><value>You were removed from the game</value></data>
+  <data name="HostCard_Display" xml:space="preserve"><value>Show the host card during the game</value></data>
+  <data name="HostCard_Name" xml:space="preserve"><value>Host name</value></data>
+  <data name="HostCard_Source" xml:space="preserve"><value>Host card visual</value></data>
+  <data name="HostCard_SourceNone" xml:space="preserve"><value>Not selected</value></data>
+  <data name="HostCard_SourceImage" xml:space="preserve"><value>Image</value></data>
+  <data name="HostCard_SourceWebcam" xml:space="preserve"><value>Webcam</value></data>
+  <data name="HostCard_Image" xml:space="preserve"><value>Host image (up to 5 MB)</value></data>
+  <data name="HostCard_InvalidImage" xml:space="preserve"><value>Select a valid image up to 5 MB.</value></data>
+  <data name="HostCard_InvalidSettings" xml:space="preserve"><value>To show the host card, enter a name and select an image or webcam.</value></data>
 </root>

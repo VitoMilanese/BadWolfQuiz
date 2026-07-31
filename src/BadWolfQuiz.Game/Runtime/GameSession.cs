@@ -186,6 +186,16 @@ public sealed class GameSession
             throw new GameRuleViolationException("A game cannot start without players.");
         }
 
+        if (Settings.DisplayHostCard &&
+            (string.IsNullOrWhiteSpace(Settings.HostName) ||
+             Settings.HostVisualSource == HostVisualSource.None ||
+             (Settings.HostVisualSource == HostVisualSource.Image &&
+              Settings.HostImageData is null)))
+        {
+            throw new GameRuleViolationException(
+                "A visible host card requires a name and visual source.");
+        }
+
         Status = GameSessionStatus.Running;
         StartedAtUtc = _timeProvider.GetUtcNow();
         CaptureRoundStartScores();
