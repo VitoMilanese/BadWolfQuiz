@@ -167,8 +167,7 @@ public sealed class GameSettingsInput
             WagerQuestionAnswerTimerStartMode,
             AllowNegativeScoreFinalPlayers,
             !string.IsNullOrWhiteSpace(HostName) ||
-                HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.None ||
-                hostImageData is not null,
+                HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.None,
             HostName,
             HostVisualSource,
             hostImageData,

@@ -76,6 +76,20 @@ public sealed class GameSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public void Stored_image_does_not_show_host_card_when_source_is_none()
+    {
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(10),
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Automatic,
+            hostImageData: new byte[] { 1, 2, 3 },
+            hostImageContentType: "image/png");
+
+        Assert.False(settings.HasHostCard);
+    }
+
+    [Fact]
     public async Task Load_returns_engine_defaults_when_file_does_not_exist()
     {
         var store = new GameSettingsStore(

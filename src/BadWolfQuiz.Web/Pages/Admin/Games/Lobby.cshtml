@@ -786,8 +786,8 @@
             {
                 <li class="scoreboard-player host-card" data-host-card>
                     <strong>@Model.Game.Session.Settings.HostName</strong>
-                    @if (Model.Game.Session.Settings.HostImageData is not null &&
-                         Model.Game.Session.Settings.HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
+                    @if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Image &&
+                         Model.Game.Session.Settings.HostImageData is not null)
                     {
                         <img class="host-card-media"
                              src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
@@ -1081,8 +1081,8 @@
             {
                 <li class="scoreboard-player host-card" data-host-card>
                     <strong>@Model.Game.Session.Settings.HostName</strong>
-                    @if (Model.Game.Session.Settings.HostImageData is not null &&
-                         Model.Game.Session.Settings.HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
+                    @if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Image &&
+                         Model.Game.Session.Settings.HostImageData is not null)
                     {
                         <img class="host-card-media"
                              src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
