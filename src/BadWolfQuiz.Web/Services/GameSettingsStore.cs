@@ -33,24 +33,11 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             using var document = await JsonDocument.ParseAsync(
                 stream,
                 cancellationToken: cancellationToken);
-            var settings = document.RootElement.Deserialize<GameSessionSettings>(
+            var settings = document.RootElement.Deserialize<StoredGameSettings>(
                 _jsonOptions)
-                ?? GameSessionSettings.Default;
+                ?? StoredGameSettings.From(GameSessionSettings.Default);
 
-            return new GameSessionSettings(
-                settings.BuzzerDuration,
-                settings.AnswerDuration,
-                settings.RegularQuestionBuzzerStartMode,
-                settings.WagerQuestionAnswerTimerStartMode,
-                allowNegativeScoreFinalPlayers: document.RootElement.TryGetProperty(
-                    nameof(GameSessionSettings.AllowNegativeScoreFinalPlayers), out _)
-                        ? settings.AllowNegativeScoreFinalPlayers
-                        : true,
-                settings.DisplayHostCard,
-                settings.HostName,
-                settings.HostVisualSource,
-                settings.HostImageData,
-                settings.HostImageContentType);
+            return settings.ToRuntimeSettings();
         }
         catch (JsonException)
         {
@@ -78,7 +65,7 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             {
                 await JsonSerializer.SerializeAsync(
                     stream,
-                    settings,
+                    StoredGameSettings.From(settings),
                     _jsonOptions,
                     cancellationToken);
             }
@@ -89,6 +76,52 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
         {
             _sync.Release();
         }
+    }
+
+    private sealed class StoredGameSettings
+    {
+        public StoredGameSettings()
+        {
+        }
+
+        public TimeSpan BuzzerDuration { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan AnswerDuration { get; set; } = TimeSpan.FromSeconds(10);
+        public GamePhaseStartMode RegularQuestionBuzzerStartMode { get; set; } =
+            GamePhaseStartMode.Manual;
+        public GamePhaseStartMode WagerQuestionAnswerTimerStartMode { get; set; } =
+            GamePhaseStartMode.Automatic;
+        public bool AllowNegativeScoreFinalPlayers { get; set; } = true;
+        public bool DisplayHostCard { get; set; }
+        public string? HostName { get; set; }
+        public HostVisualSource HostVisualSource { get; set; }
+        public byte[]? HostImageData { get; set; }
+        public string? HostImageContentType { get; set; }
+
+        public GameSessionSettings ToRuntimeSettings() => new(
+            BuzzerDuration,
+            AnswerDuration,
+            RegularQuestionBuzzerStartMode,
+            WagerQuestionAnswerTimerStartMode,
+            AllowNegativeScoreFinalPlayers,
+            DisplayHostCard,
+            HostName,
+            HostVisualSource,
+            HostImageData,
+            HostImageContentType);
+
+        public static StoredGameSettings From(GameSessionSettings settings) => new()
+        {
+            BuzzerDuration = settings.BuzzerDuration,
+            AnswerDuration = settings.AnswerDuration,
+            RegularQuestionBuzzerStartMode = settings.RegularQuestionBuzzerStartMode,
+            WagerQuestionAnswerTimerStartMode = settings.WagerQuestionAnswerTimerStartMode,
+            AllowNegativeScoreFinalPlayers = settings.AllowNegativeScoreFinalPlayers,
+            DisplayHostCard = settings.DisplayHostCard,
+            HostName = settings.HostName,
+            HostVisualSource = settings.HostVisualSource,
+            HostImageData = settings.HostImageData,
+            HostImageContentType = settings.HostImageContentType
+        };
     }
 }
 
@@ -116,12 +149,6 @@ public sealed class GameSettingsInput
         Enum.IsDefined(WagerQuestionAnswerTimerStartMode) &&
         Enum.IsDefined(HostVisualSource);
 
-    public bool IsHostCardValid(bool hasImage) =>
-        !DisplayHostCard ||
-        (!string.IsNullOrWhiteSpace(HostName) &&
-         HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.None &&
-         (HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.Image || hasImage));
-
     public GameSessionSettings ToRuntimeSettings(
         byte[]? hostImageData = null,
         string? hostImageContentType = null)
@@ -139,7 +166,9 @@ public sealed class GameSettingsInput
             RegularQuestionBuzzerStartMode,
             WagerQuestionAnswerTimerStartMode,
             AllowNegativeScoreFinalPlayers,
-            DisplayHostCard,
+            !string.IsNullOrWhiteSpace(HostName) ||
+                HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.None ||
+                hostImageData is not null,
             HostName,
             HostVisualSource,
             hostImageData,

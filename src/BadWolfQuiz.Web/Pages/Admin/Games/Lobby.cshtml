@@ -108,10 +108,6 @@
                                    type="checkbox" />
                             <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
                         </label>
-                        <label class="settings-checkbox">
-                            <input asp-for="SettingsInput.DisplayHostCard" type="checkbox" />
-                            <span>@Localizer["HostCard_Display"]</span>
-                        </label>
                         <label>
                             <span>@Localizer["HostCard_Name"]</span>
                             <input asp-for="SettingsInput.HostName" maxlength="80" />
@@ -778,17 +774,18 @@
         </form>
 
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
-            @if (Model.Game.Session.Settings.DisplayHostCard)
+            @if (Model.Game.Session.Settings.HasHostCard)
             {
                 <li class="scoreboard-player host-card" data-host-card>
                     <strong>@Model.Game.Session.Settings.HostName</strong>
-                    @if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Image)
+                    @if (Model.Game.Session.Settings.HostImageData is not null &&
+                         Model.Game.Session.Settings.HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
                     {
                         <img class="host-card-media"
                              src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
                              alt="@Model.Game.Session.Settings.HostName" />
                     }
-                    else
+                    else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
                     {
                         <video class="host-card-media" data-host-webcam autoplay muted playsinline></video>
                     }
@@ -1064,17 +1061,18 @@
         </div>
 
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
-            @if (Model.Game.Session.Settings.DisplayHostCard)
+            @if (Model.Game.Session.Settings.HasHostCard)
             {
                 <li class="scoreboard-player host-card" data-host-card>
                     <strong>@Model.Game.Session.Settings.HostName</strong>
-                    @if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Image)
+                    @if (Model.Game.Session.Settings.HostImageData is not null &&
+                         Model.Game.Session.Settings.HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
                     {
                         <img class="host-card-media"
                              src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
                              alt="@Model.Game.Session.Settings.HostName" />
                     }
-                    else
+                    else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
                     {
                         <video class="host-card-media" data-host-webcam autoplay muted playsinline></video>
                     }

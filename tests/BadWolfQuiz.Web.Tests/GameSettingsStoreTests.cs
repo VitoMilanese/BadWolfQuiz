@@ -50,6 +50,32 @@ public sealed class GameSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task Save_and_load_preserve_host_card_settings_and_image()
+    {
+        var store = new GameSettingsStore(
+            new TestWebHostEnvironment(_contentRoot));
+        var expectedImage = new byte[] { 1, 2, 3, 4 };
+        var expected = new GameSessionSettings(
+            TimeSpan.FromSeconds(47),
+            TimeSpan.FromSeconds(13),
+            GamePhaseStartMode.Automatic,
+            GamePhaseStartMode.Manual,
+            hostName: "Host",
+            hostVisualSource: HostVisualSource.Image,
+            hostImageData: expectedImage,
+            hostImageContentType: "image/png");
+
+        await store.SaveAsync(expected);
+        var actual = await store.LoadAsync();
+
+        Assert.Equal("Host", actual.HostName);
+        Assert.Equal(HostVisualSource.Image, actual.HostVisualSource);
+        Assert.Equal(expectedImage, actual.HostImageData);
+        Assert.Equal("image/png", actual.HostImageContentType);
+        Assert.True(actual.HasHostCard);
+    }
+
+    [Fact]
     public async Task Load_returns_engine_defaults_when_file_does_not_exist()
     {
         var store = new GameSettingsStore(

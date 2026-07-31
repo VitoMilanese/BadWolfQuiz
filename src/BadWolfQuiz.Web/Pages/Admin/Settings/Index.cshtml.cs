@@ -42,6 +42,7 @@ public sealed class IndexModel(
             await HostImage.CopyToAsync(stream, cancellationToken);
             imageData = stream.ToArray();
             imageContentType = HostImage.ContentType;
+            Input.HostVisualSource = BadWolfQuiz.Game.Runtime.HostVisualSource.Image;
         }
 
         if (!Input.IsValid)
@@ -49,14 +50,6 @@ public sealed class IndexModel(
             ModelState.AddModelError(
                 string.Empty,
                 localizer["GameSettings_InvalidDuration"].Value);
-            return Page();
-        }
-
-        if (!Input.IsHostCardValid(imageData is not null))
-        {
-            ModelState.AddModelError(
-                string.Empty,
-                localizer["HostCard_InvalidSettings"].Value);
             return Page();
         }
 

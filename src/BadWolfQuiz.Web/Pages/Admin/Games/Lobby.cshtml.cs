@@ -265,17 +265,12 @@ public sealed class LobbyModel(
             await HostImage.CopyToAsync(stream, cancellationToken);
             imageData = stream.ToArray();
             imageContentType = HostImage.ContentType;
+            SettingsInput.HostVisualSource = HostVisualSource.Image;
         }
 
         if (!SettingsInput.IsValid)
         {
             TempData["ErrorMessage"] = localizer["GameSettings_InvalidDuration"].Value;
-            return null;
-        }
-
-        if (!SettingsInput.IsHostCardValid(imageData is not null))
-        {
-            TempData["ErrorMessage"] = localizer["HostCard_InvalidSettings"].Value;
             return null;
         }
 

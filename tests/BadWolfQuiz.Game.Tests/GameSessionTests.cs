@@ -108,7 +108,7 @@ public sealed class GameSessionTests
     }
 
     [Fact]
-    public void Start_rejects_incomplete_visible_host_card()
+    public void Start_allows_host_card_with_name_only()
     {
         var settings = new GameSessionSettings(
             TimeSpan.FromSeconds(30),
@@ -123,7 +123,10 @@ public sealed class GameSessionTests
             new ManualTimeProvider(InitialTime));
         session.AddPlayer("Rose");
 
-        Assert.Throws<GameRuleViolationException>(() => session.Start());
+        session.Start();
+
+        Assert.Equal(GameSessionStatus.Running, session.Status);
+        Assert.True(session.Settings.HasHostCard);
     }
 
     [Fact]

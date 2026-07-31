@@ -62,6 +62,11 @@ public sealed record GameSessionSettings
     public HostVisualSource HostVisualSource { get; }
     public byte[]? HostImageData { get; }
     public string? HostImageContentType { get; }
+
+    public bool HasHostCard =>
+        !string.IsNullOrWhiteSpace(HostName) ||
+        HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.None ||
+        HostImageData is not null;
 }
 
 public enum HostVisualSource
