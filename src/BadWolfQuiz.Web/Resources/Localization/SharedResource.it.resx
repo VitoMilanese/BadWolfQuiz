@@ -992,5 +992,7 @@
   <data name="Account_EmailExpiry" xml:space="preserve"><value>Il link scade tra un’ora. Se non hai effettuato la richiesta, ignora questa email.</value></data>
   <data name="GameBoard_JoinQrAlt" xml:space="preserve"><value>Codice QR per partecipare alla partita</value></data>
   <data name="Join_SelectedGame" xml:space="preserve"><value>Codice partita: {0}</value></data>
-  <data name="GameSettings_AllowNewPlayersAfterStart" xml:space="preserve"><value>Consenti ai nuovi giocatori di partecipare dopo l’inizio della partita</value></data>
+  <data name="GameBoard_ClosePlayerJoining" xml:space="preserve"><value>Chiudi l’ingresso ai nuovi giocatori</value></data>
+  <data name="GameBoard_OpenPlayerJoining" xml:space="preserve"><value>Apri l’ingresso ai nuovi giocatori</value></data>
+  <data name="GameBoard_PlayerJoiningToggleRejected" xml:space="preserve"><value>Al momento non è possibile modificare l’accesso alla partita.</value></data>
 </root>

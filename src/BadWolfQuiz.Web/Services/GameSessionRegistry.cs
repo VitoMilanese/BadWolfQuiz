@@ -114,7 +114,7 @@ public sealed class GameSessionRegistry
             }
 
             if (game.Session.Status != GameSessionStatus.Lobby &&
-                !game.Session.Settings.AllowNewPlayersAfterStart)
+                !game.AllowsNewPlayers)
             {
                 return PlayerJoinResult.Failed(PlayerJoinStatus.GameAlreadyStarted);
             }
@@ -122,6 +122,24 @@ public sealed class GameSessionRegistry
             var player = game.Session.AddPlayer(playerName);
             var accessToken = CreatePlayerAccess(game, player);
             return PlayerJoinResult.Succeeded(game, player, accessToken);
+        }
+    }
+
+    public bool ToggleNewPlayerJoining(string publicCode)
+    {
+        var game = Find(publicCode)
+            ?? throw new GameRuleViolationException("The game was not found.");
+
+        lock (game)
+        {
+            if (game.Session.Status != GameSessionStatus.Running)
+            {
+                throw new GameRuleViolationException(
+                    "Player joining can only be changed while the game is running.");
+            }
+
+            game.AllowsNewPlayers = !game.AllowsNewPlayers;
+            return game.AllowsNewPlayers;
         }
     }
 

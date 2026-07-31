@@ -1426,6 +1426,43 @@ textarea {
     list-style: none;
 }
 
+.player-join-lock-form {
+    position: fixed;
+    z-index: 19;
+    left: max(12px, calc((100vw - 1800px) / 2 + 12px));
+    bottom: calc(var(--game-scoreboard-space) - 50px);
+}
+
+.player-join-lock {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--text);
+    background: #171735;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    font-size: 1.3rem;
+}
+
+.player-join-lock.is-open {
+    border-color: rgba(72, 199, 142, 0.8);
+    background: rgba(37, 112, 78, 0.95);
+}
+
+.player-join-lock.is-closed {
+    border-color: rgba(255, 93, 104, 0.8);
+    background: rgba(123, 38, 48, 0.95);
+}
+
+.player-join-lock:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.12);
+}
+
 .scoreboard-player {
     min-width: 150px;
     max-width: 240px;

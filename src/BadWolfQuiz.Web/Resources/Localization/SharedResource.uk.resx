@@ -992,5 +992,7 @@
   <data name="Account_EmailExpiry" xml:space="preserve"><value>Посилання діє одну годину. Якщо ви не надсилали запит, просто проігноруйте цей лист.</value></data>
   <data name="GameBoard_JoinQrAlt" xml:space="preserve"><value>QR-код для приєднання до гри</value></data>
   <data name="Join_SelectedGame" xml:space="preserve"><value>Код гри: {0}</value></data>
-  <data name="GameSettings_AllowNewPlayersAfterStart" xml:space="preserve"><value>Дозволяти новим гравцям приєднуватися після початку гри</value></data>
+  <data name="GameBoard_ClosePlayerJoining" xml:space="preserve"><value>Закрити вхід для нових гравців</value></data>
+  <data name="GameBoard_OpenPlayerJoining" xml:space="preserve"><value>Відкрити вхід для нових гравців</value></data>
+  <data name="GameBoard_PlayerJoiningToggleRejected" xml:space="preserve"><value>Зараз неможливо змінити доступ до гри.</value></data>
 </root>

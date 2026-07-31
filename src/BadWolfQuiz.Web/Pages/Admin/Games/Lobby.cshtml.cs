@@ -649,6 +649,28 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public IActionResult OnPostTogglePlayerJoining(Guid id)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.ToggleNewPlayerJoining(game.PublicCode);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_PlayerJoiningToggleRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     private Task BroadcastTimerAsync(
         GameSessionRegistration game,
         CancellationToken cancellationToken)

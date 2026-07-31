@@ -105,11 +105,6 @@
                                    type="checkbox" />
                             <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
                         </label>
-                        <label class="settings-checkbox">
-                            <input asp-for="SettingsInput.AllowNewPlayersAfterStart"
-                                   type="checkbox" />
-                            <span>@Localizer["GameSettings_AllowNewPlayersAfterStart"]</span>
-                        </label>
                     </div>
                     <div class="form-actions">
                         <button class="button button-secondary" type="submit">
@@ -712,6 +707,21 @@
             }
             </div>
         }
+
+        <form class="player-join-lock-form"
+              method="post"
+              asp-page-handler="TogglePlayerJoining">
+            <button class="player-join-lock @(Model.Game.AllowsNewPlayers ? "is-open" : "is-closed")"
+                    type="submit"
+                    title="@(Model.Game.AllowsNewPlayers
+                        ? Localizer["GameBoard_ClosePlayerJoining"]
+                        : Localizer["GameBoard_OpenPlayerJoining"])"
+                    aria-label="@(Model.Game.AllowsNewPlayers
+                        ? Localizer["GameBoard_ClosePlayerJoining"]
+                        : Localizer["GameBoard_OpenPlayerJoining"])">
+                <span aria-hidden="true">@(Model.Game.AllowsNewPlayers ? "🔓" : "🔒")</span>
+            </button>
+        </form>
 
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
             @foreach (var player in Model.Players)
