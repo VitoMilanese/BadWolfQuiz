@@ -12,7 +12,7 @@ public sealed class QuizSeedService(
 {
     public async Task SeedAsync()
     {
-        if (await db.Quizzes.AnyAsync())
+        if (await db.Quizzes.IgnoreQueryFilters().AnyAsync())
         {
             return;
         }

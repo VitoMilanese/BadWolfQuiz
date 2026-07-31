@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Games;
 
-public sealed class AnswerKeyModel(GameSessionRegistry sessionRegistry) : PageModel
+public sealed class AnswerKeyModel(
+    GameSessionRegistry sessionRegistry,
+    CurrentHost currentHost) : PageModel
 {
     public GameSessionRegistration Game { get; private set; } = null!;
 
@@ -18,7 +20,7 @@ public sealed class AnswerKeyModel(GameSessionRegistry sessionRegistry) : PageMo
 
     public IActionResult OnGet(Guid id)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -66,7 +68,7 @@ public sealed class AnswerKeyModel(GameSessionRegistry sessionRegistry) : PageMo
         int sourceContentBlockId,
         bool final)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {

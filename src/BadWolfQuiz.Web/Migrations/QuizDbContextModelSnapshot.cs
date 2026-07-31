@@ -251,6 +251,10 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Property<DateTime?>("FinishedAtUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("HostId")
+                        .HasMaxLength(36)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PublicCode")
                         .IsRequired()
                         .HasMaxLength(12)
@@ -270,9 +274,25 @@ namespace BadWolfQuiz.Web.Migrations
                     b.HasIndex("PublicCode")
                         .IsUnique();
 
+                    b.HasIndex("HostId");
+
                     b.HasIndex("QuizId");
 
                     b.ToTable("GameSessions");
+                });
+
+            modelBuilder.Entity("BadWolfQuiz.Web.Models.HostAccount", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(36)
+                        .HasColumnType("TEXT");
+                    b.Property<DateTime>("CreatedAtUtc").HasColumnType("TEXT");
+                    b.Property<string>("Email").IsRequired().HasMaxLength(254).HasColumnType("TEXT");
+                    b.Property<string>("NormalizedEmail").IsRequired().HasMaxLength(254).HasColumnType("TEXT");
+                    b.Property<string>("PasswordHash").IsRequired().HasColumnType("TEXT");
+                    b.HasKey("Id");
+                    b.HasIndex("NormalizedEmail").IsUnique();
+                    b.ToTable("Hosts");
                 });
 
             modelBuilder.Entity("BadWolfQuiz.Web.Models.PlayerBuzz", b =>
@@ -402,6 +422,10 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("HostId")
+                        .HasMaxLength(36)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(160)
@@ -411,6 +435,8 @@ namespace BadWolfQuiz.Web.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("HostId");
 
                     b.ToTable("Quizzes");
                 });
@@ -603,13 +629,29 @@ namespace BadWolfQuiz.Web.Migrations
 
             modelBuilder.Entity("BadWolfQuiz.Web.Models.GameSession", b =>
                 {
+                    b.HasOne("BadWolfQuiz.Web.Models.HostAccount", "Host")
+                        .WithMany("GameSessions")
+                        .HasForeignKey("HostId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("BadWolfQuiz.Web.Models.Quiz", "Quiz")
                         .WithMany("Sessions")
                         .HasForeignKey("QuizId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Host");
                     b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("BadWolfQuiz.Web.Models.Quiz", b =>
+                {
+                    b.HasOne("BadWolfQuiz.Web.Models.HostAccount", "Host")
+                        .WithMany("Quizzes")
+                        .HasForeignKey("HostId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Host");
                 });
 
             modelBuilder.Entity("BadWolfQuiz.Web.Models.PlayerBuzz", b =>
@@ -722,6 +764,12 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Navigation("Players");
 
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("BadWolfQuiz.Web.Models.HostAccount", b =>
+                {
+                    b.Navigation("GameSessions");
+                    b.Navigation("Quizzes");
                 });
 
             modelBuilder.Entity("BadWolfQuiz.Web.Models.Quiz", b =>

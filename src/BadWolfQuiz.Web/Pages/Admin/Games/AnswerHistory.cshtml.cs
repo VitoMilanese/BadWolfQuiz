@@ -12,6 +12,7 @@ namespace BadWolfQuiz.Web.Pages.Admin.Games;
 public sealed class AnswerHistoryModel(
     GameSessionRegistry sessionRegistry,
     GameHistoryStore gameHistoryStore,
+    CurrentHost currentHost,
     IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -84,7 +85,7 @@ public sealed class AnswerHistoryModel(
         Action<GameSessionRegistration> command,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -130,7 +131,7 @@ public sealed class AnswerHistoryModel(
 
     private IActionResult LoadPage(Guid id)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {

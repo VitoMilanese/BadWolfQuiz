@@ -28,21 +28,27 @@
         </a>
 
         <nav>
-            <a asp-page="/Admin/Quizzes/Index">
-                @Localizer["Menu_Quizzes"]
-            </a>
-
-            <a asp-page="/Admin/Games/History">
-                @Localizer["Menu_GameHistory"]
-            </a>
-
-            <a asp-page="/Admin/Settings/Index">
-                @Localizer["Menu_Settings"]
-            </a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-page="/Admin/Quizzes/Index">@Localizer["Menu_Quizzes"]</a>
+                <a asp-page="/Admin/Games/History">@Localizer["Menu_GameHistory"]</a>
+                <a asp-page="/Admin/Settings/Index">@Localizer["Menu_Settings"]</a>
+            }
 
             <a asp-page="/Join/Index">
                 @Localizer["Button_Join"]
             </a>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <form method="post" asp-page="/Account/Logout" class="nav-form">
+                    <button type="submit" class="nav-link-button">Sign out</button>
+                </form>
+            }
+            else
+            {
+                <a asp-page="/Account/Login">Host sign in</a>
+            }
         </nav>
 
         <div class="language-selector">

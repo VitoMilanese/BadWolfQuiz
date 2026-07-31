@@ -38,7 +38,8 @@ public sealed class GameSessionRegistry
 
     public GameSessionRegistration Create(
         QuizSnapshot quiz,
-        GameSessionSettings settings)
+        GameSessionSettings settings,
+        string? hostId = null)
     {
         ArgumentNullException.ThrowIfNull(quiz);
         ArgumentNullException.ThrowIfNull(settings);
@@ -50,7 +51,7 @@ public sealed class GameSessionRegistry
             var code = NormalizeCode(_gameCodeGenerator.Create());
             EnsureValidCode(code);
 
-            var registration = new GameSessionRegistration(code, session);
+            var registration = new GameSessionRegistration(code, session, hostId);
 
             if (!_sessionsByCode.TryAdd(code, registration))
             {
@@ -73,6 +74,14 @@ public sealed class GameSessionRegistry
     public GameSessionRegistration? Find(GameSessionId id)
     {
         return _sessionsById.GetValueOrDefault(id);
+    }
+
+    public GameSessionRegistration? FindOwned(GameSessionId id, string hostId)
+    {
+        var game = Find(id);
+        return game is not null && string.Equals(game.HostId, hostId, StringComparison.Ordinal)
+            ? game
+            : null;
     }
 
     public GameSessionRegistration? Find(string publicCode)

@@ -1,10 +1,17 @@
 using BadWolfQuiz.Web.Models;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 
 namespace BadWolfQuiz.Web.Data;
 
-public sealed class QuizDbContext(DbContextOptions<QuizDbContext> options) : DbContext(options)
+public sealed class QuizDbContext(
+    DbContextOptions<QuizDbContext> options,
+    IHttpContextAccessor? httpContextAccessor = null) : DbContext(options)
 {
+    private string? CurrentHostId => httpContextAccessor?.HttpContext?.User
+        .FindFirstValue(ClaimTypes.NameIdentifier);
+
+    public DbSet<HostAccount> Hosts => Set<HostAccount>();
     public DbSet<Quiz> Quizzes => Set<Quiz>();
     public DbSet<QuizRound> QuizRounds => Set<QuizRound>();
     public DbSet<QuizRoundRow> QuizRoundRows => Set<QuizRoundRow>();
@@ -24,6 +31,51 @@ public sealed class QuizDbContext(DbContextOptions<QuizDbContext> options) : DbC
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<HostAccount>()
+            .HasIndex(x => x.NormalizedEmail)
+            .IsUnique();
+
+        modelBuilder.Entity<Quiz>()
+            .HasOne(x => x.Host)
+            .WithMany(x => x.Quizzes)
+            .HasForeignKey(x => x.HostId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<GameSession>()
+            .HasOne(x => x.Host)
+            .WithMany(x => x.GameSessions)
+            .HasForeignKey(x => x.HostId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Quiz>()
+            .HasQueryFilter(x => x.HostId == CurrentHostId);
+        modelBuilder.Entity<QuizRound>()
+            .HasQueryFilter(x => x.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<QuizRoundRow>()
+            .HasQueryFilter(x => x.Round.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<QuizCategory>()
+            .HasQueryFilter(x => x.Round.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<QuizQuestion>()
+            .HasQueryFilter(x => x.Category.Round.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<FinalQuestionContentBlock>()
+            .HasQueryFilter(x => x.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<FinalAnswerContentBlock>()
+            .HasQueryFilter(x => x.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<QuestionContentBlock>()
+            .HasQueryFilter(x => x.Question.Category.Round.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<AnswerContentBlock>()
+            .HasQueryFilter(x => x.Question.Category.Round.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<GameSession>()
+            .HasQueryFilter(x => x.HostId == CurrentHostId);
+        modelBuilder.Entity<GamePlayer>()
+            .HasQueryFilter(x => x.Session.HostId == CurrentHostId);
+        modelBuilder.Entity<GameQuestion>()
+            .HasQueryFilter(x => x.Session.HostId == CurrentHostId);
+        modelBuilder.Entity<PlayerBuzz>()
+            .HasQueryFilter(x => x.GameQuestion.Session.HostId == CurrentHostId);
+        modelBuilder.Entity<PlayerQuestionResult>()
+            .HasQueryFilter(x => x.GameQuestion.Session.HostId == CurrentHostId);
+
         modelBuilder.Entity<QuizRound>()
             .HasIndex(x => new { x.QuizId, x.SortOrder })
             .IsUnique();

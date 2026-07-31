@@ -46,6 +46,7 @@ public sealed class GameHistoryStore(QuizDbContext db)
             stored = new StoredGameSession
             {
                 QuizId = runtime.Quiz.SourceQuizId,
+                HostId = registration.HostId,
                 PublicCode = registration.PublicCode
             };
             db.GameSessions.Add(stored);

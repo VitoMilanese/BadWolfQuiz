@@ -13,6 +13,7 @@ namespace BadWolfQuiz.Web.Pages.Admin.Games;
 public sealed class LobbyModel(
     GameSessionRegistry sessionRegistry,
     GameHistoryStore gameHistoryStore,
+    CurrentHost currentHost,
     IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -53,7 +54,7 @@ public sealed class LobbyModel(
         int sourceContentBlockId,
         bool answer)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -84,7 +85,7 @@ public sealed class LobbyModel(
         int sourceContentBlockId,
         bool answer)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
         var blocks = answer
             ? game?.Session.FinalQuestion?.Definition.AnswerBlocks
             : game?.Session.FinalQuestion?.Definition.QuestionBlocks;
@@ -140,7 +141,7 @@ public sealed class LobbyModel(
     public IActionResult OnPostUpdateSettings(
         Guid id)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -175,7 +176,7 @@ public sealed class LobbyModel(
         Guid id,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -217,7 +218,7 @@ public sealed class LobbyModel(
         int sourceQuestionId,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -244,7 +245,7 @@ public sealed class LobbyModel(
         Guid id,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -269,7 +270,7 @@ public sealed class LobbyModel(
         Guid id,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -294,7 +295,7 @@ public sealed class LobbyModel(
         Guid id,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -365,7 +366,7 @@ public sealed class LobbyModel(
         int sourceQuestionId,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -391,7 +392,7 @@ public sealed class LobbyModel(
         int sourceQuestionId,
         int amount)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -419,7 +420,7 @@ public sealed class LobbyModel(
         int sourceQuestionId,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -450,7 +451,7 @@ public sealed class LobbyModel(
         bool isCorrect,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -481,7 +482,7 @@ public sealed class LobbyModel(
         int sourceQuestionId,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -510,7 +511,7 @@ public sealed class LobbyModel(
         int sourceQuestionId,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -541,7 +542,7 @@ public sealed class LobbyModel(
         Guid playerId,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -568,7 +569,7 @@ public sealed class LobbyModel(
         Guid id,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -594,7 +595,7 @@ public sealed class LobbyModel(
         Guid playerId,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -669,7 +670,7 @@ public sealed class LobbyModel(
         Action<GameSessionRegistration> command,
         CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {
@@ -708,7 +709,7 @@ public sealed class LobbyModel(
         int? previewQuestionId = null,
         bool previewAnswer = false)
     {
-        var game = sessionRegistry.Find(new GameSessionId(id));
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
         if (game is null)
         {

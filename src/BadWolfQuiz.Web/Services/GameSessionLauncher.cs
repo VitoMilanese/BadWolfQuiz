@@ -8,7 +8,8 @@ public sealed class GameSessionLauncher(
     QuizDbContext db,
     QuizSnapshotFactory snapshotFactory,
     GameSessionRegistry sessionRegistry,
-    GameSettingsStore settingsStore)
+    GameSettingsStore settingsStore,
+    CurrentHost currentHost)
 {
     public async Task<GameSessionRegistration?> CreateAsync(
         int quizId,
@@ -52,6 +53,6 @@ public sealed class GameSessionLauncher(
         }
 
         var snapshot = snapshotFactory.Create(quiz);
-        return sessionRegistry.Create(snapshot, settings);
+        return sessionRegistry.Create(snapshot, settings, currentHost.RequiredId);
     }
 }

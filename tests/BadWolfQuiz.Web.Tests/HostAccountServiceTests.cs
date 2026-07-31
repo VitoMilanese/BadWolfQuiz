@@ -1,0 +1,99 @@
+using System.Security.Claims;
+using BadWolfQuiz.Web.Data;
+using BadWolfQuiz.Web.Models;
+using BadWolfQuiz.Web.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+
+namespace BadWolfQuiz.Web.Tests;
+
+public sealed class HostAccountServiceTests
+{
+    [Fact]
+    public async Task First_registered_host_claims_legacy_quizzes_and_games()
+    {
+        await using var fixture = await Fixture.CreateAsync();
+        var quiz = new Quiz { Title = "Legacy" };
+        quiz.Sessions.Add(new GameSession { PublicCode = "LEGACY" });
+        fixture.Db.Quizzes.Add(quiz);
+        await fixture.Db.SaveChangesAsync();
+
+        var result = await fixture.Accounts.RegisterAsync("first@example.com", "password-123");
+
+        Assert.NotNull(result.Host);
+        Assert.Equal(result.Host!.Id, await fixture.Db.Quizzes.IgnoreQueryFilters()
+            .Select(x => x.HostId).SingleAsync());
+        Assert.Equal(result.Host.Id, await fixture.Db.GameSessions.IgnoreQueryFilters()
+            .Select(x => x.HostId).SingleAsync());
+    }
+
+    [Fact]
+    public async Task Later_host_does_not_take_existing_data()
+    {
+        await using var fixture = await Fixture.CreateAsync();
+        var first = await fixture.Accounts.RegisterAsync("first@example.com", "password-123");
+        fixture.Db.Quizzes.Add(new Quiz { HostId = first.Host!.Id, Title = "First" });
+        await fixture.Db.SaveChangesAsync();
+
+        await fixture.Accounts.RegisterAsync("second@example.com", "password-456");
+
+        Assert.Equal(first.Host.Id, await fixture.Db.Quizzes.IgnoreQueryFilters()
+            .Select(x => x.HostId).SingleAsync());
+    }
+
+    [Fact]
+    public async Task Query_filters_hide_another_hosts_quizzes()
+    {
+        await using var fixture = await Fixture.CreateAsync("host-b");
+        fixture.Db.Hosts.AddRange(
+            new HostAccount { Id = "host-a", Email = "a@example.com", NormalizedEmail = "A@EXAMPLE.COM", PasswordHash = "x" },
+            new HostAccount { Id = "host-b", Email = "b@example.com", NormalizedEmail = "B@EXAMPLE.COM", PasswordHash = "x" });
+        fixture.Db.Quizzes.AddRange(
+            new Quiz { HostId = "host-a", Title = "Hidden" },
+            new Quiz { HostId = "host-b", Title = "Visible" });
+        await fixture.Db.SaveChangesAsync();
+
+        Assert.Equal("Visible", (await fixture.Db.Quizzes.SingleAsync()).Title);
+    }
+
+    private sealed class Fixture : IAsyncDisposable
+    {
+        private readonly SqliteConnection connection;
+        private Fixture(SqliteConnection connection, QuizDbContext db)
+        {
+            this.connection = connection;
+            Db = db;
+            Accounts = new HostAccountService(db, new PasswordHasher<HostAccount>());
+        }
+        public QuizDbContext Db { get; }
+        public HostAccountService Accounts { get; }
+
+        public static async Task<Fixture> CreateAsync(string? hostId = null)
+        {
+            var connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+            var options = new DbContextOptionsBuilder<QuizDbContext>().UseSqlite(connection).Options;
+            IHttpContextAccessor? accessor = null;
+            if (hostId is not null)
+            {
+                var context = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(
+                        [new Claim(ClaimTypes.NameIdentifier, hostId)], "test"))
+                };
+                accessor = new HttpContextAccessor { HttpContext = context };
+            }
+            var db = new QuizDbContext(options, accessor);
+            await db.Database.EnsureCreatedAsync();
+            return new Fixture(connection, db);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await Db.DisposeAsync();
+            await connection.DisposeAsync();
+        }
+    }
+}
