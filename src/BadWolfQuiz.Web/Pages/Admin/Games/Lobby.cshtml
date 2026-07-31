@@ -773,6 +773,14 @@
             </button>
         </form>
 
+        <div class="game-scoreboard-resizer"
+             data-scoreboard-resizer
+             role="separator"
+             aria-orientation="horizontal"
+             aria-label="@Localizer["GameBoard_ResizePlayerPanel"]"
+             aria-valuemin="130"
+             aria-valuenow="230"
+             tabindex="0"><span></span></div>
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
             @if (Model.Game.Session.Settings.HasHostCard)
             {
@@ -1060,6 +1068,14 @@
             }
         </div>
 
+        <div class="game-scoreboard-resizer"
+             data-scoreboard-resizer
+             role="separator"
+             aria-orientation="horizontal"
+             aria-label="@Localizer["GameBoard_ResizePlayerPanel"]"
+             aria-valuemin="130"
+             aria-valuenow="230"
+             tabindex="0"><span></span></div>
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
             @if (Model.Game.Session.Settings.HasHostCard)
             {
@@ -1218,6 +1234,83 @@
                 });
 
             refresh();
+        })();
+
+        (() => {
+            const board = document.querySelector(".host-game-board");
+            const resizer = document.querySelector("[data-scoreboard-resizer]");
+            const storageKey = "badwolfquiz:player-panel-height";
+
+            if (!board || !resizer) {
+                return;
+            }
+
+            const limits = () => ({
+                minimum: 130,
+                maximum: Math.max(130, Math.floor(window.innerHeight * 0.65))
+            });
+            const applyHeight = value => {
+                const { minimum, maximum } = limits();
+                const height = Math.min(maximum, Math.max(minimum, Math.round(value)));
+                board.style.setProperty("--game-scoreboard-space", `${height}px`);
+                resizer.setAttribute("aria-valuemax", maximum.toString());
+                resizer.setAttribute("aria-valuenow", height.toString());
+                return height;
+            };
+
+            const savedHeight = Number.parseInt(localStorage.getItem(storageKey), 10);
+            const defaultHeight = Number.parseFloat(
+                getComputedStyle(board).getPropertyValue("--game-scoreboard-space"));
+            applyHeight(Number.isFinite(savedHeight) ? savedHeight : defaultHeight);
+
+            let startY = 0;
+            let startHeight = 0;
+
+            resizer.addEventListener("pointerdown", event => {
+                startY = event.clientY;
+                startHeight = Number.parseFloat(
+                    getComputedStyle(board).getPropertyValue("--game-scoreboard-space"));
+                resizer.setPointerCapture(event.pointerId);
+                document.body.classList.add("is-resizing-scoreboard");
+            });
+
+            resizer.addEventListener("pointermove", event => {
+                if (!resizer.hasPointerCapture(event.pointerId)) {
+                    return;
+                }
+
+                applyHeight(startHeight + startY - event.clientY);
+            });
+
+            const finishResize = event => {
+                if (!resizer.hasPointerCapture(event.pointerId)) {
+                    return;
+                }
+
+                resizer.releasePointerCapture(event.pointerId);
+                document.body.classList.remove("is-resizing-scoreboard");
+                localStorage.setItem(
+                    storageKey,
+                    resizer.getAttribute("aria-valuenow"));
+            };
+            resizer.addEventListener("pointerup", finishResize);
+            resizer.addEventListener("pointercancel", finishResize);
+
+            resizer.addEventListener("keydown", event => {
+                if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
+                    return;
+                }
+
+                event.preventDefault();
+                const current = Number.parseInt(resizer.getAttribute("aria-valuenow"), 10);
+                const height = applyHeight(current + (event.key === "ArrowUp" ? 20 : -20));
+                localStorage.setItem(storageKey, height.toString());
+            });
+
+            window.addEventListener("resize", () => {
+                const current = Number.parseInt(resizer.getAttribute("aria-valuenow"), 10);
+                applyHeight(current);
+            });
         })();
 
         (() => {

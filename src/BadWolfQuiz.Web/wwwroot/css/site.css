@@ -1584,14 +1584,17 @@ textarea {
 }
 
 .scoreboard-player.host-card {
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: stretch;
     padding-right: 16px;
 }
 
 .host-card-media {
     width: 100%;
-    min-height: 78px;
-    max-height: 112px;
-    object-fit: cover;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    object-fit: contain;
     border-radius: 8px;
     background: #050507;
 }
@@ -2201,7 +2204,7 @@ iframe.game-content-video {
 /* Viewport-anchored gameplay layout */
 
 .host-game-board {
-    --game-scoreboard-space: 184px;
+    --game-scoreboard-space: 230px;
     min-height: calc(100dvh - 72px - 68px - 32px);
     padding-bottom: var(--game-scoreboard-space);
 }
@@ -2218,8 +2221,9 @@ iframe.game-content-video {
     right: 0;
     bottom: 0;
     left: 0;
-    min-height: 154px;
-    max-height: var(--game-scoreboard-space);
+    height: var(--game-scoreboard-space);
+    min-height: 0;
+    max-height: none;
     margin: 0;
     padding: 12px max(66px, calc((100vw - 1800px) / 2 + 66px)) 0
         max(12px, calc((100vw - 1800px) / 2 + 34px));
@@ -2227,6 +2231,40 @@ iframe.game-content-video {
     background: rgba(7, 7, 9, 0.97);
     box-shadow: 0 -16px 36px rgba(0, 0, 0, 0.42);
     backdrop-filter: blur(14px);
+}
+
+.game-scoreboard-resizer {
+    position: fixed;
+    z-index: 20;
+    right: 0;
+    bottom: calc(var(--game-scoreboard-space) - 8px);
+    left: 0;
+    height: 16px;
+    display: grid;
+    place-items: center;
+    cursor: ns-resize;
+    touch-action: none;
+}
+
+.game-scoreboard-resizer span {
+    width: 72px;
+    height: 5px;
+    border-radius: 999px;
+    background: #77778a;
+    box-shadow: 0 0 0 1px #111;
+    transition: width 120ms ease, background 120ms ease;
+}
+
+.game-scoreboard-resizer:hover span,
+.game-scoreboard-resizer:focus-visible span,
+.is-resizing-scoreboard .game-scoreboard-resizer span {
+    width: 104px;
+    background: var(--gold);
+}
+
+.is-resizing-scoreboard {
+    cursor: ns-resize;
+    user-select: none;
 }
 
 .current-question-summary:not(.wager-mode) {
@@ -2277,7 +2315,7 @@ iframe.game-content-video {
 
 @media (max-width: 700px) {
     .host-game-board {
-        --game-scoreboard-space: 170px;
+        --game-scoreboard-space: 212px;
     }
 
     .game-scoreboard {
@@ -2339,7 +2377,7 @@ iframe.game-content-video {
 /* Keep gameplay content above the fixed player scoreboard */
 
 .host-game-board {
-    --game-scoreboard-space: 184px;
+    --game-scoreboard-space: 230px;
     display: flex;
     flex-direction: column;
     /*
@@ -2387,7 +2425,7 @@ iframe.game-content-video {
 
 @media (max-width: 700px) {
     .host-game-board {
-        --game-scoreboard-space: 170px;
+        --game-scoreboard-space: 212px;
     }
 }
 
@@ -2440,7 +2478,7 @@ iframe.game-content-video {
 .buzzer-race-overlay {
     position: fixed;
     z-index: 40;
-    inset: 72px 0 var(--game-scoreboard-space, 184px);
+    inset: 72px 0 var(--game-scoreboard-space, 230px);
     display: grid;
     place-items: center;
     padding: 24px;

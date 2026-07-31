@@ -1009,4 +1009,5 @@
   <data name="HostCard_Image" xml:space="preserve"><value>Картинка хоста (до 5 МБ)</value></data>
   <data name="HostCard_InvalidImage" xml:space="preserve"><value>Оберіть коректне зображення розміром до 5 МБ.</value></data>
   <data name="HostCard_InvalidSettings" xml:space="preserve"><value>Щоб показувати картку хоста, вкажіть ім’я та оберіть картинку або вебкамеру.</value></data>
+  <data name="GameBoard_ResizePlayerPanel" xml:space="preserve"><value>Змінити висоту панелі гравців</value></data>
 </root>

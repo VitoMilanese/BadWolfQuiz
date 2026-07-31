@@ -1009,4 +1009,5 @@
   <data name="HostCard_Image" xml:space="preserve"><value>Immagine dell’host (fino a 5 MB)</value></data>
   <data name="HostCard_InvalidImage" xml:space="preserve"><value>Seleziona un’immagine valida fino a 5 MB.</value></data>
   <data name="HostCard_InvalidSettings" xml:space="preserve"><value>Per mostrare la scheda host, inserisci un nome e seleziona un’immagine o una webcam.</value></data>
+  <data name="GameBoard_ResizePlayerPanel" xml:space="preserve"><value>Ridimensiona il pannello dei giocatori</value></data>
 </root>
