@@ -31,6 +31,8 @@ public sealed class LobbyModel(
 
     public IReadOnlyList<RoundLeaderboardEntry> RoundLeaders { get; private set; } = [];
 
+    public IReadOnlyList<GameResultStanding> FinalStandings { get; private set; } = [];
+
     public IActionResult OnGet(Guid id)
     {
         return LoadPage(id);
@@ -54,6 +56,29 @@ public sealed class LobbyModel(
         var blocks = answer
             ? question?.AnswerBlocks
             : question?.QuestionBlocks;
+        var block = blocks?.SingleOrDefault(
+            item => item.SourceContentBlockId == sourceContentBlockId);
+
+        if (block?.FileData is null ||
+            string.IsNullOrWhiteSpace(block.FileContentType))
+        {
+            return NotFound();
+        }
+
+        return string.IsNullOrWhiteSpace(block.FileName)
+            ? File(block.FileData, block.FileContentType)
+            : File(block.FileData, block.FileContentType, block.FileName);
+    }
+
+    public IActionResult OnGetFinalContentBlock(
+        Guid id,
+        int sourceContentBlockId,
+        bool answer)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+        var blocks = answer
+            ? game?.Session.FinalQuestion?.Definition.AnswerBlocks
+            : game?.Session.FinalQuestion?.Definition.QuestionBlocks;
         var block = blocks?.SingleOrDefault(
             item => item.SourceContentBlockId == sourceContentBlockId);
 
@@ -148,8 +173,18 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
+        if (!SettingsInput.IsValid)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameSettings_InvalidDuration"].Value;
+            return RedirectToPage(new { id });
+        }
+
         try
         {
+            sessionRegistry.UpdateSettings(
+                game.PublicCode,
+                SettingsInput.ToRuntimeSettings());
             sessionRegistry.StartGame(game.PublicCode);
         }
         catch (GameRuleViolationException)
@@ -269,6 +304,51 @@ public sealed class LobbyModel(
 
         await BroadcastPlayersAsync(game, cancellationToken);
         return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostStartFinalQuestionAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return await ExecuteFinalHostCommand(
+            id,
+            game => sessionRegistry.StartFinalQuestion(game.PublicCode),
+            cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostLockFinalWagersAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return await ExecuteFinalHostCommand(
+            id,
+            game => sessionRegistry.LockFinalWagers(game.PublicCode),
+            cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostLockFinalAnswersAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return await ExecuteFinalHostCommand(
+            id,
+            game => sessionRegistry.LockFinalAnswers(game.PublicCode),
+            cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostJudgeFinalAnswerAsync(
+        Guid id,
+        Guid playerId,
+        bool isCorrect,
+        CancellationToken cancellationToken)
+    {
+        return await ExecuteFinalHostCommand(
+            id,
+            game => sessionRegistry.JudgeFinalAnswer(
+                game.PublicCode,
+                new GamePlayerId(playerId),
+                isCorrect),
+            cancellationToken);
     }
 
     public async Task<IActionResult> OnPostSelectQuestionAsync(
@@ -416,9 +496,10 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
-    public IActionResult OnPostCloseAnswer(
+    public async Task<IActionResult> OnPostCloseAnswerAsync(
         Guid id,
-        int sourceQuestionId)
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
     {
         var game = sessionRegistry.Find(new GameSessionId(id));
 
@@ -432,6 +513,7 @@ public sealed class LobbyModel(
             sessionRegistry.CloseQuestionAnswer(
                 game.PublicCode,
                 sourceQuestionId);
+            await BroadcastBuzzerAsync(game, cancellationToken);
         }
         catch (GameRuleViolationException)
         {
@@ -570,6 +652,42 @@ public sealed class LobbyModel(
                 cancellationToken);
     }
 
+    private async Task<IActionResult> ExecuteFinalHostCommand(
+        Guid id,
+        Action<GameSessionRegistration> command,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.Find(new GameSessionId(id));
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            command(game);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["FinalQuestion_ActionRejected"].Value;
+        }
+
+        await gameHub.Clients
+            .Group(GameHub.GroupName(game.PublicCode))
+            .SendAsync(
+                "GameStatusChanged",
+                GameHub.CreateStatusUpdate(game),
+                cancellationToken);
+        await gameHub.Clients
+            .Group(GameHub.GroupName(game.PublicCode))
+            .SendAsync("FinalQuestionProgressChanged", cancellationToken);
+        await BroadcastPlayersAsync(game, cancellationToken);
+
+        return RedirectToPage(new { id });
+    }
+
     private IActionResult LoadPage(Guid id)
     {
         var game = sessionRegistry.Find(new GameSessionId(id));
@@ -582,6 +700,16 @@ public sealed class LobbyModel(
         Game = game;
         Players = sessionRegistry.GetPlayers(game);
         SettingsInput = GameSettingsInput.From(game.Session.Settings);
+
+        if (game.Session.Status == GameSessionStatus.Completed)
+        {
+            FinalStandings = game.Session.GetFinalStandings();
+        }
+
+        if (game.Session.Status is not GameSessionStatus.Running)
+        {
+            return Page();
+        }
 
         var currentRound = game.Session.CurrentRound;
 

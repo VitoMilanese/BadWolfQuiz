@@ -1,0 +1,139 @@
+@page "{id:guid}"
+@model BadWolfQuiz.Web.Pages.Admin.Games.AnswerKeyModel
+@{
+    ViewData["Title"] = Localizer["AnswerKey_Title"];
+}
+
+<section class="answer-key-page"
+         data-game-code="@Model.Game.PublicCode">
+    <header class="answer-key-header">
+        <p class="eyebrow">@Localizer["AnswerKey_Eyebrow"]</p>
+        <h1>@Localizer["AnswerKey_Title"]</h1>
+        @if (!string.IsNullOrWhiteSpace(Model.QuestionLabel))
+        {
+            <p>@Model.QuestionLabel</p>
+        }
+    </header>
+
+    @if (Model.AnswerBlocks.Count == 0)
+    {
+        <div class="content-panel answer-key-waiting">
+            <p>@Localizer["AnswerKey_Waiting"]</p>
+        </div>
+    }
+    else
+    {
+        <section class="content-panel game-content-presentation answer-presentation answer-key-content">
+            <p class="eyebrow">@Localizer["GameBoard_Answer"]</p>
+            <div class="game-content-blocks">
+                @foreach (var block in Model.AnswerBlocks)
+                {
+                    <article class="game-content-block">
+                        @if (!string.IsNullOrWhiteSpace(block.TopCaption))
+                        {
+                            <p class="game-content-caption">@block.TopCaption</p>
+                        }
+
+                        @switch (block.Kind)
+                        {
+                            case BadWolfQuiz.Game.Definitions.ContentBlockKind.Text:
+                                <p class="game-content-text">@block.TextContent</p>
+                                break;
+                            case BadWolfQuiz.Game.Definitions.ContentBlockKind.Image:
+                                <img class="game-content-image"
+                                     src="@Url.Page(
+                                         "/Admin/Games/AnswerKey",
+                                         "ContentBlock",
+                                         new
+                                         {
+                                             id = Model.Game.Session.Id.Value,
+                                             sourceContentBlockId = block.SourceContentBlockId,
+                                             final = Model.IsFinalQuestion
+                                         })"
+                                     alt="@block.FileName" />
+                                break;
+                            case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
+                                <audio class="game-content-audio"
+                                       controls
+                                       src="@Url.Page(
+                                           "/Admin/Games/AnswerKey",
+                                           "ContentBlock",
+                                           new
+                                           {
+                                               id = Model.Game.Session.Id.Value,
+                                               sourceContentBlockId = block.SourceContentBlockId,
+                                               final = Model.IsFinalQuestion
+                                           })">
+                                </audio>
+                                break;
+                            case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
+                                <video class="game-content-video"
+                                       controls
+                                       src="@block.ExternalUrl">
+                                </video>
+                                break;
+                            case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
+                                <iframe class="game-content-video"
+                                        src="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
+                                        title="@Localizer["GameBoard_MediaContent"]"
+                                        allowfullscreen>
+                                </iframe>
+                                break;
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
+                        {
+                            <p class="game-content-caption">@block.BottomCaption</p>
+                        }
+                    </article>
+                }
+            </div>
+        </section>
+    }
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const page = document.querySelector(".answer-key-page");
+
+            if (!page || typeof signalR === "undefined") {
+                return;
+            }
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/game")
+                .withAutomaticReconnect()
+                .build();
+            let hasInitialStatus = false;
+            let hasInitialBuzzer = false;
+
+            connection.on("GameStatusChanged", () => {
+                if (!hasInitialStatus) {
+                    hasInitialStatus = true;
+                    return;
+                }
+
+                window.location.reload();
+            });
+
+            connection.on("BuzzerStateChanged", () => {
+                if (!hasInitialBuzzer) {
+                    hasInitialBuzzer = true;
+                    return;
+                }
+
+                window.location.reload();
+            });
+
+            const joinSession = () => connection.invoke(
+                "JoinSession",
+                page.dataset.gameCode);
+
+            connection.onreconnected(joinSession);
+            connection.start()
+                .then(joinSession)
+                .catch(console.error);
+        })();
+    </script>
+}

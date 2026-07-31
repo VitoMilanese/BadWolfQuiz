@@ -33,7 +33,18 @@ Eligibility and wager limits remain domain rules and may be refined when the pro
 
 ## Privacy
 
-Other players' wagers and answers must not be exposed by player projections. The runtime aggregate stores the authoritative values, while the Web layer will provide player-specific and host-specific projections.
+Other players' wagers and answers are not exposed by player projections. SignalR authenticates a player connection with its reconnect token and accepts wagers and answers only from approved connections. Each player receives only their own submission state; the host receives aggregate progress and sees the submitted values during judging.
+
+## Web presentation
+
+- The last round summary offers the final phase only when the immutable quiz snapshot contains complete final question and answer content.
+- During wagering, the host sees submission progress but not the wager amounts.
+- Locking wagers releases the final question to participating player devices.
+- During answering, the host sees submission progress but not answer text.
+- Locking answers starts a sequential presentation of player submissions. The host sees one player name and answer at a time, judges it as correct or incorrect, and then advances automatically to the next submission.
+- The broadcast-facing game screen never reveals the configured correct answer. The host can open a separate live answer-key tab on another display; it follows regular, wager, and final questions automatically.
+- The game finishes only after every participating answer is judged, then shows the authoritative final standings.
+- Players excluded by the negative-score setting remain connected as spectators.
 
 ## Commands
 

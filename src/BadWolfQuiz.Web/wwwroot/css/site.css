@@ -2538,6 +2538,149 @@ iframe.game-content-video {
     grid-row: 1;
 }
 
+.final-question-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    text-align: center;
+    overflow-y: auto;
+}
+
+.final-submission-list,
+.final-judging-list {
+    width: min(100%, 52rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.final-submission-list li,
+.final-judging-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--panel-2);
+}
+
+.final-submission-list li + li,
+.final-judging-card + .final-judging-card {
+    margin-top: 0.65rem;
+}
+
+.final-judging-card {
+    flex-wrap: wrap;
+    text-align: left;
+}
+
+.final-judging-card p {
+    flex: 1 1 100%;
+    margin: 0;
+}
+
+.final-judging-mode {
+    justify-content: stretch;
+}
+
+.final-judging-mode .final-judging-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.final-player-answer-presentation {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.final-player-answer-presentation h2 {
+    margin: 0 0 1rem;
+    color: var(--gold);
+    font-size: clamp(1.5rem, 4vw, 3rem);
+}
+
+.final-player-answer-presentation .game-content-text {
+    width: 100%;
+    align-self: center;
+    margin-inline: auto;
+    font-size: clamp(2rem, 6vw, 5rem);
+    text-align: center;
+}
+
+.final-judging-actions {
+    flex: 0 0 auto;
+    justify-content: center;
+    width: 100%;
+    margin-top: auto;
+}
+
+.player-final-panel {
+    display: grid;
+    gap: 1rem;
+    margin-block: 1.5rem;
+    padding: 1.25rem;
+    border: 1px solid var(--gold);
+    border-radius: 1rem;
+}
+
+.player-final-panel textarea {
+    min-height: 8rem;
+    resize: vertical;
+}
+
+.final-wager-form {
+    width: min(360px, 100%);
+    justify-self: center;
+}
+
+.host-answer-key-launch {
+    position: fixed;
+    top: 84px;
+    right: 20px;
+    z-index: 18;
+}
+
+.answer-key-page {
+    min-height: calc(100dvh - 140px);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.answer-key-header {
+    text-align: center;
+}
+
+.answer-key-header h1,
+.answer-key-header p {
+    margin-block: 0.35rem;
+}
+
+.answer-key-content,
+.answer-key-waiting {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
 .round-wager-settings {
     align-items: center;
 }

@@ -10,12 +10,16 @@ public sealed class GameSessionRegistry
 {
     private const int MaxCodeGenerationAttempts = 20;
     private static readonly TimeSpan BuzzerRaceWindow = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan PlayerTransitionTokenLifetime =
+        TimeSpan.FromSeconds(30);
     private readonly IGameCodeGenerator _gameCodeGenerator;
     private readonly TimeProvider _timeProvider;
     private readonly ConcurrentDictionary<GameSessionId, GameSessionRegistration> _sessionsById = new();
     private readonly ConcurrentDictionary<string, GameSessionRegistration> _sessionsByCode =
         new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, PlayerAccess> _playerAccessByTokenHash = new();
+    private readonly ConcurrentDictionary<string, PlayerTransitionAccess>
+        _playerTransitionAccessByTokenHash = new();
     private readonly Dictionary<string, PlayerConnection> _playerConnections = new();
     private readonly object _presenceSync = new();
 
@@ -110,7 +114,8 @@ public sealed class GameSessionRegistry
         string publicCode,
         string accessToken,
         string connectionId,
-        bool isVisible)
+        bool isVisible,
+        string? transitionToken = null)
     {
         if (string.IsNullOrWhiteSpace(accessToken) ||
             !_playerAccessByTokenHash.TryGetValue(HashToken(accessToken), out var access) ||
@@ -122,11 +127,20 @@ public sealed class GameSessionRegistry
             return null;
         }
 
+        var hasValidTransition = ConsumePlayerTransitionToken(
+            transitionToken,
+            access);
         bool requiresApproval;
 
         lock (_presenceSync)
         {
-            requiresApproval = access.Game.Session.Status != GameSessionStatus.Lobby;
+            var hasApprovedConnection = _playerConnections.Values.Any(connection =>
+                connection.Access == access &&
+                connection.IsApproved);
+            requiresApproval =
+                access.Game.Session.Status != GameSessionStatus.Lobby &&
+                !hasApprovedConnection &&
+                !hasValidTransition;
             _playerConnections[connectionId] = new PlayerConnection(
                 access,
                 isVisible,
@@ -134,6 +148,39 @@ public sealed class GameSessionRegistry
         }
 
         return new PlayerConnectionResult(access.Game, access.Player, requiresApproval);
+    }
+
+    public string? CreatePlayerTransitionToken(string connectionId)
+    {
+        PlayerConnection connection;
+
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(
+                    connectionId,
+                    out var currentConnection) ||
+                !currentConnection.IsApproved)
+            {
+                return null;
+            }
+
+            connection = currentConnection;
+        }
+
+        while (true)
+        {
+            var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+            var transition = new PlayerTransitionAccess(
+                connection.Access,
+                _timeProvider.GetUtcNow() + PlayerTransitionTokenLifetime);
+
+            if (_playerTransitionAccessByTokenHash.TryAdd(
+                    HashToken(token),
+                    transition))
+            {
+                return token;
+            }
+        }
     }
 
     public PlayerConnectionResult? SetPlayerVisibility(string connectionId, bool isVisible)
@@ -216,6 +263,89 @@ public sealed class GameSessionRegistry
         {
             game.BuzzerRace = null;
             return game.Session.AdvanceToNextRound();
+        }
+    }
+
+    public FinalQuestion? StartFinalQuestion(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.StartFinalQuestion();
+        }
+    }
+
+    public FinalPlayerActionResult? SubmitFinalWager(
+        string connectionId,
+        int amount)
+    {
+        return ExecuteApprovedPlayerAction(
+            connectionId,
+            (game, player) => game.Session.SubmitFinalWager(player.Id, amount));
+    }
+
+    public GameSessionRegistration? LockFinalWagers(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            game.Session.LockFinalWagers();
+            return game;
+        }
+    }
+
+    public FinalPlayerActionResult? SubmitFinalAnswer(
+        string connectionId,
+        string answer)
+    {
+        return ExecuteApprovedPlayerAction(
+            connectionId,
+            (game, player) => game.Session.SubmitFinalAnswer(player.Id, answer));
+    }
+
+    public GameSessionRegistration? LockFinalAnswers(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            game.Session.LockFinalAnswers();
+            return game;
+        }
+    }
+
+    public FinalPlayerSubmission? JudgeFinalAnswer(
+        string publicCode,
+        GamePlayerId playerId,
+        bool isCorrect)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.JudgeFinalAnswer(playerId, isCorrect);
         }
     }
 
@@ -600,6 +730,54 @@ public sealed class GameSessionRegistry
         }
     }
 
+    private FinalPlayerActionResult? ExecuteApprovedPlayerAction(
+        string connectionId,
+        Func<GameSessionRegistration, GamePlayer, FinalPlayerSubmission> action)
+    {
+        PlayerConnection connection;
+
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(
+                    connectionId,
+                    out var currentConnection) ||
+                !currentConnection.IsApproved)
+            {
+                return null;
+            }
+
+            connection = currentConnection;
+        }
+
+        lock (connection.Access.Game)
+        {
+            var submission = action(
+                connection.Access.Game,
+                connection.Access.Player);
+
+            return new FinalPlayerActionResult(
+                connection.Access.Game,
+                connection.Access.Player,
+                submission);
+        }
+    }
+
+    private bool ConsumePlayerTransitionToken(
+        string? transitionToken,
+        PlayerAccess access)
+    {
+        if (string.IsNullOrWhiteSpace(transitionToken) ||
+            !_playerTransitionAccessByTokenHash.TryRemove(
+                HashToken(transitionToken),
+                out var transition))
+        {
+            return false;
+        }
+
+        return transition.Access == access &&
+            transition.ExpiresAtUtc >= _timeProvider.GetUtcNow();
+    }
+
     private PlayerPresenceStatus GetPresence(GamePlayerId playerId)
     {
         var connections = _playerConnections.Values
@@ -644,6 +822,10 @@ public sealed class GameSessionRegistry
         PlayerAccess Access,
         bool IsVisible,
         bool IsApproved);
+
+    private sealed record PlayerTransitionAccess(
+        PlayerAccess Access,
+        DateTimeOffset ExpiresAtUtc);
 }
 
 
@@ -657,3 +839,9 @@ public sealed record BuzzerClaimResult(
 public sealed record QuestionTimerTickResult(
     GameSessionRegistration Game,
     QuestionTimerOutcome Outcome);
+
+
+public sealed record FinalPlayerActionResult(
+    GameSessionRegistration Game,
+    GamePlayer Player,
+    FinalPlayerSubmission Submission);

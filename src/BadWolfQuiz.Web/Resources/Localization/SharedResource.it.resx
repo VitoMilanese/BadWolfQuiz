@@ -888,4 +888,29 @@
   <data name="Message_FinalQuestionSaved" xml:space="preserve">
     <value>Domanda finale salvata.</value>
   </data>
+  <data name="FinalQuestion_Title" xml:space="preserve"><value>Domanda finale</value></data>
+  <data name="FinalQuestion_Start" xml:space="preserve"><value>Avvia la domanda finale</value></data>
+  <data name="FinalQuestion_WaitingForWagers" xml:space="preserve"><value>In attesa delle puntate finali</value></data>
+  <data name="FinalQuestion_NotSubmitted" xml:space="preserve"><value>Non confermato</value></data>
+  <data name="FinalQuestion_Submitted" xml:space="preserve"><value>Confermato</value></data>
+  <data name="FinalQuestion_ShowQuestion" xml:space="preserve"><value>Mostra la domanda finale</value></data>
+  <data name="FinalQuestion_StartJudging" xml:space="preserve"><value>Mostra la risposta e inizia la valutazione</value></data>
+  <data name="FinalQuestion_Results" xml:space="preserve"><value>Risultati finali</value></data>
+  <data name="FinalQuestion_NotEligible" xml:space="preserve"><value>Stai guardando la domanda finale come spettatore.</value></data>
+  <data name="FinalQuestion_YourWager" xml:space="preserve"><value>La tua puntata</value></data>
+  <data name="FinalQuestion_WagerLimits" xml:space="preserve"><value>Puntata consentita: {0}–{1}</value></data>
+  <data name="FinalQuestion_ConfirmWager" xml:space="preserve"><value>Conferma la puntata</value></data>
+  <data name="FinalQuestion_WagerConfirmed" xml:space="preserve"><value>Puntata confermata. Attendi il presentatore.</value></data>
+  <data name="FinalQuestion_YourAnswer" xml:space="preserve"><value>La tua risposta</value></data>
+  <data name="FinalQuestion_ConfirmAnswer" xml:space="preserve"><value>Conferma la risposta</value></data>
+  <data name="FinalQuestion_AnswerConfirmed" xml:space="preserve"><value>Risposta confermata. Attendi il presentatore.</value></data>
+  <data name="FinalQuestion_WaitingForJudging" xml:space="preserve"><value>Il presentatore sta valutando le risposte finali.</value></data>
+  <data name="FinalQuestion_YourAnswerCorrect" xml:space="preserve"><value>La tua risposta finale era corretta.</value></data>
+  <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve"><value>La tua risposta finale era errata.</value></data>
+  <data name="FinalQuestion_ActionRejected" xml:space="preserve"><value>Questa azione della domanda finale non è ancora disponibile.</value></data>
+  <data name="FinalQuestion_JudgingProgress" xml:space="preserve"><value>Risposta {0} di {1}</value></data>
+  <data name="AnswerKey_Title" xml:space="preserve"><value>Risposta corretta</value></data>
+  <data name="AnswerKey_Eyebrow" xml:space="preserve"><value>Schermata privata del presentatore</value></data>
+  <data name="AnswerKey_Open" xml:space="preserve"><value>Apri la risposta corretta</value></data>
+  <data name="AnswerKey_Waiting" xml:space="preserve"><value>In attesa di una domanda.</value></data>
 </root>

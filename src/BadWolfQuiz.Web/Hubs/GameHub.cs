@@ -38,13 +38,15 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
     public async Task JoinPlayerSession(
         string publicCode,
         string accessToken,
-        bool isVisible)
+        bool isVisible,
+        string? transitionToken)
     {
         var connection = sessionRegistry.ConnectPlayer(
             publicCode,
             accessToken,
             Context.ConnectionId,
-            isVisible);
+            isVisible,
+            transitionToken);
 
         if (connection is null)
         {
@@ -75,8 +77,29 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
         await Clients.Caller.SendAsync(
             "TimerStateChanged",
             CreateTimerUpdate(connection.Game));
+        await Clients.Caller.SendAsync(
+            "FinalQuestionStateChanged",
+            CreateFinalQuestionUpdate(connection.Game, connection.Player));
 
         await BroadcastPlayers(connection.Game);
+    }
+
+    public string? PreparePlayerTransition()
+    {
+        return sessionRegistry.CreatePlayerTransitionToken(
+            Context.ConnectionId);
+    }
+
+    public async Task SubmitFinalWager(int amount)
+    {
+        await ExecuteFinalPlayerAction(() =>
+            sessionRegistry.SubmitFinalWager(Context.ConnectionId, amount));
+    }
+
+    public async Task SubmitFinalAnswer(string answer)
+    {
+        await ExecuteFinalPlayerAction(() =>
+            sessionRegistry.SubmitFinalAnswer(Context.ConnectionId, answer));
     }
 
     public async Task SetPlayerVisibility(bool isVisible)
@@ -191,6 +214,26 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
     public static object CreateStatusUpdate(GameSessionRegistration game)
         => new { status = game.Session.Status.ToString().ToLowerInvariant() };
 
+    public static object CreateFinalQuestionUpdate(
+        GameSessionRegistration game,
+        GamePlayer player)
+    {
+        var submission = game.Session.FinalQuestion?.Submissions
+            .SingleOrDefault(item => item.PlayerId == player.Id);
+
+        return new
+        {
+            status = game.Session.Status.ToString().ToLowerInvariant(),
+            participates = submission is not null,
+            minimumWager = FinalQuestion.MinimumWager,
+            maximumWager = submission?.MaximumWager,
+            hasSubmittedWager = submission?.Wager is not null,
+            hasSubmittedAnswer = submission?.Answer is not null,
+            isJudged = submission?.IsCorrect.HasValue ?? false,
+            isCorrect = submission?.IsCorrect
+        };
+    }
+
     public static object CreateTimerUpdate(GameSessionRegistration game)
     {
         var answerTimer = game.Session.AnswerTimer;
@@ -273,5 +316,45 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
         return Clients
             .Group(GroupName(game.PublicCode))
             .SendAsync("PlayersChanged", CreatePlayersUpdate(sessionRegistry, game));
+    }
+
+    private async Task ExecuteFinalPlayerAction(
+        Func<FinalPlayerActionResult?> action)
+    {
+        FinalPlayerActionResult? result;
+
+        try
+        {
+            result = action();
+        }
+        catch (GameRuleViolationException exception)
+        {
+            await Clients.Caller.SendAsync(
+                "FinalQuestionActionRejected",
+                new { message = exception.Message });
+            return;
+        }
+        catch (ArgumentException exception)
+        {
+            await Clients.Caller.SendAsync(
+                "FinalQuestionActionRejected",
+                new { message = exception.Message });
+            return;
+        }
+
+        if (result is null)
+        {
+            await Clients.Caller.SendAsync(
+                "FinalQuestionActionRejected",
+                new { message = "Player access is not approved." });
+            return;
+        }
+
+        await Clients.Caller.SendAsync(
+            "FinalQuestionStateChanged",
+            CreateFinalQuestionUpdate(result.Game, result.Player));
+        await Clients
+            .Group(GroupName(result.Game.PublicCode))
+            .SendAsync("FinalQuestionProgressChanged");
     }
 }

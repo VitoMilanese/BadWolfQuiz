@@ -31,6 +31,25 @@ public sealed class GameSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task Save_and_load_preserve_disabled_negative_final_participation()
+    {
+        var store = new GameSettingsStore(
+            new TestWebHostEnvironment(_contentRoot));
+        var expected = new GameSessionSettings(
+            TimeSpan.FromSeconds(47),
+            TimeSpan.FromSeconds(13),
+            GamePhaseStartMode.Automatic,
+            GamePhaseStartMode.Manual,
+            allowNegativeScoreFinalPlayers: false);
+
+        await store.SaveAsync(expected);
+        var actual = await store.LoadAsync();
+
+        Assert.False(actual.AllowNegativeScoreFinalPlayers);
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
     public async Task Load_returns_engine_defaults_when_file_does_not_exist()
     {
         var store = new GameSettingsStore(
