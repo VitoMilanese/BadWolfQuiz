@@ -55,6 +55,7 @@ public sealed class HostAccountServiceTests
             new Quiz { HostId = "host-b", Title = "Visible" });
         await fixture.Db.SaveChangesAsync();
 
+        Assert.Equal("host-b", fixture.Db.CurrentHostId);
         Assert.Equal("Visible", (await fixture.Db.Quizzes.SingleAsync()).Title);
     }
 

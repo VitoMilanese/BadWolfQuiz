@@ -4,12 +4,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BadWolfQuiz.Web.Data;
 
-public sealed class QuizDbContext(
-    DbContextOptions<QuizDbContext> options,
-    IHttpContextAccessor? httpContextAccessor = null) : DbContext(options)
+public sealed class QuizDbContext : DbContext
 {
-    private string? CurrentHostId => httpContextAccessor?.HttpContext?.User
-        .FindFirstValue(ClaimTypes.NameIdentifier);
+    public QuizDbContext(
+        DbContextOptions<QuizDbContext> options,
+        IHttpContextAccessor? httpContextAccessor = null) : base(options)
+    {
+        CurrentHostId = httpContextAccessor?.HttpContext?.User
+            .FindFirstValue(ClaimTypes.NameIdentifier);
+    }
+
+    public string? CurrentHostId { get; }
 
     public DbSet<HostAccount> Hosts => Set<HostAccount>();
     public DbSet<Quiz> Quizzes => Set<Quiz>();

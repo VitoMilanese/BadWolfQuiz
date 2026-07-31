@@ -46,26 +46,14 @@ public sealed class AddHostAccounts : Migration
         migrationBuilder.CreateIndex(name: "IX_Quizzes_HostId", table: "Quizzes", column: "HostId");
         migrationBuilder.CreateIndex(name: "IX_GameSessions_HostId", table: "GameSessions", column: "HostId");
 
-        migrationBuilder.AddForeignKey(
-            name: "FK_Quizzes_Hosts_HostId",
-            table: "Quizzes",
-            column: "HostId",
-            principalTable: "Hosts",
-            principalColumn: "Id",
-            onDelete: ReferentialAction.Restrict);
-        migrationBuilder.AddForeignKey(
-            name: "FK_GameSessions_Hosts_HostId",
-            table: "GameSessions",
-            column: "HostId",
-            principalTable: "Hosts",
-            principalColumn: "Id",
-            onDelete: ReferentialAction.Restrict);
+        // SQLite cannot add foreign keys to existing tables without rebuilding
+        // them. The ownership columns and indexes are sufficient for upgraded
+        // databases; databases created from the current model include the
+        // relationships from the start.
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.DropForeignKey("FK_Quizzes_Hosts_HostId", "Quizzes");
-        migrationBuilder.DropForeignKey("FK_GameSessions_Hosts_HostId", "GameSessions");
         migrationBuilder.DropIndex("IX_Quizzes_HostId", "Quizzes");
         migrationBuilder.DropIndex("IX_GameSessions_HostId", "GameSessions");
         migrationBuilder.DropColumn("HostId", "Quizzes");
