@@ -809,42 +809,43 @@
                 }
                 else
                 {
+                    var currentSubmission = final.Submissions
+                        .First(item => !item.IsCorrect.HasValue);
+                    var judgedCount = final.Submissions.Count(item =>
+                        item.IsCorrect.HasValue);
+
                     <div class="final-judging-list">
-                        @foreach (var submission in final.Submissions)
-                        {
-                            <article class="final-judging-card">
-                                <strong>@submission.PlayerName — @submission.Wager!.Amount</strong>
-                                <p>@submission.Answer!.Text</p>
-                                @if (submission.IsCorrect.HasValue)
-                                {
-                                    <span class="@(submission.IsCorrect.Value ? "text-success" : "text-error")">
-                                        @(submission.IsCorrect.Value
-                                            ? Localizer["Message_Correct"]
-                                            : Localizer["Message_Wrong"])
-                                    </span>
-                                }
-                                else
-                                {
-                                    <form class="question-judge-actions"
-                                          method="post"
-                                          asp-page-handler="JudgeFinalAnswer">
-                                        <input name="playerId" type="hidden" value="@submission.PlayerId.Value" />
-                                        <button class="button judgment-correct-button"
-                                                name="isCorrect"
-                                                type="submit"
-                                                value="true">
-                                            @Localizer["Message_Correct"]
-                                        </button>
-                                        <button class="button judgment-incorrect-button"
-                                                name="isCorrect"
-                                                type="submit"
-                                                value="false">
-                                            @Localizer["Message_Wrong"]
-                                        </button>
-                                    </form>
-                                }
-                            </article>
-                        }
+                        <p class="dialog-warning">
+                            @Localizer[
+                                "FinalQuestion_JudgingProgress",
+                                judgedCount + 1,
+                                final.Submissions.Count]
+                        </p>
+                        <article class="final-judging-card final-current-answer">
+                            <p>
+                                <strong>@currentSubmission.PlayerName:</strong>
+                                @currentSubmission.Answer!.Text
+                            </p>
+                            <form class="question-judge-actions"
+                                  method="post"
+                                  asp-page-handler="JudgeFinalAnswer">
+                                <input name="playerId"
+                                       type="hidden"
+                                       value="@currentSubmission.PlayerId.Value" />
+                                <button class="button judgment-correct-button"
+                                        name="isCorrect"
+                                        type="submit"
+                                        value="true">
+                                    @Localizer["Message_Correct"]
+                                </button>
+                                <button class="button judgment-incorrect-button"
+                                        name="isCorrect"
+                                        type="submit"
+                                        value="false">
+                                    @Localizer["Message_Wrong"]
+                                </button>
+                            </form>
+                        </article>
                     </div>
                 }
             }

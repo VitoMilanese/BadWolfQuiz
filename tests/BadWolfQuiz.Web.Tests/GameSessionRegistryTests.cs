@@ -187,6 +187,27 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void Running_game_keeps_approval_during_overlapping_page_transition()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer("ABC123", joined.AccessToken!, "old-page", true);
+        registry.StartGame("ABC123");
+
+        var replacement = registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "new-page",
+            true);
+
+        Assert.False(replacement!.RequiresApproval);
+        Assert.Equal(
+            PlayerPresenceStatus.Active,
+            registry.GetPlayerLobbyEntries(replacement.Game).Single().Presence);
+    }
+
+    [Fact]
     public void SelectQuestion_routes_command_to_runtime_session()
     {
         var registry = CreateRegistry("ABC123");

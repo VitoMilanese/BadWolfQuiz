@@ -126,7 +126,12 @@ public sealed class GameSessionRegistry
 
         lock (_presenceSync)
         {
-            requiresApproval = access.Game.Session.Status != GameSessionStatus.Lobby;
+            var hasApprovedConnection = _playerConnections.Values.Any(connection =>
+                connection.Access == access &&
+                connection.IsApproved);
+            requiresApproval =
+                access.Game.Session.Status != GameSessionStatus.Lobby &&
+                !hasApprovedConnection;
             _playerConnections[connectionId] = new PlayerConnection(
                 access,
                 isVisible,

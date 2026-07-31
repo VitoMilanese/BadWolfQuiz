@@ -314,8 +314,15 @@
             });
 
             connection.on("GameStatusChanged", update => {
-                if (lobby.dataset.finalStatus &&
-                    lobby.dataset.finalStatus !== update.status) {
+                const finalStatuses = [
+                    "finalwagering",
+                    "finalanswering",
+                    "finaljudging",
+                    "completed"
+                ];
+
+                if (lobby.dataset.finalStatus !== update.status &&
+                    finalStatuses.includes(update.status)) {
                     window.location.reload();
                 }
             });

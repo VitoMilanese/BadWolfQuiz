@@ -908,4 +908,5 @@
   <data name="FinalQuestion_YourAnswerCorrect" xml:space="preserve"><value>La tua risposta finale era corretta.</value></data>
   <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve"><value>La tua risposta finale era errata.</value></data>
   <data name="FinalQuestion_ActionRejected" xml:space="preserve"><value>Questa azione della domanda finale non è ancora disponibile.</value></data>
+  <data name="FinalQuestion_JudgingProgress" xml:space="preserve"><value>Risposta {0} di {1}</value></data>
 </root>

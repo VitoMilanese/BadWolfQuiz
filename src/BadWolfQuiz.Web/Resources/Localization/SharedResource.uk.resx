@@ -908,4 +908,5 @@
   <data name="FinalQuestion_YourAnswerCorrect" xml:space="preserve"><value>Ваша фінальна відповідь правильна.</value></data>
   <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve"><value>Ваша фінальна відповідь неправильна.</value></data>
   <data name="FinalQuestion_ActionRejected" xml:space="preserve"><value>Ця дія з фінальним питанням поки недоступна.</value></data>
+  <data name="FinalQuestion_JudgingProgress" xml:space="preserve"><value>Відповідь {0} з {1}</value></data>
 </root>
