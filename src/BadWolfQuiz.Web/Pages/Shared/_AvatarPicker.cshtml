@@ -1,0 +1,27 @@
+<dialog class="avatar-picker" data-avatar-picker>
+    <div class="avatar-picker-card">
+        <header class="dialog-heading">
+            <h2>@Localizer["AvatarPicker_Title"]</h2>
+            <button class="dialog-close" type="button" data-avatar-close aria-label="@Localizer["Button_Close"]">×</button>
+        </header>
+
+        <section data-avatar-gender-step>
+            <p>@Localizer["AvatarPicker_SelectGender"]</p>
+            <div class="avatar-gender-grid">
+                <button type="button" data-avatar-gender="F" aria-label="@Localizer["AvatarPicker_Female"]">
+                    <img src="/avatars/F.png" alt="" />
+                </button>
+                <button type="button" data-avatar-gender="M" aria-label="@Localizer["AvatarPicker_Male"]">
+                    <img src="/avatars/M.png" alt="" />
+                </button>
+            </div>
+        </section>
+
+        <section data-avatar-list-step hidden>
+            <div class="avatar-picker-toolbar">
+                <button class="button button-secondary" type="button" data-avatar-back>← @Localizer["Button_Back"]</button>
+            </div>
+            <div class="avatar-option-grid" data-avatar-options></div>
+        </section>
+    </div>
+</dialog>

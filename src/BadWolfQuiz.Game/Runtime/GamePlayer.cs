@@ -15,10 +15,18 @@ public sealed class GamePlayer
 
     public int Score { get; private set; }
 
+    public string? AvatarId { get; private set; }
+
     public DateTimeOffset JoinedAtUtc { get; }
 
     internal void ApplyScore(int points)
     {
         Score = checked(Score + points);
+    }
+
+    public void SetAvatar(string avatarId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(avatarId);
+        AvatarId = avatarId;
     }
 }

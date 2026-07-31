@@ -1010,4 +1010,12 @@
   <data name="HostCard_InvalidImage" xml:space="preserve"><value>Оберіть коректне зображення розміром до 5 МБ.</value></data>
   <data name="HostCard_InvalidSettings" xml:space="preserve"><value>Щоб показувати картку хоста, вкажіть ім’я та оберіть картинку або вебкамеру.</value></data>
   <data name="GameBoard_ResizePlayerPanel" xml:space="preserve"><value>Змінити висоту панелі гравців</value></data>
+  <data name="HostCard_SourceAvatar" xml:space="preserve"><value>Аватар</value></data>
+  <data name="HostCard_Avatar" xml:space="preserve"><value>Аватар хоста</value></data>
+  <data name="AvatarPicker_Title" xml:space="preserve"><value>Вибір аватара</value></data>
+  <data name="AvatarPicker_SelectGender" xml:space="preserve"><value>Спочатку оберіть стать персонажа</value></data>
+  <data name="AvatarPicker_Female" xml:space="preserve"><value>Жіноча</value></data>
+  <data name="AvatarPicker_Male" xml:space="preserve"><value>Чоловіча</value></data>
+  <data name="AvatarPicker_Choose" xml:space="preserve"><value>Обрати аватар</value></data>
+  <data name="AvatarPicker_ChooseOrChange" xml:space="preserve"><value>Обрати або змінити аватар</value></data>
 </root>

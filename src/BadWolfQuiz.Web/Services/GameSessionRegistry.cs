@@ -94,7 +94,10 @@ public sealed class GameSessionRegistry
         return _sessionsByCode.GetValueOrDefault(NormalizeCode(publicCode));
     }
 
-    public PlayerJoinResult JoinPlayer(string publicCode, string playerName)
+    public PlayerJoinResult JoinPlayer(
+        string publicCode,
+        string playerName,
+        string? avatarId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(playerName);
 
@@ -120,6 +123,10 @@ public sealed class GameSessionRegistry
             }
 
             var player = game.Session.AddPlayer(playerName);
+            if (!string.IsNullOrWhiteSpace(avatarId))
+            {
+                player.SetAvatar(avatarId);
+            }
             var accessToken = CreatePlayerAccess(game, player);
             return PlayerJoinResult.Succeeded(game, player, accessToken);
         }
@@ -280,6 +287,29 @@ public sealed class GameSessionRegistry
                 connection.Access.Player,
                 !connection.IsApproved);
         }
+    }
+
+    public PlayerConnectionResult? SetPlayerAvatar(string connectionId, string avatarId)
+    {
+        PlayerConnection connection;
+
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(connectionId, out connection))
+            {
+                return null;
+            }
+        }
+
+        lock (connection.Access.Game)
+        {
+            connection.Access.Player.SetAvatar(avatarId);
+        }
+
+        return new PlayerConnectionResult(
+            connection.Access.Game,
+            connection.Access.Player,
+            !connection.IsApproved);
     }
 
     public PlayerConnectionResult? DisconnectPlayer(string connectionId)
@@ -858,6 +888,7 @@ public sealed class GameSessionRegistry
                     player.Id,
                     player.Name,
                     player.Score,
+                    player.AvatarId,
                     GetPresence(player.Id)))
                 .ToArray();
         }

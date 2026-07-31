@@ -96,6 +96,7 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
         public HostVisualSource HostVisualSource { get; set; }
         public byte[]? HostImageData { get; set; }
         public string? HostImageContentType { get; set; }
+        public string? HostAvatarId { get; set; }
 
         public GameSessionSettings ToRuntimeSettings() => new(
             BuzzerDuration,
@@ -107,7 +108,8 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             HostName,
             HostVisualSource,
             HostImageData,
-            HostImageContentType);
+            HostImageContentType,
+            HostAvatarId);
 
         public static StoredGameSettings From(GameSessionSettings settings) => new()
         {
@@ -120,7 +122,8 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             HostName = settings.HostName,
             HostVisualSource = settings.HostVisualSource,
             HostImageData = settings.HostImageData,
-            HostImageContentType = settings.HostImageContentType
+            HostImageContentType = settings.HostImageContentType,
+            HostAvatarId = settings.HostAvatarId
         };
     }
 }
@@ -141,6 +144,7 @@ public sealed class GameSettingsInput
     public bool DisplayHostCard { get; set; }
     public string? HostName { get; set; }
     public HostVisualSource HostVisualSource { get; set; }
+    public string? HostAvatarId { get; set; }
 
     public bool IsValid =>
         BuzzerDurationSeconds is >= 1 and <= 3600 &&
@@ -171,7 +175,8 @@ public sealed class GameSettingsInput
             HostName,
             HostVisualSource,
             hostImageData,
-            hostImageContentType);
+            hostImageContentType,
+            HostAvatarId);
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)
@@ -188,7 +193,8 @@ public sealed class GameSettingsInput
                 settings.AllowNegativeScoreFinalPlayers,
             DisplayHostCard = settings.DisplayHostCard,
             HostName = settings.HostName,
-            HostVisualSource = settings.HostVisualSource
+            HostVisualSource = settings.HostVisualSource,
+            HostAvatarId = settings.HostAvatarId
         };
     }
 }

@@ -11,6 +11,7 @@ namespace BadWolfQuiz.Web.Pages.Join;
 
 public sealed class IndexModel(
     GameSessionRegistry sessionRegistry,
+    AvatarCatalog avatarCatalog,
     IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -37,7 +38,13 @@ public sealed class IndexModel(
             return Page();
         }
 
-        var result = sessionRegistry.JoinPlayer(Input.GameCode, Input.PlayerName);
+        var avatarId = avatarCatalog.IsValid(Input.AvatarId)
+            ? Input.AvatarId
+            : null;
+        var result = sessionRegistry.JoinPlayer(
+            Input.GameCode,
+            Input.PlayerName,
+            avatarId);
 
         switch (result.Status)
         {
@@ -89,5 +96,7 @@ public sealed class IndexModel(
         [Required(ErrorMessage = "Error_Required")]
         [StringLength(60, ErrorMessage = "Error_MaxLength")]
         public string PlayerName { get; set; } = string.Empty;
+
+        public string? AvatarId { get; set; }
     }
 }

@@ -62,6 +62,18 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void JoinPlayer_restores_supplied_avatar()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+
+        var result = registry.JoinPlayer("ABC123", "Rose", "F/17.png");
+
+        Assert.Equal(PlayerJoinStatus.Success, result.Status);
+        Assert.Equal("F/17.png", result.Player!.AvatarId);
+    }
+
+    [Fact]
     public void JoinPlayer_rejects_duplicate_name_ignoring_case()
     {
         var registry = CreateRegistry("ABC123");
@@ -120,6 +132,24 @@ public sealed class GameSessionRegistryTests
         Assert.Equal(PlayerPresenceStatus.Inactive, inactive.Presence);
         Assert.Equal(PlayerPresenceStatus.Disconnected, disconnected.Presence);
         Assert.Equal(0, disconnected.Score);
+    }
+
+    [Fact]
+    public void Connected_player_can_change_avatar()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-1",
+            true);
+
+        var result = registry.SetPlayerAvatar("connection-1", "F/17.png");
+
+        Assert.NotNull(result);
+        Assert.Equal("F/17.png", joined.Player!.AvatarId);
     }
 
     [Fact]

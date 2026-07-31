@@ -140,6 +140,28 @@ Implemented:
 
 ---
 
+## QR join address
+
+The server must listen on a network interface, for example:
+
+```powershell
+dotnet run --project src/BadWolfQuiz.Web --urls http://0.0.0.0:5080
+```
+
+The QR code uses the explicitly configured public address:
+
+```json
+{
+  "Game": {
+    "PublicBaseUrl": "http://79.41.129.203:5080"
+  }
+}
+```
+
+The configured port must be forwarded by the router and allowed by the firewall.
+
+---
+
 ## Architecture
 
 - Entity Framework Core data model
@@ -216,6 +238,3 @@ src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
 
 - Import / Export quizzes
 - Backup
-- Version history
-- Search
-- Category templates
