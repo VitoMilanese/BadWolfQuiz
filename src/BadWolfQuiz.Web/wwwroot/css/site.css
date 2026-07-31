@@ -1539,6 +1539,25 @@ textarea {
     text-indent: 0.16em;
 }
 
+.join-qr-code {
+    width: min(320px, 70vw);
+    height: auto;
+    padding: 12px;
+    border-radius: 12px;
+    background: #fff;
+    image-rendering: pixelated;
+}
+
+.join-selected-game {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gold);
+    border-radius: 0.75rem;
+    color: var(--gold);
+    text-align: center;
+    font-weight: 700;
+}
+
 .join-code-close {
     position: absolute;
     top: 14px;

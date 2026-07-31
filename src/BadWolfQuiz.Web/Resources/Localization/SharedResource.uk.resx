@@ -990,4 +990,6 @@
   <data name="Account_EmailSubject" xml:space="preserve"><value>BAD WOLF QUIZ — відновлення пароля</value></data>
   <data name="Account_EmailIntro" xml:space="preserve"><value>Для вашого акаунта хоста BAD WOLF QUIZ надійшов запит на відновлення пароля.</value></data>
   <data name="Account_EmailExpiry" xml:space="preserve"><value>Посилання діє одну годину. Якщо ви не надсилали запит, просто проігноруйте цей лист.</value></data>
+  <data name="GameBoard_JoinQrAlt" xml:space="preserve"><value>QR-код для приєднання до гри</value></data>
+  <data name="Join_SelectedGame" xml:space="preserve"><value>Код гри: {0}</value></data>
 </root>

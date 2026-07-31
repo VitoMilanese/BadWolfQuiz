@@ -756,6 +756,11 @@
 
                 <p class="eyebrow">@Localizer["GameBoard_JoinOverlayHint"]</p>
                 <h2 id="join-code-title">@Localizer["GameBoard_JoinOverlayTitle"]</h2>
+                <img class="join-qr-code"
+                     src="@Url.Page("/Admin/Games/Lobby", "JoinQrCode", new { id = Model.Game.Session.Id.Value })"
+                     width="320"
+                     height="320"
+                     alt="@Localizer["GameBoard_JoinQrAlt"]" />
                 <strong class="join-code-value">@Model.Game.PublicCode</strong>
             </div>
         </dialog>

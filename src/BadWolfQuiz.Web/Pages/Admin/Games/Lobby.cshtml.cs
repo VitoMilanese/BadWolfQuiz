@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Localization;
+using QRCoder;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Games;
 
@@ -14,6 +15,7 @@ public sealed class LobbyModel(
     GameSessionRegistry sessionRegistry,
     GameHistoryStore gameHistoryStore,
     CurrentHost currentHost,
+    JoinUrlBuilder joinUrlBuilder,
     IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -101,6 +103,25 @@ public sealed class LobbyModel(
         return string.IsNullOrWhiteSpace(block.FileName)
             ? File(block.FileData, block.FileContentType)
             : File(block.FileData, block.FileContentType, block.FileName);
+    }
+
+    public IActionResult OnGetJoinQrCode(Guid id)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var joinUrl = joinUrlBuilder.Build(Request, game.PublicCode);
+        using var generator = new QRCodeGenerator();
+        using var data = generator.CreateQrCode(
+            joinUrl,
+            QRCodeGenerator.ECCLevel.Q);
+        using var qrCode = new PngByteQRCode(data);
+        return File(qrCode.GetGraphic(16), "image/png");
     }
 
     public static string? GetYouTubeEmbedUrl(string? value)

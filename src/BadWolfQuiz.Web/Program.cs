@@ -71,6 +71,7 @@ builder.Services.AddScoped<GameHistoryStore>();
 builder.Services.AddScoped<CurrentHost>();
 builder.Services.AddScoped<HostAccountService>();
 builder.Services.AddScoped<PasswordResetEmailSender>();
+builder.Services.AddScoped<JoinUrlBuilder>();
 builder.Services.AddScoped<IPasswordHasher<HostAccount>, PasswordHasher<HostAccount>>();
 builder.Services.AddScoped<QuizSeedService>();
 

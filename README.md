@@ -122,6 +122,7 @@ Currently implemented:
 - Host answer-history editing with immediate score and standings recalculation
 - Persistent completed-game history with final scores and answer details
 - Self-service host accounts with private quiz and game-history ownership
+- QR player joining with direct game links
 
 ---
 
