@@ -65,24 +65,63 @@
                 @if (submission.Wager is null)
                 {
                     <form id="final-wager-form"
-                          class="stack-form"
+                          class="question-wager-form final-wager-form"
                           data-minimum="@BadWolfQuiz.Game.Runtime.FinalQuestion.MinimumWager"
                           data-maximum="@submission.MaximumWager">
-                        <label>
+                        <label class="wager-display-label">
                             <span>@Localizer["FinalQuestion_YourWager"]</span>
                             <input id="final-wager"
-                                   type="number"
-                                   min="@BadWolfQuiz.Game.Runtime.FinalQuestion.MinimumWager"
-                                   max="@submission.MaximumWager"
+                                   class="wager-display"
+                                   type="text"
+                                   inputmode="none"
+                                   readonly
                                    required />
                         </label>
-                        <small>
+
+                        <div class="wager-keypad"
+                             aria-label="@Localizer["GameBoard_WagerKeypad"]">
+                            @foreach (var digit in new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 })
+                            {
+                                <button type="button" data-final-wager-digit="@digit">
+                                    @digit
+                                </button>
+                            }
+                            <button type="button"
+                                    data-final-wager-clear
+                                    aria-label="@Localizer["GameBoard_ClearWager"]">
+                                C
+                            </button>
+                            <button type="button" data-final-wager-digit="0">0</button>
+                            <button type="button"
+                                    data-final-wager-backspace
+                                    aria-label="@Localizer["GameBoard_DeleteWagerDigit"]">
+                                ⌫
+                            </button>
+                            <button class="wager-keypad-max"
+                                    type="button"
+                                    data-final-wager-max
+                                    aria-label="@Localizer["GameBoard_MaximumWager"]">
+                                MAX
+                            </button>
+                        </div>
+
+                        <p class="wager-validation"
+                           data-final-wager-validation
+                           data-valid-label="@Localizer["GameBoard_WagerValid"]"
+                           data-invalid-label="@Localizer[
+                               "GameBoard_WagerOutsideLimits",
+                               BadWolfQuiz.Game.Runtime.FinalQuestion.MinimumWager,
+                               submission.MaximumWager]">
                             @Localizer[
-                                "FinalQuestion_WagerLimits",
+                                "GameBoard_WagerOutsideLimits",
                                 BadWolfQuiz.Game.Runtime.FinalQuestion.MinimumWager,
                                 submission.MaximumWager]
-                        </small>
-                        <button class="button button-primary" type="submit">
+                        </p>
+
+                        <button class="button button-primary"
+                                type="submit"
+                                data-final-wager-submit
+                                disabled>
                             @Localizer["FinalQuestion_ConfirmWager"]
                         </button>
                     </form>
@@ -361,6 +400,68 @@
                 connection.invoke("SubmitFinalWager", amount)
                     .catch(console.error);
             });
+
+            if (finalWagerForm) {
+                const display = document.getElementById("final-wager");
+                const validation = finalWagerForm.querySelector(
+                    "[data-final-wager-validation]");
+                const submit = finalWagerForm.querySelector(
+                    "[data-final-wager-submit]");
+                const minimum = Number(finalWagerForm.dataset.minimum);
+                const maximum = Number(finalWagerForm.dataset.maximum);
+
+                const refreshFinalWager = () => {
+                    const amount = Number(display.value);
+                    const isValid = display.value !== "" &&
+                        amount >= minimum &&
+                        amount <= maximum;
+
+                    submit.disabled = !isValid;
+                    validation.textContent = isValid
+                        ? validation.dataset.validLabel
+                        : validation.dataset.invalidLabel;
+                    validation.classList.toggle("wager-valid", isValid);
+                };
+
+                finalWagerForm
+                    .querySelectorAll("[data-final-wager-digit]")
+                    .forEach(button => {
+                        button.addEventListener("click", () => {
+                            const nextValue = (
+                                display.value +
+                                button.dataset.finalWagerDigit)
+                                .replace(/^0+(?=\d)/, "");
+
+                            display.value = Math.min(
+                                Number(nextValue),
+                                maximum).toString();
+                            refreshFinalWager();
+                        });
+                    });
+
+                finalWagerForm
+                    .querySelector("[data-final-wager-max]")
+                    ?.addEventListener("click", () => {
+                        display.value = maximum.toString();
+                        refreshFinalWager();
+                    });
+
+                finalWagerForm
+                    .querySelector("[data-final-wager-clear]")
+                    ?.addEventListener("click", () => {
+                        display.value = "";
+                        refreshFinalWager();
+                    });
+
+                finalWagerForm
+                    .querySelector("[data-final-wager-backspace]")
+                    ?.addEventListener("click", () => {
+                        display.value = display.value.slice(0, -1);
+                        refreshFinalWager();
+                    });
+
+                refreshFinalWager();
+            }
 
             finalAnswerForm?.addEventListener("submit", event => {
                 event.preventDefault();

@@ -4,7 +4,7 @@
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
 }
 
-@if (Model.Game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
+@if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby)
 {
     <div class="page-heading">
     <div>
@@ -1069,6 +1069,22 @@
             connection.on("PlayersChanged", update => {
                 if (playerCount) {
                     playerCount.textContent = update.playerCount.toString();
+                }
+
+                if (lobby.classList.contains("final-question-host")) {
+                    for (const player of update.players) {
+                        const score = playerList.querySelector(
+                            `[data-player-id="${player.id}"] .scoreboard-score`);
+
+                        if (score) {
+                            score.textContent = player.score.toString();
+                            score.classList.toggle(
+                                "score-negative",
+                                player.score < 0);
+                        }
+                    }
+
+                    return;
                 }
 
                 playerList.replaceChildren();
