@@ -23,4 +23,9 @@
   <ItemGroup>
     <ProjectReference Include="..\BadWolfQuiz.Game\BadWolfQuiz.Game.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\Avatars\M\" />
+    <Folder Include="Resources\Avatars\F\" />
+  </ItemGroup>
 </Project>
