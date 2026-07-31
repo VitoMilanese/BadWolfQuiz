@@ -120,6 +120,7 @@ Currently implemented:
 - Host-controlled final question reveal, judging, and final results
 - Separate live answer-key screen for the host's second display
 - Host answer-history editing with immediate score and standings recalculation
+- Persistent completed-game history with final scores and answer details
 
 ---
 
@@ -187,7 +188,6 @@ src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
 
 ## Game Session
 
-- Persistent game history
 - Reserved player nicknames
 
 ## Game

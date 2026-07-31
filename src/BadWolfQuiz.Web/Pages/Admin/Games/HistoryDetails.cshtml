@@ -1,0 +1,75 @@
+@page "{id:int}"
+@model BadWolfQuiz.Web.Pages.Admin.Games.HistoryDetailsModel
+@{
+    ViewData["Title"] = Localizer["GameHistory_DetailsTitle"];
+}
+
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">@Model.Game!.PublicCode</p>
+        <h1>@Model.Game.QuizTitle</h1>
+        <p>
+            @Localizer["GameHistory_FinishedAt"]:
+            <time datetime="@Model.Game.FinishedAtUtc.ToString("O")">
+                @Model.Game.FinishedAtUtc.ToLocalTime().ToString("g")
+            </time>
+        </p>
+    </div>
+    <a class="button button-secondary" asp-page="History">
+        @Localizer["GameHistory_Back"]
+    </a>
+</div>
+
+<section class="content-panel">
+    <h2>@Localizer["GameHistory_Players"]</h2>
+    <div class="game-history-player-list">
+        @foreach (var player in Model.Game.Players)
+        {
+            <div class="game-history-player">
+                <strong>@player.Name</strong>
+                <span class="@(player.Score < 0 ? "score-negative" : null)">@player.Score</span>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="content-panel">
+    <h2>@Localizer["GameHistory_Answers"]</h2>
+
+    @if (Model.Game.Answers.Count == 0)
+    {
+        <p>@Localizer["GameHistory_NoAnswers"]</p>
+    }
+    else
+    {
+        <div class="table-scroll">
+            <table class="game-history-table">
+                <thead>
+                    <tr>
+                        <th>@Localizer["GameHistory_Question"]</th>
+                        <th>@Localizer["GameHistory_Player"]</th>
+                        <th>@Localizer["GameHistory_Result"]</th>
+                        <th>@Localizer["GameHistory_ScoreChange"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var answer in Model.Game.Answers)
+                    {
+                        <tr>
+                            <td>@answer.RoundTitle — @answer.CategoryTitle — @answer.Points</td>
+                            <td>@answer.PlayerName</td>
+                            <td>
+                                @(answer.IsCorrect
+                                    ? Localizer["GameHistory_Correct"]
+                                    : Localizer["GameHistory_Incorrect"])
+                            </td>
+                            <td class="@(answer.ScoreDelta < 0 ? "score-negative" : null)">
+                                @(answer.ScoreDelta > 0 ? "+" : null)@answer.ScoreDelta
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

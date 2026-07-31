@@ -11,6 +11,7 @@ namespace BadWolfQuiz.Web.Pages.Admin.Games;
 
 public sealed class AnswerHistoryModel(
     GameSessionRegistry sessionRegistry,
+    GameHistoryStore gameHistoryStore,
     IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -93,6 +94,9 @@ public sealed class AnswerHistoryModel(
         try
         {
             command(game);
+            await gameHistoryStore.SaveCompletedGameAsync(
+                game,
+                cancellationToken);
         }
         catch (GameRuleViolationException exception)
         {

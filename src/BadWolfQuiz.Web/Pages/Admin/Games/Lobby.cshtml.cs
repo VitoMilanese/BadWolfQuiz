@@ -12,6 +12,7 @@ namespace BadWolfQuiz.Web.Pages.Admin.Games;
 
 public sealed class LobbyModel(
     GameSessionRegistry sessionRegistry,
+    GameHistoryStore gameHistoryStore,
     IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -521,6 +522,9 @@ public sealed class LobbyModel(
             sessionRegistry.CloseQuestionAnswer(
                 game.PublicCode,
                 sourceQuestionId);
+            await gameHistoryStore.SaveCompletedGameAsync(
+                game,
+                cancellationToken);
             await BroadcastBuzzerAsync(game, cancellationToken);
         }
         catch (GameRuleViolationException)
@@ -675,6 +679,9 @@ public sealed class LobbyModel(
         try
         {
             command(game);
+            await gameHistoryStore.SaveCompletedGameAsync(
+                game,
+                cancellationToken);
         }
         catch (GameRuleViolationException)
         {

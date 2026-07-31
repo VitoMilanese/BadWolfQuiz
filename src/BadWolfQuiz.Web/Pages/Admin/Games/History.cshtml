@@ -1,0 +1,47 @@
+@page
+@model BadWolfQuiz.Web.Pages.Admin.Games.HistoryModel
+@{
+    ViewData["Title"] = Localizer["GameHistory_Title"];
+}
+
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">@Localizer["Admin_Eyebrow"]</p>
+        <h1>@Localizer["GameHistory_Title"]</h1>
+        <p>@Localizer["GameHistory_Description"]</p>
+    </div>
+</div>
+
+@if (Model.Games.Count == 0)
+{
+    <section class="content-panel empty-state">
+        <p>@Localizer["GameHistory_Empty"]</p>
+    </section>
+}
+else
+{
+    <div class="game-history-list">
+        @foreach (var game in Model.Games)
+        {
+            <article class="content-panel game-history-card">
+                <div>
+                    <p class="eyebrow">@game.PublicCode</p>
+                    <h2>@game.QuizTitle</h2>
+                    <p>
+                        @Localizer["GameHistory_FinishedAt"]:
+                        <time datetime="@game.FinishedAtUtc.ToString("O")">
+                            @game.FinishedAtUtc.ToLocalTime().ToString("g")
+                        </time>
+                    </p>
+                    <small>@Localizer["GameHistory_PlayerCount", game.PlayerCount]</small>
+                </div>
+
+                <a class="button button-secondary"
+                   asp-page="HistoryDetails"
+                   asp-route-id="@game.Id">
+                    @Localizer["GameHistory_View"]
+                </a>
+            </article>
+        }
+    </div>
+}
