@@ -23,6 +23,14 @@ public sealed class DatabaseMigrationServiceTests
                 CREATE TABLE "QuizQuestions" (
                     "Id" INTEGER NOT NULL CONSTRAINT "PK_QuizQuestions" PRIMARY KEY AUTOINCREMENT
                 );
+
+                CREATE TABLE "Quizzes" (
+                    "Id" INTEGER NOT NULL CONSTRAINT "PK_Quizzes" PRIMARY KEY AUTOINCREMENT
+                );
+
+                CREATE TABLE "GameSessions" (
+                    "Id" INTEGER NOT NULL CONSTRAINT "PK_GameSessions" PRIMARY KEY AUTOINCREMENT
+                );
                 """;
 
             await command.ExecuteNonQueryAsync();
@@ -55,6 +63,17 @@ public sealed class DatabaseMigrationServiceTests
         Assert.True(await TableExistsAsync(
             connection,
             "FinalAnswerContentBlocks"));
+        Assert.True(await TableExistsAsync(
+            connection,
+            "Hosts"));
+        Assert.True(await ColumnExistsAsync(
+            connection,
+            "Quizzes",
+            "HostId"));
+        Assert.True(await ColumnExistsAsync(
+            connection,
+            "GameSessions",
+            "HostId"));
 
         await using var historyCommand = connection.CreateCommand();
         historyCommand.CommandText =
