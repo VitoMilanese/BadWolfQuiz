@@ -706,7 +706,7 @@
             <div class="message message-error">@errorMessage</div>
         }
 
-        <div class="content-panel final-question-panel">
+        <div class="content-panel final-question-panel @(showAnswer ? "final-judging-mode" : null)">
             <p class="eyebrow">@Localizer["FinalQuestion_Title"]</p>
 
             @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalWagering)
@@ -739,55 +739,59 @@
                     ? final.Definition.AnswerBlocks
                     : final.Definition.QuestionBlocks;
 
-                <section class="game-content-presentation @(showAnswer ? "answer-presentation" : "question-presentation")">
-                    <p class="eyebrow">
-                        @(showAnswer
-                            ? Localizer["GameBoard_Answer"]
-                            : Localizer["GameBoard_Question"])
-                    </p>
-                    <div class="game-content-blocks">
-                        @foreach (var block in blocks)
-                        {
-                            <article class="game-content-block">
-                                @if (!string.IsNullOrWhiteSpace(block.TopCaption))
-                                {
-                                    <p class="game-content-caption">@block.TopCaption</p>
-                                }
-                                @switch (block.Kind)
-                                {
-                                    case BadWolfQuiz.Game.Definitions.ContentBlockKind.Text:
-                                        <p class="game-content-text">@block.TextContent</p>
-                                        break;
-                                    case BadWolfQuiz.Game.Definitions.ContentBlockKind.Image:
-                                        <img class="game-content-image"
-                                             src="@Url.Page("/Admin/Games/Lobby", "FinalContentBlock", new { id = Model.Game.Session.Id.Value, sourceContentBlockId = block.SourceContentBlockId, answer = showAnswer })"
-                                             alt="@block.FileName" />
-                                        break;
-                                    case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
-                                        <audio class="game-content-audio"
-                                               controls
-                                               src="@Url.Page("/Admin/Games/Lobby", "FinalContentBlock", new { id = Model.Game.Session.Id.Value, sourceContentBlockId = block.SourceContentBlockId, answer = showAnswer })">
-                                        </audio>
-                                        break;
-                                    case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
-                                        <video class="game-content-video" controls src="@block.ExternalUrl"></video>
-                                        break;
-                                    case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
-                                        <iframe class="game-content-video"
-                                                src="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
-                                                title="@Localizer["GameBoard_MediaContent"]"
-                                                allowfullscreen>
-                                        </iframe>
-                                        break;
-                                }
-                                @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
-                                {
-                                    <p class="game-content-caption">@block.BottomCaption</p>
-                                }
-                            </article>
-                        }
-                    </div>
-                </section>
+                <details class="@(showAnswer ? "final-correct-answer-reference" : "final-question-display")"
+                         open="@(showAnswer ? null : "open")">
+                    <summary>@Localizer["GameBoard_Answer"]</summary>
+                    <section class="game-content-presentation @(showAnswer ? "answer-presentation" : "question-presentation")">
+                        <p class="eyebrow">
+                            @(showAnswer
+                                ? Localizer["GameBoard_Answer"]
+                                : Localizer["GameBoard_Question"])
+                        </p>
+                        <div class="game-content-blocks">
+                            @foreach (var block in blocks)
+                            {
+                                <article class="game-content-block">
+                                    @if (!string.IsNullOrWhiteSpace(block.TopCaption))
+                                    {
+                                        <p class="game-content-caption">@block.TopCaption</p>
+                                    }
+                                    @switch (block.Kind)
+                                    {
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Text:
+                                            <p class="game-content-text">@block.TextContent</p>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Image:
+                                            <img class="game-content-image"
+                                                 src="@Url.Page("/Admin/Games/Lobby", "FinalContentBlock", new { id = Model.Game.Session.Id.Value, sourceContentBlockId = block.SourceContentBlockId, answer = showAnswer })"
+                                                 alt="@block.FileName" />
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
+                                            <audio class="game-content-audio"
+                                                   controls
+                                                   src="@Url.Page("/Admin/Games/Lobby", "FinalContentBlock", new { id = Model.Game.Session.Id.Value, sourceContentBlockId = block.SourceContentBlockId, answer = showAnswer })">
+                                            </audio>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
+                                            <video class="game-content-video" controls src="@block.ExternalUrl"></video>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
+                                            <iframe class="game-content-video"
+                                                    src="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
+                                                    title="@Localizer["GameBoard_MediaContent"]"
+                                                    allowfullscreen>
+                                            </iframe>
+                                            break;
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
+                                    {
+                                        <p class="game-content-caption">@block.BottomCaption</p>
+                                    }
+                                </article>
+                            }
+                        </div>
+                    </section>
+                </details>
 
                 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering)
                 {
@@ -826,31 +830,31 @@
                                 judgedCount + 1,
                                 final.Submissions.Count]
                         </p>
-                        <article class="final-judging-card final-current-answer">
-                            <p>
-                                <strong>@currentSubmission.PlayerName:</strong>
+                        <section class="game-content-presentation final-player-answer-presentation">
+                            <h2>@currentSubmission.PlayerName</h2>
+                            <p class="game-content-text">
                                 @currentSubmission.Answer!.Text
                             </p>
-                            <form class="question-judge-actions"
-                                  method="post"
-                                  asp-page-handler="JudgeFinalAnswer">
-                                <input name="playerId"
-                                       type="hidden"
-                                       value="@currentSubmission.PlayerId.Value" />
-                                <button class="button judgment-correct-button"
-                                        name="isCorrect"
-                                        type="submit"
-                                        value="true">
-                                    @Localizer["Message_Correct"]
-                                </button>
-                                <button class="button judgment-incorrect-button"
-                                        name="isCorrect"
-                                        type="submit"
-                                        value="false">
-                                    @Localizer["Message_Wrong"]
-                                </button>
-                            </form>
-                        </article>
+                        </section>
+                        <form class="question-judge-actions final-judging-actions"
+                              method="post"
+                              asp-page-handler="JudgeFinalAnswer">
+                            <input name="playerId"
+                                   type="hidden"
+                                   value="@currentSubmission.PlayerId.Value" />
+                            <button class="button judgment-correct-button"
+                                    name="isCorrect"
+                                    type="submit"
+                                    value="true">
+                                @Localizer["Message_Correct"]
+                            </button>
+                            <button class="button judgment-incorrect-button"
+                                    name="isCorrect"
+                                    type="submit"
+                                    value="false">
+                                @Localizer["Message_Wrong"]
+                            </button>
+                        </form>
                     </div>
                 }
             }

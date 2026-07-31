@@ -2585,6 +2585,71 @@ iframe.game-content-video {
     margin: 0;
 }
 
+.final-question-display {
+    display: contents;
+}
+
+.final-question-display > summary {
+    display: none;
+}
+
+.final-correct-answer-reference {
+    width: min(100%, 52rem);
+    text-align: left;
+}
+
+.final-correct-answer-reference > summary {
+    color: var(--gold);
+    cursor: pointer;
+    font-weight: 850;
+}
+
+.final-correct-answer-reference .game-content-presentation {
+    min-height: 0;
+    padding-block: 1rem;
+}
+
+.final-judging-mode {
+    justify-content: stretch;
+}
+
+.final-judging-mode .final-judging-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.final-player-answer-presentation {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.final-player-answer-presentation h2 {
+    margin: 0 0 1rem;
+    color: var(--gold);
+    font-size: clamp(1.5rem, 4vw, 3rem);
+}
+
+.final-player-answer-presentation .game-content-text {
+    font-size: clamp(2rem, 6vw, 5rem);
+    text-align: center;
+}
+
+.final-judging-actions {
+    flex: 0 0 auto;
+    justify-content: center;
+    width: 100%;
+    margin-top: auto;
+}
+
 .player-final-panel {
     display: grid;
     gap: 1rem;
