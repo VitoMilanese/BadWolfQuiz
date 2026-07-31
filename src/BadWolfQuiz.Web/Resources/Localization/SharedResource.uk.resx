@@ -876,4 +876,7 @@
   <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Зберегти налаштування гри</value></data>
   <data name="GameSettings_GameSaved" xml:space="preserve"><value>Налаштування гри збережено.</value></data>
   <data name="GameSettings_GameLocked" xml:space="preserve"><value>Після запуску гри налаштування змінювати не можна.</value></data>
+  <data name="GameSettings_AllowNegativeFinalPlayers" xml:space="preserve">
+    <value>Дозволити гравцям із від’ємним рахунком брати участь у фінальному питанні</value>
+  </data>
 </root>

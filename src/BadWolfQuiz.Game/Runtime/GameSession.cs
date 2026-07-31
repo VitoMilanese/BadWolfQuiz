@@ -67,6 +67,8 @@ public sealed class GameSession
 
     public GameBoard Board { get; }
 
+    public FinalQuestion? FinalQuestion { get; private set; }
+
     public GameTimer Timer { get; private set; }
 
     public GameTimer AnswerTimer { get; private set; }
@@ -468,9 +470,107 @@ public sealed class GameSession
         return CreateStandings(CreateCurrentResultMetrics());
     }
 
-    public IReadOnlyList<GameResultStanding> GetFinalStandings()
+    public FinalQuestion StartFinalQuestion()
     {
         EnsureRunning();
+
+        if (HasNextRound || !IsCurrentRoundComplete)
+        {
+            throw new GameRuleViolationException(
+                "The final question can only start after the last round is complete.");
+        }
+
+        var definition = Quiz.FinalQuestion
+            ?? throw new GameRuleViolationException(
+                "This quiz does not contain a final question.");
+
+        var eligiblePlayers = Settings.AllowNegativeScoreFinalPlayers
+            ? _players.ToArray()
+            : _players.Where(player => player.Score >= 0).ToArray();
+
+        if (eligiblePlayers.Length == 0)
+        {
+            throw new GameRuleViolationException(
+                "No players are eligible for the final question.");
+        }
+
+        FinalQuestion = new FinalQuestion(definition, eligiblePlayers);
+        Status = GameSessionStatus.FinalWagering;
+        return FinalQuestion;
+    }
+
+    public FinalPlayerSubmission SubmitFinalWager(
+        GamePlayerId playerId,
+        int amount)
+    {
+        EnsureFinalStatus(GameSessionStatus.FinalWagering);
+        return FinalQuestion!.SubmitWager(
+            FindPlayer(playerId).Id,
+            amount,
+            _timeProvider.GetUtcNow());
+    }
+
+    public void LockFinalWagers()
+    {
+        EnsureFinalStatus(GameSessionStatus.FinalWagering);
+        FinalQuestion!.LockWagers();
+        Status = GameSessionStatus.FinalAnswering;
+    }
+
+    public FinalPlayerSubmission SubmitFinalAnswer(
+        GamePlayerId playerId,
+        string answer)
+    {
+        EnsureFinalStatus(GameSessionStatus.FinalAnswering);
+        return FinalQuestion!.SubmitAnswer(
+            FindPlayer(playerId).Id,
+            answer,
+            _timeProvider.GetUtcNow());
+    }
+
+    public void LockFinalAnswers()
+    {
+        EnsureFinalStatus(GameSessionStatus.FinalAnswering);
+        FinalQuestion!.LockAnswers();
+        Status = GameSessionStatus.FinalJudging;
+    }
+
+    public FinalPlayerSubmission JudgeFinalAnswer(
+        GamePlayerId playerId,
+        bool isCorrect)
+    {
+        EnsureFinalStatus(GameSessionStatus.FinalJudging);
+        var player = FindPlayer(playerId);
+        var submission = FinalQuestion!.Judge(
+            player.Id,
+            isCorrect,
+            _timeProvider.GetUtcNow());
+        var wager = submission.Wager!.Amount;
+        player.ApplyScore(isCorrect ? wager : -wager);
+
+        if (FinalQuestion.Status == FinalQuestionStatus.Completed)
+        {
+            Status = GameSessionStatus.Completed;
+        }
+
+        return submission;
+    }
+
+    public IReadOnlyList<GameResultStanding> GetFinalStandings()
+    {
+        if (Status is not GameSessionStatus.Running and
+            not GameSessionStatus.Completed)
+        {
+            throw new GameRuleViolationException(
+                "Final standings are not available in the current game phase.");
+        }
+
+        if (Quiz.FinalQuestion is not null &&
+            Status != GameSessionStatus.Completed)
+        {
+            throw new GameRuleViolationException(
+                "Final standings are available after final judging is complete.");
+        }
 
         if (HasNextRound || !IsCurrentRoundComplete)
         {
@@ -689,6 +789,15 @@ public sealed class GameSession
                 "The selected player does not belong to this game.");
     }
 
+    private void EnsureFinalStatus(GameSessionStatus expected)
+    {
+        if (Status != expected || FinalQuestion is null)
+        {
+            throw new GameRuleViolationException(
+                $"The game must be in the {expected} phase.");
+        }
+    }
+
     private void EnsureRunning()
     {
         if (Status != GameSessionStatus.Running)
@@ -728,7 +837,10 @@ public enum GameSessionStatus
 {
     Lobby = 1,
     Running = 2,
-    Completed = 3
+    FinalWagering = 3,
+    FinalAnswering = 4,
+    FinalJudging = 5,
+    Completed = 6
 }
 
 

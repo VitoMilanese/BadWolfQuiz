@@ -30,11 +30,26 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             }
 
             await using var stream = File.OpenRead(_path);
-            return await JsonSerializer.DeserializeAsync<GameSessionSettings>(
+            using var document = await JsonDocument.ParseAsync(
                 stream,
-                _jsonOptions,
-                cancellationToken)
+                cancellationToken: cancellationToken);
+            var settings = document.RootElement.Deserialize<GameSessionSettings>(
+                _jsonOptions)
                 ?? GameSessionSettings.Default;
+
+            if (document.RootElement.TryGetProperty(
+                nameof(GameSessionSettings.AllowNegativeScoreFinalPlayers),
+                out _))
+            {
+                return settings;
+            }
+
+            return new GameSessionSettings(
+                settings.BuzzerDuration,
+                settings.AnswerDuration,
+                settings.RegularQuestionBuzzerStartMode,
+                settings.WagerQuestionAnswerTimerStartMode,
+                allowNegativeScoreFinalPlayers: true);
         }
         catch (JsonException)
         {
@@ -88,6 +103,8 @@ public sealed class GameSettingsInput
     public GamePhaseStartMode WagerQuestionAnswerTimerStartMode { get; set; } =
         GamePhaseStartMode.Automatic;
 
+    public bool AllowNegativeScoreFinalPlayers { get; set; } = true;
+
     public bool IsValid =>
         BuzzerDurationSeconds is >= 1 and <= 3600 &&
         AnswerDurationSeconds is >= 1 and <= 3600 &&
@@ -107,7 +124,8 @@ public sealed class GameSettingsInput
             TimeSpan.FromSeconds(BuzzerDurationSeconds),
             TimeSpan.FromSeconds(AnswerDurationSeconds),
             RegularQuestionBuzzerStartMode,
-            WagerQuestionAnswerTimerStartMode);
+            WagerQuestionAnswerTimerStartMode,
+            AllowNegativeScoreFinalPlayers);
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)
@@ -119,7 +137,9 @@ public sealed class GameSettingsInput
             RegularQuestionBuzzerStartMode =
                 settings.RegularQuestionBuzzerStartMode,
             WagerQuestionAnswerTimerStartMode =
-                settings.WagerQuestionAnswerTimerStartMode
+                settings.WagerQuestionAnswerTimerStartMode,
+            AllowNegativeScoreFinalPlayers =
+                settings.AllowNegativeScoreFinalPlayers
         };
     }
 }
