@@ -194,7 +194,6 @@
                         }
                         <strong>@player.Name</strong>
                         <span class="player-management">
-                            <span>@player.Score</span>
                             @if (Model.Game.Session.ActivePlayerId == player.Id)
                             {
                                 <span class="active-player-badge">
@@ -1771,13 +1770,13 @@
                     remove.textContent = "✕";
                     actions.append(remove);
 
-                    const score = document.createElement("span");
-                    score.textContent = player.score.toString();
-                    score.className = isRunning
-                        ? `scoreboard-score ${player.score < 0 ? "score-negative" : ""}`
-                        : "";
-
-                    details.append(score);
+                    if (isRunning) {
+                        const score = document.createElement("span");
+                        score.textContent = player.score.toString();
+                        score.className =
+                            `scoreboard-score ${player.score < 0 ? "score-negative" : ""}`;
+                        details.append(score);
+                    }
 
                     if (!player.isActive) {
                         const makeActive = document.createElement("button");

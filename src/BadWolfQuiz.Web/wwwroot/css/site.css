@@ -2039,10 +2039,14 @@ video.host-card-media {
     transform: translateY(-50%);
 }
 
+.player-list .player-card-actions {
+    flex-direction: row;
+}
+
 .player-list li:has(.player-card-actions) {
     position: relative;
     min-height: 88px;
-    padding-right: 52px;
+    padding-right: 88px;
 }
 
 .player-management .player-action-button,
