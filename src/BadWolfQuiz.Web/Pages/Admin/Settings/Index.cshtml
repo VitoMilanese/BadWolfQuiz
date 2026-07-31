@@ -32,13 +32,17 @@
     </label>
     <label>
         <span>@Localizer["GameSettings_RegularStartMode"]</span>
-        <select asp-for="Input.RegularQuestionBuzzerStartMode"
-                asp-items="Html.GetEnumSelectList<BadWolfQuiz.Game.Runtime.GamePhaseStartMode>()"></select>
+        <select asp-for="Input.RegularQuestionBuzzerStartMode">
+            <option value="1">@Localizer["GameSettings_Automatic"]</option>
+            <option value="2">@Localizer["GameSettings_Manual"]</option>
+        </select>
     </label>
     <label>
         <span>@Localizer["GameSettings_WagerStartMode"]</span>
-        <select asp-for="Input.WagerQuestionAnswerTimerStartMode"
-                asp-items="Html.GetEnumSelectList<BadWolfQuiz.Game.Runtime.GamePhaseStartMode>()"></select>
+        <select asp-for="Input.WagerQuestionAnswerTimerStartMode">
+            <option value="1">@Localizer["GameSettings_Automatic"]</option>
+            <option value="2">@Localizer["GameSettings_Manual"]</option>
+        </select>
     </label>
 </div>
     <div class="form-actions">

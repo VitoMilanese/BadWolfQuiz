@@ -1,4 +1,5 @@
 using BadWolfQuiz.Game.Runtime;
+using Microsoft.AspNetCore.Hosting;
 using BadWolfQuiz.Web.Services;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
