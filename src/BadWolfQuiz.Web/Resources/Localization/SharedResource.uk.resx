@@ -927,4 +927,10 @@
   <data name="AnswerHistory_Save" xml:space="preserve"><value>Зберегти зміни</value></data>
   <data name="AnswerHistory_NoEntries" xml:space="preserve"><value>Для цього питання немає записаних відповідей.</value></data>
   <data name="AnswerHistory_Rejected" xml:space="preserve"><value>Не вдалося застосувати зміну історії відповідей.</value></data>
+  <data name="AnswerHistory_PlayerAlreadyRecorded" xml:space="preserve"><value>Для цього гравця вже записана відповідь на вибране питання. Відредагуйте наявний запис.</value></data>
+  <data name="AnswerHistory_QuestionNotPlayed" xml:space="preserve"><value>Відповідь можна додати лише після того, як питання було зіграно.</value></data>
+  <data name="AnswerHistory_InvalidValue" xml:space="preserve"><value>Розмір нагороди або штрафу не може бути від’ємним.</value></data>
+  <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve"><value>Для цього питання вже є записи всіх гравців.</value></data>
+  <data name="AnswerHistory_Delete" xml:space="preserve"><value>Видалити запис</value></data>
+  <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Видалити цей запис і скасувати відповідну зміну балів?</value></data>
 </root>

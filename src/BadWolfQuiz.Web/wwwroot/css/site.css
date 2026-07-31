@@ -2683,6 +2683,10 @@ iframe.game-content-video {
     margin-top: 1rem;
 }
 
+.answer-history-entry-form {
+    grid-template-columns: repeat(2, minmax(10rem, 1fr)) repeat(4, auto);
+}
+
 .answer-history-form label {
     display: grid;
     gap: 0.35rem;
@@ -2692,6 +2696,21 @@ iframe.game-content-video {
     display: flex !important;
     align-items: center;
     align-self: center;
+    justify-content: flex-start;
+    width: max-content;
+    gap: 0.5rem !important;
+}
+
+.answer-history-correct input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: auto;
+    margin: 0;
+}
+
+.answer-history-add-warning {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--red-bright);
 }
 
 .answer-history-delta {

@@ -626,6 +626,26 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public QuestionAnswerAttempt? RemoveQuestionAnswerHistoryEntry(
+        string publicCode,
+        int sourceQuestionId,
+        Guid attemptId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.RemoveQuestionAnswerHistoryEntry(
+                sourceQuestionId,
+                attemptId);
+        }
+    }
+
     public RuntimeQuestion? ResolveQuestionWithoutCorrectAnswer(
         string publicCode,
         int sourceQuestionId)

@@ -63,6 +63,21 @@ public sealed class AnswerHistoryModel(
             cancellationToken);
     }
 
+    public async Task<IActionResult> OnPostDeleteAsync(
+        Guid id,
+        int sourceQuestionId,
+        Guid attemptId,
+        CancellationToken cancellationToken)
+    {
+        return await ExecuteAsync(
+            id,
+            game => sessionRegistry.RemoveQuestionAnswerHistoryEntry(
+                game.PublicCode,
+                sourceQuestionId,
+                attemptId),
+            cancellationToken);
+    }
+
     private async Task<IActionResult> ExecuteAsync(
         Guid id,
         Action<GameSessionRegistration> command,
@@ -79,9 +94,18 @@ public sealed class AnswerHistoryModel(
         {
             command(game);
         }
-        catch (GameRuleViolationException)
+        catch (GameRuleViolationException exception)
         {
-            TempData["ErrorMessage"] = localizer["AnswerHistory_Rejected"].Value;
+            TempData["ErrorMessage"] = exception.Message switch
+            {
+                "This player already has an answer entry for the selected question." =>
+                    localizer["AnswerHistory_PlayerAlreadyRecorded"].Value,
+                "Answer history cannot be added to a question that has not been played." =>
+                    localizer["AnswerHistory_QuestionNotPlayed"].Value,
+                "An answer history value cannot be negative." =>
+                    localizer["AnswerHistory_InvalidValue"].Value,
+                _ => localizer["AnswerHistory_Rejected"].Value
+            };
         }
 
         await gameHub.Clients
@@ -89,6 +113,12 @@ public sealed class AnswerHistoryModel(
             .SendAsync(
                 "PlayersChanged",
                 GameHub.CreatePlayersUpdate(sessionRegistry, game),
+                cancellationToken);
+        await gameHub.Clients
+            .Group(GameHub.GroupName(game.PublicCode))
+            .SendAsync(
+                "BuzzerStateChanged",
+                GameHub.CreateBuzzerUpdate(game),
                 cancellationToken);
 
         return RedirectToPage(new { id });

@@ -303,6 +303,21 @@ public sealed class RuntimeQuestion
         return (previous, updated);
     }
 
+    internal QuestionAnswerAttempt RemoveHistoricalAttempt(Guid attemptId)
+    {
+        var index = _answerAttempts.FindIndex(attempt => attempt.Id == attemptId);
+
+        if (index < 0)
+        {
+            throw new GameRuleViolationException(
+                "The selected answer history entry does not exist.");
+        }
+
+        var removed = _answerAttempts[index];
+        _answerAttempts.RemoveAt(index);
+        return removed;
+    }
+
     private void EnsureHistoricalPlayerIsUnique(GamePlayerId playerId)
     {
         if (_answerAttempts.Any(attempt => attempt.PlayerId == playerId))

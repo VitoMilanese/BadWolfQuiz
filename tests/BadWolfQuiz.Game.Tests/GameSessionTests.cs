@@ -582,6 +582,27 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void RemoveQuestionAnswerHistoryEntry_reverses_score_and_statistics()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(100);
+        var wrong = session.JudgeQuestionAnswer(100, rose.Id, false);
+        session.JudgeQuestionAnswer(100, mickey.Id, true);
+
+        var removed = session.RemoveQuestionAnswerHistoryEntry(100, wrong.Id);
+
+        Assert.Equal(wrong, removed);
+        Assert.Equal(0, rose.Score);
+        Assert.DoesNotContain(
+            session.Board.Questions.Single(question =>
+                question.SourceQuestionId == 100).AnswerAttempts,
+            attempt => attempt.Id == wrong.Id);
+    }
+
+    [Fact]
     public void ResolveQuestionWithoutCorrectAnswer_keeps_active_player()
     {
         var session = CreateSession();

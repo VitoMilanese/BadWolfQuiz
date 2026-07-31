@@ -927,4 +927,10 @@
   <data name="AnswerHistory_Save" xml:space="preserve"><value>Save changes</value></data>
   <data name="AnswerHistory_NoEntries" xml:space="preserve"><value>No answers were recorded for this question.</value></data>
   <data name="AnswerHistory_Rejected" xml:space="preserve"><value>The answer-history change could not be applied.</value></data>
+  <data name="AnswerHistory_PlayerAlreadyRecorded" xml:space="preserve"><value>This player already has an answer recorded for the selected question. Edit the existing entry instead.</value></data>
+  <data name="AnswerHistory_QuestionNotPlayed" xml:space="preserve"><value>An answer can only be added after the question has been played.</value></data>
+  <data name="AnswerHistory_InvalidValue" xml:space="preserve"><value>The reward or penalty value cannot be negative.</value></data>
+  <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve"><value>Every player already has an entry for this question.</value></data>
+  <data name="AnswerHistory_Delete" xml:space="preserve"><value>Delete entry</value></data>
+  <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Delete this answer entry and reverse its score change?</value></data>
 </root>

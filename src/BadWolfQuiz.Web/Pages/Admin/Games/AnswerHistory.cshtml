@@ -4,7 +4,8 @@
     ViewData["Title"] = Localizer["AnswerHistory_Title"];
 }
 
-<section class="answer-history-page">
+<section class="answer-history-page"
+         data-delete-confirmation="@Localizer["AnswerHistory_DeleteConfirmation"]">
     <header class="page-heading">
         <div>
             <p class="eyebrow">@Localizer["AnswerHistory_Eyebrow"]</p>
@@ -27,15 +28,17 @@
     {
         <details class="content-panel answer-history-add">
             <summary>@Localizer["AnswerHistory_AddEntry"]</summary>
-            <form class="answer-history-form"
+            <form class="answer-history-form answer-history-add-form"
                   method="post"
-                  asp-page-handler="Add">
+                  asp-page-handler="Add"
+                  data-no-eligible-players="@Localizer["AnswerHistory_NoEligiblePlayers"]">
             <label>
                 <span>@Localizer["AnswerHistory_Question"]</span>
                 <select name="sourceQuestionId" required>
                     @foreach (var question in Model.Questions)
                     {
-                        <option value="@question.SourceQuestionId">
+                        <option value="@question.SourceQuestionId"
+                                data-attempted-player-ids="@string.Join(',', question.AnswerAttempts.Select(attempt => attempt.PlayerId.Value))">
                             @question.RoundTitle — @question.CategoryTitle — @question.Points
                         </option>
                     }
@@ -58,9 +61,10 @@
                 <input name="isCorrect" type="checkbox" value="true" />
                 <span>@Localizer["AnswerHistory_Correct"]</span>
             </label>
-            <button class="button button-primary" type="submit">
+            <button class="button button-primary" type="submit" data-add-answer-history>
                 @Localizer["AnswerHistory_Add"]
             </button>
+            <p class="answer-history-add-warning" data-add-answer-history-warning hidden></p>
             </form>
         </details>
     }
@@ -81,7 +85,7 @@
                 {
                     @foreach (var attempt in question.AnswerAttempts)
                     {
-                        <form class="answer-history-form"
+                        <form class="answer-history-form answer-history-entry-form"
                               method="post"
                               asp-page-handler="Update">
                             <input name="sourceQuestionId"
@@ -123,6 +127,15 @@
                             <button class="button button-secondary" type="submit">
                                 @Localizer["AnswerHistory_Save"]
                             </button>
+                            <button class="button button-danger"
+                                    type="submit"
+                                    formaction="@Url.Page(
+                                        "/Admin/Games/AnswerHistory",
+                                        "Delete",
+                                        new { id = Model.Game.Session.Id.Value })"
+                                    data-delete-answer-history>
+                                @Localizer["AnswerHistory_Delete"]
+                            </button>
                         </form>
                     }
                 }
@@ -130,3 +143,57 @@
         }
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const form = document.querySelector(".answer-history-add-form");
+
+            if (!form) {
+                return;
+            }
+
+            const question = form.querySelector('[name="sourceQuestionId"]');
+            const player = form.querySelector('[name="playerId"]');
+            const submit = form.querySelector("[data-add-answer-history]");
+            const warning = form.querySelector("[data-add-answer-history-warning]");
+
+            const updateAvailablePlayers = () => {
+                const attemptedIds = new Set(
+                    question.selectedOptions[0]?.dataset.attemptedPlayerIds
+                        ?.split(",")
+                        .filter(Boolean) ?? []);
+                let firstAvailable = null;
+
+                for (const option of player.options) {
+                    option.disabled = attemptedIds.has(option.value);
+                    firstAvailable ??= option.disabled ? null : option;
+                }
+
+                if (player.selectedOptions[0]?.disabled && firstAvailable) {
+                    player.value = firstAvailable.value;
+                }
+
+                const hasAvailablePlayer = firstAvailable !== null;
+                submit.disabled = !hasAvailablePlayer;
+                warning.hidden = hasAvailablePlayer;
+                warning.textContent = hasAvailablePlayer
+                    ? ""
+                    : form.dataset.noEligiblePlayers;
+            };
+
+            question.addEventListener("change", updateAvailablePlayers);
+            updateAvailablePlayers();
+
+            const page = document.querySelector(".answer-history-page");
+
+            for (const button of document.querySelectorAll("[data-delete-answer-history]")) {
+                button.addEventListener("click", event => {
+                    if (!window.confirm(page.dataset.deleteConfirmation)) {
+                        event.preventDefault();
+                    }
+                });
+            }
+        })();
+    </script>
+}

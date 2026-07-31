@@ -396,6 +396,25 @@ public sealed class GameSession
         return updated;
     }
 
+    public QuestionAnswerAttempt RemoveQuestionAnswerHistoryEntry(
+        int sourceQuestionId,
+        Guid attemptId)
+    {
+        EnsureHistoryEditingAllowed();
+
+        var question = FindQuestion(sourceQuestionId);
+        EnsureQuestionHasBeenPlayed(question);
+        var removed = question.RemoveHistoricalAttempt(attemptId);
+        var player = FindPlayer(removed.PlayerId);
+
+        player.ApplyScore(-removed.ScoreDelta);
+        ApplyHistoricalScoreCorrection(
+            question,
+            player.Id,
+            -removed.ScoreDelta);
+        return removed;
+    }
+
     public RuntimeQuestion ResolveQuestionWithoutCorrectAnswer(
         int sourceQuestionId)
     {

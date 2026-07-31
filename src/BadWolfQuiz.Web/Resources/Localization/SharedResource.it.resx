@@ -927,4 +927,10 @@
   <data name="AnswerHistory_Save" xml:space="preserve"><value>Salva modifiche</value></data>
   <data name="AnswerHistory_NoEntries" xml:space="preserve"><value>Nessuna risposta registrata per questa domanda.</value></data>
   <data name="AnswerHistory_Rejected" xml:space="preserve"><value>Impossibile applicare la modifica alla cronologia.</value></data>
+  <data name="AnswerHistory_PlayerAlreadyRecorded" xml:space="preserve"><value>Questo giocatore ha già una risposta registrata per la domanda selezionata. Modifica la voce esistente.</value></data>
+  <data name="AnswerHistory_QuestionNotPlayed" xml:space="preserve"><value>È possibile aggiungere una risposta solo dopo che la domanda è stata giocata.</value></data>
+  <data name="AnswerHistory_InvalidValue" xml:space="preserve"><value>Il valore del premio o della penalità non può essere negativo.</value></data>
+  <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve"><value>Tutti i giocatori hanno già una voce per questa domanda.</value></data>
+  <data name="AnswerHistory_Delete" xml:space="preserve"><value>Elimina voce</value></data>
+  <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Eliminare questa risposta e annullare la relativa modifica del punteggio?</value></data>
 </root>
