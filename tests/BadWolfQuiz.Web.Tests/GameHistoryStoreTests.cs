@@ -172,8 +172,9 @@ public sealed class GameHistoryStoreTests
             var mickey = session.AddPlayer("Mickey");
             session.Start();
             session.SelectQuestion(_questionId);
-            session.JudgeQuestionAnswer(_questionId, rose.Id, true);
+            session.ActivateQuestionBuzzer(_questionId);
             session.JudgeQuestionAnswer(_questionId, mickey.Id, false);
+            session.JudgeQuestionAnswer(_questionId, rose.Id, true);
             session.CloseQuestionAnswer(_questionId);
 
             return new GameSessionRegistration("ABC123", session);
