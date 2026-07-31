@@ -1263,6 +1263,95 @@ textarea {
     background: #000;
 }
 
+.host-board-layout {
+    min-width: 0;
+}
+
+.board-player-sidebar {
+    display: none;
+}
+
+.board-player-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.board-player-list li {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid #31314a;
+    border-radius: 9px;
+    background: linear-gradient(145deg, #171735, #0d0d20);
+}
+
+.board-player-name {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: 800;
+}
+
+.board-player-name > span {
+    display: inline-block;
+}
+
+.board-player-name.is-overflowing > span {
+    padding-left: 100%;
+    animation: board-player-name-scroll 8s linear infinite;
+}
+
+.board-player-score {
+    color: var(--gold);
+    font-size: 1.2rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.board-player-score.score-negative {
+    color: #ff5d68;
+}
+
+@keyframes board-player-name-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .board-player-name.is-overflowing > span {
+        padding-left: 0;
+        animation: none;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 100%;
+    }
+}
+
+@media (min-width: 1500px) {
+    .host-board-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 250px;
+        align-items: start;
+        gap: 18px;
+    }
+
+    .board-player-sidebar {
+        display: block;
+        min-width: 0;
+        max-height: 100%;
+        overflow-y: auto;
+    }
+
+    .host-game-board:has(.board-player-sidebar) .game-scoreboard .scoreboard-score {
+        display: none;
+    }
+}
+
 .host-board-column {
     display: grid;
     gap: 6px;

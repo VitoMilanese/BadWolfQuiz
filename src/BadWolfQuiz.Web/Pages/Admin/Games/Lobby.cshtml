@@ -707,6 +707,7 @@
             Model.PreviewQuestion is null &&
             !Model.IsRoundSummaryVisible)
         {
+            <div class="host-board-layout">
             <div class="host-board-grid"
                  style="--board-columns: @Model.BoardCategories.Count">
             @foreach (var category in Model.BoardCategories)
@@ -741,6 +742,23 @@
                     }
                 </section>
             }
+            </div>
+
+            <aside class="board-player-sidebar" aria-label="@Localizer["Label_Players"]">
+                <ul id="board-player-list" class="board-player-list">
+                    @foreach (var player in Model.Players)
+                    {
+                        <li data-sidebar-player-id="@player.Id.Value">
+                            <span class="board-player-name" title="@player.Name">
+                                <span>@player.Name</span>
+                            </span>
+                            <strong class="board-player-score @(player.Score < 0 ? "score-negative" : null)">
+                                @player.Score
+                            </strong>
+                        </li>
+                    }
+                </ul>
+            </aside>
             </div>
         }
 
@@ -1214,6 +1232,7 @@
             const lobby = document.querySelector("[data-game-code]");
             const playerCount = document.getElementById("player-count");
             const playerList = document.getElementById("player-list");
+            const boardPlayerList = document.getElementById("board-player-list");
             const hostCard = playerList?.querySelector("[data-host-card]");
 
             if (!lobby || !playerList || typeof signalR === "undefined") {
@@ -1304,6 +1323,48 @@
             const timerPause = document.querySelector(".game-timer-pause");
             const timerResume = document.querySelector(".game-timer-resume");
 
+            const refreshScrollingNames = () => {
+                boardPlayerList?.querySelectorAll(".board-player-name").forEach(name => {
+                    name.classList.remove("is-overflowing");
+                    name.classList.toggle(
+                        "is-overflowing",
+                        name.scrollWidth > name.clientWidth + 1);
+                });
+            };
+
+            const renderBoardPlayers = players => {
+                if (!boardPlayerList) {
+                    return;
+                }
+
+                boardPlayerList.replaceChildren();
+
+                for (const player of players) {
+                    const item = document.createElement("li");
+                    item.dataset.sidebarPlayerId = player.id;
+
+                    const name = document.createElement("span");
+                    name.className = "board-player-name";
+                    name.title = player.name;
+
+                    const nameText = document.createElement("span");
+                    nameText.textContent = player.name;
+                    name.append(nameText);
+
+                    const score = document.createElement("strong");
+                    score.className = `board-player-score ${player.score < 0 ? "score-negative" : ""}`;
+                    score.textContent = player.score.toString();
+
+                    item.append(name, score);
+                    boardPlayerList.append(item);
+                }
+
+                requestAnimationFrame(refreshScrollingNames);
+            };
+
+            refreshScrollingNames();
+            window.addEventListener("resize", refreshScrollingNames);
+
             connection.on("TimerStateChanged", update => {
                 if (!timerPanel || !timerValue) {
                     return;
@@ -1360,6 +1421,8 @@
                 if (playerCount) {
                     playerCount.textContent = update.playerCount.toString();
                 }
+
+                renderBoardPlayers(update.players);
 
                 if (lobby.classList.contains("final-question-host")) {
                     playerList.replaceChildren();
