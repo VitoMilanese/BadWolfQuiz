@@ -38,13 +38,15 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
     public async Task JoinPlayerSession(
         string publicCode,
         string accessToken,
-        bool isVisible)
+        bool isVisible,
+        string? transitionToken)
     {
         var connection = sessionRegistry.ConnectPlayer(
             publicCode,
             accessToken,
             Context.ConnectionId,
-            isVisible);
+            isVisible,
+            transitionToken);
 
         if (connection is null)
         {
@@ -80,6 +82,12 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
             CreateFinalQuestionUpdate(connection.Game, connection.Player));
 
         await BroadcastPlayers(connection.Game);
+    }
+
+    public string? PreparePlayerTransition()
+    {
+        return sessionRegistry.CreatePlayerTransitionToken(
+            Context.ConnectionId);
     }
 
     public async Task SubmitFinalWager(int amount)

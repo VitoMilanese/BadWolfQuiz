@@ -208,6 +208,36 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void Running_game_preserves_approval_with_single_use_transition_token()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer("ABC123", joined.AccessToken!, "old-page", true);
+        registry.StartGame("ABC123");
+        var transitionToken = registry.CreatePlayerTransitionToken("old-page");
+        registry.DisconnectPlayer("old-page");
+
+        var replacement = registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "new-page",
+            true,
+            transitionToken);
+        registry.DisconnectPlayer("new-page");
+        var reusedToken = registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "later-page",
+            true,
+            transitionToken);
+
+        Assert.NotNull(transitionToken);
+        Assert.False(replacement!.RequiresApproval);
+        Assert.True(reusedToken!.RequiresApproval);
+    }
+
+    [Fact]
     public void SelectQuestion_routes_command_to_runtime_session()
     {
         var registry = CreateRegistry("ABC123");

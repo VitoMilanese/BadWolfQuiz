@@ -10,12 +10,16 @@ public sealed class GameSessionRegistry
 {
     private const int MaxCodeGenerationAttempts = 20;
     private static readonly TimeSpan BuzzerRaceWindow = TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan PlayerTransitionTokenLifetime =
+        TimeSpan.FromSeconds(30);
     private readonly IGameCodeGenerator _gameCodeGenerator;
     private readonly TimeProvider _timeProvider;
     private readonly ConcurrentDictionary<GameSessionId, GameSessionRegistration> _sessionsById = new();
     private readonly ConcurrentDictionary<string, GameSessionRegistration> _sessionsByCode =
         new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, PlayerAccess> _playerAccessByTokenHash = new();
+    private readonly ConcurrentDictionary<string, PlayerTransitionAccess>
+        _playerTransitionAccessByTokenHash = new();
     private readonly Dictionary<string, PlayerConnection> _playerConnections = new();
     private readonly object _presenceSync = new();
 
@@ -110,7 +114,8 @@ public sealed class GameSessionRegistry
         string publicCode,
         string accessToken,
         string connectionId,
-        bool isVisible)
+        bool isVisible,
+        string? transitionToken = null)
     {
         if (string.IsNullOrWhiteSpace(accessToken) ||
             !_playerAccessByTokenHash.TryGetValue(HashToken(accessToken), out var access) ||
@@ -122,6 +127,9 @@ public sealed class GameSessionRegistry
             return null;
         }
 
+        var hasValidTransition = ConsumePlayerTransitionToken(
+            transitionToken,
+            access);
         bool requiresApproval;
 
         lock (_presenceSync)
@@ -131,7 +139,8 @@ public sealed class GameSessionRegistry
                 connection.IsApproved);
             requiresApproval =
                 access.Game.Session.Status != GameSessionStatus.Lobby &&
-                !hasApprovedConnection;
+                !hasApprovedConnection &&
+                !hasValidTransition;
             _playerConnections[connectionId] = new PlayerConnection(
                 access,
                 isVisible,
@@ -139,6 +148,39 @@ public sealed class GameSessionRegistry
         }
 
         return new PlayerConnectionResult(access.Game, access.Player, requiresApproval);
+    }
+
+    public string? CreatePlayerTransitionToken(string connectionId)
+    {
+        PlayerConnection connection;
+
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(
+                    connectionId,
+                    out var currentConnection) ||
+                !currentConnection.IsApproved)
+            {
+                return null;
+            }
+
+            connection = currentConnection;
+        }
+
+        while (true)
+        {
+            var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+            var transition = new PlayerTransitionAccess(
+                connection.Access,
+                _timeProvider.GetUtcNow() + PlayerTransitionTokenLifetime);
+
+            if (_playerTransitionAccessByTokenHash.TryAdd(
+                    HashToken(token),
+                    transition))
+            {
+                return token;
+            }
+        }
     }
 
     public PlayerConnectionResult? SetPlayerVisibility(string connectionId, bool isVisible)
@@ -720,6 +762,22 @@ public sealed class GameSessionRegistry
         }
     }
 
+    private bool ConsumePlayerTransitionToken(
+        string? transitionToken,
+        PlayerAccess access)
+    {
+        if (string.IsNullOrWhiteSpace(transitionToken) ||
+            !_playerTransitionAccessByTokenHash.TryRemove(
+                HashToken(transitionToken),
+                out var transition))
+        {
+            return false;
+        }
+
+        return transition.Access == access &&
+            transition.ExpiresAtUtc >= _timeProvider.GetUtcNow();
+    }
+
     private PlayerPresenceStatus GetPresence(GamePlayerId playerId)
     {
         var connections = _playerConnections.Values
@@ -764,6 +822,10 @@ public sealed class GameSessionRegistry
         PlayerAccess Access,
         bool IsVisible,
         bool IsApproved);
+
+    private sealed record PlayerTransitionAccess(
+        PlayerAccess Access,
+        DateTimeOffset ExpiresAtUtc);
 }
 
 

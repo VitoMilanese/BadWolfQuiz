@@ -266,6 +266,7 @@
             const gameCode = lobby.dataset.gameCode;
             const playerId = lobby.dataset.playerId;
             const storageKey = `badwolfquiz:${gameCode}:player:${playerId}`;
+            const transitionStorageKey = `${storageKey}:transition`;
             const bootstrapToken = lobby.dataset.accessToken;
 
             if (bootstrapToken) {
@@ -302,11 +303,42 @@
                 warning.hidden = isPageActive();
             };
 
-            const joinPlayerSession = () => connection.invoke(
-                "JoinPlayerSession",
-                gameCode,
-                accessToken,
-                isPageActive());
+            const joinPlayerSession = async () => {
+                const transitionToken =
+                    sessionStorage.getItem(transitionStorageKey);
+
+                await connection.invoke(
+                    "JoinPlayerSession",
+                    gameCode,
+                    accessToken,
+                    isPageActive(),
+                    transitionToken);
+
+                if (transitionToken) {
+                    sessionStorage.removeItem(transitionStorageKey);
+                }
+            };
+
+            let transitionReloadStarted = false;
+            const reloadForGameTransition = async () => {
+                if (transitionReloadStarted) {
+                    return;
+                }
+
+                transitionReloadStarted = true;
+                const transitionToken = await connection.invoke(
+                    "PreparePlayerTransition");
+
+                if (!transitionToken) {
+                    transitionReloadStarted = false;
+                    return;
+                }
+
+                sessionStorage.setItem(
+                    transitionStorageKey,
+                    transitionToken);
+                window.location.reload();
+            };
 
             connection.on("TimerStateChanged", update => {
                 if (!timerPanel || !timerValue) {
@@ -362,7 +394,7 @@
 
                 if (lobby.dataset.finalStatus !== update.status &&
                     finalStatuses.includes(update.status)) {
-                    window.location.reload();
+                    reloadForGameTransition().catch(console.error);
                 }
             });
 
@@ -372,7 +404,7 @@
                     return;
                 }
 
-                window.location.reload();
+                reloadForGameTransition().catch(console.error);
             });
 
             connection.on("FinalQuestionActionRejected", update => {
