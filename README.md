@@ -81,6 +81,8 @@ Each question contains independent:
 - Question blocks
 - Answer blocks
 
+The quiz also has a dedicated final-question editor with independent question and answer blocks.
+
 Content blocks can be:
 
 - reordered using Drag & Drop;
@@ -146,6 +148,8 @@ Implemented:
 
 ```
 Quiz
+ ├── Final Question Blocks
+ ├── Final Answer Blocks
  ├── Round
  │     ├── Rows
  │     ├── Categories

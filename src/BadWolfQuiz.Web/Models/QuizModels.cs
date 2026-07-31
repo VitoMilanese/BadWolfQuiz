@@ -53,6 +53,10 @@ public sealed class Quiz
     public bool IsArchived { get; set; }
 
     public ICollection<QuizRound> Rounds { get; set; } = new List<QuizRound>();
+    public ICollection<FinalQuestionContentBlock> FinalQuestionBlocks { get; set; } =
+        new List<FinalQuestionContentBlock>();
+    public ICollection<FinalAnswerContentBlock> FinalAnswerBlocks { get; set; } =
+        new List<FinalAnswerContentBlock>();
     public ICollection<GameSession> Sessions { get; set; } = new List<GameSession>();
 }
 
@@ -130,6 +134,18 @@ public abstract class ContentBlockBase
     public byte[]? FileData { get; set; }
     public string? FileContentType { get; set; }
     public string? FileName { get; set; }
+}
+
+public sealed class FinalQuestionContentBlock : ContentBlockBase
+{
+    public int QuizId { get; set; }
+    public Quiz Quiz { get; set; } = null!;
+}
+
+public sealed class FinalAnswerContentBlock : ContentBlockBase
+{
+    public int QuizId { get; set; }
+    public Quiz Quiz { get; set; } = null!;
 }
 
 public sealed class QuestionContentBlock : ContentBlockBase

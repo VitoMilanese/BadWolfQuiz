@@ -30,6 +30,8 @@ public sealed class GameSessionLauncher(
         var quiz = await db.Quizzes
             .AsNoTracking()
             .AsSplitQuery()
+            .Include(item => item.FinalQuestionBlocks)
+            .Include(item => item.FinalAnswerBlocks)
             .Include(item => item.Rounds)
                 .ThenInclude(round => round.Rows)
             .Include(item => item.Rounds)

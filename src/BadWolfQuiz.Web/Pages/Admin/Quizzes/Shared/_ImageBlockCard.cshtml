@@ -13,11 +13,11 @@
     {
         imageUrl = Model.IsAnswerBlock
             ? Url.Page(
-                "/Admin/Quizzes/QuestionEditor",
+                null,
                 "AnswerBlockFile",
                 new { id = Model.Id!.Value })
             : Url.Page(
-                "/Admin/Quizzes/QuestionEditor",
+                null,
                 "QuestionBlockFile",
                 new { id = Model.Id!.Value });
     }

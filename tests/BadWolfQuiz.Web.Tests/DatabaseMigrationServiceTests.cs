@@ -49,13 +49,39 @@ public sealed class DatabaseMigrationServiceTests
             "QuizQuestions",
             "ExcludeFromRandomWagerSelection"));
 
+        Assert.True(await TableExistsAsync(
+            connection,
+            "FinalQuestionContentBlocks"));
+        Assert.True(await TableExistsAsync(
+            connection,
+            "FinalAnswerContentBlocks"));
+
         await using var historyCommand = connection.CreateCommand();
         historyCommand.CommandText =
             "SELECT COUNT(*) FROM \"__EFMigrationsHistory\";";
 
+        var expectedMigrationCount =
+            db.Database.GetMigrations().LongCount();
+
         Assert.Equal(
-            2L,
+            expectedMigrationCount,
             Convert.ToInt64(await historyCommand.ExecuteScalarAsync()));
+    }
+
+    private static async Task<bool> TableExistsAsync(
+        SqliteConnection connection,
+        string tableName)
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            SELECT COUNT(*)
+            FROM sqlite_master
+            WHERE type = 'table' AND name = $tableName;
+            """;
+        command.Parameters.AddWithValue("$tableName", tableName);
+
+        return Convert.ToInt64(await command.ExecuteScalarAsync()) == 1L;
     }
 
     private static async Task<bool> ColumnExistsAsync(

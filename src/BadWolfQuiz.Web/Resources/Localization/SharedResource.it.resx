@@ -879,4 +879,13 @@
   <data name="GameSettings_AllowNegativeFinalPlayers" xml:space="preserve">
     <value>Consenti ai giocatori con punteggio negativo di partecipare alla domanda finale</value>
   </data>
+  <data name="Title_FinalQuestionEditor" xml:space="preserve">
+    <value>Editor della domanda finale</value>
+  </data>
+  <data name="Button_EditFinalQuestion" xml:space="preserve">
+    <value>Modifica la domanda finale</value>
+  </data>
+  <data name="Message_FinalQuestionSaved" xml:space="preserve">
+    <value>Domanda finale salvata.</value>
+  </data>
 </root>
