@@ -956,4 +956,38 @@
   <data name="GameHistory_ScoreChange" xml:space="preserve"><value>Variazione punti</value></data>
   <data name="GameHistory_Correct" xml:space="preserve"><value>Corretta</value></data>
   <data name="GameHistory_Incorrect" xml:space="preserve"><value>Errata</value></data>
+  <data name="Account_HostSignIn" xml:space="preserve"><value>Accesso host</value></data>
+  <data name="Account_SignOut" xml:space="preserve"><value>Esci</value></data>
+  <data name="Account_RegisterHost" xml:space="preserve"><value>Registrazione host</value></data>
+  <data name="Account_Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Account_Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Account_ConfirmPassword" xml:space="preserve"><value>Conferma password</value></data>
+  <data name="Account_RememberMe" xml:space="preserve"><value>Ricordami</value></data>
+  <data name="Account_SignIn" xml:space="preserve"><value>Accedi</value></data>
+  <data name="Account_Register" xml:space="preserve"><value>Registrati</value></data>
+  <data name="Account_NoAccount" xml:space="preserve"><value>Non hai un account?</value></data>
+  <data name="Account_AlreadyRegistered" xml:space="preserve"><value>Hai già un account?</value></data>
+  <data name="Account_InvalidCredentials" xml:space="preserve"><value>Email o password non validi.</value></data>
+  <data name="Account_EmailAlreadyUsed" xml:space="preserve"><value>Questa email è già registrata.</value></data>
+  <data name="Account_Required" xml:space="preserve"><value>Questo campo è obbligatorio.</value></data>
+  <data name="Account_InvalidEmail" xml:space="preserve"><value>Inserisci un indirizzo email valido.</value></data>
+  <data name="Account_PasswordMinLength" xml:space="preserve"><value>La password deve contenere almeno 8 caratteri.</value></data>
+  <data name="Account_PasswordMismatch" xml:space="preserve"><value>Le password non corrispondono.</value></data>
+  <data name="Account_ForgotPassword" xml:space="preserve"><value>Password dimenticata?</value></data>
+  <data name="Account_ForgotPasswordDescription" xml:space="preserve"><value>Inserisci l’email dell’account host e invieremo un link per reimpostare la password.</value></data>
+  <data name="Account_SendResetLink" xml:space="preserve"><value>Invia il link</value></data>
+  <data name="Account_CheckEmail" xml:space="preserve"><value>Controlla la tua email</value></data>
+  <data name="Account_CheckEmailDescription" xml:space="preserve"><value>Se esiste un account con questa email, è stato inviato un link per reimpostare la password.</value></data>
+  <data name="Account_EmailSendFailed" xml:space="preserve"><value>Impossibile inviare l’email. Controlla la configurazione di Resend e riprova.</value></data>
+  <data name="Account_ResetPassword" xml:space="preserve"><value>Reimposta password</value></data>
+  <data name="Account_NewPassword" xml:space="preserve"><value>Nuova password</value></data>
+  <data name="Account_InvalidResetLink" xml:space="preserve"><value>Questo link non è valido, è scaduto oppure è già stato utilizzato.</value></data>
+  <data name="Account_PasswordResetComplete" xml:space="preserve"><value>Password reimpostata</value></data>
+  <data name="Account_ChangePassword" xml:space="preserve"><value>Cambia password</value></data>
+  <data name="Account_CurrentPassword" xml:space="preserve"><value>Password attuale</value></data>
+  <data name="Account_PasswordChanged" xml:space="preserve"><value>La password è stata modificata.</value></data>
+  <data name="Account_CurrentPasswordInvalid" xml:space="preserve"><value>La password attuale non è corretta.</value></data>
+  <data name="Account_EmailSubject" xml:space="preserve"><value>BAD WOLF QUIZ — reimpostazione password</value></data>
+  <data name="Account_EmailIntro" xml:space="preserve"><value>È stata richiesta la reimpostazione della password per il tuo account host BAD WOLF QUIZ.</value></data>
+  <data name="Account_EmailExpiry" xml:space="preserve"><value>Il link scade tra un’ora. Se non hai effettuato la richiesta, ignora questa email.</value></data>
 </root>

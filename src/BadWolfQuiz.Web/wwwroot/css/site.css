@@ -2962,3 +2962,30 @@ iframe.game-content-video {
         grid-template-columns: 1fr;
     }
 }
+.nav-form {
+    display: inline;
+}
+
+.nav-link-button {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.auth-card {
+    width: min(100%, 34rem);
+    margin: 3rem auto;
+}
+
+.auth-card form {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.auth-card input[type="email"],
+.auth-card input[type="password"] {
+    width: 100%;
+}

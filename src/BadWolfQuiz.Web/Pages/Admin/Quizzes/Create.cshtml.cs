@@ -1,6 +1,7 @@
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Models;
+using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Localization;
@@ -8,7 +9,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Quizzes;
 
-public sealed class CreateModel(QuizDbContext db, IStringLocalizer<SharedResource> localizer) : PageModel
+public sealed class CreateModel(
+    QuizDbContext db,
+    CurrentHost currentHost,
+    IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty]
     public InputModel Input { get; set; } = new();
@@ -26,6 +30,7 @@ public sealed class CreateModel(QuizDbContext db, IStringLocalizer<SharedResourc
 
         var quiz = new Quiz
         {
+            HostId = currentHost.RequiredId,
             Title = Input.Title.Trim(),
             Description = Input.Description?.Trim()
         };

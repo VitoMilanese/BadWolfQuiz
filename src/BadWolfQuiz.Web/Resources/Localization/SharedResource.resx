@@ -956,4 +956,38 @@
   <data name="GameHistory_ScoreChange" xml:space="preserve"><value>Score change</value></data>
   <data name="GameHistory_Correct" xml:space="preserve"><value>Correct</value></data>
   <data name="GameHistory_Incorrect" xml:space="preserve"><value>Incorrect</value></data>
+  <data name="Account_HostSignIn" xml:space="preserve"><value>Host sign in</value></data>
+  <data name="Account_SignOut" xml:space="preserve"><value>Sign out</value></data>
+  <data name="Account_RegisterHost" xml:space="preserve"><value>Register host</value></data>
+  <data name="Account_Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Account_Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Account_ConfirmPassword" xml:space="preserve"><value>Confirm password</value></data>
+  <data name="Account_RememberMe" xml:space="preserve"><value>Remember me</value></data>
+  <data name="Account_SignIn" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Account_Register" xml:space="preserve"><value>Register</value></data>
+  <data name="Account_NoAccount" xml:space="preserve"><value>No account?</value></data>
+  <data name="Account_AlreadyRegistered" xml:space="preserve"><value>Already registered?</value></data>
+  <data name="Account_InvalidCredentials" xml:space="preserve"><value>Invalid email or password.</value></data>
+  <data name="Account_EmailAlreadyUsed" xml:space="preserve"><value>This email is already registered.</value></data>
+  <data name="Account_Required" xml:space="preserve"><value>This field is required.</value></data>
+  <data name="Account_InvalidEmail" xml:space="preserve"><value>Enter a valid email address.</value></data>
+  <data name="Account_PasswordMinLength" xml:space="preserve"><value>The password must contain at least 8 characters.</value></data>
+  <data name="Account_PasswordMismatch" xml:space="preserve"><value>The passwords do not match.</value></data>
+  <data name="Account_ForgotPassword" xml:space="preserve"><value>Forgot password?</value></data>
+  <data name="Account_ForgotPasswordDescription" xml:space="preserve"><value>Enter your host account email and we will send a reset link.</value></data>
+  <data name="Account_SendResetLink" xml:space="preserve"><value>Send reset link</value></data>
+  <data name="Account_CheckEmail" xml:space="preserve"><value>Check your email</value></data>
+  <data name="Account_CheckEmailDescription" xml:space="preserve"><value>If an account exists for that email, a password reset link has been sent.</value></data>
+  <data name="Account_EmailSendFailed" xml:space="preserve"><value>The reset email could not be sent. Check the Resend configuration and try again.</value></data>
+  <data name="Account_ResetPassword" xml:space="preserve"><value>Reset password</value></data>
+  <data name="Account_NewPassword" xml:space="preserve"><value>New password</value></data>
+  <data name="Account_InvalidResetLink" xml:space="preserve"><value>This reset link is invalid, expired, or has already been used.</value></data>
+  <data name="Account_PasswordResetComplete" xml:space="preserve"><value>Password reset complete</value></data>
+  <data name="Account_ChangePassword" xml:space="preserve"><value>Change password</value></data>
+  <data name="Account_CurrentPassword" xml:space="preserve"><value>Current password</value></data>
+  <data name="Account_PasswordChanged" xml:space="preserve"><value>Your password has been changed.</value></data>
+  <data name="Account_CurrentPasswordInvalid" xml:space="preserve"><value>The current password is incorrect.</value></data>
+  <data name="Account_EmailSubject" xml:space="preserve"><value>BAD WOLF QUIZ — password reset</value></data>
+  <data name="Account_EmailIntro" xml:space="preserve"><value>A password reset was requested for your BAD WOLF QUIZ host account.</value></data>
+  <data name="Account_EmailExpiry" xml:space="preserve"><value>This link expires in one hour. If you did not request it, ignore this email.</value></data>
 </root>

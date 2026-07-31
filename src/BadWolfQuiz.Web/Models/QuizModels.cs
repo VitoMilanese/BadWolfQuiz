@@ -38,9 +38,34 @@ public enum GameQuestionStatus
     Finished = 6
 }
 
+public sealed class HostAccount
+{
+    [MaxLength(36)]
+    public string Id { get; set; } = Guid.NewGuid().ToString("D");
+
+    [Required, MaxLength(254)]
+    public string Email { get; set; } = string.Empty;
+
+    [Required, MaxLength(254)]
+    public string NormalizedEmail { get; set; } = string.Empty;
+
+    [Required]
+    public string PasswordHash { get; set; } = string.Empty;
+
+    [MaxLength(64)]
+    public string? PasswordResetTokenHash { get; set; }
+    public DateTime? PasswordResetTokenExpiresAtUtc { get; set; }
+
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
+    public ICollection<GameSession> GameSessions { get; set; } = new List<GameSession>();
+}
+
 public sealed class Quiz
 {
     public int Id { get; set; }
+    [MaxLength(36)]
+    public string? HostId { get; set; }
 
     [Required, MaxLength(160)]
     public string Title { get; set; } = string.Empty;
@@ -58,6 +83,7 @@ public sealed class Quiz
     public ICollection<FinalAnswerContentBlock> FinalAnswerBlocks { get; set; } =
         new List<FinalAnswerContentBlock>();
     public ICollection<GameSession> Sessions { get; set; } = new List<GameSession>();
+    public HostAccount? Host { get; set; }
 }
 
 public sealed class QuizRound
@@ -164,6 +190,8 @@ public sealed class GameSession
 {
     public int Id { get; set; }
     public int QuizId { get; set; }
+    [MaxLength(36)]
+    public string? HostId { get; set; }
 
     [Required, MaxLength(12)]
     public string PublicCode { get; set; } = string.Empty;
@@ -174,6 +202,7 @@ public sealed class GameSession
     public DateTime? FinishedAtUtc { get; set; }
 
     public Quiz Quiz { get; set; } = null!;
+    public HostAccount? Host { get; set; }
     public ICollection<GamePlayer> Players { get; set; } = new List<GamePlayer>();
     public ICollection<GameQuestion> Questions { get; set; } = new List<GameQuestion>();
 }

@@ -4,6 +4,10 @@ using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using BadWolfQuiz.Web.Models;
+using Resend;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -11,13 +15,28 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services
-    .AddRazorPages()
+    .AddRazorPages(options => options.Conventions.AuthorizeFolder("/Admin"))
     .AddViewLocalization()
     .AddDataAnnotationsLocalization(options =>
     {
         options.DataAnnotationLocalizerProvider = (_, factory) =>
             factory.Create(typeof(SharedResource));
     });
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/Login";
+        options.ExpireTimeSpan = TimeSpan.FromDays(30);
+        options.SlidingExpiration = true;
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(options =>
+    options.ApiToken = builder.Configuration["Resend:ApiToken"] ?? string.Empty);
+builder.Services.AddTransient<IResend, ResendClient>();
 
 var supportedCultures = new[]
 {
@@ -49,6 +68,10 @@ builder.Services.AddSingleton<GameSessionRegistry>();
 builder.Services.AddSingleton<GameSettingsStore>();
 builder.Services.AddScoped<GameSessionLauncher>();
 builder.Services.AddScoped<GameHistoryStore>();
+builder.Services.AddScoped<CurrentHost>();
+builder.Services.AddScoped<HostAccountService>();
+builder.Services.AddScoped<PasswordResetEmailSender>();
+builder.Services.AddScoped<IPasswordHasher<HostAccount>, PasswordHasher<HostAccount>>();
 builder.Services.AddScoped<QuizSeedService>();
 
 var app = builder.Build();
@@ -69,6 +92,7 @@ app.UseRequestLocalization(localizationOptions);
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();

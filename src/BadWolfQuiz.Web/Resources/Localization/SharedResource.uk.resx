@@ -956,4 +956,38 @@
   <data name="GameHistory_ScoreChange" xml:space="preserve"><value>Зміна балів</value></data>
   <data name="GameHistory_Correct" xml:space="preserve"><value>Правильно</value></data>
   <data name="GameHistory_Incorrect" xml:space="preserve"><value>Неправильно</value></data>
+  <data name="Account_HostSignIn" xml:space="preserve"><value>Вхід для хоста</value></data>
+  <data name="Account_SignOut" xml:space="preserve"><value>Вийти</value></data>
+  <data name="Account_RegisterHost" xml:space="preserve"><value>Реєстрація хоста</value></data>
+  <data name="Account_Email" xml:space="preserve"><value>Електронна пошта</value></data>
+  <data name="Account_Password" xml:space="preserve"><value>Пароль</value></data>
+  <data name="Account_ConfirmPassword" xml:space="preserve"><value>Підтвердження пароля</value></data>
+  <data name="Account_RememberMe" xml:space="preserve"><value>Запам’ятати мене</value></data>
+  <data name="Account_SignIn" xml:space="preserve"><value>Увійти</value></data>
+  <data name="Account_Register" xml:space="preserve"><value>Зареєструватися</value></data>
+  <data name="Account_NoAccount" xml:space="preserve"><value>Немає акаунта?</value></data>
+  <data name="Account_AlreadyRegistered" xml:space="preserve"><value>Уже зареєстровані?</value></data>
+  <data name="Account_InvalidCredentials" xml:space="preserve"><value>Неправильна електронна пошта або пароль.</value></data>
+  <data name="Account_EmailAlreadyUsed" xml:space="preserve"><value>Ця електронна пошта вже зареєстрована.</value></data>
+  <data name="Account_Required" xml:space="preserve"><value>Це поле обов’язкове.</value></data>
+  <data name="Account_InvalidEmail" xml:space="preserve"><value>Введіть правильну адресу електронної пошти.</value></data>
+  <data name="Account_PasswordMinLength" xml:space="preserve"><value>Пароль має містити щонайменше 8 символів.</value></data>
+  <data name="Account_PasswordMismatch" xml:space="preserve"><value>Паролі не збігаються.</value></data>
+  <data name="Account_ForgotPassword" xml:space="preserve"><value>Забули пароль?</value></data>
+  <data name="Account_ForgotPasswordDescription" xml:space="preserve"><value>Введіть електронну пошту акаунта хоста, і ми надішлемо посилання для відновлення.</value></data>
+  <data name="Account_SendResetLink" xml:space="preserve"><value>Надіслати посилання</value></data>
+  <data name="Account_CheckEmail" xml:space="preserve"><value>Перевірте електронну пошту</value></data>
+  <data name="Account_CheckEmailDescription" xml:space="preserve"><value>Якщо акаунт із такою адресою існує, на неї надіслано посилання для відновлення пароля.</value></data>
+  <data name="Account_EmailSendFailed" xml:space="preserve"><value>Не вдалося надіслати лист. Перевірте налаштування Resend і спробуйте ще раз.</value></data>
+  <data name="Account_ResetPassword" xml:space="preserve"><value>Відновити пароль</value></data>
+  <data name="Account_NewPassword" xml:space="preserve"><value>Новий пароль</value></data>
+  <data name="Account_InvalidResetLink" xml:space="preserve"><value>Це посилання недійсне, прострочене або вже використане.</value></data>
+  <data name="Account_PasswordResetComplete" xml:space="preserve"><value>Пароль відновлено</value></data>
+  <data name="Account_ChangePassword" xml:space="preserve"><value>Змінити пароль</value></data>
+  <data name="Account_CurrentPassword" xml:space="preserve"><value>Поточний пароль</value></data>
+  <data name="Account_PasswordChanged" xml:space="preserve"><value>Пароль успішно змінено.</value></data>
+  <data name="Account_CurrentPasswordInvalid" xml:space="preserve"><value>Поточний пароль неправильний.</value></data>
+  <data name="Account_EmailSubject" xml:space="preserve"><value>BAD WOLF QUIZ — відновлення пароля</value></data>
+  <data name="Account_EmailIntro" xml:space="preserve"><value>Для вашого акаунта хоста BAD WOLF QUIZ надійшов запит на відновлення пароля.</value></data>
+  <data name="Account_EmailExpiry" xml:space="preserve"><value>Посилання діє одну годину. Якщо ви не надсилали запит, просто проігноруйте цей лист.</value></data>
 </root>
