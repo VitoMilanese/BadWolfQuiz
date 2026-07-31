@@ -2615,6 +2615,9 @@ iframe.game-content-video {
 }
 
 .final-player-answer-presentation .game-content-text {
+    width: 100%;
+    align-self: center;
+    margin-inline: auto;
     font-size: clamp(2rem, 6vw, 5rem);
     text-align: center;
 }

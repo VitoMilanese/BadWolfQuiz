@@ -57,7 +57,8 @@
 
             <details class="lobby-settings-panel">
                 <summary>@Localizer["GameSettings_LobbyTitle"]</summary>
-                <form method="post"
+                <form id="start-game-form"
+                      method="post"
                       asp-page-handler="UpdateSettings"
                       class="stack-form">
                     <p class="settings-description">
@@ -109,11 +110,15 @@
             </details>
 
             <div class="form-actions">
-                <form id="start-game-form" method="post" asp-page-handler="Start">
-                    <button class="button button-primary" type="submit">
-                        @Localizer["GameLobby_StartGame"]
-                    </button>
-                </form>
+                <button class="button button-primary"
+                        type="submit"
+                        form="start-game-form"
+                        formaction="@Url.Page(
+                            "/Admin/Games/Lobby",
+                            "Start",
+                            new { id = Model.Game.Session.Id.Value })">
+                    @Localizer["GameLobby_StartGame"]
+                </button>
 
                 <form method="post" asp-page-handler="RandomActivePlayer">
                     <button class="button button-secondary" type="submit">
@@ -841,9 +846,7 @@
                         </p>
                         <section class="game-content-presentation final-player-answer-presentation">
                             <h2>@currentSubmission.PlayerName</h2>
-                            <p class="game-content-text">
-                                @currentSubmission.Answer!.Text
-                            </p>
+                            <p class="game-content-text">@currentSubmission.Answer!.Text</p>
                         </section>
                         <form class="question-judge-actions final-judging-actions"
                               method="post"

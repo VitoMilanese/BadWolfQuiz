@@ -173,8 +173,18 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
+        if (!SettingsInput.IsValid)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameSettings_InvalidDuration"].Value;
+            return RedirectToPage(new { id });
+        }
+
         try
         {
+            sessionRegistry.UpdateSettings(
+                game.PublicCode,
+                SettingsInput.ToRuntimeSettings());
             sessionRegistry.StartGame(game.PublicCode);
         }
         catch (GameRuleViolationException)

@@ -493,6 +493,34 @@ public sealed class GameSessionRegistryTests
         Assert.Null(result);
     }
 
+    [Fact]
+    public void Final_question_excludes_negative_player_when_game_setting_is_disabled()
+    {
+        var settings = new BadWolfQuiz.Game.Runtime.GameSessionSettings(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(10),
+            BadWolfQuiz.Game.Runtime.GamePhaseStartMode.Manual,
+            BadWolfQuiz.Game.Runtime.GamePhaseStartMode.Automatic,
+            allowNegativeScoreFinalPlayers: false);
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateFinalQuiz(), settings);
+        var positive = registry.JoinPlayer("ABC123", "Rose").Player!;
+        var negative = registry.JoinPlayer("ABC123", "Mickey").Player!;
+        registry.AdjustPlayerScore("ABC123", negative.Id, -1000);
+        CompleteOnlyQuestion(registry, positive);
+
+        var final = registry.StartFinalQuestion("ABC123");
+
+        Assert.Contains(
+            final!.Submissions,
+            item => item.PlayerId == positive.Id);
+        Assert.DoesNotContain(
+            final.Submissions,
+            item => item.PlayerId == negative.Id);
+        Assert.Equal(-1000, negative.Score);
+        Assert.False(game.Session.Settings.AllowNegativeScoreFinalPlayers);
+    }
+
     private static GameSessionRegistry CreateRegistry(params string[] codes)
     {
         return new GameSessionRegistry(new StubGameCodeGenerator(codes));
