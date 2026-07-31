@@ -660,6 +660,15 @@ textarea {
         transform: translateY(-6px);
     }
 
+[data-auto-dismiss] {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+[data-auto-dismiss].message-hidden {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
 .content-block-section-header {
     display: flex;
     align-items: center;

@@ -13,7 +13,7 @@
 
 @if (TempData["SuccessMessage"] is string successMessage)
 {
-    <div class="message message-success" role="status">@successMessage</div>
+    <div class="message message-success" role="status" data-auto-dismiss>@successMessage</div>
 }
 
 <form method="post" enctype="multipart/form-data" class="form-card narrow stack-form">
