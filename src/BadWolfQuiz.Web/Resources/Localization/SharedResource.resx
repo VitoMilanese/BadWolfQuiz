@@ -909,4 +909,8 @@
   <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve"><value>Your final answer was incorrect.</value></data>
   <data name="FinalQuestion_ActionRejected" xml:space="preserve"><value>The final question action is not available yet.</value></data>
   <data name="FinalQuestion_JudgingProgress" xml:space="preserve"><value>Answer {0} of {1}</value></data>
+  <data name="AnswerKey_Title" xml:space="preserve"><value>Answer key</value></data>
+  <data name="AnswerKey_Eyebrow" xml:space="preserve"><value>Private host screen</value></data>
+  <data name="AnswerKey_Open" xml:space="preserve"><value>Open answer key</value></data>
+  <data name="AnswerKey_Waiting" xml:space="preserve"><value>Waiting for a question.</value></data>
 </root>

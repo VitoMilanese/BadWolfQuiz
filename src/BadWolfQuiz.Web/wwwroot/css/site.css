@@ -2585,30 +2585,6 @@ iframe.game-content-video {
     margin: 0;
 }
 
-.final-question-display {
-    display: contents;
-}
-
-.final-question-display > summary {
-    display: none;
-}
-
-.final-correct-answer-reference {
-    width: min(100%, 52rem);
-    text-align: left;
-}
-
-.final-correct-answer-reference > summary {
-    color: var(--gold);
-    cursor: pointer;
-    font-weight: 850;
-}
-
-.final-correct-answer-reference .game-content-presentation {
-    min-height: 0;
-    padding-block: 1rem;
-}
-
 .final-judging-mode {
     justify-content: stretch;
 }
@@ -2667,6 +2643,39 @@ iframe.game-content-video {
 .final-wager-form {
     width: min(360px, 100%);
     justify-self: center;
+}
+
+.host-answer-key-launch {
+    position: fixed;
+    top: 84px;
+    right: 20px;
+    z-index: 18;
+}
+
+.answer-key-page {
+    min-height: calc(100dvh - 140px);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.answer-key-header {
+    text-align: center;
+}
+
+.answer-key-header h1,
+.answer-key-header p {
+    margin-block: 0.35rem;
+}
+
+.answer-key-content,
+.answer-key-waiting {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
 }
 
 .round-wager-settings {

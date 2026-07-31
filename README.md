@@ -117,6 +117,7 @@ Currently implemented:
 - Deterministic final standings with score-growth, correct-answer, and attempt tie-breakers
 - Private final wagers and answers submitted from player devices
 - Host-controlled final question reveal, judging, and final results
+- Separate live answer-key screen for the host's second display
 
 ---
 

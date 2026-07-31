@@ -486,9 +486,10 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
-    public IActionResult OnPostCloseAnswer(
+    public async Task<IActionResult> OnPostCloseAnswerAsync(
         Guid id,
-        int sourceQuestionId)
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
     {
         var game = sessionRegistry.Find(new GameSessionId(id));
 
@@ -502,6 +503,7 @@ public sealed class LobbyModel(
             sessionRegistry.CloseQuestionAnswer(
                 game.PublicCode,
                 sourceQuestionId);
+            await BroadcastBuzzerAsync(game, cancellationToken);
         }
         catch (GameRuleViolationException)
         {

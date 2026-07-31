@@ -909,4 +909,8 @@
   <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve"><value>La tua risposta finale era errata.</value></data>
   <data name="FinalQuestion_ActionRejected" xml:space="preserve"><value>Questa azione della domanda finale non è ancora disponibile.</value></data>
   <data name="FinalQuestion_JudgingProgress" xml:space="preserve"><value>Risposta {0} di {1}</value></data>
+  <data name="AnswerKey_Title" xml:space="preserve"><value>Risposta corretta</value></data>
+  <data name="AnswerKey_Eyebrow" xml:space="preserve"><value>Schermata privata del presentatore</value></data>
+  <data name="AnswerKey_Open" xml:space="preserve"><value>Apri la risposta corretta</value></data>
+  <data name="AnswerKey_Waiting" xml:space="preserve"><value>In attesa di una domanda.</value></data>
 </root>
