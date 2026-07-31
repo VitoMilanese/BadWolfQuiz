@@ -2648,18 +2648,19 @@ iframe.game-content-video {
     justify-self: center;
 }
 
-.host-answer-key-launch {
-    position: fixed;
-    top: 84px;
-    right: 20px;
-    z-index: 18;
+.host-game-actions {
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
 }
 
-.host-answer-history-launch {
-    position: fixed;
-    top: 84px;
-    right: 220px;
-    z-index: 18;
+.host-game-actions form {
+    margin: 0;
+}
+
+.final-game-actions {
+    flex: 0 0 auto;
+    width: 100%;
 }
 
 .answer-history-page,
@@ -2705,15 +2706,15 @@ iframe.game-content-video {
 }
 
 @media (max-width: 900px) {
+    .host-game-actions {
+        flex-wrap: wrap;
+    }
+
     .answer-history-form {
         grid-template-columns: 1fr;
         align-items: stretch;
     }
 
-    .host-answer-history-launch {
-        top: 140px;
-        right: 20px;
-    }
 }
 
 .answer-key-page {

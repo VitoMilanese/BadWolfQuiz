@@ -186,20 +186,6 @@
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
              data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
              data-running-label="@Localizer["GameLobby_StatusRunning"]">
-        <a class="button button-secondary host-answer-key-launch"
-           asp-page="/Admin/Games/AnswerKey"
-           asp-route-id="@Model.Game.Session.Id.Value"
-           target="_blank"
-           rel="noopener">
-            @Localizer["AnswerKey_Open"]
-        </a>
-        <a class="button button-secondary host-answer-history-launch"
-           asp-page="/Admin/Games/AnswerHistory"
-           asp-route-id="@Model.Game.Session.Id.Value"
-           target="_blank"
-           rel="noopener">
-            @Localizer["AnswerHistory_Open"]
-        </a>
         @if (TempData["ErrorMessage"] is string errorMessage)
         {
             <div class="message message-error">@errorMessage</div>
@@ -207,13 +193,21 @@
 
         @if (Model.CurrentQuestion is null && !Model.IsRoundSummaryVisible)
         {
-        <div class="page-heading">
+        <div class="page-heading host-game-heading">
             <div>
                 <p class="eyebrow">@Localizer["GameBoard_Eyebrow"]</p>
                 <h2>@Model.Game.Session.CurrentRound.Title</h2>
             </div>
 
-            <div class="form-actions">
+            <div class="form-actions host-game-actions">
+                <a class="button button-secondary"
+                   asp-page="/Admin/Games/AnswerHistory"
+                   asp-route-id="@Model.Game.Session.Id.Value"
+                   target="_blank"
+                   rel="noopener">
+                    @Localizer["AnswerHistory_Open"]
+                </a>
+
                 <form method="post" asp-page-handler="RandomActivePlayer">
                     <button class="button button-secondary"
                             type="submit"
@@ -221,6 +215,14 @@
                         @Localizer["GameBoard_RandomActivePlayer"]
                     </button>
                 </form>
+
+                <a class="button button-secondary"
+                   asp-page="/Admin/Games/AnswerKey"
+                   asp-route-id="@Model.Game.Session.Id.Value"
+                   target="_blank"
+                   rel="noopener">
+                    @Localizer["AnswerKey_Open"]
+                </a>
 
                 <button class="button button-secondary"
                         type="button"
@@ -720,20 +722,22 @@
              data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
              data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
              data-approve-label="@Localizer["GameLobby_ApproveRejoin"]">
-        <a class="button button-secondary host-answer-key-launch"
-           asp-page="/Admin/Games/AnswerKey"
-           asp-route-id="@Model.Game.Session.Id.Value"
-           target="_blank"
-           rel="noopener">
-            @Localizer["AnswerKey_Open"]
-        </a>
-        <a class="button button-secondary host-answer-history-launch"
-           asp-page="/Admin/Games/AnswerHistory"
-           asp-route-id="@Model.Game.Session.Id.Value"
-           target="_blank"
-           rel="noopener">
-            @Localizer["AnswerHistory_Open"]
-        </a>
+        <div class="form-actions host-game-actions final-game-actions">
+            <a class="button button-secondary"
+               asp-page="/Admin/Games/AnswerHistory"
+               asp-route-id="@Model.Game.Session.Id.Value"
+               target="_blank"
+               rel="noopener">
+                @Localizer["AnswerHistory_Open"]
+            </a>
+            <a class="button button-secondary"
+               asp-page="/Admin/Games/AnswerKey"
+               asp-route-id="@Model.Game.Session.Id.Value"
+               target="_blank"
+               rel="noopener">
+                @Localizer["AnswerKey_Open"]
+            </a>
+        </div>
         @if (TempData["ErrorMessage"] is string errorMessage)
         {
             <div class="message message-error">@errorMessage</div>
