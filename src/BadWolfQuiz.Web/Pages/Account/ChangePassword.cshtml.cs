@@ -15,7 +15,6 @@ public sealed class ChangePasswordModel(
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty] public InputModel Input { get; set; } = new();
-    public bool IsChanged { get; private set; }
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
@@ -25,10 +24,7 @@ public sealed class ChangePasswordModel(
             ModelState.AddModelError(string.Empty, localizer["Account_CurrentPasswordInvalid"]);
             return Page();
         }
-        IsChanged = true;
-        ModelState.Clear();
-        Input = new();
-        return Page();
+        return RedirectToPage("/Index");
     }
 
     public sealed class InputModel
