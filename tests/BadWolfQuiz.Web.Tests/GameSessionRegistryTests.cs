@@ -155,6 +155,27 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void Running_game_rejects_new_player_when_late_joining_is_disabled()
+    {
+        var registry = CreateRegistry("ABC123");
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(10),
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Automatic,
+            allowNegativeScoreFinalPlayers: true,
+            allowNewPlayersAfterStart: false);
+        var game = registry.Create(CreateQuiz(), settings);
+        registry.JoinPlayer("ABC123", "Rose");
+        registry.StartGame("ABC123");
+
+        var result = registry.JoinPlayer("ABC123", "Mickey");
+
+        Assert.Equal(PlayerJoinStatus.GameAlreadyStarted, result.Status);
+        Assert.DoesNotContain(game.Session.Players, player => player.Name == "Mickey");
+    }
+
+    [Fact]
     public void Running_game_requires_host_approval_before_player_rejoins()
     {
         var registry = CreateRegistry("ABC123");

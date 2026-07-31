@@ -22,3 +22,11 @@ Example:
 
 The QR PNG endpoint is part of the authenticated host page and verifies that the
 requested active game belongs to the current host.
+
+## Joining after the game starts
+
+The global and per-game setting `AllowNewPlayersAfterStart` controls whether a
+name that was not present in the initial lobby may join a running game. Existing
+players may still reconnect and require host approval. When late joining is
+enabled, new running-game players also appear as pending until the host approves
+their connection.

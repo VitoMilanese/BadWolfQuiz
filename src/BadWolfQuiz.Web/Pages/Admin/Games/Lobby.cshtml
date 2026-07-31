@@ -105,6 +105,11 @@
                                    type="checkbox" />
                             <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
                         </label>
+                        <label class="settings-checkbox">
+                            <input asp-for="SettingsInput.AllowNewPlayersAfterStart"
+                                   type="checkbox" />
+                            <span>@Localizer["GameSettings_AllowNewPlayersAfterStart"]</span>
+                        </label>
                     </div>
                     <div class="form-actions">
                         <button class="button button-secondary" type="submit">
@@ -1324,6 +1329,20 @@
 
             const joinSession = () => connection.invoke("JoinSession", gameCode);
 
+            let playerPollHandle = null;
+            const startPlayerPolling = () => {
+                if (playerPollHandle !== null) {
+                    clearInterval(playerPollHandle);
+                }
+
+                playerPollHandle = window.setInterval(() => {
+                    if (connection.state === signalR.HubConnectionState.Connected) {
+                        connection.invoke("PollPlayers", gameCode)
+                            .catch(console.error);
+                    }
+                }, 1000);
+            };
+
             let timerPollHandle = null;
             const startTimerPolling = () => {
                 if (timerPollHandle !== null) {
@@ -1341,11 +1360,13 @@
 
             connection.onreconnected(async () => {
                 await joinSession();
+                startPlayerPolling();
                 startTimerPolling();
             });
             connection.start()
                 .then(async () => {
                     await joinSession();
+                    startPlayerPolling();
                     startTimerPolling();
                 })
                 .catch(console.error);

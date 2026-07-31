@@ -37,19 +37,19 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
                 _jsonOptions)
                 ?? GameSessionSettings.Default;
 
-            if (document.RootElement.TryGetProperty(
-                nameof(GameSessionSettings.AllowNegativeScoreFinalPlayers),
-                out _))
-            {
-                return settings;
-            }
-
             return new GameSessionSettings(
                 settings.BuzzerDuration,
                 settings.AnswerDuration,
                 settings.RegularQuestionBuzzerStartMode,
                 settings.WagerQuestionAnswerTimerStartMode,
-                allowNegativeScoreFinalPlayers: true);
+                allowNegativeScoreFinalPlayers: document.RootElement.TryGetProperty(
+                    nameof(GameSessionSettings.AllowNegativeScoreFinalPlayers), out _)
+                        ? settings.AllowNegativeScoreFinalPlayers
+                        : true,
+                allowNewPlayersAfterStart: document.RootElement.TryGetProperty(
+                    nameof(GameSessionSettings.AllowNewPlayersAfterStart), out _)
+                        ? settings.AllowNewPlayersAfterStart
+                        : true);
         }
         catch (JsonException)
         {
@@ -104,6 +104,7 @@ public sealed class GameSettingsInput
         GamePhaseStartMode.Automatic;
 
     public bool AllowNegativeScoreFinalPlayers { get; set; } = true;
+    public bool AllowNewPlayersAfterStart { get; set; } = true;
 
     public bool IsValid =>
         BuzzerDurationSeconds is >= 1 and <= 3600 &&
@@ -125,7 +126,8 @@ public sealed class GameSettingsInput
             TimeSpan.FromSeconds(AnswerDurationSeconds),
             RegularQuestionBuzzerStartMode,
             WagerQuestionAnswerTimerStartMode,
-            AllowNegativeScoreFinalPlayers);
+            AllowNegativeScoreFinalPlayers,
+            AllowNewPlayersAfterStart);
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)
@@ -139,7 +141,8 @@ public sealed class GameSettingsInput
             WagerQuestionAnswerTimerStartMode =
                 settings.WagerQuestionAnswerTimerStartMode,
             AllowNegativeScoreFinalPlayers =
-                settings.AllowNegativeScoreFinalPlayers
+                settings.AllowNegativeScoreFinalPlayers,
+            AllowNewPlayersAfterStart = settings.AllowNewPlayersAfterStart
         };
     }
 }

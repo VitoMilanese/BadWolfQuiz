@@ -113,6 +113,12 @@ public sealed class GameSessionRegistry
                 return PlayerJoinResult.Failed(PlayerJoinStatus.NameAlreadyUsed);
             }
 
+            if (game.Session.Status != GameSessionStatus.Lobby &&
+                !game.Session.Settings.AllowNewPlayersAfterStart)
+            {
+                return PlayerJoinResult.Failed(PlayerJoinStatus.GameAlreadyStarted);
+            }
+
             var player = game.Session.AddPlayer(playerName);
             var accessToken = CreatePlayerAccess(game, player);
             return PlayerJoinResult.Succeeded(game, player, accessToken);

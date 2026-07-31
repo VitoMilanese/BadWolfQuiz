@@ -35,6 +35,16 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
         }
     }
 
+    public Task PollPlayers(string publicCode)
+    {
+        var game = sessionRegistry.Find(publicCode);
+        return game is null
+            ? Task.CompletedTask
+            : Clients.Caller.SendAsync(
+                "PlayersChanged",
+                CreatePlayersUpdate(sessionRegistry, game));
+    }
+
     public async Task JoinPlayerSession(
         string publicCode,
         string accessToken,
