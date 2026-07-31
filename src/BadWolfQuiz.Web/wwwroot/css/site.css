@@ -1250,7 +1250,16 @@ textarea {
 /* Host runtime game board */
 
 .host-game-board {
-    margin-top: 32px;
+    margin-top: 0;
+}
+
+.host-game-heading {
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.host-game-heading h2 {
+    margin-bottom: 0;
 }
 
 .host-board-grid {
@@ -2234,13 +2243,13 @@ iframe.game-content-video {
 
 .host-game-board {
     --game-scoreboard-space: 230px;
-    min-height: calc(100dvh - 72px - 68px - 32px);
+    min-height: calc(100dvh - 72px - 68px);
     padding-bottom: var(--game-scoreboard-space);
 }
 
 @media (max-width: 900px) {
     .host-game-board {
-        min-height: calc(100dvh - 72px - 40px - 32px);
+        min-height: calc(100dvh - 72px - 40px);
     }
 }
 
@@ -2412,9 +2421,8 @@ iframe.game-content-video {
     /*
      * 72px   top navigation
      * 34px   top padding of .page-shell
-     * 32px   existing margin-top of .host-game-board
      */
-    height: calc(100dvh - 72px - 34px - 32px);
+    height: calc(100dvh - 72px - 34px);
     min-height: 0;
     /*
      * The scoreboard is position: fixed, so reserve its space
@@ -2447,7 +2455,7 @@ iframe.game-content-video {
         /*
          * .page-shell uses 20px padding below 900px.
          */
-        height: calc(100dvh - 72px - 20px - 32px);
+        height: calc(100dvh - 72px - 20px);
         margin-bottom: -20px;
     }
 }
