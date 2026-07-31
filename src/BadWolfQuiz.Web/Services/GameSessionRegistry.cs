@@ -143,6 +143,55 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public PlayerRemoval? RemovePlayer(string publicCode, GamePlayerId playerId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        GamePlayer player;
+
+        lock (game)
+        {
+            player = game.Session.RemovePlayer(playerId);
+        }
+
+        string[] connectionIds;
+
+        lock (_presenceSync)
+        {
+            connectionIds = _playerConnections
+                .Where(item =>
+                    item.Value.Access.Game == game &&
+                    item.Value.Access.Player.Id == playerId)
+                .Select(item => item.Key)
+                .ToArray();
+
+            foreach (var connectionId in connectionIds)
+            {
+                _playerConnections.Remove(connectionId);
+            }
+        }
+
+        foreach (var access in _playerAccessByTokenHash.Where(item =>
+                     item.Value.Game == game && item.Value.Player.Id == playerId).ToArray())
+        {
+            _playerAccessByTokenHash.TryRemove(access.Key, out _);
+        }
+
+        foreach (var transition in _playerTransitionAccessByTokenHash.Where(item =>
+                     item.Value.Access.Game == game &&
+                     item.Value.Access.Player.Id == playerId).ToArray())
+        {
+            _playerTransitionAccessByTokenHash.TryRemove(transition.Key, out _);
+        }
+
+        return new PlayerRemoval(game, player, connectionIds);
+    }
+
     public PlayerConnectionResult? ConnectPlayer(
         string publicCode,
         string accessToken,

@@ -27,6 +27,8 @@
              data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
              data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
              data-approve-label="@Localizer["GameLobby_ApproveRejoin"]"
+             data-remove-player-label="@Localizer["GameBoard_RemovePlayer"]"
+             data-remove-player-confirm="@Localizer["GameBoard_RemovePlayerConfirm"]"
              data-active-player-label="@Localizer["GameBoard_ActivePlayer"]"
              data-make-active-label="@Localizer["GameBoard_MakeActivePlayer"]"
              data-active-player-locked="@Model.Game.Session.IsActivePlayerChangeLocked.ToString().ToLowerInvariant()"
@@ -165,6 +167,11 @@
                                     @Localizer["GameBoard_MakeActivePlayer"]
                                 </button>
                             }
+                            <button class="button button-danger"
+                                    type="button"
+                                    data-remove-player="@player.Id.Value">
+                                @Localizer["GameBoard_RemovePlayer"]
+                            </button>
                         </span>
                     </li>
                 }
@@ -185,6 +192,8 @@
              data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
              data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
              data-approve-label="@Localizer["GameLobby_ApproveRejoin"]"
+             data-remove-player-label="@Localizer["GameBoard_RemovePlayer"]"
+             data-remove-player-confirm="@Localizer["GameBoard_RemovePlayerConfirm"]"
              data-active-player-label="@Localizer["GameBoard_ActivePlayer"]"
              data-make-active-label="@Localizer["GameBoard_MakeActivePlayer"]"
              data-active-player-locked="@Model.Game.Session.IsActivePlayerChangeLocked.ToString().ToLowerInvariant()"
@@ -759,6 +768,11 @@
                             @Localizer["GameBoard_MakeActivePlayer"]
                         </button>
                     }
+                    <button class="button button-danger scoreboard-remove-player"
+                            type="button"
+                            data-remove-player="@player.Id.Value">
+                        @Localizer["GameBoard_RemovePlayer"]
+                    </button>
                 </li>
             }
         </ul>
@@ -1010,6 +1024,10 @@
     <input id="active-player-id" name="playerId" type="hidden" />
 </form>
 
+<form id="remove-player-form" method="post" asp-page-handler="RemovePlayer">
+    <input id="remove-player-id" name="playerId" type="hidden" />
+</form>
+
 @section Scripts {
     <script>
         (() => {
@@ -1109,8 +1127,31 @@
             const approvePlayerId = document.getElementById("approve-player-id");
             const activePlayerForm = document.getElementById("set-active-player-form");
             const activePlayerId = document.getElementById("active-player-id");
+            const removePlayerForm = document.getElementById("remove-player-form");
+            const removePlayerId = document.getElementById("remove-player-id");
+
+            const removePlayer = (playerId, playerName) => {
+                if (!removePlayerForm ||
+                    !removePlayerId ||
+                    !window.confirm(
+                        lobby.dataset.removePlayerConfirm.replace("{0}", playerName))) {
+                    return;
+                }
+
+                removePlayerId.value = playerId;
+                removePlayerForm.submit();
+            };
 
             document.addEventListener("click", event => {
+                const removeButton = event.target.closest("[data-remove-player]");
+
+                if (removeButton) {
+                    const card = removeButton.closest("[data-player-id]");
+                    const playerName = card?.querySelector("strong")?.textContent?.trim() ?? "";
+                    removePlayer(removeButton.dataset.removePlayer, playerName);
+                    return;
+                }
+
                 const button = event.target.closest("[data-make-active-player]");
 
                 if (!button ||
@@ -1303,6 +1344,15 @@
                         });
                         details.append(approve);
                     }
+
+                    const remove = document.createElement("button");
+                    remove.type = "button";
+                    remove.className = isRunning
+                        ? "button button-danger scoreboard-remove-player"
+                        : "button button-danger";
+                    remove.dataset.removePlayer = player.id;
+                    remove.textContent = lobby.dataset.removePlayerLabel;
+                    details.append(remove);
 
                     item.append(name, details);
                     playerList.append(item);

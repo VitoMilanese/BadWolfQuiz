@@ -995,4 +995,8 @@
   <data name="GameBoard_ClosePlayerJoining" xml:space="preserve"><value>Close joining for new players</value></data>
   <data name="GameBoard_OpenPlayerJoining" xml:space="preserve"><value>Open joining for new players</value></data>
   <data name="GameBoard_PlayerJoiningToggleRejected" xml:space="preserve"><value>Joining cannot be changed right now.</value></data>
+  <data name="GameBoard_RemovePlayer" xml:space="preserve"><value>Remove player</value></data>
+  <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve"><value>Remove {0} from the game?</value></data>
+  <data name="GameBoard_RemovePlayerRejected" xml:space="preserve"><value>This player cannot be removed during the current game phase.</value></data>
+  <data name="PlayerGame_RemovedFromGame" xml:space="preserve"><value>The host removed you from the game.</value></data>
 </root>

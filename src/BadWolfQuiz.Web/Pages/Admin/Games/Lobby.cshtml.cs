@@ -649,6 +649,47 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostRemovePlayerAsync(
+        Guid id,
+        Guid playerId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var removal = sessionRegistry.RemovePlayer(
+                game.PublicCode,
+                new GamePlayerId(playerId));
+
+            if (removal is null)
+            {
+                return NotFound();
+            }
+
+            if (removal.ConnectionIds.Count > 0)
+            {
+                await gameHub.Clients
+                    .Clients(removal.ConnectionIds)
+                    .SendAsync("RemovedFromGame", cancellationToken);
+            }
+
+            await BroadcastPlayersAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_RemovePlayerRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public IActionResult OnPostTogglePlayerJoining(Guid id)
     {
         var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);

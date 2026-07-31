@@ -1429,8 +1429,8 @@ textarea {
 .player-join-lock-form {
     position: fixed;
     z-index: 19;
-    left: max(12px, calc((100vw - 1800px) / 2 + 12px));
-    bottom: calc(var(--game-scoreboard-space) - 50px);
+    right: max(12px, calc((100vw - 1800px) / 2 + 12px));
+    bottom: calc((var(--game-scoreboard-space) - 42px) / 2);
 }
 
 .player-join-lock {
@@ -2081,7 +2081,8 @@ iframe.game-content-video {
     min-height: 154px;
     max-height: var(--game-scoreboard-space);
     margin: 0;
-    padding: 12px max(12px, calc((100vw - 1800px) / 2 + 34px)) 0;
+    padding: 12px max(66px, calc((100vw - 1800px) / 2 + 66px)) 0
+        max(12px, calc((100vw - 1800px) / 2 + 34px));
     border-top: 1px solid var(--line);
     background: rgba(7, 7, 9, 0.97);
     box-shadow: 0 -16px 36px rgba(0, 0, 0, 0.42);
@@ -2141,7 +2142,8 @@ iframe.game-content-video {
 
     .game-scoreboard {
         min-height: 140px;
-        padding-inline: 12px;
+        padding-right: 66px;
+        padding-left: 12px;
     }
 
     .current-question-summary:not(.wager-mode) {

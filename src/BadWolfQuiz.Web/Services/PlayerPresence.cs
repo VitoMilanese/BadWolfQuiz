@@ -17,6 +17,11 @@ public sealed record PlayerRejoinApproval(
     GameSessionRegistration Game,
     IReadOnlyList<string> ConnectionIds);
 
+public sealed record PlayerRemoval(
+    GameSessionRegistration Game,
+    GamePlayer Player,
+    IReadOnlyList<string> ConnectionIds);
+
 public enum PlayerPresenceStatus
 {
     Disconnected = 1,

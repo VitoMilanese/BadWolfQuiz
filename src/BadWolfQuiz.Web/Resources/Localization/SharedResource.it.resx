@@ -995,4 +995,8 @@
   <data name="GameBoard_ClosePlayerJoining" xml:space="preserve"><value>Chiudi l’ingresso ai nuovi giocatori</value></data>
   <data name="GameBoard_OpenPlayerJoining" xml:space="preserve"><value>Apri l’ingresso ai nuovi giocatori</value></data>
   <data name="GameBoard_PlayerJoiningToggleRejected" xml:space="preserve"><value>Al momento non è possibile modificare l’accesso alla partita.</value></data>
+  <data name="GameBoard_RemovePlayer" xml:space="preserve"><value>Espelli giocatore</value></data>
+  <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve"><value>Espellere {0} dalla partita?</value></data>
+  <data name="GameBoard_RemovePlayerRejected" xml:space="preserve"><value>Questo giocatore non può essere espulso nella fase attuale.</value></data>
+  <data name="PlayerGame_RemovedFromGame" xml:space="preserve"><value>L’host ti ha espulso dalla partita.</value></data>
 </root>

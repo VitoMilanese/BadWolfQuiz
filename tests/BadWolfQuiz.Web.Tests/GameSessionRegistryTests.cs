@@ -187,6 +187,31 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void Removing_player_removes_card_and_revokes_access()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        var rose = registry.JoinPlayer("ABC123", "Rose");
+        var mickey = registry.JoinPlayer("ABC123", "Mickey");
+        registry.ConnectPlayer("ABC123", rose.AccessToken!, "rose-connection", true);
+        registry.ConnectPlayer("ABC123", mickey.AccessToken!, "mickey-connection", true);
+
+        var removal = registry.RemovePlayer("ABC123", rose.Player!.Id);
+
+        Assert.Equal("rose-connection", Assert.Single(removal!.ConnectionIds));
+        Assert.DoesNotContain(game.Session.Players, player => player.Id == rose.Player.Id);
+        Assert.DoesNotContain(
+            registry.GetPlayerLobbyEntries(game),
+            player => player.Id == rose.Player.Id);
+        Assert.Equal(mickey.Player!.Id, game.Session.ActivePlayerId);
+        Assert.Null(registry.ConnectPlayer(
+            "ABC123",
+            rose.AccessToken!,
+            "rose-reconnect",
+            true));
+    }
+
+    [Fact]
     public void Running_game_requires_host_approval_before_player_rejoins()
     {
         var registry = CreateRegistry("ABC123");
