@@ -7,6 +7,7 @@
 <div class="form-card narrow player-lobby"
      data-game-code="@Model.Game.PublicCode"
      data-player-id="@Model.CurrentPlayer.Id.Value"
+     data-avatar-id="@Model.CurrentPlayer.AvatarId"
      data-access-token="@Model.AccessToken"
      data-buzzer-open-label="@Localizer["PlayerGame_BuzzerOpen"]"
      data-buzzer-claimed-label="@Localizer["PlayerGame_BuzzerClaimed"]"
@@ -29,6 +30,17 @@
         <strong>@Localizer["Label_PlayerName"]:</strong>
         @Model.CurrentPlayer.Name
     </p>
+
+    <div class="player-avatar-control">
+        <img class="player-avatar-current"
+             data-current-player-avatar
+             src="@(!string.IsNullOrWhiteSpace(Model.CurrentPlayer.AvatarId) ? $"/avatars/{Model.CurrentPlayer.AvatarId}" : null)"
+             alt=""
+             hidden="@(string.IsNullOrWhiteSpace(Model.CurrentPlayer.AvatarId) ? "hidden" : null)" />
+        <button class="button button-secondary" type="button" data-open-avatar-picker>
+            @Localizer["AvatarPicker_ChooseOrChange"]
+        </button>
+    </div>
 
     <div id="activity-warning" class="message message-error" hidden>
         @Localizer["PlayerPresence_InactiveWarning"]
@@ -243,6 +255,8 @@
     <p class="dialog-warning">@Localizer["Message_WaitingHost"]</p>
 </div>
 
+<partial name="_AvatarPicker" />
+
 <dialog id="removed-from-game-dialog"
         class="app-dialog"
         aria-labelledby="removed-from-game-dialog-title">
@@ -266,6 +280,7 @@
 </dialog>
 
 @section Scripts {
+    <script src="~/js/avatar-picker.js" asp-append-version="true"></script>
     <script>
         (() => {
             const lobby = document.querySelector(".player-lobby");
@@ -327,6 +342,21 @@
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
                 .build();
+            const avatarDialog = document.querySelector("[data-avatar-picker]");
+            const currentAvatar = document.querySelector("[data-current-player-avatar]");
+            let pendingAvatarId;
+            avatarDialog?.addEventListener("avatarselected", event => {
+                const avatarId = event.detail.avatarId;
+                pendingAvatarId = avatarId;
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    connection.invoke("SetPlayerAvatar", avatarId)
+                        .then(() => pendingAvatarId = undefined)
+                        .catch(console.error);
+                }
+                lobby.dataset.avatarId = avatarId;
+                currentAvatar.src = `/avatars/${avatarId}`;
+                currentAvatar.hidden = false;
+            });
 
             const isPageActive = () =>
                 document.visibilityState === "visible" && document.hasFocus();
@@ -577,6 +607,14 @@
                     const name = document.createElement("strong");
                     name.textContent = player.name;
 
+                    if (player.avatarId) {
+                        const avatar = document.createElement("img");
+                        avatar.className = "player-list-avatar";
+                        avatar.src = `/avatars/${player.avatarId}`;
+                        avatar.alt = "";
+                        item.append(avatar);
+                    }
+
                     const score = document.createElement("span");
                     score.textContent = player.score.toString();
 
@@ -634,7 +672,16 @@
             });
 
             updateWarning();
-            connection.start().then(joinPlayerSession).catch(() => {
+            connection.start().then(async () => {
+                await joinPlayerSession();
+                if (pendingAvatarId) {
+                    await connection.invoke("SetPlayerAvatar", pendingAvatarId);
+                    pendingAvatarId = undefined;
+                }
+                if (!lobby.dataset.avatarId) {
+                    document.querySelector("[data-open-avatar-picker]")?.click();
+                }
+            }).catch(() => {
                 warning.hidden = false;
             });
         })();

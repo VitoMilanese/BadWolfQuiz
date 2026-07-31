@@ -8,6 +8,7 @@ namespace BadWolfQuiz.Web.Pages.Admin.Settings;
 
 public sealed class IndexModel(
     GameSettingsStore settingsStore,
+    AvatarCatalog avatarCatalog,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty]
@@ -66,6 +67,13 @@ public sealed class IndexModel(
             ModelState.AddModelError(
                 string.Empty,
                 localizer["GameSettings_InvalidDuration"].Value);
+            return Page();
+        }
+
+        if (Input.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Avatar &&
+            !avatarCatalog.IsValid(Input.HostAvatarId))
+        {
+            ModelState.AddModelError(string.Empty, localizer["HostCard_InvalidSettings"].Value);
             return Page();
         }
 

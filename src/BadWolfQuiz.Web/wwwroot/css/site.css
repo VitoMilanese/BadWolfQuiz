@@ -1637,6 +1637,129 @@ textarea {
     display: none;
 }
 
+.host-avatar-field {
+    grid-column: 1 / -1;
+}
+
+.host-avatar-input-row,
+.player-avatar-control {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.host-avatar-preview,
+.player-avatar-current,
+.player-list-avatar {
+    width: 64px;
+    height: 64px;
+    flex: 0 0 auto;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+.host-avatar-preview[hidden],
+.player-avatar-current[hidden] {
+    display: none;
+}
+
+.player-card-avatar {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: contain;
+}
+
+.scoreboard-player:has(.player-card-avatar) {
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    align-content: stretch;
+}
+
+.avatar-picker {
+    width: min(960px, calc(100vw - 32px));
+    max-width: none;
+    max-height: 92dvh;
+    padding: 0;
+    border: 0;
+    border-radius: 16px;
+    background: transparent;
+}
+
+.avatar-picker::backdrop {
+    background: rgba(0, 0, 0, 0.78);
+}
+
+.avatar-picker-card {
+    max-height: 92dvh;
+    overflow: auto;
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel);
+}
+
+.avatar-gender-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.avatar-gender-grid button,
+.avatar-option {
+    padding: 10px;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    background: var(--panel-2);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.avatar-gender-grid button:hover,
+.avatar-option:hover,
+.avatar-option:focus-visible {
+    border-color: var(--gold);
+}
+
+.avatar-gender-grid img,
+.avatar-option img {
+    width: 100%;
+    display: block;
+    object-fit: contain;
+}
+
+.avatar-gender-grid strong {
+    display: block;
+    margin-top: 8px;
+    text-align: center;
+}
+
+.avatar-picker-toolbar {
+    margin-bottom: 12px;
+}
+
+.avatar-option-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .avatar-picker {
+        width: calc(100vw - 16px);
+        max-height: 96dvh;
+    }
+
+    .avatar-picker-card {
+        max-height: 96dvh;
+        padding: 12px;
+    }
+
+    .avatar-option-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 7px;
+    }
+}
+
 .scoreboard-details {
     display: grid;
     justify-items: center;

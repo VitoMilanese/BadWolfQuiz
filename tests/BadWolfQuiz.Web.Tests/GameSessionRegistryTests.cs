@@ -123,6 +123,24 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void Connected_player_can_change_avatar()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-1",
+            true);
+
+        var result = registry.SetPlayerAvatar("connection-1", "F/17.png");
+
+        Assert.NotNull(result);
+        Assert.Equal("F/17.png", joined.Player!.AvatarId);
+    }
+
+    [Fact]
     public void Running_game_accepts_new_player_pending_host_approval()
     {
         var registry = CreateRegistry("ABC123");

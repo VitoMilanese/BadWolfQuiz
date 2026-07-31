@@ -6,6 +6,7 @@ public sealed record PlayerLobbyEntry(
     GamePlayerId Id,
     string Name,
     int Score,
+    string? AvatarId,
     PlayerPresenceStatus Presence);
 
 public sealed record PlayerConnectionResult(

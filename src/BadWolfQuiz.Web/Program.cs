@@ -10,6 +10,7 @@ using BadWolfQuiz.Web.Models;
 using Resend;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +67,7 @@ builder.Services.AddSingleton<QuizSnapshotFactory>();
 builder.Services.AddSingleton<IGameCodeGenerator, GameCodeGenerator>();
 builder.Services.AddSingleton<GameSessionRegistry>();
 builder.Services.AddSingleton<GameSettingsStore>();
+builder.Services.AddSingleton<AvatarCatalog>();
 builder.Services.AddScoped<GameSessionLauncher>();
 builder.Services.AddScoped<GameHistoryStore>();
 builder.Services.AddScoped<CurrentHost>();
@@ -92,6 +94,14 @@ var localizationOptions = app.Services
 app.UseRequestLocalization(localizationOptions);
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(
+        app.Environment.ContentRootPath,
+        "Resources",
+        "Avatars")),
+    RequestPath = "/avatars"
+});
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

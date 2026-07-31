@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace BadWolfQuiz.Web.Hubs;
 
-public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
+public sealed class GameHub(
+    GameSessionRegistry sessionRegistry,
+    AvatarCatalog avatarCatalog) : Hub
 {
     public async Task JoinSession(string publicCode)
     {
@@ -124,6 +126,23 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
         }
     }
 
+    public async Task SetPlayerAvatar(string avatarId)
+    {
+        if (!avatarCatalog.IsValid(avatarId))
+        {
+            return;
+        }
+
+        var connection = sessionRegistry.SetPlayerAvatar(
+            Context.ConnectionId,
+            avatarId);
+
+        if (connection is not null)
+        {
+            await BroadcastPlayers(connection.Game);
+        }
+    }
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var connection = sessionRegistry.DisconnectPlayer(Context.ConnectionId);
@@ -215,6 +234,9 @@ public sealed class GameHub(GameSessionRegistry sessionRegistry) : Hub
                 id = player.Id.Value,
                 player.Name,
                 player.Score,
+                avatarId = player.Presence == PlayerPresenceStatus.Active
+                    ? player.AvatarId
+                    : null,
                 isActive = game.Session.ActivePlayerId == player.Id,
                 presence = player.Presence.ToString().ToLowerInvariant()
             })

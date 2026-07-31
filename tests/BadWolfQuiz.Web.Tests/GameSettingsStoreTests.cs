@@ -63,7 +63,8 @@ public sealed class GameSettingsStoreTests : IDisposable
             hostName: "Host",
             hostVisualSource: HostVisualSource.Image,
             hostImageData: expectedImage,
-            hostImageContentType: "image/png");
+            hostImageContentType: "image/png",
+            hostAvatarId: "F/17.png");
 
         await store.SaveAsync(expected);
         var actual = await store.LoadAsync();
@@ -72,6 +73,7 @@ public sealed class GameSettingsStoreTests : IDisposable
         Assert.Equal(HostVisualSource.Image, actual.HostVisualSource);
         Assert.Equal(expectedImage, actual.HostImageData);
         Assert.Equal("image/png", actual.HostImageContentType);
+        Assert.Equal("F/17.png", actual.HostAvatarId);
         Assert.True(actual.HasHostCard);
     }
 

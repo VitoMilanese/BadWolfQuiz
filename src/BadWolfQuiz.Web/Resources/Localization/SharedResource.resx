@@ -1010,4 +1010,12 @@
   <data name="HostCard_InvalidImage" xml:space="preserve"><value>Select a valid image up to 5 MB.</value></data>
   <data name="HostCard_InvalidSettings" xml:space="preserve"><value>To show the host card, enter a name and select an image or webcam.</value></data>
   <data name="GameBoard_ResizePlayerPanel" xml:space="preserve"><value>Resize player panel</value></data>
+  <data name="HostCard_SourceAvatar" xml:space="preserve"><value>Avatar</value></data>
+  <data name="HostCard_Avatar" xml:space="preserve"><value>Host avatar</value></data>
+  <data name="AvatarPicker_Title" xml:space="preserve"><value>Choose an avatar</value></data>
+  <data name="AvatarPicker_SelectGender" xml:space="preserve"><value>First choose a character group</value></data>
+  <data name="AvatarPicker_Female" xml:space="preserve"><value>Female</value></data>
+  <data name="AvatarPicker_Male" xml:space="preserve"><value>Male</value></data>
+  <data name="AvatarPicker_Choose" xml:space="preserve"><value>Choose avatar</value></data>
+  <data name="AvatarPicker_ChooseOrChange" xml:space="preserve"><value>Choose or change avatar</value></data>
 </root>

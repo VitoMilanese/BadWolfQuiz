@@ -19,7 +19,8 @@ public sealed record GameSessionSettings
         string? hostName = null,
         HostVisualSource hostVisualSource = HostVisualSource.None,
         byte[]? hostImageData = null,
-        string? hostImageContentType = null)
+        string? hostImageContentType = null,
+        string? hostAvatarId = null)
     {
         if (buzzerDuration <= TimeSpan.Zero)
         {
@@ -45,6 +46,7 @@ public sealed record GameSessionSettings
         HostVisualSource = hostVisualSource;
         HostImageData = hostImageData;
         HostImageContentType = hostImageContentType;
+        HostAvatarId = hostAvatarId;
     }
 
     public TimeSpan BuzzerDuration { get; }
@@ -62,6 +64,7 @@ public sealed record GameSessionSettings
     public HostVisualSource HostVisualSource { get; }
     public byte[]? HostImageData { get; }
     public string? HostImageContentType { get; }
+    public string? HostAvatarId { get; }
 
     public bool HasHostCard =>
         !string.IsNullOrWhiteSpace(HostName) ||
@@ -72,7 +75,8 @@ public enum HostVisualSource
 {
     None = 0,
     Image = 1,
-    Webcam = 2
+    Webcam = 2,
+    Avatar = 3
 }
 
 public enum GamePhaseStartMode

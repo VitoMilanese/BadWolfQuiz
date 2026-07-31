@@ -58,7 +58,20 @@
             <option value="0">@Localizer["HostCard_SourceNone"]</option>
             <option value="1">@Localizer["HostCard_SourceImage"]</option>
             <option value="2">@Localizer["HostCard_SourceWebcam"]</option>
+            <option value="3">@Localizer["HostCard_SourceAvatar"]</option>
         </select>
+    </label>
+    <label class="host-avatar-field">
+        <span>@Localizer["HostCard_Avatar"]</span>
+        <span class="host-avatar-input-row">
+            <input asp-for="Input.HostAvatarId" type="hidden" data-host-avatar-id />
+            <button class="button button-secondary" type="button" data-open-avatar-picker>@Localizer["AvatarPicker_Choose"]</button>
+            <img class="host-avatar-preview"
+                 data-host-avatar-preview
+                 src="@(!string.IsNullOrWhiteSpace(Model.Input.HostAvatarId) ? $"/avatars/{Model.Input.HostAvatarId}" : null)"
+                 alt=""
+                 hidden="@(string.IsNullOrWhiteSpace(Model.Input.HostAvatarId) ? "hidden" : null)" />
+        </span>
     </label>
     <label class="host-image-field">
         <span>@Localizer["HostCard_Image"]</span>
@@ -76,6 +89,7 @@
         <button class="button button-primary" type="submit">@Localizer["Button_Save"]</button>
     </div>
 </form>
+<partial name="_AvatarPicker" />
 
 @section Scripts {
     <script>
@@ -99,5 +113,19 @@
                 preview.hidden = false;
             });
         })();
+
+        (() => {
+            const dialog = document.querySelector("[data-avatar-picker]");
+            const value = document.querySelector("[data-host-avatar-id]");
+            const preview = document.querySelector("[data-host-avatar-preview]");
+            const source = document.getElementById("Input_HostVisualSource");
+            dialog?.addEventListener("avatarselected", event => {
+                value.value = event.detail.avatarId;
+                preview.src = `/avatars/${event.detail.avatarId}`;
+                preview.hidden = false;
+                source.value = "3";
+            });
+        })();
     </script>
+    <script src="~/js/avatar-picker.js" asp-append-version="true"></script>
 }

@@ -282,6 +282,29 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public PlayerConnectionResult? SetPlayerAvatar(string connectionId, string avatarId)
+    {
+        PlayerConnection connection;
+
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(connectionId, out connection))
+            {
+                return null;
+            }
+        }
+
+        lock (connection.Access.Game)
+        {
+            connection.Access.Player.SetAvatar(avatarId);
+        }
+
+        return new PlayerConnectionResult(
+            connection.Access.Game,
+            connection.Access.Player,
+            !connection.IsApproved);
+    }
+
     public PlayerConnectionResult? DisconnectPlayer(string connectionId)
     {
         lock (_presenceSync)
@@ -858,6 +881,7 @@ public sealed class GameSessionRegistry
                     player.Id,
                     player.Name,
                     player.Score,
+                    player.AvatarId,
                     GetPresence(player.Id)))
                 .ToArray();
         }

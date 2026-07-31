@@ -118,7 +118,18 @@
                                 <option value="0">@Localizer["HostCard_SourceNone"]</option>
                                 <option value="1">@Localizer["HostCard_SourceImage"]</option>
                                 <option value="2">@Localizer["HostCard_SourceWebcam"]</option>
+                                <option value="3">@Localizer["HostCard_SourceAvatar"]</option>
                             </select>
+                        </label>
+                        <label class="host-avatar-field">
+                            <span>@Localizer["HostCard_Avatar"]</span>
+                            <span class="host-avatar-input-row">
+                                <input asp-for="SettingsInput.HostAvatarId" type="hidden" data-host-avatar-id />
+                                <button class="button button-secondary" type="button" data-open-avatar-picker>@Localizer["AvatarPicker_Choose"]</button>
+                                <img class="host-avatar-preview" data-host-avatar-preview
+                                     src="@(!string.IsNullOrWhiteSpace(Model.SettingsInput.HostAvatarId) ? $"/avatars/{Model.SettingsInput.HostAvatarId}" : null)"
+                                     alt="" hidden="@(string.IsNullOrWhiteSpace(Model.SettingsInput.HostAvatarId) ? "hidden" : null)" />
+                            </span>
                         </label>
                         <label class="host-image-field">
                             <span>@Localizer["HostCard_Image"]</span>
@@ -141,6 +152,7 @@
                     </div>
                 </form>
             </details>
+            <partial name="_AvatarPicker" />
 
             <div class="form-actions">
                 <button class="button button-primary"
@@ -175,6 +187,11 @@
                 {
                     <li class="@(Model.Game.Session.ActivePlayerId == player.Id ? "active-player" : null)"
                         data-player-id="@player.Id.Value">
+                        @if (Model.ActivePlayerIds.Contains(player.Id) &&
+                             !string.IsNullOrWhiteSpace(player.AvatarId))
+                        {
+                            <img class="player-list-avatar" src="/avatars/@player.AvatarId" alt="" />
+                        }
                         <strong>@player.Name</strong>
                         <span class="player-management">
                             <span>@player.Score</span>
@@ -801,6 +818,11 @@
                              src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
                              alt="@Model.Game.Session.Settings.HostName" />
                     }
+                    else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Avatar &&
+                             !string.IsNullOrWhiteSpace(Model.Game.Session.Settings.HostAvatarId))
+                    {
+                        <img class="host-card-media" src="/avatars/@Model.Game.Session.Settings.HostAvatarId" alt="" />
+                    }
                     else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
                     {
                         <video class="host-card-media" data-host-webcam autoplay muted playsinline></video>
@@ -823,6 +845,11 @@
                            @(isAnswering ? "question-answering-player" : null)
                            @(hasAttempted ? "question-attempted-player" : null)"
                     data-player-id="@player.Id.Value">
+                    @if (Model.ActivePlayerIds.Contains(player.Id) &&
+                         !string.IsNullOrWhiteSpace(player.AvatarId))
+                    {
+                        <img class="player-card-avatar" src="/avatars/@player.AvatarId" alt="" />
+                    }
                     <strong>@player.Name</strong>
                     <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
                         @player.Score
@@ -1096,6 +1123,11 @@
                              src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
                              alt="@Model.Game.Session.Settings.HostName" />
                     }
+                    else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Avatar &&
+                             !string.IsNullOrWhiteSpace(Model.Game.Session.Settings.HostAvatarId))
+                    {
+                        <img class="host-card-media" src="/avatars/@Model.Game.Session.Settings.HostAvatarId" alt="" />
+                    }
                     else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
                     {
                         <video class="host-card-media" data-host-webcam autoplay muted playsinline></video>
@@ -1105,6 +1137,11 @@
             @foreach (var player in Model.Players)
             {
                 <li class="scoreboard-player" data-player-id="@player.Id.Value">
+                    @if (Model.ActivePlayerIds.Contains(player.Id) &&
+                         !string.IsNullOrWhiteSpace(player.AvatarId))
+                    {
+                        <img class="player-card-avatar" src="/avatars/@player.AvatarId" alt="" />
+                    }
                     <strong>@player.Name</strong>
                     <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
                         @player.Score
@@ -1167,6 +1204,19 @@
             navigator.mediaDevices.getUserMedia({ video: true, audio: false })
                 .then(stream => video.srcObject = stream)
                 .catch(console.error);
+        })();
+
+        (() => {
+            const dialog = document.querySelector("[data-avatar-picker]");
+            const value = document.querySelector("[data-host-avatar-id]");
+            const preview = document.querySelector("[data-host-avatar-preview]");
+            const source = document.getElementById("SettingsInput_HostVisualSource");
+            dialog?.addEventListener("avatarselected", event => {
+                value.value = event.detail.avatarId;
+                preview.src = `/avatars/${event.detail.avatarId}`;
+                preview.hidden = false;
+                source.value = "3";
+            });
         })();
 
         (() => {
@@ -1552,6 +1602,14 @@
                         const name = document.createElement("strong");
                         name.textContent = player.name;
 
+                        if (player.avatarId) {
+                            const avatar = document.createElement("img");
+                            avatar.className = "player-card-avatar";
+                            avatar.src = `/avatars/${player.avatarId}`;
+                            avatar.alt = "";
+                            item.append(avatar);
+                        }
+
                         const details = document.createElement("span");
                         details.className = "scoreboard-details";
 
@@ -1607,6 +1665,16 @@
 
                     const name = document.createElement("strong");
                     name.textContent = player.name;
+
+                    if (player.avatarId) {
+                        const avatar = document.createElement("img");
+                        avatar.className = isRunning
+                            ? "player-card-avatar"
+                            : "player-list-avatar";
+                        avatar.src = `/avatars/${player.avatarId}`;
+                        avatar.alt = "";
+                        item.append(avatar);
+                    }
 
                     const details = document.createElement("span");
                     details.className = isRunning
@@ -1752,4 +1820,5 @@
                 .catch(console.error);
         })();
     </script>
+    <script src="~/js/avatar-picker.js" asp-append-version="true"></script>
 }
