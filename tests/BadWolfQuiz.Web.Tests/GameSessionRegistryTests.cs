@@ -62,6 +62,18 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void JoinPlayer_restores_supplied_avatar()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+
+        var result = registry.JoinPlayer("ABC123", "Rose", "F/17.png");
+
+        Assert.Equal(PlayerJoinStatus.Success, result.Status);
+        Assert.Equal("F/17.png", result.Player!.AvatarId);
+    }
+
+    [Fact]
     public void JoinPlayer_rejects_duplicate_name_ignoring_case()
     {
         var registry = CreateRegistry("ABC123");

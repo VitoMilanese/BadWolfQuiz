@@ -34,6 +34,7 @@
                autocomplete="nickname"
                placeholder="@Localizer["Placeholder_PlayerName"]" />
         <span asp-validation-for="Input.PlayerName"></span>
+        <input asp-for="Input.AvatarId" type="hidden" />
 
         <button class="button button-primary" type="submit">
             @Localizer["Button_Join"]
@@ -47,8 +48,20 @@
         (() => {
             const form = document.getElementById("join-game-form");
             const codeInput = document.getElementById("Input_GameCode");
+            const nameInput = document.getElementById("Input_PlayerName");
+            const avatarInput = document.getElementById("Input_AvatarId");
+
+            const restoreAvatar = () => {
+                const normalizedName = nameInput?.value.trim().toLocaleLowerCase();
+                avatarInput.value = normalizedName
+                    ? localStorage.getItem(`badwolfquiz:avatar:${normalizedName}`) || ""
+                    : "";
+            };
+
+            nameInput?.addEventListener("change", restoreAvatar);
 
             form?.addEventListener("submit", event => {
+                restoreAvatar();
                 const gameCode = codeInput?.value.trim().toUpperCase();
 
                 if (!gameCode) {

@@ -94,7 +94,10 @@ public sealed class GameSessionRegistry
         return _sessionsByCode.GetValueOrDefault(NormalizeCode(publicCode));
     }
 
-    public PlayerJoinResult JoinPlayer(string publicCode, string playerName)
+    public PlayerJoinResult JoinPlayer(
+        string publicCode,
+        string playerName,
+        string? avatarId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(playerName);
 
@@ -120,6 +123,10 @@ public sealed class GameSessionRegistry
             }
 
             var player = game.Session.AddPlayer(playerName);
+            if (!string.IsNullOrWhiteSpace(avatarId))
+            {
+                player.SetAvatar(avatarId);
+            }
             var accessToken = CreatePlayerAccess(game, player);
             return PlayerJoinResult.Succeeded(game, player, accessToken);
         }

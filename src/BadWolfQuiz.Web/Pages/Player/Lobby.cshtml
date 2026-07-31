@@ -7,6 +7,7 @@
 <div class="form-card narrow player-lobby"
      data-game-code="@Model.Game.PublicCode"
      data-player-id="@Model.CurrentPlayer.Id.Value"
+     data-player-name="@Model.CurrentPlayer.Name"
      data-avatar-id="@Model.CurrentPlayer.AvatarId"
      data-access-token="@Model.AccessToken"
      data-buzzer-open-label="@Localizer["PlayerGame_BuzzerOpen"]"
@@ -302,6 +303,11 @@
             }
 
             const gameCode = lobby.dataset.gameCode;
+            const avatarPreferenceKey =
+                `badwolfquiz:avatar:${lobby.dataset.playerName.trim().toLocaleLowerCase()}`;
+            if (lobby.dataset.avatarId) {
+                localStorage.setItem(avatarPreferenceKey, lobby.dataset.avatarId);
+            }
             const removedFromGameDialog =
                 document.getElementById("removed-from-game-dialog");
             const removedFromGameRedirect = () => {
@@ -354,6 +360,7 @@
                         .catch(console.error);
                 }
                 lobby.dataset.avatarId = avatarId;
+                localStorage.setItem(avatarPreferenceKey, avatarId);
                 currentAvatar.src = `/avatars/${avatarId}`;
                 currentAvatar.hidden = false;
             });
