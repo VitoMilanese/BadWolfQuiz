@@ -389,6 +389,59 @@ public sealed class GameSessionRegistryTests
         Assert.Equal(TimeSpan.FromSeconds(12), game.Session.AnswerTimer.Duration);
     }
 
+    [Fact]
+    public void Final_question_routes_private_player_actions_by_approved_connection()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateFinalQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-1",
+            true);
+        CompleteOnlyQuestion(registry, joined.Player!);
+
+        registry.StartFinalQuestion("ABC123");
+        var wager = registry.SubmitFinalWager("connection-1", 250);
+        registry.LockFinalWagers("ABC123");
+        var answer = registry.SubmitFinalAnswer(
+            "connection-1",
+            "Bad Wolf");
+        registry.LockFinalAnswers("ABC123");
+        registry.JudgeFinalAnswer(
+            "ABC123",
+            joined.Player!.Id,
+            true);
+
+        Assert.Equal(250, wager!.Submission.Wager!.Amount);
+        Assert.Equal("Bad Wolf", answer!.Submission.Answer!.Text);
+        Assert.Equal(
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.Completed,
+            game.Session.Status);
+        Assert.Equal(350, joined.Player.Score);
+    }
+
+    [Fact]
+    public void Final_question_rejects_player_action_without_approved_connection()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateFinalQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-1",
+            true);
+        CompleteOnlyQuestion(registry, joined.Player!);
+        registry.StartFinalQuestion("ABC123");
+        registry.DisconnectPlayer("connection-1");
+
+        var result = registry.SubmitFinalWager("connection-1", 100);
+
+        Assert.Null(result);
+    }
+
     private static GameSessionRegistry CreateRegistry(params string[] codes)
     {
         return new GameSessionRegistry(new StubGameCodeGenerator(codes));
@@ -437,6 +490,50 @@ public sealed class GameSessionRegistryTests
                     0,
                     [new QuizQuestionSnapshot(1, 1, 0, 100, true)])
             ]);
+    }
+
+    private static QuizSnapshot CreateFinalQuiz()
+    {
+        return new QuizSnapshot(
+            1,
+            "Final Quiz",
+            [
+                new QuizRoundSnapshot(
+                    1,
+                    "Round 1",
+                    0,
+                    [new QuizQuestionSnapshot(1, 1, 0, 100, false)])
+            ],
+            new FinalQuestionSnapshot(
+                [CreateTextBlock(1, "Who are you?")],
+                [CreateTextBlock(2, "Bad Wolf")]));
+    }
+
+    private static ContentBlockSnapshot CreateTextBlock(int id, string text)
+    {
+        return new ContentBlockSnapshot(
+            id,
+            ContentBlockKind.Text,
+            text,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            0,
+            false);
+    }
+
+    private static void CompleteOnlyQuestion(
+        GameSessionRegistry registry,
+        BadWolfQuiz.Game.Runtime.GamePlayer player)
+    {
+        registry.StartGame("ABC123");
+        registry.SelectQuestion("ABC123", 1);
+        registry.JudgeQuestionAnswer("ABC123", 1, player.Id, true);
+        registry.CloseQuestionAnswer("ABC123", 1);
     }
 
     private sealed class TestTimeProvider : TimeProvider

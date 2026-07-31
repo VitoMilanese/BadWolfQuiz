@@ -13,7 +13,9 @@
      data-buzzer-claimed-by-you-label="@Localizer["PlayerGame_BuzzerClaimedByYou"]"
      data-buzzer-already-answered-label="@Localizer["PlayerGame_BuzzerAlreadyAnswered"]"
      data-buzzer-closed-label="@Localizer["PlayerGame_BuzzerClosed"]"
-     data-buzz-rejected-label="@Localizer["PlayerGame_BuzzRejected"]">
+     data-buzz-rejected-label="@Localizer["PlayerGame_BuzzRejected"]"
+     data-final-action-rejected-label="@Localizer["FinalQuestion_ActionRejected"]"
+     data-final-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()">
     <p class="eyebrow">@Localizer["Message_WaitingHost"]</p>
     <h1>@Model.Game.Session.Quiz.Title</h1>
 
@@ -40,6 +42,139 @@
         <strong id="game-timer-value">0.0</strong>
     </div>
 
+    @if (Model.Game.Session.Status is
+        BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalWagering or
+        BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
+        BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging or
+        BadWolfQuiz.Game.Runtime.GameSessionStatus.Completed)
+    {
+        var submission = Model.Game.Session.FinalQuestion?.Submissions
+            .SingleOrDefault(item => item.PlayerId == Model.CurrentPlayer.Id);
+
+        <section id="player-final-panel"
+                 class="player-final-panel"
+                 data-participates="@(submission is not null ? "true" : "false")">
+            <p class="eyebrow">@Localizer["FinalQuestion_Title"]</p>
+
+            @if (submission is null)
+            {
+                <p>@Localizer["FinalQuestion_NotEligible"]</p>
+            }
+            else if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalWagering)
+            {
+                @if (submission.Wager is null)
+                {
+                    <form id="final-wager-form"
+                          class="stack-form"
+                          data-minimum="@BadWolfQuiz.Game.Runtime.FinalQuestion.MinimumWager"
+                          data-maximum="@submission.MaximumWager">
+                        <label>
+                            <span>@Localizer["FinalQuestion_YourWager"]</span>
+                            <input id="final-wager"
+                                   type="number"
+                                   min="@BadWolfQuiz.Game.Runtime.FinalQuestion.MinimumWager"
+                                   max="@submission.MaximumWager"
+                                   required />
+                        </label>
+                        <small>
+                            @Localizer[
+                                "FinalQuestion_WagerLimits",
+                                BadWolfQuiz.Game.Runtime.FinalQuestion.MinimumWager,
+                                submission.MaximumWager]
+                        </small>
+                        <button class="button button-primary" type="submit">
+                            @Localizer["FinalQuestion_ConfirmWager"]
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <p>@Localizer["FinalQuestion_WagerConfirmed"]</p>
+                }
+            }
+            else if (Model.Game.Session.Status is
+                BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
+                BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging)
+            {
+                <div class="game-content-blocks">
+                    @foreach (var block in Model.Game.Session.FinalQuestion!.Definition.QuestionBlocks)
+                    {
+                        <article class="game-content-block">
+                            @if (!string.IsNullOrWhiteSpace(block.TopCaption))
+                            {
+                                <p class="game-content-caption">@block.TopCaption</p>
+                            }
+                            @switch (block.Kind)
+                            {
+                                case BadWolfQuiz.Game.Definitions.ContentBlockKind.Text:
+                                    <p class="game-content-text">@block.TextContent</p>
+                                    break;
+                                case BadWolfQuiz.Game.Definitions.ContentBlockKind.Image:
+                                    <img class="game-content-image"
+                                         src="@Url.Page("/Player/Lobby", "FinalContentBlock", new { code = Model.Game.PublicCode, playerId = Model.CurrentPlayer.Id.Value, sourceContentBlockId = block.SourceContentBlockId })"
+                                         alt="@block.FileName" />
+                                    break;
+                                case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
+                                    <audio class="game-content-audio"
+                                           controls
+                                           src="@Url.Page("/Player/Lobby", "FinalContentBlock", new { code = Model.Game.PublicCode, playerId = Model.CurrentPlayer.Id.Value, sourceContentBlockId = block.SourceContentBlockId })">
+                                    </audio>
+                                    break;
+                                case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
+                                    <video class="game-content-video" controls src="@block.ExternalUrl"></video>
+                                    break;
+                                case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
+                                    <iframe class="game-content-video"
+                                            src="@BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
+                                            title="@Localizer["GameBoard_MediaContent"]"
+                                            allowfullscreen>
+                                    </iframe>
+                                    break;
+                            }
+                            @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
+                            {
+                                <p class="game-content-caption">@block.BottomCaption</p>
+                            }
+                        </article>
+                    }
+                </div>
+
+                @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering &&
+                    submission.Answer is null)
+                {
+                    <form id="final-answer-form" class="stack-form">
+                        <label>
+                            <span>@Localizer["FinalQuestion_YourAnswer"]</span>
+                            <textarea id="final-answer" required></textarea>
+                        </label>
+                        <button class="button button-primary" type="submit">
+                            @Localizer["FinalQuestion_ConfirmAnswer"]
+                        </button>
+                    </form>
+                }
+                else if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering)
+                {
+                    <p>@Localizer["FinalQuestion_AnswerConfirmed"]</p>
+                }
+                else
+                {
+                    <p>@Localizer["FinalQuestion_WaitingForJudging"]</p>
+                }
+            }
+            else
+            {
+                <p>
+                    @(submission.IsCorrect == true
+                        ? Localizer["FinalQuestion_YourAnswerCorrect"]
+                        : Localizer["FinalQuestion_YourAnswerWrong"])
+                </p>
+            }
+
+            <div id="final-question-error" class="message message-error" hidden></div>
+        </section>
+    }
+    else
+    {
     <section class="player-buzzer-panel">
         <button id="player-buzzer"
                 class="player-buzzer"
@@ -51,6 +186,7 @@
             @Localizer["PlayerGame_BuzzerClosed"]
         </p>
     </section>
+    }
 
     <h2>@Localizer["Label_Players"] (@Model.Players.Count)</h2>
     <ul id="player-score-list" class="player-list">
@@ -78,7 +214,11 @@
             const buzzerStatus = document.getElementById("player-buzzer-status");
             const timerPanel = document.getElementById("game-timer");
             const timerValue = document.getElementById("game-timer-value");
+            const finalWagerForm = document.getElementById("final-wager-form");
+            const finalAnswerForm = document.getElementById("final-answer-form");
+            const finalError = document.getElementById("final-question-error");
             let buzzerQuestionId = null;
+            let hasReceivedInitialFinalState = false;
 
             if (!lobby || !warning || typeof signalR === "undefined") {
                 return;
@@ -171,6 +311,62 @@
                                     ? lobby.dataset.buzzerClaimedLabel
                                     : lobby.dataset.buzzerClosedLabel;
                 }
+            });
+
+            connection.on("GameStatusChanged", update => {
+                if (lobby.dataset.finalStatus &&
+                    lobby.dataset.finalStatus !== update.status) {
+                    window.location.reload();
+                }
+            });
+
+            connection.on("FinalQuestionStateChanged", () => {
+                if (!hasReceivedInitialFinalState) {
+                    hasReceivedInitialFinalState = true;
+                    return;
+                }
+
+                window.location.reload();
+            });
+
+            connection.on("FinalQuestionActionRejected", update => {
+                if (finalError) {
+                    finalError.textContent =
+                        lobby.dataset.finalActionRejectedLabel || update.message;
+                    finalError.hidden = false;
+                }
+            });
+
+            finalWagerForm?.addEventListener("submit", event => {
+                event.preventDefault();
+                const input = document.getElementById("final-wager");
+                const amount = Number(input?.value);
+                const minimum = Number(finalWagerForm.dataset.minimum);
+                const maximum = Number(finalWagerForm.dataset.maximum);
+
+                if (!Number.isInteger(amount) ||
+                    amount < minimum ||
+                    amount > maximum) {
+                    return;
+                }
+
+                finalWagerForm.querySelector("button").disabled = true;
+                connection.invoke("SubmitFinalWager", amount)
+                    .catch(console.error);
+            });
+
+            finalAnswerForm?.addEventListener("submit", event => {
+                event.preventDefault();
+                const input = document.getElementById("final-answer");
+                const answer = input?.value.trim();
+
+                if (!answer) {
+                    return;
+                }
+
+                finalAnswerForm.querySelector("button").disabled = true;
+                connection.invoke("SubmitFinalAnswer", answer)
+                    .catch(console.error);
             });
 
             buzzerButton?.addEventListener("click", () => {

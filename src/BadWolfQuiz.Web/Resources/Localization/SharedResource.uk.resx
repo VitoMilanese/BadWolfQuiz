@@ -888,4 +888,24 @@
   <data name="Message_FinalQuestionSaved" xml:space="preserve">
     <value>Фінальне питання збережено.</value>
   </data>
+  <data name="FinalQuestion_Title" xml:space="preserve"><value>Фінальне питання</value></data>
+  <data name="FinalQuestion_Start" xml:space="preserve"><value>Почати фінальне питання</value></data>
+  <data name="FinalQuestion_WaitingForWagers" xml:space="preserve"><value>Очікуються фінальні ставки</value></data>
+  <data name="FinalQuestion_NotSubmitted" xml:space="preserve"><value>Не підтверджено</value></data>
+  <data name="FinalQuestion_Submitted" xml:space="preserve"><value>Підтверджено</value></data>
+  <data name="FinalQuestion_ShowQuestion" xml:space="preserve"><value>Показати фінальне питання</value></data>
+  <data name="FinalQuestion_StartJudging" xml:space="preserve"><value>Показати відповідь і почати перевірку</value></data>
+  <data name="FinalQuestion_Results" xml:space="preserve"><value>Фінальні результати</value></data>
+  <data name="FinalQuestion_NotEligible" xml:space="preserve"><value>Ви спостерігаєте за фінальним питанням як глядач.</value></data>
+  <data name="FinalQuestion_YourWager" xml:space="preserve"><value>Ваша ставка</value></data>
+  <data name="FinalQuestion_WagerLimits" xml:space="preserve"><value>Допустима ставка: {0}–{1}</value></data>
+  <data name="FinalQuestion_ConfirmWager" xml:space="preserve"><value>Підтвердити ставку</value></data>
+  <data name="FinalQuestion_WagerConfirmed" xml:space="preserve"><value>Ставку підтверджено. Очікуйте ведучого.</value></data>
+  <data name="FinalQuestion_YourAnswer" xml:space="preserve"><value>Ваша відповідь</value></data>
+  <data name="FinalQuestion_ConfirmAnswer" xml:space="preserve"><value>Підтвердити відповідь</value></data>
+  <data name="FinalQuestion_AnswerConfirmed" xml:space="preserve"><value>Відповідь підтверджено. Очікуйте ведучого.</value></data>
+  <data name="FinalQuestion_WaitingForJudging" xml:space="preserve"><value>Ведучий перевіряє фінальні відповіді.</value></data>
+  <data name="FinalQuestion_YourAnswerCorrect" xml:space="preserve"><value>Ваша фінальна відповідь правильна.</value></data>
+  <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve"><value>Ваша фінальна відповідь неправильна.</value></data>
+  <data name="FinalQuestion_ActionRejected" xml:space="preserve"><value>Ця дія з фінальним питанням поки недоступна.</value></data>
 </root>

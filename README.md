@@ -115,6 +115,8 @@ Currently implemented:
 - Multi-round progression
 - Animated top-three inter-round leaderboard
 - Deterministic final standings with score-growth, correct-answer, and attempt tie-breakers
+- Private final wagers and answers submitted from player devices
+- Host-controlled final question reveal, judging, and final results
 
 ---
 
@@ -189,7 +191,6 @@ src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
 ## Game
 
 - Persistent global settings and per-game settings UI
-- Final question flow
 - Per-round and lifetime correct-answer and attempt statistics
 - Team mode
 

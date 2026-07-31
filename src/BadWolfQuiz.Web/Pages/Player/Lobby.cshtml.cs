@@ -39,4 +39,34 @@ public sealed class LobbyModel(GameSessionRegistry sessionRegistry) : PageModel
         AccessToken = accessToken;
         return Page();
     }
+
+    public IActionResult OnGetFinalContentBlock(
+        string code,
+        Guid playerId,
+        int sourceContentBlockId)
+    {
+        var game = sessionRegistry.Find(code);
+
+        if (game is null ||
+            game.Session.Status is not GameSessionStatus.FinalAnswering and
+                not GameSessionStatus.FinalJudging and
+                not GameSessionStatus.Completed)
+        {
+            return NotFound();
+        }
+
+        var block = game.Session.FinalQuestion?.Definition.QuestionBlocks
+            .SingleOrDefault(item =>
+                item.SourceContentBlockId == sourceContentBlockId);
+
+        if (block?.FileData is null ||
+            string.IsNullOrWhiteSpace(block.FileContentType))
+        {
+            return NotFound();
+        }
+
+        return string.IsNullOrWhiteSpace(block.FileName)
+            ? File(block.FileData, block.FileContentType)
+            : File(block.FileData, block.FileContentType, block.FileName);
+    }
 }

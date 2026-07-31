@@ -2538,6 +2538,69 @@ iframe.game-content-video {
     grid-row: 1;
 }
 
+.final-question-host,
+.final-question-panel {
+    min-height: calc(100vh - 10rem);
+}
+
+.final-question-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    text-align: center;
+}
+
+.final-submission-list,
+.final-judging-list {
+    width: min(100%, 52rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.final-submission-list li,
+.final-judging-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--panel-2);
+}
+
+.final-submission-list li + li,
+.final-judging-card + .final-judging-card {
+    margin-top: 0.65rem;
+}
+
+.final-judging-card {
+    flex-wrap: wrap;
+    text-align: left;
+}
+
+.final-judging-card p {
+    flex: 1 1 100%;
+    margin: 0;
+}
+
+.player-final-panel {
+    display: grid;
+    gap: 1rem;
+    margin-block: 1.5rem;
+    padding: 1.25rem;
+    border: 1px solid var(--gold);
+    border-radius: 1rem;
+}
+
+.player-final-panel textarea {
+    min-height: 8rem;
+    resize: vertical;
+}
+
 .round-wager-settings {
     align-items: center;
 }

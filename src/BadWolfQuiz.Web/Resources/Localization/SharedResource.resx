@@ -888,4 +888,24 @@
   <data name="Message_FinalQuestionSaved" xml:space="preserve">
     <value>Final question saved.</value>
   </data>
+  <data name="FinalQuestion_Title" xml:space="preserve"><value>Final question</value></data>
+  <data name="FinalQuestion_Start" xml:space="preserve"><value>Start final question</value></data>
+  <data name="FinalQuestion_WaitingForWagers" xml:space="preserve"><value>Waiting for final wagers</value></data>
+  <data name="FinalQuestion_NotSubmitted" xml:space="preserve"><value>Not submitted</value></data>
+  <data name="FinalQuestion_Submitted" xml:space="preserve"><value>Submitted</value></data>
+  <data name="FinalQuestion_ShowQuestion" xml:space="preserve"><value>Show final question</value></data>
+  <data name="FinalQuestion_StartJudging" xml:space="preserve"><value>Show answer and start judging</value></data>
+  <data name="FinalQuestion_Results" xml:space="preserve"><value>Final results</value></data>
+  <data name="FinalQuestion_NotEligible" xml:space="preserve"><value>You are watching this final question as a spectator.</value></data>
+  <data name="FinalQuestion_YourWager" xml:space="preserve"><value>Your wager</value></data>
+  <data name="FinalQuestion_WagerLimits" xml:space="preserve"><value>Allowed wager: {0}–{1}</value></data>
+  <data name="FinalQuestion_ConfirmWager" xml:space="preserve"><value>Confirm wager</value></data>
+  <data name="FinalQuestion_WagerConfirmed" xml:space="preserve"><value>Your wager is confirmed. Waiting for the host.</value></data>
+  <data name="FinalQuestion_YourAnswer" xml:space="preserve"><value>Your answer</value></data>
+  <data name="FinalQuestion_ConfirmAnswer" xml:space="preserve"><value>Confirm answer</value></data>
+  <data name="FinalQuestion_AnswerConfirmed" xml:space="preserve"><value>Your answer is confirmed. Waiting for the host.</value></data>
+  <data name="FinalQuestion_WaitingForJudging" xml:space="preserve"><value>The host is judging the final answers.</value></data>
+  <data name="FinalQuestion_YourAnswerCorrect" xml:space="preserve"><value>Your final answer was correct.</value></data>
+  <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve"><value>Your final answer was incorrect.</value></data>
+  <data name="FinalQuestion_ActionRejected" xml:space="preserve"><value>The final question action is not available yet.</value></data>
 </root>

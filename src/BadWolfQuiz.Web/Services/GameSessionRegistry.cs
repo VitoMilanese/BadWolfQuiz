@@ -219,6 +219,89 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public FinalQuestion? StartFinalQuestion(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.StartFinalQuestion();
+        }
+    }
+
+    public FinalPlayerActionResult? SubmitFinalWager(
+        string connectionId,
+        int amount)
+    {
+        return ExecuteApprovedPlayerAction(
+            connectionId,
+            (game, player) => game.Session.SubmitFinalWager(player.Id, amount));
+    }
+
+    public GameSessionRegistration? LockFinalWagers(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            game.Session.LockFinalWagers();
+            return game;
+        }
+    }
+
+    public FinalPlayerActionResult? SubmitFinalAnswer(
+        string connectionId,
+        string answer)
+    {
+        return ExecuteApprovedPlayerAction(
+            connectionId,
+            (game, player) => game.Session.SubmitFinalAnswer(player.Id, answer));
+    }
+
+    public GameSessionRegistration? LockFinalAnswers(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            game.Session.LockFinalAnswers();
+            return game;
+        }
+    }
+
+    public FinalPlayerSubmission? JudgeFinalAnswer(
+        string publicCode,
+        GamePlayerId playerId,
+        bool isCorrect)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.JudgeFinalAnswer(playerId, isCorrect);
+        }
+    }
+
     public RuntimeQuestion? SelectQuestion(
         string publicCode,
         int sourceQuestionId)
@@ -600,6 +683,38 @@ public sealed class GameSessionRegistry
         }
     }
 
+    private FinalPlayerActionResult? ExecuteApprovedPlayerAction(
+        string connectionId,
+        Func<GameSessionRegistration, GamePlayer, FinalPlayerSubmission> action)
+    {
+        PlayerConnection connection;
+
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(
+                    connectionId,
+                    out var currentConnection) ||
+                !currentConnection.IsApproved)
+            {
+                return null;
+            }
+
+            connection = currentConnection;
+        }
+
+        lock (connection.Access.Game)
+        {
+            var submission = action(
+                connection.Access.Game,
+                connection.Access.Player);
+
+            return new FinalPlayerActionResult(
+                connection.Access.Game,
+                connection.Access.Player,
+                submission);
+        }
+    }
+
     private PlayerPresenceStatus GetPresence(GamePlayerId playerId)
     {
         var connections = _playerConnections.Values
@@ -657,3 +772,9 @@ public sealed record BuzzerClaimResult(
 public sealed record QuestionTimerTickResult(
     GameSessionRegistration Game,
     QuestionTimerOutcome Outcome);
+
+
+public sealed record FinalPlayerActionResult(
+    GameSessionRegistration Game,
+    GamePlayer Player,
+    FinalPlayerSubmission Submission);
