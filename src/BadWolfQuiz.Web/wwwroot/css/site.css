@@ -648,7 +648,7 @@ textarea {
     position: absolute;
     bottom: 10px;
     right: 12px;
-    color: #7ee787;
+    color: color-mix(in srgb, #238636 78%, var(--text));
     text-transform: uppercase;
     font-weight: 800;
 }
@@ -3021,8 +3021,8 @@ iframe.game-content-video {
     padding: clamp(24px, 4vw, 42px);
     border: 2px solid var(--gold);
     border-radius: 22px;
-    color: #fff;
-    background: rgba(10, 10, 15, 0.96);
+    color: var(--text);
+    background: var(--panel-glass);
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.72);
     text-align: center;
 }
@@ -3269,7 +3269,7 @@ iframe.game-content-video {
     border: 2px solid var(--gold);
     border-radius: 14px;
     color: var(--gold);
-    background: rgba(10, 10, 15, 0.94);
+    background: var(--panel-glass);
     box-shadow: 0 0 24px rgba(220, 169, 0, 0.22);
 }
 
@@ -3290,9 +3290,9 @@ iframe.game-content-video {
 }
 
 .game-timer.answer-timer {
-    color: #ff697a;
-    border-color: #ff697a;
-    box-shadow: 0 0 24px rgba(255, 105, 122, 0.24);
+    color: color-mix(in srgb, #d1242f 78%, var(--text));
+    border-color: currentColor;
+    box-shadow: 0 0 24px color-mix(in srgb, #d1242f 24%, transparent);
 }
 
 .current-question-summary {
