@@ -1099,8 +1099,7 @@ textarea {
     min-width: 0;
 }
 
-.button-danger,
-.button-danger-outline {
+.button-danger {
     color: #fff;
 }
 
@@ -1115,12 +1114,14 @@ textarea {
 
 .button-danger-outline {
     background: transparent;
-    border-color: #7d2931;
+    color: color-mix(in srgb, #d41f35 78%, var(--text));
+    border-color: currentColor;
 }
 
     .button-danger-outline:hover {
-        background: rgba(239, 35, 60, .12);
-        border-color: var(--red-bright);
+        color: color-mix(in srgb, #ef233c 82%, var(--text));
+        background: color-mix(in srgb, #ef233c 12%, transparent);
+        border-color: currentColor;
     }
 
 .button:disabled,
