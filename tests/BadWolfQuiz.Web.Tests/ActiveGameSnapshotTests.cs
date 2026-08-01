@@ -32,8 +32,14 @@ public sealed class ActiveGameSnapshotTests
             session.Settings,
             session.CaptureState());
 
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new QuizSnapshotJsonConverter() }
+        };
+        // The first implementation wrote snapshots with the default serializer.
+        // The converter must remain able to read those existing files.
         var json = JsonSerializer.Serialize(snapshot);
-        var restored = JsonSerializer.Deserialize<ActiveGameSnapshot>(json);
+        var restored = JsonSerializer.Deserialize<ActiveGameSnapshot>(json, options);
 
         Assert.NotNull(restored);
         Assert.Equal(42, restored.Quiz.SourceQuizId);

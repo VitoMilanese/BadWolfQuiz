@@ -16,7 +16,8 @@ public sealed class ActiveGameStore
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        WriteIndented = true
+        WriteIndented = true,
+        Converters = { new QuizSnapshotJsonConverter() }
     };
 
     private readonly string _path;
@@ -85,7 +86,10 @@ public sealed class ActiveGameStore
                 JsonOptions) ?? [];
         }
         catch (Exception exception) when (
-            exception is JsonException or NotSupportedException)
+            exception is JsonException or
+                NotSupportedException or
+                InvalidOperationException or
+                ArgumentException)
         {
             return [];
         }
