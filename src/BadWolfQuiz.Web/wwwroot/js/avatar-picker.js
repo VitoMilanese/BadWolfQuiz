@@ -24,12 +24,12 @@
 
         for (const genderButton of dialog.querySelectorAll("[data-avatar-gender]")) {
             genderButton.addEventListener("click", () => {
-                const gender = genderButton.dataset.avatarGender;
-                const avatarCount = Number(genderButton.dataset.avatarCount);
+                const avatarIds = JSON.parse(
+                    genderButton.dataset.avatarIds || "[]"
+                );
                 options.replaceChildren();
 
-                for (let number = 1; number <= avatarCount; number += 1) {
-                    const avatarId = `${gender}/${number}.png`;
+                for (const avatarId of avatarIds) {
                     const button = document.createElement("button");
                     button.type = "button";
                     button.className = "avatar-option";

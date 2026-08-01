@@ -1,3 +1,11 @@
+@inject BadWolfQuiz.Web.Services.AvatarCatalog AvatarCatalog
+@using System.Text.Json
+@{
+    var femaleAvatarIds = AvatarCatalog.GetAvatarIds("F");
+    var maleAvatarIds = AvatarCatalog.GetAvatarIds("M");
+    var individualAvatarIds = AvatarCatalog.GetAvatarIds("I");
+}
+
 <dialog class="avatar-picker" data-avatar-picker>
     <div class="avatar-picker-card">
         <header class="dialog-heading">
@@ -7,13 +15,13 @@
 
         <section data-avatar-gender-step>
             <div class="avatar-gender-grid">
-                <button type="button" data-avatar-gender="F" data-avatar-count="60" aria-label="@Localizer["AvatarPicker_Female"]">
+                <button type="button" data-avatar-gender="F" data-avatar-ids="@JsonSerializer.Serialize(femaleAvatarIds)" aria-label="@Localizer["AvatarPicker_Female"]">
                     <img src="/avatars/F.png" alt="" />
                 </button>
-                <button type="button" data-avatar-gender="M" data-avatar-count="60" aria-label="@Localizer["AvatarPicker_Male"]">
+                <button type="button" data-avatar-gender="M" data-avatar-ids="@JsonSerializer.Serialize(maleAvatarIds)" aria-label="@Localizer["AvatarPicker_Male"]">
                     <img src="/avatars/M.png" alt="" />
                 </button>
-                <button type="button" data-avatar-gender="I" data-avatar-count="14" aria-label="@Localizer["AvatarPicker_Individual"]">
+                <button type="button" data-avatar-gender="I" data-avatar-ids="@JsonSerializer.Serialize(individualAvatarIds)" aria-label="@Localizer["AvatarPicker_Individual"]">
                     <img src="/avatars/I.png" alt="" />
                 </button>
             </div>
