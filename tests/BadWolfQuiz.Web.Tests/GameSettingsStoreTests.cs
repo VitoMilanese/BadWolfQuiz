@@ -55,6 +55,7 @@ public sealed class GameSettingsStoreTests : IDisposable
         var store = new GameSettingsStore(
             new TestWebHostEnvironment(_contentRoot));
         var expectedImage = new byte[] { 1, 2, 3, 4 };
+        var expectedLogo = new byte[] { 5, 6, 7 };
         var expected = new GameSessionSettings(
             TimeSpan.FromSeconds(47),
             TimeSpan.FromSeconds(13),
@@ -64,7 +65,9 @@ public sealed class GameSettingsStoreTests : IDisposable
             hostVisualSource: HostVisualSource.Image,
             hostImageData: expectedImage,
             hostImageContentType: "image/png",
-            hostAvatarId: "F/17.png");
+            hostAvatarId: "F/17.png",
+            brandLogoData: expectedLogo,
+            brandLogoContentType: "image/webp");
 
         await store.SaveAsync(expected);
         var actual = await store.LoadAsync();
@@ -74,6 +77,8 @@ public sealed class GameSettingsStoreTests : IDisposable
         Assert.Equal(expectedImage, actual.HostImageData);
         Assert.Equal("image/png", actual.HostImageContentType);
         Assert.Equal("F/17.png", actual.HostAvatarId);
+        Assert.Equal(expectedLogo, actual.BrandLogoData);
+        Assert.Equal("image/webp", actual.BrandLogoContentType);
         Assert.True(actual.HasHostCard);
     }
 

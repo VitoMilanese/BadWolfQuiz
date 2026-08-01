@@ -1,4 +1,6 @@
 ﻿@using System.Globalization
+@using BadWolfQuiz.Web.Services
+@inject GameSettingsStore SettingsStore
 
 @{
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
@@ -11,6 +13,14 @@
     };
 
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var hasBrandLogo = false;
+    if (isAuthenticated)
+    {
+        var settings = await SettingsStore.LoadAsync(Context.RequestAborted);
+        hasBrandLogo = settings.BrandLogoData is not null &&
+            !string.IsNullOrWhiteSpace(settings.BrandLogoContentType);
+    }
 }
 
 <!DOCTYPE html>
@@ -24,11 +34,20 @@
 <body>
     <header class="topbar">
         <a class="brand" asp-page="/Index">
-            BAD WOLF <span>QUIZ</span>
+            @if (hasBrandLogo)
+            {
+                <img class="brand-logo"
+                     src="@Url.Page("/Admin/Settings/Index", "BrandLogo")"
+                     alt="BAD WOLF QUIZ" />
+            }
+            else
+            {
+                <text>BAD WOLF <span>QUIZ</span></text>
+            }
         </a>
 
         <nav>
-            @if (User.Identity?.IsAuthenticated == true)
+            @if (isAuthenticated)
             {
                 <a asp-page="/Admin/Quizzes/Index">@Localizer["Menu_Quizzes"]</a>
                 <a asp-page="/Admin/Games/History">@Localizer["Menu_GameHistory"]</a>
@@ -40,7 +59,7 @@
                 @Localizer["Button_Join"]
             </a>
 
-            @if (User.Identity?.IsAuthenticated == true)
+            @if (isAuthenticated)
             {
                 <form method="post" asp-page="/Account/Logout" class="nav-form">
                     <button type="submit" class="nav-link-button">@Localizer["Account_SignOut"]</button>

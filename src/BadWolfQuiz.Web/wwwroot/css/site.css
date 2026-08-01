@@ -56,11 +56,38 @@ select {
     font-weight: 900;
     letter-spacing: 0.08em;
     font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
 }
 
     .brand span {
         color: var(--red-bright);
     }
+
+.brand-logo {
+    display: block;
+    width: auto;
+    height: 52px;
+    max-width: min(280px, 28vw);
+    object-fit: contain;
+}
+
+.brand-logo-input-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-logo-preview {
+    width: 140px;
+    height: 54px;
+    object-fit: contain;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 4px;
+    background: transparent;
+}
 
 .topbar nav {
     display: flex;

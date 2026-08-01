@@ -1025,4 +1025,9 @@
   <data name="PlayerWebcam_RequiresHttps" xml:space="preserve"><value>Open the site over a secure HTTPS connection to access the camera.</value></data>
   <data name="PlayerWebcam_AccessFailed" xml:space="preserve"><value>Unable to access the camera. Check the browser permission.</value></data>
   <data name="GameBoard_ResizeHostCard" xml:space="preserve"><value>Resize the host card width and height</value></data>
+  <data name="BrandLogo_Label" xml:space="preserve"><value>Custom header logo</value></data>
+  <data name="BrandLogo_Hint" xml:space="preserve"><value>Image up to 5 MB. It replaces BAD WOLF QUIZ in the header while you are signed in.</value></data>
+  <data name="BrandLogo_PreviewAlt" xml:space="preserve"><value>Custom logo preview</value></data>
+  <data name="BrandLogo_Remove" xml:space="preserve"><value>Remove the custom logo</value></data>
+  <data name="BrandLogo_InvalidImage" xml:space="preserve"><value>Select a valid logo image up to 5 MB.</value></data>
 </root>
