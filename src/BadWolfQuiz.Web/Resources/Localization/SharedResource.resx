@@ -1078,4 +1078,34 @@
   <data name="PlayerImage_Picture" xml:space="preserve"><value>Picture</value></data>
   <data name="PlayerImage_UploadOrChange" xml:space="preserve"><value>Upload or change picture</value></data>
   <data name="PlayerImage_Invalid" xml:space="preserve"><value>Select a valid PNG, JPEG, or WebP image.</value></data>
+  <data name="Menu_FAQ" xml:space="preserve"><value>FAQ</value></data>
+  <data name="Faq_Eyebrow" xml:space="preserve"><value>QUICK GUIDE</value></data>
+  <data name="Faq_Title" xml:space="preserve"><value>Frequently asked questions</value></data>
+  <data name="Faq_Description" xml:space="preserve"><value>Short answers about joining, gameplay, settings, and game management.</value></data>
+  <data name="Faq_Q1" xml:space="preserve"><value>How does a player join a game?</value></data>
+  <data name="Faq_A1" xml:space="preserve"><value>Open the Join page and enter the six-character game code and a name, or scan the QR code shown by the host. Players do not need accounts. If the QR link points to localhost, the host must configure Game:PublicBaseUrl with an address reachable from player devices.</value></data>
+  <data name="Faq_Q2" xml:space="preserve"><value>Can someone join after the game has started?</value></data>
+  <data name="Faq_A2" xml:space="preserve"><value>Yes, when the host opens late joining with the lock control. A new player appears as pending until the host approves them. A returning player may also require approval before becoming active again.</value></data>
+  <data name="Faq_Q3" xml:space="preserve"><value>Who chooses the next question?</value></data>
+  <data name="Faq_A3" xml:space="preserve"><value>The first player to join opens the first round. A correct answer transfers the choice to that player; incorrect answers or a question with no correct answer do not. The host may select a player manually or randomly. Later rounds begin with the weakest player according to the game standings rules.</value></data>
+  <data name="Faq_Q4" xml:space="preserve"><value>How do the buzzer and timers work?</value></data>
+  <data name="Faq_A4" xml:space="preserve"><value>The buzzer may open automatically or when the host activates it. The first accepted press pauses the shared buzzer timer and starts the answering player's timer. After an incorrect answer, the buzzer reopens for eligible players and the shared timer continues from its remaining time.</value></data>
+  <data name="Faq_Q5" xml:space="preserve"><value>How do wager questions work?</value></data>
+  <data name="Faq_A5" xml:space="preserve"><value>Only the player who selected the question answers it. The player announces a wager and the host enters it before revealing the question. The minimum is 5 points; the maximum is the greater of that player's score and the highest question value on the current board. A correct answer adds the wager and an incorrect answer subtracts it.</value></data>
+  <data name="Faq_Q6" xml:space="preserve"><value>How does the final question work?</value></data>
+  <data name="Faq_A6" xml:space="preserve"><value>Eligible players privately submit a wager and then an answer from their devices. The minimum wager is 5 and the maximum is the greater of 1,000 and the player's score. Negative-score players participate by default unless the host disables this setting. Wagers and answers stay private until the relevant phase is locked.</value></data>
+  <data name="Faq_Q7" xml:space="preserve"><value>Can the host correct an incorrectly judged answer?</value></data>
+  <data name="Faq_A7" xml:space="preserve"><value>Yes. Open Answer history during the game to change the player, correctness, or score value, add a missing record, or delete an erroneous record. The previous score contribution is reversed and the corrected result is applied consistently.</value></data>
+  <data name="Faq_Q8" xml:space="preserve"><value>What happens if a player disconnects or reloads the page?</value></data>
+  <data name="Faq_A8" xml:space="preserve"><value>The reconnect token restores the same player and the server sends the current game state again. During a running game, the host may need to approve the returning connection. Reloading does not create a second score entry for the same player.</value></data>
+  <data name="Faq_Q9" xml:space="preserve"><value>Can players use avatars, pictures, or webcams?</value></data>
+  <data name="Faq_A9" xml:space="preserve"><value>Players can choose a built-in avatar, upload a picture, or enable a webcam. When the webcam is unavailable, the selected picture or avatar is used as a fallback. Avatar and picture preferences are stored in that browser by normalized player name and restored for later games on the same device.</value></data>
+  <data name="Faq_Q10" xml:space="preserve"><value>What is the difference between global and lobby settings?</value></data>
+  <data name="Faq_A10" xml:space="preserve"><value>Global settings are persistent defaults for future games. Creating a lobby copies those values into an independent game snapshot. The host may customize that lobby before starting without changing the global defaults; once the game starts, its settings are locked.</value></data>
+  <data name="Faq_Q11" xml:space="preserve"><value>Is completed game history saved?</value></data>
+  <data name="Faq_A11" xml:space="preserve"><value>Yes. Completed games are stored in SQLite with players, final scores, regular questions, and recorded answer results. The host can review them from Game history. Deleting a quiz archives its definition so existing history remains available.</value></data>
+  <data name="Faq_Q12" xml:space="preserve"><value>Who can access a host's quizzes and games?</value></data>
+  <data name="Faq_A12" xml:space="preserve"><value>Quizzes, active games, and completed history belong to the authenticated host who created or launched them. Other host accounts cannot access that data. Player join and gameplay pages remain available without player accounts.</value></data>
+  <data name="Faq_ContactTitle" xml:space="preserve"><value>Still need help?</value></data>
+  <data name="Faq_ContactDescription" xml:space="preserve"><value>Send your question and it will be delivered to the BAD WOLF QUIZ Discord channel.</value></data>
 </root>

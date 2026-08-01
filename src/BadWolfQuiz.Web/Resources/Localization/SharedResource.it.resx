@@ -1078,4 +1078,34 @@
   <data name="PlayerImage_Picture" xml:space="preserve"><value>Immagine</value></data>
   <data name="PlayerImage_UploadOrChange" xml:space="preserve"><value>Carica o cambia immagine</value></data>
   <data name="PlayerImage_Invalid" xml:space="preserve"><value>Seleziona un'immagine PNG, JPEG o WebP valida.</value></data>
+  <data name="Menu_FAQ" xml:space="preserve"><value>FAQ</value></data>
+  <data name="Faq_Eyebrow" xml:space="preserve"><value>GUIDA RAPIDA</value></data>
+  <data name="Faq_Title" xml:space="preserve"><value>Domande frequenti</value></data>
+  <data name="Faq_Description" xml:space="preserve"><value>Risposte brevi su accesso, gioco, impostazioni e gestione delle partite.</value></data>
+  <data name="Faq_Q1" xml:space="preserve"><value>Come entra un giocatore nella partita?</value></data>
+  <data name="Faq_A1" xml:space="preserve"><value>Apri la pagina Partecipa e inserisci il codice di sei caratteri e un nome, oppure scansiona il codice QR mostrato dall'host. Non serve un account giocatore. Se il link QR punta a localhost, l'host deve configurare Game:PublicBaseUrl con un indirizzo raggiungibile dai dispositivi dei giocatori.</value></data>
+  <data name="Faq_Q2" xml:space="preserve"><value>È possibile entrare dopo l'inizio della partita?</value></data>
+  <data name="Faq_A2" xml:space="preserve"><value>Sì, quando l'host apre gli ingressi tardivi con il pulsante del lucchetto. Un nuovo giocatore resta in attesa finché l'host non lo approva. Anche chi rientra dopo una disconnessione potrebbe richiedere una nuova approvazione.</value></data>
+  <data name="Faq_Q3" xml:space="preserve"><value>Chi sceglie la domanda successiva?</value></data>
+  <data name="Faq_A3" xml:space="preserve"><value>Il primo giocatore entrato apre il primo round. Una risposta corretta trasferisce la scelta a quel giocatore; una risposta errata o l'assenza di una risposta corretta non la cambia. L'host può scegliere un giocatore manualmente o casualmente. I round successivi iniziano con il giocatore più debole secondo le regole della classifica.</value></data>
+  <data name="Faq_Q4" xml:space="preserve"><value>Come funzionano il buzzer e i timer?</value></data>
+  <data name="Faq_A4" xml:space="preserve"><value>Il buzzer può aprirsi automaticamente o su comando dell'host. La prima pressione accettata mette in pausa il timer comune e avvia quello del giocatore che risponde. Dopo una risposta errata, il buzzer si riapre per i giocatori idonei e il timer comune riprende dal tempo rimasto.</value></data>
+  <data name="Faq_Q5" xml:space="preserve"><value>Come funzionano le domande con puntata?</value></data>
+  <data name="Faq_A5" xml:space="preserve"><value>Risponde solo il giocatore che ha scelto la domanda. Il giocatore dichiara una puntata e l'host la inserisce prima di mostrare la domanda. Il minimo è 5 punti; il massimo è il maggiore tra il punteggio del giocatore e il valore più alto sul tabellone corrente. Una risposta corretta aggiunge la puntata, una errata la sottrae.</value></data>
+  <data name="Faq_Q6" xml:space="preserve"><value>Come funziona la domanda finale?</value></data>
+  <data name="Faq_A6" xml:space="preserve"><value>I giocatori idonei inviano privatamente una puntata e poi una risposta dai propri dispositivi. La puntata minima è 5 e la massima è il maggiore tra 1.000 e il punteggio del giocatore. Chi ha un punteggio negativo partecipa per impostazione predefinita, salvo disattivazione da parte dell'host. Puntate e risposte restano private finché la relativa fase non viene bloccata.</value></data>
+  <data name="Faq_Q7" xml:space="preserve"><value>L'host può correggere una risposta valutata male?</value></data>
+  <data name="Faq_A7" xml:space="preserve"><value>Sì. Durante la partita, nella Cronologia risposte è possibile cambiare giocatore, esito o punteggio, aggiungere un record mancante o eliminarne uno errato. Il contributo precedente viene annullato e il risultato corretto viene applicato in modo coerente.</value></data>
+  <data name="Faq_Q8" xml:space="preserve"><value>Cosa succede se un giocatore si disconnette o ricarica la pagina?</value></data>
+  <data name="Faq_A8" xml:space="preserve"><value>Il token di riconnessione ripristina lo stesso giocatore e il server invia nuovamente lo stato corrente. Durante una partita avviata, l'host potrebbe dover approvare il rientro. Il ricaricamento non crea una seconda voce di punteggio.</value></data>
+  <data name="Faq_Q9" xml:space="preserve"><value>I giocatori possono usare avatar, immagini o webcam?</value></data>
+  <data name="Faq_A9" xml:space="preserve"><value>Un giocatore può scegliere un avatar integrato, caricare un'immagine o attivare la webcam. Se la webcam non è disponibile, viene usata l'immagine o l'avatar selezionato. Le preferenze vengono salvate nel browser per nome normalizzato e ripristinate nelle partite successive sullo stesso dispositivo.</value></data>
+  <data name="Faq_Q10" xml:space="preserve"><value>Qual è la differenza tra impostazioni globali e della lobby?</value></data>
+  <data name="Faq_A10" xml:space="preserve"><value>Le impostazioni globali sono valori predefiniti persistenti per le partite future. Quando si crea una lobby vengono copiate in un'istantanea indipendente. L'host può personalizzarla prima dell'avvio senza cambiare i valori globali; dopo l'avvio le impostazioni vengono bloccate.</value></data>
+  <data name="Faq_Q11" xml:space="preserve"><value>La cronologia delle partite completate viene salvata?</value></data>
+  <data name="Faq_A11" xml:space="preserve"><value>Sì. SQLite conserva giocatori, punteggi finali, domande regolari e risultati registrati. L'host può consultarli nella Cronologia partite. Eliminare un quiz ne archivia la definizione, quindi la cronologia collegata resta disponibile.</value></data>
+  <data name="Faq_Q12" xml:space="preserve"><value>Chi può accedere ai quiz e alle partite di un host?</value></data>
+  <data name="Faq_A12" xml:space="preserve"><value>Quiz, partite attive e cronologia appartengono all'host autenticato che li ha creati o avviati. Gli altri account host non possono accedere a questi dati. Le pagine di accesso e di gioco restano disponibili senza account giocatore.</value></data>
+  <data name="Faq_ContactTitle" xml:space="preserve"><value>Hai ancora bisogno di aiuto?</value></data>
+  <data name="Faq_ContactDescription" xml:space="preserve"><value>Invia la tua domanda: verrà recapitata al canale Discord di BAD WOLF QUIZ.</value></data>
 </root>
