@@ -32,7 +32,7 @@ A player may:
 - upload an image file;
 - leave the avatar unset.
 
-Account registration is not required for the first version of this feature. Avatar ownership and persistence must follow the existing nickname-based player identity model until reserved accounts are introduced.
+Player registration is not required. The selected avatar or uploaded image is stored in the player's browser by normalized player name and restored when that name joins a later game from the same device.
 
 ## Live video sources
 
@@ -40,7 +40,7 @@ A player may optionally replace the static avatar with a live visual source:
 
 - a webcam feed;
 
-The exact transport, permissions, fallback behavior, and performance limits will be designed before implementation. A failed or unavailable stream must fall back to the player's avatar or the default card appearance.
+The browser publishes the webcam stream to the host while the player is connected and active. A failed, disabled, or unavailable stream falls back to the player's uploaded image, selected avatar, or default card appearance.
 
 ## Host card
 
@@ -49,18 +49,18 @@ The host does not participate in gameplay and has no score.
 The optional host card displays the host name and visual source:
 
 - a static image;
+- a built-in avatar;
 - a webcam feed;
 
 A setting controls whether the host card is visible. When disabled, it must not reserve empty space in the card row.
 
-Global settings provide defaults that are copied into a new game. The lobby may override them for that game. A game cannot start with a visible host card until the host name and either an uploaded image or webcam source are selected.
+Global settings provide defaults that are copied into a new game. The lobby may override them for that game. A visible host card requires a host name and a selected image, avatar, or webcam source.
 
 ## Future design decisions
 
-Implementation still requires decisions about:
+Future improvements may include:
 
-- avatar file validation and storage;
 - moderation and removal of uploaded images;
 - media device selection and browser permissions;
 - stream quality and bandwidth limits;
-- responsive layout when many player cards and the host card are visible.
+- additional responsive-layout refinements for very large player lists.

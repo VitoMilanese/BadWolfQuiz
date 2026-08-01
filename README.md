@@ -106,6 +106,11 @@ Currently implemented:
 - Near-simultaneous buzzer results with millisecond differences
 - Synchronized buzzer and answer countdown timers
 - Persistent global game defaults and editable per-game settings snapshots
+- Compact icon-only player-card controls
+- Built-in player avatars and uploaded player images, restored by player name
+- Optional player webcam feeds with static-image fallback
+- Optional host card with an uploaded image, built-in avatar, or webcam feed
+- Global host-card defaults with per-game visibility and visual-source overrides
 - Timer pause and resume controls for the host
 - Automatic timer-based judging for regular and wager questions
 - Correct and incorrect answer judging
@@ -210,29 +215,14 @@ src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
 
 # Planned Features
 
-## Game Session
-
-- Reserved player nicknames
-
 ## Game
 
-- Persistent global settings and per-game settings UI
-- Per-round and lifetime correct-answer and attempt statistics
+- Player lifetime statistics and per-round statistics UI
 - Team mode
-
-## Player and Host Cards
-
-- Compact icon-only card controls
-- Built-in and uploaded player avatars
-- Webcam or OBS feed in place of an avatar
-- Optional host card with an image, webcam, or OBS feed
-- Global defaults with per-game visibility overrides
 
 ## Media
 
-- Full-screen presentation mode
-- Advanced transitions
-- Multiple monitor support
+- Dedicated presentation window for a secondary monitor
 
 ## Administration
 
