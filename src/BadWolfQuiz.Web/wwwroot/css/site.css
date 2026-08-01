@@ -1296,7 +1296,10 @@ textarea {
 }
 
 .board-host-sidebar {
-    position: relative;
+    position: fixed;
+    z-index: 17;
+    left: var(--board-host-left, 12px);
+    top: var(--board-host-top, 120px);
     display: none;
     width: var(--board-host-width, 238px);
     height: var(--board-host-height, 300px);
@@ -1422,14 +1425,7 @@ textarea {
 }
 
 @media (min-width: 1750px) {
-    .host-board-layout:has(.board-host-sidebar) {
-        grid-template-columns:
-            var(--board-host-width, 238px)
-            minmax(0, 1fr)
-            250px;
-    }
-
-    .board-host-sidebar {
+    .board-host-sidebar.is-positioned {
         display: block;
     }
 }

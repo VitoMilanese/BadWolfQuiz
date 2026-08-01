@@ -1440,6 +1440,7 @@
             const playerCount = document.getElementById("player-count");
             const playerList = document.getElementById("player-list");
             const boardPlayerList = document.getElementById("board-player-list");
+            const boardGrid = document.querySelector(".host-board-grid");
             const hostCard = playerList?.querySelector("[data-host-card]");
             const hostSlot = document.querySelector("[data-board-host-slot]");
             const hostCardList = document.querySelector(
@@ -1455,16 +1456,43 @@
             const gameCode = lobby.dataset.gameCode;
             const hostCardSizeKey = `badwolfquiz:${gameCode}:host-card-size`;
 
+            const canPositionHostCard = () =>
+                hostSlot &&
+                boardGrid &&
+                wideHostLayout.matches &&
+                boardGrid.getBoundingClientRect().left >= 214;
+
+            const centerHostCard = () => {
+                if (!hostSlot || !boardGrid || !canPositionHostCard()) {
+                    hostSlot?.classList.remove("is-positioned");
+                    return;
+                }
+
+                const boardBounds = boardGrid.getBoundingClientRect();
+                hostSlot.classList.add("is-positioned");
+                const cardBounds = hostSlot.getBoundingClientRect();
+                const left = Math.max(
+                    8,
+                    (boardBounds.left - cardBounds.width) / 2);
+                const top = Math.max(
+                    80,
+                    boardBounds.top + (boardBounds.height - cardBounds.height) / 2);
+                hostSlot.style.setProperty("--board-host-left", `${left}px`);
+                hostSlot.style.setProperty("--board-host-top", `${top}px`);
+            };
+
             const relocateHostCard = () => {
                 if (!hostCard) {
                     return;
                 }
 
-                if (hostCardList && wideHostLayout.matches) {
+                if (hostCardList && canPositionHostCard()) {
                     hostCardList.append(hostCard);
                 } else if (!playerList.contains(hostCard)) {
                     playerList.prepend(hostCard);
                 }
+
+                centerHostCard();
             };
 
             const applyHostCardSize = (width, height) => {
@@ -1472,14 +1500,20 @@
                     return null;
                 }
 
-                const layout = hostSlot.closest(".host-board-layout");
-                const maxHeight = Math.max(180, Math.min(650, layout.clientHeight));
+                const boardBounds = boardGrid?.getBoundingClientRect();
+                const maxWidth = Math.max(
+                    190,
+                    Math.min(430, (boardBounds?.left ?? 454) - 20));
+                const maxHeight = Math.max(
+                    180,
+                    Math.min(650, boardBounds?.height ?? 650));
                 const size = {
-                    width: Math.max(190, Math.min(430, Math.round(width))),
+                    width: Math.max(190, Math.min(maxWidth, Math.round(width))),
                     height: Math.max(180, Math.min(maxHeight, Math.round(height)))
                 };
-                layout.style.setProperty("--board-host-width", `${size.width}px`);
+                hostSlot.style.setProperty("--board-host-width", `${size.width}px`);
                 hostSlot.style.setProperty("--board-host-height", `${size.height}px`);
+                centerHostCard();
                 return size;
             };
 
@@ -1503,8 +1537,8 @@
 
                     const move = moveEvent => {
                         applyHostCardSize(
-                            startWidth + moveEvent.clientX - startX,
-                            startHeight + moveEvent.clientY - startY);
+                            startWidth + 2 * (moveEvent.clientX - startX),
+                            startHeight + 2 * (moveEvent.clientY - startY));
                     };
                     const stop = stopEvent => {
                         hostCardResizer.releasePointerCapture(stopEvent.pointerId);
@@ -1531,15 +1565,16 @@
                     event.preventDefault();
                     const bounds = hostSlot.getBoundingClientRect();
                     const size = applyHostCardSize(
-                        bounds.width + (event.key === "ArrowRight" ? 12 :
-                            event.key === "ArrowLeft" ? -12 : 0),
-                        bounds.height + (event.key === "ArrowDown" ? 12 :
-                            event.key === "ArrowUp" ? -12 : 0));
+                        bounds.width + (event.key === "ArrowRight" ? 24 :
+                            event.key === "ArrowLeft" ? -24 : 0),
+                        bounds.height + (event.key === "ArrowDown" ? 24 :
+                            event.key === "ArrowUp" ? -24 : 0));
                     localStorage.setItem(hostCardSizeKey, JSON.stringify(size));
                 });
             }
 
             wideHostLayout.addEventListener("change", relocateHostCard);
+            window.addEventListener("resize", relocateHostCard);
             relocateHostCard();
             const statusLabels = {
                 active: lobby.dataset.statusActive,
