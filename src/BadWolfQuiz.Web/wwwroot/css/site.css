@@ -3458,7 +3458,10 @@ iframe.game-content-video {
 .buzzer-race-overlay {
     position: fixed;
     z-index: 40;
-    inset: var(--topbar-height) 0 var(--game-scoreboard-space, 230px);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: var(--game-scoreboard-space, 230px);
     display: grid;
     place-items: center;
     padding: 24px;
