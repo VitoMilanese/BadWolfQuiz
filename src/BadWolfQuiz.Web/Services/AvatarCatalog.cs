@@ -16,7 +16,7 @@ public sealed class AvatarCatalog(IWebHostEnvironment environment)
 
         var parts = avatarId.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 2 ||
-            (parts[0] != "F" && parts[0] != "M") ||
+            (parts[0] != "F" && parts[0] != "M" && parts[0] != "I") ||
             Path.GetFileName(parts[1]) != parts[1] ||
             !string.Equals(Path.GetExtension(parts[1]), ".png", StringComparison.OrdinalIgnoreCase))
         {

@@ -235,6 +235,7 @@
 {
     <section class="host-game-board"
              data-game-code="@Model.Game.PublicCode"
+             data-resize-player-card-label="@Localizer["GameBoard_ResizePlayerCards"]"
              data-status-active="@Localizer["PlayerPresence_Active"]"
              data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
              data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
@@ -868,6 +869,12 @@
                            @(isAnswering ? "question-answering-player" : null)
                            @(hasAttempted ? "question-attempted-player" : null)"
                     data-player-id="@player.Id.Value">
+                    <span class="player-card-width-resizer"
+                          data-player-card-width-resizer
+                          role="separator"
+                          aria-orientation="vertical"
+                          aria-label="@Localizer["GameBoard_ResizePlayerCards"]"
+                          tabindex="0"></span>
                     @if (Model.ActivePlayerIds.Contains(player.Id) &&
                          !string.IsNullOrWhiteSpace(player.AvatarId))
                     {
@@ -940,6 +947,7 @@
 
     <section class="host-game-board final-question-host"
              data-game-code="@Model.Game.PublicCode"
+             data-resize-player-card-label="@Localizer["GameBoard_ResizePlayerCards"]"
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
              data-status-active="@Localizer["PlayerPresence_Active"]"
              data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
@@ -1171,6 +1179,12 @@
             @foreach (var player in Model.Players)
             {
                 <li class="scoreboard-player" data-player-id="@player.Id.Value">
+                    <span class="player-card-width-resizer"
+                          data-player-card-width-resizer
+                          role="separator"
+                          aria-orientation="vertical"
+                          aria-label="@Localizer["GameBoard_ResizePlayerCards"]"
+                          tabindex="0"></span>
                     @if (Model.ActivePlayerIds.Contains(player.Id) &&
                          !string.IsNullOrWhiteSpace(player.AvatarId))
                     {
@@ -1491,6 +1505,89 @@
         })();
 
         (() => {
+            const board = document.querySelector(".host-game-board");
+            const playerList = document.getElementById("player-list");
+            if (!board || !playerList || !playerList.classList.contains("game-scoreboard")) {
+                return;
+            }
+
+            const storageKey = `badwolfquiz:${board.dataset.gameCode}:player-card-width`;
+            const limits = () => ({
+                minimum: 150,
+                maximum: Math.max(150, Math.min(430, window.innerWidth * 0.8))
+            });
+            const applyWidth = value => {
+                const { minimum, maximum } = limits();
+                const width = Math.min(maximum, Math.max(minimum, Math.round(value)));
+                board.style.setProperty("--player-card-width", `${width}px`);
+                return width;
+            };
+
+            const savedWidth = Number.parseInt(localStorage.getItem(storageKey), 10);
+            const defaultWidth = window.innerWidth <= 700 ? 155 : 230;
+            applyWidth(Number.isFinite(savedWidth) ? savedWidth : defaultWidth);
+
+            playerList.addEventListener("pointerdown", event => {
+                const handle = event.target.closest("[data-player-card-width-resizer]");
+                if (!handle) {
+                    return;
+                }
+
+                event.preventDefault();
+                const card = handle.closest(".scoreboard-player");
+                const startX = event.clientX;
+                const startWidth = card.getBoundingClientRect().width;
+                const pointerId = event.pointerId;
+                document.body.classList.add("is-resizing-player-cards");
+
+                const move = moveEvent => {
+                    if (moveEvent.pointerId !== pointerId) {
+                        return;
+                    }
+
+                    applyWidth(startWidth + moveEvent.clientX - startX);
+                };
+                const stop = stopEvent => {
+                    if (stopEvent.pointerId !== pointerId) {
+                        return;
+                    }
+
+                    window.removeEventListener("pointermove", move);
+                    window.removeEventListener("pointerup", stop);
+                    window.removeEventListener("pointercancel", stop);
+                    document.body.classList.remove("is-resizing-player-cards");
+                    const width = Number.parseFloat(
+                        getComputedStyle(board).getPropertyValue("--player-card-width"));
+                    localStorage.setItem(storageKey, Math.round(width).toString());
+                };
+
+                window.addEventListener("pointermove", move);
+                window.addEventListener("pointerup", stop);
+                window.addEventListener("pointercancel", stop);
+            });
+
+            playerList.addEventListener("keydown", event => {
+                if (!event.target.matches("[data-player-card-width-resizer]") ||
+                    (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) {
+                    return;
+                }
+
+                event.preventDefault();
+                const current = Number.parseFloat(
+                    getComputedStyle(board).getPropertyValue("--player-card-width"));
+                const width = applyWidth(
+                    current + (event.key === "ArrowRight" ? 12 : -12));
+                localStorage.setItem(storageKey, width.toString());
+            });
+
+            window.addEventListener("resize", () => {
+                const current = Number.parseFloat(
+                    getComputedStyle(board).getPropertyValue("--player-card-width"));
+                applyWidth(current);
+            });
+        })();
+
+        (() => {
             const lobby = document.querySelector("[data-game-code]");
             const playerCount = document.getElementById("player-count");
             const playerList = document.getElementById("player-list");
@@ -1758,6 +1855,19 @@
                 requestAnimationFrame(refreshScrollingNames);
             };
 
+            const addPlayerCardWidthResizer = item => {
+                const resizer = document.createElement("span");
+                resizer.className = "player-card-width-resizer";
+                resizer.dataset.playerCardWidthResizer = "";
+                resizer.setAttribute("role", "separator");
+                resizer.setAttribute("aria-orientation", "vertical");
+                resizer.setAttribute(
+                    "aria-label",
+                    lobby.dataset.resizePlayerCardLabel);
+                resizer.tabIndex = 0;
+                item.append(resizer);
+            };
+
             refreshScrollingNames();
             window.addEventListener("resize", refreshScrollingNames);
 
@@ -1830,6 +1940,7 @@
                         const item = document.createElement("li");
                         item.dataset.playerId = player.id;
                         item.className = "scoreboard-player";
+                        addPlayerCardWidthResizer(item);
 
                         const name = document.createElement("strong");
                         name.textContent = player.name;
@@ -1914,6 +2025,9 @@
                     item.className = isRunning
                         ? `scoreboard-player ${player.isActive ? "active-player" : ""}`
                         : player.isActive ? "active-player" : "";
+                    if (isRunning) {
+                        addPlayerCardWidthResizer(item);
+                    }
 
                     const name = document.createElement("strong");
                     name.textContent = player.name;

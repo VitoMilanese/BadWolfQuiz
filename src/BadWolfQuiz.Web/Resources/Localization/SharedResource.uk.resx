@@ -1016,6 +1016,8 @@
   <data name="AvatarPicker_SelectGender" xml:space="preserve"><value>Спочатку оберіть стать персонажа</value></data>
   <data name="AvatarPicker_Female" xml:space="preserve"><value>Жіноча</value></data>
   <data name="AvatarPicker_Male" xml:space="preserve"><value>Чоловіча</value></data>
+  <data name="AvatarPicker_Individual" xml:space="preserve"><value>Індивідуальні аватари</value></data>
+  <data name="GameBoard_ResizePlayerCards" xml:space="preserve"><value>Змінити ширину всіх карток гравців</value></data>
   <data name="AvatarPicker_Choose" xml:space="preserve"><value>Обрати аватар</value></data>
   <data name="AvatarPicker_ChooseOrChange" xml:space="preserve"><value>Обрати або змінити аватар</value></data>
   <data name="PlayerWebcam_Enable" xml:space="preserve"><value>Увімкнути вебкамеру</value></data>
