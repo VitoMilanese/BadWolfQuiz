@@ -64,18 +64,17 @@ The intended host controls also include selecting the active player with the hig
 
 This requires functionality that is not yet implemented:
 
-- persistent completed-game results;
-- aggregation of final net scores, including negative results;
+- host-scoped aggregation of persisted final net scores, including negative results;
 - a date-range query and host control.
 
 ### Persistent player identity
 
-Players should not be required to create an account before joining a game. The intended persistent identity is a `PlayerProfile` identified by a globally unique normalized nickname.
+Players do not create an account before joining a game. A persistent player identity is scoped to the host and identified by the host account together with a normalized nickname. Therefore, players with the same displayed name in games owned by different hosts are distinct players.
 
 Joining remains a one-action flow after the nickname is entered. A game participation record references the persistent player profile and stores the game, date, and score result. This data supports history and aggregate-score queries.
 
-Before account registration exists, a nickname is an unprotected identity: possession is not verified and another person could use it. A future optional registration flow will allow a player to reserve an existing nickname by attaching authentication credentials. Registration must enhance identity protection without making accounts mandatory for ordinary play.
+Normalization removes insignificant differences such as surrounding whitespace and letter casing while preserving the entered name for display. For example, `Player-X`, `player-x`, and ` Player-X ` identify the same player for one host.
 
-Nickname normalization, profile claiming, conflicts across devices, and recovery rules require a separate product and security decision before registration is implemented.
+Nicknames are intentionally not reserved through player accounts. Games are coordinated through Discord, and the host confirms the person behind a nickname through the existing lobby approval flow. This keeps joining fast while leaving identity control with the host.
 
-Until persistent history exists, the available active-player strategies are first joined, manual selection, and random selection.
+Until aggregate history queries exist, the available active-player strategies are first joined, manual selection, and random selection.
