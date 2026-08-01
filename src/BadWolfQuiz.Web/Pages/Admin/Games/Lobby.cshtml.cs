@@ -698,6 +698,24 @@ public sealed class LobbyModel(
             await gameHub.Clients
                 .Clients(approval.ConnectionIds)
                 .SendAsync("RejoinApproved", cancellationToken);
+            await gameHub.Clients
+                .Clients(approval.ConnectionIds)
+                .SendAsync(
+                    "GameStatusChanged",
+                    GameHub.CreateStatusUpdate(game),
+                    cancellationToken);
+            await gameHub.Clients
+                .Clients(approval.ConnectionIds)
+                .SendAsync(
+                    "BuzzerStateChanged",
+                    GameHub.CreateBuzzerUpdate(game),
+                    cancellationToken);
+            await gameHub.Clients
+                .Clients(approval.ConnectionIds)
+                .SendAsync(
+                    "TimerStateChanged",
+                    GameHub.CreateTimerUpdate(game),
+                    cancellationToken);
         }
 
         await gameHub.Clients
