@@ -117,6 +117,40 @@ html[data-theme="daylight"] {
     --accent-shadow: rgba(49, 95, 157, 0.2);
 }
 
+html[data-theme="warm-parchment"] {
+    --bg: #e8ddc8;
+    --panel: #f5ecd9;
+    --panel-2: #ddd0b8;
+    --line: #b8a589;
+    --text: #392f27;
+    --muted: #75675a;
+    --red: #a64b2a;
+    --red-bright: #cf6841;
+    --gold: #8d681e;
+    --body-background: radial-gradient(circle at 92% 0, rgba(207, 104, 65, 0.16) 0, transparent 34rem), linear-gradient(145deg, #f1e8d6, var(--bg));
+    --topbar-bg: rgba(245, 236, 217, 0.9);
+    --panel-glass: rgba(245, 236, 217, 0.95);
+    --panel-gradient-end: #d4c5aa;
+    --accent-shadow: rgba(166, 75, 42, 0.2);
+}
+
+html[data-theme="mint-fog"] {
+    --bg: #dce8e3;
+    --panel: #edf5f1;
+    --panel-2: #c9dbd3;
+    --line: #9db8ad;
+    --text: #20342d;
+    --muted: #5b746a;
+    --red: #18705c;
+    --red-bright: #2b9479;
+    --gold: #8a6420;
+    --body-background: radial-gradient(circle at 92% 0, rgba(43, 148, 121, 0.17) 0, transparent 34rem), linear-gradient(150deg, #edf3f0, var(--bg));
+    --topbar-bg: rgba(237, 245, 241, 0.9);
+    --panel-glass: rgba(237, 245, 241, 0.95);
+    --panel-gradient-end: #c1d5cc;
+    --accent-shadow: rgba(24, 112, 92, 0.2);
+}
+
 html[data-theme="ukrainian-sky"] {
     --bg: #061529;
     --panel: #0b2545;
@@ -3791,6 +3825,14 @@ iframe.game-content-video {
 .theme-option-light .theme-swatch i { background: #447dc6; }
 .theme-option-light .theme-swatch i:nth-child(2) { background: #b56b0a; }
 .theme-option-light .theme-swatch i:nth-child(3) { background: #182230; }
+.theme-option-parchment .theme-swatch { background: #f5ecd9; }
+.theme-option-parchment .theme-swatch i { background: #cf6841; }
+.theme-option-parchment .theme-swatch i:nth-child(2) { background: #8d681e; }
+.theme-option-parchment .theme-swatch i:nth-child(3) { background: #392f27; }
+.theme-option-mint .theme-swatch { background: #edf5f1; }
+.theme-option-mint .theme-swatch i { background: #2b9479; }
+.theme-option-mint .theme-swatch i:nth-child(2) { background: #8a6420; }
+.theme-option-mint .theme-swatch i:nth-child(3) { background: #20342d; }
 .theme-option-ukraine .theme-swatch { background: #0057b8; }
 .theme-option-ukraine .theme-swatch i { background: #2f80ed; }
 .theme-option-ukraine .theme-swatch i:nth-child(2) { background: #ffd700; }

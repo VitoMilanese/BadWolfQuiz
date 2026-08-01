@@ -1051,6 +1051,8 @@
   <data name="SiteTheme_RoyalViolet" xml:space="preserve"><value>Royal Violet</value></data>
   <data name="SiteTheme_SunsetOrange" xml:space="preserve"><value>Sunset Orange</value></data>
   <data name="SiteTheme_Daylight" xml:space="preserve"><value>Daylight</value></data>
+  <data name="SiteTheme_WarmParchment" xml:space="preserve"><value>Warm Parchment</value></data>
+  <data name="SiteTheme_MintFog" xml:space="preserve"><value>Mint Fog</value></data>
   <data name="SiteTheme_UkrainianSky" xml:space="preserve"><value>Ukrainian Sky</value></data>
   <data name="SiteTheme_ItalianSpirit" xml:space="preserve"><value>Italian Spirit</value></data>
   <data name="SiteTheme_Custom" xml:space="preserve"><value>Custom</value></data>

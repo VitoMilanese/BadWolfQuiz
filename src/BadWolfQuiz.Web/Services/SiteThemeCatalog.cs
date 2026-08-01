@@ -17,6 +17,8 @@ public static class SiteThemeCatalog
         "royal-violet",
         "sunset-orange",
         "daylight",
+        "warm-parchment",
+        "mint-fog",
         "ukrainian-sky",
         "italian-spirit",
         "custom"
