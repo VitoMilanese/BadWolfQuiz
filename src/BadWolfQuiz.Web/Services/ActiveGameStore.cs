@@ -61,13 +61,38 @@ public sealed class ActiveGameStore
                 temporaryPath,
                 serialized,
                 CancellationToken.None);
-            File.Move(temporaryPath, _path, overwrite: true);
+            await ReplaceFileWithRetryAsync(temporaryPath);
             _snapshots = snapshots;
             _serialized = serialized;
         }
         finally
         {
             _gate.Release();
+        }
+    }
+
+    private async Task ReplaceFileWithRetryAsync(string temporaryPath)
+    {
+        const int maxAttempts = 6;
+        var retryDelay = TimeSpan.FromMilliseconds(50);
+
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                File.Move(temporaryPath, _path, overwrite: true);
+                return;
+            }
+            catch (Exception exception) when (
+                attempt < maxAttempts &&
+                exception is IOException or UnauthorizedAccessException)
+            {
+                // Windows, antivirus software, or an editor may briefly hold the
+                // destination without delete sharing. Preserve the atomic move
+                // and retry instead of terminating the persistence worker.
+                await Task.Delay(retryDelay, CancellationToken.None);
+                retryDelay *= 2;
+            }
         }
     }
 
