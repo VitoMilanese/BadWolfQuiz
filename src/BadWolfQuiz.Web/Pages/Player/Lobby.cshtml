@@ -24,11 +24,6 @@
     <p class="eyebrow">@Localizer["Message_WaitingHost"]</p>
     <h1>@Model.Game.Session.Quiz.Title</h1>
 
-    <div class="game-code-panel compact">
-        <span>@Localizer["Label_GameCode"]</span>
-        <strong>@Model.Game.PublicCode</strong>
-    </div>
-
     <p>
         <strong>@Localizer["Label_PlayerName"]:</strong>
         @Model.CurrentPlayer.Name
@@ -291,19 +286,6 @@
     </section>
     }
 
-    <h2>@Localizer["Label_Players"] (@Model.Players.Count)</h2>
-    <ul id="player-score-list" class="player-list">
-        @foreach (var player in Model.Players)
-        {
-            <li class="@(player.Id == Model.CurrentPlayer.Id ? "current-player" : null)"
-                data-player-id="@player.Id.Value">
-                <strong>@player.Name</strong>
-                <span>@player.Score</span>
-            </li>
-        }
-    </ul>
-
-    <p class="dialog-warning">@Localizer["Message_WaitingHost"]</p>
 </div>
 
 <partial name="_AvatarPicker" />
@@ -338,7 +320,6 @@
             const lobby = document.querySelector(".player-lobby");
             const warning = document.getElementById("activity-warning");
             const rejoinWarning = document.getElementById("rejoin-warning");
-            const playerScoreList = document.getElementById("player-score-list");
             const buzzerButton = document.getElementById("player-buzzer");
             const buzzerStatus = document.getElementById("player-buzzer-status");
             const timerPanel = document.getElementById("game-timer");
@@ -830,41 +811,6 @@
             connection.on("BuzzRejected", () => {
                 if (buzzerStatus) {
                     buzzerStatus.textContent = lobby.dataset.buzzRejectedLabel;
-                }
-            });
-
-            connection.on("PlayersChanged", update => {
-                if (!playerScoreList) {
-                    return;
-                }
-
-                playerScoreList.replaceChildren();
-
-                for (const player of update.players) {
-                    const item = document.createElement("li");
-                    item.dataset.playerId = player.id;
-                    item.className = player.id === playerId
-                        ? "current-player"
-                        : "";
-
-                    const name = document.createElement("strong");
-                    name.textContent = player.name;
-
-                    const playerImageSource = player.imageDataUrl ||
-                        (player.avatarId ? `/avatars/${player.avatarId}` : "");
-                    if (playerImageSource) {
-                        const avatar = document.createElement("img");
-                        avatar.className = "player-list-avatar";
-                        avatar.src = playerImageSource;
-                        avatar.alt = "";
-                        item.append(avatar);
-                    }
-
-                    const score = document.createElement("span");
-                    score.textContent = player.score.toString();
-
-                    item.append(name, score);
-                    playerScoreList.append(item);
                 }
             });
 

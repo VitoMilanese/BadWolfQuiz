@@ -2196,6 +2196,12 @@ textarea {
     flex: 0 0 var(--player-card-width, 230px);
 }
 
+.game-scoreboard .scoreboard-player.host-card {
+    min-width: var(--host-bottom-card-width, 230px);
+    max-width: var(--host-bottom-card-width, 230px);
+    flex: 0 0 var(--host-bottom-card-width, 230px);
+}
+
 .player-card-width-resizer {
     position: absolute;
     z-index: 5;
@@ -2236,6 +2242,10 @@ textarea {
     grid-template-rows: auto minmax(0, 1fr);
     align-content: stretch;
     padding-right: 16px;
+}
+
+.board-host-sidebar .player-card-width-resizer {
+    display: none;
 }
 
 .host-card-media {
@@ -2488,6 +2498,20 @@ video.host-card-media {
         min-width: var(--player-card-width, 155px);
         max-width: var(--player-card-width, 155px);
         flex-basis: var(--player-card-width, 155px);
+    }
+}
+
+body:has(.player-lobby) > .topbar {
+    display: none;
+}
+
+body:has(.player-lobby) > .page-shell {
+    min-height: 100dvh;
+}
+
+@media (max-width: 700px) {
+    body:has(.player-lobby:has(.player-buzzer-panel)) > .page-shell {
+        height: 100dvh;
     }
 }
 
@@ -3378,7 +3402,7 @@ iframe.game-content-video {
 
 @media (max-width: 700px) {
     .page-shell:has(.player-lobby:has(.player-buzzer-panel)) {
-        height: calc(100dvh - var(--topbar-height));
+        height: 100dvh;
         padding: 8px;
         overflow: hidden;
     }
