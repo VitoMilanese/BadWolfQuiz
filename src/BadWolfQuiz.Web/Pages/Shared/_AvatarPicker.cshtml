@@ -1,3 +1,9 @@
+@inject BadWolfQuiz.Web.Services.AvatarCatalog AvatarCatalog
+@using System.Text.Json
+@{
+    var avatarCategories = AvatarCatalog.GetCategories();
+}
+
 <dialog class="avatar-picker" data-avatar-picker>
     <div class="avatar-picker-card">
         <header class="dialog-heading">
@@ -5,17 +11,25 @@
             <button class="dialog-close" type="button" data-avatar-close aria-label="@Localizer["Button_Close"]">×</button>
         </header>
 
-        <section data-avatar-gender-step>
+        <section data-avatar-category-step>
             <div class="avatar-gender-grid">
-                <button type="button" data-avatar-gender="F" data-avatar-count="60" aria-label="@Localizer["AvatarPicker_Female"]">
-                    <img src="/avatars/F.png" alt="" />
-                </button>
-                <button type="button" data-avatar-gender="M" data-avatar-count="60" aria-label="@Localizer["AvatarPicker_Male"]">
-                    <img src="/avatars/M.png" alt="" />
-                </button>
-                <button type="button" data-avatar-gender="I" data-avatar-count="14" aria-label="@Localizer["AvatarPicker_Individual"]">
-                    <img src="/avatars/I.png" alt="" />
-                </button>
+                @foreach (var category in avatarCategories)
+                {
+                    var categoryLabel = category.Id switch
+                    {
+                        "F" => Localizer["AvatarPicker_Female"].Value,
+                        "M" => Localizer["AvatarPicker_Male"].Value,
+                        "I" => Localizer["AvatarPicker_Individual"].Value,
+                        _ => category.Id
+                    };
+
+                    <button type="button"
+                            data-avatar-category="@category.Id"
+                            data-avatar-ids="@JsonSerializer.Serialize(category.AvatarIds)"
+                            aria-label="@categoryLabel">
+                        <img src="/avatars/@category.IconFileName" alt="" />
+                    </button>
+                }
             </div>
         </section>
 

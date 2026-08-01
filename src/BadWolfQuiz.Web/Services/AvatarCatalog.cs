@@ -2,10 +2,25 @@ namespace BadWolfQuiz.Web.Services;
 
 public sealed class AvatarCatalog(IWebHostEnvironment environment)
 {
-    private readonly string _root = Path.Combine(
-        environment.ContentRootPath,
-        "Resources",
-        "Avatars");
+    private static readonly string[] SupportedExtensions =
+        [".png", ".webp", ".jpg", ".jpeg"];
+
+    private readonly string _root = ResolveRootPath(environment);
+
+    public static string ResolveRootPath(IHostEnvironment environment)
+    {
+        var outputRoot = Path.Combine(
+            AppContext.BaseDirectory,
+            "Resources",
+            "Avatars");
+
+        return Directory.Exists(outputRoot)
+            ? outputRoot
+            : Path.Combine(
+                environment.ContentRootPath,
+                "Resources",
+                "Avatars");
+    }
 
     public bool IsValid(string? avatarId)
     {
@@ -16,13 +31,91 @@ public sealed class AvatarCatalog(IWebHostEnvironment environment)
 
         var parts = avatarId.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 2 ||
-            (parts[0] != "F" && parts[0] != "M" && parts[0] != "I") ||
+            Path.GetFileName(parts[0]) != parts[0] ||
             Path.GetFileName(parts[1]) != parts[1] ||
-            !string.Equals(Path.GetExtension(parts[1]), ".png", StringComparison.OrdinalIgnoreCase))
+            !IsSupportedImage(parts[1]) ||
+            !GetCategories().Any(category =>
+                string.Equals(category.Id, parts[0], StringComparison.Ordinal)))
         {
             return false;
         }
 
         return File.Exists(Path.Combine(_root, parts[0], parts[1]));
     }
+
+    public IReadOnlyList<AvatarCategory> GetCategories()
+    {
+        if (!Directory.Exists(_root))
+        {
+            return Array.Empty<AvatarCategory>();
+        }
+
+        return Directory.EnumerateDirectories(_root)
+            .Select(CreateCategory)
+            .Where(category => category is not null)
+            .Select(category => category!)
+            .OrderBy(category => CategorySortOrder(category.Id))
+            .ThenBy(category => category.Id, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    private AvatarCategory? CreateCategory(string categoryDirectory)
+    {
+        var categoryId = Path.GetFileName(categoryDirectory);
+        var avatarIds = Directory
+            .EnumerateFiles(categoryDirectory, "*", SearchOption.TopDirectoryOnly)
+            .Where(IsSupportedImage)
+            .Select(Path.GetFileName)
+            .Where(fileName => !string.IsNullOrWhiteSpace(fileName))
+            .OrderBy(fileName => ParseNumericFileName(fileName!), Comparer<int?>.Create(
+                (left, right) => left.HasValue && right.HasValue
+                    ? left.Value.CompareTo(right.Value)
+                    : left.HasValue ? -1 : right.HasValue ? 1 : 0))
+            .ThenBy(fileName => fileName, StringComparer.OrdinalIgnoreCase)
+            .Select(fileName => $"{categoryId}/{fileName}")
+            .ToArray();
+
+        if (avatarIds.Length == 0)
+        {
+            return null;
+        }
+
+        var iconFileName = Directory
+            .EnumerateFiles(_root, "*", SearchOption.TopDirectoryOnly)
+            .Where(IsSupportedImage)
+            .Select(Path.GetFileName)
+            .FirstOrDefault(fileName => string.Equals(
+                Path.GetFileNameWithoutExtension(fileName),
+                categoryId,
+                StringComparison.OrdinalIgnoreCase));
+
+        return iconFileName is null
+            ? null
+            : new AvatarCategory(categoryId, iconFileName, avatarIds);
+    }
+
+    private static bool IsSupportedImage(string path) =>
+        SupportedExtensions.Contains(
+            Path.GetExtension(path),
+            StringComparer.OrdinalIgnoreCase);
+
+    private static int CategorySortOrder(string categoryId) => categoryId switch
+    {
+        "F" => 0,
+        "M" => 1,
+        "I" => 2,
+        _ => 3
+    };
+
+    private static int? ParseNumericFileName(string fileName) =>
+        int.TryParse(
+            Path.GetFileNameWithoutExtension(fileName),
+            out var number)
+            ? number
+            : null;
 }
+
+public sealed record AvatarCategory(
+    string Id,
+    string IconFileName,
+    IReadOnlyList<string> AvatarIds);

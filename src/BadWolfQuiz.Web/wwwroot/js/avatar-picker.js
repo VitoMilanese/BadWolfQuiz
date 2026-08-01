@@ -1,18 +1,18 @@
 (() => {
     for (const dialog of document.querySelectorAll("[data-avatar-picker]")) {
-        const genderStep = dialog.querySelector("[data-avatar-gender-step]");
+        const categoryStep = dialog.querySelector("[data-avatar-category-step]");
         const listStep = dialog.querySelector("[data-avatar-list-step]");
         const options = dialog.querySelector("[data-avatar-options]");
 
-        const showGenderStep = () => {
-            genderStep.hidden = false;
+        const showCategoryStep = () => {
+            categoryStep.hidden = false;
             listStep.hidden = true;
             options.replaceChildren();
         };
 
         for (const opener of document.querySelectorAll("[data-open-avatar-picker]")) {
             opener.addEventListener("click", () => {
-                showGenderStep();
+                showCategoryStep();
                 dialog.showModal();
             });
         }
@@ -20,16 +20,16 @@
         dialog.querySelector("[data-avatar-close]")
             ?.addEventListener("click", () => dialog.close());
         dialog.querySelector("[data-avatar-back]")
-            ?.addEventListener("click", showGenderStep);
+            ?.addEventListener("click", showCategoryStep);
 
-        for (const genderButton of dialog.querySelectorAll("[data-avatar-gender]")) {
-            genderButton.addEventListener("click", () => {
-                const gender = genderButton.dataset.avatarGender;
-                const avatarCount = Number(genderButton.dataset.avatarCount);
+        for (const categoryButton of dialog.querySelectorAll("[data-avatar-category]")) {
+            categoryButton.addEventListener("click", () => {
+                const avatarIds = JSON.parse(
+                    categoryButton.dataset.avatarIds || "[]"
+                );
                 options.replaceChildren();
 
-                for (let number = 1; number <= avatarCount; number += 1) {
-                    const avatarId = `${gender}/${number}.png`;
+                for (const avatarId of avatarIds) {
                     const button = document.createElement("button");
                     button.type = "button";
                     button.className = "avatar-option";
@@ -49,7 +49,7 @@
                     options.append(button);
                 }
 
-                genderStep.hidden = true;
+                categoryStep.hidden = true;
                 listStep.hidden = false;
             });
         }
