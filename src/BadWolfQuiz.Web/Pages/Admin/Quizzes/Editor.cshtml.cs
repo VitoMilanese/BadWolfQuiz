@@ -143,6 +143,11 @@ public sealed class EditorModel(
                 .ThenInclude(x => x.Categories)
                     .ThenInclude(x => x.Questions)
                         .ThenInclude(x => x.QuestionBlocks)
+            .Include(x => x.Rounds)
+                .ThenInclude(x => x.Categories)
+                    .ThenInclude(x => x.Questions)
+                        .ThenInclude(x => x.AnswerBlocks)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(x => x.Id == id);
 
         if (quiz is null)

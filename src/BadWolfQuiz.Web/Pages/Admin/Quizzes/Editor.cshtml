@@ -1,5 +1,21 @@
 @page "{id:int}"
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.EditorModel
+@functions {
+    private static bool HasBlockContent(ContentBlockBase block) =>
+        block.BlockType switch
+        {
+            ContentBlockType.Text =>
+                !string.IsNullOrWhiteSpace(block.TextContent),
+            ContentBlockType.Image or ContentBlockType.Audio =>
+                block.FileData is { Length: > 0 } ||
+                !string.IsNullOrWhiteSpace(block.MediaPath) ||
+                !string.IsNullOrWhiteSpace(block.ExternalUrl),
+            ContentBlockType.Video or ContentBlockType.YouTube =>
+                !string.IsNullOrWhiteSpace(block.ExternalUrl) ||
+                !string.IsNullOrWhiteSpace(block.MediaPath),
+            _ => false
+        };
+}
 @{
     ViewData["Title"] = Model.Quiz.Title;
 
@@ -206,17 +222,31 @@
                                 continue;
                             }
 
-                            var hasContent = question.QuestionBlocks.Any(x =>
-                                !string.IsNullOrWhiteSpace(x.TextContent) ||
-                                !string.IsNullOrWhiteSpace(x.MediaPath) ||
-                                !string.IsNullOrWhiteSpace(x.ExternalUrl));
+                            var orderedQuestionBlocks = question.QuestionBlocks
+                                .OrderBy(x => x.SortOrder)
+                                .ToList();
+                            var hasQuestion = orderedQuestionBlocks.Any(HasBlockContent);
+                            var hasAnswer = question.AnswerBlocks.Any(HasBlockContent);
+                            var previewBlock = orderedQuestionBlocks
+                                .FirstOrDefault(HasBlockContent);
+                            string? previewImageUrl = null;
+
+                            if (previewBlock?.BlockType == ContentBlockType.Image)
+                            {
+                                previewImageUrl = previewBlock.FileData is { Length: > 0 }
+                                    ? Url.Page(
+                                        "QuestionEditor",
+                                        "QuestionBlockFile",
+                                        new { id = previewBlock.Id })
+                                    : previewBlock.MediaPath;
+                            }
 
                             <div class="question-cell-slot"
                                  draggable="true"
                                  data-question-id="@question.Id"
                                  data-question-title="@category.Title — @roundRow.Points"
                                  title="@Localizer["QuizEditor_DragQuestion"]">
-                                <a class="question-cell @(hasContent ? "filled" : null) @(question.IsSpecial ? "wager-question" : null)"
+                                <a class="question-cell @(hasQuestion ? "filled" : null) @(question.IsSpecial ? "wager-question" : null)"
                                    asp-page="QuestionEditor"
                                    asp-route-id="@question.Id">
                                     @if (question.IsSpecial)
@@ -226,9 +256,51 @@
                                         </span>
                                     }
 
-                                    @if (hasContent)
+                                    <span class="question-editor-preview">
+                                        @if (!string.IsNullOrWhiteSpace(previewImageUrl))
+                                        {
+                                            <img src="@previewImageUrl"
+                                                 alt="@Localizer["Label_Question"]" />
+                                        }
+                                        else if (previewBlock?.BlockType == ContentBlockType.Text)
+                                        {
+                                            <span class="question-editor-preview-text">
+                                                @previewBlock.TextContent
+                                            </span>
+                                        }
+                                        else if (previewBlock is not null)
+                                        {
+                                            <span class="question-editor-preview-media"
+                                                  aria-hidden="true">
+                                                @(previewBlock.BlockType switch
+                                                {
+                                                    ContentBlockType.Audio => "♪",
+                                                    ContentBlockType.Video => "▶",
+                                                    ContentBlockType.YouTube => "▶",
+                                                    _ => "◆"
+                                                })
+                                            </span>
+                                            <span class="question-editor-preview-type">
+                                                @Localizer[$"Content_{previewBlock.BlockType}"]
+                                            </span>
+                                        }
+                                    </span>
+
+                                    <span class="question-completion"
+                                          aria-label="@Localizer["Label_Question"] @(hasQuestion ? "✓" : "—"), @Localizer["Label_CorrectAnswer"] @(hasAnswer ? "✓" : "—")">
+                                        <span class="question-completion-item @(hasQuestion ? "complete" : null)"
+                                              title="@Localizer["Label_Question"]">
+                                            Q @(hasQuestion ? "✓" : "—")
+                                        </span>
+                                        <span class="question-completion-item @(hasAnswer ? "complete" : null)"
+                                              title="@Localizer["Label_CorrectAnswer"]">
+                                            A @(hasAnswer ? "✓" : "—")
+                                        </span>
+                                    </span>
+
+                                    @if (hasQuestion && hasAnswer)
                                     {
-                                        <small>@Localizer["Status_Ready"]</small>
+                                        <small class="visually-hidden">@Localizer["Status_Ready"]</small>
                                     }
                                 </a>
 
