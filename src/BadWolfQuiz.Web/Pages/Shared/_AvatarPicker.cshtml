@@ -25,9 +25,9 @@
 
                     <button type="button"
                             data-avatar-category="@category.Id"
-                            data-avatar-ids="@JsonSerializer.Serialize(category.AvatarIds)"
+                            data-avatar-options="@JsonSerializer.Serialize(category.Avatars)"
                             aria-label="@categoryLabel">
-                        <img src="/avatars/@category.IconFileName" alt="" />
+                        <img src="/avatars/@category.IconFileName?v=@category.IconVersion" alt="" />
                     </button>
                 }
             </div>

@@ -118,7 +118,14 @@ app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
         AvatarCatalog.ResolveRootPath(app.Environment)),
-    RequestPath = "/avatars"
+    RequestPath = "/avatars",
+    OnPrepareResponse = context =>
+    {
+        context.Context.Response.Headers.CacheControl =
+            "no-store, no-cache, must-revalidate";
+        context.Context.Response.Headers.Pragma = "no-cache";
+        context.Context.Response.Headers.Expires = "0";
+    }
 });
 app.UseRouting();
 app.UseRateLimiter();

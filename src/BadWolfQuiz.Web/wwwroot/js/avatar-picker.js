@@ -24,24 +24,27 @@
 
         for (const categoryButton of dialog.querySelectorAll("[data-avatar-category]")) {
             categoryButton.addEventListener("click", () => {
-                const avatarIds = JSON.parse(
-                    categoryButton.dataset.avatarIds || "[]"
+                const avatarOptions = JSON.parse(
+                    categoryButton.dataset.avatarOptions || "[]"
                 );
                 options.replaceChildren();
 
-                for (const avatarId of avatarIds) {
+                for (const avatarOption of avatarOptions) {
+                    const avatarId = avatarOption.Id;
+                    const avatarUrl =
+                        `/avatars/${avatarId}?v=${encodeURIComponent(avatarOption.Version)}`;
                     const button = document.createElement("button");
                     button.type = "button";
                     button.className = "avatar-option";
                     button.dataset.avatarId = avatarId;
 
                     const image = document.createElement("img");
-                    image.src = `/avatars/${avatarId}`;
+                    image.src = avatarUrl;
                     image.alt = "";
                     button.append(image);
                     button.addEventListener("click", () => {
                         dialog.dispatchEvent(new CustomEvent("avatarselected", {
-                            detail: { avatarId },
+                            detail: { avatarId, avatarUrl },
                             bubbles: true
                         }));
                         dialog.close();
