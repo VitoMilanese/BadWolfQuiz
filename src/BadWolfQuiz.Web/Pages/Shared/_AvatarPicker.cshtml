@@ -1,9 +1,7 @@
 @inject BadWolfQuiz.Web.Services.AvatarCatalog AvatarCatalog
 @using System.Text.Json
 @{
-    var femaleAvatarIds = AvatarCatalog.GetAvatarIds("F");
-    var maleAvatarIds = AvatarCatalog.GetAvatarIds("M");
-    var individualAvatarIds = AvatarCatalog.GetAvatarIds("I");
+    var avatarCategories = AvatarCatalog.GetCategories();
 }
 
 <dialog class="avatar-picker" data-avatar-picker>
@@ -13,17 +11,25 @@
             <button class="dialog-close" type="button" data-avatar-close aria-label="@Localizer["Button_Close"]">×</button>
         </header>
 
-        <section data-avatar-gender-step>
+        <section data-avatar-category-step>
             <div class="avatar-gender-grid">
-                <button type="button" data-avatar-gender="F" data-avatar-ids="@JsonSerializer.Serialize(femaleAvatarIds)" aria-label="@Localizer["AvatarPicker_Female"]">
-                    <img src="/avatars/F.png" alt="" />
-                </button>
-                <button type="button" data-avatar-gender="M" data-avatar-ids="@JsonSerializer.Serialize(maleAvatarIds)" aria-label="@Localizer["AvatarPicker_Male"]">
-                    <img src="/avatars/M.png" alt="" />
-                </button>
-                <button type="button" data-avatar-gender="I" data-avatar-ids="@JsonSerializer.Serialize(individualAvatarIds)" aria-label="@Localizer["AvatarPicker_Individual"]">
-                    <img src="/avatars/I.png" alt="" />
-                </button>
+                @foreach (var category in avatarCategories)
+                {
+                    var categoryLabel = category.Id switch
+                    {
+                        "F" => Localizer["AvatarPicker_Female"].Value,
+                        "M" => Localizer["AvatarPicker_Male"].Value,
+                        "I" => Localizer["AvatarPicker_Individual"].Value,
+                        _ => category.Id
+                    };
+
+                    <button type="button"
+                            data-avatar-category="@category.Id"
+                            data-avatar-ids="@JsonSerializer.Serialize(category.AvatarIds)"
+                            aria-label="@categoryLabel">
+                        <img src="/avatars/@category.IconFileName" alt="" />
+                    </button>
+                }
             </div>
         </section>
 
