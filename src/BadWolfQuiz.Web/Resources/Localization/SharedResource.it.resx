@@ -1042,4 +1042,21 @@
   <data name="AskQuestion_Invalid" xml:space="preserve"><value>Inserisci una domanda di massimo 1.500 caratteri.</value></data>
   <data name="AskQuestion_Failed" xml:space="preserve"><value>Non è stato possibile inviare la domanda. Riprova più tardi.</value></data>
   <data name="AskQuestion_Sent" xml:space="preserve"><value>La tua domanda è stata inviata.</value></data>
+  <data name="SiteTheme_Label" xml:space="preserve"><value>Tema cromatico del sito</value></data>
+  <data name="SiteTheme_Hint" xml:space="preserve"><value>Scegli un tema pronto o creane uno personalizzato. Le modifiche vengono visualizzate immediatamente.</value></data>
+  <data name="SiteTheme_ClassicWolf" xml:space="preserve"><value>Lupo classico</value></data>
+  <data name="SiteTheme_CrimsonNight" xml:space="preserve"><value>Notte cremisi</value></data>
+  <data name="SiteTheme_ArcticNeon" xml:space="preserve"><value>Neon artico</value></data>
+  <data name="SiteTheme_EmeraldStage" xml:space="preserve"><value>Palco smeraldo</value></data>
+  <data name="SiteTheme_RoyalViolet" xml:space="preserve"><value>Viola reale</value></data>
+  <data name="SiteTheme_Custom" xml:space="preserve"><value>Personalizzato</value></data>
+  <data name="SiteTheme_Background" xml:space="preserve"><value>Sfondo</value></data>
+  <data name="SiteTheme_Panel" xml:space="preserve"><value>Pannello</value></data>
+  <data name="SiteTheme_PanelSecondary" xml:space="preserve"><value>Pannello secondario</value></data>
+  <data name="SiteTheme_Text" xml:space="preserve"><value>Testo</value></data>
+  <data name="SiteTheme_MutedText" xml:space="preserve"><value>Testo secondario</value></data>
+  <data name="SiteTheme_Accent" xml:space="preserve"><value>Accento</value></data>
+  <data name="SiteTheme_AccentBright" xml:space="preserve"><value>Accento luminoso</value></data>
+  <data name="SiteTheme_Highlight" xml:space="preserve"><value>Evidenziazione</value></data>
+  <data name="SiteTheme_Invalid" xml:space="preserve"><value>Seleziona un tema e colori validi.</value></data>
 </root>

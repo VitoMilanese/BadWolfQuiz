@@ -22,7 +22,9 @@ public sealed record GameSessionSettings
         string? hostImageContentType = null,
         string? hostAvatarId = null,
         byte[]? brandLogoData = null,
-        string? brandLogoContentType = null)
+        string? brandLogoContentType = null,
+        string siteThemeId = "classic-wolf",
+        SiteThemeColors? customThemeColors = null)
     {
         if (buzzerDuration <= TimeSpan.Zero)
         {
@@ -51,6 +53,8 @@ public sealed record GameSessionSettings
         HostAvatarId = hostAvatarId;
         BrandLogoData = brandLogoData;
         BrandLogoContentType = brandLogoContentType;
+        SiteThemeId = siteThemeId;
+        CustomThemeColors = customThemeColors ?? SiteThemeColors.Default;
     }
 
     public TimeSpan BuzzerDuration { get; }
@@ -71,10 +75,50 @@ public sealed record GameSessionSettings
     public string? HostAvatarId { get; }
     public byte[]? BrandLogoData { get; }
     public string? BrandLogoContentType { get; }
+    public string SiteThemeId { get; }
+    public SiteThemeColors CustomThemeColors { get; }
 
     public bool HasHostCard =>
         !string.IsNullOrWhiteSpace(HostName) ||
         HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.None;
+}
+
+public sealed class SiteThemeColors
+{
+    public SiteThemeColors()
+    {
+    }
+
+    public SiteThemeColors(
+        string background,
+        string panel,
+        string panelSecondary,
+        string text,
+        string mutedText,
+        string accent,
+        string accentBright,
+        string highlight)
+    {
+        Background = background;
+        Panel = panel;
+        PanelSecondary = panelSecondary;
+        Text = text;
+        MutedText = mutedText;
+        Accent = accent;
+        AccentBright = accentBright;
+        Highlight = highlight;
+    }
+
+    public string Background { get; set; } = "#080b12";
+    public string Panel { get; set; } = "#121826";
+    public string PanelSecondary { get; set; } = "#1c2638";
+    public string Text { get; set; } = "#f4f7fb";
+    public string MutedText { get; set; } = "#9eabc0";
+    public string Accent { get; set; } = "#2563eb";
+    public string AccentBright { get; set; } = "#60a5fa";
+    public string Highlight { get; set; } = "#f59e0b";
+
+    public static SiteThemeColors Default => new();
 }
 
 public enum HostVisualSource

@@ -100,6 +100,13 @@ public sealed class IndexModel(
             HasBrandLogo = true;
         }
 
+        if (!SiteThemeCatalog.IsValid(Input.SiteThemeId) ||
+            !SiteThemeCatalog.AreValid(Input.CustomThemeColors))
+        {
+            ModelState.AddModelError(string.Empty, localizer["SiteTheme_Invalid"].Value);
+            return Page();
+        }
+
         if (!Input.IsValid)
         {
             ModelState.AddModelError(

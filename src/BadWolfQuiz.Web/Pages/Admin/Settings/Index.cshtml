@@ -20,6 +20,52 @@
     <p class="settings-description">@Localizer["GameSettings_GlobalDescription"]</p>
     <div asp-validation-summary="ModelOnly" class="message message-error"></div>
     <div class="settings-grid">
+    <fieldset class="theme-picker">
+        <legend>@Localizer["SiteTheme_Label"]</legend>
+        <p>@Localizer["SiteTheme_Hint"]</p>
+        <div class="theme-options">
+            <label class="theme-option theme-option-classic">
+                <input asp-for="Input.SiteThemeId" type="radio" value="classic-wolf" />
+                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>@Localizer["SiteTheme_ClassicWolf"]</strong>
+            </label>
+            <label class="theme-option theme-option-crimson">
+                <input asp-for="Input.SiteThemeId" type="radio" value="crimson-night" />
+                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>@Localizer["SiteTheme_CrimsonNight"]</strong>
+            </label>
+            <label class="theme-option theme-option-arctic">
+                <input asp-for="Input.SiteThemeId" type="radio" value="arctic-neon" />
+                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>@Localizer["SiteTheme_ArcticNeon"]</strong>
+            </label>
+            <label class="theme-option theme-option-emerald">
+                <input asp-for="Input.SiteThemeId" type="radio" value="emerald-stage" />
+                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>@Localizer["SiteTheme_EmeraldStage"]</strong>
+            </label>
+            <label class="theme-option theme-option-violet">
+                <input asp-for="Input.SiteThemeId" type="radio" value="royal-violet" />
+                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>@Localizer["SiteTheme_RoyalViolet"]</strong>
+            </label>
+            <label class="theme-option theme-option-custom">
+                <input asp-for="Input.SiteThemeId" type="radio" value="custom" data-custom-theme-radio />
+                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>@Localizer["SiteTheme_Custom"]</strong>
+            </label>
+        </div>
+        <div class="custom-theme-colors" data-custom-theme-colors>
+            <label><span>@Localizer["SiteTheme_Background"]</span><input asp-for="Input.CustomThemeColors.Background" type="color" data-theme-variable="--bg" /></label>
+            <label><span>@Localizer["SiteTheme_Panel"]</span><input asp-for="Input.CustomThemeColors.Panel" type="color" data-theme-variable="--panel" /></label>
+            <label><span>@Localizer["SiteTheme_PanelSecondary"]</span><input asp-for="Input.CustomThemeColors.PanelSecondary" type="color" data-theme-variable="--panel-2" /></label>
+            <label><span>@Localizer["SiteTheme_Text"]</span><input asp-for="Input.CustomThemeColors.Text" type="color" data-theme-variable="--text" /></label>
+            <label><span>@Localizer["SiteTheme_MutedText"]</span><input asp-for="Input.CustomThemeColors.MutedText" type="color" data-theme-variable="--muted" /></label>
+            <label><span>@Localizer["SiteTheme_Accent"]</span><input asp-for="Input.CustomThemeColors.Accent" type="color" data-theme-variable="--red" /></label>
+            <label><span>@Localizer["SiteTheme_AccentBright"]</span><input asp-for="Input.CustomThemeColors.AccentBright" type="color" data-theme-variable="--red-bright" /></label>
+            <label><span>@Localizer["SiteTheme_Highlight"]</span><input asp-for="Input.CustomThemeColors.Highlight" type="color" data-theme-variable="--gold" /></label>
+        </div>
+    </fieldset>
     <label class="brand-logo-field">
         <span>@Localizer["BrandLogo_Label"]</span>
         <span class="brand-logo-input-row">
@@ -111,6 +157,40 @@
 <partial name="_AvatarPicker" />
 
 @section Scripts {
+    <script>
+        (() => {
+            const themeInputs = document.querySelectorAll('input[name="Input.SiteThemeId"]');
+            const colorInputs = document.querySelectorAll("[data-theme-variable]");
+            const customRadio = document.querySelector("[data-custom-theme-radio]");
+
+            const applyCustomTheme = () => {
+                document.documentElement.dataset.theme = "custom";
+                colorInputs.forEach(input =>
+                    document.documentElement.style.setProperty(
+                        input.dataset.themeVariable,
+                        input.value));
+            };
+
+            themeInputs.forEach(input => {
+            input.addEventListener("change", () => {
+                if (input.checked) {
+                    document.documentElement.dataset.theme = input.value;
+                    document.documentElement.removeAttribute("style");
+                    if (input.value === "custom") {
+                        applyCustomTheme();
+                    }
+                }
+            });
+            });
+
+            colorInputs.forEach(input => {
+                input.addEventListener("input", () => {
+                    customRadio.checked = true;
+                    applyCustomTheme();
+                });
+            });
+        })();
+    </script>
     <script>
         (() => {
             const input = document.querySelector("[data-brand-logo-input]");
