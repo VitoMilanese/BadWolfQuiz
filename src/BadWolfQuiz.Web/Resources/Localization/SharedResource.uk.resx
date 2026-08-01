@@ -1073,4 +1073,9 @@
   <data name="QuizEditor_SelectedQuestion" xml:space="preserve"><value>Обране питання</value></data>
   <data name="QuizEditor_TargetQuestion" xml:space="preserve"><value>Питання для обміну</value></data>
   <data name="QuizEditor_NoQuestionForExchange" xml:space="preserve"><value>Немає доступного питання для обміну.</value></data>
+  <data name="PlayerImage_Source" xml:space="preserve"><value>Джерело зображення картки гравця</value></data>
+  <data name="PlayerImage_Avatar" xml:space="preserve"><value>Аватар</value></data>
+  <data name="PlayerImage_Picture" xml:space="preserve"><value>Картинка</value></data>
+  <data name="PlayerImage_UploadOrChange" xml:space="preserve"><value>Завантажити або змінити картинку</value></data>
+  <data name="PlayerImage_Invalid" xml:space="preserve"><value>Оберіть коректне зображення PNG, JPEG або WebP.</value></data>
 </root>

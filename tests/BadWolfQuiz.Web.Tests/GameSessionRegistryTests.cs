@@ -150,6 +150,39 @@ public sealed class GameSessionRegistryTests
 
         Assert.NotNull(result);
         Assert.Equal("F/17.png", joined.Player!.AvatarId);
+        Assert.False(joined.Player.UsesUploadedImage);
+    }
+
+    [Fact]
+    public void Connected_player_can_switch_between_uploaded_image_and_avatar()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-1",
+            true);
+
+        registry.SetPlayerAvatar("connection-1", "F/17.png");
+        var imageResult = registry.SetPlayerUploadedImage(
+            "connection-1",
+            "data:image/webp;base64,AQID");
+
+        Assert.NotNull(imageResult);
+        Assert.True(joined.Player!.UsesUploadedImage);
+        Assert.Equal(
+            "data:image/webp;base64,AQID",
+            joined.Player.UploadedImageDataUrl);
+
+        registry.SetPlayerAvatar("connection-1", "F/17.png");
+
+        Assert.False(joined.Player.UsesUploadedImage);
+        Assert.Equal("F/17.png", joined.Player.AvatarId);
+        Assert.Equal(
+            "data:image/webp;base64,AQID",
+            joined.Player.UploadedImageDataUrl);
     }
 
     [Fact]

@@ -2083,6 +2083,22 @@ textarea {
     gap: 14px;
 }
 
+.player-avatar-control {
+    flex-wrap: wrap;
+}
+
+.player-image-source-switch,
+.player-image-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.player-image-source-switch .button,
+.player-image-actions .button {
+    min-height: 42px;
+}
+
 .host-avatar-preview,
 .player-avatar-current,
 .player-list-avatar {

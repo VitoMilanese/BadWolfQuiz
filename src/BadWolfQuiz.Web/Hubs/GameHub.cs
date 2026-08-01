@@ -10,6 +10,7 @@ public sealed class GameHub(
     GameSessionRegistry sessionRegistry,
     AvatarCatalog avatarCatalog) : Hub
 {
+    private const int MaxPlayerImageBytes = 160 * 1024;
     private static readonly ConcurrentDictionary<string, string> HostConnections = new();
 
     public async Task RegisterHostSession(string publicCode)
@@ -158,6 +159,23 @@ public sealed class GameHub(
         var connection = sessionRegistry.SetPlayerAvatar(
             Context.ConnectionId,
             avatarId);
+
+        if (connection is not null)
+        {
+            await BroadcastPlayers(connection.Game);
+        }
+    }
+
+    public async Task SetPlayerUploadedImage(string imageDataUrl)
+    {
+        if (!IsValidPlayerImage(imageDataUrl))
+        {
+            return;
+        }
+
+        var connection = sessionRegistry.SetPlayerUploadedImage(
+            Context.ConnectionId,
+            imageDataUrl);
 
         if (connection is not null)
         {
@@ -328,6 +346,10 @@ public sealed class GameHub(
                 avatarId = player.Presence == PlayerPresenceStatus.Active
                     ? player.AvatarId
                     : null,
+                imageDataUrl = player.Presence == PlayerPresenceStatus.Active &&
+                    player.UsesUploadedImage
+                        ? player.UploadedImageDataUrl
+                        : null,
                 webcamEnabled = player.Presence == PlayerPresenceStatus.Active &&
                     player.IsWebcamEnabled,
                 isActive = game.Session.ActivePlayerId == player.Id,
@@ -338,6 +360,39 @@ public sealed class GameHub(
 
     public static object CreateStatusUpdate(GameSessionRegistration game)
         => new { status = game.Session.Status.ToString().ToLowerInvariant() };
+
+    private static bool IsValidPlayerImage(string? imageDataUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageDataUrl) ||
+            imageDataUrl.Length > 225_000)
+        {
+            return false;
+        }
+
+        var commaIndex = imageDataUrl.IndexOf(',');
+        if (commaIndex <= 0)
+        {
+            return false;
+        }
+
+        var prefix = imageDataUrl[..commaIndex];
+        if (prefix is not "data:image/jpeg;base64" and
+            not "data:image/png;base64" and
+            not "data:image/webp;base64")
+        {
+            return false;
+        }
+
+        try
+        {
+            return Convert.FromBase64String(imageDataUrl[(commaIndex + 1)..])
+                .Length <= MaxPlayerImageBytes;
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+    }
 
     public static object CreateFinalQuestionUpdate(
         GameSessionRegistration game,

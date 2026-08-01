@@ -17,6 +17,10 @@ public sealed class GamePlayer
 
     public string? AvatarId { get; private set; }
 
+    public string? UploadedImageDataUrl { get; private set; }
+
+    public bool UsesUploadedImage { get; private set; }
+
     public DateTimeOffset JoinedAtUtc { get; }
 
     internal void ApplyScore(int points)
@@ -28,5 +32,13 @@ public sealed class GamePlayer
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(avatarId);
         AvatarId = avatarId;
+        UsesUploadedImage = false;
+    }
+
+    public void SetUploadedImage(string imageDataUrl)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(imageDataUrl);
+        UploadedImageDataUrl = imageDataUrl;
+        UsesUploadedImage = true;
     }
 }

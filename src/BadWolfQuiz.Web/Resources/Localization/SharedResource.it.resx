@@ -1073,4 +1073,9 @@
   <data name="QuizEditor_SelectedQuestion" xml:space="preserve"><value>Domanda selezionata</value></data>
   <data name="QuizEditor_TargetQuestion" xml:space="preserve"><value>Domanda da scambiare</value></data>
   <data name="QuizEditor_NoQuestionForExchange" xml:space="preserve"><value>Non ci sono domande disponibili per lo scambio.</value></data>
+  <data name="PlayerImage_Source" xml:space="preserve"><value>Origine immagine della scheda giocatore</value></data>
+  <data name="PlayerImage_Avatar" xml:space="preserve"><value>Avatar</value></data>
+  <data name="PlayerImage_Picture" xml:space="preserve"><value>Immagine</value></data>
+  <data name="PlayerImage_UploadOrChange" xml:space="preserve"><value>Carica o cambia immagine</value></data>
+  <data name="PlayerImage_Invalid" xml:space="preserve"><value>Seleziona un'immagine PNG, JPEG o WebP valida.</value></data>
 </root>

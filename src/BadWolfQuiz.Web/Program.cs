@@ -76,7 +76,10 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     };
 });
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 256 * 1024;
+});
 builder.Services.AddDbContext<QuizDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("QuizDatabase")));
 builder.Services.AddSingleton<BuzzCoordinator>();

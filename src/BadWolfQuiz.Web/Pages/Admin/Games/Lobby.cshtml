@@ -188,9 +188,12 @@
                     <li class="@(Model.Game.Session.ActivePlayerId == player.Id ? "active-player" : null)"
                         data-player-id="@player.Id.Value">
                         @if (Model.ActivePlayerIds.Contains(player.Id) &&
-                             !string.IsNullOrWhiteSpace(player.AvatarId))
+                             (player.UsesUploadedImage ||
+                              !string.IsNullOrWhiteSpace(player.AvatarId)))
                         {
-                            <img class="player-list-avatar" src="/avatars/@player.AvatarId" alt="" />
+                            <img class="player-list-avatar"
+                                 src="@(player.UsesUploadedImage ? player.UploadedImageDataUrl : $"/avatars/{player.AvatarId}")"
+                                 alt="" />
                         }
                         <strong>@player.Name</strong>
                         <span class="player-management">
@@ -876,9 +879,12 @@
                           aria-label="@Localizer["GameBoard_ResizePlayerCards"]"
                           tabindex="0"></span>
                     @if (Model.ActivePlayerIds.Contains(player.Id) &&
-                         !string.IsNullOrWhiteSpace(player.AvatarId))
+                         (player.UsesUploadedImage ||
+                          !string.IsNullOrWhiteSpace(player.AvatarId)))
                     {
-                        <img class="player-card-avatar" src="/avatars/@player.AvatarId" alt="" />
+                        <img class="player-card-avatar"
+                             src="@(player.UsesUploadedImage ? player.UploadedImageDataUrl : $"/avatars/{player.AvatarId}")"
+                             alt="" />
                     }
                     <strong>@player.Name</strong>
                     <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
@@ -1186,9 +1192,12 @@
                           aria-label="@Localizer["GameBoard_ResizePlayerCards"]"
                           tabindex="0"></span>
                     @if (Model.ActivePlayerIds.Contains(player.Id) &&
-                         !string.IsNullOrWhiteSpace(player.AvatarId))
+                         (player.UsesUploadedImage ||
+                          !string.IsNullOrWhiteSpace(player.AvatarId)))
                     {
-                        <img class="player-card-avatar" src="/avatars/@player.AvatarId" alt="" />
+                        <img class="player-card-avatar"
+                             src="@(player.UsesUploadedImage ? player.UploadedImageDataUrl : $"/avatars/{player.AvatarId}")"
+                             alt="" />
                     }
                     <strong>@player.Name</strong>
                     <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
@@ -1734,6 +1743,10 @@
                 disconnected: lobby.dataset.statusDisconnected,
                 rejoinpending: lobby.dataset.statusRejoinpending
             };
+
+            const getPlayerImageSource = player =>
+                player.imageDataUrl ||
+                (player.avatarId ? `/avatars/${player.avatarId}` : "");
             const gameStatus = document.getElementById("game-status");
             const startGameForm = document.getElementById("start-game-form");
             const approveForm = document.getElementById("approve-rejoin-form");
@@ -1945,12 +1958,13 @@
                         const name = document.createElement("strong");
                         name.textContent = player.name;
 
+                        const playerImageSource = getPlayerImageSource(player);
                         if (player.webcamEnabled) {
-                            if (player.avatarId) {
+                            if (playerImageSource) {
                                 const fallback = document.createElement("img");
                                 fallback.className = "player-card-avatar";
                                 fallback.dataset.playerWebcamFallback = "";
-                                fallback.src = `/avatars/${player.avatarId}`;
+                                fallback.src = playerImageSource;
                                 fallback.alt = "";
                                 item.append(fallback);
                             }
@@ -1962,10 +1976,10 @@
                             video.playsInline = true;
                             video.hidden = true;
                             item.append(video);
-                        } else if (player.avatarId) {
+                        } else if (playerImageSource) {
                             const avatar = document.createElement("img");
                             avatar.className = "player-card-avatar";
-                            avatar.src = `/avatars/${player.avatarId}`;
+                            avatar.src = playerImageSource;
                             avatar.alt = "";
                             item.append(avatar);
                         }
@@ -2032,14 +2046,15 @@
                     const name = document.createElement("strong");
                     name.textContent = player.name;
 
+                    const playerImageSource = getPlayerImageSource(player);
                     if (player.webcamEnabled) {
-                        if (player.avatarId) {
+                        if (playerImageSource) {
                             const fallback = document.createElement("img");
                             fallback.className = isRunning
                                 ? "player-card-avatar"
                                 : "player-list-avatar";
                             fallback.dataset.playerWebcamFallback = "";
-                            fallback.src = `/avatars/${player.avatarId}`;
+                            fallback.src = playerImageSource;
                             fallback.alt = "";
                             item.append(fallback);
                         }
@@ -2053,12 +2068,12 @@
                         video.playsInline = true;
                         video.hidden = true;
                         item.append(video);
-                    } else if (player.avatarId) {
+                    } else if (playerImageSource) {
                         const avatar = document.createElement("img");
                         avatar.className = isRunning
                             ? "player-card-avatar"
                             : "player-list-avatar";
-                        avatar.src = `/avatars/${player.avatarId}`;
+                        avatar.src = playerImageSource;
                         avatar.alt = "";
                         item.append(avatar);
                     }

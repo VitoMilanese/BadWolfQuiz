@@ -313,6 +313,31 @@ public sealed class GameSessionRegistry
             !connection.IsApproved);
     }
 
+    public PlayerConnectionResult? SetPlayerUploadedImage(
+        string connectionId,
+        string imageDataUrl)
+    {
+        PlayerConnection connection;
+
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(connectionId, out connection))
+            {
+                return null;
+            }
+        }
+
+        lock (connection.Access.Game)
+        {
+            connection.Access.Player.SetUploadedImage(imageDataUrl);
+        }
+
+        return new PlayerConnectionResult(
+            connection.Access.Game,
+            connection.Access.Player,
+            !connection.IsApproved);
+    }
+
     public PlayerConnectionResult? SetPlayerWebcamEnabled(
         string connectionId,
         bool isEnabled)
