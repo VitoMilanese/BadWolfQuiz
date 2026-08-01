@@ -33,7 +33,7 @@
     <input type="hidden" asp-for="Input.Id" />
     <input type="hidden" asp-for="Input.QuizId" />
 
-    <h2>Question blocks</h2>
+    <h2>@Localizer["Label_QuestionBlocks"]</h2>
 
     <partial name="Shared/_ContentBlockCollection"
              model="questionBlockCollection" />
@@ -41,7 +41,7 @@
     <span asp-validation-for="Input.QuestionBlocks"
           class="text-danger"></span>
 
-    <h2>Answer blocks</h2>
+    <h2>@Localizer["Label_AnswerBlocks"]</h2>
 
     <partial name="Shared/_ContentBlockCollection"
              model="answerBlockCollection" />

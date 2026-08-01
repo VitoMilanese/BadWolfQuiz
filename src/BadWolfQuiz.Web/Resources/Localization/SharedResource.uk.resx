@@ -276,6 +276,12 @@
   <data name="Label_Question" xml:space="preserve">
     <value>Питання</value>
   </data>
+  <data name="Label_QuestionBlocks" xml:space="preserve">
+    <value>Блоки питання</value>
+  </data>
+  <data name="Label_AnswerBlocks" xml:space="preserve">
+    <value>Блоки відповіді</value>
+  </data>
   <data name="Label_Points" xml:space="preserve">
     <value>Бали</value>
   </data>
