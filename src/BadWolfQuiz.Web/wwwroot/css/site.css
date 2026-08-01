@@ -3197,8 +3197,13 @@ iframe.game-content-video {
 }
 
 .current-question-summary:not(.wager-mode) > .game-content-presentation {
-    width: min(1200px, 100%);
+    width: 100%;
     justify-self: center;
+}
+
+.current-question-summary:not(.wager-mode) .game-content-text,
+.current-question-summary:not(.wager-mode) .game-content-caption {
+    max-width: none;
 }
 
 .current-question-summary:not(.wager-mode) > .question-controls {
@@ -3249,6 +3254,14 @@ iframe.game-content-video {
     max-height: none;
     margin-bottom: 0;
     overflow: hidden;
+}
+
+/* Let active questions and answers use the viewport instead of the page-shell cap. */
+.host-game-board:has(> .current-question-summary:not(.wager-mode)) {
+    width: calc(100vw - 32px);
+    max-width: none;
+    margin-left: calc(50% - 50vw + 16px);
+    margin-right: calc(50% - 50vw + 16px);
 }
 
 @media (max-width: 900px) {
