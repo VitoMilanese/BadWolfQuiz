@@ -55,7 +55,10 @@
 
 
     <div class="editor-actions">
-        <a class="button button-secondary" asp-page="Editor" asp-route-id="@Model.Input.QuizId">@Localizer["Button_Back"]</a>
+        <a id="final-question-editor-back-link"
+           class="button button-secondary"
+           asp-page="Editor"
+           asp-route-id="@Model.Input.QuizId">@Localizer["Button_Back"]</a>
         <button class="button button-secondary"
                 type="button"
                 data-open-question-preview="question">
@@ -445,13 +448,24 @@
             }
         });
 
-        document.addEventListener("keydown", event => {
-            if (event.key === "Escape" &&
-                questionPreviewModal &&
+        window.addEventListener("keyup", event => {
+            if (event.key !== "Escape") {
+                return;
+            }
+
+            if (questionPreviewModal &&
                 !questionPreviewModal.hidden) {
                 closeQuestionPreview();
+                return;
             }
-        });
+
+            const backLink = document.getElementById(
+                "final-question-editor-back-link");
+
+            if (backLink) {
+                window.location.assign(backLink.href);
+            }
+        }, true);
 
         document.querySelectorAll('.type-tabs').forEach(tabGroup => {
             tabGroup.querySelectorAll('.type-tab').forEach(button => {

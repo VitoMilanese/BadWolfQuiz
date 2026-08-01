@@ -88,6 +88,7 @@ builder.Services.AddSingleton<IGameCodeGenerator, GameCodeGenerator>();
 builder.Services.AddSingleton<GameSessionRegistry>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ActiveGameStore>();
+builder.Services.AddSingleton<CrashLog>();
 builder.Services.AddHostedService<ActiveGamePersistenceService>();
 builder.Services.AddSingleton<GameSettingsStore>();
 builder.Services.AddSingleton<AvatarCatalog>();
@@ -104,6 +105,19 @@ var app = builder.Build();
 
 Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "App_Data"));
 
+var crashLog = app.Services.GetRequiredService<CrashLog>();
+AppDomain.CurrentDomain.UnhandledException += (_, eventArgs) =>
+    crashLog.Write(
+        $"Unhandled process exception; terminating={eventArgs.IsTerminating}",
+        eventArgs.ExceptionObject as Exception);
+TaskScheduler.UnobservedTaskException += (_, eventArgs) =>
+{
+    crashLog.Write("Unobserved task exception", eventArgs.Exception);
+    eventArgs.SetObserved();
+};
+app.Lifetime.ApplicationStopping.Register(() =>
+    crashLog.Write("Application stopping"));
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -115,6 +129,21 @@ var localizationOptions = app.Services
     .Value;
 
 app.UseRequestLocalization(localizationOptions);
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next(context);
+    }
+    catch (Exception exception)
+    {
+        crashLog.Write(
+            $"Unhandled HTTP exception: {context.Request.Method} " +
+            $"{context.Request.Path}{context.Request.QueryString}",
+            exception);
+        throw;
+    }
+});
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseStaticFiles(new StaticFileOptions
