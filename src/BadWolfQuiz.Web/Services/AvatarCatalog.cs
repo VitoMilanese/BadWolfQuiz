@@ -5,10 +5,22 @@ public sealed class AvatarCatalog(IWebHostEnvironment environment)
     private static readonly string[] SupportedExtensions =
         [".png", ".webp", ".jpg", ".jpeg"];
 
-    private readonly string _root = Path.Combine(
-        environment.ContentRootPath,
-        "Resources",
-        "Avatars");
+    private readonly string _root = ResolveRootPath(environment);
+
+    public static string ResolveRootPath(IHostEnvironment environment)
+    {
+        var outputRoot = Path.Combine(
+            AppContext.BaseDirectory,
+            "Resources",
+            "Avatars");
+
+        return Directory.Exists(outputRoot)
+            ? outputRoot
+            : Path.Combine(
+                environment.ContentRootPath,
+                "Resources",
+                "Avatars");
+    }
 
     public bool IsValid(string? avatarId)
     {

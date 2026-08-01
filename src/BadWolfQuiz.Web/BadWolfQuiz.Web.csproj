@@ -27,7 +27,7 @@
   <ItemGroup>
     <Folder Include="Resources\Avatars\M\" />
     <Folder Include="Resources\Avatars\F\" />
-    <None Update="Resources\Avatars\**\*.png"
+    <None Update="Resources\Avatars\**\*.png;Resources\Avatars\**\*.webp;Resources\Avatars\**\*.jpg;Resources\Avatars\**\*.jpeg"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
