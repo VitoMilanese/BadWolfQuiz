@@ -44,6 +44,11 @@ public sealed class GameSessionRegistry
         ArgumentNullException.ThrowIfNull(quiz);
         ArgumentNullException.ThrowIfNull(settings);
 
+        if (!string.IsNullOrWhiteSpace(hostId))
+        {
+            RemoveUnfinished(hostId, quiz.SourceQuizId);
+        }
+
         var session = GameSession.Create(quiz, settings);
 
         for (var attempt = 0; attempt < MaxCodeGenerationAttempts; attempt++)
@@ -74,6 +79,76 @@ public sealed class GameSessionRegistry
     public GameSessionRegistration? Find(GameSessionId id)
     {
         return _sessionsById.GetValueOrDefault(id);
+    }
+
+    public IReadOnlyList<GameSessionRegistration> GetAll() =>
+        _sessionsById.Values.ToArray();
+
+    public GameSessionRegistration Restore(
+        string publicCode,
+        GameSession session,
+        string hostId,
+        bool allowsNewPlayers)
+    {
+        var code = NormalizeCode(publicCode);
+        EnsureValidCode(code);
+        var registration = new GameSessionRegistration(
+            code,
+            session,
+            hostId,
+            isRecovered: true)
+        {
+            AllowsNewPlayers = allowsNewPlayers
+        };
+
+        if (!_sessionsByCode.TryAdd(code, registration) ||
+            !_sessionsById.TryAdd(session.Id, registration))
+        {
+            _sessionsByCode.TryRemove(code, out _);
+            throw new InvalidOperationException(
+                "The recovered game conflicts with an active session.");
+        }
+
+        return registration;
+    }
+
+    public void RemoveUnfinished(string hostId, int sourceQuizId)
+    {
+        foreach (var game in _sessionsById.Values.Where(game =>
+                     string.Equals(game.HostId, hostId, StringComparison.Ordinal) &&
+                     game.Session.Quiz.SourceQuizId == sourceQuizId &&
+                     game.Session.Status != GameSessionStatus.Completed).ToArray())
+        {
+            _sessionsById.TryRemove(game.Session.Id, out _);
+            _sessionsByCode.TryRemove(game.PublicCode, out _);
+
+            lock (_presenceSync)
+            {
+                foreach (var connectionId in _playerConnections
+                             .Where(item => item.Value.Access.Game == game)
+                             .Select(item => item.Key)
+                             .ToArray())
+                {
+                    _playerConnections.Remove(connectionId);
+                }
+            }
+
+            foreach (var access in _playerAccessByTokenHash
+                         .Where(item => item.Value.Game == game)
+                         .Select(item => item.Key)
+                         .ToArray())
+            {
+                _playerAccessByTokenHash.TryRemove(access, out _);
+            }
+
+            foreach (var transition in _playerTransitionAccessByTokenHash
+                         .Where(item => item.Value.Access.Game == game)
+                         .Select(item => item.Key)
+                         .ToArray())
+            {
+                _playerTransitionAccessByTokenHash.TryRemove(transition, out _);
+            }
+        }
     }
 
     public GameSessionRegistration? FindOwned(GameSessionId id, string hostId)
@@ -110,8 +185,23 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            if (game.Session.Players.Any(player =>
-                    string.Equals(player.Name, playerName.Trim(), StringComparison.OrdinalIgnoreCase)))
+            var existingPlayer = game.Session.Players.FirstOrDefault(player =>
+                string.Equals(
+                    player.Name,
+                    playerName.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+
+            if (existingPlayer is not null &&
+                game.RecoveredPlayerIdsAwaitingReconnect.Remove(existingPlayer.Id))
+            {
+                var recoveredAccessToken = CreatePlayerAccess(game, existingPlayer);
+                return PlayerJoinResult.Succeeded(
+                    game,
+                    existingPlayer,
+                    recoveredAccessToken);
+            }
+
+            if (existingPlayer is not null)
             {
                 return PlayerJoinResult.Failed(PlayerJoinStatus.NameAlreadyUsed);
             }
@@ -863,7 +953,15 @@ public sealed class GameSessionRegistry
         int sourceQuestionId)
     {
         var game = Find(publicCode);
-        return game?.Session.CloseQuestionAnswer(sourceQuestionId);
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.CloseQuestionAnswer(sourceQuestionId);
+        }
     }
 
     public GamePlayer? SetActivePlayer(

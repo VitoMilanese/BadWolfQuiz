@@ -667,6 +667,25 @@ public sealed class GameSessionRegistryTests
         return new GameSessionRegistry(new StubGameCodeGenerator(codes));
     }
 
+    [Fact]
+    public void Recovered_player_can_rejoin_once_with_the_same_score()
+    {
+        var original = BadWolfQuiz.Game.Runtime.GameSession.Create(CreateQuiz());
+        var player = original.AddPlayer("Rose");
+        original.AdjustPlayerScore(player.Id, 300);
+        original.Start();
+        var registry = CreateRegistry();
+        registry.Restore("ABC123", original, "host-1", true);
+
+        var rejoined = registry.JoinPlayer("ABC123", "rose");
+        var duplicate = registry.JoinPlayer("ABC123", "Rose");
+
+        Assert.Equal(PlayerJoinStatus.Success, rejoined.Status);
+        Assert.Equal(player.Id, rejoined.Player!.Id);
+        Assert.Equal(300, rejoined.Player.Score);
+        Assert.Equal(PlayerJoinStatus.NameAlreadyUsed, duplicate.Status);
+    }
+
     private static QuizSnapshot CreateQuiz()
     {
         return new QuizSnapshot(

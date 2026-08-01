@@ -45,6 +45,16 @@
                 </button>
             </form>
 
+            @if (Model.ResumableQuizIds.Contains(quiz.Id))
+            {
+                <form method="post" asp-page-handler="ContinueGame">
+                    <input name="quizId" type="hidden" value="@quiz.Id" />
+                    <button class="button button-secondary" type="submit">
+                        @Localizer["Button_ContinueGame"]
+                    </button>
+                </form>
+            }
+
             <a class="button button-secondary"
                asp-page="Editor"
                asp-route-id="@quiz.Id">

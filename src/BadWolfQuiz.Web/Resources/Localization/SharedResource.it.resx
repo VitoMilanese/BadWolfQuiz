@@ -718,6 +718,7 @@
   </data>
 
   <data name="Button_CreateGame" xml:space="preserve"><value>Crea partita</value></data>
+  <data name="Button_ContinueGame" xml:space="preserve"><value>Continua partita</value></data>
   <data name="Button_BackToQuizzes" xml:space="preserve"><value>Torna ai quiz</value></data>
   <data name="GameLobby_Eyebrow" xml:space="preserve"><value>Lobby del conduttore</value></data>
   <data name="GameLobby_StatusLabel" xml:space="preserve"><value>Stato</value></data>
