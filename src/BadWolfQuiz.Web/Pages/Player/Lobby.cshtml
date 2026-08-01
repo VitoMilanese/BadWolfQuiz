@@ -18,6 +18,7 @@
      data-buzz-rejected-label="@Localizer["PlayerGame_BuzzRejected"]"
      data-final-action-rejected-label="@Localizer["FinalQuestion_ActionRejected"]"
      data-removed-from-game-label="@Localizer["PlayerGame_RemovedFromGame"]"
+     data-player-image-invalid-label="@Localizer["PlayerImage_Invalid"]"
      data-final-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()">
     <p class="eyebrow">@Localizer["Message_WaitingHost"]</p>
     <h1>@Model.Game.Session.Quiz.Title</h1>
@@ -44,9 +45,33 @@
                muted
                playsinline
                hidden></video>
-        <button class="button button-secondary" type="button" data-open-avatar-picker>
-            @Localizer["AvatarPicker_ChooseOrChange"]
-        </button>
+        <div class="player-image-source-switch" role="group"
+             aria-label="@Localizer["PlayerImage_Source"]">
+            <button class="button button-secondary"
+                    type="button"
+                    data-use-player-avatar>
+                @Localizer["PlayerImage_Avatar"]
+            </button>
+            <button class="button button-secondary"
+                    type="button"
+                    data-use-player-image>
+                @Localizer["PlayerImage_Picture"]
+            </button>
+        </div>
+        <div class="player-image-actions">
+            <button class="button button-secondary" type="button" data-open-avatar-picker>
+                @Localizer["AvatarPicker_ChooseOrChange"]
+            </button>
+            <button class="button button-secondary"
+                    type="button"
+                    data-upload-player-image>
+                @Localizer["PlayerImage_UploadOrChange"]
+            </button>
+            <input type="file"
+                   accept="image/png,image/jpeg,image/webp"
+                   data-player-image-input
+                   hidden />
+        </div>
         <button class="button button-secondary"
                 type="button"
                 data-toggle-player-webcam
@@ -323,8 +348,12 @@
             }
 
             const gameCode = lobby.dataset.gameCode;
-            const avatarPreferenceKey =
-                `badwolfquiz:avatar:${lobby.dataset.playerName.trim().toLocaleLowerCase()}`;
+            const normalizedPlayerName =
+                lobby.dataset.playerName.trim().toLocaleLowerCase();
+            const avatarPreferenceKey = `badwolfquiz:avatar:${normalizedPlayerName}`;
+            const imagePreferenceKey = `badwolfquiz:image:${normalizedPlayerName}`;
+            const imageSourcePreferenceKey =
+                `badwolfquiz:image-source:${normalizedPlayerName}`;
             if (lobby.dataset.avatarId) {
                 localStorage.setItem(avatarPreferenceKey, lobby.dataset.avatarId);
             }
@@ -368,6 +397,17 @@
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
                 .build();
+            const currentAvatar = document.querySelector("[data-current-player-avatar]");
+            const avatarSourceButton = document.querySelector("[data-use-player-avatar]");
+            const imageSourceButton = document.querySelector("[data-use-player-image]");
+            const uploadImageButton = document.querySelector("[data-upload-player-image]");
+            const imageInput = document.querySelector("[data-player-image-input]");
+            let storedAvatarId = lobby.dataset.avatarId ||
+                localStorage.getItem(avatarPreferenceKey) || "";
+            let storedImageDataUrl = localStorage.getItem(imagePreferenceKey) || "";
+            let selectedImageSource =
+                localStorage.getItem(imageSourcePreferenceKey) ||
+                (storedImageDataUrl ? "image" : "avatar");
             const webcamButton = document.querySelector(
                 "[data-toggle-player-webcam]");
             const webcam = window.BadWolfWebcam.createPlayer({
@@ -381,22 +421,173 @@
                 disableLabel: webcamButton?.dataset.disableLabel
             });
             const avatarDialog = document.querySelector("[data-avatar-picker]");
-            const currentAvatar = document.querySelector("[data-current-player-avatar]");
             let pendingAvatarId;
-            avatarDialog?.addEventListener("avatarselected", event => {
-                webcam.disable().catch(console.error);
-                const avatarId = event.detail.avatarId;
-                pendingAvatarId = avatarId;
-                if (connection.state === signalR.HubConnectionState.Connected) {
-                    connection.invoke("SetPlayerAvatar", avatarId)
-                        .then(() => pendingAvatarId = undefined)
-                        .catch(console.error);
+            let pendingImageDataUrl;
+
+            const setSourceButtonState = () => {
+                avatarSourceButton.disabled = !storedAvatarId;
+                imageSourceButton.disabled = !storedImageDataUrl;
+                const updateButton = (button, isSelected) => {
+                    button.classList.toggle("button-primary", isSelected);
+                    button.classList.toggle("button-secondary", !isSelected);
+                    button.setAttribute("aria-pressed", isSelected.toString());
+                };
+                updateButton(
+                    avatarSourceButton,
+                    selectedImageSource === "avatar"
+                );
+                updateButton(
+                    imageSourceButton,
+                    selectedImageSource === "image"
+                );
+            };
+
+            const showSelectedPlayerImage = () => {
+                const source = selectedImageSource === "image"
+                    ? storedImageDataUrl
+                    : storedAvatarId ? `/avatars/${storedAvatarId}` : "";
+
+                if (source) {
+                    currentAvatar.src = source;
+                    currentAvatar.hidden = false;
+                } else {
+                    currentAvatar.removeAttribute("src");
+                    currentAvatar.hidden = true;
                 }
+
+                setSourceButtonState();
+            };
+
+            const activateAvatar = async () => {
+                if (!storedAvatarId) {
+                    return;
+                }
+
+                await webcam.disable();
+                selectedImageSource = "avatar";
+                localStorage.setItem(imageSourcePreferenceKey, selectedImageSource);
+                showSelectedPlayerImage();
+                pendingAvatarId = storedAvatarId;
+
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    await connection.invoke("SetPlayerAvatar", storedAvatarId);
+                    pendingAvatarId = undefined;
+                }
+            };
+
+            const activateUploadedImage = async () => {
+                if (!storedImageDataUrl) {
+                    return;
+                }
+
+                await webcam.disable();
+                selectedImageSource = "image";
+                localStorage.setItem(imageSourcePreferenceKey, selectedImageSource);
+                showSelectedPlayerImage();
+                pendingImageDataUrl = storedImageDataUrl;
+
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    await connection.invoke(
+                        "SetPlayerUploadedImage",
+                        storedImageDataUrl
+                    );
+                    pendingImageDataUrl = undefined;
+                }
+            };
+
+            const resizePlayerImage = file => new Promise((resolve, reject) => {
+                const image = new Image();
+                const objectUrl = URL.createObjectURL(file);
+
+                image.onload = () => {
+                    URL.revokeObjectURL(objectUrl);
+                    let maxSide = 640;
+                    let dataUrl = "";
+
+                    while (maxSide >= 240) {
+                        const scale = Math.min(1, maxSide / Math.max(
+                            image.naturalWidth,
+                            image.naturalHeight
+                        ));
+                        const canvas = document.createElement("canvas");
+                        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+                        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+                        canvas.getContext("2d").drawImage(
+                            image,
+                            0,
+                            0,
+                            canvas.width,
+                            canvas.height
+                        );
+                        dataUrl = canvas.toDataURL("image/webp", .82);
+
+                        if (dataUrl.length <= 200000) {
+                            resolve(dataUrl);
+                            return;
+                        }
+
+                        maxSide -= 80;
+                    }
+
+                    reject(new Error(lobby.dataset.playerImageInvalidLabel));
+                };
+
+                image.onerror = () => {
+                    URL.revokeObjectURL(objectUrl);
+                    reject(new Error(lobby.dataset.playerImageInvalidLabel));
+                };
+
+                image.src = objectUrl;
+            });
+
+            avatarSourceButton?.addEventListener("click", () => {
+                activateAvatar().catch(console.error);
+            });
+            imageSourceButton?.addEventListener("click", () => {
+                activateUploadedImage().catch(console.error);
+            });
+            uploadImageButton?.addEventListener("click", () => imageInput?.click());
+            imageInput?.addEventListener("change", async () => {
+                const file = imageInput.files?.[0];
+                imageInput.value = "";
+
+                if (!file || !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+                    alert(lobby.dataset.playerImageInvalidLabel);
+                    return;
+                }
+
+                try {
+                    storedImageDataUrl = await resizePlayerImage(file);
+                    localStorage.setItem(imagePreferenceKey, storedImageDataUrl);
+                    await activateUploadedImage();
+                }
+                catch (error) {
+                    console.error(error);
+                    alert(error.message || lobby.dataset.playerImageInvalidLabel);
+                }
+            });
+
+            avatarDialog?.addEventListener("avatarselected", event => {
+                const avatarId = event.detail.avatarId;
+                storedAvatarId = avatarId;
                 lobby.dataset.avatarId = avatarId;
                 localStorage.setItem(avatarPreferenceKey, avatarId);
-                currentAvatar.src = `/avatars/${avatarId}`;
-                currentAvatar.hidden = false;
+                activateAvatar().catch(console.error);
             });
+
+            if (selectedImageSource === "image" && !storedImageDataUrl) {
+                selectedImageSource = "avatar";
+            }
+            if (selectedImageSource === "avatar" && !storedAvatarId && storedImageDataUrl) {
+                selectedImageSource = "image";
+            }
+            localStorage.setItem(imageSourcePreferenceKey, selectedImageSource);
+            showSelectedPlayerImage();
+            if (selectedImageSource === "image") {
+                pendingImageDataUrl = storedImageDataUrl;
+            } else if (storedAvatarId) {
+                pendingAvatarId = storedAvatarId;
+            }
 
             const isPageActive = () =>
                 document.visibilityState === "visible" && document.hasFocus();
@@ -647,10 +838,12 @@
                     const name = document.createElement("strong");
                     name.textContent = player.name;
 
-                    if (player.avatarId) {
+                    const playerImageSource = player.imageDataUrl ||
+                        (player.avatarId ? `/avatars/${player.avatarId}` : "");
+                    if (playerImageSource) {
                         const avatar = document.createElement("img");
                         avatar.className = "player-list-avatar";
-                        avatar.src = `/avatars/${player.avatarId}`;
+                        avatar.src = playerImageSource;
                         avatar.alt = "";
                         item.append(avatar);
                     }
@@ -726,7 +919,14 @@
                     await connection.invoke("SetPlayerAvatar", pendingAvatarId);
                     pendingAvatarId = undefined;
                 }
-                if (!lobby.dataset.avatarId) {
+                if (pendingImageDataUrl) {
+                    await connection.invoke(
+                        "SetPlayerUploadedImage",
+                        pendingImageDataUrl
+                    );
+                    pendingImageDataUrl = undefined;
+                }
+                if (!storedAvatarId && !storedImageDataUrl) {
                     document.querySelector("[data-open-avatar-picker]")?.click();
                 }
             }).catch(() => {

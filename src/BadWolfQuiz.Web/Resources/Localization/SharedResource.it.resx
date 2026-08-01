@@ -1067,4 +1067,15 @@
   <data name="SiteTheme_AccentBright" xml:space="preserve"><value>Accento luminoso</value></data>
   <data name="SiteTheme_Highlight" xml:space="preserve"><value>Evidenziazione</value></data>
   <data name="SiteTheme_Invalid" xml:space="preserve"><value>Seleziona un tema e colori validi.</value></data>
+  <data name="QuizEditor_DragQuestion" xml:space="preserve"><value>Trascina su un'altra domanda per scambiarle</value></data>
+  <data name="QuizEditor_MoveQuestionToRound" xml:space="preserve"><value>Sposta la domanda in un altro round</value></data>
+  <data name="QuizEditor_ExchangeQuestion" xml:space="preserve"><value>Scambia domanda</value></data>
+  <data name="QuizEditor_SelectedQuestion" xml:space="preserve"><value>Domanda selezionata</value></data>
+  <data name="QuizEditor_TargetQuestion" xml:space="preserve"><value>Domanda da scambiare</value></data>
+  <data name="QuizEditor_NoQuestionForExchange" xml:space="preserve"><value>Non ci sono domande disponibili per lo scambio.</value></data>
+  <data name="PlayerImage_Source" xml:space="preserve"><value>Origine immagine della scheda giocatore</value></data>
+  <data name="PlayerImage_Avatar" xml:space="preserve"><value>Avatar</value></data>
+  <data name="PlayerImage_Picture" xml:space="preserve"><value>Immagine</value></data>
+  <data name="PlayerImage_UploadOrChange" xml:space="preserve"><value>Carica o cambia immagine</value></data>
+  <data name="PlayerImage_Invalid" xml:space="preserve"><value>Seleziona un'immagine PNG, JPEG o WebP valida.</value></data>
 </root>
