@@ -2949,7 +2949,7 @@ video.host-card-media {
 .current-question-summary:not(.wager-mode) {
     min-height: min(720px, calc(100vh - 210px));
     align-content: center;
-    gap: 24px;
+    gap: 8px;
     padding: clamp(24px, 4vw, 56px);
 }
 
@@ -3253,6 +3253,7 @@ iframe.game-content-video {
     min-height: 0;
     max-height: none;
     margin-bottom: 0;
+    padding: 16px clamp(24px, 4vw, 56px) 8px;
     overflow: hidden;
 }
 
@@ -3262,6 +3263,18 @@ iframe.game-content-video {
     max-width: none;
     margin-left: calc(50% - 50vw + 16px);
     margin-right: calc(50% - 50vw + 16px);
+}
+
+.current-question-summary:not(.wager-mode) > .game-content-presentation {
+    gap: 8px;
+}
+
+.current-question-summary:not(.wager-mode) .game-content-blocks {
+    padding-block: 4px;
+}
+
+.current-question-summary:not(.wager-mode) > .question-controls {
+    padding-top: 0;
 }
 
 @media (max-width: 900px) {
