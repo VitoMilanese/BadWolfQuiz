@@ -449,13 +449,14 @@ public sealed class GameSession
         EnsureHistoryEditingAllowed();
 
         var question = FindQuestion(sourceQuestionId);
-        EnsureQuestionHasBeenPlayed(question);
+        EnsureQuestionCanHaveHistoryAdded(question);
         var player = FindPlayer(playerId);
         var attempt = question.AddHistoricalAttempt(
             player.Id,
             isCorrect,
             value,
             _timeProvider.GetUtcNow());
+        question.ResolveFromHistory();
 
         player.ApplyScore(attempt.ScoreDelta);
         ApplyHistoricalScoreCorrection(question, player.Id, attempt.ScoreDelta);
@@ -818,12 +819,22 @@ public sealed class GameSession
         }
     }
 
+    private void EnsureQuestionCanHaveHistoryAdded(RuntimeQuestion question)
+    {
+        if (question.Status == RuntimeQuestionStatus.Available &&
+            question.SourceRoundId != CurrentRound.SourceRoundId)
+        {
+            throw new GameRuleViolationException(
+                "Answer history cannot be added to a question that has not been played.");
+        }
+    }
+
     private static void EnsureQuestionHasBeenPlayed(RuntimeQuestion question)
     {
         if (question.Status == RuntimeQuestionStatus.Available)
         {
             throw new GameRuleViolationException(
-                "Answer history cannot be added to a question that has not been played.");
+                "Answer history cannot be edited for a question that has not been played.");
         }
     }
 

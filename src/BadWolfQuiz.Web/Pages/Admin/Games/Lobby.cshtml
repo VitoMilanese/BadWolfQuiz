@@ -495,8 +495,12 @@
                     <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation")">
                         <p class="eyebrow">
                             @(isShowingAnswer
-                                ? Localizer["GameBoard_Answer"]
-                                : Localizer["GameBoard_Question"])
+                                ? Localizer[
+                                    "GameBoard_AnswerWithCategory",
+                                    Model.CurrentQuestion.CategoryTitle]
+                                : Localizer[
+                                    "GameBoard_QuestionWithCategory",
+                                    Model.CurrentQuestion.CategoryTitle])
                         </p>
 
                         <div class="game-content-blocks">
@@ -839,6 +843,12 @@
             @if (Model.Game.Session.Settings.HasHostCard)
             {
                 <li class="scoreboard-player host-card" data-host-card>
+                    <span class="player-card-width-resizer"
+                          data-player-card-width-resizer
+                          role="separator"
+                          aria-orientation="vertical"
+                          aria-label="@Localizer["GameBoard_ResizePlayerCards"]"
+                          tabindex="0"></span>
                     <strong>@Model.Game.Session.Settings.HostName</strong>
                     @if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Image &&
                          Model.Game.Session.Settings.HostImageData is not null)
@@ -1172,6 +1182,12 @@
             @if (Model.Game.Session.Settings.HasHostCard)
             {
                 <li class="scoreboard-player host-card" data-host-card>
+                    <span class="player-card-width-resizer"
+                          data-player-card-width-resizer
+                          role="separator"
+                          aria-orientation="vertical"
+                          aria-label="@Localizer["GameBoard_ResizePlayerCards"]"
+                          tabindex="0"></span>
                     <strong>@Model.Game.Session.Settings.HostName</strong>
                     @if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Image &&
                          Model.Game.Session.Settings.HostImageData is not null)
@@ -1280,6 +1296,33 @@
 @section Scripts {
     <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
     <script>
+        (() => {
+            const titles = [...document.querySelectorAll(".host-board-column h3")];
+            if (titles.length === 0) {
+                return;
+            }
+
+            const fitTitle = title => {
+                let size = 30;
+                title.style.setProperty("--category-title-size", `${size}px`);
+                while (size > 12 &&
+                    (title.scrollWidth > title.clientWidth ||
+                     title.scrollHeight > title.clientHeight)) {
+                    size -= 1;
+                    title.style.setProperty("--category-title-size", `${size}px`);
+                }
+            };
+
+            const fitTitles = () => titles.forEach(fitTitle);
+            fitTitles();
+            const grid = document.querySelector(".host-board-grid");
+            if (grid && typeof ResizeObserver !== "undefined") {
+                new ResizeObserver(fitTitles).observe(grid);
+            } else {
+                window.addEventListener("resize", fitTitles);
+            }
+        })();
+
         (() => {
             const videos = document.querySelectorAll("[data-host-webcam]");
             if (videos.length === 0 || !navigator.mediaDevices?.getUserMedia) {

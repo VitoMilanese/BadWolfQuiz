@@ -305,6 +305,18 @@ public sealed class RuntimeQuestion
         return attempt;
     }
 
+    internal void ResolveFromHistory()
+    {
+        if (Status != RuntimeQuestionStatus.Available)
+        {
+            return;
+        }
+
+        BuzzerStatus = QuestionBuzzerStatus.Closed;
+        AnsweringPlayerId = null;
+        Status = RuntimeQuestionStatus.Resolved;
+    }
+
     internal (QuestionAnswerAttempt Previous, QuestionAnswerAttempt Updated)
         UpdateHistoricalAttempt(
             Guid attemptId,

@@ -34,7 +34,10 @@
         @Model.CurrentPlayer.Name
     </p>
 
-    <div class="player-avatar-control">
+    <details class="player-media-settings">
+        <summary>@Localizer["PlayerMedia_Settings"]</summary>
+        <div class="player-media-settings-content">
+        <div class="player-avatar-control">
         <img class="player-avatar-current"
              data-current-player-avatar
              src="@(!string.IsNullOrWhiteSpace(Model.CurrentPlayer.AvatarId) ? $"/avatars/{Model.CurrentPlayer.AvatarId}" : null)"
@@ -81,12 +84,14 @@
                 data-webcam-enabled="false">
             @Localizer["PlayerWebcam_Enable"]
         </button>
-    </div>
-    <div class="message message-error"
-         data-player-webcam-error
-         data-unsupported-label="@Localizer["PlayerWebcam_RequiresHttps"]"
-         data-denied-label="@Localizer["PlayerWebcam_AccessFailed"]"
-         hidden></div>
+        </div>
+        <div class="message message-error"
+             data-player-webcam-error
+             data-unsupported-label="@Localizer["PlayerWebcam_RequiresHttps"]"
+             data-denied-label="@Localizer["PlayerWebcam_AccessFailed"]"
+             hidden></div>
+        </div>
+    </details>
 
     <div id="activity-warning" class="message message-error" hidden>
         @Localizer["PlayerPresence_InactiveWarning"]

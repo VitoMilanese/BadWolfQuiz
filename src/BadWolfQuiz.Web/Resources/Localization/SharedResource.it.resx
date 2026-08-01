@@ -782,6 +782,9 @@
   <data name="GameBoard_Answer" xml:space="preserve">
     <value>Risposta</value>
   </data>
+  <data name="GameBoard_QuestionWithCategory" xml:space="preserve"><value>Domanda della categoria «{0}»</value></data>
+  <data name="GameBoard_AnswerWithCategory" xml:space="preserve"><value>Risposta alla domanda della categoria «{0}»</value></data>
+  <data name="PlayerMedia_Settings" xml:space="preserve"><value>Immagine, avatar e webcam</value></data>
   <data name="GameBoard_ReturnToBoard" xml:space="preserve">
     <value>Torna al tabellone</value>
   </data>

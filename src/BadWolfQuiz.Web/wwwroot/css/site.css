@@ -1,4 +1,5 @@
 :root {
+    --topbar-height: 60px;
     --bg: #070709;
     --panel: #111116;
     --panel-2: #18181f;
@@ -258,7 +259,7 @@ select {
 }
 
 .topbar {
-    min-height: 72px;
+    min-height: var(--topbar-height);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -287,7 +288,7 @@ select {
 .brand-logo {
     display: block;
     width: auto;
-    height: 52px;
+    height: 44px;
     max-width: min(280px, 28vw);
     object-fit: contain;
 }
@@ -312,6 +313,8 @@ select {
     display: flex;
     gap: 22px;
     color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.15;
 }
 
     .topbar nav a:hover {
@@ -1977,6 +1980,9 @@ textarea {
     background: linear-gradient(145deg, color-mix(in srgb, var(--red) 28%, var(--panel-2)), var(--panel));
     text-align: center;
     text-transform: uppercase;
+    font-size: var(--category-title-size, 1.2rem);
+    line-height: 1.08;
+    overflow: hidden;
 }
 
 .host-board-column form {
@@ -2284,6 +2290,25 @@ textarea {
 
 .player-avatar-control {
     flex-wrap: wrap;
+}
+
+.player-media-settings {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-2);
+}
+
+.player-media-settings > summary {
+    padding: 10px 12px;
+    color: var(--text);
+    font-weight: 850;
+    cursor: pointer;
+}
+
+.player-media-settings-content {
+    display: grid;
+    gap: 10px;
+    padding: 0 12px 12px;
 }
 
 .player-image-source-switch,
@@ -3038,13 +3063,13 @@ iframe.game-content-video {
 
 .host-game-board {
     --game-scoreboard-space: 230px;
-    min-height: calc(100dvh - 72px - 68px);
+    min-height: calc(100dvh - var(--topbar-height) - 68px);
     padding-bottom: var(--game-scoreboard-space);
 }
 
 @media (max-width: 900px) {
     .host-game-board {
-        min-height: calc(100dvh - 72px - 40px);
+        min-height: calc(100dvh - var(--topbar-height) - 40px);
     }
 }
 
@@ -3101,8 +3126,8 @@ iframe.game-content-video {
 }
 
 .current-question-summary:not(.wager-mode) {
-    min-height: calc(100dvh - 72px - var(--game-scoreboard-space) - 24px);
-    max-height: calc(100dvh - 72px - var(--game-scoreboard-space) - 24px);
+    min-height: calc(100dvh - var(--topbar-height) - var(--game-scoreboard-space) - 24px);
+    max-height: calc(100dvh - var(--topbar-height) - var(--game-scoreboard-space) - 24px);
     grid-template-rows: auto minmax(0, 1fr) auto;
     align-content: stretch;
     overflow: hidden;
@@ -3164,7 +3189,7 @@ iframe.game-content-video {
     }
 
     .current-question-summary:not(.wager-mode) {
-        min-height: calc(100dvh - 72px - var(--game-scoreboard-space) - 16px);
+        min-height: calc(100dvh - var(--topbar-height) - var(--game-scoreboard-space) - 16px);
         max-height: none;
     }
 }
@@ -3225,10 +3250,10 @@ iframe.game-content-video {
     display: flex;
     flex-direction: column;
     /*
-     * 72px   top navigation
+     * --topbar-height - top navigation
      * 34px   top padding of .page-shell
      */
-    height: calc(100dvh - 72px - 34px);
+    height: calc(100dvh - var(--topbar-height) - 34px);
     min-height: 0;
     /*
      * The scoreboard is position: fixed, so reserve its space
@@ -3274,6 +3299,11 @@ iframe.game-content-video {
     gap: 8px;
 }
 
+.current-question-summary:not(.wager-mode) > .game-content-presentation > .eyebrow {
+    font-size: clamp(.95rem, 1.25vw, 1.3rem);
+    line-height: 1.15;
+}
+
 .current-question-summary:not(.wager-mode) .game-content-blocks {
     padding-block: 4px;
 }
@@ -3292,7 +3322,7 @@ iframe.game-content-video {
         /*
          * .page-shell uses 20px padding below 900px.
          */
-        height: calc(100dvh - 72px - 20px);
+        height: calc(100dvh - var(--topbar-height) - 20px);
         margin-bottom: -20px;
     }
 }
@@ -3346,13 +3376,89 @@ iframe.game-content-video {
         inset 0 -8px 0 rgba(0, 0, 0, 0.22);
 }
 
+@media (max-width: 700px) {
+    .page-shell:has(.player-lobby:has(.player-buzzer-panel)) {
+        height: calc(100dvh - var(--topbar-height));
+        padding: 8px;
+        overflow: hidden;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        overflow: hidden;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) > .eyebrow,
+    .player-lobby:has(.player-buzzer-panel) > h1,
+    .player-lobby:has(.player-buzzer-panel) > p,
+    .player-lobby:has(.player-buzzer-panel) > h2 {
+        margin: 0;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) > h1 {
+        font-size: clamp(1.25rem, 6vw, 1.8rem);
+        line-height: 1.05;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) .game-code-panel.compact {
+        min-height: 0;
+        padding: 6px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) .game-code-panel.compact strong {
+        font-size: 1.35rem;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) .player-media-settings > summary {
+        padding: 7px 10px;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) .player-buzzer-panel {
+        flex: 1 1 auto;
+        min-height: 0;
+        gap: 5px;
+        margin: 2px 0;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) .player-buzzer {
+        width: min(100%, 34dvh, 250px);
+        min-width: 0;
+        min-height: 0;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) .player-list {
+        grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+        gap: 4px;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) .player-list li {
+        gap: 6px;
+        padding: 5px 7px;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) > .dialog-warning:last-child {
+        display: none;
+    }
+}
+
 
 /* Near-simultaneous buzzer result */
 
 .buzzer-race-overlay {
     position: fixed;
     z-index: 40;
-    inset: 72px 0 var(--game-scoreboard-space, 230px);
+    inset: var(--topbar-height) 0 var(--game-scoreboard-space, 230px);
     display: grid;
     place-items: center;
     padding: 24px;

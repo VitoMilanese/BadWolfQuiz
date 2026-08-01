@@ -625,6 +625,40 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void AddQuestionAnswerHistoryEntry_accepts_unopened_current_round_question()
+    {
+        var session = CreateMultiRoundSession();
+        var player = session.AddPlayer("Rose");
+        session.Start();
+
+        var added = session.AddQuestionAnswerHistoryEntry(
+            100,
+            player.Id,
+            true,
+            100);
+
+        var question = session.Board.Questions.Single(item =>
+            item.SourceQuestionId == 100);
+        Assert.Equal(100, added.ScoreDelta);
+        Assert.Equal(RuntimeQuestionStatus.Resolved, question.Status);
+    }
+
+    [Fact]
+    public void AddQuestionAnswerHistoryEntry_rejects_future_round_question()
+    {
+        var session = CreateMultiRoundSession();
+        var player = session.AddPlayer("Rose");
+        session.Start();
+
+        Assert.Throws<GameRuleViolationException>(() =>
+            session.AddQuestionAnswerHistoryEntry(
+                200,
+                player.Id,
+                true,
+                200));
+    }
+
+    [Fact]
     public void Editing_previous_round_history_does_not_change_current_round_gain()
     {
         var session = CreateMultiRoundSession();
