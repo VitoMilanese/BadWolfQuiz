@@ -496,7 +496,7 @@ textarea {
     max-width: 100%;
     overflow: auto;
     border-radius: 12px;
-    background: #000;
+    background: color-mix(in srgb, var(--bg) 88%, #000);
 }
 
 .quiz-board {
@@ -507,7 +507,7 @@ textarea {
     min-width: 0;
     padding: 5px;
     box-sizing: border-box;
-    background: #000;
+    background: color-mix(in srgb, var(--bg) 88%, #000);
 }
 
 .quiz-board-corner,
@@ -515,8 +515,8 @@ textarea {
 .question-points-cell,
 .question-cell {
     min-height: 120px;
-    border: 1px solid #2c2c39;
-    background: linear-gradient(145deg, #17171e, #0c0c10);
+    border: 1px solid var(--line);
+    background: linear-gradient(145deg, var(--panel-2), var(--panel-gradient-end));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -535,7 +535,7 @@ textarea {
 .quiz-board-corner {
     left: 0;
     z-index: 6;
-    background: linear-gradient(145deg, #170308, #0b0b0f);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--red) 24%, var(--panel)), var(--panel-gradient-end));
 }
 
 .category-cell {
@@ -547,7 +547,7 @@ textarea {
     font-weight: 900;
     text-transform: uppercase;
     padding: 12px 14px;
-    background: linear-gradient(145deg, #2b050a, #111116);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--red) 28%, var(--panel-2)), var(--panel));
 }
 
 .category-title {
@@ -794,7 +794,7 @@ textarea {
     padding: 7px;
     border: 1px solid var(--line);
     border-radius: 12px;
-    background: rgba(17, 17, 22, 0.98);
+    background: var(--panel-glass);
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
     display: none;
     z-index: 100;
@@ -813,6 +813,10 @@ textarea {
         color: var(--muted);
         white-space: nowrap;
         cursor: pointer;
+    }
+
+    .language-menu a:not(.active) {
+        color: var(--muted);
     }
 
         .language-menu a:hover {
@@ -1084,6 +1088,27 @@ textarea {
         background: rgba(239, 35, 60, .12);
         border-color: var(--red-bright);
     }
+
+.button:disabled,
+.button[disabled],
+.button-danger:disabled,
+.button-danger-outline:disabled {
+    color: var(--muted);
+    background: var(--panel-2);
+    border-color: var(--line);
+    box-shadow: none;
+    opacity: 0.72;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.button:disabled:hover,
+.button[disabled]:hover {
+    color: var(--muted);
+    background: var(--panel-2);
+    border-color: var(--line);
+    transform: none;
+}
 
 .icon-button {
     width: 40px;
@@ -1468,7 +1493,7 @@ textarea {
     overflow: auto;
     padding: 6px;
     border-radius: 14px;
-    background: #000;
+    background: color-mix(in srgb, var(--bg) 88%, #000);
 }
 
 .host-board-layout {
@@ -1632,8 +1657,8 @@ textarea {
     padding: 14px;
     display: grid;
     place-items: center;
-    border: 1px solid #2c2c39;
-    background: linear-gradient(145deg, #2b050a, #111116);
+    border: 1px solid var(--line);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--red) 28%, var(--panel-2)), var(--panel));
     text-align: center;
     text-transform: uppercase;
 }
@@ -1645,8 +1670,8 @@ textarea {
 .host-board-question {
     width: 100%;
     min-height: 92px;
-    border: 1px solid #2c2c39;
-    background: linear-gradient(145deg, #17171e, #0c0c10);
+    border: 1px solid var(--line);
+    background: linear-gradient(145deg, var(--panel-2), var(--panel-gradient-end));
     color: var(--gold);
     font-size: 1.65rem;
     font-weight: 950;
@@ -1657,9 +1682,9 @@ textarea {
 }
 
 .host-board-question.status-resolved {
-    border-color: #25252c;
-    color: #8d8268;
-    background: linear-gradient(145deg, #111116, #09090c);
+    border-color: var(--line);
+    color: var(--muted);
+    background: linear-gradient(145deg, var(--panel), var(--bg));
     box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.58);
     filter: grayscale(0.85) saturate(0.35) brightness(0.62);
     opacity: 0.5;
@@ -2698,7 +2723,7 @@ iframe.game-content-video {
     padding: 12px max(66px, calc((100vw - 1800px) / 2 + 66px)) 0
         max(12px, calc((100vw - 1800px) / 2 + 34px));
     border-top: 1px solid var(--line);
-    background: rgba(7, 7, 9, 0.97);
+    background: color-mix(in srgb, var(--bg) 97%, transparent);
     box-shadow: 0 -16px 36px rgba(0, 0, 0, 0.42);
     backdrop-filter: blur(14px);
 }
