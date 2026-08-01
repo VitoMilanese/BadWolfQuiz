@@ -1,5 +1,4 @@
 @inject BadWolfQuiz.Web.Services.AvatarCatalog AvatarCatalog
-@using System.Text.Json
 @{
     var avatarCategories = AvatarCatalog.GetCategories();
 }
@@ -13,8 +12,9 @@
 
         <section data-avatar-category-step>
             <div class="avatar-gender-grid">
-                @foreach (var category in avatarCategories)
+                @for (var categoryIndex = 0; categoryIndex < avatarCategories.Count; categoryIndex++)
                 {
+                    var category = avatarCategories[categoryIndex];
                     var categoryLabel = category.Id switch
                     {
                         "F" => Localizer["AvatarPicker_Female"].Value,
@@ -25,7 +25,7 @@
 
                     <button type="button"
                             data-avatar-category="@category.Id"
-                            data-avatar-options="@JsonSerializer.Serialize(category.Avatars)"
+                            data-avatar-template="@categoryIndex"
                             aria-label="@categoryLabel">
                         <img src="/avatars/@category.IconFileName?v=@category.IconVersion" alt="" />
                     </button>
@@ -39,5 +39,22 @@
             </div>
             <div class="avatar-option-grid" data-avatar-options></div>
         </section>
+
+        @for (var categoryIndex = 0; categoryIndex < avatarCategories.Count; categoryIndex++)
+        {
+            var category = avatarCategories[categoryIndex];
+            <template data-avatar-options-template="@categoryIndex">
+                @foreach (var avatar in category.Avatars)
+                {
+                    var avatarUrl = $"/avatars/{avatar.Id}?v={avatar.Version}";
+                    <button type="button"
+                            class="avatar-option"
+                            data-avatar-id="@avatar.Id"
+                            data-avatar-url="@avatarUrl">
+                        <img src="@avatarUrl" alt="" />
+                    </button>
+                }
+            </template>
+        }
     </div>
 </dialog>

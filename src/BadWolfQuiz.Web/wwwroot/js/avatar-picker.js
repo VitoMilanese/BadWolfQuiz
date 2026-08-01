@@ -24,32 +24,26 @@
 
         for (const categoryButton of dialog.querySelectorAll("[data-avatar-category]")) {
             categoryButton.addEventListener("click", () => {
-                const avatarOptions = JSON.parse(
-                    categoryButton.dataset.avatarOptions || "[]"
+                const template = dialog.querySelector(
+                    `[data-avatar-options-template="${categoryButton.dataset.avatarTemplate}"]`
                 );
                 options.replaceChildren();
 
-                for (const avatarOption of avatarOptions) {
-                    const avatarId = avatarOption.Id;
-                    const avatarUrl =
-                        `/avatars/${avatarId}?v=${encodeURIComponent(avatarOption.Version)}`;
-                    const button = document.createElement("button");
-                    button.type = "button";
-                    button.className = "avatar-option";
-                    button.dataset.avatarId = avatarId;
+                if (template) {
+                    options.append(template.content.cloneNode(true));
+                }
 
-                    const image = document.createElement("img");
-                    image.src = avatarUrl;
-                    image.alt = "";
-                    button.append(image);
+                for (const button of options.querySelectorAll("[data-avatar-id]")) {
                     button.addEventListener("click", () => {
                         dialog.dispatchEvent(new CustomEvent("avatarselected", {
-                            detail: { avatarId, avatarUrl },
+                            detail: {
+                                avatarId: button.dataset.avatarId,
+                                avatarUrl: button.dataset.avatarUrl
+                            },
                             bubbles: true
                         }));
                         dialog.close();
                     });
-                    options.append(button);
                 }
 
                 categoryStep.hidden = true;
