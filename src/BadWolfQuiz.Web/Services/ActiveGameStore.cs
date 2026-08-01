@@ -40,11 +40,12 @@ public sealed class ActiveGameStore
             snapshot.HostId == hostId &&
             snapshot.Quiz.SourceQuizId == sourceQuizId);
 
-    public async Task ReplaceAsync(
-        IReadOnlyList<ActiveGameSnapshot> snapshots,
-        CancellationToken cancellationToken)
+    public async Task ReplaceAsync(IReadOnlyList<ActiveGameSnapshot> snapshots)
     {
-        await _gate.WaitAsync(cancellationToken);
+        // Do not cancel while waiting for or performing the atomic replacement.
+        // A canceled host token used to surface as TaskCanceledException from
+        // this method and could make Visual Studio stop the application.
+        await _gate.WaitAsync(CancellationToken.None);
         try
         {
             var serialized = JsonSerializer.Serialize(snapshots, JsonOptions);
@@ -58,7 +59,7 @@ public sealed class ActiveGameStore
             await File.WriteAllTextAsync(
                 temporaryPath,
                 serialized,
-                cancellationToken);
+                CancellationToken.None);
             File.Move(temporaryPath, _path, overwrite: true);
             _snapshots = snapshots;
             _serialized = serialized;

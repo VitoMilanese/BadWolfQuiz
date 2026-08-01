@@ -13,16 +13,35 @@ public sealed class ActiveGamePersistenceService(
         RestoreSavedGames();
 
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-        do
+        try
         {
-            await SaveAsync(stoppingToken);
+            do
+            {
+                await SaveAsync();
+            }
+            while (await timer.WaitForNextTickAsync(stoppingToken));
         }
-        while (await timer.WaitForNextTickAsync(stoppingToken));
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            // Application shutdown is an expected end to the persistence loop.
+        }
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        await SaveAsync(cancellationToken);
+        try
+        {
+            // The host-provided token may already be canceled. The final atomic
+            // snapshot is small and must be allowed to finish during shutdown.
+            await SaveAsync();
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(
+                exception,
+                "Unable to save active games during application shutdown.");
+        }
+
         await base.StopAsync(cancellationToken);
     }
 
@@ -52,7 +71,7 @@ public sealed class ActiveGamePersistenceService(
         }
     }
 
-    private Task SaveAsync(CancellationToken cancellationToken)
+    private Task SaveAsync()
     {
         var snapshots = registry.GetAll()
             .Where(game =>
@@ -69,7 +88,7 @@ public sealed class ActiveGamePersistenceService(
             .Select(CaptureSnapshot)
             .ToArray();
 
-        return store.ReplaceAsync(snapshots, cancellationToken);
+        return store.ReplaceAsync(snapshots);
     }
 
     private static bool IsComplete(GameSession session) =>
