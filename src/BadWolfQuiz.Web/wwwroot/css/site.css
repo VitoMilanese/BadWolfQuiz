@@ -1487,21 +1487,21 @@ textarea {
 }
 
 .presence-active {
-    color: #7ee787;
-    border-color: rgba(63, 185, 80, 0.55);
-    background: rgba(63, 185, 80, 0.12);
+    color: color-mix(in srgb, #238636 78%, var(--text));
+    border-color: currentColor;
+    background: color-mix(in srgb, #3fb950 15%, transparent);
 }
 
 .presence-inactive {
-    color: var(--gold);
-    border-color: rgba(242, 177, 52, 0.55);
-    background: rgba(242, 177, 52, 0.12);
+    color: color-mix(in srgb, #9a6700 78%, var(--text));
+    border-color: currentColor;
+    background: color-mix(in srgb, #f2b134 16%, transparent);
 }
 
 .presence-disconnected {
-    color: #ff8d8d;
-    border-color: rgba(239, 35, 60, 0.55);
-    background: rgba(239, 35, 60, 0.12);
+    color: color-mix(in srgb, #d1242f 78%, var(--text));
+    border-color: currentColor;
+    background: color-mix(in srgb, #ef233c 14%, transparent);
 }
 
 
@@ -2149,9 +2149,9 @@ video.host-card-media {
 }
 
 .presence-rejoinpending {
-    color: #ffb3ba;
-    border-color: rgba(239, 35, 60, 0.7);
-    background: rgba(239, 35, 60, 0.16);
+    color: color-mix(in srgb, #9a6700 82%, var(--text));
+    border-color: currentColor;
+    background: color-mix(in srgb, #f2b134 20%, transparent);
 }
 
 @media (max-width: 700px) {
