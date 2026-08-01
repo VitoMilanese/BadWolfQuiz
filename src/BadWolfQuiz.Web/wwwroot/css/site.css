@@ -691,6 +691,49 @@ textarea {
     font-weight: 800;
 }
 
+.question-cell-slot {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    cursor: grab;
+}
+
+.question-cell-slot .question-cell {
+    width: 100%;
+    height: 100%;
+}
+
+.question-cell-slot:active {
+    cursor: grabbing;
+}
+
+.question-exchange-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0;
+    opacity: .82;
+}
+
+.question-exchange-button:hover,
+.question-exchange-button:focus-visible {
+    opacity: 1;
+}
+
+.question-cell-dragging {
+    opacity: .42;
+}
+
+.question-cell-drop-target .question-cell {
+    border-color: var(--gold);
+    box-shadow: inset 0 0 0 2px var(--gold), 0 0 18px var(--accent-shadow);
+}
+
 .question-editor-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

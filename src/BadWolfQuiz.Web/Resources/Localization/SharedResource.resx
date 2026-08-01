@@ -1067,4 +1067,10 @@
   <data name="SiteTheme_AccentBright" xml:space="preserve"><value>Bright accent</value></data>
   <data name="SiteTheme_Highlight" xml:space="preserve"><value>Highlight</value></data>
   <data name="SiteTheme_Invalid" xml:space="preserve"><value>Select a valid theme and colors.</value></data>
+  <data name="QuizEditor_DragQuestion" xml:space="preserve"><value>Drag onto another question to exchange them</value></data>
+  <data name="QuizEditor_MoveQuestionToRound" xml:space="preserve"><value>Move question to another round</value></data>
+  <data name="QuizEditor_ExchangeQuestion" xml:space="preserve"><value>Exchange question</value></data>
+  <data name="QuizEditor_SelectedQuestion" xml:space="preserve"><value>Selected question</value></data>
+  <data name="QuizEditor_TargetQuestion" xml:space="preserve"><value>Question to exchange with</value></data>
+  <data name="QuizEditor_NoQuestionForExchange" xml:space="preserve"><value>There is no question available for exchange.</value></data>
 </root>

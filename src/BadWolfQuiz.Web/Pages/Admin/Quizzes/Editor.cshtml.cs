@@ -38,6 +38,9 @@ public sealed class EditorModel(
     [BindProperty]
     public ExchangeCategoriesInputModel ExchangeCategories { get; set; } = new();
 
+    [BindProperty]
+    public ExchangeQuestionsInputModel ExchangeQuestions { get; set; } = new();
+
     public int SelectedRoundId { get; private set; }
 
     public Quiz Quiz { get; private set; } = null!;
@@ -117,6 +120,15 @@ public sealed class EditorModel(
         public int SourceCategoryId { get; set; }
 
         public int TargetCategoryId { get; set; }
+    }
+
+    public sealed class ExchangeQuestionsInputModel
+    {
+        public int QuizId { get; set; }
+
+        public int SourceQuestionId { get; set; }
+
+        public int TargetQuestionId { get; set; }
     }
 
     public async Task<IActionResult> OnGetAsync(
@@ -495,6 +507,88 @@ public sealed class EditorModel(
             sourceCategory.SortOrder = targetSortOrder;
             targetCategory.SortOrder = sourceSortOrder;
 
+            quiz.UpdatedAtUtc = DateTime.UtcNow;
+
+            await db.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+
+        return RedirectToPage(new
+        {
+            id = quiz.Id,
+            selectedRoundId = sourceRoundId
+        });
+    }
+
+    public async Task<IActionResult> OnPostExchangeQuestionsAsync()
+    {
+        if (ExchangeQuestions.SourceQuestionId <= 0 ||
+            ExchangeQuestions.TargetQuestionId <= 0 ||
+            ExchangeQuestions.SourceQuestionId ==
+            ExchangeQuestions.TargetQuestionId)
+        {
+            return BadRequest();
+        }
+
+        var quiz = await db.Quizzes
+            .Include(x => x.Rounds)
+                .ThenInclude(x => x.Categories)
+                    .ThenInclude(x => x.Questions)
+            .SingleOrDefaultAsync(x => x.Id == ExchangeQuestions.QuizId);
+
+        if (quiz is null)
+        {
+            return NotFound();
+        }
+
+        var questions = quiz.Rounds
+            .SelectMany(x => x.Categories)
+            .SelectMany(x => x.Questions)
+            .ToDictionary(x => x.Id);
+
+        if (!questions.TryGetValue(
+                ExchangeQuestions.SourceQuestionId,
+                out var sourceQuestion) ||
+            !questions.TryGetValue(
+                ExchangeQuestions.TargetQuestionId,
+                out var targetQuestion))
+        {
+            return NotFound();
+        }
+
+        var categories = quiz.Rounds
+            .SelectMany(x => x.Categories)
+            .ToDictionary(x => x.Id);
+
+        var sourceRoundId = categories[sourceQuestion.QuizCategoryId]
+            .QuizRoundId;
+        var sourceCategoryId = sourceQuestion.QuizCategoryId;
+        var sourceRowIndex = sourceQuestion.RowIndex;
+        var targetCategoryId = targetQuestion.QuizCategoryId;
+        var targetRowIndex = targetQuestion.RowIndex;
+
+        await using var transaction =
+            await db.Database.BeginTransactionAsync();
+
+        try
+        {
+            sourceQuestion.RowIndex =
+                TemporarySortOrderOffset + sourceQuestion.Id;
+            await db.SaveChangesAsync();
+
+            targetQuestion.QuizCategoryId = sourceCategoryId;
+            targetQuestion.RowIndex = sourceRowIndex;
+            await db.SaveChangesAsync();
+
+            sourceQuestion.QuizCategoryId = targetCategoryId;
+            sourceQuestion.RowIndex = targetRowIndex;
+            sourceQuestion.UpdatedAtUtc = DateTime.UtcNow;
+            targetQuestion.UpdatedAtUtc = DateTime.UtcNow;
             quiz.UpdatedAtUtc = DateTime.UtcNow;
 
             await db.SaveChangesAsync();

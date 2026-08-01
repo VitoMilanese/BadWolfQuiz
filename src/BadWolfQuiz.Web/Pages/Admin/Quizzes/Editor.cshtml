@@ -46,12 +46,6 @@
     </div>
 
     <div class="round-navigation">
-        <a class="button button-secondary"
-           asp-page="FinalQuestionEditor"
-           asp-route-id="@Model.Quiz.Id">
-            @Localizer["Button_EditFinalQuestion"]
-        </a>
-
         <div class="round-tabs" id="roundTabs">
             @foreach (var item in rounds)
             {
@@ -81,6 +75,12 @@
         </div>
 
         <div class="round-actions">
+            <a class="button button-secondary round-action-button"
+               asp-page="FinalQuestionEditor"
+               asp-route-id="@Model.Quiz.Id">
+                @Localizer["Button_EditFinalQuestion"]
+            </a>
+
             <button type="button"
                     class="button button-secondary round-action-button"
                     onclick="openRenameRoundDialog()">
@@ -211,21 +211,41 @@
                                 !string.IsNullOrWhiteSpace(x.MediaPath) ||
                                 !string.IsNullOrWhiteSpace(x.ExternalUrl));
 
-                            <a class="question-cell @(hasContent ? "filled" : null) @(question.IsSpecial ? "wager-question" : null)"
-                               asp-page="QuestionEditor"
-                               asp-route-id="@question.Id">
-                                @if (question.IsSpecial)
-                                {
-                                    <span class="question-wager-badge">
-                                        @Localizer["Label_WagerQuestion"]
-                                    </span>
-                                }
+                            <div class="question-cell-slot"
+                                 draggable="true"
+                                 data-question-id="@question.Id"
+                                 data-question-title="@category.Title — @roundRow.Points"
+                                 title="@Localizer["QuizEditor_DragQuestion"]">
+                                <a class="question-cell @(hasContent ? "filled" : null) @(question.IsSpecial ? "wager-question" : null)"
+                                   asp-page="QuestionEditor"
+                                   asp-route-id="@question.Id">
+                                    @if (question.IsSpecial)
+                                    {
+                                        <span class="question-wager-badge">
+                                            @Localizer["Label_WagerQuestion"]
+                                        </span>
+                                    }
 
-                                @if (hasContent)
+                                    @if (hasContent)
+                                    {
+                                        <small>@Localizer["Status_Ready"]</small>
+                                    }
+                                </a>
+
+                                @if (rounds.Count > 1)
                                 {
-                                    <small>@Localizer["Status_Ready"]</small>
+                                    <button type="button"
+                                            class="js-question-exchange button button-secondary icon-button question-exchange-button"
+                                            draggable="false"
+                                            data-question-id="@question.Id"
+                                            data-question-title="@category.Title — @roundRow.Points"
+                                            data-round-id="@round.Id"
+                                            title="@Localizer["QuizEditor_MoveQuestionToRound"]"
+                                            aria-label="@Localizer["QuizEditor_MoveQuestionToRound"]">
+                                        ⇅
+                                    </button>
                                 }
-                            </a>
+                            </div>
                         }
                     </div>
                 }
@@ -452,6 +472,81 @@
     </div>
 </dialog>
 
+<dialog id="exchange-question-dialog" class="app-dialog">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2>@Localizer["QuizEditor_ExchangeQuestion"]</h2>
+
+            <button type="button"
+                    class="dialog-close"
+                    onclick="closeExchangeQuestionDialog()">
+                ×
+            </button>
+        </div>
+
+        <form method="post" asp-page-handler="ExchangeQuestions">
+            <input asp-for="ExchangeQuestions.QuizId"
+                   type="hidden"
+                   value="@Model.Quiz.Id" />
+
+            <input asp-for="ExchangeQuestions.SourceQuestionId"
+                   id="exchange-question-source-id"
+                   type="hidden" />
+
+            <p class="dialog-warning">
+                @Localizer["QuizEditor_SelectedQuestion"]
+            </p>
+
+            <div id="exchange-question-source-title"
+                 class="dialog-target">
+            </div>
+
+            <div style="margin-top: 20px;">
+                <label for="exchange-question-target-round">
+                    @Localizer["QuizEditor_TargetRound"]
+                </label>
+
+                <select id="exchange-question-target-round"
+                        onchange="refreshExchangeTargetQuestions()">
+                </select>
+            </div>
+
+            <div style="margin-top: 16px;">
+                <label for="exchange-question-target-question">
+                    @Localizer["QuizEditor_TargetQuestion"]
+                </label>
+
+                <select asp-for="ExchangeQuestions.TargetQuestionId"
+                        id="exchange-question-target-question"
+                        onchange="updateExchangeQuestionButtonState()"
+                        required>
+                </select>
+            </div>
+
+            <p id="exchange-question-empty-message"
+               class="dialog-warning"
+               style="display: none; margin-top: 16px;">
+                @Localizer["QuizEditor_NoQuestionForExchange"]
+            </p>
+
+            <div class="dialog-actions form-actions">
+                <button type="button"
+                        class="button button-secondary"
+                        onclick="closeExchangeQuestionDialog()">
+                    @Localizer["Button_Cancel"]
+                </button>
+
+                <button id="exchange-question-submit-button"
+                        type="submit"
+                        class="button button-primary"
+                        disabled>
+                    @Localizer["QuizEditor_Exchange"]
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
 @if (rounds.Count > 1)
 {
     <dialog id="delete-round-dialog" class="app-dialog">
@@ -536,6 +631,26 @@
                     })
             })));
 
+        const exchangeQuestionRounds = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            rounds.Select(roundItem => new
+            {
+                id = roundItem.Id,
+                title = roundItem.Title,
+                questions = roundItem.Categories
+                    .OrderBy(categoryItem => categoryItem.SortOrder)
+                    .SelectMany(categoryItem => categoryItem.Questions
+                        .OrderBy(questionItem => questionItem.RowIndex)
+                        .Select(questionItem => new
+                        {
+                            id = questionItem.Id,
+                            category = categoryItem.Title,
+                            points = roundItem.Rows
+                                .Single(rowItem =>
+                                    rowItem.RowIndex == questionItem.RowIndex)
+                                .Points
+                        }))
+            })));
+
         function openExchangeCategoryDialog(categoryId, categoryTitle, sourceRoundId) {
             const dialog = document.getElementById("exchange-category-dialog");
             const sourceIdInput = document.getElementById("exchange-category-source-id");
@@ -608,6 +723,79 @@
             document.getElementById("exchange-category-dialog").close();
         }
 
+        function openExchangeQuestionDialog(questionId, questionTitle, sourceRoundId) {
+            const dialog = document.getElementById("exchange-question-dialog");
+            const sourceIdInput = document.getElementById("exchange-question-source-id");
+            const sourceTitle = document.getElementById("exchange-question-source-title");
+            const targetRoundSelect = document.getElementById("exchange-question-target-round");
+
+            sourceIdInput.value = questionId;
+            sourceTitle.textContent = questionTitle;
+            targetRoundSelect.innerHTML = "";
+
+            const availableRounds = exchangeQuestionRounds.filter(
+                roundItem => roundItem.id !== sourceRoundId &&
+                             roundItem.questions.length > 0
+            );
+
+            for (const roundItem of availableRounds) {
+                const option = document.createElement("option");
+                option.value = roundItem.id.toString();
+                option.textContent = roundItem.title;
+                targetRoundSelect.appendChild(option);
+            }
+
+            refreshExchangeTargetQuestions();
+            dialog.showModal();
+        }
+
+        function refreshExchangeTargetQuestions() {
+            const targetRoundSelect = document.getElementById("exchange-question-target-round");
+            const targetQuestionSelect = document.getElementById("exchange-question-target-question");
+            const emptyMessage = document.getElementById("exchange-question-empty-message");
+
+            targetQuestionSelect.innerHTML = "";
+
+            const selectedRoundId = Number(targetRoundSelect.value);
+            const selectedRound = exchangeQuestionRounds.find(
+                roundItem => roundItem.id === selectedRoundId
+            );
+
+            if (selectedRound) {
+                for (const questionItem of selectedRound.questions) {
+                    const option = document.createElement("option");
+                    option.value = questionItem.id.toString();
+                    option.textContent =
+                        `${questionItem.category} — ${questionItem.points}`;
+                    targetQuestionSelect.appendChild(option);
+                }
+            }
+
+            const hasAvailableTarget =
+                targetRoundSelect.options.length > 0 &&
+                targetQuestionSelect.options.length > 0;
+
+            targetRoundSelect.disabled = targetRoundSelect.options.length === 0;
+            targetQuestionSelect.disabled = !hasAvailableTarget;
+            emptyMessage.style.display = hasAvailableTarget ? "none" : "block";
+
+            updateExchangeQuestionButtonState();
+        }
+
+        function updateExchangeQuestionButtonState() {
+            const targetRoundSelect = document.getElementById("exchange-question-target-round");
+            const targetQuestionSelect = document.getElementById("exchange-question-target-question");
+            const submitButton = document.getElementById("exchange-question-submit-button");
+
+            submitButton.disabled =
+                !targetRoundSelect.value ||
+                !targetQuestionSelect.value;
+        }
+
+        function closeExchangeQuestionDialog() {
+            document.getElementById("exchange-question-dialog").close();
+        }
+
         function openAddRoundDialog() {
             const dialog = document.getElementById("add-round-dialog");
             const input = document.getElementById("add-round-title");
@@ -667,15 +855,90 @@
             const roundTabs = document.getElementById("roundTabs");
             const categoryColumns = document.getElementById("categoryColumns");
 
-            if (typeof Sortable === "undefined") {
-                return;
-            }
-
             const getAntiforgeryToken = function () {
                 return document.querySelector(
                     'input[name="__RequestVerificationToken"]'
                 );
             };
+
+            let draggedQuestionSlot = null;
+
+            document.querySelectorAll(".question-exchange-button").forEach(button => {
+                const slot = button.closest(".question-cell-slot");
+
+                button.addEventListener("pointerdown", () => {
+                    slot.draggable = false;
+                });
+
+                for (const eventName of ["pointerup", "pointercancel", "mouseleave"]) {
+                    button.addEventListener(eventName, () => {
+                        slot.draggable = true;
+                    });
+                }
+            });
+
+            document.querySelectorAll(".question-cell-slot").forEach(slot => {
+                slot.addEventListener("dragstart", event => {
+                    if (event.target.closest(".question-exchange-button")) {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    draggedQuestionSlot = slot;
+                    slot.classList.add("question-cell-dragging");
+                    event.dataTransfer.effectAllowed = "move";
+                    event.dataTransfer.setData(
+                        "text/plain",
+                        slot.dataset.questionId
+                    );
+                });
+
+                slot.addEventListener("dragover", event => {
+                    if (!draggedQuestionSlot ||
+                        draggedQuestionSlot === slot) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                    slot.classList.add("question-cell-drop-target");
+                });
+
+                slot.addEventListener("dragleave", () => {
+                    slot.classList.remove("question-cell-drop-target");
+                });
+
+                slot.addEventListener("drop", async event => {
+                    event.preventDefault();
+                    slot.classList.remove("question-cell-drop-target");
+
+                    if (!draggedQuestionSlot ||
+                        draggedQuestionSlot === slot) {
+                        return;
+                    }
+
+                    await exchangeQuestions(
+                        Number(draggedQuestionSlot.dataset.questionId),
+                        Number(slot.dataset.questionId),
+                        getAntiforgeryToken()
+                    );
+                });
+
+                slot.addEventListener("dragend", () => {
+                    document.querySelectorAll(
+                        ".question-cell-dragging, .question-cell-drop-target"
+                    ).forEach(element => element.classList.remove(
+                        "question-cell-dragging",
+                        "question-cell-drop-target"
+                    ));
+
+                    draggedQuestionSlot = null;
+                });
+            });
+
+            if (typeof Sortable === "undefined") {
+                return;
+            }
 
             if (roundTabs) {
                 new Sortable(roundTabs, {
@@ -794,6 +1057,47 @@
             }
         });
 
+        async function exchangeQuestions(sourceQuestionId, targetQuestionId, antiforgeryToken) {
+            const formData = new FormData();
+            formData.append("ExchangeQuestions.QuizId", "@Model.Quiz.Id");
+            formData.append(
+                "ExchangeQuestions.SourceQuestionId",
+                sourceQuestionId.toString()
+            );
+            formData.append(
+                "ExchangeQuestions.TargetQuestionId",
+                targetQuestionId.toString()
+            );
+
+            if (antiforgeryToken) {
+                formData.append(
+                    "__RequestVerificationToken",
+                    antiforgeryToken.value
+                );
+            }
+
+            try {
+                const response = await fetch("?handler=ExchangeQuestions", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const responseText = await response.text();
+                    throw new Error(
+                        `Question exchange failed. Status: ${response.status}. ${responseText}`
+                    );
+                }
+
+                window.location.reload();
+            }
+            catch (error) {
+                console.error("Question exchange error:", error);
+                alert(error.message);
+                window.location.reload();
+            }
+        }
+
         document.addEventListener("click", function (event) {
             const button = event.target.closest(".js-category-exchange");
 
@@ -807,6 +1111,23 @@
             openExchangeCategoryDialog(
                 Number(button.dataset.categoryId),
                 button.dataset.categoryTitle,
+                Number(button.dataset.roundId)
+            );
+        });
+
+        document.addEventListener("click", function (event) {
+            const button = event.target.closest(".js-question-exchange");
+
+            if (!button) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            openExchangeQuestionDialog(
+                Number(button.dataset.questionId),
+                button.dataset.questionTitle,
                 Number(button.dataset.roundId)
             );
         });
