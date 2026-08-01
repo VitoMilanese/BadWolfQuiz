@@ -1655,6 +1655,40 @@ textarea {
     text-align: center;
 }
 
+.game-scoreboard .scoreboard-player:not(.host-card) {
+    min-width: var(--player-card-width, 230px);
+    max-width: var(--player-card-width, 230px);
+    flex: 0 0 var(--player-card-width, 230px);
+}
+
+.player-card-width-resizer {
+    position: absolute;
+    z-index: 5;
+    top: 50%;
+    left: -6px;
+    width: 12px;
+    height: 52px;
+    border-radius: 999px;
+    background: #77778a;
+    box-shadow: 0 0 0 1px #111;
+    transform: translateY(-50%);
+    cursor: ew-resize;
+    touch-action: none;
+    transition: height 120ms ease, background 120ms ease;
+}
+
+.player-card-width-resizer:hover,
+.player-card-width-resizer:focus-visible,
+.is-resizing-player-cards .player-card-width-resizer {
+    height: 72px;
+    background: var(--gold);
+}
+
+.is-resizing-player-cards {
+    cursor: ew-resize;
+    user-select: none;
+}
+
 .scoreboard-player > strong {
     max-width: 100%;
     overflow: hidden;
@@ -1878,6 +1912,12 @@ video.host-card-media {
 
     .scoreboard-player {
         min-width: 155px;
+    }
+
+    .game-scoreboard .scoreboard-player:not(.host-card) {
+        min-width: var(--player-card-width, 155px);
+        max-width: var(--player-card-width, 155px);
+        flex-basis: var(--player-card-width, 155px);
     }
 }
 
