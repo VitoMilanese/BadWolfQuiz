@@ -6,24 +6,37 @@ public sealed class ActiveGamePersistenceService(
     GameSessionRegistry registry,
     ActiveGameStore store,
     TimeProvider timeProvider,
-    ILogger<ActiveGamePersistenceService> logger) : BackgroundService
+    ILogger<ActiveGamePersistenceService> logger,
+    CrashLog crashLog) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         RestoreSavedGames();
 
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-        try
+        while (!stoppingToken.IsCancellationRequested)
         {
-            do
+            try
             {
                 await SaveAsync();
             }
-            while (await timer.WaitForNextTickAsync(stoppingToken));
-        }
-        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-        {
-            // Application shutdown is an expected end to the persistence loop.
+            catch (Exception exception)
+            {
+                logger.LogError(exception, "Unable to persist active games.");
+                crashLog.Write("Active game persistence failed", exception);
+            }
+
+            try
+            {
+                if (!await timer.WaitForNextTickAsync(stoppingToken))
+                {
+                    break;
+                }
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
         }
     }
 
@@ -40,6 +53,9 @@ public sealed class ActiveGamePersistenceService(
             logger.LogError(
                 exception,
                 "Unable to save active games during application shutdown.");
+            crashLog.Write(
+                "Final active game persistence failed during shutdown",
+                exception);
         }
 
         await base.StopAsync(cancellationToken);
@@ -67,6 +83,9 @@ public sealed class ActiveGamePersistenceService(
                     exception,
                     "Unable to restore active game {PublicCode}.",
                     snapshot.PublicCode);
+                crashLog.Write(
+                    $"Unable to restore active game {snapshot.PublicCode}",
+                    exception);
             }
         }
     }
