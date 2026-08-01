@@ -704,12 +704,18 @@ public sealed class GameSessionRegistryTests
         original.Start();
         var registry = CreateRegistry();
         var game = registry.Restore("ABC123", original, "host-1", true);
+        Assert.Equal(
+            PlayerPresenceStatus.Disconnected,
+            registry.GetPlayerLobbyEntries(game).Single().Presence);
         var rejoined = registry.JoinPlayer("ABC123", "Rose");
         registry.ConnectPlayer(
             "ABC123",
             rejoined.AccessToken!,
             "connection-1",
             isVisible: false);
+        Assert.Equal(
+            PlayerPresenceStatus.RejoinPending,
+            registry.GetPlayerLobbyEntries(game).Single().Presence);
         registry.ApprovePlayerRejoin("ABC123", player.Id);
 
         registry.SelectQuestion("ABC123", 1);

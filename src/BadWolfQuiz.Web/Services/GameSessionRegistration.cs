@@ -24,6 +24,8 @@ public sealed class GameSessionRegistration
     public GameSession Session { get; }
     public string? HostId { get; }
 
+    public string ClientInstanceId { get; } = Guid.NewGuid().ToString("N");
+
     public bool IsRecovered { get; }
 
     internal HashSet<GamePlayerId> RecoveredPlayerIdsAwaitingReconnect { get; }

@@ -22,10 +22,7 @@ public sealed class LobbyModel(
 {
     public GameSessionRegistration Game { get; private set; } = null!;
 
-    public IReadOnlyList<GamePlayer> Players { get; private set; } = [];
-
-    public IReadOnlySet<GamePlayerId> ActivePlayerIds { get; private set; } =
-        new HashSet<GamePlayerId>();
+    public IReadOnlyList<PlayerLobbyEntry> Players { get; private set; } = [];
 
     public IReadOnlyList<GameBoardCategory> BoardCategories { get; private set; } = [];
 
@@ -880,11 +877,7 @@ public sealed class LobbyModel(
         }
 
         Game = game;
-        Players = sessionRegistry.GetPlayers(game);
-        ActivePlayerIds = sessionRegistry.GetPlayerLobbyEntries(game)
-            .Where(player => player.Presence == PlayerPresenceStatus.Active)
-            .Select(player => player.Id)
-            .ToHashSet();
+        Players = sessionRegistry.GetPlayerLobbyEntries(game);
         SettingsInput = GameSettingsInput.From(game.Session.Settings);
 
         if (game.Session.Status == GameSessionStatus.Completed)
