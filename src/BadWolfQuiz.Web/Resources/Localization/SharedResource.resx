@@ -1016,6 +1016,7 @@
   <data name="AvatarPicker_SelectGender" xml:space="preserve"><value>First choose a character group</value></data>
   <data name="AvatarPicker_Female" xml:space="preserve"><value>Female</value></data>
   <data name="AvatarPicker_Male" xml:space="preserve"><value>Male</value></data>
+  <data name="AvatarPicker_Individual" xml:space="preserve"><value>Individual avatars</value></data>
   <data name="AvatarPicker_Choose" xml:space="preserve"><value>Choose avatar</value></data>
   <data name="AvatarPicker_ChooseOrChange" xml:space="preserve"><value>Choose or change avatar</value></data>
   <data name="PlayerWebcam_Enable" xml:space="preserve"><value>Enable webcam</value></data>
