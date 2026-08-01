@@ -1537,26 +1537,33 @@
                 const card = handle.closest(".scoreboard-player");
                 const startX = event.clientX;
                 const startWidth = card.getBoundingClientRect().width;
-                handle.setPointerCapture(event.pointerId);
+                const pointerId = event.pointerId;
                 document.body.classList.add("is-resizing-player-cards");
 
                 const move = moveEvent => {
+                    if (moveEvent.pointerId !== pointerId) {
+                        return;
+                    }
+
                     applyWidth(startWidth + moveEvent.clientX - startX);
                 };
                 const stop = stopEvent => {
-                    handle.releasePointerCapture(stopEvent.pointerId);
-                    handle.removeEventListener("pointermove", move);
-                    handle.removeEventListener("pointerup", stop);
-                    handle.removeEventListener("pointercancel", stop);
+                    if (stopEvent.pointerId !== pointerId) {
+                        return;
+                    }
+
+                    window.removeEventListener("pointermove", move);
+                    window.removeEventListener("pointerup", stop);
+                    window.removeEventListener("pointercancel", stop);
                     document.body.classList.remove("is-resizing-player-cards");
                     const width = Number.parseFloat(
                         getComputedStyle(board).getPropertyValue("--player-card-width"));
                     localStorage.setItem(storageKey, Math.round(width).toString());
                 };
 
-                handle.addEventListener("pointermove", move);
-                handle.addEventListener("pointerup", stop);
-                handle.addEventListener("pointercancel", stop);
+                window.addEventListener("pointermove", move);
+                window.addEventListener("pointerup", stop);
+                window.addEventListener("pointercancel", stop);
             });
 
             playerList.addEventListener("keydown", event => {
