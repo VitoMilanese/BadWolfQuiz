@@ -42,14 +42,26 @@ public sealed class DiscordQuestionSender(
                 return true;
             }
 
+            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (responseBody.Length > 500)
+            {
+                responseBody = responseBody[..500];
+            }
+
             logger.LogWarning(
-                "Discord rejected a question with status code {StatusCode}.",
-                response.StatusCode);
+                "Discord rejected a question with status code {StatusCode}: {ResponseBody}",
+                response.StatusCode,
+                responseBody);
             return false;
         }
         catch (HttpRequestException exception)
         {
             logger.LogWarning(exception, "Failed to send a question to Discord.");
+            return false;
+        }
+        catch (TaskCanceledException exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogWarning(exception, "The Discord webhook request timed out.");
             return false;
         }
     }
