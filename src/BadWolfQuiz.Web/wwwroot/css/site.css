@@ -1835,6 +1835,44 @@ textarea {
     filter: brightness(1.35);
 }
 
+.board-host-card-drag-handle {
+    position: absolute;
+    z-index: 5;
+    top: -9px;
+    left: 50%;
+    width: 58px;
+    height: 20px;
+    border: 2px solid var(--gold);
+    border-radius: 999px;
+    background: var(--panel);
+    cursor: ns-resize;
+    touch-action: none;
+    transform: translateX(-50%);
+}
+
+.board-host-card-drag-handle::after {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--gold);
+    content: "•••";
+    font-size: .7rem;
+    letter-spacing: .12em;
+    line-height: 1;
+}
+
+.board-host-card-drag-handle:hover,
+.board-host-card-drag-handle:focus-visible,
+.is-moving-host-card .board-host-card-drag-handle {
+    filter: brightness(1.35);
+}
+
+.is-moving-host-card {
+    cursor: ns-resize;
+    user-select: none;
+}
+
 .board-player-list {
     display: grid;
     gap: 8px;

@@ -744,6 +744,12 @@
                 <aside class="board-host-sidebar"
                        data-board-host-slot
                        aria-label="@Model.Game.Session.Settings.HostName">
+                    <div class="board-host-card-drag-handle"
+                         data-board-host-card-drag-handle
+                         role="button"
+                         aria-label="@Localizer["GameBoard_MoveHostCard"]"
+                         title="@Localizer["GameBoard_MoveHostCard"]"
+                         tabindex="0"></div>
                     <ul class="board-host-card-list" data-board-host-card-list></ul>
                     <div class="board-host-card-resizer"
                          data-board-host-card-resizer
@@ -1629,6 +1635,8 @@
                 "[data-board-host-card-list]");
             const hostCardResizer = document.querySelector(
                 "[data-board-host-card-resizer]");
+            const hostCardDragHandle = document.querySelector(
+                "[data-board-host-card-drag-handle]");
             const wideHostLayout = window.matchMedia("(min-width: 1750px)");
 
             if (!lobby || !playerList || typeof signalR === "undefined") {
@@ -1637,6 +1645,16 @@
 
             const gameCode = lobby.dataset.gameCode;
             const hostCardSizeKey = `badwolfquiz:${gameCode}:host-card-size`;
+            const hostCardPositionKey = `badwolfquiz:${gameCode}:host-card-position`;
+            let hostCardVerticalPosition = .5;
+
+            const storedHostCardPosition = Number.parseFloat(
+                localStorage.getItem(hostCardPositionKey));
+            if (Number.isFinite(storedHostCardPosition)) {
+                hostCardVerticalPosition = Math.max(
+                    0,
+                    Math.min(1, storedHostCardPosition));
+            }
 
             const canPositionHostCard = () =>
                 hostSlot &&
@@ -1644,7 +1662,20 @@
                 wideHostLayout.matches &&
                 boardGrid.getBoundingClientRect().left >= 214;
 
-            const centerHostCard = () => {
+            const getHostCardVerticalBounds = () => {
+                const boardBounds = boardGrid.getBoundingClientRect();
+                const cardBounds = hostSlot.getBoundingClientRect();
+                const minTop = Math.max(80, boardBounds.top);
+                const maxTop = Math.max(
+                    minTop,
+                    Math.min(
+                        window.innerHeight - cardBounds.height - 8,
+                        boardBounds.bottom - cardBounds.height));
+
+                return { minTop, maxTop };
+            };
+
+            const positionHostCard = () => {
                 if (!hostSlot || !boardGrid || !canPositionHostCard()) {
                     hostSlot?.classList.remove("is-positioned");
                     return;
@@ -1656,9 +1687,10 @@
                 const left = Math.max(
                     8,
                     (boardBounds.left - cardBounds.width) / 2);
-                const top = Math.max(
-                    80,
-                    boardBounds.top + (boardBounds.height - cardBounds.height) / 2);
+                const verticalBounds = getHostCardVerticalBounds();
+                const top = verticalBounds.minTop +
+                    (verticalBounds.maxTop - verticalBounds.minTop) *
+                    hostCardVerticalPosition;
                 hostSlot.style.setProperty("--board-host-left", `${left}px`);
                 hostSlot.style.setProperty("--board-host-top", `${top}px`);
             };
@@ -1674,7 +1706,7 @@
                     playerList.prepend(hostCard);
                 }
 
-                centerHostCard();
+                positionHostCard();
             };
 
             const applyHostCardSize = (width, height) => {
@@ -1695,9 +1727,79 @@
                 };
                 hostSlot.style.setProperty("--board-host-width", `${size.width}px`);
                 hostSlot.style.setProperty("--board-host-height", `${size.height}px`);
-                centerHostCard();
+                positionHostCard();
                 return size;
             };
+
+            if (hostSlot && hostCardDragHandle) {
+                hostCardDragHandle.addEventListener("pointerdown", event => {
+                    if (!canPositionHostCard()) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    const startY = event.clientY;
+                    const startTop = hostSlot.getBoundingClientRect().top;
+                    hostCardDragHandle.setPointerCapture(event.pointerId);
+                    document.body.classList.add("is-moving-host-card");
+
+                    const move = moveEvent => {
+                        const bounds = getHostCardVerticalBounds();
+                        const top = Math.max(
+                            bounds.minTop,
+                            Math.min(
+                                bounds.maxTop,
+                                startTop + moveEvent.clientY - startY));
+                        const range = bounds.maxTop - bounds.minTop;
+                        hostCardVerticalPosition = range > 0
+                            ? (top - bounds.minTop) / range
+                            : .5;
+                        hostSlot.style.setProperty(
+                            "--board-host-top",
+                            `${top}px`);
+                    };
+
+                    const stop = stopEvent => {
+                        if (hostCardDragHandle.hasPointerCapture(stopEvent.pointerId)) {
+                            hostCardDragHandle.releasePointerCapture(stopEvent.pointerId);
+                        }
+                        hostCardDragHandle.removeEventListener("pointermove", move);
+                        hostCardDragHandle.removeEventListener("pointerup", stop);
+                        hostCardDragHandle.removeEventListener("pointercancel", stop);
+                        document.body.classList.remove("is-moving-host-card");
+                        localStorage.setItem(
+                            hostCardPositionKey,
+                            hostCardVerticalPosition.toString());
+                    };
+
+                    hostCardDragHandle.addEventListener("pointermove", move);
+                    hostCardDragHandle.addEventListener("pointerup", stop);
+                    hostCardDragHandle.addEventListener("pointercancel", stop);
+                });
+
+                hostCardDragHandle.addEventListener("keydown", event => {
+                    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    const bounds = getHostCardVerticalBounds();
+                    const currentTop = hostSlot.getBoundingClientRect().top;
+                    const top = Math.max(
+                        bounds.minTop,
+                        Math.min(
+                            bounds.maxTop,
+                            currentTop + (event.key === "ArrowDown" ? 24 : -24)));
+                    const range = bounds.maxTop - bounds.minTop;
+                    hostCardVerticalPosition = range > 0
+                        ? (top - bounds.minTop) / range
+                        : .5;
+                    positionHostCard();
+                    localStorage.setItem(
+                        hostCardPositionKey,
+                        hostCardVerticalPosition.toString());
+                });
+            }
 
             if (hostSlot && hostCardResizer) {
                 try {

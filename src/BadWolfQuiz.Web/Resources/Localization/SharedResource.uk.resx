@@ -1032,6 +1032,7 @@
   <data name="PlayerWebcam_RequiresHttps" xml:space="preserve"><value>Для доступу до камери відкрийте сайт через захищене HTTPS-з’єднання.</value></data>
   <data name="PlayerWebcam_AccessFailed" xml:space="preserve"><value>Не вдалося отримати доступ до камери. Перевірте дозвіл браузера.</value></data>
   <data name="GameBoard_ResizeHostCard" xml:space="preserve"><value>Змінити ширину та висоту картки хоста</value></data>
+  <data name="GameBoard_MoveHostCard" xml:space="preserve"><value>Перемістити картку хоста вгору або вниз</value></data>
   <data name="BrandLogo_Label" xml:space="preserve"><value>Власний логотип у хедері</value></data>
   <data name="BrandLogo_Hint" xml:space="preserve"><value>Зображення до 5 МБ. Воно замінює BAD WOLF QUIZ у хедері, коли ви авторизовані.</value></data>
   <data name="BrandLogo_PreviewAlt" xml:space="preserve"><value>Прев’ю власного логотипа</value></data>
