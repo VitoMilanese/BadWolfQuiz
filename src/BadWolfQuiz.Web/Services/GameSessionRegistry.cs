@@ -951,6 +951,8 @@ public sealed class GameSessionRegistry
                     player.Name,
                     player.Score,
                     player.AvatarId,
+                    player.UploadedImageDataUrl,
+                    player.UsesUploadedImage,
                     _playerConnections.Values.Any(connection =>
                         connection.Access.Game == game &&
                         connection.Access.Player.Id == player.Id &&

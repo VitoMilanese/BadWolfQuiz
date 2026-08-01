@@ -7,6 +7,8 @@ public sealed record PlayerLobbyEntry(
     string Name,
     int Score,
     string? AvatarId,
+    string? UploadedImageDataUrl,
+    bool UsesUploadedImage,
     bool IsWebcamEnabled,
     PlayerPresenceStatus Presence);
 
