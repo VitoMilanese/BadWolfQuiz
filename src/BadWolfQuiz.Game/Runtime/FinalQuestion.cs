@@ -33,6 +33,21 @@ public sealed class FinalQuestion
     public IReadOnlyList<FinalPlayerSubmission> Submissions =>
         _readOnlySubmissions;
 
+    internal FinalQuestionState CaptureState() => new(
+        Status,
+        _submissions.Select(submission => submission.CaptureState()).ToArray());
+
+    internal static FinalQuestion Restore(
+        FinalQuestionSnapshot definition,
+        FinalQuestionState state)
+    {
+        var finalQuestion = new FinalQuestion(definition, []);
+        finalQuestion.Status = state.Status;
+        finalQuestion._submissions.AddRange(
+            state.Submissions.Select(FinalPlayerSubmission.Restore));
+        return finalQuestion;
+    }
+
     internal FinalPlayerSubmission SubmitWager(
         GamePlayerId playerId,
         int amount,
@@ -140,6 +155,30 @@ public sealed class FinalPlayerSubmission
     public bool? IsCorrect { get; private set; }
 
     public DateTimeOffset? JudgedAtUtc { get; private set; }
+
+    internal FinalPlayerSubmissionState CaptureState() => new(
+        PlayerId,
+        PlayerName,
+        MaximumWager,
+        Wager,
+        Answer,
+        IsCorrect,
+        JudgedAtUtc);
+
+    internal static FinalPlayerSubmission Restore(FinalPlayerSubmissionState state)
+    {
+        var submission = new FinalPlayerSubmission(
+            state.PlayerId,
+            state.PlayerName,
+            state.MaximumWager)
+        {
+            Wager = state.Wager,
+            Answer = state.Answer,
+            IsCorrect = state.IsCorrect,
+            JudgedAtUtc = state.JudgedAtUtc
+        };
+        return submission;
+    }
 
     internal void SubmitWager(int amount, DateTimeOffset submittedAtUtc)
     {

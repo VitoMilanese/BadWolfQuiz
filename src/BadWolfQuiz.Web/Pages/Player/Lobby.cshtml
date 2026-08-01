@@ -6,6 +6,7 @@
 
 <div class="form-card narrow player-lobby"
      data-game-code="@Model.Game.PublicCode"
+     data-game-instance-id="@Model.Game.ClientInstanceId"
      data-player-id="@Model.CurrentPlayer.Id.Value"
      data-player-name="@Model.CurrentPlayer.Name"
      data-avatar-id="@Model.CurrentPlayer.AvatarId"
@@ -348,6 +349,7 @@
             }
 
             const gameCode = lobby.dataset.gameCode;
+            const gameInstanceId = lobby.dataset.gameInstanceId;
             const normalizedPlayerName =
                 lobby.dataset.playerName.trim().toLocaleLowerCase();
             const avatarPreferenceKey = `badwolfquiz:avatar:${normalizedPlayerName}`;
@@ -368,6 +370,8 @@
             removedFromGameDialog?.addEventListener("close", removedFromGameRedirect);
             const playerId = lobby.dataset.playerId;
             const storageKey = `badwolfquiz:${gameCode}:player:${playerId}`;
+            const currentPlayerStorageKey =
+                `badwolfquiz:${gameCode}:current-player`;
             const transitionStorageKey = `${storageKey}:transition`;
             const bootstrapToken = lobby.dataset.accessToken;
 
@@ -380,10 +384,11 @@
 
             if (accessToken) {
                 localStorage.setItem(
-                    `badwolfquiz:${gameCode}:current-player`,
+                    currentPlayerStorageKey,
                     JSON.stringify({
                         playerId,
                         accessToken,
+                        gameInstanceId,
                         path: window.location.pathname
                     }));
             }
@@ -859,7 +864,9 @@
             });
 
             connection.on("PlayerAccessRejected", () => {
-                warning.hidden = false;
+                localStorage.removeItem(storageKey);
+                localStorage.removeItem(currentPlayerStorageKey);
+                removedFromGameRedirect();
             });
 
             connection.on("RejoinApprovalRequired", () => {

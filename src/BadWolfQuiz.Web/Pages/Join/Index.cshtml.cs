@@ -18,11 +18,14 @@ public sealed class IndexModel(
     [BindProperty]
     public JoinGameInput Input { get; set; } = new();
 
+    public string? GameInstanceId { get; private set; }
+
     public void OnGet(string? code)
     {
         if (!string.IsNullOrWhiteSpace(code))
         {
             Input.GameCode = GameSessionRegistry.NormalizeCode(code);
+            GameInstanceId = sessionRegistry.Find(Input.GameCode)?.ClientInstanceId;
         }
     }
 
@@ -30,6 +33,7 @@ public sealed class IndexModel(
     {
         Input.GameCode = GameSessionRegistry.NormalizeCode(Input.GameCode ?? string.Empty);
         Input.PlayerName = Input.PlayerName?.Trim() ?? string.Empty;
+        GameInstanceId = sessionRegistry.Find(Input.GameCode)?.ClientInstanceId;
         ModelState.Clear();
         TryValidateModel(Input, nameof(Input));
 

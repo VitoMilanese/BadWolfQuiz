@@ -718,6 +718,7 @@
   </data>
 
   <data name="Button_CreateGame" xml:space="preserve"><value>Створити гру</value></data>
+  <data name="Button_ContinueGame" xml:space="preserve"><value>Продовжити гру</value></data>
   <data name="Button_BackToQuizzes" xml:space="preserve"><value>Назад до квізів</value></data>
   <data name="GameLobby_Eyebrow" xml:space="preserve"><value>Лобі ведучого</value></data>
   <data name="GameLobby_StatusLabel" xml:space="preserve"><value>Статус</value></data>

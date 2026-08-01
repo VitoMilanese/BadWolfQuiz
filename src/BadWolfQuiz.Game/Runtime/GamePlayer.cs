@@ -28,6 +28,27 @@ public sealed class GamePlayer
         Score = checked(Score + points);
     }
 
+    internal GamePlayerState CaptureState() => new(
+        Id,
+        Name,
+        Score,
+        AvatarId,
+        UploadedImageDataUrl,
+        UsesUploadedImage,
+        JoinedAtUtc);
+
+    internal static GamePlayer Restore(GamePlayerState state)
+    {
+        var player = new GamePlayer(state.Id, state.Name, state.JoinedAtUtc)
+        {
+            Score = state.Score,
+            AvatarId = state.AvatarId,
+            UploadedImageDataUrl = state.UploadedImageDataUrl,
+            UsesUploadedImage = state.UsesUploadedImage
+        };
+        return player;
+    }
+
     public void SetAvatar(string avatarId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(avatarId);

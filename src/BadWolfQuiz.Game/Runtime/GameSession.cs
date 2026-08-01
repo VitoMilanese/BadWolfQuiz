@@ -31,7 +31,7 @@ public sealed class GameSession
         _readOnlyPlayers = _players.AsReadOnly();
     }
 
-    public GameSessionId Id { get; }
+    public GameSessionId Id { get; private set; }
 
     public QuizSnapshot Quiz { get; }
 
@@ -76,7 +76,7 @@ public sealed class GameSession
 
     public GameTimer AnswerTimer { get; private set; }
 
-    public DateTimeOffset CreatedAtUtc { get; }
+    public DateTimeOffset CreatedAtUtc { get; private set; }
 
     public DateTimeOffset? StartedAtUtc { get; private set; }
 
@@ -85,6 +85,67 @@ public sealed class GameSession
         TimeProvider? timeProvider = null)
     {
         return Create(quiz, GameSessionSettings.Default, timeProvider);
+    }
+
+    public GameSessionState CaptureState() => new(
+        Id,
+        Status,
+        ActivePlayerId,
+        CurrentRoundIndex,
+        CreatedAtUtc,
+        StartedAtUtc,
+        _currentRoundStartScores
+            .Select(score => new PlayerRoundStartScoreState(score.Key, score.Value))
+            .ToArray(),
+        _players.Select(player => player.CaptureState()).ToArray(),
+        _removedPlayers.Select(player => player.CaptureState()).ToArray(),
+        Board.Questions.Select(question => question.CaptureState()).ToArray(),
+        FinalQuestion?.CaptureState());
+
+    public static GameSession Restore(
+        QuizSnapshot quiz,
+        GameSessionSettings settings,
+        GameSessionState state,
+        TimeProvider? timeProvider = null)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        var session = new GameSession(
+            quiz,
+            settings,
+            timeProvider ?? TimeProvider.System)
+        {
+            Id = state.Id,
+            Status = state.Status,
+            ActivePlayerId = state.ActivePlayerId,
+            CurrentRoundIndex = state.CurrentRoundIndex,
+            CreatedAtUtc = state.CreatedAtUtc,
+            StartedAtUtc = state.StartedAtUtc
+        };
+
+        session._players.AddRange(state.Players.Select(GamePlayer.Restore));
+        session._removedPlayers.AddRange(
+            state.RemovedPlayers.Select(GamePlayer.Restore));
+        session._currentRoundStartScores.Clear();
+        foreach (var score in state.CurrentRoundStartScores)
+        {
+            session._currentRoundStartScores[score.PlayerId] = score.Score;
+        }
+        session.Board.RestoreState(state.Questions);
+        foreach (var question in session.Board.Questions)
+        {
+            question.SuspendOpenBuzzerForRecovery();
+        }
+        session.FinalQuestion = state.FinalQuestion is null
+            ? null
+            : FinalQuestion.Restore(
+                quiz.FinalQuestion ?? throw new InvalidOperationException(
+                    "The saved final question no longer exists."),
+                state.FinalQuestion);
+
+        // Timer progress is intentionally not restored.
+        session.Timer.Stop();
+        session.AnswerTimer.Stop();
+        return session;
     }
 
     public static GameSession Create(

@@ -718,6 +718,7 @@
   </data>
 
   <data name="Button_CreateGame" xml:space="preserve"><value>Create game</value></data>
+  <data name="Button_ContinueGame" xml:space="preserve"><value>Continue game</value></data>
   <data name="Button_BackToQuizzes" xml:space="preserve"><value>Back to quizzes</value></data>
   <data name="GameLobby_Eyebrow" xml:space="preserve"><value>Host lobby</value></data>
   <data name="GameLobby_StatusLabel" xml:space="preserve"><value>Status</value></data>

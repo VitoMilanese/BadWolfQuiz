@@ -18,6 +18,16 @@ public sealed class GameBoard
 
     public IReadOnlyList<RuntimeQuestion> Questions => _questions;
 
+    internal void RestoreState(IReadOnlyList<RuntimeQuestionState> states)
+    {
+        foreach (var state in states)
+        {
+            _questions.Single(question =>
+                question.SourceQuestionId == state.SourceQuestionId)
+                .RestoreState(state);
+        }
+    }
+
     private static IEnumerable<RuntimeQuestion> CreateRoundQuestions(
         QuizRoundSnapshot round)
     {
@@ -99,7 +109,7 @@ public sealed class RuntimeQuestion
 
     public int Points { get; }
 
-    public bool IsSpecial { get; }
+    public bool IsSpecial { get; private set; }
 
     public IReadOnlyList<ContentBlockSnapshot> QuestionBlocks { get; }
 
@@ -117,6 +127,39 @@ public sealed class RuntimeQuestion
     public GamePlayerId? AnsweringPlayerId { get; private set; }
 
     public IReadOnlyList<QuestionAnswerAttempt> AnswerAttempts => _readOnlyAnswerAttempts;
+
+    internal RuntimeQuestionState CaptureState() => new(
+        SourceQuestionId,
+        IsSpecial,
+        Status,
+        SelectedByPlayerId,
+        Wager,
+        BuzzerStatus,
+        AnsweringPlayerId,
+        _answerAttempts.ToArray());
+
+    internal void RestoreState(RuntimeQuestionState state)
+    {
+        IsSpecial = state.IsSpecial;
+        Status = state.Status;
+        SelectedByPlayerId = state.SelectedByPlayerId;
+        Wager = state.Wager;
+        BuzzerStatus = state.BuzzerStatus;
+        AnsweringPlayerId = state.AnsweringPlayerId;
+        _answerAttempts.Clear();
+        _answerAttempts.AddRange(state.AnswerAttempts);
+    }
+
+    internal void SuspendOpenBuzzerForRecovery()
+    {
+        if (BuzzerStatus != QuestionBuzzerStatus.Open)
+        {
+            return;
+        }
+
+        BuzzerStatus = QuestionBuzzerStatus.Inactive;
+        AnsweringPlayerId = null;
+    }
 
     internal void Select(GamePlayerId selectedByPlayerId)
     {

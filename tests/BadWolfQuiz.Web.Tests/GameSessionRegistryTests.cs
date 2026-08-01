@@ -1,6 +1,8 @@
 using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
+using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Services;
+using System.Text.Json;
 
 namespace BadWolfQuiz.Web.Tests;
 
@@ -665,6 +667,70 @@ public sealed class GameSessionRegistryTests
     private static GameSessionRegistry CreateRegistry(params string[] codes)
     {
         return new GameSessionRegistry(new StubGameCodeGenerator(codes));
+    }
+
+    [Fact]
+    public void Recovered_player_can_rejoin_once_with_the_same_score()
+    {
+        var original = BadWolfQuiz.Game.Runtime.GameSession.Create(CreateQuiz());
+        var player = original.AddPlayer("Rose");
+        original.AdjustPlayerScore(player.Id, 300);
+        original.Start();
+        var registry = CreateRegistry();
+        registry.Restore("ABC123", original, "host-1", false);
+
+        var rejoined = registry.JoinPlayer("ABC123", "rose");
+        var duplicate = registry.JoinPlayer("ABC123", "Rose");
+        var newPlayer = registry.JoinPlayer("ABC123", "Mickey");
+
+        Assert.Equal(PlayerJoinStatus.Success, rejoined.Status);
+        Assert.Equal(player.Id, rejoined.Player!.Id);
+        Assert.Equal(300, rejoined.Player.Score);
+        Assert.Equal(PlayerJoinStatus.NameAlreadyUsed, duplicate.Status);
+        Assert.Equal(PlayerJoinStatus.GameAlreadyStarted, newPlayer.Status);
+    }
+
+    [Fact]
+    public void Approved_recovered_player_receives_avatar_and_open_buzzer_state()
+    {
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(10),
+            GamePhaseStartMode.Automatic,
+            GamePhaseStartMode.Automatic);
+        var original = BadWolfQuiz.Game.Runtime.GameSession.Create(
+            CreateQuiz(),
+            settings);
+        var player = original.AddPlayer("Rose");
+        player.SetAvatar("F/19.png");
+        original.Start();
+        var registry = CreateRegistry();
+        var game = registry.Restore("ABC123", original, "host-1", true);
+        Assert.Equal(
+            PlayerPresenceStatus.Disconnected,
+            registry.GetPlayerLobbyEntries(game).Single().Presence);
+        var rejoined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            rejoined.AccessToken!,
+            "connection-1",
+            isVisible: false);
+        Assert.Equal(
+            PlayerPresenceStatus.RejoinPending,
+            registry.GetPlayerLobbyEntries(game).Single().Presence);
+        registry.ApprovePlayerRejoin("ABC123", player.Id);
+
+        registry.SelectQuestion("ABC123", 1);
+
+        var playersJson = JsonSerializer.SerializeToElement(
+            GameHub.CreatePlayersUpdate(registry, game));
+        var restoredPlayer = playersJson
+            .GetProperty("players")[0];
+        var buzzerJson = JsonSerializer.SerializeToElement(
+            GameHub.CreateBuzzerUpdate(game));
+        Assert.Equal("F/19.png", restoredPlayer.GetProperty("avatarId").GetString());
+        Assert.Equal("inactive", restoredPlayer.GetProperty("presence").GetString());
+        Assert.Equal("open", buzzerJson.GetProperty("status").GetString());
     }
 
     private static QuizSnapshot CreateQuiz()

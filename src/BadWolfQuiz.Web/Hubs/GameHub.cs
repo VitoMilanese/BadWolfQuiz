@@ -343,10 +343,12 @@ public sealed class GameHub(
                 id = player.Id.Value,
                 player.Name,
                 player.Score,
-                avatarId = player.Presence == PlayerPresenceStatus.Active
+                avatarId = player.Presence is
+                    PlayerPresenceStatus.Active or PlayerPresenceStatus.Inactive
                     ? player.AvatarId
                     : null,
-                imageDataUrl = player.Presence == PlayerPresenceStatus.Active &&
+                imageDataUrl = (player.Presence is
+                    PlayerPresenceStatus.Active or PlayerPresenceStatus.Inactive) &&
                     player.UsesUploadedImage
                         ? player.UploadedImageDataUrl
                         : null,

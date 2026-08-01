@@ -9,6 +9,55 @@ public sealed class GameSessionTests
         new(2026, 7, 29, 12, 0, 0, TimeSpan.Zero);
 
     [Fact]
+    public void Restore_preserves_gameplay_state_but_stops_timers()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, rose.Id);
+        session.JudgeQuestionAnswer(100, rose.Id, false);
+
+        var restored = GameSession.Restore(
+            session.Quiz,
+            session.Settings,
+            session.CaptureState());
+
+        Assert.Equal(session.Id, restored.Id);
+        Assert.Equal(GameSessionStatus.Running, restored.Status);
+        Assert.Equal(2, restored.Players.Count);
+        Assert.Equal(-100, restored.Players.Single(p => p.Id == rose.Id).Score);
+        var question = restored.Board.Questions.Single(q => q.SourceQuestionId == 100);
+        Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
+        Assert.Equal(QuestionBuzzerStatus.Inactive, question.BuzzerStatus);
+        Assert.Single(question.AnswerAttempts);
+        Assert.Equal(GameTimerStatus.Stopped, restored.Timer.Status);
+        Assert.Equal(GameTimerStatus.Stopped, restored.AnswerTimer.Status);
+    }
+
+    [Fact]
+    public void Restore_preserves_a_claimed_buzzer()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, rose.Id);
+
+        var restored = GameSession.Restore(
+            session.Quiz,
+            session.Settings,
+            session.CaptureState());
+
+        var question = restored.Board.Questions.Single(q => q.SourceQuestionId == 100);
+        Assert.Equal(QuestionBuzzerStatus.Claimed, question.BuzzerStatus);
+        Assert.Equal(rose.Id, question.AnsweringPlayerId);
+    }
+
+    [Fact]
     public void Create_uses_game_specific_timer_settings()
     {
         var settings = new GameSessionSettings(

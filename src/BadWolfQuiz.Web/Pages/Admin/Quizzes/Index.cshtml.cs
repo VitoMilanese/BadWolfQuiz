@@ -12,13 +12,44 @@ namespace BadWolfQuiz.Web.Pages.Admin.Quizzes;
 public sealed class IndexModel(
     QuizDbContext db,
     GameSessionLauncher gameSessionLauncher,
+    GameSessionRegistry sessionRegistry,
+    ActiveGameStore activeGameStore,
+    CurrentHost currentHost,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     public IReadOnlyList<Quiz> Quizzes { get; private set; } = [];
+    public IReadOnlySet<int> ResumableQuizIds { get; private set; } =
+        new HashSet<int>();
 
     public async Task OnGetAsync()
     {
         await LoadQuizzesAsync();
+    }
+
+    public IActionResult OnPostContinueGame(int quizId)
+    {
+        var snapshot = activeGameStore.Find(currentHost.RequiredId, quizId);
+        if (snapshot is null)
+        {
+            return NotFound();
+        }
+
+        var game = sessionRegistry.Find(snapshot.SessionState.Id);
+        if (game is null)
+        {
+            game = sessionRegistry.Restore(
+                snapshot.PublicCode,
+                BadWolfQuiz.Game.Runtime.GameSession.Restore(
+                    snapshot.Quiz,
+                    snapshot.Settings,
+                    snapshot.SessionState),
+                snapshot.HostId,
+                snapshot.AllowsNewPlayers);
+        }
+
+        return RedirectToPage(
+            "/Admin/Games/Lobby",
+            new { id = game.Session.Id.Value });
     }
 
     public async Task<IActionResult> OnPostCreateGameAsync(
@@ -122,5 +153,9 @@ public sealed class IndexModel(
             .Where(x => !x.IsArchived)
             .OrderByDescending(x => x.UpdatedAtUtc)
             .ToListAsync();
+        ResumableQuizIds = activeGameStore.GetAll()
+            .Where(snapshot => snapshot.HostId == currentHost.RequiredId)
+            .Select(snapshot => snapshot.Quiz.SourceQuizId)
+            .ToHashSet();
     }
 }

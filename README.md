@@ -96,6 +96,8 @@ Content blocks can be:
 Currently implemented:
 
 - Create a game from an immutable quiz snapshot
+- Continue one unfinished game per quiz after an application restart, preserving
+  the board, players, scores, visuals, and answer history
 - Lobby and join code
 - Join and reconnect flows with host approval
 - Real-time player presence and score updates
@@ -210,6 +212,15 @@ SQLite database is automatically created in:
 ```
 src/BadWolfQuiz.Web/App_Data/badwolfquiz.db
 ```
+
+Unfinished game snapshots are stored atomically in:
+
+```
+src/BadWolfQuiz.Web/App_Data/active-games.json
+```
+
+See [Active Game Recovery](docs/features/active-game-recovery.md) for recovery
+behavior and snapshot scope.
 
 ---
 

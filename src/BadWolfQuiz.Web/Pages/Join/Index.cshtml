@@ -8,7 +8,10 @@
     <p class="eyebrow">@Localizer["Join_Eyebrow"]</p>
     <h1>@Localizer["Title_JoinGame"]</h1>
 
-    <form id="join-game-form" method="post" class="stack-form">
+    <form id="join-game-form"
+          method="post"
+          class="stack-form"
+          data-game-instance-id="@Model.GameInstanceId">
         <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
         @if (string.IsNullOrWhiteSpace(Model.Input.GameCode))
@@ -50,6 +53,7 @@
             const codeInput = document.getElementById("Input_GameCode");
             const nameInput = document.getElementById("Input_PlayerName");
             const avatarInput = document.getElementById("Input_AvatarId");
+            const gameInstanceId = form?.dataset.gameInstanceId;
 
             const restoreAvatar = () => {
                 const normalizedName = nameInput?.value.trim().toLocaleLowerCase();
@@ -78,7 +82,10 @@
                 try {
                     const identity = JSON.parse(storedIdentity);
 
-                    if (identity.accessToken && identity.playerId && identity.path) {
+                    if (identity.accessToken &&
+                        identity.playerId &&
+                        identity.path &&
+                        identity.gameInstanceId === gameInstanceId) {
                         event.preventDefault();
                         window.location.assign(identity.path);
                     }

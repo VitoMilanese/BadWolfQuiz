@@ -187,7 +187,8 @@
                 {
                     <li class="@(Model.Game.Session.ActivePlayerId == player.Id ? "active-player" : null)"
                         data-player-id="@player.Id.Value">
-                        @if (Model.ActivePlayerIds.Contains(player.Id) &&
+                        @if ((player.Presence is BadWolfQuiz.Web.Services.PlayerPresenceStatus.Active or
+                                BadWolfQuiz.Web.Services.PlayerPresenceStatus.Inactive) &&
                              (player.UsesUploadedImage ||
                               !string.IsNullOrWhiteSpace(player.AvatarId)))
                         {
@@ -196,6 +197,12 @@
                                  alt="" />
                         }
                         <strong>@player.Name</strong>
+                        @if (player.Presence != BadWolfQuiz.Web.Services.PlayerPresenceStatus.Active)
+                        {
+                            <span class="presence-badge presence-@player.Presence.ToString().ToLowerInvariant()">
+                                @Localizer[$"PlayerPresence_{player.Presence}"]
+                            </span>
+                        }
                         <span class="player-management">
                             @if (Model.Game.Session.ActivePlayerId == player.Id)
                             {
@@ -578,12 +585,12 @@
                 var eligiblePlayers = Model.CurrentQuestion.IsSpecial
                     ? Model.Game.Session.AnswerTimer.Status ==
                             BadWolfQuiz.Game.Runtime.GameTimerStatus.Stopped
-                        ? Enumerable.Empty<BadWolfQuiz.Game.Runtime.GamePlayer>()
+                        ? Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>()
                         : Model.Players.Where(player =>
                             player.Id == Model.CurrentQuestion.Wager!.PlayerId)
                     : Model.CurrentQuestion.AnsweringPlayerId is { } answeringPlayerId
                         ? Model.Players.Where(player => player.Id == answeringPlayerId)
-                        : Enumerable.Empty<BadWolfQuiz.Game.Runtime.GamePlayer>();
+                        : Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>();
 
                 @if (!Model.CurrentQuestion.IsSpecial &&
                     Model.Game.BuzzerRace is { } buzzerRace &&
@@ -878,7 +885,8 @@
                           aria-orientation="vertical"
                           aria-label="@Localizer["GameBoard_ResizePlayerCards"]"
                           tabindex="0"></span>
-                    @if (Model.ActivePlayerIds.Contains(player.Id) &&
+                    @if ((player.Presence is BadWolfQuiz.Web.Services.PlayerPresenceStatus.Active or
+                            BadWolfQuiz.Web.Services.PlayerPresenceStatus.Inactive) &&
                          (player.UsesUploadedImage ||
                           !string.IsNullOrWhiteSpace(player.AvatarId)))
                     {
@@ -887,6 +895,12 @@
                              alt="" />
                     }
                     <strong>@player.Name</strong>
+                    @if (player.Presence != BadWolfQuiz.Web.Services.PlayerPresenceStatus.Active)
+                    {
+                        <span class="presence-badge presence-@player.Presence.ToString().ToLowerInvariant()">
+                            @Localizer[$"PlayerPresence_{player.Presence}"]
+                        </span>
+                    }
                     <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
                         @player.Score
                     </span>
@@ -1191,7 +1205,8 @@
                           aria-orientation="vertical"
                           aria-label="@Localizer["GameBoard_ResizePlayerCards"]"
                           tabindex="0"></span>
-                    @if (Model.ActivePlayerIds.Contains(player.Id) &&
+                    @if ((player.Presence is BadWolfQuiz.Web.Services.PlayerPresenceStatus.Active or
+                            BadWolfQuiz.Web.Services.PlayerPresenceStatus.Inactive) &&
                          (player.UsesUploadedImage ||
                           !string.IsNullOrWhiteSpace(player.AvatarId)))
                     {
@@ -1200,6 +1215,12 @@
                              alt="" />
                     }
                     <strong>@player.Name</strong>
+                    @if (player.Presence != BadWolfQuiz.Web.Services.PlayerPresenceStatus.Active)
+                    {
+                        <span class="presence-badge presence-@player.Presence.ToString().ToLowerInvariant()">
+                            @Localizer[$"PlayerPresence_{player.Presence}"]
+                        </span>
+                    }
                     <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
                         @player.Score
                     </span>
