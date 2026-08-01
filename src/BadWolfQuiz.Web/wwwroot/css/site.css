@@ -320,6 +320,10 @@ select {
     flex-wrap: wrap;
 }
 
+.discord-button {
+    gap: 9px;
+}
+
 .discord-button svg {
     width: 1.35em;
     height: 1.35em;
@@ -3017,7 +3021,7 @@ iframe.game-content-video {
 }
 
 .buzzer-race-card {
-    width: min(680px, 92vw);
+    width: min(900px, 94vw);
     padding: clamp(24px, 4vw, 42px);
     border: 2px solid var(--gold);
     border-radius: 22px;
@@ -3032,6 +3036,7 @@ iframe.game-content-video {
     color: var(--gold);
     font-size: clamp(1.5rem, 3vw, 2.6rem);
     font-weight: 950;
+    white-space: nowrap;
 }
 
 .buzzer-race-card ul {
@@ -3042,6 +3047,12 @@ iframe.game-content-video {
     list-style: none;
     font-size: clamp(1rem, 2vw, 1.4rem);
     font-weight: 800;
+}
+
+@media (max-width: 700px) {
+    .buzzer-race-card p {
+        white-space: normal;
+    }
 }
 
 @keyframes buzzer-race-overlay-life {
