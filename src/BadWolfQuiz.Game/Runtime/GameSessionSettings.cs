@@ -83,7 +83,7 @@ public sealed record GameSessionSettings
         HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.None;
 }
 
-public sealed class SiteThemeColors
+public sealed record SiteThemeColors
 {
     public SiteThemeColors()
     {
