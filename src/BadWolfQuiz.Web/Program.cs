@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Threading.RateLimiting;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
@@ -11,6 +12,7 @@ using Resend;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +40,21 @@ builder.Services.AddHttpClient<ResendClient>();
 builder.Services.Configure<ResendClientOptions>(options =>
     options.ApiToken = builder.Configuration["Resend:ApiToken"] ?? string.Empty);
 builder.Services.AddTransient<IResend, ResendClient>();
+builder.Services.AddHttpClient<DiscordQuestionSender>();
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("discord-questions", httpContext =>
+        !HttpMethods.IsPost(httpContext.Request.Method)
+            ? RateLimitPartition.GetNoLimiter("discord-questions-read")
+            : RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+});
 
 var supportedCultures = new[]
 {
@@ -103,6 +120,7 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/avatars"
 });
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

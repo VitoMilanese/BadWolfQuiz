@@ -97,6 +97,8 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
         public byte[]? HostImageData { get; set; }
         public string? HostImageContentType { get; set; }
         public string? HostAvatarId { get; set; }
+        public byte[]? BrandLogoData { get; set; }
+        public string? BrandLogoContentType { get; set; }
 
         public GameSessionSettings ToRuntimeSettings() => new(
             BuzzerDuration,
@@ -109,7 +111,9 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             HostVisualSource,
             HostImageData,
             HostImageContentType,
-            HostAvatarId);
+            HostAvatarId,
+            BrandLogoData,
+            BrandLogoContentType);
 
         public static StoredGameSettings From(GameSessionSettings settings) => new()
         {
@@ -123,7 +127,9 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             HostVisualSource = settings.HostVisualSource,
             HostImageData = settings.HostImageData,
             HostImageContentType = settings.HostImageContentType,
-            HostAvatarId = settings.HostAvatarId
+            HostAvatarId = settings.HostAvatarId,
+            BrandLogoData = settings.BrandLogoData,
+            BrandLogoContentType = settings.BrandLogoContentType
         };
     }
 }
@@ -155,7 +161,9 @@ public sealed class GameSettingsInput
 
     public GameSessionSettings ToRuntimeSettings(
         byte[]? hostImageData = null,
-        string? hostImageContentType = null)
+        string? hostImageContentType = null,
+        byte[]? brandLogoData = null,
+        string? brandLogoContentType = null)
     {
         if (!IsValid)
         {
@@ -176,7 +184,9 @@ public sealed class GameSettingsInput
             HostVisualSource,
             hostImageData,
             hostImageContentType,
-            HostAvatarId);
+            HostAvatarId,
+            brandLogoData,
+            brandLogoContentType);
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)

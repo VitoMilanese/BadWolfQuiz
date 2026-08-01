@@ -286,7 +286,11 @@ public sealed class LobbyModel(
             return null;
         }
 
-        return SettingsInput.ToRuntimeSettings(imageData, imageContentType);
+        return SettingsInput.ToRuntimeSettings(
+            imageData,
+            imageContentType,
+            existing.BrandLogoData,
+            existing.BrandLogoContentType);
     }
 
     public async Task<IActionResult> OnPostStartWagerAnswerTimerAsync(

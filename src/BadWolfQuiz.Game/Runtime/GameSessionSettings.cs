@@ -20,7 +20,9 @@ public sealed record GameSessionSettings
         HostVisualSource hostVisualSource = HostVisualSource.None,
         byte[]? hostImageData = null,
         string? hostImageContentType = null,
-        string? hostAvatarId = null)
+        string? hostAvatarId = null,
+        byte[]? brandLogoData = null,
+        string? brandLogoContentType = null)
     {
         if (buzzerDuration <= TimeSpan.Zero)
         {
@@ -47,6 +49,8 @@ public sealed record GameSessionSettings
         HostImageData = hostImageData;
         HostImageContentType = hostImageContentType;
         HostAvatarId = hostAvatarId;
+        BrandLogoData = brandLogoData;
+        BrandLogoContentType = brandLogoContentType;
     }
 
     public TimeSpan BuzzerDuration { get; }
@@ -65,6 +69,8 @@ public sealed record GameSessionSettings
     public byte[]? HostImageData { get; }
     public string? HostImageContentType { get; }
     public string? HostAvatarId { get; }
+    public byte[]? BrandLogoData { get; }
+    public string? BrandLogoContentType { get; }
 
     public bool HasHostCard =>
         !string.IsNullOrWhiteSpace(HostName) ||

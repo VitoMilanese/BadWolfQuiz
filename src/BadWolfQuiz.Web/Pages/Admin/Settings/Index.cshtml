@@ -20,6 +20,25 @@
     <p class="settings-description">@Localizer["GameSettings_GlobalDescription"]</p>
     <div asp-validation-summary="ModelOnly" class="message message-error"></div>
     <div class="settings-grid">
+    <label class="brand-logo-field">
+        <span>@Localizer["BrandLogo_Label"]</span>
+        <span class="brand-logo-input-row">
+            <input asp-for="BrandLogo" type="file" accept="image/*" data-brand-logo-input />
+            <img class="brand-logo-preview"
+                 data-brand-logo-preview
+                 src="@(Model.HasBrandLogo ? Url.Page("/Admin/Settings/Index", "BrandLogo") : null)"
+                 alt="@Localizer["BrandLogo_PreviewAlt"]"
+                 hidden="@(Model.HasBrandLogo ? null : "hidden")" />
+        </span>
+        <small>@Localizer["BrandLogo_Hint"]</small>
+    </label>
+    @if (Model.HasBrandLogo)
+    {
+        <label class="settings-checkbox">
+            <input asp-for="RemoveBrandLogo" type="checkbox" />
+            <span>@Localizer["BrandLogo_Remove"]</span>
+        </label>
+    }
     <label>
         <span>@Localizer["GameSettings_BuzzerDuration"]</span>
         <input asp-for="Input.BuzzerDurationSeconds" type="number" min="1" max="3600" required />
@@ -92,6 +111,28 @@
 <partial name="_AvatarPicker" />
 
 @section Scripts {
+    <script>
+        (() => {
+            const input = document.querySelector("[data-brand-logo-input]");
+            const preview = document.querySelector("[data-brand-logo-preview]");
+            let previewUrl;
+
+            input?.addEventListener("change", () => {
+                const file = input.files?.[0];
+                if (!file || !preview) {
+                    return;
+                }
+
+                if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                }
+
+                previewUrl = URL.createObjectURL(file);
+                preview.src = previewUrl;
+                preview.hidden = false;
+            });
+        })();
+    </script>
     <script>
         (() => {
             const input = document.querySelector("[data-host-image-input]");

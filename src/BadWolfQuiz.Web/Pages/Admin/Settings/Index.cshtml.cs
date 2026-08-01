@@ -17,13 +17,32 @@ public sealed class IndexModel(
     [BindProperty]
     public IFormFile? HostImage { get; set; }
 
+    [BindProperty]
+    public IFormFile? BrandLogo { get; set; }
+
+    [BindProperty]
+    public bool RemoveBrandLogo { get; set; }
+
     public bool HasHostImage { get; private set; }
+    public bool HasBrandLogo { get; private set; }
 
     public async Task OnGetAsync(CancellationToken cancellationToken)
     {
         var settings = await settingsStore.LoadAsync(cancellationToken);
         Input = GameSettingsInput.From(settings);
         HasHostImage = settings.HostImageData is not null;
+        HasBrandLogo = settings.BrandLogoData is not null;
+    }
+
+    public async Task<IActionResult> OnGetBrandLogoAsync(
+        CancellationToken cancellationToken)
+    {
+        var settings = await settingsStore.LoadAsync(cancellationToken);
+        Response.Headers.CacheControl = "no-store";
+        return settings.BrandLogoData is not null &&
+               !string.IsNullOrWhiteSpace(settings.BrandLogoContentType)
+            ? File(settings.BrandLogoData, settings.BrandLogoContentType)
+            : NotFound();
     }
 
     public async Task<IActionResult> OnGetHostImageAsync(
@@ -44,6 +63,9 @@ public sealed class IndexModel(
         var imageData = existing.HostImageData;
         var imageContentType = existing.HostImageContentType;
         HasHostImage = imageData is not null;
+        var logoData = RemoveBrandLogo ? null : existing.BrandLogoData;
+        var logoContentType = RemoveBrandLogo ? null : existing.BrandLogoContentType;
+        HasBrandLogo = logoData is not null;
 
         if (HostImage is not null)
         {
@@ -62,6 +84,22 @@ public sealed class IndexModel(
             Input.HostVisualSource = BadWolfQuiz.Game.Runtime.HostVisualSource.Image;
         }
 
+        if (BrandLogo is not null)
+        {
+            if (!BrandLogo.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
+                BrandLogo.Length is <= 0 or > 5 * 1024 * 1024)
+            {
+                ModelState.AddModelError(string.Empty, localizer["BrandLogo_InvalidImage"].Value);
+                return Page();
+            }
+
+            await using var stream = new MemoryStream();
+            await BrandLogo.CopyToAsync(stream, cancellationToken);
+            logoData = stream.ToArray();
+            logoContentType = BrandLogo.ContentType;
+            HasBrandLogo = true;
+        }
+
         if (!Input.IsValid)
         {
             ModelState.AddModelError(
@@ -78,7 +116,11 @@ public sealed class IndexModel(
         }
 
         await settingsStore.SaveAsync(
-            Input.ToRuntimeSettings(imageData, imageContentType),
+            Input.ToRuntimeSettings(
+                imageData,
+                imageContentType,
+                logoData,
+                logoContentType),
             cancellationToken);
         TempData["SuccessMessage"] =
             localizer["GameSettings_GlobalSaved"].Value;
