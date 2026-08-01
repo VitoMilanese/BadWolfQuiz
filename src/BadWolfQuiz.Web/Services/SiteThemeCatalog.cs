@@ -21,6 +21,8 @@ public static class SiteThemeCatalog
         "mint-fog",
         "ukrainian-sky",
         "italian-spirit",
+        "pride-spectrum",
+        "retro-arcade",
         "custom"
     };
 

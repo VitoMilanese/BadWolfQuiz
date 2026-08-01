@@ -1055,6 +1055,8 @@
   <data name="SiteTheme_MintFog" xml:space="preserve"><value>Mint Fog</value></data>
   <data name="SiteTheme_UkrainianSky" xml:space="preserve"><value>Ukrainian Sky</value></data>
   <data name="SiteTheme_ItalianSpirit" xml:space="preserve"><value>Italian Spirit</value></data>
+  <data name="SiteTheme_PrideSpectrum" xml:space="preserve"><value>Pride Spectrum</value></data>
+  <data name="SiteTheme_RetroArcade" xml:space="preserve"><value>Retro Arcade</value></data>
   <data name="SiteTheme_Custom" xml:space="preserve"><value>Custom</value></data>
   <data name="SiteTheme_Background" xml:space="preserve"><value>Background</value></data>
   <data name="SiteTheme_Panel" xml:space="preserve"><value>Panel</value></data>

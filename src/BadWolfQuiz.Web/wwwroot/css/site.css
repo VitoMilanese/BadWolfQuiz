@@ -185,6 +185,40 @@ html[data-theme="italian-spirit"] {
     --accent-shadow: rgba(32, 184, 106, 0.22);
 }
 
+html[data-theme="pride-spectrum"] {
+    --bg: #100b18;
+    --panel: #1a1325;
+    --panel-2: #291b38;
+    --line: #5a3c70;
+    --text: #fff8ff;
+    --muted: #c4accb;
+    --red: #c22d8f;
+    --red-bright: #ff69c7;
+    --gold: #ffd166;
+    --body-background: radial-gradient(circle at 12% 10%, rgba(228, 3, 3, 0.18) 0, transparent 24rem), radial-gradient(circle at 38% 0, rgba(255, 140, 0, 0.15) 0, transparent 22rem), radial-gradient(circle at 64% 0, rgba(255, 237, 0, 0.12) 0, transparent 22rem), radial-gradient(circle at 86% 18%, rgba(0, 128, 38, 0.15) 0, transparent 24rem), radial-gradient(circle at 92% 75%, rgba(0, 77, 255, 0.17) 0, transparent 28rem), radial-gradient(circle at 8% 82%, rgba(117, 7, 135, 0.2) 0, transparent 28rem), var(--bg);
+    --topbar-bg: rgba(16, 11, 24, 0.9);
+    --panel-glass: rgba(26, 19, 37, 0.96);
+    --panel-gradient-end: #120c1b;
+    --accent-shadow: rgba(255, 105, 199, 0.25);
+}
+
+html[data-theme="retro-arcade"] {
+    --bg: #07081a;
+    --panel: #10132b;
+    --panel-2: #1a2040;
+    --line: #39427a;
+    --text: #f8f7ff;
+    --muted: #a9add1;
+    --red: #be1f91;
+    --red-bright: #ff43d1;
+    --gold: #b8f34a;
+    --body-background: radial-gradient(circle at 88% 0, rgba(255, 67, 209, 0.27) 0, transparent 32rem), radial-gradient(circle at 8% 100%, rgba(184, 243, 74, 0.12) 0, transparent 28rem), var(--bg);
+    --topbar-bg: rgba(7, 8, 26, 0.9);
+    --panel-glass: rgba(16, 19, 43, 0.96);
+    --panel-gradient-end: #090b20;
+    --accent-shadow: rgba(255, 67, 209, 0.26);
+}
+
 html[data-theme="custom"] {
     --line: color-mix(in srgb, var(--panel-2) 72%, var(--text));
     --body-background: radial-gradient(circle at 92% 0, color-mix(in srgb, var(--red-bright) 26%, transparent) 0, transparent 34rem), radial-gradient(circle at 8% 100%, color-mix(in srgb, var(--gold) 14%, transparent) 0, transparent 30rem), var(--bg);
@@ -3856,6 +3890,14 @@ iframe.game-content-video {
 .theme-option-italy .theme-swatch i { background: #008c45; }
 .theme-option-italy .theme-swatch i:nth-child(2) { background: #f4f4f2; }
 .theme-option-italy .theme-swatch i:nth-child(3) { background: #cd212a; }
+.theme-option-pride .theme-swatch { background: linear-gradient(90deg, #e40303 0 16.6%, #ff8c00 16.6% 33.2%, #ffed00 33.2% 49.8%, #008026 49.8% 66.4%, #004dff 66.4% 83%, #750787 83%); }
+.theme-option-pride .theme-swatch i { background: #ff69c7; }
+.theme-option-pride .theme-swatch i:nth-child(2) { background: #ffd166; }
+.theme-option-pride .theme-swatch i:nth-child(3) { background: #fff8ff; }
+.theme-option-arcade .theme-swatch { background: #10132b; }
+.theme-option-arcade .theme-swatch i { background: #ff43d1; }
+.theme-option-arcade .theme-swatch i:nth-child(2) { background: #b8f34a; }
+.theme-option-arcade .theme-swatch i:nth-child(3) { background: #f8f7ff; }
 .theme-option-custom .theme-swatch { background: var(--panel); }
 .theme-option-custom .theme-swatch i { background: var(--red-bright); }
 .theme-option-custom .theme-swatch i:nth-child(2) { background: var(--gold); }
