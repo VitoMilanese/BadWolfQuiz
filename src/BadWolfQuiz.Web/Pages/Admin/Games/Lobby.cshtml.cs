@@ -290,7 +290,9 @@ public sealed class LobbyModel(
             imageData,
             imageContentType,
             existing.BrandLogoData,
-            existing.BrandLogoContentType);
+            existing.BrandLogoContentType,
+            existing.SiteThemeId,
+            existing.CustomThemeColors);
     }
 
     public async Task<IActionResult> OnPostStartWagerAnswerTimerAsync(

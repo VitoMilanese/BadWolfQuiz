@@ -16,17 +16,18 @@
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
     var discordInviteUrl = Configuration["Discord:InviteUrl"];
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
-    var hasBrandLogo = false;
-    if (isAuthenticated)
-    {
-        var settings = await SettingsStore.LoadAsync(Context.RequestAborted);
-        hasBrandLogo = settings.BrandLogoData is not null &&
-            !string.IsNullOrWhiteSpace(settings.BrandLogoContentType);
-    }
+    var settings = await SettingsStore.LoadAsync(Context.RequestAborted);
+    var siteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId);
+    var customThemeStyle = siteThemeId == "custom"
+        ? SiteThemeCatalog.BuildCssVariables(settings.CustomThemeColors)
+        : null;
+    var hasBrandLogo = isAuthenticated &&
+        settings.BrandLogoData is not null &&
+        !string.IsNullOrWhiteSpace(settings.BrandLogoContentType);
 }
 
 <!DOCTYPE html>
-<html lang="@currentCulture">
+<html lang="@currentCulture" data-theme="@siteThemeId" style="@customThemeStyle">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

@@ -56,6 +56,15 @@ public sealed class GameSettingsStoreTests : IDisposable
             new TestWebHostEnvironment(_contentRoot));
         var expectedImage = new byte[] { 1, 2, 3, 4 };
         var expectedLogo = new byte[] { 5, 6, 7 };
+        var expectedTheme = new SiteThemeColors(
+            "#010203",
+            "#111213",
+            "#212223",
+            "#f1f2f3",
+            "#a1a2a3",
+            "#314159",
+            "#abcdef",
+            "#fedcba");
         var expected = new GameSessionSettings(
             TimeSpan.FromSeconds(47),
             TimeSpan.FromSeconds(13),
@@ -67,7 +76,9 @@ public sealed class GameSettingsStoreTests : IDisposable
             hostImageContentType: "image/png",
             hostAvatarId: "F/17.png",
             brandLogoData: expectedLogo,
-            brandLogoContentType: "image/webp");
+            brandLogoContentType: "image/webp",
+            siteThemeId: "custom",
+            customThemeColors: expectedTheme);
 
         await store.SaveAsync(expected);
         var actual = await store.LoadAsync();
@@ -79,6 +90,9 @@ public sealed class GameSettingsStoreTests : IDisposable
         Assert.Equal("F/17.png", actual.HostAvatarId);
         Assert.Equal(expectedLogo, actual.BrandLogoData);
         Assert.Equal("image/webp", actual.BrandLogoContentType);
+        Assert.Equal("custom", actual.SiteThemeId);
+        Assert.Equal(expectedTheme.Background, actual.CustomThemeColors.Background);
+        Assert.Equal(expectedTheme.AccentBright, actual.CustomThemeColors.AccentBright);
         Assert.True(actual.HasHostCard);
     }
 

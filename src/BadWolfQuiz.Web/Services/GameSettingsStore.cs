@@ -99,6 +99,8 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
         public string? HostAvatarId { get; set; }
         public byte[]? BrandLogoData { get; set; }
         public string? BrandLogoContentType { get; set; }
+        public string SiteThemeId { get; set; } = SiteThemeCatalog.DefaultId;
+        public SiteThemeColors CustomThemeColors { get; set; } = SiteThemeColors.Default;
 
         public GameSessionSettings ToRuntimeSettings() => new(
             BuzzerDuration,
@@ -113,7 +115,9 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             HostImageContentType,
             HostAvatarId,
             BrandLogoData,
-            BrandLogoContentType);
+            BrandLogoContentType,
+            SiteThemeCatalog.Normalize(SiteThemeId),
+            SiteThemeCatalog.Normalize(CustomThemeColors));
 
         public static StoredGameSettings From(GameSessionSettings settings) => new()
         {
@@ -129,7 +133,9 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             HostImageContentType = settings.HostImageContentType,
             HostAvatarId = settings.HostAvatarId,
             BrandLogoData = settings.BrandLogoData,
-            BrandLogoContentType = settings.BrandLogoContentType
+            BrandLogoContentType = settings.BrandLogoContentType,
+            SiteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId),
+            CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors)
         };
     }
 }
@@ -151,19 +157,25 @@ public sealed class GameSettingsInput
     public string? HostName { get; set; }
     public HostVisualSource HostVisualSource { get; set; }
     public string? HostAvatarId { get; set; }
+    public string SiteThemeId { get; set; } = SiteThemeCatalog.DefaultId;
+    public SiteThemeColors CustomThemeColors { get; set; } = SiteThemeColors.Default;
 
     public bool IsValid =>
         BuzzerDurationSeconds is >= 1 and <= 3600 &&
         AnswerDurationSeconds is >= 1 and <= 3600 &&
         Enum.IsDefined(RegularQuestionBuzzerStartMode) &&
         Enum.IsDefined(WagerQuestionAnswerTimerStartMode) &&
-        Enum.IsDefined(HostVisualSource);
+        Enum.IsDefined(HostVisualSource) &&
+        SiteThemeCatalog.IsValid(SiteThemeId) &&
+        SiteThemeCatalog.AreValid(CustomThemeColors);
 
     public GameSessionSettings ToRuntimeSettings(
         byte[]? hostImageData = null,
         string? hostImageContentType = null,
         byte[]? brandLogoData = null,
-        string? brandLogoContentType = null)
+        string? brandLogoContentType = null,
+        string? siteThemeId = null,
+        SiteThemeColors? customThemeColors = null)
     {
         if (!IsValid)
         {
@@ -186,7 +198,9 @@ public sealed class GameSettingsInput
             hostImageContentType,
             HostAvatarId,
             brandLogoData,
-            brandLogoContentType);
+            brandLogoContentType,
+            SiteThemeCatalog.Normalize(siteThemeId ?? SiteThemeId),
+            SiteThemeCatalog.Normalize(customThemeColors ?? CustomThemeColors));
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)
@@ -204,7 +218,9 @@ public sealed class GameSettingsInput
             DisplayHostCard = settings.DisplayHostCard,
             HostName = settings.HostName,
             HostVisualSource = settings.HostVisualSource,
-            HostAvatarId = settings.HostAvatarId
+            HostAvatarId = settings.HostAvatarId,
+            SiteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId),
+            CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors)
         };
     }
 }

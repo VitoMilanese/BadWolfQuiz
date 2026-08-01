@@ -1042,4 +1042,29 @@
   <data name="AskQuestion_Invalid" xml:space="preserve"><value>Enter a question of up to 1,500 characters.</value></data>
   <data name="AskQuestion_Failed" xml:space="preserve"><value>The question could not be sent. Please try again later.</value></data>
   <data name="AskQuestion_Sent" xml:space="preserve"><value>Your question has been sent.</value></data>
+  <data name="SiteTheme_Label" xml:space="preserve"><value>Site color theme</value></data>
+  <data name="SiteTheme_Hint" xml:space="preserve"><value>Choose a ready-made theme or create your own. Changes are previewed immediately.</value></data>
+  <data name="SiteTheme_ClassicWolf" xml:space="preserve"><value>Classic Wolf</value></data>
+  <data name="SiteTheme_CrimsonNight" xml:space="preserve"><value>Crimson Night</value></data>
+  <data name="SiteTheme_ArcticNeon" xml:space="preserve"><value>Arctic Neon</value></data>
+  <data name="SiteTheme_EmeraldStage" xml:space="preserve"><value>Emerald Stage</value></data>
+  <data name="SiteTheme_RoyalViolet" xml:space="preserve"><value>Royal Violet</value></data>
+  <data name="SiteTheme_SunsetOrange" xml:space="preserve"><value>Sunset Orange</value></data>
+  <data name="SiteTheme_Daylight" xml:space="preserve"><value>Daylight</value></data>
+  <data name="SiteTheme_WarmParchment" xml:space="preserve"><value>Warm Parchment</value></data>
+  <data name="SiteTheme_MintFog" xml:space="preserve"><value>Mint Fog</value></data>
+  <data name="SiteTheme_UkrainianSky" xml:space="preserve"><value>Ukrainian Sky</value></data>
+  <data name="SiteTheme_ItalianSpirit" xml:space="preserve"><value>Italian Spirit</value></data>
+  <data name="SiteTheme_PrideSpectrum" xml:space="preserve"><value>Pride Spectrum</value></data>
+  <data name="SiteTheme_RetroArcade" xml:space="preserve"><value>Retro Arcade</value></data>
+  <data name="SiteTheme_Custom" xml:space="preserve"><value>Custom</value></data>
+  <data name="SiteTheme_Background" xml:space="preserve"><value>Background</value></data>
+  <data name="SiteTheme_Panel" xml:space="preserve"><value>Panel</value></data>
+  <data name="SiteTheme_PanelSecondary" xml:space="preserve"><value>Secondary panel</value></data>
+  <data name="SiteTheme_Text" xml:space="preserve"><value>Text</value></data>
+  <data name="SiteTheme_MutedText" xml:space="preserve"><value>Muted text</value></data>
+  <data name="SiteTheme_Accent" xml:space="preserve"><value>Accent</value></data>
+  <data name="SiteTheme_AccentBright" xml:space="preserve"><value>Bright accent</value></data>
+  <data name="SiteTheme_Highlight" xml:space="preserve"><value>Highlight</value></data>
+  <data name="SiteTheme_Invalid" xml:space="preserve"><value>Select a valid theme and colors.</value></data>
 </root>
