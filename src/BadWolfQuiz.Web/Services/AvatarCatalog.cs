@@ -62,7 +62,7 @@ public sealed class AvatarCatalog(IWebHostEnvironment environment)
     private AvatarCategory? CreateCategory(string categoryDirectory)
     {
         var categoryId = Path.GetFileName(categoryDirectory);
-        var avatarIds = Directory
+        var avatars = Directory
             .EnumerateFiles(categoryDirectory, "*", SearchOption.TopDirectoryOnly)
             .Where(IsSupportedImage)
             .Select(Path.GetFileName)
@@ -72,10 +72,12 @@ public sealed class AvatarCatalog(IWebHostEnvironment environment)
                     ? left.Value.CompareTo(right.Value)
                     : left.HasValue ? -1 : right.HasValue ? 1 : 0))
             .ThenBy(fileName => fileName, StringComparer.OrdinalIgnoreCase)
-            .Select(fileName => $"{categoryId}/{fileName}")
+            .Select(fileName => new AvatarOption(
+                $"{categoryId}/{fileName}",
+                GetFileVersion(Path.Combine(categoryDirectory, fileName!))))
             .ToArray();
 
-        if (avatarIds.Length == 0)
+        if (avatars.Length == 0)
         {
             return null;
         }
@@ -91,7 +93,11 @@ public sealed class AvatarCatalog(IWebHostEnvironment environment)
 
         return iconFileName is null
             ? null
-            : new AvatarCategory(categoryId, iconFileName, avatarIds);
+            : new AvatarCategory(
+                categoryId,
+                iconFileName,
+                GetFileVersion(Path.Combine(_root, iconFileName)),
+                avatars);
     }
 
     private static bool IsSupportedImage(string path) =>
@@ -113,9 +119,18 @@ public sealed class AvatarCatalog(IWebHostEnvironment environment)
             out var number)
             ? number
             : null;
+
+    private static string GetFileVersion(string path)
+    {
+        var file = new FileInfo(path);
+        return $"{file.Length:x}-{file.LastWriteTimeUtc.Ticks:x}";
+    }
 }
 
 public sealed record AvatarCategory(
     string Id,
     string IconFileName,
-    IReadOnlyList<string> AvatarIds);
+    string IconVersion,
+    IReadOnlyList<AvatarOption> Avatars);
+
+public sealed record AvatarOption(string Id, string Version);

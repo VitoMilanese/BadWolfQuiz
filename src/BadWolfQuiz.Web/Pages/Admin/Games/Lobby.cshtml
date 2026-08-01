@@ -1334,7 +1334,7 @@
             const source = document.getElementById("SettingsInput_HostVisualSource");
             dialog?.addEventListener("avatarselected", event => {
                 value.value = event.detail.avatarId;
-                preview.src = `/avatars/${event.detail.avatarId}`;
+                preview.src = event.detail.avatarUrl;
                 preview.hidden = false;
                 source.value = "3";
             });

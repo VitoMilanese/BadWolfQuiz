@@ -572,7 +572,9 @@
                 storedAvatarId = avatarId;
                 lobby.dataset.avatarId = avatarId;
                 localStorage.setItem(avatarPreferenceKey, avatarId);
-                activateAvatar().catch(console.error);
+                activateAvatar()
+                    .then(() => currentAvatar.src = event.detail.avatarUrl)
+                    .catch(console.error);
             });
 
             if (selectedImageSource === "image" && !storedImageDataUrl) {

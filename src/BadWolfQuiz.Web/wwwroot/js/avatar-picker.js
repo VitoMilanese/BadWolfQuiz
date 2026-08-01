@@ -24,29 +24,26 @@
 
         for (const categoryButton of dialog.querySelectorAll("[data-avatar-category]")) {
             categoryButton.addEventListener("click", () => {
-                const avatarIds = JSON.parse(
-                    categoryButton.dataset.avatarIds || "[]"
+                const template = dialog.querySelector(
+                    `[data-avatar-options-template="${categoryButton.dataset.avatarTemplate}"]`
                 );
                 options.replaceChildren();
 
-                for (const avatarId of avatarIds) {
-                    const button = document.createElement("button");
-                    button.type = "button";
-                    button.className = "avatar-option";
-                    button.dataset.avatarId = avatarId;
+                if (template) {
+                    options.append(template.content.cloneNode(true));
+                }
 
-                    const image = document.createElement("img");
-                    image.src = `/avatars/${avatarId}`;
-                    image.alt = "";
-                    button.append(image);
+                for (const button of options.querySelectorAll("[data-avatar-id]")) {
                     button.addEventListener("click", () => {
                         dialog.dispatchEvent(new CustomEvent("avatarselected", {
-                            detail: { avatarId },
+                            detail: {
+                                avatarId: button.dataset.avatarId,
+                                avatarUrl: button.dataset.avatarUrl
+                            },
                             bubbles: true
                         }));
                         dialog.close();
                     });
-                    options.append(button);
                 }
 
                 categoryStep.hidden = true;
