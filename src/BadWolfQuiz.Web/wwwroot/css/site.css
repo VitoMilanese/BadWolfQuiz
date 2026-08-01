@@ -435,9 +435,9 @@ input,
 textarea,
 select {
     width: 100%;
-    background: #f8f8fa;
-    color: #111116;
-    border: 2px solid transparent;
+    background: color-mix(in srgb, var(--panel) 88%, var(--text));
+    color: var(--text);
+    border: 2px solid var(--line);
     border-radius: 8px;
     padding: 12px 14px;
 }
@@ -609,7 +609,7 @@ textarea {
     left: 0;
     z-index: 3;
     padding: 12px;
-    background: linear-gradient(145deg, #2b050a, #111116);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--red) 28%, var(--panel-2)), var(--panel));
 }
 
 .question-points-input {
@@ -617,7 +617,7 @@ textarea {
     min-width: 0;
     padding: 10px 8px;
     border: 1px solid rgba(242, 177, 52, 0.45);
-    background: #0d0d11;
+    background: var(--panel-gradient-end);
     color: var(--gold);
     text-align: center;
     font-size: 1.18rem;
@@ -641,7 +641,7 @@ textarea {
 }
 
 .question-cell.filled {
-    background: linear-gradient(145deg, #281015, #111116);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--red) 18%, var(--panel-2)), var(--panel));
 }
 
 .question-cell small {
@@ -913,9 +913,9 @@ textarea {
     z-index: 20;
     min-width: 180px;
     padding: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid var(--line);
     border-radius: 8px;
-    background: #1c1c1c;
+    background: var(--panel-glass);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
@@ -932,7 +932,7 @@ textarea {
 }
 
     .content-block-type-option:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--panel-2);
     }
 
 .content-block-card {
@@ -1019,7 +1019,7 @@ textarea {
     padding: 14px;
     border: 1px solid var(--line);
     border-radius: 10px;
-    background: rgba(7, 7, 9, 0.55);
+    background: color-mix(in srgb, var(--bg) 55%, transparent);
     text-align: center;
 }
 
@@ -1190,7 +1190,8 @@ textarea {
 
 .dialog-card {
     padding: 24px;
-    background: linear-gradient(145deg, #17171e, #0d0d11);
+    color: var(--text);
+    background: linear-gradient(145deg, var(--panel-2), var(--panel-gradient-end));
     border: 1px solid var(--line);
     border-radius: 16px;
     box-shadow: 0 24px 80px rgba(0, 0, 0, .55);
@@ -1238,7 +1239,7 @@ textarea {
 .dialog-target {
     padding: 14px 16px;
     border-left: 3px solid var(--red-bright);
-    background: rgba(239, 35, 60, .08);
+    background: color-mix(in srgb, var(--red-bright) 8%, transparent);
     font-size: 1.08rem;
     font-weight: 850;
     overflow-wrap: anywhere;
@@ -2193,7 +2194,7 @@ video.host-card-media {
     padding: clamp(32px, 7vw, 72px);
     border: 2px solid var(--gold);
     border-radius: 20px;
-    background: radial-gradient(circle at top, #31070e, #0b0b10 65%);
+    background: radial-gradient(circle at top, color-mix(in srgb, var(--red) 26%, var(--panel-2)), var(--panel-gradient-end) 65%);
     box-shadow: 0 28px 100px rgba(0, 0, 0, 0.7);
     text-align: center;
 }
@@ -2247,7 +2248,7 @@ video.host-card-media {
     border: 1px solid var(--line);
     border-radius: 10px;
     color: var(--text);
-    background: rgba(17, 17, 22, 0.9);
+    background: var(--panel-glass);
     cursor: pointer;
     font-size: 1.7rem;
     line-height: 1;
@@ -2573,7 +2574,7 @@ video.host-card-media {
     padding: 18px;
     border: 1px solid var(--line);
     border-radius: 12px;
-    background: rgba(17, 17, 22, 0.92);
+    background: var(--panel-glass);
 }
 
 .question-judgment-panel h3 {
