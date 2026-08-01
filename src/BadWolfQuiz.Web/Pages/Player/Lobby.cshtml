@@ -50,6 +50,8 @@
         <button class="button button-secondary"
                 type="button"
                 data-toggle-player-webcam
+                data-enable-label="@Localizer["PlayerWebcam_Enable"]"
+                data-disable-label="@Localizer["PlayerWebcam_Disable"]"
                 data-webcam-enabled="false">
             @Localizer["PlayerWebcam_Enable"]
         </button>
@@ -366,15 +368,17 @@
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
                 .build();
+            const webcamButton = document.querySelector(
+                "[data-toggle-player-webcam]");
             const webcam = window.BadWolfWebcam.createPlayer({
                 connection,
                 gameCode,
                 preview: document.querySelector("[data-player-webcam-preview]"),
                 avatar: document.querySelector("[data-current-player-avatar]"),
-                button: document.querySelector("[data-toggle-player-webcam]"),
+                button: webcamButton,
                 error: document.querySelector("[data-player-webcam-error]"),
-                enableLabel: "@Localizer["PlayerWebcam_Enable"]",
-                disableLabel: "@Localizer["PlayerWebcam_Disable"]"
+                enableLabel: webcamButton?.dataset.enableLabel,
+                disableLabel: webcamButton?.dataset.disableLabel
             });
             const avatarDialog = document.querySelector("[data-avatar-picker]");
             const currentAvatar = document.querySelector("[data-current-player-avatar]");

@@ -15,6 +15,9 @@ window.BadWolfWebcam = (() => {
     }) => {
         let stream = null;
         let peer = null;
+        let requested = false;
+        let acquiring = false;
+        let pageIsActive = true;
         const pendingCandidates = [];
 
         const showError = message => {
@@ -64,6 +67,7 @@ window.BadWolfWebcam = (() => {
         };
 
         const disable = async () => {
+            requested = false;
             closePeer();
             stream?.getTracks().forEach(track => track.stop());
             stream = null;
@@ -84,22 +88,53 @@ window.BadWolfWebcam = (() => {
         };
 
         const enable = async () => {
+            requested = true;
             if (!navigator.mediaDevices?.getUserMedia) {
                 showError(error?.dataset.unsupportedLabel || "Camera access requires HTTPS.");
                 return;
             }
 
+            if (acquiring || stream) {
+                return;
+            }
+
+            acquiring = true;
             try {
-                stream = await navigator.mediaDevices.getUserMedia({
+                const capturedStream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: "user" },
                     audio: false
                 });
+                if (!requested) {
+                    capturedStream.getTracks().forEach(track => track.stop());
+                    return;
+                }
+                stream = capturedStream;
+                stream.getTracks().forEach(track => {
+                    track.enabled = pageIsActive;
+                    track.addEventListener("ended", async () => {
+                        if (stream !== capturedStream) {
+                            return;
+                        }
+                        closePeer();
+                        stream = null;
+                        if (preview) {
+                            preview.srcObject = null;
+                            preview.hidden = true;
+                        }
+                        if (avatar?.getAttribute("src")) {
+                            avatar.hidden = false;
+                        }
+                        if (connection.state === signalR.HubConnectionState.Connected) {
+                            await connection.invoke("SetPlayerWebcamEnabled", false);
+                        }
+                    }, { once: true });
+                });
                 if (preview) {
                     preview.srcObject = stream;
-                    preview.hidden = false;
+                    preview.hidden = !pageIsActive;
                 }
                 if (avatar) {
-                    avatar.hidden = true;
+                    avatar.hidden = pageIsActive;
                 }
                 if (error) {
                     error.hidden = true;
@@ -108,18 +143,28 @@ window.BadWolfWebcam = (() => {
                     button.textContent = disableLabel;
                     button.dataset.webcamEnabled = "true";
                 }
-                await connection.invoke("SetPlayerWebcamEnabled", true);
-                await negotiate();
+                await connection.invoke("SetPlayerWebcamEnabled", pageIsActive);
+                if (pageIsActive) {
+                    await negotiate();
+                }
             } catch (exception) {
                 console.error(exception);
                 showError(error?.dataset.deniedLabel || "Unable to access the camera.");
                 await disable();
+            } finally {
+                acquiring = false;
             }
         };
 
         button?.addEventListener("click", () => {
-            const action = stream ? disable() : enable();
+            const action = requested ? disable() : enable();
             action.catch(console.error);
+        });
+
+        navigator.mediaDevices?.addEventListener("devicechange", () => {
+            if (requested && !stream) {
+                enable().catch(console.error);
+            }
         });
 
         connection.on("HostWebcamReady", () => negotiate().catch(console.error));
@@ -144,6 +189,7 @@ window.BadWolfWebcam = (() => {
         });
 
         window.addEventListener("pagehide", () => {
+            requested = false;
             stream?.getTracks().forEach(track => track.stop());
             closePeer();
         });
@@ -157,6 +203,7 @@ window.BadWolfWebcam = (() => {
                 }
             },
             setActive: async isActive => {
+                pageIsActive = Boolean(isActive);
                 if (!stream || connection.state !== signalR.HubConnectionState.Connected) {
                     return;
                 }

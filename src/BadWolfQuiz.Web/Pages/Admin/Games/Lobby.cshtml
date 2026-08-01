@@ -1236,17 +1236,72 @@
                 return;
             }
 
-            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-                .then(stream => videos.forEach(video => {
-                    video.srcObject = stream;
-                    video.hidden = false;
-                    const fallback = video.closest("[data-host-card]")
-                        ?.querySelector("[data-host-webcam-fallback]");
-                    if (fallback) {
-                        fallback.hidden = true;
-                    }
-                }))
-                .catch(console.error);
+            let currentStream = null;
+            let isStarting = false;
+            let retryHandle = null;
+
+            const showFallback = () => videos.forEach(video => {
+                video.srcObject = null;
+                video.hidden = true;
+                const fallback = video.closest("[data-host-card]")
+                    ?.querySelector("[data-host-webcam-fallback]");
+                if (fallback) {
+                    fallback.hidden = false;
+                }
+            });
+
+            const startCamera = async () => {
+                if (isStarting || currentStream) {
+                    return;
+                }
+
+                isStarting = true;
+                try {
+                    const capturedStream = await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: false
+                    });
+                    currentStream = capturedStream;
+                    capturedStream.getTracks().forEach(track => {
+                        track.addEventListener("ended", () => {
+                            if (currentStream !== capturedStream) {
+                                return;
+                            }
+                            currentStream = null;
+                            showFallback();
+                            clearTimeout(retryHandle);
+                            retryHandle = window.setTimeout(startCamera, 1500);
+                        }, { once: true });
+                    });
+                    videos.forEach(video => {
+                        video.srcObject = capturedStream;
+                        video.hidden = false;
+                        const fallback = video.closest("[data-host-card]")
+                            ?.querySelector("[data-host-webcam-fallback]");
+                        if (fallback) {
+                            fallback.hidden = true;
+                        }
+                    });
+                } catch (exception) {
+                    console.error(exception);
+                    showFallback();
+                } finally {
+                    isStarting = false;
+                }
+            };
+
+            navigator.mediaDevices.addEventListener("devicechange", () => {
+                if (!currentStream) {
+                    clearTimeout(retryHandle);
+                    retryHandle = window.setTimeout(startCamera, 250);
+                }
+            });
+            window.addEventListener("pagehide", () => {
+                clearTimeout(retryHandle);
+                currentStream?.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            });
+            startCamera();
         })();
 
         (() => {
