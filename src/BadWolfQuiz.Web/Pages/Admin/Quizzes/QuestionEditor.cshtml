@@ -508,7 +508,7 @@
             }
         });
 
-        document.addEventListener("keydown", event => {
+        window.addEventListener("keyup", event => {
             if (event.key !== "Escape") {
                 return;
             }
@@ -525,7 +525,7 @@
             if (backLink) {
                 window.location.assign(backLink.href);
             }
-        });
+        }, true);
 
         document.querySelectorAll('.type-tabs').forEach(tabGroup => {
             tabGroup.querySelectorAll('.type-tab').forEach(button => {
