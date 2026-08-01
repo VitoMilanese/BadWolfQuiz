@@ -15,6 +15,10 @@ public static class SiteThemeCatalog
         "arctic-neon",
         "emerald-stage",
         "royal-violet",
+        "sunset-orange",
+        "daylight",
+        "ukrainian-sky",
+        "italian-spirit",
         "custom"
     };
 

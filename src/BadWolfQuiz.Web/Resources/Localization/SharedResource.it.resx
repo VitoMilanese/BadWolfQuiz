@@ -1049,6 +1049,10 @@
   <data name="SiteTheme_ArcticNeon" xml:space="preserve"><value>Neon artico</value></data>
   <data name="SiteTheme_EmeraldStage" xml:space="preserve"><value>Palco smeraldo</value></data>
   <data name="SiteTheme_RoyalViolet" xml:space="preserve"><value>Viola reale</value></data>
+  <data name="SiteTheme_SunsetOrange" xml:space="preserve"><value>Tramonto arancione</value></data>
+  <data name="SiteTheme_Daylight" xml:space="preserve"><value>Luce del giorno</value></data>
+  <data name="SiteTheme_UkrainianSky" xml:space="preserve"><value>Cielo ucraino</value></data>
+  <data name="SiteTheme_ItalianSpirit" xml:space="preserve"><value>Spirito italiano</value></data>
   <data name="SiteTheme_Custom" xml:space="preserve"><value>Personalizzato</value></data>
   <data name="SiteTheme_Background" xml:space="preserve"><value>Sfondo</value></data>
   <data name="SiteTheme_Panel" xml:space="preserve"><value>Pannello</value></data>

@@ -20,8 +20,9 @@
     <p class="settings-description">@Localizer["GameSettings_GlobalDescription"]</p>
     <div asp-validation-summary="ModelOnly" class="message message-error"></div>
     <div class="settings-grid">
-    <fieldset class="theme-picker">
-        <legend>@Localizer["SiteTheme_Label"]</legend>
+    <details class="theme-picker">
+        <summary>@Localizer["SiteTheme_Label"]</summary>
+        <div class="theme-picker-content">
         <p>@Localizer["SiteTheme_Hint"]</p>
         <div class="theme-options">
             <label class="theme-option theme-option-classic">
@@ -49,6 +50,26 @@
                 <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
                 <strong>@Localizer["SiteTheme_RoyalViolet"]</strong>
             </label>
+            <label class="theme-option theme-option-orange">
+                <input asp-for="Input.SiteThemeId" type="radio" value="sunset-orange" />
+                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>@Localizer["SiteTheme_SunsetOrange"]</strong>
+            </label>
+            <label class="theme-option theme-option-light">
+                <input asp-for="Input.SiteThemeId" type="radio" value="daylight" />
+                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>@Localizer["SiteTheme_Daylight"]</strong>
+            </label>
+            <label class="theme-option theme-option-ukraine">
+                <input asp-for="Input.SiteThemeId" type="radio" value="ukrainian-sky" />
+                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>@Localizer["SiteTheme_UkrainianSky"]</strong>
+            </label>
+            <label class="theme-option theme-option-italy">
+                <input asp-for="Input.SiteThemeId" type="radio" value="italian-spirit" />
+                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>@Localizer["SiteTheme_ItalianSpirit"]</strong>
+            </label>
             <label class="theme-option theme-option-custom">
                 <input asp-for="Input.SiteThemeId" type="radio" value="custom" data-custom-theme-radio />
                 <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -65,7 +86,8 @@
             <label><span>@Localizer["SiteTheme_AccentBright"]</span><input asp-for="Input.CustomThemeColors.AccentBright" type="color" data-theme-variable="--red-bright" /></label>
             <label><span>@Localizer["SiteTheme_Highlight"]</span><input asp-for="Input.CustomThemeColors.Highlight" type="color" data-theme-variable="--gold" /></label>
         </div>
-    </fieldset>
+        </div>
+    </details>
     <label class="brand-logo-field">
         <span>@Localizer["BrandLogo_Label"]</span>
         <span class="brand-logo-input-row">

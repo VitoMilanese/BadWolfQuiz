@@ -1049,6 +1049,10 @@
   <data name="SiteTheme_ArcticNeon" xml:space="preserve"><value>Arctic Neon</value></data>
   <data name="SiteTheme_EmeraldStage" xml:space="preserve"><value>Emerald Stage</value></data>
   <data name="SiteTheme_RoyalViolet" xml:space="preserve"><value>Royal Violet</value></data>
+  <data name="SiteTheme_SunsetOrange" xml:space="preserve"><value>Sunset Orange</value></data>
+  <data name="SiteTheme_Daylight" xml:space="preserve"><value>Daylight</value></data>
+  <data name="SiteTheme_UkrainianSky" xml:space="preserve"><value>Ukrainian Sky</value></data>
+  <data name="SiteTheme_ItalianSpirit" xml:space="preserve"><value>Italian Spirit</value></data>
   <data name="SiteTheme_Custom" xml:space="preserve"><value>Custom</value></data>
   <data name="SiteTheme_Background" xml:space="preserve"><value>Background</value></data>
   <data name="SiteTheme_Panel" xml:space="preserve"><value>Panel</value></data>

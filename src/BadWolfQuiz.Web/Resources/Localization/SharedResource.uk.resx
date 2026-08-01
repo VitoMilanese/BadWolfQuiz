@@ -1049,6 +1049,10 @@
   <data name="SiteTheme_ArcticNeon" xml:space="preserve"><value>Арктичний неон</value></data>
   <data name="SiteTheme_EmeraldStage" xml:space="preserve"><value>Смарагдова сцена</value></data>
   <data name="SiteTheme_RoyalViolet" xml:space="preserve"><value>Королівський фіолет</value></data>
+  <data name="SiteTheme_SunsetOrange" xml:space="preserve"><value>Помаранчевий захід</value></data>
+  <data name="SiteTheme_Daylight" xml:space="preserve"><value>Денне світло</value></data>
+  <data name="SiteTheme_UkrainianSky" xml:space="preserve"><value>Українське небо</value></data>
+  <data name="SiteTheme_ItalianSpirit" xml:space="preserve"><value>Італійський дух</value></data>
   <data name="SiteTheme_Custom" xml:space="preserve"><value>Власна тема</value></data>
   <data name="SiteTheme_Background" xml:space="preserve"><value>Фон</value></data>
   <data name="SiteTheme_Panel" xml:space="preserve"><value>Панель</value></data>
