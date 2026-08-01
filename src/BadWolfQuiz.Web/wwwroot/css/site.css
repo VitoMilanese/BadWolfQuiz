@@ -1295,6 +1295,55 @@ textarea {
     display: none;
 }
 
+.board-host-sidebar {
+    position: fixed;
+    z-index: 17;
+    left: var(--board-host-left, 12px);
+    top: var(--board-host-top, 120px);
+    display: none;
+    width: var(--board-host-width, 238px);
+    height: var(--board-host-height, 300px);
+    min-width: 0;
+    align-self: start;
+}
+
+.board-host-sidebar .host-card {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+.board-host-card-list {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.board-host-card-resizer {
+    position: absolute;
+    z-index: 4;
+    right: -7px;
+    bottom: -7px;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--gold);
+    border-top: 0;
+    border-left: 0;
+    border-radius: 0 0 7px 0;
+    cursor: nwse-resize;
+    touch-action: none;
+}
+
+.board-host-card-resizer:hover,
+.board-host-card-resizer:focus-visible,
+.is-resizing-host-card .board-host-card-resizer {
+    filter: brightness(1.35);
+}
+
 .board-player-list {
     display: grid;
     gap: 8px;
@@ -1372,6 +1421,12 @@ textarea {
 
     .host-game-board:has(.board-player-sidebar) .game-scoreboard .scoreboard-score {
         display: none;
+    }
+}
+
+@media (min-width: 1750px) {
+    .board-host-sidebar.is-positioned {
+        display: block;
     }
 }
 
@@ -1579,9 +1634,9 @@ textarea {
 
 .scoreboard-player {
     position: relative;
-    min-width: 180px;
-    max-width: 270px;
-    flex: 1 1 200px;
+    min-width: 207px;
+    max-width: 311px;
+    flex: 1 1 230px;
     display: grid;
     align-content: center;
     justify-items: center;
@@ -1665,6 +1720,17 @@ textarea {
     flex: 0 0 auto;
     object-fit: contain;
     border-radius: 10px;
+}
+
+.player-webcam-preview,
+video.player-card-avatar,
+video.host-card-media {
+    object-fit: cover;
+}
+
+.player-webcam-preview,
+video.host-card-media {
+    transform: scaleX(-1);
 }
 
 .host-avatar-preview[hidden],
@@ -1804,7 +1870,7 @@ textarea {
     }
 
     .scoreboard-player {
-        min-width: 135px;
+        min-width: 155px;
     }
 }
 
@@ -2028,10 +2094,14 @@ textarea {
     transform: translateY(-50%);
 }
 
+.player-list .player-card-actions {
+    flex-direction: row;
+}
+
 .player-list li:has(.player-card-actions) {
     position: relative;
     min-height: 88px;
-    padding-right: 52px;
+    padding-right: 88px;
 }
 
 .player-management .player-action-button,

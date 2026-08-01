@@ -38,10 +38,29 @@
              src="@(!string.IsNullOrWhiteSpace(Model.CurrentPlayer.AvatarId) ? $"/avatars/{Model.CurrentPlayer.AvatarId}" : null)"
              alt=""
              hidden="@(string.IsNullOrWhiteSpace(Model.CurrentPlayer.AvatarId) ? "hidden" : null)" />
+        <video class="player-avatar-current player-webcam-preview"
+               data-player-webcam-preview
+               autoplay
+               muted
+               playsinline
+               hidden></video>
         <button class="button button-secondary" type="button" data-open-avatar-picker>
             @Localizer["AvatarPicker_ChooseOrChange"]
         </button>
+        <button class="button button-secondary"
+                type="button"
+                data-toggle-player-webcam
+                data-enable-label="@Localizer["PlayerWebcam_Enable"]"
+                data-disable-label="@Localizer["PlayerWebcam_Disable"]"
+                data-webcam-enabled="false">
+            @Localizer["PlayerWebcam_Enable"]
+        </button>
     </div>
+    <div class="message message-error"
+         data-player-webcam-error
+         data-unsupported-label="@Localizer["PlayerWebcam_RequiresHttps"]"
+         data-denied-label="@Localizer["PlayerWebcam_AccessFailed"]"
+         hidden></div>
 
     <div id="activity-warning" class="message message-error" hidden>
         @Localizer["PlayerPresence_InactiveWarning"]
@@ -282,6 +301,7 @@
 
 @section Scripts {
     <script src="~/js/avatar-picker.js" asp-append-version="true"></script>
+    <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
     <script>
         (() => {
             const lobby = document.querySelector(".player-lobby");
@@ -348,10 +368,23 @@
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
                 .build();
+            const webcamButton = document.querySelector(
+                "[data-toggle-player-webcam]");
+            const webcam = window.BadWolfWebcam.createPlayer({
+                connection,
+                gameCode,
+                preview: document.querySelector("[data-player-webcam-preview]"),
+                avatar: document.querySelector("[data-current-player-avatar]"),
+                button: webcamButton,
+                error: document.querySelector("[data-player-webcam-error]"),
+                enableLabel: webcamButton?.dataset.enableLabel,
+                disableLabel: webcamButton?.dataset.disableLabel
+            });
             const avatarDialog = document.querySelector("[data-avatar-picker]");
             const currentAvatar = document.querySelector("[data-current-player-avatar]");
             let pendingAvatarId;
             avatarDialog?.addEventListener("avatarselected", event => {
+                webcam.disable().catch(console.error);
                 const avatarId = event.detail.avatarId;
                 pendingAvatarId = avatarId;
                 if (connection.state === signalR.HubConnectionState.Connected) {
@@ -652,13 +685,18 @@
                 removedFromGameRedirect();
             });
 
-            connection.onreconnected(joinPlayerSession);
+            connection.onreconnected(async () => {
+                await joinPlayerSession();
+                await webcam.reconnect();
+            });
 
             document.addEventListener("visibilitychange", () => {
                 updateWarning();
 
                 if (connection.state === signalR.HubConnectionState.Connected) {
-                    connection.invoke("SetPlayerVisibility", isPageActive()).catch(console.error);
+                    const active = isPageActive();
+                    connection.invoke("SetPlayerVisibility", active).catch(console.error);
+                    webcam.setActive(active).catch(console.error);
                 }
             });
 
@@ -667,6 +705,7 @@
 
                 if (connection.state === signalR.HubConnectionState.Connected) {
                     connection.invoke("SetPlayerVisibility", true).catch(console.error);
+                    webcam.setActive(true).catch(console.error);
                 }
             });
 
@@ -675,12 +714,14 @@
 
                 if (connection.state === signalR.HubConnectionState.Connected) {
                     connection.invoke("SetPlayerVisibility", false).catch(console.error);
+                    webcam.setActive(false).catch(console.error);
                 }
             });
 
             updateWarning();
             connection.start().then(async () => {
                 await joinPlayerSession();
+                await webcam.reconnect();
                 if (pendingAvatarId) {
                     await connection.invoke("SetPlayerAvatar", pendingAvatarId);
                     pendingAvatarId = undefined;

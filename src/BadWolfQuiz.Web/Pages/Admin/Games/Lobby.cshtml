@@ -194,7 +194,6 @@
                         }
                         <strong>@player.Name</strong>
                         <span class="player-management">
-                            <span>@player.Score</span>
                             @if (Model.Game.Session.ActivePlayerId == player.Id)
                             {
                                 <span class="active-player-badge">
@@ -729,6 +728,19 @@
             !Model.IsRoundSummaryVisible)
         {
             <div class="host-board-layout">
+            @if (Model.Game.Session.Settings.HasHostCard)
+            {
+                <aside class="board-host-sidebar"
+                       data-board-host-slot
+                       aria-label="@Model.Game.Session.Settings.HostName">
+                    <ul class="board-host-card-list" data-board-host-card-list></ul>
+                    <div class="board-host-card-resizer"
+                         data-board-host-card-resizer
+                         role="separator"
+                         aria-label="@Localizer["GameBoard_ResizeHostCard"]"
+                         tabindex="0"></div>
+                </aside>
+            }
             <div class="host-board-grid"
                  style="--board-columns: @Model.BoardCategories.Count">
             @foreach (var category in Model.BoardCategories)
@@ -825,7 +837,18 @@
                     }
                     else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
                     {
-                        <video class="host-card-media" data-host-webcam autoplay muted playsinline></video>
+                        @if (!string.IsNullOrWhiteSpace(Model.Game.Session.Settings.HostAvatarId))
+                        {
+                            <img class="host-card-media" data-host-webcam-fallback src="/avatars/@Model.Game.Session.Settings.HostAvatarId" alt="" />
+                        }
+                        else if (Model.Game.Session.Settings.HostImageData is not null)
+                        {
+                            <img class="host-card-media"
+                                 data-host-webcam-fallback
+                                 src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
+                                 alt="@Model.Game.Session.Settings.HostName" />
+                        }
+                        <video class="host-card-media" data-host-webcam autoplay muted playsinline hidden></video>
                     }
                 </li>
             }
@@ -1130,7 +1153,18 @@
                     }
                     else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Webcam)
                     {
-                        <video class="host-card-media" data-host-webcam autoplay muted playsinline></video>
+                        @if (!string.IsNullOrWhiteSpace(Model.Game.Session.Settings.HostAvatarId))
+                        {
+                            <img class="host-card-media" data-host-webcam-fallback src="/avatars/@Model.Game.Session.Settings.HostAvatarId" alt="" />
+                        }
+                        else if (Model.Game.Session.Settings.HostImageData is not null)
+                        {
+                            <img class="host-card-media"
+                                 data-host-webcam-fallback
+                                 src="@Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })"
+                                 alt="@Model.Game.Session.Settings.HostName" />
+                        }
+                        <video class="host-card-media" data-host-webcam autoplay muted playsinline hidden></video>
                     }
                 </li>
             }
@@ -1194,16 +1228,80 @@
 </dialog>
 
 @section Scripts {
+    <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
     <script>
         (() => {
-            const video = document.querySelector("[data-host-webcam]");
-            if (!video || !navigator.mediaDevices?.getUserMedia) {
+            const videos = document.querySelectorAll("[data-host-webcam]");
+            if (videos.length === 0 || !navigator.mediaDevices?.getUserMedia) {
                 return;
             }
 
-            navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-                .then(stream => video.srcObject = stream)
-                .catch(console.error);
+            let currentStream = null;
+            let isStarting = false;
+            let retryHandle = null;
+
+            const showFallback = () => videos.forEach(video => {
+                video.srcObject = null;
+                video.hidden = true;
+                const fallback = video.closest("[data-host-card]")
+                    ?.querySelector("[data-host-webcam-fallback]");
+                if (fallback) {
+                    fallback.hidden = false;
+                }
+            });
+
+            const startCamera = async () => {
+                if (isStarting || currentStream) {
+                    return;
+                }
+
+                isStarting = true;
+                try {
+                    const capturedStream = await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: false
+                    });
+                    currentStream = capturedStream;
+                    capturedStream.getTracks().forEach(track => {
+                        track.addEventListener("ended", () => {
+                            if (currentStream !== capturedStream) {
+                                return;
+                            }
+                            currentStream = null;
+                            showFallback();
+                            clearTimeout(retryHandle);
+                            retryHandle = window.setTimeout(startCamera, 1500);
+                        }, { once: true });
+                    });
+                    videos.forEach(video => {
+                        video.srcObject = capturedStream;
+                        video.hidden = false;
+                        const fallback = video.closest("[data-host-card]")
+                            ?.querySelector("[data-host-webcam-fallback]");
+                        if (fallback) {
+                            fallback.hidden = true;
+                        }
+                    });
+                } catch (exception) {
+                    console.error(exception);
+                    showFallback();
+                } finally {
+                    isStarting = false;
+                }
+            };
+
+            navigator.mediaDevices.addEventListener("devicechange", () => {
+                if (!currentStream) {
+                    clearTimeout(retryHandle);
+                    retryHandle = window.setTimeout(startCamera, 250);
+                }
+            });
+            window.addEventListener("pagehide", () => {
+                clearTimeout(retryHandle);
+                currentStream?.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            });
+            startCamera();
         })();
 
         (() => {
@@ -1397,13 +1495,142 @@
             const playerCount = document.getElementById("player-count");
             const playerList = document.getElementById("player-list");
             const boardPlayerList = document.getElementById("board-player-list");
+            const boardGrid = document.querySelector(".host-board-grid");
             const hostCard = playerList?.querySelector("[data-host-card]");
+            const hostSlot = document.querySelector("[data-board-host-slot]");
+            const hostCardList = document.querySelector(
+                "[data-board-host-card-list]");
+            const hostCardResizer = document.querySelector(
+                "[data-board-host-card-resizer]");
+            const wideHostLayout = window.matchMedia("(min-width: 1750px)");
 
             if (!lobby || !playerList || typeof signalR === "undefined") {
                 return;
             }
 
             const gameCode = lobby.dataset.gameCode;
+            const hostCardSizeKey = `badwolfquiz:${gameCode}:host-card-size`;
+
+            const canPositionHostCard = () =>
+                hostSlot &&
+                boardGrid &&
+                wideHostLayout.matches &&
+                boardGrid.getBoundingClientRect().left >= 214;
+
+            const centerHostCard = () => {
+                if (!hostSlot || !boardGrid || !canPositionHostCard()) {
+                    hostSlot?.classList.remove("is-positioned");
+                    return;
+                }
+
+                const boardBounds = boardGrid.getBoundingClientRect();
+                hostSlot.classList.add("is-positioned");
+                const cardBounds = hostSlot.getBoundingClientRect();
+                const left = Math.max(
+                    8,
+                    (boardBounds.left - cardBounds.width) / 2);
+                const top = Math.max(
+                    80,
+                    boardBounds.top + (boardBounds.height - cardBounds.height) / 2);
+                hostSlot.style.setProperty("--board-host-left", `${left}px`);
+                hostSlot.style.setProperty("--board-host-top", `${top}px`);
+            };
+
+            const relocateHostCard = () => {
+                if (!hostCard) {
+                    return;
+                }
+
+                if (hostCardList && canPositionHostCard()) {
+                    hostCardList.append(hostCard);
+                } else if (!playerList.contains(hostCard)) {
+                    playerList.prepend(hostCard);
+                }
+
+                centerHostCard();
+            };
+
+            const applyHostCardSize = (width, height) => {
+                if (!hostSlot) {
+                    return null;
+                }
+
+                const boardBounds = boardGrid?.getBoundingClientRect();
+                const maxWidth = Math.max(
+                    190,
+                    Math.min(430, (boardBounds?.left ?? 454) - 20));
+                const maxHeight = Math.max(
+                    180,
+                    Math.min(650, boardBounds?.height ?? 650));
+                const size = {
+                    width: Math.max(190, Math.min(maxWidth, Math.round(width))),
+                    height: Math.max(180, Math.min(maxHeight, Math.round(height)))
+                };
+                hostSlot.style.setProperty("--board-host-width", `${size.width}px`);
+                hostSlot.style.setProperty("--board-host-height", `${size.height}px`);
+                centerHostCard();
+                return size;
+            };
+
+            if (hostSlot && hostCardResizer) {
+                try {
+                    const storedSize = JSON.parse(localStorage.getItem(hostCardSizeKey));
+                    if (storedSize?.width && storedSize?.height) {
+                        applyHostCardSize(storedSize.width, storedSize.height);
+                    }
+                } catch {
+                    localStorage.removeItem(hostCardSizeKey);
+                }
+
+                hostCardResizer.addEventListener("pointerdown", event => {
+                    const startX = event.clientX;
+                    const startY = event.clientY;
+                    const startWidth = hostSlot.getBoundingClientRect().width;
+                    const startHeight = hostSlot.getBoundingClientRect().height;
+                    hostCardResizer.setPointerCapture(event.pointerId);
+                    document.body.classList.add("is-resizing-host-card");
+
+                    const move = moveEvent => {
+                        applyHostCardSize(
+                            startWidth + 2 * (moveEvent.clientX - startX),
+                            startHeight + 2 * (moveEvent.clientY - startY));
+                    };
+                    const stop = stopEvent => {
+                        hostCardResizer.releasePointerCapture(stopEvent.pointerId);
+                        hostCardResizer.removeEventListener("pointermove", move);
+                        hostCardResizer.removeEventListener("pointerup", stop);
+                        hostCardResizer.removeEventListener("pointercancel", stop);
+                        document.body.classList.remove("is-resizing-host-card");
+                        const bounds = hostSlot.getBoundingClientRect();
+                        const size = applyHostCardSize(bounds.width, bounds.height);
+                        localStorage.setItem(hostCardSizeKey, JSON.stringify(size));
+                    };
+
+                    hostCardResizer.addEventListener("pointermove", move);
+                    hostCardResizer.addEventListener("pointerup", stop);
+                    hostCardResizer.addEventListener("pointercancel", stop);
+                });
+
+                hostCardResizer.addEventListener("keydown", event => {
+                    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"]
+                        .includes(event.key)) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    const bounds = hostSlot.getBoundingClientRect();
+                    const size = applyHostCardSize(
+                        bounds.width + (event.key === "ArrowRight" ? 24 :
+                            event.key === "ArrowLeft" ? -24 : 0),
+                        bounds.height + (event.key === "ArrowDown" ? 24 :
+                            event.key === "ArrowUp" ? -24 : 0));
+                    localStorage.setItem(hostCardSizeKey, JSON.stringify(size));
+                });
+            }
+
+            wideHostLayout.addEventListener("change", relocateHostCard);
+            window.addEventListener("resize", relocateHostCard);
+            relocateHostCard();
             const statusLabels = {
                 active: lobby.dataset.statusActive,
                 inactive: lobby.dataset.statusInactive,
@@ -1479,6 +1706,11 @@
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
                 .build();
+            const webcam = window.BadWolfWebcam.createHost({
+                connection,
+                gameCode,
+                playerList
+            });
 
             let hasReceivedInitialBuzzerState = false;
             let buzzerState = null;
@@ -1602,7 +1834,24 @@
                         const name = document.createElement("strong");
                         name.textContent = player.name;
 
-                        if (player.avatarId) {
+                        if (player.webcamEnabled) {
+                            if (player.avatarId) {
+                                const fallback = document.createElement("img");
+                                fallback.className = "player-card-avatar";
+                                fallback.dataset.playerWebcamFallback = "";
+                                fallback.src = `/avatars/${player.avatarId}`;
+                                fallback.alt = "";
+                                item.append(fallback);
+                            }
+                            const video = document.createElement("video");
+                            video.className = "player-card-avatar";
+                            video.dataset.playerWebcam = "";
+                            video.autoplay = true;
+                            video.muted = true;
+                            video.playsInline = true;
+                            video.hidden = true;
+                            item.append(video);
+                        } else if (player.avatarId) {
                             const avatar = document.createElement("img");
                             avatar.className = "player-card-avatar";
                             avatar.src = `/avatars/${player.avatarId}`;
@@ -1647,6 +1896,9 @@
                         playerList.append(item);
                     }
 
+                    webcam.refresh(update.players);
+                    relocateHostCard();
+
                     return;
                 }
 
@@ -1666,7 +1918,28 @@
                     const name = document.createElement("strong");
                     name.textContent = player.name;
 
-                    if (player.avatarId) {
+                    if (player.webcamEnabled) {
+                        if (player.avatarId) {
+                            const fallback = document.createElement("img");
+                            fallback.className = isRunning
+                                ? "player-card-avatar"
+                                : "player-list-avatar";
+                            fallback.dataset.playerWebcamFallback = "";
+                            fallback.src = `/avatars/${player.avatarId}`;
+                            fallback.alt = "";
+                            item.append(fallback);
+                        }
+                        const video = document.createElement("video");
+                        video.className = isRunning
+                            ? "player-card-avatar"
+                            : "player-list-avatar";
+                        video.dataset.playerWebcam = "";
+                        video.autoplay = true;
+                        video.muted = true;
+                        video.playsInline = true;
+                        video.hidden = true;
+                        item.append(video);
+                    } else if (player.avatarId) {
                         const avatar = document.createElement("img");
                         avatar.className = isRunning
                             ? "player-card-avatar"
@@ -1695,13 +1968,13 @@
                     remove.textContent = "✕";
                     actions.append(remove);
 
-                    const score = document.createElement("span");
-                    score.textContent = player.score.toString();
-                    score.className = isRunning
-                        ? `scoreboard-score ${player.score < 0 ? "score-negative" : ""}`
-                        : "";
-
-                    details.append(score);
+                    if (isRunning) {
+                        const score = document.createElement("span");
+                        score.textContent = player.score.toString();
+                        score.className =
+                            `scoreboard-score ${player.score < 0 ? "score-negative" : ""}`;
+                        details.append(score);
+                    }
 
                     if (!player.isActive) {
                         const makeActive = document.createElement("button");
@@ -1747,6 +2020,8 @@
                 }
 
                 applyBuzzerPlayerStates();
+                webcam.refresh(update.players);
+                relocateHostCard();
             });
 
             connection.on("GameStatusChanged", update => {
@@ -1808,12 +2083,14 @@
 
             connection.onreconnected(async () => {
                 await joinSession();
+                await webcam.register();
                 startPlayerPolling();
                 startTimerPolling();
             });
             connection.start()
                 .then(async () => {
                     await joinSession();
+                    await webcam.register();
                     startPlayerPolling();
                     startTimerPolling();
                 })

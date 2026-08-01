@@ -153,6 +153,27 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void Webcam_is_exposed_only_for_an_active_connected_player()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-1",
+            true);
+
+        registry.SetPlayerWebcamEnabled("connection-1", true);
+        var active = registry.GetPlayerLobbyEntries(joined.Game!).Single();
+        registry.SetPlayerVisibility("connection-1", false);
+        var inactive = registry.GetPlayerLobbyEntries(joined.Game!).Single();
+
+        Assert.True(active.IsWebcamEnabled);
+        Assert.False(inactive.IsWebcamEnabled);
+    }
+
+    [Fact]
     public void Running_game_accepts_new_player_pending_host_approval()
     {
         var registry = CreateRegistry("ABC123");

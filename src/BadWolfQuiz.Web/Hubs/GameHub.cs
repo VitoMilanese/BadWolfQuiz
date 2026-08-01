@@ -1,6 +1,8 @@
 using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent;
+using System.Text.Json;
 
 namespace BadWolfQuiz.Web.Hubs;
 
@@ -8,6 +10,26 @@ public sealed class GameHub(
     GameSessionRegistry sessionRegistry,
     AvatarCatalog avatarCatalog) : Hub
 {
+    private static readonly ConcurrentDictionary<string, string> HostConnections = new();
+
+    public async Task RegisterHostSession(string publicCode)
+    {
+        if (Context.User?.Identity?.IsAuthenticated != true)
+        {
+            return;
+        }
+
+        var normalizedCode = GameSessionRegistry.NormalizeCode(publicCode);
+        if (sessionRegistry.Find(normalizedCode) is null)
+        {
+            return;
+        }
+
+        HostConnections[Context.ConnectionId] = normalizedCode;
+        await Groups.AddToGroupAsync(Context.ConnectionId, HostGroupName(normalizedCode));
+        await Clients.Group(GroupName(normalizedCode)).SendAsync("HostWebcamReady");
+    }
+
     public async Task JoinSession(string publicCode)
     {
         var normalizedCode = GameSessionRegistry.NormalizeCode(publicCode);
@@ -143,8 +165,77 @@ public sealed class GameHub(
         }
     }
 
+    public async Task SetPlayerWebcamEnabled(bool isEnabled)
+    {
+        var connection = sessionRegistry.SetPlayerWebcamEnabled(
+            Context.ConnectionId,
+            isEnabled);
+
+        if (connection is not null)
+        {
+            await BroadcastPlayers(connection.Game);
+        }
+    }
+
+    public Task SendPlayerWebcamOffer(
+        string publicCode,
+        JsonElement sessionDescription)
+    {
+        var connection = GetApprovedPlayer(publicCode);
+        return connection is null
+            ? Task.CompletedTask
+            : Clients.Group(HostGroupName(connection.Game.PublicCode)).SendAsync(
+                "PlayerWebcamOffer",
+                new
+                {
+                    playerId = connection.Player.Id.Value,
+                    playerConnectionId = Context.ConnectionId,
+                    sessionDescription
+                });
+    }
+
+    public Task SendPlayerWebcamIceCandidate(
+        string publicCode,
+        JsonElement candidate)
+    {
+        var connection = GetApprovedPlayer(publicCode);
+        return connection is null
+            ? Task.CompletedTask
+            : Clients.Group(HostGroupName(connection.Game.PublicCode)).SendAsync(
+                "PlayerWebcamIceCandidate",
+                new
+                {
+                    playerId = connection.Player.Id.Value,
+                    playerConnectionId = Context.ConnectionId,
+                    candidate
+                });
+    }
+
+    public Task SendHostWebcamAnswer(
+        string playerConnectionId,
+        JsonElement sessionDescription)
+    {
+        return CanRelayToPlayer(playerConnectionId)
+            ? Clients.Client(playerConnectionId).SendAsync(
+                "HostWebcamAnswer",
+                sessionDescription)
+            : Task.CompletedTask;
+    }
+
+    public Task SendHostWebcamIceCandidate(
+        string playerConnectionId,
+        JsonElement candidate)
+    {
+        return CanRelayToPlayer(playerConnectionId)
+            ? Clients.Client(playerConnectionId).SendAsync(
+                "HostWebcamIceCandidate",
+                candidate)
+            : Task.CompletedTask;
+    }
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
+        HostConnections.TryRemove(Context.ConnectionId, out _);
         var connection = sessionRegistry.DisconnectPlayer(Context.ConnectionId);
 
         if (connection is not null)
@@ -237,6 +328,8 @@ public sealed class GameHub(
                 avatarId = player.Presence == PlayerPresenceStatus.Active
                     ? player.AvatarId
                     : null,
+                webcamEnabled = player.Presence == PlayerPresenceStatus.Active &&
+                    player.IsWebcamEnabled,
                 isActive = game.Session.ActivePlayerId == player.Id,
                 presence = player.Presence.ToString().ToLowerInvariant()
             })
@@ -342,6 +435,34 @@ public sealed class GameHub(
 
     public static string GroupName(string publicCode)
         => $"game:{GameSessionRegistry.NormalizeCode(publicCode)}";
+
+    private static string HostGroupName(string publicCode)
+        => $"game-host:{GameSessionRegistry.NormalizeCode(publicCode)}";
+
+    private PlayerConnectionResult? GetApprovedPlayer(string publicCode)
+    {
+        var connection = sessionRegistry.GetPlayerConnection(Context.ConnectionId);
+        return connection is not null && string.Equals(
+            connection.Game.PublicCode,
+            GameSessionRegistry.NormalizeCode(publicCode),
+            StringComparison.OrdinalIgnoreCase)
+            ? connection
+            : null;
+    }
+
+    private bool CanRelayToPlayer(string playerConnectionId)
+    {
+        if (!HostConnections.TryGetValue(Context.ConnectionId, out var hostCode))
+        {
+            return false;
+        }
+
+        var player = sessionRegistry.GetPlayerConnection(playerConnectionId);
+        return player is not null && string.Equals(
+            player.Game.PublicCode,
+            hostCode,
+            StringComparison.OrdinalIgnoreCase);
+    }
 
     private Task BroadcastPlayers(GameSessionRegistration game)
     {

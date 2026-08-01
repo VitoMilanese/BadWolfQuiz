@@ -233,7 +233,8 @@ public sealed class GameSessionRegistry
             _playerConnections[connectionId] = new PlayerConnection(
                 access,
                 isVisible,
-                !requiresApproval);
+                !requiresApproval,
+                false);
         }
 
         return new PlayerConnectionResult(access.Game, access.Player, requiresApproval);
@@ -310,6 +311,42 @@ public sealed class GameSessionRegistry
             connection.Access.Game,
             connection.Access.Player,
             !connection.IsApproved);
+    }
+
+    public PlayerConnectionResult? SetPlayerWebcamEnabled(
+        string connectionId,
+        bool isEnabled)
+    {
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(connectionId, out var connection))
+            {
+                return null;
+            }
+
+            _playerConnections[connectionId] = connection with
+            {
+                IsWebcamEnabled = isEnabled
+            };
+            return new PlayerConnectionResult(
+                connection.Access.Game,
+                connection.Access.Player,
+                !connection.IsApproved);
+        }
+    }
+
+    public PlayerConnectionResult? GetPlayerConnection(string connectionId)
+    {
+        lock (_presenceSync)
+        {
+            return !_playerConnections.TryGetValue(connectionId, out var connection) ||
+                   !connection.IsApproved
+                ? null
+                : new PlayerConnectionResult(
+                    connection.Access.Game,
+                    connection.Access.Player,
+                    false);
+        }
     }
 
     public PlayerConnectionResult? DisconnectPlayer(string connectionId)
@@ -889,6 +926,12 @@ public sealed class GameSessionRegistry
                     player.Name,
                     player.Score,
                     player.AvatarId,
+                    _playerConnections.Values.Any(connection =>
+                        connection.Access.Game == game &&
+                        connection.Access.Player.Id == player.Id &&
+                        connection.IsApproved &&
+                        connection.IsVisible &&
+                        connection.IsWebcamEnabled),
                     GetPresence(player.Id)))
                 .ToArray();
         }
@@ -1004,7 +1047,8 @@ public sealed class GameSessionRegistry
     private sealed record PlayerConnection(
         PlayerAccess Access,
         bool IsVisible,
-        bool IsApproved);
+        bool IsApproved,
+        bool IsWebcamEnabled);
 
     private sealed record PlayerTransitionAccess(
         PlayerAccess Access,
