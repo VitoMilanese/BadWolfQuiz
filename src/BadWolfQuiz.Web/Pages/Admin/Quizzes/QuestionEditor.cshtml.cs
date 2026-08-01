@@ -35,6 +35,7 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
         {
             Id = question.Id,
             QuizId = question.Category.Round.QuizId,
+            RoundId = question.Category.Round.Id,
             IsSpecial = question.IsSpecial,
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
@@ -407,6 +408,7 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
     {
         public int Id { get; set; }
         public int QuizId { get; set; }
+        public int RoundId { get; set; }
 
         [Display(Name = "Label_SpecialQuestion")]
         public bool IsSpecial { get; set; }
