@@ -150,6 +150,17 @@ public sealed class RuntimeQuestion
         _answerAttempts.AddRange(state.AnswerAttempts);
     }
 
+    internal void SuspendOpenBuzzerForRecovery()
+    {
+        if (BuzzerStatus != QuestionBuzzerStatus.Open)
+        {
+            return;
+        }
+
+        BuzzerStatus = QuestionBuzzerStatus.Inactive;
+        AnsweringPlayerId = null;
+    }
+
     internal void Select(GamePlayerId selectedByPlayerId)
     {
         if (Status != RuntimeQuestionStatus.Available)

@@ -131,6 +131,10 @@ public sealed class GameSession
             session._currentRoundStartScores[score.PlayerId] = score.Score;
         }
         session.Board.RestoreState(state.Questions);
+        foreach (var question in session.Board.Questions)
+        {
+            question.SuspendOpenBuzzerForRecovery();
+        }
         session.FinalQuestion = state.FinalQuestion is null
             ? null
             : FinalQuestion.Restore(

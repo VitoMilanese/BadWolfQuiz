@@ -677,15 +677,17 @@ public sealed class GameSessionRegistryTests
         original.AdjustPlayerScore(player.Id, 300);
         original.Start();
         var registry = CreateRegistry();
-        registry.Restore("ABC123", original, "host-1", true);
+        registry.Restore("ABC123", original, "host-1", false);
 
         var rejoined = registry.JoinPlayer("ABC123", "rose");
         var duplicate = registry.JoinPlayer("ABC123", "Rose");
+        var newPlayer = registry.JoinPlayer("ABC123", "Mickey");
 
         Assert.Equal(PlayerJoinStatus.Success, rejoined.Status);
         Assert.Equal(player.Id, rejoined.Player!.Id);
         Assert.Equal(300, rejoined.Player.Score);
         Assert.Equal(PlayerJoinStatus.NameAlreadyUsed, duplicate.Status);
+        Assert.Equal(PlayerJoinStatus.GameAlreadyStarted, newPlayer.Status);
     }
 
     [Fact]

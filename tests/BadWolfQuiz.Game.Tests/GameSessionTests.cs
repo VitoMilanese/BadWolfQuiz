@@ -31,9 +31,30 @@ public sealed class GameSessionTests
         Assert.Equal(-100, restored.Players.Single(p => p.Id == rose.Id).Score);
         var question = restored.Board.Questions.Single(q => q.SourceQuestionId == 100);
         Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
+        Assert.Equal(QuestionBuzzerStatus.Inactive, question.BuzzerStatus);
         Assert.Single(question.AnswerAttempts);
         Assert.Equal(GameTimerStatus.Stopped, restored.Timer.Status);
         Assert.Equal(GameTimerStatus.Stopped, restored.AnswerTimer.Status);
+    }
+
+    [Fact]
+    public void Restore_preserves_a_claimed_buzzer()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, rose.Id);
+
+        var restored = GameSession.Restore(
+            session.Quiz,
+            session.Settings,
+            session.CaptureState());
+
+        var question = restored.Board.Questions.Single(q => q.SourceQuestionId == 100);
+        Assert.Equal(QuestionBuzzerStatus.Claimed, question.BuzzerStatus);
+        Assert.Equal(rose.Id, question.AnsweringPlayerId);
     }
 
     [Fact]
