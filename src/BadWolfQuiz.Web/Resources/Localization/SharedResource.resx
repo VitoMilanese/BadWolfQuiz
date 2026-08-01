@@ -785,6 +785,7 @@
   <data name="GameBoard_QuestionWithCategory" xml:space="preserve"><value>Question from “{0}”</value></data>
   <data name="GameBoard_AnswerWithCategory" xml:space="preserve"><value>Answer to the question from “{0}”</value></data>
   <data name="PlayerMedia_Settings" xml:space="preserve"><value>Picture, avatar, and webcam</value></data>
+  <data name="Language_Label" xml:space="preserve"><value>Language</value></data>
   <data name="GameBoard_ReturnToBoard" xml:space="preserve">
     <value>Return to board</value>
   </data>

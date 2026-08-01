@@ -2,6 +2,8 @@
 @model BadWolfQuiz.Web.Pages.Player.LobbyModel
 @{
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
+    var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
 
 <div class="form-card narrow player-lobby"
@@ -85,6 +87,23 @@
              data-unsupported-label="@Localizer["PlayerWebcam_RequiresHttps"]"
              data-denied-label="@Localizer["PlayerWebcam_AccessFailed"]"
              hidden></div>
+        <div class="player-language-settings">
+            <strong>@Localizer["Language_Label"]</strong>
+            <div class="player-language-options">
+                <a class="button button-secondary @(currentCulture == "uk" ? "is-selected" : null)"
+                   asp-page="/SetLanguage"
+                   asp-route-culture="uk"
+                   asp-route-returnUrl="@returnUrl">🇺🇦 Українська</a>
+                <a class="button button-secondary @(currentCulture == "en" ? "is-selected" : null)"
+                   asp-page="/SetLanguage"
+                   asp-route-culture="en"
+                   asp-route-returnUrl="@returnUrl">🇬🇧 English</a>
+                <a class="button button-secondary @(currentCulture == "it" ? "is-selected" : null)"
+                   asp-page="/SetLanguage"
+                   asp-route-culture="it"
+                   asp-route-returnUrl="@returnUrl">🇮🇹 Italiano</a>
+            </div>
+        </div>
         </div>
     </details>
 
@@ -647,6 +666,7 @@
                 buzzerQuestionId = canBuzz
                     ? update.sourceQuestionId
                     : null;
+                lobby.classList.toggle("is-page-buzzer-active", canBuzz);
 
                 if (buzzerButton) {
                     buzzerButton.disabled = !canBuzz;
@@ -795,7 +815,7 @@
                     .catch(console.error);
             });
 
-            buzzerButton?.addEventListener("click", () => {
+            const tryBuzz = () => {
                 if (buzzerQuestionId === null ||
                     connection.state !== signalR.HubConnectionState.Connected) {
                     return;
@@ -803,9 +823,22 @@
 
                 const sourceQuestionId = buzzerQuestionId;
                 buzzerQuestionId = null;
+                lobby.classList.remove("is-page-buzzer-active");
                 buzzerButton.disabled = true;
                 buzzerButton.classList.remove("player-buzzer-open");
                 connection.invoke("Buzz", sourceQuestionId).catch(console.error);
+            };
+
+            buzzerButton?.addEventListener("click", tryBuzz);
+
+            document.addEventListener("click", event => {
+                if (buzzerQuestionId === null ||
+                    event.target.closest(
+                        "button, a, input, textarea, select, summary, details, dialog")) {
+                    return;
+                }
+
+                tryBuzz();
             });
 
             connection.on("BuzzRejected", () => {

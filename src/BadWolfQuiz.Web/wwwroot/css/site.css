@@ -2321,6 +2321,38 @@ textarea {
     padding: 0 12px 12px;
 }
 
+.player-language-settings {
+    display: grid;
+    gap: 7px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+}
+
+.player-language-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.player-language-options .button {
+    min-height: 38px;
+    padding: 7px 10px;
+}
+
+.player-language-options .is-selected {
+    border-color: var(--gold);
+    color: var(--text);
+    box-shadow: 0 0 0 1px var(--gold);
+}
+
+.player-lobby.is-page-buzzer-active {
+    cursor: pointer;
+}
+
+.player-lobby.is-page-buzzer-active :is(button, a, input, textarea, select, summary) {
+    cursor: auto;
+}
+
 .player-image-source-switch,
 .player-image-actions {
     display: flex;

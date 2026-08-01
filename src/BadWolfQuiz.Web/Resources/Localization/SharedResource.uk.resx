@@ -785,6 +785,7 @@
   <data name="GameBoard_QuestionWithCategory" xml:space="preserve"><value>Питання з категорії «{0}»</value></data>
   <data name="GameBoard_AnswerWithCategory" xml:space="preserve"><value>Відповідь на питання з категорії «{0}»</value></data>
   <data name="PlayerMedia_Settings" xml:space="preserve"><value>Зображення, аватар і вебкамера</value></data>
+  <data name="Language_Label" xml:space="preserve"><value>Мова</value></data>
   <data name="GameBoard_ReturnToBoard" xml:space="preserve">
     <value>Повернутися до дошки</value>
   </data>
