@@ -1030,4 +1030,16 @@
   <data name="BrandLogo_PreviewAlt" xml:space="preserve"><value>Custom logo preview</value></data>
   <data name="BrandLogo_Remove" xml:space="preserve"><value>Remove the custom logo</value></data>
   <data name="BrandLogo_InvalidImage" xml:space="preserve"><value>Select a valid logo image up to 5 MB.</value></data>
+  <data name="Menu_PlayWithUs" xml:space="preserve"><value>Play with us</value></data>
+  <data name="Menu_AskQuestion" xml:space="preserve"><value>Ask a question</value></data>
+  <data name="AskQuestion_Eyebrow" xml:space="preserve"><value>CONTACT US</value></data>
+  <data name="AskQuestion_Title" xml:space="preserve"><value>Ask a question</value></data>
+  <data name="AskQuestion_Description" xml:space="preserve"><value>Send us a question. It will be delivered to the BAD WOLF QUIZ Discord channel.</value></data>
+  <data name="AskQuestion_Name" xml:space="preserve"><value>Your name</value></data>
+  <data name="AskQuestion_NameHint" xml:space="preserve"><value>Optional</value></data>
+  <data name="AskQuestion_Question" xml:space="preserve"><value>Question</value></data>
+  <data name="AskQuestion_Send" xml:space="preserve"><value>Send question</value></data>
+  <data name="AskQuestion_Invalid" xml:space="preserve"><value>Enter a question of up to 1,500 characters.</value></data>
+  <data name="AskQuestion_Failed" xml:space="preserve"><value>The question could not be sent. Please try again later.</value></data>
+  <data name="AskQuestion_Sent" xml:space="preserve"><value>Your question has been sent.</value></data>
 </root>

@@ -1,6 +1,7 @@
 ﻿@using System.Globalization
 @using BadWolfQuiz.Web.Services
 @inject GameSettingsStore SettingsStore
+@inject IConfiguration Configuration
 
 @{
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
@@ -13,6 +14,7 @@
     };
 
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var discordInviteUrl = Configuration["Discord:InviteUrl"];
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
     var hasBrandLogo = false;
     if (isAuthenticated)
@@ -58,6 +60,13 @@
             <a asp-page="/Join/Index">
                 @Localizer["Button_Join"]
             </a>
+            @if (!string.IsNullOrWhiteSpace(discordInviteUrl))
+            {
+                <a href="@discordInviteUrl" target="_blank" rel="noopener noreferrer">
+                    @Localizer["Menu_PlayWithUs"]
+                </a>
+            }
+            <a asp-page="/AskQuestion">@Localizer["Menu_AskQuestion"]</a>
 
             @if (isAuthenticated)
             {

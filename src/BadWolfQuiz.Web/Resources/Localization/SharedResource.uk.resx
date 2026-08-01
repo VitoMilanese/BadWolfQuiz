@@ -1030,4 +1030,16 @@
   <data name="BrandLogo_PreviewAlt" xml:space="preserve"><value>Прев’ю власного логотипа</value></data>
   <data name="BrandLogo_Remove" xml:space="preserve"><value>Прибрати власний логотип</value></data>
   <data name="BrandLogo_InvalidImage" xml:space="preserve"><value>Оберіть коректне зображення логотипа розміром до 5 МБ.</value></data>
+  <data name="Menu_PlayWithUs" xml:space="preserve"><value>Грати з нами</value></data>
+  <data name="Menu_AskQuestion" xml:space="preserve"><value>Задати питання</value></data>
+  <data name="AskQuestion_Eyebrow" xml:space="preserve"><value>ЗВ’ЯЗАТИСЯ З НАМИ</value></data>
+  <data name="AskQuestion_Title" xml:space="preserve"><value>Задати питання</value></data>
+  <data name="AskQuestion_Description" xml:space="preserve"><value>Надішліть нам питання. Воно потрапить у Discord-канал BAD WOLF QUIZ.</value></data>
+  <data name="AskQuestion_Name" xml:space="preserve"><value>Ваше ім’я</value></data>
+  <data name="AskQuestion_NameHint" xml:space="preserve"><value>Необов’язково</value></data>
+  <data name="AskQuestion_Question" xml:space="preserve"><value>Питання</value></data>
+  <data name="AskQuestion_Send" xml:space="preserve"><value>Надіслати питання</value></data>
+  <data name="AskQuestion_Invalid" xml:space="preserve"><value>Введіть питання довжиною до 1500 символів.</value></data>
+  <data name="AskQuestion_Failed" xml:space="preserve"><value>Не вдалося надіслати питання. Спробуйте пізніше.</value></data>
+  <data name="AskQuestion_Sent" xml:space="preserve"><value>Ваше питання надіслано.</value></data>
 </root>

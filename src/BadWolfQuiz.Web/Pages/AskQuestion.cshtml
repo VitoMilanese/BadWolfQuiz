@@ -1,0 +1,36 @@
+@page
+@model BadWolfQuiz.Web.Pages.AskQuestionModel
+@{
+    ViewData["Title"] = Localizer["AskQuestion_Title"];
+}
+
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">@Localizer["AskQuestion_Eyebrow"]</p>
+        <h1>@Localizer["AskQuestion_Title"]</h1>
+        <p>@Localizer["AskQuestion_Description"]</p>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="message message-success" role="status" data-auto-dismiss>@successMessage</div>
+}
+
+<form method="post" class="form-card narrow stack-form">
+    <div asp-validation-summary="ModelOnly" class="message message-error"></div>
+    <label>
+        <span>@Localizer["AskQuestion_Name"]</span>
+        <input asp-for="SenderName" maxlength="80" autocomplete="name" />
+        <small>@Localizer["AskQuestion_NameHint"]</small>
+    </label>
+    <label>
+        <span>@Localizer["AskQuestion_Question"]</span>
+        <textarea asp-for="Question" maxlength="1500" rows="8" required></textarea>
+    </label>
+    <div class="form-actions">
+        <button class="button button-primary" type="submit">
+            @Localizer["AskQuestion_Send"]
+        </button>
+    </div>
+</form>
