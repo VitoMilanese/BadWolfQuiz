@@ -4472,13 +4472,16 @@ iframe.game-content-video {
     width: 100%;
 }
 .four-clue-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: clamp(.5rem, 1vw, 1rem);
+    --four-clue-gap: clamp(.5rem, 1vw, 1rem);
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: var(--four-clue-gap);
     width: 100%;
 }
 
 .four-clue-grid .game-content-block {
+    flex: 0 0 calc((100% - 3 * var(--four-clue-gap)) / 4);
     min-height: clamp(8rem, 24vh, 18rem);
     padding: clamp(.6rem, 1.3vw, 1.25rem);
     border: 2px solid var(--line);
@@ -4508,5 +4511,11 @@ iframe.game-content-video {
 }
 
 @media (max-width: 760px) {
-    .four-clue-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .four-clue-grid {
+        flex-wrap: wrap;
+    }
+
+    .four-clue-grid .game-content-block {
+        flex-basis: calc((100% - var(--four-clue-gap)) / 2);
+    }
 }

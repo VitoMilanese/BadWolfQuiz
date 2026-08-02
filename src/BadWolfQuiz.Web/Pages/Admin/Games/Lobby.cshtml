@@ -621,17 +621,6 @@
                 }
 
                 <section class="question-controls">
-                    @if (Model.CurrentQuestion.CanRevealClue)
-                    {
-                        <form method="post" asp-page-handler="RevealClue">
-                            <input name="sourceQuestionId"
-                                   type="hidden"
-                                   value="@Model.CurrentQuestion.SourceQuestionId" />
-                            <button class="button button-secondary" type="submit">
-                                @Localizer["GameBoard_RevealOneClue"]
-                            </button>
-                        </form>
-                    }
                     @if (!Model.CurrentQuestion.IsSpecial &&
                         Model.CurrentQuestion.BuzzerStatus ==
                             BadWolfQuiz.Game.Runtime.QuestionBuzzerStatus.Inactive)
@@ -702,6 +691,18 @@
                                    value="@Model.CurrentQuestion.SourceQuestionId" />
                             <button class="button button-secondary" type="submit">
                                 @Localizer["GameBoard_NoCorrectAnswer"]
+                            </button>
+                        </form>
+                    }
+
+                    @if (Model.CurrentQuestion.CanRevealClue)
+                    {
+                        <form method="post" asp-page-handler="RevealClue">
+                            <input name="sourceQuestionId"
+                                   type="hidden"
+                                   value="@Model.CurrentQuestion.SourceQuestionId" />
+                            <button class="button button-secondary" type="submit">
+                                @Localizer["GameBoard_RevealOneClue"]
                             </button>
                         </form>
                     }
