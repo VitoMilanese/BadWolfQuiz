@@ -386,6 +386,12 @@
             const transitionStorageKey = `${storageKey}:transition`;
             const bootstrapToken = lobby.dataset.accessToken;
 
+            const clearStoredPlayerAccess = () => {
+                localStorage.removeItem(storageKey);
+                localStorage.removeItem(currentPlayerStorageKey);
+                localStorage.removeItem(transitionStorageKey);
+            };
+
             if (bootstrapToken) {
                 localStorage.setItem(storageKey, bootstrapToken);
                 history.replaceState({}, document.title, window.location.pathname);
@@ -854,8 +860,7 @@
             });
 
             connection.on("PlayerAccessRejected", () => {
-                localStorage.removeItem(storageKey);
-                localStorage.removeItem(currentPlayerStorageKey);
+                clearStoredPlayerAccess();
                 removedFromGameRedirect();
             });
 
@@ -869,6 +874,7 @@
             });
 
             connection.on("RemovedFromGame", () => {
+                clearStoredPlayerAccess();
                 if (removedFromGameDialog) {
                     removedFromGameDialog.showModal();
                     return;
