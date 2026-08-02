@@ -1009,6 +1009,12 @@
   <data name="GameBoard_RemovePlayer" xml:space="preserve"><value>Remove player</value></data>
   <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve"><value>Remove {0} from the game?</value></data>
   <data name="GameBoard_RemovePlayerRejected" xml:space="preserve"><value>This player cannot be removed during the current game phase.</value></data>
+  <data name="GameBoard_ManageBlockedPlayers" xml:space="preserve"><value>Blocked players</value></data>
+  <data name="GameBoard_BlockedPlayersTitle" xml:space="preserve"><value>Blocked players</value></data>
+  <data name="GameBoard_NoBlockedPlayers" xml:space="preserve"><value>No players are currently blocked.</value></data>
+  <data name="GameBoard_UnblockPlayer" xml:space="preserve"><value>Unblock</value></data>
+  <data name="GameBoard_UnblockPlayerRejected" xml:space="preserve"><value>This player could not be unblocked.</value></data>
+  <data name="Error_PlayerBlocked" xml:space="preserve"><value>You were removed from this game. Ask the host to unblock you before joining again.</value></data>
   <data name="PlayerGame_RemovedFromGame" xml:space="preserve"><value>The host removed you from the game.</value></data>
   <data name="PlayerGame_RemovedFromGameTitle" xml:space="preserve"><value>You were removed from the game</value></data>
   <data name="HostCard_Display" xml:space="preserve"><value>Show the host card during the game</value></data>

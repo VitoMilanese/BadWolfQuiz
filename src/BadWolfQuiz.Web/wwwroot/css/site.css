@@ -1606,6 +1606,25 @@ textarea {
     margin-top: 24px;
 }
 
+.blocked-player-list {
+    display: grid;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.blocked-player-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 0.7rem;
+    background: var(--panel);
+}
+
 .dialog-target {
     padding: 14px 16px;
     border-left: 3px solid var(--red-bright);

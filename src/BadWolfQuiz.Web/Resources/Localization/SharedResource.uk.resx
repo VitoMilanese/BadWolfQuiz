@@ -1009,6 +1009,12 @@
   <data name="GameBoard_RemovePlayer" xml:space="preserve"><value>Виключити гравця</value></data>
   <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve"><value>Виключити гравця {0} з гри?</value></data>
   <data name="GameBoard_RemovePlayerRejected" xml:space="preserve"><value>Цього гравця зараз неможливо виключити.</value></data>
+  <data name="GameBoard_ManageBlockedPlayers" xml:space="preserve"><value>Заблоковані гравці</value></data>
+  <data name="GameBoard_BlockedPlayersTitle" xml:space="preserve"><value>Заблоковані гравці</value></data>
+  <data name="GameBoard_NoBlockedPlayers" xml:space="preserve"><value>Зараз немає заблокованих гравців.</value></data>
+  <data name="GameBoard_UnblockPlayer" xml:space="preserve"><value>Розблокувати</value></data>
+  <data name="GameBoard_UnblockPlayerRejected" xml:space="preserve"><value>Не вдалося розблокувати цього гравця.</value></data>
+  <data name="Error_PlayerBlocked" xml:space="preserve"><value>Вас виключили з цієї гри. Попросіть хоста розблокувати вас перед повторним приєднанням.</value></data>
   <data name="PlayerGame_RemovedFromGame" xml:space="preserve"><value>Адмін виключив вас із гри.</value></data>
   <data name="PlayerGame_RemovedFromGameTitle" xml:space="preserve"><value>Вас виключено з гри</value></data>
   <data name="HostCard_Display" xml:space="preserve"><value>Показувати картку хоста під час гри</value></data>

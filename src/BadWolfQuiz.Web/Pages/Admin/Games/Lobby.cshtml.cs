@@ -24,6 +24,8 @@ public sealed class LobbyModel(
 
     public IReadOnlyList<PlayerLobbyEntry> Players { get; private set; } = [];
 
+    public IReadOnlyList<GamePlayer> BlockedPlayers { get; private set; } = [];
+
     public IReadOnlyList<GameBoardCategory> BoardCategories { get; private set; } = [];
 
     public RuntimeQuestion? CurrentQuestion { get; private set; }
@@ -788,6 +790,26 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public IActionResult OnPostUnblockPlayer(Guid id, Guid playerId)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        if (!sessionRegistry.UnblockPlayer(
+                game.PublicCode,
+                new GamePlayerId(playerId)))
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_UnblockPlayerRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public IActionResult OnPostTogglePlayerJoining(Guid id)
     {
         var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
@@ -900,6 +922,7 @@ public sealed class LobbyModel(
 
         Game = game;
         Players = sessionRegistry.GetPlayerLobbyEntries(game);
+        BlockedPlayers = sessionRegistry.GetBlockedPlayers(game);
         SettingsInput = GameSettingsInput.From(game.Session.Settings);
 
         if (game.Session.Status == GameSessionStatus.Completed)

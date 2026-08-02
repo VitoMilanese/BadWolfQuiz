@@ -45,6 +45,12 @@
                             data-open-join-code>
                         @Localizer["GameBoard_ShowJoinCode"]
                     </button>
+
+                    <button class="action-menu-item"
+                            type="button"
+                            data-open-blocked-players>
+                        @Localizer["GameBoard_ManageBlockedPlayers"]
+                    </button>
                 </div>
                 </details>
             }
@@ -1317,6 +1323,42 @@
     </div>
 </dialog>
 
+<dialog id="blocked-players-dialog"
+        class="app-dialog"
+        aria-labelledby="blocked-players-dialog-title">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2 id="blocked-players-dialog-title">@Localizer["GameBoard_BlockedPlayersTitle"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-blocked-players
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        @if (Model.BlockedPlayers.Count == 0)
+        {
+            <p class="muted">@Localizer["GameBoard_NoBlockedPlayers"]</p>
+        }
+        else
+        {
+            <ul class="blocked-player-list">
+                @foreach (var player in Model.BlockedPlayers)
+                {
+                    <li>
+                        <strong>@player.Name</strong>
+                        <form method="post" asp-page-handler="UnblockPlayer">
+                            <input name="playerId" type="hidden" value="@player.Id.Value" />
+                            <button class="button button-secondary" type="submit">
+                                @Localizer["GameBoard_UnblockPlayer"]
+                            </button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</dialog>
+
 @section Scripts {
     <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
     <script>
@@ -1981,6 +2023,20 @@
             const removePlayerDialog = document.getElementById("remove-player-dialog");
             const removePlayerDialogTarget = document.getElementById("remove-player-dialog-target");
             const confirmRemovePlayer = document.querySelector("[data-confirm-remove-player]");
+            const blockedPlayersDialog = document.getElementById("blocked-players-dialog");
+
+            document.querySelector("[data-open-blocked-players]")
+                ?.addEventListener("click", () => blockedPlayersDialog?.showModal());
+
+            for (const button of document.querySelectorAll("[data-close-blocked-players]")) {
+                button.addEventListener("click", () => blockedPlayersDialog?.close());
+            }
+
+            blockedPlayersDialog?.addEventListener("click", event => {
+                if (event.target === blockedPlayersDialog) {
+                    blockedPlayersDialog.close();
+                }
+            });
 
             const removePlayer = (playerId, playerName) => {
                 if (!removePlayerForm ||

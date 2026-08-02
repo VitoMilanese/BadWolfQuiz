@@ -298,6 +298,30 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void Removed_player_cannot_rejoin_until_host_unblocks_them()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.RemovePlayer("ABC123", joined.Player!.Id);
+
+        var blocked = registry.JoinPlayer("ABC123", "rose");
+
+        Assert.Equal(PlayerJoinStatus.PlayerBlocked, blocked.Status);
+        Assert.Equal(joined.Player, Assert.Single(registry.GetBlockedPlayers(game)));
+
+        Assert.True(registry.UnblockPlayer("ABC123", joined.Player.Id));
+        Assert.Empty(registry.GetBlockedPlayers(game));
+
+        var rejoined = registry.JoinPlayer("ABC123", "ROSE");
+
+        Assert.Equal(PlayerJoinStatus.Success, rejoined.Status);
+        Assert.Same(joined.Player, rejoined.Player);
+        Assert.Contains(rejoined.Player!, game.Session.Players);
+        Assert.Empty(game.Session.RemovedPlayers);
+    }
+
+    [Fact]
     public void Running_game_requires_host_approval_before_player_rejoins()
     {
         var registry = CreateRegistry("ABC123");
