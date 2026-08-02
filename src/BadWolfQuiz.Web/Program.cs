@@ -13,8 +13,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
+
+const long maximumImportRequestBodySize = 1100L * 1024 * 1024;
+const long maximumMultipartBodySize = 1050L * 1024 * 1024;
+
+builder.Services.Configure<FormOptions>(options =>
+    options.MultipartBodyLengthLimit = maximumMultipartBodySize);
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services
@@ -100,6 +107,7 @@ builder.Services.AddScoped<PasswordResetEmailSender>();
 builder.Services.AddScoped<JoinUrlBuilder>();
 builder.Services.AddScoped<IPasswordHasher<HostAccount>, PasswordHasher<HostAccount>>();
 builder.Services.AddScoped<QuizSeedService>();
+builder.Services.AddScoped<QuizPackageService>();
 
 var app = builder.Build();
 
@@ -129,6 +137,21 @@ var localizationOptions = app.Services
     .Value;
 
 app.UseRequestLocalization(localizationOptions);
+app.Use(async (context, next) =>
+{
+    if (HttpMethods.IsPost(context.Request.Method) &&
+        context.Request.Path == "/Admin/Quizzes" &&
+        string.Equals(context.Request.Query["handler"], "Import", StringComparison.OrdinalIgnoreCase))
+    {
+        var bodySizeFeature = context.Features.Get<IHttpMaxRequestBodySizeFeature>();
+        if (bodySizeFeature is { IsReadOnly: false })
+        {
+            bodySizeFeature.MaxRequestBodySize = maximumImportRequestBodySize;
+        }
+    }
+
+    await next(context);
+});
 app.Use(async (context, next) =>
 {
     try

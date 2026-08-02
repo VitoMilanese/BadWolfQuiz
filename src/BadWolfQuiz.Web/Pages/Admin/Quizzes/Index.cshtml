@@ -9,7 +9,16 @@
         <p class="eyebrow">@Localizer["Admin_Eyebrow"]</p>
         <h1>@Localizer["Title_MyQuizzes"]</h1>
     </div>
-    <a class="button button-primary" asp-page="Create">@Localizer["Button_CreateQuiz"]</a>
+    <div class="page-heading-actions">
+        <form id="quiz-import-form" method="post" asp-page-handler="Import" asp-antiforgery="false" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input asp-for="ImportFile" type="file" accept=".bwquiz" required hidden data-quiz-import-file />
+            <button class="button button-secondary" type="button" data-quiz-import-select>
+                @Localizer["Button_ImportQuiz"]
+            </button>
+        </form>
+        <a class="button button-primary" asp-page="Create">@Localizer["Button_CreateQuiz"]</a>
+    </div>
 </div>
 
 @if (TempData["SuccessMessage"] is string successMessage)
@@ -59,6 +68,12 @@
                asp-page="Editor"
                asp-route-id="@quiz.Id">
                 @Localizer["Button_Edit"]
+            </a>
+
+            <a class="button button-secondary"
+               asp-page-handler="Export"
+               asp-route-quizId="@quiz.Id">
+                @Localizer["Button_ExportQuiz"]
             </a>
 
             <button class="button button-secondary"
@@ -138,6 +153,14 @@
 
     const deleteQuizId = document.getElementById('deleteQuizId');
     const deleteQuizTitle = document.getElementById('deleteQuizTitle');
+    const importFile = document.querySelector('[data-quiz-import-file]');
+
+    document.querySelector('[data-quiz-import-select]')?.addEventListener('click', () => importFile?.click());
+    importFile?.addEventListener('change', () => {
+        if (importFile.files.length > 0) {
+            importFile.form.requestSubmit();
+        }
+    });
 
     document.querySelectorAll('[data-open-rename-dialog]').forEach(button => {
         button.addEventListener('click', () => {

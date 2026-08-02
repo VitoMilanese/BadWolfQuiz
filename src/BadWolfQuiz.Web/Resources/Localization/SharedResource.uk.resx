@@ -1129,4 +1129,8 @@
   <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 підказка</value></data>
   <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>Не вдалося відкрити наступну підказку.</value></data>
   <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Питання з категорії «{0}» — {1} балів</value></data>
+  <data name="Button_ImportQuiz" xml:space="preserve"><value>Імпортувати квіз</value></data>
+  <data name="Button_ExportQuiz" xml:space="preserve"><value>Експортувати</value></data>
+  <data name="QuizImport_Success" xml:space="preserve"><value>Квіз успішно імпортовано.</value></data>
+  <data name="QuizImport_InvalidFile" xml:space="preserve"><value>Обраний файл не є коректним або підтримуваним пакетом BAD WOLF QUIZ.</value></data>
 </root>
