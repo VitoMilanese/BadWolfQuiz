@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BadWolfQuiz.Game.Definitions;
 
 namespace BadWolfQuiz.Web.Models;
 
@@ -138,6 +139,7 @@ public sealed class QuizQuestion
     public BuzzActivationMode BuzzModeOverride { get; set; } = BuzzActivationMode.UseRoundDefault;
     public int BuzzDelaySeconds { get; set; }
     public bool IsSpecial { get; set; }
+    public QuestionPresentationType PresentationType { get; set; }
     public bool ExcludeFromRandomWagerSelection { get; set; }
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 

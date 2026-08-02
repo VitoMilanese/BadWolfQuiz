@@ -8,6 +8,85 @@ public sealed class GameSessionTests
     private static readonly DateTimeOffset InitialTime =
         new(2026, 7, 29, 12, 0, 0, TimeSpan.Zero);
 
+    [Theory]
+    [InlineData(0, 100)]
+    [InlineData(1, 50)]
+    [InlineData(2, 25)]
+    public void Four_clue_question_reduces_correct_score_as_clues_are_revealed(
+        int additionalClues,
+        int expectedScore)
+    {
+        var session = CreateFourClueSession();
+        var player = session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+        for (var index = 0; index < additionalClues; index++)
+        {
+            session.RevealNextClue(100);
+        }
+        Assert.Equal(
+            expectedScore,
+            session.Board.Questions.Single().CorrectAnswerValue);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, player.Id);
+
+        var attempt = session.JudgeQuestionAnswer(100, player.Id, true);
+
+        Assert.Equal(expectedScore, attempt.ScoreDelta);
+    }
+
+    [Fact]
+    public void Four_clue_question_always_deducts_the_full_value_for_a_wrong_answer()
+    {
+        var session = CreateFourClueSession();
+        var player = session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+        session.RevealNextClue(100);
+        session.RevealNextClue(100);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, player.Id);
+
+        var attempt = session.JudgeQuestionAnswer(100, player.Id, false);
+
+        Assert.Equal(-100, attempt.ScoreDelta);
+    }
+
+    [Fact]
+    public void Restore_preserves_the_number_of_revealed_clues()
+    {
+        var session = CreateFourClueSession();
+        session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+        session.RevealNextClue(100);
+
+        var restored = GameSession.Restore(
+            session.Quiz,
+            session.Settings,
+            session.CaptureState());
+
+        Assert.Equal(
+            3,
+            restored.Board.Questions.Single().RevealedClueCount);
+    }
+
+    private static GameSession CreateFourClueSession()
+    {
+        static ContentBlockSnapshot Clue(int id) => new(
+            id, ContentBlockKind.Text, $"Clue {id}", null, null, null,
+            null, null, null, null, id, false);
+
+        var question = new QuizQuestionSnapshot(
+            100, 10, 0, 100, false, "Connections", false,
+            [Clue(1), Clue(2), Clue(3), Clue(4)],
+            [],
+            QuestionPresentationType.FourClues);
+        var quiz = new QuizSnapshot(
+            1, "Four clues", [new QuizRoundSnapshot(1, "Round 1", 0, [question])]);
+        return GameSession.Create(quiz, new ManualTimeProvider(InitialTime));
+    }
+
     [Fact]
     public void Restore_preserves_gameplay_state_but_stops_timers()
     {

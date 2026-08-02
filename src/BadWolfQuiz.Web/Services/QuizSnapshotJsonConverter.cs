@@ -97,7 +97,8 @@ public sealed class QuizSnapshotJsonConverter : JsonConverter<QuizSnapshot>
         string CategoryTitle,
         bool ExcludeFromRandomWagerSelection,
         ContentBlockSnapshot[] QuestionBlocks,
-        ContentBlockSnapshot[] AnswerBlocks)
+        ContentBlockSnapshot[] AnswerBlocks,
+        QuestionPresentationType PresentationType = QuestionPresentationType.Standard)
     {
         public QuizQuestionSnapshot ToSnapshot() => new(
             SourceQuestionId,
@@ -108,7 +109,8 @@ public sealed class QuizSnapshotJsonConverter : JsonConverter<QuizSnapshot>
             CategoryTitle,
             ExcludeFromRandomWagerSelection,
             QuestionBlocks,
-            AnswerBlocks);
+            AnswerBlocks,
+            PresentationType);
 
         public static QuizQuestionSnapshotData From(
             QuizQuestionSnapshot snapshot) => new(
@@ -120,6 +122,7 @@ public sealed class QuizSnapshotJsonConverter : JsonConverter<QuizSnapshot>
                 snapshot.CategoryTitle,
                 snapshot.ExcludeFromRandomWagerSelection,
                 snapshot.QuestionBlocks.ToArray(),
-                snapshot.AnswerBlocks.ToArray());
+                snapshot.AnswerBlocks.ToArray(),
+                snapshot.PresentationType);
     }
 }

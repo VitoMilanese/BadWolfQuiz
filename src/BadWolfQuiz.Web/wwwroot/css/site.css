@@ -4471,3 +4471,53 @@ iframe.game-content-video {
 .auth-card input[type="password"] {
     width: 100%;
 }
+.four-clue-grid {
+    --four-clue-gap: clamp(.5rem, 1vw, 1rem);
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: var(--four-clue-gap);
+    width: 100%;
+}
+
+.four-clue-grid .game-content-block {
+    flex: 0 0 calc((100% - 3 * var(--four-clue-gap)) / 4);
+    align-self: stretch;
+    height: auto;
+    min-height: clamp(8rem, 24vh, 18rem);
+    padding: clamp(.6rem, 1.3vw, 1.25rem);
+    border: 2px solid var(--line);
+    border-radius: 1rem;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.four-clue-grid .game-content-text {
+    font-size: clamp(1rem, 2.2vw, 2.25rem);
+}
+
+.four-clue-grid .game-content-image {
+    width: 100%;
+    height: 100%;
+    max-height: 24vh;
+    object-fit: contain;
+}
+
+.four-clue-grid .game-content-audio {
+    width: 100%;
+    max-width: 22rem;
+}
+
+@media (max-width: 760px) {
+    .four-clue-grid {
+        flex-wrap: wrap;
+    }
+
+    .four-clue-grid .game-content-block {
+        flex-basis: calc((100% - var(--four-clue-gap)) / 2);
+    }
+}

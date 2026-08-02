@@ -81,6 +81,8 @@ Each question contains independent:
 - Question blocks
 - Answer blocks
 
+Questions may use the standard presentation or the four-clue presentation. A four-clue question contains exactly four text, image, or audio clues: two are visible initially and the host may reveal the remaining clues one at a time. Correct answers are worth 100%, 50%, or 25% of the question value depending on how many clues were revealed; an incorrect answer always deducts the full value.
+
 The quiz also has a dedicated final-question editor with independent question and answer blocks.
 
 Content blocks can be:
@@ -160,7 +162,7 @@ The QR code uses the explicitly configured public address:
 ```json
 {
   "Game": {
-    "PublicBaseUrl": "http://79.41.129.203:5080"
+    "PublicBaseUrl": "http://203.0.113.10:5080"
   }
 }
 ```

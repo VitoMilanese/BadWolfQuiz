@@ -499,12 +499,15 @@
                                     "GameBoard_AnswerWithCategory",
                                     Model.CurrentQuestion.CategoryTitle]
                                 : Localizer[
-                                    "GameBoard_QuestionWithCategory",
-                                    Model.CurrentQuestion.CategoryTitle])
+                                    "GameBoard_QuestionWithCategoryAndPoints",
+                                    Model.CurrentQuestion.CategoryTitle,
+                                    Model.CurrentQuestion.CorrectAnswerValue])
                         </p>
 
-                        <div class="game-content-blocks">
-                            @foreach (var block in contentBlocks)
+                        <div class="game-content-blocks @(Model.CurrentQuestion.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !isShowingAnswer ? "four-clue-grid" : null)">
+                            @foreach (var block in (Model.CurrentQuestion.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !isShowingAnswer
+                                ? contentBlocks.Take(Model.CurrentQuestion.RevealedClueCount)
+                                : contentBlocks))
                             {
                                 <article class="game-content-block">
                                     @if (!string.IsNullOrWhiteSpace(block.TopCaption))
@@ -689,6 +692,18 @@
                                    value="@Model.CurrentQuestion.SourceQuestionId" />
                             <button class="button button-secondary" type="submit">
                                 @Localizer["GameBoard_NoCorrectAnswer"]
+                            </button>
+                        </form>
+                    }
+
+                    @if (Model.CurrentQuestion.CanRevealClue)
+                    {
+                        <form method="post" asp-page-handler="RevealClue">
+                            <input name="sourceQuestionId"
+                                   type="hidden"
+                                   value="@Model.CurrentQuestion.SourceQuestionId" />
+                            <button class="button button-secondary" type="submit">
+                                @Localizer["GameBoard_RevealOneClue"]
                             </button>
                         </form>
                     }

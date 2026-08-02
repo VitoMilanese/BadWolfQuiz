@@ -45,6 +45,7 @@ public sealed class GameBoard
             round.UseRandomWagerQuestions
                 ? randomWagerQuestionIds.Contains(question.SourceQuestionId)
                 : question.IsSpecial,
+            question.PresentationType,
             question.QuestionBlocks,
             question.AnswerBlocks));
     }
@@ -53,7 +54,8 @@ public sealed class GameBoard
         QuizRoundSnapshot round)
     {
         var candidates = round.Questions
-            .Where(question => !question.ExcludeFromRandomWagerSelection)
+            .Where(question => !question.ExcludeFromRandomWagerSelection &&
+                question.PresentationType == QuestionPresentationType.Standard)
             .ToList();
 
         for (var index = candidates.Count - 1; index > 0; index--)
@@ -82,6 +84,7 @@ public sealed class RuntimeQuestion
         int rowIndex,
         int points,
         bool isSpecial,
+        QuestionPresentationType presentationType,
         IReadOnlyList<ContentBlockSnapshot> questionBlocks,
         IReadOnlyList<ContentBlockSnapshot> answerBlocks)
     {
@@ -92,6 +95,8 @@ public sealed class RuntimeQuestion
         RowIndex = rowIndex;
         Points = points;
         IsSpecial = isSpecial;
+        PresentationType = presentationType;
+        RevealedClueCount = presentationType == QuestionPresentationType.FourClues ? 2 : 0;
         QuestionBlocks = questionBlocks;
         AnswerBlocks = answerBlocks;
         _readOnlyAnswerAttempts = _answerAttempts.AsReadOnly();
@@ -110,6 +115,20 @@ public sealed class RuntimeQuestion
     public int Points { get; }
 
     public bool IsSpecial { get; private set; }
+
+    public QuestionPresentationType PresentationType { get; }
+
+    public int RevealedClueCount { get; private set; }
+
+    public bool CanRevealClue => PresentationType == QuestionPresentationType.FourClues &&
+        RevealedClueCount < 4 &&
+        Status is RuntimeQuestionStatus.Selected or RuntimeQuestionStatus.Active;
+
+    public int CorrectAnswerValue => IsSpecial
+        ? Wager?.Amount ?? Points
+        : PresentationType == QuestionPresentationType.FourClues
+            ? RevealedClueCount switch { 3 => Points / 2, 4 => Points / 4, _ => Points }
+            : Points;
 
     public IReadOnlyList<ContentBlockSnapshot> QuestionBlocks { get; }
 
@@ -136,7 +155,8 @@ public sealed class RuntimeQuestion
         Wager,
         BuzzerStatus,
         AnsweringPlayerId,
-        _answerAttempts.ToArray());
+        _answerAttempts.ToArray(),
+        RevealedClueCount);
 
     internal void RestoreState(RuntimeQuestionState state)
     {
@@ -146,6 +166,9 @@ public sealed class RuntimeQuestion
         Wager = state.Wager;
         BuzzerStatus = state.BuzzerStatus;
         AnsweringPlayerId = state.AnsweringPlayerId;
+        RevealedClueCount = PresentationType == QuestionPresentationType.FourClues
+            ? Math.Clamp(state.RevealedClueCount == 0 ? 2 : state.RevealedClueCount, 2, 4)
+            : 0;
         _answerAttempts.Clear();
         _answerAttempts.AddRange(state.AnswerAttempts);
     }
@@ -211,6 +234,16 @@ public sealed class RuntimeQuestion
         Status = RuntimeQuestionStatus.Active;
     }
 
+    internal void RevealNextClue()
+    {
+        if (!CanRevealClue)
+        {
+            throw new GameRuleViolationException("No additional clue can be revealed.");
+        }
+
+        RevealedClueCount++;
+    }
+
     internal void ClaimBuzzer(GamePlayerId playerId)
     {
         if (IsSpecial || BuzzerStatus != QuestionBuzzerStatus.Open)
@@ -256,8 +289,8 @@ public sealed class RuntimeQuestion
         var value = IsSpecial
             ? Wager?.Amount ?? throw new GameRuleViolationException(
                 "A wager question cannot be judged before its wager is accepted.")
-            : Points;
-        var scoreDelta = isCorrect ? value : -value;
+            : CorrectAnswerValue;
+        var scoreDelta = isCorrect ? value : IsSpecial ? -value : -Points;
         var attempt = new QuestionAnswerAttempt(
             playerId,
             isCorrect,

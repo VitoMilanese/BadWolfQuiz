@@ -81,9 +81,10 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
-        return string.IsNullOrWhiteSpace(block.FileName)
-            ? File(block.FileData, block.FileContentType)
-            : File(block.FileData, block.FileContentType, block.FileName);
+        return new FileContentResult(block.FileData, block.FileContentType)
+        {
+            EnableRangeProcessing = true
+        };
     }
 
     public IActionResult OnGetFinalContentBlock(
@@ -104,9 +105,10 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
-        return string.IsNullOrWhiteSpace(block.FileName)
-            ? File(block.FileData, block.FileContentType)
-            : File(block.FileData, block.FileContentType, block.FileName);
+        return new FileContentResult(block.FileData, block.FileContentType)
+        {
+            EnableRangeProcessing = true
+        };
     }
 
     public IActionResult OnGetJoinQrCode(Guid id)
@@ -518,6 +520,26 @@ public sealed class LobbyModel(
         {
             TempData["ErrorMessage"] =
                 localizer["GameBoard_BuzzerActivationRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
+    public IActionResult OnPostRevealClue(Guid id, int sourceQuestionId)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.RevealNextClue(game.PublicCode, sourceQuestionId);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] = localizer["GameBoard_RevealClueRejected"].Value;
         }
 
         return RedirectToPage(new { id });

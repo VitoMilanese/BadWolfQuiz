@@ -20,6 +20,19 @@ When a player answers correctly, that player becomes the active player. If the c
 
 The host can explicitly resolve a regular question with no correct answer. In that case no additional score is applied and the existing active player keeps the right to select the next question.
 
+## Four-clue questions
+
+A four-clue question is a regular buzzer question with a different presentation and scoring rule. Its immutable definition contains exactly four ordered clues. A clue may be text, an image, or audio; video and YouTube blocks are not supported.
+
+The first two clues are revealed when the question opens. The host may reveal the third and fourth clues one at a time. The number of revealed clues is part of the recoverable runtime state.
+
+- A correct answer with two visible clues awards 100% of the question value.
+- A correct answer with three visible clues awards 50%.
+- A correct answer with four visible clues awards 25%.
+- An incorrect answer always deducts 100% of the question value.
+
+Four-clue questions cannot become wager questions, including through random wager selection.
+
 ## Wager questions
 
 Only the player who selected the wager question may answer it. The accepted wager is the score value for judging:

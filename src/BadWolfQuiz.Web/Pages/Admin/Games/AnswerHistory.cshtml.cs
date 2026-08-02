@@ -20,6 +20,8 @@ public sealed class AnswerHistoryModel(
 
     public IReadOnlyList<AnswerHistoryQuestion> Questions { get; private set; } = [];
 
+    public IReadOnlyList<AnswerHistoryQuestion> AddableQuestions { get; private set; } = [];
+
     public IActionResult OnGet(Guid id)
     {
         return LoadPage(id);
@@ -139,29 +141,47 @@ public sealed class AnswerHistoryModel(
         }
 
         Game = game;
+        var availableRoundIds = game.Session.Quiz.Rounds
+            .OrderBy(round => round.SortOrder)
+            .Take(game.Session.CurrentRoundIndex + 1)
+            .Select(round => round.SourceRoundId)
+            .ToHashSet();
+
         Questions = game.Session.Board.Questions
-            .Where(question =>
-                question.Status != RuntimeQuestionStatus.Available ||
-                question.SourceRoundId == game.Session.CurrentRound.SourceRoundId)
+            .Where(question => question.Status != RuntimeQuestionStatus.Available)
             .OrderByDescending(question => question.AnswerAttempts.Count > 0
                 ? question.AnswerAttempts.Max(attempt => attempt.JudgedAtUtc)
                 : DateTimeOffset.MinValue)
             .ThenBy(question => question.RowIndex)
             .ThenBy(question => question.SourceCategoryId)
-            .Select(question => new AnswerHistoryQuestion(
-                question.SourceQuestionId,
-                game.Session.Quiz.Rounds
-                    .Single(round => round.SourceRoundId == question.SourceRoundId)
-                    .Title,
-                question.CategoryTitle,
-                question.Points,
-                question.AnswerAttempts
-                    .OrderByDescending(attempt => attempt.JudgedAtUtc)
-                    .ToArray()))
+            .Select(question => CreateQuestion(game, question))
+            .ToArray();
+
+        AddableQuestions = game.Session.Board.Questions
+            .Where(question => availableRoundIds.Contains(question.SourceRoundId))
+            .OrderBy(question => game.Session.Quiz.Rounds
+                .Single(round => round.SourceRoundId == question.SourceRoundId)
+                .SortOrder)
+            .ThenBy(question => question.RowIndex)
+            .ThenBy(question => question.SourceCategoryId)
+            .Select(question => CreateQuestion(game, question))
             .ToArray();
 
         return Page();
     }
+
+    private static AnswerHistoryQuestion CreateQuestion(
+        GameSessionRegistration game,
+        RuntimeQuestion question) => new(
+        question.SourceQuestionId,
+        game.Session.Quiz.Rounds
+            .Single(round => round.SourceRoundId == question.SourceRoundId)
+            .Title,
+        question.CategoryTitle,
+        question.Points,
+        question.AnswerAttempts
+            .OrderByDescending(attempt => attempt.JudgedAtUtc)
+            .ToArray());
 }
 
 public sealed record AnswerHistoryQuestion(
