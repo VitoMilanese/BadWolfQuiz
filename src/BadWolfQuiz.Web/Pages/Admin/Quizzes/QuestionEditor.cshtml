@@ -34,6 +34,15 @@
     <input type="hidden" asp-for="Input.QuizId" />
     <input type="hidden" asp-for="Input.RoundId" />
 
+    <section class="content-panel question-type-setting">
+        <label asp-for="Input.PresentationType">@Localizer["Label_QuestionType"]</label>
+        <select asp-for="Input.PresentationType">
+            <option value="0">@Localizer["QuestionType_Standard"]</option>
+            <option value="1">@Localizer["QuestionType_FourClues"]</option>
+        </select>
+        <small id="four-clues-help" hidden>@Localizer["FourClues_EditorHint"]</small>
+    </section>
+
     <h2>@Localizer["Label_QuestionBlocks"]</h2>
 
     <partial name="Shared/_ContentBlockCollection"
@@ -119,6 +128,23 @@
         const buzzModeSelect =
             document.getElementById("Input_BuzzModeOverride");
 
+        const presentationTypeSelect =
+            document.getElementById("Input_PresentationType");
+
+        function updateQuestionTypeUi() {
+            const isFourClues = presentationTypeSelect?.value === "1";
+            document.getElementById("four-clues-help").hidden = !isFourClues;
+            document.querySelectorAll(".wager-question-setting").forEach(
+                element => element.hidden = isFourClues);
+            document.querySelectorAll(
+                '#question-blocks .content-block-type-option[data-block-type="YouTube"], #question-blocks .content-block-type-option[data-block-type="Video"]')
+                .forEach(element => element.hidden = isFourClues);
+            if (isFourClues && wagerQuestionCheckbox) {
+                wagerQuestionCheckbox.checked = false;
+            }
+            updateBuzzModeVisibility();
+        }
+
         function updateBuzzModeVisibility() {
             const isWagerQuestion =
                 wagerQuestionCheckbox?.checked ?? false;
@@ -136,7 +162,18 @@
             "change",
             updateBuzzModeVisibility);
 
+        presentationTypeSelect?.addEventListener("change", async () => {
+            updateQuestionTypeUi();
+            if (presentationTypeSelect.value === "1") {
+                const section = document.getElementById("question-blocks");
+                while (section.querySelectorAll(".content-block-card").length < 4) {
+                    await addContentBlock(section, "Text");
+                }
+            }
+        });
+
         updateBuzzModeVisibility();
+        updateQuestionTypeUi();
 
         const questionPreviewModal =
             document.getElementById("question-preview-modal");
@@ -569,6 +606,12 @@
             const list = section.querySelector('.content-block-list');
             const fieldPrefix = section.dataset.blockCollection;
             const index = list.querySelectorAll('.content-block-card').length;
+
+            if (section.id === 'question-blocks' &&
+                presentationTypeSelect?.value === '1' &&
+                index >= 4) {
+                return;
+            }
 
             const url =
                 `${window.location.pathname}` +

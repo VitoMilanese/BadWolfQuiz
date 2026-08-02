@@ -1120,4 +1120,12 @@
   <data name="Faq_A12" xml:space="preserve"><value>Квізи, активні ігри й завершена історія належать авторизованому хосту, який їх створив або запустив. Інші облікові записи хостів не мають доступу до цих даних. Сторінки приєднання та гри залишаються доступними без облікового запису гравця.</value></data>
   <data name="Faq_ContactTitle" xml:space="preserve"><value>Залишилися питання?</value></data>
   <data name="Faq_ContactDescription" xml:space="preserve"><value>Надішліть питання — воно потрапить у Discord-канал BAD WOLF QUIZ.</value></data>
+  <data name="Label_QuestionType" xml:space="preserve"><value>Тип питання</value></data>
+  <data name="QuestionType_Standard" xml:space="preserve"><value>Звичайне питання</value></data>
+  <data name="QuestionType_FourClues" xml:space="preserve"><value>Чотири підказки</value></data>
+  <data name="FourClues_EditorHint" xml:space="preserve"><value>Додайте рівно чотири підказки. Кожна може містити текст, зображення або аудіо.</value></data>
+  <data name="FourClues_ExactlyFourRequired" xml:space="preserve"><value>Питання цього типу повинно містити рівно чотири підказки.</value></data>
+  <data name="FourClues_UnsupportedMedia" xml:space="preserve"><value>Для чотирьох підказок підтримуються лише текст, зображення та аудіо.</value></data>
+  <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 підказка</value></data>
+  <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>Не вдалося відкрити наступну підказку.</value></data>
 </root>

@@ -2,6 +2,12 @@ using System.Collections.ObjectModel;
 
 namespace BadWolfQuiz.Game.Definitions;
 
+public enum QuestionPresentationType
+{
+    Standard = 0,
+    FourClues = 1
+}
+
 public sealed class QuizSnapshot
 {
     private readonly ReadOnlyCollection<QuizRoundSnapshot> _rounds;
@@ -136,7 +142,8 @@ public sealed class QuizQuestionSnapshot
         string? categoryTitle = null,
         bool excludeFromRandomWagerSelection = false,
         IEnumerable<ContentBlockSnapshot>? questionBlocks = null,
-        IEnumerable<ContentBlockSnapshot>? answerBlocks = null)
+        IEnumerable<ContentBlockSnapshot>? answerBlocks = null,
+        QuestionPresentationType presentationType = QuestionPresentationType.Standard)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceQuestionId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceCategoryId);
@@ -147,12 +154,23 @@ public sealed class QuizQuestionSnapshot
         SourceCategoryId = sourceCategoryId;
         RowIndex = rowIndex;
         Points = points;
-        IsSpecial = isSpecial;
+        var orderedQuestionBlocks = (questionBlocks ?? []).OrderBy(block => block.SortOrder).ToArray();
+        if (presentationType == QuestionPresentationType.FourClues &&
+            (orderedQuestionBlocks.Length != 4 ||
+             orderedQuestionBlocks.Any(block => block.Kind is ContentBlockKind.Video or ContentBlockKind.YouTube)))
+        {
+            throw new ArgumentException(
+                "A four-clue question must contain exactly four text, image, or audio blocks.",
+                nameof(questionBlocks));
+        }
+
+        IsSpecial = presentationType == QuestionPresentationType.FourClues ? false : isSpecial;
+        PresentationType = presentationType;
         ExcludeFromRandomWagerSelection = excludeFromRandomWagerSelection;
         CategoryTitle = string.IsNullOrWhiteSpace(categoryTitle)
             ? sourceCategoryId.ToString()
             : categoryTitle.Trim();
-        QuestionBlocks = (questionBlocks ?? []).OrderBy(block => block.SortOrder).ToArray();
+        QuestionBlocks = orderedQuestionBlocks;
         AnswerBlocks = (answerBlocks ?? []).OrderBy(block => block.SortOrder).ToArray();
     }
 
@@ -165,6 +183,8 @@ public sealed class QuizQuestionSnapshot
     public int Points { get; }
 
     public bool IsSpecial { get; }
+
+    public QuestionPresentationType PresentationType { get; }
 
     public bool ExcludeFromRandomWagerSelection { get; }
 

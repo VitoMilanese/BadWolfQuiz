@@ -1,6 +1,7 @@
 ﻿using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Localization;
+using BadWolfQuiz.Game.Definitions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,7 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
             QuizId = question.Category.Round.QuizId,
             RoundId = question.Category.Round.Id,
             IsSpecial = question.IsSpecial,
+            PresentationType = question.PresentationType,
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
             BuzzModeOverride = question.BuzzModeOverride
@@ -97,6 +99,23 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
                 localizer["AnswerBlocksRequired"]);
         }
 
+        if (Input.PresentationType == QuestionPresentationType.FourClues)
+        {
+            if (Input.QuestionBlocks?.Count != 4)
+            {
+                ModelState.AddModelError(
+                    $"{nameof(Input)}.{nameof(Input.QuestionBlocks)}",
+                    localizer["FourClues_ExactlyFourRequired"]);
+            }
+            else if (Input.QuestionBlocks.Any(block =>
+                block.BlockType is ContentBlockType.Video or ContentBlockType.YouTube))
+            {
+                ModelState.AddModelError(
+                    $"{nameof(Input)}.{nameof(Input.QuestionBlocks)}",
+                    localizer["FourClues_UnsupportedMedia"]);
+            }
+        }
+
         if (!ModelState.IsValid)
         {
             return Page();
@@ -112,10 +131,11 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
             return NotFound();
         }
 
-        question.IsSpecial = Input.IsSpecial;
+        question.PresentationType = Input.PresentationType;
+        question.IsSpecial = Input.PresentationType == QuestionPresentationType.Standard && Input.IsSpecial;
         question.ExcludeFromRandomWagerSelection =
             Input.ExcludeFromRandomWagerSelection;
-        question.BuzzModeOverride = Input.IsSpecial
+        question.BuzzModeOverride = question.IsSpecial
             ? BuzzActivationMode.Disabled
             : Input.BuzzModeOverride;
         question.UpdatedAtUtc = DateTime.UtcNow;
@@ -412,6 +432,9 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
 
         [Display(Name = "Label_SpecialQuestion")]
         public bool IsSpecial { get; set; }
+
+        [Display(Name = "Label_QuestionType")]
+        public QuestionPresentationType PresentationType { get; set; }
 
         [Display(Name = "Label_ExcludeFromRandomWagerSelection")]
         public bool ExcludeFromRandomWagerSelection { get; set; }

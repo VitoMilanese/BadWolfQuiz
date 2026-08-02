@@ -255,6 +255,12 @@
                                             @Localizer["Label_WagerQuestion"]
                                         </span>
                                     }
+                                    else if (question.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues)
+                                    {
+                                        <span class="question-wager-badge">
+                                            @Localizer["QuestionType_FourClues"]
+                                        </span>
+                                    }
 
                                     <span class="question-editor-preview">
                                         @if (!string.IsNullOrWhiteSpace(previewImageUrl))

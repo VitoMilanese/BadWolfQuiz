@@ -738,6 +738,20 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public RuntimeQuestion? RevealNextClue(string publicCode, int sourceQuestionId)
+    {
+        var game = Find(publicCode);
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.RevealNextClue(sourceQuestionId);
+        }
+    }
+
     public BuzzerClaimResult? ClaimQuestionBuzzer(
         string connectionId,
         int sourceQuestionId)

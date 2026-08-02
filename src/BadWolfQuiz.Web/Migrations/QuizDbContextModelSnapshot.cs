@@ -486,6 +486,9 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Property<bool>("IsSpecial")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("PresentationType")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("QuizCategoryId")
                         .HasColumnType("INTEGER");
 

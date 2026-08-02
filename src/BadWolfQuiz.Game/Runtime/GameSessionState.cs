@@ -32,7 +32,8 @@ public sealed record RuntimeQuestionState(
     Wager? Wager,
     QuestionBuzzerStatus BuzzerStatus,
     GamePlayerId? AnsweringPlayerId,
-    IReadOnlyList<QuestionAnswerAttempt> AnswerAttempts);
+    IReadOnlyList<QuestionAnswerAttempt> AnswerAttempts,
+    int RevealedClueCount = 0);
 
 public sealed record FinalQuestionState(
     FinalQuestionStatus Status,

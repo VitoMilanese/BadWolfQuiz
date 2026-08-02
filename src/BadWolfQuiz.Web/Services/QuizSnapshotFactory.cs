@@ -63,7 +63,8 @@ public sealed class QuizSnapshotFactory
             question.Category.Title,
             question.ExcludeFromRandomWagerSelection,
             question.QuestionBlocks.Select(CreateContentBlock),
-            question.AnswerBlocks.Select(CreateContentBlock));
+            question.AnswerBlocks.Select(CreateContentBlock),
+            question.PresentationType);
     }
 
     private static ContentBlockSnapshot CreateContentBlock(ContentBlockBase block)

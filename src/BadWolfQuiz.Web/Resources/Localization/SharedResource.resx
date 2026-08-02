@@ -1120,4 +1120,12 @@
   <data name="Faq_A12" xml:space="preserve"><value>Quizzes, active games, and completed history belong to the authenticated host who created or launched them. Other host accounts cannot access that data. Player join and gameplay pages remain available without player accounts.</value></data>
   <data name="Faq_ContactTitle" xml:space="preserve"><value>Still need help?</value></data>
   <data name="Faq_ContactDescription" xml:space="preserve"><value>Send your question and it will be delivered to the BAD WOLF QUIZ Discord channel.</value></data>
+  <data name="Label_QuestionType" xml:space="preserve"><value>Question type</value></data>
+  <data name="QuestionType_Standard" xml:space="preserve"><value>Standard question</value></data>
+  <data name="QuestionType_FourClues" xml:space="preserve"><value>Four clues</value></data>
+  <data name="FourClues_EditorHint" xml:space="preserve"><value>Add exactly four clues. Each clue may contain text, an image, or audio.</value></data>
+  <data name="FourClues_ExactlyFourRequired" xml:space="preserve"><value>A four-clue question must contain exactly four clues.</value></data>
+  <data name="FourClues_UnsupportedMedia" xml:space="preserve"><value>Four-clue questions support only text, images, and audio.</value></data>
+  <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 clue</value></data>
+  <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>The next clue could not be revealed.</value></data>
 </root>

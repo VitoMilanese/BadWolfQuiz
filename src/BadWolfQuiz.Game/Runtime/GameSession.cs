@@ -387,6 +387,14 @@ public sealed class GameSession
         return question;
     }
 
+    public RuntimeQuestion RevealNextClue(int sourceQuestionId)
+    {
+        EnsureRunning();
+        var question = FindQuestion(sourceQuestionId);
+        question.RevealNextClue();
+        return question;
+    }
+
     public RuntimeQuestion ClaimQuestionBuzzer(
         int sourceQuestionId,
         GamePlayerId playerId)

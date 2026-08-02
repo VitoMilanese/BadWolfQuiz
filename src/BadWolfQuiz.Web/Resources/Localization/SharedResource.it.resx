@@ -1120,4 +1120,12 @@
   <data name="Faq_A12" xml:space="preserve"><value>Quiz, partite attive e cronologia appartengono all'host autenticato che li ha creati o avviati. Gli altri account host non possono accedere a questi dati. Le pagine di accesso e di gioco restano disponibili senza account giocatore.</value></data>
   <data name="Faq_ContactTitle" xml:space="preserve"><value>Hai ancora bisogno di aiuto?</value></data>
   <data name="Faq_ContactDescription" xml:space="preserve"><value>Invia la tua domanda: verrà recapitata al canale Discord di BAD WOLF QUIZ.</value></data>
+  <data name="Label_QuestionType" xml:space="preserve"><value>Tipo di domanda</value></data>
+  <data name="QuestionType_Standard" xml:space="preserve"><value>Domanda standard</value></data>
+  <data name="QuestionType_FourClues" xml:space="preserve"><value>Quattro indizi</value></data>
+  <data name="FourClues_EditorHint" xml:space="preserve"><value>Aggiungi esattamente quattro indizi. Ogni indizio può contenere testo, un'immagine o audio.</value></data>
+  <data name="FourClues_ExactlyFourRequired" xml:space="preserve"><value>Una domanda a quattro indizi deve contenere esattamente quattro indizi.</value></data>
+  <data name="FourClues_UnsupportedMedia" xml:space="preserve"><value>Le domande a quattro indizi supportano solo testo, immagini e audio.</value></data>
+  <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 indizio</value></data>
+  <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>Impossibile mostrare l'indizio successivo.</value></data>
 </root>
