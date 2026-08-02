@@ -1149,4 +1149,8 @@
   <data name="PlayerMenu_Title" xml:space="preserve"><value>Меню</value></data>
   <data name="GameHistory_Winner" xml:space="preserve"><value>Переможець</value></data>
   <data name="GameHistory_Winners" xml:space="preserve"><value>Переможці</value></data>
+  <data name="Button_ImportQuiz" xml:space="preserve"><value>Імпортувати квіз</value></data>
+  <data name="Button_ExportQuiz" xml:space="preserve"><value>Експортувати</value></data>
+  <data name="QuizImport_Success" xml:space="preserve"><value>Квіз успішно імпортовано.</value></data>
+  <data name="QuizImport_InvalidFile" xml:space="preserve"><value>Обраний файл не є коректним або підтримуваним пакетом BAD WOLF QUIZ.</value></data>
 </root>

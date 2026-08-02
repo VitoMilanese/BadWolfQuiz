@@ -1149,4 +1149,8 @@
   <data name="PlayerMenu_Title" xml:space="preserve"><value>Menu</value></data>
   <data name="GameHistory_Winner" xml:space="preserve"><value>Winner</value></data>
   <data name="GameHistory_Winners" xml:space="preserve"><value>Winners</value></data>
+  <data name="Button_ImportQuiz" xml:space="preserve"><value>Import quiz</value></data>
+  <data name="Button_ExportQuiz" xml:space="preserve"><value>Export</value></data>
+  <data name="QuizImport_Success" xml:space="preserve"><value>Quiz imported successfully.</value></data>
+  <data name="QuizImport_InvalidFile" xml:space="preserve"><value>The selected file is not a valid or supported BAD WOLF QUIZ package.</value></data>
 </root>

@@ -91,6 +91,8 @@ Content blocks can be:
 - removed;
 - added dynamically.
 
+Quizzes can be exported and imported as `.bwquiz` packages. Each package is a ZIP archive containing a versioned `manifest.json` and separate media files, so imported quizzes receive new database identifiers and remain independent from the source host and game history.
+
 ---
 
 ## Live Game
@@ -131,6 +133,7 @@ Currently implemented:
 - Host answer-history editing with immediate score and standings recalculation
 - Persistent completed-game history with final scores and answer details
 - Per-round answer statistics and lifetime player statistics per host
+- Portable quiz import and export packages with embedded media
 - Self-service host accounts with private quiz and game-history ownership
 - QR player joining with direct game links
 
@@ -224,20 +227,3 @@ src/BadWolfQuiz.Web/App_Data/active-games.json
 
 See [Active Game Recovery](docs/features/active-game-recovery.md) for recovery
 behavior and snapshot scope.
-
----
-
-# Planned Features
-
-## Game
-
-- Team mode
-
-## Media
-
-- Dedicated presentation window for a secondary monitor
-
-## Administration
-
-- Import / Export quizzes
-- Backup

@@ -4657,6 +4657,18 @@ iframe.game-content-video {
     max-width: 22rem;
 }
 
+.page-heading-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.page-heading-actions form {
+    margin: 0;
+}
+
 @media (max-width: 760px) {
     .four-clue-grid {
         flex-wrap: wrap;
