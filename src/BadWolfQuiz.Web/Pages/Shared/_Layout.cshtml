@@ -49,6 +49,10 @@
             }
         </a>
 
+        <div class="topbar-page-context">
+            @await RenderSectionAsync("HeaderContext", required: false)
+        </div>
+
         <details class="action-menu header-action-menu">
             <summary class="button button-secondary action-menu-trigger">
                 <span aria-hidden="true">☰</span>

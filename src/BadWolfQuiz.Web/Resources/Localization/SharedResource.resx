@@ -480,7 +480,7 @@
     <value>Category editor, multimedia questions, QR player connection, and a first-answer buzzer.</value>
   </data>
   <data name="Button_OpenEditor" xml:space="preserve">
-    <value>Open editor</value>
+    <value>Quizzes</value>
   </data>
   <data name="Button_JoinGame" xml:space="preserve">
     <value>Join game</value>
@@ -1145,6 +1145,7 @@
   <data name="PlayerStatistics_NoRoundAnswers" xml:space="preserve"><value>No judged answers are available for round statistics.</value></data>
   <data name="Menu_Title" xml:space="preserve"><value>Menu</value></data>
   <data name="Menu_Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="Menu_Tools" xml:space="preserve"><value>Tools</value></data>
   <data name="GameHistory_Winner" xml:space="preserve"><value>Winner</value></data>
   <data name="GameHistory_Winners" xml:space="preserve"><value>Winners</value></data>
 </root>

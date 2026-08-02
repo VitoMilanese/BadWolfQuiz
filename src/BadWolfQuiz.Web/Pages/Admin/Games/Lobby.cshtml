@@ -4,6 +4,54 @@
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
 }
 
+@section HeaderContext {
+    @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
+    {
+        <div class="game-header-context">
+            <h2 title="@Model.Game.Session.CurrentRound.Title">
+                @Model.Game.Session.CurrentRound.Title
+            </h2>
+            @if (Model.CurrentQuestion is null && !Model.IsRoundSummaryVisible)
+            {
+                <details class="action-menu board-action-menu">
+                <summary class="button button-secondary action-menu-trigger">
+                    @Localizer["Menu_Tools"]
+                </summary>
+                <div class="action-menu-popover">
+                    <a class="action-menu-item"
+                       asp-page="/Admin/Games/AnswerHistory"
+                       asp-route-id="@Model.Game.Session.Id.Value">
+                        @Localizer["AnswerHistory_Open"]
+                    </a>
+
+                    <form method="post" asp-page-handler="RandomActivePlayer">
+                        <button class="action-menu-item"
+                                type="submit"
+                                disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
+                            @Localizer["GameBoard_RandomActivePlayer"]
+                        </button>
+                    </form>
+
+                    <a class="action-menu-item"
+                       asp-page="/Admin/Games/AnswerKey"
+                       asp-route-id="@Model.Game.Session.Id.Value"
+                       target="_blank"
+                       rel="noopener">
+                        @Localizer["AnswerKey_Open"]
+                    </a>
+
+                    <button class="action-menu-item"
+                            type="button"
+                            data-open-join-code>
+                        @Localizer["GameBoard_ShowJoinCode"]
+                    </button>
+                </div>
+                </details>
+            }
+        </div>
+    }
+}
+
 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby)
 {
     <div class="page-heading">
@@ -262,52 +310,6 @@
         @if (TempData["ErrorMessage"] is string errorMessage)
         {
             <div class="message message-error">@errorMessage</div>
-        }
-
-        @if (Model.CurrentQuestion is null && !Model.IsRoundSummaryVisible)
-        {
-        <div class="page-heading host-game-heading">
-            <div>
-                <h2>@Model.Game.Session.CurrentRound.Title</h2>
-            </div>
-
-            <div class="host-game-actions">
-                <details class="action-menu board-action-menu">
-                    <summary class="button button-secondary action-menu-trigger">
-                        @Localizer["Menu_Actions"]
-                    </summary>
-                    <div class="action-menu-popover">
-                        <a class="action-menu-item"
-                           asp-page="/Admin/Games/AnswerHistory"
-                           asp-route-id="@Model.Game.Session.Id.Value">
-                            @Localizer["AnswerHistory_Open"]
-                        </a>
-
-                        <form method="post" asp-page-handler="RandomActivePlayer">
-                            <button class="action-menu-item"
-                                    type="submit"
-                                    disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
-                                @Localizer["GameBoard_RandomActivePlayer"]
-                            </button>
-                        </form>
-
-                        <a class="action-menu-item"
-                           asp-page="/Admin/Games/AnswerKey"
-                           asp-route-id="@Model.Game.Session.Id.Value"
-                           target="_blank"
-                           rel="noopener">
-                            @Localizer["AnswerKey_Open"]
-                        </a>
-
-                        <button class="action-menu-item"
-                                type="button"
-                                data-open-join-code>
-                            @Localizer["GameBoard_ShowJoinCode"]
-                        </button>
-                    </div>
-                </details>
-            </div>
-        </div>
         }
 
         @if (Model.PreviewQuestion is { } previewQuestion)

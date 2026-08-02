@@ -480,7 +480,7 @@
     <value>Редактор категорій, мультимедійні питання, QR-підключення гравців і кнопка першої відповіді.</value>
   </data>
   <data name="Button_OpenEditor" xml:space="preserve">
-    <value>Відкрити редактор</value>
+    <value>Квізи</value>
   </data>
   <data name="Button_JoinGame" xml:space="preserve">
     <value>Приєднатися до гри</value>
@@ -1145,6 +1145,7 @@
   <data name="PlayerStatistics_NoRoundAnswers" xml:space="preserve"><value>Немає оцінених відповідей для статистики за раундами.</value></data>
   <data name="Menu_Title" xml:space="preserve"><value>Меню</value></data>
   <data name="Menu_Actions" xml:space="preserve"><value>Дії</value></data>
+  <data name="Menu_Tools" xml:space="preserve"><value>Інструменти</value></data>
   <data name="GameHistory_Winner" xml:space="preserve"><value>Переможець</value></data>
   <data name="GameHistory_Winners" xml:space="preserve"><value>Переможці</value></data>
 </root>
