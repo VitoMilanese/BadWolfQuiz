@@ -31,6 +31,29 @@
         @Model.CurrentPlayer.Name
     </p>
 
+    <details class="player-media-settings player-menu-settings">
+        <summary>@Localizer["PlayerMenu_Title"]</summary>
+        <div class="player-media-settings-content">
+            <div class="player-language-settings">
+                <strong>@Localizer["Language_Label"]</strong>
+                <div class="player-language-options">
+                    <a class="button button-secondary @(currentCulture == "uk" ? "is-selected" : null)"
+                       asp-page="/SetLanguage"
+                       asp-route-culture="uk"
+                       asp-route-returnUrl="@returnUrl">🇺🇦 Українська</a>
+                    <a class="button button-secondary @(currentCulture == "en" ? "is-selected" : null)"
+                       asp-page="/SetLanguage"
+                       asp-route-culture="en"
+                       asp-route-returnUrl="@returnUrl">🇬🇧 English</a>
+                    <a class="button button-secondary @(currentCulture == "it" ? "is-selected" : null)"
+                       asp-page="/SetLanguage"
+                       asp-route-culture="it"
+                       asp-route-returnUrl="@returnUrl">🇮🇹 Italiano</a>
+                </div>
+            </div>
+        </div>
+    </details>
+
     <details class="player-media-settings">
         <summary>@Localizer["PlayerMedia_Settings"]</summary>
         <div class="player-media-settings-content">
@@ -87,23 +110,6 @@
              data-unsupported-label="@Localizer["PlayerWebcam_RequiresHttps"]"
              data-denied-label="@Localizer["PlayerWebcam_AccessFailed"]"
              hidden></div>
-        <div class="player-language-settings">
-            <strong>@Localizer["Language_Label"]</strong>
-            <div class="player-language-options">
-                <a class="button button-secondary @(currentCulture == "uk" ? "is-selected" : null)"
-                   asp-page="/SetLanguage"
-                   asp-route-culture="uk"
-                   asp-route-returnUrl="@returnUrl">🇺🇦 Українська</a>
-                <a class="button button-secondary @(currentCulture == "en" ? "is-selected" : null)"
-                   asp-page="/SetLanguage"
-                   asp-route-culture="en"
-                   asp-route-returnUrl="@returnUrl">🇬🇧 English</a>
-                <a class="button button-secondary @(currentCulture == "it" ? "is-selected" : null)"
-                   asp-page="/SetLanguage"
-                   asp-route-culture="it"
-                   asp-route-returnUrl="@returnUrl">🇮🇹 Italiano</a>
-            </div>
-        </div>
         </div>
     </details>
 

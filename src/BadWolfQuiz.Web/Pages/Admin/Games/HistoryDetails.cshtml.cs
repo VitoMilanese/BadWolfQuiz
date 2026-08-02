@@ -36,6 +36,51 @@ public sealed class HistoryDetailsModel(QuizDbContext db) : PageModel
             return NotFound();
         }
 
+        var answers = stored.Questions
+            .SelectMany(question => question.Results.Select(result =>
+                new GameHistoryAnswer(
+                    question.QuizQuestion.Category.Round.SortOrder,
+                    question.QuizQuestion.Category.Round.Title,
+                    question.QuizQuestion.Category.Title,
+                    question.QuizQuestion.Category.Round.Rows
+                        .Single(row => row.RowIndex == question.QuizQuestion.RowIndex)
+                        .Points,
+                    result.Player.Id,
+                    result.Player.Name,
+                    result.IsCorrect == true,
+                    result.PointsAwarded,
+                    result.CreatedAtUtc)))
+            .OrderBy(answer => answer.JudgedAtUtc)
+            .ToArray();
+
+        var rounds = stored.Questions
+            .Select(question => question.QuizQuestion.Category.Round)
+            .DistinctBy(round => round.Id)
+            .OrderBy(round => round.SortOrder)
+            .ToArray();
+        var roundStatistics = rounds
+            .SelectMany(round => stored.Players.Select(player =>
+            {
+                var playerAnswers = answers
+                    .Where(answer => answer.RoundSortOrder == round.SortOrder &&
+                        answer.PlayerId == player.Id)
+                    .ToArray();
+                var attempts = playerAnswers.Length;
+                var correctAnswers = playerAnswers.Count(answer => answer.IsCorrect);
+                return new GameHistoryRoundStatistics(
+                    round.SortOrder,
+                    round.Title,
+                    player.Name,
+                    correctAnswers,
+                    attempts,
+                    attempts == 0 ? null : (double)correctAnswers / attempts,
+                    playerAnswers.Sum(answer => answer.ScoreDelta));
+            }))
+            .OrderBy(item => item.RoundSortOrder)
+            .ThenByDescending(item => item.CorrectAnswers)
+            .ThenBy(item => item.PlayerName)
+            .ToArray();
+
         Game = new GameHistoryDetails(
             stored.Quiz.Title,
             stored.PublicCode,
@@ -47,20 +92,8 @@ public sealed class HistoryDetailsModel(QuizDbContext db) : PageModel
                     player.Name,
                     player.TotalScore))
                 .ToArray(),
-            stored.Questions
-                .SelectMany(question => question.Results.Select(result =>
-                    new GameHistoryAnswer(
-                        question.QuizQuestion.Category.Round.Title,
-                        question.QuizQuestion.Category.Title,
-                        question.QuizQuestion.Category.Round.Rows
-                            .Single(row => row.RowIndex == question.QuizQuestion.RowIndex)
-                            .Points,
-                        result.Player.Name,
-                        result.IsCorrect == true,
-                        result.PointsAwarded,
-                        result.CreatedAtUtc)))
-                .OrderBy(answer => answer.JudgedAtUtc)
-                .ToArray());
+            roundStatistics,
+            answers);
 
         return Page();
     }
@@ -71,15 +104,27 @@ public sealed record GameHistoryDetails(
     string PublicCode,
     DateTime FinishedAtUtc,
     IReadOnlyList<GameHistoryPlayer> Players,
+    IReadOnlyList<GameHistoryRoundStatistics> RoundStatistics,
     IReadOnlyList<GameHistoryAnswer> Answers);
 
 public sealed record GameHistoryPlayer(string Name, int Score);
 
 public sealed record GameHistoryAnswer(
+    int RoundSortOrder,
     string RoundTitle,
     string CategoryTitle,
     int Points,
+    int PlayerId,
     string PlayerName,
     bool IsCorrect,
     int ScoreDelta,
     DateTime JudgedAtUtc);
+
+public sealed record GameHistoryRoundStatistics(
+    int RoundSortOrder,
+    string RoundTitle,
+    string PlayerName,
+    int CorrectAnswers,
+    int Attempts,
+    double? Accuracy,
+    int ScoreDelta);

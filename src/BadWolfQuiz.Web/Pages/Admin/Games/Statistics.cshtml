@@ -1,0 +1,69 @@
+@page
+@model BadWolfQuiz.Web.Pages.Admin.Games.StatisticsModel
+@{
+    ViewData["Title"] = Localizer["PlayerStatistics_Title"];
+}
+
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">@Localizer["Admin_Eyebrow"]</p>
+        <h1>@Localizer["PlayerStatistics_Title"]</h1>
+        <p>@Localizer["PlayerStatistics_Description"]</p>
+    </div>
+</div>
+
+@if (Model.Players.Count == 0)
+{
+    <section class="content-panel empty-state">
+        <p>@Localizer["PlayerStatistics_Empty"]</p>
+    </section>
+}
+else
+{
+    <section class="content-panel">
+        <div class="table-scroll">
+            <table class="game-history-table statistics-table">
+                <thead>
+                    <tr>
+                        <th>@Localizer["GameHistory_Player"]</th>
+                        <th>@Localizer["PlayerStatistics_Games"]</th>
+                        <th>@Localizer["PlayerStatistics_TotalScore"]</th>
+                        <th>@Localizer["PlayerStatistics_Correct"]</th>
+                        <th>@Localizer["PlayerStatistics_Attempts"]</th>
+                        <th>@Localizer["PlayerStatistics_Accuracy"]</th>
+                        <th>@Localizer["PlayerStatistics_LastPlayed"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var player in Model.Players)
+                    {
+                        <tr>
+                            <th scope="row">@player.Name</th>
+                            <td>@player.GamesPlayed</td>
+                            <td class="@(player.TotalFinalScore < 0 ? "score-negative" : null)">
+                                @player.TotalFinalScore
+                            </td>
+                            <td>@player.CorrectAnswers</td>
+                            <td>@player.Attempts</td>
+                            <td>
+                                @if (player.Accuracy.HasValue)
+                                {
+                                    @player.Accuracy.Value.ToString("P1")
+                                }
+                                else
+                                {
+                                    @Localizer["PlayerStatistics_NotAvailable"]
+                                }
+                            </td>
+                            <td>
+                                <time datetime="@player.LastPlayedAtUtc.ToString("O")">
+                                    @player.LastPlayedAtUtc.ToLocalTime().ToString("g")
+                                </time>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

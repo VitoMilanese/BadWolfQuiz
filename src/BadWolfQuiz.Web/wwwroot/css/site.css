@@ -279,6 +279,33 @@ select {
     display: flex;
     align-items: center;
     flex: 0 0 auto;
+    order: 1;
+}
+
+.topbar-page-context {
+    order: 2;
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-header-context {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.game-header-context h2 {
+    max-width: min(38vw, 32rem);
+    margin: 0;
+    overflow: hidden;
+    font-size: clamp(1rem, 1.45vw, 1.35rem);
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
     .brand span {
@@ -315,6 +342,103 @@ select {
     color: var(--muted);
     font-size: 1.05rem;
     line-height: 1.15;
+}
+
+.action-menu {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.action-menu > summary {
+    list-style: none;
+}
+
+.action-menu > summary::-webkit-details-marker {
+    display: none;
+}
+
+.action-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+}
+
+.action-menu[open] > .action-menu-trigger {
+    border-color: var(--red-bright);
+}
+
+.action-menu-popover {
+    position: absolute;
+    top: calc(100% + 0.55rem);
+    right: 0;
+    z-index: 120;
+    display: grid;
+    min-width: 15rem;
+    max-width: min(22rem, calc(100vw - 2rem));
+    padding: 0.45rem;
+    border: 1px solid var(--line);
+    border-radius: 0.8rem;
+    background: var(--panel);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.action-menu-popover form {
+    display: contents;
+}
+
+.action-menu-item {
+    display: block;
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    border: 0;
+    border-radius: 0.55rem;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    white-space: normal;
+    cursor: pointer;
+}
+
+.action-menu-item:hover,
+.action-menu-item:focus-visible,
+.action-menu-item.active {
+    background: var(--panel-2);
+    color: var(--text);
+    outline: none;
+}
+
+.action-menu-item:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.action-menu-danger {
+    color: color-mix(in srgb, #ef233c 82%, var(--text));
+}
+
+.action-menu-separator {
+    height: 1px;
+    margin: 0.35rem 0.25rem;
+    background: var(--line);
+}
+
+.header-action-menu .action-menu-popover {
+    min-width: 17rem;
+}
+
+.header-action-menu {
+    order: 4;
+    margin-left: 0.65rem;
+}
+
+.quiz-action-menu .action-menu-popover,
+.board-action-menu .action-menu-popover {
+    min-width: 16rem;
 }
 
     .topbar nav a:hover {
@@ -1043,6 +1167,7 @@ textarea {
 .language-selector {
     position: relative;
     margin-left: 22px;
+    order: 3;
 }
 
 .language-button {
@@ -2319,6 +2444,15 @@ textarea {
     display: grid;
     gap: 10px;
     padding: 0 12px 12px;
+}
+
+.player-menu-settings {
+    margin-bottom: 8px;
+}
+
+.player-menu-settings .player-language-settings {
+    padding-top: 0;
+    border-top: 0;
 }
 
 .player-language-settings {
@@ -4159,6 +4293,17 @@ iframe.game-content-video {
     text-align: left;
 }
 
+.statistics-table th,
+.statistics-table td {
+    white-space: nowrap;
+    text-align: center;
+}
+
+.statistics-table th:first-child,
+.statistics-table td:first-child {
+    text-align: left;
+}
+
 @media (max-width: 700px) {
     .game-history-card {
         align-items: stretch;
@@ -4512,6 +4657,18 @@ iframe.game-content-video {
     max-width: 22rem;
 }
 
+.page-heading-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.page-heading-actions form {
+    margin: 0;
+}
+
 @media (max-width: 760px) {
     .four-clue-grid {
         flex-wrap: wrap;
@@ -4520,15 +4677,4 @@ iframe.game-content-video {
     .four-clue-grid .game-content-block {
         flex-basis: calc((100% - var(--four-clue-gap)) / 2);
     }
-}
-.page-heading-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.page-heading-actions form {
-    margin: 0;
 }
