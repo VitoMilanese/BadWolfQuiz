@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
-    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var returnUrl = Request.Path + Request.QueryString;
 }
 
 <div class="form-card narrow player-lobby"
