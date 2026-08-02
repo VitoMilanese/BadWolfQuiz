@@ -23,7 +23,7 @@
         <div class="message message-error">@errorMessage</div>
     }
 
-    @if (Model.Questions.Count > 0)
+    @if (Model.AddableQuestions.Count > 0)
     {
         <details class="content-panel answer-history-add">
             <summary>@Localizer["AnswerHistory_AddEntry"]</summary>
@@ -34,7 +34,7 @@
             <label>
                 <span>@Localizer["AnswerHistory_Question"]</span>
                 <select name="sourceQuestionId" required>
-                    @foreach (var question in Model.Questions)
+                    @foreach (var question in Model.AddableQuestions)
                     {
                         <option value="@question.SourceQuestionId"
                                 data-attempted-player-ids="@string.Join(',', question.AnswerAttempts.Select(attempt => attempt.PlayerId.Value))">

@@ -829,8 +829,13 @@ public sealed class GameSession
 
     private void EnsureQuestionCanHaveHistoryAdded(RuntimeQuestion question)
     {
+        var availableRoundIds = Quiz.Rounds
+            .OrderBy(round => round.SortOrder)
+            .Take(CurrentRoundIndex + 1)
+            .Select(round => round.SourceRoundId);
+
         if (question.Status == RuntimeQuestionStatus.Available &&
-            question.SourceRoundId != CurrentRound.SourceRoundId)
+            !availableRoundIds.Contains(question.SourceRoundId))
         {
             throw new GameRuleViolationException(
                 "Answer history cannot be added to a question that has not been played.");
