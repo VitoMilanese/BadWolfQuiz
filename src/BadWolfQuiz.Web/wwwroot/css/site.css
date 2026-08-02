@@ -4482,6 +4482,8 @@ iframe.game-content-video {
 
 .four-clue-grid .game-content-block {
     flex: 0 0 calc((100% - 3 * var(--four-clue-gap)) / 4);
+    align-self: stretch;
+    height: auto;
     min-height: clamp(8rem, 24vh, 18rem);
     padding: clamp(.6rem, 1.3vw, 1.25rem);
     border: 2px solid var(--line);

@@ -81,9 +81,10 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
-        return string.IsNullOrWhiteSpace(block.FileName)
-            ? File(block.FileData, block.FileContentType)
-            : File(block.FileData, block.FileContentType, block.FileName);
+        return new FileContentResult(block.FileData, block.FileContentType)
+        {
+            EnableRangeProcessing = true
+        };
     }
 
     public IActionResult OnGetFinalContentBlock(
@@ -104,9 +105,10 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
-        return string.IsNullOrWhiteSpace(block.FileName)
-            ? File(block.FileData, block.FileContentType)
-            : File(block.FileData, block.FileContentType, block.FileName);
+        return new FileContentResult(block.FileData, block.FileContentType)
+        {
+            EnableRangeProcessing = true
+        };
     }
 
     public IActionResult OnGetJoinQrCode(Guid id)

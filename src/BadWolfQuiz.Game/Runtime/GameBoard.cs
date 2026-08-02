@@ -124,6 +124,12 @@ public sealed class RuntimeQuestion
         RevealedClueCount < 4 &&
         Status is RuntimeQuestionStatus.Selected or RuntimeQuestionStatus.Active;
 
+    public int CorrectAnswerValue => IsSpecial
+        ? Wager?.Amount ?? Points
+        : PresentationType == QuestionPresentationType.FourClues
+            ? RevealedClueCount switch { 3 => Points / 2, 4 => Points / 4, _ => Points }
+            : Points;
+
     public IReadOnlyList<ContentBlockSnapshot> QuestionBlocks { get; }
 
     public IReadOnlyList<ContentBlockSnapshot> AnswerBlocks { get; }
@@ -280,13 +286,10 @@ public sealed class RuntimeQuestion
                 "Only the wager player can answer a wager question.");
         }
 
-        var correctValue = PresentationType == QuestionPresentationType.FourClues
-            ? RevealedClueCount switch { 3 => Points / 2, 4 => Points / 4, _ => Points }
-            : Points;
         var value = IsSpecial
             ? Wager?.Amount ?? throw new GameRuleViolationException(
                 "A wager question cannot be judged before its wager is accepted.")
-            : correctValue;
+            : CorrectAnswerValue;
         var scoreDelta = isCorrect ? value : IsSpecial ? -value : -Points;
         var attempt = new QuestionAnswerAttempt(
             playerId,

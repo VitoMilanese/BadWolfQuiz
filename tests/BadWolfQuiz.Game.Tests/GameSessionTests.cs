@@ -24,6 +24,9 @@ public sealed class GameSessionTests
         {
             session.RevealNextClue(100);
         }
+        Assert.Equal(
+            expectedScore,
+            session.Board.Questions.Single().CorrectAnswerValue);
         session.ActivateQuestionBuzzer(100);
         session.ClaimQuestionBuzzer(100, player.Id);
 

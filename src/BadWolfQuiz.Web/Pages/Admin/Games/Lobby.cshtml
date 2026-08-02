@@ -499,8 +499,9 @@
                                     "GameBoard_AnswerWithCategory",
                                     Model.CurrentQuestion.CategoryTitle]
                                 : Localizer[
-                                    "GameBoard_QuestionWithCategory",
-                                    Model.CurrentQuestion.CategoryTitle])
+                                    "GameBoard_QuestionWithCategoryAndPoints",
+                                    Model.CurrentQuestion.CategoryTitle,
+                                    Model.CurrentQuestion.CorrectAnswerValue])
                         </p>
 
                         <div class="game-content-blocks @(Model.CurrentQuestion.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !isShowingAnswer ? "four-clue-grid" : null)">
