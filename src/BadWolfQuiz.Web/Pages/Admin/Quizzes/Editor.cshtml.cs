@@ -14,6 +14,13 @@ public sealed class EditorModel(
 {
     const int TemporarySortOrderOffset = 100000;
 
+    public static int CalculateDefaultPoints(int roundNumber, int rowNumber)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(roundNumber);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rowNumber);
+        return checked(200 * roundNumber * rowNumber);
+    }
+
     [BindProperty]
     public AddRoundInputModel AddRound { get; set; } = new();
 
@@ -240,16 +247,16 @@ public sealed class EditorModel(
 
         if (templateRows is { Count: > 0 })
         {
-            // Increase the base point value for each subsequent round.
-            var roundNumber = nextSortOrder + 1;
-            var step = roundNumber * 200;
+            var roundNumber = quiz.Rounds.Count + 1;
 
             foreach (var templateRow in templateRows)
             {
                 round.Rows.Add(new QuizRoundRow
                 {
                     RowIndex = templateRow.RowIndex,
-                    Points = templateRow.RowIndex * step
+                    Points = CalculateDefaultPoints(
+                        roundNumber,
+                        templateRow.RowIndex)
                 });
             }
         }
@@ -260,7 +267,7 @@ public sealed class EditorModel(
                 round.Rows.Add(new QuizRoundRow
                 {
                     RowIndex = rowIndex,
-                    Points = rowIndex * 200
+                    Points = CalculateDefaultPoints(1, rowIndex)
                 });
             }
         }
