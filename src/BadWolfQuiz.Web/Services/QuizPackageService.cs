@@ -1,5 +1,7 @@
 using System.IO.Compression;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Unicode;
 using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Models;
@@ -15,7 +17,8 @@ public sealed class QuizPackageService(QuizDbContext db)
     private const long MaximumExpandedBytes = 200 * 1024 * 1024;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
-        WriteIndented = true
+        WriteIndented = true,
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
     };
 
     public async Task<byte[]?> ExportAsync(int quizId, CancellationToken cancellationToken)
