@@ -6,6 +6,13 @@
 @{
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
 
+    var currentFlag = currentCulture switch
+    {
+        "uk" => "🇺🇦",
+        "it" => "🇮🇹",
+        _ => "🇬🇧"
+    };
+
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
     var discordInviteUrl = Configuration["Discord:InviteUrl"];
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
@@ -68,26 +75,6 @@
                 <a class="action-menu-item" asp-page="/AskQuestion">@Localizer["Menu_AskQuestion"]</a>
 
                 <div class="action-menu-separator"></div>
-                <a asp-page="/SetLanguage"
-                   asp-route-culture="uk"
-                   asp-route-returnUrl="@returnUrl"
-                   class="action-menu-item @(currentCulture == "uk" ? "active" : null)">
-                    🇺🇦 Українська
-                </a>
-                <a asp-page="/SetLanguage"
-                   asp-route-culture="en"
-                   asp-route-returnUrl="@returnUrl"
-                   class="action-menu-item @(currentCulture == "en" ? "active" : null)">
-                    🇬🇧 English
-                </a>
-                <a asp-page="/SetLanguage"
-                   asp-route-culture="it"
-                   asp-route-returnUrl="@returnUrl"
-                   class="action-menu-item @(currentCulture == "it" ? "active" : null)">
-                    🇮🇹 Italiano
-                </a>
-
-                <div class="action-menu-separator"></div>
                 @if (isAuthenticated)
                 {
                     <form method="post" asp-page="/Account/Logout">
@@ -100,6 +87,37 @@
                 }
             </div>
         </details>
+
+        <div class="language-selector">
+            <button id="languageButton"
+                    class="language-button"
+                    type="button"
+                    aria-label="Language"
+                    aria-expanded="false">
+                @currentFlag
+            </button>
+
+            <div id="languageMenu" class="language-menu">
+                <a asp-page="/SetLanguage"
+                   asp-route-culture="uk"
+                   asp-route-returnUrl="@returnUrl"
+                   class="@(currentCulture == "uk" ? "active" : null)">
+                    🇺🇦 Українська
+                </a>
+                <a asp-page="/SetLanguage"
+                   asp-route-culture="en"
+                   asp-route-returnUrl="@returnUrl"
+                   class="@(currentCulture == "en" ? "active" : null)">
+                    🇬🇧 English
+                </a>
+                <a asp-page="/SetLanguage"
+                   asp-route-culture="it"
+                   asp-route-returnUrl="@returnUrl"
+                   class="@(currentCulture == "it" ? "active" : null)">
+                    🇮🇹 Italiano
+                </a>
+            </div>
+        </div>
     </header>
 
     <main class="page-shell">
