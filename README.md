@@ -91,6 +91,8 @@ Content blocks can be:
 - removed;
 - added dynamically.
 
+Quizzes can be exported and imported as `.bwquiz` packages. Each package is a ZIP archive containing a versioned `manifest.json` and separate media files, so imported quizzes receive new database identifiers and remain independent from the source host and game history.
+
 ---
 
 ## Live Game

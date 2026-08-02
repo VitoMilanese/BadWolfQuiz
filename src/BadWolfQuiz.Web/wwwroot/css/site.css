@@ -4521,3 +4521,14 @@ iframe.game-content-video {
         flex-basis: calc((100% - var(--four-clue-gap)) / 2);
     }
 }
+.page-heading-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.page-heading-actions form {
+    margin: 0;
+}

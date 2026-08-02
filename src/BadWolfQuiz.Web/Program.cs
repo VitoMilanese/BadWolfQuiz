@@ -100,6 +100,7 @@ builder.Services.AddScoped<PasswordResetEmailSender>();
 builder.Services.AddScoped<JoinUrlBuilder>();
 builder.Services.AddScoped<IPasswordHasher<HostAccount>, PasswordHasher<HostAccount>>();
 builder.Services.AddScoped<QuizSeedService>();
+builder.Services.AddScoped<QuizPackageService>();
 
 var app = builder.Build();
 

@@ -1129,4 +1129,8 @@
   <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 clue</value></data>
   <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>The next clue could not be revealed.</value></data>
   <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Question from “{0}” — {1} points</value></data>
+  <data name="Button_ImportQuiz" xml:space="preserve"><value>Import quiz</value></data>
+  <data name="Button_ExportQuiz" xml:space="preserve"><value>Export</value></data>
+  <data name="QuizImport_Success" xml:space="preserve"><value>Quiz imported successfully.</value></data>
+  <data name="QuizImport_InvalidFile" xml:space="preserve"><value>The selected file is not a valid or supported BAD WOLF QUIZ package.</value></data>
 </root>

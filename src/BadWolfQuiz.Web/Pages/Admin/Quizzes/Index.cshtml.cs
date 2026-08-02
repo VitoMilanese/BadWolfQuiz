@@ -14,12 +14,16 @@ public sealed class IndexModel(
     GameSessionLauncher gameSessionLauncher,
     GameSessionRegistry sessionRegistry,
     ActiveGameStore activeGameStore,
+    QuizPackageService quizPackageService,
     CurrentHost currentHost,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     public IReadOnlyList<Quiz> Quizzes { get; private set; } = [];
     public IReadOnlySet<int> ResumableQuizIds { get; private set; } =
         new HashSet<int>();
+
+    [BindProperty]
+    public IFormFile? ImportFile { get; set; }
 
     public async Task OnGetAsync()
     {
@@ -142,6 +146,50 @@ public sealed class IndexModel(
         await db.SaveChangesAsync();
 
         TempData["SuccessMessage"] = localizer["Message_QuizDeleted"].Value;
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnGetExportAsync(int quizId, CancellationToken cancellationToken)
+    {
+        var package = await quizPackageService.ExportAsync(quizId, cancellationToken);
+        if (package is null)
+        {
+            return NotFound();
+        }
+
+        var quiz = await db.Quizzes.AsNoTracking()
+            .SingleAsync(item => item.Id == quizId, cancellationToken);
+        var safeName = string.Concat(quiz.Title.Select(character =>
+            Path.GetInvalidFileNameChars().Contains(character) ? '_' : character));
+        return File(package, "application/vnd.badwolfquiz+zip", safeName + QuizPackageService.FileExtension);
+    }
+
+    [RequestSizeLimit(105 * 1024 * 1024)]
+    public async Task<IActionResult> OnPostImportAsync(CancellationToken cancellationToken)
+    {
+        if (ImportFile is null ||
+            !string.Equals(Path.GetExtension(ImportFile.FileName), QuizPackageService.FileExtension, StringComparison.OrdinalIgnoreCase))
+        {
+            TempData["ErrorMessage"] = localizer["QuizImport_InvalidFile"].Value;
+            return RedirectToPage();
+        }
+
+        try
+        {
+            await using var stream = ImportFile.OpenReadStream();
+            await quizPackageService.ImportAsync(
+                stream, ImportFile.Length, currentHost.RequiredId, cancellationToken);
+            TempData["SuccessMessage"] = localizer["QuizImport_Success"].Value;
+        }
+        catch (InvalidDataException)
+        {
+            TempData["ErrorMessage"] = localizer["QuizImport_InvalidFile"].Value;
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            TempData["ErrorMessage"] = localizer["QuizImport_InvalidFile"].Value;
+        }
+
         return RedirectToPage();
     }
 
