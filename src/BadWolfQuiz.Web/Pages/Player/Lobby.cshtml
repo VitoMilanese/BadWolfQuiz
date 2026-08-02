@@ -376,18 +376,37 @@
 @section Scripts {
     <script src="~/js/avatar-picker.js" asp-append-version="true"></script>
     <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
     <script>
         (() => {
-            if (!("wakeLock" in navigator)) {
-                return;
-            }
-
             let screenWakeLock = null;
             let isRequestingScreenWakeLock = false;
+            let fallbackWakeLockEnabled = false;
+            const fallbackWakeLock = typeof NoSleep === "function"
+                ? new NoSleep()
+                : null;
+
+            const enableFallbackWakeLock = () => {
+                if (fallbackWakeLockEnabled ||
+                    !fallbackWakeLock) {
+                    return;
+                }
+
+                try {
+                    const enableResult = fallbackWakeLock.enable();
+                    fallbackWakeLockEnabled = true;
+                    Promise.resolve(enableResult).catch(() => {
+                        fallbackWakeLockEnabled = false;
+                    });
+                } catch {
+                    fallbackWakeLockEnabled = false;
+                }
+            };
 
             const requestScreenWakeLock = async () => {
                 if (screenWakeLock ||
                     isRequestingScreenWakeLock ||
+                    !("wakeLock" in navigator) ||
                     document.visibilityState !== "visible") {
                     return;
                 }
@@ -397,6 +416,7 @@
                     screenWakeLock = await navigator.wakeLock.request("screen");
                     screenWakeLock.addEventListener("release", () => {
                         screenWakeLock = null;
+                        window.setTimeout(requestScreenWakeLock, 250);
                     }, { once: true });
                 } catch {
                     screenWakeLock = null;
@@ -410,8 +430,19 @@
                     void requestScreenWakeLock();
                 }
             });
-            document.addEventListener("pointerdown", requestScreenWakeLock, { passive: true });
-            document.addEventListener("touchstart", requestScreenWakeLock, { passive: true });
+            const keepScreenAwakeAfterInteraction = () => {
+                void requestScreenWakeLock();
+                enableFallbackWakeLock();
+            };
+            document.addEventListener(
+                "pointerdown",
+                keepScreenAwakeAfterInteraction,
+                { passive: true });
+            document.addEventListener(
+                "touchstart",
+                keepScreenAwakeAfterInteraction,
+                { passive: true });
+            window.setInterval(() => void requestScreenWakeLock(), 15000);
             void requestScreenWakeLock();
         })();
     </script>
