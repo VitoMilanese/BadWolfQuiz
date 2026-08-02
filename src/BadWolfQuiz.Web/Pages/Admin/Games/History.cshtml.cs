@@ -10,18 +10,37 @@ public sealed class HistoryModel(QuizDbContext db) : PageModel
 
     public async Task OnGetAsync(CancellationToken cancellationToken)
     {
-        Games = await db.GameSessions
+        var storedGames = await db.GameSessions
             .AsNoTracking()
+            .Include(game => game.Quiz)
+            .Include(game => game.Players)
             .Where(game =>
                 game.Status == BadWolfQuiz.Web.Models.GameSessionStatus.Finished)
             .OrderByDescending(game => game.FinishedAtUtc)
-            .Select(game => new GameHistoryListItem(
+            .ToListAsync(cancellationToken);
+
+        Games = storedGames.Select(game =>
+        {
+            var winningScore = game.Players.Count == 0
+                ? (int?)null
+                : game.Players.Max(player => player.TotalScore);
+            var winners = winningScore.HasValue
+                ? game.Players
+                    .Where(player => player.TotalScore == winningScore.Value)
+                    .OrderBy(player => player.Name)
+                    .Select(player => player.Name)
+                    .ToArray()
+                : [];
+
+            return new GameHistoryListItem(
                 game.Id,
                 game.Quiz.Title,
                 game.PublicCode,
                 game.FinishedAtUtc ?? game.CreatedAtUtc,
-                game.Players.Count))
-            .ToListAsync(cancellationToken);
+                game.Players.Count,
+                winners,
+                winningScore);
+        }).ToArray();
     }
 }
 
@@ -30,4 +49,6 @@ public sealed record GameHistoryListItem(
     string QuizTitle,
     string PublicCode,
     DateTime FinishedAtUtc,
-    int PlayerCount);
+    int PlayerCount,
+    IReadOnlyList<string> Winners,
+    int? WinningScore);

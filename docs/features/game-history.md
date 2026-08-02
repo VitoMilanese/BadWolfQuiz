@@ -28,7 +28,8 @@ last final answer is judged.
 The administration area provides a chronological game-history list and a
 details page with final scores and regular-question answers. The details page
 also groups correct answers, attempts, accuracy, and score changes by round and
-player.
+player. Each completed-game card identifies the highest-scoring winner, or all
+joint winners when the final score is tied.
 
 The player-statistics page groups player names case-insensitively within the
 current host account. It shows completed games, the sum of final scores,

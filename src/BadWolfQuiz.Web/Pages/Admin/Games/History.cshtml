@@ -34,6 +34,20 @@ else
                         </time>
                     </p>
                     <small>@Localizer["GameHistory_PlayerCount", game.PlayerCount]</small>
+                    @if (game.Winners.Count > 0)
+                    {
+                        <p class="game-history-winner">
+                            <strong>
+                                @(game.Winners.Count == 1
+                                    ? Localizer["GameHistory_Winner"]
+                                    : Localizer["GameHistory_Winners"]):
+                            </strong>
+                            @string.Join(", ", game.Winners)
+                            <span class="@(game.WinningScore < 0 ? "score-negative" : null)">
+                                (@game.WinningScore)
+                            </span>
+                        </p>
+                    }
                 </div>
 
                 <a class="button button-secondary"

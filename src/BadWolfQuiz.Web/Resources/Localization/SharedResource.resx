@@ -723,7 +723,7 @@
     <value>Category renamed successfully.</value>
   </data>
 
-  <data name="Button_CreateGame" xml:space="preserve"><value>Create game</value></data>
+  <data name="Button_CreateGame" xml:space="preserve"><value>Play</value></data>
   <data name="Button_ContinueGame" xml:space="preserve"><value>Continue game</value></data>
   <data name="Button_BackToQuizzes" xml:space="preserve"><value>Back to quizzes</value></data>
   <data name="GameLobby_Eyebrow" xml:space="preserve"><value>Host lobby</value></data>
@@ -1143,4 +1143,8 @@
   <data name="PlayerStatistics_PerRound" xml:space="preserve"><value>Statistics by round</value></data>
   <data name="PlayerStatistics_Round" xml:space="preserve"><value>Round</value></data>
   <data name="PlayerStatistics_NoRoundAnswers" xml:space="preserve"><value>No judged answers are available for round statistics.</value></data>
+  <data name="Menu_Title" xml:space="preserve"><value>Menu</value></data>
+  <data name="Menu_Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="GameHistory_Winner" xml:space="preserve"><value>Winner</value></data>
+  <data name="GameHistory_Winners" xml:space="preserve"><value>Winners</value></data>
 </root>

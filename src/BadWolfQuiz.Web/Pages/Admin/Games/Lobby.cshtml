@@ -271,34 +271,41 @@
                 <h2>@Model.Game.Session.CurrentRound.Title</h2>
             </div>
 
-            <div class="form-actions host-game-actions">
-                <a class="button button-secondary"
-                   asp-page="/Admin/Games/AnswerHistory"
-                   asp-route-id="@Model.Game.Session.Id.Value">
-                    @Localizer["AnswerHistory_Open"]
-                </a>
+            <div class="host-game-actions">
+                <details class="action-menu board-action-menu">
+                    <summary class="button button-secondary action-menu-trigger">
+                        @Localizer["Menu_Actions"]
+                    </summary>
+                    <div class="action-menu-popover">
+                        <a class="action-menu-item"
+                           asp-page="/Admin/Games/AnswerHistory"
+                           asp-route-id="@Model.Game.Session.Id.Value">
+                            @Localizer["AnswerHistory_Open"]
+                        </a>
 
-                <form method="post" asp-page-handler="RandomActivePlayer">
-                    <button class="button button-secondary"
-                            type="submit"
-                            disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
-                        @Localizer["GameBoard_RandomActivePlayer"]
-                    </button>
-                </form>
+                        <form method="post" asp-page-handler="RandomActivePlayer">
+                            <button class="action-menu-item"
+                                    type="submit"
+                                    disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
+                                @Localizer["GameBoard_RandomActivePlayer"]
+                            </button>
+                        </form>
 
-                <a class="button button-secondary"
-                   asp-page="/Admin/Games/AnswerKey"
-                   asp-route-id="@Model.Game.Session.Id.Value"
-                   target="_blank"
-                   rel="noopener">
-                    @Localizer["AnswerKey_Open"]
-                </a>
+                        <a class="action-menu-item"
+                           asp-page="/Admin/Games/AnswerKey"
+                           asp-route-id="@Model.Game.Session.Id.Value"
+                           target="_blank"
+                           rel="noopener">
+                            @Localizer["AnswerKey_Open"]
+                        </a>
 
-                <button class="button button-secondary"
-                        type="button"
-                        data-open-join-code>
-                    @Localizer["GameBoard_ShowJoinCode"]
-                </button>
+                        <button class="action-menu-item"
+                                type="button"
+                                data-open-join-code>
+                            @Localizer["GameBoard_ShowJoinCode"]
+                        </button>
+                    </div>
+                </details>
             </div>
         </div>
         }

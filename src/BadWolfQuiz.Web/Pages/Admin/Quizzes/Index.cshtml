@@ -55,28 +55,35 @@
                 </form>
             }
 
-            <a class="button button-secondary"
-               asp-page="Editor"
-               asp-route-id="@quiz.Id">
-                @Localizer["Button_Edit"]
-            </a>
+            <details class="action-menu quiz-action-menu">
+                <summary class="button button-secondary action-menu-trigger">
+                    @Localizer["Menu_Actions"]
+                </summary>
+                <div class="action-menu-popover">
+                    <a class="action-menu-item"
+                       asp-page="Editor"
+                       asp-route-id="@quiz.Id">
+                        @Localizer["Button_Edit"]
+                    </a>
 
-            <button class="button button-secondary"
-                    type="button"
-                    data-open-rename-dialog
-                    data-quiz-id="@quiz.Id"
-                    data-quiz-title="@quiz.Title"
-                    data-quiz-description="@(quiz.Description ?? string.Empty)">
-                @Localizer["Button_Rename"]
-            </button>
+                    <button class="action-menu-item"
+                            type="button"
+                            data-open-rename-dialog
+                            data-quiz-id="@quiz.Id"
+                            data-quiz-title="@quiz.Title"
+                            data-quiz-description="@(quiz.Description ?? string.Empty)">
+                        @Localizer["Button_Rename"]
+                    </button>
 
-            <button class="button button-danger-outline"
-                    type="button"
-                    data-open-delete-dialog
-                    data-quiz-id="@quiz.Id"
-                    data-quiz-title="@quiz.Title">
-                @Localizer["Button_Delete"]
-            </button>
+                    <button class="action-menu-item action-menu-danger"
+                            type="button"
+                            data-open-delete-dialog
+                            data-quiz-id="@quiz.Id"
+                            data-quiz-title="@quiz.Title">
+                        @Localizer["Button_Delete"]
+                    </button>
+                </div>
+            </details>
         </div>
     </article>
 }
@@ -141,6 +148,7 @@
 
     document.querySelectorAll('[data-open-rename-dialog]').forEach(button => {
         button.addEventListener('click', () => {
+            button.closest('details')?.removeAttribute('open');
             renameQuizId.value = button.dataset.quizId ?? '';
             renameQuizTitle.value = button.dataset.quizTitle ?? '';
             renameQuizDescription.value = button.dataset.quizDescription ?? '';
@@ -156,6 +164,7 @@
 
     document.querySelectorAll('[data-open-delete-dialog]').forEach(button => {
         button.addEventListener('click', () => {
+            button.closest('details')?.removeAttribute('open');
             deleteQuizId.value = button.dataset.quizId ?? '';
             deleteQuizTitle.textContent = button.dataset.quizTitle ?? '';
             deleteDialog.showModal();
