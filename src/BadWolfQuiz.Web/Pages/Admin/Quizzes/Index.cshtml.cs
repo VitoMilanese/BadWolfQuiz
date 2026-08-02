@@ -164,8 +164,8 @@ public sealed class IndexModel(
         return File(package, "application/vnd.badwolfquiz+zip", safeName + QuizPackageService.FileExtension);
     }
 
-    [RequestSizeLimit(220 * 1024 * 1024)]
-    [RequestFormLimits(MultipartBodyLengthLimit = 110 * 1024 * 1024)]
+    [RequestSizeLimit(1100L * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 1050L * 1024 * 1024)]
     public async Task<IActionResult> OnPostImportAsync(CancellationToken cancellationToken)
     {
         if (ImportFile is null ||

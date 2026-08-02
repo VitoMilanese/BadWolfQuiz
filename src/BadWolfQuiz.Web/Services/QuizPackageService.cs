@@ -13,15 +13,15 @@ public sealed class QuizPackageService(QuizDbContext db)
 {
     public const string FileExtension = ".bwquiz";
     private const int FormatVersion = 1;
-    private const long MaximumPackageBytes = 100 * 1024 * 1024;
-    private const long MaximumExpandedBytes = 200 * 1024 * 1024;
+    private const long MaximumPackageBytes = 1024L * 1024 * 1024;
+    private const long MaximumExpandedBytes = 2L * 1024 * 1024 * 1024;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true,
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
     };
 
-    public async Task<byte[]?> ExportAsync(int quizId, CancellationToken cancellationToken)
+    public async Task<Stream?> ExportAsync(int quizId, CancellationToken cancellationToken)
     {
         var quiz = await db.Quizzes
             .AsNoTracking()
@@ -42,30 +42,38 @@ public sealed class QuizPackageService(QuizDbContext db)
             return null;
         }
 
-        await using var output = new MemoryStream();
-        using (var archive = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
+        var output = new FileStream(
+            Path.Combine(Path.GetTempPath(), $"badwolfquiz-{Guid.NewGuid():N}.tmp"),
+            FileMode.CreateNew,
+            FileAccess.ReadWrite,
+            FileShare.None,
+            64 * 1024,
+            FileOptions.Asynchronous | FileOptions.SequentialScan | FileOptions.DeleteOnClose);
+        try
         {
-            var mediaIndex = 0;
-            BlockData MapBlock(ContentBlockBase block)
+            using (var archive = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
             {
-                string? mediaEntry = null;
-                if (block.FileData is { Length: > 0 })
+                var mediaIndex = 0;
+                BlockData MapBlock(ContentBlockBase block)
                 {
-                    var extension = Path.GetExtension(block.FileName);
-                    mediaEntry = $"media/{++mediaIndex:D6}{NormalizeExtension(extension)}";
-                    var entry = archive.CreateEntry(mediaEntry, CompressionLevel.Optimal);
-                    using var stream = entry.Open();
-                    stream.Write(block.FileData);
+                    string? mediaEntry = null;
+                    if (block.FileData is { Length: > 0 })
+                    {
+                        var extension = Path.GetExtension(block.FileName);
+                        mediaEntry = $"media/{++mediaIndex:D6}{NormalizeExtension(extension)}";
+                        var entry = archive.CreateEntry(mediaEntry, CompressionLevel.Optimal);
+                        using var stream = entry.Open();
+                        stream.Write(block.FileData);
+                    }
+
+                    return new BlockData(
+                        block.BlockType, block.TextContent, block.TopCaption,
+                        block.BottomCaption, block.MediaPath, block.ExternalUrl,
+                        block.SortOrder, block.AudioOnly, mediaEntry,
+                        block.FileContentType, block.FileName);
                 }
 
-                return new BlockData(
-                    block.BlockType, block.TextContent, block.TopCaption,
-                    block.BottomCaption, block.MediaPath, block.ExternalUrl,
-                    block.SortOrder, block.AudioOnly, mediaEntry,
-                    block.FileContentType, block.FileName);
-            }
-
-            var manifest = new PackageData(
+                var manifest = new PackageData(
                 FormatVersion,
                 quiz.Title,
                 quiz.Description,
@@ -99,12 +107,19 @@ public sealed class QuizPackageService(QuizDbContext db)
                 quiz.FinalQuestionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                 quiz.FinalAnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray());
 
-            var manifestEntry = archive.CreateEntry("manifest.json", CompressionLevel.Optimal);
-            await using var manifestStream = manifestEntry.Open();
-            await JsonSerializer.SerializeAsync(manifestStream, manifest, JsonOptions, cancellationToken);
-        }
+                var manifestEntry = archive.CreateEntry("manifest.json", CompressionLevel.Optimal);
+                await using var manifestStream = manifestEntry.Open();
+                await JsonSerializer.SerializeAsync(manifestStream, manifest, JsonOptions, cancellationToken);
+            }
 
-        return output.ToArray();
+            output.Position = 0;
+            return output;
+        }
+        catch
+        {
+            await output.DisposeAsync();
+            throw;
+        }
     }
 
     public async Task<Quiz> ImportAsync(

@@ -6,4 +6,4 @@ The manifest contains quiz metadata, rounds, row values, categories, questions, 
 
 Import always creates a new quiz with new local identifiers. A suffix is added when necessary to avoid a duplicate title. Before database changes are made, the importer validates the format version, archive paths, expanded size, manifest limits, and referenced media entries.
 
-Format version 1 limits the compressed package to 100 MB and its expanded contents to 200 MB. These limits protect the server from malformed or unexpectedly large archives.
+Format version 1 limits the compressed package to 1 GB and its expanded contents to 2 GB. Import request limits apply only to the authenticated quiz-import endpoint. Export archives are streamed through an automatically deleted temporary file instead of being assembled entirely in memory.
