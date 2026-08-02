@@ -1,9 +1,12 @@
 @page "{code}/{playerId:guid}"
 @model BadWolfQuiz.Web.Pages.Player.LobbyModel
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
     var returnUrl = Request.Path + Request.QueryString;
+    var discordInviteUrl = Configuration["Discord:InviteUrl"];
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
 }
 
 <div class="form-card narrow player-lobby"
@@ -34,6 +37,39 @@
     <details class="player-media-settings player-menu-settings">
         <summary>@Localizer["PlayerMenu_Title"]</summary>
         <div class="player-media-settings-content">
+            <nav class="player-menu-links" aria-label="@Localizer["PlayerMenu_Title"]">
+                @if (isAuthenticated)
+                {
+                    <a class="button button-secondary" asp-page="/Admin/Quizzes/Index">@Localizer["Menu_Quizzes"]</a>
+                    <a class="button button-secondary" asp-page="/Admin/Games/History">@Localizer["Menu_GameHistory"]</a>
+                    <a class="button button-secondary" asp-page="/Admin/Games/Statistics">@Localizer["Menu_PlayerStatistics"]</a>
+                    <a class="button button-secondary" asp-page="/Admin/Settings/Index">@Localizer["Menu_Settings"]</a>
+                    <a class="button button-secondary" asp-page="/Account/ChangePassword">@Localizer["Account_ChangePassword"]</a>
+                }
+
+                <a class="button button-secondary" asp-page="/Join/Index">@Localizer["Button_Join"]</a>
+                @if (!string.IsNullOrWhiteSpace(discordInviteUrl))
+                {
+                    <a class="button button-secondary"
+                       href="@discordInviteUrl"
+                       target="_blank"
+                       rel="noopener noreferrer">@Localizer["Menu_PlayWithUs"]</a>
+                }
+                <a class="button button-secondary" asp-page="/Faq">@Localizer["Menu_FAQ"]</a>
+                <a class="button button-secondary" asp-page="/AskQuestion">@Localizer["Menu_AskQuestion"]</a>
+
+                @if (isAuthenticated)
+                {
+                    <form method="post" asp-page="/Account/Logout">
+                        <button type="submit" class="button button-secondary">@Localizer["Account_SignOut"]</button>
+                    </form>
+                }
+                else
+                {
+                    <a class="button button-secondary" asp-page="/Account/Login">@Localizer["Account_HostSignIn"]</a>
+                }
+            </nav>
+
             <div class="player-language-settings">
                 <strong>@Localizer["Language_Label"]</strong>
                 <div class="player-language-options">
@@ -340,6 +376,45 @@
 @section Scripts {
     <script src="~/js/avatar-picker.js" asp-append-version="true"></script>
     <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
+    <script>
+        (() => {
+            if (!("wakeLock" in navigator)) {
+                return;
+            }
+
+            let screenWakeLock = null;
+            let isRequestingScreenWakeLock = false;
+
+            const requestScreenWakeLock = async () => {
+                if (screenWakeLock ||
+                    isRequestingScreenWakeLock ||
+                    document.visibilityState !== "visible") {
+                    return;
+                }
+
+                isRequestingScreenWakeLock = true;
+                try {
+                    screenWakeLock = await navigator.wakeLock.request("screen");
+                    screenWakeLock.addEventListener("release", () => {
+                        screenWakeLock = null;
+                    }, { once: true });
+                } catch {
+                    screenWakeLock = null;
+                } finally {
+                    isRequestingScreenWakeLock = false;
+                }
+            };
+
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "visible") {
+                    void requestScreenWakeLock();
+                }
+            });
+            document.addEventListener("pointerdown", requestScreenWakeLock, { passive: true });
+            document.addEventListener("touchstart", requestScreenWakeLock, { passive: true });
+            void requestScreenWakeLock();
+        })();
+    </script>
     <script>
         (() => {
             const lobby = document.querySelector(".player-lobby");
