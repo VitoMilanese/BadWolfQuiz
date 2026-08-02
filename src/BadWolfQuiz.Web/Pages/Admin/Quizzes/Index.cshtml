@@ -10,7 +10,8 @@
         <h1>@Localizer["Title_MyQuizzes"]</h1>
     </div>
     <div class="page-heading-actions">
-        <form method="post" asp-page-handler="Import" enctype="multipart/form-data">
+        <form id="quiz-import-form" method="post" asp-page-handler="Import" asp-antiforgery="false" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
             <input asp-for="ImportFile" type="file" accept=".bwquiz" required hidden data-quiz-import-file />
             <button class="button button-secondary" type="button" data-quiz-import-select>
                 @Localizer["Button_ImportQuiz"]
@@ -157,7 +158,7 @@
     document.querySelector('[data-quiz-import-select]')?.addEventListener('click', () => importFile?.click());
     importFile?.addEventListener('change', () => {
         if (importFile.files.length > 0) {
-            importFile.form.submit();
+            importFile.form.requestSubmit();
         }
     });
 
