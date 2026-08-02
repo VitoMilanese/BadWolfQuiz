@@ -1129,4 +1129,18 @@
   <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 indizio</value></data>
   <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>Impossibile mostrare l'indizio successivo.</value></data>
   <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Domanda della categoria «{0}» — {1} punti</value></data>
+  <data name="Menu_PlayerStatistics" xml:space="preserve"><value>Statistiche giocatori</value></data>
+  <data name="PlayerStatistics_Title" xml:space="preserve"><value>Statistiche giocatori</value></data>
+  <data name="PlayerStatistics_Description" xml:space="preserve"><value>Risultati complessivi calcolati dalle partite completate di questo host.</value></data>
+  <data name="PlayerStatistics_Empty" xml:space="preserve"><value>Completa una partita per iniziare a raccogliere le statistiche.</value></data>
+  <data name="PlayerStatistics_Games" xml:space="preserve"><value>Partite</value></data>
+  <data name="PlayerStatistics_TotalScore" xml:space="preserve"><value>Punteggio finale totale</value></data>
+  <data name="PlayerStatistics_Correct" xml:space="preserve"><value>Corrette</value></data>
+  <data name="PlayerStatistics_Attempts" xml:space="preserve"><value>Tentativi</value></data>
+  <data name="PlayerStatistics_Accuracy" xml:space="preserve"><value>Precisione</value></data>
+  <data name="PlayerStatistics_LastPlayed" xml:space="preserve"><value>Ultima partita</value></data>
+  <data name="PlayerStatistics_NotAvailable" xml:space="preserve"><value>—</value></data>
+  <data name="PlayerStatistics_PerRound" xml:space="preserve"><value>Statistiche per round</value></data>
+  <data name="PlayerStatistics_Round" xml:space="preserve"><value>Round</value></data>
+  <data name="PlayerStatistics_NoRoundAnswers" xml:space="preserve"><value>Non ci sono risposte valutate per le statistiche del round.</value></data>
 </root>

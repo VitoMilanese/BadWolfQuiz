@@ -94,6 +94,7 @@ builder.Services.AddSingleton<GameSettingsStore>();
 builder.Services.AddSingleton<AvatarCatalog>();
 builder.Services.AddScoped<GameSessionLauncher>();
 builder.Services.AddScoped<GameHistoryStore>();
+builder.Services.AddScoped<PlayerStatisticsService>();
 builder.Services.AddScoped<CurrentHost>();
 builder.Services.AddScoped<HostAccountService>();
 builder.Services.AddScoped<PasswordResetEmailSender>();

@@ -26,7 +26,16 @@ of the last round closes. Games with a final question are persisted when the
 last final answer is judged.
 
 The administration area provides a chronological game-history list and a
-details page with final scores and regular-question answers.
+details page with final scores and regular-question answers. The details page
+also groups correct answers, attempts, accuracy, and score changes by round and
+player.
+
+The player-statistics page groups player names case-insensitively within the
+current host account. It shows completed games, the sum of final scores,
+lifetime correct answers and attempts, accuracy, and the latest game date.
+Players do not need accounts: their trimmed nickname is their identity inside a
+host's history, so similarly named people must still be distinguished by the
+host when they join.
 
 ## Data retention
 

@@ -34,6 +34,56 @@
 </section>
 
 <section class="content-panel">
+    <h2>@Localizer["PlayerStatistics_PerRound"]</h2>
+
+    @if (Model.Game.RoundStatistics.Count == 0)
+    {
+        <p>@Localizer["PlayerStatistics_NoRoundAnswers"]</p>
+    }
+    else
+    {
+        <div class="table-scroll">
+            <table class="game-history-table statistics-table">
+                <thead>
+                    <tr>
+                        <th>@Localizer["PlayerStatistics_Round"]</th>
+                        <th>@Localizer["GameHistory_Player"]</th>
+                        <th>@Localizer["PlayerStatistics_Correct"]</th>
+                        <th>@Localizer["PlayerStatistics_Attempts"]</th>
+                        <th>@Localizer["PlayerStatistics_Accuracy"]</th>
+                        <th>@Localizer["GameHistory_ScoreChange"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Game.RoundStatistics)
+                    {
+                        <tr>
+                            <td>@item.RoundTitle</td>
+                            <th scope="row">@item.PlayerName</th>
+                            <td>@item.CorrectAnswers</td>
+                            <td>@item.Attempts</td>
+                            <td>
+                                @if (item.Accuracy.HasValue)
+                                {
+                                    @item.Accuracy.Value.ToString("P1")
+                                }
+                                else
+                                {
+                                    @Localizer["PlayerStatistics_NotAvailable"]
+                                }
+                            </td>
+                            <td class="@(item.ScoreDelta < 0 ? "score-negative" : null)">
+                                @(item.ScoreDelta > 0 ? "+" : null)@item.ScoreDelta
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="content-panel">
     <h2>@Localizer["GameHistory_Answers"]</h2>
 
     @if (Model.Game.Answers.Count == 0)

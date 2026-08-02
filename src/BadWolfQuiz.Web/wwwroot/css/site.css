@@ -4159,6 +4159,17 @@ iframe.game-content-video {
     text-align: left;
 }
 
+.statistics-table th,
+.statistics-table td {
+    white-space: nowrap;
+    text-align: center;
+}
+
+.statistics-table th:first-child,
+.statistics-table td:first-child {
+    text-align: left;
+}
+
 @media (max-width: 700px) {
     .game-history-card {
         align-items: stretch;

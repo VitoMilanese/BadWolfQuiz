@@ -1129,4 +1129,18 @@
   <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 підказка</value></data>
   <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>Не вдалося відкрити наступну підказку.</value></data>
   <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Питання з категорії «{0}» — {1} балів</value></data>
+  <data name="Menu_PlayerStatistics" xml:space="preserve"><value>Статистика гравців</value></data>
+  <data name="PlayerStatistics_Title" xml:space="preserve"><value>Статистика гравців</value></data>
+  <data name="PlayerStatistics_Description" xml:space="preserve"><value>Результати за весь час, розраховані із завершених ігор цього хоста.</value></data>
+  <data name="PlayerStatistics_Empty" xml:space="preserve"><value>Завершіть гру, щоб почати збирати статистику гравців.</value></data>
+  <data name="PlayerStatistics_Games" xml:space="preserve"><value>Ігри</value></data>
+  <data name="PlayerStatistics_TotalScore" xml:space="preserve"><value>Сума фінальних балів</value></data>
+  <data name="PlayerStatistics_Correct" xml:space="preserve"><value>Правильно</value></data>
+  <data name="PlayerStatistics_Attempts" xml:space="preserve"><value>Спроби</value></data>
+  <data name="PlayerStatistics_Accuracy" xml:space="preserve"><value>Точність</value></data>
+  <data name="PlayerStatistics_LastPlayed" xml:space="preserve"><value>Остання гра</value></data>
+  <data name="PlayerStatistics_NotAvailable" xml:space="preserve"><value>—</value></data>
+  <data name="PlayerStatistics_PerRound" xml:space="preserve"><value>Статистика за раундами</value></data>
+  <data name="PlayerStatistics_Round" xml:space="preserve"><value>Раунд</value></data>
+  <data name="PlayerStatistics_NoRoundAnswers" xml:space="preserve"><value>Немає оцінених відповідей для статистики за раундами.</value></data>
 </root>

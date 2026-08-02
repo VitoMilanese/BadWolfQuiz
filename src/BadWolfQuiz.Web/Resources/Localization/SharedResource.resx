@@ -1129,4 +1129,18 @@
   <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 clue</value></data>
   <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>The next clue could not be revealed.</value></data>
   <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Question from “{0}” — {1} points</value></data>
+  <data name="Menu_PlayerStatistics" xml:space="preserve"><value>Player statistics</value></data>
+  <data name="PlayerStatistics_Title" xml:space="preserve"><value>Player statistics</value></data>
+  <data name="PlayerStatistics_Description" xml:space="preserve"><value>Lifetime results calculated from this host's completed games.</value></data>
+  <data name="PlayerStatistics_Empty" xml:space="preserve"><value>Complete a game to start collecting player statistics.</value></data>
+  <data name="PlayerStatistics_Games" xml:space="preserve"><value>Games</value></data>
+  <data name="PlayerStatistics_TotalScore" xml:space="preserve"><value>Total final score</value></data>
+  <data name="PlayerStatistics_Correct" xml:space="preserve"><value>Correct</value></data>
+  <data name="PlayerStatistics_Attempts" xml:space="preserve"><value>Attempts</value></data>
+  <data name="PlayerStatistics_Accuracy" xml:space="preserve"><value>Accuracy</value></data>
+  <data name="PlayerStatistics_LastPlayed" xml:space="preserve"><value>Last played</value></data>
+  <data name="PlayerStatistics_NotAvailable" xml:space="preserve"><value>—</value></data>
+  <data name="PlayerStatistics_PerRound" xml:space="preserve"><value>Statistics by round</value></data>
+  <data name="PlayerStatistics_Round" xml:space="preserve"><value>Round</value></data>
+  <data name="PlayerStatistics_NoRoundAnswers" xml:space="preserve"><value>No judged answers are available for round statistics.</value></data>
 </root>
