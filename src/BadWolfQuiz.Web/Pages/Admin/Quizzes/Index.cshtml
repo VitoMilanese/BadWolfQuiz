@@ -14,7 +14,7 @@
 
 @if (TempData["SuccessMessage"] is string successMessage)
 {
-    <div class="message message-success" role="status">@successMessage</div>
+    <div class="message message-success" role="status" data-auto-dismiss>@successMessage</div>
 }
 
 @if (TempData["ErrorMessage"] is string errorMessage)

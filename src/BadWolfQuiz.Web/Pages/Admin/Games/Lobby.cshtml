@@ -495,8 +495,12 @@
                     <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation")">
                         <p class="eyebrow">
                             @(isShowingAnswer
-                                ? Localizer["GameBoard_Answer"]
-                                : Localizer["GameBoard_Question"])
+                                ? Localizer[
+                                    "GameBoard_AnswerWithCategory",
+                                    Model.CurrentQuestion.CategoryTitle]
+                                : Localizer[
+                                    "GameBoard_QuestionWithCategory",
+                                    Model.CurrentQuestion.CategoryTitle])
                         </p>
 
                         <div class="game-content-blocks">
@@ -839,6 +843,12 @@
             @if (Model.Game.Session.Settings.HasHostCard)
             {
                 <li class="scoreboard-player host-card" data-host-card>
+                    <span class="player-card-width-resizer"
+                          data-player-card-width-resizer
+                          role="separator"
+                          aria-orientation="vertical"
+                          aria-label="@Localizer["GameBoard_ResizePlayerCards"]"
+                          tabindex="0"></span>
                     <strong>@Model.Game.Session.Settings.HostName</strong>
                     @if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Image &&
                          Model.Game.Session.Settings.HostImageData is not null)
@@ -1172,6 +1182,12 @@
             @if (Model.Game.Session.Settings.HasHostCard)
             {
                 <li class="scoreboard-player host-card" data-host-card>
+                    <span class="player-card-width-resizer"
+                          data-player-card-width-resizer
+                          role="separator"
+                          aria-orientation="vertical"
+                          aria-label="@Localizer["GameBoard_ResizePlayerCards"]"
+                          tabindex="0"></span>
                     <strong>@Model.Game.Session.Settings.HostName</strong>
                     @if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Image &&
                          Model.Game.Session.Settings.HostImageData is not null)
@@ -1280,6 +1296,33 @@
 @section Scripts {
     <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
     <script>
+        (() => {
+            const titles = [...document.querySelectorAll(".host-board-column h3")];
+            if (titles.length === 0) {
+                return;
+            }
+
+            const fitTitle = title => {
+                let size = 30;
+                title.style.setProperty("--category-title-size", `${size}px`);
+                while (size > 12 &&
+                    (title.scrollWidth > title.clientWidth ||
+                     title.scrollHeight > title.clientHeight)) {
+                    size -= 1;
+                    title.style.setProperty("--category-title-size", `${size}px`);
+                }
+            };
+
+            const fitTitles = () => titles.forEach(fitTitle);
+            fitTitles();
+            const grid = document.querySelector(".host-board-grid");
+            if (grid && typeof ResizeObserver !== "undefined") {
+                new ResizeObserver(fitTitles).observe(grid);
+            } else {
+                window.addEventListener("resize", fitTitles);
+            }
+        })();
+
         (() => {
             const videos = document.querySelectorAll("[data-host-webcam]");
             if (videos.length === 0 || !navigator.mediaDevices?.getUserMedia) {
@@ -1547,21 +1590,36 @@
                 return;
             }
 
-            const storageKey = `badwolfquiz:${board.dataset.gameCode}:player-card-width`;
+            const playerStorageKey =
+                `badwolfquiz:${board.dataset.gameCode}:player-card-width`;
+            const hostStorageKey =
+                `badwolfquiz:${board.dataset.gameCode}:host-bottom-card-width`;
             const limits = () => ({
                 minimum: 150,
                 maximum: Math.max(150, Math.min(430, window.innerWidth * 0.8))
             });
-            const applyWidth = value => {
+            const applyWidth = (value, isHost) => {
                 const { minimum, maximum } = limits();
                 const width = Math.min(maximum, Math.max(minimum, Math.round(value)));
-                board.style.setProperty("--player-card-width", `${width}px`);
+                board.style.setProperty(
+                    isHost ? "--host-bottom-card-width" : "--player-card-width",
+                    `${width}px`);
                 return width;
             };
 
-            const savedWidth = Number.parseInt(localStorage.getItem(storageKey), 10);
+            const savedPlayerWidth = Number.parseInt(
+                localStorage.getItem(playerStorageKey),
+                10);
+            const savedHostWidth = Number.parseInt(
+                localStorage.getItem(hostStorageKey),
+                10);
             const defaultWidth = window.innerWidth <= 700 ? 155 : 230;
-            applyWidth(Number.isFinite(savedWidth) ? savedWidth : defaultWidth);
+            applyWidth(
+                Number.isFinite(savedPlayerWidth) ? savedPlayerWidth : defaultWidth,
+                false);
+            applyWidth(
+                Number.isFinite(savedHostWidth) ? savedHostWidth : defaultWidth,
+                true);
 
             playerList.addEventListener("pointerdown", event => {
                 const handle = event.target.closest("[data-player-card-width-resizer]");
@@ -1571,6 +1629,7 @@
 
                 event.preventDefault();
                 const card = handle.closest(".scoreboard-player");
+                const isHost = card.classList.contains("host-card");
                 const startX = event.clientX;
                 const startWidth = card.getBoundingClientRect().width;
                 const pointerId = event.pointerId;
@@ -1581,7 +1640,7 @@
                         return;
                     }
 
-                    applyWidth(startWidth + moveEvent.clientX - startX);
+                    applyWidth(startWidth + moveEvent.clientX - startX, isHost);
                 };
                 const stop = stopEvent => {
                     if (stopEvent.pointerId !== pointerId) {
@@ -1592,9 +1651,14 @@
                     window.removeEventListener("pointerup", stop);
                     window.removeEventListener("pointercancel", stop);
                     document.body.classList.remove("is-resizing-player-cards");
+                    const property = isHost
+                        ? "--host-bottom-card-width"
+                        : "--player-card-width";
                     const width = Number.parseFloat(
-                        getComputedStyle(board).getPropertyValue("--player-card-width"));
-                    localStorage.setItem(storageKey, Math.round(width).toString());
+                        getComputedStyle(board).getPropertyValue(property));
+                    localStorage.setItem(
+                        isHost ? hostStorageKey : playerStorageKey,
+                        Math.round(width).toString());
                 };
 
                 window.addEventListener("pointermove", move);
@@ -1609,17 +1673,29 @@
                 }
 
                 event.preventDefault();
+                const isHost = event.target
+                    .closest(".scoreboard-player")
+                    .classList.contains("host-card");
+                const property = isHost
+                    ? "--host-bottom-card-width"
+                    : "--player-card-width";
                 const current = Number.parseFloat(
-                    getComputedStyle(board).getPropertyValue("--player-card-width"));
+                    getComputedStyle(board).getPropertyValue(property));
                 const width = applyWidth(
-                    current + (event.key === "ArrowRight" ? 12 : -12));
-                localStorage.setItem(storageKey, width.toString());
+                    current + (event.key === "ArrowRight" ? 12 : -12),
+                    isHost);
+                localStorage.setItem(
+                    isHost ? hostStorageKey : playerStorageKey,
+                    width.toString());
             });
 
             window.addEventListener("resize", () => {
-                const current = Number.parseFloat(
+                const playerWidth = Number.parseFloat(
                     getComputedStyle(board).getPropertyValue("--player-card-width"));
-                applyWidth(current);
+                const hostWidth = Number.parseFloat(
+                    getComputedStyle(board).getPropertyValue("--host-bottom-card-width"));
+                applyWidth(playerWidth, false);
+                applyWidth(hostWidth, true);
             });
         })();
 

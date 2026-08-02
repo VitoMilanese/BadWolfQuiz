@@ -140,10 +140,12 @@ public sealed class AnswerHistoryModel(
 
         Game = game;
         Questions = game.Session.Board.Questions
-            .Where(question => question.Status != RuntimeQuestionStatus.Available)
-            .OrderBy(question => game.Session.Quiz.Rounds
-                .Single(round => round.SourceRoundId == question.SourceRoundId)
-                .SortOrder)
+            .Where(question =>
+                question.Status != RuntimeQuestionStatus.Available ||
+                question.SourceRoundId == game.Session.CurrentRound.SourceRoundId)
+            .OrderByDescending(question => question.AnswerAttempts.Count > 0
+                ? question.AnswerAttempts.Max(attempt => attempt.JudgedAtUtc)
+                : DateTimeOffset.MinValue)
             .ThenBy(question => question.RowIndex)
             .ThenBy(question => question.SourceCategoryId)
             .Select(question => new AnswerHistoryQuestion(
@@ -153,7 +155,9 @@ public sealed class AnswerHistoryModel(
                     .Title,
                 question.CategoryTitle,
                 question.Points,
-                question.AnswerAttempts))
+                question.AnswerAttempts
+                    .OrderByDescending(attempt => attempt.JudgedAtUtc)
+                    .ToArray()))
             .ToArray();
 
         return Page();
