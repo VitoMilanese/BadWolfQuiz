@@ -2446,6 +2446,15 @@ textarea {
     padding: 0 12px 12px;
 }
 
+.player-menu-settings {
+    margin-bottom: 8px;
+}
+
+.player-menu-settings .player-language-settings {
+    padding-top: 0;
+    border-top: 0;
+}
+
 .player-language-settings {
     display: grid;
     gap: 7px;
