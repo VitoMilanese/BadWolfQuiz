@@ -855,7 +855,9 @@
 
         <form class="player-join-lock-form"
               method="post"
-              asp-page-handler="TogglePlayerJoining">
+              asp-page-handler="TogglePlayerJoining"
+              data-open-label="@Localizer["GameBoard_OpenPlayerJoining"]"
+              data-close-label="@Localizer["GameBoard_ClosePlayerJoining"]">
             <button class="player-join-lock @(Model.Game.AllowsNewPlayers ? "is-open" : "is-closed")"
                     type="submit"
                     title="@(Model.Game.AllowsNewPlayers
@@ -2123,6 +2125,76 @@
             const timerValue = document.getElementById("game-timer-value");
             const timerPause = document.querySelector(".game-timer-pause");
             const timerResume = document.querySelector(".game-timer-resume");
+            const playerJoinLockForm = document.querySelector(
+                ".player-join-lock-form");
+            const playerJoinLockButton = playerJoinLockForm?.querySelector(
+                ".player-join-lock");
+
+            const submitGameControl = async form => {
+                const button = form.querySelector("button[type='submit']");
+                button?.setAttribute("disabled", "disabled");
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        body: new FormData(form),
+                        headers: {
+                            "Accept": "application/json",
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    });
+                    const contentType = response.headers.get("content-type") ?? "";
+                    const result = contentType.includes("application/json")
+                        ? await response.json()
+                        : null;
+
+                    if (!response.ok || !result?.success) {
+                        throw new Error(result?.error ?? response.statusText);
+                    }
+
+                    return result;
+                } finally {
+                    button?.removeAttribute("disabled");
+                }
+            };
+
+            const handleGameControlError = error => {
+                console.error(error);
+                window.alert(error.message);
+            };
+
+            for (const timerForm of [timerPause, timerResume]) {
+                timerForm?.addEventListener("submit", async event => {
+                    event.preventDefault();
+
+                    try {
+                        await submitGameControl(timerForm);
+                    } catch (error) {
+                        handleGameControlError(error);
+                    }
+                });
+            }
+
+            playerJoinLockForm?.addEventListener("submit", async event => {
+                event.preventDefault();
+
+                try {
+                    const result = await submitGameControl(playerJoinLockForm);
+                    const isOpen = result.allowsNewPlayers;
+                    const label = isOpen
+                        ? playerJoinLockForm.dataset.closeLabel
+                        : playerJoinLockForm.dataset.openLabel;
+
+                    playerJoinLockButton.classList.toggle("is-open", isOpen);
+                    playerJoinLockButton.classList.toggle("is-closed", !isOpen);
+                    playerJoinLockButton.title = label;
+                    playerJoinLockButton.setAttribute("aria-label", label);
+                    playerJoinLockButton.querySelector("span").textContent =
+                        isOpen ? "🔓" : "🔒";
+                } catch (error) {
+                    handleGameControlError(error);
+                }
+            });
 
             const refreshScrollingNames = () => {
                 boardPlayerList?.querySelectorAll(".board-player-name").forEach(name => {

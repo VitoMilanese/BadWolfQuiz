@@ -342,8 +342,19 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException)
         {
-            TempData["ErrorMessage"] =
-                localizer["GameTimer_PauseRejected"].Value;
+            var errorMessage = localizer["GameTimer_PauseRejected"].Value;
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+        }
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new { success = true });
         }
 
         return RedirectToPage(new { id });
@@ -367,8 +378,19 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException)
         {
-            TempData["ErrorMessage"] =
-                localizer["GameTimer_ResumeRejected"].Value;
+            var errorMessage = localizer["GameTimer_ResumeRejected"].Value;
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+        }
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new { success = true });
         }
 
         return RedirectToPage(new { id });
@@ -825,11 +847,35 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException)
         {
-            TempData["ErrorMessage"] =
+            var errorMessage =
                 localizer["GameBoard_PlayerJoiningToggleRejected"].Value;
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+        }
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                allowsNewPlayers = game.AllowsNewPlayers
+            });
         }
 
         return RedirectToPage(new { id });
+    }
+
+    private bool IsAjaxRequest()
+    {
+        return string.Equals(
+            Request.Headers["X-Requested-With"],
+            "XMLHttpRequest",
+            StringComparison.OrdinalIgnoreCase);
     }
 
     private Task BroadcastTimerAsync(
