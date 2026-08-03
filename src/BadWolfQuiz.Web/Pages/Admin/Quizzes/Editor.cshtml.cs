@@ -1,6 +1,7 @@
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Models;
+using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace BadWolfQuiz.Web.Pages.Admin.Quizzes;
 
 public sealed class EditorModel(
     QuizDbContext db,
+    GameSessionLauncher gameSessionLauncher,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     const int TemporarySortOrderOffset = 100000;
@@ -619,7 +621,9 @@ public sealed class EditorModel(
         });
     }
 
-    public async Task<IActionResult> OnPostSaveRoundRowsAsync()
+    public async Task<IActionResult> OnPostSaveRoundRowsAsync(
+        bool play,
+        CancellationToken cancellationToken)
     {
         var quiz = await db.Quizzes
             .Include(x => x.Rounds)
@@ -701,6 +705,45 @@ public sealed class EditorModel(
         quiz.UpdatedAtUtc = DateTime.UtcNow;
 
         await db.SaveChangesAsync();
+
+        if (play)
+        {
+            try
+            {
+                var game = await gameSessionLauncher.CreateAsync(
+                    quiz.Id,
+                    cancellationToken);
+
+                if (game is null)
+                {
+                    return NotFound();
+                }
+
+                return RedirectToPage(
+                    "/Admin/Games/Lobby",
+                    new { id = game.Session.Id.Value });
+            }
+            catch (ArgumentException)
+            {
+                TempData["ErrorMessage"] =
+                    localizer["Error_QuizCannotStart"].Value;
+                return RedirectToPage(new
+                {
+                    id = quiz.Id,
+                    selectedRoundId = round.Id
+                });
+            }
+            catch (InvalidOperationException)
+            {
+                TempData["ErrorMessage"] =
+                    localizer["Error_QuizCannotStart"].Value;
+                return RedirectToPage(new
+                {
+                    id = quiz.Id,
+                    selectedRoundId = round.Id
+                });
+            }
+        }
 
         TempData["SuccessMessage"] =
             localizer["QuizEditor_RoundRowsSaved"].Value;

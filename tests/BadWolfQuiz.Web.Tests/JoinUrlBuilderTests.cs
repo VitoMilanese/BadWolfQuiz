@@ -19,7 +19,7 @@ public sealed class JoinUrlBuilderTests
 
         var result = new JoinUrlBuilder(configuration).Build(request, "ABC123");
 
-        Assert.Equal("https://quiz.example.com/Join/ABC123", result);
+        Assert.Equal("https://quiz.example.com/Join/ABC123/", result);
     }
 
     [Fact]
@@ -33,6 +33,6 @@ public sealed class JoinUrlBuilderTests
 
         var result = new JoinUrlBuilder(configuration).Build(request, "WOLF42");
 
-        Assert.Equal("https://quiz.local:7080/badwolf/Join/WOLF42", result);
+        Assert.Equal("https://quiz.local:7080/badwolf/Join/WOLF42/", result);
     }
 }

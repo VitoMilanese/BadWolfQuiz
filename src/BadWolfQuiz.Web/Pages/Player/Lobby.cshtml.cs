@@ -37,6 +37,7 @@ public sealed class LobbyModel(GameSessionRegistry sessionRegistry) : PageModel
         CurrentPlayer = currentPlayer;
         Players = players;
         AccessToken = accessToken;
+        ViewData["GameThemeSettings"] = game.Session.Settings;
         return Page();
     }
 

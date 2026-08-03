@@ -764,6 +764,12 @@
                     else
                     {
                         <p class="round-summary-finished">@Localizer["GameBoard_AllRoundsComplete"]</p>
+                        <div class="form-actions final-finish-actions">
+                            <a class="button button-primary"
+                               asp-page="/Admin/Quizzes/Index">
+                                @Localizer["GameBoard_FinishGame"]
+                            </a>
+                        </div>
                     }
                 }
             </section>
