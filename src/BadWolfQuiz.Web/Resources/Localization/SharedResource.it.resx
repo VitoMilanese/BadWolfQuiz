@@ -1129,9 +1129,8 @@
   <data name="Label_QuestionType" xml:space="preserve"><value>Tipo di domanda</value></data>
   <data name="QuestionType_Standard" xml:space="preserve"><value>Domanda standard</value></data>
   <data name="QuestionType_FourClues" xml:space="preserve"><value>Quattro indizi</value></data>
-  <data name="FourClues_EditorHint" xml:space="preserve"><value>Aggiungi esattamente quattro indizi. Ogni indizio può contenere testo, un'immagine o audio.</value></data>
+  <data name="FourClues_EditorHint" xml:space="preserve"><value>Aggiungi esattamente quattro indizi. Ogni indizio può contenere testo, un'immagine, audio o video.</value></data>
   <data name="FourClues_ExactlyFourRequired" xml:space="preserve"><value>Una domanda a quattro indizi deve contenere esattamente quattro indizi.</value></data>
-  <data name="FourClues_UnsupportedMedia" xml:space="preserve"><value>Le domande a quattro indizi supportano solo testo, immagini e audio.</value></data>
   <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 indizio</value></data>
   <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>Impossibile mostrare l'indizio successivo.</value></data>
   <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Domanda della categoria «{0}» — {1} punti</value></data>

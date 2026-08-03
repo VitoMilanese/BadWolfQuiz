@@ -1,4 +1,6 @@
-﻿@model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
+﻿@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> localizer
+@model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
 
 <input asp-for="ExternalUrl"
        class="form-control"
@@ -8,9 +10,9 @@
 <input asp-for="TopCaption"
        class="form-control"
        style="margin-top: 10px;"
-       placeholder="Top caption" />
+       placeholder="@localizer["Label_TopCaption"]" />
 
 <input asp-for="BottomCaption"
        class="form-control"
        style="margin-top: 10px;"
-       placeholder="Bottom caption" />
+       placeholder="@localizer["Label_BottomCaption"]" />

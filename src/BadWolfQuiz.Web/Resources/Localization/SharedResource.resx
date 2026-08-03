@@ -1129,9 +1129,8 @@
   <data name="Label_QuestionType" xml:space="preserve"><value>Question type</value></data>
   <data name="QuestionType_Standard" xml:space="preserve"><value>Standard question</value></data>
   <data name="QuestionType_FourClues" xml:space="preserve"><value>Four clues</value></data>
-  <data name="FourClues_EditorHint" xml:space="preserve"><value>Add exactly four clues. Each clue may contain text, an image, or audio.</value></data>
+  <data name="FourClues_EditorHint" xml:space="preserve"><value>Add exactly four clues. Each clue may contain text, an image, audio, or video.</value></data>
   <data name="FourClues_ExactlyFourRequired" xml:space="preserve"><value>A four-clue question must contain exactly four clues.</value></data>
-  <data name="FourClues_UnsupportedMedia" xml:space="preserve"><value>Four-clue questions support only text, images, and audio.</value></data>
   <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 clue</value></data>
   <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>The next clue could not be revealed.</value></data>
   <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Question from “{0}” — {1} points</value></data>

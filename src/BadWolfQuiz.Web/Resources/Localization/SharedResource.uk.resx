@@ -1129,9 +1129,8 @@
   <data name="Label_QuestionType" xml:space="preserve"><value>Тип питання</value></data>
   <data name="QuestionType_Standard" xml:space="preserve"><value>Звичайне питання</value></data>
   <data name="QuestionType_FourClues" xml:space="preserve"><value>Чотири підказки</value></data>
-  <data name="FourClues_EditorHint" xml:space="preserve"><value>Додайте рівно чотири підказки. Кожна може містити текст, зображення або аудіо.</value></data>
+  <data name="FourClues_EditorHint" xml:space="preserve"><value>Додайте рівно чотири підказки. Кожна може містити текст, зображення, аудіо або відео.</value></data>
   <data name="FourClues_ExactlyFourRequired" xml:space="preserve"><value>Питання цього типу повинно містити рівно чотири підказки.</value></data>
-  <data name="FourClues_UnsupportedMedia" xml:space="preserve"><value>Для чотирьох підказок підтримуються лише текст, зображення та аудіо.</value></data>
   <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 підказка</value></data>
   <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>Не вдалося відкрити наступну підказку.</value></data>
   <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Питання з категорії «{0}» — {1} балів</value></data>
