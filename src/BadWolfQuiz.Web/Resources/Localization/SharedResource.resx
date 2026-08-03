@@ -1159,4 +1159,5 @@
   <data name="Button_ExportQuiz" xml:space="preserve"><value>Export</value></data>
   <data name="QuizImport_Success" xml:space="preserve"><value>Quiz imported successfully.</value></data>
   <data name="QuizImport_InvalidFile" xml:space="preserve"><value>The selected file is not a valid or supported BAD WOLF QUIZ package.</value></data>
+  <data name="GameBoard_FinishGame" xml:space="preserve"><value>Finish game</value></data>
 </root>

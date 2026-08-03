@@ -220,6 +220,7 @@ public sealed class GameSessionRegistry
                 }
 
                 var restoredPlayer = game.Session.RestoreRemovedPlayer(removedPlayer.Id);
+                game.MarkPersistenceChanged();
                 var restoredAccessToken = CreatePlayerAccess(game, restoredPlayer);
                 return PlayerJoinResult.Succeeded(
                     game,
@@ -238,6 +239,7 @@ public sealed class GameSessionRegistry
             {
                 player.SetAvatar(avatarId);
             }
+            game.MarkPersistenceChanged();
             var accessToken = CreatePlayerAccess(game, player);
             return PlayerJoinResult.Succeeded(game, player, accessToken);
         }
@@ -257,6 +259,7 @@ public sealed class GameSessionRegistry
             }
 
             game.AllowsNewPlayers = !game.AllowsNewPlayers;
+            game.MarkPersistenceChanged();
             return game.AllowsNewPlayers;
         }
     }
@@ -275,6 +278,7 @@ public sealed class GameSessionRegistry
         lock (game)
         {
             player = game.Session.RemovePlayer(playerId);
+            game.MarkPersistenceChanged();
         }
 
         string[] connectionIds;
@@ -450,6 +454,7 @@ public sealed class GameSessionRegistry
         lock (connection.Access.Game)
         {
             connection.Access.Player.SetAvatar(avatarId);
+            connection.Access.Game.MarkPersistenceChanged();
         }
 
         return new PlayerConnectionResult(
@@ -475,6 +480,7 @@ public sealed class GameSessionRegistry
         lock (connection.Access.Game)
         {
             connection.Access.Player.SetUploadedImage(imageDataUrl);
+            connection.Access.Game.MarkPersistenceChanged();
         }
 
         return new PlayerConnectionResult(
@@ -549,6 +555,7 @@ public sealed class GameSessionRegistry
         lock (game)
         {
             game.Session.UpdateSettings(settings);
+            game.MarkPersistenceChanged();
             return game;
         }
     }
@@ -565,6 +572,7 @@ public sealed class GameSessionRegistry
         lock (game)
         {
             game.Session.Start();
+            game.MarkPersistenceChanged();
             return game;
         }
     }
@@ -581,7 +589,9 @@ public sealed class GameSessionRegistry
         lock (game)
         {
             game.BuzzerRace = null;
-            return game.Session.AdvanceToNextRound();
+            var round = game.Session.AdvanceToNextRound();
+            game.MarkPersistenceChanged();
+            return round;
         }
     }
 
@@ -596,7 +606,9 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.StartFinalQuestion();
+            var finalQuestion = game.Session.StartFinalQuestion();
+            game.MarkPersistenceChanged();
+            return finalQuestion;
         }
     }
 
@@ -621,6 +633,7 @@ public sealed class GameSessionRegistry
         lock (game)
         {
             game.Session.LockFinalWagers();
+            game.MarkPersistenceChanged();
             return game;
         }
     }
@@ -646,6 +659,7 @@ public sealed class GameSessionRegistry
         lock (game)
         {
             game.Session.LockFinalAnswers();
+            game.MarkPersistenceChanged();
             return game;
         }
     }
@@ -664,7 +678,9 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.JudgeFinalAnswer(playerId, isCorrect);
+            var submission = game.Session.JudgeFinalAnswer(playerId, isCorrect);
+            game.MarkPersistenceChanged();
+            return submission;
         }
     }
 
@@ -681,7 +697,9 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.SelectQuestion(sourceQuestionId);
+            var question = game.Session.SelectQuestion(sourceQuestionId);
+            game.MarkPersistenceChanged();
+            return question;
         }
     }
 
@@ -699,9 +717,11 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.SubmitQuestionWager(
+            var question = game.Session.SubmitQuestionWager(
                 sourceQuestionId,
                 amount);
+            game.MarkPersistenceChanged();
+            return question;
         }
     }
 
@@ -718,7 +738,9 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.StartWagerAnswerTimer(sourceQuestionId);
+            var timer = game.Session.StartWagerAnswerTimer(sourceQuestionId);
+            game.MarkPersistenceChanged();
+            return timer;
         }
     }
 
@@ -768,6 +790,7 @@ public sealed class GameSessionRegistry
             if (outcome != QuestionTimerOutcome.None)
             {
                 game.BuzzerRace = null;
+                game.MarkPersistenceChanged();
             }
 
             return new QuestionTimerTickResult(game, outcome);
@@ -789,6 +812,7 @@ public sealed class GameSessionRegistry
         {
             var question = game.Session.ActivateQuestionBuzzer(sourceQuestionId);
             game.BuzzerRace = null;
+            game.MarkPersistenceChanged();
             return question;
         }
     }
@@ -803,7 +827,9 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.RevealNextClue(sourceQuestionId);
+            var question = game.Session.RevealNextClue(sourceQuestionId);
+            game.MarkPersistenceChanged();
+            return question;
         }
     }
 
@@ -851,6 +877,7 @@ public sealed class GameSessionRegistry
                     player.Id,
                     player.Name,
                     []);
+                game.MarkPersistenceChanged();
 
                 return new BuzzerClaimResult(game, question, player, true);
             }
@@ -905,6 +932,7 @@ public sealed class GameSessionRegistry
                 playerId,
                 isCorrect);
             game.BuzzerRace = null;
+            game.MarkPersistenceChanged();
             return attempt;
         }
     }
@@ -925,11 +953,13 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.AddQuestionAnswerHistoryEntry(
+            var attempt = game.Session.AddQuestionAnswerHistoryEntry(
                 sourceQuestionId,
                 playerId,
                 isCorrect,
                 value);
+            game.MarkPersistenceChanged();
+            return attempt;
         }
     }
 
@@ -950,12 +980,14 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.UpdateQuestionAnswerHistoryEntry(
+            var attempt = game.Session.UpdateQuestionAnswerHistoryEntry(
                 sourceQuestionId,
                 attemptId,
                 playerId,
                 isCorrect,
                 value);
+            game.MarkPersistenceChanged();
+            return attempt;
         }
     }
 
@@ -973,9 +1005,11 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.RemoveQuestionAnswerHistoryEntry(
+            var attempt = game.Session.RemoveQuestionAnswerHistoryEntry(
                 sourceQuestionId,
                 attemptId);
+            game.MarkPersistenceChanged();
+            return attempt;
         }
     }
 
@@ -995,6 +1029,7 @@ public sealed class GameSessionRegistry
             var question = game.Session.ResolveQuestionWithoutCorrectAnswer(
                 sourceQuestionId);
             game.BuzzerRace = null;
+            game.MarkPersistenceChanged();
             return question;
         }
     }
@@ -1013,7 +1048,9 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.AdjustPlayerScore(playerId, points);
+            var player = game.Session.AdjustPlayerScore(playerId, points);
+            game.MarkPersistenceChanged();
+            return player;
         }
     }
 
@@ -1029,7 +1066,9 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.CloseQuestionAnswer(sourceQuestionId);
+            var question = game.Session.CloseQuestionAnswer(sourceQuestionId);
+            game.MarkPersistenceChanged();
+            return question;
         }
     }
 
@@ -1046,7 +1085,9 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.SetActivePlayer(playerId);
+            var player = game.Session.SetActivePlayer(playerId);
+            game.MarkPersistenceChanged();
+            return player;
         }
     }
 
@@ -1061,7 +1102,9 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            return game.Session.SelectRandomActivePlayer();
+            var player = game.Session.SelectRandomActivePlayer();
+            game.MarkPersistenceChanged();
+            return player;
         }
     }
 
@@ -1174,6 +1217,7 @@ public sealed class GameSessionRegistry
             var submission = action(
                 connection.Access.Game,
                 connection.Access.Player);
+            connection.Access.Game.MarkPersistenceChanged();
 
             return new FinalPlayerActionResult(
                 connection.Access.Game,

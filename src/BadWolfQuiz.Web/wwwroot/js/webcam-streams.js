@@ -247,7 +247,9 @@ window.BadWolfWebcam = (() => {
                 `[data-player-id="${CSS.escape(playerId)}"] [data-player-webcam]`);
             const stream = streams.get(playerId);
             if (video && stream) {
-                video.srcObject = stream;
+                if (video.srcObject !== stream) {
+                    video.srcObject = stream;
+                }
                 video.hidden = false;
                 const fallback = video.closest("[data-player-id]")
                     ?.querySelector("[data-player-webcam-fallback]");

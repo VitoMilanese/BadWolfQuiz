@@ -9,6 +9,6 @@ public sealed class JoinUrlBuilder(IConfiguration configuration)
             ? $"{request.Scheme}://{request.Host}{request.PathBase}"
             : configuredBaseUrl.TrimEnd('/');
 
-        return $"{baseUrl}/Join/{Uri.EscapeDataString(publicCode)}";
+        return $"{baseUrl}/Join/{Uri.EscapeDataString(publicCode)}/";
     }
 }

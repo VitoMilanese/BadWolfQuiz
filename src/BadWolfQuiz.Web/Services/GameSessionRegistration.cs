@@ -4,6 +4,8 @@ namespace BadWolfQuiz.Web.Services;
 
 public sealed class GameSessionRegistration
 {
+    private long _persistenceRevision;
+
     public GameSessionRegistration(
         string publicCode,
         GameSession session,
@@ -33,6 +35,11 @@ public sealed class GameSessionRegistration
     internal HashSet<GamePlayerId> UnblockedPlayerIdsAwaitingReconnect { get; } = [];
 
     public bool AllowsNewPlayers { get; internal set; } = true;
+
+    public long PersistenceRevision => Interlocked.Read(ref _persistenceRevision);
+
+    internal void MarkPersistenceChanged() =>
+        Interlocked.Increment(ref _persistenceRevision);
 
     public BuzzerRaceSnapshot? BuzzerRace { get; internal set; }
 }

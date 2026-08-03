@@ -18,8 +18,10 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
     };
 
     public async Task<GameSessionSettings> LoadAsync(
+        string hostId,
         CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(hostId);
         await _sync.WaitAsync(cancellationToken);
 
         try
@@ -33,9 +35,23 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             using var document = await JsonDocument.ParseAsync(
                 stream,
                 cancellationToken: cancellationToken);
-            var settings = document.RootElement.Deserialize<StoredGameSettings>(
-                _jsonOptions)
-                ?? StoredGameSettings.From(GameSessionSettings.Default);
+            var root = document.RootElement;
+            StoredGameSettings settings;
+            if (root.TryGetProperty(nameof(StoredSettingsFile.Hosts), out _))
+            {
+                var file = root.Deserialize<StoredSettingsFile>(_jsonOptions)
+                    ?? new StoredSettingsFile();
+                settings = file.Hosts.GetValueOrDefault(hostId)
+                    ?? file.LegacyDefault
+                    ?? StoredGameSettings.From(GameSessionSettings.Default);
+            }
+            else
+            {
+                // Files written before per-host settings remain the initial
+                // default for hosts that have not saved their own settings yet.
+                settings = root.Deserialize<StoredGameSettings>(_jsonOptions)
+                    ?? StoredGameSettings.From(GameSessionSettings.Default);
+            }
 
             return settings.ToRuntimeSettings();
         }
@@ -50,9 +66,11 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
     }
 
     public async Task SaveAsync(
+        string hostId,
         GameSessionSettings settings,
         CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(hostId);
         ArgumentNullException.ThrowIfNull(settings);
         await _sync.WaitAsync(cancellationToken);
 
@@ -61,11 +79,14 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
             Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
             var temporaryPath = _path + ".tmp";
 
+            var file = await ReadFileForUpdateAsync(cancellationToken);
+            file.Hosts[hostId] = StoredGameSettings.From(settings);
+
             await using (var stream = File.Create(temporaryPath))
             {
                 await JsonSerializer.SerializeAsync(
                     stream,
-                    StoredGameSettings.From(settings),
+                    file,
                     _jsonOptions,
                     cancellationToken);
             }
@@ -76,6 +97,46 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
         {
             _sync.Release();
         }
+    }
+
+    private async Task<StoredSettingsFile> ReadFileForUpdateAsync(
+        CancellationToken cancellationToken)
+    {
+        if (!File.Exists(_path))
+        {
+            return new StoredSettingsFile();
+        }
+
+        try
+        {
+            await using var stream = File.OpenRead(_path);
+            using var document = await JsonDocument.ParseAsync(
+                stream,
+                cancellationToken: cancellationToken);
+            var root = document.RootElement;
+            if (root.TryGetProperty(nameof(StoredSettingsFile.Hosts), out _))
+            {
+                return root.Deserialize<StoredSettingsFile>(_jsonOptions)
+                    ?? new StoredSettingsFile();
+            }
+
+            return new StoredSettingsFile
+            {
+                LegacyDefault = root.Deserialize<StoredGameSettings>(_jsonOptions)
+            };
+        }
+        catch (JsonException)
+        {
+            return new StoredSettingsFile();
+        }
+    }
+
+    private sealed class StoredSettingsFile
+    {
+        public Dictionary<string, StoredGameSettings> Hosts { get; set; } =
+            new(StringComparer.Ordinal);
+
+        public StoredGameSettings? LegacyDefault { get; set; }
     }
 
     private sealed class StoredGameSettings

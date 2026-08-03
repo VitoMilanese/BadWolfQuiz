@@ -19,5 +19,5 @@
         <span asp-validation-for="Input.ConfirmPassword"></span>
         <button class="button button-primary" type="submit">@Localizer["Account_Register"]</button>
     </form>
-    <p>@Localizer["Account_AlreadyRegistered"] <a asp-page="Login" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Account_SignIn"]</a>.</p>
+    <p>@Localizer["Account_AlreadyRegistered"] <a class="auth-link" asp-page="Login" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Account_SignIn"]</a>.</p>
 </section>

@@ -16,14 +16,14 @@ public sealed class ActiveGameStore
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        WriteIndented = true,
         Converters = { new QuizSnapshotJsonConverter() }
     };
 
     private readonly string _path;
     private readonly SemaphoreSlim _gate = new(1, 1);
     private IReadOnlyList<ActiveGameSnapshot> _snapshots;
-    private string _serialized = "[]";
+
+    internal int WriteCount { get; private set; }
 
     public ActiveGameStore(IWebHostEnvironment environment)
     {
@@ -49,21 +49,27 @@ public sealed class ActiveGameStore
         await _gate.WaitAsync(CancellationToken.None);
         try
         {
-            var serialized = JsonSerializer.Serialize(snapshots, JsonOptions);
-            if (string.Equals(serialized, _serialized, StringComparison.Ordinal))
-            {
-                return;
-            }
-
             Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
             var temporaryPath = _path + ".tmp";
-            await File.WriteAllTextAsync(
+            await using (var stream = new FileStream(
                 temporaryPath,
-                serialized,
-                CancellationToken.None);
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 64 * 1024,
+                useAsync: true))
+            {
+                await JsonSerializer.SerializeAsync(
+                    stream,
+                    snapshots,
+                    JsonOptions,
+                    CancellationToken.None);
+                await stream.FlushAsync(CancellationToken.None);
+            }
+
             await ReplaceFileWithRetryAsync(temporaryPath);
             _snapshots = snapshots;
-            _serialized = serialized;
+            WriteCount++;
         }
         finally
         {
@@ -105,9 +111,9 @@ public sealed class ActiveGameStore
 
         try
         {
-            _serialized = File.ReadAllText(_path);
+            using var stream = File.OpenRead(_path);
             return JsonSerializer.Deserialize<ActiveGameSnapshot[]>(
-                _serialized,
+                stream,
                 JsonOptions) ?? [];
         }
         catch (Exception exception) when (

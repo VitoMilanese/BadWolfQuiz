@@ -100,17 +100,6 @@
         }
 
         <div class="stack-form">
-            <div class="game-code-panel">
-                <span>@Localizer["Label_GameCode"]</span>
-                <img class="join-qr-code lobby-join-qr"
-                     src="@Url.Page("/Admin/Games/Lobby", "JoinQrCode", new { id = Model.Game.Session.Id.Value })"
-                     width="280"
-                     height="280"
-                     alt="@Localizer["GameBoard_JoinQrAlt"]" />
-                <strong>@Model.Game.PublicCode</strong>
-                <small>@Localizer["Message_WaitingPlayers"]</small>
-            </div>
-
             <p>
                 <strong>@Localizer["GameLobby_StatusLabel"]:</strong>
                 <span id="game-status">@Localizer["GameLobby_StatusLobby"]</span>
@@ -208,15 +197,11 @@
             </details>
             <partial name="_AvatarPicker" />
 
-            <div class="form-actions">
-                <button class="button button-primary"
-                        type="submit"
-                        form="start-game-form"
-                        formaction="@Url.Page(
-                            "/Admin/Games/Lobby",
-                            "Start",
-                            new { id = Model.Game.Session.Id.Value })">
-                    @Localizer["GameLobby_StartGame"]
+            <div class="lobby-secondary-actions">
+                <button class="button button-secondary"
+                        type="button"
+                        data-open-join-code>
+                    @Localizer["GameBoard_ShowJoinCode"]
                 </button>
 
                 <form method="post" asp-page-handler="RandomActivePlayer">
@@ -224,7 +209,23 @@
                         @Localizer["GameBoard_RandomActivePlayer"]
                     </button>
                 </form>
+
+                <button class="button button-secondary"
+                        type="button"
+                        data-open-blocked-players>
+                    @Localizer["GameBoard_ManageBlockedPlayers"]
+                </button>
             </div>
+
+            <button class="button button-primary lobby-start-button"
+                    type="submit"
+                    form="start-game-form"
+                    formaction="@Url.Page(
+                        "/Admin/Games/Lobby",
+                        "Start",
+                        new { id = Model.Game.Session.Id.Value })">
+                @Localizer["GameLobby_StartGame"]
+            </button>
 
             <p>
                 <strong>@Localizer["GameLobby_PlayerCount"]:</strong>
@@ -763,6 +764,12 @@
                     else
                     {
                         <p class="round-summary-finished">@Localizer["GameBoard_AllRoundsComplete"]</p>
+                        <div class="form-actions final-finish-actions">
+                            <a class="button button-primary"
+                               asp-page="/Admin/Quizzes/Index">
+                                @Localizer["GameBoard_FinishGame"]
+                            </a>
+                        </div>
                     }
                 }
             </section>
@@ -848,7 +855,9 @@
 
         <form class="player-join-lock-form"
               method="post"
-              asp-page-handler="TogglePlayerJoining">
+              asp-page-handler="TogglePlayerJoining"
+              data-open-label="@Localizer["GameBoard_OpenPlayerJoining"]"
+              data-close-label="@Localizer["GameBoard_ClosePlayerJoining"]">
             <button class="player-join-lock @(Model.Game.AllowsNewPlayers ? "is-open" : "is-closed")"
                     type="submit"
                     title="@(Model.Game.AllowsNewPlayers
@@ -974,27 +983,6 @@
             }
         </ul>
 
-        <dialog id="join-code-dialog"
-                class="join-code-dialog"
-                aria-labelledby="join-code-title">
-            <div class="join-code-card">
-                <button class="join-code-close"
-                        type="button"
-                        data-close-join-code
-                        aria-label="@Localizer["Button_Close"]">
-                    ×
-                </button>
-
-                <p class="eyebrow">@Localizer["GameBoard_JoinOverlayHint"]</p>
-                <h2 id="join-code-title">@Localizer["GameBoard_JoinOverlayTitle"]</h2>
-                <img class="join-qr-code"
-                     src="@Url.Page("/Admin/Games/Lobby", "JoinQrCode", new { id = Model.Game.Session.Id.Value })"
-                     width="320"
-                     height="320"
-                     alt="@Localizer["GameBoard_JoinQrAlt"]" />
-                <strong class="join-code-value">@Model.Game.PublicCode</strong>
-            </div>
-        </dialog>
     </section>
 }
 
@@ -1197,6 +1185,12 @@
                         </li>
                     }
                 </ol>
+                <div class="form-actions final-finish-actions">
+                    <a class="button button-primary"
+                       asp-page="/Admin/Quizzes/Index">
+                        @Localizer["GameBoard_FinishGame"]
+                    </a>
+                </div>
             }
         </div>
 
@@ -1293,6 +1287,28 @@
 <form id="remove-player-form" method="post" asp-page-handler="RemovePlayer">
     <input id="remove-player-id" name="playerId" type="hidden" />
 </form>
+
+<dialog id="join-code-dialog"
+        class="join-code-dialog"
+        aria-labelledby="join-code-title">
+    <div class="join-code-card">
+        <button class="join-code-close"
+                type="button"
+                data-close-join-code
+                aria-label="@Localizer["Button_Close"]">
+            ×
+        </button>
+
+        <p class="eyebrow">@Localizer["GameBoard_JoinOverlayHint"]</p>
+        <h2 id="join-code-title">@Localizer["GameBoard_JoinOverlayTitle"]</h2>
+        <img class="join-qr-code"
+             src="@Url.Page("/Admin/Games/Lobby", "JoinQrCode", new { id = Model.Game.Session.Id.Value })"
+             width="320"
+             height="320"
+             alt="@Localizer["GameBoard_JoinQrAlt"]" />
+        <strong class="join-code-value">@Model.Game.PublicCode</strong>
+    </div>
+</dialog>
 
 <dialog id="remove-player-dialog"
         class="app-dialog"
@@ -1478,10 +1494,12 @@
 
         (() => {
             const dialog = document.getElementById("join-code-dialog");
-            const openButton = document.querySelector("[data-open-join-code]");
+            const openButtons = document.querySelectorAll("[data-open-join-code]");
             const closeButton = document.querySelector("[data-close-join-code]");
 
-            openButton?.addEventListener("click", () => dialog?.showModal());
+            for (const openButton of openButtons) {
+                openButton.addEventListener("click", () => dialog?.showModal());
+            }
             closeButton?.addEventListener("click", () => dialog?.close());
 
             dialog?.addEventListener("click", event => {
@@ -2107,6 +2125,76 @@
             const timerValue = document.getElementById("game-timer-value");
             const timerPause = document.querySelector(".game-timer-pause");
             const timerResume = document.querySelector(".game-timer-resume");
+            const playerJoinLockForm = document.querySelector(
+                ".player-join-lock-form");
+            const playerJoinLockButton = playerJoinLockForm?.querySelector(
+                ".player-join-lock");
+
+            const submitGameControl = async form => {
+                const button = form.querySelector("button[type='submit']");
+                button?.setAttribute("disabled", "disabled");
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        body: new FormData(form),
+                        headers: {
+                            "Accept": "application/json",
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    });
+                    const contentType = response.headers.get("content-type") ?? "";
+                    const result = contentType.includes("application/json")
+                        ? await response.json()
+                        : null;
+
+                    if (!response.ok || !result?.success) {
+                        throw new Error(result?.error ?? response.statusText);
+                    }
+
+                    return result;
+                } finally {
+                    button?.removeAttribute("disabled");
+                }
+            };
+
+            const handleGameControlError = error => {
+                console.error(error);
+                window.alert(error.message);
+            };
+
+            for (const timerForm of [timerPause, timerResume]) {
+                timerForm?.addEventListener("submit", async event => {
+                    event.preventDefault();
+
+                    try {
+                        await submitGameControl(timerForm);
+                    } catch (error) {
+                        handleGameControlError(error);
+                    }
+                });
+            }
+
+            playerJoinLockForm?.addEventListener("submit", async event => {
+                event.preventDefault();
+
+                try {
+                    const result = await submitGameControl(playerJoinLockForm);
+                    const isOpen = result.allowsNewPlayers;
+                    const label = isOpen
+                        ? playerJoinLockForm.dataset.closeLabel
+                        : playerJoinLockForm.dataset.openLabel;
+
+                    playerJoinLockButton.classList.toggle("is-open", isOpen);
+                    playerJoinLockButton.classList.toggle("is-closed", !isOpen);
+                    playerJoinLockButton.title = label;
+                    playerJoinLockButton.setAttribute("aria-label", label);
+                    playerJoinLockButton.querySelector("span").textContent =
+                        isOpen ? "🔓" : "🔒";
+                } catch (error) {
+                    handleGameControlError(error);
+                }
+            });
 
             const refreshScrollingNames = () => {
                 boardPlayerList?.querySelectorAll(".board-player-name").forEach(name => {
@@ -2215,10 +2303,32 @@
                 }
             });
 
+            let renderedPlayersFingerprint = null;
+            const playerFingerprint = players => JSON.stringify(players.map(player => ({
+                id: player.id,
+                name: player.name,
+                score: player.score,
+                presence: player.presence,
+                isActive: player.isActive,
+                webcamEnabled: player.webcamEnabled,
+                avatarId: player.avatarId,
+                usesUploadedImage: player.usesUploadedImage,
+                uploadedImageVersion: player.uploadedImageDataUrl
+                    ? `${player.uploadedImageDataUrl.length}:${player.uploadedImageDataUrl.slice(-32)}`
+                    : null
+            })));
+
             connection.on("PlayersChanged", update => {
                 if (playerCount) {
                     playerCount.textContent = update.playerCount.toString();
                 }
+
+                const fingerprint = playerFingerprint(update.players);
+                if (fingerprint === renderedPlayersFingerprint) {
+                    webcam.refresh(update.players);
+                    return;
+                }
+                renderedPlayersFingerprint = fingerprint;
 
                 renderBoardPlayers(update.players);
 

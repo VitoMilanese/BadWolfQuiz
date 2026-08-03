@@ -8,6 +8,7 @@ namespace BadWolfQuiz.Web.Tests;
 
 public sealed class GameSettingsStoreTests : IDisposable
 {
+    private const string HostId = "host-a";
     private readonly string _contentRoot = Path.Combine(
         Path.GetTempPath(),
         "BadWolfQuiz.Tests",
@@ -24,8 +25,8 @@ public sealed class GameSettingsStoreTests : IDisposable
             GamePhaseStartMode.Automatic,
             GamePhaseStartMode.Manual);
 
-        await store.SaveAsync(expected);
-        var actual = await store.LoadAsync();
+        await store.SaveAsync(HostId, expected);
+        var actual = await store.LoadAsync(HostId);
 
         Assert.Equal(expected, actual);
     }
@@ -42,8 +43,8 @@ public sealed class GameSettingsStoreTests : IDisposable
             GamePhaseStartMode.Manual,
             allowNegativeScoreFinalPlayers: false);
 
-        await store.SaveAsync(expected);
-        var actual = await store.LoadAsync();
+        await store.SaveAsync(HostId, expected);
+        var actual = await store.LoadAsync(HostId);
 
         Assert.False(actual.AllowNegativeScoreFinalPlayers);
         Assert.Equal(expected, actual);
@@ -80,8 +81,8 @@ public sealed class GameSettingsStoreTests : IDisposable
             siteThemeId: "custom",
             customThemeColors: expectedTheme);
 
-        await store.SaveAsync(expected);
-        var actual = await store.LoadAsync();
+        await store.SaveAsync(HostId, expected);
+        var actual = await store.LoadAsync(HostId);
 
         Assert.Equal("Host", actual.HostName);
         Assert.Equal(HostVisualSource.Image, actual.HostVisualSource);
@@ -116,9 +117,34 @@ public sealed class GameSettingsStoreTests : IDisposable
         var store = new GameSettingsStore(
             new TestWebHostEnvironment(_contentRoot));
 
-        var settings = await store.LoadAsync();
+        var settings = await store.LoadAsync(HostId);
 
         Assert.Equal(GameSessionSettings.Default, settings);
+    }
+
+    [Fact]
+    public async Task Settings_are_isolated_between_hosts()
+    {
+        var store = new GameSettingsStore(
+            new TestWebHostEnvironment(_contentRoot));
+        var first = new GameSessionSettings(
+            TimeSpan.FromSeconds(17),
+            TimeSpan.FromSeconds(10),
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Automatic,
+            hostName: "First host");
+        var second = new GameSessionSettings(
+            TimeSpan.FromSeconds(43),
+            TimeSpan.FromSeconds(10),
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Automatic,
+            hostName: "Second host");
+
+        await store.SaveAsync("host-one", first);
+        await store.SaveAsync("host-two", second);
+
+        Assert.Equal(first, await store.LoadAsync("host-one"));
+        Assert.Equal(second, await store.LoadAsync("host-two"));
     }
 
     public void Dispose()
