@@ -104,11 +104,13 @@ Currently implemented:
   the board, players, scores, visuals, and answer history
 - Lobby and join code
 - Join and reconnect flows with host approval
+- Host-managed blocked-player list with explicit unblocking and identity-preserving rejoin
 - Real-time player presence and score updates
 - Active player selection and automatic lowest-score selection for later rounds
 - Random wager questions, including rounds configured with zero wager questions
 - Wager keypad and validation
 - Player buzzer with server-authoritative winner selection
+- Compact player-page navigation and mobile screen-wake protection while the buzzer page is open
 - Near-simultaneous buzzer results with millisecond differences
 - Synchronized buzzer and answer countdown timers
 - Persistent global game defaults and editable per-game settings snapshots

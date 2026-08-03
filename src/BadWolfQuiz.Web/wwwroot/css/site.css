@@ -1606,6 +1606,25 @@ textarea {
     margin-top: 24px;
 }
 
+.blocked-player-list {
+    display: grid;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.blocked-player-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 0.7rem;
+    background: var(--panel);
+}
+
 .dialog-target {
     padding: 14px 16px;
     border-left: 3px solid var(--red-bright);
@@ -2455,6 +2474,24 @@ textarea {
     border-top: 0;
 }
 
+.player-menu-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.player-menu-links .button,
+.player-menu-links form,
+.player-menu-links form .button {
+    width: 100%;
+}
+
+.player-menu-links + .player-language-settings {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+}
+
 .player-language-settings {
     display: grid;
     gap: 7px;
@@ -2685,8 +2722,9 @@ body:has(.player-lobby) > .page-shell {
 
 .join-code-dialog {
     width: min(760px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
     padding: 0;
-    overflow: visible;
+    overflow: auto;
     color: var(--text);
     background: transparent;
     border: 0;
@@ -2700,9 +2738,12 @@ body:has(.player-lobby) > .page-shell {
 .join-code-card {
     position: relative;
     display: grid;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     justify-items: center;
     gap: 18px;
-    padding: clamp(32px, 7vw, 72px);
+    padding: clamp(28px, 6vw, 64px);
     border: 2px solid var(--gold);
     border-radius: 20px;
     background: radial-gradient(circle at top, color-mix(in srgb, var(--red) 26%, var(--panel-2)), var(--panel-gradient-end) 65%);
@@ -2711,8 +2752,10 @@ body:has(.player-lobby) > .page-shell {
 }
 
 .join-code-card h2 {
+    max-width: 100%;
     margin: 0;
-    font-size: clamp(1.8rem, 5vw, 3.2rem);
+    font-size: clamp(1.65rem, 5vw, 3.2rem);
+    overflow-wrap: anywhere;
 }
 
 .join-code-card .eyebrow {
@@ -2720,16 +2763,21 @@ body:has(.player-lobby) > .page-shell {
 }
 
 .join-code-value {
+    display: block;
+    max-width: 100%;
     color: var(--gold);
-    font-size: clamp(3.8rem, 14vw, 8rem);
-    letter-spacing: 0.16em;
+    font-size: clamp(2.4rem, 11vw, 6rem);
+    letter-spacing: 0.1em;
     line-height: 0.95;
-    text-indent: 0.16em;
+    text-indent: 0.1em;
+    white-space: nowrap;
 }
 
 .join-qr-code {
     width: min(320px, 70vw);
+    max-width: 100%;
     height: auto;
+    box-sizing: border-box;
     padding: 12px;
     border-radius: 12px;
     background: #fff;

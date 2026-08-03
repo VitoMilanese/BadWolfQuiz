@@ -86,6 +86,12 @@ public sealed class IndexModel(
                     string.Empty,
                     localizer["Message_GameStarted"]);
                 break;
+
+            case PlayerJoinStatus.PlayerBlocked:
+                ModelState.AddModelError(
+                    string.Empty,
+                    localizer["Error_PlayerBlocked"]);
+                break;
         }
 
         return Page();

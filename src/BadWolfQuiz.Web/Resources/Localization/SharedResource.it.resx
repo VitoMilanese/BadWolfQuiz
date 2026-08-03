@@ -1009,6 +1009,12 @@
   <data name="GameBoard_RemovePlayer" xml:space="preserve"><value>Espelli giocatore</value></data>
   <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve"><value>Espellere {0} dalla partita?</value></data>
   <data name="GameBoard_RemovePlayerRejected" xml:space="preserve"><value>Questo giocatore non può essere espulso nella fase attuale.</value></data>
+  <data name="GameBoard_ManageBlockedPlayers" xml:space="preserve"><value>Giocatori bloccati</value></data>
+  <data name="GameBoard_BlockedPlayersTitle" xml:space="preserve"><value>Giocatori bloccati</value></data>
+  <data name="GameBoard_NoBlockedPlayers" xml:space="preserve"><value>Al momento non ci sono giocatori bloccati.</value></data>
+  <data name="GameBoard_UnblockPlayer" xml:space="preserve"><value>Sblocca</value></data>
+  <data name="GameBoard_UnblockPlayerRejected" xml:space="preserve"><value>Non è stato possibile sbloccare questo giocatore.</value></data>
+  <data name="Error_PlayerBlocked" xml:space="preserve"><value>Sei stato espulso da questa partita. Chiedi all'host di sbloccarti prima di rientrare.</value></data>
   <data name="PlayerGame_RemovedFromGame" xml:space="preserve"><value>L’host ti ha espulso dalla partita.</value></data>
   <data name="PlayerGame_RemovedFromGameTitle" xml:space="preserve"><value>Sei stato espulso dalla partita</value></data>
   <data name="HostCard_Display" xml:space="preserve"><value>Mostra la scheda dell’host durante la partita</value></data>

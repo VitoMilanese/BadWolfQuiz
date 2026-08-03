@@ -22,5 +22,6 @@ public enum PlayerJoinStatus
     Success = 1,
     GameNotFound = 2,
     NameAlreadyUsed = 3,
-    GameAlreadyStarted = 4
+    GameAlreadyStarted = 4,
+    PlayerBlocked = 5
 }

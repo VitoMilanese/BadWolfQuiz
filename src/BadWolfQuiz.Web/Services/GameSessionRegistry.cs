@@ -206,6 +206,27 @@ public sealed class GameSessionRegistry
                 return PlayerJoinResult.Failed(PlayerJoinStatus.NameAlreadyUsed);
             }
 
+            var removedPlayer = game.Session.RemovedPlayers.FirstOrDefault(player =>
+                string.Equals(
+                    player.Name,
+                    playerName.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+
+            if (removedPlayer is not null)
+            {
+                if (!game.UnblockedPlayerIdsAwaitingReconnect.Remove(removedPlayer.Id))
+                {
+                    return PlayerJoinResult.Failed(PlayerJoinStatus.PlayerBlocked);
+                }
+
+                var restoredPlayer = game.Session.RestoreRemovedPlayer(removedPlayer.Id);
+                var restoredAccessToken = CreatePlayerAccess(game, restoredPlayer);
+                return PlayerJoinResult.Succeeded(
+                    game,
+                    restoredPlayer,
+                    restoredAccessToken);
+            }
+
             if (game.Session.Status != GameSessionStatus.Lobby &&
                 !game.AllowsNewPlayers)
             {
@@ -287,6 +308,40 @@ public sealed class GameSessionRegistry
         }
 
         return new PlayerRemoval(game, player, connectionIds);
+    }
+
+    public bool UnblockPlayer(string publicCode, GamePlayerId playerId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return false;
+        }
+
+        lock (game)
+        {
+            if (game.Session.RemovedPlayers.All(player => player.Id != playerId))
+            {
+                return false;
+            }
+
+            game.UnblockedPlayerIdsAwaitingReconnect.Add(playerId);
+            return true;
+        }
+    }
+
+    public IReadOnlyList<GamePlayer> GetBlockedPlayers(GameSessionRegistration game)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+
+        lock (game)
+        {
+            return game.Session.RemovedPlayers
+                .Where(player =>
+                    !game.UnblockedPlayerIdsAwaitingReconnect.Contains(player.Id))
+                .ToArray();
+        }
     }
 
     public PlayerConnectionResult? ConnectPlayer(

@@ -13,6 +13,7 @@ public sealed class GameSession
     private readonly List<GamePlayer> _removedPlayers = [];
     private readonly Dictionary<GamePlayerId, int> _currentRoundStartScores = [];
     private readonly ReadOnlyCollection<GamePlayer> _readOnlyPlayers;
+    private readonly ReadOnlyCollection<GamePlayer> _readOnlyRemovedPlayers;
     private readonly TimeProvider _timeProvider;
 
     private GameSession(
@@ -29,6 +30,7 @@ public sealed class GameSession
         CreatedAtUtc = timeProvider.GetUtcNow();
         _timeProvider = timeProvider;
         _readOnlyPlayers = _players.AsReadOnly();
+        _readOnlyRemovedPlayers = _removedPlayers.AsReadOnly();
     }
 
     public GameSessionId Id { get; private set; }
@@ -40,6 +42,8 @@ public sealed class GameSession
     public GameSessionStatus Status { get; private set; } = GameSessionStatus.Lobby;
 
     public IReadOnlyList<GamePlayer> Players => _readOnlyPlayers;
+
+    public IReadOnlyList<GamePlayer> RemovedPlayers => _readOnlyRemovedPlayers;
 
     public IReadOnlyList<GamePlayer> AllPlayers => [.. _players, .. _removedPlayers];
 
@@ -235,6 +239,29 @@ public sealed class GameSession
             ActivePlayerId = _players.FirstOrDefault()?.Id;
         }
 
+        return player;
+    }
+
+    public GamePlayer RestoreRemovedPlayer(GamePlayerId playerId)
+    {
+        if (Status is not GameSessionStatus.Lobby and not GameSessionStatus.Running)
+        {
+            throw new GameRuleViolationException(
+                "Players cannot rejoin during or after the final question.");
+        }
+
+        var player = _removedPlayers.SingleOrDefault(player => player.Id == playerId)
+            ?? throw new GameRuleViolationException("The removed player was not found.");
+
+        _removedPlayers.Remove(player);
+        _players.Add(player);
+
+        if (Status == GameSessionStatus.Running)
+        {
+            _currentRoundStartScores[player.Id] = player.Score;
+        }
+
+        ActivePlayerId ??= player.Id;
         return player;
     }
 
