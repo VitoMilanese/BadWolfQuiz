@@ -105,6 +105,12 @@
                 <span id="game-status">@Localizer["GameLobby_StatusLobby"]</span>
             </p>
 
+            <button class="button button-secondary lobby-join-code-button"
+                    type="button"
+                    data-open-join-code>
+                @Localizer["GameBoard_ShowJoinCode"]
+            </button>
+
             <details class="lobby-settings-panel">
                 <summary>@Localizer["GameSettings_LobbyTitle"]</summary>
                 <form id="start-game-form"
@@ -220,11 +226,6 @@
                     @Localizer["GameBoard_ManageBlockedPlayers"]
                 </button>
 
-                <button class="button button-secondary"
-                        type="button"
-                        data-open-join-code>
-                    @Localizer["GameBoard_ShowJoinCode"]
-                </button>
             </div>
 
             <p>
@@ -975,27 +976,6 @@
             }
         </ul>
 
-        <dialog id="join-code-dialog"
-                class="join-code-dialog"
-                aria-labelledby="join-code-title">
-            <div class="join-code-card">
-                <button class="join-code-close"
-                        type="button"
-                        data-close-join-code
-                        aria-label="@Localizer["Button_Close"]">
-                    ×
-                </button>
-
-                <p class="eyebrow">@Localizer["GameBoard_JoinOverlayHint"]</p>
-                <h2 id="join-code-title">@Localizer["GameBoard_JoinOverlayTitle"]</h2>
-                <img class="join-qr-code"
-                     src="@Url.Page("/Admin/Games/Lobby", "JoinQrCode", new { id = Model.Game.Session.Id.Value })"
-                     width="320"
-                     height="320"
-                     alt="@Localizer["GameBoard_JoinQrAlt"]" />
-                <strong class="join-code-value">@Model.Game.PublicCode</strong>
-            </div>
-        </dialog>
     </section>
 }
 
@@ -1294,6 +1274,28 @@
 <form id="remove-player-form" method="post" asp-page-handler="RemovePlayer">
     <input id="remove-player-id" name="playerId" type="hidden" />
 </form>
+
+<dialog id="join-code-dialog"
+        class="join-code-dialog"
+        aria-labelledby="join-code-title">
+    <div class="join-code-card">
+        <button class="join-code-close"
+                type="button"
+                data-close-join-code
+                aria-label="@Localizer["Button_Close"]">
+            ×
+        </button>
+
+        <p class="eyebrow">@Localizer["GameBoard_JoinOverlayHint"]</p>
+        <h2 id="join-code-title">@Localizer["GameBoard_JoinOverlayTitle"]</h2>
+        <img class="join-qr-code"
+             src="@Url.Page("/Admin/Games/Lobby", "JoinQrCode", new { id = Model.Game.Session.Id.Value })"
+             width="320"
+             height="320"
+             alt="@Localizer["GameBoard_JoinQrAlt"]" />
+        <strong class="join-code-value">@Model.Game.PublicCode</strong>
+    </div>
+</dialog>
 
 <dialog id="remove-player-dialog"
         class="app-dialog"

@@ -4418,6 +4418,33 @@ iframe.game-content-video {
 
 /* Game settings */
 
+.lobby-join-code-button {
+    justify-self: start;
+}
+
+.lobby-settings-panel {
+    overflow: hidden;
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel) 88%, var(--gold) 12%);
+}
+
+.lobby-settings-panel > summary {
+    padding: 16px 18px;
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 850;
+    cursor: pointer;
+}
+
+.lobby-settings-panel[open] > summary {
+    border-bottom: 1px solid var(--line);
+}
+
+.lobby-settings-panel > form {
+    padding: 18px;
+}
+
 .settings-description {
     color: var(--muted);
     line-height: 1.55;
