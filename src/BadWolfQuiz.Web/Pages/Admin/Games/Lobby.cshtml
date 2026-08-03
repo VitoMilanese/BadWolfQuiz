@@ -105,12 +105,6 @@
                 <span id="game-status">@Localizer["GameLobby_StatusLobby"]</span>
             </p>
 
-            <button class="button button-secondary lobby-join-code-button"
-                    type="button"
-                    data-open-join-code>
-                @Localizer["GameBoard_ShowJoinCode"]
-            </button>
-
             <details class="lobby-settings-panel">
                 <summary>@Localizer["GameSettings_LobbyTitle"]</summary>
                 <form id="start-game-form"
@@ -203,15 +197,11 @@
             </details>
             <partial name="_AvatarPicker" />
 
-            <div class="form-actions">
-                <button class="button button-primary"
-                        type="submit"
-                        form="start-game-form"
-                        formaction="@Url.Page(
-                            "/Admin/Games/Lobby",
-                            "Start",
-                            new { id = Model.Game.Session.Id.Value })">
-                    @Localizer["GameLobby_StartGame"]
+            <div class="lobby-secondary-actions">
+                <button class="button button-secondary"
+                        type="button"
+                        data-open-join-code>
+                    @Localizer["GameBoard_ShowJoinCode"]
                 </button>
 
                 <form method="post" asp-page-handler="RandomActivePlayer">
@@ -225,8 +215,17 @@
                         data-open-blocked-players>
                     @Localizer["GameBoard_ManageBlockedPlayers"]
                 </button>
-
             </div>
+
+            <button class="button button-primary lobby-start-button"
+                    type="submit"
+                    form="start-game-form"
+                    formaction="@Url.Page(
+                        "/Admin/Games/Lobby",
+                        "Start",
+                        new { id = Model.Game.Session.Id.Value })">
+                @Localizer["GameLobby_StartGame"]
+            </button>
 
             <p>
                 <strong>@Localizer["GameLobby_PlayerCount"]:</strong>
@@ -1178,6 +1177,12 @@
                         </li>
                     }
                 </ol>
+                <div class="form-actions final-finish-actions">
+                    <a class="button button-primary"
+                       asp-page="/Admin/Quizzes/Index">
+                        @Localizer["GameBoard_FinishGame"]
+                    </a>
+                </div>
             }
         </div>
 

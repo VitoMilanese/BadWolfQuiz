@@ -4418,10 +4418,6 @@ iframe.game-content-video {
 
 /* Game settings */
 
-.lobby-join-code-button {
-    justify-self: start;
-}
-
 .lobby-settings-panel {
     overflow: hidden;
     border: 1px solid var(--gold);
@@ -4443,6 +4439,38 @@ iframe.game-content-video {
 
 .lobby-settings-panel > form {
     padding: 18px;
+}
+
+.lobby-secondary-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.lobby-secondary-actions > *,
+.lobby-secondary-actions .button,
+.lobby-start-button {
+    width: 100%;
+}
+
+.lobby-start-button {
+    margin-top: -8px;
+}
+
+.final-finish-actions {
+    justify-content: center;
+    margin-top: 18px;
+}
+
+@media (max-width: 720px) {
+    .lobby-secondary-actions {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .lobby-start-button {
+        margin-top: 0;
+    }
 }
 
 .settings-description {
@@ -4690,6 +4718,19 @@ iframe.game-content-video {
 .auth-card input[type="email"],
 .auth-card input[type="password"] {
     width: 100%;
+}
+
+.auth-card .auth-link {
+    color: var(--gold);
+    font-weight: 850;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.22em;
+}
+
+.auth-card .auth-link:hover,
+.auth-card .auth-link:focus-visible {
+    color: var(--red-bright);
 }
 .four-clue-grid {
     --four-clue-gap: clamp(.5rem, 1vw, 1rem);

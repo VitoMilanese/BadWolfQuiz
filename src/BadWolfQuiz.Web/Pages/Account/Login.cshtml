@@ -17,6 +17,6 @@
         <label class="checkbox-row"><input asp-for="Input.RememberMe" /> @Localizer["Account_RememberMe"]</label>
         <button class="button button-primary" type="submit">@Localizer["Account_SignIn"]</button>
     </form>
-    <p><a asp-page="ForgotPassword">@Localizer["Account_ForgotPassword"]</a></p>
-    <p>@Localizer["Account_NoAccount"] <a asp-page="Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Account_Register"]</a>.</p>
+    <p><a class="auth-link" asp-page="ForgotPassword">@Localizer["Account_ForgotPassword"]</a></p>
+    <p>@Localizer["Account_NoAccount"] <a class="auth-link" asp-page="Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Account_Register"]</a>.</p>
 </section>
