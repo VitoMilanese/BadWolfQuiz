@@ -229,3 +229,6 @@ src/BadWolfQuiz.Web/App_Data/active-games.json
 
 See [Active Game Recovery](docs/features/active-game-recovery.md) for recovery
 behavior and snapshot scope.
+
+For Linux OOM investigation and cgroup commands, see
+[Production OOM Diagnostics](docs/operations/oom-diagnostics.md).

@@ -9,6 +9,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 ## Architecture
 
 - [Runtime model](architecture/runtime-model.md)
+- [Production OOM diagnostics](operations/oom-diagnostics.md)
 
 ## Features
 

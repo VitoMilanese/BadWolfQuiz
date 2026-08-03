@@ -38,6 +38,13 @@ score, and require the normal host approval before becoming active again.
 Saved players may rejoin an active question even when joining is closed to new
 players. New names remain blocked until the host permits them.
 
-Snapshots are written atomically to `App_Data/active-games.json`. The persistence
-worker checks active sessions regularly and avoids rewriting the file when the
-serialized gameplay state has not changed.
+Snapshots are written atomically to `App_Data/active-games.json`. Each registered
+game exposes a persistence revision that changes only when recoverable state is
+mutated. The persistence worker checks these lightweight revisions before it
+captures or serializes a snapshot, so an unchanged media-heavy quiz is not
+serialized every second.
+
+When a revision changes, JSON is streamed directly to the temporary snapshot
+file and atomically moved into place. The store does not build or retain a full
+UTF-16 JSON string. This is important because quiz snapshots contain embedded
+image, audio, and video bytes that JSON represents as Base64.

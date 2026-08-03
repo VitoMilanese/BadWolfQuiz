@@ -9,6 +9,9 @@ public sealed class ActiveGamePersistenceService(
     ILogger<ActiveGamePersistenceService> logger,
     CrashLog crashLog) : BackgroundService
 {
+    private readonly SemaphoreSlim _persistenceGate = new(1, 1);
+    private PersistedGameRevision[]? _lastPersistedRevisions;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         RestoreSavedGames();
@@ -18,7 +21,7 @@ public sealed class ActiveGamePersistenceService(
         {
             try
             {
-                await SaveAsync();
+                await PersistIfChangedAsync();
             }
             catch (Exception exception)
             {
@@ -44,9 +47,9 @@ public sealed class ActiveGamePersistenceService(
     {
         try
         {
-            // The host-provided token may already be canceled. The final atomic
-            // snapshot is small and must be allowed to finish during shutdown.
-            await SaveAsync();
+            // The host-provided token may already be canceled. Allow the final
+            // atomic snapshot to finish during shutdown.
+            await PersistIfChangedAsync();
         }
         catch (Exception exception)
         {
@@ -90,24 +93,47 @@ public sealed class ActiveGamePersistenceService(
         }
     }
 
-    private Task SaveAsync()
+    internal async Task PersistIfChangedAsync()
     {
-        var snapshots = registry.GetAll()
-            .Where(game =>
-                !string.IsNullOrWhiteSpace(game.HostId) &&
-                !IsComplete(game.Session))
-            .GroupBy(game => new
-            {
-                HostId = game.HostId!,
-                game.Session.Quiz.SourceQuizId
-            })
-            .Select(group => group
-                .OrderByDescending(game => game.Session.CreatedAtUtc)
-                .First())
-            .Select(CaptureSnapshot)
-            .ToArray();
+        await _persistenceGate.WaitAsync(CancellationToken.None);
+        try
+        {
+            var games = registry.GetAll()
+                .Where(game =>
+                    !string.IsNullOrWhiteSpace(game.HostId) &&
+                    !IsComplete(game.Session))
+                .GroupBy(game => new
+                {
+                    HostId = game.HostId!,
+                    game.Session.Quiz.SourceQuizId
+                })
+                .Select(group => group
+                    .OrderByDescending(game => game.Session.CreatedAtUtc)
+                    .First())
+                .OrderBy(game => game.Session.Id.Value)
+                .ToArray();
 
-        return store.ReplaceAsync(snapshots);
+            var revisions = games
+                .Select(game => new PersistedGameRevision(
+                    game.Session.Id,
+                    game.PersistenceRevision,
+                    game.AllowsNewPlayers))
+                .ToArray();
+
+            if (_lastPersistedRevisions is not null &&
+                revisions.SequenceEqual(_lastPersistedRevisions))
+            {
+                return;
+            }
+
+            var snapshots = games.Select(CaptureSnapshot).ToArray();
+            await store.ReplaceAsync(snapshots);
+            _lastPersistedRevisions = revisions;
+        }
+        finally
+        {
+            _persistenceGate.Release();
+        }
     }
 
     private static bool IsComplete(GameSession session) =>
@@ -130,4 +156,9 @@ public sealed class ActiveGamePersistenceService(
                 game.Session.CaptureState());
         }
     }
+
+    private sealed record PersistedGameRevision(
+        GameSessionId SessionId,
+        long Revision,
+        bool AllowsNewPlayers);
 }
