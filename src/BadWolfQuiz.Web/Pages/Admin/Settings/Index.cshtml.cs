@@ -9,6 +9,7 @@ namespace BadWolfQuiz.Web.Pages.Admin.Settings;
 public sealed class IndexModel(
     GameSettingsStore settingsStore,
     AvatarCatalog avatarCatalog,
+    CurrentHost currentHost,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty]
@@ -28,7 +29,7 @@ public sealed class IndexModel(
 
     public async Task OnGetAsync(CancellationToken cancellationToken)
     {
-        var settings = await settingsStore.LoadAsync(cancellationToken);
+        var settings = await settingsStore.LoadAsync(currentHost.RequiredId, cancellationToken);
         Input = GameSettingsInput.From(settings);
         HasHostImage = settings.HostImageData is not null;
         HasBrandLogo = settings.BrandLogoData is not null;
@@ -37,7 +38,7 @@ public sealed class IndexModel(
     public async Task<IActionResult> OnGetBrandLogoAsync(
         CancellationToken cancellationToken)
     {
-        var settings = await settingsStore.LoadAsync(cancellationToken);
+        var settings = await settingsStore.LoadAsync(currentHost.RequiredId, cancellationToken);
         Response.Headers.CacheControl = "no-store";
         return settings.BrandLogoData is not null &&
                !string.IsNullOrWhiteSpace(settings.BrandLogoContentType)
@@ -48,7 +49,7 @@ public sealed class IndexModel(
     public async Task<IActionResult> OnGetHostImageAsync(
         CancellationToken cancellationToken)
     {
-        var settings = await settingsStore.LoadAsync(cancellationToken);
+        var settings = await settingsStore.LoadAsync(currentHost.RequiredId, cancellationToken);
         Response.Headers.CacheControl = "no-store";
         return settings.HostImageData is not null &&
                !string.IsNullOrWhiteSpace(settings.HostImageContentType)
@@ -59,7 +60,7 @@ public sealed class IndexModel(
     public async Task<IActionResult> OnPostAsync(
         CancellationToken cancellationToken)
     {
-        var existing = await settingsStore.LoadAsync(cancellationToken);
+        var existing = await settingsStore.LoadAsync(currentHost.RequiredId, cancellationToken);
         var imageData = existing.HostImageData;
         var imageContentType = existing.HostImageContentType;
         HasHostImage = imageData is not null;
@@ -123,6 +124,7 @@ public sealed class IndexModel(
         }
 
         await settingsStore.SaveAsync(
+            currentHost.RequiredId,
             Input.ToRuntimeSettings(
                 imageData,
                 imageContentType,

@@ -15,7 +15,9 @@ public sealed class GameSessionLauncher(
         int quizId,
         CancellationToken cancellationToken = default)
     {
-        var settings = await settingsStore.LoadAsync(cancellationToken);
+        var settings = await settingsStore.LoadAsync(
+            currentHost.RequiredId,
+            cancellationToken);
 
         return await CreateAsync(
             quizId,

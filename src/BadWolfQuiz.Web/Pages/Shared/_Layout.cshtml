@@ -1,6 +1,7 @@
 ﻿@using System.Globalization
 @using BadWolfQuiz.Web.Services
 @inject GameSettingsStore SettingsStore
+@inject CurrentHost CurrentHost
 @inject IConfiguration Configuration
 
 @{
@@ -16,7 +17,9 @@
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
     var discordInviteUrl = Configuration["Discord:InviteUrl"];
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
-    var settings = await SettingsStore.LoadAsync(Context.RequestAborted);
+    var settings = isAuthenticated && CurrentHost.Id is { } hostId
+        ? await SettingsStore.LoadAsync(hostId, Context.RequestAborted)
+        : BadWolfQuiz.Game.Runtime.GameSessionSettings.Default;
     var siteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId);
     var customThemeStyle = siteThemeId == "custom"
         ? SiteThemeCatalog.BuildCssVariables(settings.CustomThemeColors)

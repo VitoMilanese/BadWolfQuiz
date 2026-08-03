@@ -100,17 +100,6 @@
         }
 
         <div class="stack-form">
-            <div class="game-code-panel">
-                <span>@Localizer["Label_GameCode"]</span>
-                <img class="join-qr-code lobby-join-qr"
-                     src="@Url.Page("/Admin/Games/Lobby", "JoinQrCode", new { id = Model.Game.Session.Id.Value })"
-                     width="280"
-                     height="280"
-                     alt="@Localizer["GameBoard_JoinQrAlt"]" />
-                <strong>@Model.Game.PublicCode</strong>
-                <small>@Localizer["Message_WaitingPlayers"]</small>
-            </div>
-
             <p>
                 <strong>@Localizer["GameLobby_StatusLabel"]:</strong>
                 <span id="game-status">@Localizer["GameLobby_StatusLobby"]</span>
@@ -224,6 +213,18 @@
                         @Localizer["GameBoard_RandomActivePlayer"]
                     </button>
                 </form>
+
+                <button class="button button-secondary"
+                        type="button"
+                        data-open-blocked-players>
+                    @Localizer["GameBoard_ManageBlockedPlayers"]
+                </button>
+
+                <button class="button button-secondary"
+                        type="button"
+                        data-open-join-code>
+                    @Localizer["GameBoard_ShowJoinCode"]
+                </button>
             </div>
 
             <p>
@@ -1478,10 +1479,12 @@
 
         (() => {
             const dialog = document.getElementById("join-code-dialog");
-            const openButton = document.querySelector("[data-open-join-code]");
+            const openButtons = document.querySelectorAll("[data-open-join-code]");
             const closeButton = document.querySelector("[data-close-join-code]");
 
-            openButton?.addEventListener("click", () => dialog?.showModal());
+            for (const openButton of openButtons) {
+                openButton.addEventListener("click", () => dialog?.showModal());
+            }
             closeButton?.addEventListener("click", () => dialog?.close());
 
             dialog?.addEventListener("click", event => {
@@ -2215,10 +2218,32 @@
                 }
             });
 
+            let renderedPlayersFingerprint = null;
+            const playerFingerprint = players => JSON.stringify(players.map(player => ({
+                id: player.id,
+                name: player.name,
+                score: player.score,
+                presence: player.presence,
+                isActive: player.isActive,
+                webcamEnabled: player.webcamEnabled,
+                avatarId: player.avatarId,
+                usesUploadedImage: player.usesUploadedImage,
+                uploadedImageVersion: player.uploadedImageDataUrl
+                    ? `${player.uploadedImageDataUrl.length}:${player.uploadedImageDataUrl.slice(-32)}`
+                    : null
+            })));
+
             connection.on("PlayersChanged", update => {
                 if (playerCount) {
                     playerCount.textContent = update.playerCount.toString();
                 }
+
+                const fingerprint = playerFingerprint(update.players);
+                if (fingerprint === renderedPlayersFingerprint) {
+                    webcam.refresh(update.players);
+                    return;
+                }
+                renderedPlayersFingerprint = fingerprint;
 
                 renderBoardPlayers(update.players);
 

@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Http.Features;
 var builder = WebApplication.CreateBuilder(args);
 
 const long maximumImportRequestBodySize = 1100L * 1024 * 1024;
+const long maximumQuestionEditorRequestBodySize = 128L * 1024 * 1024;
 const long maximumMultipartBodySize = 1050L * 1024 * 1024;
 
 builder.Services.Configure<FormOptions>(options =>
@@ -140,14 +141,23 @@ var localizationOptions = app.Services
 app.UseRequestLocalization(localizationOptions);
 app.Use(async (context, next) =>
 {
-    if (HttpMethods.IsPost(context.Request.Method) &&
-        context.Request.Path == "/Admin/Quizzes" &&
-        string.Equals(context.Request.Query["handler"], "Import", StringComparison.OrdinalIgnoreCase))
+    if (HttpMethods.IsPost(context.Request.Method))
     {
         var bodySizeFeature = context.Features.Get<IHttpMaxRequestBodySizeFeature>();
         if (bodySizeFeature is { IsReadOnly: false })
         {
-            bodySizeFeature.MaxRequestBodySize = maximumImportRequestBodySize;
+            if (context.Request.Path == "/Admin/Quizzes" &&
+                string.Equals(context.Request.Query["handler"], "Import", StringComparison.OrdinalIgnoreCase))
+            {
+                bodySizeFeature.MaxRequestBodySize = maximumImportRequestBodySize;
+            }
+            else if (context.Request.Path.StartsWithSegments(
+                "/Admin/Quizzes/QuestionEditor") ||
+                context.Request.Path.StartsWithSegments(
+                    "/Admin/Quizzes/FinalQuestionEditor"))
+            {
+                bodySizeFeature.MaxRequestBodySize = maximumQuestionEditorRequestBodySize;
+            }
         }
     }
 
