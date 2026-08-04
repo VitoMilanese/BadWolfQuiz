@@ -328,8 +328,61 @@
                         ? Localizer["FinalQuestion_YourAnswerCorrect"]
                         : Localizer["FinalQuestion_YourAnswerWrong"])
                 </p>
+
             }
 
+            @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Completed)
+            {
+                <section class="quiz-rating-panel">
+                    <h2>@Localizer["QuizRating_Title"]</h2>
+                    <p>@Localizer["QuizRating_Description"]</p>
+
+                    @if (TempData["RatingSuccess"] is not null)
+                    {
+                        <div class="message message-success" role="status">
+                            @Localizer["QuizRating_Saved"]
+                        </div>
+                    }
+                    @if (TempData["RatingError"] is not null)
+                    {
+                        <div class="message message-error" role="alert">
+                            @Localizer["QuizRating_NotReady"]
+                        </div>
+                    }
+
+                    <form method="post"
+                          asp-page-handler="RateQuiz"
+                          class="quiz-rating-form">
+                        <input name="code" type="hidden" value="@Model.Game.PublicCode" />
+                        <input name="playerId" type="hidden" value="@Model.CurrentPlayer.Id.Value" />
+                        <input name="accessToken" type="hidden" value="@Model.AccessToken" />
+                        <fieldset class="star-rating">
+                            <legend>@Localizer["QuizRating_ScoreLabel"]</legend>
+                            @for (var score = 5; score >= 1; score--)
+                            {
+                                <input id="quiz-rating-@score"
+                                       name="score"
+                                       type="radio"
+                                       value="@score"
+                                       checked="@(Model.ExistingRating == score)" />
+                                <label for="quiz-rating-@score"
+                                       title="@Localizer["QuizRating_Stars", score]">★</label>
+                            }
+                            <input id="quiz-rating-0"
+                                   name="score"
+                                   type="radio"
+                                   value="0"
+                                   checked="@(Model.ExistingRating == 0)" />
+                            <label for="quiz-rating-0" class="zero-rating">
+                                @Localizer["QuizRating_Zero"]
+                            </label>
+                        </fieldset>
+                        <button class="button button-primary" type="submit">
+                            @Localizer["QuizRating_Submit"]
+                        </button>
+                    </form>
+                </section>
+            }
             <div id="final-question-error" class="message message-error" hidden></div>
         </section>
     }

@@ -77,6 +77,8 @@ public sealed class Quiz
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
     public bool IsArchived { get; set; }
+    public bool IsPublic { get; set; }
+    public DateTime? PublishedAtUtc { get; set; }
 
     public ICollection<QuizRound> Rounds { get; set; } = new List<QuizRound>();
     public ICollection<FinalQuestionContentBlock> FinalQuestionBlocks { get; set; } =
@@ -84,7 +86,23 @@ public sealed class Quiz
     public ICollection<FinalAnswerContentBlock> FinalAnswerBlocks { get; set; } =
         new List<FinalAnswerContentBlock>();
     public ICollection<GameSession> Sessions { get; set; } = new List<GameSession>();
+    public ICollection<QuizRating> Ratings { get; set; } = new List<QuizRating>();
     public HostAccount? Host { get; set; }
+}
+
+public sealed class QuizRating
+{
+    public int Id { get; set; }
+    public int QuizId { get; set; }
+    public int GameSessionId { get; set; }
+    [Required, MaxLength(60)]
+    public string PlayerName { get; set; } = string.Empty;
+    [Range(0, 5)]
+    public int Score { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    public Quiz Quiz { get; set; } = null!;
+    public GameSession GameSession { get; set; } = null!;
 }
 
 public sealed class QuizRound

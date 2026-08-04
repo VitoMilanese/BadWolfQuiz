@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BadWolfQuiz.Web.Pages.Player;
 
-public sealed class LobbyModel(GameSessionRegistry sessionRegistry) : PageModel
+public sealed class LobbyModel(
+    GameSessionRegistry sessionRegistry,
+    QuizRatingService quizRatingService) : PageModel
 {
     public GameSessionRegistration Game { get; private set; } = null!;
 
@@ -14,8 +16,13 @@ public sealed class LobbyModel(GameSessionRegistry sessionRegistry) : PageModel
     public IReadOnlyList<GamePlayer> Players { get; private set; } = [];
 
     public string? AccessToken { get; private set; }
+    public int? ExistingRating { get; private set; }
 
-    public IActionResult OnGet(string code, Guid playerId, string? accessToken)
+    public async Task<IActionResult> OnGetAsync(
+        string code,
+        Guid playerId,
+        string? accessToken,
+        CancellationToken cancellationToken)
     {
         var game = sessionRegistry.Find(code);
 
@@ -37,8 +44,36 @@ public sealed class LobbyModel(GameSessionRegistry sessionRegistry) : PageModel
         CurrentPlayer = currentPlayer;
         Players = players;
         AccessToken = accessToken;
+        if (game.Session.Status == GameSessionStatus.Completed)
+        {
+            ExistingRating = await quizRatingService.GetPlayerRatingAsync(
+                code,
+                currentPlayer.Id,
+                cancellationToken);
+        }
         ViewData["GameThemeSettings"] = game.Session.Settings;
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostRateQuizAsync(
+        string code,
+        Guid playerId,
+        string? accessToken,
+        int? score,
+        CancellationToken cancellationToken)
+    {
+        var result = score.HasValue
+            ? await quizRatingService.RateAsync(
+                code,
+                new GamePlayerId(playerId),
+                score.Value,
+                cancellationToken)
+            : QuizRatingResult.InvalidScore;
+
+        TempData[result == QuizRatingResult.Saved
+            ? "RatingSuccess"
+            : "RatingError"] = result.ToString();
+        return RedirectToPage(new { code, playerId, accessToken });
     }
 
     public IActionResult OnGetFinalContentBlock(

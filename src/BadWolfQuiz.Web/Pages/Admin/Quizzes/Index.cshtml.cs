@@ -21,6 +21,8 @@ public sealed class IndexModel(
     public IReadOnlyList<Quiz> Quizzes { get; private set; } = [];
     public IReadOnlySet<int> ResumableQuizIds { get; private set; } =
         new HashSet<int>();
+    public IReadOnlyDictionary<int, QuizRatingSummary> Ratings { get; private set; } =
+        new Dictionary<int, QuizRatingSummary>();
 
     [BindProperty]
     public IFormFile? ImportFile { get; set; }
@@ -149,6 +151,29 @@ public sealed class IndexModel(
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPostSetPublicationAsync(
+        int quizId,
+        bool isPublic,
+        CancellationToken cancellationToken)
+    {
+        var quiz = await db.Quizzes.SingleOrDefaultAsync(
+            item => item.Id == quizId && !item.IsArchived,
+            cancellationToken);
+        if (quiz is null)
+        {
+            return NotFound();
+        }
+
+        quiz.IsPublic = isPublic;
+        quiz.PublishedAtUtc = isPublic ? DateTime.UtcNow : null;
+        quiz.UpdatedAtUtc = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+
+        TempData["SuccessMessage"] = localizer[
+            isPublic ? "QuizPublication_Published" : "QuizPublication_Unpublished"].Value;
+        return RedirectToPage();
+    }
+
     public async Task<IActionResult> OnGetExportAsync(int quizId, CancellationToken cancellationToken)
     {
         var package = await quizPackageService.ExportAsync(quizId, cancellationToken);
@@ -202,9 +227,25 @@ public sealed class IndexModel(
             .Where(x => !x.IsArchived)
             .OrderByDescending(x => x.UpdatedAtUtc)
             .ToListAsync();
+        var quizIds = Quizzes.Select(quiz => quiz.Id).ToArray();
+        Ratings = await db.QuizRatings
+            .AsNoTracking()
+            .Where(rating => quizIds.Contains(rating.QuizId))
+            .GroupBy(rating => rating.QuizId)
+            .Select(group => new
+            {
+                QuizId = group.Key,
+                Average = group.Average(rating => rating.Score),
+                Count = group.Count()
+            })
+            .ToDictionaryAsync(
+                item => item.QuizId,
+                item => new QuizRatingSummary(item.Average, item.Count));
         ResumableQuizIds = activeGameStore.GetAll()
             .Where(snapshot => snapshot.HostId == currentHost.RequiredId)
             .Select(snapshot => snapshot.Quiz.SourceQuizId)
             .ToHashSet();
     }
 }
+
+public sealed record QuizRatingSummary(double Average, int Count);

@@ -44,6 +44,19 @@
             }
 
             <small>@Localizer["Quiz_RoundCount", quiz.Rounds.Count]</small>
+            @if (Model.Ratings.TryGetValue(quiz.Id, out var rating))
+            {
+                <div class="quiz-rating-summary"
+                     aria-label="@Localizer["QuizRating_AccessibleSummary", rating.Average, rating.Count]">
+                    <span class="quiz-rating-stars" aria-hidden="true">★</span>
+                    <strong>@rating.Average.ToString("0.0")</strong>
+                    <span>@Localizer["QuizRating_Count", rating.Count]</span>
+                </div>
+            }
+            @if (quiz.IsPublic)
+            {
+                <span class="status-pill">@Localizer["QuizPublication_Public"]</span>
+            }
         </div>
 
         <div class="card-actions">
@@ -88,6 +101,16 @@
                             data-quiz-description="@(quiz.Description ?? string.Empty)">
                         @Localizer["Button_Rename"]
                     </button>
+
+                    <form method="post" asp-page-handler="SetPublication">
+                        <input name="quizId" type="hidden" value="@quiz.Id" />
+                        <input name="isPublic" type="hidden" value="@(!quiz.IsPublic ? "true" : "false")" />
+                        <button class="action-menu-item" type="submit">
+                            @(quiz.IsPublic
+                                ? Localizer["QuizPublication_Unpublish"]
+                                : Localizer["QuizPublication_Publish"])
+                        </button>
+                    </form>
 
                     <button class="action-menu-item action-menu-danger"
                             type="button"

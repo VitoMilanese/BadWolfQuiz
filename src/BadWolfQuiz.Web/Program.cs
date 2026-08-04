@@ -131,6 +131,7 @@ builder.Services.AddScoped<JoinUrlBuilder>();
 builder.Services.AddScoped<IPasswordHasher<HostAccount>, PasswordHasher<HostAccount>>();
 builder.Services.AddScoped<QuizSeedService>();
 builder.Services.AddScoped<QuizPackageService>();
+builder.Services.AddScoped<QuizRatingService>();
 
 var app = builder.Build();
 
