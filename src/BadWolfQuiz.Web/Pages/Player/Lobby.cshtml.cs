@@ -17,6 +17,7 @@ public sealed class LobbyModel(
 
     public string? AccessToken { get; private set; }
     public int? ExistingRating { get; private set; }
+    public bool CanRateQuiz { get; private set; }
 
     public async Task<IActionResult> OnGetAsync(
         string code,
@@ -44,7 +45,8 @@ public sealed class LobbyModel(
         CurrentPlayer = currentPlayer;
         Players = players;
         AccessToken = accessToken;
-        if (game.Session.Status == GameSessionStatus.Completed)
+        CanRateQuiz = QuizRatingService.IsRatingAvailable(game.Session);
+        if (CanRateQuiz)
         {
             ExistingRating = await quizRatingService.GetPlayerRatingAsync(
                 code,
@@ -70,10 +72,13 @@ public sealed class LobbyModel(
                 cancellationToken)
             : QuizRatingResult.InvalidScore;
 
-        TempData[result == QuizRatingResult.Saved
-            ? "RatingSuccess"
-            : "RatingError"] = result.ToString();
-        return RedirectToPage(new { code, playerId, accessToken });
+        return new JsonResult(new
+        {
+            saved = result == QuizRatingResult.Saved
+        })
+        {
+            StatusCode = result == QuizRatingResult.Saved ? 200 : 409
+        };
     }
 
     public IActionResult OnGetFinalContentBlock(

@@ -115,7 +115,7 @@ public sealed class QuizDbContext : DbContext
             .IsUnique();
 
         modelBuilder.Entity<QuizRating>()
-            .HasIndex(x => new { x.GameSessionId, x.PlayerName })
+            .HasIndex(x => new { x.GameSessionId, x.RaterKey })
             .IsUnique();
 
         modelBuilder.Entity<QuizRating>()

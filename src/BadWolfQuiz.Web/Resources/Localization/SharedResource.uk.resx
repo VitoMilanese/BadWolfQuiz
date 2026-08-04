@@ -1184,9 +1184,6 @@
   <data name="QuizRating_Description" xml:space="preserve"><value>Наскільки вам сподобався цей квіз?</value></data>
   <data name="QuizRating_ScoreLabel" xml:space="preserve"><value>Оцінка від 0 до 5 зірочок</value></data>
   <data name="QuizRating_Stars" xml:space="preserve"><value>{0} зірочок</value></data>
-  <data name="QuizRating_Zero" xml:space="preserve"><value>0 зірочок</value></data>
-  <data name="QuizRating_Submit" xml:space="preserve"><value>Зберегти оцінку</value></data>
-  <data name="QuizRating_Saved" xml:space="preserve"><value>Вашу оцінку збережено.</value></data>
   <data name="QuizRating_NotReady" xml:space="preserve"><value>Оцінку поки не вдалося зберегти. Спробуйте ще раз.</value></data>
   <data name="QuizRating_Count" xml:space="preserve"><value>Оцінок: {0}</value></data>
   <data name="QuizRating_AccessibleSummary" xml:space="preserve"><value>Середня оцінка {0:0.0} з 5 від {1} людей</value></data>

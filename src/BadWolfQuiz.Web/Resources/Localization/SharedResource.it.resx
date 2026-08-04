@@ -1184,9 +1184,6 @@
   <data name="QuizRating_Description" xml:space="preserve"><value>Quanto ti è piaciuto questo quiz?</value></data>
   <data name="QuizRating_ScoreLabel" xml:space="preserve"><value>Valutazione da 0 a 5 stelle</value></data>
   <data name="QuizRating_Stars" xml:space="preserve"><value>{0} stelle</value></data>
-  <data name="QuizRating_Zero" xml:space="preserve"><value>0 stelle</value></data>
-  <data name="QuizRating_Submit" xml:space="preserve"><value>Salva valutazione</value></data>
-  <data name="QuizRating_Saved" xml:space="preserve"><value>La tua valutazione è stata salvata.</value></data>
   <data name="QuizRating_NotReady" xml:space="preserve"><value>Non è ancora stato possibile salvare la valutazione. Riprova.</value></data>
   <data name="QuizRating_Count" xml:space="preserve"><value>{0} valutazioni</value></data>
   <data name="QuizRating_AccessibleSummary" xml:space="preserve"><value>Valutazione media {0:0.0} su 5 da {1} persone</value></data>

@@ -17,6 +17,7 @@ public sealed class LobbyModel(
     CurrentHost currentHost,
     JoinUrlBuilder joinUrlBuilder,
     AvatarCatalog avatarCatalog,
+    QuizRatingService quizRatingService,
     IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -47,13 +48,50 @@ public sealed class LobbyModel(
     public IReadOnlyList<RoundLeaderboardEntry> RoundLeaders { get; private set; } = [];
 
     public IReadOnlyList<GameResultStanding> FinalStandings { get; private set; } = [];
+    public bool CanRateQuiz { get; private set; }
+    public int? ExistingRating { get; private set; }
 
-    public IActionResult OnGet(
+    public async Task<IActionResult> OnGetAsync(
         Guid id,
         int? previewQuestionId,
-        bool previewAnswer = false)
+        bool previewAnswer = false,
+        CancellationToken cancellationToken = default)
     {
-        return LoadPage(id, previewQuestionId, previewAnswer);
+        var result = LoadPage(id, previewQuestionId, previewAnswer);
+        if (result is PageResult)
+        {
+            var rating = await quizRatingService.GetHostRatingStateAsync(
+                Game,
+                currentHost.RequiredId,
+                cancellationToken);
+            CanRateQuiz = rating.IsAvailable;
+            ExistingRating = rating.Score;
+        }
+        return result;
+    }
+
+    public async Task<IActionResult> OnPostRateQuizAsync(
+        Guid id,
+        int score,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var result = await quizRatingService.RateHostAsync(
+            game,
+            currentHost.RequiredId,
+            score,
+            cancellationToken);
+        return new JsonResult(new { saved = result == QuizRatingResult.Saved })
+        {
+            StatusCode = result == QuizRatingResult.Saved ? 200 : 409
+        };
     }
 
     public IActionResult OnGetContentBlock(
@@ -648,10 +686,16 @@ public sealed class LobbyModel(
             sessionRegistry.CloseQuestionAnswer(
                 game.PublicCode,
                 sourceQuestionId);
-            await gameHistoryStore.SaveCompletedGameAsync(
+            var quizCompleted = await gameHistoryStore.SaveCompletedGameAsync(
                 game,
                 cancellationToken);
             await BroadcastBuzzerAsync(game, cancellationToken);
+            if (quizCompleted)
+            {
+                await gameHub.Clients
+                    .Group(GameHub.GroupName(game.PublicCode))
+                    .SendAsync("QuizCompleted", cancellationToken);
+            }
         }
         catch (GameRuleViolationException)
         {

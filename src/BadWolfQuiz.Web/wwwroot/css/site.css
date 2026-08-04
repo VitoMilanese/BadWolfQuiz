@@ -99,16 +99,17 @@
     transform: scale(1.08);
 }
 
-.star-rating .zero-rating {
-    order: 1;
-    margin-inline-end: 10px;
-    color: var(--muted);
-    cursor: pointer;
-}
-
 .star-rating input:focus-visible + label {
     outline: 2px solid var(--red-bright);
     outline-offset: 3px;
+}
+
+.quiz-rating-form.is-saved .star-rating {
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--gold) 38%, transparent));
+}
+
+.quiz-rating-save-state:not(:empty) {
+    color: var(--red-bright);
 }
 
 @media (max-width: 560px) {

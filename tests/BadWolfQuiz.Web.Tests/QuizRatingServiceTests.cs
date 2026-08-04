@@ -58,7 +58,7 @@ public sealed class QuizRatingServiceTests
 
         var rating = Assert.Single(await db.QuizRatings.ToListAsync());
         Assert.Equal(2, rating.Score);
-        Assert.Equal("Rose", rating.PlayerName);
+        Assert.Equal("player:Rose", rating.RaterKey);
     }
 
     [Theory]
@@ -82,6 +82,57 @@ public sealed class QuizRatingServiceTests
             await service.RateAsync("ABC123", new(Guid.NewGuid()), score));
     }
 
+    [Fact]
+    public async Task RateHostAsync_allows_runner_to_rate_another_hosts_public_quiz()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<QuizDbContext>()
+            .UseSqlite(connection)
+            .Options;
+        await using var db = new QuizDbContext(options);
+        await db.Database.EnsureCreatedAsync();
+
+        db.Hosts.AddRange(
+            CreateHost("owner", "owner@example.com"),
+            CreateHost("runner", "runner@example.com"));
+        var quiz = CreateStoredQuiz();
+        quiz.HostId = "owner";
+        quiz.IsPublic = true;
+        db.Quizzes.Add(quiz);
+        await db.SaveChangesAsync();
+
+        var registry = new GameSessionRegistry(new FixedCodeGenerator());
+        var registration = registry.Create(
+            CreateSnapshot(quiz),
+            BadWolfQuiz.Game.Runtime.GameSessionSettings.Default,
+            "runner");
+        var player = registration.Session.AddPlayer("Rose");
+        registration.Session.Start();
+        var questionId = quiz.Rounds.Single().Categories.Single().Questions.Single().Id;
+        registration.Session.SelectQuestion(questionId);
+        registration.Session.ActivateQuestionBuzzer(questionId);
+        registration.Session.JudgeQuestionAnswer(questionId, player.Id, true);
+        registration.Session.CloseQuestionAnswer(questionId);
+
+        db.GameSessions.Add(new BadWolfQuiz.Web.Models.GameSession
+        {
+            QuizId = quiz.Id,
+            HostId = "runner",
+            PublicCode = registration.PublicCode,
+            Status = BadWolfQuiz.Web.Models.GameSessionStatus.Finished
+        });
+        await db.SaveChangesAsync();
+
+        var service = new QuizRatingService(db, registry);
+        Assert.Equal(
+            QuizRatingResult.Saved,
+            await service.RateHostAsync(registration, "runner", 4));
+        var rating = Assert.Single(await db.QuizRatings.ToListAsync());
+        Assert.Equal("host:runner", rating.RaterKey);
+        Assert.Equal(4, rating.Score);
+    }
+
     private static Quiz CreateStoredQuiz()
     {
         var quiz = new Quiz { Title = "Rated quiz" };
@@ -93,6 +144,14 @@ public sealed class QuizRatingServiceTests
         quiz.Rounds.Add(round);
         return quiz;
     }
+
+    private static HostAccount CreateHost(string id, string email) => new()
+    {
+        Id = id,
+        Email = email,
+        NormalizedEmail = email.ToUpperInvariant(),
+        PasswordHash = "hash"
+    };
 
     private static QuizSnapshot CreateSnapshot(Quiz quiz)
     {

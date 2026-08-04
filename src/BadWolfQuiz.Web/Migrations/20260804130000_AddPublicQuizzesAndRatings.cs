@@ -33,7 +33,7 @@ public partial class AddPublicQuizzesAndRatings : Migration
                     .Annotation("Sqlite:Autoincrement", true),
                 QuizId = table.Column<int>(type: "INTEGER", nullable: false),
                 GameSessionId = table.Column<int>(type: "INTEGER", nullable: false),
-                PlayerName = table.Column<string>(type: "TEXT", maxLength: 60, nullable: false),
+                RaterKey = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                 Score = table.Column<int>(type: "INTEGER", nullable: false),
                 CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
             },
@@ -55,9 +55,9 @@ public partial class AddPublicQuizzesAndRatings : Migration
             });
 
         migrationBuilder.CreateIndex(
-            name: "IX_QuizRatings_GameSessionId_PlayerName",
+            name: "IX_QuizRatings_GameSessionId_RaterKey",
             table: "QuizRatings",
-            columns: new[] { "GameSessionId", "PlayerName" },
+            columns: new[] { "GameSessionId", "RaterKey" },
             unique: true);
 
         migrationBuilder.CreateIndex(

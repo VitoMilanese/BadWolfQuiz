@@ -95,8 +95,8 @@ public sealed class QuizRating
     public int Id { get; set; }
     public int QuizId { get; set; }
     public int GameSessionId { get; set; }
-    [Required, MaxLength(60)]
-    public string PlayerName { get; set; } = string.Empty;
+    [Required, MaxLength(100)]
+    public string RaterKey { get; set; } = string.Empty;
     [Range(0, 5)]
     public int Score { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;

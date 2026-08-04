@@ -461,9 +461,9 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Property<int>("GameSessionId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("PlayerName")
+                    b.Property<string>("RaterKey")
                         .IsRequired()
-                        .HasMaxLength(60)
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("QuizId")
@@ -474,7 +474,7 @@ namespace BadWolfQuiz.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GameSessionId", "PlayerName")
+                    b.HasIndex("GameSessionId", "RaterKey")
                         .IsUnique();
 
                     b.HasIndex("QuizId");

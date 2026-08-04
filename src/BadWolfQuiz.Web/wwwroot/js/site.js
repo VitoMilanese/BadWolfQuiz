@@ -38,6 +38,53 @@ document.addEventListener("keydown", event => {
     }
 });
 
+document.querySelectorAll("[data-auto-rating-form]").forEach(form => {
+    form.addEventListener("submit", event => event.preventDefault());
+    const inputs = form.querySelectorAll('input[name="score"]');
+    const state = form.querySelector("[data-rating-save-state]");
+
+    const saveRating = async score => {
+            const formData = new FormData(form);
+            formData.set("score", score);
+            inputs.forEach(item => item.disabled = true);
+            if (state) {
+                state.textContent = "";
+            }
+
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: formData,
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                if (!response.ok) {
+                    throw new Error("Rating was not saved.");
+                }
+                form.classList.add("is-saved");
+            } catch {
+                if (state) {
+                    state.textContent = form.dataset.ratingErrorLabel;
+                }
+            } finally {
+                inputs.forEach(item => item.disabled = false);
+            }
+    };
+
+    inputs.forEach(input => {
+        input.addEventListener("change", () => saveRating(input.value));
+        const label = form.querySelector(`label[for="${input.id}"]`);
+        label?.addEventListener("click", event => {
+            if (!input.checked) {
+                return;
+            }
+
+            event.preventDefault();
+            input.checked = false;
+            saveRating("0");
+        });
+    });
+});
+
 const languageButton = document.getElementById("languageButton");
 const languageMenu = document.getElementById("languageMenu");
 
