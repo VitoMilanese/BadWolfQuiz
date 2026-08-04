@@ -53,6 +53,45 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void Four_clue_question_accepts_video_clues_without_captions()
+    {
+        static ContentBlockSnapshot VideoClue(int id) => new(
+            id,
+            ContentBlockKind.YouTube,
+            null,
+            null,
+            null,
+            null,
+            $"https://youtu.be/video-{id}",
+            null,
+            null,
+            null,
+            id,
+            false);
+
+        var question = new QuizQuestionSnapshot(
+            100,
+            10,
+            0,
+            100,
+            false,
+            "Connections",
+            false,
+            [VideoClue(1), VideoClue(2), VideoClue(3), VideoClue(4)],
+            [],
+            QuestionPresentationType.FourClues);
+
+        Assert.All(
+            question.QuestionBlocks,
+            block =>
+            {
+                Assert.Equal(ContentBlockKind.YouTube, block.Kind);
+                Assert.Null(block.TopCaption);
+                Assert.Null(block.BottomCaption);
+            });
+    }
+
+    [Fact]
     public void Restore_preserves_the_number_of_revealed_clues()
     {
         var session = CreateFourClueSession();

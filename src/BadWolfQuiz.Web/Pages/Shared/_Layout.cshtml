@@ -3,6 +3,7 @@
 @inject GameSettingsStore SettingsStore
 @inject CurrentHost CurrentHost
 @inject IConfiguration Configuration
+@inject Microsoft.Extensions.Options.IOptions<SiteDefaultsOptions> SiteDefaults
 
 @{
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
@@ -20,13 +21,14 @@
     var settings = ViewData["GameThemeSettings"] as BadWolfQuiz.Game.Runtime.GameSessionSettings
         ?? (isAuthenticated && CurrentHost.Id is { } hostId
             ? await SettingsStore.LoadAsync(hostId, Context.RequestAborted)
-            : BadWolfQuiz.Game.Runtime.GameSessionSettings.Default);
-    var siteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId);
+            : null);
+    var siteThemeId = SiteThemeCatalog.Normalize(
+        settings?.SiteThemeId ?? SiteDefaults.Value.ThemeId);
     var customThemeStyle = siteThemeId == "custom"
-        ? SiteThemeCatalog.BuildCssVariables(settings.CustomThemeColors)
+        ? SiteThemeCatalog.BuildCssVariables(settings?.CustomThemeColors)
         : null;
     var hasBrandLogo = isAuthenticated &&
-        settings.BrandLogoData is not null &&
+        settings?.BrandLogoData is not null &&
         !string.IsNullOrWhiteSpace(settings.BrandLogoContentType);
 }
 
@@ -134,6 +136,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/youtube-auto-expand.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

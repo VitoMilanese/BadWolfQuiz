@@ -2821,7 +2821,7 @@ body:has(.player-lobby) > .page-shell {
 
 .round-wager-settings {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
     align-items: end;
     gap: 24px;
     margin-bottom: 18px;
@@ -2832,6 +2832,8 @@ body:has(.player-lobby) > .page-shell {
 }
 
 .round-wager-settings .checkbox-row span,
+#round-category-count-setting,
+#round-question-count-setting,
 #random-wager-count-setting {
     display: grid;
     gap: 5px;
@@ -3273,6 +3275,44 @@ body:has(.player-lobby) > .page-shell {
 iframe.game-content-video {
     width: min(100%, 960px);
     aspect-ratio: 16 / 9;
+}
+
+iframe.youtube-auto-expanded {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 10000 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #000;
+}
+
+.youtube-auto-expand-close {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 10001;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.72);
+    color: #fff;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+body.youtube-auto-expanded-open {
+    overflow: hidden;
 }
 
 .game-content-audio {

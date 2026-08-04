@@ -689,6 +689,12 @@
   <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Domande disponibili: {0}</value></data>
   <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Il numero di domande con puntata casuali deve essere compreso tra 0 e {0}.</value></data>
   <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Impostazioni del round salvate.</value></data>
+  <data name="QuizEditor_QuestionCount" xml:space="preserve"><value>Domande per categoria</value></data>
+  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve"><value>Scegli da {0} a {1}. Ridurre il numero elimina le righe inferiori e le relative domande.</value></data>
+  <data name="QuizEditor_QuestionCountDeleteConfirmation" xml:space="preserve"><value>Alcune domande nelle righe rimosse contengono dati. Eliminarle definitivamente?</value></data>
+  <data name="QuizEditor_CategoryCount" xml:space="preserve"><value>Categorie nel round</value></data>
+  <data name="QuizEditor_CategoryCountDescription" xml:space="preserve"><value>Scegli da {0} a {1}. Ridurre il numero elimina le ultime categorie.</value></data>
+  <data name="QuizEditor_CategoryCountDeleteConfirmation" xml:space="preserve"><value>Alcune categorie da rimuovere contengono domande. Eliminarle definitivamente?</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Valore delle domande</value>
   </data>
@@ -791,6 +797,9 @@
   </data>
   <data name="GameBoard_MediaContent" xml:space="preserve">
     <value>Contenuto multimediale della domanda</value>
+  </data>
+  <data name="GameBoard_CloseVideo" xml:space="preserve">
+    <value>Chiudi video</value>
   </data>
   <data name="GameBoard_CloseAnswerRejected" xml:space="preserve">
     <value>Non è stato possibile chiudere la risposta.</value>
@@ -1129,9 +1138,8 @@
   <data name="Label_QuestionType" xml:space="preserve"><value>Tipo di domanda</value></data>
   <data name="QuestionType_Standard" xml:space="preserve"><value>Domanda standard</value></data>
   <data name="QuestionType_FourClues" xml:space="preserve"><value>Quattro indizi</value></data>
-  <data name="FourClues_EditorHint" xml:space="preserve"><value>Aggiungi esattamente quattro indizi. Ogni indizio può contenere testo, un'immagine o audio.</value></data>
+  <data name="FourClues_EditorHint" xml:space="preserve"><value>Aggiungi esattamente quattro indizi. Ogni indizio può contenere testo, un'immagine, audio o video.</value></data>
   <data name="FourClues_ExactlyFourRequired" xml:space="preserve"><value>Una domanda a quattro indizi deve contenere esattamente quattro indizi.</value></data>
-  <data name="FourClues_UnsupportedMedia" xml:space="preserve"><value>Le domande a quattro indizi supportano solo testo, immagini e audio.</value></data>
   <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 indizio</value></data>
   <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>Impossibile mostrare l'indizio successivo.</value></data>
   <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Domanda della categoria «{0}» — {1} punti</value></data>

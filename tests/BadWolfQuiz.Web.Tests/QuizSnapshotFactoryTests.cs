@@ -1,3 +1,4 @@
+using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Services;
 
@@ -119,6 +120,58 @@ public sealed class QuizSnapshotFactoryTests
         Assert.Equal(
             "Final answer",
             Assert.Single(snapshot.FinalQuestion.AnswerBlocks).TextContent);
+    }
+
+    [Theory]
+    [InlineData("https://youtu.be/abc123")]
+    [InlineData("https://www.youtube.com/watch?v=abc123")]
+    [InlineData("https://www.youtube-nocookie.com/embed/abc123")]
+    public void Create_maps_legacy_video_blocks_with_youtube_urls_as_youtube(
+        string externalUrl)
+    {
+        var quiz = CreateQuiz();
+        var question = quiz.Rounds
+            .Single()
+            .Categories
+            .SelectMany(category => category.Questions)
+            .First();
+        question.QuestionBlocks.Add(new QuestionContentBlock
+        {
+            Id = 503,
+            BlockType = ContentBlockType.Video,
+            ExternalUrl = externalUrl
+        });
+
+        var snapshot = _factory.Create(quiz);
+        var block = snapshot.Rounds.Single().Questions
+            .Single(item => item.SourceQuestionId == question.Id)
+            .QuestionBlocks.Single();
+
+        Assert.Equal(ContentBlockKind.YouTube, block.Kind);
+    }
+
+    [Fact]
+    public void Create_keeps_direct_video_urls_as_video()
+    {
+        var quiz = CreateQuiz();
+        var question = quiz.Rounds
+            .Single()
+            .Categories
+            .SelectMany(category => category.Questions)
+            .First();
+        question.QuestionBlocks.Add(new QuestionContentBlock
+        {
+            Id = 504,
+            BlockType = ContentBlockType.Video,
+            ExternalUrl = "https://media.example.com/clue.mp4"
+        });
+
+        var snapshot = _factory.Create(quiz);
+        var block = snapshot.Rounds.Single().Questions
+            .Single(item => item.SourceQuestionId == question.Id)
+            .QuestionBlocks.Single();
+
+        Assert.Equal(ContentBlockKind.Video, block.Kind);
     }
 
     [Fact]

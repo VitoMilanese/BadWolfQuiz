@@ -317,9 +317,7 @@ public sealed class QuizPackageService(QuizDbContext db)
                 if (!Enum.IsDefined(question.BuzzModeOverride) ||
                     !Enum.IsDefined(question.PresentationType) ||
                     question.PresentationType == QuestionPresentationType.FourClues &&
-                        (question.IsSpecial || question.QuestionBlocks.Length != 4 ||
-                         question.QuestionBlocks.Any(block =>
-                             block.BlockType is ContentBlockType.Video or ContentBlockType.YouTube)))
+                        (question.IsSpecial || question.QuestionBlocks.Length != 4))
                 {
                     throw new InvalidDataException("The quiz manifest contains invalid question data.");
                 }

@@ -36,6 +36,28 @@
     var eligibleRandomWagerQuestionCount = categories
         .SelectMany(category => category.Questions)
         .Count(question => !question.ExcludeFromRandomWagerSelection);
+
+    var rowsWithQuestionContent = categories
+        .SelectMany(category => category.Questions)
+        .Where(question =>
+            question.QuestionBlocks.Any(HasBlockContent) ||
+            question.AnswerBlocks.Any(HasBlockContent))
+        .Select(question => question.RowIndex)
+        .Distinct()
+        .OrderBy(rowIndex => rowIndex)
+        .ToList();
+
+    var filledCategoryPositions = categories
+        .Select((category, index) => new
+        {
+            Position = index + 1,
+            HasContent = category.Questions.Any(question =>
+                question.QuestionBlocks.Any(HasBlockContent) ||
+                question.AnswerBlocks.Any(HasBlockContent))
+        })
+        .Where(item => item.HasContent)
+        .Select(item => item.Position)
+        .ToList();
 }
 
 @if (TempData["SuccessMessage"] is string successMessage)
@@ -127,6 +149,50 @@
            value="@round.Id" />
 
     <section class="content-panel round-wager-settings">
+        <div id="round-category-count-setting">
+            <label asp-for="RoundRows.CategoryCount">
+                @Localizer["QuizEditor_CategoryCount"]
+            </label>
+            <select asp-for="RoundRows.CategoryCount"
+                    data-initial-count="@categories.Count"
+                    data-filled-items="@string.Join(",", filledCategoryPositions)"
+                    data-delete-confirmation="@Localizer["QuizEditor_CategoryCountDeleteConfirmation"]">
+                @for (var categoryCount = Model.MinimumCategoryCount;
+                      categoryCount <= Model.MaximumCategoryCount;
+                      categoryCount++)
+                {
+                    <option value="@categoryCount">@categoryCount</option>
+                }
+            </select>
+            <small>
+                @Localizer["QuizEditor_CategoryCountDescription",
+                    Model.MinimumCategoryCount,
+                    Model.MaximumCategoryCount]
+            </small>
+        </div>
+
+        <div id="round-question-count-setting">
+            <label asp-for="RoundRows.QuestionCount">
+                @Localizer["QuizEditor_QuestionCount"]
+            </label>
+            <select asp-for="RoundRows.QuestionCount"
+                    data-initial-count="@roundRows.Count"
+                    data-filled-items="@string.Join(",", rowsWithQuestionContent)"
+                    data-delete-confirmation="@Localizer["QuizEditor_QuestionCountDeleteConfirmation"]">
+                @for (var questionCount = Model.MinimumQuestionCount;
+                      questionCount <= Model.MaximumQuestionCount;
+                      questionCount++)
+                {
+                    <option value="@questionCount">@questionCount</option>
+                }
+            </select>
+            <small>
+                @Localizer["QuizEditor_QuestionCountDescription",
+                    Model.MinimumQuestionCount,
+                    Model.MaximumQuestionCount]
+            </small>
+        </div>
+
         <label class="checkbox-row">
             <input asp-for="RoundRows.UseRandomWagerQuestions" />
             <span>
@@ -684,6 +750,43 @@
     <script>
         const randomWagerCheckbox =
             document.getElementById("RoundRows_UseRandomWagerQuestions");
+
+        const questionCountSelect =
+            document.getElementById("RoundRows_QuestionCount");
+
+        const categoryCountSelect =
+            document.getElementById("RoundRows_CategoryCount");
+
+        const quizBoardForm = document.querySelector(".quiz-board-form");
+
+        const saveCountChange = select => {
+            const initialCount = Number(
+                select.dataset.initialCount);
+            const nextCount = Number(select.value);
+            const filledItems = (select.dataset.filledItems ?? "")
+                .split(",")
+                .filter(Boolean)
+                .map(Number);
+            const deletesFilledQuestion =
+                nextCount < initialCount &&
+                filledItems.some(position => position > nextCount);
+
+            if (deletesFilledQuestion &&
+                !window.confirm(
+                    select.dataset.deleteConfirmation)) {
+                select.value = initialCount.toString();
+                return;
+            }
+
+            quizBoardForm?.requestSubmit();
+        };
+
+        questionCountSelect?.addEventListener(
+            "change",
+            () => saveCountChange(questionCountSelect));
+        categoryCountSelect?.addEventListener(
+            "change",
+            () => saveCountChange(categoryCountSelect));
 
         const randomWagerCountSetting =
             document.getElementById("random-wager-count-setting");

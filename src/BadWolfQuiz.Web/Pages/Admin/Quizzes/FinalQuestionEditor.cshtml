@@ -571,13 +571,9 @@
                 .querySelectorAll('.content-block-type-option')
                 .forEach(option => {
                     option.addEventListener('click', async () => {
-                        let blockType = option.dataset.blockType;
-
-                        if (blockType === 'YouTube') {
-                            blockType = 'Video';
-                        }
-
-                        await addContentBlock(section, blockType);
+                        await addContentBlock(
+                            section,
+                            option.dataset.blockType);
 
                         typeMenu.hidden = true;
                     });

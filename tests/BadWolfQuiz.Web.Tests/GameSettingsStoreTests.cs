@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using BadWolfQuiz.Web.Services;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace BadWolfQuiz.Web.Tests;
 
@@ -120,6 +121,21 @@ public sealed class GameSettingsStoreTests : IDisposable
         var settings = await store.LoadAsync(HostId);
 
         Assert.Equal(GameSessionSettings.Default, settings);
+    }
+
+    [Fact]
+    public async Task Load_uses_configured_default_theme_for_a_new_host()
+    {
+        var store = new GameSettingsStore(
+            new TestWebHostEnvironment(_contentRoot),
+            Options.Create(new SiteDefaultsOptions
+            {
+                ThemeId = "daylight"
+            }));
+
+        var settings = await store.LoadAsync(HostId);
+
+        Assert.Equal("daylight", settings.SiteThemeId);
     }
 
     [Fact]

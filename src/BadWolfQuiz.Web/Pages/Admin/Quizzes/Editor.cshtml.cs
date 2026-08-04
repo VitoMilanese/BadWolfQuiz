@@ -6,15 +6,22 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Quizzes;
 
 public sealed class EditorModel(
     QuizDbContext db,
     GameSessionLauncher gameSessionLauncher,
-    IStringLocalizer<SharedResource> localizer) : PageModel
+    IStringLocalizer<SharedResource> localizer,
+    IOptions<QuizEditorOptions> editorOptions) : PageModel
 {
     const int TemporarySortOrderOffset = 100000;
+
+    public int MinimumCategoryCount => editorOptions.Value.MinimumCategoryCount;
+    public int MaximumCategoryCount => editorOptions.Value.MaximumCategoryCount;
+    public int MinimumQuestionCount => editorOptions.Value.MinimumQuestionCount;
+    public int MaximumQuestionCount => editorOptions.Value.MaximumQuestionCount;
 
     public static int CalculateDefaultPoints(int roundNumber, int rowNumber)
     {
@@ -95,6 +102,10 @@ public sealed class EditorModel(
         public bool UseRandomWagerQuestions { get; set; }
 
         public int RandomWagerQuestionCount { get; set; }
+
+        public int QuestionCount { get; set; }
+
+        public int CategoryCount { get; set; }
 
         public List<RoundRowInputModel> Rows { get; set; } = new();
     }
@@ -190,6 +201,8 @@ public sealed class EditorModel(
             UseRandomWagerQuestions = selectedRound.UseRandomWagerQuestions,
             RandomWagerQuestionCount =
                 selectedRound.RandomWagerQuestionCount,
+            QuestionCount = selectedRound.Rows.Count,
+            CategoryCount = selectedRound.Categories.Count,
             Rows = selectedRound.Rows
                 .OrderBy(x => x.RowIndex)
                 .Select(x => new RoundRowInputModel
@@ -232,7 +245,7 @@ public sealed class EditorModel(
 
         var templateRound = quiz.Rounds
             .OrderBy(x => x.SortOrder)
-            .FirstOrDefault();
+            .LastOrDefault();
 
         var round = new QuizRound
         {
@@ -246,37 +259,26 @@ public sealed class EditorModel(
         var templateRows = templateRound?.Rows
             .OrderBy(x => x.RowIndex)
             .ToList();
+        var questionCount = Math.Clamp(
+            templateRows?.Count ?? editorOptions.Value.MinimumQuestionCount,
+            editorOptions.Value.MinimumQuestionCount,
+            editorOptions.Value.MaximumQuestionCount);
+        var roundNumber = quiz.Rounds.Count + 1;
 
-        if (templateRows is { Count: > 0 })
+        for (var rowIndex = 1; rowIndex <= questionCount; rowIndex++)
         {
-            var roundNumber = quiz.Rounds.Count + 1;
-
-            foreach (var templateRow in templateRows)
+            round.Rows.Add(new QuizRoundRow
             {
-                round.Rows.Add(new QuizRoundRow
-                {
-                    RowIndex = templateRow.RowIndex,
-                    Points = CalculateDefaultPoints(
-                        roundNumber,
-                        templateRow.RowIndex)
-                });
-            }
-        }
-        else
-        {
-            for (var rowIndex = 1; rowIndex <= 5; rowIndex++)
-            {
-                round.Rows.Add(new QuizRoundRow
-                {
-                    RowIndex = rowIndex,
-                    Points = CalculateDefaultPoints(1, rowIndex)
-                });
-            }
+                RowIndex = rowIndex,
+                Points = CalculateDefaultPoints(roundNumber, rowIndex)
+            });
         }
 
         if (templateRound is not null)
         {
-            foreach (var category in templateRound.Categories.OrderBy(x => x.SortOrder))
+            foreach (var category in templateRound.Categories
+                .OrderBy(x => x.SortOrder)
+                .Take(editorOptions.Value.MaximumCategoryCount))
             {
                 var newCategory = new QuizCategory
                 {
@@ -308,6 +310,34 @@ public sealed class EditorModel(
 
                 round.Categories.Add(newCategory);
             }
+        }
+
+        while (round.Categories.Count < editorOptions.Value.MinimumCategoryCount)
+        {
+            var categoryNumber = round.Categories.Count + 1;
+            var category = new QuizCategory
+            {
+                Title = localizer["Default_CategoryTitle", categoryNumber],
+                SortOrder = categoryNumber
+            };
+
+            foreach (var roundRow in round.Rows.OrderBy(x => x.RowIndex))
+            {
+                var question = new QuizQuestion { RowIndex = roundRow.RowIndex };
+                question.QuestionBlocks.Add(new QuestionContentBlock
+                {
+                    BlockType = ContentBlockType.Text,
+                    SortOrder = 1
+                });
+                question.AnswerBlocks.Add(new AnswerContentBlock
+                {
+                    BlockType = ContentBlockType.Text,
+                    SortOrder = 1
+                });
+                category.Questions.Add(question);
+            }
+
+            round.Categories.Add(category);
         }
 
         quiz.Rounds.Add(round);
@@ -652,7 +682,11 @@ public sealed class EditorModel(
             .OrderBy(x => x.RowIndex)
             .ToList();
 
-        if (submittedRows.Count == 0 ||
+        if (RoundRows.QuestionCount < MinimumQuestionCount ||
+            RoundRows.QuestionCount > MaximumQuestionCount ||
+            RoundRows.CategoryCount < MinimumCategoryCount ||
+            RoundRows.CategoryCount > MaximumCategoryCount ||
+            submittedRows.Count == 0 ||
             submittedRows.Any(x => x.RowIndex <= 0 || x.Points < 0))
         {
             TempData["ErrorMessage"] =
@@ -665,9 +699,115 @@ public sealed class EditorModel(
             });
         }
 
+        var removedRowIndexes = round.Rows
+            .Where(row => row.RowIndex > RoundRows.QuestionCount)
+            .Select(row => row.RowIndex)
+            .ToHashSet();
+
+        if (removedRowIndexes.Count > 0)
+        {
+            db.RemoveRange(round.Categories
+                .SelectMany(category => category.Questions)
+                .Where(question => removedRowIndexes.Contains(question.RowIndex)));
+            db.RemoveRange(round.Rows
+                .Where(row => removedRowIndexes.Contains(row.RowIndex)));
+        }
+
+        var roundNumber = quiz.Rounds
+            .OrderBy(item => item.SortOrder)
+            .ToList()
+            .FindIndex(item => item.Id == round.Id) + 1;
+
+        for (var rowIndex = 1; rowIndex <= RoundRows.QuestionCount; rowIndex++)
+        {
+            if (round.Rows.All(row => row.RowIndex != rowIndex))
+            {
+                round.Rows.Add(new QuizRoundRow
+                {
+                    RowIndex = rowIndex,
+                    Points = CalculateDefaultPoints(roundNumber, rowIndex)
+                });
+            }
+
+            foreach (var category in round.Categories)
+            {
+                if (category.Questions.Any(question =>
+                    question.RowIndex == rowIndex))
+                {
+                    continue;
+                }
+
+                var question = new QuizQuestion { RowIndex = rowIndex };
+                question.QuestionBlocks.Add(new QuestionContentBlock
+                {
+                    BlockType = ContentBlockType.Text,
+                    SortOrder = 1
+                });
+                question.AnswerBlocks.Add(new AnswerContentBlock
+                {
+                    BlockType = ContentBlockType.Text,
+                    SortOrder = 1
+                });
+                category.Questions.Add(question);
+            }
+        }
+
+        var orderedCategories = round.Categories
+            .OrderBy(category => category.SortOrder)
+            .ToList();
+        var categoriesToRemove = orderedCategories
+            .Skip(RoundRows.CategoryCount)
+            .ToList();
+
+        if (categoriesToRemove.Count > 0)
+        {
+            db.RemoveRange(categoriesToRemove);
+        }
+
+        var nextCategorySortOrder = orderedCategories.Count == 0
+            ? 1
+            : orderedCategories.Max(category => category.SortOrder) + 1;
+
+        while (orderedCategories.Count < RoundRows.CategoryCount)
+        {
+            var categoryNumber = orderedCategories.Count + 1;
+            var category = new QuizCategory
+            {
+                Title = localizer["Default_CategoryTitle", categoryNumber],
+                SortOrder = nextCategorySortOrder++
+            };
+
+            foreach (var roundRow in round.Rows
+                .Where(row => row.RowIndex <= RoundRows.QuestionCount)
+                .OrderBy(row => row.RowIndex))
+            {
+                var question = new QuizQuestion
+                {
+                    RowIndex = roundRow.RowIndex
+                };
+                question.QuestionBlocks.Add(new QuestionContentBlock
+                {
+                    BlockType = ContentBlockType.Text,
+                    SortOrder = 1
+                });
+                question.AnswerBlocks.Add(new AnswerContentBlock
+                {
+                    BlockType = ContentBlockType.Text,
+                    SortOrder = 1
+                });
+                category.Questions.Add(question);
+            }
+
+            round.Categories.Add(category);
+            orderedCategories.Add(category);
+        }
+
         var eligibleQuestionCount = round.Categories
+            .Where(category => !categoriesToRemove.Contains(category))
             .SelectMany(category => category.Questions)
-            .Count(question => !question.ExcludeFromRandomWagerSelection);
+            .Count(question =>
+                question.RowIndex <= RoundRows.QuestionCount &&
+                !question.ExcludeFromRandomWagerSelection);
 
         if (RoundRows.UseRandomWagerQuestions &&
             (RoundRows.RandomWagerQuestionCount < 0 ||
@@ -691,6 +831,11 @@ public sealed class EditorModel(
 
         foreach (var submittedRow in submittedRows)
         {
+            if (submittedRow.RowIndex > RoundRows.QuestionCount)
+            {
+                continue;
+            }
+
             var roundRow = round.Rows
                 .SingleOrDefault(x => x.RowIndex == submittedRow.RowIndex);
 

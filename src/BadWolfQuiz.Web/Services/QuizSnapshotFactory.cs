@@ -71,7 +71,7 @@ public sealed class QuizSnapshotFactory
     {
         return new ContentBlockSnapshot(
             block.Id,
-            (ContentBlockKind)(int)block.BlockType,
+            ResolveContentBlockKind(block),
             block.TextContent,
             block.TopCaption,
             block.BottomCaption,
@@ -82,5 +82,34 @@ public sealed class QuizSnapshotFactory
             block.FileName,
             block.SortOrder,
             block.AudioOnly);
+    }
+
+    private static ContentBlockKind ResolveContentBlockKind(
+        ContentBlockBase block)
+    {
+        var kind = (ContentBlockKind)(int)block.BlockType;
+
+        if (kind != ContentBlockKind.Video ||
+            !Uri.TryCreate(block.ExternalUrl, UriKind.Absolute, out var uri))
+        {
+            return kind;
+        }
+
+        var host = uri.IdnHost.TrimEnd('.');
+        var isYouTubeUrl =
+            string.Equals(host, "youtu.be", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(host, "youtube.com", StringComparison.OrdinalIgnoreCase) ||
+            host.EndsWith(".youtube.com", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(
+                host,
+                "youtube-nocookie.com",
+                StringComparison.OrdinalIgnoreCase) ||
+            host.EndsWith(
+                ".youtube-nocookie.com",
+                StringComparison.OrdinalIgnoreCase);
+
+        return isYouTubeUrl
+            ? ContentBlockKind.YouTube
+            : kind;
     }
 }

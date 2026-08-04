@@ -689,6 +689,12 @@
   <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Eligible questions: {0}</value></data>
   <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Random wager question count must be between 0 and {0}.</value></data>
   <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Round settings saved.</value></data>
+  <data name="QuizEditor_QuestionCount" xml:space="preserve"><value>Questions per category</value></data>
+  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve"><value>Choose from {0} to {1}. Reducing the count removes the lower rows and their questions.</value></data>
+  <data name="QuizEditor_QuestionCountDeleteConfirmation" xml:space="preserve"><value>Some questions in the removed rows contain content. Delete them permanently?</value></data>
+  <data name="QuizEditor_CategoryCount" xml:space="preserve"><value>Categories in the round</value></data>
+  <data name="QuizEditor_CategoryCountDescription" xml:space="preserve"><value>Choose from {0} to {1}. Reducing the count removes the categories at the end.</value></data>
+  <data name="QuizEditor_CategoryCountDeleteConfirmation" xml:space="preserve"><value>Some categories being removed contain questions. Delete them permanently?</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Question values</value>
   </data>
@@ -791,6 +797,9 @@
   </data>
   <data name="GameBoard_MediaContent" xml:space="preserve">
     <value>Question media</value>
+  </data>
+  <data name="GameBoard_CloseVideo" xml:space="preserve">
+    <value>Close video</value>
   </data>
   <data name="GameBoard_CloseAnswerRejected" xml:space="preserve">
     <value>The answer presentation could not be closed.</value>
@@ -1129,9 +1138,8 @@
   <data name="Label_QuestionType" xml:space="preserve"><value>Question type</value></data>
   <data name="QuestionType_Standard" xml:space="preserve"><value>Standard question</value></data>
   <data name="QuestionType_FourClues" xml:space="preserve"><value>Four clues</value></data>
-  <data name="FourClues_EditorHint" xml:space="preserve"><value>Add exactly four clues. Each clue may contain text, an image, or audio.</value></data>
+  <data name="FourClues_EditorHint" xml:space="preserve"><value>Add exactly four clues. Each clue may contain text, an image, audio, or video.</value></data>
   <data name="FourClues_ExactlyFourRequired" xml:space="preserve"><value>A four-clue question must contain exactly four clues.</value></data>
-  <data name="FourClues_UnsupportedMedia" xml:space="preserve"><value>Four-clue questions support only text, images, and audio.</value></data>
   <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 clue</value></data>
   <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>The next clue could not be revealed.</value></data>
   <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Question from “{0}” — {1} points</value></data>

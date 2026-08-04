@@ -107,13 +107,6 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
                     $"{nameof(Input)}.{nameof(Input.QuestionBlocks)}",
                     localizer["FourClues_ExactlyFourRequired"]);
             }
-            else if (Input.QuestionBlocks.Any(block =>
-                block.BlockType is ContentBlockType.Video or ContentBlockType.YouTube))
-            {
-                ModelState.AddModelError(
-                    $"{nameof(Input)}.{nameof(Input.QuestionBlocks)}",
-                    localizer["FourClues_UnsupportedMedia"]);
-            }
         }
 
         if (!ModelState.IsValid)

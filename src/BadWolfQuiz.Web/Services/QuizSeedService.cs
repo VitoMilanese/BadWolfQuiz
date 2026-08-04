@@ -3,12 +3,14 @@ using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 
 namespace BadWolfQuiz.Web.Services;
 
 public sealed class QuizSeedService(
     QuizDbContext db,
-    IStringLocalizer<SharedResource> localizer)
+    IStringLocalizer<SharedResource> localizer,
+    IOptions<QuizEditorOptions> editorOptions)
 {
     public async Task SeedAsync()
     {
@@ -30,7 +32,10 @@ public sealed class QuizSeedService(
             DefaultBuzzMode = BuzzActivationMode.Manual
         };
 
-        for (var row = 1; row <= 5; row++)
+        var initialCategoryCount = editorOptions.Value.InitialCategoryCount;
+        var initialQuestionCount = editorOptions.Value.InitialQuestionCount;
+
+        for (var row = 1; row <= initialQuestionCount; row++)
         {
             round.Rows.Add(new QuizRoundRow
             {
@@ -39,7 +44,9 @@ public sealed class QuizSeedService(
             });
         }
 
-        for (var categoryIndex = 1; categoryIndex <= 6; categoryIndex++)
+        for (var categoryIndex = 1;
+             categoryIndex <= initialCategoryCount;
+             categoryIndex++)
         {
             var category = new QuizCategory
             {
@@ -47,7 +54,9 @@ public sealed class QuizSeedService(
                 SortOrder = categoryIndex
             };
 
-            for (var row = 1; row <= 5; row++)
+            for (var row = 1;
+                 row <= initialQuestionCount;
+                 row++)
             {
                 var question = new QuizQuestion
                 {

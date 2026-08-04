@@ -156,11 +156,10 @@ public sealed class QuizQuestionSnapshot
         Points = points;
         var orderedQuestionBlocks = (questionBlocks ?? []).OrderBy(block => block.SortOrder).ToArray();
         if (presentationType == QuestionPresentationType.FourClues &&
-            (orderedQuestionBlocks.Length != 4 ||
-             orderedQuestionBlocks.Any(block => block.Kind is ContentBlockKind.Video or ContentBlockKind.YouTube)))
+            orderedQuestionBlocks.Length != 4)
         {
             throw new ArgumentException(
-                "A four-clue question must contain exactly four text, image, or audio blocks.",
+                "A four-clue question must contain exactly four content blocks.",
                 nameof(questionBlocks));
         }
 
