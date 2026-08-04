@@ -287,6 +287,7 @@ namespace BadWolfQuiz.Web.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("TEXT");
                     b.Property<DateTime>("CreatedAtUtc").HasColumnType("TEXT");
+                    b.Property<string>("DisplayName").HasMaxLength(80).HasColumnType("TEXT");
                     b.Property<string>("Email").IsRequired().HasMaxLength(254).HasColumnType("TEXT");
                     b.Property<string>("NormalizedEmail").IsRequired().HasMaxLength(254).HasColumnType("TEXT");
                     b.Property<string>("PasswordHash").IsRequired().HasColumnType("TEXT");

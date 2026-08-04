@@ -17,7 +17,48 @@ public static class DatabaseMigrationService
         ArgumentNullException.ThrowIfNull(db);
 
         await BootstrapMigrationHistoryAsync(db, cancellationToken);
+        await UpgradeLegacyQuizRatingsAsync(db, cancellationToken);
         await db.Database.MigrateAsync(cancellationToken);
+    }
+
+    private static async Task UpgradeLegacyQuizRatingsAsync(
+        QuizDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var connection = db.Database.GetDbConnection();
+        var shouldClose = connection.State == ConnectionState.Closed;
+
+        if (shouldClose)
+        {
+            await connection.OpenAsync(cancellationToken);
+        }
+
+        try
+        {
+            if (!await TableExistsAsync(connection, "QuizRatings", cancellationToken) ||
+                await ColumnExistsAsync(connection, "QuizRatings", "RaterKey", cancellationToken) ||
+                !await ColumnExistsAsync(connection, "QuizRatings", "PlayerName", cancellationToken))
+            {
+                return;
+            }
+
+            await using var command = connection.CreateCommand();
+            command.CommandText =
+                """
+                DROP INDEX IF EXISTS "IX_QuizRatings_GameSessionId_PlayerName";
+                ALTER TABLE "QuizRatings" RENAME COLUMN "PlayerName" TO "RaterKey";
+                CREATE UNIQUE INDEX IF NOT EXISTS "IX_QuizRatings_GameSessionId_RaterKey"
+                    ON "QuizRatings" ("GameSessionId", "RaterKey");
+                """;
+            await command.ExecuteNonQueryAsync(cancellationToken);
+        }
+        finally
+        {
+            if (shouldClose)
+            {
+                await connection.CloseAsync();
+            }
+        }
     }
 
     private static async Task BootstrapMigrationHistoryAsync(
@@ -104,5 +145,26 @@ public static class DatabaseMigrationService
 
         var result = await command.ExecuteScalarAsync(cancellationToken);
         return Convert.ToInt64(result) > 0;
+    }
+
+    private static async Task<bool> ColumnExistsAsync(
+        System.Data.Common.DbConnection connection,
+        string tableName,
+        string columnName,
+        CancellationToken cancellationToken)
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = $"PRAGMA table_info(\"{tableName}\");";
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            if (string.Equals(reader.GetString(1), columnName, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

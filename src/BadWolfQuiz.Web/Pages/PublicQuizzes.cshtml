@@ -50,6 +50,10 @@ else
                     {
                         <p>@quiz.Description</p>
                     }
+                    @if (!string.IsNullOrWhiteSpace(quiz.AuthorName))
+                    {
+                        <small>@Localizer["PublicQuizzes_Author", quiz.AuthorName]</small>
+                    }
                     <small>@Localizer["Quiz_RoundCount", quiz.RoundCount]</small>
                     @if (quiz.AverageRating is { } average)
                     {

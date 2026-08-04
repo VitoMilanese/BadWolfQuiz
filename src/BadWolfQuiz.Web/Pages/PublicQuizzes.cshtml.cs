@@ -42,6 +42,7 @@ public sealed class PublicQuizzesModel(
                 quiz.Id,
                 quiz.Title,
                 quiz.Description,
+                quiz.Host == null ? null : quiz.Host.DisplayName,
                 quiz.Rounds.Count,
                 quiz.Ratings.Average(rating => (double?)rating.Score),
                 quiz.Ratings.Count))
@@ -88,6 +89,7 @@ public sealed record PublicQuizListItem(
     int Id,
     string Title,
     string? Description,
+    string? AuthorName,
     int RoundCount,
     double? AverageRating,
     int RatingCount);

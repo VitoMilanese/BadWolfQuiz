@@ -80,10 +80,23 @@
            value="false"
            class="remove-file-value" />
 
-    <input asp-for="UploadedFile"
-           class="form-control image-block-file uploaded-file-input"
-           type="file"
-           accept="image/*" />
+    <div class="image-block-upload-row">
+        <input asp-for="UploadedFile"
+               class="form-control image-block-file uploaded-file-input"
+               type="file"
+               accept="image/*" />
+        <button type="button"
+                class="button secondary-button image-clipboard-button"
+                data-image-clipboard-button
+                data-clipboard-empty="@localizer["ImageClipboard_Empty"]"
+                data-clipboard-error="@localizer["ImageClipboard_Error"]">
+            @localizer["ImageClipboard_Button"]
+        </button>
+    </div>
+    <span class="field-validation-error image-clipboard-error"
+          data-image-clipboard-error
+          role="alert"
+          hidden></span>
 
     <input asp-for="TopCaption"
            class="form-control"

@@ -53,6 +53,9 @@ public sealed class HostAccount
     [Required]
     public string PasswordHash { get; set; } = string.Empty;
 
+    [MaxLength(80)]
+    public string? DisplayName { get; set; }
+
     [MaxLength(64)]
     public string? PasswordResetTokenHash { get; set; }
     public DateTime? PasswordResetTokenExpiresAtUtc { get; set; }

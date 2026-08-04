@@ -1187,4 +1187,14 @@
   <data name="QuizRating_NotReady" xml:space="preserve"><value>Оцінку поки не вдалося зберегти. Спробуйте ще раз.</value></data>
   <data name="QuizRating_Count" xml:space="preserve"><value>Оцінок: {0}</value></data>
   <data name="QuizRating_AccessibleSummary" xml:space="preserve"><value>Середня оцінка {0:0.0} з 5 від {1} людей</value></data>
+  <data name="PublicQuizzes_Author" xml:space="preserve"><value>Автор: {0}</value></data>
+  <data name="ContentBlock_Add" xml:space="preserve"><value>+ Додати блок</value></data>
+  <data name="ContentBlockType_Text" xml:space="preserve"><value>Текст</value></data>
+  <data name="ContentBlockType_Image" xml:space="preserve"><value>Зображення</value></data>
+  <data name="ContentBlockType_Audio" xml:space="preserve"><value>Аудіо</value></data>
+  <data name="ContentBlockType_Video" xml:space="preserve"><value>Відео</value></data>
+  <data name="ContentBlockType_YouTube" xml:space="preserve"><value>YouTube</value></data>
+  <data name="ImageClipboard_Button" xml:space="preserve"><value>Вставити з буфера</value></data>
+  <data name="ImageClipboard_Empty" xml:space="preserve"><value>У буфері немає зображення.</value></data>
+  <data name="ImageClipboard_Error" xml:space="preserve"><value>Не вдалося прочитати зображення з буфера. Дозвольте доступ до буфера й повторіть спробу.</value></data>
 </root>

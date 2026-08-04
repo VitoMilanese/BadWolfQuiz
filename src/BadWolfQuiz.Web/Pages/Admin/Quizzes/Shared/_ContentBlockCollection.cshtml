@@ -1,4 +1,6 @@
-﻿@model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockCollectionViewModel
+﻿@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> localizer
+@model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockCollectionViewModel
 
 <section id="@Model.CollectionId"
          class="content-panel content-block-section"
@@ -10,32 +12,32 @@
         <div class="content-block-add-menu">
             <button type="button"
                     class="button secondary-button content-block-add-button">
-                + Додати блок
+                @localizer["ContentBlock_Add"]
             </button>
 
             <div class="content-block-type-menu" hidden>
                 <button type="button"
                         class="content-block-type-option"
                         data-block-type="Text">
-                    Текст
+                    @localizer["ContentBlockType_Text"]
                 </button>
 
                 <button type="button"
                         class="content-block-type-option"
                         data-block-type="Image">
-                    Зображення
+                    @localizer["ContentBlockType_Image"]
                 </button>
 
                 <button type="button"
                         class="content-block-type-option"
                         data-block-type="Audio">
-                    Аудіо
+                    @localizer["ContentBlockType_Audio"]
                 </button>
 
                 <button type="button"
                         class="content-block-type-option"
                         data-block-type="YouTube">
-                    YouTube
+                    @localizer["ContentBlockType_YouTube"]
                 </button>
             </div>
         </div>

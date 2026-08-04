@@ -1187,4 +1187,14 @@
   <data name="QuizRating_NotReady" xml:space="preserve"><value>The rating could not be saved yet. Please try again.</value></data>
   <data name="QuizRating_Count" xml:space="preserve"><value>{0} ratings</value></data>
   <data name="QuizRating_AccessibleSummary" xml:space="preserve"><value>Average rating {0:0.0} out of 5 from {1} people</value></data>
+  <data name="PublicQuizzes_Author" xml:space="preserve"><value>Author: {0}</value></data>
+  <data name="ContentBlock_Add" xml:space="preserve"><value>+ Add block</value></data>
+  <data name="ContentBlockType_Text" xml:space="preserve"><value>Text</value></data>
+  <data name="ContentBlockType_Image" xml:space="preserve"><value>Image</value></data>
+  <data name="ContentBlockType_Audio" xml:space="preserve"><value>Audio</value></data>
+  <data name="ContentBlockType_Video" xml:space="preserve"><value>Video</value></data>
+  <data name="ContentBlockType_YouTube" xml:space="preserve"><value>YouTube</value></data>
+  <data name="ImageClipboard_Button" xml:space="preserve"><value>Paste from clipboard</value></data>
+  <data name="ImageClipboard_Empty" xml:space="preserve"><value>The clipboard does not contain an image.</value></data>
+  <data name="ImageClipboard_Error" xml:space="preserve"><value>Could not read the image from the clipboard. Allow clipboard access and try again.</value></data>
 </root>

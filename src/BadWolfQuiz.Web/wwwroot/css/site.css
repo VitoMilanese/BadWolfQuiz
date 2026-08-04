@@ -41,6 +41,21 @@
     gap: 10px;
 }
 
+.image-block-upload-row {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.image-block-upload-row .uploaded-file-input {
+    flex: 1 1 18rem;
+}
+
+.image-clipboard-error {
+    display: block;
+}
+
 .quiz-rating-panel {
     width: min(100%, 520px);
     margin: 24px auto 0;
