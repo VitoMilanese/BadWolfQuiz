@@ -8,13 +8,43 @@
 
     let expandedIframe = null;
     let closeButton = null;
+    let shouldResumeTimer = false;
+
+    const pauseRunningTimer = () => {
+        const timerPanel = document.getElementById("game-timer");
+        const pauseForm = document.querySelector(".game-timer-pause");
+
+        shouldResumeTimer = Boolean(
+            timerPanel &&
+            !timerPanel.hidden &&
+            pauseForm &&
+            !pauseForm.hidden);
+
+        if (shouldResumeTimer) {
+            pauseForm.requestSubmit();
+        }
+    };
+
+    const resumePausedTimer = () => {
+        if (!shouldResumeTimer) {
+            return;
+        }
+
+        shouldResumeTimer = false;
+        document.querySelector(".game-timer-resume")?.requestSubmit();
+    };
 
     const collapseVideo = () => {
+        const wasExpanded = expandedIframe !== null;
         expandedIframe?.classList.remove("youtube-auto-expanded");
         expandedIframe = null;
         closeButton?.remove();
         closeButton = null;
         document.body.classList.remove("youtube-auto-expanded-open");
+
+        if (wasExpanded) {
+            resumePausedTimer();
+        }
     };
 
     const expandVideo = iframe => {
@@ -26,6 +56,7 @@
         expandedIframe = iframe;
         iframe.classList.add("youtube-auto-expanded");
         document.body.classList.add("youtube-auto-expanded-open");
+        pauseRunningTimer();
 
         closeButton = document.createElement("button");
         closeButton.type = "button";
