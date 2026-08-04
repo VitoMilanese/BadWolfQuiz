@@ -33,6 +33,7 @@ public sealed class QuizDbContext : DbContext
     public DbSet<GameQuestion> GameQuestions => Set<GameQuestion>();
     public DbSet<PlayerBuzz> PlayerBuzzes => Set<PlayerBuzz>();
     public DbSet<PlayerQuestionResult> PlayerQuestionResults => Set<PlayerQuestionResult>();
+    public DbSet<QuizRating> QuizRatings => Set<QuizRating>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -112,5 +113,22 @@ public sealed class QuizDbContext : DbContext
         modelBuilder.Entity<PlayerQuestionResult>()
             .HasIndex(x => new { x.GameQuestionId, x.GamePlayerId })
             .IsUnique();
+
+        modelBuilder.Entity<QuizRating>()
+            .HasIndex(x => new { x.GameSessionId, x.RaterKey })
+            .IsUnique();
+
+        modelBuilder.Entity<QuizRating>()
+            .HasOne(x => x.Quiz)
+            .WithMany(x => x.Ratings)
+            .HasForeignKey(x => x.QuizId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<QuizRating>()
+            .HasOne(x => x.GameSession)
+            .WithMany()
+            .HasForeignKey(x => x.GameSessionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
     }
 }

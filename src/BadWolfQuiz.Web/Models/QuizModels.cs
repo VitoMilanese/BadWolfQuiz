@@ -53,6 +53,9 @@ public sealed class HostAccount
     [Required]
     public string PasswordHash { get; set; } = string.Empty;
 
+    [MaxLength(80)]
+    public string? DisplayName { get; set; }
+
     [MaxLength(64)]
     public string? PasswordResetTokenHash { get; set; }
     public DateTime? PasswordResetTokenExpiresAtUtc { get; set; }
@@ -77,6 +80,8 @@ public sealed class Quiz
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
     public bool IsArchived { get; set; }
+    public bool IsPublic { get; set; }
+    public DateTime? PublishedAtUtc { get; set; }
 
     public ICollection<QuizRound> Rounds { get; set; } = new List<QuizRound>();
     public ICollection<FinalQuestionContentBlock> FinalQuestionBlocks { get; set; } =
@@ -84,7 +89,23 @@ public sealed class Quiz
     public ICollection<FinalAnswerContentBlock> FinalAnswerBlocks { get; set; } =
         new List<FinalAnswerContentBlock>();
     public ICollection<GameSession> Sessions { get; set; } = new List<GameSession>();
+    public ICollection<QuizRating> Ratings { get; set; } = new List<QuizRating>();
     public HostAccount? Host { get; set; }
+}
+
+public sealed class QuizRating
+{
+    public int Id { get; set; }
+    public int QuizId { get; set; }
+    public int GameSessionId { get; set; }
+    [Required, MaxLength(100)]
+    public string RaterKey { get; set; } = string.Empty;
+    [Range(0, 5)]
+    public int Score { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    public Quiz Quiz { get; set; } = null!;
+    public GameSession GameSession { get; set; } = null!;
 }
 
 public sealed class QuizRound

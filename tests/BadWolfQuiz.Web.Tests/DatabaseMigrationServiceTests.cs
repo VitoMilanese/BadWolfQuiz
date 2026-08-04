@@ -7,6 +7,36 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class DatabaseMigrationServiceTests
 {
     [Fact]
+    public async Task MigrateAsync_renames_legacy_quiz_rating_identity_column()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<QuizDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        await using var db = new QuizDbContext(options);
+        await db.Database.MigrateAsync();
+
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText =
+                """
+                DROP INDEX "IX_QuizRatings_GameSessionId_RaterKey";
+                ALTER TABLE "QuizRatings" RENAME COLUMN "RaterKey" TO "PlayerName";
+                CREATE UNIQUE INDEX "IX_QuizRatings_GameSessionId_PlayerName"
+                    ON "QuizRatings" ("GameSessionId", "PlayerName");
+                """;
+            await command.ExecuteNonQueryAsync();
+        }
+
+        await DatabaseMigrationService.MigrateAsync(db);
+
+        Assert.True(await ColumnExistsAsync(connection, "QuizRatings", "RaterKey"));
+        Assert.False(await ColumnExistsAsync(connection, "QuizRatings", "PlayerName"));
+    }
+
+    [Fact]
     public async Task MigrateAsync_upgrades_database_created_without_migration_history()
     {
         await using var connection = new SqliteConnection("Data Source=:memory:");

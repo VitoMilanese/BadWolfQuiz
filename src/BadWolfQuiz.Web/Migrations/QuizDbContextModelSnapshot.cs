@@ -287,6 +287,7 @@ namespace BadWolfQuiz.Web.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("TEXT");
                     b.Property<DateTime>("CreatedAtUtc").HasColumnType("TEXT");
+                    b.Property<string>("DisplayName").HasMaxLength(80).HasColumnType("TEXT");
                     b.Property<string>("Email").IsRequired().HasMaxLength(254).HasColumnType("TEXT");
                     b.Property<string>("NormalizedEmail").IsRequired().HasMaxLength(254).HasColumnType("TEXT");
                     b.Property<string>("PasswordHash").IsRequired().HasColumnType("TEXT");
@@ -424,6 +425,9 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("HostId")
                         .HasMaxLength(36)
                         .HasColumnType("TEXT");
@@ -431,6 +435,9 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(160)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAtUtc")
@@ -441,6 +448,39 @@ namespace BadWolfQuiz.Web.Migrations
                     b.HasIndex("HostId");
 
                     b.ToTable("Quizzes");
+                });
+
+            modelBuilder.Entity("BadWolfQuiz.Web.Models.QuizRating", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("GameSessionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RaterKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("QuizId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameSessionId", "RaterKey")
+                        .IsUnique();
+
+                    b.HasIndex("QuizId");
+
+                    b.ToTable("QuizRatings");
                 });
 
             modelBuilder.Entity("BadWolfQuiz.Web.Models.QuizCategory", b =>
@@ -659,6 +699,24 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Navigation("Host");
                 });
 
+            modelBuilder.Entity("BadWolfQuiz.Web.Models.QuizRating", b =>
+                {
+                    b.HasOne("BadWolfQuiz.Web.Models.GameSession", "GameSession")
+                        .WithMany()
+                        .HasForeignKey("GameSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BadWolfQuiz.Web.Models.Quiz", "Quiz")
+                        .WithMany("Ratings")
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GameSession");
+                    b.Navigation("Quiz");
+                });
+
             modelBuilder.Entity("BadWolfQuiz.Web.Models.PlayerBuzz", b =>
                 {
                     b.HasOne("BadWolfQuiz.Web.Models.GamePlayer", "Player")
@@ -784,6 +842,8 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Navigation("FinalQuestionBlocks");
 
                     b.Navigation("Rounds");
+
+                    b.Navigation("Ratings");
 
                     b.Navigation("Sessions");
                 });

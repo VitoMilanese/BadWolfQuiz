@@ -24,7 +24,9 @@ public sealed class GameHistoryStore(QuizDbContext db)
             return false;
         }
 
-        var quizExists = await db.Quizzes.AnyAsync(
+        var quizExists = await db.Quizzes
+            .IgnoreQueryFilters()
+            .AnyAsync(
             quiz => quiz.Id == runtime.Quiz.SourceQuizId,
             cancellationToken);
 

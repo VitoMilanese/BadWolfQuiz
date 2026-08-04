@@ -328,12 +328,13 @@
                         ? Localizer["FinalQuestion_YourAnswerCorrect"]
                         : Localizer["FinalQuestion_YourAnswerWrong"])
                 </p>
+
             }
 
             <div id="final-question-error" class="message message-error" hidden></div>
         </section>
     }
-    else
+    else if (!Model.CanRateQuiz)
     {
     <section class="player-buzzer-panel">
         <button id="player-buzzer"
@@ -346,6 +347,37 @@
             @Localizer["PlayerGame_BuzzerClosed"]
         </p>
     </section>
+    }
+
+    @if (Model.CanRateQuiz)
+    {
+        <section class="quiz-rating-panel">
+            <h2>@Localizer["QuizRating_Title"]</h2>
+            <p>@Localizer["QuizRating_Description"]</p>
+            <form method="post"
+                  asp-page-handler="RateQuiz"
+                  class="quiz-rating-form"
+                  data-auto-rating-form
+                  data-rating-error-label="@Localizer["QuizRating_NotReady"]">
+                <input name="code" type="hidden" value="@Model.Game.PublicCode" />
+                <input name="playerId" type="hidden" value="@Model.CurrentPlayer.Id.Value" />
+                <input name="accessToken" type="hidden" value="@Model.AccessToken" />
+                <fieldset class="star-rating">
+                    <legend>@Localizer["QuizRating_ScoreLabel"]</legend>
+                    @for (var score = 5; score >= 1; score--)
+                    {
+                        <input id="quiz-rating-@score"
+                               name="score"
+                               type="radio"
+                               value="@score"
+                               checked="@(Model.ExistingRating == score)" />
+                        <label for="quiz-rating-@score"
+                               title="@Localizer["QuizRating_Stars", score]">★</label>
+                    }
+                </fieldset>
+                <span class="quiz-rating-save-state" data-rating-save-state aria-live="polite"></span>
+            </form>
+        </section>
     }
 
 </div>
@@ -823,6 +855,10 @@
                 }
             });
 
+            connection.on("QuizCompleted", () => {
+                reloadForGameTransition().catch(console.error);
+            });
+
             connection.on("FinalQuestionStateChanged", () => {
                 if (!hasReceivedInitialFinalState) {
                     hasReceivedInitialFinalState = true;
@@ -933,6 +969,7 @@
                 connection.invoke("SubmitFinalAnswer", answer)
                     .catch(console.error);
             });
+
 
             const tryBuzz = () => {
                 if (buzzerQuestionId === null ||

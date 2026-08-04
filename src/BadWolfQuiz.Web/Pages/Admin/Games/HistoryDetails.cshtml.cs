@@ -2,10 +2,11 @@ using BadWolfQuiz.Web.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using BadWolfQuiz.Web.Services;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Games;
 
-public sealed class HistoryDetailsModel(QuizDbContext db) : PageModel
+public sealed class HistoryDetailsModel(QuizDbContext db, CurrentHost currentHost) : PageModel
 {
     public GameHistoryDetails? Game { get; private set; }
 
@@ -14,6 +15,7 @@ public sealed class HistoryDetailsModel(QuizDbContext db) : PageModel
         CancellationToken cancellationToken)
     {
         var stored = await db.GameSessions
+            .IgnoreQueryFilters()
             .AsNoTracking()
             .AsSplitQuery()
             .Include(game => game.Quiz)
@@ -28,6 +30,7 @@ public sealed class HistoryDetailsModel(QuizDbContext db) : PageModel
                     .ThenInclude(result => result.Player)
             .SingleOrDefaultAsync(
                 game => game.Id == id &&
+                    game.HostId == currentHost.RequiredId &&
                     game.Status == BadWolfQuiz.Web.Models.GameSessionStatus.Finished,
                 cancellationToken);
 

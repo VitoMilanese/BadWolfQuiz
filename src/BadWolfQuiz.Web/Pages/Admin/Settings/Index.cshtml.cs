@@ -1,8 +1,10 @@
 using BadWolfQuiz.Web.Localization;
+using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Localization;
+using Microsoft.EntityFrameworkCore;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Settings;
 
@@ -10,6 +12,7 @@ public sealed class IndexModel(
     GameSettingsStore settingsStore,
     AvatarCatalog avatarCatalog,
     CurrentHost currentHost,
+    QuizDbContext db,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty]
@@ -31,6 +34,17 @@ public sealed class IndexModel(
     {
         var settings = await settingsStore.LoadAsync(currentHost.RequiredId, cancellationToken);
         Input = GameSettingsInput.From(settings);
+        var host = await db.Hosts.SingleAsync(
+            item => item.Id == currentHost.RequiredId,
+            cancellationToken);
+        if (string.IsNullOrWhiteSpace(host.DisplayName) &&
+            !string.IsNullOrWhiteSpace(settings.HostName))
+        {
+            host.DisplayName = settings.HostName.Trim();
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        Input.HostName = host.DisplayName;
         HasHostImage = settings.HostImageData is not null;
         HasBrandLogo = settings.BrandLogoData is not null;
     }
@@ -67,6 +81,11 @@ public sealed class IndexModel(
         var logoData = RemoveBrandLogo ? null : existing.BrandLogoData;
         var logoContentType = RemoveBrandLogo ? null : existing.BrandLogoContentType;
         HasBrandLogo = logoData is not null;
+
+        if (!ModelState.IsValid)
+        {
+            return Page();
+        }
 
         if (HostImage is not null)
         {
@@ -122,6 +141,15 @@ public sealed class IndexModel(
             ModelState.AddModelError(string.Empty, localizer["HostCard_InvalidSettings"].Value);
             return Page();
         }
+
+        var host = await db.Hosts.SingleAsync(
+            item => item.Id == currentHost.RequiredId,
+            cancellationToken);
+        host.DisplayName = string.IsNullOrWhiteSpace(Input.HostName)
+            ? null
+            : Input.HostName.Trim();
+        Input.HostName = host.DisplayName;
+        await db.SaveChangesAsync(cancellationToken);
 
         await settingsStore.SaveAsync(
             currentHost.RequiredId,

@@ -1,0 +1,79 @@
+@page "/public-quizzes"
+@model BadWolfQuiz.Web.Pages.PublicQuizzesModel
+@{
+    ViewData["Title"] = Localizer["PublicQuizzes_Title"];
+}
+
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">BAD WOLF QUIZ</p>
+        <h1>@Localizer["PublicQuizzes_Title"]</h1>
+        <p>@Localizer["PublicQuizzes_Description"]</p>
+    </div>
+</div>
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="message message-error" role="alert">@errorMessage</div>
+}
+
+<form method="get" class="public-quiz-search">
+    <label for="public-quiz-search">@Localizer["PublicQuizzes_SearchLabel"]</label>
+    <div class="public-quiz-search-row">
+        <input id="public-quiz-search"
+               name="Search"
+               value="@Model.Search"
+               maxlength="160"
+               placeholder="@Localizer["PublicQuizzes_SearchPlaceholder"]" />
+        <button class="button button-primary" type="submit">
+            @Localizer["PublicQuizzes_Search"]
+        </button>
+    </div>
+</form>
+
+@if (Model.Quizzes.Count == 0)
+{
+    <div class="empty-state content-panel">
+        <h2>@Localizer["PublicQuizzes_EmptyTitle"]</h2>
+        <p>@Localizer["PublicQuizzes_EmptyDescription"]</p>
+    </div>
+}
+else
+{
+    <div class="quiz-list public-quiz-list">
+        @foreach (var quiz in Model.Quizzes)
+        {
+            <article class="quiz-card">
+                <div class="quiz-card-content">
+                    <h2>@quiz.Title</h2>
+                    @if (!string.IsNullOrWhiteSpace(quiz.Description))
+                    {
+                        <p>@quiz.Description</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(quiz.AuthorName))
+                    {
+                        <small>@Localizer["PublicQuizzes_Author", quiz.AuthorName]</small>
+                    }
+                    <small>@Localizer["Quiz_RoundCount", quiz.RoundCount]</small>
+                    @if (quiz.AverageRating is { } average)
+                    {
+                        <div class="quiz-rating-summary"
+                             aria-label="@Localizer["QuizRating_AccessibleSummary", average, quiz.RatingCount]">
+                            <span class="quiz-rating-stars" aria-hidden="true">★</span>
+                            <strong>@average.ToString("0.0")</strong>
+                            <span>@Localizer["QuizRating_Count", quiz.RatingCount]</span>
+                        </div>
+                    }
+                </div>
+                <div class="card-actions">
+                    <form method="post" asp-page-handler="CreateGame">
+                        <input name="quizId" type="hidden" value="@quiz.Id" />
+                        <button class="button button-primary" type="submit">
+                            @Localizer["Button_CreateGame"]
+                        </button>
+                    </form>
+                </div>
+            </article>
+        }
+    </div>
+}

@@ -75,6 +75,7 @@
                 }
 
                 <a class="action-menu-item" asp-page="/Join/Index">@Localizer["Button_Join"]</a>
+                <a class="action-menu-item" asp-page="/PublicQuizzes">@Localizer["PublicQuizzes_Title"]</a>
                 @if (!string.IsNullOrWhiteSpace(discordInviteUrl))
                 {
                     <a class="action-menu-item" href="@discordInviteUrl" target="_blank" rel="noopener noreferrer">

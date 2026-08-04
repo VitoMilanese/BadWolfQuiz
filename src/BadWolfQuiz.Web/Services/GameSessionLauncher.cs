@@ -31,6 +31,7 @@ public sealed class GameSessionLauncher(
         CancellationToken cancellationToken = default)
     {
         var quiz = await db.Quizzes
+            .IgnoreQueryFilters()
             .AsNoTracking()
             .AsSplitQuery()
             .Include(item => item.FinalQuestionBlocks)
@@ -46,7 +47,9 @@ public sealed class GameSessionLauncher(
                     .ThenInclude(category => category.Questions)
                         .ThenInclude(question => question.AnswerBlocks)
             .SingleOrDefaultAsync(
-                item => item.Id == quizId && !item.IsArchived,
+                item => item.Id == quizId &&
+                    !item.IsArchived &&
+                    (item.HostId == currentHost.RequiredId || item.IsPublic),
                 cancellationToken);
 
         if (quiz is null)

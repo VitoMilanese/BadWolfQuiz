@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using BadWolfQuiz.Game.Runtime;
@@ -230,6 +231,7 @@ public sealed class GameSettingsInput
 
     public bool AllowNegativeScoreFinalPlayers { get; set; } = true;
     public bool DisplayHostCard { get; set; }
+    [MaxLength(80)]
     public string? HostName { get; set; }
     public HostVisualSource HostVisualSource { get; set; }
     public string? HostAvatarId { get; set; }

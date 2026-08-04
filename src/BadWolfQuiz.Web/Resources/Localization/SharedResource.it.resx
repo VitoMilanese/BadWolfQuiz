@@ -1168,4 +1168,33 @@
   <data name="QuizImport_Success" xml:space="preserve"><value>Quiz importato correttamente.</value></data>
   <data name="QuizImport_InvalidFile" xml:space="preserve"><value>Il file selezionato non è un pacchetto BAD WOLF QUIZ valido o supportato.</value></data>
   <data name="GameBoard_FinishGame" xml:space="preserve"><value>Termina partita</value></data>
+  <data name="PublicQuizzes_Title" xml:space="preserve"><value>Quiz pubblici</value></data>
+  <data name="PublicQuizzes_Description" xml:space="preserve"><value>Trova i quiz pubblicati da altri host e avvia la tua partita.</value></data>
+  <data name="PublicQuizzes_SearchLabel" xml:space="preserve"><value>Cerca quiz pubblici</value></data>
+  <data name="PublicQuizzes_SearchPlaceholder" xml:space="preserve"><value>Nome o descrizione del quiz</value></data>
+  <data name="PublicQuizzes_Search" xml:space="preserve"><value>Cerca</value></data>
+  <data name="PublicQuizzes_EmptyTitle" xml:space="preserve"><value>Nessun quiz trovato</value></data>
+  <data name="PublicQuizzes_EmptyDescription" xml:space="preserve"><value>Prova un'altra ricerca o torna più tardi.</value></data>
+  <data name="QuizPublication_Public" xml:space="preserve"><value>Pubblico</value></data>
+  <data name="QuizPublication_Publish" xml:space="preserve"><value>Pubblica</value></data>
+  <data name="QuizPublication_Unpublish" xml:space="preserve"><value>Rimuovi dalla pubblicazione</value></data>
+  <data name="QuizPublication_Published" xml:space="preserve"><value>Il quiz è ora pubblico.</value></data>
+  <data name="QuizPublication_Unpublished" xml:space="preserve"><value>Il quiz non è più pubblico.</value></data>
+  <data name="QuizRating_Title" xml:space="preserve"><value>Valuta questo quiz</value></data>
+  <data name="QuizRating_Description" xml:space="preserve"><value>Quanto ti è piaciuto questo quiz?</value></data>
+  <data name="QuizRating_ScoreLabel" xml:space="preserve"><value>Valutazione da 0 a 5 stelle</value></data>
+  <data name="QuizRating_Stars" xml:space="preserve"><value>{0} stelle</value></data>
+  <data name="QuizRating_NotReady" xml:space="preserve"><value>Non è ancora stato possibile salvare la valutazione. Riprova.</value></data>
+  <data name="QuizRating_Count" xml:space="preserve"><value>{0} valutazioni</value></data>
+  <data name="QuizRating_AccessibleSummary" xml:space="preserve"><value>Valutazione media {0:0.0} su 5 da {1} persone</value></data>
+  <data name="PublicQuizzes_Author" xml:space="preserve"><value>Autore: {0}</value></data>
+  <data name="ContentBlock_Add" xml:space="preserve"><value>+ Aggiungi blocco</value></data>
+  <data name="ContentBlockType_Text" xml:space="preserve"><value>Testo</value></data>
+  <data name="ContentBlockType_Image" xml:space="preserve"><value>Immagine</value></data>
+  <data name="ContentBlockType_Audio" xml:space="preserve"><value>Audio</value></data>
+  <data name="ContentBlockType_Video" xml:space="preserve"><value>Video</value></data>
+  <data name="ContentBlockType_YouTube" xml:space="preserve"><value>YouTube</value></data>
+  <data name="ImageClipboard_Button" xml:space="preserve"><value>Incolla dagli appunti</value></data>
+  <data name="ImageClipboard_Empty" xml:space="preserve"><value>Gli appunti non contengono un'immagine.</value></data>
+  <data name="ImageClipboard_Error" xml:space="preserve"><value>Impossibile leggere l'immagine dagli appunti. Consenti l'accesso e riprova.</value></data>
 </root>

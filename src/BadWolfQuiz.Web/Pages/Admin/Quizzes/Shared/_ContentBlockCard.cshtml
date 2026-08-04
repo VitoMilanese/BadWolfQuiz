@@ -1,4 +1,6 @@
-﻿@model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
+﻿@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> localizer
+@model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
 
 <div class="content-panel content-block-card"
      data-block-type="@Model.BlockType"
@@ -28,7 +30,7 @@
     </div>
 
     <div style="margin-bottom:12px;">
-        <strong>@Model.BlockType</strong>
+        <strong>@localizer[$"ContentBlockType_{Model.BlockType}"]</strong>
     </div>
 
     @switch (Model.BlockType)

@@ -1278,6 +1278,34 @@
     </section>
 }
 
+@if (Model.CanRateQuiz)
+{
+    <section class="quiz-rating-panel host-quiz-rating-panel">
+        <h2>@Localizer["QuizRating_Title"]</h2>
+        <p>@Localizer["QuizRating_Description"]</p>
+        <form method="post"
+              asp-page-handler="RateQuiz"
+              class="quiz-rating-form"
+              data-auto-rating-form
+              data-rating-error-label="@Localizer["QuizRating_NotReady"]">
+            <fieldset class="star-rating">
+                <legend>@Localizer["QuizRating_ScoreLabel"]</legend>
+                @for (var score = 5; score >= 1; score--)
+                {
+                    <input id="host-quiz-rating-@score"
+                           name="score"
+                           type="radio"
+                           value="@score"
+                           checked="@(Model.ExistingRating == score)" />
+                    <label for="host-quiz-rating-@score"
+                           title="@Localizer["QuizRating_Stars", score]">★</label>
+                }
+            </fieldset>
+            <span class="quiz-rating-save-state" data-rating-save-state aria-live="polite"></span>
+        </form>
+    </section>
+}
+
 <form id="approve-rejoin-form" method="post" asp-page-handler="ApproveRejoin">
     <input id="approve-player-id" name="playerId" type="hidden" />
 </form>

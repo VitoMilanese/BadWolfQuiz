@@ -1,20 +1,23 @@
 using BadWolfQuiz.Web.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using BadWolfQuiz.Web.Services;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Games;
 
-public sealed class HistoryModel(QuizDbContext db) : PageModel
+public sealed class HistoryModel(QuizDbContext db, CurrentHost currentHost) : PageModel
 {
     public IReadOnlyList<GameHistoryListItem> Games { get; private set; } = [];
 
     public async Task OnGetAsync(CancellationToken cancellationToken)
     {
         var storedGames = await db.GameSessions
+            .IgnoreQueryFilters()
             .AsNoTracking()
             .Include(game => game.Quiz)
             .Include(game => game.Players)
             .Where(game =>
+                game.HostId == currentHost.RequiredId &&
                 game.Status == BadWolfQuiz.Web.Models.GameSessionStatus.Finished)
             .OrderByDescending(game => game.FinishedAtUtc)
             .ToListAsync(cancellationToken);

@@ -1168,4 +1168,33 @@
   <data name="QuizImport_Success" xml:space="preserve"><value>Квіз успішно імпортовано.</value></data>
   <data name="QuizImport_InvalidFile" xml:space="preserve"><value>Обраний файл не є коректним або підтримуваним пакетом BAD WOLF QUIZ.</value></data>
   <data name="GameBoard_FinishGame" xml:space="preserve"><value>Закінчити гру</value></data>
+  <data name="PublicQuizzes_Title" xml:space="preserve"><value>Публічні квізи</value></data>
+  <data name="PublicQuizzes_Description" xml:space="preserve"><value>Знаходьте квізи, опубліковані іншими хостами, і створюйте власну гру.</value></data>
+  <data name="PublicQuizzes_SearchLabel" xml:space="preserve"><value>Пошук публічних квізів</value></data>
+  <data name="PublicQuizzes_SearchPlaceholder" xml:space="preserve"><value>Назва або опис квіза</value></data>
+  <data name="PublicQuizzes_Search" xml:space="preserve"><value>Знайти</value></data>
+  <data name="PublicQuizzes_EmptyTitle" xml:space="preserve"><value>Квізів не знайдено</value></data>
+  <data name="PublicQuizzes_EmptyDescription" xml:space="preserve"><value>Спробуйте інший запит або поверніться пізніше.</value></data>
+  <data name="QuizPublication_Public" xml:space="preserve"><value>Публічний</value></data>
+  <data name="QuizPublication_Publish" xml:space="preserve"><value>Опублікувати</value></data>
+  <data name="QuizPublication_Unpublish" xml:space="preserve"><value>Зняти з публікації</value></data>
+  <data name="QuizPublication_Published" xml:space="preserve"><value>Квіз опубліковано.</value></data>
+  <data name="QuizPublication_Unpublished" xml:space="preserve"><value>Квіз знято з публікації.</value></data>
+  <data name="QuizRating_Title" xml:space="preserve"><value>Оцініть цей квіз</value></data>
+  <data name="QuizRating_Description" xml:space="preserve"><value>Наскільки вам сподобався цей квіз?</value></data>
+  <data name="QuizRating_ScoreLabel" xml:space="preserve"><value>Оцінка від 0 до 5 зірочок</value></data>
+  <data name="QuizRating_Stars" xml:space="preserve"><value>{0} зірочок</value></data>
+  <data name="QuizRating_NotReady" xml:space="preserve"><value>Оцінку поки не вдалося зберегти. Спробуйте ще раз.</value></data>
+  <data name="QuizRating_Count" xml:space="preserve"><value>Оцінок: {0}</value></data>
+  <data name="QuizRating_AccessibleSummary" xml:space="preserve"><value>Середня оцінка {0:0.0} з 5 від {1} людей</value></data>
+  <data name="PublicQuizzes_Author" xml:space="preserve"><value>Автор: {0}</value></data>
+  <data name="ContentBlock_Add" xml:space="preserve"><value>+ Додати блок</value></data>
+  <data name="ContentBlockType_Text" xml:space="preserve"><value>Текст</value></data>
+  <data name="ContentBlockType_Image" xml:space="preserve"><value>Зображення</value></data>
+  <data name="ContentBlockType_Audio" xml:space="preserve"><value>Аудіо</value></data>
+  <data name="ContentBlockType_Video" xml:space="preserve"><value>Відео</value></data>
+  <data name="ContentBlockType_YouTube" xml:space="preserve"><value>YouTube</value></data>
+  <data name="ImageClipboard_Button" xml:space="preserve"><value>Вставити з буфера</value></data>
+  <data name="ImageClipboard_Empty" xml:space="preserve"><value>У буфері немає зображення.</value></data>
+  <data name="ImageClipboard_Error" xml:space="preserve"><value>Не вдалося прочитати зображення з буфера. Дозвольте доступ до буфера й повторіть спробу.</value></data>
 </root>
