@@ -32,7 +32,10 @@ public sealed class QuizSeedService(
             DefaultBuzzMode = BuzzActivationMode.Manual
         };
 
-        for (var row = 1; row <= editorOptions.Value.MinimumQuestionCount; row++)
+        var initialCategoryCount = editorOptions.Value.InitialCategoryCount;
+        var initialQuestionCount = editorOptions.Value.InitialQuestionCount;
+
+        for (var row = 1; row <= initialQuestionCount; row++)
         {
             round.Rows.Add(new QuizRoundRow
             {
@@ -42,7 +45,7 @@ public sealed class QuizSeedService(
         }
 
         for (var categoryIndex = 1;
-             categoryIndex <= editorOptions.Value.MinimumCategoryCount;
+             categoryIndex <= initialCategoryCount;
              categoryIndex++)
         {
             var category = new QuizCategory
@@ -52,7 +55,7 @@ public sealed class QuizSeedService(
             };
 
             for (var row = 1;
-                 row <= editorOptions.Value.MinimumQuestionCount;
+                 row <= initialQuestionCount;
                  row++)
             {
                 var question = new QuizQuestion
