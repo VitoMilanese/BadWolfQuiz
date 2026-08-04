@@ -18,6 +18,11 @@
 
 <form method="post" enctype="multipart/form-data" class="form-card narrow stack-form">
     <p class="settings-description">@Localizer["GameSettings_GlobalDescription"]</p>
+    <div class="field-group">
+        <label>@Localizer["Settings_HostId"]</label>
+        <code class="host-id-value">@Model.HostId</code>
+        <small>@Localizer["Settings_HostIdHint"]</small>
+    </div>
     <div asp-validation-summary="ModelOnly" class="message message-error"></div>
     <div class="settings-grid">
     <details class="theme-picker">
@@ -118,7 +123,7 @@
                  alt="@Localizer["BrandLogo_PreviewAlt"]"
                  hidden="@(Model.HasBrandLogo ? null : "hidden")" />
         </span>
-        <small>@Localizer["BrandLogo_Hint"]</small>
+        <small>@Localizer["BrandLogo_Hint", Model.MaximumImageUploadMegabytes]</small>
     </label>
     @if (Model.HasBrandLogo)
     {
@@ -181,7 +186,7 @@
         </span>
     </label>
     <label class="host-image-field">
-        <span>@Localizer["HostCard_Image"]</span>
+        <span>@Localizer["HostCard_Image", Model.MaximumImageUploadMegabytes]</span>
         <span class="host-image-input-row">
             <input asp-for="HostImage" type="file" accept="image/*" data-host-image-input />
             <img class="host-image-preview"

@@ -1,6 +1,7 @@
 ﻿using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Localization;
+using BadWolfQuiz.Web.Services;
 using BadWolfQuiz.Game.Definitions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,7 +11,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Quizzes;
 
-public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<SharedResource> localizer) : PageModel
+public sealed class QuestionEditorModel(
+    QuizDbContext db,
+    CurrentHost currentHost,
+    MediaUploadProcessor mediaUploadProcessor,
+    PremiumHostAccess premiumHostAccess,
+    IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty]
     public InputModel Input { get; set; } = new();
@@ -83,7 +89,7 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
         if (Input.QuestionBlocks == null || Input.QuestionBlocks.Count == 0)
         {
@@ -144,9 +150,6 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
 
         db.RemoveRange(questionBlocksToDelete);
 
-        const int maxFileSizeMb = 10;
-        const long maxFileSize = 10 * 1024 * 1024;
-
         foreach (var inputBlock in Input.QuestionBlocks.OrderBy(x => x.SortOrder))
         {
             QuestionContentBlock entity;
@@ -173,47 +176,25 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
             if (inputBlock.UploadedFile is not null &&
                 inputBlock.UploadedFile.Length > 0)
             {
-                if (inputBlock.BlockType == ContentBlockType.Image &&
-                    !inputBlock.UploadedFile.ContentType.StartsWith(
-                        "image/",
-                        StringComparison.OrdinalIgnoreCase))
+                try
+                {
+                    var media = await mediaUploadProcessor.ProcessContentBlockAsync(
+                        inputBlock.UploadedFile,
+                        inputBlock.BlockType,
+                        premiumHostAccess.IsPremium(currentHost.RequiredId),
+                        cancellationToken);
+                    entity.FileData = media.Data;
+                    entity.FileContentType = media.ContentType;
+                    entity.FileName = media.FileName;
+                }
+                catch (MediaUploadException exception)
                 {
                     ModelState.AddModelError(
                         string.Empty,
-                        localizer["InvalidImageFile"]);
+                        localizer[exception.ResourceKey, exception.ResourceArguments]);
 
                     return Page();
                 }
-
-                if (inputBlock.BlockType == ContentBlockType.Audio &&
-                    !inputBlock.UploadedFile.ContentType.StartsWith(
-                        "audio/",
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        localizer["InvalidAudioFile"]);
-
-                    return Page();
-                }
-
-                if (inputBlock.UploadedFile.Length > maxFileSize)
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        localizer["FileSizeLimitExceeded", maxFileSizeMb]);
-
-                    return Page();
-                }
-
-                await using var memoryStream = new MemoryStream();
-
-                await inputBlock.UploadedFile.CopyToAsync(memoryStream);
-
-                entity.FileData = memoryStream.ToArray();
-                entity.FileContentType = inputBlock.UploadedFile.ContentType;
-                entity.FileName = Path.GetFileName(
-                    inputBlock.UploadedFile.FileName);
             }
 
             entity.SortOrder = inputBlock.SortOrder;
@@ -262,47 +243,25 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
             if (inputBlock.UploadedFile is not null &&
                 inputBlock.UploadedFile.Length > 0)
             {
-                if (inputBlock.BlockType == ContentBlockType.Image &&
-                    !inputBlock.UploadedFile.ContentType.StartsWith(
-                        "image/",
-                        StringComparison.OrdinalIgnoreCase))
+                try
+                {
+                    var media = await mediaUploadProcessor.ProcessContentBlockAsync(
+                        inputBlock.UploadedFile,
+                        inputBlock.BlockType,
+                        premiumHostAccess.IsPremium(currentHost.RequiredId),
+                        cancellationToken);
+                    entity.FileData = media.Data;
+                    entity.FileContentType = media.ContentType;
+                    entity.FileName = media.FileName;
+                }
+                catch (MediaUploadException exception)
                 {
                     ModelState.AddModelError(
                         string.Empty,
-                        localizer["InvalidImageFile"]);
+                        localizer[exception.ResourceKey, exception.ResourceArguments]);
 
                     return Page();
                 }
-
-                if (inputBlock.BlockType == ContentBlockType.Audio &&
-                    !inputBlock.UploadedFile.ContentType.StartsWith(
-                        "audio/",
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        localizer["InvalidAudioFile"]);
-
-                    return Page();
-                }
-
-                if (inputBlock.UploadedFile.Length > maxFileSize)
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        localizer["FileSizeLimitExceeded", maxFileSizeMb]);
-
-                    return Page();
-                }
-
-                await using var memoryStream = new MemoryStream();
-
-                await inputBlock.UploadedFile.CopyToAsync(memoryStream);
-
-                entity.FileData = memoryStream.ToArray();
-                entity.FileContentType = inputBlock.UploadedFile.ContentType;
-                entity.FileName = Path.GetFileName(
-                    inputBlock.UploadedFile.FileName);
             }
 
             entity.SortOrder = inputBlock.SortOrder;
@@ -314,7 +273,7 @@ public sealed class QuestionEditorModel(QuizDbContext db, IStringLocalizer<Share
             entity.AudioOnly = inputBlock.AudioOnly;
         }
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(cancellationToken);
         TempData["SuccessMessage"] = localizer["Message_QuestionSaved"].Value;
         //return RedirectToPage("Editor", new { id = Input.QuizId });
         return RedirectToPage(new { id = Input.Id });

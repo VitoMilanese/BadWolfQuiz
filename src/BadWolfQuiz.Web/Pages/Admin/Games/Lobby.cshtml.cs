@@ -18,6 +18,8 @@ public sealed class LobbyModel(
     JoinUrlBuilder joinUrlBuilder,
     AvatarCatalog avatarCatalog,
     QuizRatingService quizRatingService,
+    MediaUploadProcessor mediaUploadProcessor,
+    PremiumHostAccess premiumHostAccess,
     IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -50,6 +52,8 @@ public sealed class LobbyModel(
     public IReadOnlyList<GameResultStanding> FinalStandings { get; private set; } = [];
     public bool CanRateQuiz { get; private set; }
     public int? ExistingRating { get; private set; }
+    public int MaximumImageUploadMegabytes =>
+        mediaUploadProcessor.MaximumImageUploadMegabytes;
 
     public async Task<IActionResult> OnGetAsync(
         Guid id,
@@ -298,18 +302,22 @@ public sealed class LobbyModel(
 
         if (HostImage is not null)
         {
-            if (!HostImage.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
-                HostImage.Length is <= 0 or > 5 * 1024 * 1024)
+            try
             {
-                TempData["ErrorMessage"] = localizer["HostCard_InvalidImage"].Value;
+                var media = await mediaUploadProcessor.ProcessImageAsync(
+                    HostImage,
+                    premiumHostAccess.IsPremium(currentHost.RequiredId),
+                    cancellationToken);
+                imageData = media.Data;
+                imageContentType = media.ContentType;
+                SettingsInput.HostVisualSource = HostVisualSource.Image;
+            }
+            catch (MediaUploadException exception)
+            {
+                TempData["ErrorMessage"] =
+                    localizer[exception.ResourceKey, exception.ResourceArguments].Value;
                 return null;
             }
-
-            await using var stream = new MemoryStream();
-            await HostImage.CopyToAsync(stream, cancellationToken);
-            imageData = stream.ToArray();
-            imageContentType = HostImage.ContentType;
-            SettingsInput.HostVisualSource = HostVisualSource.Image;
         }
 
         if (!SettingsInput.IsValid)

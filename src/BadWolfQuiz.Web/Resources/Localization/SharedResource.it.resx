@@ -1032,8 +1032,7 @@
   <data name="HostCard_SourceNone" xml:space="preserve"><value>Non selezionato</value></data>
   <data name="HostCard_SourceImage" xml:space="preserve"><value>Immagine</value></data>
   <data name="HostCard_SourceWebcam" xml:space="preserve"><value>Webcam</value></data>
-  <data name="HostCard_Image" xml:space="preserve"><value>Immagine dell’host (fino a 5 MB)</value></data>
-  <data name="HostCard_InvalidImage" xml:space="preserve"><value>Seleziona un’immagine valida fino a 5 MB.</value></data>
+  <data name="HostCard_Image" xml:space="preserve"><value>Immagine dell’host (fino a {0} MB)</value></data>
   <data name="HostCard_InvalidSettings" xml:space="preserve"><value>Per mostrare la scheda host, inserisci un nome e seleziona un’immagine o una webcam.</value></data>
   <data name="GameBoard_ResizePlayerPanel" xml:space="preserve"><value>Ridimensiona il pannello dei giocatori</value></data>
   <data name="HostCard_SourceAvatar" xml:space="preserve"><value>Avatar</value></data>
@@ -1053,10 +1052,9 @@
   <data name="GameBoard_ResizeHostCard" xml:space="preserve"><value>Ridimensiona la larghezza e l'altezza della scheda host</value></data>
   <data name="GameBoard_MoveHostCard" xml:space="preserve"><value>Sposta la scheda host verso l'alto o il basso</value></data>
   <data name="BrandLogo_Label" xml:space="preserve"><value>Logo personalizzato nell'intestazione</value></data>
-  <data name="BrandLogo_Hint" xml:space="preserve"><value>Immagine fino a 5 MB. Sostituisce BAD WOLF QUIZ nell'intestazione quando hai effettuato l'accesso.</value></data>
+  <data name="BrandLogo_Hint" xml:space="preserve"><value>Immagine fino a {0} MB. Sostituisce BAD WOLF QUIZ nell'intestazione quando hai effettuato l'accesso.</value></data>
   <data name="BrandLogo_PreviewAlt" xml:space="preserve"><value>Anteprima del logo personalizzato</value></data>
   <data name="BrandLogo_Remove" xml:space="preserve"><value>Rimuovi il logo personalizzato</value></data>
-  <data name="BrandLogo_InvalidImage" xml:space="preserve"><value>Seleziona un'immagine valida per il logo fino a 5 MB.</value></data>
   <data name="Menu_PlayWithUs" xml:space="preserve"><value>Gioca con noi</value></data>
   <data name="Menu_AskQuestion" xml:space="preserve"><value>Fai una domanda</value></data>
   <data name="AskQuestion_Eyebrow" xml:space="preserve"><value>CONTATTACI</value></data>
@@ -1200,4 +1198,9 @@
   <data name="Account_HostName" xml:space="preserve"><value>Nome host (facoltativo)</value></data>
   <data name="Account_HostNameHint" xml:space="preserve"><value>Potrai modificare il nome host in seguito nelle Impostazioni.</value></data>
   <data name="QuizEditor_CountReductionTitle" xml:space="preserve"><value>Eliminare le domande?</value></data>
+  <data name="InvalidMediaFile" xml:space="preserve"><value>Questo blocco non supporta il caricamento di file.</value></data>
+  <data name="AudioConversionUnavailable" xml:space="preserve"><value>La conversione audio non è disponibile. Installa FFmpeg o correggi MediaProcessing:FfmpegExecutablePath.</value></data>
+  <data name="FileUploadLimit" xml:space="preserve"><value>Dimensione massima del file: {0} MB.</value></data>
+  <data name="Settings_HostId" xml:space="preserve"><value>ID host</value></data>
+  <data name="Settings_HostIdHint" xml:space="preserve"><value>Usa questo identificatore per configurare gli host premium.</value></data>
 </root>
