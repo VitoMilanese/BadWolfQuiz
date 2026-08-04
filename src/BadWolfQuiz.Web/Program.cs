@@ -18,7 +18,6 @@ using Microsoft.AspNetCore.Http.Features;
 var builder = WebApplication.CreateBuilder(args);
 
 const long maximumImportRequestBodySize = 1100L * 1024 * 1024;
-const long maximumQuestionEditorRequestBodySize = 128L * 1024 * 1024;
 const long maximumMultipartBodySize = 1050L * 1024 * 1024;
 
 builder.Services.Configure<FormOptions>(options =>
@@ -88,6 +87,14 @@ builder.Services.AddOptions<SiteDefaultsOptions>()
         options => SiteThemeCatalog.IsValid(options.ThemeId),
         "The default site theme is invalid.")
     .ValidateOnStart();
+builder.Services.AddOptions<MediaProcessingOptions>()
+    .Bind(builder.Configuration.GetSection(MediaProcessingOptions.SectionName))
+    .Validate(options => options.IsValid, "Media processing settings are invalid.")
+    .ValidateOnStart();
+builder.Services.AddOptions<PremiumHostOptions>()
+    .Bind(builder.Configuration.GetSection(PremiumHostOptions.SectionName))
+    .Validate(options => options.IsValid, "Premium host identifiers are invalid.")
+    .ValidateOnStart();
 
 var defaultCulture = builder.Configuration[
     $"{SiteDefaultsOptions.SectionName}:{nameof(SiteDefaultsOptions.Culture)}"] ?? "en";
@@ -132,6 +139,8 @@ builder.Services.AddScoped<IPasswordHasher<HostAccount>, PasswordHasher<HostAcco
 builder.Services.AddScoped<QuizSeedService>();
 builder.Services.AddScoped<QuizPackageService>();
 builder.Services.AddScoped<QuizRatingService>();
+builder.Services.AddSingleton<MediaUploadProcessor>();
+builder.Services.AddSingleton<PremiumHostAccess>();
 
 var app = builder.Build();
 
@@ -176,9 +185,11 @@ app.Use(async (context, next) =>
             else if (context.Request.Path.StartsWithSegments(
                 "/Admin/Quizzes/QuestionEditor") ||
                 context.Request.Path.StartsWithSegments(
-                    "/Admin/Quizzes/FinalQuestionEditor"))
+                    "/Admin/Quizzes/FinalQuestionEditor") ||
+                context.Request.Path.StartsWithSegments("/Admin/Settings") ||
+                context.Request.Path.StartsWithSegments("/Admin/Games/Lobby"))
             {
-                bodySizeFeature.MaxRequestBodySize = maximumQuestionEditorRequestBodySize;
+                bodySizeFeature.MaxRequestBodySize = maximumMultipartBodySize;
             }
         }
     }

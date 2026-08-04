@@ -16,6 +16,34 @@ public sealed class GameSettingsStoreTests : IDisposable
         Guid.NewGuid().ToString("N"));
 
     [Fact]
+    public async Task InitializeHost_does_not_inherit_legacy_host_name()
+    {
+        var appData = Path.Combine(_contentRoot, "App_Data");
+        Directory.CreateDirectory(appData);
+        await File.WriteAllTextAsync(
+            Path.Combine(appData, "game-settings.json"),
+            """
+            {
+              "HostName": "Kystick",
+              "BuzzerDuration": "00:00:30",
+              "AnswerDuration": "00:00:10",
+              "RegularQuestionBuzzerStartMode": "Manual",
+              "WagerQuestionAnswerTimerStartMode": "Automatic",
+              "AllowNegativeScoreFinalPlayers": true,
+              "SiteThemeId": "classic-wolf"
+            }
+            """);
+        var store = new GameSettingsStore(
+            new TestWebHostEnvironment(_contentRoot));
+
+        await store.InitializeHostAsync("new-host", null);
+        var settings = await store.LoadAsync("new-host");
+
+        Assert.Null(settings.HostName);
+        Assert.False(settings.DisplayHostCard);
+    }
+
+    [Fact]
     public async Task Save_and_load_preserve_global_defaults()
     {
         var store = new GameSettingsStore(

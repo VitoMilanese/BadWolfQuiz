@@ -745,6 +745,35 @@
     </dialog>
 }
 
+<dialog id="count-reduction-dialog" class="app-dialog">
+    <div class="dialog-card dialog-card-danger">
+        <div class="dialog-heading">
+            <h2>@Localizer["QuizEditor_CountReductionTitle"]</h2>
+            <button type="button"
+                    class="dialog-close"
+                    onclick="cancelCountReduction()"
+                    aria-label="@Localizer["Button_Cancel"]">
+                ×
+            </button>
+        </div>
+
+        <p class="dialog-warning" data-count-reduction-message></p>
+
+        <div class="dialog-actions form-actions">
+            <button type="button"
+                    class="button button-secondary"
+                    onclick="cancelCountReduction()">
+                @Localizer["Button_Cancel"]
+            </button>
+            <button type="button"
+                    class="button button-danger"
+                    onclick="confirmCountReduction()">
+                @Localizer["Button_Delete"]
+            </button>
+        </div>
+    </div>
+</dialog>
+
 @section Scripts
 {
     <script>
@@ -759,6 +788,26 @@
 
         const quizBoardForm = document.querySelector(".quiz-board-form");
 
+        const countReductionDialog =
+            document.getElementById("count-reduction-dialog");
+
+        let pendingCountSelect = null;
+
+        const cancelCountReduction = () => {
+            if (pendingCountSelect) {
+                pendingCountSelect.value =
+                    pendingCountSelect.dataset.initialCount;
+            }
+            pendingCountSelect = null;
+            countReductionDialog?.close();
+        };
+
+        const confirmCountReduction = () => {
+            pendingCountSelect = null;
+            countReductionDialog?.close();
+            quizBoardForm?.requestSubmit();
+        };
+
         const saveCountChange = select => {
             const initialCount = Number(
                 select.dataset.initialCount);
@@ -771,10 +820,14 @@
                 nextCount < initialCount &&
                 filledItems.some(position => position > nextCount);
 
-            if (deletesFilledQuestion &&
-                !window.confirm(
-                    select.dataset.deleteConfirmation)) {
-                select.value = initialCount.toString();
+            if (deletesFilledQuestion) {
+                pendingCountSelect = select;
+                const message = countReductionDialog?.querySelector(
+                    "[data-count-reduction-message]");
+                if (message) {
+                    message.textContent = select.dataset.deleteConfirmation;
+                }
+                countReductionDialog?.showModal();
                 return;
             }
 
@@ -787,6 +840,11 @@
         categoryCountSelect?.addEventListener(
             "change",
             () => saveCountChange(categoryCountSelect));
+
+        countReductionDialog?.addEventListener("cancel", event => {
+            event.preventDefault();
+            cancelCountReduction();
+        });
 
         const randomWagerCountSetting =
             document.getElementById("random-wager-count-setting");

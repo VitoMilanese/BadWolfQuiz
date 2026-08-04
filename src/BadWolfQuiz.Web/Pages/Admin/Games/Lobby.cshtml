@@ -175,7 +175,7 @@
                             </span>
                         </label>
                         <label class="host-image-field">
-                            <span>@Localizer["HostCard_Image"]</span>
+                            <span>@Localizer["HostCard_Image", Model.MaximumImageUploadMegabytes]</span>
                             <span class="host-image-input-row">
                                 <input asp-for="HostImage" type="file" accept="image/*" data-host-image-input />
                                 <img class="host-image-preview"

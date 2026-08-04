@@ -19,6 +19,15 @@ public sealed class HostAccountService(
         string password,
         CancellationToken cancellationToken = default)
     {
+        return await RegisterAsync(email, password, null, cancellationToken);
+    }
+
+    public async Task<HostRegistrationResult> RegisterAsync(
+        string email,
+        string password,
+        string? displayName,
+        CancellationToken cancellationToken = default)
+    {
         var normalizedEmail = NormalizeEmail(email);
         if (await db.Hosts.AnyAsync(x => x.NormalizedEmail == normalizedEmail, cancellationToken))
         {
@@ -30,7 +39,10 @@ public sealed class HostAccountService(
         var host = new HostAccount
         {
             Email = email.Trim(),
-            NormalizedEmail = normalizedEmail
+            NormalizedEmail = normalizedEmail,
+            DisplayName = string.IsNullOrWhiteSpace(displayName)
+                ? null
+                : displayName.Trim()
         };
         host.PasswordHash = passwordHasher.HashPassword(host, password);
         db.Hosts.Add(host);

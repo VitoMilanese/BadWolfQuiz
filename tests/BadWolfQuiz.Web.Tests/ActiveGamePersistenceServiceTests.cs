@@ -45,7 +45,19 @@ public sealed class ActiveGamePersistenceServiceTests : IDisposable
         Assert.True(new FileInfo(Path.Combine(
             _contentRoot,
             "App_Data",
-            "active-games.json")).Length > 4 * 1024 * 1024);
+            "active-games.json")).Length < 100 * 1024);
+        var blobFiles = Directory.GetFiles(Path.Combine(
+            _contentRoot,
+            "App_Data",
+            "active-game-blobs"), "*.bin");
+        var blobFile = Assert.Single(blobFiles);
+        Assert.Equal(4 * 1024 * 1024, new FileInfo(blobFile).Length);
+
+        var restoredStore = new ActiveGameStore(environment);
+        Assert.Equal(
+            4 * 1024 * 1024,
+            restoredStore.GetAll().Single().Quiz.Rounds.Single()
+                .Questions.Single().QuestionBlocks.Single().FileData!.Length);
     }
 
     public void Dispose()

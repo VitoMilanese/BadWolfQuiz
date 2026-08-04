@@ -1032,8 +1032,7 @@
   <data name="HostCard_SourceNone" xml:space="preserve"><value>Not selected</value></data>
   <data name="HostCard_SourceImage" xml:space="preserve"><value>Image</value></data>
   <data name="HostCard_SourceWebcam" xml:space="preserve"><value>Webcam</value></data>
-  <data name="HostCard_Image" xml:space="preserve"><value>Host image (up to 5 MB)</value></data>
-  <data name="HostCard_InvalidImage" xml:space="preserve"><value>Select a valid image up to 5 MB.</value></data>
+  <data name="HostCard_Image" xml:space="preserve"><value>Host image (up to {0} MB)</value></data>
   <data name="HostCard_InvalidSettings" xml:space="preserve"><value>To show the host card, enter a name and select an image or webcam.</value></data>
   <data name="GameBoard_ResizePlayerPanel" xml:space="preserve"><value>Resize player panel</value></data>
   <data name="HostCard_SourceAvatar" xml:space="preserve"><value>Avatar</value></data>
@@ -1053,10 +1052,9 @@
   <data name="GameBoard_ResizeHostCard" xml:space="preserve"><value>Resize the host card width and height</value></data>
   <data name="GameBoard_MoveHostCard" xml:space="preserve"><value>Move the host card up or down</value></data>
   <data name="BrandLogo_Label" xml:space="preserve"><value>Custom header logo</value></data>
-  <data name="BrandLogo_Hint" xml:space="preserve"><value>Image up to 5 MB. It replaces BAD WOLF QUIZ in the header while you are signed in.</value></data>
+  <data name="BrandLogo_Hint" xml:space="preserve"><value>Image up to {0} MB. It replaces BAD WOLF QUIZ in the header while you are signed in.</value></data>
   <data name="BrandLogo_PreviewAlt" xml:space="preserve"><value>Custom logo preview</value></data>
   <data name="BrandLogo_Remove" xml:space="preserve"><value>Remove the custom logo</value></data>
-  <data name="BrandLogo_InvalidImage" xml:space="preserve"><value>Select a valid logo image up to 5 MB.</value></data>
   <data name="Menu_PlayWithUs" xml:space="preserve"><value>Play with us</value></data>
   <data name="Menu_AskQuestion" xml:space="preserve"><value>Ask a question</value></data>
   <data name="AskQuestion_Eyebrow" xml:space="preserve"><value>CONTACT US</value></data>
@@ -1197,4 +1195,12 @@
   <data name="ImageClipboard_Button" xml:space="preserve"><value>Paste from clipboard</value></data>
   <data name="ImageClipboard_Empty" xml:space="preserve"><value>The clipboard does not contain an image.</value></data>
   <data name="ImageClipboard_Error" xml:space="preserve"><value>Could not read the image from the clipboard. Allow clipboard access and try again.</value></data>
+  <data name="Account_HostName" xml:space="preserve"><value>Host name (optional)</value></data>
+  <data name="Account_HostNameHint" xml:space="preserve"><value>You can change the host name later in Settings.</value></data>
+  <data name="QuizEditor_CountReductionTitle" xml:space="preserve"><value>Delete questions?</value></data>
+  <data name="InvalidMediaFile" xml:space="preserve"><value>This block does not support file uploads.</value></data>
+  <data name="AudioConversionUnavailable" xml:space="preserve"><value>Audio conversion is unavailable. Install FFmpeg or correct MediaProcessing:FfmpegExecutablePath.</value></data>
+  <data name="FileUploadLimit" xml:space="preserve"><value>Maximum file size: {0} MB.</value></data>
+  <data name="Settings_HostId" xml:space="preserve"><value>Host ID</value></data>
+  <data name="Settings_HostIdHint" xml:space="preserve"><value>Use this identifier when configuring premium hosts.</value></data>
 </root>

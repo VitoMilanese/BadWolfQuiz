@@ -13,6 +13,8 @@ public sealed class IndexModel(
     AvatarCatalog avatarCatalog,
     CurrentHost currentHost,
     QuizDbContext db,
+    MediaUploadProcessor mediaUploadProcessor,
+    PremiumHostAccess premiumHostAccess,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty]
@@ -29,6 +31,10 @@ public sealed class IndexModel(
 
     public bool HasHostImage { get; private set; }
     public bool HasBrandLogo { get; private set; }
+    public string HostId => currentHost.RequiredId;
+    public int MaximumImageUploadMegabytes =>
+        mediaUploadProcessor.MaximumImageUploadMegabytes(
+            premiumHostAccess.IsPremium(currentHost.RequiredId));
 
     public async Task OnGetAsync(CancellationToken cancellationToken)
     {
@@ -89,35 +95,45 @@ public sealed class IndexModel(
 
         if (HostImage is not null)
         {
-            if (!HostImage.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
-                HostImage.Length is <= 0 or > 5 * 1024 * 1024)
+            try
             {
-                ModelState.AddModelError(string.Empty, localizer["HostCard_InvalidImage"].Value);
+                var media = await mediaUploadProcessor.ProcessImageAsync(
+                    HostImage,
+                    premiumHostAccess.IsPremium(currentHost.RequiredId),
+                    cancellationToken);
+                imageData = media.Data;
+                imageContentType = media.ContentType;
+                HasHostImage = true;
+                Input.HostVisualSource = BadWolfQuiz.Game.Runtime.HostVisualSource.Image;
+            }
+            catch (MediaUploadException exception)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    localizer[exception.ResourceKey, exception.ResourceArguments]);
                 return Page();
             }
-
-            await using var stream = new MemoryStream();
-            await HostImage.CopyToAsync(stream, cancellationToken);
-            imageData = stream.ToArray();
-            imageContentType = HostImage.ContentType;
-            HasHostImage = true;
-            Input.HostVisualSource = BadWolfQuiz.Game.Runtime.HostVisualSource.Image;
         }
 
         if (BrandLogo is not null)
         {
-            if (!BrandLogo.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
-                BrandLogo.Length is <= 0 or > 5 * 1024 * 1024)
+            try
             {
-                ModelState.AddModelError(string.Empty, localizer["BrandLogo_InvalidImage"].Value);
+                var media = await mediaUploadProcessor.ProcessImageAsync(
+                    BrandLogo,
+                    premiumHostAccess.IsPremium(currentHost.RequiredId),
+                    cancellationToken);
+                logoData = media.Data;
+                logoContentType = media.ContentType;
+                HasBrandLogo = true;
+            }
+            catch (MediaUploadException exception)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    localizer[exception.ResourceKey, exception.ResourceArguments]);
                 return Page();
             }
-
-            await using var stream = new MemoryStream();
-            await BrandLogo.CopyToAsync(stream, cancellationToken);
-            logoData = stream.ToArray();
-            logoContentType = BrandLogo.ContentType;
-            HasBrandLogo = true;
         }
 
         if (!SiteThemeCatalog.IsValid(Input.SiteThemeId) ||

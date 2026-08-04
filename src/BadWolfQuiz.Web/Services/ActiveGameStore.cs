@@ -14,13 +14,11 @@ public sealed record ActiveGameSnapshot(
 
 public sealed class ActiveGameStore
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        Converters = { new QuizSnapshotJsonConverter() }
-    };
-
     private readonly string _path;
+    private readonly string _blobDirectory;
     private readonly SemaphoreSlim _gate = new(1, 1);
+    private readonly ExternalByteArrayJsonConverter _binaryConverter;
+    private readonly JsonSerializerOptions _jsonOptions;
     private IReadOnlyList<ActiveGameSnapshot> _snapshots;
 
     internal int WriteCount { get; private set; }
@@ -31,6 +29,19 @@ public sealed class ActiveGameStore
             environment.ContentRootPath,
             "App_Data",
             "active-games.json");
+        _blobDirectory = Path.Combine(
+            environment.ContentRootPath,
+            "App_Data",
+            "active-game-blobs");
+        _binaryConverter = new ExternalByteArrayJsonConverter(_blobDirectory);
+        _jsonOptions = new JsonSerializerOptions
+        {
+            Converters =
+            {
+                new QuizSnapshotJsonConverter(),
+                _binaryConverter
+            }
+        };
         _snapshots = LoadFromDisk();
     }
 
@@ -51,6 +62,7 @@ public sealed class ActiveGameStore
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
             var temporaryPath = _path + ".tmp";
+            _binaryConverter.BeginWrite();
             await using (var stream = new FileStream(
                 temporaryPath,
                 FileMode.Create,
@@ -62,18 +74,45 @@ public sealed class ActiveGameStore
                 await JsonSerializer.SerializeAsync(
                     stream,
                     snapshots,
-                    JsonOptions,
+                    _jsonOptions,
                     CancellationToken.None);
                 await stream.FlushAsync(CancellationToken.None);
             }
 
             await ReplaceFileWithRetryAsync(temporaryPath);
+            DeleteUnreferencedBlobs();
             _snapshots = snapshots;
             WriteCount++;
         }
         finally
         {
             _gate.Release();
+        }
+    }
+
+    private void DeleteUnreferencedBlobs()
+    {
+        if (!Directory.Exists(_blobDirectory))
+        {
+            return;
+        }
+
+        foreach (var path in Directory.EnumerateFiles(_blobDirectory, "*.bin"))
+        {
+            var blobName = Path.GetFileNameWithoutExtension(path);
+            if (!_binaryConverter.ReferencedBlobs.Contains(blobName))
+            {
+                try
+                {
+                    File.Delete(path);
+                }
+                catch (Exception exception) when (
+                    exception is IOException or UnauthorizedAccessException)
+                {
+                    // Orphaned blobs are harmless and can be retried on the
+                    // next successful snapshot replacement.
+                }
+            }
         }
     }
 
@@ -114,7 +153,7 @@ public sealed class ActiveGameStore
             using var stream = File.OpenRead(_path);
             return JsonSerializer.Deserialize<ActiveGameSnapshot[]>(
                 stream,
-                JsonOptions) ?? [];
+                _jsonOptions) ?? [];
         }
         catch (Exception exception) when (
             exception is JsonException or

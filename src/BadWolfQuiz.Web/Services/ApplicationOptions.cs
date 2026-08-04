@@ -33,3 +33,40 @@ public sealed class SiteDefaultsOptions
     public string Culture { get; set; } = "en";
     public string ThemeId { get; set; } = SiteThemeCatalog.DefaultId;
 }
+
+public sealed class MediaProcessingOptions
+{
+    public const string SectionName = "MediaProcessing";
+    public int MaximumImageUploadMegabytes { get; set; } = 5;
+    public int MaximumAudioUploadMegabytes { get; set; } = 5;
+    public int MaximumImageWidth { get; set; } = 1920;
+    public int MaximumImageHeight { get; set; } = 1080;
+    public bool ConvertAudioToMp3 { get; set; } = true;
+    public int Mp3BitrateKbps { get; set; } = 128;
+    public string FfmpegExecutablePath { get; set; } = "ffmpeg";
+    public bool ConvertOpaqueImagesToJpeg { get; set; } = true;
+    public int JpegQuality { get; set; } = 85;
+
+    public bool IsValid =>
+        MaximumImageUploadMegabytes is >= 1 and <= 1024 &&
+        MaximumAudioUploadMegabytes is >= 1 and <= 1024 &&
+        MaximumImageWidth is >= 1 and <= 32768 &&
+        MaximumImageHeight is >= 1 and <= 32768 &&
+        Mp3BitrateKbps is >= 32 and <= 320 &&
+        (!ConvertAudioToMp3 || !string.IsNullOrWhiteSpace(FfmpegExecutablePath)) &&
+        JpegQuality is >= 1 and <= 100;
+}
+
+public sealed class PremiumHostOptions
+{
+    public const string SectionName = "PremiumHosts";
+    public string[] HostIds { get; set; } = [];
+    public int MaximumImageUploadMegabytes { get; set; } = 10;
+    public int MaximumAudioUploadMegabytes { get; set; } = 10;
+
+    public bool IsValid =>
+        MaximumImageUploadMegabytes is >= 1 and <= 1024 &&
+        MaximumAudioUploadMegabytes is >= 1 and <= 1024 &&
+        HostIds is not null && HostIds.All(hostId =>
+            !string.IsNullOrWhiteSpace(hostId) && hostId.Length <= 36);
+}
