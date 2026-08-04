@@ -689,6 +689,8 @@
   <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Domande disponibili: {0}</value></data>
   <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Il numero di domande con puntata casuali deve essere compreso tra 0 e {0}.</value></data>
   <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Impostazioni del round salvate.</value></data>
+  <data name="QuizEditor_QuestionCount" xml:space="preserve"><value>Domande per categoria</value></data>
+  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve"><value>Scegli da 5 a 10. Ridurre il numero elimina le righe inferiori e le relative domande.</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Valore delle domande</value>
   </data>

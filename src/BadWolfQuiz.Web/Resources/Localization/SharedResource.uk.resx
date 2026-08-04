@@ -689,6 +689,8 @@
   <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Доступних питань: {0}</value></data>
   <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Кількість випадкових питань зі ставкою має бути від 0 до {0}.</value></data>
   <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Налаштування раунду збережено.</value></data>
+  <data name="QuizEditor_QuestionCount" xml:space="preserve"><value>Питань у категорії</value></data>
+  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve"><value>Оберіть від 5 до 10. Зменшення видалить нижні рядки та питання в них.</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Вартість запитань</value>
   </data>

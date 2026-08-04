@@ -2821,7 +2821,7 @@ body:has(.player-lobby) > .page-shell {
 
 .round-wager-settings {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+    grid-template-columns: minmax(180px, 240px) minmax(0, 1fr) minmax(220px, 320px);
     align-items: end;
     gap: 24px;
     margin-bottom: 18px;
@@ -2832,6 +2832,7 @@ body:has(.player-lobby) > .page-shell {
 }
 
 .round-wager-settings .checkbox-row span,
+#round-question-count-setting,
 #random-wager-count-setting {
     display: grid;
     gap: 5px;

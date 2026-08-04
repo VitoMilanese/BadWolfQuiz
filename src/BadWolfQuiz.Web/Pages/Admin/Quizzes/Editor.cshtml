@@ -127,6 +127,19 @@
            value="@round.Id" />
 
     <section class="content-panel round-wager-settings">
+        <div id="round-question-count-setting">
+            <label asp-for="RoundRows.QuestionCount">
+                @Localizer["QuizEditor_QuestionCount"]
+            </label>
+            <select asp-for="RoundRows.QuestionCount">
+                @for (var questionCount = 5; questionCount <= 10; questionCount++)
+                {
+                    <option value="@questionCount">@questionCount</option>
+                }
+            </select>
+            <small>@Localizer["QuizEditor_QuestionCountDescription"]</small>
+        </div>
+
         <label class="checkbox-row">
             <input asp-for="RoundRows.UseRandomWagerQuestions" />
             <span>

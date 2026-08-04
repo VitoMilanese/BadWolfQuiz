@@ -689,6 +689,8 @@
   <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Eligible questions: {0}</value></data>
   <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Random wager question count must be between 0 and {0}.</value></data>
   <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Round settings saved.</value></data>
+  <data name="QuizEditor_QuestionCount" xml:space="preserve"><value>Questions per category</value></data>
+  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve"><value>Choose from 5 to 10. Reducing the count removes the lower rows and their questions.</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Question values</value>
   </data>
