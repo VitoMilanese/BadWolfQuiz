@@ -1197,4 +1197,7 @@
   <data name="ImageClipboard_Button" xml:space="preserve"><value>Incolla dagli appunti</value></data>
   <data name="ImageClipboard_Empty" xml:space="preserve"><value>Gli appunti non contengono un'immagine.</value></data>
   <data name="ImageClipboard_Error" xml:space="preserve"><value>Impossibile leggere l'immagine dagli appunti. Consenti l'accesso e riprova.</value></data>
+  <data name="Account_HostName" xml:space="preserve"><value>Nome host (facoltativo)</value></data>
+  <data name="Account_HostNameHint" xml:space="preserve"><value>Potrai modificare il nome host in seguito nelle Impostazioni.</value></data>
+  <data name="QuizEditor_CountReductionTitle" xml:space="preserve"><value>Eliminare le domande?</value></data>
 </root>

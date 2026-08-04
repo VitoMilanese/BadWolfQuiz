@@ -115,6 +115,24 @@ public sealed class GameSettingsStore(
         }
     }
 
+    public Task InitializeHostAsync(
+        string hostId,
+        string? hostName,
+        CancellationToken cancellationToken = default)
+    {
+        var settings = new GameSessionSettings(
+            _defaultSettings.BuzzerDuration,
+            _defaultSettings.AnswerDuration,
+            _defaultSettings.RegularQuestionBuzzerStartMode,
+            _defaultSettings.WagerQuestionAnswerTimerStartMode,
+            _defaultSettings.AllowNegativeScoreFinalPlayers,
+            !string.IsNullOrWhiteSpace(hostName),
+            hostName,
+            siteThemeId: _defaultSettings.SiteThemeId,
+            customThemeColors: _defaultSettings.CustomThemeColors);
+        return SaveAsync(hostId, settings, cancellationToken);
+    }
+
     private async Task<StoredSettingsFile> ReadFileForUpdateAsync(
         CancellationToken cancellationToken)
     {

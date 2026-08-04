@@ -12,6 +12,24 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class HostAccountServiceTests
 {
     [Fact]
+    public async Task Registration_saves_optional_trimmed_host_name()
+    {
+        await using var fixture = await Fixture.CreateAsync();
+
+        var named = await fixture.Accounts.RegisterAsync(
+            "named@example.com",
+            "password-123",
+            "  Quiz club  ");
+        var unnamed = await fixture.Accounts.RegisterAsync(
+            "unnamed@example.com",
+            "password-123",
+            "   ");
+
+        Assert.Equal("Quiz club", named.Host!.DisplayName);
+        Assert.Null(unnamed.Host!.DisplayName);
+    }
+
+    [Fact]
     public async Task First_registered_host_claims_legacy_quizzes_and_games()
     {
         await using var fixture = await Fixture.CreateAsync();

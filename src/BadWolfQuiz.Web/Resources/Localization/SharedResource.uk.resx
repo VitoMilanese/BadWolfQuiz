@@ -1197,4 +1197,7 @@
   <data name="ImageClipboard_Button" xml:space="preserve"><value>Вставити з буфера</value></data>
   <data name="ImageClipboard_Empty" xml:space="preserve"><value>У буфері немає зображення.</value></data>
   <data name="ImageClipboard_Error" xml:space="preserve"><value>Не вдалося прочитати зображення з буфера. Дозвольте доступ до буфера й повторіть спробу.</value></data>
+  <data name="Account_HostName" xml:space="preserve"><value>Назва хоста (необов’язково)</value></data>
+  <data name="Account_HostNameHint" xml:space="preserve"><value>Назву хоста можна буде змінити пізніше в налаштуваннях.</value></data>
+  <data name="QuizEditor_CountReductionTitle" xml:space="preserve"><value>Видалити питання?</value></data>
 </root>

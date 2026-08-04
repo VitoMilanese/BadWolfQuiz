@@ -11,6 +11,7 @@ namespace BadWolfQuiz.Web.Pages.Account;
 
 public sealed class RegisterModel(
     HostAccountService accounts,
+    GameSettingsStore settingsStore,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty] public InputModel Input { get; set; } = new();
@@ -23,12 +24,20 @@ public sealed class RegisterModel(
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) return Page();
-        var result = await accounts.RegisterAsync(Input.Email, Input.Password, cancellationToken);
+        var result = await accounts.RegisterAsync(
+            Input.Email,
+            Input.Password,
+            Input.HostName,
+            cancellationToken);
         if (result.IsEmailAlreadyUsed)
         {
             ModelState.AddModelError(nameof(Input.Email), localizer["Account_EmailAlreadyUsed"]);
             return Page();
         }
+        await settingsStore.InitializeHostAsync(
+            result.Host!.Id,
+            result.Host.DisplayName,
+            cancellationToken);
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             HostAccountService.CreatePrincipal(result.Host!),
@@ -41,6 +50,9 @@ public sealed class RegisterModel(
 
     public sealed class InputModel
     {
+        [MaxLength(80)]
+        public string? HostName { get; set; }
+
         [Required(ErrorMessage = "Account_Required"), EmailAddress(ErrorMessage = "Account_InvalidEmail"), MaxLength(254)]
         public string Email { get; set; } = string.Empty;
         [Required(ErrorMessage = "Account_Required"), MinLength(8, ErrorMessage = "Account_PasswordMinLength"), DataType(DataType.Password)]
