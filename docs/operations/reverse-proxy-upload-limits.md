@@ -58,10 +58,12 @@ Premium hosts can be configured by copying their database ID from the Settings p
 
 ```json
 "PremiumHosts": {
+  "MaximumImageUploadMegabytes": 50,
+  "MaximumAudioUploadMegabytes": 100,
   "HostIds": [
     "host-id-from-settings"
   ]
 }
 ```
 
-Premium uploads retain their original image or audio format and skip optional JPEG/MP3 conversion. File-size limits still apply, and oversized images are proportionally resized in their original format.
+Premium uploads retain their original image or audio format and skip optional JPEG/MP3 conversion. Their separate, higher file-size limits still apply, and oversized images are proportionally resized in their original format.

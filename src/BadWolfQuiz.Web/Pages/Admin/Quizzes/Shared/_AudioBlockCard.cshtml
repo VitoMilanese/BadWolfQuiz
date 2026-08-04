@@ -2,6 +2,8 @@
 @using BadWolfQuiz.Web.Services
 @inject IStringLocalizer<SharedResource> localizer
 @inject MediaUploadProcessor mediaUploadProcessor
+@inject CurrentHost currentHost
+@inject PremiumHostAccess premiumHostAccess
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
 
 @{
@@ -89,7 +91,8 @@
            class="form-control audio-block-file uploaded-file-input"
            type="file"
            accept="audio/*" />
-    <small>@localizer["FileUploadLimit", mediaUploadProcessor.MaximumAudioUploadMegabytes]</small>
+    <small>@localizer["FileUploadLimit", mediaUploadProcessor.MaximumAudioUploadMegabytes(
+        premiumHostAccess.IsPremium(currentHost.RequiredId))]</small>
 
     <input asp-for="TopCaption"
            class="form-control"

@@ -61,7 +61,12 @@ public sealed class PremiumHostOptions
 {
     public const string SectionName = "PremiumHosts";
     public string[] HostIds { get; set; } = [];
+    public int MaximumImageUploadMegabytes { get; set; } = 50;
+    public int MaximumAudioUploadMegabytes { get; set; } = 100;
 
-    public bool IsValid => HostIds is not null && HostIds.All(hostId =>
-        !string.IsNullOrWhiteSpace(hostId) && hostId.Length <= 36);
+    public bool IsValid =>
+        MaximumImageUploadMegabytes is >= 1 and <= 1024 &&
+        MaximumAudioUploadMegabytes is >= 1 and <= 1024 &&
+        HostIds is not null && HostIds.All(hostId =>
+            !string.IsNullOrWhiteSpace(hostId) && hostId.Length <= 36);
 }

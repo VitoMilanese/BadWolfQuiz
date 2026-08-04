@@ -53,7 +53,8 @@ public sealed class LobbyModel(
     public bool CanRateQuiz { get; private set; }
     public int? ExistingRating { get; private set; }
     public int MaximumImageUploadMegabytes =>
-        mediaUploadProcessor.MaximumImageUploadMegabytes;
+        mediaUploadProcessor.MaximumImageUploadMegabytes(
+            premiumHostAccess.IsPremium(currentHost.RequiredId));
 
     public async Task<IActionResult> OnGetAsync(
         Guid id,

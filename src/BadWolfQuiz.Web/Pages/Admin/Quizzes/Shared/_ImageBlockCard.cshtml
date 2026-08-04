@@ -2,6 +2,8 @@
 @using BadWolfQuiz.Web.Services
 @inject IStringLocalizer<SharedResource> localizer
 @inject MediaUploadProcessor mediaUploadProcessor
+@inject CurrentHost currentHost
+@inject PremiumHostAccess premiumHostAccess
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
 
 @{
@@ -99,7 +101,8 @@
           data-image-clipboard-error
           role="alert"
           hidden></span>
-    <small>@localizer["FileUploadLimit", mediaUploadProcessor.MaximumImageUploadMegabytes]</small>
+    <small>@localizer["FileUploadLimit", mediaUploadProcessor.MaximumImageUploadMegabytes(
+        premiumHostAccess.IsPremium(currentHost.RequiredId))]</small>
 
     <input asp-for="TopCaption"
            class="form-control"

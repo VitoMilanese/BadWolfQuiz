@@ -33,7 +33,8 @@ public sealed class IndexModel(
     public bool HasBrandLogo { get; private set; }
     public string HostId => currentHost.RequiredId;
     public int MaximumImageUploadMegabytes =>
-        mediaUploadProcessor.MaximumImageUploadMegabytes;
+        mediaUploadProcessor.MaximumImageUploadMegabytes(
+            premiumHostAccess.IsPremium(currentHost.RequiredId));
 
     public async Task OnGetAsync(CancellationToken cancellationToken)
     {

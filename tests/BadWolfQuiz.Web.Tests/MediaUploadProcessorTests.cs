@@ -1,7 +1,7 @@
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp;
+using SkiaSharp;
 
 namespace BadWolfQuiz.Web.Tests;
 
@@ -42,7 +42,8 @@ public sealed class MediaUploadProcessorTests
         {
             MaximumImageUploadMegabytes = 1,
             MaximumAudioUploadMegabytes = 2,
-            ConvertAudioToMp3 = false
+            ConvertAudioToMp3 = false,
+            ConvertOpaqueImagesToJpeg = false
         });
         var oversizedImage = CreateFile(
             CreateOpaqueBitmap(800, 600),
@@ -54,7 +55,7 @@ public sealed class MediaUploadProcessorTests
             "allowed.wav");
 
         var exception = await Assert.ThrowsAsync<MediaUploadException>(
-            () => processor.ProcessImageAsync(oversizedImage, skipConversion: true));
+            () => processor.ProcessImageAsync(oversizedImage));
         var audio = await processor.ProcessAudioAsync(allowedAudio);
 
         Assert.Equal("FileSizeLimitExceeded", exception.ResourceKey);
@@ -75,11 +76,11 @@ public sealed class MediaUploadProcessorTests
             CreateOpaqueBitmap(200, 100),
             "image/bmp",
             "wide.bmp"));
-        var info = Image.Identify(result.Data);
+        using var image = SKBitmap.Decode(result.Data);
 
-        Assert.NotNull(info);
-        Assert.Equal(50, info.Width);
-        Assert.Equal(25, info.Height);
+        Assert.NotNull(image);
+        Assert.Equal(50, image.Width);
+        Assert.Equal(25, image.Height);
     }
 
     [Fact]
@@ -90,7 +91,7 @@ public sealed class MediaUploadProcessorTests
 
         var result = await processor.ProcessImageAsync(
             CreateFile(original, "image/bmp", "premium.bmp"),
-            skipConversion: true);
+            isPremium: true);
 
         Assert.Equal("image/bmp", result.ContentType);
         Assert.Equal(original, result.Data);
@@ -113,9 +114,36 @@ public sealed class MediaUploadProcessorTests
         Assert.Equal("image/jpeg", result.ContentType);
     }
 
+    [Fact]
+    public async Task Premium_media_uses_its_higher_configured_limit()
+    {
+        var processor = CreateProcessor(
+            new MediaProcessingOptions
+            {
+                MaximumAudioUploadMegabytes = 1,
+                ConvertAudioToMp3 = false
+            },
+            new PremiumHostOptions
+            {
+                MaximumImageUploadMegabytes = 3,
+                MaximumAudioUploadMegabytes = 2
+            });
+        var file = CreateFile(
+            new byte[1024 * 1024 + 1],
+            "audio/wav",
+            "premium.wav");
+
+        var result = await processor.ProcessAudioAsync(file, isPremium: true);
+
+        Assert.Equal("audio/wav", result.ContentType);
+    }
+
     private static MediaUploadProcessor CreateProcessor(
-        MediaProcessingOptions? options = null) =>
-        new(Options.Create(options ?? new MediaProcessingOptions()));
+        MediaProcessingOptions? options = null,
+        PremiumHostOptions? premiumOptions = null) =>
+        new(
+            Options.Create(options ?? new MediaProcessingOptions()),
+            Options.Create(premiumOptions ?? new PremiumHostOptions()));
 
     private static FormFile CreateFile(
         byte[] data,

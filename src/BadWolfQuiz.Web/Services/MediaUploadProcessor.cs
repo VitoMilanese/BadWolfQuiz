@@ -1,39 +1,42 @@
 using System.Diagnostics;
 using BadWolfQuiz.Web.Models;
 using Microsoft.Extensions.Options;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 
 namespace BadWolfQuiz.Web.Services;
 
-public sealed class MediaUploadProcessor(IOptions<MediaProcessingOptions> options)
+public sealed class MediaUploadProcessor(
+    IOptions<MediaProcessingOptions> options,
+    IOptions<PremiumHostOptions> premiumOptions)
 {
     private readonly MediaProcessingOptions _options = options.Value;
+    private readonly PremiumHostOptions _premiumOptions = premiumOptions.Value;
 
-    public int MaximumImageUploadMegabytes =>
-        _options.MaximumImageUploadMegabytes;
+    public int MaximumImageUploadMegabytes(bool isPremium) =>
+        isPremium
+            ? _premiumOptions.MaximumImageUploadMegabytes
+            : _options.MaximumImageUploadMegabytes;
 
-    public int MaximumAudioUploadMegabytes =>
-        _options.MaximumAudioUploadMegabytes;
+    public int MaximumAudioUploadMegabytes(bool isPremium) =>
+        isPremium
+            ? _premiumOptions.MaximumAudioUploadMegabytes
+            : _options.MaximumAudioUploadMegabytes;
 
     public async Task<ProcessedMedia> ProcessContentBlockAsync(
         IFormFile file,
         ContentBlockType blockType,
-        bool skipConversion,
+        bool isPremium,
         CancellationToken cancellationToken = default) =>
         blockType switch
         {
-            ContentBlockType.Image => await ProcessImageAsync(file, skipConversion, cancellationToken),
-            ContentBlockType.Audio => await ProcessAudioAsync(file, skipConversion, cancellationToken),
+            ContentBlockType.Image => await ProcessImageAsync(file, isPremium, cancellationToken),
+            ContentBlockType.Audio => await ProcessAudioAsync(file, isPremium, cancellationToken),
             _ => throw new MediaUploadException("InvalidMediaFile")
         };
 
     public async Task<ProcessedMedia> ProcessImageAsync(
         IFormFile file,
-        bool skipConversion = false,
+        bool isPremium = false,
         CancellationToken cancellationToken = default)
     {
         ValidateFile(file, "image/", "InvalidImageFile");
@@ -41,68 +44,67 @@ public sealed class MediaUploadProcessor(IOptions<MediaProcessingOptions> option
 
         try
         {
-            using var image = Image.Load<Rgba32>(original);
-            var format = Image.DetectFormat(original);
-            var needsResize = image.Width > _options.MaximumImageWidth ||
-                              image.Height > _options.MaximumImageHeight;
-            var hasTransparency = HasFullyTransparentPixel(image);
-            var shouldConvertToJpeg = !skipConversion &&
+            using var encodedData = SKData.CreateCopy(original);
+            using var codec = SKCodec.Create(encodedData) ??
+                throw new MediaUploadException("InvalidImageFile");
+            using var decoded = SKBitmap.Decode(original) ??
+                throw new MediaUploadException("InvalidImageFile");
+            var needsResize = decoded.Width > _options.MaximumImageWidth ||
+                              decoded.Height > _options.MaximumImageHeight;
+            var hasTransparency = decoded.Pixels.Any(pixel => pixel.Alpha == 0);
+            var shouldConvertToJpeg = !isPremium &&
                                       _options.ConvertOpaqueImagesToJpeg &&
-                                      !IsJpeg(file) &&
-                                      image.Frames.Count == 1 &&
+                                      codec.EncodedFormat != SKEncodedImageFormat.Jpeg &&
+                                      codec.FrameCount <= 1 &&
                                       !hasTransparency;
 
             if (!needsResize && !shouldConvertToJpeg)
             {
                 return EnsureSize(
                     Original(file, original),
-                    _options.MaximumImageUploadMegabytes);
+                    MaximumImageUploadMegabytes(isPremium));
             }
 
+            SKBitmap? resized = null;
+            var image = decoded;
             if (needsResize)
             {
-                image.Mutate(context => context.Resize(new ResizeOptions
-                {
-                    Mode = ResizeMode.Max,
-                    Size = new Size(
-                        _options.MaximumImageWidth,
-                        _options.MaximumImageHeight)
-                }));
+                var scale = Math.Min(
+                    (double)_options.MaximumImageWidth / decoded.Width,
+                    (double)_options.MaximumImageHeight / decoded.Height);
+                var width = Math.Max(1, (int)Math.Round(decoded.Width * scale));
+                var height = Math.Max(1, (int)Math.Round(decoded.Height * scale));
+                resized = Resize(decoded, width, height);
+                image = resized;
             }
 
-            await using var output = new MemoryStream();
-            if (shouldConvertToJpeg || IsJpeg(file))
+            try
             {
-                if (shouldConvertToJpeg)
-                {
-                    image.Mutate(context => context.BackgroundColor(Color.White));
-                }
-                await image.SaveAsJpegAsync(
-                    output,
-                    new JpegEncoder { Quality = _options.JpegQuality },
-                    cancellationToken);
+                var outputFormat = shouldConvertToJpeg
+                    ? SKEncodedImageFormat.Jpeg
+                    : codec.EncodedFormat;
+                var quality = isPremium ? 100 : _options.JpegQuality;
+                using var outputImage = SKImage.FromBitmap(image);
+                using var output = outputImage.Encode(outputFormat, quality) ??
+                    throw new MediaUploadException("InvalidImageFile");
+                var converted = output.ToArray();
+                var result = !needsResize && converted.Length >= original.Length
+                    ? Original(file, original)
+                    : shouldConvertToJpeg
+                    ? new ProcessedMedia(
+                        converted,
+                        "image/jpeg",
+                        Path.ChangeExtension(SafeFileName(file), ".jpg"))
+                    : new ProcessedMedia(converted, file.ContentType, SafeFileName(file));
+                return EnsureSize(result, MaximumImageUploadMegabytes(isPremium));
             }
-            else
+            finally
             {
-                await image.SaveAsync(output, format, cancellationToken);
+                resized?.Dispose();
             }
-
-            var converted = output.ToArray();
-            var result = !needsResize && converted.Length >= original.Length
-                ? Original(file, original)
-                : shouldConvertToJpeg
-                ? new ProcessedMedia(
-                    converted,
-                    "image/jpeg",
-                    Path.ChangeExtension(SafeFileName(file), ".jpg"))
-                : new ProcessedMedia(converted, file.ContentType, SafeFileName(file));
-            return EnsureSize(result, _options.MaximumImageUploadMegabytes);
         }
-        catch (UnknownImageFormatException)
-        {
-            throw new MediaUploadException("InvalidImageFile");
-        }
-        catch (InvalidImageContentException)
+        catch (Exception exception) when (
+            exception is ArgumentException or InvalidOperationException)
         {
             throw new MediaUploadException("InvalidImageFile");
         }
@@ -110,16 +112,16 @@ public sealed class MediaUploadProcessor(IOptions<MediaProcessingOptions> option
 
     public async Task<ProcessedMedia> ProcessAudioAsync(
         IFormFile file,
-        bool skipConversion = false,
+        bool isPremium = false,
         CancellationToken cancellationToken = default)
     {
         ValidateFile(file, "audio/", "InvalidAudioFile");
-        if (skipConversion || !_options.ConvertAudioToMp3 ||
+        if (isPremium || !_options.ConvertAudioToMp3 ||
             IsMp3(file))
         {
             return EnsureSize(
                 Original(file, await ReadAsync(file, cancellationToken)),
-                _options.MaximumAudioUploadMegabytes);
+                MaximumAudioUploadMegabytes(isPremium));
         }
 
         var inputPath = Path.Combine(Path.GetTempPath(), $"badwolf-audio-{Guid.NewGuid():N}.input");
@@ -195,7 +197,7 @@ public sealed class MediaUploadProcessor(IOptions<MediaProcessingOptions> option
                     converted,
                     "audio/mpeg",
                     Path.ChangeExtension(SafeFileName(file), ".mp3")),
-                _options.MaximumAudioUploadMegabytes);
+                MaximumAudioUploadMegabytes(isPremium));
         }
         finally
         {
@@ -204,31 +206,22 @@ public sealed class MediaUploadProcessor(IOptions<MediaProcessingOptions> option
         }
     }
 
-    private static bool HasFullyTransparentPixel(Image<Rgba32> image)
+    private static SKBitmap Resize(SKBitmap source, int width, int height)
     {
-        var result = false;
-        foreach (var frame in image.Frames)
+        var result = new SKBitmap(
+            width,
+            height,
+            SKColorType.Bgra8888,
+            source.AlphaType);
+        using var canvas = new SKCanvas(result);
+        canvas.Clear(SKColors.Transparent);
+        using var paint = new SKPaint
         {
-            frame.ProcessPixelRows(accessor =>
-            {
-                for (var y = 0; y < accessor.Height && !result; y++)
-                {
-                    var row = accessor.GetRowSpan(y);
-                    for (var x = 0; x < row.Length; x++)
-                    {
-                        if (row[x].A == 0)
-                        {
-                            result = true;
-                            break;
-                        }
-                    }
-                }
-            });
-            if (result)
-            {
-                break;
-            }
-        }
+            IsAntialias = true,
+            FilterQuality = SKFilterQuality.High
+        };
+        canvas.DrawBitmap(source, new SKRect(0, 0, width, height), paint);
+        canvas.Flush();
         return result;
     }
 
@@ -265,11 +258,6 @@ public sealed class MediaUploadProcessor(IOptions<MediaProcessingOptions> option
 
     private static ProcessedMedia Original(IFormFile file, byte[] data) =>
         new(data, file.ContentType, SafeFileName(file));
-
-    private static bool IsJpeg(IFormFile file) =>
-        string.Equals(file.ContentType, "image/jpeg", StringComparison.OrdinalIgnoreCase) ||
-        string.Equals(Path.GetExtension(file.FileName), ".jpg", StringComparison.OrdinalIgnoreCase) ||
-        string.Equals(Path.GetExtension(file.FileName), ".jpeg", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsMp3(IFormFile file) =>
         string.Equals(file.ContentType, "audio/mpeg", StringComparison.OrdinalIgnoreCase) ||
