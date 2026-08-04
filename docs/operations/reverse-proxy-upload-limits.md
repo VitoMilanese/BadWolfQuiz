@@ -30,10 +30,10 @@ Per-file limits and conversion settings are configured in `appsettings.json`:
 
 ```json
 "MediaProcessing": {
-  "MaximumImageUploadMegabytes": 10,
-  "MaximumAudioUploadMegabytes": 10,
-  "MaximumImageWidth": 3840,
-  "MaximumImageHeight": 2160,
+  "MaximumImageUploadMegabytes": 5,
+  "MaximumAudioUploadMegabytes": 5,
+  "MaximumImageWidth": 1920,
+  "MaximumImageHeight": 1080,
   "ConvertAudioToMp3": true,
   "Mp3BitrateKbps": 128,
   "FfmpegExecutablePath": "ffmpeg",
@@ -58,8 +58,8 @@ Premium hosts can be configured by copying their database ID from the Settings p
 
 ```json
 "PremiumHosts": {
-  "MaximumImageUploadMegabytes": 50,
-  "MaximumAudioUploadMegabytes": 100,
+  "MaximumImageUploadMegabytes": 10,
+  "MaximumAudioUploadMegabytes": 10,
   "HostIds": [
     "host-id-from-settings"
   ]

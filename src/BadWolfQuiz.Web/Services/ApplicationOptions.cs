@@ -37,10 +37,10 @@ public sealed class SiteDefaultsOptions
 public sealed class MediaProcessingOptions
 {
     public const string SectionName = "MediaProcessing";
-    public int MaximumImageUploadMegabytes { get; set; } = 10;
-    public int MaximumAudioUploadMegabytes { get; set; } = 10;
-    public int MaximumImageWidth { get; set; } = 3840;
-    public int MaximumImageHeight { get; set; } = 2160;
+    public int MaximumImageUploadMegabytes { get; set; } = 5;
+    public int MaximumAudioUploadMegabytes { get; set; } = 5;
+    public int MaximumImageWidth { get; set; } = 1920;
+    public int MaximumImageHeight { get; set; } = 1080;
     public bool ConvertAudioToMp3 { get; set; } = true;
     public int Mp3BitrateKbps { get; set; } = 128;
     public string FfmpegExecutablePath { get; set; } = "ffmpeg";
@@ -61,8 +61,8 @@ public sealed class PremiumHostOptions
 {
     public const string SectionName = "PremiumHosts";
     public string[] HostIds { get; set; } = [];
-    public int MaximumImageUploadMegabytes { get; set; } = 50;
-    public int MaximumAudioUploadMegabytes { get; set; } = 100;
+    public int MaximumImageUploadMegabytes { get; set; } = 10;
+    public int MaximumAudioUploadMegabytes { get; set; } = 10;
 
     public bool IsValid =>
         MaximumImageUploadMegabytes is >= 1 and <= 1024 &&
