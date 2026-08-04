@@ -792,6 +792,9 @@
   <data name="GameBoard_MediaContent" xml:space="preserve">
     <value>Медіа питання</value>
   </data>
+  <data name="GameBoard_CloseVideo" xml:space="preserve">
+    <value>Закрити відео</value>
+  </data>
   <data name="GameBoard_CloseAnswerRejected" xml:space="preserve">
     <value>Не вдалося закрити показ відповіді.</value>
   </data>

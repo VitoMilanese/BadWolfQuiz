@@ -792,6 +792,9 @@
   <data name="GameBoard_MediaContent" xml:space="preserve">
     <value>Question media</value>
   </data>
+  <data name="GameBoard_CloseVideo" xml:space="preserve">
+    <value>Close video</value>
+  </data>
   <data name="GameBoard_CloseAnswerRejected" xml:space="preserve">
     <value>The answer presentation could not be closed.</value>
   </data>

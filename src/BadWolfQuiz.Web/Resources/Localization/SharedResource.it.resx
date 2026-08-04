@@ -792,6 +792,9 @@
   <data name="GameBoard_MediaContent" xml:space="preserve">
     <value>Contenuto multimediale della domanda</value>
   </data>
+  <data name="GameBoard_CloseVideo" xml:space="preserve">
+    <value>Chiudi video</value>
+  </data>
   <data name="GameBoard_CloseAnswerRejected" xml:space="preserve">
     <value>Non è stato possibile chiudere la risposta.</value>
   </data>
