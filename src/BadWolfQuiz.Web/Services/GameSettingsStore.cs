@@ -1,16 +1,31 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using BadWolfQuiz.Game.Runtime;
+using Microsoft.Extensions.Options;
 
 namespace BadWolfQuiz.Web.Services;
 
-public sealed class GameSettingsStore(IWebHostEnvironment environment)
+public sealed class GameSettingsStore(
+    IWebHostEnvironment environment,
+    IOptions<SiteDefaultsOptions> siteDefaults)
 {
+    public GameSettingsStore(IWebHostEnvironment environment)
+        : this(environment, Options.Create(new SiteDefaultsOptions()))
+    {
+    }
+
     private readonly SemaphoreSlim _sync = new(1, 1);
     private readonly string _path = Path.Combine(
         environment.ContentRootPath,
         "App_Data",
         "game-settings.json");
+    private readonly GameSessionSettings _defaultSettings = new(
+        GameSessionSettings.Default.BuzzerDuration,
+        GameSessionSettings.Default.AnswerDuration,
+        GameSessionSettings.Default.RegularQuestionBuzzerStartMode,
+        GameSessionSettings.Default.WagerQuestionAnswerTimerStartMode,
+        GameSessionSettings.Default.AllowNegativeScoreFinalPlayers,
+        siteThemeId: SiteThemeCatalog.Normalize(siteDefaults.Value.ThemeId));
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         WriteIndented = true,
@@ -28,7 +43,7 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
         {
             if (!File.Exists(_path))
             {
-                return GameSessionSettings.Default;
+                return _defaultSettings;
             }
 
             await using var stream = File.OpenRead(_path);
@@ -43,21 +58,21 @@ public sealed class GameSettingsStore(IWebHostEnvironment environment)
                     ?? new StoredSettingsFile();
                 settings = file.Hosts.GetValueOrDefault(hostId)
                     ?? file.LegacyDefault
-                    ?? StoredGameSettings.From(GameSessionSettings.Default);
+                    ?? StoredGameSettings.From(_defaultSettings);
             }
             else
             {
                 // Files written before per-host settings remain the initial
                 // default for hosts that have not saved their own settings yet.
                 settings = root.Deserialize<StoredGameSettings>(_jsonOptions)
-                    ?? StoredGameSettings.From(GameSessionSettings.Default);
+                    ?? StoredGameSettings.From(_defaultSettings);
             }
 
             return settings.ToRuntimeSettings();
         }
         catch (JsonException)
         {
-            return GameSessionSettings.Default;
+            return _defaultSettings;
         }
         finally
         {

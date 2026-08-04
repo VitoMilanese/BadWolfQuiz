@@ -71,9 +71,30 @@ var supportedCultures = new[]
     new CultureInfo("it")
 };
 
+builder.Services.AddOptions<QuizEditorOptions>()
+    .Bind(builder.Configuration.GetSection(QuizEditorOptions.SectionName))
+    .Validate(options => options.IsValid, "Quiz editor limits are invalid.")
+    .ValidateOnStart();
+builder.Services.AddOptions<SiteDefaultsOptions>()
+    .Bind(builder.Configuration.GetSection(SiteDefaultsOptions.SectionName))
+    .Validate(
+        options => supportedCultures.Any(culture =>
+            string.Equals(
+                culture.Name,
+                options.Culture,
+                StringComparison.OrdinalIgnoreCase)),
+        "The default site culture is not supported.")
+    .Validate(
+        options => SiteThemeCatalog.IsValid(options.ThemeId),
+        "The default site theme is invalid.")
+    .ValidateOnStart();
+
+var defaultCulture = builder.Configuration[
+    $"{SiteDefaultsOptions.SectionName}:{nameof(SiteDefaultsOptions.Culture)}"] ?? "en";
+
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    options.DefaultRequestCulture = new RequestCulture("en");
+    options.DefaultRequestCulture = new RequestCulture(defaultCulture);
 
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;

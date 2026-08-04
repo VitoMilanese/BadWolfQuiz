@@ -5,6 +5,7 @@ using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Quizzes;
@@ -12,7 +13,8 @@ namespace BadWolfQuiz.Web.Pages.Admin.Quizzes;
 public sealed class CreateModel(
     QuizDbContext db,
     CurrentHost currentHost,
-    IStringLocalizer<SharedResource> localizer) : PageModel
+    IStringLocalizer<SharedResource> localizer,
+    IOptions<QuizEditorOptions> editorOptions) : PageModel
 {
     [BindProperty]
     public InputModel Input { get; set; } = new();
@@ -41,7 +43,7 @@ public sealed class CreateModel(
             SortOrder = 1
         };
 
-        for (var row = 1; row <= 5; row++)
+        for (var row = 1; row <= editorOptions.Value.MinimumQuestionCount; row++)
         {
             round.Rows.Add(new QuizRoundRow
             {
@@ -50,7 +52,9 @@ public sealed class CreateModel(
             });
         }
 
-        for (var categoryIndex = 1; categoryIndex <= 6; categoryIndex++)
+        for (var categoryIndex = 1;
+             categoryIndex <= editorOptions.Value.MinimumCategoryCount;
+             categoryIndex++)
         {
             var category = new QuizCategory
             {
@@ -58,7 +62,9 @@ public sealed class CreateModel(
                 SortOrder = categoryIndex
             };
 
-            for (var row = 1; row <= 5; row++)
+            for (var row = 1;
+                 row <= editorOptions.Value.MinimumQuestionCount;
+                 row++)
             {
                 var question = new QuizQuestion
                 {

@@ -690,7 +690,11 @@
   <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Random wager question count must be between 0 and {0}.</value></data>
   <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Round settings saved.</value></data>
   <data name="QuizEditor_QuestionCount" xml:space="preserve"><value>Questions per category</value></data>
-  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve"><value>Choose from 5 to 10. Reducing the count removes the lower rows and their questions.</value></data>
+  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve"><value>Choose from {0} to {1}. Reducing the count removes the lower rows and their questions.</value></data>
+  <data name="QuizEditor_QuestionCountDeleteConfirmation" xml:space="preserve"><value>Some questions in the removed rows contain content. Delete them permanently?</value></data>
+  <data name="QuizEditor_CategoryCount" xml:space="preserve"><value>Categories in the round</value></data>
+  <data name="QuizEditor_CategoryCountDescription" xml:space="preserve"><value>Choose from {0} to {1}. Reducing the count removes the categories at the end.</value></data>
+  <data name="QuizEditor_CategoryCountDeleteConfirmation" xml:space="preserve"><value>Some categories being removed contain questions. Delete them permanently?</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Question values</value>
   </data>

@@ -690,7 +690,11 @@
   <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Il numero di domande con puntata casuali deve essere compreso tra 0 e {0}.</value></data>
   <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Impostazioni del round salvate.</value></data>
   <data name="QuizEditor_QuestionCount" xml:space="preserve"><value>Domande per categoria</value></data>
-  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve"><value>Scegli da 5 a 10. Ridurre il numero elimina le righe inferiori e le relative domande.</value></data>
+  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve"><value>Scegli da {0} a {1}. Ridurre il numero elimina le righe inferiori e le relative domande.</value></data>
+  <data name="QuizEditor_QuestionCountDeleteConfirmation" xml:space="preserve"><value>Alcune domande nelle righe rimosse contengono dati. Eliminarle definitivamente?</value></data>
+  <data name="QuizEditor_CategoryCount" xml:space="preserve"><value>Categorie nel round</value></data>
+  <data name="QuizEditor_CategoryCountDescription" xml:space="preserve"><value>Scegli da {0} a {1}. Ridurre il numero elimina le ultime categorie.</value></data>
+  <data name="QuizEditor_CategoryCountDeleteConfirmation" xml:space="preserve"><value>Alcune categorie da rimuovere contengono domande. Eliminarle definitivamente?</value></data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Valore delle domande</value>
   </data>
