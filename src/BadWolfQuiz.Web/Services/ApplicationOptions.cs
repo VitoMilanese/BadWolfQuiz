@@ -85,6 +85,7 @@ public sealed class MediaArchiveOptions
     public bool Enabled { get; set; } = true;
     public int ArchiveAfterDays { get; set; } = 180;
     public int ScanIntervalHours { get; set; } = 24;
+    public TimeSpan ScanStartTimeUtc { get; set; } = TimeSpan.FromHours(3);
     public int MaximumQuizzesPerRun { get; set; } = 2;
     public int DeleteArchiveCopyAfterRestoreDays { get; set; } = 14;
     public int OrphanRetentionDays { get; set; } = 30;
@@ -92,6 +93,8 @@ public sealed class MediaArchiveOptions
     public bool IsValid =>
         ArchiveAfterDays > 0 &&
         ScanIntervalHours > 0 &&
+        ScanStartTimeUtc >= TimeSpan.Zero &&
+        ScanStartTimeUtc < TimeSpan.FromDays(1) &&
         MaximumQuizzesPerRun > 0 &&
         DeleteArchiveCopyAfterRestoreDays >= 0 &&
         OrphanRetentionDays >= 0;

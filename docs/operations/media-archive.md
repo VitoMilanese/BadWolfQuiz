@@ -19,6 +19,7 @@ Configure both SQLite files independently:
     "Enabled": true,
     "ArchiveAfterDays": 180,
     "ScanIntervalHours": 24,
+    "ScanStartTimeUtc": "03:00:00",
     "MaximumQuizzesPerRun": 2,
     "DeleteArchiveCopyAfterRestoreDays": 14,
     "OrphanRetentionDays": 30
@@ -28,6 +29,10 @@ Configure both SQLite files independently:
 
 Relative SQLite paths are resolved from the application content root. Positive limits are
 validated at startup; retention periods may be zero but cannot be negative.
+
+`ScanStartTimeUtc` anchors the recurring scan schedule independently of application startup.
+For example, an interval of 24 hours with `03:00:00` runs daily at 03:00 UTC. An interval of
+12 hours runs at 03:00 and 15:00 UTC. The value must be between `00:00:00` and `23:59:59`.
 
 ## Safety and recovery
 

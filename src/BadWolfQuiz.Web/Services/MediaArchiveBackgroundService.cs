@@ -20,9 +20,39 @@ public sealed class MediaArchiveBackgroundService(
         await RecoverInterruptedOperationsAsync(stoppingToken);
         while (!stoppingToken.IsCancellationRequested)
         {
+            var nextScanUtc = CalculateNextScanUtc(
+                timeProvider.GetUtcNow(),
+                TimeSpan.FromHours(options.Value.ScanIntervalHours),
+                options.Value.ScanStartTimeUtc);
+            var delay = nextScanUtc - timeProvider.GetUtcNow();
+            if (delay > TimeSpan.Zero)
+            {
+                logger.LogInformation(
+                    "Next automatic media archive scan scheduled for {NextScanUtc}",
+                    nextScanUtc);
+                await Task.Delay(delay, timeProvider, stoppingToken);
+            }
             if (options.Value.Enabled) await ScanAsync(stoppingToken);
-            await Task.Delay(TimeSpan.FromHours(options.Value.ScanIntervalHours), timeProvider, stoppingToken);
         }
+    }
+
+    internal static DateTimeOffset CalculateNextScanUtc(
+        DateTimeOffset nowUtc,
+        TimeSpan interval,
+        TimeSpan startTimeUtc)
+    {
+        if (interval <= TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(interval));
+        if (startTimeUtc < TimeSpan.Zero || startTimeUtc >= TimeSpan.FromDays(1))
+            throw new ArgumentOutOfRangeException(nameof(startTimeUtc));
+
+        var anchor = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)
+            .Add(startTimeUtc);
+        if (nowUtc < anchor) return anchor;
+
+        var elapsedTicks = (nowUtc - anchor).Ticks;
+        var intervalCount = elapsedTicks / interval.Ticks + 1;
+        return anchor.AddTicks(checked(intervalCount * interval.Ticks));
     }
 
     internal async Task ScanAsync(CancellationToken token)
