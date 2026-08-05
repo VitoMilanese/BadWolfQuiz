@@ -1,0 +1,173 @@
+@page
+@model BadWolfQuiz.Web.Pages.Admin.MasterGamesModel
+@{
+    ViewData["Title"] = Localizer["MasterGames_Title"];
+}
+
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">@Localizer["Admin_Eyebrow"]</p>
+        <h1>@Localizer["MasterGames_Title"]</h1>
+    </div>
+</div>
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="message message-error" role="alert">@errorMessage</div>
+}
+
+@if (Model.Games.Count == 0)
+{
+    <section class="content-panel empty-state">
+        <h2>@Localizer["MasterGames_Empty"]</h2>
+    </section>
+}
+else
+{
+    <div class="master-game-list">
+        @foreach (var game in Model.Games)
+        {
+            <article class="content-panel master-game-card">
+                <div class="master-game-heading">
+                    <div>
+                        @if (!string.IsNullOrWhiteSpace(game.QuizTitle))
+                        {
+                            <h2>@game.QuizTitle</h2>
+                        }
+                        <span class="status-pill">
+                            @(game.IsInLobby
+                                ? Localizer["MasterGames_InLobby"]
+                                : Localizer["MasterGames_Playing"])
+                        </span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="button button-secondary"
+                                type="button"
+                                data-open-join-code
+                                data-game-code="@game.PublicCode"
+                                data-qr-url="@Url.Page("/Admin/MasterGames", "JoinQrCode", new { id = game.SessionId })">
+                            @Localizer["GameBoard_ShowJoinCode"]
+                        </button>
+
+                        @if (game.CanPlay && game.QuizId is int quizId)
+                        {
+                            <form method="post" asp-page-handler="CreateGame">
+                                <input name="quizId" type="hidden" value="@quizId" />
+                                <button class="button button-primary" type="submit">
+                                    @Localizer["Button_CreateGame"]
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+
+                <dl class="master-game-details">
+                    <div>
+                        <dt>@Localizer["MasterGames_SessionId"]</dt>
+                        <dd><code>@game.SessionId</code></dd>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(game.HostId))
+                    {
+                        <div>
+                            <dt>@Localizer["MasterGames_HostId"]</dt>
+                            <dd><code>@game.HostId</code></dd>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(game.HostName))
+                    {
+                        <div>
+                            <dt>@Localizer["MasterGames_HostName"]</dt>
+                            <dd>@game.HostName</dd>
+                        </div>
+                    }
+                    @if (game.RoundNumber is int roundNumber)
+                    {
+                        <div>
+                            <dt>@Localizer["MasterGames_Round"]</dt>
+                            <dd>
+                                <span>@roundNumber</span>
+                                @if (!string.IsNullOrWhiteSpace(game.RoundTitle))
+                                {
+                                    <text> — @game.RoundTitle</text>
+                                }
+                            </dd>
+                        </div>
+                    }
+                </dl>
+
+                <section class="master-game-players">
+                    <h3>@Localizer["MasterGames_Players"]</h3>
+                    @if (game.Players.Count == 0)
+                    {
+                        <p class="muted">@Localizer["MasterGames_NoPlayers"]</p>
+                    }
+                    else
+                    {
+                        <ul>
+                            @foreach (var player in game.Players)
+                            {
+                                <li>
+                                    <span>@player.Name</span>
+                                    <strong>@player.Score</strong>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </section>
+            </article>
+        }
+    </div>
+}
+
+<dialog id="join-code-dialog"
+        class="join-code-dialog"
+        aria-labelledby="join-code-title">
+    <div class="join-code-card">
+        <button class="join-code-close"
+                type="button"
+                data-close-join-code
+                aria-label="@Localizer["Button_Close"]">
+            ×
+        </button>
+
+        <p class="eyebrow">@Localizer["GameBoard_JoinOverlayHint"]</p>
+        <h2 id="join-code-title">@Localizer["GameBoard_JoinOverlayTitle"]</h2>
+        <img class="join-qr-code"
+             data-join-qr-code
+             width="320"
+             height="320"
+             alt="@Localizer["GameBoard_JoinQrAlt"]" />
+        <strong class="join-code-value" data-join-code-value></strong>
+    </div>
+</dialog>
+
+@section Scripts {
+    <script>
+        (() => {
+            const dialog = document.getElementById("join-code-dialog");
+            const qrCode = dialog?.querySelector("[data-join-qr-code]");
+            const codeValue = dialog?.querySelector("[data-join-code-value]");
+            const closeButton = dialog?.querySelector("[data-close-join-code]");
+
+            for (const openButton of document.querySelectorAll("[data-open-join-code]")) {
+                openButton.addEventListener("click", () => {
+                    if (qrCode) {
+                        qrCode.src = openButton.dataset.qrUrl ?? "";
+                    }
+                    if (codeValue) {
+                        codeValue.textContent = openButton.dataset.gameCode ?? "";
+                    }
+                    dialog?.showModal();
+                });
+            }
+
+            closeButton?.addEventListener("click", () => dialog?.close());
+            dialog?.addEventListener("click", event => {
+                if (event.target === dialog) {
+                    dialog.close();
+                }
+            });
+        })();
+    </script>
+}

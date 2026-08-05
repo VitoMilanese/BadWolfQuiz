@@ -84,6 +84,15 @@ public sealed class GameSessionRegistry
     public IReadOnlyList<GameSessionRegistration> GetAll() =>
         _sessionsById.Values.ToArray();
 
+    public bool HasConnectedPlayer(GameSessionRegistration game)
+    {
+        lock (_presenceSync)
+        {
+            return _playerConnections.Values.Any(connection =>
+                connection.Access.Game == game && connection.IsApproved);
+        }
+    }
+
     public GameSessionRegistration Restore(
         string publicCode,
         GameSession session,

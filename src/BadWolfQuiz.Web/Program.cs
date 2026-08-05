@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Http.Features;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +26,11 @@ builder.Services.Configure<FormOptions>(options =>
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services
-    .AddRazorPages(options => options.Conventions.AuthorizeFolder("/Admin"))
+    .AddRazorPages(options =>
+    {
+        options.Conventions.AuthorizeFolder("/Admin");
+        options.Conventions.AuthorizePage("/Admin/MasterGames", "MasterHost");
+    })
     .AddViewLocalization()
     .AddDataAnnotationsLocalization(options =>
     {
@@ -40,7 +45,20 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromDays(30);
         options.SlidingExpiration = true;
     });
-builder.Services.AddAuthorization();
+var masterHostId = builder.Configuration["MasterHostId"]?.Trim();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("MasterHost", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireAssertion(context =>
+            !string.IsNullOrWhiteSpace(masterHostId) &&
+            string.Equals(
+                context.User.FindFirstValue(ClaimTypes.NameIdentifier),
+                masterHostId,
+                StringComparison.Ordinal));
+    });
+});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddOptions();
 builder.Services.AddHttpClient<ResendClient>();
@@ -95,6 +113,10 @@ builder.Services.AddOptions<PremiumHostOptions>()
     .Bind(builder.Configuration.GetSection(PremiumHostOptions.SectionName))
     .Validate(options => options.IsValid, "Premium host identifiers are invalid.")
     .ValidateOnStart();
+builder.Services.AddOptions<ActiveGameOptions>()
+    .Bind(builder.Configuration.GetSection(ActiveGameOptions.SectionName))
+    .Validate(options => options.IsValid, "Active game settings are invalid.")
+    .ValidateOnStart();
 
 var defaultCulture = builder.Configuration[
     $"{SiteDefaultsOptions.SectionName}:{nameof(SiteDefaultsOptions.Culture)}"] ?? "en";
@@ -124,6 +146,7 @@ builder.Services.AddSingleton<IGameCodeGenerator, GameCodeGenerator>();
 builder.Services.AddSingleton<GameSessionRegistry>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ActiveGameStore>();
+builder.Services.AddSingleton<ActiveGameAvailability>();
 builder.Services.AddSingleton<CrashLog>();
 builder.Services.AddHostedService<ActiveGamePersistenceService>();
 builder.Services.AddSingleton<GameSettingsStore>();

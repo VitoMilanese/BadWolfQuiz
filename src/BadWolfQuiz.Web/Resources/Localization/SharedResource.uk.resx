@@ -1203,4 +1203,14 @@
   <data name="FileUploadLimit" xml:space="preserve"><value>Максимальний розмір файла: {0} МБ.</value></data>
   <data name="Settings_HostId" xml:space="preserve"><value>Ідентифікатор хоста (ID)</value></data>
   <data name="Settings_HostIdHint" xml:space="preserve"><value>Використовуйте цей ідентифікатор для налаштування преміум-хостів.</value></data>
+  <data name="MasterGames_Title" xml:space="preserve"><value>Активні ігри</value></data>
+  <data name="MasterGames_Empty" xml:space="preserve"><value>Активних ігор немає.</value></data>
+  <data name="MasterGames_InLobby" xml:space="preserve"><value>У лобі</value></data>
+  <data name="MasterGames_Playing" xml:space="preserve"><value>Грають</value></data>
+  <data name="MasterGames_SessionId" xml:space="preserve"><value>ID гри</value></data>
+  <data name="MasterGames_HostId" xml:space="preserve"><value>ID хоста</value></data>
+  <data name="MasterGames_HostName" xml:space="preserve"><value>Ім’я хоста</value></data>
+  <data name="MasterGames_Round" xml:space="preserve"><value>Раунд</value></data>
+  <data name="MasterGames_Players" xml:space="preserve"><value>Гравці</value></data>
+  <data name="MasterGames_NoPlayers" xml:space="preserve"><value>Ще ніхто не приєднався.</value></data>
 </root>

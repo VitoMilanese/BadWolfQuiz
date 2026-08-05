@@ -14,6 +14,7 @@ public sealed class IndexModel(
     GameSessionLauncher gameSessionLauncher,
     GameSessionRegistry sessionRegistry,
     ActiveGameStore activeGameStore,
+    ActiveGameAvailability activeGameAvailability,
     QuizPackageService quizPackageService,
     CurrentHost currentHost,
     IStringLocalizer<SharedResource> localizer) : PageModel
@@ -35,7 +36,7 @@ public sealed class IndexModel(
     public IActionResult OnPostContinueGame(int quizId)
     {
         var snapshot = activeGameStore.Find(currentHost.RequiredId, quizId);
-        if (snapshot is null)
+        if (snapshot is null || !activeGameAvailability.CanResume(snapshot))
         {
             return NotFound();
         }
@@ -242,7 +243,9 @@ public sealed class IndexModel(
                 item => item.QuizId,
                 item => new QuizRatingSummary(item.Average, item.Count));
         ResumableQuizIds = activeGameStore.GetAll()
-            .Where(snapshot => snapshot.HostId == currentHost.RequiredId)
+            .Where(snapshot =>
+                snapshot.HostId == currentHost.RequiredId &&
+                activeGameAvailability.CanResume(snapshot))
             .Select(snapshot => snapshot.Quiz.SourceQuizId)
             .ToHashSet();
     }

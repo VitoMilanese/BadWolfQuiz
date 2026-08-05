@@ -1203,4 +1203,14 @@
   <data name="FileUploadLimit" xml:space="preserve"><value>Dimensione massima del file: {0} MB.</value></data>
   <data name="Settings_HostId" xml:space="preserve"><value>ID host</value></data>
   <data name="Settings_HostIdHint" xml:space="preserve"><value>Usa questo identificatore per configurare gli host premium.</value></data>
+  <data name="MasterGames_Title" xml:space="preserve"><value>Partite attive</value></data>
+  <data name="MasterGames_Empty" xml:space="preserve"><value>Non ci sono partite attive.</value></data>
+  <data name="MasterGames_InLobby" xml:space="preserve"><value>Nella lobby</value></data>
+  <data name="MasterGames_Playing" xml:space="preserve"><value>In gioco</value></data>
+  <data name="MasterGames_SessionId" xml:space="preserve"><value>ID partita</value></data>
+  <data name="MasterGames_HostId" xml:space="preserve"><value>ID host</value></data>
+  <data name="MasterGames_HostName" xml:space="preserve"><value>Nome host</value></data>
+  <data name="MasterGames_Round" xml:space="preserve"><value>Round</value></data>
+  <data name="MasterGames_Players" xml:space="preserve"><value>Giocatori</value></data>
+  <data name="MasterGames_NoPlayers" xml:space="preserve"><value>Nessun giocatore si è ancora unito.</value></data>
 </root>

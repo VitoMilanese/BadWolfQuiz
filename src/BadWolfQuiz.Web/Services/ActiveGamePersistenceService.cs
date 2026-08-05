@@ -142,7 +142,7 @@ public sealed class ActiveGamePersistenceService(
         !session.HasNextRound &&
         session.IsCurrentRoundComplete;
 
-    private static ActiveGameSnapshot CaptureSnapshot(
+    private ActiveGameSnapshot CaptureSnapshot(
         GameSessionRegistration game)
     {
         lock (game)
@@ -153,7 +153,8 @@ public sealed class ActiveGamePersistenceService(
                 game.AllowsNewPlayers,
                 game.Session.Quiz,
                 game.Session.Settings,
-                game.Session.CaptureState());
+                game.Session.CaptureState(),
+                timeProvider.GetUtcNow());
         }
     }
 

@@ -18,6 +18,12 @@
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
     var discordInviteUrl = Configuration["Discord:InviteUrl"];
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var isMasterHost = isAuthenticated &&
+        !string.IsNullOrWhiteSpace(Configuration["MasterHostId"]) &&
+        string.Equals(
+            CurrentHost.Id,
+            Configuration["MasterHostId"]?.Trim(),
+            StringComparison.Ordinal);
     var settings = ViewData["GameThemeSettings"] as BadWolfQuiz.Game.Runtime.GameSessionSettings
         ?? (isAuthenticated && CurrentHost.Id is { } hostId
             ? await SettingsStore.LoadAsync(hostId, Context.RequestAborted)
@@ -70,6 +76,10 @@
                     <a class="action-menu-item" asp-page="/Admin/Quizzes/Index">@Localizer["Menu_Quizzes"]</a>
                     <a class="action-menu-item" asp-page="/Admin/Games/History">@Localizer["Menu_GameHistory"]</a>
                     <a class="action-menu-item" asp-page="/Admin/Games/Statistics">@Localizer["Menu_PlayerStatistics"]</a>
+                    @if (isMasterHost)
+                    {
+                        <a class="action-menu-item" asp-page="/Admin/MasterGames">@Localizer["MasterGames_Title"]</a>
+                    }
                     <a class="action-menu-item" asp-page="/Admin/Settings/Index">@Localizer["Menu_Settings"]</a>
                     <a class="action-menu-item" asp-page="/Account/ChangePassword">@Localizer["Account_ChangePassword"]</a>
                 }

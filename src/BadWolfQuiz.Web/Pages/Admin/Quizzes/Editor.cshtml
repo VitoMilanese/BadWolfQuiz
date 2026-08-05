@@ -398,16 +398,23 @@
     </div>
 
     <div class="quiz-board-actions form-actions">
-        <button type="submit"
-                class="button button-primary">
-            @Localizer["Button_Save"]
-        </button>
-        <button type="submit"
-                name="play"
-                value="true"
-                class="button button-primary">
-            @Localizer["Button_CreateGame"]
-        </button>
+        <a id="quiz-editor-my-quizzes"
+           class="button button-secondary"
+           asp-page="Index">
+            @Localizer["Title_MyQuizzes"]
+        </a>
+        <div class="quiz-board-primary-actions">
+            <button type="submit"
+                    class="button button-primary">
+                @Localizer["Button_Save"]
+            </button>
+            <button type="submit"
+                    name="play"
+                    value="true"
+                    class="button button-primary">
+                @Localizer["Button_CreateGame"]
+            </button>
+        </div>
     </div>
 </form>
 
@@ -1358,6 +1365,19 @@
                 button.dataset.categoryTitle,
                 Number(button.dataset.roundId)
             );
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key !== "Escape" || event.defaultPrevented ||
+                document.querySelector("dialog[open]")) {
+                return;
+            }
+
+            const myQuizzesLink = document.getElementById("quiz-editor-my-quizzes");
+            if (myQuizzesLink) {
+                event.preventDefault();
+                window.location.assign(myQuizzesLink.href);
+            }
         });
 
         document.addEventListener("click", function (event) {

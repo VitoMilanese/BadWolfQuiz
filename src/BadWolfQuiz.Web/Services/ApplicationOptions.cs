@@ -70,3 +70,11 @@ public sealed class PremiumHostOptions
         HostIds is not null && HostIds.All(hostId =>
             !string.IsNullOrWhiteSpace(hostId) && hostId.Length <= 36);
 }
+
+public sealed class ActiveGameOptions
+{
+    public const string SectionName = "ActiveGames";
+    public int ResumeAvailabilityDays { get; set; } = 30;
+
+    public bool IsValid => ResumeAvailabilityDays is >= 1 and <= 3650;
+}

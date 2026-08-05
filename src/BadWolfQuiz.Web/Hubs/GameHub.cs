@@ -2,6 +2,7 @@ using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace BadWolfQuiz.Web.Hubs;
@@ -11,7 +12,19 @@ public sealed class GameHub(
     AvatarCatalog avatarCatalog) : Hub
 {
     private const int MaxPlayerImageBytes = 160 * 1024;
-    private static readonly ConcurrentDictionary<string, string> HostConnections = new();
+    private static readonly ConcurrentDictionary<string, HostConnection> HostConnections = new();
+
+    public static bool IsHostConnected(GameSessionRegistration game) =>
+        !string.IsNullOrWhiteSpace(game.HostId) &&
+        HostConnections.Values.Any(connection =>
+            string.Equals(
+                connection.PublicCode,
+                game.PublicCode,
+                StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(
+                connection.HostId,
+                game.HostId,
+                StringComparison.Ordinal));
 
     public async Task RegisterHostSession(string publicCode)
     {
@@ -21,12 +34,18 @@ public sealed class GameHub(
         }
 
         var normalizedCode = GameSessionRegistry.NormalizeCode(publicCode);
-        if (sessionRegistry.Find(normalizedCode) is null)
+        var game = sessionRegistry.Find(normalizedCode);
+        var hostId = Context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (game is null ||
+            string.IsNullOrWhiteSpace(hostId) ||
+            !string.Equals(game.HostId, hostId, StringComparison.Ordinal))
         {
             return;
         }
 
-        HostConnections[Context.ConnectionId] = normalizedCode;
+        HostConnections[Context.ConnectionId] = new HostConnection(
+            normalizedCode,
+            hostId);
         await Groups.AddToGroupAsync(Context.ConnectionId, HostGroupName(normalizedCode));
         await Clients.Group(GroupName(normalizedCode)).SendAsync("HostWebcamReady");
     }
@@ -509,7 +528,7 @@ public sealed class GameHub(
 
     private bool CanRelayToPlayer(string playerConnectionId)
     {
-        if (!HostConnections.TryGetValue(Context.ConnectionId, out var hostCode))
+        if (!HostConnections.TryGetValue(Context.ConnectionId, out var hostConnection))
         {
             return false;
         }
@@ -517,7 +536,7 @@ public sealed class GameHub(
         var player = sessionRegistry.GetPlayerConnection(playerConnectionId);
         return player is not null && string.Equals(
             player.Game.PublicCode,
-            hostCode,
+            hostConnection.PublicCode,
             StringComparison.OrdinalIgnoreCase);
     }
 
@@ -567,4 +586,6 @@ public sealed class GameHub(
             .Group(GroupName(result.Game.PublicCode))
             .SendAsync("FinalQuestionProgressChanged");
     }
+
+    private sealed record HostConnection(string PublicCode, string HostId);
 }
