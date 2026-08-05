@@ -11,6 +11,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Runtime model](architecture/runtime-model.md)
 - [Production OOM diagnostics](operations/oom-diagnostics.md)
 - [Reverse-proxy upload limits](operations/reverse-proxy-upload-limits.md)
+- [Quiz media archive operations](operations/media-archive.md)
 
 ## Features
 

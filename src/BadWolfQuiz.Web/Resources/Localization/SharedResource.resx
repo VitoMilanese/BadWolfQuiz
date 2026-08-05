@@ -1213,4 +1213,27 @@
   <data name="MasterGames_Round" xml:space="preserve"><value>Round</value></data>
   <data name="MasterGames_Players" xml:space="preserve"><value>Players</value></data>
   <data name="MasterGames_NoPlayers" xml:space="preserve"><value>No players have joined yet.</value></data>
+  <data name="MediaArchive_State_Active" xml:space="preserve"><value>Media active</value></data>
+  <data name="MediaArchive_State_Archiving" xml:space="preserve"><value>Archiving media</value></data>
+  <data name="MediaArchive_State_Archived" xml:space="preserve"><value>Media archived</value></data>
+  <data name="MediaArchive_State_Restoring" xml:space="preserve"><value>Restoring media</value></data>
+  <data name="MediaArchive_State_Failed" xml:space="preserve"><value>Media operation failed</value></data>
+  <data name="MediaArchive_ArchivedOn" xml:space="preserve"><value>Archived on</value></data>
+  <data name="MediaArchive_MediaSize" xml:space="preserve"><value>Media size</value></data>
+  <data name="MediaArchive_ArchiveMedia" xml:space="preserve"><value>Archive media</value></data>
+  <data name="MediaArchive_RestoreMedia" xml:space="preserve"><value>Restore media</value></data>
+  <data name="MediaArchive_PreventAutomatic" xml:space="preserve"><value>Do not archive automatically</value></data>
+  <data name="MediaArchive_AllowAutomatic" xml:space="preserve"><value>Allow automatic archiving</value></data>
+  <data name="MediaArchive_ConfirmTitle" xml:space="preserve"><value>Archive quiz media?</value></data>
+  <data name="MediaArchive_ConfirmText" xml:space="preserve"><value>The quiz structure will remain available. Media will move to the archive database and must be restored before playing.</value></data>
+  <data name="MediaArchive_Archived" xml:space="preserve"><value>Quiz media was archived.</value></data>
+  <data name="MediaArchive_Restored" xml:space="preserve"><value>Quiz media was restored.</value></data>
+  <data name="MediaArchive_Failed" xml:space="preserve"><value>Quiz media could not be archived. The original media remains available.</value></data>
+  <data name="MediaArchive_RestoreFailed" xml:space="preserve"><value>Quiz media could not be restored. The archive was not changed.</value></data>
+  <data name="MediaArchive_RestoreBeforeEditing" xml:space="preserve"><value>Restore archived media before editing this quiz.</value></data>
+  <data name="MediaArchive_PublicRestoreTitle" xml:space="preserve"><value>Restore archived quiz media?</value></data>
+  <data name="MediaArchive_PublicRestoreText" xml:space="preserve"><value>This quiz's media is archived. It will be restored before the game starts, which may take some time.</value></data>
+  <data name="MediaArchive_RestoreAndPlay" xml:space="preserve"><value>Restore and play</value></data>
+  <data name="MediaArchive_PublicRestoreUnavailable" xml:space="preserve"><value>This quiz is temporarily unavailable while its media is being processed.</value></data>
+  <data name="MediaArchive_NoMedia" xml:space="preserve"><value>This quiz has no media to archive.</value></data>
 </root>

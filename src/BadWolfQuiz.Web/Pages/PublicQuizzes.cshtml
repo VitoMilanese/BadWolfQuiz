@@ -66,14 +66,71 @@ else
                     }
                 </div>
                 <div class="card-actions">
-                    <form method="post" asp-page-handler="CreateGame">
-                        <input name="quizId" type="hidden" value="@quiz.Id" />
-                        <button class="button button-primary" type="submit">
+                    @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived)
+                    {
+                        <button class="button button-primary"
+                                type="button"
+                                data-open-public-restore-dialog
+                                data-quiz-id="@quiz.Id"
+                                data-quiz-title="@quiz.Title">
                             @Localizer["Button_CreateGame"]
                         </button>
-                    </form>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="CreateGame">
+                            <input name="quizId" type="hidden" value="@quiz.Id" />
+                            <button class="button button-primary" type="submit" disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)">
+                                @Localizer["Button_CreateGame"]
+                            </button>
+                        </form>
+                    }
                 </div>
             </article>
         }
     </div>
+}
+
+<dialog id="publicRestoreDialog" class="app-dialog">
+    <form method="post" asp-page-handler="CreateGame" class="dialog-card">
+        <input id="publicRestoreQuizId" name="quizId" type="hidden" />
+        <input name="Search" type="hidden" value="@Model.Search" />
+        <div class="dialog-heading">
+            <div>
+                <p class="eyebrow">BAD WOLF QUIZ</p>
+                <h2>@Localizer["MediaArchive_PublicRestoreTitle"]</h2>
+            </div>
+            <button class="dialog-close" type="button" data-close-public-restore-dialog aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+        <p>@Localizer["MediaArchive_PublicRestoreText"]</p>
+        <strong id="publicRestoreQuizTitle"></strong>
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary" type="button" data-close-public-restore-dialog>@Localizer["Button_Cancel"]</button>
+            <button class="button button-primary" type="submit">@Localizer["MediaArchive_RestoreAndPlay"]</button>
+        </div>
+    </form>
+</dialog>
+
+@section Scripts {
+<script>
+(() => {
+    const dialog = document.getElementById('publicRestoreDialog');
+    const quizId = document.getElementById('publicRestoreQuizId');
+    const quizTitle = document.getElementById('publicRestoreQuizTitle');
+
+    document.querySelectorAll('[data-open-public-restore-dialog]').forEach(button => {
+        button.addEventListener('click', () => {
+            quizId.value = button.dataset.quizId ?? '';
+            quizTitle.textContent = button.dataset.quizTitle ?? '';
+            dialog.showModal();
+        });
+    });
+    document.querySelectorAll('[data-close-public-restore-dialog]').forEach(button => {
+        button.addEventListener('click', () => dialog.close());
+    });
+    dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
+    });
+})();
+</script>
 }

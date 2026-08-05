@@ -418,6 +418,16 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("ArchivedMediaCount").HasColumnType("INTEGER");
+                    b.Property<long>("ArchivedMediaBytes").HasColumnType("INTEGER");
+                    b.Property<Guid?>("CurrentArchiveOperationId").HasColumnType("TEXT");
+                    b.Property<DateTime?>("LastPlayedAtUtc").HasColumnType("TEXT");
+                    b.Property<DateTime?>("MediaArchivedAtUtc").HasColumnType("TEXT");
+                    b.Property<string>("MediaArchiveFailureReason").HasMaxLength(1000).HasColumnType("TEXT");
+                    b.Property<DateTime?>("MediaRestoredAtUtc").HasColumnType("TEXT");
+                    b.Property<int>("MediaState").HasColumnType("INTEGER");
+                    b.Property<bool>("PreventAutomaticArchiving").HasColumnType("INTEGER");
+
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");

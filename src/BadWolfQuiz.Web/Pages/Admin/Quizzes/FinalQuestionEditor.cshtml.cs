@@ -31,6 +31,11 @@ public sealed class FinalQuestionEditorModel(
         {
             return NotFound();
         }
+        if (quiz.MediaState != QuizMediaState.Active)
+        {
+            TempData["ErrorMessage"] = localizer["MediaArchive_RestoreBeforeEditing"].Value;
+            return RedirectToPage("Index");
+        }
 
         Input = new InputModel
         {
@@ -71,6 +76,13 @@ public sealed class FinalQuestionEditorModel(
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
+        if (!await db.Quizzes.AsNoTracking().AnyAsync(
+            x => x.Id == Input.QuizId && x.MediaState == QuizMediaState.Active,
+            cancellationToken))
+        {
+            TempData["ErrorMessage"] = localizer["MediaArchive_RestoreBeforeEditing"].Value;
+            return RedirectToPage("Index");
+        }
         if (Input.QuestionBlocks == null || Input.QuestionBlocks.Count == 0)
         {
             ModelState.AddModelError(
