@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using QRCoder;
 
 namespace BadWolfQuiz.Web.Pages.Admin;
 
@@ -15,6 +16,7 @@ public sealed class MasterGamesModel(
     GameSessionRegistry sessionRegistry,
     GameSessionLauncher gameSessionLauncher,
     CurrentHost currentHost,
+    JoinUrlBuilder joinUrlBuilder,
     IConfiguration configuration,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -80,6 +82,7 @@ public sealed class MasterGamesModel(
                               StringComparison.Ordinal));
             return new MasterActiveGameItem(
                 game.SessionId,
+                game.PublicCode,
                 game.HostId,
                 hostName,
                 quiz?.Title ?? game.QuizTitle,
@@ -124,6 +127,28 @@ public sealed class MasterGamesModel(
         return RedirectToPage();
     }
 
+    public IActionResult OnGetJoinQrCode(Guid id)
+    {
+        if (!IsMasterHost())
+        {
+            return Forbid();
+        }
+
+        var game = sessionRegistry.Find(new GameSessionId(id));
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var joinUrl = joinUrlBuilder.Build(Request, game.PublicCode);
+        using var generator = new QRCodeGenerator();
+        using var data = generator.CreateQrCode(
+            joinUrl,
+            QRCodeGenerator.ECCLevel.Q);
+        using var qrCode = new PngByteQRCode(data);
+        return File(qrCode.GetGraphic(16), "image/png");
+    }
+
     private bool IsMasterHost() =>
         !string.IsNullOrWhiteSpace(configuration["MasterHostId"]) &&
         string.Equals(
@@ -143,6 +168,7 @@ public sealed class MasterGamesModel(
 
             return new RuntimeGameSnapshot(
                 session.Id.Value,
+                game.PublicCode,
                 game.HostId,
                 session.Quiz.SourceQuizId,
                 session.Quiz.Title,
@@ -164,6 +190,7 @@ public sealed class MasterGamesModel(
 
     private sealed record RuntimeGameSnapshot(
         Guid SessionId,
+        string PublicCode,
         string? HostId,
         int QuizId,
         string QuizTitle,
@@ -176,6 +203,7 @@ public sealed class MasterGamesModel(
 
 public sealed record MasterActiveGameItem(
     Guid SessionId,
+    string PublicCode,
     string? HostId,
     string? HostName,
     string? QuizTitle,
