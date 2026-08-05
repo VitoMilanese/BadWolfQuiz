@@ -1,6 +1,7 @@
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Services;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -16,9 +17,9 @@ public sealed class QuizMediaArchiveServiceTests : IAsyncLifetime
     {
         Directory.CreateDirectory(_directory);
         var mainOptions = new DbContextOptionsBuilder<QuizDbContext>()
-            .UseSqlite($"Data Source={Path.Combine(_directory, "main.db")}").Options;
+            .UseSqlite($"Data Source={Path.Combine(_directory, "main.db")};Pooling=False").Options;
         var archiveOptions = new DbContextOptionsBuilder<ArchiveDbContext>()
-            .UseSqlite($"Data Source={Path.Combine(_directory, "archive.db")}").Options;
+            .UseSqlite($"Data Source={Path.Combine(_directory, "archive.db")};Pooling=False").Options;
         _mainFactory = new(() => new QuizDbContext(mainOptions));
         _archiveFactory = new(() => new ArchiveDbContext(archiveOptions));
         await using var main = await _mainFactory.CreateDbContextAsync();
@@ -131,6 +132,7 @@ public sealed class QuizMediaArchiveServiceTests : IAsyncLifetime
 
     public Task DisposeAsync()
     {
+        SqliteConnection.ClearAllPools();
         if (Directory.Exists(_directory)) Directory.Delete(_directory, true);
         return Task.CompletedTask;
     }
