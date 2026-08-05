@@ -1,7 +1,7 @@
 # Quiz media archive
 
-Bad Wolf Quiz stores active quiz data in `Data/BadWolfQuiz.db` and archived quiz media in
-`Data/BadWolfQuiz.Archive.db`. The archive contains only the `FileData` BLOBs from question,
+Bad Wolf Quiz stores active quiz data in `App_Data/BadWolfQuiz.db` and archived quiz media in
+`App_Data/BadWolfQuiz.Archive.db`. The archive contains only the `FileData` BLOBs from question,
 answer, final-question, and final-answer content blocks. Quiz structure, text, MIME types,
 file names, ownership, game history, and resumable-game data remain in the main database.
 
@@ -12,8 +12,8 @@ Configure both SQLite files independently:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Data Source=Data/BadWolfQuiz.db",
-    "ArchiveConnection": "Data Source=Data/BadWolfQuiz.Archive.db"
+    "DefaultConnection": "Data Source=App_Data/BadWolfQuiz.db",
+    "ArchiveConnection": "Data Source=App_Data/BadWolfQuiz.Archive.db"
   },
   "MediaArchive": {
     "Enabled": true,
