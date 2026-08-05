@@ -1013,7 +1013,14 @@ textarea {
 
 .quiz-board-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.quiz-board-primary-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .question-cell:hover {
@@ -1829,6 +1836,74 @@ textarea {
     .quiz-board-actions .button {
         width: 100%;
     }
+
+    .quiz-board-primary-actions {
+        width: 100%;
+    }
+}
+
+.master-game-list {
+    display: grid;
+    gap: 18px;
+}
+
+.master-game-card {
+    display: grid;
+    gap: 18px;
+}
+
+.master-game-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.master-game-heading h2 {
+    margin: 0 0 10px;
+}
+
+.master-game-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 0;
+}
+
+.master-game-details div {
+    min-width: 0;
+}
+
+.master-game-details dt {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.master-game-details dd {
+    margin: 4px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.master-game-players h3 {
+    margin-top: 0;
+}
+
+.master-game-players ul {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-game-players li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-2);
 }
 
 /* Quiz editor: draggable category columns */
