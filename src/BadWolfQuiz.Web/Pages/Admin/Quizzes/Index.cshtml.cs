@@ -16,6 +16,8 @@ public sealed class IndexModel(
     ActiveGameStore activeGameStore,
     ActiveGameAvailability activeGameAvailability,
     QuizPackageService quizPackageService,
+    IQuizMediaArchiveService mediaArchiveService,
+    PremiumHostAccess premiumHostAccess,
     CurrentHost currentHost,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -24,6 +26,7 @@ public sealed class IndexModel(
         new HashSet<int>();
     public IReadOnlyDictionary<int, QuizRatingSummary> Ratings { get; private set; } =
         new Dictionary<int, QuizRatingSummary>();
+    public bool CanDisableAutomaticArchiving => premiumHostAccess.IsPremium(currentHost.RequiredId);
 
     [BindProperty]
     public IFormFile? ImportFile { get; set; }
@@ -86,6 +89,30 @@ public sealed class IndexModel(
             TempData["ErrorMessage"] = localizer["Error_QuizCannotStart"].Value;
             return RedirectToPage();
         }
+    }
+
+    public async Task<IActionResult> OnPostArchiveMediaAsync(int quizId, CancellationToken cancellationToken)
+    {
+        var result = await mediaArchiveService.ArchiveAsync(quizId, currentHost.RequiredId, cancellationToken);
+        TempData[result.Succeeded ? "SuccessMessage" : "ErrorMessage"] = localizer[
+            result.Succeeded ? "MediaArchive_Archived" : "MediaArchive_Failed"].Value;
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostRestoreMediaAsync(int quizId, CancellationToken cancellationToken)
+    {
+        var result = await mediaArchiveService.RestoreAsync(quizId, currentHost.RequiredId, cancellationToken);
+        TempData[result.Succeeded ? "SuccessMessage" : "ErrorMessage"] = localizer[
+            result.Succeeded ? "MediaArchive_Restored" : "MediaArchive_RestoreFailed"].Value;
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostSetAutomaticArchivingAsync(int quizId, bool prevent, CancellationToken cancellationToken)
+    {
+        if (!premiumHostAccess.IsPremium(currentHost.RequiredId)) return Forbid();
+        var changed = await db.Quizzes.Where(x => x.Id == quizId && !x.IsArchived)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.PreventAutomaticArchiving, prevent), cancellationToken);
+        return changed == 1 ? RedirectToPage() : NotFound();
     }
 
     public async Task<IActionResult> OnPostRenameAsync(

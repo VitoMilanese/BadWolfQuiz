@@ -155,6 +155,15 @@ public sealed class EditorModel(
         int id,
         int? selectedRoundId = null)
     {
+        var mediaState = await db.Quizzes.AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(x => (QuizMediaState?)x.MediaState)
+            .SingleOrDefaultAsync();
+        if (mediaState != QuizMediaState.Active)
+        {
+            TempData["ErrorMessage"] = localizer["MediaArchive_RestoreBeforeEditing"].Value;
+            return RedirectToPage("Index");
+        }
         var quiz = await db.Quizzes
             .AsNoTracking()
             .Include(x => x.Rounds)

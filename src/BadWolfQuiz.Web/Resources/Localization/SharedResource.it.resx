@@ -1213,4 +1213,22 @@
   <data name="MasterGames_Round" xml:space="preserve"><value>Round</value></data>
   <data name="MasterGames_Players" xml:space="preserve"><value>Giocatori</value></data>
   <data name="MasterGames_NoPlayers" xml:space="preserve"><value>Nessun giocatore si è ancora unito.</value></data>
+  <data name="MediaArchive_State_Active" xml:space="preserve"><value>Media attivi</value></data>
+  <data name="MediaArchive_State_Archiving" xml:space="preserve"><value>Archiviazione media</value></data>
+  <data name="MediaArchive_State_Archived" xml:space="preserve"><value>Media archiviati</value></data>
+  <data name="MediaArchive_State_Restoring" xml:space="preserve"><value>Ripristino media</value></data>
+  <data name="MediaArchive_State_Failed" xml:space="preserve"><value>Operazione media non riuscita</value></data>
+  <data name="MediaArchive_ArchivedOn" xml:space="preserve"><value>Archiviato il</value></data>
+  <data name="MediaArchive_MediaSize" xml:space="preserve"><value>Dimensione media</value></data>
+  <data name="MediaArchive_ArchiveMedia" xml:space="preserve"><value>Archivia media</value></data>
+  <data name="MediaArchive_RestoreMedia" xml:space="preserve"><value>Ripristina media</value></data>
+  <data name="MediaArchive_PreventAutomatic" xml:space="preserve"><value>Non archiviare automaticamente</value></data>
+  <data name="MediaArchive_AllowAutomatic" xml:space="preserve"><value>Consenti archiviazione automatica</value></data>
+  <data name="MediaArchive_ConfirmTitle" xml:space="preserve"><value>Archiviare i media del quiz?</value></data>
+  <data name="MediaArchive_ConfirmText" xml:space="preserve"><value>La struttura del quiz resterà disponibile. I media verranno spostati nel database di archivio e dovranno essere ripristinati prima di giocare.</value></data>
+  <data name="MediaArchive_Archived" xml:space="preserve"><value>I media del quiz sono stati archiviati.</value></data>
+  <data name="MediaArchive_Restored" xml:space="preserve"><value>I media del quiz sono stati ripristinati.</value></data>
+  <data name="MediaArchive_Failed" xml:space="preserve"><value>Impossibile archiviare i media. I media originali restano disponibili.</value></data>
+  <data name="MediaArchive_RestoreFailed" xml:space="preserve"><value>Impossibile ripristinare i media. L'archivio non è stato modificato.</value></data>
+  <data name="MediaArchive_RestoreBeforeEditing" xml:space="preserve"><value>Ripristina i media archiviati prima di modificare questo quiz.</value></data>
 </root>

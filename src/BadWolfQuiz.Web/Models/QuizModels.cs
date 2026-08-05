@@ -39,6 +39,15 @@ public enum GameQuestionStatus
     Finished = 6
 }
 
+public enum QuizMediaState
+{
+    Active = 0,
+    Archiving = 1,
+    Archived = 2,
+    Restoring = 3,
+    Failed = 4
+}
+
 public sealed class HostAccount
 {
     [MaxLength(36)]
@@ -80,6 +89,16 @@ public sealed class Quiz
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
     public bool IsArchived { get; set; }
+    public QuizMediaState MediaState { get; set; } = QuizMediaState.Active;
+    public Guid? CurrentArchiveOperationId { get; set; }
+    public int ArchivedMediaCount { get; set; }
+    public long ArchivedMediaBytes { get; set; }
+    public DateTime? MediaArchivedAtUtc { get; set; }
+    public DateTime? MediaRestoredAtUtc { get; set; }
+    [MaxLength(1000)]
+    public string? MediaArchiveFailureReason { get; set; }
+    public bool PreventAutomaticArchiving { get; set; }
+    public DateTime? LastPlayedAtUtc { get; set; }
     public bool IsPublic { get; set; }
     public DateTime? PublishedAtUtc { get; set; }
 

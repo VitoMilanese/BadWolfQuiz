@@ -23,6 +23,13 @@ public sealed class QuestionEditorModel(
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
+        var canEdit = await db.QuizQuestions.AsNoTracking().AnyAsync(x =>
+            x.Id == id && x.Category.Round.Quiz.MediaState == QuizMediaState.Active);
+        if (!canEdit)
+        {
+            TempData["ErrorMessage"] = localizer["MediaArchive_RestoreBeforeEditing"].Value;
+            return RedirectToPage("Index");
+        }
         var question = await db.QuizQuestions
             .Include(x => x.Category)
                 .ThenInclude(x => x.Round)
@@ -91,6 +98,13 @@ public sealed class QuestionEditorModel(
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
+        if (!await db.Quizzes.AsNoTracking().AnyAsync(
+            x => x.Id == Input.QuizId && x.MediaState == QuizMediaState.Active,
+            cancellationToken))
+        {
+            TempData["ErrorMessage"] = localizer["MediaArchive_RestoreBeforeEditing"].Value;
+            return RedirectToPage("Index");
+        }
         if (Input.QuestionBlocks == null || Input.QuestionBlocks.Count == 0)
         {
             ModelState.AddModelError(

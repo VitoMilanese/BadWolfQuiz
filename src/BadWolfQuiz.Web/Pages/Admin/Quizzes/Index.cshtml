@@ -57,12 +57,17 @@
             {
                 <span class="status-pill">@Localizer["QuizPublication_Public"]</span>
             }
+            <span class="status-pill">@Localizer[$"MediaArchive_State_{quiz.MediaState}"]</span>
+            @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived)
+            {
+                <small>@Localizer["MediaArchive_ArchivedOn"]: @quiz.MediaArchivedAtUtc?.ToLocalTime().ToString("g") · @Localizer["MediaArchive_MediaSize"]: @FormatBytes(quiz.ArchivedMediaBytes)</small>
+            }
         </div>
 
         <div class="card-actions">
             <form method="post" asp-page-handler="CreateGame">
                 <input name="quizId" type="hidden" value="@quiz.Id" />
-                <button class="button button-primary" type="submit">
+                <button class="button button-primary" type="submit" disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)">
                     @Localizer["Button_CreateGame"]
                 </button>
             </form>
@@ -86,6 +91,30 @@
                        asp-route-id="@quiz.Id">
                         @Localizer["Button_Edit"]
                     </a>
+
+                    @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Active || (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Failed && quiz.ArchivedMediaCount == 0))
+                    {
+                        <button class="action-menu-item" type="button" data-open-archive-dialog data-quiz-id="@quiz.Id" data-quiz-title="@quiz.Title">
+                            @Localizer["MediaArchive_ArchiveMedia"]
+                        </button>
+                    }
+                    @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived || (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Failed && quiz.ArchivedMediaCount > 0))
+                    {
+                        <form method="post" asp-page-handler="RestoreMedia">
+                            <input name="quizId" type="hidden" value="@quiz.Id" />
+                            <button class="action-menu-item" type="submit">@Localizer["MediaArchive_RestoreMedia"]</button>
+                        </form>
+                    }
+                    @if (Model.CanDisableAutomaticArchiving)
+                    {
+                        <form method="post" asp-page-handler="SetAutomaticArchiving">
+                            <input name="quizId" type="hidden" value="@quiz.Id" />
+                            <input name="prevent" type="hidden" value="@(!quiz.PreventAutomaticArchiving ? "true" : "false")" />
+                            <button class="action-menu-item" type="submit">
+                                @(quiz.PreventAutomaticArchiving ? Localizer["MediaArchive_AllowAutomatic"] : Localizer["MediaArchive_PreventAutomatic"])
+                            </button>
+                        </form>
+                    }
 
                     <a class="action-menu-item"
                        asp-page-handler="Export"
@@ -170,11 +199,22 @@
 
 <partial name="_ConfirmDialog" />
 
+<dialog id="archiveMediaDialog" class="app-dialog">
+    <form method="post" asp-page-handler="ArchiveMedia" class="dialog-card">
+        <input id="archiveQuizId" name="quizId" type="hidden" />
+        <div class="dialog-heading"><h2>@Localizer["MediaArchive_ConfirmTitle"]</h2><button class="dialog-close" type="button" data-close-dialog>×</button></div>
+        <p>@Localizer["MediaArchive_ConfirmText"]</p>
+        <strong id="archiveQuizTitle"></strong>
+        <div class="form-actions dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>@Localizer["Button_Cancel"]</button><button class="button button-primary" type="submit">@Localizer["MediaArchive_ArchiveMedia"]</button></div>
+    </form>
+</dialog>
+
 @section Scripts {
 <script>
 (() => {
     const renameDialog = document.getElementById('renameQuizDialog');
     const deleteDialog = document.getElementById('confirmDeleteDialog');
+    const archiveDialog = document.getElementById('archiveMediaDialog');
 
     const renameQuizId = document.getElementById('renameQuizId');
     const renameQuizTitle = document.getElementById('renameQuizTitle');
@@ -215,6 +255,14 @@
             deleteDialog.showModal();
         });
     });
+    document.querySelectorAll('[data-open-archive-dialog]').forEach(button => {
+        button.addEventListener('click', () => {
+            button.closest('details')?.removeAttribute('open');
+            document.getElementById('archiveQuizId').value = button.dataset.quizId ?? '';
+            document.getElementById('archiveQuizTitle').textContent = button.dataset.quizTitle ?? '';
+            archiveDialog.showModal();
+        });
+    });
 
     document.querySelectorAll('[data-close-dialog]').forEach(button => {
         button.addEventListener('click', () => {
@@ -231,4 +279,10 @@
     });
 })();
 </script>
+}
+
+@functions {
+    private static string FormatBytes(long bytes) => bytes >= 1024 * 1024
+        ? $"{bytes / 1024d / 1024d:0.##} MB"
+        : $"{bytes / 1024d:0.##} KB";
 }

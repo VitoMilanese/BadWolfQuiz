@@ -1213,4 +1213,22 @@
   <data name="MasterGames_Round" xml:space="preserve"><value>Раунд</value></data>
   <data name="MasterGames_Players" xml:space="preserve"><value>Гравці</value></data>
   <data name="MasterGames_NoPlayers" xml:space="preserve"><value>Ще ніхто не приєднався.</value></data>
+  <data name="MediaArchive_State_Active" xml:space="preserve"><value>Медіа активні</value></data>
+  <data name="MediaArchive_State_Archiving" xml:space="preserve"><value>Архівація медіа</value></data>
+  <data name="MediaArchive_State_Archived" xml:space="preserve"><value>Медіа архівовано</value></data>
+  <data name="MediaArchive_State_Restoring" xml:space="preserve"><value>Відновлення медіа</value></data>
+  <data name="MediaArchive_State_Failed" xml:space="preserve"><value>Помилка операції з медіа</value></data>
+  <data name="MediaArchive_ArchivedOn" xml:space="preserve"><value>Архівовано</value></data>
+  <data name="MediaArchive_MediaSize" xml:space="preserve"><value>Розмір медіа</value></data>
+  <data name="MediaArchive_ArchiveMedia" xml:space="preserve"><value>Архівувати медіа</value></data>
+  <data name="MediaArchive_RestoreMedia" xml:space="preserve"><value>Відновити медіа</value></data>
+  <data name="MediaArchive_PreventAutomatic" xml:space="preserve"><value>Не архівувати автоматично</value></data>
+  <data name="MediaArchive_AllowAutomatic" xml:space="preserve"><value>Дозволити автоматичну архівацію</value></data>
+  <data name="MediaArchive_ConfirmTitle" xml:space="preserve"><value>Архівувати медіа квізу?</value></data>
+  <data name="MediaArchive_ConfirmText" xml:space="preserve"><value>Структура квізу залишиться доступною. Медіа буде перенесено до архівної бази, і перед грою його потрібно буде відновити.</value></data>
+  <data name="MediaArchive_Archived" xml:space="preserve"><value>Медіа квізу архівовано.</value></data>
+  <data name="MediaArchive_Restored" xml:space="preserve"><value>Медіа квізу відновлено.</value></data>
+  <data name="MediaArchive_Failed" xml:space="preserve"><value>Не вдалося архівувати медіа. Оригінальні медіа залишилися доступними.</value></data>
+  <data name="MediaArchive_RestoreFailed" xml:space="preserve"><value>Не вдалося відновити медіа. Архів не змінено.</value></data>
+  <data name="MediaArchive_RestoreBeforeEditing" xml:space="preserve"><value>Відновіть архівовані медіа перед редагуванням цього квізу.</value></data>
 </root>

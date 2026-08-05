@@ -1,17 +1,20 @@
 using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
+using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using QRCoder;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Games;
 
 public sealed class LobbyModel(
+    QuizDbContext db,
     GameSessionRegistry sessionRegistry,
     GameHistoryStore gameHistoryStore,
     CurrentHost currentHost,
@@ -277,6 +280,11 @@ public sealed class LobbyModel(
                 game.PublicCode,
                 settings);
             sessionRegistry.StartGame(game.PublicCode);
+            await db.Quizzes
+                .Where(quiz => quiz.Id == game.Session.Quiz.SourceQuizId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(quiz => quiz.LastPlayedAtUtc, DateTime.UtcNow),
+                    cancellationToken);
         }
         catch (GameRuleViolationException)
         {

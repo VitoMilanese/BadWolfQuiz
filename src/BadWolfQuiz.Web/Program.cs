@@ -117,6 +117,10 @@ builder.Services.AddOptions<ActiveGameOptions>()
     .Bind(builder.Configuration.GetSection(ActiveGameOptions.SectionName))
     .Validate(options => options.IsValid, "Active game settings are invalid.")
     .ValidateOnStart();
+builder.Services.AddOptions<MediaArchiveOptions>()
+    .Bind(builder.Configuration.GetSection(MediaArchiveOptions.SectionName))
+    .Validate(options => options.IsValid, "Media archive settings are invalid.")
+    .ValidateOnStart();
 
 var defaultCulture = builder.Configuration[
     $"{SiteDefaultsOptions.SectionName}:{nameof(SiteDefaultsOptions.Culture)}"] ?? "en";
@@ -138,8 +142,24 @@ builder.Services.AddSignalR(options =>
 {
     options.MaximumReceiveMessageSize = 256 * 1024;
 });
-builder.Services.AddDbContext<QuizDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("QuizDatabase")));
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? builder.Configuration.GetConnectionString("QuizDatabase")
+    ?? "Data Source=Data/BadWolfQuiz.db";
+var archiveConnection = builder.Configuration.GetConnectionString("ArchiveConnection")
+    ?? "Data Source=Data/BadWolfQuiz.Archive.db";
+builder.Services.AddDbContext<QuizDbContext>(options => options.UseSqlite(defaultConnection));
+builder.Services.AddDbContext<ArchiveDbContext>(options => options.UseSqlite(
+    archiveConnection,
+    sqlite => sqlite.MigrationsAssembly(typeof(ArchiveDbContext).Assembly.FullName)
+        .MigrationsHistoryTable("__ArchiveMigrationsHistory")));
+builder.Services.AddSingleton<IDbContextFactory<QuizDbContext>>(_ =>
+    new QuizDbContextFactory(new DbContextOptionsBuilder<QuizDbContext>()
+        .UseSqlite(defaultConnection).Options));
+builder.Services.AddSingleton<IDbContextFactory<ArchiveDbContext>>(_ =>
+    new ArchiveDbContextFactory(new DbContextOptionsBuilder<ArchiveDbContext>()
+        .UseSqlite(archiveConnection, sqlite => sqlite
+            .MigrationsAssembly(typeof(ArchiveDbContext).Assembly.FullName)
+            .MigrationsHistoryTable("__ArchiveMigrationsHistory")).Options));
 builder.Services.AddSingleton<BuzzCoordinator>();
 builder.Services.AddSingleton<QuizSnapshotFactory>();
 builder.Services.AddSingleton<IGameCodeGenerator, GameCodeGenerator>();
@@ -162,12 +182,16 @@ builder.Services.AddScoped<IPasswordHasher<HostAccount>, PasswordHasher<HostAcco
 builder.Services.AddScoped<QuizSeedService>();
 builder.Services.AddScoped<QuizPackageService>();
 builder.Services.AddScoped<QuizRatingService>();
+builder.Services.AddScoped<IQuizMediaArchiveService, QuizMediaArchiveService>();
+builder.Services.AddScoped<IQuizDeletionService, QuizDeletionService>();
+builder.Services.AddScoped<ISqliteVacuumService, SqliteVacuumService>();
+builder.Services.AddHostedService<MediaArchiveBackgroundService>();
 builder.Services.AddSingleton<MediaUploadProcessor>();
 builder.Services.AddSingleton<PremiumHostAccess>();
 
 var app = builder.Build();
 
-Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "App_Data"));
+Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "Data"));
 
 var crashLog = app.Services.GetRequiredService<CrashLog>();
 AppDomain.CurrentDomain.UnhandledException += (_, eventArgs) =>
@@ -261,6 +285,8 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<QuizDbContext>();
     await DatabaseMigrationService.MigrateAsync(db);
+    var archiveDb = scope.ServiceProvider.GetRequiredService<ArchiveDbContext>();
+    await archiveDb.Database.MigrateAsync();
 
     var seed = scope.ServiceProvider.GetRequiredService<QuizSeedService>();
     await seed.SeedAsync();

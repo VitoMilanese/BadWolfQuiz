@@ -1,5 +1,6 @@
 using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
+using BadWolfQuiz.Web.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BadWolfQuiz.Web.Services;
@@ -49,6 +50,7 @@ public sealed class GameSessionLauncher(
             .SingleOrDefaultAsync(
                 item => item.Id == quizId &&
                     !item.IsArchived &&
+                    item.MediaState == QuizMediaState.Active &&
                     (item.HostId == currentHost.RequiredId || item.IsPublic),
                 cancellationToken);
 
