@@ -142,7 +142,7 @@ public sealed class ActiveGamePersistenceService(
         !session.HasNextRound &&
         session.IsCurrentRoundComplete;
 
-    private static ActiveGameSnapshot CaptureSnapshot(
+    private ActiveGameSnapshot CaptureSnapshot(
         GameSessionRegistration game)
     {
         lock (game)
