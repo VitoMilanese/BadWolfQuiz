@@ -153,7 +153,8 @@ public sealed class ActiveGamePersistenceService(
                 game.AllowsNewPlayers,
                 game.Session.Quiz,
                 game.Session.Settings,
-                game.Session.CaptureState());
+                game.Session.CaptureState(),
+                timeProvider.GetUtcNow());
         }
     }
 

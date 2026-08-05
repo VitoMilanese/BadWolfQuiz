@@ -10,7 +10,8 @@ public sealed record ActiveGameSnapshot(
     bool AllowsNewPlayers,
     QuizSnapshot Quiz,
     GameSessionSettings Settings,
-    GameSessionState SessionState);
+    GameSessionState SessionState,
+    DateTimeOffset? SavedAtUtc = null);
 
 public sealed class ActiveGameStore
 {

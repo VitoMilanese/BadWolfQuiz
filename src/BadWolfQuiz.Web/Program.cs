@@ -113,6 +113,10 @@ builder.Services.AddOptions<PremiumHostOptions>()
     .Bind(builder.Configuration.GetSection(PremiumHostOptions.SectionName))
     .Validate(options => options.IsValid, "Premium host identifiers are invalid.")
     .ValidateOnStart();
+builder.Services.AddOptions<ActiveGameOptions>()
+    .Bind(builder.Configuration.GetSection(ActiveGameOptions.SectionName))
+    .Validate(options => options.IsValid, "Active game settings are invalid.")
+    .ValidateOnStart();
 
 var defaultCulture = builder.Configuration[
     $"{SiteDefaultsOptions.SectionName}:{nameof(SiteDefaultsOptions.Culture)}"] ?? "en";
@@ -142,6 +146,7 @@ builder.Services.AddSingleton<IGameCodeGenerator, GameCodeGenerator>();
 builder.Services.AddSingleton<GameSessionRegistry>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ActiveGameStore>();
+builder.Services.AddSingleton<ActiveGameAvailability>();
 builder.Services.AddSingleton<CrashLog>();
 builder.Services.AddHostedService<ActiveGamePersistenceService>();
 builder.Services.AddSingleton<GameSettingsStore>();

@@ -2,6 +2,7 @@ using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
+using BadWolfQuiz.Web.Hubs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,9 @@ public sealed class MasterGamesModel(
         }
 
         var activeGames = sessionRegistry.GetAll()
+            .Where(game =>
+                GameHub.IsHostConnected(game) &&
+                sessionRegistry.HasConnectedPlayer(game))
             .Select(CaptureGame)
             .Where(game => game is not null)
             .Cast<RuntimeGameSnapshot>()
