@@ -704,10 +704,14 @@ select {
 }
 
 .hero {
-    min-height: calc(100vh - 140px);
     display: grid;
     align-content: center;
     max-width: 850px;
+}
+
+.page-shell:has(> .hero) {
+    display: grid;
+    align-items: center;
 }
 
     .hero h1 {
