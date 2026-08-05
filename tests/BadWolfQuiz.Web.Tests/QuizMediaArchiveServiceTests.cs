@@ -102,6 +102,33 @@ public sealed class QuizMediaArchiveServiceTests : IAsyncLifetime
         Assert.Equal(4, await archive.ArchivedQuizMedia.CountAsync());
     }
 
+    [Fact]
+    public async Task RepeatedArchiveRestore_ReusesOperationWithoutAccumulatingMedia()
+    {
+        var service = CreateService();
+        Assert.True((await service.ArchiveAsync(1, "host-1")).Succeeded);
+
+        Guid operationId;
+        await using (var main = await _mainFactory.CreateDbContextAsync())
+        {
+            operationId = (await main.Quizzes.IgnoreQueryFilters().SingleAsync(x => x.Id == 1))
+                .CurrentArchiveOperationId!.Value;
+        }
+
+        for (var cycle = 0; cycle < 3; cycle++)
+        {
+            Assert.True((await service.RestoreAsync(1, "host-1")).Succeeded);
+            Assert.True((await service.ArchiveAsync(1, "host-1")).Succeeded);
+
+            await using var archive = await _archiveFactory.CreateDbContextAsync();
+            Assert.Equal(4, await archive.ArchivedQuizMedia.CountAsync());
+            Assert.Equal(1, await archive.ArchiveOperations.CountAsync());
+            Assert.All(
+                await archive.ArchivedQuizMedia.ToListAsync(),
+                item => Assert.Equal(operationId, item.OperationId));
+        }
+    }
+
     public Task DisposeAsync()
     {
         if (Directory.Exists(_directory)) Directory.Delete(_directory, true);

@@ -1231,4 +1231,8 @@
   <data name="MediaArchive_Failed" xml:space="preserve"><value>Не вдалося архівувати медіа. Оригінальні медіа залишилися доступними.</value></data>
   <data name="MediaArchive_RestoreFailed" xml:space="preserve"><value>Не вдалося відновити медіа. Архів не змінено.</value></data>
   <data name="MediaArchive_RestoreBeforeEditing" xml:space="preserve"><value>Відновіть архівовані медіа перед редагуванням цього квізу.</value></data>
+  <data name="MediaArchive_PublicRestoreTitle" xml:space="preserve"><value>Відновити медіа архівованого квізу?</value></data>
+  <data name="MediaArchive_PublicRestoreText" xml:space="preserve"><value>Медіа цього квізу заархівовано. Перед початком гри його буде відновлено, і це може зайняти деякий час.</value></data>
+  <data name="MediaArchive_RestoreAndPlay" xml:space="preserve"><value>Відновити та грати</value></data>
+  <data name="MediaArchive_PublicRestoreUnavailable" xml:space="preserve"><value>Цей квіз тимчасово недоступний, поки обробляються його медіа.</value></data>
 </root>

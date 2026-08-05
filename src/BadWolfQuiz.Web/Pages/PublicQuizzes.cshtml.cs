@@ -1,5 +1,6 @@
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Localization;
+using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -11,6 +12,7 @@ namespace BadWolfQuiz.Web.Pages;
 public sealed class PublicQuizzesModel(
     QuizDbContext db,
     GameSessionLauncher gameSessionLauncher,
+    IQuizMediaArchiveService mediaArchiveService,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty(SupportsGet = true)]
@@ -45,7 +47,8 @@ public sealed class PublicQuizzesModel(
                 quiz.Host == null ? null : quiz.Host.DisplayName,
                 quiz.Rounds.Count,
                 quiz.Ratings.Average(rating => (double?)rating.Score),
-                quiz.Ratings.Count))
+                quiz.Ratings.Count,
+                quiz.MediaState))
             .ToListAsync(cancellationToken);
     }
 
@@ -63,6 +66,36 @@ public sealed class PublicQuizzesModel(
 
         try
         {
+            var quiz = await db.Quizzes
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(item => item.Id == quizId && item.IsPublic && !item.IsArchived)
+                .Select(item => new { item.HostId, item.MediaState })
+                .SingleOrDefaultAsync(cancellationToken);
+            if (quiz is null)
+            {
+                return NotFound();
+            }
+
+            if (quiz.MediaState != QuizMediaState.Active)
+            {
+                if (quiz.MediaState != QuizMediaState.Archived || string.IsNullOrWhiteSpace(quiz.HostId))
+                {
+                    TempData["ErrorMessage"] = localizer["MediaArchive_PublicRestoreUnavailable"].Value;
+                    return RedirectToPage(new { Search });
+                }
+
+                var restore = await mediaArchiveService.RestoreAsync(
+                    quizId,
+                    quiz.HostId,
+                    cancellationToken);
+                if (!restore.Succeeded)
+                {
+                    TempData["ErrorMessage"] = localizer["MediaArchive_RestoreFailed"].Value;
+                    return RedirectToPage(new { Search });
+                }
+            }
+
             var session = await gameSessionLauncher.CreateAsync(
                 quizId,
                 cancellationToken);
@@ -92,4 +125,5 @@ public sealed record PublicQuizListItem(
     string? AuthorName,
     int RoundCount,
     double? AverageRating,
-    int RatingCount);
+    int RatingCount,
+    QuizMediaState MediaState);

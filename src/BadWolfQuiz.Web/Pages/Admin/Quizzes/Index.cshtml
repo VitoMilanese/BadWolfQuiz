@@ -86,11 +86,14 @@
                     @Localizer["Menu_Actions"]
                 </summary>
                 <div class="action-menu-popover">
-                    <a class="action-menu-item"
-                       asp-page="Editor"
-                       asp-route-id="@quiz.Id">
-                        @Localizer["Button_Edit"]
-                    </a>
+                    @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Active)
+                    {
+                        <a class="action-menu-item"
+                           asp-page="Editor"
+                           asp-route-id="@quiz.Id">
+                            @Localizer["Button_Edit"]
+                        </a>
+                    }
 
                     @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Active || (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Failed && quiz.ArchivedMediaCount == 0))
                     {
@@ -116,20 +119,23 @@
                         </form>
                     }
 
-                    <a class="action-menu-item"
-                       asp-page-handler="Export"
-                       asp-route-quizId="@quiz.Id">
-                        @Localizer["Button_ExportQuiz"]
-                    </a>
+                    @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Active)
+                    {
+                        <a class="action-menu-item"
+                           asp-page-handler="Export"
+                           asp-route-quizId="@quiz.Id">
+                            @Localizer["Button_ExportQuiz"]
+                        </a>
 
-                    <button class="action-menu-item"
-                            type="button"
-                            data-open-rename-dialog
-                            data-quiz-id="@quiz.Id"
-                            data-quiz-title="@quiz.Title"
-                            data-quiz-description="@(quiz.Description ?? string.Empty)">
-                        @Localizer["Button_Rename"]
-                    </button>
+                        <button class="action-menu-item"
+                                type="button"
+                                data-open-rename-dialog
+                                data-quiz-id="@quiz.Id"
+                                data-quiz-title="@quiz.Title"
+                                data-quiz-description="@(quiz.Description ?? string.Empty)">
+                            @Localizer["Button_Rename"]
+                        </button>
+                    }
 
                     <form method="post" asp-page-handler="SetPublication">
                         <input name="quizId" type="hidden" value="@quiz.Id" />

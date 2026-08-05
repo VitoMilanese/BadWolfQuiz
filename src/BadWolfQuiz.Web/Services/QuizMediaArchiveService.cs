@@ -27,6 +27,7 @@ public sealed class QuizMediaArchiveService(
     {
         var stopwatch = Stopwatch.StartNew();
         Guid operationId;
+        bool replaceExistingArchive;
         await using (var db = await quizDbFactory.CreateDbContextAsync(cancellationToken))
         {
             var quiz = await db.Quizzes.IgnoreQueryFilters().AsNoTracking()
@@ -38,9 +39,9 @@ public sealed class QuizMediaArchiveService(
             if (await db.GameSessions.IgnoreQueryFilters().AnyAsync(
                 x => x.QuizId == quizId && x.HostId == hostId && x.Status != GameSessionStatus.Finished,
                 cancellationToken)) return new(false, "active-game");
-            operationId = quiz.MediaState == QuizMediaState.Archiving && quiz.CurrentArchiveOperationId.HasValue
-                ? quiz.CurrentArchiveOperationId.Value
-                : Guid.NewGuid();
+            replaceExistingArchive = quiz.MediaState != QuizMediaState.Archiving &&
+                quiz.CurrentArchiveOperationId.HasValue;
+            operationId = quiz.CurrentArchiveOperationId ?? Guid.NewGuid();
 
             if (quiz.MediaState != QuizMediaState.Archiving)
             {
@@ -64,7 +65,13 @@ public sealed class QuizMediaArchiveService(
                 return new(false, "no-media");
             }
 
-            await CopyToArchiveAsync(media, operationId, quizId, hostId, cancellationToken);
+            await CopyToArchiveAsync(
+                media,
+                operationId,
+                quizId,
+                hostId,
+                replaceExistingArchive,
+                cancellationToken);
             await VerifyArchiveAsync(media, operationId, quizId, hostId, cancellationToken);
             var bytes = media.Sum(x => x.Length);
             await ClearMainMediaAsync(media, operationId, quizId, hostId, bytes, cancellationToken);
@@ -168,7 +175,13 @@ public sealed class QuizMediaArchiveService(
         }
     }
 
-    private async Task CopyToArchiveAsync(List<ArchivedQuizMedia> media, Guid operationId, int quizId, string hostId, CancellationToken token)
+    private async Task CopyToArchiveAsync(
+        List<ArchivedQuizMedia> media,
+        Guid operationId,
+        int quizId,
+        string hostId,
+        bool replaceExistingArchive,
+        CancellationToken token)
     {
         await using var db = await archiveDbFactory.CreateDbContextAsync(token);
         await using var transaction = await db.Database.BeginTransactionAsync(token);
@@ -176,6 +189,23 @@ public sealed class QuizMediaArchiveService(
         if (operation is null)
         {
             db.ArchiveOperations.Add(new ArchiveOperation { Id = operationId, QuizId = quizId, HostId = hostId, State = ArchiveOperationState.Creating, CreatedAtUtc = DateTime.UtcNow });
+        }
+        else if (replaceExistingArchive)
+        {
+            await db.ArchivedQuizMedia
+                .Where(x => x.OperationId == operationId)
+                .ExecuteDeleteAsync(token);
+            operation.State = ArchiveOperationState.Creating;
+            operation.MediaCount = 0;
+            operation.MediaBytes = 0;
+            operation.CompletedAtUtc = null;
+            operation.RestoredAtUtc = null;
+            operation.OrphanedAtUtc = null;
+            operation.FailureReason = null;
+            db.ArchivedQuizMedia.AddRange(media);
+            await db.SaveChangesAsync(token);
+            await transaction.CommitAsync(token);
+            return;
         }
         var existing = await db.ArchivedQuizMedia.Where(x => x.OperationId == operationId)
             .Select(x => new { x.EntityId, x.Role }).ToListAsync(token);

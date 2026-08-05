@@ -1231,4 +1231,8 @@
   <data name="MediaArchive_Failed" xml:space="preserve"><value>Quiz media could not be archived. The original media remains available.</value></data>
   <data name="MediaArchive_RestoreFailed" xml:space="preserve"><value>Quiz media could not be restored. The archive was not changed.</value></data>
   <data name="MediaArchive_RestoreBeforeEditing" xml:space="preserve"><value>Restore archived media before editing this quiz.</value></data>
+  <data name="MediaArchive_PublicRestoreTitle" xml:space="preserve"><value>Restore archived quiz media?</value></data>
+  <data name="MediaArchive_PublicRestoreText" xml:space="preserve"><value>This quiz's media is archived. It will be restored before the game starts, which may take some time.</value></data>
+  <data name="MediaArchive_RestoreAndPlay" xml:space="preserve"><value>Restore and play</value></data>
+  <data name="MediaArchive_PublicRestoreUnavailable" xml:space="preserve"><value>This quiz is temporarily unavailable while its media is being processed.</value></data>
 </root>
