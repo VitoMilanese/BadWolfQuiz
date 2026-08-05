@@ -65,12 +65,25 @@
         </div>
 
         <div class="card-actions">
-            <form method="post" asp-page-handler="CreateGame">
-                <input name="quizId" type="hidden" value="@quiz.Id" />
-                <button class="button button-primary" type="submit" disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)">
+            @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived)
+            {
+                <button class="button button-primary"
+                        type="button"
+                        data-open-owned-restore-dialog
+                        data-quiz-id="@quiz.Id"
+                        data-quiz-title="@quiz.Title">
                     @Localizer["Button_CreateGame"]
                 </button>
-            </form>
+            }
+            else
+            {
+                <form method="post" asp-page-handler="CreateGame">
+                    <input name="quizId" type="hidden" value="@quiz.Id" />
+                    <button class="button button-primary" type="submit" disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)">
+                        @Localizer["Button_CreateGame"]
+                    </button>
+                </form>
+            }
 
             @if (Model.ResumableQuizIds.Contains(quiz.Id))
             {
@@ -215,12 +228,32 @@
     </form>
 </dialog>
 
+<dialog id="ownedRestoreDialog" class="app-dialog">
+    <form method="post" asp-page-handler="CreateGame" class="dialog-card">
+        <input id="ownedRestoreQuizId" name="quizId" type="hidden" />
+        <div class="dialog-heading">
+            <div>
+                <p class="eyebrow">BAD WOLF QUIZ</p>
+                <h2>@Localizer["MediaArchive_PublicRestoreTitle"]</h2>
+            </div>
+            <button class="dialog-close" type="button" data-close-dialog aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+        <p>@Localizer["MediaArchive_PublicRestoreText"]</p>
+        <strong id="ownedRestoreQuizTitle"></strong>
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary" type="button" data-close-dialog>@Localizer["Button_Cancel"]</button>
+            <button class="button button-primary" type="submit">@Localizer["MediaArchive_RestoreAndPlay"]</button>
+        </div>
+    </form>
+</dialog>
+
 @section Scripts {
 <script>
 (() => {
     const renameDialog = document.getElementById('renameQuizDialog');
     const deleteDialog = document.getElementById('confirmDeleteDialog');
     const archiveDialog = document.getElementById('archiveMediaDialog');
+    const ownedRestoreDialog = document.getElementById('ownedRestoreDialog');
 
     const renameQuizId = document.getElementById('renameQuizId');
     const renameQuizTitle = document.getElementById('renameQuizTitle');
@@ -267,6 +300,13 @@
             document.getElementById('archiveQuizId').value = button.dataset.quizId ?? '';
             document.getElementById('archiveQuizTitle').textContent = button.dataset.quizTitle ?? '';
             archiveDialog.showModal();
+        });
+    });
+    document.querySelectorAll('[data-open-owned-restore-dialog]').forEach(button => {
+        button.addEventListener('click', () => {
+            document.getElementById('ownedRestoreQuizId').value = button.dataset.quizId ?? '';
+            document.getElementById('ownedRestoreQuizTitle').textContent = button.dataset.quizTitle ?? '';
+            ownedRestoreDialog.showModal();
         });
     });
 

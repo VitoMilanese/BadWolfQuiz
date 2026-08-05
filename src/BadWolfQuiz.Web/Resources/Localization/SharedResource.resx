@@ -1235,4 +1235,5 @@
   <data name="MediaArchive_PublicRestoreText" xml:space="preserve"><value>This quiz's media is archived. It will be restored before the game starts, which may take some time.</value></data>
   <data name="MediaArchive_RestoreAndPlay" xml:space="preserve"><value>Restore and play</value></data>
   <data name="MediaArchive_PublicRestoreUnavailable" xml:space="preserve"><value>This quiz is temporarily unavailable while its media is being processed.</value></data>
+  <data name="MediaArchive_NoMedia" xml:space="preserve"><value>This quiz has no media to archive.</value></data>
 </root>

@@ -69,6 +69,33 @@ public sealed class QuizMediaArchiveServiceTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Archive_QuizWithoutMediaRemainsActive()
+    {
+        await using (var main = await _mainFactory.CreateDbContextAsync())
+        {
+            await main.QuestionContentBlocks.IgnoreQueryFilters()
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.FileData, (byte[]?)null));
+            await main.AnswerContentBlocks.IgnoreQueryFilters()
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.FileData, (byte[]?)null));
+            await main.FinalQuestionContentBlocks.IgnoreQueryFilters()
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.FileData, (byte[]?)null));
+            await main.FinalAnswerContentBlocks.IgnoreQueryFilters()
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.FileData, (byte[]?)null));
+        }
+
+        var result = await CreateService().ArchiveAsync(1, "host-1");
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("no-media", result.Code);
+        await using var verification = await _mainFactory.CreateDbContextAsync();
+        var quiz = await verification.Quizzes.IgnoreQueryFilters().SingleAsync(x => x.Id == 1);
+        Assert.Equal(QuizMediaState.Active, quiz.MediaState);
+        Assert.Null(quiz.MediaArchiveFailureReason);
+        await using var archive = await _archiveFactory.CreateDbContextAsync();
+        Assert.Empty(await archive.ArchivedQuizMedia.ToListAsync());
+    }
+
+    [Fact]
     public async Task Restore_CorruptArchiveDoesNotPartiallyRestore()
     {
         var service = CreateService();

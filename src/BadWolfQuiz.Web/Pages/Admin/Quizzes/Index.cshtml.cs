@@ -68,6 +68,34 @@ public sealed class IndexModel(
     {
         try
         {
+            var mediaState = await db.Quizzes
+                .AsNoTracking()
+                .Where(quiz => quiz.Id == quizId && !quiz.IsArchived)
+                .Select(quiz => (QuizMediaState?)quiz.MediaState)
+                .SingleOrDefaultAsync(cancellationToken);
+            if (!mediaState.HasValue)
+            {
+                return NotFound();
+            }
+
+            if (mediaState == QuizMediaState.Archived)
+            {
+                var restore = await mediaArchiveService.RestoreAsync(
+                    quizId,
+                    currentHost.RequiredId,
+                    cancellationToken);
+                if (!restore.Succeeded)
+                {
+                    TempData["ErrorMessage"] = localizer["MediaArchive_RestoreFailed"].Value;
+                    return RedirectToPage();
+                }
+            }
+            else if (mediaState != QuizMediaState.Active)
+            {
+                TempData["ErrorMessage"] = localizer["MediaArchive_PublicRestoreUnavailable"].Value;
+                return RedirectToPage();
+            }
+
             var session = await gameSessionLauncher.CreateAsync(quizId, cancellationToken);
 
             if (session is null)
@@ -94,8 +122,15 @@ public sealed class IndexModel(
     public async Task<IActionResult> OnPostArchiveMediaAsync(int quizId, CancellationToken cancellationToken)
     {
         var result = await mediaArchiveService.ArchiveAsync(quizId, currentHost.RequiredId, cancellationToken);
-        TempData[result.Succeeded ? "SuccessMessage" : "ErrorMessage"] = localizer[
-            result.Succeeded ? "MediaArchive_Archived" : "MediaArchive_Failed"].Value;
+        var messageKey = result.Succeeded
+            ? "MediaArchive_Archived"
+            : result.Code == "no-media"
+                ? "MediaArchive_NoMedia"
+                : "MediaArchive_Failed";
+        TempData[result.Succeeded || result.Code == "no-media"
+            ? "SuccessMessage"
+            : "ErrorMessage"] =
+            localizer[messageKey].Value;
         return RedirectToPage();
     }
 

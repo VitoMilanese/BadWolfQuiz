@@ -61,7 +61,7 @@ public sealed class QuizMediaArchiveService(
             var media = await ReadMediaAsync(quizId, hostId, operationId, cancellationToken);
             if (media.Count == 0)
             {
-                await MarkArchiveFailedAsync(quizId, hostId, "No quiz media was found.", cancellationToken);
+                await RestoreActiveStateAsync(quizId, hostId, operationId, cancellationToken);
                 return new(false, "no-media");
             }
 
@@ -153,10 +153,10 @@ public sealed class QuizMediaArchiveService(
         if (!ownsQuiz) throw new InvalidOperationException("Quiz ownership changed.");
         var now = DateTime.UtcNow;
         var result = new List<ArchivedQuizMedia>();
-        await AddAsync(db.QuestionContentBlocks.IgnoreQueryFilters().Where(x => x.Question.Category.Round.QuizId == quizId && x.FileData != null), ArchivedMediaRole.QuestionBlock);
-        await AddAsync(db.AnswerContentBlocks.IgnoreQueryFilters().Where(x => x.Question.Category.Round.QuizId == quizId && x.FileData != null), ArchivedMediaRole.AnswerBlock);
-        await AddAsync(db.FinalQuestionContentBlocks.IgnoreQueryFilters().Where(x => x.QuizId == quizId && x.FileData != null), ArchivedMediaRole.FinalQuestionBlock);
-        await AddAsync(db.FinalAnswerContentBlocks.IgnoreQueryFilters().Where(x => x.QuizId == quizId && x.FileData != null), ArchivedMediaRole.FinalAnswerBlock);
+        await AddAsync(db.QuestionContentBlocks.IgnoreQueryFilters().Where(x => x.Question.Category.Round.QuizId == quizId && x.FileData != null && x.FileData.Length > 0), ArchivedMediaRole.QuestionBlock);
+        await AddAsync(db.AnswerContentBlocks.IgnoreQueryFilters().Where(x => x.Question.Category.Round.QuizId == quizId && x.FileData != null && x.FileData.Length > 0), ArchivedMediaRole.AnswerBlock);
+        await AddAsync(db.FinalQuestionContentBlocks.IgnoreQueryFilters().Where(x => x.QuizId == quizId && x.FileData != null && x.FileData.Length > 0), ArchivedMediaRole.FinalQuestionBlock);
+        await AddAsync(db.FinalAnswerContentBlocks.IgnoreQueryFilters().Where(x => x.QuizId == quizId && x.FileData != null && x.FileData.Length > 0), ArchivedMediaRole.FinalAnswerBlock);
         return result;
 
         async Task AddAsync<T>(IQueryable<T> query, ArchivedMediaRole role) where T : ContentBlockBase
@@ -302,6 +302,22 @@ public sealed class QuizMediaArchiveService(
         await using var db = await quizDbFactory.CreateDbContextAsync(token);
         await db.Quizzes.IgnoreQueryFilters().Where(x => x.Id == quizId && x.HostId == hostId)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.MediaState, QuizMediaState.Failed).SetProperty(x => x.MediaArchiveFailureReason, reason), token);
+    }
+
+    private async Task RestoreActiveStateAsync(
+        int quizId,
+        string hostId,
+        Guid operationId,
+        CancellationToken token)
+    {
+        await using var db = await quizDbFactory.CreateDbContextAsync(token);
+        await db.Quizzes.IgnoreQueryFilters()
+            .Where(x => x.Id == quizId && x.HostId == hostId &&
+                x.MediaState == QuizMediaState.Archiving &&
+                x.CurrentArchiveOperationId == operationId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.MediaState, QuizMediaState.Active)
+                .SetProperty(x => x.MediaArchiveFailureReason, (string?)null), token);
     }
 
     private async Task MarkOperationFailedAsync(Guid id, string reason, CancellationToken token)
