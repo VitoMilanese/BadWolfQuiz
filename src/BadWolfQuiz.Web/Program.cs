@@ -117,6 +117,8 @@ builder.Services.AddOptions<ActiveGameOptions>()
     .Bind(builder.Configuration.GetSection(ActiveGameOptions.SectionName))
     .Validate(options => options.IsValid, "Active game settings are invalid.")
     .ValidateOnStart();
+builder.Services.Configure<FooterOptions>(
+    builder.Configuration.GetSection(FooterOptions.SectionName));
 builder.Services.AddOptions<MediaArchiveOptions>()
     .Bind(builder.Configuration.GetSection(MediaArchiveOptions.SectionName))
     .Validate(options => options.IsValid, "Media archive settings are invalid.")

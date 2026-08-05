@@ -79,6 +79,40 @@ public sealed class ActiveGameOptions
     public bool IsValid => ResumeAvailabilityDays is >= 1 and <= 3650;
 }
 
+public sealed class FooterOptions
+{
+    public const string SectionName = "Footer";
+    public const int DefaultContributorDisplayDurationMilliseconds = 2000;
+    public string?[]? Contributors { get; set; }
+    public string? DonationUrl { get; set; }
+    public int ContributorDisplayDurationMilliseconds { get; set; } =
+        DefaultContributorDisplayDurationMilliseconds;
+
+    public int EffectiveContributorDisplayDurationMilliseconds =>
+        ContributorDisplayDurationMilliseconds is >= 250 and <= 600000
+            ? ContributorDisplayDurationMilliseconds
+            : DefaultContributorDisplayDurationMilliseconds;
+
+    public IReadOnlyList<string> GetContributors() =>
+        (Contributors ?? [])
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name!.Trim())
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+
+    public Uri? GetDonationUri()
+    {
+        var value = DonationUrl?.Trim();
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp))
+        {
+            return null;
+        }
+
+        return uri;
+    }
+}
+
 public sealed class MediaArchiveOptions
 {
     public const string SectionName = "MediaArchive";

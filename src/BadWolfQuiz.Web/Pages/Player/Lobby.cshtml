@@ -3,6 +3,7 @@
 @inject IConfiguration Configuration
 @{
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
+    ViewData["HidePortalFooter"] = true;
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
     var returnUrl = Request.Path + Request.QueryString;
     var discordInviteUrl = Configuration["Discord:InviteUrl"];

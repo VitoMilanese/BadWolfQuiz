@@ -1236,4 +1236,12 @@
   <data name="MediaArchive_RestoreAndPlay" xml:space="preserve"><value>Ripristina e gioca</value></data>
   <data name="MediaArchive_PublicRestoreUnavailable" xml:space="preserve"><value>Questo quiz è temporaneamente non disponibile durante l'elaborazione dei media.</value></data>
   <data name="MediaArchive_NoMedia" xml:space="preserve"><value>Questo quiz non contiene media da archiviare.</value></data>
+  <data name="Footer_MadeWith" xml:space="preserve"><value>Realizzato con ❤️ da Bad Wolf</value></data>
+  <data name="Footer_SpecialThanks" xml:space="preserve"><value>Un ringraziamento speciale per l’aiuto nello sviluppo:</value></data>
+  <data name="Footer_FreePlatform" xml:space="preserve"><value>Bad Wolf Quiz è una piattaforma completamente gratuita.</value></data>
+  <data name="Footer_SupportProject" xml:space="preserve"><value>Se lo desideri, sostieni lo sviluppo del progetto ❤️</value></data>
+  <data name="Footer_DonationTitle" xml:space="preserve"><value>Sostieni Bad Wolf Quiz ❤️</value></data>
+  <data name="Footer_DonationScanQr" xml:space="preserve"><value>Scansiona il codice QR per aprire la pagina di supporto.</value></data>
+  <data name="Footer_DonationQrAlt" xml:space="preserve"><value>Codice QR della pagina di supporto di Bad Wolf Quiz</value></data>
+  <data name="Footer_OpenDonationPage" xml:space="preserve"><value>Apri la pagina di supporto</value></data>
 </root>

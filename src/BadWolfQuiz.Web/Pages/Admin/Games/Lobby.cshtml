@@ -2,6 +2,7 @@
 @model BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel
 @{
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
+    ViewData["HidePortalFooter"] = true;
 }
 
 @section HeaderContext {

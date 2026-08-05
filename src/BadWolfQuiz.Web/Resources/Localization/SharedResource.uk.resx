@@ -1236,4 +1236,12 @@
   <data name="MediaArchive_RestoreAndPlay" xml:space="preserve"><value>Відновити та грати</value></data>
   <data name="MediaArchive_PublicRestoreUnavailable" xml:space="preserve"><value>Цей квіз тимчасово недоступний, поки обробляються його медіа.</value></data>
   <data name="MediaArchive_NoMedia" xml:space="preserve"><value>У цьому квізі немає медіа для архівації.</value></data>
+  <data name="Footer_MadeWith" xml:space="preserve"><value>Створено з ❤️ командою Bad Wolf</value></data>
+  <data name="Footer_SpecialThanks" xml:space="preserve"><value>Особлива подяка за допомогу в розробці:</value></data>
+  <data name="Footer_FreePlatform" xml:space="preserve"><value>Bad Wolf Quiz — повністю безкоштовна платформа.</value></data>
+  <data name="Footer_SupportProject" xml:space="preserve"><value>Якщо є бажання — підтримайте розвиток проєкту ❤️</value></data>
+  <data name="Footer_DonationTitle" xml:space="preserve"><value>Підтримати Bad Wolf Quiz ❤️</value></data>
+  <data name="Footer_DonationScanQr" xml:space="preserve"><value>Відскануйте QR-код, щоб відкрити сторінку підтримки.</value></data>
+  <data name="Footer_DonationQrAlt" xml:space="preserve"><value>QR-код сторінки підтримки Bad Wolf Quiz</value></data>
+  <data name="Footer_OpenDonationPage" xml:space="preserve"><value>Відкрити сторінку підтримки</value></data>
 </root>
