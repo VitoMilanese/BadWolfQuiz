@@ -1,0 +1,58 @@
+@model BadWolfQuiz.Web.ViewComponents.PortalFooterViewModel
+
+<portal-footer class="portal-footer">
+    <div class="portal-footer-inner">
+        <div class="portal-footer-credits">
+            <p class="portal-footer-authorship">@Localizer["Footer_MadeWith"]</p>
+
+            @if (Model.Contributors.Count > 0)
+            {
+                <p class="portal-footer-contributors">
+                    <span>@Localizer["Footer_SpecialThanks"]</span>
+                    <span class="portal-footer-name" aria-live="polite" aria-atomic="true">
+                        @for (var index = 0; index < Model.Contributors.Count; index++)
+                        {
+                            <span data-footer-contributor
+                                  data-current="@(index == Model.InitialContributorIndex ? "true" : null)"
+                                  aria-hidden="@(index != Model.InitialContributorIndex ? "true" : "false")">@Model.Contributors[index]</span>
+                        }
+                    </span>
+                </p>
+            }
+        </div>
+
+        @if (Model.DonationUrl is not null)
+        {
+            <div class="portal-footer-support">
+                <span>@Localizer["Footer_FreePlatform"]</span>
+                <button class="portal-footer-support-link" type="button" data-open-donation-dialog>
+                    @Localizer["Footer_SupportProject"]
+                </button>
+            </div>
+
+            <dialog class="app-dialog portal-footer-dialog" aria-labelledby="footer-donation-title">
+                <div class="dialog-card portal-footer-dialog-card">
+                    <div class="dialog-heading">
+                        <h2 id="footer-donation-title">@Localizer["Footer_DonationTitle"]</h2>
+                        <button class="dialog-close"
+                                type="button"
+                                data-close-donation-dialog
+                                aria-label="@Localizer["Button_Close"]">×</button>
+                    </div>
+                    <p>@Localizer["Footer_DonationScanQr"]</p>
+                    <img class="portal-footer-qr"
+                         src="@Model.DonationQrCodeDataUrl"
+                         width="280"
+                         height="280"
+                         alt="@Localizer["Footer_DonationQrAlt"]" />
+                    <a class="button button-primary"
+                       href="@Model.DonationUrl"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        @Localizer["Footer_OpenDonationPage"]
+                    </a>
+                </div>
+            </dialog>
+        }
+    </div>
+</portal-footer>
