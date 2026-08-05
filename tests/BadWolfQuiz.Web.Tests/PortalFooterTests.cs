@@ -24,6 +24,23 @@ public sealed class PortalFooterTests
         Assert.Empty(new FooterOptions().GetContributors());
     }
 
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(240, 240)]
+    [InlineData(-1, FooterOptions.DefaultContributorFadeDurationMilliseconds)]
+    [InlineData(5001, FooterOptions.DefaultContributorFadeDurationMilliseconds)]
+    public void Contributor_fade_duration_uses_valid_configuration_or_default(
+        int configured,
+        int expected)
+    {
+        var options = new FooterOptions
+        {
+            ContributorFadeDurationMilliseconds = configured
+        };
+
+        Assert.Equal(expected, options.EffectiveContributorFadeDurationMilliseconds);
+    }
+
     [Fact]
     public void One_contributor_uses_the_only_index_without_selecting_randomly()
     {

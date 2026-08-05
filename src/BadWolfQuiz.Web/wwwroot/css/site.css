@@ -619,7 +619,7 @@ select {
     vertical-align: top;
     color: var(--gold);
     font-weight: 700;
-    transition: opacity 160ms ease;
+    transition: opacity var(--footer-contributor-fade-duration, 160ms) ease;
 }
 
 .portal-footer-name > [data-footer-contributor] {

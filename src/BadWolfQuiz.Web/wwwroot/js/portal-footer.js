@@ -5,6 +5,7 @@ class PortalFooterElement extends HTMLElement {
     #contributors = [];
     #currentIndex = 0;
     #reducedMotion = false;
+    #fadeDurationMilliseconds = 160;
 
     connectedCallback() {
         this.#abortController?.abort();
@@ -13,6 +14,10 @@ class PortalFooterElement extends HTMLElement {
         this.#contributors = [...this.querySelectorAll("[data-footer-contributor]")];
         this.#currentIndex = Math.max(0, this.#contributors.findIndex(item => item.dataset.current === "true"));
         this.#reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const configuredFadeDuration = Number(this.dataset.contributorFadeDuration);
+        this.#fadeDurationMilliseconds = Number.isFinite(configuredFadeDuration)
+            ? Math.min(5000, Math.max(0, configuredFadeDuration))
+            : 160;
 
         const dialog = this.querySelector("dialog");
         const openButton = this.querySelector("[data-open-donation-dialog]");
@@ -57,7 +62,9 @@ class PortalFooterElement extends HTMLElement {
         }
 
         this.classList.add("is-changing-contributor");
-        this.#transitionTimeoutId = window.setTimeout(showNext, 160);
+        this.#transitionTimeoutId = window.setTimeout(
+            showNext,
+            this.#fadeDurationMilliseconds);
     }
 
     #stopRotation() {

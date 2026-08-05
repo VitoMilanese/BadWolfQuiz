@@ -1,6 +1,8 @@
 @model BadWolfQuiz.Web.ViewComponents.PortalFooterViewModel
 
-<portal-footer class="portal-footer">
+<portal-footer class="portal-footer"
+               data-contributor-fade-duration="@Model.ContributorFadeDurationMilliseconds"
+               style="--footer-contributor-fade-duration: @(Model.ContributorFadeDurationMilliseconds)ms">
     <div class="portal-footer-inner">
         <div class="portal-footer-credits">
             <p class="portal-footer-authorship">@Localizer["Footer_MadeWith"]</p>
