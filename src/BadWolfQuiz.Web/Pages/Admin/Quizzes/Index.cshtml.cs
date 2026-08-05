@@ -17,8 +17,8 @@ public sealed class IndexModel(
     ActiveGameAvailability activeGameAvailability,
     QuizPackageService quizPackageService,
     IQuizMediaArchiveService mediaArchiveService,
-    PremiumHostAccess premiumHostAccess,
     CurrentHost currentHost,
+    IConfiguration configuration,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     public IReadOnlyList<Quiz> Quizzes { get; private set; } = [];
@@ -26,7 +26,7 @@ public sealed class IndexModel(
         new HashSet<int>();
     public IReadOnlyDictionary<int, QuizRatingSummary> Ratings { get; private set; } =
         new Dictionary<int, QuizRatingSummary>();
-    public bool CanDisableAutomaticArchiving => premiumHostAccess.IsPremium(currentHost.RequiredId);
+    public bool CanDisableAutomaticArchiving => IsMasterHost();
 
     [BindProperty]
     public IFormFile? ImportFile { get; set; }
@@ -144,7 +144,7 @@ public sealed class IndexModel(
 
     public async Task<IActionResult> OnPostSetAutomaticArchivingAsync(int quizId, bool prevent, CancellationToken cancellationToken)
     {
-        if (!premiumHostAccess.IsPremium(currentHost.RequiredId)) return Forbid();
+        if (!IsMasterHost()) return Forbid();
         var changed = await db.Quizzes.Where(x => x.Id == quizId && !x.IsArchived)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.PreventAutomaticArchiving, prevent), cancellationToken);
         return changed == 1 ? RedirectToPage() : NotFound();
@@ -311,6 +311,13 @@ public sealed class IndexModel(
             .Select(snapshot => snapshot.Quiz.SourceQuizId)
             .ToHashSet();
     }
+
+    private bool IsMasterHost() =>
+        !string.IsNullOrWhiteSpace(configuration["MasterHostId"]) &&
+        string.Equals(
+            currentHost.RequiredId,
+            configuration["MasterHostId"]?.Trim(),
+            StringComparison.Ordinal);
 }
 
 public sealed record QuizRatingSummary(double Average, int Count);
