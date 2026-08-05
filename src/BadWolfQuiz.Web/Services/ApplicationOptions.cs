@@ -82,16 +82,16 @@ public sealed class ActiveGameOptions
 public sealed class FooterOptions
 {
     public const string SectionName = "Footer";
-    public const int DefaultContributorFadeDurationMilliseconds = 160;
+    public const int DefaultContributorDisplayDurationMilliseconds = 2000;
     public string?[]? Contributors { get; set; }
     public string? DonationUrl { get; set; }
-    public int ContributorFadeDurationMilliseconds { get; set; } =
-        DefaultContributorFadeDurationMilliseconds;
+    public int ContributorDisplayDurationMilliseconds { get; set; } =
+        DefaultContributorDisplayDurationMilliseconds;
 
-    public int EffectiveContributorFadeDurationMilliseconds =>
-        ContributorFadeDurationMilliseconds is >= 0 and <= 5000
-            ? ContributorFadeDurationMilliseconds
-            : DefaultContributorFadeDurationMilliseconds;
+    public int EffectiveContributorDisplayDurationMilliseconds =>
+        ContributorDisplayDurationMilliseconds is >= 250 and <= 600000
+            ? ContributorDisplayDurationMilliseconds
+            : DefaultContributorDisplayDurationMilliseconds;
 
     public IReadOnlyList<string> GetContributors() =>
         (Contributors ?? [])

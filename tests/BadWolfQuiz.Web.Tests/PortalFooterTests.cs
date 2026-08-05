@@ -25,20 +25,20 @@ public sealed class PortalFooterTests
     }
 
     [Theory]
-    [InlineData(0, 0)]
-    [InlineData(240, 240)]
-    [InlineData(-1, FooterOptions.DefaultContributorFadeDurationMilliseconds)]
-    [InlineData(5001, FooterOptions.DefaultContributorFadeDurationMilliseconds)]
-    public void Contributor_fade_duration_uses_valid_configuration_or_default(
+    [InlineData(250, 250)]
+    [InlineData(5000, 5000)]
+    [InlineData(249, FooterOptions.DefaultContributorDisplayDurationMilliseconds)]
+    [InlineData(600001, FooterOptions.DefaultContributorDisplayDurationMilliseconds)]
+    public void Contributor_display_duration_uses_valid_configuration_or_default(
         int configured,
         int expected)
     {
         var options = new FooterOptions
         {
-            ContributorFadeDurationMilliseconds = configured
+            ContributorDisplayDurationMilliseconds = configured
         };
 
-        Assert.Equal(expected, options.EffectiveContributorFadeDurationMilliseconds);
+        Assert.Equal(expected, options.EffectiveContributorDisplayDurationMilliseconds);
     }
 
     [Fact]

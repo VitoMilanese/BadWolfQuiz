@@ -28,7 +28,7 @@ public sealed class PortalFooterViewComponent(IOptions<FooterOptions> options) :
             initialIndex,
             donationUri?.AbsoluteUri,
             donationUri is null ? null : BuildQrCodeDataUrl(donationUri.AbsoluteUri),
-            options.EffectiveContributorFadeDurationMilliseconds);
+            options.EffectiveContributorDisplayDurationMilliseconds);
     }
 
     internal static string BuildQrCodeDataUrl(string donationUrl)
@@ -47,4 +47,4 @@ public sealed record PortalFooterViewModel(
     int InitialContributorIndex,
     string? DonationUrl,
     string? DonationQrCodeDataUrl,
-    int ContributorFadeDurationMilliseconds);
+    int ContributorDisplayDurationMilliseconds);
