@@ -694,6 +694,15 @@ public sealed class EditorModel(
 
         await db.SaveChangesAsync();
 
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                message = localizer["QuizEditor_QuestionDeleted"].Value
+            });
+        }
+
         TempData["SuccessMessage"] =
             localizer["QuizEditor_QuestionDeleted"].Value;
 

@@ -391,15 +391,18 @@
                                             ⇅
                                         </button>
                                     }
-                                    <button type="button"
-                                            class="js-question-delete button button-danger icon-button"
-                                            draggable="false"
-                                            data-question-id="@question.Id"
-                                            data-question-title="@category.Title — @roundRow.Points"
-                                            title="@Localizer["Dialog_DeleteQuestion_Title"]"
-                                            aria-label="@Localizer["Dialog_DeleteQuestion_Title"]">
-                                        🗑
-                                    </button>
+                                    @if (hasQuestion && hasAnswer)
+                                    {
+                                        <button type="button"
+                                                class="js-question-delete button button-danger icon-button"
+                                                draggable="false"
+                                                data-question-id="@question.Id"
+                                                data-question-title="@category.Title — @roundRow.Points"
+                                                title="@Localizer["Dialog_DeleteQuestion_Title"]"
+                                                aria-label="@Localizer["Dialog_DeleteQuestion_Title"]">
+                                            🗑
+                                        </button>
+                                    }
                                 </div>
                             </div>
                         }
@@ -491,7 +494,9 @@
         </p>
         <div class="dialog-target" data-delete-question-title></div>
 
-        <form method="post" asp-page-handler="DeleteQuestion">
+        <form method="post"
+              asp-page-handler="DeleteQuestion"
+              data-delete-question-form>
             <input asp-for="DeleteQuestion.QuizId"
                    type="hidden"
                    value="@Model.Quiz.Id" />
@@ -852,6 +857,20 @@
         const quizSaveStatus = document.querySelector("[data-quiz-save-status]");
         let quizSaveStatusTimeout;
 
+        const showQuizSaveStatus = (message, success) => {
+            clearTimeout(quizSaveStatusTimeout);
+            quizSaveStatus.textContent = message;
+            quizSaveStatus.classList.toggle("alert-success", success);
+            quizSaveStatus.classList.toggle("alert-error", !success);
+            quizSaveStatus.hidden = false;
+
+            if (success) {
+                quizSaveStatusTimeout = setTimeout(() => {
+                    quizSaveStatus.hidden = true;
+                }, 4000);
+            }
+        };
+
         quizBoardForm?.addEventListener("submit", async event => {
             const submitter = event.submitter;
             if (!submitter?.matches("[data-ajax-save-round]")) {
@@ -874,19 +893,11 @@
                     throw new Error(result.error || quizBoardForm.dataset.saveError);
                 }
 
-                quizSaveStatus.textContent = result.message;
-                quizSaveStatus.classList.add("alert-success");
-                quizSaveStatus.classList.remove("alert-error");
-                quizSaveStatus.hidden = false;
-                quizSaveStatusTimeout = setTimeout(() => {
-                    quizSaveStatus.hidden = true;
-                }, 4000);
+                showQuizSaveStatus(result.message, true);
             } catch (error) {
-                quizSaveStatus.textContent =
-                    error.message || quizBoardForm.dataset.saveError;
-                quizSaveStatus.classList.add("alert-error");
-                quizSaveStatus.classList.remove("alert-success");
-                quizSaveStatus.hidden = false;
+                showQuizSaveStatus(
+                    error.message || quizBoardForm.dataset.saveError,
+                    false);
             } finally {
                 submitter.disabled = false;
             }
@@ -894,9 +905,13 @@
 
         const deleteQuestionDialog =
             document.getElementById("delete-question-dialog");
+        const deleteQuestionForm = document.querySelector(
+            "[data-delete-question-form]");
+        let pendingDeleteQuestionButton = null;
 
         document.querySelectorAll(".js-question-delete").forEach(button => {
             button.addEventListener("click", () => {
+                pendingDeleteQuestionButton = button;
                 document.getElementById("delete-question-id").value =
                     button.dataset.questionId;
                 deleteQuestionDialog.querySelector(
@@ -904,6 +919,52 @@
                     button.dataset.questionTitle;
                 deleteQuestionDialog.showModal();
             });
+        });
+
+        deleteQuestionForm?.addEventListener("submit", async event => {
+            event.preventDefault();
+            const submitter = event.submitter;
+            submitter.disabled = true;
+
+            try {
+                const response = await fetch(deleteQuestionForm.action, {
+                    method: "POST",
+                    body: new FormData(deleteQuestionForm),
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(
+                        result.error || quizBoardForm.dataset.saveError);
+                }
+
+                const slot = pendingDeleteQuestionButton?.closest(
+                    ".question-cell-slot");
+                const questionCard = slot?.querySelector(".question-cell");
+                questionCard?.classList.remove("filled");
+                const preview = questionCard?.querySelector(
+                    ".question-editor-preview");
+                if (preview) {
+                    preview.replaceChildren();
+                }
+                questionCard?.querySelectorAll(
+                    ".question-completion-item").forEach(item => {
+                        item.classList.remove("complete");
+                        item.textContent = `${item.textContent.trim()[0]} —`;
+                    });
+                questionCard?.querySelector(".visually-hidden")?.remove();
+                pendingDeleteQuestionButton?.remove();
+                pendingDeleteQuestionButton = null;
+                deleteQuestionDialog.close();
+                showQuizSaveStatus(result.message, true);
+            } catch (error) {
+                deleteQuestionDialog.close();
+                showQuizSaveStatus(
+                    error.message || quizBoardForm.dataset.saveError,
+                    false);
+            } finally {
+                submitter.disabled = false;
+            }
         });
 
         document.querySelectorAll("[data-close-delete-question]")
