@@ -217,7 +217,8 @@
             }
 
             const element = document.createElement("div");
-            element.className = "question-preview-text";
+            element.className =
+                "question-preview-text game-content-block game-content-text";
             element.textContent = text;
 
             return element;
@@ -239,7 +240,8 @@
             }
 
             const wrapper = document.createElement("figure");
-            wrapper.className = "question-preview-media";
+            wrapper.className =
+                "question-preview-media game-content-block";
 
             appendQuestionPreviewCaption(
                 wrapper,
@@ -280,7 +282,7 @@
 
             const wrapper = document.createElement("div");
             wrapper.className =
-                "question-preview-media question-preview-audio";
+                "question-preview-media question-preview-audio game-content-block";
 
             appendQuestionPreviewCaption(
                 wrapper,
@@ -352,7 +354,8 @@
             }
 
             const wrapper = document.createElement("figure");
-            wrapper.className = "question-preview-media";
+            wrapper.className =
+                "question-preview-media game-content-block";
 
             appendQuestionPreviewCaption(
                 wrapper,
@@ -481,6 +484,13 @@
                     : "@JavaScriptEncoder.Default.Encode(Localizer["Label_Question"])";
 
             questionPreviewContent.replaceChildren();
+            const isFourCluesPreview =
+                previewType === "question" &&
+                presentationTypeSelect?.value === "1";
+
+            questionPreviewContent.classList.toggle(
+                "four-clue-grid",
+                isFourCluesPreview);
 
             collection
                 .querySelectorAll(".content-block-card")
