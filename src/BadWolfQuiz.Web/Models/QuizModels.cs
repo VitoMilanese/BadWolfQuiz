@@ -72,6 +72,38 @@ public sealed class HostAccount
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
     public ICollection<GameSession> GameSessions { get; set; } = new List<GameSession>();
+    public HostDiscordConnection? DiscordConnection { get; set; }
+}
+
+public sealed class HostDiscordConnection
+{
+    public int Id { get; set; }
+
+    [Required, MaxLength(36)]
+    public string HostId { get; set; } = string.Empty;
+
+    [Required, MaxLength(20)]
+    public string DiscordUserId { get; set; } = string.Empty;
+
+    [MaxLength(80)]
+    public string? DiscordUserName { get; set; }
+
+    [MaxLength(20)]
+    public string? GuildId { get; set; }
+
+    [MaxLength(100)]
+    public string? GuildName { get; set; }
+
+    [MaxLength(20)]
+    public string? VoiceChannelId { get; set; }
+
+    [MaxLength(100)]
+    public string? VoiceChannelName { get; set; }
+
+    public bool AutoMuteDuringMedia { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+    public HostAccount Host { get; set; } = null!;
 }
 
 public sealed class Quiz

@@ -3,10 +3,12 @@ using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
+using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using QRCoder;
@@ -23,6 +25,9 @@ public sealed class LobbyModel(
     QuizRatingService quizRatingService,
     MediaUploadProcessor mediaUploadProcessor,
     PremiumHostAccess premiumHostAccess,
+    DiscordConnectionRepository discordRepository,
+    DiscordMuteCoordinator discordMuteCoordinator,
+    IDiscordVoiceGateway discordGateway,
     IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -58,6 +63,8 @@ public sealed class LobbyModel(
     public int MaximumImageUploadMegabytes =>
         mediaUploadProcessor.MaximumImageUploadMegabytes(
             premiumHostAccess.IsPremium(currentHost.RequiredId));
+    public HostDiscordConnection? DiscordConnection { get; private set; }
+    public bool IsDiscordVoiceReady { get; private set; }
 
     public async Task<IActionResult> OnGetAsync(
         Guid id,
@@ -68,6 +75,11 @@ public sealed class LobbyModel(
         var result = LoadPage(id, previewQuestionId, previewAnswer);
         if (result is PageResult)
         {
+            DiscordConnection = await discordRepository.GetAsync(cancellationToken);
+            IsDiscordVoiceReady = DiscordConnection is not null &&
+                discordGateway.GetHealth(
+                    DiscordConnection.GuildId,
+                    DiscordConnection.VoiceChannelId).IsReady;
             var rating = await quizRatingService.GetHostRatingStateAsync(
                 Game,
                 currentHost.RequiredId,
@@ -76,6 +88,67 @@ public sealed class LobbyModel(
             ExistingRating = rating.Score;
         }
         return result;
+    }
+
+    public async Task<IActionResult> OnPostDiscordMuteAsync(
+        Guid id,
+        bool muted,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var connection = await discordRepository.GetAsync(cancellationToken);
+        if (connection is null ||
+            !discordGateway.GetHealth(connection.GuildId, connection.VoiceChannelId).IsReady)
+        {
+            return new JsonResult(new { error = localizer["Discord_NotReady"].Value })
+                { StatusCode = 409 };
+        }
+
+        var result = await discordMuteCoordinator.SetManualAsync(
+            id, currentHost.RequiredId, connection, muted, cancellationToken);
+        return DiscordResult(result);
+    }
+
+    public async Task<IActionResult> OnPostDiscordMediaAsync(
+        Guid id,
+        bool active,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var connection = await discordRepository.GetAsync(cancellationToken);
+        if (connection is null || !connection.AutoMuteDuringMedia)
+        {
+            return new JsonResult(new { ignored = true });
+        }
+
+        var result = await discordMuteCoordinator.SetAutomaticAsync(
+            id, currentHost.RequiredId, connection, active, cancellationToken);
+        return DiscordResult(result);
+    }
+
+    private IActionResult DiscordResult(DiscordMuteResult result)
+    {
+        var payload = new
+        {
+            result.TargetCount,
+            result.SucceededCount,
+            result.FailedCount,
+            result.SkippedCount,
+            message = result.FailedCount == 0
+                ? localizer["Discord_OperationComplete", result.SucceededCount, result.SkippedCount].Value
+                : localizer["Discord_OperationPartial", result.SucceededCount, result.FailedCount, result.SkippedCount].Value
+        };
+        return new JsonResult(payload);
     }
 
     public async Task<IActionResult> OnPostRateQuizAsync(
@@ -198,7 +271,7 @@ public sealed class LobbyModel(
 
         if (uri.AbsolutePath.StartsWith("/embed/", StringComparison.OrdinalIgnoreCase))
         {
-            return value;
+            return QueryHelpers.AddQueryString(value, "enablejsapi", "1");
         }
 
         string? videoId = null;
@@ -221,7 +294,7 @@ public sealed class LobbyModel(
 
         return string.IsNullOrWhiteSpace(videoId)
             ? value
-            : $"https://www.youtube.com/embed/{Uri.EscapeDataString(videoId)}";
+            : $"https://www.youtube.com/embed/{Uri.EscapeDataString(videoId)}?enablejsapi=1";
     }
 
     public async Task<IActionResult> OnPostUpdateSettingsAsync(
@@ -473,6 +546,7 @@ public sealed class LobbyModel(
         }
 
         await BroadcastPlayersAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
         return RedirectToPage(new { id });
     }
 
@@ -507,6 +581,7 @@ public sealed class LobbyModel(
         await BroadcastPlayersAsync(game, cancellationToken);
         await BroadcastBuzzerAsync(game, cancellationToken);
         await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
 
         return RedirectToPage(new { id });
     }
@@ -709,6 +784,7 @@ public sealed class LobbyModel(
 
         await BroadcastPlayersAsync(game, cancellationToken);
         await BroadcastBuzzerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
         return RedirectToPage(new { id });
     }
 
@@ -738,6 +814,7 @@ public sealed class LobbyModel(
 
         await BroadcastPlayersAsync(game, cancellationToken);
         await BroadcastBuzzerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
         return RedirectToPage(new { id });
     }
 
@@ -764,9 +841,19 @@ public sealed class LobbyModel(
             await BroadcastBuzzerAsync(game, cancellationToken);
             if (quizCompleted)
             {
+                var connection = await discordRepository.GetAsync(cancellationToken);
+                if (connection is not null)
+                {
+                    await discordMuteCoordinator.CleanupAsync(
+                        id, currentHost.RequiredId, connection, cancellationToken);
+                }
                 await gameHub.Clients
                     .Group(GameHub.GroupName(game.PublicCode))
                     .SendAsync("QuizCompleted", cancellationToken);
+            }
+            else
+            {
+                await StopAutomaticDiscordMuteAsync(id, cancellationToken);
             }
         }
         catch (GameRuleViolationException)
@@ -1006,6 +1093,18 @@ public sealed class LobbyModel(
                 cancellationToken);
     }
 
+    private async Task StopAutomaticDiscordMuteAsync(
+        Guid gameId,
+        CancellationToken cancellationToken)
+    {
+        var connection = await discordRepository.GetAsync(cancellationToken);
+        if (connection is not null)
+        {
+            await discordMuteCoordinator.SetAutomaticAsync(
+                gameId, currentHost.RequiredId, connection, false, cancellationToken);
+        }
+    }
+
     private Task BroadcastBuzzerAsync(
         GameSessionRegistration game,
         CancellationToken cancellationToken)
@@ -1066,6 +1165,21 @@ public sealed class LobbyModel(
             .Group(GameHub.GroupName(game.PublicCode))
             .SendAsync("FinalQuestionProgressChanged", cancellationToken);
         await BroadcastPlayersAsync(game, cancellationToken);
+
+        var discordConnection = await discordRepository.GetAsync(cancellationToken);
+        if (discordConnection is not null)
+        {
+            if (game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Completed)
+            {
+                await discordMuteCoordinator.CleanupAsync(
+                    id, currentHost.RequiredId, discordConnection, cancellationToken);
+            }
+            else
+            {
+                await discordMuteCoordinator.SetAutomaticAsync(
+                    id, currentHost.RequiredId, discordConnection, false, cancellationToken);
+            }
+        }
 
         return RedirectToPage(new { id });
     }

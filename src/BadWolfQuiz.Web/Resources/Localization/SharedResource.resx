@@ -2124,4 +2124,31 @@
   <data name="GameBoard_NextRound" xml:space="preserve">
     <value>Next round</value>
   </data>
+  <data name="Discord_Menu" xml:space="preserve"><value>Discord voice</value></data>
+  <data name="Discord_SettingsTitle" xml:space="preserve"><value>Discord voice moderation</value></data>
+  <data name="Discord_NotEnabled" xml:space="preserve"><value>Discord integration is not enabled on this server.</value></data>
+  <data name="Discord_ConnectDescription" xml:space="preserve"><value>Connect your Discord account to select a server and voice channel.</value></data>
+  <data name="Discord_Connect" xml:space="preserve"><value>Connect Discord</value></data>
+  <data name="Discord_Account" xml:space="preserve"><value>Discord account</value></data>
+  <data name="Discord_Server" xml:space="preserve"><value>Server</value></data>
+  <data name="Discord_VoiceChannel" xml:space="preserve"><value>Voice channel</value></data>
+  <data name="Discord_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Discord_Ready" xml:space="preserve"><value>Ready</value></data>
+  <data name="Discord_NeedsAttention" xml:space="preserve"><value>Check the bot and its permissions</value></data>
+  <data name="Discord_ReauthorizeHint" xml:space="preserve"><value>Authorize Discord again after installing the bot or when your session expires.</value></data>
+  <data name="Discord_Reauthorize" xml:space="preserve"><value>Authorize again</value></data>
+  <data name="Discord_InstallBot" xml:space="preserve"><value>Install bot</value></data>
+  <data name="Discord_SelectServer" xml:space="preserve"><value>Select a server</value></data>
+  <data name="Discord_SelectChannel" xml:space="preserve"><value>Select a voice channel</value></data>
+  <data name="Discord_AutoMute" xml:space="preserve"><value>Automatically mute participants while media is playing</value></data>
+  <data name="Discord_Test" xml:space="preserve"><value>Test mute</value></data>
+  <data name="Discord_TestRunning" xml:space="preserve"><value>Testing…</value></data>
+  <data name="Discord_TestComplete" xml:space="preserve"><value>Test complete</value></data>
+  <data name="Discord_TestFailed" xml:space="preserve"><value>Test failed</value></data>
+  <data name="Discord_Disconnect" xml:space="preserve"><value>Disconnect Discord</value></data>
+  <data name="Discord_MuteParticipants" xml:space="preserve"><value>Mute Discord participants</value></data>
+  <data name="Discord_UnmuteParticipants" xml:space="preserve"><value>Unmute Discord participants</value></data>
+  <data name="Discord_NotReady" xml:space="preserve"><value>Discord voice moderation is not ready.</value></data>
+  <data name="Discord_OperationComplete" xml:space="preserve"><value>Discord operation complete: {0} changed, {1} skipped.</value></data>
+  <data name="Discord_OperationPartial" xml:space="preserve"><value>Discord operation partially complete: {0} changed, {1} failed, {2} skipped.</value></data>
 </root>

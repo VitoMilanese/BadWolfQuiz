@@ -69,6 +69,20 @@
                             data-open-game-settings>
                         @Localizer["GameSettings_LobbyTitle"]
                     </button>
+
+                    @if (Model.IsDiscordVoiceReady)
+                    {
+                        <button class="action-menu-item"
+                                type="button"
+                                data-discord-mute="true">
+                            @Localizer["Discord_MuteParticipants"]
+                        </button>
+                        <button class="action-menu-item"
+                                type="button"
+                                data-discord-mute="false">
+                            @Localizer["Discord_UnmuteParticipants"]
+                        </button>
+                    }
                 </div>
                 </details>
             }
@@ -242,6 +256,8 @@
 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
 {
     <section class="host-game-board"
+             data-game-id="@Model.Game.Session.Id.Value"
+             data-discord-auto-mute="@((Model.DiscordConnection?.AutoMuteDuringMedia ?? false).ToString().ToLowerInvariant())"
              data-game-code="@Model.Game.PublicCode"
              data-resize-player-card-label="@Localizer["GameBoard_ResizePlayerCards"]"
              data-status-active="@Localizer["PlayerPresence_Active"]"
@@ -271,6 +287,9 @@
              class="message message-error"
              role="alert"
              hidden></div>
+        <div class="discord-operation-status form-status"
+             role="status"
+             data-discord-operation-status></div>
 
         @if (Model.PreviewQuestion is { } previewQuestion)
         {
@@ -960,6 +979,8 @@
         Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging;
 
     <section class="host-game-board final-question-host"
+             data-game-id="@Model.Game.Session.Id.Value"
+             data-discord-auto-mute="@((Model.DiscordConnection?.AutoMuteDuringMedia ?? false).ToString().ToLowerInvariant())"
              data-game-code="@Model.Game.PublicCode"
              data-resize-player-card-label="@Localizer["GameBoard_ResizePlayerCards"]"
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
@@ -1398,6 +1419,8 @@
 
 @section Scripts {
     <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
+    <script src="~/js/discord-media-state.js" asp-append-version="true"></script>
+    <script src="~/js/discord-media-mute.js" asp-append-version="true"></script>
     <script>
         (() => {
             const titles = [...document.querySelectorAll(".host-board-column h3")];

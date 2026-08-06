@@ -34,12 +34,25 @@ public sealed class QuizDbContext : DbContext
     public DbSet<PlayerBuzz> PlayerBuzzes => Set<PlayerBuzz>();
     public DbSet<PlayerQuestionResult> PlayerQuestionResults => Set<PlayerQuestionResult>();
     public DbSet<QuizRating> QuizRatings => Set<QuizRating>();
+    public DbSet<HostDiscordConnection> HostDiscordConnections =>
+        Set<HostDiscordConnection>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<HostAccount>()
             .HasIndex(x => x.NormalizedEmail)
             .IsUnique();
+
+        modelBuilder.Entity<HostDiscordConnection>()
+            .HasIndex(x => x.HostId)
+            .IsUnique();
+        modelBuilder.Entity<HostDiscordConnection>()
+            .HasOne(x => x.Host)
+            .WithOne(x => x.DiscordConnection)
+            .HasForeignKey<HostDiscordConnection>(x => x.HostId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<HostDiscordConnection>()
+            .HasQueryFilter(x => x.HostId == CurrentHostId);
 
         modelBuilder.Entity<Quiz>()
             .HasOne(x => x.Host)

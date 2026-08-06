@@ -15,6 +15,8 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Http.Features;
 using System.Security.Claims;
+using Discord;
+using Discord.WebSocket;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,11 +63,13 @@ builder.Services.AddAuthorization(options =>
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddOptions();
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient<ResendClient>();
 builder.Services.Configure<ResendClientOptions>(options =>
     options.ApiToken = builder.Configuration["Resend:ApiToken"] ?? string.Empty);
 builder.Services.AddTransient<IResend, ResendClient>();
 builder.Services.AddHttpClient<DiscordQuestionSender>();
+builder.Services.AddHttpClient<DiscordOAuthService>();
 builder.Services.AddRateLimiter(options =>
 {
     options.AddPolicy("discord-questions", httpContext =>
@@ -116,6 +120,10 @@ builder.Services.AddOptions<PremiumHostOptions>()
 builder.Services.AddOptions<ActiveGameOptions>()
     .Bind(builder.Configuration.GetSection(ActiveGameOptions.SectionName))
     .Validate(options => options.IsValid, "Active game settings are invalid.")
+    .ValidateOnStart();
+builder.Services.AddOptions<DiscordIntegrationOptions>()
+    .Bind(builder.Configuration.GetSection(DiscordIntegrationOptions.SectionName))
+    .Validate(options => options.IsValid, "Discord integration settings are invalid.")
     .ValidateOnStart();
 builder.Services.Configure<FooterOptions>(
     builder.Configuration.GetSection(FooterOptions.SectionName));
@@ -190,6 +198,19 @@ builder.Services.AddScoped<ISqliteVacuumService, SqliteVacuumService>();
 builder.Services.AddHostedService<MediaArchiveBackgroundService>();
 builder.Services.AddSingleton<MediaUploadProcessor>();
 builder.Services.AddSingleton<PremiumHostAccess>();
+builder.Services.AddSingleton(_ => new DiscordSocketClient(new DiscordSocketConfig
+{
+    GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildVoiceStates,
+    LogGatewayIntentWarnings = false
+}));
+builder.Services.AddSingleton<DiscordVoiceGateway>();
+builder.Services.AddSingleton<IDiscordVoiceGateway>(provider =>
+    provider.GetRequiredService<DiscordVoiceGateway>());
+builder.Services.AddHostedService(provider =>
+    provider.GetRequiredService<DiscordVoiceGateway>());
+builder.Services.AddSingleton<DiscordMuteCoordinator>();
+builder.Services.AddHostedService<DiscordMuteTimeoutService>();
+builder.Services.AddScoped<DiscordConnectionRepository>();
 
 var app = builder.Build();
 

@@ -298,6 +298,24 @@ namespace BadWolfQuiz.Web.Migrations
                     b.ToTable("Hosts");
                 });
 
+            modelBuilder.Entity("BadWolfQuiz.Web.Models.HostDiscordConnection", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER");
+                    b.Property<bool>("AutoMuteDuringMedia").HasColumnType("INTEGER");
+                    b.Property<DateTime>("CreatedAtUtc").HasColumnType("TEXT");
+                    b.Property<string>("DiscordUserId").IsRequired().HasMaxLength(20).HasColumnType("TEXT");
+                    b.Property<string>("DiscordUserName").HasMaxLength(80).HasColumnType("TEXT");
+                    b.Property<string>("GuildId").HasMaxLength(20).HasColumnType("TEXT");
+                    b.Property<string>("GuildName").HasMaxLength(100).HasColumnType("TEXT");
+                    b.Property<string>("HostId").IsRequired().HasMaxLength(36).HasColumnType("TEXT");
+                    b.Property<DateTime>("UpdatedAtUtc").HasColumnType("TEXT");
+                    b.Property<string>("VoiceChannelId").HasMaxLength(20).HasColumnType("TEXT");
+                    b.Property<string>("VoiceChannelName").HasMaxLength(100).HasColumnType("TEXT");
+                    b.HasKey("Id");
+                    b.HasIndex("HostId").IsUnique();
+                    b.ToTable("HostDiscordConnections");
+                });
+
             modelBuilder.Entity("BadWolfQuiz.Web.Models.PlayerBuzz", b =>
                 {
                     b.Property<int>("Id")
@@ -699,6 +717,16 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Navigation("Quiz");
                 });
 
+            modelBuilder.Entity("BadWolfQuiz.Web.Models.HostDiscordConnection", b =>
+                {
+                    b.HasOne("BadWolfQuiz.Web.Models.HostAccount", "Host")
+                        .WithOne("DiscordConnection")
+                        .HasForeignKey("BadWolfQuiz.Web.Models.HostDiscordConnection", "HostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Host");
+                });
+
             modelBuilder.Entity("BadWolfQuiz.Web.Models.Quiz", b =>
                 {
                     b.HasOne("BadWolfQuiz.Web.Models.HostAccount", "Host")
@@ -841,6 +869,7 @@ namespace BadWolfQuiz.Web.Migrations
 
             modelBuilder.Entity("BadWolfQuiz.Web.Models.HostAccount", b =>
                 {
+                    b.Navigation("DiscordConnection");
                     b.Navigation("GameSessions");
                     b.Navigation("Quizzes");
                 });

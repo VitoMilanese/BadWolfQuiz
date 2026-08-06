@@ -24,6 +24,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Player and host cards](features/player-and-host-cards.md)
 - [QR player join and player-device behavior](features/qr-player-join.md)
 - [Active game recovery](features/active-game-recovery.md)
+- [Discord voice moderation](features/discord-voice-moderation.md)
 
 ## Documentation principles
 

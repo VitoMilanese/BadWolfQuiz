@@ -5240,3 +5240,36 @@ body.youtube-auto-expanded-open {
         flex-basis: calc((100% - var(--four-clue-gap)) / 2);
     }
 }
+.discord-settings .settings-summary {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0 0 1.25rem;
+}
+
+.discord-settings .settings-summary > div {
+    display: grid;
+    grid-template-columns: minmax(8rem, 0.6fr) 1fr;
+    gap: 1rem;
+}
+
+.discord-settings dt {
+    color: var(--muted);
+}
+
+.discord-settings dd {
+    margin: 0;
+}
+
+.discord-health-ok {
+    color: #63d884;
+}
+
+.discord-health-error {
+    color: var(--red-bright);
+}
+
+.discord-operation-status {
+    min-height: 1.5rem;
+    padding: 0.25rem 1rem;
+    text-align: center;
+}
