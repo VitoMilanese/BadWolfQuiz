@@ -70,19 +70,6 @@
                         @Localizer["GameSettings_LobbyTitle"]
                     </button>
 
-                    @if (Model.IsDiscordVoiceReady)
-                    {
-                        <button class="action-menu-item"
-                                type="button"
-                                data-discord-mute="true">
-                            @Localizer["Discord_MuteParticipants"]
-                        </button>
-                        <button class="action-menu-item"
-                                type="button"
-                                data-discord-mute="false">
-                            @Localizer["Discord_UnmuteParticipants"]
-                        </button>
-                    }
                 </div>
                 </details>
             }
@@ -832,22 +819,42 @@
             </div>
         }
 
-        <form class="player-join-lock-form"
-              method="post"
-              asp-page-handler="TogglePlayerJoining"
-              data-open-label="@Localizer["GameBoard_OpenPlayerJoining"]"
-              data-close-label="@Localizer["GameBoard_ClosePlayerJoining"]">
-            <button class="player-join-lock @(Model.Game.AllowsNewPlayers ? "is-open" : "is-closed")"
-                    type="submit"
-                    title="@(Model.Game.AllowsNewPlayers
-                        ? Localizer["GameBoard_ClosePlayerJoining"]
-                        : Localizer["GameBoard_OpenPlayerJoining"])"
-                    aria-label="@(Model.Game.AllowsNewPlayers
-                        ? Localizer["GameBoard_ClosePlayerJoining"]
-                        : Localizer["GameBoard_OpenPlayerJoining"])">
-                <span aria-hidden="true">@(Model.Game.AllowsNewPlayers ? "🔓" : "🔒")</span>
-            </button>
-        </form>
+        <div class="game-side-controls">
+            @if (Model.IsDiscordVoiceReady)
+            {
+                <button class="game-side-control discord-mute-control"
+                        type="button"
+                        data-discord-mute="true"
+                        title="@Localizer["Discord_MuteParticipants"]"
+                        aria-label="@Localizer["Discord_MuteParticipants"]">
+                    <span aria-hidden="true">🔇</span>
+                </button>
+                <button class="game-side-control discord-unmute-control"
+                        type="button"
+                        data-discord-mute="false"
+                        title="@Localizer["Discord_UnmuteParticipants"]"
+                        aria-label="@Localizer["Discord_UnmuteParticipants"]">
+                    <span aria-hidden="true">🔊</span>
+                </button>
+            }
+
+            <form class="player-join-lock-form"
+                  method="post"
+                  asp-page-handler="TogglePlayerJoining"
+                  data-open-label="@Localizer["GameBoard_OpenPlayerJoining"]"
+                  data-close-label="@Localizer["GameBoard_ClosePlayerJoining"]">
+                <button class="player-join-lock @(Model.Game.AllowsNewPlayers ? "is-open" : "is-closed")"
+                        type="submit"
+                        title="@(Model.Game.AllowsNewPlayers
+                            ? Localizer["GameBoard_ClosePlayerJoining"]
+                            : Localizer["GameBoard_OpenPlayerJoining"])"
+                        aria-label="@(Model.Game.AllowsNewPlayers
+                            ? Localizer["GameBoard_ClosePlayerJoining"]
+                            : Localizer["GameBoard_OpenPlayerJoining"])">
+                    <span aria-hidden="true">@(Model.Game.AllowsNewPlayers ? "🔓" : "🔒")</span>
+                </button>
+            </form>
+        </div>
 
         <div class="game-scoreboard-resizer"
              data-scoreboard-resizer

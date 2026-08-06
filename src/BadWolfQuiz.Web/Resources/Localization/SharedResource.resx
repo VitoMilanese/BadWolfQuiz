@@ -2151,4 +2151,5 @@
   <data name="Discord_NotReady" xml:space="preserve"><value>Discord voice moderation is not ready.</value></data>
   <data name="Discord_OperationComplete" xml:space="preserve"><value>Discord operation complete: {0} changed, {1} skipped.</value></data>
   <data name="Discord_OperationPartial" xml:space="preserve"><value>Discord operation partially complete: {0} changed, {1} failed, {2} skipped.</value></data>
+  <data name="Discord_ChannelSaved" xml:space="preserve"><value>Discord voice channel saved.</value></data>
 </root>

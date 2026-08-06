@@ -1,8 +1,10 @@
 using BadWolfQuiz.Web.Models;
+using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Localization;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Settings;
 
@@ -12,6 +14,7 @@ public sealed class DiscordModel(
     IDiscordVoiceGateway gateway,
     DiscordMuteCoordinator muteCoordinator,
     CurrentHost currentHost,
+    IStringLocalizer<SharedResource> localizer,
     IOptions<DiscordIntegrationOptions> options) : PageModel
 {
     private readonly DiscordIntegrationOptions settings = options.Value;
@@ -104,7 +107,7 @@ public sealed class DiscordModel(
         await repository.SaveSelectionAsync(
             guild.Id, guild.Name, channel.Id, channel.Name,
             AutoMuteDuringMedia, cancellationToken);
-        TempData["DiscordSuccess"] = "Discord voice channel saved.";
+        TempData["DiscordSuccess"] = localizer["Discord_ChannelSaved"].Value;
         return RedirectToPage();
     }
 

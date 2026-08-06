@@ -2652,11 +2652,43 @@ textarea {
     list-style: none;
 }
 
-.player-join-lock-form {
+.game-side-controls {
     position: fixed;
     z-index: 19;
     right: max(12px, calc((100vw - 1800px) / 2 + 12px));
     bottom: calc((var(--game-scoreboard-space) - 42px) / 2);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.player-join-lock-form {
+    margin: 0;
+}
+
+.game-side-control {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(115, 163, 255, 0.8);
+    border-radius: 10px;
+    background: rgba(27, 65, 112, 0.95);
+    color: #fff;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.game-side-control:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.12);
+}
+
+.game-side-control:disabled {
+    cursor: wait;
+    opacity: 0.55;
 }
 
 .player-join-lock {
