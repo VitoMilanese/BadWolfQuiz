@@ -3654,7 +3654,8 @@ body.youtube-auto-expanded-open {
 
 .game-content-audio-shell {
     display: flex;
-    width: min(720px, 100%);
+    width: 100%;
+    max-width: 720px;
     min-width: 0;
     min-height: 54px;
     align-items: center;
@@ -3663,13 +3664,18 @@ body.youtube-auto-expanded-open {
     background: #f1f3f4;
 }
 
+.game-content-block:has(.game-content-audio-shell) {
+    width: 100%;
+}
+
 .game-content-audio {
     display: block;
-    width: min(720px, 100%);
+    width: 100%;
+    max-width: none;
     min-width: 0;
     height: 54px;
     min-height: 54px;
-    flex: 1 0 54px;
+    flex: 1 1 auto;
     visibility: visible;
     opacity: 1;
 }
