@@ -351,8 +351,12 @@
   <data name="Label_WagerQuestion" xml:space="preserve">
     <value>Ставка</value>
   </data>
-  <data name="Label_ExcludeFromRandomWagerSelection" xml:space="preserve"><value>Виключити з випадкового вибору ставки</value></data>
-  <data name="Hint_ExcludeFromRandomWagerSelection" xml:space="preserve"><value>Це питання ніколи не буде вибране як випадкове питання зі ставкою.</value></data>
+  <data name="Label_ExcludeFromRandomWagerSelection" xml:space="preserve">
+    <value>Виключити з випадкового вибору ставки</value>
+  </data>
+  <data name="Hint_ExcludeFromRandomWagerSelection" xml:space="preserve">
+    <value>Це питання ніколи не буде вибране як випадкове питання зі ставкою.</value>
+  </data>
   <data name="Label_Created" xml:space="preserve">
     <value>Створено</value>
   </data>
@@ -689,18 +693,42 @@
   <data name="QuizEditor_CannotDeleteOnlyRound" xml:space="preserve">
     <value>Неможливо видалити єдиний раунд.</value>
   </data>
-  <data name="QuizEditor_UseRandomWagerQuestions" xml:space="preserve"><value>Випадкові питання зі ставкою</value></data>
-  <data name="QuizEditor_RandomWagerDescription" xml:space="preserve"><value>Ігнорувати вручну позначені питання та вибирати випадкові позиції під час створення кожної гри.</value></data>
-  <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve"><value>Кількість питань зі ставкою</value></data>
-  <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Доступних питань: {0}</value></data>
-  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Кількість випадкових питань зі ставкою має бути від 0 до {0}.</value></data>
-  <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Налаштування раунду збережено.</value></data>
-  <data name="QuizEditor_QuestionCount" xml:space="preserve"><value>Питань у категорії</value></data>
-  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve"><value>Оберіть від {0} до {1}. Зменшення видалить нижні рядки та питання в них.</value></data>
-  <data name="QuizEditor_QuestionCountDeleteConfirmation" xml:space="preserve"><value>Деякі питання у видалених рядках містять дані. Видалити їх назавжди?</value></data>
-  <data name="QuizEditor_CategoryCount" xml:space="preserve"><value>Категорій у раунді</value></data>
-  <data name="QuizEditor_CategoryCountDescription" xml:space="preserve"><value>Оберіть від {0} до {1}. Зменшення видалить останні категорії.</value></data>
-  <data name="QuizEditor_CategoryCountDeleteConfirmation" xml:space="preserve"><value>Деякі категорії, які буде видалено, містять питання. Видалити їх назавжди?</value></data>
+  <data name="QuizEditor_UseRandomWagerQuestions" xml:space="preserve">
+    <value>Випадкові питання зі ставкою</value>
+  </data>
+  <data name="QuizEditor_RandomWagerDescription" xml:space="preserve">
+    <value>Ігнорувати вручну позначені питання та вибирати випадкові позиції під час створення кожної гри.</value>
+  </data>
+  <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve">
+    <value>Кількість питань зі ставкою</value>
+  </data>
+  <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve">
+    <value>Доступних питань: {0}</value>
+  </data>
+  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve">
+    <value>Кількість випадкових питань зі ставкою має бути від 0 до {0}.</value>
+  </data>
+  <data name="QuizEditor_RoundRowsSaved" xml:space="preserve">
+    <value>Налаштування раунду збережено.</value>
+  </data>
+  <data name="QuizEditor_QuestionCount" xml:space="preserve">
+    <value>Питань у категорії</value>
+  </data>
+  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve">
+    <value>Оберіть від {0} до {1}. Зменшення видалить нижні рядки та питання в них.</value>
+  </data>
+  <data name="QuizEditor_QuestionCountDeleteConfirmation" xml:space="preserve">
+    <value>Деякі питання у видалених рядках містять дані. Видалити їх назавжди?</value>
+  </data>
+  <data name="QuizEditor_CategoryCount" xml:space="preserve">
+    <value>Категорій у раунді</value>
+  </data>
+  <data name="QuizEditor_CategoryCountDescription" xml:space="preserve">
+    <value>Оберіть від {0} до {1}. Зменшення видалить останні категорії.</value>
+  </data>
+  <data name="QuizEditor_CategoryCountDeleteConfirmation" xml:space="preserve">
+    <value>Деякі категорії, які буде видалено, містять питання. Видалити їх назавжди?</value>
+  </data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Вартість запитань</value>
   </data>
@@ -734,70 +762,174 @@
   <data name="QuizEditor_CategoryRenamed" xml:space="preserve">
     <value>Категорію успішно перейменовано.</value>
   </data>
-
-  <data name="Button_CreateGame" xml:space="preserve"><value>Грати</value></data>
-  <data name="Button_ContinueGame" xml:space="preserve"><value>Продовжити гру</value></data>
-  <data name="Button_BackToQuizzes" xml:space="preserve"><value>Назад до квізів</value></data>
-  <data name="GameLobby_Eyebrow" xml:space="preserve"><value>Лобі ведучого</value></data>
-  <data name="GameLobby_StatusLabel" xml:space="preserve"><value>Статус</value></data>
-  <data name="GameLobby_StatusLobby" xml:space="preserve"><value>Лобі</value></data>
-  <data name="GameLobby_PlayerCount" xml:space="preserve"><value>Гравці</value></data>
-  <data name="GameLobby_QuestionCount" xml:space="preserve"><value>Питання</value></data>
-  <data name="GameLobby_SessionId" xml:space="preserve"><value>ID сесії</value></data>
-  <data name="GameLobby_TransientNotice" xml:space="preserve"><value>Ця сесія зберігається в пам’яті й буде втрачена після перезапуску застосунку.</value></data>
-  <data name="Error_QuizCannotStart" xml:space="preserve"><value>Цей квіз неможливо використати для створення гри. Перевірте раунди, питання та рядки балів.</value></data>
-
-  <data name="PlayerPresence_Active" xml:space="preserve"><value>Активний</value></data>
-  <data name="PlayerPresence_Inactive" xml:space="preserve"><value>Неактивний</value></data>
-  <data name="PlayerPresence_Disconnected" xml:space="preserve"><value>Відключений</value></data>
-  <data name="PlayerPresence_MonitoringNotice" xml:space="preserve"><value>Під час гри тримайте цю сторінку відкритою й активною. Ведучий бачить стан сторінки.</value></data>
-  <data name="PlayerPresence_InactiveWarning" xml:space="preserve"><value>Поверніться на сторінку гри. Ведучий бачить, що сторінка неактивна або відключена.</value></data>
-
-  <data name="PlayerPresence_RejoinPending" xml:space="preserve"><value>Очікує дозволу</value></data>
-  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve"><value>Очікуйте, доки ведучий підтвердить ваш вхід у поточну гру.</value></data>
-  <data name="GameLobby_ApproveRejoin" xml:space="preserve"><value>Підтвердити вхід</value></data>
-  <data name="GameLobby_StartGame" xml:space="preserve"><value>Почати гру</value></data>
-  <data name="GameLobby_StatusRunning" xml:space="preserve"><value>Триває</value></data>
-  <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Перед початком гри додайте хоча б одного гравця.</value></data>
-
-  <data name="GameBoard_ShowJoinCode" xml:space="preserve"><value>Показати код приєднання</value></data>
-  <data name="GameBoard_JoinOverlayTitle" xml:space="preserve"><value>Приєднуйтеся до гри</value></data>
-  <data name="GameBoard_JoinOverlayHint" xml:space="preserve"><value>Нові гравці можуть приєднатися за цим кодом.</value></data>
-  <data name="GameBoard_Eyebrow" xml:space="preserve"><value>ІГРОВЕ ПОЛЕ</value></data>
-  <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Питання вибрано</value></data>
-  <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>Очікується ставка</value></data>
-  <data name="GameBoard_SelectionRejected" xml:space="preserve"><value>Зараз це питання не можна вибрати.</value></data>
-  <data name="GameBoard_SelectWagerPlayer" xml:space="preserve"><value>Оберіть гравця</value></data>
-  <data name="GameBoard_WagerAmount" xml:space="preserve"><value>Сума ставки</value></data>
-  <data name="GameBoard_AcceptWager" xml:space="preserve"><value>Прийняти ставку</value></data>
-  <data name="GameBoard_WagerAccepted" xml:space="preserve"><value>Ставку прийнято</value></data>
-  <data name="GameBoard_AcceptedWagerSummary" xml:space="preserve"><value>{0} — {1} балів</value></data>
-  <data name="GameBoard_WagerRejected" xml:space="preserve"><value>Не вдалося прийняти ставку. Перевірте активного гравця та допустимі межі ставки.</value></data>
-  <data name="GameBoard_ActivePlayer" xml:space="preserve"><value>Обирає питання</value></data>
-  <data name="GameBoard_MakeActivePlayer" xml:space="preserve"><value>Передати вибір</value></data>
-  <data name="GameBoard_RandomActivePlayer" xml:space="preserve"><value>Обрати гравця випадково</value></data>
-  <data name="GameBoard_ActivePlayerRejected" xml:space="preserve"><value>Не вдалося змінити активного гравця.</value></data>
-  <data name="GameBoard_WagerPlayer" xml:space="preserve"><value>Відповідає на питання</value></data>
-  <data name="GameBoard_WagerLimits" xml:space="preserve"><value>Допустима ставка: {0}–{1}</value></data>
-  <data name="GameBoard_WagerKeypad" xml:space="preserve"><value>Цифрова панель ставки</value></data>
-  <data name="GameBoard_ClearWager" xml:space="preserve"><value>Очистити ставку</value></data>
-  <data name="GameBoard_DeleteWagerDigit" xml:space="preserve"><value>Видалити останню цифру</value></data>
-  <data name="GameBoard_WagerValid" xml:space="preserve"><value>Ставка допустима.</value></data>
-  <data name="GameBoard_WagerOutsideLimits" xml:space="preserve"><value>Введіть суму від {0} до {1}.</value></data>
-  <data name="GameBoard_MaximumWager" xml:space="preserve"><value>Максимальна ставка</value></data>
-  <data name="GameBoard_JudgeAnswer" xml:space="preserve"><value>Оцінити відповідь</value></data>
-  <data name="GameBoard_NoCorrectAnswer" xml:space="preserve"><value>Правильної відповіді немає</value></data>
-  <data name="GameBoard_JudgmentRejected" xml:space="preserve"><value>Цю відповідь не можна оцінити в поточному стані питання.</value></data>
+  <data name="Button_CreateGame" xml:space="preserve">
+    <value>Грати</value>
+  </data>
+  <data name="Button_ContinueGame" xml:space="preserve">
+    <value>Продовжити гру</value>
+  </data>
+  <data name="Button_BackToQuizzes" xml:space="preserve">
+    <value>Назад до квізів</value>
+  </data>
+  <data name="GameLobby_Eyebrow" xml:space="preserve">
+    <value>Лобі ведучого</value>
+  </data>
+  <data name="GameLobby_StatusLabel" xml:space="preserve">
+    <value>Статус</value>
+  </data>
+  <data name="GameLobby_StatusLobby" xml:space="preserve">
+    <value>Лобі</value>
+  </data>
+  <data name="GameLobby_PlayerCount" xml:space="preserve">
+    <value>Гравці</value>
+  </data>
+  <data name="GameLobby_QuestionCount" xml:space="preserve">
+    <value>Питання</value>
+  </data>
+  <data name="GameLobby_SessionId" xml:space="preserve">
+    <value>ID сесії</value>
+  </data>
+  <data name="GameLobby_TransientNotice" xml:space="preserve">
+    <value>Ця сесія зберігається в пам’яті й буде втрачена після перезапуску застосунку.</value>
+  </data>
+  <data name="Error_QuizCannotStart" xml:space="preserve">
+    <value>Цей квіз неможливо використати для створення гри. Перевірте раунди, питання та рядки балів.</value>
+  </data>
+  <data name="PlayerPresence_Active" xml:space="preserve">
+    <value>Активний</value>
+  </data>
+  <data name="PlayerPresence_Inactive" xml:space="preserve">
+    <value>Неактивний</value>
+  </data>
+  <data name="PlayerPresence_Disconnected" xml:space="preserve">
+    <value>Відключений</value>
+  </data>
+  <data name="PlayerPresence_MonitoringNotice" xml:space="preserve">
+    <value>Під час гри тримайте цю сторінку відкритою й активною. Ведучий бачить стан сторінки.</value>
+  </data>
+  <data name="PlayerPresence_InactiveWarning" xml:space="preserve">
+    <value>Поверніться на сторінку гри. Ведучий бачить, що сторінка неактивна або відключена.</value>
+  </data>
+  <data name="PlayerPresence_RejoinPending" xml:space="preserve">
+    <value>Очікує дозволу</value>
+  </data>
+  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve">
+    <value>Очікуйте, доки ведучий підтвердить ваш вхід у поточну гру.</value>
+  </data>
+  <data name="GameLobby_ApproveRejoin" xml:space="preserve">
+    <value>Підтвердити вхід</value>
+  </data>
+  <data name="GameLobby_StartGame" xml:space="preserve">
+    <value>Почати гру</value>
+  </data>
+  <data name="GameLobby_StatusRunning" xml:space="preserve">
+    <value>Триває</value>
+  </data>
+  <data name="GameLobby_StartRequiresPlayer" xml:space="preserve">
+    <value>Перед початком гри додайте хоча б одного гравця.</value>
+  </data>
+  <data name="GameBoard_ShowJoinCode" xml:space="preserve">
+    <value>Показати код приєднання</value>
+  </data>
+  <data name="GameBoard_JoinOverlayTitle" xml:space="preserve">
+    <value>Приєднуйтеся до гри</value>
+  </data>
+  <data name="GameBoard_JoinOverlayHint" xml:space="preserve">
+    <value>Нові гравці можуть приєднатися за цим кодом.</value>
+  </data>
+  <data name="GameBoard_Eyebrow" xml:space="preserve">
+    <value>ІГРОВЕ ПОЛЕ</value>
+  </data>
+  <data name="GameBoard_QuestionSelected" xml:space="preserve">
+    <value>Питання вибрано</value>
+  </data>
+  <data name="GameBoard_AwaitingWager" xml:space="preserve">
+    <value>Очікується ставка</value>
+  </data>
+  <data name="GameBoard_SelectionRejected" xml:space="preserve">
+    <value>Зараз це питання не можна вибрати.</value>
+  </data>
+  <data name="GameBoard_SelectWagerPlayer" xml:space="preserve">
+    <value>Оберіть гравця</value>
+  </data>
+  <data name="GameBoard_WagerAmount" xml:space="preserve">
+    <value>Сума ставки</value>
+  </data>
+  <data name="GameBoard_AcceptWager" xml:space="preserve">
+    <value>Прийняти ставку</value>
+  </data>
+  <data name="GameBoard_WagerAccepted" xml:space="preserve">
+    <value>Ставку прийнято</value>
+  </data>
+  <data name="GameBoard_AcceptedWagerSummary" xml:space="preserve">
+    <value>{0} — {1} балів</value>
+  </data>
+  <data name="GameBoard_WagerRejected" xml:space="preserve">
+    <value>Не вдалося прийняти ставку. Перевірте активного гравця та допустимі межі ставки.</value>
+  </data>
+  <data name="GameBoard_ActivePlayer" xml:space="preserve">
+    <value>Обирає питання</value>
+  </data>
+  <data name="GameBoard_MakeActivePlayer" xml:space="preserve">
+    <value>Передати вибір</value>
+  </data>
+  <data name="GameBoard_RandomActivePlayer" xml:space="preserve">
+    <value>Обрати гравця випадково</value>
+  </data>
+  <data name="GameBoard_ActivePlayerRejected" xml:space="preserve">
+    <value>Не вдалося змінити активного гравця.</value>
+  </data>
+  <data name="GameBoard_WagerPlayer" xml:space="preserve">
+    <value>Відповідає на питання</value>
+  </data>
+  <data name="GameBoard_WagerLimits" xml:space="preserve">
+    <value>Допустима ставка: {0}–{1}</value>
+  </data>
+  <data name="GameBoard_WagerKeypad" xml:space="preserve">
+    <value>Цифрова панель ставки</value>
+  </data>
+  <data name="GameBoard_ClearWager" xml:space="preserve">
+    <value>Очистити ставку</value>
+  </data>
+  <data name="GameBoard_DeleteWagerDigit" xml:space="preserve">
+    <value>Видалити останню цифру</value>
+  </data>
+  <data name="GameBoard_WagerValid" xml:space="preserve">
+    <value>Ставка допустима.</value>
+  </data>
+  <data name="GameBoard_WagerOutsideLimits" xml:space="preserve">
+    <value>Введіть суму від {0} до {1}.</value>
+  </data>
+  <data name="GameBoard_MaximumWager" xml:space="preserve">
+    <value>Максимальна ставка</value>
+  </data>
+  <data name="GameBoard_JudgeAnswer" xml:space="preserve">
+    <value>Оцінити відповідь</value>
+  </data>
+  <data name="GameBoard_NoCorrectAnswer" xml:space="preserve">
+    <value>Правильної відповіді немає</value>
+  </data>
+  <data name="GameBoard_JudgmentRejected" xml:space="preserve">
+    <value>Цю відповідь не можна оцінити в поточному стані питання.</value>
+  </data>
   <data name="GameBoard_Question" xml:space="preserve">
     <value>Питання</value>
   </data>
   <data name="GameBoard_Answer" xml:space="preserve">
     <value>Відповідь</value>
   </data>
-  <data name="GameBoard_QuestionWithCategory" xml:space="preserve"><value>Питання з категорії «{0}»</value></data>
-  <data name="GameBoard_AnswerWithCategory" xml:space="preserve"><value>Відповідь на питання з категорії «{0}»</value></data>
-  <data name="PlayerMedia_Settings" xml:space="preserve"><value>Зображення, аватар і вебкамера</value></data>
-  <data name="Language_Label" xml:space="preserve"><value>Мова</value></data>
+  <data name="GameBoard_QuestionWithCategory" xml:space="preserve">
+    <value>Питання з категорії «{0}»</value>
+  </data>
+  <data name="GameBoard_AnswerWithCategory" xml:space="preserve">
+    <value>Відповідь на питання з категорії «{0}»</value>
+  </data>
+  <data name="PlayerMedia_Settings" xml:space="preserve">
+    <value>Зображення, аватар і вебкамера</value>
+  </data>
+  <data name="Language_Label" xml:space="preserve">
+    <value>Мова</value>
+  </data>
   <data name="GameBoard_ReturnToBoard" xml:space="preserve">
     <value>Повернутися до дошки</value>
   </data>
@@ -882,29 +1014,72 @@
   <data name="GameTimer_ResumeRejected" xml:space="preserve">
     <value>Не вдалося продовжити таймер.</value>
   </data>
-  <data name="Menu_Settings" xml:space="preserve"><value>Налаштування</value></data>
-  <data name="GameSettings_Eyebrow" xml:space="preserve"><value>НАЛАШТУВАННЯ ГРИ</value></data>
-  <data name="GameSettings_Title" xml:space="preserve"><value>Глобальні налаштування гри</value></data>
-  <data name="GameSettings_GlobalDescription" xml:space="preserve"><value>Ці значення копіюються в кожну нову гру. Вже створені ігри не змінюються.</value></data>
-  <data name="GameSettings_BuzzerDuration" xml:space="preserve"><value>Час для натискання буззера</value></data>
-  <data name="GameSettings_AnswerDuration" xml:space="preserve"><value>Час на відповідь</value></data>
-  <data name="GameSettings_SecondsHint" xml:space="preserve"><value>Секунди (1–3600)</value></data>
-  <data name="GameSettings_RegularStartMode" xml:space="preserve"><value>Запуск буззера у звичайному питанні</value></data>
-  <data name="GameSettings_WagerStartMode" xml:space="preserve"><value>Запуск таймера у питанні зі ставкою</value></data>
-  <data name="GameSettings_InvalidDuration" xml:space="preserve"><value>Тривалість таймерів повинна бути від 1 до 3600 секунд.</value></data>
-  <data name="GameSettings_GlobalSaved" xml:space="preserve"><value>Глобальні налаштування гри збережено.</value></data>
-  <data name="GameSettings_CreateGameTitle" xml:space="preserve"><value>Створити гру</value></data>
-  <data name="GameSettings_GameEyebrow" xml:space="preserve"><value>НОВА ГРА</value></data>
-  <data name="GameSettings_GameDescription" xml:space="preserve"><value>Ці значення успадковані з глобальних налаштувань. Зміни застосуються лише до цієї гри.</value></data>
-  <data name="GameBoard_StartAnswerTimer" xml:space="preserve"><value>Запустити таймер</value></data>
-  <data name="GameTimer_StartRejected" xml:space="preserve"><value>Не вдалося запустити таймер відповіді.</value></data>
-  <data name="GameSettings_LobbyTitle" xml:space="preserve"><value>Налаштування гри</value></data>
-  <data name="GameSettings_LobbyDescription" xml:space="preserve"><value>Ці налаштування застосовуються лише до цієї гри та можуть змінюватися також під час звичайної гри.</value></data>
-  <data name="GameSettings_Automatic" xml:space="preserve"><value>Автоматично</value></data>
-  <data name="GameSettings_Manual" xml:space="preserve"><value>Вручну</value></data>
-  <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Зберегти налаштування гри</value></data>
-  <data name="GameSettings_GameSaved" xml:space="preserve"><value>Налаштування гри збережено.</value></data>
-  <data name="GameSettings_GameLocked" xml:space="preserve"><value>Після запуску гри налаштування змінювати не можна.</value></data>
+  <data name="GameSettings_Eyebrow" xml:space="preserve">
+    <value>НАЛАШТУВАННЯ ГРИ</value>
+  </data>
+  <data name="GameSettings_Title" xml:space="preserve">
+    <value>Глобальні налаштування гри</value>
+  </data>
+  <data name="GameSettings_GlobalDescription" xml:space="preserve">
+    <value>Ці значення копіюються в кожну нову гру. Вже створені ігри не змінюються.</value>
+  </data>
+  <data name="GameSettings_BuzzerDuration" xml:space="preserve">
+    <value>Час для натискання буззера</value>
+  </data>
+  <data name="GameSettings_AnswerDuration" xml:space="preserve">
+    <value>Час на відповідь</value>
+  </data>
+  <data name="GameSettings_SecondsHint" xml:space="preserve">
+    <value>Секунди (1–3600)</value>
+  </data>
+  <data name="GameSettings_RegularStartMode" xml:space="preserve">
+    <value>Запуск буззера у звичайному питанні</value>
+  </data>
+  <data name="GameSettings_WagerStartMode" xml:space="preserve">
+    <value>Запуск таймера у питанні зі ставкою</value>
+  </data>
+  <data name="GameSettings_InvalidDuration" xml:space="preserve">
+    <value>Тривалість таймерів повинна бути від 1 до 3600 секунд.</value>
+  </data>
+  <data name="GameSettings_GlobalSaved" xml:space="preserve">
+    <value>Глобальні налаштування гри збережено.</value>
+  </data>
+  <data name="GameSettings_CreateGameTitle" xml:space="preserve">
+    <value>Створити гру</value>
+  </data>
+  <data name="GameSettings_GameEyebrow" xml:space="preserve">
+    <value>НОВА ГРА</value>
+  </data>
+  <data name="GameSettings_GameDescription" xml:space="preserve">
+    <value>Ці значення успадковані з глобальних налаштувань. Зміни застосуються лише до цієї гри.</value>
+  </data>
+  <data name="GameBoard_StartAnswerTimer" xml:space="preserve">
+    <value>Запустити таймер</value>
+  </data>
+  <data name="GameTimer_StartRejected" xml:space="preserve">
+    <value>Не вдалося запустити таймер відповіді.</value>
+  </data>
+  <data name="GameSettings_LobbyTitle" xml:space="preserve">
+    <value>Налаштування гри</value>
+  </data>
+  <data name="GameSettings_LobbyDescription" xml:space="preserve">
+    <value>Ці налаштування застосовуються лише до цієї гри та можуть змінюватися також під час звичайної гри.</value>
+  </data>
+  <data name="GameSettings_Automatic" xml:space="preserve">
+    <value>Автоматично</value>
+  </data>
+  <data name="GameSettings_Manual" xml:space="preserve">
+    <value>Вручну</value>
+  </data>
+  <data name="GameSettings_SaveForGame" xml:space="preserve">
+    <value>Зберегти налаштування гри</value>
+  </data>
+  <data name="GameSettings_GameSaved" xml:space="preserve">
+    <value>Налаштування гри збережено.</value>
+  </data>
+  <data name="GameSettings_GameLocked" xml:space="preserve">
+    <value>Після запуску гри налаштування змінювати не можна.</value>
+  </data>
   <data name="GameSettings_AllowNegativeFinalPlayers" xml:space="preserve">
     <value>Дозволити гравцям із від’ємним рахунком брати участь у фінальному питанні</value>
   </data>
@@ -929,343 +1104,1024 @@
   <data name="Message_FinalQuestionSaved" xml:space="preserve">
     <value>Фінальне питання збережено.</value>
   </data>
-  <data name="FinalQuestion_Title" xml:space="preserve"><value>Фінальне питання</value></data>
-  <data name="FinalQuestion_Start" xml:space="preserve"><value>Почати фінальне питання</value></data>
-  <data name="FinalQuestion_WaitingForWagers" xml:space="preserve"><value>Очікуються фінальні ставки</value></data>
-  <data name="FinalQuestion_NotSubmitted" xml:space="preserve"><value>Не підтверджено</value></data>
-  <data name="FinalQuestion_Submitted" xml:space="preserve"><value>Підтверджено</value></data>
-  <data name="FinalQuestion_ShowQuestion" xml:space="preserve"><value>Показати фінальне питання</value></data>
-  <data name="FinalQuestion_StartJudging" xml:space="preserve"><value>Показати відповідь і почати перевірку</value></data>
-  <data name="FinalQuestion_Results" xml:space="preserve"><value>Фінальні результати</value></data>
-  <data name="FinalQuestion_NotEligible" xml:space="preserve"><value>Ви спостерігаєте за фінальним питанням як глядач.</value></data>
-  <data name="FinalQuestion_YourWager" xml:space="preserve"><value>Ваша ставка</value></data>
-  <data name="FinalQuestion_WagerLimits" xml:space="preserve"><value>Допустима ставка: {0}–{1}</value></data>
-  <data name="FinalQuestion_ConfirmWager" xml:space="preserve"><value>Підтвердити ставку</value></data>
-  <data name="FinalQuestion_WagerConfirmed" xml:space="preserve"><value>Ставку підтверджено. Очікуйте ведучого.</value></data>
-  <data name="FinalQuestion_YourAnswer" xml:space="preserve"><value>Ваша відповідь</value></data>
-  <data name="FinalQuestion_ConfirmAnswer" xml:space="preserve"><value>Підтвердити відповідь</value></data>
-  <data name="FinalQuestion_AnswerConfirmed" xml:space="preserve"><value>Відповідь підтверджено. Очікуйте ведучого.</value></data>
-  <data name="FinalQuestion_WaitingForJudging" xml:space="preserve"><value>Ведучий перевіряє фінальні відповіді.</value></data>
-  <data name="FinalQuestion_YourAnswerCorrect" xml:space="preserve"><value>Ваша фінальна відповідь правильна.</value></data>
-  <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve"><value>Ваша фінальна відповідь неправильна.</value></data>
-  <data name="FinalQuestion_ActionRejected" xml:space="preserve"><value>Ця дія з фінальним питанням поки недоступна.</value></data>
-  <data name="FinalQuestion_JudgingProgress" xml:space="preserve"><value>Відповідь {0} з {1}</value></data>
-  <data name="AnswerKey_Title" xml:space="preserve"><value>Правильна відповідь</value></data>
-  <data name="AnswerKey_Eyebrow" xml:space="preserve"><value>Приватний екран ведучого</value></data>
-  <data name="AnswerKey_Open" xml:space="preserve"><value>Відкрити правильну відповідь</value></data>
-  <data name="AnswerKey_Waiting" xml:space="preserve"><value>Очікується вибір питання.</value></data>
-  <data name="AnswerHistory_Open" xml:space="preserve"><value>Редагувати історію</value></data>
-  <data name="AnswerHistory_Eyebrow" xml:space="preserve"><value>ІНСТРУМЕНТ ВЕДУЧОГО</value></data>
-  <data name="AnswerHistory_Title" xml:space="preserve"><value>Історія відповідей</value></data>
-  <data name="AnswerHistory_Description" xml:space="preserve"><value>Виправляйте записані відповіді та бали. Зміни відразу впливають на рейтинг і вибір першого гравця наступного раунду.</value></data>
-  <data name="AnswerHistory_BackToGame" xml:space="preserve"><value>Повернутися до гри</value></data>
-  <data name="AnswerHistory_AddEntry" xml:space="preserve"><value>Додати відсутню відповідь</value></data>
-  <data name="AnswerHistory_Question" xml:space="preserve"><value>Питання</value></data>
-  <data name="AnswerHistory_Player" xml:space="preserve"><value>Гравець</value></data>
-  <data name="AnswerHistory_Value" xml:space="preserve"><value>Розмір нагороди або штрафу</value></data>
-  <data name="AnswerHistory_Correct" xml:space="preserve"><value>Правильна відповідь</value></data>
-  <data name="AnswerHistory_Add" xml:space="preserve"><value>Додати запис</value></data>
-  <data name="AnswerHistory_Save" xml:space="preserve"><value>Зберегти зміни</value></data>
-  <data name="AnswerHistory_NoEntries" xml:space="preserve"><value>Для цього питання немає записаних відповідей.</value></data>
-  <data name="AnswerHistory_Rejected" xml:space="preserve"><value>Не вдалося застосувати зміну історії відповідей.</value></data>
-  <data name="AnswerHistory_PlayerAlreadyRecorded" xml:space="preserve"><value>Для цього гравця вже записана відповідь на вибране питання. Відредагуйте наявний запис.</value></data>
-  <data name="AnswerHistory_QuestionNotPlayed" xml:space="preserve"><value>Відповідь можна додати лише після того, як питання було зіграно.</value></data>
-  <data name="AnswerHistory_InvalidValue" xml:space="preserve"><value>Розмір нагороди або штрафу не може бути від’ємним.</value></data>
-  <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve"><value>Для цього питання вже є записи всіх гравців.</value></data>
-  <data name="AnswerHistory_Delete" xml:space="preserve"><value>Видалити запис</value></data>
-  <data name="AnswerHistory_DeleteTitle" xml:space="preserve"><value>Видалити запис відповіді</value></data>
-  <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Видалити цей запис і скасувати відповідну зміну балів?</value></data>
-  <data name="GameBoard_QuestionPreview" xml:space="preserve"><value>Перегляд закритого питання</value></data>
-  <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve"><value>Переглянути закрите питання за {0} балів</value></data>
-  <data name="GameBoard_ShowQuestion" xml:space="preserve"><value>Показати питання</value></data>
-  <data name="GameBoard_ShowAnswer" xml:space="preserve"><value>Показати відповідь</value></data>
-  <data name="Menu_GameHistory" xml:space="preserve"><value>Історія ігор</value></data>
-  <data name="GameHistory_Title" xml:space="preserve"><value>Історія ігор</value></data>
-  <data name="GameHistory_Description" xml:space="preserve"><value>Переглядайте завершені ігри, фінальні бали та записані відповіді.</value></data>
-  <data name="GameHistory_Empty" xml:space="preserve"><value>Ще не збережено жодної завершеної гри.</value></data>
-  <data name="GameHistory_FinishedAt" xml:space="preserve"><value>Завершено</value></data>
-  <data name="GameHistory_PlayerCount" xml:space="preserve"><value>Гравців: {0}</value></data>
-  <data name="GameHistory_View" xml:space="preserve"><value>Переглянути деталі</value></data>
-  <data name="GameHistory_DetailsTitle" xml:space="preserve"><value>Деталі гри</value></data>
-  <data name="GameHistory_Back" xml:space="preserve"><value>Повернутися до історії ігор</value></data>
-  <data name="GameHistory_Players" xml:space="preserve"><value>Фінальні бали</value></data>
-  <data name="GameHistory_Answers" xml:space="preserve"><value>Записані відповіді</value></data>
-  <data name="GameHistory_NoAnswers" xml:space="preserve"><value>Відповіді на звичайні питання не записані.</value></data>
-  <data name="GameHistory_Question" xml:space="preserve"><value>Питання</value></data>
-  <data name="GameHistory_Player" xml:space="preserve"><value>Гравець</value></data>
-  <data name="GameHistory_Result" xml:space="preserve"><value>Результат</value></data>
-  <data name="GameHistory_ScoreChange" xml:space="preserve"><value>Зміна балів</value></data>
-  <data name="GameHistory_Correct" xml:space="preserve"><value>Правильно</value></data>
-  <data name="GameHistory_Incorrect" xml:space="preserve"><value>Неправильно</value></data>
-  <data name="Account_HostSignIn" xml:space="preserve"><value>Вхід для хоста</value></data>
-  <data name="Account_SignOut" xml:space="preserve"><value>Вийти</value></data>
-  <data name="Account_RegisterHost" xml:space="preserve"><value>Реєстрація хоста</value></data>
-  <data name="Account_Email" xml:space="preserve"><value>Електронна пошта</value></data>
-  <data name="Account_Password" xml:space="preserve"><value>Пароль</value></data>
-  <data name="Account_ConfirmPassword" xml:space="preserve"><value>Підтвердження пароля</value></data>
-  <data name="Account_RememberMe" xml:space="preserve"><value>Запам’ятати мене</value></data>
-  <data name="Account_SignIn" xml:space="preserve"><value>Увійти</value></data>
-  <data name="Account_Register" xml:space="preserve"><value>Зареєструватися</value></data>
-  <data name="Account_NoAccount" xml:space="preserve"><value>Немає акаунта?</value></data>
-  <data name="Account_AlreadyRegistered" xml:space="preserve"><value>Уже зареєстровані?</value></data>
-  <data name="Account_InvalidCredentials" xml:space="preserve"><value>Неправильна електронна пошта або пароль.</value></data>
-  <data name="Account_EmailAlreadyUsed" xml:space="preserve"><value>Ця електронна пошта вже зареєстрована.</value></data>
-  <data name="Account_Required" xml:space="preserve"><value>Це поле обов’язкове.</value></data>
-  <data name="Account_InvalidEmail" xml:space="preserve"><value>Введіть правильну адресу електронної пошти.</value></data>
-  <data name="Account_PasswordMinLength" xml:space="preserve"><value>Пароль має містити щонайменше 8 символів.</value></data>
-  <data name="Account_PasswordMismatch" xml:space="preserve"><value>Паролі не збігаються.</value></data>
-  <data name="Account_ForgotPassword" xml:space="preserve"><value>Забули пароль?</value></data>
-  <data name="Account_ForgotPasswordDescription" xml:space="preserve"><value>Введіть електронну пошту акаунта хоста, і ми надішлемо посилання для відновлення.</value></data>
-  <data name="Account_SendResetLink" xml:space="preserve"><value>Надіслати посилання</value></data>
-  <data name="Account_CheckEmail" xml:space="preserve"><value>Перевірте електронну пошту</value></data>
-  <data name="Account_CheckEmailDescription" xml:space="preserve"><value>Якщо акаунт із такою адресою існує, на неї надіслано посилання для відновлення пароля.</value></data>
-  <data name="Account_EmailSendFailed" xml:space="preserve"><value>Не вдалося надіслати лист. Перевірте налаштування Resend і спробуйте ще раз.</value></data>
-  <data name="Account_ResetPassword" xml:space="preserve"><value>Відновити пароль</value></data>
-  <data name="Account_NewPassword" xml:space="preserve"><value>Новий пароль</value></data>
-  <data name="Account_InvalidResetLink" xml:space="preserve"><value>Це посилання недійсне, прострочене або вже використане.</value></data>
-  <data name="Account_PasswordResetComplete" xml:space="preserve"><value>Пароль відновлено</value></data>
-  <data name="Account_ChangePassword" xml:space="preserve"><value>Змінити пароль</value></data>
-  <data name="Account_CurrentPassword" xml:space="preserve"><value>Поточний пароль</value></data>
-  <data name="Account_PasswordChanged" xml:space="preserve"><value>Пароль успішно змінено.</value></data>
-  <data name="Account_CurrentPasswordInvalid" xml:space="preserve"><value>Поточний пароль неправильний.</value></data>
-  <data name="Account_EmailSubject" xml:space="preserve"><value>BAD WOLF QUIZ — відновлення пароля</value></data>
-  <data name="Account_EmailIntro" xml:space="preserve"><value>Для вашого акаунта хоста BAD WOLF QUIZ надійшов запит на відновлення пароля.</value></data>
-  <data name="Account_EmailExpiry" xml:space="preserve"><value>Посилання діє одну годину. Якщо ви не надсилали запит, просто проігноруйте цей лист.</value></data>
-  <data name="GameBoard_JoinQrAlt" xml:space="preserve"><value>QR-код для приєднання до гри</value></data>
-  <data name="Join_SelectedGame" xml:space="preserve"><value>Код гри: {0}</value></data>
-  <data name="GameBoard_ClosePlayerJoining" xml:space="preserve"><value>Закрити вхід для нових гравців</value></data>
-  <data name="GameBoard_OpenPlayerJoining" xml:space="preserve"><value>Відкрити вхід для нових гравців</value></data>
-  <data name="GameBoard_PlayerJoiningToggleRejected" xml:space="preserve"><value>Зараз неможливо змінити доступ до гри.</value></data>
-  <data name="GameBoard_RemovePlayer" xml:space="preserve"><value>Виключити гравця</value></data>
-  <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve"><value>Виключити гравця {0} з гри?</value></data>
-  <data name="GameBoard_RemovePlayerRejected" xml:space="preserve"><value>Цього гравця зараз неможливо виключити.</value></data>
-  <data name="GameBoard_ManageBlockedPlayers" xml:space="preserve"><value>Заблоковані гравці</value></data>
-  <data name="GameBoard_BlockedPlayersTitle" xml:space="preserve"><value>Заблоковані гравці</value></data>
-  <data name="GameBoard_NoBlockedPlayers" xml:space="preserve"><value>Зараз немає заблокованих гравців.</value></data>
-  <data name="GameBoard_UnblockPlayer" xml:space="preserve"><value>Розблокувати</value></data>
-  <data name="GameBoard_UnblockPlayerRejected" xml:space="preserve"><value>Не вдалося розблокувати цього гравця.</value></data>
-  <data name="Error_PlayerBlocked" xml:space="preserve"><value>Вас виключили з цієї гри. Попросіть хоста розблокувати вас перед повторним приєднанням.</value></data>
-  <data name="PlayerGame_RemovedFromGame" xml:space="preserve"><value>Адмін виключив вас із гри.</value></data>
-  <data name="PlayerGame_RemovedFromGameTitle" xml:space="preserve"><value>Вас виключено з гри</value></data>
-  <data name="HostCard_Display" xml:space="preserve"><value>Показувати картку хоста під час гри</value></data>
-  <data name="HostCard_Name" xml:space="preserve"><value>Ім’я хоста</value></data>
-  <data name="HostCard_Source" xml:space="preserve"><value>Зображення картки хоста</value></data>
-  <data name="HostCard_SourceNone" xml:space="preserve"><value>Не обрано</value></data>
-  <data name="HostCard_SourceImage" xml:space="preserve"><value>Картинка</value></data>
-  <data name="HostCard_SourceWebcam" xml:space="preserve"><value>Вебкамера</value></data>
-  <data name="HostCard_Image" xml:space="preserve"><value>Картинка хоста (до {0} МБ)</value></data>
-  <data name="HostCard_InvalidSettings" xml:space="preserve"><value>Щоб показувати картку хоста, вкажіть ім’я та оберіть картинку або вебкамеру.</value></data>
-  <data name="GameBoard_ResizePlayerPanel" xml:space="preserve"><value>Змінити висоту панелі гравців</value></data>
-  <data name="HostCard_SourceAvatar" xml:space="preserve"><value>Аватар</value></data>
-  <data name="HostCard_Avatar" xml:space="preserve"><value>Аватар хоста</value></data>
-  <data name="AvatarPicker_Title" xml:space="preserve"><value>Вибір аватара</value></data>
-  <data name="AvatarPicker_SelectGender" xml:space="preserve"><value>Спочатку оберіть стать персонажа</value></data>
-  <data name="AvatarPicker_Female" xml:space="preserve"><value>Жіноча</value></data>
-  <data name="AvatarPicker_Male" xml:space="preserve"><value>Чоловіча</value></data>
-  <data name="AvatarPicker_Individual" xml:space="preserve"><value>Індивідуальні аватари</value></data>
-  <data name="GameBoard_ResizePlayerCards" xml:space="preserve"><value>Змінити ширину всіх карток гравців</value></data>
-  <data name="AvatarPicker_Choose" xml:space="preserve"><value>Обрати аватар</value></data>
-  <data name="AvatarPicker_ChooseOrChange" xml:space="preserve"><value>Обрати або змінити аватар</value></data>
-  <data name="PlayerWebcam_Enable" xml:space="preserve"><value>Увімкнути вебкамеру</value></data>
-  <data name="PlayerWebcam_Disable" xml:space="preserve"><value>Вимкнути вебкамеру</value></data>
-  <data name="PlayerWebcam_RequiresHttps" xml:space="preserve"><value>Для доступу до камери відкрийте сайт через захищене HTTPS-з’єднання.</value></data>
-  <data name="PlayerWebcam_AccessFailed" xml:space="preserve"><value>Не вдалося отримати доступ до камери. Перевірте дозвіл браузера.</value></data>
-  <data name="GameBoard_ResizeHostCard" xml:space="preserve"><value>Змінити ширину та висоту картки хоста</value></data>
-  <data name="GameBoard_MoveHostCard" xml:space="preserve"><value>Перемістити картку хоста вгору або вниз</value></data>
-  <data name="BrandLogo_Label" xml:space="preserve"><value>Власний логотип у хедері</value></data>
-  <data name="BrandLogo_Hint" xml:space="preserve"><value>Зображення до {0} МБ. Воно замінює BAD WOLF QUIZ у хедері, коли ви авторизовані.</value></data>
-  <data name="BrandLogo_PreviewAlt" xml:space="preserve"><value>Прев’ю власного логотипа</value></data>
-  <data name="BrandLogo_Remove" xml:space="preserve"><value>Прибрати власний логотип</value></data>
-  <data name="Menu_PlayWithUs" xml:space="preserve"><value>Грати з нами</value></data>
-  <data name="Menu_AskQuestion" xml:space="preserve"><value>Задати питання</value></data>
-  <data name="AskQuestion_Eyebrow" xml:space="preserve"><value>ЗВ’ЯЗАТИСЯ З НАМИ</value></data>
-  <data name="AskQuestion_Title" xml:space="preserve"><value>Задати питання</value></data>
-  <data name="AskQuestion_Description" xml:space="preserve"><value>Надішліть нам питання. Воно потрапить у Discord-канал BAD WOLF QUIZ.</value></data>
-  <data name="AskQuestion_Name" xml:space="preserve"><value>Ваше ім’я</value></data>
-  <data name="AskQuestion_NameHint" xml:space="preserve"><value>Необов’язково</value></data>
-  <data name="AskQuestion_Question" xml:space="preserve"><value>Питання</value></data>
-  <data name="AskQuestion_Send" xml:space="preserve"><value>Надіслати питання</value></data>
-  <data name="AskQuestion_Invalid" xml:space="preserve"><value>Введіть питання довжиною до 1500 символів.</value></data>
-  <data name="AskQuestion_Failed" xml:space="preserve"><value>Не вдалося надіслати питання. Спробуйте пізніше.</value></data>
-  <data name="AskQuestion_Sent" xml:space="preserve"><value>Ваше питання надіслано.</value></data>
-  <data name="SiteTheme_Label" xml:space="preserve"><value>Колірна тема сайту</value></data>
-  <data name="SiteTheme_Hint" xml:space="preserve"><value>Оберіть готову тему або створіть власну. Зміни відображаються відразу.</value></data>
-  <data name="SiteTheme_ClassicWolf" xml:space="preserve"><value>Класичний вовк</value></data>
-  <data name="SiteTheme_CrimsonNight" xml:space="preserve"><value>Багряна ніч</value></data>
-  <data name="SiteTheme_ArcticNeon" xml:space="preserve"><value>Арктичний неон</value></data>
-  <data name="SiteTheme_EmeraldStage" xml:space="preserve"><value>Смарагдова сцена</value></data>
-  <data name="SiteTheme_RoyalViolet" xml:space="preserve"><value>Королівський фіолет</value></data>
-  <data name="SiteTheme_SunsetOrange" xml:space="preserve"><value>Помаранчевий захід</value></data>
-  <data name="SiteTheme_Daylight" xml:space="preserve"><value>Денне світло</value></data>
-  <data name="SiteTheme_WarmParchment" xml:space="preserve"><value>Теплий пергамент</value></data>
-  <data name="SiteTheme_MintFog" xml:space="preserve"><value>М’ятний туман</value></data>
-  <data name="SiteTheme_UkrainianSky" xml:space="preserve"><value>Українське небо</value></data>
-  <data name="SiteTheme_ItalianSpirit" xml:space="preserve"><value>Італійський дух</value></data>
-  <data name="SiteTheme_PrideSpectrum" xml:space="preserve"><value>Прайд-спектр</value></data>
-  <data name="SiteTheme_RetroArcade" xml:space="preserve"><value>Ретро-аркада</value></data>
-  <data name="SiteTheme_Custom" xml:space="preserve"><value>Власна тема</value></data>
-  <data name="SiteTheme_Background" xml:space="preserve"><value>Фон</value></data>
-  <data name="SiteTheme_Panel" xml:space="preserve"><value>Панель</value></data>
-  <data name="SiteTheme_PanelSecondary" xml:space="preserve"><value>Додаткова панель</value></data>
-  <data name="SiteTheme_Text" xml:space="preserve"><value>Текст</value></data>
-  <data name="SiteTheme_MutedText" xml:space="preserve"><value>Другорядний текст</value></data>
-  <data name="SiteTheme_Accent" xml:space="preserve"><value>Акцент</value></data>
-  <data name="SiteTheme_AccentBright" xml:space="preserve"><value>Яскравий акцент</value></data>
-  <data name="SiteTheme_Highlight" xml:space="preserve"><value>Підсвічування</value></data>
-  <data name="SiteTheme_Invalid" xml:space="preserve"><value>Оберіть коректну тему та кольори.</value></data>
-  <data name="QuizEditor_DragQuestion" xml:space="preserve"><value>Перетягніть на інше питання, щоб поміняти їх місцями</value></data>
-  <data name="QuizEditor_MoveQuestionToRound" xml:space="preserve"><value>Перенести питання в інший раунд</value></data>
-  <data name="QuizEditor_ExchangeQuestion" xml:space="preserve"><value>Перенесення питання</value></data>
-  <data name="QuizEditor_SelectedQuestion" xml:space="preserve"><value>Обране питання</value></data>
-  <data name="QuizEditor_TargetQuestion" xml:space="preserve"><value>Питання для обміну</value></data>
-  <data name="QuizEditor_NoQuestionForExchange" xml:space="preserve"><value>Немає доступного питання для обміну.</value></data>
-  <data name="PlayerImage_Source" xml:space="preserve"><value>Джерело зображення картки гравця</value></data>
-  <data name="PlayerImage_Avatar" xml:space="preserve"><value>Аватар</value></data>
-  <data name="PlayerImage_Picture" xml:space="preserve"><value>Картинка</value></data>
-  <data name="PlayerImage_UploadOrChange" xml:space="preserve"><value>Завантажити або змінити картинку</value></data>
-  <data name="PlayerImage_Invalid" xml:space="preserve"><value>Оберіть коректне зображення PNG, JPEG або WebP.</value></data>
-  <data name="Menu_FAQ" xml:space="preserve"><value>FAQ</value></data>
-  <data name="Faq_Eyebrow" xml:space="preserve"><value>КОРОТКИЙ ПОСІБНИК</value></data>
-  <data name="Faq_Title" xml:space="preserve"><value>Часті питання</value></data>
-  <data name="Faq_Description" xml:space="preserve"><value>Короткі відповіді про приєднання, правила гри, налаштування та керування.</value></data>
-  <data name="Faq_Q1" xml:space="preserve"><value>Як гравцеві приєднатися до гри?</value></data>
-  <data name="Faq_A1" xml:space="preserve"><value>Відкрийте сторінку приєднання та введіть шестисимвольний код гри й ім’я або відскануйте QR-код хоста. Обліковий запис гравцеві не потрібен. Якщо QR-посилання веде на localhost, хост має вказати в Game:PublicBaseUrl адресу, доступну з пристроїв гравців.</value></data>
-  <data name="Faq_Q2" xml:space="preserve"><value>Чи можна приєднатися після початку гри?</value></data>
-  <data name="Faq_A2" xml:space="preserve"><value>Так, якщо хост відкрив пізнє приєднання кнопкою із замком. Новий гравець очікуватиме підтвердження хоста. Гравцеві, який повертається після від’єднання, також може знадобитися повторне підтвердження.</value></data>
-  <data name="Faq_Q3" xml:space="preserve"><value>Хто обирає наступне питання?</value></data>
-  <data name="Faq_A3" xml:space="preserve"><value>Перший гравець, який приєднався, відкриває перший раунд. Після правильної відповіді право вибору переходить до цього гравця; неправильна відповідь або відсутність правильної відповіді його не змінює. Хост може обрати гравця вручну чи випадково. Наступні раунди починає найслабший гравець за правилами турнірної таблиці.</value></data>
-  <data name="Faq_Q4" xml:space="preserve"><value>Як працюють бузер і таймери?</value></data>
-  <data name="Faq_A4" xml:space="preserve"><value>Бузер відкривається автоматично або після команди хоста. Перше прийняте натискання призупиняє загальний таймер бузера й запускає таймер відповіді гравця. Після неправильної відповіді бузер знову відкривається для доступних гравців, а загальний таймер продовжується із залишку часу.</value></data>
-  <data name="Faq_Q5" xml:space="preserve"><value>Як працюють питання зі ставкою?</value></data>
-  <data name="Faq_A5" xml:space="preserve"><value>Відповідає лише гравець, який обрав питання. Він оголошує ставку, а хост вводить її перед показом питання. Мінімум — 5 балів; максимум — більше зі значень: рахунок гравця або найбільша вартість питання на поточній дошці. Правильна відповідь додає ставку, неправильна — віднімає.</value></data>
-  <data name="Faq_Q6" xml:space="preserve"><value>Як відбувається фінальне питання?</value></data>
-  <data name="Faq_A6" xml:space="preserve"><value>Допущені гравці приватно надсилають ставку, а потім відповідь зі своїх пристроїв. Мінімальна ставка — 5, максимальна — більше зі значень 1000 або рахунок гравця. Гравці з від’ємним рахунком беруть участь за замовчуванням, якщо хост не вимкнув це налаштування. Ставки й відповіді приховані до блокування відповідного етапу.</value></data>
-  <data name="Faq_Q7" xml:space="preserve"><value>Чи може хост виправити неправильно оцінену відповідь?</value></data>
-  <data name="Faq_A7" xml:space="preserve"><value>Так. У «Історії відповідей» під час гри можна змінити гравця, правильність або кількість балів, додати пропущений запис чи видалити помилковий. Попередня зміна рахунку скасовується, після чого послідовно застосовується виправлений результат.</value></data>
-  <data name="Faq_Q8" xml:space="preserve"><value>Що станеться, якщо гравець від’єднається або перезавантажить сторінку?</value></data>
-  <data name="Faq_A8" xml:space="preserve"><value>Токен повторного підключення відновить того самого гравця, а сервер повторно надішле поточний стан гри. Під час запущеної гри хосту може знадобитися підтвердити повернення. Перезавантаження не створює другого запису рахунку.</value></data>
-  <data name="Faq_Q9" xml:space="preserve"><value>Чи можуть гравці використовувати аватари, картинки або вебкамеру?</value></data>
-  <data name="Faq_A9" xml:space="preserve"><value>Гравець може обрати вбудований аватар, завантажити картинку або ввімкнути вебкамеру. Якщо вебкамера недоступна, використовується обрана картинка чи аватар. Уподобання зберігаються в цьому браузері за нормалізованим іменем і відновлюються в наступних іграх на тому самому пристрої.</value></data>
-  <data name="Faq_Q10" xml:space="preserve"><value>Чим глобальні налаштування відрізняються від налаштувань лобі?</value></data>
-  <data name="Faq_A10" xml:space="preserve"><value>Глобальні налаштування — це постійні стандартні значення для майбутніх ігор. Під час створення лобі вони копіюються в незалежний знімок гри. Хост може змінити їх до початку лише для цього лобі, не змінюючи глобальні налаштування. Після запуску гри налаштування все ще можна змінювати за допомогою редактора налаштувань, доступного під час гри.</value></data>
-  <data name="Faq_Q11" xml:space="preserve"><value>Чи зберігається історія завершених ігор?</value></data>
-  <data name="Faq_A11" xml:space="preserve"><value>Так. У SQLite зберігаються гравці, фінальні рахунки, звичайні питання та записані результати відповідей. Хост переглядає їх у «Історії ігор». Видалення квізу архівує його визначення, тому пов’язана історія залишається доступною.</value></data>
-  <data name="Faq_Q12" xml:space="preserve"><value>Хто має доступ до квізів та ігор хоста?</value></data>
-  <data name="Faq_A12" xml:space="preserve"><value>Квізи, активні ігри й завершена історія належать авторизованому хосту, який їх створив або запустив. Інші облікові записи хостів не мають доступу до цих даних. Сторінки приєднання та гри залишаються доступними без облікового запису гравця.</value></data>
-  <data name="Faq_ContactTitle" xml:space="preserve"><value>Залишилися питання?</value></data>
-  <data name="Faq_ContactDescription" xml:space="preserve"><value>Надішліть питання — воно потрапить у Discord-канал BAD WOLF QUIZ.</value></data>
-  <data name="Label_QuestionType" xml:space="preserve"><value>Тип питання</value></data>
-  <data name="QuestionType_Standard" xml:space="preserve"><value>Звичайне питання</value></data>
-  <data name="QuestionType_FourClues" xml:space="preserve"><value>Чотири підказки</value></data>
-  <data name="FourClues_EditorHint" xml:space="preserve"><value>Додайте рівно чотири підказки. Кожна може містити текст, зображення, аудіо або відео.</value></data>
-  <data name="FourClues_ExactlyFourRequired" xml:space="preserve"><value>Питання цього типу повинно містити рівно чотири підказки.</value></data>
-  <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 підказка</value></data>
-  <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>Не вдалося відкрити наступну підказку.</value></data>
-  <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Питання з категорії «{0}» — {1} балів</value></data>
-  <data name="Menu_PlayerStatistics" xml:space="preserve"><value>Статистика гравців</value></data>
-  <data name="PlayerStatistics_Title" xml:space="preserve"><value>Статистика гравців</value></data>
-  <data name="PlayerStatistics_Description" xml:space="preserve"><value>Результати за весь час, розраховані із завершених ігор цього хоста.</value></data>
-  <data name="PlayerStatistics_Empty" xml:space="preserve"><value>Завершіть гру, щоб почати збирати статистику гравців.</value></data>
-  <data name="PlayerStatistics_Games" xml:space="preserve"><value>Ігри</value></data>
-  <data name="PlayerStatistics_TotalScore" xml:space="preserve"><value>Сума фінальних балів</value></data>
-  <data name="PlayerStatistics_Correct" xml:space="preserve"><value>Правильно</value></data>
-  <data name="PlayerStatistics_Attempts" xml:space="preserve"><value>Спроби</value></data>
-  <data name="PlayerStatistics_Accuracy" xml:space="preserve"><value>Точність</value></data>
-  <data name="PlayerStatistics_LastPlayed" xml:space="preserve"><value>Остання гра</value></data>
-  <data name="PlayerStatistics_NotAvailable" xml:space="preserve"><value>—</value></data>
-  <data name="PlayerStatistics_PerRound" xml:space="preserve"><value>Статистика за раундами</value></data>
-  <data name="PlayerStatistics_Round" xml:space="preserve"><value>Раунд</value></data>
-  <data name="PlayerStatistics_NoRoundAnswers" xml:space="preserve"><value>Немає оцінених відповідей для статистики за раундами.</value></data>
-  <data name="Menu_Title" xml:space="preserve"><value>Меню</value></data>
-  <data name="Menu_Actions" xml:space="preserve"><value>Дії</value></data>
-  <data name="Menu_Tools" xml:space="preserve"><value>Інструменти</value></data>
-  <data name="PlayerMenu_Title" xml:space="preserve"><value>Меню</value></data>
-  <data name="GameHistory_Winner" xml:space="preserve"><value>Переможець</value></data>
-  <data name="GameHistory_Winners" xml:space="preserve"><value>Переможці</value></data>
-  <data name="Button_ImportQuiz" xml:space="preserve"><value>Імпортувати квіз</value></data>
-  <data name="Button_ExportQuiz" xml:space="preserve"><value>Експортувати</value></data>
-  <data name="QuizImport_Success" xml:space="preserve"><value>Квіз успішно імпортовано.</value></data>
-  <data name="QuizImport_InvalidFile" xml:space="preserve"><value>Обраний файл не є коректним або підтримуваним пакетом BAD WOLF QUIZ.</value></data>
-  <data name="GameBoard_FinishGame" xml:space="preserve"><value>Закінчити гру</value></data>
-  <data name="PublicQuizzes_Title" xml:space="preserve"><value>Публічні квізи</value></data>
-  <data name="PublicQuizzes_Description" xml:space="preserve"><value>Знаходьте квізи, опубліковані іншими хостами, і створюйте власну гру.</value></data>
-  <data name="PublicQuizzes_SearchLabel" xml:space="preserve"><value>Пошук публічних квізів</value></data>
-  <data name="PublicQuizzes_SearchPlaceholder" xml:space="preserve"><value>Назва або опис квіза</value></data>
-  <data name="PublicQuizzes_Search" xml:space="preserve"><value>Знайти</value></data>
-  <data name="PublicQuizzes_EmptyTitle" xml:space="preserve"><value>Квізів не знайдено</value></data>
-  <data name="PublicQuizzes_EmptyDescription" xml:space="preserve"><value>Спробуйте інший запит або поверніться пізніше.</value></data>
-  <data name="QuizPublication_Public" xml:space="preserve"><value>Публічний</value></data>
-  <data name="QuizPublication_Publish" xml:space="preserve"><value>Опублікувати</value></data>
-  <data name="QuizPublication_Unpublish" xml:space="preserve"><value>Зняти з публікації</value></data>
-  <data name="QuizPublication_Published" xml:space="preserve"><value>Квіз опубліковано.</value></data>
-  <data name="QuizPublication_Unpublished" xml:space="preserve"><value>Квіз знято з публікації.</value></data>
-  <data name="QuizRating_Title" xml:space="preserve"><value>Оцініть цей квіз</value></data>
-  <data name="QuizRating_Description" xml:space="preserve"><value>Наскільки вам сподобався цей квіз?</value></data>
-  <data name="QuizRating_ScoreLabel" xml:space="preserve"><value>Оцінка від 0 до 5 зірочок</value></data>
-  <data name="QuizRating_Stars" xml:space="preserve"><value>{0} зірочок</value></data>
-  <data name="QuizRating_NotReady" xml:space="preserve"><value>Оцінку поки не вдалося зберегти. Спробуйте ще раз.</value></data>
-  <data name="QuizRating_Count" xml:space="preserve"><value>Оцінок: {0}</value></data>
-  <data name="QuizRating_AccessibleSummary" xml:space="preserve"><value>Середня оцінка {0:0.0} з 5 від {1} людей</value></data>
-  <data name="PublicQuizzes_Author" xml:space="preserve"><value>Автор: {0}</value></data>
-  <data name="ContentBlock_Add" xml:space="preserve"><value>+ Додати блок</value></data>
-  <data name="ContentBlockType_Text" xml:space="preserve"><value>Текст</value></data>
-  <data name="ContentBlockType_Image" xml:space="preserve"><value>Зображення</value></data>
-  <data name="ContentBlockType_Audio" xml:space="preserve"><value>Аудіо</value></data>
-  <data name="ContentBlockType_Video" xml:space="preserve"><value>Відео</value></data>
-  <data name="ContentBlockType_YouTube" xml:space="preserve"><value>YouTube</value></data>
-  <data name="ImageClipboard_Button" xml:space="preserve"><value>Вставити з буфера</value></data>
-  <data name="ImageClipboard_Empty" xml:space="preserve"><value>У буфері немає зображення.</value></data>
-  <data name="ImageClipboard_Error" xml:space="preserve"><value>Не вдалося прочитати зображення з буфера. Дозвольте доступ до буфера й повторіть спробу.</value></data>
-  <data name="AudioClipboard_Button" xml:space="preserve"><value>Вставити з буфера</value></data>
-  <data name="AudioClipboard_Empty" xml:space="preserve"><value>У буфері немає аудіофайла.</value></data>
-  <data name="AudioClipboard_Error" xml:space="preserve"><value>Не вдалося прочитати аудіофайл із буфера. Дозвольте доступ до буфера й повторіть спробу.</value></data>
-  <data name="Account_HostName" xml:space="preserve"><value>Назва хоста (необов’язково)</value></data>
-  <data name="Account_HostNameHint" xml:space="preserve"><value>Назву хоста можна буде змінити пізніше в налаштуваннях.</value></data>
-  <data name="QuizEditor_CountReductionTitle" xml:space="preserve"><value>Видалити питання?</value></data>
-  <data name="InvalidMediaFile" xml:space="preserve"><value>Цей блок не підтримує завантаження файлів.</value></data>
-  <data name="AudioConversionUnavailable" xml:space="preserve"><value>Конвертація аудіо недоступна. Встановіть FFmpeg або виправте MediaProcessing:FfmpegExecutablePath.</value></data>
-  <data name="FileUploadLimit" xml:space="preserve"><value>Максимальний розмір файла: {0} МБ.</value></data>
-  <data name="Settings_HostId" xml:space="preserve"><value>Ідентифікатор хоста (ID)</value></data>
-  <data name="Settings_HostIdHint" xml:space="preserve"><value>Використовуйте цей ідентифікатор для налаштування преміум-хостів.</value></data>
-  <data name="MasterGames_Title" xml:space="preserve"><value>Активні ігри</value></data>
-  <data name="MasterGames_Empty" xml:space="preserve"><value>Активних ігор немає.</value></data>
-  <data name="MasterGames_InLobby" xml:space="preserve"><value>У лобі</value></data>
-  <data name="MasterGames_Playing" xml:space="preserve"><value>Грають</value></data>
-  <data name="MasterGames_SessionId" xml:space="preserve"><value>ID гри</value></data>
-  <data name="MasterGames_HostId" xml:space="preserve"><value>ID хоста</value></data>
-  <data name="MasterGames_HostName" xml:space="preserve"><value>Ім’я хоста</value></data>
-  <data name="MasterGames_Round" xml:space="preserve"><value>Раунд</value></data>
-  <data name="MasterGames_Players" xml:space="preserve"><value>Гравці</value></data>
-  <data name="MasterGames_NoPlayers" xml:space="preserve"><value>Ще ніхто не приєднався.</value></data>
-  <data name="MediaArchive_State_Active" xml:space="preserve"><value>Медіа активні</value></data>
-  <data name="MediaArchive_State_Archiving" xml:space="preserve"><value>Архівація медіа</value></data>
-  <data name="MediaArchive_State_Archived" xml:space="preserve"><value>Медіа архівовано</value></data>
-  <data name="MediaArchive_State_Restoring" xml:space="preserve"><value>Відновлення медіа</value></data>
-  <data name="MediaArchive_State_Failed" xml:space="preserve"><value>Помилка операції з медіа</value></data>
-  <data name="MediaArchive_ArchivedOn" xml:space="preserve"><value>Архівовано</value></data>
-  <data name="MediaArchive_MediaSize" xml:space="preserve"><value>Розмір медіа</value></data>
-  <data name="MediaArchive_ArchiveMedia" xml:space="preserve"><value>Архівувати медіа</value></data>
-  <data name="MediaArchive_RestoreMedia" xml:space="preserve"><value>Відновити медіа</value></data>
-  <data name="MediaArchive_PreventAutomatic" xml:space="preserve"><value>Не архівувати автоматично</value></data>
-  <data name="MediaArchive_AllowAutomatic" xml:space="preserve"><value>Дозволити автоматичну архівацію</value></data>
-  <data name="MediaArchive_ConfirmTitle" xml:space="preserve"><value>Архівувати медіа квізу?</value></data>
-  <data name="MediaArchive_ConfirmText" xml:space="preserve"><value>Структура квізу залишиться доступною. Медіа буде перенесено до архівної бази, і перед грою його потрібно буде відновити.</value></data>
-  <data name="MediaArchive_Archived" xml:space="preserve"><value>Медіа квізу архівовано.</value></data>
-  <data name="MediaArchive_Restored" xml:space="preserve"><value>Медіа квізу відновлено.</value></data>
-  <data name="MediaArchive_Failed" xml:space="preserve"><value>Не вдалося архівувати медіа. Оригінальні медіа залишилися доступними.</value></data>
-  <data name="MediaArchive_RestoreFailed" xml:space="preserve"><value>Не вдалося відновити медіа. Архів не змінено.</value></data>
-  <data name="MediaArchive_RestoreBeforeEditing" xml:space="preserve"><value>Відновіть архівовані медіа перед редагуванням цього квізу.</value></data>
-  <data name="MediaArchive_PublicRestoreTitle" xml:space="preserve"><value>Відновити медіа архівованого квізу?</value></data>
-  <data name="MediaArchive_PublicRestoreText" xml:space="preserve"><value>Медіа цього квізу заархівовано. Перед початком гри його буде відновлено, і це може зайняти деякий час.</value></data>
-  <data name="MediaArchive_RestoreAndPlay" xml:space="preserve"><value>Відновити та грати</value></data>
-  <data name="MediaArchive_PublicRestoreUnavailable" xml:space="preserve"><value>Цей квіз тимчасово недоступний, поки обробляються його медіа.</value></data>
-  <data name="MediaArchive_NoMedia" xml:space="preserve"><value>У цьому квізі немає медіа для архівації.</value></data>
-  <data name="Footer_MadeWith" xml:space="preserve"><value>Створено з ❤️ командою Bad Wolf</value></data>
-  <data name="Footer_SpecialThanks" xml:space="preserve"><value>Особлива подяка за допомогу в розробці:</value></data>
-  <data name="Footer_FreePlatform" xml:space="preserve"><value>Bad Wolf Quiz — повністю безкоштовна платформа.</value></data>
-  <data name="Footer_SupportProject" xml:space="preserve"><value>Якщо є бажання — підтримайте розвиток проєкту ❤️</value></data>
-  <data name="Footer_DonationTitle" xml:space="preserve"><value>Підтримати Bad Wolf Quiz ❤️</value></data>
-  <data name="Footer_DonationScanQr" xml:space="preserve"><value>Відскануйте QR-код, щоб відкрити сторінку підтримки.</value></data>
-  <data name="Footer_DonationQrAlt" xml:space="preserve"><value>QR-код сторінки підтримки Bad Wolf Quiz</value></data>
-  <data name="Footer_OpenDonationPage" xml:space="preserve"><value>Відкрити сторінку підтримки</value></data>
+  <data name="FinalQuestion_Title" xml:space="preserve">
+    <value>Фінальне питання</value>
+  </data>
+  <data name="FinalQuestion_Start" xml:space="preserve">
+    <value>Почати фінальне питання</value>
+  </data>
+  <data name="FinalQuestion_WaitingForWagers" xml:space="preserve">
+    <value>Очікуються фінальні ставки</value>
+  </data>
+  <data name="FinalQuestion_NotSubmitted" xml:space="preserve">
+    <value>Не підтверджено</value>
+  </data>
+  <data name="FinalQuestion_Submitted" xml:space="preserve">
+    <value>Підтверджено</value>
+  </data>
+  <data name="FinalQuestion_ShowQuestion" xml:space="preserve">
+    <value>Показати фінальне питання</value>
+  </data>
+  <data name="FinalQuestion_StartJudging" xml:space="preserve">
+    <value>Показати відповідь і почати перевірку</value>
+  </data>
+  <data name="FinalQuestion_Results" xml:space="preserve">
+    <value>Фінальні результати</value>
+  </data>
+  <data name="FinalQuestion_NotEligible" xml:space="preserve">
+    <value>Ви спостерігаєте за фінальним питанням як глядач.</value>
+  </data>
+  <data name="FinalQuestion_YourWager" xml:space="preserve">
+    <value>Ваша ставка</value>
+  </data>
+  <data name="FinalQuestion_WagerLimits" xml:space="preserve">
+    <value>Допустима ставка: {0}–{1}</value>
+  </data>
+  <data name="FinalQuestion_ConfirmWager" xml:space="preserve">
+    <value>Підтвердити ставку</value>
+  </data>
+  <data name="FinalQuestion_WagerConfirmed" xml:space="preserve">
+    <value>Ставку підтверджено. Очікуйте ведучого.</value>
+  </data>
+  <data name="FinalQuestion_YourAnswer" xml:space="preserve">
+    <value>Ваша відповідь</value>
+  </data>
+  <data name="FinalQuestion_ConfirmAnswer" xml:space="preserve">
+    <value>Підтвердити відповідь</value>
+  </data>
+  <data name="FinalQuestion_AnswerConfirmed" xml:space="preserve">
+    <value>Відповідь підтверджено. Очікуйте ведучого.</value>
+  </data>
+  <data name="FinalQuestion_WaitingForJudging" xml:space="preserve">
+    <value>Ведучий перевіряє фінальні відповіді.</value>
+  </data>
+  <data name="FinalQuestion_YourAnswerCorrect" xml:space="preserve">
+    <value>Ваша фінальна відповідь правильна.</value>
+  </data>
+  <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve">
+    <value>Ваша фінальна відповідь неправильна.</value>
+  </data>
+  <data name="FinalQuestion_ActionRejected" xml:space="preserve">
+    <value>Ця дія з фінальним питанням поки недоступна.</value>
+  </data>
+  <data name="FinalQuestion_JudgingProgress" xml:space="preserve">
+    <value>Відповідь {0} з {1}</value>
+  </data>
+  <data name="AnswerKey_Title" xml:space="preserve">
+    <value>Правильна відповідь</value>
+  </data>
+  <data name="AnswerKey_Eyebrow" xml:space="preserve">
+    <value>Приватний екран ведучого</value>
+  </data>
+  <data name="AnswerKey_Open" xml:space="preserve">
+    <value>Відкрити правильну відповідь</value>
+  </data>
+  <data name="AnswerKey_Waiting" xml:space="preserve">
+    <value>Очікується вибір питання.</value>
+  </data>
+  <data name="AnswerHistory_Open" xml:space="preserve">
+    <value>Редагувати історію</value>
+  </data>
+  <data name="AnswerHistory_Eyebrow" xml:space="preserve">
+    <value>ІНСТРУМЕНТ ВЕДУЧОГО</value>
+  </data>
+  <data name="AnswerHistory_Title" xml:space="preserve">
+    <value>Історія відповідей</value>
+  </data>
+  <data name="AnswerHistory_Description" xml:space="preserve">
+    <value>Виправляйте записані відповіді та бали. Зміни відразу впливають на рейтинг і вибір першого гравця наступного раунду.</value>
+  </data>
+  <data name="AnswerHistory_BackToGame" xml:space="preserve">
+    <value>Повернутися до гри</value>
+  </data>
+  <data name="AnswerHistory_AddEntry" xml:space="preserve">
+    <value>Додати відсутню відповідь</value>
+  </data>
+  <data name="AnswerHistory_Question" xml:space="preserve">
+    <value>Питання</value>
+  </data>
+  <data name="AnswerHistory_Player" xml:space="preserve">
+    <value>Гравець</value>
+  </data>
+  <data name="AnswerHistory_Value" xml:space="preserve">
+    <value>Розмір нагороди або штрафу</value>
+  </data>
+  <data name="AnswerHistory_Correct" xml:space="preserve">
+    <value>Правильна відповідь</value>
+  </data>
+  <data name="AnswerHistory_Add" xml:space="preserve">
+    <value>Додати запис</value>
+  </data>
+  <data name="AnswerHistory_Save" xml:space="preserve">
+    <value>Зберегти зміни</value>
+  </data>
+  <data name="AnswerHistory_NoEntries" xml:space="preserve">
+    <value>Для цього питання немає записаних відповідей.</value>
+  </data>
+  <data name="AnswerHistory_Rejected" xml:space="preserve">
+    <value>Не вдалося застосувати зміну історії відповідей.</value>
+  </data>
+  <data name="AnswerHistory_PlayerAlreadyRecorded" xml:space="preserve">
+    <value>Для цього гравця вже записана відповідь на вибране питання. Відредагуйте наявний запис.</value>
+  </data>
+  <data name="AnswerHistory_QuestionNotPlayed" xml:space="preserve">
+    <value>Відповідь можна додати лише після того, як питання було зіграно.</value>
+  </data>
+  <data name="AnswerHistory_InvalidValue" xml:space="preserve">
+    <value>Розмір нагороди або штрафу не може бути від’ємним.</value>
+  </data>
+  <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve">
+    <value>Для цього питання вже є записи всіх гравців.</value>
+  </data>
+  <data name="AnswerHistory_Delete" xml:space="preserve">
+    <value>Видалити запис</value>
+  </data>
+  <data name="AnswerHistory_DeleteTitle" xml:space="preserve">
+    <value>Видалити запис відповіді</value>
+  </data>
+  <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve">
+    <value>Видалити цей запис і скасувати відповідну зміну балів?</value>
+  </data>
+  <data name="GameBoard_QuestionPreview" xml:space="preserve">
+    <value>Перегляд закритого питання</value>
+  </data>
+  <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve">
+    <value>Переглянути закрите питання за {0} балів</value>
+  </data>
+  <data name="GameBoard_ShowQuestion" xml:space="preserve">
+    <value>Показати питання</value>
+  </data>
+  <data name="GameBoard_ShowAnswer" xml:space="preserve">
+    <value>Показати відповідь</value>
+  </data>
+  <data name="Menu_GameHistory" xml:space="preserve">
+    <value>Історія ігор</value>
+  </data>
+  <data name="GameHistory_Title" xml:space="preserve">
+    <value>Історія ігор</value>
+  </data>
+  <data name="GameHistory_Description" xml:space="preserve">
+    <value>Переглядайте завершені ігри, фінальні бали та записані відповіді.</value>
+  </data>
+  <data name="GameHistory_Empty" xml:space="preserve">
+    <value>Ще не збережено жодної завершеної гри.</value>
+  </data>
+  <data name="GameHistory_FinishedAt" xml:space="preserve">
+    <value>Завершено</value>
+  </data>
+  <data name="GameHistory_PlayerCount" xml:space="preserve">
+    <value>Гравців: {0}</value>
+  </data>
+  <data name="GameHistory_View" xml:space="preserve">
+    <value>Переглянути деталі</value>
+  </data>
+  <data name="GameHistory_DetailsTitle" xml:space="preserve">
+    <value>Деталі гри</value>
+  </data>
+  <data name="GameHistory_Back" xml:space="preserve">
+    <value>Повернутися до історії ігор</value>
+  </data>
+  <data name="GameHistory_Players" xml:space="preserve">
+    <value>Фінальні бали</value>
+  </data>
+  <data name="GameHistory_Answers" xml:space="preserve">
+    <value>Записані відповіді</value>
+  </data>
+  <data name="GameHistory_NoAnswers" xml:space="preserve">
+    <value>Відповіді на звичайні питання не записані.</value>
+  </data>
+  <data name="GameHistory_Question" xml:space="preserve">
+    <value>Питання</value>
+  </data>
+  <data name="GameHistory_Player" xml:space="preserve">
+    <value>Гравець</value>
+  </data>
+  <data name="GameHistory_Result" xml:space="preserve">
+    <value>Результат</value>
+  </data>
+  <data name="GameHistory_ScoreChange" xml:space="preserve">
+    <value>Зміна балів</value>
+  </data>
+  <data name="GameHistory_Correct" xml:space="preserve">
+    <value>Правильно</value>
+  </data>
+  <data name="GameHistory_Incorrect" xml:space="preserve">
+    <value>Неправильно</value>
+  </data>
+  <data name="Account_HostSignIn" xml:space="preserve">
+    <value>Вхід для хоста</value>
+  </data>
+  <data name="Account_SignOut" xml:space="preserve">
+    <value>Вийти</value>
+  </data>
+  <data name="Account_RegisterHost" xml:space="preserve">
+    <value>Реєстрація хоста</value>
+  </data>
+  <data name="Account_Email" xml:space="preserve">
+    <value>Електронна пошта</value>
+  </data>
+  <data name="Account_Password" xml:space="preserve">
+    <value>Пароль</value>
+  </data>
+  <data name="Account_ConfirmPassword" xml:space="preserve">
+    <value>Підтвердження пароля</value>
+  </data>
+  <data name="Account_RememberMe" xml:space="preserve">
+    <value>Запам’ятати мене</value>
+  </data>
+  <data name="Account_SignIn" xml:space="preserve">
+    <value>Увійти</value>
+  </data>
+  <data name="Account_Register" xml:space="preserve">
+    <value>Зареєструватися</value>
+  </data>
+  <data name="Account_NoAccount" xml:space="preserve">
+    <value>Немає акаунта?</value>
+  </data>
+  <data name="Account_AlreadyRegistered" xml:space="preserve">
+    <value>Уже зареєстровані?</value>
+  </data>
+  <data name="Account_InvalidCredentials" xml:space="preserve">
+    <value>Неправильна електронна пошта або пароль.</value>
+  </data>
+  <data name="Account_EmailAlreadyUsed" xml:space="preserve">
+    <value>Ця електронна пошта вже зареєстрована.</value>
+  </data>
+  <data name="Account_Required" xml:space="preserve">
+    <value>Це поле обов’язкове.</value>
+  </data>
+  <data name="Account_InvalidEmail" xml:space="preserve">
+    <value>Введіть правильну адресу електронної пошти.</value>
+  </data>
+  <data name="Account_PasswordMinLength" xml:space="preserve">
+    <value>Пароль має містити щонайменше 8 символів.</value>
+  </data>
+  <data name="Account_PasswordMismatch" xml:space="preserve">
+    <value>Паролі не збігаються.</value>
+  </data>
+  <data name="Account_ForgotPassword" xml:space="preserve">
+    <value>Забули пароль?</value>
+  </data>
+  <data name="Account_ForgotPasswordDescription" xml:space="preserve">
+    <value>Введіть електронну пошту акаунта хоста, і ми надішлемо посилання для відновлення.</value>
+  </data>
+  <data name="Account_SendResetLink" xml:space="preserve">
+    <value>Надіслати посилання</value>
+  </data>
+  <data name="Account_CheckEmail" xml:space="preserve">
+    <value>Перевірте електронну пошту</value>
+  </data>
+  <data name="Account_CheckEmailDescription" xml:space="preserve">
+    <value>Якщо акаунт із такою адресою існує, на неї надіслано посилання для відновлення пароля.</value>
+  </data>
+  <data name="Account_EmailSendFailed" xml:space="preserve">
+    <value>Не вдалося надіслати лист. Перевірте налаштування Resend і спробуйте ще раз.</value>
+  </data>
+  <data name="Account_ResetPassword" xml:space="preserve">
+    <value>Відновити пароль</value>
+  </data>
+  <data name="Account_NewPassword" xml:space="preserve">
+    <value>Новий пароль</value>
+  </data>
+  <data name="Account_InvalidResetLink" xml:space="preserve">
+    <value>Це посилання недійсне, прострочене або вже використане.</value>
+  </data>
+  <data name="Account_PasswordResetComplete" xml:space="preserve">
+    <value>Пароль відновлено</value>
+  </data>
+  <data name="Account_ChangePassword" xml:space="preserve">
+    <value>Змінити пароль</value>
+  </data>
+  <data name="Account_CurrentPassword" xml:space="preserve">
+    <value>Поточний пароль</value>
+  </data>
+  <data name="Account_PasswordChanged" xml:space="preserve">
+    <value>Пароль успішно змінено.</value>
+  </data>
+  <data name="Account_CurrentPasswordInvalid" xml:space="preserve">
+    <value>Поточний пароль неправильний.</value>
+  </data>
+  <data name="Account_EmailSubject" xml:space="preserve">
+    <value>BAD WOLF QUIZ — відновлення пароля</value>
+  </data>
+  <data name="Account_EmailIntro" xml:space="preserve">
+    <value>Для вашого акаунта хоста BAD WOLF QUIZ надійшов запит на відновлення пароля.</value>
+  </data>
+  <data name="Account_EmailExpiry" xml:space="preserve">
+    <value>Посилання діє одну годину. Якщо ви не надсилали запит, просто проігноруйте цей лист.</value>
+  </data>
+  <data name="GameBoard_JoinQrAlt" xml:space="preserve">
+    <value>QR-код для приєднання до гри</value>
+  </data>
+  <data name="Join_SelectedGame" xml:space="preserve">
+    <value>Код гри: {0}</value>
+  </data>
+  <data name="GameBoard_ClosePlayerJoining" xml:space="preserve">
+    <value>Закрити вхід для нових гравців</value>
+  </data>
+  <data name="GameBoard_OpenPlayerJoining" xml:space="preserve">
+    <value>Відкрити вхід для нових гравців</value>
+  </data>
+  <data name="GameBoard_PlayerJoiningToggleRejected" xml:space="preserve">
+    <value>Зараз неможливо змінити доступ до гри.</value>
+  </data>
+  <data name="GameBoard_RemovePlayer" xml:space="preserve">
+    <value>Виключити гравця</value>
+  </data>
+  <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve">
+    <value>Виключити гравця {0} з гри?</value>
+  </data>
+  <data name="GameBoard_RemovePlayerRejected" xml:space="preserve">
+    <value>Цього гравця зараз неможливо виключити.</value>
+  </data>
+  <data name="GameBoard_ManageBlockedPlayers" xml:space="preserve">
+    <value>Заблоковані гравці</value>
+  </data>
+  <data name="GameBoard_BlockedPlayersTitle" xml:space="preserve">
+    <value>Заблоковані гравці</value>
+  </data>
+  <data name="GameBoard_NoBlockedPlayers" xml:space="preserve">
+    <value>Зараз немає заблокованих гравців.</value>
+  </data>
+  <data name="GameBoard_UnblockPlayer" xml:space="preserve">
+    <value>Розблокувати</value>
+  </data>
+  <data name="GameBoard_UnblockPlayerRejected" xml:space="preserve">
+    <value>Не вдалося розблокувати цього гравця.</value>
+  </data>
+  <data name="Error_PlayerBlocked" xml:space="preserve">
+    <value>Вас виключили з цієї гри. Попросіть хоста розблокувати вас перед повторним приєднанням.</value>
+  </data>
+  <data name="PlayerGame_RemovedFromGame" xml:space="preserve">
+    <value>Адмін виключив вас із гри.</value>
+  </data>
+  <data name="PlayerGame_RemovedFromGameTitle" xml:space="preserve">
+    <value>Вас виключено з гри</value>
+  </data>
+  <data name="HostCard_Display" xml:space="preserve">
+    <value>Показувати картку хоста під час гри</value>
+  </data>
+  <data name="HostCard_Name" xml:space="preserve">
+    <value>Ім’я хоста</value>
+  </data>
+  <data name="HostCard_Source" xml:space="preserve">
+    <value>Зображення картки хоста</value>
+  </data>
+  <data name="HostCard_SourceNone" xml:space="preserve">
+    <value>Не обрано</value>
+  </data>
+  <data name="HostCard_SourceImage" xml:space="preserve">
+    <value>Картинка</value>
+  </data>
+  <data name="HostCard_SourceWebcam" xml:space="preserve">
+    <value>Вебкамера</value>
+  </data>
+  <data name="HostCard_Image" xml:space="preserve">
+    <value>Картинка хоста (до {0} МБ)</value>
+  </data>
+  <data name="HostCard_InvalidSettings" xml:space="preserve">
+    <value>Щоб показувати картку хоста, вкажіть ім’я та оберіть картинку або вебкамеру.</value>
+  </data>
+  <data name="GameBoard_ResizePlayerPanel" xml:space="preserve">
+    <value>Змінити висоту панелі гравців</value>
+  </data>
+  <data name="HostCard_SourceAvatar" xml:space="preserve">
+    <value>Аватар</value>
+  </data>
+  <data name="HostCard_Avatar" xml:space="preserve">
+    <value>Аватар хоста</value>
+  </data>
+  <data name="AvatarPicker_Title" xml:space="preserve">
+    <value>Вибір аватара</value>
+  </data>
+  <data name="AvatarPicker_SelectGender" xml:space="preserve">
+    <value>Спочатку оберіть стать персонажа</value>
+  </data>
+  <data name="AvatarPicker_Female" xml:space="preserve">
+    <value>Жіноча</value>
+  </data>
+  <data name="AvatarPicker_Male" xml:space="preserve">
+    <value>Чоловіча</value>
+  </data>
+  <data name="AvatarPicker_Individual" xml:space="preserve">
+    <value>Індивідуальні аватари</value>
+  </data>
+  <data name="GameBoard_ResizePlayerCards" xml:space="preserve">
+    <value>Змінити ширину всіх карток гравців</value>
+  </data>
+  <data name="AvatarPicker_Choose" xml:space="preserve">
+    <value>Обрати аватар</value>
+  </data>
+  <data name="AvatarPicker_ChooseOrChange" xml:space="preserve">
+    <value>Обрати або змінити аватар</value>
+  </data>
+  <data name="PlayerWebcam_Enable" xml:space="preserve">
+    <value>Увімкнути вебкамеру</value>
+  </data>
+  <data name="PlayerWebcam_Disable" xml:space="preserve">
+    <value>Вимкнути вебкамеру</value>
+  </data>
+  <data name="PlayerWebcam_RequiresHttps" xml:space="preserve">
+    <value>Для доступу до камери відкрийте сайт через захищене HTTPS-з’єднання.</value>
+  </data>
+  <data name="PlayerWebcam_AccessFailed" xml:space="preserve">
+    <value>Не вдалося отримати доступ до камери. Перевірте дозвіл браузера.</value>
+  </data>
+  <data name="GameBoard_ResizeHostCard" xml:space="preserve">
+    <value>Змінити ширину та висоту картки хоста</value>
+  </data>
+  <data name="GameBoard_MoveHostCard" xml:space="preserve">
+    <value>Перемістити картку хоста вгору або вниз</value>
+  </data>
+  <data name="BrandLogo_Label" xml:space="preserve">
+    <value>Власний логотип у хедері</value>
+  </data>
+  <data name="BrandLogo_Hint" xml:space="preserve">
+    <value>Зображення до {0} МБ. Воно замінює BAD WOLF QUIZ у хедері, коли ви авторизовані.</value>
+  </data>
+  <data name="BrandLogo_PreviewAlt" xml:space="preserve">
+    <value>Прев’ю власного логотипа</value>
+  </data>
+  <data name="BrandLogo_Remove" xml:space="preserve">
+    <value>Прибрати власний логотип</value>
+  </data>
+  <data name="Menu_PlayWithUs" xml:space="preserve">
+    <value>Грати з нами</value>
+  </data>
+  <data name="Menu_AskQuestion" xml:space="preserve">
+    <value>Задати питання</value>
+  </data>
+  <data name="AskQuestion_Eyebrow" xml:space="preserve">
+    <value>ЗВ’ЯЗАТИСЯ З НАМИ</value>
+  </data>
+  <data name="AskQuestion_Title" xml:space="preserve">
+    <value>Задати питання</value>
+  </data>
+  <data name="AskQuestion_Description" xml:space="preserve">
+    <value>Надішліть нам питання. Воно потрапить у Discord-канал BAD WOLF QUIZ.</value>
+  </data>
+  <data name="AskQuestion_Name" xml:space="preserve">
+    <value>Ваше ім’я</value>
+  </data>
+  <data name="AskQuestion_NameHint" xml:space="preserve">
+    <value>Необов’язково</value>
+  </data>
+  <data name="AskQuestion_Question" xml:space="preserve">
+    <value>Питання</value>
+  </data>
+  <data name="AskQuestion_Send" xml:space="preserve">
+    <value>Надіслати питання</value>
+  </data>
+  <data name="AskQuestion_Invalid" xml:space="preserve">
+    <value>Введіть питання довжиною до 1500 символів.</value>
+  </data>
+  <data name="AskQuestion_Failed" xml:space="preserve">
+    <value>Не вдалося надіслати питання. Спробуйте пізніше.</value>
+  </data>
+  <data name="AskQuestion_Sent" xml:space="preserve">
+    <value>Ваше питання надіслано.</value>
+  </data>
+  <data name="SiteTheme_Label" xml:space="preserve">
+    <value>Колірна тема сайту</value>
+  </data>
+  <data name="SiteTheme_Hint" xml:space="preserve">
+    <value>Оберіть готову тему або створіть власну. Зміни відображаються відразу.</value>
+  </data>
+  <data name="SiteTheme_ClassicWolf" xml:space="preserve">
+    <value>Класичний вовк</value>
+  </data>
+  <data name="SiteTheme_CrimsonNight" xml:space="preserve">
+    <value>Багряна ніч</value>
+  </data>
+  <data name="SiteTheme_ArcticNeon" xml:space="preserve">
+    <value>Арктичний неон</value>
+  </data>
+  <data name="SiteTheme_EmeraldStage" xml:space="preserve">
+    <value>Смарагдова сцена</value>
+  </data>
+  <data name="SiteTheme_RoyalViolet" xml:space="preserve">
+    <value>Королівський фіолет</value>
+  </data>
+  <data name="SiteTheme_SunsetOrange" xml:space="preserve">
+    <value>Помаранчевий захід</value>
+  </data>
+  <data name="SiteTheme_Daylight" xml:space="preserve">
+    <value>Денне світло</value>
+  </data>
+  <data name="SiteTheme_WarmParchment" xml:space="preserve">
+    <value>Теплий пергамент</value>
+  </data>
+  <data name="SiteTheme_MintFog" xml:space="preserve">
+    <value>М’ятний туман</value>
+  </data>
+  <data name="SiteTheme_UkrainianSky" xml:space="preserve">
+    <value>Українське небо</value>
+  </data>
+  <data name="SiteTheme_ItalianSpirit" xml:space="preserve">
+    <value>Італійський дух</value>
+  </data>
+  <data name="SiteTheme_PrideSpectrum" xml:space="preserve">
+    <value>Прайд-спектр</value>
+  </data>
+  <data name="SiteTheme_RetroArcade" xml:space="preserve">
+    <value>Ретро-аркада</value>
+  </data>
+  <data name="SiteTheme_Custom" xml:space="preserve">
+    <value>Власна тема</value>
+  </data>
+  <data name="SiteTheme_Background" xml:space="preserve">
+    <value>Фон</value>
+  </data>
+  <data name="SiteTheme_Panel" xml:space="preserve">
+    <value>Панель</value>
+  </data>
+  <data name="SiteTheme_PanelSecondary" xml:space="preserve">
+    <value>Додаткова панель</value>
+  </data>
+  <data name="SiteTheme_Text" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="SiteTheme_MutedText" xml:space="preserve">
+    <value>Другорядний текст</value>
+  </data>
+  <data name="SiteTheme_Accent" xml:space="preserve">
+    <value>Акцент</value>
+  </data>
+  <data name="SiteTheme_AccentBright" xml:space="preserve">
+    <value>Яскравий акцент</value>
+  </data>
+  <data name="SiteTheme_Highlight" xml:space="preserve">
+    <value>Підсвічування</value>
+  </data>
+  <data name="SiteTheme_Invalid" xml:space="preserve">
+    <value>Оберіть коректну тему та кольори.</value>
+  </data>
+  <data name="QuizEditor_DragQuestion" xml:space="preserve">
+    <value>Перетягніть на інше питання, щоб поміняти їх місцями</value>
+  </data>
+  <data name="QuizEditor_MoveQuestionToRound" xml:space="preserve">
+    <value>Перенести питання в інший раунд</value>
+  </data>
+  <data name="QuizEditor_ExchangeQuestion" xml:space="preserve">
+    <value>Перенесення питання</value>
+  </data>
+  <data name="QuizEditor_SelectedQuestion" xml:space="preserve">
+    <value>Обране питання</value>
+  </data>
+  <data name="QuizEditor_TargetQuestion" xml:space="preserve">
+    <value>Питання для обміну</value>
+  </data>
+  <data name="QuizEditor_NoQuestionForExchange" xml:space="preserve">
+    <value>Немає доступного питання для обміну.</value>
+  </data>
+  <data name="PlayerImage_Source" xml:space="preserve">
+    <value>Джерело зображення картки гравця</value>
+  </data>
+  <data name="PlayerImage_Avatar" xml:space="preserve">
+    <value>Аватар</value>
+  </data>
+  <data name="PlayerImage_Picture" xml:space="preserve">
+    <value>Картинка</value>
+  </data>
+  <data name="PlayerImage_UploadOrChange" xml:space="preserve">
+    <value>Завантажити або змінити картинку</value>
+  </data>
+  <data name="PlayerImage_Invalid" xml:space="preserve">
+    <value>Оберіть коректне зображення PNG, JPEG або WebP.</value>
+  </data>
+  <data name="Menu_FAQ" xml:space="preserve">
+    <value>FAQ</value>
+  </data>
+  <data name="Faq_Eyebrow" xml:space="preserve">
+    <value>КОРОТКИЙ ПОСІБНИК</value>
+  </data>
+  <data name="Faq_Title" xml:space="preserve">
+    <value>Часті питання</value>
+  </data>
+  <data name="Faq_Description" xml:space="preserve">
+    <value>Короткі відповіді про приєднання, правила гри, налаштування та керування.</value>
+  </data>
+  <data name="Faq_Q1" xml:space="preserve">
+    <value>Як гравцеві приєднатися до гри?</value>
+  </data>
+  <data name="Faq_A1" xml:space="preserve">
+    <value>Відкрийте сторінку приєднання та введіть шестисимвольний код гри й ім’я або відскануйте QR-код хоста. Обліковий запис гравцеві не потрібен. Якщо QR-посилання веде на localhost, хост має вказати в Game:PublicBaseUrl адресу, доступну з пристроїв гравців.</value>
+  </data>
+  <data name="Faq_Q2" xml:space="preserve">
+    <value>Чи можна приєднатися після початку гри?</value>
+  </data>
+  <data name="Faq_A2" xml:space="preserve">
+    <value>Так, якщо хост відкрив пізнє приєднання кнопкою із замком. Новий гравець очікуватиме підтвердження хоста. Гравцеві, який повертається після від’єднання, також може знадобитися повторне підтвердження.</value>
+  </data>
+  <data name="Faq_Q3" xml:space="preserve">
+    <value>Хто обирає наступне питання?</value>
+  </data>
+  <data name="Faq_A3" xml:space="preserve">
+    <value>Перший гравець, який приєднався, відкриває перший раунд. Після правильної відповіді право вибору переходить до цього гравця; неправильна відповідь або відсутність правильної відповіді його не змінює. Хост може обрати гравця вручну чи випадково. Наступні раунди починає найслабший гравець за правилами турнірної таблиці.</value>
+  </data>
+  <data name="Faq_Q4" xml:space="preserve">
+    <value>Як працюють бузер і таймери?</value>
+  </data>
+  <data name="Faq_A4" xml:space="preserve">
+    <value>Бузер відкривається автоматично або після команди хоста. Перше прийняте натискання призупиняє загальний таймер бузера й запускає таймер відповіді гравця. Після неправильної відповіді бузер знову відкривається для доступних гравців, а загальний таймер продовжується із залишку часу.</value>
+  </data>
+  <data name="Faq_Q5" xml:space="preserve">
+    <value>Як працюють питання зі ставкою?</value>
+  </data>
+  <data name="Faq_A5" xml:space="preserve">
+    <value>Відповідає лише гравець, який обрав питання. Він оголошує ставку, а хост вводить її перед показом питання. Мінімум — 5 балів; максимум — більше зі значень: рахунок гравця або найбільша вартість питання на поточній дошці. Правильна відповідь додає ставку, неправильна — віднімає.</value>
+  </data>
+  <data name="Faq_Q6" xml:space="preserve">
+    <value>Як відбувається фінальне питання?</value>
+  </data>
+  <data name="Faq_A6" xml:space="preserve">
+    <value>Допущені гравці приватно надсилають ставку, а потім відповідь зі своїх пристроїв. Мінімальна ставка — 5, максимальна — більше зі значень 1000 або рахунок гравця. Гравці з від’ємним рахунком беруть участь за замовчуванням, якщо хост не вимкнув це налаштування. Ставки й відповіді приховані до блокування відповідного етапу.</value>
+  </data>
+  <data name="Faq_Q7" xml:space="preserve">
+    <value>Чи може хост виправити неправильно оцінену відповідь?</value>
+  </data>
+  <data name="Faq_A7" xml:space="preserve">
+    <value>Так. У «Історії відповідей» під час гри можна змінити гравця, правильність або кількість балів, додати пропущений запис чи видалити помилковий. Попередня зміна рахунку скасовується, після чого послідовно застосовується виправлений результат.</value>
+  </data>
+  <data name="Faq_Q8" xml:space="preserve">
+    <value>Що станеться, якщо гравець від’єднається або перезавантажить сторінку?</value>
+  </data>
+  <data name="Faq_A8" xml:space="preserve">
+    <value>Токен повторного підключення відновить того самого гравця, а сервер повторно надішле поточний стан гри. Під час запущеної гри хосту може знадобитися підтвердити повернення. Перезавантаження не створює другого запису рахунку.</value>
+  </data>
+  <data name="Faq_Q9" xml:space="preserve">
+    <value>Чи можуть гравці використовувати аватари, картинки або вебкамеру?</value>
+  </data>
+  <data name="Faq_A9" xml:space="preserve">
+    <value>Гравець може обрати вбудований аватар, завантажити картинку або ввімкнути вебкамеру. Якщо вебкамера недоступна, використовується обрана картинка чи аватар. Уподобання зберігаються в цьому браузері за нормалізованим іменем і відновлюються в наступних іграх на тому самому пристрої.</value>
+  </data>
+  <data name="Faq_Q10" xml:space="preserve">
+    <value>Чим глобальні налаштування відрізняються від налаштувань лобі?</value>
+  </data>
+  <data name="Faq_A10" xml:space="preserve">
+    <value>Глобальні налаштування — це постійні стандартні значення для майбутніх ігор. Під час створення лобі вони копіюються в незалежний знімок гри. Хост може змінити їх до початку лише для цього лобі, не змінюючи глобальні налаштування. Після запуску гри налаштування все ще можна змінювати за допомогою редактора налаштувань, доступного під час гри.</value>
+  </data>
+  <data name="Faq_Q11" xml:space="preserve">
+    <value>Чи зберігається історія завершених ігор?</value>
+  </data>
+  <data name="Faq_A11" xml:space="preserve">
+    <value>Так. У SQLite зберігаються гравці, фінальні рахунки, звичайні питання та записані результати відповідей. Хост переглядає їх у «Історії ігор». Видалення квізу архівує його визначення, тому пов’язана історія залишається доступною.</value>
+  </data>
+  <data name="Faq_Q12" xml:space="preserve">
+    <value>Хто має доступ до квізів та ігор хоста?</value>
+  </data>
+  <data name="Faq_A12" xml:space="preserve">
+    <value>Квізи, активні ігри й завершена історія належать авторизованому хосту, який їх створив або запустив. Інші облікові записи хостів не мають доступу до цих даних. Сторінки приєднання та гри залишаються доступними без облікового запису гравця.</value>
+  </data>
+  <data name="Faq_ContactTitle" xml:space="preserve">
+    <value>Залишилися питання?</value>
+  </data>
+  <data name="Faq_ContactDescription" xml:space="preserve">
+    <value>Надішліть питання — воно потрапить у Discord-канал BAD WOLF QUIZ.</value>
+  </data>
+  <data name="Label_QuestionType" xml:space="preserve">
+    <value>Тип питання</value>
+  </data>
+  <data name="QuestionType_Standard" xml:space="preserve">
+    <value>Звичайне питання</value>
+  </data>
+  <data name="QuestionType_FourClues" xml:space="preserve">
+    <value>Чотири підказки</value>
+  </data>
+  <data name="FourClues_EditorHint" xml:space="preserve">
+    <value>Додайте рівно чотири підказки. Кожна може містити текст, зображення, аудіо або відео.</value>
+  </data>
+  <data name="FourClues_ExactlyFourRequired" xml:space="preserve">
+    <value>Питання цього типу повинно містити рівно чотири підказки.</value>
+  </data>
+  <data name="GameBoard_RevealOneClue" xml:space="preserve">
+    <value>+1 підказка</value>
+  </data>
+  <data name="GameBoard_RevealClueRejected" xml:space="preserve">
+    <value>Не вдалося відкрити наступну підказку.</value>
+  </data>
+  <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve">
+    <value>Питання з категорії «{0}» — {1} балів</value>
+  </data>
+  <data name="Menu_PlayerStatistics" xml:space="preserve">
+    <value>Статистика гравців</value>
+  </data>
+  <data name="PlayerStatistics_Title" xml:space="preserve">
+    <value>Статистика гравців</value>
+  </data>
+  <data name="PlayerStatistics_Description" xml:space="preserve">
+    <value>Результати за весь час, розраховані із завершених ігор цього хоста.</value>
+  </data>
+  <data name="PlayerStatistics_Empty" xml:space="preserve">
+    <value>Завершіть гру, щоб почати збирати статистику гравців.</value>
+  </data>
+  <data name="PlayerStatistics_Games" xml:space="preserve">
+    <value>Ігри</value>
+  </data>
+  <data name="PlayerStatistics_TotalScore" xml:space="preserve">
+    <value>Сума фінальних балів</value>
+  </data>
+  <data name="PlayerStatistics_Correct" xml:space="preserve">
+    <value>Правильно</value>
+  </data>
+  <data name="PlayerStatistics_Attempts" xml:space="preserve">
+    <value>Спроби</value>
+  </data>
+  <data name="PlayerStatistics_Accuracy" xml:space="preserve">
+    <value>Точність</value>
+  </data>
+  <data name="PlayerStatistics_LastPlayed" xml:space="preserve">
+    <value>Остання гра</value>
+  </data>
+  <data name="PlayerStatistics_NotAvailable" xml:space="preserve">
+    <value>—</value>
+  </data>
+  <data name="PlayerStatistics_PerRound" xml:space="preserve">
+    <value>Статистика за раундами</value>
+  </data>
+  <data name="PlayerStatistics_Round" xml:space="preserve">
+    <value>Раунд</value>
+  </data>
+  <data name="PlayerStatistics_NoRoundAnswers" xml:space="preserve">
+    <value>Немає оцінених відповідей для статистики за раундами.</value>
+  </data>
+  <data name="Menu_Title" xml:space="preserve">
+    <value>Меню</value>
+  </data>
+  <data name="Menu_Actions" xml:space="preserve">
+    <value>Дії</value>
+  </data>
+  <data name="Menu_Tools" xml:space="preserve">
+    <value>Інструменти</value>
+  </data>
+  <data name="PlayerMenu_Title" xml:space="preserve">
+    <value>Меню</value>
+  </data>
+  <data name="GameHistory_Winner" xml:space="preserve">
+    <value>Переможець</value>
+  </data>
+  <data name="GameHistory_Winners" xml:space="preserve">
+    <value>Переможці</value>
+  </data>
+  <data name="Button_ImportQuiz" xml:space="preserve">
+    <value>Імпортувати квіз</value>
+  </data>
+  <data name="Button_ExportQuiz" xml:space="preserve">
+    <value>Експортувати</value>
+  </data>
+  <data name="QuizImport_Success" xml:space="preserve">
+    <value>Квіз успішно імпортовано.</value>
+  </data>
+  <data name="QuizImport_InvalidFile" xml:space="preserve">
+    <value>Обраний файл не є коректним або підтримуваним пакетом BAD WOLF QUIZ.</value>
+  </data>
+  <data name="GameBoard_FinishGame" xml:space="preserve">
+    <value>Закінчити гру</value>
+  </data>
+  <data name="PublicQuizzes_Title" xml:space="preserve">
+    <value>Публічні квізи</value>
+  </data>
+  <data name="PublicQuizzes_Description" xml:space="preserve">
+    <value>Знаходьте квізи, опубліковані іншими хостами, і створюйте власну гру.</value>
+  </data>
+  <data name="PublicQuizzes_SearchLabel" xml:space="preserve">
+    <value>Пошук публічних квізів</value>
+  </data>
+  <data name="PublicQuizzes_SearchPlaceholder" xml:space="preserve">
+    <value>Назва або опис квіза</value>
+  </data>
+  <data name="PublicQuizzes_Search" xml:space="preserve">
+    <value>Знайти</value>
+  </data>
+  <data name="PublicQuizzes_EmptyTitle" xml:space="preserve">
+    <value>Квізів не знайдено</value>
+  </data>
+  <data name="PublicQuizzes_EmptyDescription" xml:space="preserve">
+    <value>Спробуйте інший запит або поверніться пізніше.</value>
+  </data>
+  <data name="QuizPublication_Public" xml:space="preserve">
+    <value>Публічний</value>
+  </data>
+  <data name="QuizPublication_Publish" xml:space="preserve">
+    <value>Опублікувати</value>
+  </data>
+  <data name="QuizPublication_Unpublish" xml:space="preserve">
+    <value>Зняти з публікації</value>
+  </data>
+  <data name="QuizPublication_Published" xml:space="preserve">
+    <value>Квіз опубліковано.</value>
+  </data>
+  <data name="QuizPublication_Unpublished" xml:space="preserve">
+    <value>Квіз знято з публікації.</value>
+  </data>
+  <data name="QuizRating_Title" xml:space="preserve">
+    <value>Оцініть цей квіз</value>
+  </data>
+  <data name="QuizRating_Description" xml:space="preserve">
+    <value>Наскільки вам сподобався цей квіз?</value>
+  </data>
+  <data name="QuizRating_ScoreLabel" xml:space="preserve">
+    <value>Оцінка від 0 до 5 зірочок</value>
+  </data>
+  <data name="QuizRating_Stars" xml:space="preserve">
+    <value>{0} зірочок</value>
+  </data>
+  <data name="QuizRating_NotReady" xml:space="preserve">
+    <value>Оцінку поки не вдалося зберегти. Спробуйте ще раз.</value>
+  </data>
+  <data name="QuizRating_Count" xml:space="preserve">
+    <value>Оцінок: {0}</value>
+  </data>
+  <data name="QuizRating_AccessibleSummary" xml:space="preserve">
+    <value>Середня оцінка {0:0.0} з 5 від {1} людей</value>
+  </data>
+  <data name="PublicQuizzes_Author" xml:space="preserve">
+    <value>Автор: {0}</value>
+  </data>
+  <data name="ContentBlock_Add" xml:space="preserve">
+    <value>+ Додати блок</value>
+  </data>
+  <data name="ContentBlockType_Text" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="ContentBlockType_Image" xml:space="preserve">
+    <value>Зображення</value>
+  </data>
+  <data name="ContentBlockType_Audio" xml:space="preserve">
+    <value>Аудіо</value>
+  </data>
+  <data name="ContentBlockType_Video" xml:space="preserve">
+    <value>Відео</value>
+  </data>
+  <data name="ContentBlockType_YouTube" xml:space="preserve">
+    <value>YouTube</value>
+  </data>
+  <data name="ImageClipboard_Button" xml:space="preserve">
+    <value>Вставити з буфера</value>
+  </data>
+  <data name="ImageClipboard_Empty" xml:space="preserve">
+    <value>У буфері немає зображення.</value>
+  </data>
+  <data name="ImageClipboard_Error" xml:space="preserve">
+    <value>Не вдалося прочитати зображення з буфера. Дозвольте доступ до буфера й повторіть спробу.</value>
+  </data>
+  <data name="AudioClipboard_Button" xml:space="preserve">
+    <value>Вставити з буфера</value>
+  </data>
+  <data name="AudioClipboard_Empty" xml:space="preserve">
+    <value>У буфері немає аудіофайла.</value>
+  </data>
+  <data name="AudioClipboard_Error" xml:space="preserve">
+    <value>Не вдалося прочитати аудіофайл із буфера. Дозвольте доступ до буфера й повторіть спробу.</value>
+  </data>
+  <data name="Account_HostName" xml:space="preserve">
+    <value>Назва хоста (необов’язково)</value>
+  </data>
+  <data name="Account_HostNameHint" xml:space="preserve">
+    <value>Назву хоста можна буде змінити пізніше в налаштуваннях.</value>
+  </data>
+  <data name="QuizEditor_CountReductionTitle" xml:space="preserve">
+    <value>Видалити питання?</value>
+  </data>
+  <data name="InvalidMediaFile" xml:space="preserve">
+    <value>Цей блок не підтримує завантаження файлів.</value>
+  </data>
+  <data name="AudioConversionUnavailable" xml:space="preserve">
+    <value>Конвертація аудіо недоступна. Встановіть FFmpeg або виправте MediaProcessing:FfmpegExecutablePath.</value>
+  </data>
+  <data name="FileUploadLimit" xml:space="preserve">
+    <value>Максимальний розмір файла: {0} МБ.</value>
+  </data>
+  <data name="Settings_HostId" xml:space="preserve">
+    <value>Ідентифікатор хоста (ID)</value>
+  </data>
+  <data name="Settings_HostIdHint" xml:space="preserve">
+    <value>Використовуйте цей ідентифікатор для налаштування преміум-хостів.</value>
+  </data>
+  <data name="MasterGames_Title" xml:space="preserve">
+    <value>Активні ігри</value>
+  </data>
+  <data name="MasterGames_Empty" xml:space="preserve">
+    <value>Активних ігор немає.</value>
+  </data>
+  <data name="MasterGames_InLobby" xml:space="preserve">
+    <value>У лобі</value>
+  </data>
+  <data name="MasterGames_Playing" xml:space="preserve">
+    <value>Грають</value>
+  </data>
+  <data name="MasterGames_SessionId" xml:space="preserve">
+    <value>ID гри</value>
+  </data>
+  <data name="MasterGames_HostId" xml:space="preserve">
+    <value>ID хоста</value>
+  </data>
+  <data name="MasterGames_HostName" xml:space="preserve">
+    <value>Ім’я хоста</value>
+  </data>
+  <data name="MasterGames_Round" xml:space="preserve">
+    <value>Раунд</value>
+  </data>
+  <data name="MasterGames_Players" xml:space="preserve">
+    <value>Гравці</value>
+  </data>
+  <data name="MasterGames_NoPlayers" xml:space="preserve">
+    <value>Ще ніхто не приєднався.</value>
+  </data>
+  <data name="MediaArchive_State_Active" xml:space="preserve">
+    <value>Медіа активні</value>
+  </data>
+  <data name="MediaArchive_State_Archiving" xml:space="preserve">
+    <value>Архівація медіа</value>
+  </data>
+  <data name="MediaArchive_State_Archived" xml:space="preserve">
+    <value>Медіа архівовано</value>
+  </data>
+  <data name="MediaArchive_State_Restoring" xml:space="preserve">
+    <value>Відновлення медіа</value>
+  </data>
+  <data name="MediaArchive_State_Failed" xml:space="preserve">
+    <value>Помилка операції з медіа</value>
+  </data>
+  <data name="MediaArchive_ArchivedOn" xml:space="preserve">
+    <value>Архівовано</value>
+  </data>
+  <data name="MediaArchive_MediaSize" xml:space="preserve">
+    <value>Розмір медіа</value>
+  </data>
+  <data name="MediaArchive_ArchiveMedia" xml:space="preserve">
+    <value>Архівувати медіа</value>
+  </data>
+  <data name="MediaArchive_RestoreMedia" xml:space="preserve">
+    <value>Відновити медіа</value>
+  </data>
+  <data name="MediaArchive_PreventAutomatic" xml:space="preserve">
+    <value>Не архівувати автоматично</value>
+  </data>
+  <data name="MediaArchive_AllowAutomatic" xml:space="preserve">
+    <value>Дозволити автоматичну архівацію</value>
+  </data>
+  <data name="MediaArchive_ConfirmTitle" xml:space="preserve">
+    <value>Архівувати медіа квізу?</value>
+  </data>
+  <data name="MediaArchive_ConfirmText" xml:space="preserve">
+    <value>Структура квізу залишиться доступною. Медіа буде перенесено до архівної бази, і перед грою його потрібно буде відновити.</value>
+  </data>
+  <data name="MediaArchive_Archived" xml:space="preserve">
+    <value>Медіа квізу архівовано.</value>
+  </data>
+  <data name="MediaArchive_Restored" xml:space="preserve">
+    <value>Медіа квізу відновлено.</value>
+  </data>
+  <data name="MediaArchive_Failed" xml:space="preserve">
+    <value>Не вдалося архівувати медіа. Оригінальні медіа залишилися доступними.</value>
+  </data>
+  <data name="MediaArchive_RestoreFailed" xml:space="preserve">
+    <value>Не вдалося відновити медіа. Архів не змінено.</value>
+  </data>
+  <data name="MediaArchive_RestoreBeforeEditing" xml:space="preserve">
+    <value>Відновіть архівовані медіа перед редагуванням цього квізу.</value>
+  </data>
+  <data name="MediaArchive_PublicRestoreTitle" xml:space="preserve">
+    <value>Відновити медіа архівованого квізу?</value>
+  </data>
+  <data name="MediaArchive_PublicRestoreText" xml:space="preserve">
+    <value>Медіа цього квізу заархівовано. Перед початком гри його буде відновлено, і це може зайняти деякий час.</value>
+  </data>
+  <data name="MediaArchive_RestoreAndPlay" xml:space="preserve">
+    <value>Відновити та грати</value>
+  </data>
+  <data name="MediaArchive_PublicRestoreUnavailable" xml:space="preserve">
+    <value>Цей квіз тимчасово недоступний, поки обробляються його медіа.</value>
+  </data>
+  <data name="MediaArchive_NoMedia" xml:space="preserve">
+    <value>У цьому квізі немає медіа для архівації.</value>
+  </data>
+  <data name="Footer_MadeWith" xml:space="preserve">
+    <value>Створено з ❤️ командою Bad Wolf</value>
+  </data>
+  <data name="Footer_SpecialThanks" xml:space="preserve">
+    <value>Особлива подяка за допомогу в розробці:</value>
+  </data>
+  <data name="Footer_FreePlatform" xml:space="preserve">
+    <value>Bad Wolf Quiz — повністю безкоштовна платформа.</value>
+  </data>
+  <data name="Footer_SupportProject" xml:space="preserve">
+    <value>Якщо є бажання — підтримайте розвиток проєкту ❤️</value>
+  </data>
+  <data name="Footer_DonationTitle" xml:space="preserve">
+    <value>Підтримати Bad Wolf Quiz ❤️</value>
+  </data>
+  <data name="Footer_DonationScanQr" xml:space="preserve">
+    <value>Відскануйте QR-код, щоб відкрити сторінку підтримки.</value>
+  </data>
+  <data name="Footer_DonationQrAlt" xml:space="preserve">
+    <value>QR-код сторінки підтримки Bad Wolf Quiz</value>
+  </data>
+  <data name="Footer_OpenDonationPage" xml:space="preserve">
+    <value>Відкрити сторінку підтримки</value>
+  </data>
+  <data name="GameBoard_NextRound" xml:space="preserve">
+    <value>Наступний раунд</value>
+  </data>
 </root>

@@ -604,6 +604,25 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public GameSessionRegistration? ForceCompleteCurrentRound(
+    string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            game.Session.ForceCompleteCurrentRound();
+            game.MarkPersistenceChanged();
+            return game;
+        }
+    }
+
     public FinalQuestion? StartFinalQuestion(string publicCode)
     {
         var game = Find(publicCode);

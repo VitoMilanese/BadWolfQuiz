@@ -440,6 +440,13 @@ public sealed class RuntimeQuestion
 
         Status = RuntimeQuestionStatus.Resolved;
     }
+
+    internal void ForceResolve()
+    {
+        BuzzerStatus = QuestionBuzzerStatus.Closed;
+        AnsweringPlayerId = null;
+        Status = RuntimeQuestionStatus.Resolved;
+    }
 }
 
 public enum RuntimeQuestionStatus

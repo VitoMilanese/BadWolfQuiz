@@ -33,6 +33,17 @@
                         </button>
                     </form>
 
+                    @if (Model.Game.Session.HasNextRound)
+                    {
+                        <form method="post"
+                                asp-page-handler="ForceAdvanceRound">
+                            <button class="action-menu-item"
+                                    type="submit">
+                                @Localizer["GameBoard_NextRound"]
+                            </button>
+                        </form>
+                    }
+
                     <a class="action-menu-item"
                        asp-page="/Admin/Games/AnswerKey"
                        asp-route-id="@Model.Game.Session.Id.Value"

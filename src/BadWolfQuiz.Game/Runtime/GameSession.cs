@@ -654,13 +654,36 @@ public sealed class GameSession
                 "The game does not have another round.");
         }
 
-        var nextActivePlayerId = GetWeakestCurrentRoundPlayerId();
+        GamePlayerId? nextActivePlayerId = _players.Count > 0
+            ? GetWeakestCurrentRoundPlayerId()
+            : null;
 
         CurrentRoundIndex++;
         CaptureRoundStartScores();
         ActivePlayerId = nextActivePlayerId;
 
         return CurrentRound;
+    }
+
+    public void ForceCompleteCurrentRound()
+    {
+        EnsureRunning();
+
+        if (!HasNextRound)
+        {
+            throw new GameRuleViolationException(
+                "The game does not have another round.");
+        }
+
+        foreach (var question in Board.Questions.Where(question =>
+                     question.SourceRoundId == CurrentRound.SourceRoundId &&
+                     question.Status != RuntimeQuestionStatus.Resolved))
+        {
+            question.ForceResolve();
+        }
+
+        Timer.Stop();
+        AnswerTimer.Stop();
     }
 
     public IReadOnlyList<GameResultStanding> GetCurrentRoundStandings()

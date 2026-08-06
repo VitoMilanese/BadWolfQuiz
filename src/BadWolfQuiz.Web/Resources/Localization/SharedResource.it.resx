@@ -351,8 +351,12 @@
   <data name="Label_WagerQuestion" xml:space="preserve">
     <value>Puntata</value>
   </data>
-  <data name="Label_ExcludeFromRandomWagerSelection" xml:space="preserve"><value>Escludi dalla selezione casuale delle puntate</value></data>
-  <data name="Hint_ExcludeFromRandomWagerSelection" xml:space="preserve"><value>Questa domanda non verrà mai scelta come domanda con puntata casuale.</value></data>
+  <data name="Label_ExcludeFromRandomWagerSelection" xml:space="preserve">
+    <value>Escludi dalla selezione casuale delle puntate</value>
+  </data>
+  <data name="Hint_ExcludeFromRandomWagerSelection" xml:space="preserve">
+    <value>Questa domanda non verrà mai scelta come domanda con puntata casuale.</value>
+  </data>
   <data name="Label_Created" xml:space="preserve">
     <value>Creato</value>
   </data>
@@ -689,18 +693,42 @@
   <data name="QuizEditor_CannotDeleteOnlyRound" xml:space="preserve">
     <value>Non è possibile eliminare l’unico round.</value>
   </data>
-  <data name="QuizEditor_UseRandomWagerQuestions" xml:space="preserve"><value>Domande con puntata casuali</value></data>
-  <data name="QuizEditor_RandomWagerDescription" xml:space="preserve"><value>Ignora le domande contrassegnate manualmente e scegli posizioni casuali alla creazione di ogni partita.</value></data>
-  <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve"><value>Numero di domande con puntata</value></data>
-  <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve"><value>Domande disponibili: {0}</value></data>
-  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve"><value>Il numero di domande con puntata casuali deve essere compreso tra 0 e {0}.</value></data>
-  <data name="QuizEditor_RoundRowsSaved" xml:space="preserve"><value>Impostazioni del round salvate.</value></data>
-  <data name="QuizEditor_QuestionCount" xml:space="preserve"><value>Domande per categoria</value></data>
-  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve"><value>Scegli da {0} a {1}. Ridurre il numero elimina le righe inferiori e le relative domande.</value></data>
-  <data name="QuizEditor_QuestionCountDeleteConfirmation" xml:space="preserve"><value>Alcune domande nelle righe rimosse contengono dati. Eliminarle definitivamente?</value></data>
-  <data name="QuizEditor_CategoryCount" xml:space="preserve"><value>Categorie nel round</value></data>
-  <data name="QuizEditor_CategoryCountDescription" xml:space="preserve"><value>Scegli da {0} a {1}. Ridurre il numero elimina le ultime categorie.</value></data>
-  <data name="QuizEditor_CategoryCountDeleteConfirmation" xml:space="preserve"><value>Alcune categorie da rimuovere contengono domande. Eliminarle definitivamente?</value></data>
+  <data name="QuizEditor_UseRandomWagerQuestions" xml:space="preserve">
+    <value>Domande con puntata casuali</value>
+  </data>
+  <data name="QuizEditor_RandomWagerDescription" xml:space="preserve">
+    <value>Ignora le domande contrassegnate manualmente e scegli posizioni casuali alla creazione di ogni partita.</value>
+  </data>
+  <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve">
+    <value>Numero di domande con puntata</value>
+  </data>
+  <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve">
+    <value>Domande disponibili: {0}</value>
+  </data>
+  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve">
+    <value>Il numero di domande con puntata casuali deve essere compreso tra 0 e {0}.</value>
+  </data>
+  <data name="QuizEditor_RoundRowsSaved" xml:space="preserve">
+    <value>Impostazioni del round salvate.</value>
+  </data>
+  <data name="QuizEditor_QuestionCount" xml:space="preserve">
+    <value>Domande per categoria</value>
+  </data>
+  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve">
+    <value>Scegli da {0} a {1}. Ridurre il numero elimina le righe inferiori e le relative domande.</value>
+  </data>
+  <data name="QuizEditor_QuestionCountDeleteConfirmation" xml:space="preserve">
+    <value>Alcune domande nelle righe rimosse contengono dati. Eliminarle definitivamente?</value>
+  </data>
+  <data name="QuizEditor_CategoryCount" xml:space="preserve">
+    <value>Categorie nel round</value>
+  </data>
+  <data name="QuizEditor_CategoryCountDescription" xml:space="preserve">
+    <value>Scegli da {0} a {1}. Ridurre il numero elimina le ultime categorie.</value>
+  </data>
+  <data name="QuizEditor_CategoryCountDeleteConfirmation" xml:space="preserve">
+    <value>Alcune categorie da rimuovere contengono domande. Eliminarle definitivamente?</value>
+  </data>
   <data name="QuizEditor_RowPoints" xml:space="preserve">
     <value>Valore delle domande</value>
   </data>
@@ -734,70 +762,174 @@
   <data name="QuizEditor_CategoryRenamed" xml:space="preserve">
     <value>Categoria rinominata con successo</value>
   </data>
-
-  <data name="Button_CreateGame" xml:space="preserve"><value>Gioca</value></data>
-  <data name="Button_ContinueGame" xml:space="preserve"><value>Continua partita</value></data>
-  <data name="Button_BackToQuizzes" xml:space="preserve"><value>Torna ai quiz</value></data>
-  <data name="GameLobby_Eyebrow" xml:space="preserve"><value>Lobby del conduttore</value></data>
-  <data name="GameLobby_StatusLabel" xml:space="preserve"><value>Stato</value></data>
-  <data name="GameLobby_StatusLobby" xml:space="preserve"><value>Lobby</value></data>
-  <data name="GameLobby_PlayerCount" xml:space="preserve"><value>Giocatori</value></data>
-  <data name="GameLobby_QuestionCount" xml:space="preserve"><value>Domande</value></data>
-  <data name="GameLobby_SessionId" xml:space="preserve"><value>ID sessione</value></data>
-  <data name="GameLobby_TransientNotice" xml:space="preserve"><value>Questa sessione è memorizzata in memoria e verrà persa al riavvio dell'applicazione.</value></data>
-  <data name="Error_QuizCannotStart" xml:space="preserve"><value>Questo quiz non può essere usato per creare una partita. Controlla round, domande e righe dei punti.</value></data>
-
-  <data name="PlayerPresence_Active" xml:space="preserve"><value>Attivo</value></data>
-  <data name="PlayerPresence_Inactive" xml:space="preserve"><value>Inattivo</value></data>
-  <data name="PlayerPresence_Disconnected" xml:space="preserve"><value>Disconnesso</value></data>
-  <data name="PlayerPresence_MonitoringNotice" xml:space="preserve"><value>Durante la partita mantieni questa pagina aperta e attiva. Il presentatore può vedere lo stato della pagina.</value></data>
-  <data name="PlayerPresence_InactiveWarning" xml:space="preserve"><value>Torna alla pagina della partita. Il presentatore vede che la pagina è inattiva o disconnessa.</value></data>
-
-  <data name="PlayerPresence_RejoinPending" xml:space="preserve"><value>In attesa di approvazione</value></data>
-  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve"><value>Attendi che il presentatore approvi il tuo accesso alla partita in corso.</value></data>
-  <data name="GameLobby_ApproveRejoin" xml:space="preserve"><value>Approva accesso</value></data>
-  <data name="GameLobby_StartGame" xml:space="preserve"><value>Avvia partita</value></data>
-  <data name="GameLobby_StatusRunning" xml:space="preserve"><value>In corso</value></data>
-  <data name="GameLobby_StartRequiresPlayer" xml:space="preserve"><value>Aggiungi almeno un giocatore prima di iniziare la partita.</value></data>
-
-  <data name="GameBoard_ShowJoinCode" xml:space="preserve"><value>Mostra codice di accesso</value></data>
-  <data name="GameBoard_JoinOverlayTitle" xml:space="preserve"><value>Partecipa alla partita</value></data>
-  <data name="GameBoard_JoinOverlayHint" xml:space="preserve"><value>I nuovi giocatori possono partecipare con questo codice.</value></data>
-  <data name="GameBoard_Eyebrow" xml:space="preserve"><value>TABELLONE DI GIOCO</value></data>
-  <data name="GameBoard_QuestionSelected" xml:space="preserve"><value>Domanda selezionata</value></data>
-  <data name="GameBoard_AwaitingWager" xml:space="preserve"><value>In attesa della puntata</value></data>
-  <data name="GameBoard_SelectionRejected" xml:space="preserve"><value>Questa domanda non può essere selezionata in questo momento.</value></data>
-  <data name="GameBoard_SelectWagerPlayer" xml:space="preserve"><value>Seleziona un giocatore</value></data>
-  <data name="GameBoard_WagerAmount" xml:space="preserve"><value>Importo della puntata</value></data>
-  <data name="GameBoard_AcceptWager" xml:space="preserve"><value>Accetta puntata</value></data>
-  <data name="GameBoard_WagerAccepted" xml:space="preserve"><value>Puntata accettata</value></data>
-  <data name="GameBoard_AcceptedWagerSummary" xml:space="preserve"><value>{0} — {1} punti</value></data>
-  <data name="GameBoard_WagerRejected" xml:space="preserve"><value>Impossibile accettare la puntata. Controlla il giocatore attivo e i limiti consentiti.</value></data>
-  <data name="GameBoard_ActivePlayer" xml:space="preserve"><value>Sceglie la domanda</value></data>
-  <data name="GameBoard_MakeActivePlayer" xml:space="preserve"><value>Assegna la scelta</value></data>
-  <data name="GameBoard_RandomActivePlayer" xml:space="preserve"><value>Scegli giocatore casualmente</value></data>
-  <data name="GameBoard_ActivePlayerRejected" xml:space="preserve"><value>Impossibile cambiare il giocatore attivo.</value></data>
-  <data name="GameBoard_WagerPlayer" xml:space="preserve"><value>Giocatore che risponde</value></data>
-  <data name="GameBoard_WagerLimits" xml:space="preserve"><value>Puntata consentita: {0}–{1}</value></data>
-  <data name="GameBoard_WagerKeypad" xml:space="preserve"><value>Tastierino della puntata</value></data>
-  <data name="GameBoard_ClearWager" xml:space="preserve"><value>Cancella puntata</value></data>
-  <data name="GameBoard_DeleteWagerDigit" xml:space="preserve"><value>Elimina l'ultima cifra</value></data>
-  <data name="GameBoard_WagerValid" xml:space="preserve"><value>La puntata è valida.</value></data>
-  <data name="GameBoard_WagerOutsideLimits" xml:space="preserve"><value>Inserisci un importo da {0} a {1}.</value></data>
-  <data name="GameBoard_MaximumWager" xml:space="preserve"><value>Puntata massima</value></data>
-  <data name="GameBoard_JudgeAnswer" xml:space="preserve"><value>Valuta la risposta</value></data>
-  <data name="GameBoard_NoCorrectAnswer" xml:space="preserve"><value>Nessuna risposta corretta</value></data>
-  <data name="GameBoard_JudgmentRejected" xml:space="preserve"><value>Questa risposta non può essere valutata nello stato attuale della domanda.</value></data>
+  <data name="Button_CreateGame" xml:space="preserve">
+    <value>Gioca</value>
+  </data>
+  <data name="Button_ContinueGame" xml:space="preserve">
+    <value>Continua partita</value>
+  </data>
+  <data name="Button_BackToQuizzes" xml:space="preserve">
+    <value>Torna ai quiz</value>
+  </data>
+  <data name="GameLobby_Eyebrow" xml:space="preserve">
+    <value>Lobby del conduttore</value>
+  </data>
+  <data name="GameLobby_StatusLabel" xml:space="preserve">
+    <value>Stato</value>
+  </data>
+  <data name="GameLobby_StatusLobby" xml:space="preserve">
+    <value>Lobby</value>
+  </data>
+  <data name="GameLobby_PlayerCount" xml:space="preserve">
+    <value>Giocatori</value>
+  </data>
+  <data name="GameLobby_QuestionCount" xml:space="preserve">
+    <value>Domande</value>
+  </data>
+  <data name="GameLobby_SessionId" xml:space="preserve">
+    <value>ID sessione</value>
+  </data>
+  <data name="GameLobby_TransientNotice" xml:space="preserve">
+    <value>Questa sessione è memorizzata in memoria e verrà persa al riavvio dell'applicazione.</value>
+  </data>
+  <data name="Error_QuizCannotStart" xml:space="preserve">
+    <value>Questo quiz non può essere usato per creare una partita. Controlla round, domande e righe dei punti.</value>
+  </data>
+  <data name="PlayerPresence_Active" xml:space="preserve">
+    <value>Attivo</value>
+  </data>
+  <data name="PlayerPresence_Inactive" xml:space="preserve">
+    <value>Inattivo</value>
+  </data>
+  <data name="PlayerPresence_Disconnected" xml:space="preserve">
+    <value>Disconnesso</value>
+  </data>
+  <data name="PlayerPresence_MonitoringNotice" xml:space="preserve">
+    <value>Durante la partita mantieni questa pagina aperta e attiva. Il presentatore può vedere lo stato della pagina.</value>
+  </data>
+  <data name="PlayerPresence_InactiveWarning" xml:space="preserve">
+    <value>Torna alla pagina della partita. Il presentatore vede che la pagina è inattiva o disconnessa.</value>
+  </data>
+  <data name="PlayerPresence_RejoinPending" xml:space="preserve">
+    <value>In attesa di approvazione</value>
+  </data>
+  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve">
+    <value>Attendi che il presentatore approvi il tuo accesso alla partita in corso.</value>
+  </data>
+  <data name="GameLobby_ApproveRejoin" xml:space="preserve">
+    <value>Approva accesso</value>
+  </data>
+  <data name="GameLobby_StartGame" xml:space="preserve">
+    <value>Avvia partita</value>
+  </data>
+  <data name="GameLobby_StatusRunning" xml:space="preserve">
+    <value>In corso</value>
+  </data>
+  <data name="GameLobby_StartRequiresPlayer" xml:space="preserve">
+    <value>Aggiungi almeno un giocatore prima di iniziare la partita.</value>
+  </data>
+  <data name="GameBoard_ShowJoinCode" xml:space="preserve">
+    <value>Mostra codice di accesso</value>
+  </data>
+  <data name="GameBoard_JoinOverlayTitle" xml:space="preserve">
+    <value>Partecipa alla partita</value>
+  </data>
+  <data name="GameBoard_JoinOverlayHint" xml:space="preserve">
+    <value>I nuovi giocatori possono partecipare con questo codice.</value>
+  </data>
+  <data name="GameBoard_Eyebrow" xml:space="preserve">
+    <value>TABELLONE DI GIOCO</value>
+  </data>
+  <data name="GameBoard_QuestionSelected" xml:space="preserve">
+    <value>Domanda selezionata</value>
+  </data>
+  <data name="GameBoard_AwaitingWager" xml:space="preserve">
+    <value>In attesa della puntata</value>
+  </data>
+  <data name="GameBoard_SelectionRejected" xml:space="preserve">
+    <value>Questa domanda non può essere selezionata in questo momento.</value>
+  </data>
+  <data name="GameBoard_SelectWagerPlayer" xml:space="preserve">
+    <value>Seleziona un giocatore</value>
+  </data>
+  <data name="GameBoard_WagerAmount" xml:space="preserve">
+    <value>Importo della puntata</value>
+  </data>
+  <data name="GameBoard_AcceptWager" xml:space="preserve">
+    <value>Accetta puntata</value>
+  </data>
+  <data name="GameBoard_WagerAccepted" xml:space="preserve">
+    <value>Puntata accettata</value>
+  </data>
+  <data name="GameBoard_AcceptedWagerSummary" xml:space="preserve">
+    <value>{0} — {1} punti</value>
+  </data>
+  <data name="GameBoard_WagerRejected" xml:space="preserve">
+    <value>Impossibile accettare la puntata. Controlla il giocatore attivo e i limiti consentiti.</value>
+  </data>
+  <data name="GameBoard_ActivePlayer" xml:space="preserve">
+    <value>Sceglie la domanda</value>
+  </data>
+  <data name="GameBoard_MakeActivePlayer" xml:space="preserve">
+    <value>Assegna la scelta</value>
+  </data>
+  <data name="GameBoard_RandomActivePlayer" xml:space="preserve">
+    <value>Scegli giocatore casualmente</value>
+  </data>
+  <data name="GameBoard_ActivePlayerRejected" xml:space="preserve">
+    <value>Impossibile cambiare il giocatore attivo.</value>
+  </data>
+  <data name="GameBoard_WagerPlayer" xml:space="preserve">
+    <value>Giocatore che risponde</value>
+  </data>
+  <data name="GameBoard_WagerLimits" xml:space="preserve">
+    <value>Puntata consentita: {0}–{1}</value>
+  </data>
+  <data name="GameBoard_WagerKeypad" xml:space="preserve">
+    <value>Tastierino della puntata</value>
+  </data>
+  <data name="GameBoard_ClearWager" xml:space="preserve">
+    <value>Cancella puntata</value>
+  </data>
+  <data name="GameBoard_DeleteWagerDigit" xml:space="preserve">
+    <value>Elimina l'ultima cifra</value>
+  </data>
+  <data name="GameBoard_WagerValid" xml:space="preserve">
+    <value>La puntata è valida.</value>
+  </data>
+  <data name="GameBoard_WagerOutsideLimits" xml:space="preserve">
+    <value>Inserisci un importo da {0} a {1}.</value>
+  </data>
+  <data name="GameBoard_MaximumWager" xml:space="preserve">
+    <value>Puntata massima</value>
+  </data>
+  <data name="GameBoard_JudgeAnswer" xml:space="preserve">
+    <value>Valuta la risposta</value>
+  </data>
+  <data name="GameBoard_NoCorrectAnswer" xml:space="preserve">
+    <value>Nessuna risposta corretta</value>
+  </data>
+  <data name="GameBoard_JudgmentRejected" xml:space="preserve">
+    <value>Questa risposta non può essere valutata nello stato attuale della domanda.</value>
+  </data>
   <data name="GameBoard_Question" xml:space="preserve">
     <value>Domanda</value>
   </data>
   <data name="GameBoard_Answer" xml:space="preserve">
     <value>Risposta</value>
   </data>
-  <data name="GameBoard_QuestionWithCategory" xml:space="preserve"><value>Domanda della categoria «{0}»</value></data>
-  <data name="GameBoard_AnswerWithCategory" xml:space="preserve"><value>Risposta alla domanda della categoria «{0}»</value></data>
-  <data name="PlayerMedia_Settings" xml:space="preserve"><value>Immagine, avatar e webcam</value></data>
-  <data name="Language_Label" xml:space="preserve"><value>Lingua</value></data>
+  <data name="GameBoard_QuestionWithCategory" xml:space="preserve">
+    <value>Domanda della categoria «{0}»</value>
+  </data>
+  <data name="GameBoard_AnswerWithCategory" xml:space="preserve">
+    <value>Risposta alla domanda della categoria «{0}»</value>
+  </data>
+  <data name="PlayerMedia_Settings" xml:space="preserve">
+    <value>Immagine, avatar e webcam</value>
+  </data>
+  <data name="Language_Label" xml:space="preserve">
+    <value>Lingua</value>
+  </data>
   <data name="GameBoard_ReturnToBoard" xml:space="preserve">
     <value>Torna al tabellone</value>
   </data>
@@ -882,29 +1014,72 @@
   <data name="GameTimer_ResumeRejected" xml:space="preserve">
     <value>Impossibile riprendere il timer.</value>
   </data>
-  <data name="Menu_Settings" xml:space="preserve"><value>Impostazioni</value></data>
-  <data name="GameSettings_Eyebrow" xml:space="preserve"><value>IMPOSTAZIONI DI GIOCO</value></data>
-  <data name="GameSettings_Title" xml:space="preserve"><value>Impostazioni globali di gioco</value></data>
-  <data name="GameSettings_GlobalDescription" xml:space="preserve"><value>Questi valori vengono copiati in ogni nuova partita. Le partite esistenti non vengono modificate.</value></data>
-  <data name="GameSettings_BuzzerDuration" xml:space="preserve"><value>Tempo per il buzzer</value></data>
-  <data name="GameSettings_AnswerDuration" xml:space="preserve"><value>Tempo per la risposta</value></data>
-  <data name="GameSettings_SecondsHint" xml:space="preserve"><value>Secondi (1–3600)</value></data>
-  <data name="GameSettings_RegularStartMode" xml:space="preserve"><value>Avvio del buzzer per le domande normali</value></data>
-  <data name="GameSettings_WagerStartMode" xml:space="preserve"><value>Avvio del timer per le domande con puntata</value></data>
-  <data name="GameSettings_InvalidDuration" xml:space="preserve"><value>La durata dei timer deve essere compresa tra 1 e 3600 secondi.</value></data>
-  <data name="GameSettings_GlobalSaved" xml:space="preserve"><value>Impostazioni globali salvate.</value></data>
-  <data name="GameSettings_CreateGameTitle" xml:space="preserve"><value>Crea partita</value></data>
-  <data name="GameSettings_GameEyebrow" xml:space="preserve"><value>NUOVA PARTITA</value></data>
-  <data name="GameSettings_GameDescription" xml:space="preserve"><value>Questi valori sono ereditati dalle impostazioni globali. Le modifiche valgono solo per questa partita.</value></data>
-  <data name="GameBoard_StartAnswerTimer" xml:space="preserve"><value>Avvia timer</value></data>
-  <data name="GameTimer_StartRejected" xml:space="preserve"><value>Impossibile avviare il timer della risposta.</value></data>
-  <data name="GameSettings_LobbyTitle" xml:space="preserve"><value>Impostazioni della partita</value></data>
-  <data name="GameSettings_LobbyDescription" xml:space="preserve"><value>Queste impostazioni valgono solo per questa partita e possono essere modificate anche durante il gioco normale.</value></data>
-  <data name="GameSettings_Automatic" xml:space="preserve"><value>Automatico</value></data>
-  <data name="GameSettings_Manual" xml:space="preserve"><value>Manuale</value></data>
-  <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Salva impostazioni della partita</value></data>
-  <data name="GameSettings_GameSaved" xml:space="preserve"><value>Impostazioni della partita salvate.</value></data>
-  <data name="GameSettings_GameLocked" xml:space="preserve"><value>Le impostazioni non possono essere modificate dopo l'avvio della partita.</value></data>
+  <data name="GameSettings_Eyebrow" xml:space="preserve">
+    <value>IMPOSTAZIONI DI GIOCO</value>
+  </data>
+  <data name="GameSettings_Title" xml:space="preserve">
+    <value>Impostazioni globali di gioco</value>
+  </data>
+  <data name="GameSettings_GlobalDescription" xml:space="preserve">
+    <value>Questi valori vengono copiati in ogni nuova partita. Le partite esistenti non vengono modificate.</value>
+  </data>
+  <data name="GameSettings_BuzzerDuration" xml:space="preserve">
+    <value>Tempo per il buzzer</value>
+  </data>
+  <data name="GameSettings_AnswerDuration" xml:space="preserve">
+    <value>Tempo per la risposta</value>
+  </data>
+  <data name="GameSettings_SecondsHint" xml:space="preserve">
+    <value>Secondi (1–3600)</value>
+  </data>
+  <data name="GameSettings_RegularStartMode" xml:space="preserve">
+    <value>Avvio del buzzer per le domande normali</value>
+  </data>
+  <data name="GameSettings_WagerStartMode" xml:space="preserve">
+    <value>Avvio del timer per le domande con puntata</value>
+  </data>
+  <data name="GameSettings_InvalidDuration" xml:space="preserve">
+    <value>La durata dei timer deve essere compresa tra 1 e 3600 secondi.</value>
+  </data>
+  <data name="GameSettings_GlobalSaved" xml:space="preserve">
+    <value>Impostazioni globali salvate.</value>
+  </data>
+  <data name="GameSettings_CreateGameTitle" xml:space="preserve">
+    <value>Crea partita</value>
+  </data>
+  <data name="GameSettings_GameEyebrow" xml:space="preserve">
+    <value>NUOVA PARTITA</value>
+  </data>
+  <data name="GameSettings_GameDescription" xml:space="preserve">
+    <value>Questi valori sono ereditati dalle impostazioni globali. Le modifiche valgono solo per questa partita.</value>
+  </data>
+  <data name="GameBoard_StartAnswerTimer" xml:space="preserve">
+    <value>Avvia timer</value>
+  </data>
+  <data name="GameTimer_StartRejected" xml:space="preserve">
+    <value>Impossibile avviare il timer della risposta.</value>
+  </data>
+  <data name="GameSettings_LobbyTitle" xml:space="preserve">
+    <value>Impostazioni della partita</value>
+  </data>
+  <data name="GameSettings_LobbyDescription" xml:space="preserve">
+    <value>Queste impostazioni valgono solo per questa partita e possono essere modificate anche durante il gioco normale.</value>
+  </data>
+  <data name="GameSettings_Automatic" xml:space="preserve">
+    <value>Automatico</value>
+  </data>
+  <data name="GameSettings_Manual" xml:space="preserve">
+    <value>Manuale</value>
+  </data>
+  <data name="GameSettings_SaveForGame" xml:space="preserve">
+    <value>Salva impostazioni della partita</value>
+  </data>
+  <data name="GameSettings_GameSaved" xml:space="preserve">
+    <value>Impostazioni della partita salvate.</value>
+  </data>
+  <data name="GameSettings_GameLocked" xml:space="preserve">
+    <value>Le impostazioni non possono essere modificate dopo l'avvio della partita.</value>
+  </data>
   <data name="GameSettings_AllowNegativeFinalPlayers" xml:space="preserve">
     <value>Consenti ai giocatori con punteggio negativo di partecipare alla domanda finale</value>
   </data>
@@ -929,343 +1104,1024 @@
   <data name="Message_FinalQuestionSaved" xml:space="preserve">
     <value>Domanda finale salvata.</value>
   </data>
-  <data name="FinalQuestion_Title" xml:space="preserve"><value>Domanda finale</value></data>
-  <data name="FinalQuestion_Start" xml:space="preserve"><value>Avvia la domanda finale</value></data>
-  <data name="FinalQuestion_WaitingForWagers" xml:space="preserve"><value>In attesa delle puntate finali</value></data>
-  <data name="FinalQuestion_NotSubmitted" xml:space="preserve"><value>Non confermato</value></data>
-  <data name="FinalQuestion_Submitted" xml:space="preserve"><value>Confermato</value></data>
-  <data name="FinalQuestion_ShowQuestion" xml:space="preserve"><value>Mostra la domanda finale</value></data>
-  <data name="FinalQuestion_StartJudging" xml:space="preserve"><value>Mostra la risposta e inizia la valutazione</value></data>
-  <data name="FinalQuestion_Results" xml:space="preserve"><value>Risultati finali</value></data>
-  <data name="FinalQuestion_NotEligible" xml:space="preserve"><value>Stai guardando la domanda finale come spettatore.</value></data>
-  <data name="FinalQuestion_YourWager" xml:space="preserve"><value>La tua puntata</value></data>
-  <data name="FinalQuestion_WagerLimits" xml:space="preserve"><value>Puntata consentita: {0}–{1}</value></data>
-  <data name="FinalQuestion_ConfirmWager" xml:space="preserve"><value>Conferma la puntata</value></data>
-  <data name="FinalQuestion_WagerConfirmed" xml:space="preserve"><value>Puntata confermata. Attendi il presentatore.</value></data>
-  <data name="FinalQuestion_YourAnswer" xml:space="preserve"><value>La tua risposta</value></data>
-  <data name="FinalQuestion_ConfirmAnswer" xml:space="preserve"><value>Conferma la risposta</value></data>
-  <data name="FinalQuestion_AnswerConfirmed" xml:space="preserve"><value>Risposta confermata. Attendi il presentatore.</value></data>
-  <data name="FinalQuestion_WaitingForJudging" xml:space="preserve"><value>Il presentatore sta valutando le risposte finali.</value></data>
-  <data name="FinalQuestion_YourAnswerCorrect" xml:space="preserve"><value>La tua risposta finale era corretta.</value></data>
-  <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve"><value>La tua risposta finale era errata.</value></data>
-  <data name="FinalQuestion_ActionRejected" xml:space="preserve"><value>Questa azione della domanda finale non è ancora disponibile.</value></data>
-  <data name="FinalQuestion_JudgingProgress" xml:space="preserve"><value>Risposta {0} di {1}</value></data>
-  <data name="AnswerKey_Title" xml:space="preserve"><value>Risposta corretta</value></data>
-  <data name="AnswerKey_Eyebrow" xml:space="preserve"><value>Schermata privata del presentatore</value></data>
-  <data name="AnswerKey_Open" xml:space="preserve"><value>Apri la risposta corretta</value></data>
-  <data name="AnswerKey_Waiting" xml:space="preserve"><value>In attesa di una domanda.</value></data>
-  <data name="AnswerHistory_Open" xml:space="preserve"><value>Modifica cronologia</value></data>
-  <data name="AnswerHistory_Eyebrow" xml:space="preserve"><value>STRUMENTO DEL PRESENTATORE</value></data>
-  <data name="AnswerHistory_Title" xml:space="preserve"><value>Cronologia delle risposte</value></data>
-  <data name="AnswerHistory_Description" xml:space="preserve"><value>Correggi risposte e punteggi registrati. Le modifiche aggiornano subito la classifica e la scelta del primo giocatore del turno successivo.</value></data>
-  <data name="AnswerHistory_BackToGame" xml:space="preserve"><value>Torna alla partita</value></data>
-  <data name="AnswerHistory_AddEntry" xml:space="preserve"><value>Aggiungi una risposta mancante</value></data>
-  <data name="AnswerHistory_Question" xml:space="preserve"><value>Domanda</value></data>
-  <data name="AnswerHistory_Player" xml:space="preserve"><value>Giocatore</value></data>
-  <data name="AnswerHistory_Value" xml:space="preserve"><value>Valore del premio o della penalità</value></data>
-  <data name="AnswerHistory_Correct" xml:space="preserve"><value>Risposta corretta</value></data>
-  <data name="AnswerHistory_Add" xml:space="preserve"><value>Aggiungi voce</value></data>
-  <data name="AnswerHistory_Save" xml:space="preserve"><value>Salva modifiche</value></data>
-  <data name="AnswerHistory_NoEntries" xml:space="preserve"><value>Nessuna risposta registrata per questa domanda.</value></data>
-  <data name="AnswerHistory_Rejected" xml:space="preserve"><value>Impossibile applicare la modifica alla cronologia.</value></data>
-  <data name="AnswerHistory_PlayerAlreadyRecorded" xml:space="preserve"><value>Questo giocatore ha già una risposta registrata per la domanda selezionata. Modifica la voce esistente.</value></data>
-  <data name="AnswerHistory_QuestionNotPlayed" xml:space="preserve"><value>È possibile aggiungere una risposta solo dopo che la domanda è stata giocata.</value></data>
-  <data name="AnswerHistory_InvalidValue" xml:space="preserve"><value>Il valore del premio o della penalità non può essere negativo.</value></data>
-  <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve"><value>Tutti i giocatori hanno già una voce per questa domanda.</value></data>
-  <data name="AnswerHistory_Delete" xml:space="preserve"><value>Elimina voce</value></data>
-  <data name="AnswerHistory_DeleteTitle" xml:space="preserve"><value>Elimina risposta</value></data>
-  <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve"><value>Eliminare questa risposta e annullare la relativa modifica del punteggio?</value></data>
-  <data name="GameBoard_QuestionPreview" xml:space="preserve"><value>Anteprima domanda chiusa</value></data>
-  <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve"><value>Visualizza la domanda chiusa da {0} punti</value></data>
-  <data name="GameBoard_ShowQuestion" xml:space="preserve"><value>Mostra domanda</value></data>
-  <data name="GameBoard_ShowAnswer" xml:space="preserve"><value>Mostra risposta</value></data>
-  <data name="Menu_GameHistory" xml:space="preserve"><value>Cronologia partite</value></data>
-  <data name="GameHistory_Title" xml:space="preserve"><value>Cronologia partite</value></data>
-  <data name="GameHistory_Description" xml:space="preserve"><value>Consulta le partite completate, i punteggi finali e le risposte registrate.</value></data>
-  <data name="GameHistory_Empty" xml:space="preserve"><value>Non è stata ancora salvata alcuna partita completata.</value></data>
-  <data name="GameHistory_FinishedAt" xml:space="preserve"><value>Terminata</value></data>
-  <data name="GameHistory_PlayerCount" xml:space="preserve"><value>Giocatori: {0}</value></data>
-  <data name="GameHistory_View" xml:space="preserve"><value>Visualizza dettagli</value></data>
-  <data name="GameHistory_DetailsTitle" xml:space="preserve"><value>Dettagli partita</value></data>
-  <data name="GameHistory_Back" xml:space="preserve"><value>Torna alla cronologia</value></data>
-  <data name="GameHistory_Players" xml:space="preserve"><value>Punteggi finali</value></data>
-  <data name="GameHistory_Answers" xml:space="preserve"><value>Risposte registrate</value></data>
-  <data name="GameHistory_NoAnswers" xml:space="preserve"><value>Non sono state registrate risposte alle domande normali.</value></data>
-  <data name="GameHistory_Question" xml:space="preserve"><value>Domanda</value></data>
-  <data name="GameHistory_Player" xml:space="preserve"><value>Giocatore</value></data>
-  <data name="GameHistory_Result" xml:space="preserve"><value>Risultato</value></data>
-  <data name="GameHistory_ScoreChange" xml:space="preserve"><value>Variazione punti</value></data>
-  <data name="GameHistory_Correct" xml:space="preserve"><value>Corretta</value></data>
-  <data name="GameHistory_Incorrect" xml:space="preserve"><value>Errata</value></data>
-  <data name="Account_HostSignIn" xml:space="preserve"><value>Accesso host</value></data>
-  <data name="Account_SignOut" xml:space="preserve"><value>Esci</value></data>
-  <data name="Account_RegisterHost" xml:space="preserve"><value>Registrazione host</value></data>
-  <data name="Account_Email" xml:space="preserve"><value>Email</value></data>
-  <data name="Account_Password" xml:space="preserve"><value>Password</value></data>
-  <data name="Account_ConfirmPassword" xml:space="preserve"><value>Conferma password</value></data>
-  <data name="Account_RememberMe" xml:space="preserve"><value>Ricordami</value></data>
-  <data name="Account_SignIn" xml:space="preserve"><value>Accedi</value></data>
-  <data name="Account_Register" xml:space="preserve"><value>Registrati</value></data>
-  <data name="Account_NoAccount" xml:space="preserve"><value>Non hai un account?</value></data>
-  <data name="Account_AlreadyRegistered" xml:space="preserve"><value>Hai già un account?</value></data>
-  <data name="Account_InvalidCredentials" xml:space="preserve"><value>Email o password non validi.</value></data>
-  <data name="Account_EmailAlreadyUsed" xml:space="preserve"><value>Questa email è già registrata.</value></data>
-  <data name="Account_Required" xml:space="preserve"><value>Questo campo è obbligatorio.</value></data>
-  <data name="Account_InvalidEmail" xml:space="preserve"><value>Inserisci un indirizzo email valido.</value></data>
-  <data name="Account_PasswordMinLength" xml:space="preserve"><value>La password deve contenere almeno 8 caratteri.</value></data>
-  <data name="Account_PasswordMismatch" xml:space="preserve"><value>Le password non corrispondono.</value></data>
-  <data name="Account_ForgotPassword" xml:space="preserve"><value>Password dimenticata?</value></data>
-  <data name="Account_ForgotPasswordDescription" xml:space="preserve"><value>Inserisci l’email dell’account host e invieremo un link per reimpostare la password.</value></data>
-  <data name="Account_SendResetLink" xml:space="preserve"><value>Invia il link</value></data>
-  <data name="Account_CheckEmail" xml:space="preserve"><value>Controlla la tua email</value></data>
-  <data name="Account_CheckEmailDescription" xml:space="preserve"><value>Se esiste un account con questa email, è stato inviato un link per reimpostare la password.</value></data>
-  <data name="Account_EmailSendFailed" xml:space="preserve"><value>Impossibile inviare l’email. Controlla la configurazione di Resend e riprova.</value></data>
-  <data name="Account_ResetPassword" xml:space="preserve"><value>Reimposta password</value></data>
-  <data name="Account_NewPassword" xml:space="preserve"><value>Nuova password</value></data>
-  <data name="Account_InvalidResetLink" xml:space="preserve"><value>Questo link non è valido, è scaduto oppure è già stato utilizzato.</value></data>
-  <data name="Account_PasswordResetComplete" xml:space="preserve"><value>Password reimpostata</value></data>
-  <data name="Account_ChangePassword" xml:space="preserve"><value>Cambia password</value></data>
-  <data name="Account_CurrentPassword" xml:space="preserve"><value>Password attuale</value></data>
-  <data name="Account_PasswordChanged" xml:space="preserve"><value>La password è stata modificata.</value></data>
-  <data name="Account_CurrentPasswordInvalid" xml:space="preserve"><value>La password attuale non è corretta.</value></data>
-  <data name="Account_EmailSubject" xml:space="preserve"><value>BAD WOLF QUIZ — reimpostazione password</value></data>
-  <data name="Account_EmailIntro" xml:space="preserve"><value>È stata richiesta la reimpostazione della password per il tuo account host BAD WOLF QUIZ.</value></data>
-  <data name="Account_EmailExpiry" xml:space="preserve"><value>Il link scade tra un’ora. Se non hai effettuato la richiesta, ignora questa email.</value></data>
-  <data name="GameBoard_JoinQrAlt" xml:space="preserve"><value>Codice QR per partecipare alla partita</value></data>
-  <data name="Join_SelectedGame" xml:space="preserve"><value>Codice partita: {0}</value></data>
-  <data name="GameBoard_ClosePlayerJoining" xml:space="preserve"><value>Chiudi l’ingresso ai nuovi giocatori</value></data>
-  <data name="GameBoard_OpenPlayerJoining" xml:space="preserve"><value>Apri l’ingresso ai nuovi giocatori</value></data>
-  <data name="GameBoard_PlayerJoiningToggleRejected" xml:space="preserve"><value>Al momento non è possibile modificare l’accesso alla partita.</value></data>
-  <data name="GameBoard_RemovePlayer" xml:space="preserve"><value>Espelli giocatore</value></data>
-  <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve"><value>Espellere {0} dalla partita?</value></data>
-  <data name="GameBoard_RemovePlayerRejected" xml:space="preserve"><value>Questo giocatore non può essere espulso nella fase attuale.</value></data>
-  <data name="GameBoard_ManageBlockedPlayers" xml:space="preserve"><value>Giocatori bloccati</value></data>
-  <data name="GameBoard_BlockedPlayersTitle" xml:space="preserve"><value>Giocatori bloccati</value></data>
-  <data name="GameBoard_NoBlockedPlayers" xml:space="preserve"><value>Al momento non ci sono giocatori bloccati.</value></data>
-  <data name="GameBoard_UnblockPlayer" xml:space="preserve"><value>Sblocca</value></data>
-  <data name="GameBoard_UnblockPlayerRejected" xml:space="preserve"><value>Non è stato possibile sbloccare questo giocatore.</value></data>
-  <data name="Error_PlayerBlocked" xml:space="preserve"><value>Sei stato espulso da questa partita. Chiedi all'host di sbloccarti prima di rientrare.</value></data>
-  <data name="PlayerGame_RemovedFromGame" xml:space="preserve"><value>L’host ti ha espulso dalla partita.</value></data>
-  <data name="PlayerGame_RemovedFromGameTitle" xml:space="preserve"><value>Sei stato espulso dalla partita</value></data>
-  <data name="HostCard_Display" xml:space="preserve"><value>Mostra la scheda dell’host durante la partita</value></data>
-  <data name="HostCard_Name" xml:space="preserve"><value>Nome dell’host</value></data>
-  <data name="HostCard_Source" xml:space="preserve"><value>Immagine della scheda host</value></data>
-  <data name="HostCard_SourceNone" xml:space="preserve"><value>Non selezionato</value></data>
-  <data name="HostCard_SourceImage" xml:space="preserve"><value>Immagine</value></data>
-  <data name="HostCard_SourceWebcam" xml:space="preserve"><value>Webcam</value></data>
-  <data name="HostCard_Image" xml:space="preserve"><value>Immagine dell’host (fino a {0} MB)</value></data>
-  <data name="HostCard_InvalidSettings" xml:space="preserve"><value>Per mostrare la scheda host, inserisci un nome e seleziona un’immagine o una webcam.</value></data>
-  <data name="GameBoard_ResizePlayerPanel" xml:space="preserve"><value>Ridimensiona il pannello dei giocatori</value></data>
-  <data name="HostCard_SourceAvatar" xml:space="preserve"><value>Avatar</value></data>
-  <data name="HostCard_Avatar" xml:space="preserve"><value>Avatar dell’host</value></data>
-  <data name="AvatarPicker_Title" xml:space="preserve"><value>Scegli un avatar</value></data>
-  <data name="AvatarPicker_SelectGender" xml:space="preserve"><value>Prima scegli il genere del personaggio</value></data>
-  <data name="AvatarPicker_Female" xml:space="preserve"><value>Femminile</value></data>
-  <data name="AvatarPicker_Male" xml:space="preserve"><value>Maschile</value></data>
-  <data name="AvatarPicker_Individual" xml:space="preserve"><value>Avatar individuali</value></data>
-  <data name="GameBoard_ResizePlayerCards" xml:space="preserve"><value>Ridimensiona tutte le schede dei giocatori</value></data>
-  <data name="AvatarPicker_Choose" xml:space="preserve"><value>Scegli avatar</value></data>
-  <data name="AvatarPicker_ChooseOrChange" xml:space="preserve"><value>Scegli o cambia avatar</value></data>
-  <data name="PlayerWebcam_Enable" xml:space="preserve"><value>Attiva webcam</value></data>
-  <data name="PlayerWebcam_Disable" xml:space="preserve"><value>Disattiva webcam</value></data>
-  <data name="PlayerWebcam_RequiresHttps" xml:space="preserve"><value>Apri il sito tramite una connessione HTTPS sicura per accedere alla fotocamera.</value></data>
-  <data name="PlayerWebcam_AccessFailed" xml:space="preserve"><value>Impossibile accedere alla fotocamera. Controlla l'autorizzazione del browser.</value></data>
-  <data name="GameBoard_ResizeHostCard" xml:space="preserve"><value>Ridimensiona la larghezza e l'altezza della scheda host</value></data>
-  <data name="GameBoard_MoveHostCard" xml:space="preserve"><value>Sposta la scheda host verso l'alto o il basso</value></data>
-  <data name="BrandLogo_Label" xml:space="preserve"><value>Logo personalizzato nell'intestazione</value></data>
-  <data name="BrandLogo_Hint" xml:space="preserve"><value>Immagine fino a {0} MB. Sostituisce BAD WOLF QUIZ nell'intestazione quando hai effettuato l'accesso.</value></data>
-  <data name="BrandLogo_PreviewAlt" xml:space="preserve"><value>Anteprima del logo personalizzato</value></data>
-  <data name="BrandLogo_Remove" xml:space="preserve"><value>Rimuovi il logo personalizzato</value></data>
-  <data name="Menu_PlayWithUs" xml:space="preserve"><value>Gioca con noi</value></data>
-  <data name="Menu_AskQuestion" xml:space="preserve"><value>Fai una domanda</value></data>
-  <data name="AskQuestion_Eyebrow" xml:space="preserve"><value>CONTATTACI</value></data>
-  <data name="AskQuestion_Title" xml:space="preserve"><value>Fai una domanda</value></data>
-  <data name="AskQuestion_Description" xml:space="preserve"><value>Inviaci una domanda. Verrà recapitata nel canale Discord di BAD WOLF QUIZ.</value></data>
-  <data name="AskQuestion_Name" xml:space="preserve"><value>Il tuo nome</value></data>
-  <data name="AskQuestion_NameHint" xml:space="preserve"><value>Facoltativo</value></data>
-  <data name="AskQuestion_Question" xml:space="preserve"><value>Domanda</value></data>
-  <data name="AskQuestion_Send" xml:space="preserve"><value>Invia domanda</value></data>
-  <data name="AskQuestion_Invalid" xml:space="preserve"><value>Inserisci una domanda di massimo 1.500 caratteri.</value></data>
-  <data name="AskQuestion_Failed" xml:space="preserve"><value>Non è stato possibile inviare la domanda. Riprova più tardi.</value></data>
-  <data name="AskQuestion_Sent" xml:space="preserve"><value>La tua domanda è stata inviata.</value></data>
-  <data name="SiteTheme_Label" xml:space="preserve"><value>Tema cromatico del sito</value></data>
-  <data name="SiteTheme_Hint" xml:space="preserve"><value>Scegli un tema pronto o creane uno personalizzato. Le modifiche vengono visualizzate immediatamente.</value></data>
-  <data name="SiteTheme_ClassicWolf" xml:space="preserve"><value>Lupo classico</value></data>
-  <data name="SiteTheme_CrimsonNight" xml:space="preserve"><value>Notte cremisi</value></data>
-  <data name="SiteTheme_ArcticNeon" xml:space="preserve"><value>Neon artico</value></data>
-  <data name="SiteTheme_EmeraldStage" xml:space="preserve"><value>Palco smeraldo</value></data>
-  <data name="SiteTheme_RoyalViolet" xml:space="preserve"><value>Viola reale</value></data>
-  <data name="SiteTheme_SunsetOrange" xml:space="preserve"><value>Tramonto arancione</value></data>
-  <data name="SiteTheme_Daylight" xml:space="preserve"><value>Luce del giorno</value></data>
-  <data name="SiteTheme_WarmParchment" xml:space="preserve"><value>Pergamena calda</value></data>
-  <data name="SiteTheme_MintFog" xml:space="preserve"><value>Nebbia menta</value></data>
-  <data name="SiteTheme_UkrainianSky" xml:space="preserve"><value>Cielo ucraino</value></data>
-  <data name="SiteTheme_ItalianSpirit" xml:space="preserve"><value>Spirito italiano</value></data>
-  <data name="SiteTheme_PrideSpectrum" xml:space="preserve"><value>Spettro Pride</value></data>
-  <data name="SiteTheme_RetroArcade" xml:space="preserve"><value>Arcade retrò</value></data>
-  <data name="SiteTheme_Custom" xml:space="preserve"><value>Personalizzato</value></data>
-  <data name="SiteTheme_Background" xml:space="preserve"><value>Sfondo</value></data>
-  <data name="SiteTheme_Panel" xml:space="preserve"><value>Pannello</value></data>
-  <data name="SiteTheme_PanelSecondary" xml:space="preserve"><value>Pannello secondario</value></data>
-  <data name="SiteTheme_Text" xml:space="preserve"><value>Testo</value></data>
-  <data name="SiteTheme_MutedText" xml:space="preserve"><value>Testo secondario</value></data>
-  <data name="SiteTheme_Accent" xml:space="preserve"><value>Accento</value></data>
-  <data name="SiteTheme_AccentBright" xml:space="preserve"><value>Accento luminoso</value></data>
-  <data name="SiteTheme_Highlight" xml:space="preserve"><value>Evidenziazione</value></data>
-  <data name="SiteTheme_Invalid" xml:space="preserve"><value>Seleziona un tema e colori validi.</value></data>
-  <data name="QuizEditor_DragQuestion" xml:space="preserve"><value>Trascina su un'altra domanda per scambiarle</value></data>
-  <data name="QuizEditor_MoveQuestionToRound" xml:space="preserve"><value>Sposta la domanda in un altro round</value></data>
-  <data name="QuizEditor_ExchangeQuestion" xml:space="preserve"><value>Scambia domanda</value></data>
-  <data name="QuizEditor_SelectedQuestion" xml:space="preserve"><value>Domanda selezionata</value></data>
-  <data name="QuizEditor_TargetQuestion" xml:space="preserve"><value>Domanda da scambiare</value></data>
-  <data name="QuizEditor_NoQuestionForExchange" xml:space="preserve"><value>Non ci sono domande disponibili per lo scambio.</value></data>
-  <data name="PlayerImage_Source" xml:space="preserve"><value>Origine immagine della scheda giocatore</value></data>
-  <data name="PlayerImage_Avatar" xml:space="preserve"><value>Avatar</value></data>
-  <data name="PlayerImage_Picture" xml:space="preserve"><value>Immagine</value></data>
-  <data name="PlayerImage_UploadOrChange" xml:space="preserve"><value>Carica o cambia immagine</value></data>
-  <data name="PlayerImage_Invalid" xml:space="preserve"><value>Seleziona un'immagine PNG, JPEG o WebP valida.</value></data>
-  <data name="Menu_FAQ" xml:space="preserve"><value>FAQ</value></data>
-  <data name="Faq_Eyebrow" xml:space="preserve"><value>GUIDA RAPIDA</value></data>
-  <data name="Faq_Title" xml:space="preserve"><value>Domande frequenti</value></data>
-  <data name="Faq_Description" xml:space="preserve"><value>Risposte brevi su accesso, gioco, impostazioni e gestione delle partite.</value></data>
-  <data name="Faq_Q1" xml:space="preserve"><value>Come entra un giocatore nella partita?</value></data>
-  <data name="Faq_A1" xml:space="preserve"><value>Apri la pagina Partecipa e inserisci il codice di sei caratteri e un nome, oppure scansiona il codice QR mostrato dall'host. Non serve un account giocatore. Se il link QR punta a localhost, l'host deve configurare Game:PublicBaseUrl con un indirizzo raggiungibile dai dispositivi dei giocatori.</value></data>
-  <data name="Faq_Q2" xml:space="preserve"><value>È possibile entrare dopo l'inizio della partita?</value></data>
-  <data name="Faq_A2" xml:space="preserve"><value>Sì, quando l'host apre gli ingressi tardivi con il pulsante del lucchetto. Un nuovo giocatore resta in attesa finché l'host non lo approva. Anche chi rientra dopo una disconnessione potrebbe richiedere una nuova approvazione.</value></data>
-  <data name="Faq_Q3" xml:space="preserve"><value>Chi sceglie la domanda successiva?</value></data>
-  <data name="Faq_A3" xml:space="preserve"><value>Il primo giocatore entrato apre il primo round. Una risposta corretta trasferisce la scelta a quel giocatore; una risposta errata o l'assenza di una risposta corretta non la cambia. L'host può scegliere un giocatore manualmente o casualmente. I round successivi iniziano con il giocatore più debole secondo le regole della classifica.</value></data>
-  <data name="Faq_Q4" xml:space="preserve"><value>Come funzionano il buzzer e i timer?</value></data>
-  <data name="Faq_A4" xml:space="preserve"><value>Il buzzer può aprirsi automaticamente o su comando dell'host. La prima pressione accettata mette in pausa il timer comune e avvia quello del giocatore che risponde. Dopo una risposta errata, il buzzer si riapre per i giocatori idonei e il timer comune riprende dal tempo rimasto.</value></data>
-  <data name="Faq_Q5" xml:space="preserve"><value>Come funzionano le domande con puntata?</value></data>
-  <data name="Faq_A5" xml:space="preserve"><value>Risponde solo il giocatore che ha scelto la domanda. Il giocatore dichiara una puntata e l'host la inserisce prima di mostrare la domanda. Il minimo è 5 punti; il massimo è il maggiore tra il punteggio del giocatore e il valore più alto sul tabellone corrente. Una risposta corretta aggiunge la puntata, una errata la sottrae.</value></data>
-  <data name="Faq_Q6" xml:space="preserve"><value>Come funziona la domanda finale?</value></data>
-  <data name="Faq_A6" xml:space="preserve"><value>I giocatori idonei inviano privatamente una puntata e poi una risposta dai propri dispositivi. La puntata minima è 5 e la massima è il maggiore tra 1.000 e il punteggio del giocatore. Chi ha un punteggio negativo partecipa per impostazione predefinita, salvo disattivazione da parte dell'host. Puntate e risposte restano private finché la relativa fase non viene bloccata.</value></data>
-  <data name="Faq_Q7" xml:space="preserve"><value>L'host può correggere una risposta valutata male?</value></data>
-  <data name="Faq_A7" xml:space="preserve"><value>Sì. Durante la partita, nella Cronologia risposte è possibile cambiare giocatore, esito o punteggio, aggiungere un record mancante o eliminarne uno errato. Il contributo precedente viene annullato e il risultato corretto viene applicato in modo coerente.</value></data>
-  <data name="Faq_Q8" xml:space="preserve"><value>Cosa succede se un giocatore si disconnette o ricarica la pagina?</value></data>
-  <data name="Faq_A8" xml:space="preserve"><value>Il token di riconnessione ripristina lo stesso giocatore e il server invia nuovamente lo stato corrente. Durante una partita avviata, l'host potrebbe dover approvare il rientro. Il ricaricamento non crea una seconda voce di punteggio.</value></data>
-  <data name="Faq_Q9" xml:space="preserve"><value>I giocatori possono usare avatar, immagini o webcam?</value></data>
-  <data name="Faq_A9" xml:space="preserve"><value>Un giocatore può scegliere un avatar integrato, caricare un'immagine o attivare la webcam. Se la webcam non è disponibile, viene usata l'immagine o l'avatar selezionato. Le preferenze vengono salvate nel browser per nome normalizzato e ripristinate nelle partite successive sullo stesso dispositivo.</value></data>
-  <data name="Faq_Q10" xml:space="preserve"><value>Qual è la differenza tra impostazioni globali e della lobby?</value></data>
-  <data name="Faq_A10" xml:space="preserve"><value>Le impostazioni globali sono valori predefiniti persistenti per le partite future. Quando si crea una lobby vengono copiate in un'istantanea indipendente. L'host può personalizzarla prima dell'avvio senza modificare i valori globali. Dopo l'avvio della partita, le impostazioni possono ancora essere modificate tramite l'Editor delle impostazioni disponibile durante la partita.</value></data>
-  <data name="Faq_Q11" xml:space="preserve"><value>La cronologia delle partite completate viene salvata?</value></data>
-  <data name="Faq_A11" xml:space="preserve"><value>Sì. SQLite conserva giocatori, punteggi finali, domande regolari e risultati registrati. L'host può consultarli nella Cronologia partite. Eliminare un quiz ne archivia la definizione, quindi la cronologia collegata resta disponibile.</value></data>
-  <data name="Faq_Q12" xml:space="preserve"><value>Chi può accedere ai quiz e alle partite di un host?</value></data>
-  <data name="Faq_A12" xml:space="preserve"><value>Quiz, partite attive e cronologia appartengono all'host autenticato che li ha creati o avviati. Gli altri account host non possono accedere a questi dati. Le pagine di accesso e di gioco restano disponibili senza account giocatore.</value></data>
-  <data name="Faq_ContactTitle" xml:space="preserve"><value>Hai ancora bisogno di aiuto?</value></data>
-  <data name="Faq_ContactDescription" xml:space="preserve"><value>Invia la tua domanda: verrà recapitata al canale Discord di BAD WOLF QUIZ.</value></data>
-  <data name="Label_QuestionType" xml:space="preserve"><value>Tipo di domanda</value></data>
-  <data name="QuestionType_Standard" xml:space="preserve"><value>Domanda standard</value></data>
-  <data name="QuestionType_FourClues" xml:space="preserve"><value>Quattro indizi</value></data>
-  <data name="FourClues_EditorHint" xml:space="preserve"><value>Aggiungi esattamente quattro indizi. Ogni indizio può contenere testo, un'immagine, audio o video.</value></data>
-  <data name="FourClues_ExactlyFourRequired" xml:space="preserve"><value>Una domanda a quattro indizi deve contenere esattamente quattro indizi.</value></data>
-  <data name="GameBoard_RevealOneClue" xml:space="preserve"><value>+1 indizio</value></data>
-  <data name="GameBoard_RevealClueRejected" xml:space="preserve"><value>Impossibile mostrare l'indizio successivo.</value></data>
-  <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve"><value>Domanda della categoria «{0}» — {1} punti</value></data>
-  <data name="Menu_PlayerStatistics" xml:space="preserve"><value>Statistiche giocatori</value></data>
-  <data name="PlayerStatistics_Title" xml:space="preserve"><value>Statistiche giocatori</value></data>
-  <data name="PlayerStatistics_Description" xml:space="preserve"><value>Risultati complessivi calcolati dalle partite completate di questo host.</value></data>
-  <data name="PlayerStatistics_Empty" xml:space="preserve"><value>Completa una partita per iniziare a raccogliere le statistiche.</value></data>
-  <data name="PlayerStatistics_Games" xml:space="preserve"><value>Partite</value></data>
-  <data name="PlayerStatistics_TotalScore" xml:space="preserve"><value>Punteggio finale totale</value></data>
-  <data name="PlayerStatistics_Correct" xml:space="preserve"><value>Corrette</value></data>
-  <data name="PlayerStatistics_Attempts" xml:space="preserve"><value>Tentativi</value></data>
-  <data name="PlayerStatistics_Accuracy" xml:space="preserve"><value>Precisione</value></data>
-  <data name="PlayerStatistics_LastPlayed" xml:space="preserve"><value>Ultima partita</value></data>
-  <data name="PlayerStatistics_NotAvailable" xml:space="preserve"><value>—</value></data>
-  <data name="PlayerStatistics_PerRound" xml:space="preserve"><value>Statistiche per round</value></data>
-  <data name="PlayerStatistics_Round" xml:space="preserve"><value>Round</value></data>
-  <data name="PlayerStatistics_NoRoundAnswers" xml:space="preserve"><value>Non ci sono risposte valutate per le statistiche del round.</value></data>
-  <data name="Menu_Title" xml:space="preserve"><value>Menu</value></data>
-  <data name="Menu_Actions" xml:space="preserve"><value>Azioni</value></data>
-  <data name="Menu_Tools" xml:space="preserve"><value>Strumenti</value></data>
-  <data name="PlayerMenu_Title" xml:space="preserve"><value>Menu</value></data>
-  <data name="GameHistory_Winner" xml:space="preserve"><value>Vincitore</value></data>
-  <data name="GameHistory_Winners" xml:space="preserve"><value>Vincitori</value></data>
-  <data name="Button_ImportQuiz" xml:space="preserve"><value>Importa quiz</value></data>
-  <data name="Button_ExportQuiz" xml:space="preserve"><value>Esporta</value></data>
-  <data name="QuizImport_Success" xml:space="preserve"><value>Quiz importato correttamente.</value></data>
-  <data name="QuizImport_InvalidFile" xml:space="preserve"><value>Il file selezionato non è un pacchetto BAD WOLF QUIZ valido o supportato.</value></data>
-  <data name="GameBoard_FinishGame" xml:space="preserve"><value>Termina partita</value></data>
-  <data name="PublicQuizzes_Title" xml:space="preserve"><value>Quiz pubblici</value></data>
-  <data name="PublicQuizzes_Description" xml:space="preserve"><value>Trova i quiz pubblicati da altri host e avvia la tua partita.</value></data>
-  <data name="PublicQuizzes_SearchLabel" xml:space="preserve"><value>Cerca quiz pubblici</value></data>
-  <data name="PublicQuizzes_SearchPlaceholder" xml:space="preserve"><value>Nome o descrizione del quiz</value></data>
-  <data name="PublicQuizzes_Search" xml:space="preserve"><value>Cerca</value></data>
-  <data name="PublicQuizzes_EmptyTitle" xml:space="preserve"><value>Nessun quiz trovato</value></data>
-  <data name="PublicQuizzes_EmptyDescription" xml:space="preserve"><value>Prova un'altra ricerca o torna più tardi.</value></data>
-  <data name="QuizPublication_Public" xml:space="preserve"><value>Pubblico</value></data>
-  <data name="QuizPublication_Publish" xml:space="preserve"><value>Pubblica</value></data>
-  <data name="QuizPublication_Unpublish" xml:space="preserve"><value>Rimuovi dalla pubblicazione</value></data>
-  <data name="QuizPublication_Published" xml:space="preserve"><value>Il quiz è ora pubblico.</value></data>
-  <data name="QuizPublication_Unpublished" xml:space="preserve"><value>Il quiz non è più pubblico.</value></data>
-  <data name="QuizRating_Title" xml:space="preserve"><value>Valuta questo quiz</value></data>
-  <data name="QuizRating_Description" xml:space="preserve"><value>Quanto ti è piaciuto questo quiz?</value></data>
-  <data name="QuizRating_ScoreLabel" xml:space="preserve"><value>Valutazione da 0 a 5 stelle</value></data>
-  <data name="QuizRating_Stars" xml:space="preserve"><value>{0} stelle</value></data>
-  <data name="QuizRating_NotReady" xml:space="preserve"><value>Non è ancora stato possibile salvare la valutazione. Riprova.</value></data>
-  <data name="QuizRating_Count" xml:space="preserve"><value>{0} valutazioni</value></data>
-  <data name="QuizRating_AccessibleSummary" xml:space="preserve"><value>Valutazione media {0:0.0} su 5 da {1} persone</value></data>
-  <data name="PublicQuizzes_Author" xml:space="preserve"><value>Autore: {0}</value></data>
-  <data name="ContentBlock_Add" xml:space="preserve"><value>+ Aggiungi blocco</value></data>
-  <data name="ContentBlockType_Text" xml:space="preserve"><value>Testo</value></data>
-  <data name="ContentBlockType_Image" xml:space="preserve"><value>Immagine</value></data>
-  <data name="ContentBlockType_Audio" xml:space="preserve"><value>Audio</value></data>
-  <data name="ContentBlockType_Video" xml:space="preserve"><value>Video</value></data>
-  <data name="ContentBlockType_YouTube" xml:space="preserve"><value>YouTube</value></data>
-  <data name="ImageClipboard_Button" xml:space="preserve"><value>Incolla dagli appunti</value></data>
-  <data name="ImageClipboard_Empty" xml:space="preserve"><value>Gli appunti non contengono un'immagine.</value></data>
-  <data name="ImageClipboard_Error" xml:space="preserve"><value>Impossibile leggere l'immagine dagli appunti. Consenti l'accesso e riprova.</value></data>
-  <data name="AudioClipboard_Button" xml:space="preserve"><value>Incolla dagli appunti</value></data>
-  <data name="AudioClipboard_Empty" xml:space="preserve"><value>Gli appunti non contengono un file audio.</value></data>
-  <data name="AudioClipboard_Error" xml:space="preserve"><value>Impossibile leggere il file audio dagli appunti. Consenti l'accesso e riprova.</value></data>
-  <data name="Account_HostName" xml:space="preserve"><value>Nome host (facoltativo)</value></data>
-  <data name="Account_HostNameHint" xml:space="preserve"><value>Potrai modificare il nome host in seguito nelle Impostazioni.</value></data>
-  <data name="QuizEditor_CountReductionTitle" xml:space="preserve"><value>Eliminare le domande?</value></data>
-  <data name="InvalidMediaFile" xml:space="preserve"><value>Questo blocco non supporta il caricamento di file.</value></data>
-  <data name="AudioConversionUnavailable" xml:space="preserve"><value>La conversione audio non è disponibile. Installa FFmpeg o correggi MediaProcessing:FfmpegExecutablePath.</value></data>
-  <data name="FileUploadLimit" xml:space="preserve"><value>Dimensione massima del file: {0} MB.</value></data>
-  <data name="Settings_HostId" xml:space="preserve"><value>ID host</value></data>
-  <data name="Settings_HostIdHint" xml:space="preserve"><value>Usa questo identificatore per configurare gli host premium.</value></data>
-  <data name="MasterGames_Title" xml:space="preserve"><value>Partite attive</value></data>
-  <data name="MasterGames_Empty" xml:space="preserve"><value>Non ci sono partite attive.</value></data>
-  <data name="MasterGames_InLobby" xml:space="preserve"><value>Nella lobby</value></data>
-  <data name="MasterGames_Playing" xml:space="preserve"><value>In gioco</value></data>
-  <data name="MasterGames_SessionId" xml:space="preserve"><value>ID partita</value></data>
-  <data name="MasterGames_HostId" xml:space="preserve"><value>ID host</value></data>
-  <data name="MasterGames_HostName" xml:space="preserve"><value>Nome host</value></data>
-  <data name="MasterGames_Round" xml:space="preserve"><value>Round</value></data>
-  <data name="MasterGames_Players" xml:space="preserve"><value>Giocatori</value></data>
-  <data name="MasterGames_NoPlayers" xml:space="preserve"><value>Nessun giocatore si è ancora unito.</value></data>
-  <data name="MediaArchive_State_Active" xml:space="preserve"><value>Media attivi</value></data>
-  <data name="MediaArchive_State_Archiving" xml:space="preserve"><value>Archiviazione media</value></data>
-  <data name="MediaArchive_State_Archived" xml:space="preserve"><value>Media archiviati</value></data>
-  <data name="MediaArchive_State_Restoring" xml:space="preserve"><value>Ripristino media</value></data>
-  <data name="MediaArchive_State_Failed" xml:space="preserve"><value>Operazione media non riuscita</value></data>
-  <data name="MediaArchive_ArchivedOn" xml:space="preserve"><value>Archiviato il</value></data>
-  <data name="MediaArchive_MediaSize" xml:space="preserve"><value>Dimensione media</value></data>
-  <data name="MediaArchive_ArchiveMedia" xml:space="preserve"><value>Archivia media</value></data>
-  <data name="MediaArchive_RestoreMedia" xml:space="preserve"><value>Ripristina media</value></data>
-  <data name="MediaArchive_PreventAutomatic" xml:space="preserve"><value>Non archiviare automaticamente</value></data>
-  <data name="MediaArchive_AllowAutomatic" xml:space="preserve"><value>Consenti archiviazione automatica</value></data>
-  <data name="MediaArchive_ConfirmTitle" xml:space="preserve"><value>Archiviare i media del quiz?</value></data>
-  <data name="MediaArchive_ConfirmText" xml:space="preserve"><value>La struttura del quiz resterà disponibile. I media verranno spostati nel database di archivio e dovranno essere ripristinati prima di giocare.</value></data>
-  <data name="MediaArchive_Archived" xml:space="preserve"><value>I media del quiz sono stati archiviati.</value></data>
-  <data name="MediaArchive_Restored" xml:space="preserve"><value>I media del quiz sono stati ripristinati.</value></data>
-  <data name="MediaArchive_Failed" xml:space="preserve"><value>Impossibile archiviare i media. I media originali restano disponibili.</value></data>
-  <data name="MediaArchive_RestoreFailed" xml:space="preserve"><value>Impossibile ripristinare i media. L'archivio non è stato modificato.</value></data>
-  <data name="MediaArchive_RestoreBeforeEditing" xml:space="preserve"><value>Ripristina i media archiviati prima di modificare questo quiz.</value></data>
-  <data name="MediaArchive_PublicRestoreTitle" xml:space="preserve"><value>Ripristinare i media archiviati del quiz?</value></data>
-  <data name="MediaArchive_PublicRestoreText" xml:space="preserve"><value>I media di questo quiz sono archiviati. Verranno ripristinati prima dell'avvio della partita e l'operazione potrebbe richiedere del tempo.</value></data>
-  <data name="MediaArchive_RestoreAndPlay" xml:space="preserve"><value>Ripristina e gioca</value></data>
-  <data name="MediaArchive_PublicRestoreUnavailable" xml:space="preserve"><value>Questo quiz è temporaneamente non disponibile durante l'elaborazione dei media.</value></data>
-  <data name="MediaArchive_NoMedia" xml:space="preserve"><value>Questo quiz non contiene media da archiviare.</value></data>
-  <data name="Footer_MadeWith" xml:space="preserve"><value>Realizzato con ❤️ da Bad Wolf</value></data>
-  <data name="Footer_SpecialThanks" xml:space="preserve"><value>Un ringraziamento speciale per l’aiuto nello sviluppo:</value></data>
-  <data name="Footer_FreePlatform" xml:space="preserve"><value>Bad Wolf Quiz è una piattaforma completamente gratuita.</value></data>
-  <data name="Footer_SupportProject" xml:space="preserve"><value>Se lo desideri, sostieni lo sviluppo del progetto ❤️</value></data>
-  <data name="Footer_DonationTitle" xml:space="preserve"><value>Sostieni Bad Wolf Quiz ❤️</value></data>
-  <data name="Footer_DonationScanQr" xml:space="preserve"><value>Scansiona il codice QR per aprire la pagina di supporto.</value></data>
-  <data name="Footer_DonationQrAlt" xml:space="preserve"><value>Codice QR della pagina di supporto di Bad Wolf Quiz</value></data>
-  <data name="Footer_OpenDonationPage" xml:space="preserve"><value>Apri la pagina di supporto</value></data>
+  <data name="FinalQuestion_Title" xml:space="preserve">
+    <value>Domanda finale</value>
+  </data>
+  <data name="FinalQuestion_Start" xml:space="preserve">
+    <value>Avvia la domanda finale</value>
+  </data>
+  <data name="FinalQuestion_WaitingForWagers" xml:space="preserve">
+    <value>In attesa delle puntate finali</value>
+  </data>
+  <data name="FinalQuestion_NotSubmitted" xml:space="preserve">
+    <value>Non confermato</value>
+  </data>
+  <data name="FinalQuestion_Submitted" xml:space="preserve">
+    <value>Confermato</value>
+  </data>
+  <data name="FinalQuestion_ShowQuestion" xml:space="preserve">
+    <value>Mostra la domanda finale</value>
+  </data>
+  <data name="FinalQuestion_StartJudging" xml:space="preserve">
+    <value>Mostra la risposta e inizia la valutazione</value>
+  </data>
+  <data name="FinalQuestion_Results" xml:space="preserve">
+    <value>Risultati finali</value>
+  </data>
+  <data name="FinalQuestion_NotEligible" xml:space="preserve">
+    <value>Stai guardando la domanda finale come spettatore.</value>
+  </data>
+  <data name="FinalQuestion_YourWager" xml:space="preserve">
+    <value>La tua puntata</value>
+  </data>
+  <data name="FinalQuestion_WagerLimits" xml:space="preserve">
+    <value>Puntata consentita: {0}–{1}</value>
+  </data>
+  <data name="FinalQuestion_ConfirmWager" xml:space="preserve">
+    <value>Conferma la puntata</value>
+  </data>
+  <data name="FinalQuestion_WagerConfirmed" xml:space="preserve">
+    <value>Puntata confermata. Attendi il presentatore.</value>
+  </data>
+  <data name="FinalQuestion_YourAnswer" xml:space="preserve">
+    <value>La tua risposta</value>
+  </data>
+  <data name="FinalQuestion_ConfirmAnswer" xml:space="preserve">
+    <value>Conferma la risposta</value>
+  </data>
+  <data name="FinalQuestion_AnswerConfirmed" xml:space="preserve">
+    <value>Risposta confermata. Attendi il presentatore.</value>
+  </data>
+  <data name="FinalQuestion_WaitingForJudging" xml:space="preserve">
+    <value>Il presentatore sta valutando le risposte finali.</value>
+  </data>
+  <data name="FinalQuestion_YourAnswerCorrect" xml:space="preserve">
+    <value>La tua risposta finale era corretta.</value>
+  </data>
+  <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve">
+    <value>La tua risposta finale era errata.</value>
+  </data>
+  <data name="FinalQuestion_ActionRejected" xml:space="preserve">
+    <value>Questa azione della domanda finale non è ancora disponibile.</value>
+  </data>
+  <data name="FinalQuestion_JudgingProgress" xml:space="preserve">
+    <value>Risposta {0} di {1}</value>
+  </data>
+  <data name="AnswerKey_Title" xml:space="preserve">
+    <value>Risposta corretta</value>
+  </data>
+  <data name="AnswerKey_Eyebrow" xml:space="preserve">
+    <value>Schermata privata del presentatore</value>
+  </data>
+  <data name="AnswerKey_Open" xml:space="preserve">
+    <value>Apri la risposta corretta</value>
+  </data>
+  <data name="AnswerKey_Waiting" xml:space="preserve">
+    <value>In attesa di una domanda.</value>
+  </data>
+  <data name="AnswerHistory_Open" xml:space="preserve">
+    <value>Modifica cronologia</value>
+  </data>
+  <data name="AnswerHistory_Eyebrow" xml:space="preserve">
+    <value>STRUMENTO DEL PRESENTATORE</value>
+  </data>
+  <data name="AnswerHistory_Title" xml:space="preserve">
+    <value>Cronologia delle risposte</value>
+  </data>
+  <data name="AnswerHistory_Description" xml:space="preserve">
+    <value>Correggi risposte e punteggi registrati. Le modifiche aggiornano subito la classifica e la scelta del primo giocatore del turno successivo.</value>
+  </data>
+  <data name="AnswerHistory_BackToGame" xml:space="preserve">
+    <value>Torna alla partita</value>
+  </data>
+  <data name="AnswerHistory_AddEntry" xml:space="preserve">
+    <value>Aggiungi una risposta mancante</value>
+  </data>
+  <data name="AnswerHistory_Question" xml:space="preserve">
+    <value>Domanda</value>
+  </data>
+  <data name="AnswerHistory_Player" xml:space="preserve">
+    <value>Giocatore</value>
+  </data>
+  <data name="AnswerHistory_Value" xml:space="preserve">
+    <value>Valore del premio o della penalità</value>
+  </data>
+  <data name="AnswerHistory_Correct" xml:space="preserve">
+    <value>Risposta corretta</value>
+  </data>
+  <data name="AnswerHistory_Add" xml:space="preserve">
+    <value>Aggiungi voce</value>
+  </data>
+  <data name="AnswerHistory_Save" xml:space="preserve">
+    <value>Salva modifiche</value>
+  </data>
+  <data name="AnswerHistory_NoEntries" xml:space="preserve">
+    <value>Nessuna risposta registrata per questa domanda.</value>
+  </data>
+  <data name="AnswerHistory_Rejected" xml:space="preserve">
+    <value>Impossibile applicare la modifica alla cronologia.</value>
+  </data>
+  <data name="AnswerHistory_PlayerAlreadyRecorded" xml:space="preserve">
+    <value>Questo giocatore ha già una risposta registrata per la domanda selezionata. Modifica la voce esistente.</value>
+  </data>
+  <data name="AnswerHistory_QuestionNotPlayed" xml:space="preserve">
+    <value>È possibile aggiungere una risposta solo dopo che la domanda è stata giocata.</value>
+  </data>
+  <data name="AnswerHistory_InvalidValue" xml:space="preserve">
+    <value>Il valore del premio o della penalità non può essere negativo.</value>
+  </data>
+  <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve">
+    <value>Tutti i giocatori hanno già una voce per questa domanda.</value>
+  </data>
+  <data name="AnswerHistory_Delete" xml:space="preserve">
+    <value>Elimina voce</value>
+  </data>
+  <data name="AnswerHistory_DeleteTitle" xml:space="preserve">
+    <value>Elimina risposta</value>
+  </data>
+  <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve">
+    <value>Eliminare questa risposta e annullare la relativa modifica del punteggio?</value>
+  </data>
+  <data name="GameBoard_QuestionPreview" xml:space="preserve">
+    <value>Anteprima domanda chiusa</value>
+  </data>
+  <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve">
+    <value>Visualizza la domanda chiusa da {0} punti</value>
+  </data>
+  <data name="GameBoard_ShowQuestion" xml:space="preserve">
+    <value>Mostra domanda</value>
+  </data>
+  <data name="GameBoard_ShowAnswer" xml:space="preserve">
+    <value>Mostra risposta</value>
+  </data>
+  <data name="Menu_GameHistory" xml:space="preserve">
+    <value>Cronologia partite</value>
+  </data>
+  <data name="GameHistory_Title" xml:space="preserve">
+    <value>Cronologia partite</value>
+  </data>
+  <data name="GameHistory_Description" xml:space="preserve">
+    <value>Consulta le partite completate, i punteggi finali e le risposte registrate.</value>
+  </data>
+  <data name="GameHistory_Empty" xml:space="preserve">
+    <value>Non è stata ancora salvata alcuna partita completata.</value>
+  </data>
+  <data name="GameHistory_FinishedAt" xml:space="preserve">
+    <value>Terminata</value>
+  </data>
+  <data name="GameHistory_PlayerCount" xml:space="preserve">
+    <value>Giocatori: {0}</value>
+  </data>
+  <data name="GameHistory_View" xml:space="preserve">
+    <value>Visualizza dettagli</value>
+  </data>
+  <data name="GameHistory_DetailsTitle" xml:space="preserve">
+    <value>Dettagli partita</value>
+  </data>
+  <data name="GameHistory_Back" xml:space="preserve">
+    <value>Torna alla cronologia</value>
+  </data>
+  <data name="GameHistory_Players" xml:space="preserve">
+    <value>Punteggi finali</value>
+  </data>
+  <data name="GameHistory_Answers" xml:space="preserve">
+    <value>Risposte registrate</value>
+  </data>
+  <data name="GameHistory_NoAnswers" xml:space="preserve">
+    <value>Non sono state registrate risposte alle domande normali.</value>
+  </data>
+  <data name="GameHistory_Question" xml:space="preserve">
+    <value>Domanda</value>
+  </data>
+  <data name="GameHistory_Player" xml:space="preserve">
+    <value>Giocatore</value>
+  </data>
+  <data name="GameHistory_Result" xml:space="preserve">
+    <value>Risultato</value>
+  </data>
+  <data name="GameHistory_ScoreChange" xml:space="preserve">
+    <value>Variazione punti</value>
+  </data>
+  <data name="GameHistory_Correct" xml:space="preserve">
+    <value>Corretta</value>
+  </data>
+  <data name="GameHistory_Incorrect" xml:space="preserve">
+    <value>Errata</value>
+  </data>
+  <data name="Account_HostSignIn" xml:space="preserve">
+    <value>Accesso host</value>
+  </data>
+  <data name="Account_SignOut" xml:space="preserve">
+    <value>Esci</value>
+  </data>
+  <data name="Account_RegisterHost" xml:space="preserve">
+    <value>Registrazione host</value>
+  </data>
+  <data name="Account_Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Account_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Account_ConfirmPassword" xml:space="preserve">
+    <value>Conferma password</value>
+  </data>
+  <data name="Account_RememberMe" xml:space="preserve">
+    <value>Ricordami</value>
+  </data>
+  <data name="Account_SignIn" xml:space="preserve">
+    <value>Accedi</value>
+  </data>
+  <data name="Account_Register" xml:space="preserve">
+    <value>Registrati</value>
+  </data>
+  <data name="Account_NoAccount" xml:space="preserve">
+    <value>Non hai un account?</value>
+  </data>
+  <data name="Account_AlreadyRegistered" xml:space="preserve">
+    <value>Hai già un account?</value>
+  </data>
+  <data name="Account_InvalidCredentials" xml:space="preserve">
+    <value>Email o password non validi.</value>
+  </data>
+  <data name="Account_EmailAlreadyUsed" xml:space="preserve">
+    <value>Questa email è già registrata.</value>
+  </data>
+  <data name="Account_Required" xml:space="preserve">
+    <value>Questo campo è obbligatorio.</value>
+  </data>
+  <data name="Account_InvalidEmail" xml:space="preserve">
+    <value>Inserisci un indirizzo email valido.</value>
+  </data>
+  <data name="Account_PasswordMinLength" xml:space="preserve">
+    <value>La password deve contenere almeno 8 caratteri.</value>
+  </data>
+  <data name="Account_PasswordMismatch" xml:space="preserve">
+    <value>Le password non corrispondono.</value>
+  </data>
+  <data name="Account_ForgotPassword" xml:space="preserve">
+    <value>Password dimenticata?</value>
+  </data>
+  <data name="Account_ForgotPasswordDescription" xml:space="preserve">
+    <value>Inserisci l’email dell’account host e invieremo un link per reimpostare la password.</value>
+  </data>
+  <data name="Account_SendResetLink" xml:space="preserve">
+    <value>Invia il link</value>
+  </data>
+  <data name="Account_CheckEmail" xml:space="preserve">
+    <value>Controlla la tua email</value>
+  </data>
+  <data name="Account_CheckEmailDescription" xml:space="preserve">
+    <value>Se esiste un account con questa email, è stato inviato un link per reimpostare la password.</value>
+  </data>
+  <data name="Account_EmailSendFailed" xml:space="preserve">
+    <value>Impossibile inviare l’email. Controlla la configurazione di Resend e riprova.</value>
+  </data>
+  <data name="Account_ResetPassword" xml:space="preserve">
+    <value>Reimposta password</value>
+  </data>
+  <data name="Account_NewPassword" xml:space="preserve">
+    <value>Nuova password</value>
+  </data>
+  <data name="Account_InvalidResetLink" xml:space="preserve">
+    <value>Questo link non è valido, è scaduto oppure è già stato utilizzato.</value>
+  </data>
+  <data name="Account_PasswordResetComplete" xml:space="preserve">
+    <value>Password reimpostata</value>
+  </data>
+  <data name="Account_ChangePassword" xml:space="preserve">
+    <value>Cambia password</value>
+  </data>
+  <data name="Account_CurrentPassword" xml:space="preserve">
+    <value>Password attuale</value>
+  </data>
+  <data name="Account_PasswordChanged" xml:space="preserve">
+    <value>La password è stata modificata.</value>
+  </data>
+  <data name="Account_CurrentPasswordInvalid" xml:space="preserve">
+    <value>La password attuale non è corretta.</value>
+  </data>
+  <data name="Account_EmailSubject" xml:space="preserve">
+    <value>BAD WOLF QUIZ — reimpostazione password</value>
+  </data>
+  <data name="Account_EmailIntro" xml:space="preserve">
+    <value>È stata richiesta la reimpostazione della password per il tuo account host BAD WOLF QUIZ.</value>
+  </data>
+  <data name="Account_EmailExpiry" xml:space="preserve">
+    <value>Il link scade tra un’ora. Se non hai effettuato la richiesta, ignora questa email.</value>
+  </data>
+  <data name="GameBoard_JoinQrAlt" xml:space="preserve">
+    <value>Codice QR per partecipare alla partita</value>
+  </data>
+  <data name="Join_SelectedGame" xml:space="preserve">
+    <value>Codice partita: {0}</value>
+  </data>
+  <data name="GameBoard_ClosePlayerJoining" xml:space="preserve">
+    <value>Chiudi l’ingresso ai nuovi giocatori</value>
+  </data>
+  <data name="GameBoard_OpenPlayerJoining" xml:space="preserve">
+    <value>Apri l’ingresso ai nuovi giocatori</value>
+  </data>
+  <data name="GameBoard_PlayerJoiningToggleRejected" xml:space="preserve">
+    <value>Al momento non è possibile modificare l’accesso alla partita.</value>
+  </data>
+  <data name="GameBoard_RemovePlayer" xml:space="preserve">
+    <value>Espelli giocatore</value>
+  </data>
+  <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve">
+    <value>Espellere {0} dalla partita?</value>
+  </data>
+  <data name="GameBoard_RemovePlayerRejected" xml:space="preserve">
+    <value>Questo giocatore non può essere espulso nella fase attuale.</value>
+  </data>
+  <data name="GameBoard_ManageBlockedPlayers" xml:space="preserve">
+    <value>Giocatori bloccati</value>
+  </data>
+  <data name="GameBoard_BlockedPlayersTitle" xml:space="preserve">
+    <value>Giocatori bloccati</value>
+  </data>
+  <data name="GameBoard_NoBlockedPlayers" xml:space="preserve">
+    <value>Al momento non ci sono giocatori bloccati.</value>
+  </data>
+  <data name="GameBoard_UnblockPlayer" xml:space="preserve">
+    <value>Sblocca</value>
+  </data>
+  <data name="GameBoard_UnblockPlayerRejected" xml:space="preserve">
+    <value>Non è stato possibile sbloccare questo giocatore.</value>
+  </data>
+  <data name="Error_PlayerBlocked" xml:space="preserve">
+    <value>Sei stato espulso da questa partita. Chiedi all'host di sbloccarti prima di rientrare.</value>
+  </data>
+  <data name="PlayerGame_RemovedFromGame" xml:space="preserve">
+    <value>L’host ti ha espulso dalla partita.</value>
+  </data>
+  <data name="PlayerGame_RemovedFromGameTitle" xml:space="preserve">
+    <value>Sei stato espulso dalla partita</value>
+  </data>
+  <data name="HostCard_Display" xml:space="preserve">
+    <value>Mostra la scheda dell’host durante la partita</value>
+  </data>
+  <data name="HostCard_Name" xml:space="preserve">
+    <value>Nome dell’host</value>
+  </data>
+  <data name="HostCard_Source" xml:space="preserve">
+    <value>Immagine della scheda host</value>
+  </data>
+  <data name="HostCard_SourceNone" xml:space="preserve">
+    <value>Non selezionato</value>
+  </data>
+  <data name="HostCard_SourceImage" xml:space="preserve">
+    <value>Immagine</value>
+  </data>
+  <data name="HostCard_SourceWebcam" xml:space="preserve">
+    <value>Webcam</value>
+  </data>
+  <data name="HostCard_Image" xml:space="preserve">
+    <value>Immagine dell’host (fino a {0} MB)</value>
+  </data>
+  <data name="HostCard_InvalidSettings" xml:space="preserve">
+    <value>Per mostrare la scheda host, inserisci un nome e seleziona un’immagine o una webcam.</value>
+  </data>
+  <data name="GameBoard_ResizePlayerPanel" xml:space="preserve">
+    <value>Ridimensiona il pannello dei giocatori</value>
+  </data>
+  <data name="HostCard_SourceAvatar" xml:space="preserve">
+    <value>Avatar</value>
+  </data>
+  <data name="HostCard_Avatar" xml:space="preserve">
+    <value>Avatar dell’host</value>
+  </data>
+  <data name="AvatarPicker_Title" xml:space="preserve">
+    <value>Scegli un avatar</value>
+  </data>
+  <data name="AvatarPicker_SelectGender" xml:space="preserve">
+    <value>Prima scegli il genere del personaggio</value>
+  </data>
+  <data name="AvatarPicker_Female" xml:space="preserve">
+    <value>Femminile</value>
+  </data>
+  <data name="AvatarPicker_Male" xml:space="preserve">
+    <value>Maschile</value>
+  </data>
+  <data name="AvatarPicker_Individual" xml:space="preserve">
+    <value>Avatar individuali</value>
+  </data>
+  <data name="GameBoard_ResizePlayerCards" xml:space="preserve">
+    <value>Ridimensiona tutte le schede dei giocatori</value>
+  </data>
+  <data name="AvatarPicker_Choose" xml:space="preserve">
+    <value>Scegli avatar</value>
+  </data>
+  <data name="AvatarPicker_ChooseOrChange" xml:space="preserve">
+    <value>Scegli o cambia avatar</value>
+  </data>
+  <data name="PlayerWebcam_Enable" xml:space="preserve">
+    <value>Attiva webcam</value>
+  </data>
+  <data name="PlayerWebcam_Disable" xml:space="preserve">
+    <value>Disattiva webcam</value>
+  </data>
+  <data name="PlayerWebcam_RequiresHttps" xml:space="preserve">
+    <value>Apri il sito tramite una connessione HTTPS sicura per accedere alla fotocamera.</value>
+  </data>
+  <data name="PlayerWebcam_AccessFailed" xml:space="preserve">
+    <value>Impossibile accedere alla fotocamera. Controlla l'autorizzazione del browser.</value>
+  </data>
+  <data name="GameBoard_ResizeHostCard" xml:space="preserve">
+    <value>Ridimensiona la larghezza e l'altezza della scheda host</value>
+  </data>
+  <data name="GameBoard_MoveHostCard" xml:space="preserve">
+    <value>Sposta la scheda host verso l'alto o il basso</value>
+  </data>
+  <data name="BrandLogo_Label" xml:space="preserve">
+    <value>Logo personalizzato nell'intestazione</value>
+  </data>
+  <data name="BrandLogo_Hint" xml:space="preserve">
+    <value>Immagine fino a {0} MB. Sostituisce BAD WOLF QUIZ nell'intestazione quando hai effettuato l'accesso.</value>
+  </data>
+  <data name="BrandLogo_PreviewAlt" xml:space="preserve">
+    <value>Anteprima del logo personalizzato</value>
+  </data>
+  <data name="BrandLogo_Remove" xml:space="preserve">
+    <value>Rimuovi il logo personalizzato</value>
+  </data>
+  <data name="Menu_PlayWithUs" xml:space="preserve">
+    <value>Gioca con noi</value>
+  </data>
+  <data name="Menu_AskQuestion" xml:space="preserve">
+    <value>Fai una domanda</value>
+  </data>
+  <data name="AskQuestion_Eyebrow" xml:space="preserve">
+    <value>CONTATTACI</value>
+  </data>
+  <data name="AskQuestion_Title" xml:space="preserve">
+    <value>Fai una domanda</value>
+  </data>
+  <data name="AskQuestion_Description" xml:space="preserve">
+    <value>Inviaci una domanda. Verrà recapitata nel canale Discord di BAD WOLF QUIZ.</value>
+  </data>
+  <data name="AskQuestion_Name" xml:space="preserve">
+    <value>Il tuo nome</value>
+  </data>
+  <data name="AskQuestion_NameHint" xml:space="preserve">
+    <value>Facoltativo</value>
+  </data>
+  <data name="AskQuestion_Question" xml:space="preserve">
+    <value>Domanda</value>
+  </data>
+  <data name="AskQuestion_Send" xml:space="preserve">
+    <value>Invia domanda</value>
+  </data>
+  <data name="AskQuestion_Invalid" xml:space="preserve">
+    <value>Inserisci una domanda di massimo 1.500 caratteri.</value>
+  </data>
+  <data name="AskQuestion_Failed" xml:space="preserve">
+    <value>Non è stato possibile inviare la domanda. Riprova più tardi.</value>
+  </data>
+  <data name="AskQuestion_Sent" xml:space="preserve">
+    <value>La tua domanda è stata inviata.</value>
+  </data>
+  <data name="SiteTheme_Label" xml:space="preserve">
+    <value>Tema cromatico del sito</value>
+  </data>
+  <data name="SiteTheme_Hint" xml:space="preserve">
+    <value>Scegli un tema pronto o creane uno personalizzato. Le modifiche vengono visualizzate immediatamente.</value>
+  </data>
+  <data name="SiteTheme_ClassicWolf" xml:space="preserve">
+    <value>Lupo classico</value>
+  </data>
+  <data name="SiteTheme_CrimsonNight" xml:space="preserve">
+    <value>Notte cremisi</value>
+  </data>
+  <data name="SiteTheme_ArcticNeon" xml:space="preserve">
+    <value>Neon artico</value>
+  </data>
+  <data name="SiteTheme_EmeraldStage" xml:space="preserve">
+    <value>Palco smeraldo</value>
+  </data>
+  <data name="SiteTheme_RoyalViolet" xml:space="preserve">
+    <value>Viola reale</value>
+  </data>
+  <data name="SiteTheme_SunsetOrange" xml:space="preserve">
+    <value>Tramonto arancione</value>
+  </data>
+  <data name="SiteTheme_Daylight" xml:space="preserve">
+    <value>Luce del giorno</value>
+  </data>
+  <data name="SiteTheme_WarmParchment" xml:space="preserve">
+    <value>Pergamena calda</value>
+  </data>
+  <data name="SiteTheme_MintFog" xml:space="preserve">
+    <value>Nebbia menta</value>
+  </data>
+  <data name="SiteTheme_UkrainianSky" xml:space="preserve">
+    <value>Cielo ucraino</value>
+  </data>
+  <data name="SiteTheme_ItalianSpirit" xml:space="preserve">
+    <value>Spirito italiano</value>
+  </data>
+  <data name="SiteTheme_PrideSpectrum" xml:space="preserve">
+    <value>Spettro Pride</value>
+  </data>
+  <data name="SiteTheme_RetroArcade" xml:space="preserve">
+    <value>Arcade retrò</value>
+  </data>
+  <data name="SiteTheme_Custom" xml:space="preserve">
+    <value>Personalizzato</value>
+  </data>
+  <data name="SiteTheme_Background" xml:space="preserve">
+    <value>Sfondo</value>
+  </data>
+  <data name="SiteTheme_Panel" xml:space="preserve">
+    <value>Pannello</value>
+  </data>
+  <data name="SiteTheme_PanelSecondary" xml:space="preserve">
+    <value>Pannello secondario</value>
+  </data>
+  <data name="SiteTheme_Text" xml:space="preserve">
+    <value>Testo</value>
+  </data>
+  <data name="SiteTheme_MutedText" xml:space="preserve">
+    <value>Testo secondario</value>
+  </data>
+  <data name="SiteTheme_Accent" xml:space="preserve">
+    <value>Accento</value>
+  </data>
+  <data name="SiteTheme_AccentBright" xml:space="preserve">
+    <value>Accento luminoso</value>
+  </data>
+  <data name="SiteTheme_Highlight" xml:space="preserve">
+    <value>Evidenziazione</value>
+  </data>
+  <data name="SiteTheme_Invalid" xml:space="preserve">
+    <value>Seleziona un tema e colori validi.</value>
+  </data>
+  <data name="QuizEditor_DragQuestion" xml:space="preserve">
+    <value>Trascina su un'altra domanda per scambiarle</value>
+  </data>
+  <data name="QuizEditor_MoveQuestionToRound" xml:space="preserve">
+    <value>Sposta la domanda in un altro round</value>
+  </data>
+  <data name="QuizEditor_ExchangeQuestion" xml:space="preserve">
+    <value>Scambia domanda</value>
+  </data>
+  <data name="QuizEditor_SelectedQuestion" xml:space="preserve">
+    <value>Domanda selezionata</value>
+  </data>
+  <data name="QuizEditor_TargetQuestion" xml:space="preserve">
+    <value>Domanda da scambiare</value>
+  </data>
+  <data name="QuizEditor_NoQuestionForExchange" xml:space="preserve">
+    <value>Non ci sono domande disponibili per lo scambio.</value>
+  </data>
+  <data name="PlayerImage_Source" xml:space="preserve">
+    <value>Origine immagine della scheda giocatore</value>
+  </data>
+  <data name="PlayerImage_Avatar" xml:space="preserve">
+    <value>Avatar</value>
+  </data>
+  <data name="PlayerImage_Picture" xml:space="preserve">
+    <value>Immagine</value>
+  </data>
+  <data name="PlayerImage_UploadOrChange" xml:space="preserve">
+    <value>Carica o cambia immagine</value>
+  </data>
+  <data name="PlayerImage_Invalid" xml:space="preserve">
+    <value>Seleziona un'immagine PNG, JPEG o WebP valida.</value>
+  </data>
+  <data name="Menu_FAQ" xml:space="preserve">
+    <value>FAQ</value>
+  </data>
+  <data name="Faq_Eyebrow" xml:space="preserve">
+    <value>GUIDA RAPIDA</value>
+  </data>
+  <data name="Faq_Title" xml:space="preserve">
+    <value>Domande frequenti</value>
+  </data>
+  <data name="Faq_Description" xml:space="preserve">
+    <value>Risposte brevi su accesso, gioco, impostazioni e gestione delle partite.</value>
+  </data>
+  <data name="Faq_Q1" xml:space="preserve">
+    <value>Come entra un giocatore nella partita?</value>
+  </data>
+  <data name="Faq_A1" xml:space="preserve">
+    <value>Apri la pagina Partecipa e inserisci il codice di sei caratteri e un nome, oppure scansiona il codice QR mostrato dall'host. Non serve un account giocatore. Se il link QR punta a localhost, l'host deve configurare Game:PublicBaseUrl con un indirizzo raggiungibile dai dispositivi dei giocatori.</value>
+  </data>
+  <data name="Faq_Q2" xml:space="preserve">
+    <value>È possibile entrare dopo l'inizio della partita?</value>
+  </data>
+  <data name="Faq_A2" xml:space="preserve">
+    <value>Sì, quando l'host apre gli ingressi tardivi con il pulsante del lucchetto. Un nuovo giocatore resta in attesa finché l'host non lo approva. Anche chi rientra dopo una disconnessione potrebbe richiedere una nuova approvazione.</value>
+  </data>
+  <data name="Faq_Q3" xml:space="preserve">
+    <value>Chi sceglie la domanda successiva?</value>
+  </data>
+  <data name="Faq_A3" xml:space="preserve">
+    <value>Il primo giocatore entrato apre il primo round. Una risposta corretta trasferisce la scelta a quel giocatore; una risposta errata o l'assenza di una risposta corretta non la cambia. L'host può scegliere un giocatore manualmente o casualmente. I round successivi iniziano con il giocatore più debole secondo le regole della classifica.</value>
+  </data>
+  <data name="Faq_Q4" xml:space="preserve">
+    <value>Come funzionano il buzzer e i timer?</value>
+  </data>
+  <data name="Faq_A4" xml:space="preserve">
+    <value>Il buzzer può aprirsi automaticamente o su comando dell'host. La prima pressione accettata mette in pausa il timer comune e avvia quello del giocatore che risponde. Dopo una risposta errata, il buzzer si riapre per i giocatori idonei e il timer comune riprende dal tempo rimasto.</value>
+  </data>
+  <data name="Faq_Q5" xml:space="preserve">
+    <value>Come funzionano le domande con puntata?</value>
+  </data>
+  <data name="Faq_A5" xml:space="preserve">
+    <value>Risponde solo il giocatore che ha scelto la domanda. Il giocatore dichiara una puntata e l'host la inserisce prima di mostrare la domanda. Il minimo è 5 punti; il massimo è il maggiore tra il punteggio del giocatore e il valore più alto sul tabellone corrente. Una risposta corretta aggiunge la puntata, una errata la sottrae.</value>
+  </data>
+  <data name="Faq_Q6" xml:space="preserve">
+    <value>Come funziona la domanda finale?</value>
+  </data>
+  <data name="Faq_A6" xml:space="preserve">
+    <value>I giocatori idonei inviano privatamente una puntata e poi una risposta dai propri dispositivi. La puntata minima è 5 e la massima è il maggiore tra 1.000 e il punteggio del giocatore. Chi ha un punteggio negativo partecipa per impostazione predefinita, salvo disattivazione da parte dell'host. Puntate e risposte restano private finché la relativa fase non viene bloccata.</value>
+  </data>
+  <data name="Faq_Q7" xml:space="preserve">
+    <value>L'host può correggere una risposta valutata male?</value>
+  </data>
+  <data name="Faq_A7" xml:space="preserve">
+    <value>Sì. Durante la partita, nella Cronologia risposte è possibile cambiare giocatore, esito o punteggio, aggiungere un record mancante o eliminarne uno errato. Il contributo precedente viene annullato e il risultato corretto viene applicato in modo coerente.</value>
+  </data>
+  <data name="Faq_Q8" xml:space="preserve">
+    <value>Cosa succede se un giocatore si disconnette o ricarica la pagina?</value>
+  </data>
+  <data name="Faq_A8" xml:space="preserve">
+    <value>Il token di riconnessione ripristina lo stesso giocatore e il server invia nuovamente lo stato corrente. Durante una partita avviata, l'host potrebbe dover approvare il rientro. Il ricaricamento non crea una seconda voce di punteggio.</value>
+  </data>
+  <data name="Faq_Q9" xml:space="preserve">
+    <value>I giocatori possono usare avatar, immagini o webcam?</value>
+  </data>
+  <data name="Faq_A9" xml:space="preserve">
+    <value>Un giocatore può scegliere un avatar integrato, caricare un'immagine o attivare la webcam. Se la webcam non è disponibile, viene usata l'immagine o l'avatar selezionato. Le preferenze vengono salvate nel browser per nome normalizzato e ripristinate nelle partite successive sullo stesso dispositivo.</value>
+  </data>
+  <data name="Faq_Q10" xml:space="preserve">
+    <value>Qual è la differenza tra impostazioni globali e della lobby?</value>
+  </data>
+  <data name="Faq_A10" xml:space="preserve">
+    <value>Le impostazioni globali sono valori predefiniti persistenti per le partite future. Quando si crea una lobby vengono copiate in un'istantanea indipendente. L'host può personalizzarla prima dell'avvio senza modificare i valori globali. Dopo l'avvio della partita, le impostazioni possono ancora essere modificate tramite l'Editor delle impostazioni disponibile durante la partita.</value>
+  </data>
+  <data name="Faq_Q11" xml:space="preserve">
+    <value>La cronologia delle partite completate viene salvata?</value>
+  </data>
+  <data name="Faq_A11" xml:space="preserve">
+    <value>Sì. SQLite conserva giocatori, punteggi finali, domande regolari e risultati registrati. L'host può consultarli nella Cronologia partite. Eliminare un quiz ne archivia la definizione, quindi la cronologia collegata resta disponibile.</value>
+  </data>
+  <data name="Faq_Q12" xml:space="preserve">
+    <value>Chi può accedere ai quiz e alle partite di un host?</value>
+  </data>
+  <data name="Faq_A12" xml:space="preserve">
+    <value>Quiz, partite attive e cronologia appartengono all'host autenticato che li ha creati o avviati. Gli altri account host non possono accedere a questi dati. Le pagine di accesso e di gioco restano disponibili senza account giocatore.</value>
+  </data>
+  <data name="Faq_ContactTitle" xml:space="preserve">
+    <value>Hai ancora bisogno di aiuto?</value>
+  </data>
+  <data name="Faq_ContactDescription" xml:space="preserve">
+    <value>Invia la tua domanda: verrà recapitata al canale Discord di BAD WOLF QUIZ.</value>
+  </data>
+  <data name="Label_QuestionType" xml:space="preserve">
+    <value>Tipo di domanda</value>
+  </data>
+  <data name="QuestionType_Standard" xml:space="preserve">
+    <value>Domanda standard</value>
+  </data>
+  <data name="QuestionType_FourClues" xml:space="preserve">
+    <value>Quattro indizi</value>
+  </data>
+  <data name="FourClues_EditorHint" xml:space="preserve">
+    <value>Aggiungi esattamente quattro indizi. Ogni indizio può contenere testo, un'immagine, audio o video.</value>
+  </data>
+  <data name="FourClues_ExactlyFourRequired" xml:space="preserve">
+    <value>Una domanda a quattro indizi deve contenere esattamente quattro indizi.</value>
+  </data>
+  <data name="GameBoard_RevealOneClue" xml:space="preserve">
+    <value>+1 indizio</value>
+  </data>
+  <data name="GameBoard_RevealClueRejected" xml:space="preserve">
+    <value>Impossibile mostrare l'indizio successivo.</value>
+  </data>
+  <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve">
+    <value>Domanda della categoria «{0}» — {1} punti</value>
+  </data>
+  <data name="Menu_PlayerStatistics" xml:space="preserve">
+    <value>Statistiche giocatori</value>
+  </data>
+  <data name="PlayerStatistics_Title" xml:space="preserve">
+    <value>Statistiche giocatori</value>
+  </data>
+  <data name="PlayerStatistics_Description" xml:space="preserve">
+    <value>Risultati complessivi calcolati dalle partite completate di questo host.</value>
+  </data>
+  <data name="PlayerStatistics_Empty" xml:space="preserve">
+    <value>Completa una partita per iniziare a raccogliere le statistiche.</value>
+  </data>
+  <data name="PlayerStatistics_Games" xml:space="preserve">
+    <value>Partite</value>
+  </data>
+  <data name="PlayerStatistics_TotalScore" xml:space="preserve">
+    <value>Punteggio finale totale</value>
+  </data>
+  <data name="PlayerStatistics_Correct" xml:space="preserve">
+    <value>Corrette</value>
+  </data>
+  <data name="PlayerStatistics_Attempts" xml:space="preserve">
+    <value>Tentativi</value>
+  </data>
+  <data name="PlayerStatistics_Accuracy" xml:space="preserve">
+    <value>Precisione</value>
+  </data>
+  <data name="PlayerStatistics_LastPlayed" xml:space="preserve">
+    <value>Ultima partita</value>
+  </data>
+  <data name="PlayerStatistics_NotAvailable" xml:space="preserve">
+    <value>—</value>
+  </data>
+  <data name="PlayerStatistics_PerRound" xml:space="preserve">
+    <value>Statistiche per round</value>
+  </data>
+  <data name="PlayerStatistics_Round" xml:space="preserve">
+    <value>Round</value>
+  </data>
+  <data name="PlayerStatistics_NoRoundAnswers" xml:space="preserve">
+    <value>Non ci sono risposte valutate per le statistiche del round.</value>
+  </data>
+  <data name="Menu_Title" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="Menu_Actions" xml:space="preserve">
+    <value>Azioni</value>
+  </data>
+  <data name="Menu_Tools" xml:space="preserve">
+    <value>Strumenti</value>
+  </data>
+  <data name="PlayerMenu_Title" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="GameHistory_Winner" xml:space="preserve">
+    <value>Vincitore</value>
+  </data>
+  <data name="GameHistory_Winners" xml:space="preserve">
+    <value>Vincitori</value>
+  </data>
+  <data name="Button_ImportQuiz" xml:space="preserve">
+    <value>Importa quiz</value>
+  </data>
+  <data name="Button_ExportQuiz" xml:space="preserve">
+    <value>Esporta</value>
+  </data>
+  <data name="QuizImport_Success" xml:space="preserve">
+    <value>Quiz importato correttamente.</value>
+  </data>
+  <data name="QuizImport_InvalidFile" xml:space="preserve">
+    <value>Il file selezionato non è un pacchetto BAD WOLF QUIZ valido o supportato.</value>
+  </data>
+  <data name="GameBoard_FinishGame" xml:space="preserve">
+    <value>Termina partita</value>
+  </data>
+  <data name="PublicQuizzes_Title" xml:space="preserve">
+    <value>Quiz pubblici</value>
+  </data>
+  <data name="PublicQuizzes_Description" xml:space="preserve">
+    <value>Trova i quiz pubblicati da altri host e avvia la tua partita.</value>
+  </data>
+  <data name="PublicQuizzes_SearchLabel" xml:space="preserve">
+    <value>Cerca quiz pubblici</value>
+  </data>
+  <data name="PublicQuizzes_SearchPlaceholder" xml:space="preserve">
+    <value>Nome o descrizione del quiz</value>
+  </data>
+  <data name="PublicQuizzes_Search" xml:space="preserve">
+    <value>Cerca</value>
+  </data>
+  <data name="PublicQuizzes_EmptyTitle" xml:space="preserve">
+    <value>Nessun quiz trovato</value>
+  </data>
+  <data name="PublicQuizzes_EmptyDescription" xml:space="preserve">
+    <value>Prova un'altra ricerca o torna più tardi.</value>
+  </data>
+  <data name="QuizPublication_Public" xml:space="preserve">
+    <value>Pubblico</value>
+  </data>
+  <data name="QuizPublication_Publish" xml:space="preserve">
+    <value>Pubblica</value>
+  </data>
+  <data name="QuizPublication_Unpublish" xml:space="preserve">
+    <value>Rimuovi dalla pubblicazione</value>
+  </data>
+  <data name="QuizPublication_Published" xml:space="preserve">
+    <value>Il quiz è ora pubblico.</value>
+  </data>
+  <data name="QuizPublication_Unpublished" xml:space="preserve">
+    <value>Il quiz non è più pubblico.</value>
+  </data>
+  <data name="QuizRating_Title" xml:space="preserve">
+    <value>Valuta questo quiz</value>
+  </data>
+  <data name="QuizRating_Description" xml:space="preserve">
+    <value>Quanto ti è piaciuto questo quiz?</value>
+  </data>
+  <data name="QuizRating_ScoreLabel" xml:space="preserve">
+    <value>Valutazione da 0 a 5 stelle</value>
+  </data>
+  <data name="QuizRating_Stars" xml:space="preserve">
+    <value>{0} stelle</value>
+  </data>
+  <data name="QuizRating_NotReady" xml:space="preserve">
+    <value>Non è ancora stato possibile salvare la valutazione. Riprova.</value>
+  </data>
+  <data name="QuizRating_Count" xml:space="preserve">
+    <value>{0} valutazioni</value>
+  </data>
+  <data name="QuizRating_AccessibleSummary" xml:space="preserve">
+    <value>Valutazione media {0:0.0} su 5 da {1} persone</value>
+  </data>
+  <data name="PublicQuizzes_Author" xml:space="preserve">
+    <value>Autore: {0}</value>
+  </data>
+  <data name="ContentBlock_Add" xml:space="preserve">
+    <value>+ Aggiungi blocco</value>
+  </data>
+  <data name="ContentBlockType_Text" xml:space="preserve">
+    <value>Testo</value>
+  </data>
+  <data name="ContentBlockType_Image" xml:space="preserve">
+    <value>Immagine</value>
+  </data>
+  <data name="ContentBlockType_Audio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+  <data name="ContentBlockType_Video" xml:space="preserve">
+    <value>Video</value>
+  </data>
+  <data name="ContentBlockType_YouTube" xml:space="preserve">
+    <value>YouTube</value>
+  </data>
+  <data name="ImageClipboard_Button" xml:space="preserve">
+    <value>Incolla dagli appunti</value>
+  </data>
+  <data name="ImageClipboard_Empty" xml:space="preserve">
+    <value>Gli appunti non contengono un'immagine.</value>
+  </data>
+  <data name="ImageClipboard_Error" xml:space="preserve">
+    <value>Impossibile leggere l'immagine dagli appunti. Consenti l'accesso e riprova.</value>
+  </data>
+  <data name="AudioClipboard_Button" xml:space="preserve">
+    <value>Incolla dagli appunti</value>
+  </data>
+  <data name="AudioClipboard_Empty" xml:space="preserve">
+    <value>Gli appunti non contengono un file audio.</value>
+  </data>
+  <data name="AudioClipboard_Error" xml:space="preserve">
+    <value>Impossibile leggere il file audio dagli appunti. Consenti l'accesso e riprova.</value>
+  </data>
+  <data name="Account_HostName" xml:space="preserve">
+    <value>Nome host (facoltativo)</value>
+  </data>
+  <data name="Account_HostNameHint" xml:space="preserve">
+    <value>Potrai modificare il nome host in seguito nelle Impostazioni.</value>
+  </data>
+  <data name="QuizEditor_CountReductionTitle" xml:space="preserve">
+    <value>Eliminare le domande?</value>
+  </data>
+  <data name="InvalidMediaFile" xml:space="preserve">
+    <value>Questo blocco non supporta il caricamento di file.</value>
+  </data>
+  <data name="AudioConversionUnavailable" xml:space="preserve">
+    <value>La conversione audio non è disponibile. Installa FFmpeg o correggi MediaProcessing:FfmpegExecutablePath.</value>
+  </data>
+  <data name="FileUploadLimit" xml:space="preserve">
+    <value>Dimensione massima del file: {0} MB.</value>
+  </data>
+  <data name="Settings_HostId" xml:space="preserve">
+    <value>ID host</value>
+  </data>
+  <data name="Settings_HostIdHint" xml:space="preserve">
+    <value>Usa questo identificatore per configurare gli host premium.</value>
+  </data>
+  <data name="MasterGames_Title" xml:space="preserve">
+    <value>Partite attive</value>
+  </data>
+  <data name="MasterGames_Empty" xml:space="preserve">
+    <value>Non ci sono partite attive.</value>
+  </data>
+  <data name="MasterGames_InLobby" xml:space="preserve">
+    <value>Nella lobby</value>
+  </data>
+  <data name="MasterGames_Playing" xml:space="preserve">
+    <value>In gioco</value>
+  </data>
+  <data name="MasterGames_SessionId" xml:space="preserve">
+    <value>ID partita</value>
+  </data>
+  <data name="MasterGames_HostId" xml:space="preserve">
+    <value>ID host</value>
+  </data>
+  <data name="MasterGames_HostName" xml:space="preserve">
+    <value>Nome host</value>
+  </data>
+  <data name="MasterGames_Round" xml:space="preserve">
+    <value>Round</value>
+  </data>
+  <data name="MasterGames_Players" xml:space="preserve">
+    <value>Giocatori</value>
+  </data>
+  <data name="MasterGames_NoPlayers" xml:space="preserve">
+    <value>Nessun giocatore si è ancora unito.</value>
+  </data>
+  <data name="MediaArchive_State_Active" xml:space="preserve">
+    <value>Media attivi</value>
+  </data>
+  <data name="MediaArchive_State_Archiving" xml:space="preserve">
+    <value>Archiviazione media</value>
+  </data>
+  <data name="MediaArchive_State_Archived" xml:space="preserve">
+    <value>Media archiviati</value>
+  </data>
+  <data name="MediaArchive_State_Restoring" xml:space="preserve">
+    <value>Ripristino media</value>
+  </data>
+  <data name="MediaArchive_State_Failed" xml:space="preserve">
+    <value>Operazione media non riuscita</value>
+  </data>
+  <data name="MediaArchive_ArchivedOn" xml:space="preserve">
+    <value>Archiviato il</value>
+  </data>
+  <data name="MediaArchive_MediaSize" xml:space="preserve">
+    <value>Dimensione media</value>
+  </data>
+  <data name="MediaArchive_ArchiveMedia" xml:space="preserve">
+    <value>Archivia media</value>
+  </data>
+  <data name="MediaArchive_RestoreMedia" xml:space="preserve">
+    <value>Ripristina media</value>
+  </data>
+  <data name="MediaArchive_PreventAutomatic" xml:space="preserve">
+    <value>Non archiviare automaticamente</value>
+  </data>
+  <data name="MediaArchive_AllowAutomatic" xml:space="preserve">
+    <value>Consenti archiviazione automatica</value>
+  </data>
+  <data name="MediaArchive_ConfirmTitle" xml:space="preserve">
+    <value>Archiviare i media del quiz?</value>
+  </data>
+  <data name="MediaArchive_ConfirmText" xml:space="preserve">
+    <value>La struttura del quiz resterà disponibile. I media verranno spostati nel database di archivio e dovranno essere ripristinati prima di giocare.</value>
+  </data>
+  <data name="MediaArchive_Archived" xml:space="preserve">
+    <value>I media del quiz sono stati archiviati.</value>
+  </data>
+  <data name="MediaArchive_Restored" xml:space="preserve">
+    <value>I media del quiz sono stati ripristinati.</value>
+  </data>
+  <data name="MediaArchive_Failed" xml:space="preserve">
+    <value>Impossibile archiviare i media. I media originali restano disponibili.</value>
+  </data>
+  <data name="MediaArchive_RestoreFailed" xml:space="preserve">
+    <value>Impossibile ripristinare i media. L'archivio non è stato modificato.</value>
+  </data>
+  <data name="MediaArchive_RestoreBeforeEditing" xml:space="preserve">
+    <value>Ripristina i media archiviati prima di modificare questo quiz.</value>
+  </data>
+  <data name="MediaArchive_PublicRestoreTitle" xml:space="preserve">
+    <value>Ripristinare i media archiviati del quiz?</value>
+  </data>
+  <data name="MediaArchive_PublicRestoreText" xml:space="preserve">
+    <value>I media di questo quiz sono archiviati. Verranno ripristinati prima dell'avvio della partita e l'operazione potrebbe richiedere del tempo.</value>
+  </data>
+  <data name="MediaArchive_RestoreAndPlay" xml:space="preserve">
+    <value>Ripristina e gioca</value>
+  </data>
+  <data name="MediaArchive_PublicRestoreUnavailable" xml:space="preserve">
+    <value>Questo quiz è temporaneamente non disponibile durante l'elaborazione dei media.</value>
+  </data>
+  <data name="MediaArchive_NoMedia" xml:space="preserve">
+    <value>Questo quiz non contiene media da archiviare.</value>
+  </data>
+  <data name="Footer_MadeWith" xml:space="preserve">
+    <value>Realizzato con ❤️ da Bad Wolf</value>
+  </data>
+  <data name="Footer_SpecialThanks" xml:space="preserve">
+    <value>Un ringraziamento speciale per l’aiuto nello sviluppo:</value>
+  </data>
+  <data name="Footer_FreePlatform" xml:space="preserve">
+    <value>Bad Wolf Quiz è una piattaforma completamente gratuita.</value>
+  </data>
+  <data name="Footer_SupportProject" xml:space="preserve">
+    <value>Se lo desideri, sostieni lo sviluppo del progetto ❤️</value>
+  </data>
+  <data name="Footer_DonationTitle" xml:space="preserve">
+    <value>Sostieni Bad Wolf Quiz ❤️</value>
+  </data>
+  <data name="Footer_DonationScanQr" xml:space="preserve">
+    <value>Scansiona il codice QR per aprire la pagina di supporto.</value>
+  </data>
+  <data name="Footer_DonationQrAlt" xml:space="preserve">
+    <value>Codice QR della pagina di supporto di Bad Wolf Quiz</value>
+  </data>
+  <data name="Footer_OpenDonationPage" xml:space="preserve">
+    <value>Apri la pagina di supporto</value>
+  </data>
+  <data name="GameBoard_NextRound" xml:space="preserve">
+    <value>Prossimo round</value>
+  </data>
 </root>
