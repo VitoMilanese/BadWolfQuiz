@@ -552,19 +552,23 @@
                                                  alt="@block.FileName" />
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
-                                            <audio class="game-content-audio"
-                                                   controls
-                                                   src="@Url.Page(
-                                                       "/Admin/Games/Lobby",
-                                                       "ContentBlock",
-                                                       new
-                                                       {
-                                                           id = Model.Game.Session.Id.Value,
-                                                           sourceQuestionId = Model.CurrentQuestion.SourceQuestionId,
-                                                           sourceContentBlockId = block.SourceContentBlockId,
-                                                           answer = isShowingAnswer
-                                                       })">
-                                            </audio>
+                                            <div class="game-content-audio-shell">
+                                                <audio class="game-content-audio"
+                                                       controls
+                                                       preload="metadata"
+                                                       src="@Url.Page(
+                                                           "/Admin/Games/Lobby",
+                                                           "ContentBlock",
+                                                           new
+                                                           {
+                                                               id = Model.Game.Session.Id.Value,
+                                                               sourceQuestionId = Model.CurrentQuestion.SourceQuestionId,
+                                                               sourceContentBlockId = block.SourceContentBlockId,
+                                                               answer = isShowingAnswer
+                                                           })">
+                                                    @Localizer["GameBoard_AudioUnsupported"]
+                                                </audio>
+                                            </div>
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
                                             <video class="game-content-video"
@@ -1085,10 +1089,14 @@
                                                  alt="@block.FileName" />
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
-                                            <audio class="game-content-audio"
-                                                   controls
-                                                   src="@Url.Page("/Admin/Games/Lobby", "FinalContentBlock", new { id = Model.Game.Session.Id.Value, sourceContentBlockId = block.SourceContentBlockId, answer = false })">
-                                            </audio>
+                                            <div class="game-content-audio-shell">
+                                                <audio class="game-content-audio"
+                                                       controls
+                                                       preload="metadata"
+                                                       src="@Url.Page("/Admin/Games/Lobby", "FinalContentBlock", new { id = Model.Game.Session.Id.Value, sourceContentBlockId = block.SourceContentBlockId, answer = false })">
+                                                    @Localizer["GameBoard_AudioUnsupported"]
+                                                </audio>
+                                            </div>
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
                                             <video class="game-content-video" controls src="@block.ExternalUrl"></video>

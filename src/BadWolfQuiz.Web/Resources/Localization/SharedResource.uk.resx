@@ -798,6 +798,9 @@
   <data name="GameBoard_MediaContent" xml:space="preserve">
     <value>Медіа питання</value>
   </data>
+  <data name="GameBoard_AudioUnsupported" xml:space="preserve">
+    <value>Ваш браузер не підтримує відтворення аудіо.</value>
+  </data>
   <data name="GameBoard_CloseVideo" xml:space="preserve">
     <value>Закрити відео</value>
   </data>

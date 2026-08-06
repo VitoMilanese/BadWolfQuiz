@@ -798,6 +798,9 @@
   <data name="GameBoard_MediaContent" xml:space="preserve">
     <value>Contenuto multimediale della domanda</value>
   </data>
+  <data name="GameBoard_AudioUnsupported" xml:space="preserve">
+    <value>Il browser non supporta la riproduzione audio.</value>
+  </data>
   <data name="GameBoard_CloseVideo" xml:space="preserve">
     <value>Chiudi video</value>
   </data>

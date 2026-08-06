@@ -53,18 +53,22 @@
                                      alt="@block.FileName" />
                                 break;
                             case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
-                                <audio class="game-content-audio"
-                                       controls
-                                       src="@Url.Page(
-                                           "/Admin/Games/AnswerKey",
-                                           "ContentBlock",
-                                           new
-                                           {
-                                               id = Model.Game.Session.Id.Value,
-                                               sourceContentBlockId = block.SourceContentBlockId,
-                                               final = Model.IsFinalQuestion
-                                           })">
-                                </audio>
+                                <div class="game-content-audio-shell">
+                                    <audio class="game-content-audio"
+                                           controls
+                                           preload="metadata"
+                                           src="@Url.Page(
+                                               "/Admin/Games/AnswerKey",
+                                               "ContentBlock",
+                                               new
+                                               {
+                                                   id = Model.Game.Session.Id.Value,
+                                                   sourceContentBlockId = block.SourceContentBlockId,
+                                                   final = Model.IsFinalQuestion
+                                               })">
+                                        @Localizer["GameBoard_AudioUnsupported"]
+                                    </audio>
+                                </div>
                                 break;
                             case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
                                 <video class="game-content-video"

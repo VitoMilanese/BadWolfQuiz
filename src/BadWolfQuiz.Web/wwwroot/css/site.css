@@ -3652,8 +3652,26 @@ body.youtube-auto-expanded-open {
     overflow: hidden;
 }
 
-.game-content-audio {
+.game-content-audio-shell {
+    display: flex;
     width: min(720px, 100%);
+    min-width: 0;
+    min-height: 54px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #f1f3f4;
+}
+
+.game-content-audio {
+    display: block;
+    width: min(720px, 100%);
+    min-width: 0;
+    height: 54px;
+    min-height: 54px;
+    flex: 1 0 54px;
+    visibility: visible;
+    opacity: 1;
 }
 
 .answer-presentation {
@@ -5152,6 +5170,11 @@ body.youtube-auto-expanded-open {
 }
 
 .four-clue-grid .game-content-audio {
+    width: 100%;
+    max-width: 22rem;
+}
+
+.four-clue-grid .game-content-audio-shell {
     width: 100%;
     max-width: 22rem;
 }
