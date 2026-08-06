@@ -333,11 +333,14 @@ public sealed class GameSessionTests
     }
 
     [Fact]
-    public void Start_rejects_session_without_players()
+    public void Start_allows_session_without_players()
     {
         var session = CreateSession();
 
-        Assert.Throws<GameRuleViolationException>(() => session.Start());
+        session.Start();
+
+        Assert.Equal(GameSessionStatus.Running, session.Status);
+        Assert.Equal(InitialTime, session.StartedAtUtc);
     }
 
     [Fact]

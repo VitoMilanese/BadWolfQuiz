@@ -269,11 +269,6 @@ public sealed class GameSession
     {
         EnsureLobby();
 
-        if (_players.Count == 0)
-        {
-            throw new GameRuleViolationException("A game cannot start without players.");
-        }
-
         Status = GameSessionStatus.Running;
         StartedAtUtc = _timeProvider.GetUtcNow();
         CaptureRoundStartScores();

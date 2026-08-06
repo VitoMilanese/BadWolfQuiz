@@ -689,6 +689,18 @@ public sealed class EditorModel(
 
         db.QuestionContentBlocks.RemoveRange(question.QuestionBlocks);
         db.AnswerContentBlocks.RemoveRange(question.AnswerBlocks);
+        db.QuestionContentBlocks.Add(new QuestionContentBlock
+        {
+            QuizQuestionId = question.Id,
+            BlockType = ContentBlockType.Text,
+            SortOrder = 1
+        });
+        db.AnswerContentBlocks.Add(new AnswerContentBlock
+        {
+            QuizQuestionId = question.Id,
+            BlockType = ContentBlockType.Text,
+            SortOrder = 1
+        });
         question.UpdatedAtUtc = DateTime.UtcNow;
         question.Category.Round.Quiz.UpdatedAtUtc = DateTime.UtcNow;
 
