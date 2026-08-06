@@ -359,10 +359,13 @@ html {
 body {
     margin: 0;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
     background: var(--body-background);
     background-attachment: fixed;
+}
+
+body.portal-layout {
+    display: flex;
+    flex-direction: column;
 }
 
 a {
@@ -566,10 +569,13 @@ select {
 
 .page-shell {
     width: 100%;
-    flex: 1 0 auto;
     padding: 34px;
     max-width: 1800px;
     margin: 0 auto;
+}
+
+.portal-layout > .page-shell {
+    flex: 1 0 auto;
 }
 
 /* Portal footer */
@@ -1832,6 +1838,16 @@ textarea {
 
 .dialog-card-danger {
     border-color: rgba(239, 35, 60, .55);
+}
+
+.game-settings-dialog {
+    width: min(920px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+}
+
+.game-settings-dialog-card {
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
 }
 
 .dialog-heading {
@@ -3646,8 +3662,32 @@ body.youtube-auto-expanded-open {
     overflow: hidden;
 }
 
+.game-content-audio-shell {
+    display: flex;
+    width: 100%;
+    max-width: 720px;
+    min-width: 0;
+    min-height: 54px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #f1f3f4;
+}
+
+.game-content-block:has(.game-content-audio-shell) {
+    width: 100%;
+}
+
 .game-content-audio {
-    width: min(720px, 100%);
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: 54px;
+    min-height: 54px;
+    flex: 1 1 auto;
+    visibility: visible;
+    opacity: 1;
 }
 
 .answer-presentation {
@@ -5146,6 +5186,11 @@ body.youtube-auto-expanded-open {
 }
 
 .four-clue-grid .game-content-audio {
+    width: 100%;
+    max-width: 22rem;
+}
+
+.four-clue-grid .game-content-audio-shell {
     width: 100%;
     max-width: 22rem;
 }

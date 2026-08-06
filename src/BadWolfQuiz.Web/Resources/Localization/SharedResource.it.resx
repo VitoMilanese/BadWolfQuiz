@@ -798,6 +798,9 @@
   <data name="GameBoard_MediaContent" xml:space="preserve">
     <value>Contenuto multimediale della domanda</value>
   </data>
+  <data name="GameBoard_AudioUnsupported" xml:space="preserve">
+    <value>Il browser non supporta la riproduzione audio.</value>
+  </data>
   <data name="GameBoard_CloseVideo" xml:space="preserve">
     <value>Chiudi video</value>
   </data>
@@ -890,7 +893,7 @@
   <data name="GameBoard_StartAnswerTimer" xml:space="preserve"><value>Avvia timer</value></data>
   <data name="GameTimer_StartRejected" xml:space="preserve"><value>Impossibile avviare il timer della risposta.</value></data>
   <data name="GameSettings_LobbyTitle" xml:space="preserve"><value>Impostazioni della partita</value></data>
-  <data name="GameSettings_LobbyDescription" xml:space="preserve"><value>Queste impostazioni valgono solo per questa partita e possono essere modificate fino all'avvio.</value></data>
+  <data name="GameSettings_LobbyDescription" xml:space="preserve"><value>Queste impostazioni valgono solo per questa partita e possono essere modificate anche durante il gioco normale.</value></data>
   <data name="GameSettings_Automatic" xml:space="preserve"><value>Automatico</value></data>
   <data name="GameSettings_Manual" xml:space="preserve"><value>Manuale</value></data>
   <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Salva impostazioni della partita</value></data>
@@ -1195,6 +1198,9 @@
   <data name="ImageClipboard_Button" xml:space="preserve"><value>Incolla dagli appunti</value></data>
   <data name="ImageClipboard_Empty" xml:space="preserve"><value>Gli appunti non contengono un'immagine.</value></data>
   <data name="ImageClipboard_Error" xml:space="preserve"><value>Impossibile leggere l'immagine dagli appunti. Consenti l'accesso e riprova.</value></data>
+  <data name="AudioClipboard_Button" xml:space="preserve"><value>Incolla dagli appunti</value></data>
+  <data name="AudioClipboard_Empty" xml:space="preserve"><value>Gli appunti non contengono un file audio.</value></data>
+  <data name="AudioClipboard_Error" xml:space="preserve"><value>Impossibile leggere il file audio dagli appunti. Consenti l'accesso e riprova.</value></data>
   <data name="Account_HostName" xml:space="preserve"><value>Nome host (facoltativo)</value></data>
   <data name="Account_HostNameHint" xml:space="preserve"><value>Potrai modificare il nome host in seguito nelle Impostazioni.</value></data>
   <data name="QuizEditor_CountReductionTitle" xml:space="preserve"><value>Eliminare le domande?</value></data>

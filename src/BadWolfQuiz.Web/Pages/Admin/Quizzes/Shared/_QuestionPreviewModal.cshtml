@@ -23,7 +23,7 @@
             </div>
 
             <div id="question-preview-content"
-                 class="question-preview-content">
+                 class="question-preview-content game-content-blocks">
             </div>
         </div>
     </div>
@@ -36,12 +36,11 @@
 
     .question-preview-modal {
         position: fixed;
-        inset: 0;
+        inset: var(--topbar-height) 0 0;
         z-index: 1000;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
+        align-items: stretch;
+        padding: 0;
         background: rgba(0, 0, 0, 0.84);
         backdrop-filter: blur(8px);
     }
@@ -52,11 +51,11 @@
 
     .question-preview-dialog {
         position: relative;
-        width: min(1180px, 100%);
-        max-height: calc(100vh - 48px);
-        overflow: auto;
-        border: 1px solid var(--line);
-        border-radius: 18px;
+        width: 100%;
+        height: calc(100dvh - var(--topbar-height));
+        max-height: none;
+        overflow: hidden;
+        border: 0;
         background:
             radial-gradient(
                 circle at top right,
@@ -67,13 +66,13 @@
     }
 
     .question-preview-close-button {
-        position: sticky;
+        position: absolute;
         top: 14px;
+        right: 14px;
         z-index: 5;
-        float: right;
         width: 44px;
         height: 44px;
-        margin: 14px 14px 0 0;
+        margin: 0;
         padding: 0;
         border: 1px solid var(--line);
         border-radius: 50%;
@@ -90,16 +89,18 @@
     }
 
     .question-preview-screen {
-        min-height: min(720px, calc(100vh - 50px));
-        padding: clamp(30px, 5vw, 70px);
-        clear: both;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        padding: clamp(18px, 3vw, 40px) clamp(24px, 4vw, 56px);
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        align-content: stretch;
+        overflow: hidden;
     }
 
     .question-preview-title {
-        margin-bottom: clamp(24px, 4vw, 48px);
+        margin-bottom: 8px;
         color: var(--red-bright);
         font-size: clamp(0.8rem, 1.5vw, 1rem);
         font-weight: 900;
@@ -110,9 +111,15 @@
 
     .question-preview-content {
         width: 100%;
+        min-height: 0;
+        align-self: stretch;
+        align-content: safe center;
         display: grid;
         gap: clamp(22px, 4vw, 42px);
         justify-items: center;
+        overflow: auto;
+        overscroll-behavior: contain;
+        padding: 12px 8px;
     }
 
     .question-preview-text {
@@ -189,22 +196,41 @@
         font-size: clamp(2rem, 5vw, 5rem);
     }
 
+    .question-preview-content.four-clue-grid {
+        display: flex;
+        justify-items: initial;
+        gap: var(--four-clue-gap);
+    }
+
+    .question-preview-content.four-clue-grid .question-preview-text {
+        width: auto;
+        max-width: none;
+        font-size: clamp(1rem, 2.2vw, 2.25rem);
+    }
+
+    .question-preview-content.four-clue-grid .question-preview-image {
+        width: 100%;
+        height: 100%;
+        max-height: 24vh;
+    }
+
     @@media (max-width: 700px) {
         .question-preview-modal {
-            padding: 0;
+            inset: var(--topbar-height) 0 0;
         }
 
         .question-preview-dialog {
             width: 100%;
-            max-height: 100vh;
-            min-height: 100vh;
+            height: calc(100dvh - var(--topbar-height));
+            max-height: none;
+            min-height: 0;
             border: 0;
             border-radius: 0;
         }
 
         .question-preview-screen {
-            min-height: 100vh;
-            padding: 70px 20px 32px;
+            min-height: 0;
+            padding: 58px 20px 20px;
         }
     }
 </style>

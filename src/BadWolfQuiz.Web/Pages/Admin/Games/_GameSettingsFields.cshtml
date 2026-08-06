@@ -1,0 +1,70 @@
+@model BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel
+
+<p class="settings-description">
+    @Localizer["GameSettings_LobbyDescription"]
+</p>
+<div class="settings-grid">
+    <label>
+        <span>@Localizer["GameSettings_BuzzerDuration"]</span>
+        <input asp-for="SettingsInput.BuzzerDurationSeconds"
+               type="number" min="1" max="3600" required />
+    </label>
+    <label>
+        <span>@Localizer["GameSettings_AnswerDuration"]</span>
+        <input asp-for="SettingsInput.AnswerDurationSeconds"
+               type="number" min="1" max="3600" required />
+    </label>
+    <label>
+        <span>@Localizer["GameSettings_RegularStartMode"]</span>
+        <select asp-for="SettingsInput.RegularQuestionBuzzerStartMode">
+            <option value="1">@Localizer["GameSettings_Automatic"]</option>
+            <option value="2">@Localizer["GameSettings_Manual"]</option>
+        </select>
+    </label>
+    <label>
+        <span>@Localizer["GameSettings_WagerStartMode"]</span>
+        <select asp-for="SettingsInput.WagerQuestionAnswerTimerStartMode">
+            <option value="1">@Localizer["GameSettings_Automatic"]</option>
+            <option value="2">@Localizer["GameSettings_Manual"]</option>
+        </select>
+    </label>
+    <label class="settings-checkbox">
+        <input asp-for="SettingsInput.AllowNegativeScoreFinalPlayers" type="checkbox" />
+        <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
+    </label>
+    <label>
+        <span>@Localizer["HostCard_Name"]</span>
+        <input asp-for="SettingsInput.HostName" maxlength="80" />
+    </label>
+    <label>
+        <span>@Localizer["HostCard_Source"]</span>
+        <select asp-for="SettingsInput.HostVisualSource">
+            <option value="0">@Localizer["HostCard_SourceNone"]</option>
+            <option value="1">@Localizer["HostCard_SourceImage"]</option>
+            <option value="2">@Localizer["HostCard_SourceWebcam"]</option>
+            <option value="3">@Localizer["HostCard_SourceAvatar"]</option>
+        </select>
+    </label>
+    <label class="host-avatar-field">
+        <span>@Localizer["HostCard_Avatar"]</span>
+        <span class="host-avatar-input-row">
+            <input asp-for="SettingsInput.HostAvatarId" type="hidden" data-host-avatar-id />
+            <button class="button button-secondary" type="button" data-open-avatar-picker>@Localizer["AvatarPicker_Choose"]</button>
+            <img class="host-avatar-preview" data-host-avatar-preview
+                 src="@(!string.IsNullOrWhiteSpace(Model.SettingsInput.HostAvatarId) ? $"/avatars/{Model.SettingsInput.HostAvatarId}" : null)"
+                 alt="" hidden="@(string.IsNullOrWhiteSpace(Model.SettingsInput.HostAvatarId) ? "hidden" : null)" />
+        </span>
+    </label>
+    <label class="host-image-field">
+        <span>@Localizer["HostCard_Image", Model.MaximumImageUploadMegabytes]</span>
+        <span class="host-image-input-row">
+            <input asp-for="HostImage" type="file" accept="image/*" data-host-image-input />
+            <img class="host-image-preview" data-host-image-preview
+                 src="@(Model.Game.Session.Settings.HostImageData is not null
+                     ? Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })
+                     : null)"
+                 alt=""
+                 hidden="@(Model.Game.Session.Settings.HostImageData is not null ? null : "hidden")" />
+        </span>
+    </label>
+</div>
