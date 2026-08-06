@@ -1195,6 +1195,9 @@
   <data name="ImageClipboard_Button" xml:space="preserve"><value>Paste from clipboard</value></data>
   <data name="ImageClipboard_Empty" xml:space="preserve"><value>The clipboard does not contain an image.</value></data>
   <data name="ImageClipboard_Error" xml:space="preserve"><value>Could not read the image from the clipboard. Allow clipboard access and try again.</value></data>
+  <data name="AudioClipboard_Button" xml:space="preserve"><value>Paste from clipboard</value></data>
+  <data name="AudioClipboard_Empty" xml:space="preserve"><value>The clipboard does not contain an audio file.</value></data>
+  <data name="AudioClipboard_Error" xml:space="preserve"><value>Could not read the audio file from the clipboard. Allow clipboard access and try again.</value></data>
   <data name="Account_HostName" xml:space="preserve"><value>Host name (optional)</value></data>
   <data name="Account_HostNameHint" xml:space="preserve"><value>You can change the host name later in Settings.</value></data>
   <data name="QuizEditor_CountReductionTitle" xml:space="preserve"><value>Delete questions?</value></data>
