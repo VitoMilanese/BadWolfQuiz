@@ -117,13 +117,21 @@
             const channel = root?.querySelector("[data-discord-channel]");
             const status = root?.querySelector("[data-discord-status]");
             const token = root?.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const selectChannelLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Localizer["Discord_SelectChannel"].Value));
+            const testRunningLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Localizer["Discord_TestRunning"].Value));
+            const testCompleteLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Localizer["Discord_TestComplete"].Value));
+            const testFailedLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Localizer["Discord_TestFailed"].Value));
 
             guild?.addEventListener("change", async () => {
                 channel.disabled = true;
                 try {
                     const response = await fetch(`?handler=Channels&guildId=${encodeURIComponent(guild.value)}`);
                     const channels = await response.json();
-                    channel.replaceChildren(new Option("@Localizer["Discord_SelectChannel"]", ""));
+                    channel.replaceChildren(new Option(selectChannelLabel, ""));
                     channels.forEach(item => channel.add(new Option(item.name, item.id)));
                 } finally {
                     channel.disabled = false;
@@ -133,7 +141,7 @@
             root?.querySelector("[data-discord-test]")?.addEventListener("click", async event => {
                 const button = event.currentTarget;
                 button.disabled = true;
-                status.textContent = "@Localizer["Discord_TestRunning"]";
+                status.textContent = testRunningLabel;
                 try {
                     const response = await fetch("?handler=Test", {
                         method: "POST",
@@ -141,8 +149,8 @@
                     });
                     const result = await response.json();
                     status.textContent = response.ok
-                        ? `@Localizer["Discord_TestComplete"] (${result.succeededCount}/${result.targetCount})`
-                        : (result.error ?? "@Localizer["Discord_TestFailed"]");
+                        ? `${testCompleteLabel} (${result.succeededCount}/${result.targetCount})`
+                        : (result.error ?? testFailedLabel);
                 } finally {
                     button.disabled = false;
                 }
