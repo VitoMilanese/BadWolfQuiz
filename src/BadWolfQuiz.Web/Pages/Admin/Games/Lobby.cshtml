@@ -1976,14 +1976,14 @@
             }
 
             if (hostSlot && hostCardResizer) {
-                try {
-                    const storedSize = JSON.parse(localStorage.getItem(hostCardSizeKey));
-                    if (storedSize?.width && storedSize?.height) {
-                        applyHostCardSize(storedSize.width, storedSize.height);
-                    }
-                } catch {
-                    localStorage.removeItem(hostCardSizeKey);
-                }
+                // try {
+                //     const storedSize = JSON.parse(localStorage.getItem(hostCardSizeKey));
+                //     if (storedSize?.width && storedSize?.height) {
+                //         applyHostCardSize(storedSize.width, storedSize.height);
+                //     }
+                // } catch {
+                //     localStorage.removeItem(hostCardSizeKey);
+                // }
 
                 hostCardResizer.addEventListener("pointerdown", event => {
                     const startX = event.clientX;
@@ -2031,9 +2031,42 @@
                 });
             }
 
-            wideHostLayout.addEventListener("change", relocateHostCard);
-            window.addEventListener("resize", relocateHostCard);
-            relocateHostCard();
+            const restoreHostCardSize = () => {
+                if (!hostSlot || !hostCardResizer) {
+                    return;
+                }
+
+                try {
+                    const storedSize = JSON.parse(
+                        localStorage.getItem(hostCardSizeKey));
+
+                    if (storedSize?.width && storedSize?.height) {
+                        applyHostCardSize(storedSize.width, storedSize.height);
+                    }
+                } catch {
+                    localStorage.removeItem(hostCardSizeKey);
+                }
+            };
+
+            const relocateAndRestoreHostCard = () => {
+                relocateHostCard();
+
+                requestAnimationFrame(() => {
+                    restoreHostCardSize();
+                    positionHostCard();
+                });
+            };
+
+            wideHostLayout.addEventListener(
+                "change",
+                relocateAndRestoreHostCard);
+
+            window.addEventListener(
+                "resize",
+                relocateAndRestoreHostCard);
+
+            relocateAndRestoreHostCard();
+
             const statusLabels = {
                 active: lobby.dataset.statusActive,
                 inactive: lobby.dataset.statusInactive,
