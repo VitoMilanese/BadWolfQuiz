@@ -1417,6 +1417,11 @@ textarea {
     background: rgba(63, 185, 80, 0.12);
 }
 
+.ajax-save-status {
+    margin: 0;
+    align-self: center;
+}
+
 .validation-summary,
 .field-validation-error {
     color: #ff8d8d;

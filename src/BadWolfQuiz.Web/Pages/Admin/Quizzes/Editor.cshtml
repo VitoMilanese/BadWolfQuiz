@@ -139,7 +139,8 @@
 
 <form method="post"
       asp-page-handler="SaveRoundRows"
-      class="quiz-board-form">
+      class="quiz-board-form"
+      data-save-error="@Localizer["Error_Unexpected"]">
     <input asp-for="RoundRows.QuizId"
            type="hidden"
            value="@Model.Quiz.Id" />
@@ -404,8 +405,11 @@
             @Localizer["Title_MyQuizzes"]
         </a>
         <div class="quiz-board-primary-actions">
+            <span class="alert ajax-save-status" role="status"
+                  data-quiz-save-status hidden></span>
             <button type="submit"
-                    class="button button-primary">
+                    class="button button-primary"
+                    data-ajax-save-round>
                 @Localizer["Button_Save"]
             </button>
             <button type="submit"
@@ -794,6 +798,44 @@
             document.getElementById("RoundRows_CategoryCount");
 
         const quizBoardForm = document.querySelector(".quiz-board-form");
+
+        const quizSaveStatus = document.querySelector("[data-quiz-save-status]");
+
+        quizBoardForm?.addEventListener("submit", async event => {
+            const submitter = event.submitter;
+            if (!submitter?.matches("[data-ajax-save-round]")) {
+                return;
+            }
+
+            event.preventDefault();
+            submitter.disabled = true;
+            quizSaveStatus.hidden = true;
+
+            try {
+                const response = await fetch(quizBoardForm.action, {
+                    method: "POST",
+                    body: new FormData(quizBoardForm),
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || quizBoardForm.dataset.saveError);
+                }
+
+                quizSaveStatus.textContent = result.message;
+                quizSaveStatus.classList.add("alert-success");
+                quizSaveStatus.classList.remove("alert-error");
+                quizSaveStatus.hidden = false;
+            } catch (error) {
+                quizSaveStatus.textContent =
+                    error.message || quizBoardForm.dataset.saveError;
+                quizSaveStatus.classList.add("alert-error");
+                quizSaveStatus.classList.remove("alert-success");
+                quizSaveStatus.hidden = false;
+            } finally {
+                submitter.disabled = false;
+            }
+        });
 
         const countReductionDialog =
             document.getElementById("count-reduction-dialog");

@@ -29,7 +29,9 @@
     </div>
 }
 
-<form method="post" class="question-editor" enctype="multipart/form-data">
+<form method="post" class="question-editor" enctype="multipart/form-data"
+      data-ajax-question-editor
+      data-save-error="@Localizer["Error_Unexpected"]">
     <input type="hidden" asp-for="Input.Id" />
     <input type="hidden" asp-for="Input.QuizId" />
     <input type="hidden" asp-for="Input.RoundId" />
@@ -111,7 +113,17 @@
                 data-open-question-preview="answer">
             @Localizer["Button_Preview"] — @Localizer["Label_CorrectAnswer"]
         </button>
+        <span class="alert ajax-save-status" role="status"
+              data-question-save-status hidden></span>
         <button class="button button-primary" type="submit">@Localizer["Button_Save"]</button>
+        @if (Model.NextQuestionId.HasValue)
+        {
+            <a class="button button-secondary"
+               asp-page="QuestionEditor"
+               asp-route-id="@Model.NextQuestionId.Value">
+                @Localizer["Button_NextQuestion"]
+            </a>
+        }
     </div>
 </form>
 
@@ -120,6 +132,63 @@
 @section Scripts {
     <script src="~/js/image-clipboard-upload.js" asp-append-version="true"></script>
     <script>
+        (() => {
+            const form = document.querySelector("[data-ajax-question-editor]");
+            const status = document.querySelector("[data-question-save-status]");
+            if (!form || !status) {
+                return;
+            }
+
+            const setStatus = (message, success) => {
+                status.textContent = message;
+                status.hidden = false;
+                status.classList.toggle("alert-success", success);
+                status.classList.toggle("alert-error", !success);
+            };
+
+            const applyBlockIds = (prefix, blocks) => {
+                for (const block of blocks ?? []) {
+                    const sortOrder = [...form.querySelectorAll(
+                        `input[name^="${prefix}"][name$=".SortOrder"]`)]
+                        .find(input => Number(input.value) === block.sortOrder);
+                    const card = sortOrder?.closest(".content-block-card");
+                    const id = card?.querySelector(`input[name^="${prefix}"][name$=".Id"]`);
+                    if (id) {
+                        id.value = block.id;
+                    }
+                }
+            };
+
+            form.addEventListener("submit", async event => {
+                event.preventDefault();
+                const submitter = event.submitter;
+                submitter?.setAttribute("disabled", "disabled");
+                status.hidden = true;
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        body: new FormData(form),
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.error || form.dataset.saveError);
+                    }
+
+                    applyBlockIds("Input.QuestionBlocks", result.questionBlocks);
+                    applyBlockIds("Input.AnswerBlocks", result.answerBlocks);
+                    form.querySelectorAll('input[type="file"]').forEach(input => input.value = "");
+                    form.querySelectorAll('input[name$=".RemoveFile"]').forEach(input => input.checked = false);
+                    setStatus(result.message, true);
+                } catch (error) {
+                    setStatus(error.message || form.dataset.saveError, false);
+                } finally {
+                    submitter?.removeAttribute("disabled");
+                }
+            });
+        })();
+
         const wagerQuestionCheckbox =
             document.getElementById("Input_IsSpecial");
 

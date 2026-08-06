@@ -698,6 +698,14 @@ public sealed class EditorModel(
             submittedRows.Count == 0 ||
             submittedRows.Any(x => x.RowIndex <= 0 || x.Points < 0))
         {
+            if (IsAjaxRequest() && !play)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = localizer["QuizEditor_InvalidRoundRows"].Value
+                });
+            }
             TempData["ErrorMessage"] =
                 localizer["QuizEditor_InvalidRoundRows"].Value;
 
@@ -822,6 +830,16 @@ public sealed class EditorModel(
             (RoundRows.RandomWagerQuestionCount < 0 ||
              RoundRows.RandomWagerQuestionCount > eligibleQuestionCount))
         {
+            if (IsAjaxRequest() && !play)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = localizer[
+                        "QuizEditor_InvalidRandomWagerCount",
+                        eligibleQuestionCount].Value
+                });
+            }
             TempData["ErrorMessage"] = localizer[
                 "QuizEditor_InvalidRandomWagerCount",
                 eligibleQuestionCount].Value;
@@ -899,6 +917,15 @@ public sealed class EditorModel(
             }
         }
 
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                message = localizer["QuizEditor_RoundRowsSaved"].Value
+            });
+        }
+
         TempData["SuccessMessage"] =
             localizer["QuizEditor_RoundRowsSaved"].Value;
 
@@ -908,6 +935,11 @@ public sealed class EditorModel(
             selectedRoundId = round.Id
         });
     }
+
+    private bool IsAjaxRequest() => string.Equals(
+        Request.Headers["X-Requested-With"],
+        "XMLHttpRequest",
+        StringComparison.OrdinalIgnoreCase);
 
     public async Task<IActionResult> OnPostRenameRoundAsync()
     {

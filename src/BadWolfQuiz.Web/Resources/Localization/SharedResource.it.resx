@@ -144,6 +144,9 @@
   <data name="Button_Save" xml:space="preserve">
     <value>Salva</value>
   </data>
+  <data name="Button_NextQuestion" xml:space="preserve">
+    <value>Domanda successiva</value>
+  </data>
   <data name="Label_Score" xml:space="preserve">
     <value>Punti</value>
   </data>
