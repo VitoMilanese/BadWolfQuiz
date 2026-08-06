@@ -91,14 +91,15 @@
                accept="image/*" />
         <button type="button"
                 class="button secondary-button image-clipboard-button"
-                data-image-clipboard-button
+                data-media-clipboard-button
+                data-media-kind="image"
                 data-clipboard-empty="@localizer["ImageClipboard_Empty"]"
                 data-clipboard-error="@localizer["ImageClipboard_Error"]">
             @localizer["ImageClipboard_Button"]
         </button>
     </div>
     <span class="field-validation-error image-clipboard-error"
-          data-image-clipboard-error
+          data-media-clipboard-error
           role="alert"
           hidden></span>
     <small>@localizer["FileUploadLimit", mediaUploadProcessor.MaximumImageUploadMegabytes(

@@ -36,19 +36,23 @@
                              alt="@block.FileName" />
                         break;
                     case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
-                        <audio class="game-content-audio"
-                               controls
-                               src="@Url.Page(
-                                   "/Admin/Games/Lobby",
-                                   "ContentBlock",
-                                   new
-                                   {
-                                       id = Model.GameSessionId,
-                                       sourceQuestionId = Model.SourceQuestionId,
-                                       sourceContentBlockId = block.SourceContentBlockId,
-                                       answer = Model.IsAnswer
-                                   })">
-                        </audio>
+                        <div class="game-content-audio-shell">
+                            <audio class="game-content-audio"
+                                   controls
+                                   preload="metadata"
+                                   src="@Url.Page(
+                                       "/Admin/Games/Lobby",
+                                       "ContentBlock",
+                                       new
+                                       {
+                                           id = Model.GameSessionId,
+                                           sourceQuestionId = Model.SourceQuestionId,
+                                           sourceContentBlockId = block.SourceContentBlockId,
+                                           answer = Model.IsAnswer
+                                       })">
+                                @Localizer["GameBoard_AudioUnsupported"]
+                            </audio>
+                        </div>
                         break;
                     case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
                         <video class="game-content-video"

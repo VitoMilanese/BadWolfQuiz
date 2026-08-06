@@ -167,7 +167,11 @@ public sealed class GameSession
 
     public void UpdateSettings(GameSessionSettings settings)
     {
-        EnsureLobby();
+        if (Status is not GameSessionStatus.Lobby and not GameSessionStatus.Running)
+        {
+            throw new GameRuleViolationException(
+                "Game settings can only be changed in the lobby or during regular play.");
+        }
         ArgumentNullException.ThrowIfNull(settings);
 
         Settings = settings;

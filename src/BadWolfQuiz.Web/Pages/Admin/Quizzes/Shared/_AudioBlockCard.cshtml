@@ -87,10 +87,24 @@
            value="false"
            class="remove-file-value" />
 
-    <input asp-for="UploadedFile"
-           class="form-control audio-block-file uploaded-file-input"
-           type="file"
-           accept="audio/*" />
+    <div class="image-block-upload-row">
+        <input asp-for="UploadedFile"
+               class="form-control audio-block-file uploaded-file-input"
+               type="file"
+               accept="audio/*" />
+        <button type="button"
+                class="button secondary-button audio-clipboard-button"
+                data-media-clipboard-button
+                data-media-kind="audio"
+                data-clipboard-empty="@localizer["AudioClipboard_Empty"]"
+                data-clipboard-error="@localizer["AudioClipboard_Error"]">
+            @localizer["AudioClipboard_Button"]
+        </button>
+    </div>
+    <span class="field-validation-error image-clipboard-error"
+          data-media-clipboard-error
+          role="alert"
+          hidden></span>
     <small>@localizer["FileUploadLimit", mediaUploadProcessor.MaximumAudioUploadMegabytes(
         premiumHostAccess.IsPremium(currentHost.RequiredId))]</small>
 

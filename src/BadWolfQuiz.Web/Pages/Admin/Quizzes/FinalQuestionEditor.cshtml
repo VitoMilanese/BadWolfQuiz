@@ -123,7 +123,8 @@
             }
 
             const element = document.createElement("div");
-            element.className = "question-preview-text";
+            element.className =
+                "question-preview-text game-content-block game-content-text";
             element.textContent = text;
 
             return element;
@@ -145,7 +146,8 @@
             }
 
             const wrapper = document.createElement("figure");
-            wrapper.className = "question-preview-media";
+            wrapper.className =
+                "question-preview-media game-content-block";
 
             appendQuestionPreviewCaption(
                 wrapper,
@@ -186,7 +188,7 @@
 
             const wrapper = document.createElement("div");
             wrapper.className =
-                "question-preview-media question-preview-audio";
+                "question-preview-media question-preview-audio game-content-block";
 
             appendQuestionPreviewCaption(
                 wrapper,
@@ -258,7 +260,8 @@
             }
 
             const wrapper = document.createElement("figure");
-            wrapper.className = "question-preview-media";
+            wrapper.className =
+                "question-preview-media game-content-block";
 
             appendQuestionPreviewCaption(
                 wrapper,

@@ -52,6 +52,12 @@
                             data-open-blocked-players>
                         @Localizer["GameBoard_ManageBlockedPlayers"]
                     </button>
+
+                    <button class="action-menu-item"
+                            type="button"
+                            data-open-game-settings>
+                        @Localizer["GameSettings_LobbyTitle"]
+                    </button>
                 </div>
                 </details>
             }
@@ -113,82 +119,7 @@
                       enctype="multipart/form-data"
                       asp-page-handler="UpdateSettings"
                       class="stack-form">
-                    <p class="settings-description">
-                        @Localizer["GameSettings_LobbyDescription"]
-                    </p>
-                    <div class="settings-grid">
-                        <label>
-                            <span>@Localizer["GameSettings_BuzzerDuration"]</span>
-                            <input asp-for="SettingsInput.BuzzerDurationSeconds"
-                                   type="number"
-                                   min="1"
-                                   max="3600"
-                                   required />
-                        </label>
-                        <label>
-                            <span>@Localizer["GameSettings_AnswerDuration"]</span>
-                            <input asp-for="SettingsInput.AnswerDurationSeconds"
-                                   type="number"
-                                   min="1"
-                                   max="3600"
-                                   required />
-                        </label>
-                        <label>
-                            <span>@Localizer["GameSettings_RegularStartMode"]</span>
-                            <select asp-for="SettingsInput.RegularQuestionBuzzerStartMode">
-                                <option value="1">@Localizer["GameSettings_Automatic"]</option>
-                                <option value="2">@Localizer["GameSettings_Manual"]</option>
-                            </select>
-                        </label>
-                        <label>
-                            <span>@Localizer["GameSettings_WagerStartMode"]</span>
-                            <select asp-for="SettingsInput.WagerQuestionAnswerTimerStartMode">
-                                <option value="1">@Localizer["GameSettings_Automatic"]</option>
-                                <option value="2">@Localizer["GameSettings_Manual"]</option>
-                            </select>
-                        </label>
-                        <label class="settings-checkbox">
-                            <input asp-for="SettingsInput.AllowNegativeScoreFinalPlayers"
-                                   type="checkbox" />
-                            <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
-                        </label>
-                        <label>
-                            <span>@Localizer["HostCard_Name"]</span>
-                            <input asp-for="SettingsInput.HostName" maxlength="80" />
-                        </label>
-                        <label>
-                            <span>@Localizer["HostCard_Source"]</span>
-                            <select asp-for="SettingsInput.HostVisualSource">
-                                <option value="0">@Localizer["HostCard_SourceNone"]</option>
-                                <option value="1">@Localizer["HostCard_SourceImage"]</option>
-                                <option value="2">@Localizer["HostCard_SourceWebcam"]</option>
-                                <option value="3">@Localizer["HostCard_SourceAvatar"]</option>
-                            </select>
-                        </label>
-                        <label class="host-avatar-field">
-                            <span>@Localizer["HostCard_Avatar"]</span>
-                            <span class="host-avatar-input-row">
-                                <input asp-for="SettingsInput.HostAvatarId" type="hidden" data-host-avatar-id />
-                                <button class="button button-secondary" type="button" data-open-avatar-picker>@Localizer["AvatarPicker_Choose"]</button>
-                                <img class="host-avatar-preview" data-host-avatar-preview
-                                     src="@(!string.IsNullOrWhiteSpace(Model.SettingsInput.HostAvatarId) ? $"/avatars/{Model.SettingsInput.HostAvatarId}" : null)"
-                                     alt="" hidden="@(string.IsNullOrWhiteSpace(Model.SettingsInput.HostAvatarId) ? "hidden" : null)" />
-                            </span>
-                        </label>
-                        <label class="host-image-field">
-                            <span>@Localizer["HostCard_Image", Model.MaximumImageUploadMegabytes]</span>
-                            <span class="host-image-input-row">
-                                <input asp-for="HostImage" type="file" accept="image/*" data-host-image-input />
-                                <img class="host-image-preview"
-                                     data-host-image-preview
-                                     src="@(Model.Game.Session.Settings.HostImageData is not null
-                                         ? Url.Page("/Admin/Games/Lobby", "HostCardImage", new { id = Model.Game.Session.Id.Value })
-                                         : null)"
-                                     alt=""
-                                     hidden="@(Model.Game.Session.Settings.HostImageData is not null ? null : "hidden")" />
-                            </span>
-                        </label>
-                    </div>
+                    <partial name="_GameSettingsFields" model="Model" />
                     <div class="form-actions">
                         <button class="button button-secondary" type="submit">
                             @Localizer["GameSettings_SaveForGame"]
@@ -552,19 +483,23 @@
                                                  alt="@block.FileName" />
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
-                                            <audio class="game-content-audio"
-                                                   controls
-                                                   src="@Url.Page(
-                                                       "/Admin/Games/Lobby",
-                                                       "ContentBlock",
-                                                       new
-                                                       {
-                                                           id = Model.Game.Session.Id.Value,
-                                                           sourceQuestionId = Model.CurrentQuestion.SourceQuestionId,
-                                                           sourceContentBlockId = block.SourceContentBlockId,
-                                                           answer = isShowingAnswer
-                                                       })">
-                                            </audio>
+                                            <div class="game-content-audio-shell">
+                                                <audio class="game-content-audio"
+                                                       controls
+                                                       preload="metadata"
+                                                       src="@Url.Page(
+                                                           "/Admin/Games/Lobby",
+                                                           "ContentBlock",
+                                                           new
+                                                           {
+                                                               id = Model.Game.Session.Id.Value,
+                                                               sourceQuestionId = Model.CurrentQuestion.SourceQuestionId,
+                                                               sourceContentBlockId = block.SourceContentBlockId,
+                                                               answer = isShowingAnswer
+                                                           })">
+                                                    @Localizer["GameBoard_AudioUnsupported"]
+                                                </audio>
+                                            </div>
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
                                             <video class="game-content-video"
@@ -1085,10 +1020,14 @@
                                                  alt="@block.FileName" />
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
-                                            <audio class="game-content-audio"
-                                                   controls
-                                                   src="@Url.Page("/Admin/Games/Lobby", "FinalContentBlock", new { id = Model.Game.Session.Id.Value, sourceContentBlockId = block.SourceContentBlockId, answer = false })">
-                                            </audio>
+                                            <div class="game-content-audio-shell">
+                                                <audio class="game-content-audio"
+                                                       controls
+                                                       preload="metadata"
+                                                       src="@Url.Page("/Admin/Games/Lobby", "FinalContentBlock", new { id = Model.Game.Session.Id.Value, sourceContentBlockId = block.SourceContentBlockId, answer = false })">
+                                                    @Localizer["GameBoard_AudioUnsupported"]
+                                                </audio>
+                                            </div>
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
                                             <video class="game-content-video" controls src="@block.ExternalUrl"></video>
@@ -1341,6 +1280,34 @@
     </div>
 </dialog>
 
+@if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
+{
+    <dialog id="game-settings-dialog"
+            class="app-dialog game-settings-dialog"
+            aria-labelledby="game-settings-dialog-title">
+        <div class="dialog-card game-settings-dialog-card">
+            <div class="dialog-heading">
+                <h2 id="game-settings-dialog-title">@Localizer["GameSettings_LobbyTitle"]</h2>
+                <button class="dialog-close" type="button" data-close-game-settings
+                        aria-label="@Localizer["Button_Close"]">×</button>
+            </div>
+            <form method="post" enctype="multipart/form-data"
+                  asp-page-handler="UpdateSettings" class="stack-form">
+                <partial name="_GameSettingsFields" model="Model" />
+                <div class="form-actions dialog-actions">
+                    <button class="button button-secondary" type="button" data-close-game-settings>
+                        @Localizer["Button_Cancel"]
+                    </button>
+                    <button class="button button-primary" type="submit">
+                        @Localizer["GameSettings_SaveForGame"]
+                    </button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+    <partial name="_AvatarPicker" />
+}
+
 <dialog id="remove-player-dialog"
         class="app-dialog"
         aria-labelledby="remove-player-dialog-title">
@@ -1434,6 +1401,22 @@
             } else {
                 window.addEventListener("resize", fitTitles);
             }
+        })();
+
+        (() => {
+            const dialog = document.getElementById("game-settings-dialog");
+            document.querySelector("[data-open-game-settings]")
+                ?.addEventListener("click", () => dialog?.showModal());
+
+            for (const button of document.querySelectorAll("[data-close-game-settings]")) {
+                button.addEventListener("click", () => dialog?.close());
+            }
+
+            dialog?.addEventListener("click", event => {
+                if (event.target === dialog) {
+                    dialog.close();
+                }
+            });
         })();
 
         (() => {
