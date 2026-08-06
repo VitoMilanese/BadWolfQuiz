@@ -60,6 +60,9 @@ public sealed class EditorModel(
     [BindProperty]
     public DeleteQuestionInputModel DeleteQuestion { get; set; } = new();
 
+    [BindProperty]
+    public DeleteFinalQuestionInputModel DeleteFinalQuestion { get; set; } = new();
+
     public int SelectedRoundId { get; private set; }
 
     public Quiz Quiz { get; private set; } = null!;
@@ -161,6 +164,13 @@ public sealed class EditorModel(
         public int QuestionId { get; set; }
     }
 
+    public sealed class DeleteFinalQuestionInputModel
+    {
+        public int QuizId { get; set; }
+
+        public int RoundId { get; set; }
+    }
+
     public async Task<IActionResult> OnGetAsync(
         int id,
         int? selectedRoundId = null)
@@ -176,6 +186,8 @@ public sealed class EditorModel(
         }
         var quiz = await db.Quizzes
             .AsNoTracking()
+            .Include(x => x.FinalQuestionBlocks)
+            .Include(x => x.FinalAnswerBlocks)
             .Include(x => x.Rounds)
                 .ThenInclude(x => x.Rows)
             .Include(x => x.Rounds)
@@ -722,6 +734,34 @@ public sealed class EditorModel(
         {
             id = question.Category.Round.QuizId,
             selectedRoundId = question.Category.QuizRoundId
+        });
+    }
+
+    public async Task<IActionResult> OnPostDeleteFinalQuestionAsync()
+    {
+        var quiz = await db.Quizzes
+            .Include(x => x.FinalQuestionBlocks)
+            .Include(x => x.FinalAnswerBlocks)
+            .SingleOrDefaultAsync(x => x.Id == DeleteFinalQuestion.QuizId);
+
+        if (quiz is null)
+        {
+            return NotFound();
+        }
+
+        db.FinalQuestionContentBlocks.RemoveRange(quiz.FinalQuestionBlocks);
+        db.FinalAnswerContentBlocks.RemoveRange(quiz.FinalAnswerBlocks);
+        quiz.UpdatedAtUtc = DateTime.UtcNow;
+
+        await db.SaveChangesAsync();
+
+        TempData["SuccessMessage"] =
+            localizer["Message_FinalQuestionDeleted"].Value;
+
+        return RedirectToPage(new
+        {
+            id = quiz.Id,
+            selectedRoundId = DeleteFinalQuestion.RoundId
         });
     }
 

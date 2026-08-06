@@ -914,6 +914,18 @@
   <data name="Button_EditFinalQuestion" xml:space="preserve">
     <value>Edit final question</value>
   </data>
+  <data name="Button_DeleteFinalQuestion" xml:space="preserve">
+    <value>Delete final question</value>
+  </data>
+  <data name="Dialog_DeleteFinalQuestion_Title" xml:space="preserve">
+    <value>Delete final question</value>
+  </data>
+  <data name="Dialog_DeleteFinalQuestion_Text" xml:space="preserve">
+    <value>Are you sure you want to delete the final question and answer?</value>
+  </data>
+  <data name="Message_FinalQuestionDeleted" xml:space="preserve">
+    <value>Final question deleted.</value>
+  </data>
   <data name="Message_FinalQuestionSaved" xml:space="preserve">
     <value>Final question saved.</value>
   </data>

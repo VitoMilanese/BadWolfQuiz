@@ -119,6 +119,16 @@
                 @Localizer["Button_EditFinalQuestion"]
             </a>
 
+            @if (Model.Quiz.FinalQuestionBlocks.Any(HasBlockContent) ||
+                Model.Quiz.FinalAnswerBlocks.Any(HasBlockContent))
+            {
+                <button type="button"
+                        class="button button-danger-outline round-action-button"
+                        onclick="openDeleteFinalQuestionDialog()">
+                    @Localizer["Button_DeleteFinalQuestion"]
+                </button>
+            }
+
             <button type="button"
                     class="button button-secondary round-action-button"
                     onclick="openRenameRoundDialog()">
@@ -508,6 +518,44 @@
                 <button type="button"
                         class="button button-secondary"
                         data-close-delete-question>
+                    @Localizer["Button_Cancel"]
+                </button>
+                <button type="submit" class="button button-danger">
+                    @Localizer["Button_Delete"]
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog id="delete-final-question-dialog" class="app-dialog">
+    <div class="dialog-card dialog-card-danger">
+        <div class="dialog-heading">
+            <h2>@Localizer["Dialog_DeleteFinalQuestion_Title"]</h2>
+            <button type="button"
+                    class="dialog-close"
+                    onclick="closeDeleteFinalQuestionDialog()"
+                    aria-label="@Localizer["Button_Cancel"]">
+                ×
+            </button>
+        </div>
+
+        <p class="dialog-warning">
+            @Localizer["Dialog_DeleteFinalQuestion_Text"]
+        </p>
+
+        <form method="post" asp-page-handler="DeleteFinalQuestion">
+            <input asp-for="DeleteFinalQuestion.QuizId"
+                   type="hidden"
+                   value="@Model.Quiz.Id" />
+            <input asp-for="DeleteFinalQuestion.RoundId"
+                   type="hidden"
+                   value="@round.Id" />
+
+            <div class="dialog-actions form-actions">
+                <button type="button"
+                        class="button button-secondary"
+                        onclick="closeDeleteFinalQuestionDialog()">
                     @Localizer["Button_Cancel"]
                 </button>
                 <button type="submit" class="button button-danger">
@@ -1265,6 +1313,14 @@
 
         function closeDeleteRoundDialog() {
             document.getElementById("delete-round-dialog").close();
+        }
+
+        function openDeleteFinalQuestionDialog() {
+            document.getElementById("delete-final-question-dialog").showModal();
+        }
+
+        function closeDeleteFinalQuestionDialog() {
+            document.getElementById("delete-final-question-dialog").close();
         }
 
         const successMessage = document.getElementById("success-message");

@@ -914,6 +914,18 @@
   <data name="Button_EditFinalQuestion" xml:space="preserve">
     <value>Редагувати фінальне питання</value>
   </data>
+  <data name="Button_DeleteFinalQuestion" xml:space="preserve">
+    <value>Видалити фінальне питання</value>
+  </data>
+  <data name="Dialog_DeleteFinalQuestion_Title" xml:space="preserve">
+    <value>Видалити фінальне питання</value>
+  </data>
+  <data name="Dialog_DeleteFinalQuestion_Text" xml:space="preserve">
+    <value>Ви впевнені, що хочете видалити фінальне питання та відповідь?</value>
+  </data>
+  <data name="Message_FinalQuestionDeleted" xml:space="preserve">
+    <value>Фінальне питання видалено.</value>
+  </data>
   <data name="Message_FinalQuestionSaved" xml:space="preserve">
     <value>Фінальне питання збережено.</value>
   </data>
