@@ -2627,6 +2627,29 @@
                     startTimerPolling();
                 })
                 .catch(console.error);
+
+            const syncBoardHeaderHeights = () => {
+                const headers = document.querySelectorAll(
+                    ".host-board-grid .host-board-column > h3");
+
+                if (headers.length === 0) {
+                    return;
+                }
+
+                headers.forEach(header => {
+                    header.style.height = "";
+                });
+
+                const maximumHeight = Math.max(
+                    ...Array.from(headers, header => header.offsetHeight));
+
+                headers.forEach(header => {
+                    header.style.height = `${maximumHeight}px`;
+                });
+            };
+
+            syncBoardHeaderHeights();
+            window.addEventListener("resize", syncBoardHeaderHeights);
         })();
     </script>
     <script src="~/js/avatar-picker.js" asp-append-version="true"></script>

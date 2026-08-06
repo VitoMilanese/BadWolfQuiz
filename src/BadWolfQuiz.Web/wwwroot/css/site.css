@@ -2499,6 +2499,7 @@ textarea {
         place-items: center;
         overflow: hidden;
         overflow-wrap: anywhere;
+        text-align: center;
     }
 
     .host-board-column form {
