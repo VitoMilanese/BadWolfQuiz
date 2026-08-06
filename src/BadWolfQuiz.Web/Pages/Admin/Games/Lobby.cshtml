@@ -246,10 +246,20 @@
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
              data-lobby-label="@Localizer["GameLobby_StatusLobby"]"
              data-running-label="@Localizer["GameLobby_StatusRunning"]">
+
         @if (TempData["ErrorMessage"] is string errorMessage)
         {
-            <div class="message message-error">@errorMessage</div>
+            <div class="message message-error"
+                 role="alert"
+                 data-auto-dismiss>
+                @errorMessage
+            </div>
         }
+
+        <div id="game-board-error"
+             class="message message-error"
+             role="alert"
+             hidden></div>
 
         @if (Model.PreviewQuestion is { } previewQuestion)
         {
@@ -747,7 +757,9 @@
                     {
                         @if (question.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Available)
                         {
-                            <form method="post" asp-page-handler="SelectQuestion">
+                            <form class="question-selection-form"
+                                  method="post"
+                                  asp-page-handler="SelectQuestion">
                                 <input name="sourceQuestionId"
                                        type="hidden"
                                        value="@question.SourceQuestionId" />
@@ -2177,6 +2189,35 @@
             const playerJoinLockButton = playerJoinLockForm?.querySelector(
                 ".player-join-lock");
 
+            const questionSelectionForms = document.querySelectorAll(
+                ".question-selection-form");
+
+            const gameBoardError = document.getElementById(
+                "game-board-error");
+
+            let gameBoardErrorDismissHandle = null;
+
+            const showGameBoardError = message => {
+                if (!gameBoardError) {
+                    return;
+                }
+
+                window.clearTimeout(gameBoardErrorDismissHandle);
+
+                gameBoardError.textContent = message;
+                gameBoardError.hidden = false;
+                gameBoardError.classList.remove("message-hidden");
+
+                gameBoardErrorDismissHandle = window.setTimeout(() => {
+                    gameBoardError.classList.add("message-hidden");
+
+                    window.setTimeout(() => {
+                        gameBoardError.hidden = true;
+                        gameBoardError.classList.remove("message-hidden");
+                    }, 300);
+                }, 3000);
+            };
+
             const submitGameControl = async form => {
                 const button = form.querySelector("button[type='submit']");
                 button?.setAttribute("disabled", "disabled");
@@ -2204,6 +2245,20 @@
                     button?.removeAttribute("disabled");
                 }
             };
+
+            for (const form of questionSelectionForms) {
+                form.addEventListener("submit", async event => {
+                    event.preventDefault();
+
+                    try {
+                        await submitGameControl(form);
+                        window.location.reload();
+                    } catch (error) {
+                        console.error(error);
+                        showGameBoardError(error.message);
+                    }
+                });
+            }
 
             const handleGameControlError = error => {
                 console.error(error);

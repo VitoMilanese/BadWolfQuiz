@@ -541,7 +541,27 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException)
         {
-            TempData["ErrorMessage"] = localizer["GameBoard_SelectionRejected"].Value;
+            var errorMessage =
+                localizer["GameBoard_SelectionRejected"].Value;
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = errorMessage
+                });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+        }
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true
+            });
         }
 
         return RedirectToPage(new { id });
