@@ -31,12 +31,109 @@ The bot install flow requests View Channel, Connect, and Mute Members. The bot
 does not join the voice channel: it observes voice states through the gateway and
 updates guild-member mute state through Discord's API.
 
+## Linux production configuration
+
+ASP.NET Core maps double underscores in environment-variable names to nested
+configuration keys. Production credentials should therefore be registered as
+`DiscordIntegration__*` variables on the application process. Do not put the
+client secret or bot token in the repository, deployment script, shell history,
+or a world-readable file.
+
+### systemd
+
+For a `badwolfquiz.service` deployment, keep the values in a root-owned
+environment file:
+
+```bash
+sudo install -d -m 750 /etc/badwolfquiz
+sudoedit /etc/badwolfquiz/discord.env
+sudo chmod 600 /etc/badwolfquiz/discord.env
+sudo chown root:root /etc/badwolfquiz/discord.env
+```
+
+The contents of `/etc/badwolfquiz/discord.env` should be:
+
+```text
+DiscordIntegration__Enabled=true
+DiscordIntegration__ClientId=APPLICATION_ID
+DiscordIntegration__ClientSecret=CLIENT_SECRET
+DiscordIntegration__BotToken=BOT_TOKEN
+DiscordIntegration__CallbackUrl=https://quiz.example.com/Admin/Settings/Discord?handler=Callback
+DiscordIntegration__AutomaticMuteTimeoutMinutes=15
+DiscordIntegration__MaximumParallelOperations=4
+```
+
+Connect that file to the service with a systemd override:
+
+```bash
+sudo systemctl edit badwolfquiz.service
+```
+
+```ini
+[Service]
+EnvironmentFile=/etc/badwolfquiz/discord.env
+```
+
+Apply the change and verify that the service starts:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart badwolfquiz.service
+sudo systemctl status badwolfquiz.service
+sudo journalctl -u badwolfquiz.service -n 100 --no-pager
+```
+
+Do not print the environment file or inspect the process environment in shared
+logs, because both operations can disclose the bot token and OAuth secret.
+
+### Docker Compose
+
+Container deployments can reference the same uncommitted environment file:
+
+```yaml
+services:
+  badwolfquiz:
+    env_file:
+      - /etc/badwolfquiz/discord.env
+```
+
+Recreate the container after changing a value:
+
+```bash
+docker compose up -d --force-recreate badwolfquiz
+```
+
+### Temporary shell launch
+
+For a short-lived manual launch, export the variables in the same shell before
+starting the application. This is not recommended for permanent hosting because
+the values disappear with the session and can leak into shell history.
+
+### OAuth callback and reverse proxy
+
+`DiscordIntegration__CallbackUrl` must use the public HTTPS origin visible to
+the host's browser, not the internal Kestrel address or container name. Register
+the exact same value under **OAuth2 → Redirects** in the Discord Developer Portal.
+The scheme, host, port, path, and `handler=Callback` query parameter must match.
+
+For example, even when Kestrel listens internally on `http://127.0.0.1:5080`, a
+deployment behind a reverse proxy should normally use:
+
+```text
+https://quiz.example.com/Admin/Settings/Discord?handler=Callback
+```
+
+Restart the service or recreate the container after rotating the client secret
+or bot token. Update the environment file first, then replace the corresponding
+credential in the Discord Developer Portal to keep downtime short.
+
 ## Host setup
 
-Open **Discord voice** from the authenticated menu, connect the host's Discord
-account, install the bot if necessary, and select a server and standard voice
-channel. Only servers where the user can manage the server and where the bot is
-present are offered. The page reports bot, server, channel, and permission health.
+Open the Discord voice dialog from the global settings page or directly from an
+active host game, connect the host's Discord account, install the bot if necessary,
+and select a server and standard voice channel. Only servers where the user can
+manage the server and where the bot is present are offered. The dialog reports
+bot, server, channel, and permission health.
 
 OAuth access tokens and CSRF state are kept only in short-lived server memory.
 Only stable Discord IDs, display names, and the automatic-media preference are
