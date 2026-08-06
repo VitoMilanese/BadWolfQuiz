@@ -144,6 +144,9 @@
   <data name="Button_Save" xml:space="preserve">
     <value>Save</value>
   </data>
+  <data name="Button_NextQuestion" xml:space="preserve">
+    <value>Next question</value>
+  </data>
   <data name="Label_Score" xml:space="preserve">
     <value>Score</value>
   </data>
@@ -430,6 +433,9 @@
   </data>
   <data name="Dialog_DeleteQuestion_Text" xml:space="preserve">
     <value>Are you sure you want to delete this question?</value>
+  </data>
+  <data name="QuizEditor_QuestionDeleted" xml:space="preserve">
+    <value>Question deleted.</value>
   </data>
   <data name="Dialog_DeleteCategory_Title" xml:space="preserve">
     <value>Delete category</value>
@@ -907,6 +913,18 @@
   </data>
   <data name="Button_EditFinalQuestion" xml:space="preserve">
     <value>Edit final question</value>
+  </data>
+  <data name="Button_DeleteFinalQuestion" xml:space="preserve">
+    <value>Delete final question</value>
+  </data>
+  <data name="Dialog_DeleteFinalQuestion_Title" xml:space="preserve">
+    <value>Delete final question</value>
+  </data>
+  <data name="Dialog_DeleteFinalQuestion_Text" xml:space="preserve">
+    <value>Are you sure you want to delete the final question and answer?</value>
+  </data>
+  <data name="Message_FinalQuestionDeleted" xml:space="preserve">
+    <value>Final question deleted.</value>
   </data>
   <data name="Message_FinalQuestionSaved" xml:space="preserve">
     <value>Final question saved.</value>

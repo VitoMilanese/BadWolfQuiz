@@ -119,6 +119,16 @@
                 @Localizer["Button_EditFinalQuestion"]
             </a>
 
+            @if (Model.Quiz.FinalQuestionBlocks.Any(HasBlockContent) ||
+                Model.Quiz.FinalAnswerBlocks.Any(HasBlockContent))
+            {
+                <button type="button"
+                        class="button button-danger-outline round-action-button"
+                        onclick="openDeleteFinalQuestionDialog()">
+                    @Localizer["Button_DeleteFinalQuestion"]
+                </button>
+            }
+
             <button type="button"
                     class="button button-secondary round-action-button"
                     onclick="openRenameRoundDialog()">
@@ -139,7 +149,8 @@
 
 <form method="post"
       asp-page-handler="SaveRoundRows"
-      class="quiz-board-form">
+      class="quiz-board-form"
+      data-save-error="@Localizer["Error_Unexpected"]">
     <input asp-for="RoundRows.QuizId"
            type="hidden"
            value="@Model.Quiz.Id" />
@@ -376,19 +387,33 @@
                                     }
                                 </a>
 
-                                @if (rounds.Count > 1)
-                                {
-                                    <button type="button"
-                                            class="js-question-exchange button button-secondary icon-button question-exchange-button"
-                                            draggable="false"
-                                            data-question-id="@question.Id"
-                                            data-question-title="@category.Title — @roundRow.Points"
-                                            data-round-id="@round.Id"
-                                            title="@Localizer["QuizEditor_MoveQuestionToRound"]"
-                                            aria-label="@Localizer["QuizEditor_MoveQuestionToRound"]">
-                                        ⇅
-                                    </button>
-                                }
+                                <div class="question-card-actions">
+                                    @if (rounds.Count > 1)
+                                    {
+                                        <button type="button"
+                                                class="js-question-exchange button button-secondary icon-button"
+                                                draggable="false"
+                                                data-question-id="@question.Id"
+                                                data-question-title="@category.Title — @roundRow.Points"
+                                                data-round-id="@round.Id"
+                                                title="@Localizer["QuizEditor_MoveQuestionToRound"]"
+                                                aria-label="@Localizer["QuizEditor_MoveQuestionToRound"]">
+                                            ⇅
+                                        </button>
+                                    }
+                                    @if (hasQuestion || hasAnswer)
+                                    {
+                                        <button type="button"
+                                                class="js-question-delete button button-danger icon-button"
+                                                draggable="false"
+                                                data-question-id="@question.Id"
+                                                data-question-title="@category.Title — @roundRow.Points"
+                                                title="@Localizer["Dialog_DeleteQuestion_Title"]"
+                                                aria-label="@Localizer["Dialog_DeleteQuestion_Title"]">
+                                            🗑
+                                        </button>
+                                    }
+                                </div>
                             </div>
                         }
                     </div>
@@ -404,8 +429,11 @@
             @Localizer["Title_MyQuizzes"]
         </a>
         <div class="quiz-board-primary-actions">
+            <span class="alert ajax-save-status" role="status"
+                  data-quiz-save-status hidden></span>
             <button type="submit"
-                    class="button button-primary">
+                    class="button button-primary"
+                    data-ajax-save-round>
                 @Localizer["Button_Save"]
             </button>
             <button type="submit"
@@ -453,6 +481,85 @@
                 <button type="submit"
                         class="button button-primary">
                     @Localizer["QuizEditor_AddRound"]
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog id="delete-question-dialog" class="app-dialog">
+    <div class="dialog-card dialog-card-danger">
+        <div class="dialog-heading">
+            <h2>@Localizer["Dialog_DeleteQuestion_Title"]</h2>
+            <button type="button"
+                    class="dialog-close"
+                    data-close-delete-question
+                    aria-label="@Localizer["Button_Cancel"]">
+                ×
+            </button>
+        </div>
+
+        <p class="dialog-warning">
+            @Localizer["Dialog_DeleteQuestion_Text"]
+        </p>
+        <div class="dialog-target" data-delete-question-title></div>
+
+        <form method="post"
+              asp-page-handler="DeleteQuestion"
+              data-delete-question-form>
+            <input asp-for="DeleteQuestion.QuizId"
+                   type="hidden"
+                   value="@Model.Quiz.Id" />
+            <input asp-for="DeleteQuestion.QuestionId"
+                   id="delete-question-id"
+                   type="hidden" />
+
+            <div class="dialog-actions form-actions">
+                <button type="button"
+                        class="button button-secondary"
+                        data-close-delete-question>
+                    @Localizer["Button_Cancel"]
+                </button>
+                <button type="submit" class="button button-danger">
+                    @Localizer["Button_Delete"]
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog id="delete-final-question-dialog" class="app-dialog">
+    <div class="dialog-card dialog-card-danger">
+        <div class="dialog-heading">
+            <h2>@Localizer["Dialog_DeleteFinalQuestion_Title"]</h2>
+            <button type="button"
+                    class="dialog-close"
+                    onclick="closeDeleteFinalQuestionDialog()"
+                    aria-label="@Localizer["Button_Cancel"]">
+                ×
+            </button>
+        </div>
+
+        <p class="dialog-warning">
+            @Localizer["Dialog_DeleteFinalQuestion_Text"]
+        </p>
+
+        <form method="post" asp-page-handler="DeleteFinalQuestion">
+            <input asp-for="DeleteFinalQuestion.QuizId"
+                   type="hidden"
+                   value="@Model.Quiz.Id" />
+            <input asp-for="DeleteFinalQuestion.RoundId"
+                   type="hidden"
+                   value="@round.Id" />
+
+            <div class="dialog-actions form-actions">
+                <button type="button"
+                        class="button button-secondary"
+                        onclick="closeDeleteFinalQuestionDialog()">
+                    @Localizer["Button_Cancel"]
+                </button>
+                <button type="submit" class="button button-danger">
+                    @Localizer["Button_Delete"]
                 </button>
             </div>
         </form>
@@ -795,6 +902,125 @@
 
         const quizBoardForm = document.querySelector(".quiz-board-form");
 
+        const quizSaveStatus = document.querySelector("[data-quiz-save-status]");
+        let quizSaveStatusTimeout;
+
+        const showQuizSaveStatus = (message, success) => {
+            clearTimeout(quizSaveStatusTimeout);
+            quizSaveStatus.textContent = message;
+            quizSaveStatus.classList.toggle("alert-success", success);
+            quizSaveStatus.classList.toggle("alert-error", !success);
+            quizSaveStatus.hidden = false;
+
+            if (success) {
+                quizSaveStatusTimeout = setTimeout(() => {
+                    quizSaveStatus.hidden = true;
+                }, 4000);
+            }
+        };
+
+        quizBoardForm?.addEventListener("submit", async event => {
+            const submitter = event.submitter;
+            if (!submitter?.matches("[data-ajax-save-round]")) {
+                return;
+            }
+
+            event.preventDefault();
+            submitter.disabled = true;
+            clearTimeout(quizSaveStatusTimeout);
+            quizSaveStatus.hidden = true;
+
+            try {
+                const response = await fetch(quizBoardForm.action, {
+                    method: "POST",
+                    body: new FormData(quizBoardForm),
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || quizBoardForm.dataset.saveError);
+                }
+
+                showQuizSaveStatus(result.message, true);
+            } catch (error) {
+                showQuizSaveStatus(
+                    error.message || quizBoardForm.dataset.saveError,
+                    false);
+            } finally {
+                submitter.disabled = false;
+            }
+        });
+
+        const deleteQuestionDialog =
+            document.getElementById("delete-question-dialog");
+        const deleteQuestionForm = document.querySelector(
+            "[data-delete-question-form]");
+        let pendingDeleteQuestionButton = null;
+
+        document.querySelectorAll(".js-question-delete").forEach(button => {
+            button.addEventListener("click", () => {
+                pendingDeleteQuestionButton = button;
+                document.getElementById("delete-question-id").value =
+                    button.dataset.questionId;
+                deleteQuestionDialog.querySelector(
+                    "[data-delete-question-title]").textContent =
+                    button.dataset.questionTitle;
+                deleteQuestionDialog.showModal();
+            });
+        });
+
+        deleteQuestionForm?.addEventListener("submit", async event => {
+            event.preventDefault();
+            const submitter = event.submitter;
+            submitter.disabled = true;
+
+            try {
+                const response = await fetch(deleteQuestionForm.action, {
+                    method: "POST",
+                    body: new FormData(deleteQuestionForm),
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(
+                        result.error || quizBoardForm.dataset.saveError);
+                }
+
+                const slot = pendingDeleteQuestionButton?.closest(
+                    ".question-cell-slot");
+                const questionCard = slot?.querySelector(".question-cell");
+                questionCard?.classList.remove("filled");
+                const preview = questionCard?.querySelector(
+                    ".question-editor-preview");
+                if (preview) {
+                    preview.replaceChildren();
+                }
+                questionCard?.querySelectorAll(
+                    ".question-completion-item").forEach(item => {
+                        item.classList.remove("complete");
+                        item.textContent = `${item.textContent.trim()[0]} —`;
+                    });
+                questionCard?.querySelector(".visually-hidden")?.remove();
+                pendingDeleteQuestionButton?.remove();
+                pendingDeleteQuestionButton = null;
+                deleteQuestionDialog.close();
+                showQuizSaveStatus(result.message, true);
+            } catch (error) {
+                deleteQuestionDialog.close();
+                showQuizSaveStatus(
+                    error.message || quizBoardForm.dataset.saveError,
+                    false);
+            } finally {
+                submitter.disabled = false;
+            }
+        });
+
+        document.querySelectorAll("[data-close-delete-question]")
+            .forEach(button => {
+                button.addEventListener("click", () =>
+                    deleteQuestionDialog.close());
+            });
+
         const countReductionDialog =
             document.getElementById("count-reduction-dialog");
 
@@ -1087,6 +1313,14 @@
 
         function closeDeleteRoundDialog() {
             document.getElementById("delete-round-dialog").close();
+        }
+
+        function openDeleteFinalQuestionDialog() {
+            document.getElementById("delete-final-question-dialog").showModal();
+        }
+
+        function closeDeleteFinalQuestionDialog() {
+            document.getElementById("delete-final-question-dialog").close();
         }
 
         const successMessage = document.getElementById("success-message");

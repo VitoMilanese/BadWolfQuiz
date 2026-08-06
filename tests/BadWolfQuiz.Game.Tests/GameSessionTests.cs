@@ -348,6 +348,7 @@ public sealed class GameSessionTests
         session.Start();
 
         Assert.Equal(GameSessionStatus.Running, session.Status);
+        Assert.Equal(InitialTime, session.StartedAtUtc);
         Assert.Empty(session.Players);
     }
 

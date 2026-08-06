@@ -21,6 +21,8 @@ public sealed class QuestionEditorModel(
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
+    public int? NextQuestionId { get; private set; }
+
     public async Task<IActionResult> OnGetAsync(int id)
     {
         var canEdit = await db.QuizQuestions.AsNoTracking().AnyAsync(x =>
@@ -93,6 +95,15 @@ public sealed class QuestionEditorModel(
             })
             .ToList();
 
+        NextQuestionId = await db.QuizQuestions
+            .AsNoTracking()
+            .Where(x =>
+                x.QuizCategoryId == question.QuizCategoryId &&
+                x.RowIndex > question.RowIndex)
+            .OrderBy(x => x.RowIndex)
+            .Select(x => (int?)x.Id)
+            .FirstOrDefaultAsync();
+
         return Page();
     }
 
@@ -131,6 +142,10 @@ public sealed class QuestionEditorModel(
 
         if (!ModelState.IsValid)
         {
+            if (IsAjaxRequest())
+            {
+                return AjaxValidationError();
+            }
             return Page();
         }
 
@@ -207,6 +222,10 @@ public sealed class QuestionEditorModel(
                         string.Empty,
                         localizer[exception.ResourceKey, exception.ResourceArguments]);
 
+                    if (IsAjaxRequest())
+                    {
+                        return AjaxValidationError();
+                    }
                     return Page();
                 }
             }
@@ -274,6 +293,10 @@ public sealed class QuestionEditorModel(
                         string.Empty,
                         localizer[exception.ResourceKey, exception.ResourceArguments]);
 
+                    if (IsAjaxRequest())
+                    {
+                        return AjaxValidationError();
+                    }
                     return Page();
                 }
             }
@@ -288,9 +311,49 @@ public sealed class QuestionEditorModel(
         }
 
         await db.SaveChangesAsync(cancellationToken);
+
+        if (IsAjaxRequest())
+        {
+            var questionBlocks = await db.QuestionContentBlocks
+                .AsNoTracking()
+                .Where(x => x.QuizQuestionId == question.Id)
+                .OrderBy(x => x.SortOrder)
+                .Select(x => new { id = x.Id, sortOrder = x.SortOrder })
+                .ToListAsync(cancellationToken);
+            var answerBlocks = await db.AnswerContentBlocks
+                .AsNoTracking()
+                .Where(x => x.QuizQuestionId == question.Id)
+                .OrderBy(x => x.SortOrder)
+                .Select(x => new { id = x.Id, sortOrder = x.SortOrder })
+                .ToListAsync(cancellationToken);
+
+            return new JsonResult(new
+            {
+                success = true,
+                message = localizer["Message_QuestionSaved"].Value,
+                questionBlocks,
+                answerBlocks
+            });
+        }
+
         TempData["SuccessMessage"] = localizer["Message_QuestionSaved"].Value;
-        //return RedirectToPage("Editor", new { id = Input.QuizId });
         return RedirectToPage(new { id = Input.Id });
+    }
+
+    private bool IsAjaxRequest() => string.Equals(
+        Request.Headers["X-Requested-With"],
+        "XMLHttpRequest",
+        StringComparison.OrdinalIgnoreCase);
+
+    private IActionResult AjaxValidationError()
+    {
+        var error = ModelState.Values
+            .SelectMany(value => value.Errors)
+            .Select(item => item.ErrorMessage)
+            .FirstOrDefault(message => !string.IsNullOrWhiteSpace(message))
+            ?? localizer["Error_Unexpected"].Value;
+
+        return BadRequest(new { success = false, error });
     }
 
     public PartialViewResult OnGetContentBlock(

@@ -57,6 +57,12 @@ public sealed class EditorModel(
     [BindProperty]
     public ExchangeQuestionsInputModel ExchangeQuestions { get; set; } = new();
 
+    [BindProperty]
+    public DeleteQuestionInputModel DeleteQuestion { get; set; } = new();
+
+    [BindProperty]
+    public DeleteFinalQuestionInputModel DeleteFinalQuestion { get; set; } = new();
+
     public int SelectedRoundId { get; private set; }
 
     public Quiz Quiz { get; private set; } = null!;
@@ -151,6 +157,20 @@ public sealed class EditorModel(
         public int TargetQuestionId { get; set; }
     }
 
+    public sealed class DeleteQuestionInputModel
+    {
+        public int QuizId { get; set; }
+
+        public int QuestionId { get; set; }
+    }
+
+    public sealed class DeleteFinalQuestionInputModel
+    {
+        public int QuizId { get; set; }
+
+        public int RoundId { get; set; }
+    }
+
     public async Task<IActionResult> OnGetAsync(
         int id,
         int? selectedRoundId = null)
@@ -166,6 +186,8 @@ public sealed class EditorModel(
         }
         var quiz = await db.Quizzes
             .AsNoTracking()
+            .Include(x => x.FinalQuestionBlocks)
+            .Include(x => x.FinalAnswerBlocks)
             .Include(x => x.Rounds)
                 .ThenInclude(x => x.Rows)
             .Include(x => x.Rounds)
@@ -660,6 +682,89 @@ public sealed class EditorModel(
         });
     }
 
+    public async Task<IActionResult> OnPostDeleteQuestionAsync()
+    {
+        var question = await db.QuizQuestions
+            .Include(x => x.QuestionBlocks)
+            .Include(x => x.AnswerBlocks)
+            .Include(x => x.Category)
+                .ThenInclude(x => x.Round)
+                    .ThenInclude(x => x.Quiz)
+            .SingleOrDefaultAsync(x =>
+                x.Id == DeleteQuestion.QuestionId &&
+                x.Category.Round.QuizId == DeleteQuestion.QuizId);
+
+        if (question is null)
+        {
+            return NotFound();
+        }
+
+        db.QuestionContentBlocks.RemoveRange(question.QuestionBlocks);
+        db.AnswerContentBlocks.RemoveRange(question.AnswerBlocks);
+        db.QuestionContentBlocks.Add(new QuestionContentBlock
+        {
+            QuizQuestionId = question.Id,
+            BlockType = ContentBlockType.Text,
+            SortOrder = 1
+        });
+        db.AnswerContentBlocks.Add(new AnswerContentBlock
+        {
+            QuizQuestionId = question.Id,
+            BlockType = ContentBlockType.Text,
+            SortOrder = 1
+        });
+        question.UpdatedAtUtc = DateTime.UtcNow;
+        question.Category.Round.Quiz.UpdatedAtUtc = DateTime.UtcNow;
+
+        await db.SaveChangesAsync();
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                message = localizer["QuizEditor_QuestionDeleted"].Value
+            });
+        }
+
+        TempData["SuccessMessage"] =
+            localizer["QuizEditor_QuestionDeleted"].Value;
+
+        return RedirectToPage(new
+        {
+            id = question.Category.Round.QuizId,
+            selectedRoundId = question.Category.QuizRoundId
+        });
+    }
+
+    public async Task<IActionResult> OnPostDeleteFinalQuestionAsync()
+    {
+        var quiz = await db.Quizzes
+            .Include(x => x.FinalQuestionBlocks)
+            .Include(x => x.FinalAnswerBlocks)
+            .SingleOrDefaultAsync(x => x.Id == DeleteFinalQuestion.QuizId);
+
+        if (quiz is null)
+        {
+            return NotFound();
+        }
+
+        db.FinalQuestionContentBlocks.RemoveRange(quiz.FinalQuestionBlocks);
+        db.FinalAnswerContentBlocks.RemoveRange(quiz.FinalAnswerBlocks);
+        quiz.UpdatedAtUtc = DateTime.UtcNow;
+
+        await db.SaveChangesAsync();
+
+        TempData["SuccessMessage"] =
+            localizer["Message_FinalQuestionDeleted"].Value;
+
+        return RedirectToPage(new
+        {
+            id = quiz.Id,
+            selectedRoundId = DeleteFinalQuestion.RoundId
+        });
+    }
+
     public async Task<IActionResult> OnPostSaveRoundRowsAsync(
         bool play,
         CancellationToken cancellationToken)
@@ -698,6 +803,14 @@ public sealed class EditorModel(
             submittedRows.Count == 0 ||
             submittedRows.Any(x => x.RowIndex <= 0 || x.Points < 0))
         {
+            if (IsAjaxRequest() && !play)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = localizer["QuizEditor_InvalidRoundRows"].Value
+                });
+            }
             TempData["ErrorMessage"] =
                 localizer["QuizEditor_InvalidRoundRows"].Value;
 
@@ -822,6 +935,16 @@ public sealed class EditorModel(
             (RoundRows.RandomWagerQuestionCount < 0 ||
              RoundRows.RandomWagerQuestionCount > eligibleQuestionCount))
         {
+            if (IsAjaxRequest() && !play)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = localizer[
+                        "QuizEditor_InvalidRandomWagerCount",
+                        eligibleQuestionCount].Value
+                });
+            }
             TempData["ErrorMessage"] = localizer[
                 "QuizEditor_InvalidRandomWagerCount",
                 eligibleQuestionCount].Value;
@@ -899,6 +1022,15 @@ public sealed class EditorModel(
             }
         }
 
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                message = localizer["QuizEditor_RoundRowsSaved"].Value
+            });
+        }
+
         TempData["SuccessMessage"] =
             localizer["QuizEditor_RoundRowsSaved"].Value;
 
@@ -908,6 +1040,11 @@ public sealed class EditorModel(
             selectedRoundId = round.Id
         });
     }
+
+    private bool IsAjaxRequest() => string.Equals(
+        Request.Headers["X-Requested-With"],
+        "XMLHttpRequest",
+        StringComparison.OrdinalIgnoreCase);
 
     public async Task<IActionResult> OnPostRenameRoundAsync()
     {
