@@ -1,6 +1,35 @@
 (function () {
     "use strict";
 
+    let filePickerPending = false;
+    let suppressEscapeUntil = 0;
+
+    document.addEventListener("click", event => {
+        if (event.target.closest?.('input[type="file"]')) {
+            filePickerPending = true;
+        }
+    }, true);
+
+    window.addEventListener("focus", () => {
+        if (!filePickerPending) {
+            return;
+        }
+
+        filePickerPending = false;
+        suppressEscapeUntil = Date.now() + 1000;
+    }, true);
+
+    window.addEventListener("keyup", event => {
+        if (event.key !== "Escape" ||
+            (!filePickerPending && Date.now() > suppressEscapeUntil)) {
+            return;
+        }
+
+        filePickerPending = false;
+        suppressEscapeUntil = 0;
+        event.stopImmediatePropagation();
+    }, true);
+
     const extensionsByMimeType = {
         "audio/aac": "aac",
         "audio/flac": "flac",
