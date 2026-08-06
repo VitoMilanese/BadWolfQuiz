@@ -2152,4 +2152,5 @@
   <data name="Discord_OperationComplete" xml:space="preserve"><value>Операцію Discord завершено: змінено {0}, пропущено {1}.</value></data>
   <data name="Discord_OperationPartial" xml:space="preserve"><value>Операцію Discord виконано частково: змінено {0}, помилок {1}, пропущено {2}.</value></data>
   <data name="Discord_ChannelSaved" xml:space="preserve"><value>Голосовий канал Discord збережено.</value></data>
+  <data name="Discord_AutomaticMuteSaved" xml:space="preserve"><value>Налаштування автоматичного приглушення Discord збережено.</value></data>
 </root>

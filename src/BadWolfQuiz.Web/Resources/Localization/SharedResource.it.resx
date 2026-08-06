@@ -2152,4 +2152,5 @@
   <data name="Discord_OperationComplete" xml:space="preserve"><value>Operazione Discord completata: {0} modificati, {1} saltati.</value></data>
   <data name="Discord_OperationPartial" xml:space="preserve"><value>Operazione Discord parzialmente completata: {0} modificati, {1} non riusciti, {2} saltati.</value></data>
   <data name="Discord_ChannelSaved" xml:space="preserve"><value>Canale vocale Discord salvato.</value></data>
+  <data name="Discord_AutomaticMuteSaved" xml:space="preserve"><value>Impostazione di disattivazione automatica dell’audio Discord salvata.</value></data>
 </root>

@@ -63,4 +63,15 @@ public sealed class DiscordConnectionRepository(QuizDbContext db)
             await db.SaveChangesAsync(cancellationToken);
         }
     }
+
+    public async Task SaveAutomaticMuteAsync(
+        bool automaticMute,
+        CancellationToken cancellationToken)
+    {
+        var connection = await GetAsync(cancellationToken)
+            ?? throw new InvalidOperationException("Discord is not connected.");
+        connection.AutoMuteDuringMedia = automaticMute;
+        connection.UpdatedAtUtc = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+    }
 }

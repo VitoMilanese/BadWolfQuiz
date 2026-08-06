@@ -36,14 +36,20 @@ public sealed class DiscordModel(
     [BindProperty]
     public bool AutoMuteDuringMedia { get; set; }
 
-    public async Task OnGetAsync(CancellationToken cancellationToken) =>
+    [BindProperty(SupportsGet = true)]
+    public bool Embedded { get; set; }
+
+    public async Task OnGetAsync(CancellationToken cancellationToken)
+    {
+        ViewData["EmbeddedDiscordSettings"] = Embedded;
         await LoadAsync(cancellationToken);
+    }
 
     public IActionResult OnPostConnect()
     {
         if (!settings.Enabled)
         {
-            return RedirectToPage();
+            return RedirectToPage(new { embedded = Embedded });
         }
         return Redirect(oauth.CreateAuthorizationUrl(currentHost.RequiredId));
     }
@@ -59,7 +65,7 @@ public sealed class DiscordModel(
             !oauth.ConsumeState(state, currentHost.RequiredId))
         {
             TempData["DiscordError"] = "Discord authorization was cancelled or expired.";
-            return RedirectToPage();
+            return RedirectToPage(new { embedded = Embedded });
         }
 
         try
@@ -74,7 +80,7 @@ public sealed class DiscordModel(
         {
             TempData["DiscordError"] = "Discord authorization failed.";
         }
-        return RedirectToPage();
+        return RedirectToPage(new { embedded = Embedded });
     }
 
     public JsonResult OnGetChannels(string guildId)
@@ -90,6 +96,7 @@ public sealed class DiscordModel(
 
     public async Task<IActionResult> OnPostSaveAsync(CancellationToken cancellationToken)
     {
+        var existingConnection = await repository.GetAsync(cancellationToken);
         var session = oauth.GetSession(currentHost.RequiredId);
         var guild = session is not null && GuildId is not null &&
             session.GuildNames.TryGetValue(GuildId, out var guildName)
@@ -101,14 +108,14 @@ public sealed class DiscordModel(
         if (guild is null || channel is null)
         {
             TempData["DiscordError"] = "Select a Discord server and voice channel.";
-            return RedirectToPage();
+            return RedirectToPage(new { embedded = Embedded });
         }
 
         await repository.SaveSelectionAsync(
             guild.Id, guild.Name, channel.Id, channel.Name,
-            AutoMuteDuringMedia, cancellationToken);
+            existingConnection?.AutoMuteDuringMedia ?? false, cancellationToken);
         TempData["DiscordSuccess"] = localizer["Discord_ChannelSaved"].Value;
-        return RedirectToPage();
+        return RedirectToPage(new { embedded = Embedded });
     }
 
     public async Task<IActionResult> OnPostDisconnectAsync(CancellationToken cancellationToken)
@@ -127,7 +134,22 @@ public sealed class DiscordModel(
         await repository.DeleteAsync(cancellationToken);
         oauth.ClearSession(currentHost.RequiredId);
         TempData["DiscordSuccess"] = "Discord disconnected.";
-        return RedirectToPage();
+        return RedirectToPage(new { embedded = Embedded });
+    }
+
+    public async Task<IActionResult> OnPostSaveAutomaticMuteAsync(
+        CancellationToken cancellationToken)
+    {
+        if (await repository.GetAsync(cancellationToken) is null)
+        {
+            TempData["DiscordError"] = localizer["Discord_NotReady"].Value;
+            return RedirectToPage(new { embedded = Embedded });
+        }
+
+        await repository.SaveAutomaticMuteAsync(
+            AutoMuteDuringMedia, cancellationToken);
+        TempData["DiscordSuccess"] = localizer["Discord_AutomaticMuteSaved"].Value;
+        return RedirectToPage(new { embedded = Embedded });
     }
 
     public async Task<JsonResult> OnPostTestAsync(CancellationToken cancellationToken)

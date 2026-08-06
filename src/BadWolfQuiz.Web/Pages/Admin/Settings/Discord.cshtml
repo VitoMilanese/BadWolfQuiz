@@ -4,7 +4,7 @@
     ViewData["Title"] = Localizer["Discord_SettingsTitle"];
 }
 
-<div class="page-heading">
+<div class="page-heading" hidden="@(Model.Embedded ? "hidden" : null)">
     <div>
         <p class="eyebrow">@Localizer["Menu_Settings"]</p>
         <h1>@Localizer["Discord_SettingsTitle"]</h1>
@@ -32,7 +32,8 @@
     {
         <p>@Localizer["Discord_ConnectDescription"]</p>
         <form method="post" asp-page-handler="Connect">
-            <button class="button button-primary" type="submit">
+            <input asp-for="Embedded" type="hidden" />
+            <button class="button button-primary" type="submit" formtarget="_blank">
                 @Localizer["Discord_Connect"]
             </button>
         </form>
@@ -56,7 +57,8 @@
             <p>@Localizer["Discord_ReauthorizeHint"]</p>
             <div class="form-actions">
                 <form method="post" asp-page-handler="Connect">
-                    <button class="button button-secondary" type="submit">@Localizer["Discord_Reauthorize"]</button>
+                    <input asp-for="Embedded" type="hidden" />
+                    <button class="button button-secondary" type="submit" formtarget="_blank">@Localizer["Discord_Reauthorize"]</button>
                 </form>
                 <a class="button button-secondary" href="@Model.BotInstallUrl" target="_blank" rel="noopener">
                     @Localizer["Discord_InstallBot"]
@@ -66,6 +68,7 @@
         else
         {
             <form method="post" asp-page-handler="Save" class="stack-form">
+                <input asp-for="Embedded" type="hidden" />
                 <label>
                     <span>@Localizer["Discord_Server"]</span>
                     <select asp-for="GuildId" data-discord-guild required>
@@ -86,13 +89,18 @@
                         }
                     </select>
                 </label>
-                <label class="settings-checkbox">
-                    <input asp-for="AutoMuteDuringMedia" type="checkbox" />
-                    <span>@Localizer["Discord_AutoMute"]</span>
-                </label>
                 <button class="button button-primary" type="submit">@Localizer["Button_Save"]</button>
             </form>
         }
+
+        <form method="post" asp-page-handler="SaveAutomaticMute" class="discord-auto-mute-form">
+            <input asp-for="Embedded" type="hidden" />
+            <label class="settings-checkbox">
+                <input asp-for="AutoMuteDuringMedia" type="checkbox" />
+                <span>@Localizer["Discord_AutoMute"]</span>
+            </label>
+            <button class="button button-secondary" type="submit">@Localizer["Button_Save"]</button>
+        </form>
 
         <div class="form-actions">
             @if (Model.Health.IsReady)
@@ -102,6 +110,7 @@
                 </button>
             }
             <form method="post" asp-page-handler="Disconnect">
+                <input asp-for="Embedded" type="hidden" />
                 <button class="button button-danger" type="submit">@Localizer["Discord_Disconnect"]</button>
             </form>
             <span class="form-status" role="status" data-discord-status></span>
