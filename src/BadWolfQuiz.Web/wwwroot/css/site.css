@@ -1259,11 +1259,17 @@ textarea {
     cursor: grabbing;
 }
 
-.question-exchange-button {
+.question-card-actions {
     position: absolute;
     top: 8px;
     right: 8px;
     z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.question-card-actions .icon-button {
     width: 34px;
     height: 34px;
     min-height: 34px;
@@ -1271,9 +1277,21 @@ textarea {
     opacity: .82;
 }
 
-.question-exchange-button:hover,
-.question-exchange-button:focus-visible {
+.question-card-actions .icon-button:hover,
+.question-card-actions .icon-button:focus-visible {
     opacity: 1;
+}
+
+.question-card-actions .js-question-delete {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 140ms ease;
+}
+
+.question-cell-slot:hover .js-question-delete,
+.question-cell-slot:focus-within .js-question-delete {
+    opacity: .82;
+    pointer-events: auto;
 }
 
 .question-cell-dragging {

@@ -135,6 +135,7 @@
         (() => {
             const form = document.querySelector("[data-ajax-question-editor]");
             const status = document.querySelector("[data-question-save-status]");
+            let statusTimeout;
             if (!form || !status) {
                 return;
             }
@@ -163,6 +164,7 @@
                 event.preventDefault();
                 const submitter = event.submitter;
                 submitter?.setAttribute("disabled", "disabled");
+                clearTimeout(statusTimeout);
                 status.hidden = true;
 
                 try {
@@ -181,6 +183,9 @@
                     form.querySelectorAll('input[type="file"]').forEach(input => input.value = "");
                     form.querySelectorAll('input[name$=".RemoveFile"]').forEach(input => input.checked = false);
                     setStatus(result.message, true);
+                    statusTimeout = setTimeout(() => {
+                        status.hidden = true;
+                    }, 4000);
                 } catch (error) {
                     setStatus(error.message || form.dataset.saveError, false);
                 } finally {

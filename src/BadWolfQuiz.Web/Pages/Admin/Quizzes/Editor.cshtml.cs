@@ -57,6 +57,9 @@ public sealed class EditorModel(
     [BindProperty]
     public ExchangeQuestionsInputModel ExchangeQuestions { get; set; } = new();
 
+    [BindProperty]
+    public DeleteQuestionInputModel DeleteQuestion { get; set; } = new();
+
     public int SelectedRoundId { get; private set; }
 
     public Quiz Quiz { get; private set; } = null!;
@@ -149,6 +152,13 @@ public sealed class EditorModel(
         public int SourceQuestionId { get; set; }
 
         public int TargetQuestionId { get; set; }
+    }
+
+    public sealed class DeleteQuestionInputModel
+    {
+        public int QuizId { get; set; }
+
+        public int QuestionId { get; set; }
     }
 
     public async Task<IActionResult> OnGetAsync(
@@ -657,6 +667,40 @@ public sealed class EditorModel(
         {
             id = quiz.Id,
             selectedRoundId = sourceRoundId
+        });
+    }
+
+    public async Task<IActionResult> OnPostDeleteQuestionAsync()
+    {
+        var question = await db.QuizQuestions
+            .Include(x => x.QuestionBlocks)
+            .Include(x => x.AnswerBlocks)
+            .Include(x => x.Category)
+                .ThenInclude(x => x.Round)
+                    .ThenInclude(x => x.Quiz)
+            .SingleOrDefaultAsync(x =>
+                x.Id == DeleteQuestion.QuestionId &&
+                x.Category.Round.QuizId == DeleteQuestion.QuizId);
+
+        if (question is null)
+        {
+            return NotFound();
+        }
+
+        db.QuestionContentBlocks.RemoveRange(question.QuestionBlocks);
+        db.AnswerContentBlocks.RemoveRange(question.AnswerBlocks);
+        question.UpdatedAtUtc = DateTime.UtcNow;
+        question.Category.Round.Quiz.UpdatedAtUtc = DateTime.UtcNow;
+
+        await db.SaveChangesAsync();
+
+        TempData["SuccessMessage"] =
+            localizer["QuizEditor_QuestionDeleted"].Value;
+
+        return RedirectToPage(new
+        {
+            id = question.Category.Round.QuizId,
+            selectedRoundId = question.Category.QuizRoundId
         });
     }
 

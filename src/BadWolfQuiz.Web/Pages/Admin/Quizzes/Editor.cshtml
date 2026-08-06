@@ -377,19 +377,30 @@
                                     }
                                 </a>
 
-                                @if (rounds.Count > 1)
-                                {
+                                <div class="question-card-actions">
+                                    @if (rounds.Count > 1)
+                                    {
+                                        <button type="button"
+                                                class="js-question-exchange button button-secondary icon-button"
+                                                draggable="false"
+                                                data-question-id="@question.Id"
+                                                data-question-title="@category.Title — @roundRow.Points"
+                                                data-round-id="@round.Id"
+                                                title="@Localizer["QuizEditor_MoveQuestionToRound"]"
+                                                aria-label="@Localizer["QuizEditor_MoveQuestionToRound"]">
+                                            ⇅
+                                        </button>
+                                    }
                                     <button type="button"
-                                            class="js-question-exchange button button-secondary icon-button question-exchange-button"
+                                            class="js-question-delete button button-danger icon-button"
                                             draggable="false"
                                             data-question-id="@question.Id"
                                             data-question-title="@category.Title — @roundRow.Points"
-                                            data-round-id="@round.Id"
-                                            title="@Localizer["QuizEditor_MoveQuestionToRound"]"
-                                            aria-label="@Localizer["QuizEditor_MoveQuestionToRound"]">
-                                        ⇅
+                                            title="@Localizer["Dialog_DeleteQuestion_Title"]"
+                                            aria-label="@Localizer["Dialog_DeleteQuestion_Title"]">
+                                        🗑
                                     </button>
-                                }
+                                </div>
                             </div>
                         }
                     </div>
@@ -457,6 +468,45 @@
                 <button type="submit"
                         class="button button-primary">
                     @Localizer["QuizEditor_AddRound"]
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog id="delete-question-dialog" class="app-dialog">
+    <div class="dialog-card dialog-card-danger">
+        <div class="dialog-heading">
+            <h2>@Localizer["Dialog_DeleteQuestion_Title"]</h2>
+            <button type="button"
+                    class="dialog-close"
+                    data-close-delete-question
+                    aria-label="@Localizer["Button_Cancel"]">
+                ×
+            </button>
+        </div>
+
+        <p class="dialog-warning">
+            @Localizer["Dialog_DeleteQuestion_Text"]
+        </p>
+        <div class="dialog-target" data-delete-question-title></div>
+
+        <form method="post" asp-page-handler="DeleteQuestion">
+            <input asp-for="DeleteQuestion.QuizId"
+                   type="hidden"
+                   value="@Model.Quiz.Id" />
+            <input asp-for="DeleteQuestion.QuestionId"
+                   id="delete-question-id"
+                   type="hidden" />
+
+            <div class="dialog-actions form-actions">
+                <button type="button"
+                        class="button button-secondary"
+                        data-close-delete-question>
+                    @Localizer["Button_Cancel"]
+                </button>
+                <button type="submit" class="button button-danger">
+                    @Localizer["Button_Delete"]
                 </button>
             </div>
         </form>
@@ -800,6 +850,7 @@
         const quizBoardForm = document.querySelector(".quiz-board-form");
 
         const quizSaveStatus = document.querySelector("[data-quiz-save-status]");
+        let quizSaveStatusTimeout;
 
         quizBoardForm?.addEventListener("submit", async event => {
             const submitter = event.submitter;
@@ -809,6 +860,7 @@
 
             event.preventDefault();
             submitter.disabled = true;
+            clearTimeout(quizSaveStatusTimeout);
             quizSaveStatus.hidden = true;
 
             try {
@@ -826,6 +878,9 @@
                 quizSaveStatus.classList.add("alert-success");
                 quizSaveStatus.classList.remove("alert-error");
                 quizSaveStatus.hidden = false;
+                quizSaveStatusTimeout = setTimeout(() => {
+                    quizSaveStatus.hidden = true;
+                }, 4000);
             } catch (error) {
                 quizSaveStatus.textContent =
                     error.message || quizBoardForm.dataset.saveError;
@@ -836,6 +891,26 @@
                 submitter.disabled = false;
             }
         });
+
+        const deleteQuestionDialog =
+            document.getElementById("delete-question-dialog");
+
+        document.querySelectorAll(".js-question-delete").forEach(button => {
+            button.addEventListener("click", () => {
+                document.getElementById("delete-question-id").value =
+                    button.dataset.questionId;
+                deleteQuestionDialog.querySelector(
+                    "[data-delete-question-title]").textContent =
+                    button.dataset.questionTitle;
+                deleteQuestionDialog.showModal();
+            });
+        });
+
+        document.querySelectorAll("[data-close-delete-question]")
+            .forEach(button => {
+                button.addEventListener("click", () =>
+                    deleteQuestionDialog.close());
+            });
 
         const countReductionDialog =
             document.getElementById("count-reduction-dialog");

@@ -434,6 +434,9 @@
   <data name="Dialog_DeleteQuestion_Text" xml:space="preserve">
     <value>Vuoi davvero eliminare questa domanda?</value>
   </data>
+  <data name="QuizEditor_QuestionDeleted" xml:space="preserve">
+    <value>Domanda eliminata.</value>
+  </data>
   <data name="Dialog_DeleteCategory_Title" xml:space="preserve">
     <value>Elimina categoria</value>
   </data>
