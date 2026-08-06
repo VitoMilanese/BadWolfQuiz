@@ -20,6 +20,11 @@ When a player answers correctly, that player becomes the active player. If the c
 
 The host can explicitly resolve a regular question with no correct answer. In that case no additional score is applied and the existing active player keeps the right to select the next question.
 
+Question selection is submitted asynchronously. If the Engine rejects the
+selection because the board state changed or the question is no longer
+available, the host remains on the current board and receives a temporary inline
+error instead of a full-page reload.
+
 ## Four-clue questions
 
 A four-clue question is a regular buzzer question with a different presentation and scoring rule. Its immutable definition contains exactly four ordered clues. A clue may be text, an image, or audio; video and YouTube blocks are not supported.
@@ -130,6 +135,18 @@ After the wager answer is judged correct or incorrect, the correct answer is dis
 The first round starts with the first player who joined the lobby as the active player.
 
 At the beginning of every later round, the Engine transfers the right to select the first question to the weakest player. It applies the standings criteria in reverse: lowest total score, lowest score gain in the completed round, fewest correct answers overall and by round from newest to oldest, then fewest attempts overall and by round from newest to oldest. If every gameplay metric is identical, the player who joined first receives the selection right.
+
+### Completing a round early
+
+When another round exists, the host action menu can complete the current round
+without opening every remaining question. The Engine force-resolves every
+unresolved question in the current round, closes any buzzer state, clears the
+answering player, and stops both timers. No score is awarded or deducted for the
+skipped questions.
+
+With connected players, the normal inter-round standings remain visible before
+the host advances. In an empty game, the session advances directly to the next
+round because there is no leaderboard to present or active player to select.
 
 
 ## Runtime timer orchestration

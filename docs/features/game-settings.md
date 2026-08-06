@@ -20,7 +20,9 @@ When a lobby is created, the application copies the current global settings into
 
 The lobby creation flow exposes a game settings menu where the host can review and personalize those values for that game. A personalized value belongs only to that game and does not change the global default.
 
-A game must use its own snapshot throughout its lifetime. This makes its behavior deterministic and prevents later global changes from altering an already prepared or running session.
+A game uses its own settings snapshot throughout its lifetime. This prevents
+later global changes from altering that session, while still allowing the host
+to edit the game-specific snapshot in the lobby or during regular play.
 
 ## Timer and buzzer start modes
 
@@ -59,23 +61,33 @@ The game-specific settings snapshot is part of the runtime session configuration
 
 The Game Engine interprets and enforces gameplay settings. The host and player UIs render the resulting state and submit permitted commands; they are not authoritative sources for settings or timing rules.
 
-Settings that affect an active phase should not silently change that phase after it has started. Any future support for editing settings during a game must define when a new value takes effect.
+Settings may be edited while the session is in the lobby or regular-play state.
+Saving replaces the game-specific snapshot and rebuilds both timers from the new
+durations. Settings are locked once the final-question workflow begins or the
+session is completed.
 
 ## User interface expectations
 
 The administration experience provides:
 
 - a global settings menu for persistent host defaults;
-- a game settings panel in the lobby before the game starts;
+- a game settings panel in the lobby and during regular play;
 - inherited values preselected from the global settings;
 - the ability to personalize settings for the new game;
 - a clear way to distinguish inherited values from game-specific overrides.
 
-A future settings implementation may add a reset action that restores a game setting to the current inherited default before the game starts.
+A future settings implementation may add a reset action that restores a game
+setting to the inherited global default.
 
 
 ## Implementation status
 
 The Engine-level settings snapshot is implemented. It configures buzzer and answer durations, automatically opens the regular-question buzzer when requested, supports explicit start of a wager answer timer in manual mode, and controls whether negative-score players participate in the final question.
 
-Global defaults are persisted per host in `App_Data/game-settings.json`, keyed by the authenticated host identifier. One host cannot read or overwrite another host's defaults. Files written by older versions are treated as a legacy initial default until each host saves their own settings. Creating a game immediately copies the current host's defaults into its runtime session. The host can edit the per-game values from the lobby until the game starts; updating them rebuilds the stopped timers. Once the game starts, the snapshot is locked.
+Global defaults are persisted per host in `App_Data/game-settings.json`, keyed by
+the authenticated host identifier. One host cannot read or overwrite another
+host's defaults. Files written by older versions are treated as a legacy initial
+default until each host saves their own settings. Creating a game immediately
+copies the current host's defaults into its runtime session. The host can edit
+the per-game values from the lobby or during regular play; updating them rebuilds
+the timers. The snapshot becomes locked outside those two session states.
