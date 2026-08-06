@@ -36,6 +36,7 @@
     var hasBrandLogo = isAuthenticated &&
         settings?.BrandLogoData is not null &&
         !string.IsNullOrWhiteSpace(settings.BrandLogoContentType);
+    var hidePortalFooter = ViewData["HidePortalFooter"] is true;
 }
 
 <!DOCTYPE html>
@@ -46,7 +47,7 @@
     <title>@ViewData["Title"] - BAD WOLF QUIZ</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body>
+<body class="@(hidePortalFooter ? "gameplay-layout" : "portal-layout")">
     <header class="topbar">
         <a class="brand" asp-page="/Index">
             @if (hasBrandLogo)
@@ -145,7 +146,7 @@
         @RenderBody()
     </main>
 
-    @if (ViewData["HidePortalFooter"] is not true)
+    @if (!hidePortalFooter)
     {
         @await Component.InvokeAsync("PortalFooter")
     }
