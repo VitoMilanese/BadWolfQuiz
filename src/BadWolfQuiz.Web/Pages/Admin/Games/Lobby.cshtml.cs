@@ -3,7 +3,6 @@ using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
-using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -63,7 +62,7 @@ public sealed class LobbyModel(
     public int MaximumImageUploadMegabytes =>
         mediaUploadProcessor.MaximumImageUploadMegabytes(
             premiumHostAccess.IsPremium(currentHost.RequiredId));
-    public HostDiscordConnection? DiscordConnection { get; private set; }
+    public BadWolfQuiz.Web.Models.HostDiscordConnection? DiscordConnection { get; private set; }
     public bool IsDiscordVoiceReady { get; private set; }
 
     public async Task<IActionResult> OnGetAsync(
