@@ -1840,6 +1840,16 @@ textarea {
     border-color: rgba(239, 35, 60, .55);
 }
 
+.game-settings-dialog {
+    width: min(920px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+}
+
+.game-settings-dialog-card {
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+}
+
 .dialog-heading {
     display: flex;
     justify-content: space-between;

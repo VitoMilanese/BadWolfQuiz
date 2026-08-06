@@ -893,7 +893,7 @@
   <data name="GameBoard_StartAnswerTimer" xml:space="preserve"><value>Запустити таймер</value></data>
   <data name="GameTimer_StartRejected" xml:space="preserve"><value>Не вдалося запустити таймер відповіді.</value></data>
   <data name="GameSettings_LobbyTitle" xml:space="preserve"><value>Налаштування гри</value></data>
-  <data name="GameSettings_LobbyDescription" xml:space="preserve"><value>Ці налаштування застосовуються лише до цієї гри та можуть змінюватися до її запуску.</value></data>
+  <data name="GameSettings_LobbyDescription" xml:space="preserve"><value>Ці налаштування застосовуються лише до цієї гри та можуть змінюватися також під час звичайної гри.</value></data>
   <data name="GameSettings_Automatic" xml:space="preserve"><value>Автоматично</value></data>
   <data name="GameSettings_Manual" xml:space="preserve"><value>Вручну</value></data>
   <data name="GameSettings_SaveForGame" xml:space="preserve"><value>Зберегти налаштування гри</value></data>

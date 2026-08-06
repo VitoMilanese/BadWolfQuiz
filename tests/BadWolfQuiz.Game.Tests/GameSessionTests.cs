@@ -297,14 +297,22 @@ public sealed class GameSessionTests
     }
 
     [Fact]
-    public void UpdateSettings_rejects_changes_after_game_starts()
+    public void UpdateSettings_rebuilds_timers_during_regular_play()
     {
         var session = CreateSession();
         session.AddPlayer("Rose");
         session.Start();
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(45),
+            TimeSpan.FromSeconds(12),
+            GamePhaseStartMode.Automatic,
+            GamePhaseStartMode.Manual);
 
-        Assert.Throws<GameRuleViolationException>(
-            () => session.UpdateSettings(GameSessionSettings.Default));
+        session.UpdateSettings(settings);
+
+        Assert.Same(settings, session.Settings);
+        Assert.Equal(TimeSpan.FromSeconds(45), session.Timer.Duration);
+        Assert.Equal(TimeSpan.FromSeconds(12), session.AnswerTimer.Duration);
     }
 
     [Fact]
@@ -333,11 +341,26 @@ public sealed class GameSessionTests
     }
 
     [Fact]
-    public void Start_rejects_session_without_players()
+    public void Start_allows_session_without_players()
     {
         var session = CreateSession();
 
-        Assert.Throws<GameRuleViolationException>(() => session.Start());
+        session.Start();
+
+        Assert.Equal(GameSessionStatus.Running, session.Status);
+        Assert.Empty(session.Players);
+    }
+
+    [Fact]
+    public void Player_can_join_after_empty_lobby_game_starts()
+    {
+        var session = CreateSession();
+        session.Start();
+
+        var player = session.AddPlayer("Rose");
+
+        Assert.Same(player, Assert.Single(session.Players));
+        Assert.Equal(player.Id, session.ActivePlayerId);
     }
 
     [Fact]

@@ -167,7 +167,11 @@ public sealed class GameSession
 
     public void UpdateSettings(GameSessionSettings settings)
     {
-        EnsureLobby();
+        if (Status is not GameSessionStatus.Lobby and not GameSessionStatus.Running)
+        {
+            throw new GameRuleViolationException(
+                "Game settings can only be changed in the lobby or during regular play.");
+        }
         ArgumentNullException.ThrowIfNull(settings);
 
         Settings = settings;
@@ -268,11 +272,6 @@ public sealed class GameSession
     public void Start()
     {
         EnsureLobby();
-
-        if (_players.Count == 0)
-        {
-            throw new GameRuleViolationException("A game cannot start without players.");
-        }
 
         Status = GameSessionStatus.Running;
         StartedAtUtc = _timeProvider.GetUtcNow();
