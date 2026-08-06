@@ -15,6 +15,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 
 ## Features
 
+- [Quiz and question editing](features/quiz-editor.md)
 - [Wagering and active player rules](features/wagering.md)
 - [Question judging](features/question-judging.md)
 - [Final question](features/final-question.md)

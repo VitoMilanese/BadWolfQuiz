@@ -56,6 +56,16 @@ A setting controls whether the host card is visible. When disabled, it must not 
 
 Global settings provide defaults that are copied into a new game. The lobby may override them for that game. A visible host card requires a host name and a selected image, avatar, or webcam source.
 
+On wide boards the host card may move into a dedicated side position so it does
+not reduce the playable board area. A host-adjusted card width and height are
+stored in that browser and restored after page reloads, viewport changes, and
+movement between the card row and side position.
+
+The board uses all available width for its configured category count. Category
+headers are synchronized to the tallest rendered heading, while question rows
+share the remaining height. This keeps differently sized boards aligned without
+introducing horizontal board scrolling.
+
 ## Future design decisions
 
 Future improvements may include:

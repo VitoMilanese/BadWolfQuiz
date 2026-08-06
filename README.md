@@ -61,6 +61,9 @@
 - Automatic row point editor
 - Category toolbar
 - Visual feedback during Drag & Drop
+- Asynchronous board-setting saves that preserve the current scroll position
+- Question-card deletion with confirmation and immediate board updates
+- Final-question deletion that removes all final question and answer blocks
 
 ---
 
@@ -91,6 +94,12 @@ Content blocks can be:
 - removed;
 - added dynamically.
 
+Regular questions are saved asynchronously, including uploaded media. Newly
+created content-block identifiers are synchronized after each save so repeated
+saves do not create duplicates. The editor also provides a localized next-question
+action within the current category and keeps file-picker cancellation from closing
+the editor.
+
 Quizzes can be exported and imported as `.bwquiz` packages. Each package is a ZIP archive containing a versioned `manifest.json` and separate media files, so imported quizzes receive new database identifiers and remain independent from the source host and game history.
 
 ---
@@ -103,6 +112,7 @@ Currently implemented:
 - Continue one unfinished game per quiz after an application restart, preserving
   the board, players, scores, visuals, and answer history
 - Lobby and join code
+- Empty-lobby game start, with players still able to join during regular play
 - Join and reconnect flows with host approval
 - Host-managed blocked-player list with explicit unblocking and identity-preserving rejoin
 - Real-time player presence and score updates
@@ -112,8 +122,8 @@ Currently implemented:
 - Player buzzer with server-authoritative winner selection
 - Compact player-page navigation and mobile screen-wake protection while the buzzer page is open
 - Near-simultaneous buzzer results with millisecond differences
-- Synchronized buzzer and answer countdown timers
-- Persistent global game defaults and editable per-game settings snapshots
+- Synchronized buzzer and answer countdown timers displayed as whole seconds
+- Persistent global game defaults and per-game settings editable in the lobby or during regular play
 - Compact icon-only player-card controls
 - Built-in player avatars and uploaded player images, restored by player name
 - Optional player webcam feeds with static-image fallback
@@ -127,7 +137,10 @@ Currently implemented:
 - Read-only question and answer previews for resolved board cells
 - Player scoreboard with answering and ineligible states
 - Multi-round progression
+- Host action to resolve all remaining questions and complete the current round
 - Animated top-three inter-round leaderboard
+- Adaptive game-board sizing with equal-height category headers
+- Host-card dimensions preserved across reloads and responsive layout changes
 - Deterministic final standings with score-growth, correct-answer, and attempt tie-breakers
 - Private final wagers and answers submitted from player devices
 - Host-controlled final question reveal, judging, and final results
