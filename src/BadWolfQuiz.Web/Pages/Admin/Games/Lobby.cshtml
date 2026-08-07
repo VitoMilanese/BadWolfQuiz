@@ -2482,6 +2482,7 @@
                 presence: player.presence,
                 isActive: player.isActive,
                 webcamEnabled: player.webcamEnabled,
+                webcamUrl: player.webcamUrl,
                 avatarId: player.avatarId,
                 usesUploadedImage: player.usesUploadedImage,
                 uploadedImageVersion: player.uploadedImageDataUrl
@@ -2519,7 +2520,17 @@
                         name.textContent = player.name;
 
                         const playerImageSource = getPlayerImageSource(player);
-                        if (player.webcamEnabled) {
+                        if (player.webcamUrl) {
+                            const frame = document.createElement("iframe");
+                            frame.className = "player-card-avatar player-webcam-url-frame";
+                            frame.src = player.webcamUrl;
+                            frame.title = player.name;
+                            frame.allow = "autoplay; camera; microphone; fullscreen; picture-in-picture";
+                            frame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation");
+                            frame.referrerPolicy = "no-referrer";
+                            frame.allowFullscreen = true;
+                            item.append(frame);
+                        } else if (player.webcamEnabled) {
                             if (playerImageSource) {
                                 const fallback = document.createElement("img");
                                 fallback.className = "player-card-avatar";
@@ -2607,7 +2618,19 @@
                     name.textContent = player.name;
 
                     const playerImageSource = getPlayerImageSource(player);
-                    if (player.webcamEnabled) {
+                    if (player.webcamUrl) {
+                        const frame = document.createElement("iframe");
+                        frame.className = isRunning
+                            ? "player-card-avatar player-webcam-url-frame"
+                            : "player-list-avatar player-webcam-url-frame";
+                        frame.src = player.webcamUrl;
+                        frame.title = player.name;
+                        frame.allow = "autoplay; camera; microphone; fullscreen; picture-in-picture";
+                        frame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation");
+                        frame.referrerPolicy = "no-referrer";
+                        frame.allowFullscreen = true;
+                        item.append(frame);
+                    } else if (player.webcamEnabled) {
                         if (playerImageSource) {
                             const fallback = document.createElement("img");
                             fallback.className = isRunning

@@ -2820,6 +2820,22 @@ iframe.host-card-media {
     grid-column: 1 / -1;
 }
 
+.host-webcam-url-field .form-hint a,
+.player-webcam-url-field .form-hint a {
+    color: var(--gold);
+    font-weight: 800;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.host-webcam-url-field .form-hint a:hover,
+.host-webcam-url-field .form-hint a:focus-visible,
+.player-webcam-url-field .form-hint a:hover,
+.player-webcam-url-field .form-hint a:focus-visible {
+    color: var(--text);
+}
+
 .host-image-field {
     grid-column: 1 / -1;
 }
@@ -2968,6 +2984,35 @@ iframe.host-card-media {
 video.player-card-avatar,
 video.host-card-media {
     object-fit: cover;
+}
+
+.player-webcam-url-preview,
+.player-webcam-url-frame {
+    border: 0;
+}
+
+.player-webcam-url-field {
+    display: grid;
+    gap: 6px;
+    width: 100%;
+}
+
+.player-webcam-url-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.player-webcam-url-row input {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+@media (max-width: 560px) {
+    .player-webcam-url-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
 }
 
 .player-webcam-preview,

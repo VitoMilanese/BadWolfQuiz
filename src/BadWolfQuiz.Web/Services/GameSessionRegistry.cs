@@ -502,9 +502,11 @@ public sealed class GameSessionRegistry
         string connectionId,
         bool isEnabled)
     {
+        PlayerConnection connection;
+
         lock (_presenceSync)
         {
-            if (!_playerConnections.TryGetValue(connectionId, out var connection))
+            if (!_playerConnections.TryGetValue(connectionId, out connection))
             {
                 return null;
             }
@@ -513,11 +515,52 @@ public sealed class GameSessionRegistry
             {
                 IsWebcamEnabled = isEnabled
             };
-            return new PlayerConnectionResult(
-                connection.Access.Game,
-                connection.Access.Player,
-                !connection.IsApproved);
         }
+
+        if (isEnabled)
+        {
+            lock (connection.Access.Game)
+            {
+                connection.Access.Player.ClearWebcamUrl();
+                connection.Access.Game.MarkPersistenceChanged();
+            }
+        }
+
+        return new PlayerConnectionResult(
+            connection.Access.Game,
+            connection.Access.Player,
+            !connection.IsApproved);
+    }
+
+    public PlayerConnectionResult? SetPlayerWebcamUrl(
+        string connectionId,
+        string webcamUrl)
+    {
+        PlayerConnection connection;
+
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(connectionId, out connection))
+            {
+                return null;
+            }
+
+            _playerConnections[connectionId] = connection with
+            {
+                IsWebcamEnabled = false
+            };
+        }
+
+        lock (connection.Access.Game)
+        {
+            connection.Access.Player.SetWebcamUrl(webcamUrl);
+            connection.Access.Game.MarkPersistenceChanged();
+        }
+
+        return new PlayerConnectionResult(
+            connection.Access.Game,
+            connection.Access.Player,
+            !connection.IsApproved);
     }
 
     public PlayerConnectionResult? GetPlayerConnection(string connectionId)
@@ -1197,7 +1240,8 @@ public sealed class GameSessionRegistry
                         connection.IsApproved &&
                         connection.IsVisible &&
                         connection.IsWebcamEnabled),
-                    GetPresence(player.Id)))
+                    GetPresence(player.Id),
+                    player.WebcamUrl))
                 .ToArray();
         }
     }

@@ -1530,6 +1530,9 @@
   <data name="PlayerWebcam_AccessFailed" xml:space="preserve">
     <value>Не вдалося отримати доступ до камери. Перевірте дозвіл браузера.</value>
   </data>
+  <data name="PlayerWebcam_Url" xml:space="preserve"><value>URL вебкамера</value></data>
+  <data name="PlayerWebcam_UseUrl" xml:space="preserve"><value>Використати URL вебкамеру</value></data>
+  <data name="PlayerWebcam_InvalidUrl" xml:space="preserve"><value>Введіть коректне HTTPS-посилання для перегляду вебкамери.</value></data>
   <data name="GameBoard_ResizeHostCard" xml:space="preserve">
     <value>Змінити ширину та висоту картки хоста</value>
   </data>

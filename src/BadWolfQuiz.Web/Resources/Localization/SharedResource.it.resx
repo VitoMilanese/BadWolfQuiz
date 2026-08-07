@@ -1530,6 +1530,9 @@
   <data name="PlayerWebcam_AccessFailed" xml:space="preserve">
     <value>Impossibile accedere alla fotocamera. Controlla l'autorizzazione del browser.</value>
   </data>
+  <data name="PlayerWebcam_Url" xml:space="preserve"><value>URL webcam</value></data>
+  <data name="PlayerWebcam_UseUrl" xml:space="preserve"><value>Usa webcam tramite URL</value></data>
+  <data name="PlayerWebcam_InvalidUrl" xml:space="preserve"><value>Inserisci un URL HTTPS valido per visualizzare la webcam.</value></data>
   <data name="GameBoard_ResizeHostCard" xml:space="preserve">
     <value>Ridimensiona la larghezza e l'altezza della scheda host</value>
   </data>

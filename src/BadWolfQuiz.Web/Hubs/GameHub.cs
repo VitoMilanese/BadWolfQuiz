@@ -214,6 +214,23 @@ public sealed class GameHub(
         }
     }
 
+    public async Task SetPlayerWebcamUrl(string webcamUrl)
+    {
+        if (!IsValidWebcamUrl(webcamUrl))
+        {
+            return;
+        }
+
+        var connection = sessionRegistry.SetPlayerWebcamUrl(
+            Context.ConnectionId,
+            webcamUrl.Trim());
+
+        if (connection is not null)
+        {
+            await BroadcastPlayers(connection.Game);
+        }
+    }
+
     public Task SendPlayerWebcamOffer(
         string publicCode,
         JsonElement sessionDescription)
@@ -373,6 +390,10 @@ public sealed class GameHub(
                         : null,
                 webcamEnabled = player.Presence == PlayerPresenceStatus.Active &&
                     player.IsWebcamEnabled,
+                webcamUrl = player.Presence is
+                    PlayerPresenceStatus.Active or PlayerPresenceStatus.Inactive
+                        ? player.WebcamUrl
+                        : null,
                 isActive = game.Session.ActivePlayerId == player.Id,
                 presence = player.Presence.ToString().ToLowerInvariant()
             })
@@ -414,6 +435,13 @@ public sealed class GameHub(
             return false;
         }
     }
+
+    private static bool IsValidWebcamUrl(string? value) =>
+        Uri.TryCreate(value?.Trim(), UriKind.Absolute, out var uri) &&
+        string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) &&
+        !string.IsNullOrWhiteSpace(uri.Host) &&
+        string.IsNullOrEmpty(uri.UserInfo) &&
+        value!.Length <= 2048;
 
     public static object CreateFinalQuestionUpdate(
         GameSessionRegistration game,

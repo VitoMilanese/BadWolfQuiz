@@ -39,8 +39,9 @@ Player registration is not required. The selected avatar or uploaded image is st
 A player may optionally replace the static avatar with a live visual source:
 
 - a webcam feed;
+- an HTTPS webcam page URL, including a VDO.Ninja viewer link;
 
-The browser publishes the webcam stream to the host while the player is connected and active. A failed, disabled, or unavailable stream falls back to the player's uploaded image, selected avatar, or default card appearance.
+The browser publishes a local webcam stream to the host while the player is connected and active. Alternatively, the player can send a validated HTTPS viewer URL that the host embeds directly in the player card. A failed, disabled, or unavailable local stream falls back to the player's uploaded image, selected avatar, or default card appearance.
 
 ## Host card
 
