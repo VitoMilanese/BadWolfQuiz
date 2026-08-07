@@ -50,6 +50,18 @@
                     @(Model.Health.IsReady ? Localizer["Discord_Ready"] : Localizer["Discord_NeedsAttention"])
                 </dd>
             </div>
+            <div>
+                <dt>@Localizer["Discord_BotStatus"]</dt>
+                <dd class="@(Model.Health.BotOnline ? "discord-health-ok" : "discord-health-error")">
+                    @(Model.Health.BotOnline ? Localizer["Discord_Available"] : Localizer["Discord_Unavailable"])
+                </dd>
+            </div>
+            <div>
+                <dt>@Localizer["Discord_MutePermission"]</dt>
+                <dd class="@(Model.Health.HasMutePermission ? "discord-health-ok" : "discord-health-error")">
+                    @(Model.Health.HasMutePermission ? Localizer["Discord_Available"] : Localizer["Discord_Unavailable"])
+                </dd>
+            </div>
         </dl>
 
         @if (Model.Guilds.Count == 0)
@@ -102,6 +114,7 @@
                 <input asp-for="AutoMuteDuringMedia" type="checkbox" />
                 <span>@Localizer["Discord_AutoMute"]</span>
             </label>
+            <p class="form-hint">@Localizer["Discord_AutoMuteHint"]</p>
             <button class="button button-secondary" type="submit">@Localizer["Button_Save"]</button>
         </form>
 

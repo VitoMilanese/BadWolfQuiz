@@ -149,7 +149,10 @@ Automatic moderation observes native audio/video and YouTube playback on the hos
 game page. It uses a set of active media elements: the first playback start requests
 mute and the last playback stop requests unmute. Pause, ended, error, abort, answer
 close, question transition, round completion, and game completion release the
-automatic reason.
+automatic reason. Changing the automatic-mute preference in the Discord dialog is
+applied to the open game immediately without reloading it. While media remains
+active, the page sends a lightweight status update every minute so the safety
+timeout is reserved for abandoned playback sessions.
 
 Manual and automatic requests are independent:
 

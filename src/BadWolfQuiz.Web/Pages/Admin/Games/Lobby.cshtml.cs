@@ -125,7 +125,7 @@ public sealed class LobbyModel(
         }
 
         var connection = await discordRepository.GetAsync(cancellationToken);
-        if (connection is null || !connection.AutoMuteDuringMedia)
+        if (connection is null || (active && !connection.AutoMuteDuringMedia))
         {
             return new JsonResult(new { ignored = true });
         }

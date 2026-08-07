@@ -57,12 +57,24 @@
         reconcileAutomaticMute(enabled && mediaState.isActive);
     });
 
+    window.setInterval(() => {
+        if (!automaticRequestActive || !mediaState.isActive ||
+            board.dataset.discordAutoMute !== "true") {
+            return;
+        }
+
+        requestInFlight = requestInFlight
+            .then(() => post("DiscordMedia", { active: "true" }))
+            .catch(error => {
+                if (status) {
+                    status.textContent = error.message;
+                }
+            });
+    }, 60_000);
+
     board.querySelectorAll("audio.game-content-audio, video.game-content-video")
-        .forEach(media => {
-            media.addEventListener("play", () => activate(media));
-            ["pause", "ended", "error", "abort", "emptied"]
-                .forEach(name => media.addEventListener(name, () => deactivate(media)));
-        });
+        .forEach(media => BadWolfDiscordMediaState.bindNativeMedia(
+            media, mediaState, media));
 
     const youtubePlayers = new Map();
     board.querySelectorAll("iframe.youtube-auto-expand").forEach((iframe, index) => {
@@ -96,9 +108,11 @@
             return;
         }
         const key = youtubePlayers.get(event.source);
-        if (message.info === 1) {
+        const playbackState = BadWolfDiscordMediaState.getYouTubePlaybackState(
+            message.info);
+        if (playbackState === true) {
             activate(key);
-        } else if (message.info === 0 || message.info === 2 || message.info === 5) {
+        } else if (playbackState === false) {
             deactivate(key);
         }
     });

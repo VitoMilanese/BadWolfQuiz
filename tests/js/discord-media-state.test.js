@@ -59,3 +59,32 @@ test("media can start again after it stops", () => {
     assert.equal(state.isActive, true);
     assert.deepEqual(transitions, [true, false, true]);
 });
+
+test("native media events map play and every cleanup event to state changes", () => {
+    const handlers = new Map();
+    const media = {
+        addEventListener(name, handler) {
+            handlers.set(name, handler);
+        }
+    };
+
+    for (const stopEvent of ["pause", "ended", "error", "abort", "emptied"]) {
+        const transitions = [];
+        const state = new DiscordMediaState(value => transitions.push(value));
+        DiscordMediaState.bindNativeMedia(media, state, "native");
+
+        handlers.get("play")();
+        handlers.get(stopEvent)();
+
+        assert.deepEqual(transitions, [true, false], stopEvent);
+    }
+});
+
+test("YouTube player states map playing, paused, ended, and cued", () => {
+    assert.equal(DiscordMediaState.getYouTubePlaybackState(1), true);
+    assert.equal(DiscordMediaState.getYouTubePlaybackState(2), false);
+    assert.equal(DiscordMediaState.getYouTubePlaybackState(0), false);
+    assert.equal(DiscordMediaState.getYouTubePlaybackState(5), false);
+    assert.equal(DiscordMediaState.getYouTubePlaybackState(3), null);
+    assert.equal(DiscordMediaState.getYouTubePlaybackState(-1), null);
+});

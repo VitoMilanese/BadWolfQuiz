@@ -2153,4 +2153,15 @@
   <data name="Discord_OperationPartial" xml:space="preserve"><value>Операцію Discord виконано частково: змінено {0}, помилок {1}, пропущено {2}.</value></data>
   <data name="Discord_ChannelSaved" xml:space="preserve"><value>Голосовий канал Discord збережено.</value></data>
   <data name="Discord_AutomaticMuteSaved" xml:space="preserve"><value>Налаштування автоматичного приглушення Discord збережено.</value></data>
+  <data name="Discord_AuthorizationCancelled" xml:space="preserve"><value>Авторизацію Discord скасовано або термін її дії минув.</value></data>
+  <data name="Discord_AccountConnected" xml:space="preserve"><value>Обліковий запис Discord під’єднано.</value></data>
+  <data name="Discord_AuthorizationFailed" xml:space="preserve"><value>Не вдалося авторизувати Discord.</value></data>
+  <data name="Discord_AuthorizationExpired" xml:space="preserve"><value>Термін авторизації Discord минув. Авторизуйте Discord знову.</value></data>
+  <data name="Discord_SelectServerAndChannel" xml:space="preserve"><value>Виберіть сервер Discord і голосовий канал.</value></data>
+  <data name="Discord_Disconnected" xml:space="preserve"><value>Discord від’єднано.</value></data>
+  <data name="Discord_AutoMuteHint" xml:space="preserve"><value>Усі учасники вибраного голосового каналу, крім хоста, будуть автоматично приглушені під час відтворення медіа в питанні.</value></data>
+  <data name="Discord_BotStatus" xml:space="preserve"><value>Бот</value></data>
+  <data name="Discord_MutePermission" xml:space="preserve"><value>Дозвіл Mute Members</value></data>
+  <data name="Discord_Available" xml:space="preserve"><value>Доступний</value></data>
+  <data name="Discord_Unavailable" xml:space="preserve"><value>Недоступний</value></data>
 </root>

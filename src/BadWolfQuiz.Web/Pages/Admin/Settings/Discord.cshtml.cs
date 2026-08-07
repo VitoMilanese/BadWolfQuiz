@@ -64,7 +64,7 @@ public sealed class DiscordModel(
             string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(state) ||
             !oauth.ConsumeState(state, currentHost.RequiredId))
         {
-            TempData["DiscordError"] = "Discord authorization was cancelled or expired.";
+            TempData["DiscordError"] = localizer["Discord_AuthorizationCancelled"].Value;
             return RedirectToPage(new { embedded = Embedded });
         }
 
@@ -74,11 +74,11 @@ public sealed class DiscordModel(
                 currentHost.RequiredId, code, cancellationToken);
             await repository.SaveIdentityAsync(
                 currentHost.RequiredId, session.User, cancellationToken);
-            TempData["DiscordSuccess"] = "Discord account connected.";
+            TempData["DiscordSuccess"] = localizer["Discord_AccountConnected"].Value;
         }
         catch (HttpRequestException)
         {
-            TempData["DiscordError"] = "Discord authorization failed.";
+            TempData["DiscordError"] = localizer["Discord_AuthorizationFailed"].Value;
         }
         return RedirectToPage(new { embedded = Embedded });
     }
@@ -88,7 +88,7 @@ public sealed class DiscordModel(
         var session = oauth.GetSession(currentHost.RequiredId);
         if (session is null || !session.GuildNames.ContainsKey(guildId))
         {
-            return new JsonResult(new { error = "Discord authorization expired." })
+            return new JsonResult(new { error = localizer["Discord_AuthorizationExpired"].Value })
                 { StatusCode = 403 };
         }
         return new JsonResult(gateway.GetVoiceChannels(guildId));
@@ -107,7 +107,7 @@ public sealed class DiscordModel(
             : null;
         if (guild is null || channel is null)
         {
-            TempData["DiscordError"] = "Select a Discord server and voice channel.";
+            TempData["DiscordError"] = localizer["Discord_SelectServerAndChannel"].Value;
             return RedirectToPage(new { embedded = Embedded });
         }
 
@@ -131,9 +131,10 @@ public sealed class DiscordModel(
                 settings.MaximumParallelOperations,
                 cancellationToken);
         }
+        muteCoordinator.ClearHost(currentHost.RequiredId);
         await repository.DeleteAsync(cancellationToken);
         oauth.ClearSession(currentHost.RequiredId);
-        TempData["DiscordSuccess"] = "Discord disconnected.";
+        TempData["DiscordSuccess"] = localizer["Discord_Disconnected"].Value;
         return RedirectToPage(new { embedded = Embedded });
     }
 
@@ -178,7 +179,8 @@ public sealed class DiscordModel(
         var connection = await repository.GetAsync(cancellationToken);
         if (connection is null)
         {
-            return new JsonResult(new { error = "Discord is not configured." }) { StatusCode = 409 };
+            return new JsonResult(new { error = localizer["Discord_NotReady"].Value })
+                { StatusCode = 409 };
         }
 
         var result = await gateway.SetMutedAsync(

@@ -2153,4 +2153,15 @@
   <data name="Discord_OperationPartial" xml:space="preserve"><value>Operazione Discord parzialmente completata: {0} modificati, {1} non riusciti, {2} saltati.</value></data>
   <data name="Discord_ChannelSaved" xml:space="preserve"><value>Canale vocale Discord salvato.</value></data>
   <data name="Discord_AutomaticMuteSaved" xml:space="preserve"><value>Impostazione di disattivazione automatica dell’audio Discord salvata.</value></data>
+  <data name="Discord_AuthorizationCancelled" xml:space="preserve"><value>L’autorizzazione Discord è stata annullata o è scaduta.</value></data>
+  <data name="Discord_AccountConnected" xml:space="preserve"><value>Account Discord collegato.</value></data>
+  <data name="Discord_AuthorizationFailed" xml:space="preserve"><value>Autorizzazione Discord non riuscita.</value></data>
+  <data name="Discord_AuthorizationExpired" xml:space="preserve"><value>L’autorizzazione Discord è scaduta. Autorizza nuovamente Discord.</value></data>
+  <data name="Discord_SelectServerAndChannel" xml:space="preserve"><value>Seleziona un server Discord e un canale vocale.</value></data>
+  <data name="Discord_Disconnected" xml:space="preserve"><value>Discord disconnesso.</value></data>
+  <data name="Discord_AutoMuteHint" xml:space="preserve"><value>Tutti i partecipanti del canale vocale selezionato, tranne l’host, verranno silenziati durante la riproduzione dei contenuti multimediali della domanda.</value></data>
+  <data name="Discord_BotStatus" xml:space="preserve"><value>Bot</value></data>
+  <data name="Discord_MutePermission" xml:space="preserve"><value>Permesso Mute Members</value></data>
+  <data name="Discord_Available" xml:space="preserve"><value>Disponibile</value></data>
+  <data name="Discord_Unavailable" xml:space="preserve"><value>Non disponibile</value></data>
 </root>

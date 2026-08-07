@@ -31,4 +31,20 @@
         get isActive() {
             return this.active.size > 0;
         }
+
+        static bindNativeMedia(media, state, key = media) {
+            media.addEventListener("play", () => state.start(key));
+            ["pause", "ended", "error", "abort", "emptied"]
+                .forEach(name => media.addEventListener(name, () => state.stop(key)));
+        }
+
+        static getYouTubePlaybackState(playerState) {
+            if (playerState === 1) {
+                return true;
+            }
+            if (playerState === 0 || playerState === 2 || playerState === 5) {
+                return false;
+            }
+            return null;
+        }
     });

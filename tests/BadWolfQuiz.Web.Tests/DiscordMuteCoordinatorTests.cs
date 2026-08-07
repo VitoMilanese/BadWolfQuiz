@@ -68,6 +68,21 @@ public sealed class DiscordMuteCoordinatorTests
     }
 
     [Fact]
+    public async Task DisablingAutomaticPreferenceReleasesAnExistingAutomaticMute()
+    {
+        var gateway = new RecordingGateway();
+        var coordinator = CreateCoordinator(gateway);
+        var gameId = Guid.NewGuid();
+        var connection = CreateConnection();
+
+        await coordinator.SetAutomaticAsync(gameId, "host", connection, true, default);
+        connection.AutoMuteDuringMedia = false;
+        await coordinator.SetAutomaticAsync(gameId, "host", connection, false, default);
+
+        Assert.Equal([true, false], gateway.Operations);
+    }
+
+    [Fact]
     public async Task RepeatedRequestsAreIdempotent()
     {
         var gateway = new RecordingGateway();
@@ -114,6 +129,23 @@ public sealed class DiscordMuteCoordinatorTests
         await coordinator.CleanupAsync(gameId, "host", connection, default);
 
         Assert.Equal([true, false], gateway.Operations);
+    }
+
+    [Fact]
+    public async Task ClearingAHostRemovesStaleMuteStateAfterDisconnect()
+    {
+        var gateway = new RecordingGateway();
+        var coordinator = CreateCoordinator(gateway);
+        var gameId = Guid.NewGuid();
+        var connection = CreateConnection();
+
+        await coordinator.SetManualAsync(gameId, "host", connection, true, default);
+        coordinator.ClearHost("another-host");
+        await coordinator.SetManualAsync(gameId, "host", connection, true, default);
+        coordinator.ClearHost("host");
+        await coordinator.SetManualAsync(gameId, "host", connection, true, default);
+
+        Assert.Equal([true, true], gateway.Operations);
     }
 
     [Fact]

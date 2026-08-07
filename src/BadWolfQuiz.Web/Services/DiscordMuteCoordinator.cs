@@ -94,6 +94,16 @@ public sealed class DiscordMuteCoordinator(
         }
     }
 
+    public void ClearHost(string hostId)
+    {
+        foreach (var item in states.Where(item =>
+                     string.Equals(item.Value.HostId, hostId, StringComparison.Ordinal))
+                 .ToArray())
+        {
+            states.TryRemove(item.Key, out _);
+        }
+    }
+
     private async Task<DiscordMuteResult> UpdateAsync(
         Guid gameId,
         string hostId,
@@ -102,7 +112,7 @@ public sealed class DiscordMuteCoordinator(
         Action<GameMuteState> update,
         CancellationToken cancellationToken)
     {
-        var state = states.GetOrAdd(gameId, _ => new());
+        var state = states.GetOrAdd(gameId, _ => new(hostId));
         await state.Gate.WaitAsync(cancellationToken);
         try
         {
@@ -160,8 +170,9 @@ public sealed class DiscordMuteCoordinator(
 
     private static DiscordMuteResult EmptyResult() => new(0, 0, 0, 0, []);
 
-    private sealed class GameMuteState
+    private sealed class GameMuteState(string hostId)
     {
+        public string HostId { get; } = hostId;
         public SemaphoreSlim Gate { get; } = new(1, 1);
         public bool ManualMuteRequested { get; set; }
         public bool AutomaticMediaMuteRequested { get; set; }
