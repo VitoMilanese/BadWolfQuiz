@@ -4,16 +4,6 @@
     ViewData["Title"] = Localizer["Discord_SettingsTitle"];
 }
 
-<div class="page-heading" hidden="@(Model.Embedded ? "hidden" : null)">
-    <div>
-        <p class="eyebrow">@Localizer["Menu_Settings"]</p>
-        <h1>@Localizer["Discord_SettingsTitle"]</h1>
-    </div>
-    <a class="button button-secondary" asp-page="/Admin/Settings/Index">
-        @Localizer["Button_Back"]
-    </a>
-</div>
-
 <section class="content-panel narrow discord-settings" data-discord-settings>
     @if (TempData["DiscordSuccess"] is string success)
     {
@@ -107,6 +97,7 @@
 
         <form method="post"
               asp-page-handler="SaveAutomaticMute"
+              id="discord-auto-mute-form"
               class="discord-auto-mute-form"
               data-discord-auto-mute-form>
             <input asp-for="Embedded" type="hidden" />
@@ -115,10 +106,14 @@
                 <span>@Localizer["Discord_AutoMute"]</span>
             </label>
             <p class="form-hint">@Localizer["Discord_AutoMuteHint"]</p>
-            <button class="button button-secondary" type="submit">@Localizer["Button_Save"]</button>
         </form>
 
-        <div class="form-actions">
+        <div class="form-actions discord-auto-mute-actions">
+            <button class="button button-secondary"
+                    type="submit"
+                    form="discord-auto-mute-form">
+                @Localizer["Button_Save"]
+            </button>
             @if (Model.Health.IsReady)
             {
                 <button class="button button-secondary" type="button" data-discord-test>

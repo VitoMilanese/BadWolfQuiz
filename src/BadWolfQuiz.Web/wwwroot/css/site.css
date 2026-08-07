@@ -5346,8 +5346,19 @@ body.youtube-auto-expanded-open {
     border-top: 1px solid var(--line);
 }
 
-.discord-auto-mute-form .button {
-    justify-self: start;
+.discord-auto-mute-actions {
+    align-items: center;
+    margin-top: 12px;
+}
+
+.discord-auto-mute-actions form {
+    margin: 0;
+}
+
+@media (min-width: 701px) {
+    .discord-auto-mute-actions {
+        flex-wrap: nowrap;
+    }
 }
 
 .discord-settings-dialog {
@@ -5357,7 +5368,7 @@ body.youtube-auto-expanded-open {
 
 .discord-settings-dialog-card {
     width: 100%;
-    height: min(820px, calc(100vh - 36px));
+    height: min(725px, calc(100vh - 36px));
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     padding: 0;
