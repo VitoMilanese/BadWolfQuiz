@@ -1041,14 +1041,48 @@
             quizBoardForm?.requestSubmit();
         };
 
+        const getFilledItems = select => {
+            const categoryColumns = Array.from(
+                document.querySelectorAll(".quiz-board-category-column"));
+            const hasContent = cell =>
+                cell.querySelector(".question-completion-item.complete") !== null;
+
+            if (select === categoryCountSelect) {
+                return categoryColumns
+                    .map((column, index) => ({
+                        position: index + 1,
+                        hasContent: Array.from(column.children)
+                            .slice(1)
+                            .some(hasContent)
+                    }))
+                    .filter(item => item.hasContent)
+                    .map(item => item.position);
+            }
+
+            if (select === questionCountSelect) {
+                const filledRows = new Set();
+
+                for (const column of categoryColumns) {
+                    Array.from(column.children)
+                        .slice(1)
+                        .forEach((cell, index) => {
+                            if (hasContent(cell)) {
+                                filledRows.add(index + 1);
+                            }
+                        });
+                }
+
+                return Array.from(filledRows);
+            }
+
+            return [];
+        };
+
         const saveCountChange = select => {
             const initialCount = Number(
                 select.dataset.initialCount);
             const nextCount = Number(select.value);
-            const filledItems = (select.dataset.filledItems ?? "")
-                .split(",")
-                .filter(Boolean)
-                .map(Number);
+            const filledItems = getFilledItems(select);
             const deletesFilledQuestion =
                 nextCount < initialCount &&
                 filledItems.some(position => position > nextCount);
