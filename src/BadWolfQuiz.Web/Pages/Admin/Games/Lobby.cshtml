@@ -913,9 +913,9 @@
                              !string.IsNullOrWhiteSpace(Model.Game.Session.Settings.HostWebcamUrl))
                     {
                         <iframe class="host-card-media"
-                                src="@Model.Game.Session.Settings.HostWebcamUrl"
+                                src="@BadWolfQuiz.Web.Services.WebcamUrlUtility.MuteAudio(Model.Game.Session.Settings.HostWebcamUrl)"
                                 title="@Model.Game.Session.Settings.HostName"
-                                allow="autoplay; camera; microphone; fullscreen; picture-in-picture"
+                                allow="autoplay; fullscreen; picture-in-picture"
                                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
                                 referrerpolicy="no-referrer"
                                 allowfullscreen></iframe>
@@ -1255,9 +1255,9 @@
                              !string.IsNullOrWhiteSpace(Model.Game.Session.Settings.HostWebcamUrl))
                     {
                         <iframe class="host-card-media"
-                                src="@Model.Game.Session.Settings.HostWebcamUrl"
+                                src="@BadWolfQuiz.Web.Services.WebcamUrlUtility.MuteAudio(Model.Game.Session.Settings.HostWebcamUrl)"
                                 title="@Model.Game.Session.Settings.HostName"
-                                allow="autoplay; camera; microphone; fullscreen; picture-in-picture"
+                                allow="autoplay; fullscreen; picture-in-picture"
                                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
                                 referrerpolicy="no-referrer"
                                 allowfullscreen></iframe>
