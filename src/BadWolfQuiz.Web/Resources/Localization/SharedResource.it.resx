@@ -1493,7 +1493,7 @@
   </data>
   <data name="HostCard_SourceWebcamUrl" xml:space="preserve"><value>URL webcam</value></data>
   <data name="HostCard_WebcamUrl" xml:space="preserve"><value>URL della pagina webcam</value></data>
-  <data name="HostCard_WebcamUrlHint" xml:space="preserve"><value>Incolla un URL HTTPS di visualizzazione, ad esempio da vdo.ninja.</value></data>
+  <data name="HostCard_WebcamUrlHintPrefix" xml:space="preserve"><value>Incolla un URL HTTPS di visualizzazione, ad esempio da</value></data>
   <data name="AvatarPicker_Title" xml:space="preserve">
     <value>Scegli un avatar</value>
   </data>
