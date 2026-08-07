@@ -416,8 +416,12 @@ public sealed class GameSession
     public RuntimeQuestion RevealNextClue(int sourceQuestionId)
     {
         EnsureRunning();
+
         var question = FindQuestion(sourceQuestionId);
         question.RevealNextClue();
+
+        Timer.Restart();
+
         return question;
     }
 
@@ -635,7 +639,6 @@ public sealed class GameSession
             if (question.CanRevealClue)
             {
                 RevealNextClue(question.SourceQuestionId);
-                Timer.Restart();
 
                 return QuestionTimerOutcome.ClueRevealed;
             }

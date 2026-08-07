@@ -771,6 +771,8 @@ public sealed class LobbyModel(
                         question.CanRevealClue
                     },
                     cancellationToken);
+
+            await BroadcastTimerAsync(game, cancellationToken);
         }
         catch (GameRuleViolationException)
         {
