@@ -1480,7 +1480,7 @@
     <value>Immagine dell’host (fino a {0} MB)</value>
   </data>
   <data name="HostCard_InvalidSettings" xml:space="preserve">
-    <value>Per mostrare la scheda host, inserisci un nome e seleziona un’immagine o una webcam.</value>
+    <value>Scegli una sorgente valida per la scheda host. L’URL della pagina webcam deve usare HTTPS.</value>
   </data>
   <data name="GameBoard_ResizePlayerPanel" xml:space="preserve">
     <value>Ridimensiona il pannello dei giocatori</value>
@@ -1491,6 +1491,9 @@
   <data name="HostCard_Avatar" xml:space="preserve">
     <value>Avatar dell’host</value>
   </data>
+  <data name="HostCard_SourceWebcamUrl" xml:space="preserve"><value>URL webcam</value></data>
+  <data name="HostCard_WebcamUrl" xml:space="preserve"><value>URL della pagina webcam</value></data>
+  <data name="HostCard_WebcamUrlHint" xml:space="preserve"><value>Incolla un URL HTTPS di visualizzazione, ad esempio da vdo.ninja.</value></data>
   <data name="AvatarPicker_Title" xml:space="preserve">
     <value>Scegli un avatar</value>
   </data>

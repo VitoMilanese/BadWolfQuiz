@@ -143,18 +143,20 @@ public sealed class IndexModel(
             return Page();
         }
 
+        if ((Input.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Avatar &&
+             !avatarCatalog.IsValid(Input.HostAvatarId)) ||
+            (Input.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.WebcamUrl &&
+             !GameSettingsInput.IsValidWebcamUrl(Input.HostWebcamUrl)))
+        {
+            ModelState.AddModelError(string.Empty, localizer["HostCard_InvalidSettings"].Value);
+            return Page();
+        }
+
         if (!Input.IsValid)
         {
             ModelState.AddModelError(
                 string.Empty,
                 localizer["GameSettings_InvalidDuration"].Value);
-            return Page();
-        }
-
-        if (Input.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.Avatar &&
-            !avatarCatalog.IsValid(Input.HostAvatarId))
-        {
-            ModelState.AddModelError(string.Empty, localizer["HostCard_InvalidSettings"].Value);
             return Page();
         }
 

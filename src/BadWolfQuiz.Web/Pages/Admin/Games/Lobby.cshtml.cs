@@ -401,16 +401,18 @@ public sealed class LobbyModel(
             }
         }
 
-        if (!SettingsInput.IsValid)
+        if ((SettingsInput.HostVisualSource == HostVisualSource.Avatar &&
+             !avatarCatalog.IsValid(SettingsInput.HostAvatarId)) ||
+            (SettingsInput.HostVisualSource == HostVisualSource.WebcamUrl &&
+             !GameSettingsInput.IsValidWebcamUrl(SettingsInput.HostWebcamUrl)))
         {
-            TempData["ErrorMessage"] = localizer["GameSettings_InvalidDuration"].Value;
+            TempData["ErrorMessage"] = localizer["HostCard_InvalidSettings"].Value;
             return null;
         }
 
-        if (SettingsInput.HostVisualSource == HostVisualSource.Avatar &&
-            !avatarCatalog.IsValid(SettingsInput.HostAvatarId))
+        if (!SettingsInput.IsValid)
         {
-            TempData["ErrorMessage"] = localizer["HostCard_InvalidSettings"].Value;
+            TempData["ErrorMessage"] = localizer["GameSettings_InvalidDuration"].Value;
             return null;
         }
 

@@ -2812,6 +2812,14 @@ textarea {
     background: transparent;
 }
 
+iframe.host-card-media {
+    border: 0;
+}
+
+.host-webcam-url-field {
+    grid-column: 1 / -1;
+}
+
 .host-image-field {
     grid-column: 1 / -1;
 }
