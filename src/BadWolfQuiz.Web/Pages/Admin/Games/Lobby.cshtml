@@ -1893,8 +1893,7 @@
             const canPositionHostCard = () =>
                 hostSlot &&
                 boardGrid &&
-                wideHostLayout.matches &&
-                boardGrid.getBoundingClientRect().left >= 120;
+                wideHostLayout.matches;
 
             const getHostCardVerticalBounds = () => {
                 const boardBounds = boardGrid.getBoundingClientRect();

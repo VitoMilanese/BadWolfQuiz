@@ -2528,7 +2528,7 @@ textarea {
     min-height: 0;
 }
 
-.host-board-question.status-resolved:hover {
+.host-board-question.status-resolved {
     filter: grayscale(0.6) saturate(0.5) brightness(0.78);
     opacity: 0.72;
 }

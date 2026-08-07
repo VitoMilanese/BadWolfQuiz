@@ -26,4 +26,16 @@
             frame.src = frame.src;
         }
     });
+
+    window.addEventListener("message", event => {
+        if (event.origin !== window.location.origin ||
+            event.source !== frame.contentWindow ||
+            event.data?.type !== "badwolfquiz:discord-auto-mute-changed") {
+            return;
+        }
+
+        window.dispatchEvent(new CustomEvent("badwolfquiz:discord-auto-mute-changed", {
+            detail: { enabled: event.data.enabled === true }
+        }));
+    });
 })();

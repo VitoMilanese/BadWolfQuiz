@@ -138,17 +138,38 @@ public sealed class DiscordModel(
     }
 
     public async Task<IActionResult> OnPostSaveAutomaticMuteAsync(
+        bool ajax,
         CancellationToken cancellationToken)
     {
         if (await repository.GetAsync(cancellationToken) is null)
         {
+            if (ajax)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    error = localizer["Discord_NotReady"].Value
+                }) { StatusCode = 409 };
+            }
+
             TempData["DiscordError"] = localizer["Discord_NotReady"].Value;
             return RedirectToPage(new { embedded = Embedded });
         }
 
         await repository.SaveAutomaticMuteAsync(
             AutoMuteDuringMedia, cancellationToken);
-        TempData["DiscordSuccess"] = localizer["Discord_AutomaticMuteSaved"].Value;
+        var message = localizer["Discord_AutomaticMuteSaved"].Value;
+        if (ajax)
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                autoMuteDuringMedia = AutoMuteDuringMedia,
+                message
+            });
+        }
+
+        TempData["DiscordSuccess"] = message;
         return RedirectToPage(new { embedded = Embedded });
     }
 

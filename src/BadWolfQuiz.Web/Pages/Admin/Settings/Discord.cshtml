@@ -93,7 +93,10 @@
             </form>
         }
 
-        <form method="post" asp-page-handler="SaveAutomaticMute" class="discord-auto-mute-form">
+        <form method="post"
+              asp-page-handler="SaveAutomaticMute"
+              class="discord-auto-mute-form"
+              data-discord-auto-mute-form>
             <input asp-for="Embedded" type="hidden" />
             <label class="settings-checkbox">
                 <input asp-for="AutoMuteDuringMedia" type="checkbox" />
@@ -134,6 +137,36 @@
                 Localizer["Discord_TestComplete"].Value));
             const testFailedLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
                 Localizer["Discord_TestFailed"].Value));
+
+            root?.querySelector("[data-discord-auto-mute-form]")
+                ?.addEventListener("submit", async event => {
+                    event.preventDefault();
+                    const form = event.currentTarget;
+                    const checkbox = form.querySelector('[name="AutoMuteDuringMedia"]');
+                    const button = form.querySelector('button[type="submit"]');
+                    const requested = checkbox.checked;
+                    button.disabled = true;
+                    try {
+                        const response = await fetch("?handler=SaveAutomaticMute&ajax=true", {
+                            method: "POST",
+                            body: new FormData(form)
+                        });
+                        const result = await response.json();
+                        if (!response.ok) {
+                            throw new Error(result.error);
+                        }
+                        status.textContent = result.message;
+                        window.parent.postMessage({
+                            type: "badwolfquiz:discord-auto-mute-changed",
+                            enabled: result.autoMuteDuringMedia
+                        }, window.location.origin);
+                    } catch (error) {
+                        checkbox.checked = !requested;
+                        status.textContent = error.message;
+                    } finally {
+                        button.disabled = false;
+                    }
+                });
 
             guild?.addEventListener("change", async () => {
                 channel.disabled = true;

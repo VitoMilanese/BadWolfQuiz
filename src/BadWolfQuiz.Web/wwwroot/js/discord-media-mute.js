@@ -28,7 +28,7 @@
     };
 
     const reconcileAutomaticMute = shouldBeActive => {
-        if (board.dataset.discordAutoMute !== "true") {
+        if (shouldBeActive && board.dataset.discordAutoMute !== "true") {
             return;
         }
 
@@ -50,6 +50,12 @@
     const mediaState = new BadWolfDiscordMediaState(reconcileAutomaticMute);
     const activate = media => mediaState.start(media);
     const deactivate = media => mediaState.stop(media);
+
+    window.addEventListener("badwolfquiz:discord-auto-mute-changed", event => {
+        const enabled = event.detail?.enabled === true;
+        board.dataset.discordAutoMute = enabled.toString();
+        reconcileAutomaticMute(enabled && mediaState.isActive);
+    });
 
     board.querySelectorAll("audio.game-content-audio, video.game-content-video")
         .forEach(media => {
