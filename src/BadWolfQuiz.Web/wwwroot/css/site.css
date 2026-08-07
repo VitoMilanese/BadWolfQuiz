@@ -5346,8 +5346,19 @@ body.youtube-auto-expanded-open {
     border-top: 1px solid var(--line);
 }
 
-.discord-auto-mute-form .button {
-    justify-self: start;
+.discord-auto-mute-actions {
+    align-items: center;
+    margin-top: 12px;
+}
+
+.discord-auto-mute-actions form {
+    margin: 0;
+}
+
+@media (min-width: 701px) {
+    .discord-auto-mute-actions {
+        flex-wrap: nowrap;
+    }
 }
 
 .discord-settings-dialog {
