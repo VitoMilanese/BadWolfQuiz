@@ -4,16 +4,6 @@
     ViewData["Title"] = Localizer["Discord_SettingsTitle"];
 }
 
-<div class="page-heading" hidden="@(Model.Embedded ? "hidden" : null)">
-    <div>
-        <p class="eyebrow">@Localizer["Menu_Settings"]</p>
-        <h1>@Localizer["Discord_SettingsTitle"]</h1>
-    </div>
-    <a class="button button-secondary" asp-page="/Admin/Settings/Index">
-        @Localizer["Button_Back"]
-    </a>
-</div>
-
 <section class="content-panel narrow discord-settings" data-discord-settings>
     @if (TempData["DiscordSuccess"] is string success)
     {

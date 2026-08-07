@@ -5368,7 +5368,7 @@ body.youtube-auto-expanded-open {
 
 .discord-settings-dialog-card {
     width: 100%;
-    height: min(820px, calc(100vh - 36px));
+    height: min(725px, calc(100vh - 36px));
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     padding: 0;
