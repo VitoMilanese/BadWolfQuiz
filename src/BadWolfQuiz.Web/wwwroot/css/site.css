@@ -5425,3 +5425,7 @@ body.youtube-auto-expanded-open {
     padding: 0.25rem 1rem;
     text-align: center;
 }
+
+.question-clue-hidden {
+    display: none !important;
+}

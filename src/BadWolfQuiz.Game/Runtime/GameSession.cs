@@ -416,8 +416,12 @@ public sealed class GameSession
     public RuntimeQuestion RevealNextClue(int sourceQuestionId)
     {
         EnsureRunning();
+
         var question = FindQuestion(sourceQuestionId);
         question.RevealNextClue();
+
+        Timer.Restart();
+
         return question;
     }
 
@@ -623,6 +627,7 @@ public sealed class GameSession
                 question.SourceQuestionId,
                 answeringPlayerId,
                 false);
+
             return QuestionTimerOutcome.AnswerExpired;
         }
 
@@ -631,6 +636,13 @@ public sealed class GameSession
         if (Timer.Status == GameTimerStatus.Expired &&
             question.AnsweringPlayerId is null)
         {
+            if (question.CanRevealClue)
+            {
+                RevealNextClue(question.SourceQuestionId);
+
+                return QuestionTimerOutcome.ClueRevealed;
+            }
+
             ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
             return QuestionTimerOutcome.BuzzerExpired;
         }
@@ -1133,7 +1145,8 @@ public enum QuestionTimerOutcome
 {
     None = 0,
     BuzzerExpired = 1,
-    AnswerExpired = 2
+    AnswerExpired = 2,
+    ClueRevealed = 3
 }
 
 

@@ -12,26 +12,29 @@
             <h2 title="@Model.Game.Session.CurrentRound.Title">
                 @Model.Game.Session.CurrentRound.Title
             </h2>
-            @if (Model.CurrentQuestion is null && !Model.IsRoundSummaryVisible)
+            @if (!Model.IsRoundSummaryVisible)
             {
                 <details class="action-menu board-action-menu">
                 <summary class="button button-secondary action-menu-trigger">
                     @Localizer["Menu_Tools"]
                 </summary>
                 <div class="action-menu-popover">
-                    <a class="action-menu-item"
-                       asp-page="/Admin/Games/AnswerHistory"
-                       asp-route-id="@Model.Game.Session.Id.Value">
-                        @Localizer["AnswerHistory_Open"]
-                    </a>
+                    @if (Model.CurrentQuestion is null)
+                    {
+                        <a class="action-menu-item"
+                            asp-page="/Admin/Games/AnswerHistory"
+                            asp-route-id="@Model.Game.Session.Id.Value">
+                            @Localizer["AnswerHistory_Open"]
+                        </a>
 
-                    <form method="post" asp-page-handler="RandomActivePlayer">
-                        <button class="action-menu-item"
-                                type="submit"
-                                disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
-                            @Localizer["GameBoard_RandomActivePlayer"]
-                        </button>
-                    </form>
+                        <form method="post" asp-page-handler="RandomActivePlayer">
+                            <button class="action-menu-item"
+                                    type="submit"
+                                    disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
+                                @Localizer["GameBoard_RandomActivePlayer"]
+                            </button>
+                        </form>
+                    }
 
                     @if (Model.Game.Session.HasNextRound)
                     {
@@ -486,12 +489,23 @@
                                     Model.CurrentQuestion.CorrectAnswerValue])
                         </p>
 
-                        <div class="game-content-blocks @(Model.CurrentQuestion.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !isShowingAnswer ? "four-clue-grid" : null)">
-                            @foreach (var block in (Model.CurrentQuestion.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !isShowingAnswer
-                                ? contentBlocks.Take(Model.CurrentQuestion.RevealedClueCount)
-                                : contentBlocks))
+                        <div class="game-content-blocks @(Model.CurrentQuestion.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !isShowingAnswer ? "four-clue-grid" : null)"
+                             data-question-clues
+                             data-source-question-id="@Model.CurrentQuestion.SourceQuestionId">
+                            @{
+                                var clueIndex = 0;
+                            }
+
+                            @foreach (var block in contentBlocks)
                             {
-                                <article class="game-content-block">
+                                var isHiddenClue =
+                                    Model.CurrentQuestion.PresentationType ==
+                                    BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues &&
+                                    !isShowingAnswer &&
+                                    clueIndex >= Model.CurrentQuestion.RevealedClueCount;
+
+                                <article class="game-content-block @(isHiddenClue ? "question-clue-hidden" : null)"
+                                         data-question-clue>
                                     @if (!string.IsNullOrWhiteSpace(block.TopCaption))
                                     {
                                         <p class="game-content-caption">@block.TopCaption</p>
@@ -556,6 +570,8 @@
                                         <p class="game-content-caption">@block.BottomCaption</p>
                                     }
                                 </article>
+
+                                clueIndex++;
                             }
                         </div>
 
@@ -685,10 +701,12 @@
 
                     @if (Model.CurrentQuestion.CanRevealClue)
                     {
-                        <form method="post" asp-page-handler="RevealClue">
+                        <form method="post"
+                                asp-page-handler="RevealClue"
+                                data-reveal-clue-form>
                             <input name="sourceQuestionId"
-                                   type="hidden"
-                                   value="@Model.CurrentQuestion.SourceQuestionId" />
+                                    type="hidden"
+                                    value="@Model.CurrentQuestion.SourceQuestionId" />
                             <button class="button button-secondary" type="submit">
                                 @Localizer["GameBoard_RevealOneClue"]
                             </button>
@@ -1486,6 +1504,98 @@
         })();
 
         (() => {
+            const nativeMediaSelector =
+                ".game-content-audio, video.game-content-video";
+            const youtubeFrameSelector = ".youtube-auto-expand";
+            const youtubePlayers = new Map();
+
+            const pauseNativeMedia = exceptMedia => {
+                for (const media of document.querySelectorAll(nativeMediaSelector)) {
+                    if (media !== exceptMedia && !media.paused) {
+                        media.pause();
+                    }
+                }
+            };
+
+            const pauseYouTubeFrames = exceptFrame => {
+                for (const frame of document.querySelectorAll(youtubeFrameSelector)) {
+                    if (frame === exceptFrame) {
+                        continue;
+                    }
+
+                    const player = youtubePlayers.get(frame);
+                    if (typeof player?.pauseVideo === "function") {
+                        try {
+                            player.pauseVideo();
+                            continue;
+                        } catch {
+                        }
+                    }
+
+                    frame.contentWindow?.postMessage(
+                        JSON.stringify({
+                            event: "command",
+                            func: "pauseVideo",
+                            args: []
+                        }),
+                        "*");
+                }
+            };
+
+            for (const media of document.querySelectorAll(nativeMediaSelector)) {
+                media.addEventListener("play", () => {
+                    pauseNativeMedia(media);
+                    pauseYouTubeFrames(null);
+                });
+            }
+
+            const youtubeFrames = document.querySelectorAll(youtubeFrameSelector);
+            if (youtubeFrames.length === 0) {
+                return;
+            }
+
+            const initializeYouTubePlayers = () => {
+                for (const frame of youtubeFrames) {
+                    if (youtubePlayers.has(frame)) {
+                        continue;
+                    }
+
+                    const player = new window.YT.Player(frame, {
+                        events: {
+                            onStateChange: event => {
+                                if (event.data !== window.YT.PlayerState.PLAYING) {
+                                    return;
+                                }
+
+                                pauseNativeMedia(null);
+                                pauseYouTubeFrames(frame);
+                            }
+                        }
+                    });
+
+                    youtubePlayers.set(frame, player);
+                }
+            };
+
+            if (window.YT?.Player) {
+                initializeYouTubePlayers();
+                return;
+            }
+
+            const previousReadyHandler = window.onYouTubeIframeAPIReady;
+            window.onYouTubeIframeAPIReady = () => {
+                previousReadyHandler?.();
+                initializeYouTubePlayers();
+            };
+
+            if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+                const script = document.createElement("script");
+                script.src = "https://www.youtube.com/iframe_api";
+                document.head.append(script);
+            }
+        })();
+
+        (() => {
             const dialog = document.getElementById("game-settings-dialog");
             document.querySelector("[data-open-game-settings]")
                 ?.addEventListener("click", () => dialog?.showModal());
@@ -2261,20 +2371,17 @@
 
             let hasReceivedInitialBuzzerState = false;
             let buzzerState = null;
+            
             const timerPanel = document.getElementById("game-timer");
             const timerValue = document.getElementById("game-timer-value");
             const timerPause = document.querySelector(".game-timer-pause");
             const timerResume = document.querySelector(".game-timer-resume");
-            const playerJoinLockForm = document.querySelector(
-                ".player-join-lock-form");
-            const playerJoinLockButton = playerJoinLockForm?.querySelector(
-                ".player-join-lock");
-
-            const questionSelectionForms = document.querySelectorAll(
-                ".question-selection-form");
-
-            const gameBoardError = document.getElementById(
-                "game-board-error");
+            const playerJoinLockForm = document.querySelector(".player-join-lock-form");
+            const playerJoinLockButton = playerJoinLockForm?.querySelector(".player-join-lock");
+            const questionSelectionForms = document.querySelectorAll(".question-selection-form");
+            const gameBoardError = document.getElementById("game-board-error");
+            const revealClueForm = document.querySelector("[data-reveal-clue-form]");
+            const questionClues = document.querySelector("[data-question-clues]");
 
             let gameBoardErrorDismissHandle = null;
 
@@ -2345,6 +2452,41 @@
                 console.error(error);
                 window.alert(error.message);
             };
+
+            const applyClueReveal = update => {
+                if (!questionClues ||
+                    questionClues.dataset.sourceQuestionId !==
+                        update.sourceQuestionId.toString()) {
+                    return;
+                }
+
+                const clues = questionClues.querySelectorAll(
+                    "[data-question-clue]");
+
+                clues.forEach((clue, index) => {
+                    clue.classList.toggle(
+                        "question-clue-hidden",
+                        index >= update.revealedClueCount);
+                });
+
+                if (revealClueForm && !update.canRevealClue) {
+                    revealClueForm.remove();
+                }
+            };
+
+            revealClueForm?.addEventListener("submit", async event => {
+                event.preventDefault();
+
+                try {
+                    await submitGameControl(revealClueForm);
+                } catch (error) {
+                    handleGameControlError(error);
+                }
+            });
+
+            connection.on("QuestionClueRevealed", update => {
+                applyClueReveal(update);
+            });
 
             for (const timerForm of [timerPause, timerResume]) {
                 timerForm?.addEventListener("submit", async event => {
@@ -2444,7 +2586,7 @@
                     "answer-timer",
                     update.mode === "answer");
                 timerValue.textContent =
-                    Math.floor(update.remainingMilliseconds / 1000);
+                    Math.ceil(update.remainingMilliseconds / 1000);
 
                 if (timerPause) {
                     timerPause.hidden = update.status !== "running";

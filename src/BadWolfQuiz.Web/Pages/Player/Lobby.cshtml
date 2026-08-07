@@ -932,7 +932,7 @@
                     "answer-timer",
                     update.mode === "answer");
                 timerValue.textContent =
-                    Math.floor(update.remainingMilliseconds / 1000);
+                    Math.ceil(update.remainingMilliseconds / 1000);
             });
 
             connection.on("BuzzerStateChanged", update => {
