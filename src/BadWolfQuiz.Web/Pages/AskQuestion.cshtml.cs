@@ -4,11 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Localization;
+using BadWolfQuiz.Web.Data;
+using BadWolfQuiz.Web.Models;
 
 namespace BadWolfQuiz.Web.Pages;
 
 [EnableRateLimiting("discord-questions")]
 public sealed class AskQuestionModel(
+    QuizDbContext db,
     DiscordQuestionSender questionSender,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
@@ -26,17 +29,52 @@ public sealed class AskQuestionModel(
         if (SenderName?.Length > 80 ||
             Question.Length is < 1 or > 1500)
         {
-            ModelState.AddModelError(string.Empty, localizer["AskQuestion_Invalid"].Value);
+            ModelState.AddModelError(
+                string.Empty,
+                localizer["AskQuestion_Invalid"].Value);
+
             return Page();
         }
 
-        if (!await questionSender.SendAsync(SenderName, Question, cancellationToken))
+        var now = DateTimeOffset.UtcNow;
+
+        var userQuestion = new UserQuestion
         {
-            ModelState.AddModelError(string.Empty, localizer["AskQuestion_Failed"].Value);
+            PublicToken = Guid.NewGuid().ToString("N"),
+            SenderName = SenderName,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
+            Messages =
+            [
+                new UserQuestionMessage
+                {
+                    AuthorType = UserQuestionAuthorType.User,
+                    Text = Question,
+                    CreatedAtUtc = now
+                }
+            ]
+        };
+
+        db.UserQuestions.Add(userQuestion);
+        await db.SaveChangesAsync(cancellationToken);
+
+        if (!await questionSender.SendAsync(
+                SenderName,
+                Question,
+                cancellationToken))
+        {
+            db.UserQuestions.Remove(userQuestion);
+            await db.SaveChangesAsync(cancellationToken);
+
+            ModelState.AddModelError(
+                string.Empty,
+                localizer["AskQuestion_Failed"].Value);
+
             return Page();
         }
 
-        TempData["SuccessMessage"] = localizer["AskQuestion_Sent"].Value;
-        return RedirectToPage();
+        return RedirectToPage(
+            "/Question",
+            new { token = userQuestion.PublicToken });
     }
 }

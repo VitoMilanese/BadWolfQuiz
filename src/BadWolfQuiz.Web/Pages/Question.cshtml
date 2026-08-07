@@ -1,0 +1,83 @@
+﻿@page
+@model BadWolfQuiz.Web.Pages.QuestionModel
+@{
+    ViewData["Title"] = "Ваше питання";
+}
+@using BadWolfQuiz.Web.Models
+
+<section class="page-section">
+    <h1>Ваше питання</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.UserQuestion.SenderName))
+    {
+        <p>
+            <strong>Ім’я:</strong>
+            @Model.UserQuestion.SenderName
+        </p>
+    }
+
+    <div>
+        @foreach (var message in Model.UserQuestion.Messages
+            .OrderBy(x => x.CreatedAtUtc)
+            .ThenBy(x => x.Id))
+        {
+            <div>
+                <h2>
+                    @(message.AuthorType == UserQuestionAuthorType.User
+                        ? "Ви"
+                        : "Розробник")
+            </h2>
+
+                <p>@message.Text</p>
+            </div>
+        }
+    </div>
+
+    @{
+        var lastMessage = Model.UserQuestion.Messages
+            .OrderBy(x => x.CreatedAtUtc)
+            .ThenBy(x => x.Id)
+            .LastOrDefault();
+
+        var awaitingDeveloper =
+        lastMessage?.AuthorType == UserQuestionAuthorType.User;
+
+        var canReply =
+        lastMessage?.AuthorType == UserQuestionAuthorType.Developer;
+    }
+
+    @if (awaitingDeveloper)
+    {
+        <p>
+            <strong>Статус:</strong>
+            Очікує відповіді
+        </p>
+    }
+
+    @if (canReply)
+    {
+        <div asp-validation-summary="ModelOnly"></div>
+
+        <form method="post" asp-page-handler="Reply">
+            <input type="hidden"
+                   name="token"
+                   value="@Model.UserQuestion.PublicToken" />
+
+            <label for="message">
+                <strong>Продовжити розмову</strong>
+            </label>
+
+            <textarea id="message"
+                  name="message"
+                  rows="5"
+                  maxlength="5000"
+                  required></textarea>
+
+            <div>
+                <button type="submit">
+                    Надіслати
+                </button>
+            </div>
+        </form>
+    }
+</section>

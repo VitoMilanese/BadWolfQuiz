@@ -34,8 +34,9 @@ public sealed class QuizDbContext : DbContext
     public DbSet<PlayerBuzz> PlayerBuzzes => Set<PlayerBuzz>();
     public DbSet<PlayerQuestionResult> PlayerQuestionResults => Set<PlayerQuestionResult>();
     public DbSet<QuizRating> QuizRatings => Set<QuizRating>();
-    public DbSet<HostDiscordConnection> HostDiscordConnections =>
-        Set<HostDiscordConnection>();
+    public DbSet<HostDiscordConnection> HostDiscordConnections => Set<HostDiscordConnection>();
+    public DbSet<UserQuestion> UserQuestions => Set<UserQuestion>();
+    public DbSet<UserQuestionMessage> UserQuestionMessages => Set<UserQuestionMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,6 +54,16 @@ public sealed class QuizDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<HostDiscordConnection>()
             .HasQueryFilter(x => x.HostId == CurrentHostId);
+
+        modelBuilder.Entity<UserQuestion>()
+            .HasIndex(x => x.PublicToken)
+            .IsUnique();
+
+        modelBuilder.Entity<UserQuestionMessage>()
+            .HasOne(x => x.UserQuestion)
+            .WithMany(x => x.Messages)
+            .HasForeignKey(x => x.UserQuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Quiz>()
             .HasOne(x => x.Host)

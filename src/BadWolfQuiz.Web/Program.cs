@@ -32,6 +32,7 @@ builder.Services
     {
         options.Conventions.AuthorizeFolder("/Admin");
         options.Conventions.AuthorizePage("/Admin/MasterGames", "MasterHost");
+        options.Conventions.AuthorizePage("/Admin/QuestionInbox", "MasterHost");
     })
     .AddViewLocalization()
     .AddDataAnnotationsLocalization(options =>
@@ -131,6 +132,10 @@ builder.Services.AddOptions<MediaArchiveOptions>()
     .Bind(builder.Configuration.GetSection(MediaArchiveOptions.SectionName))
     .Validate(options => options.IsValid, "Media archive settings are invalid.")
     .ValidateOnStart();
+builder.Services.AddOptions<UserQuestionOptions>()
+    .Bind(builder.Configuration.GetSection(UserQuestionOptions.SectionName))
+    .Validate(options => options.IsValid, "User question settings are invalid.")
+    .ValidateOnStart();
 
 var defaultCulture = builder.Configuration[
     $"{SiteDefaultsOptions.SectionName}:{nameof(SiteDefaultsOptions.Culture)}"] ?? "en";
@@ -211,6 +216,7 @@ builder.Services.AddHostedService(provider =>
 builder.Services.AddSingleton<DiscordMuteCoordinator>();
 builder.Services.AddHostedService<DiscordMuteTimeoutService>();
 builder.Services.AddScoped<DiscordConnectionRepository>();
+builder.Services.AddScoped<UserQuestionCleanupService>();
 
 var app = builder.Build();
 
@@ -308,8 +314,13 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<QuizDbContext>();
     await DatabaseMigrationService.MigrateAsync(db);
+
     var archiveDb = scope.ServiceProvider.GetRequiredService<ArchiveDbContext>();
     await archiveDb.Database.MigrateAsync();
+
+    var questionCleanup = scope.ServiceProvider
+        .GetRequiredService<UserQuestionCleanupService>();
+    await questionCleanup.CleanupAsync();
 
     var seed = scope.ServiceProvider.GetRequiredService<QuizSeedService>();
     await seed.SeedAsync();

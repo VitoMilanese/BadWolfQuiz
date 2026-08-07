@@ -1,0 +1,87 @@
+@page
+@model BadWolfQuiz.Web.Pages.Admin.QuestionInboxModel
+@{
+    ViewData["Title"] = "Питання користувачів";
+}
+@using BadWolfQuiz.Web.Models
+
+<section class="page-section">
+    <h1>Питання користувачів</h1>
+
+    <div asp-validation-summary="ModelOnly"></div>
+
+    @if (Model.Questions.Count == 0)
+    {
+        <p>Питань поки немає.</p>
+    }
+    else
+    {
+        @foreach (var question in Model.Questions)
+        {
+            <article class="panel">
+                @if (!string.IsNullOrWhiteSpace(question.SenderName))
+                {
+                    <p>
+                        <strong>Від:</strong>
+                        @question.SenderName
+                    </p>
+                }
+
+                <p>
+                    <strong>Питання:</strong>
+                </p>
+
+                @foreach (var message in question.Messages
+                    .OrderBy(x => x.CreatedAtUtc)
+                    .ThenBy(x => x.Id))
+                {
+                    <div>
+                        <strong>
+                            @(message.AuthorType == UserQuestionAuthorType.User
+                                ? "Користувач"
+                                : "Розробник"):
+                        </strong>
+
+                        <p>@message.Text</p>
+                    </div>
+                }
+
+                @{
+                    var lastMessage = question.Messages
+                        .OrderBy(x => x.CreatedAtUtc)
+                        .ThenBy(x => x.Id)
+                        .LastOrDefault();
+
+                    var awaitingDeveloper = lastMessage?.AuthorType == UserQuestionAuthorType.User;
+                }
+
+                @if (awaitingDeveloper)
+                {
+                    <form method="post"
+                          asp-page-handler="Answer">
+
+                        <input type="hidden"
+                               name="id"
+                               value="@question.Id" />
+
+                        <label for="answer-@question.Id">
+                            <strong>Відповідь</strong>
+                        </label>
+
+                        <textarea id="answer-@question.Id"
+                                  name="answer"
+                                  rows="5"
+                                  maxlength="5000"
+                                  required></textarea>
+
+                        <div>
+                            <button type="submit">
+                                Відповісти
+                            </button>
+                        </div>
+                    </form>
+                }
+            </article>
+        }
+    }
+</section>
