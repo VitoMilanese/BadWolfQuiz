@@ -320,6 +320,25 @@ public sealed class GameHub(
             return;
         }
 
+        if (tick.Outcome == QuestionTimerOutcome.ClueRevealed)
+        {
+            var question = tick.Game.Session.Board.Questions
+                .First(item =>
+                    item.Status is RuntimeQuestionStatus.Selected or
+                        RuntimeQuestionStatus.Active);
+
+            await group.SendAsync(
+                "QuestionClueRevealed",
+                new
+                {
+                    sourceQuestionId = question.SourceQuestionId,
+                    question.RevealedClueCount,
+                    question.CanRevealClue
+                });
+
+            return;
+        }
+
         await group.SendAsync(
             "BuzzerStateChanged",
             CreateBuzzerUpdate(tick.Game));

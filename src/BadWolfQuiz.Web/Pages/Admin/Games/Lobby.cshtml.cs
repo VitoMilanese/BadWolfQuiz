@@ -735,9 +735,15 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
-    public IActionResult OnPostRevealClue(Guid id, int sourceQuestionId)
+    public async Task<IActionResult> OnPostRevealClueAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
     {
-        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
         if (game is null)
         {
             return NotFound();
@@ -745,11 +751,50 @@ public sealed class LobbyModel(
 
         try
         {
-            sessionRegistry.RevealNextClue(game.PublicCode, sourceQuestionId);
+            var question = sessionRegistry.RevealNextClue(
+                game.PublicCode,
+                sourceQuestionId);
+
+            if (question is null)
+            {
+                return NotFound();
+            }
+
+            await gameHub.Clients
+                .Group(GameHub.GroupName(game.PublicCode))
+                .SendAsync(
+                    "QuestionClueRevealed",
+                    new
+                    {
+                        sourceQuestionId,
+                        question.RevealedClueCount,
+                        question.CanRevealClue
+                    },
+                    cancellationToken);
         }
         catch (GameRuleViolationException)
         {
-            TempData["ErrorMessage"] = localizer["GameBoard_RevealClueRejected"].Value;
+            var errorMessage =
+                localizer["GameBoard_RevealClueRejected"].Value;
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = errorMessage
+                });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+        }
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true
+            });
         }
 
         return RedirectToPage(new { id });
