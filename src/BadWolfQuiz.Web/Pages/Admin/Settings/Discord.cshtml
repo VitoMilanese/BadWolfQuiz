@@ -1,0 +1,215 @@
+@page
+@model BadWolfQuiz.Web.Pages.Admin.Settings.DiscordModel
+@{
+    ViewData["Title"] = Localizer["Discord_SettingsTitle"];
+}
+
+<div class="page-heading" hidden="@(Model.Embedded ? "hidden" : null)">
+    <div>
+        <p class="eyebrow">@Localizer["Menu_Settings"]</p>
+        <h1>@Localizer["Discord_SettingsTitle"]</h1>
+    </div>
+    <a class="button button-secondary" asp-page="/Admin/Settings/Index">
+        @Localizer["Button_Back"]
+    </a>
+</div>
+
+<section class="content-panel narrow discord-settings" data-discord-settings>
+    @if (TempData["DiscordSuccess"] is string success)
+    {
+        <div class="message message-success" role="status" data-auto-dismiss>@success</div>
+    }
+    @if (TempData["DiscordError"] is string error)
+    {
+        <div class="message message-error" role="alert">@error</div>
+    }
+
+    @if (!Model.IsEnabled)
+    {
+        <p class="message message-warning">@Localizer["Discord_NotEnabled"]</p>
+    }
+    else if (Model.Connection is null)
+    {
+        <p>@Localizer["Discord_ConnectDescription"]</p>
+        <form method="post" asp-page-handler="Connect">
+            <input asp-for="Embedded" type="hidden" />
+            <button class="button button-primary" type="submit" formtarget="_blank">
+                @Localizer["Discord_Connect"]
+            </button>
+        </form>
+    }
+    else
+    {
+        <dl class="settings-summary">
+            <div><dt>@Localizer["Discord_Account"]</dt><dd>@Model.Connection.DiscordUserName</dd></div>
+            <div><dt>@Localizer["Discord_Server"]</dt><dd>@(Model.Connection.GuildName ?? "—")</dd></div>
+            <div><dt>@Localizer["Discord_VoiceChannel"]</dt><dd>@(Model.Connection.VoiceChannelName ?? "—")</dd></div>
+            <div>
+                <dt>@Localizer["Discord_Status"]</dt>
+                <dd class="@(Model.Health.IsReady ? "discord-health-ok" : "discord-health-error")">
+                    @(Model.Health.IsReady ? Localizer["Discord_Ready"] : Localizer["Discord_NeedsAttention"])
+                </dd>
+            </div>
+            <div>
+                <dt>@Localizer["Discord_BotStatus"]</dt>
+                <dd class="@(Model.Health.BotOnline ? "discord-health-ok" : "discord-health-error")">
+                    @(Model.Health.BotOnline ? Localizer["Discord_Available"] : Localizer["Discord_Unavailable"])
+                </dd>
+            </div>
+            <div>
+                <dt>@Localizer["Discord_MutePermission"]</dt>
+                <dd class="@(Model.Health.HasMutePermission ? "discord-health-ok" : "discord-health-error")">
+                    @(Model.Health.HasMutePermission ? Localizer["Discord_Available"] : Localizer["Discord_Unavailable"])
+                </dd>
+            </div>
+        </dl>
+
+        @if (Model.Guilds.Count == 0)
+        {
+            <p>@Localizer["Discord_ReauthorizeHint"]</p>
+            <div class="form-actions">
+                <form method="post" asp-page-handler="Connect">
+                    <input asp-for="Embedded" type="hidden" />
+                    <button class="button button-secondary" type="submit" formtarget="_blank">@Localizer["Discord_Reauthorize"]</button>
+                </form>
+                <a class="button button-secondary" href="@Model.BotInstallUrl" target="_blank" rel="noopener">
+                    @Localizer["Discord_InstallBot"]
+                </a>
+            </div>
+        }
+        else
+        {
+            <form method="post" asp-page-handler="Save" class="stack-form">
+                <input asp-for="Embedded" type="hidden" />
+                <label>
+                    <span>@Localizer["Discord_Server"]</span>
+                    <select asp-for="GuildId" data-discord-guild required>
+                        <option value="">@Localizer["Discord_SelectServer"]</option>
+                        @foreach (var guild in Model.Guilds)
+                        {
+                            <option value="@guild.Id">@guild.Name</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>@Localizer["Discord_VoiceChannel"]</span>
+                    <select asp-for="VoiceChannelId" data-discord-channel required>
+                        <option value="">@Localizer["Discord_SelectChannel"]</option>
+                        @foreach (var channel in Model.Channels)
+                        {
+                            <option value="@channel.Id">@channel.Name</option>
+                        }
+                    </select>
+                </label>
+                <button class="button button-primary" type="submit">@Localizer["Button_Save"]</button>
+            </form>
+        }
+
+        <form method="post"
+              asp-page-handler="SaveAutomaticMute"
+              class="discord-auto-mute-form"
+              data-discord-auto-mute-form>
+            <input asp-for="Embedded" type="hidden" />
+            <label class="settings-checkbox">
+                <input asp-for="AutoMuteDuringMedia" type="checkbox" />
+                <span>@Localizer["Discord_AutoMute"]</span>
+            </label>
+            <p class="form-hint">@Localizer["Discord_AutoMuteHint"]</p>
+            <button class="button button-secondary" type="submit">@Localizer["Button_Save"]</button>
+        </form>
+
+        <div class="form-actions">
+            @if (Model.Health.IsReady)
+            {
+                <button class="button button-secondary" type="button" data-discord-test>
+                    @Localizer["Discord_Test"]
+                </button>
+            }
+            <form method="post" asp-page-handler="Disconnect">
+                <input asp-for="Embedded" type="hidden" />
+                <button class="button button-danger" type="submit">@Localizer["Discord_Disconnect"]</button>
+            </form>
+            <span class="form-status" role="status" data-discord-status></span>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const root = document.querySelector("[data-discord-settings]");
+            const guild = root?.querySelector("[data-discord-guild]");
+            const channel = root?.querySelector("[data-discord-channel]");
+            const status = root?.querySelector("[data-discord-status]");
+            const token = root?.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const selectChannelLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Localizer["Discord_SelectChannel"].Value));
+            const testRunningLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Localizer["Discord_TestRunning"].Value));
+            const testCompleteLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Localizer["Discord_TestComplete"].Value));
+            const testFailedLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Localizer["Discord_TestFailed"].Value));
+
+            root?.querySelector("[data-discord-auto-mute-form]")
+                ?.addEventListener("submit", async event => {
+                    event.preventDefault();
+                    const form = event.currentTarget;
+                    const checkbox = form.querySelector('[name="AutoMuteDuringMedia"]');
+                    const button = form.querySelector('button[type="submit"]');
+                    const requested = checkbox.checked;
+                    button.disabled = true;
+                    try {
+                        const response = await fetch("?handler=SaveAutomaticMute&ajax=true", {
+                            method: "POST",
+                            body: new FormData(form)
+                        });
+                        const result = await response.json();
+                        if (!response.ok) {
+                            throw new Error(result.error);
+                        }
+                        status.textContent = result.message;
+                        window.parent.postMessage({
+                            type: "badwolfquiz:discord-auto-mute-changed",
+                            enabled: result.autoMuteDuringMedia
+                        }, window.location.origin);
+                    } catch (error) {
+                        checkbox.checked = !requested;
+                        status.textContent = error.message;
+                    } finally {
+                        button.disabled = false;
+                    }
+                });
+
+            guild?.addEventListener("change", async () => {
+                channel.disabled = true;
+                try {
+                    const response = await fetch(`?handler=Channels&guildId=${encodeURIComponent(guild.value)}`);
+                    const channels = await response.json();
+                    channel.replaceChildren(new Option(selectChannelLabel, ""));
+                    channels.forEach(item => channel.add(new Option(item.name, item.id)));
+                } finally {
+                    channel.disabled = false;
+                }
+            });
+
+            root?.querySelector("[data-discord-test]")?.addEventListener("click", async event => {
+                const button = event.currentTarget;
+                button.disabled = true;
+                status.textContent = testRunningLabel;
+                try {
+                    const response = await fetch("?handler=Test", {
+                        method: "POST",
+                        headers: { "RequestVerificationToken": token }
+                    });
+                    const result = await response.json();
+                    status.textContent = response.ok
+                        ? `${testCompleteLabel} (${result.succeededCount}/${result.targetCount})`
+                        : (result.error ?? testFailedLabel);
+                } finally {
+                    button.disabled = false;
+                }
+            });
+        })();
+    </script>
+}

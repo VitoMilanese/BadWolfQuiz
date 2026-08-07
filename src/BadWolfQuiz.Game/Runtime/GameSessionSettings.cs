@@ -24,7 +24,8 @@ public sealed record GameSessionSettings
         byte[]? brandLogoData = null,
         string? brandLogoContentType = null,
         string siteThemeId = "classic-wolf",
-        SiteThemeColors? customThemeColors = null)
+        SiteThemeColors? customThemeColors = null,
+        string? hostWebcamUrl = null)
     {
         if (buzzerDuration <= TimeSpan.Zero)
         {
@@ -51,6 +52,7 @@ public sealed record GameSessionSettings
         HostImageData = hostImageData;
         HostImageContentType = hostImageContentType;
         HostAvatarId = hostAvatarId;
+        HostWebcamUrl = hostWebcamUrl?.Trim();
         BrandLogoData = brandLogoData;
         BrandLogoContentType = brandLogoContentType;
         SiteThemeId = siteThemeId;
@@ -73,6 +75,7 @@ public sealed record GameSessionSettings
     public byte[]? HostImageData { get; }
     public string? HostImageContentType { get; }
     public string? HostAvatarId { get; }
+    public string? HostWebcamUrl { get; }
     public byte[]? BrandLogoData { get; }
     public string? BrandLogoContentType { get; }
     public string SiteThemeId { get; }
@@ -126,7 +129,8 @@ public enum HostVisualSource
     None = 0,
     Image = 1,
     Webcam = 2,
-    Avatar = 3
+    Avatar = 3,
+    WebcamUrl = 4
 }
 
 public enum GamePhaseStartMode

@@ -22,7 +22,8 @@ public sealed record GamePlayerState(
     string? AvatarId,
     string? UploadedImageDataUrl,
     bool UsesUploadedImage,
-    DateTimeOffset JoinedAtUtc);
+    DateTimeOffset JoinedAtUtc,
+    string? WebcamUrl = null);
 
 public sealed record RuntimeQuestionState(
     int SourceQuestionId,

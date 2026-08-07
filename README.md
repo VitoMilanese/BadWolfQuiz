@@ -152,6 +152,20 @@ Currently implemented:
 - Self-service host accounts with private quiz and game-history ownership
 - QR player joining with direct game links
 
+### Discord voice moderation
+
+Each host can connect a Discord account, select a server where the shared bot is
+installed, and select one voice channel. During a game, the host can mute or
+unmute all participants in that channel except their own Discord user. Optional
+automatic moderation mutes participants while question or answer audio, video,
+or YouTube content is playing.
+
+Manual and automatic mute requests are tracked independently. Participants are
+unmuted only after both reasons have been released, which prevents a media-end
+event from overriding a manual mute. See
+[`docs/features/discord-voice-moderation.md`](docs/features/discord-voice-moderation.md)
+for setup and operational details.
+
 ---
 
 ## Media

@@ -78,6 +78,26 @@ public sealed class HostAccountServiceTests
     }
 
     [Fact]
+    public async Task Query_filters_hide_another_hosts_discord_connection()
+    {
+        await using var fixture = await Fixture.CreateAsync("host-b");
+        fixture.Db.Hosts.AddRange(
+            new HostAccount { Id = "host-a", Email = "a@example.com", NormalizedEmail = "A@EXAMPLE.COM", PasswordHash = "x" },
+            new HostAccount { Id = "host-b", Email = "b@example.com", NormalizedEmail = "B@EXAMPLE.COM", PasswordHash = "x" });
+        fixture.Db.HostDiscordConnections.AddRange(
+            new HostDiscordConnection { HostId = "host-a", DiscordUserId = "1" },
+            new HostDiscordConnection { HostId = "host-b", DiscordUserId = "2" });
+        await fixture.Db.SaveChangesAsync();
+
+        var connection = await new DiscordConnectionRepository(fixture.Db)
+            .GetAsync(default);
+
+        Assert.NotNull(connection);
+        Assert.Equal("host-b", connection.HostId);
+        Assert.Equal("2", connection.DiscordUserId);
+    }
+
+    [Fact]
     public async Task Password_reset_token_is_single_use()
     {
         await using var fixture = await Fixture.CreateAsync();

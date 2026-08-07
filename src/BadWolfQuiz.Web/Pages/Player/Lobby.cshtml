@@ -16,6 +16,7 @@
      data-player-id="@Model.CurrentPlayer.Id.Value"
      data-player-name="@Model.CurrentPlayer.Name"
      data-avatar-id="@Model.CurrentPlayer.AvatarId"
+     data-webcam-url="@Model.CurrentPlayer.WebcamUrl"
      data-access-token="@Model.AccessToken"
      data-buzzer-open-label="@Localizer["PlayerGame_BuzzerOpen"]"
      data-buzzer-claimed-label="@Localizer["PlayerGame_BuzzerClaimed"]"
@@ -26,6 +27,7 @@
      data-final-action-rejected-label="@Localizer["FinalQuestion_ActionRejected"]"
      data-removed-from-game-label="@Localizer["PlayerGame_RemovedFromGame"]"
      data-player-image-invalid-label="@Localizer["PlayerImage_Invalid"]"
+     data-player-webcam-url-invalid-label="@Localizer["PlayerWebcam_InvalidUrl"]"
      data-final-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()">
     <p class="eyebrow">@Localizer["Message_WaitingHost"]</p>
     <h1>@Model.Game.Session.Quiz.Title</h1>
@@ -106,6 +108,14 @@
                muted
                playsinline
                hidden></video>
+        <iframe class="player-avatar-current player-webcam-url-preview"
+                data-player-webcam-url-preview
+                title="@Model.CurrentPlayer.Name"
+                allow="autoplay; fullscreen; picture-in-picture"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
+                referrerpolicy="no-referrer"
+                allowfullscreen
+                hidden></iframe>
         <div class="player-image-source-switch" role="group"
              aria-label="@Localizer["PlayerImage_Source"]">
             <button class="button button-secondary"
@@ -117,6 +127,11 @@
                     type="button"
                     data-use-player-image>
                 @Localizer["PlayerImage_Picture"]
+            </button>
+            <button class="button button-secondary"
+                    type="button"
+                    data-use-player-webcam-url>
+                @Localizer["PlayerWebcam_Url"]
             </button>
         </div>
         <div class="player-image-actions">
@@ -132,6 +147,25 @@
                    accept="image/png,image/jpeg,image/webp"
                    data-player-image-input
                    hidden />
+        </div>
+        <div class="player-webcam-url-field">
+            <label for="player-webcam-url">@Localizer["PlayerWebcam_Url"]</label>
+            <div class="player-webcam-url-row">
+                <input id="player-webcam-url"
+                       type="url"
+                       maxlength="2048"
+                       placeholder="https://vdo.ninja/?view=..."
+                       data-player-webcam-url />
+                <button class="button button-secondary"
+                        type="button"
+                        data-activate-player-webcam-url>
+                    @Localizer["PlayerWebcam_UseUrl"]
+                </button>
+            </div>
+            <small class="form-hint">
+                @Localizer["HostCard_WebcamUrlHintPrefix"]
+                <a href="https://vdo.ninja/" target="_blank" rel="noopener noreferrer">vdo.ninja</a>.
+            </small>
         </div>
         <button class="button button-secondary"
                 type="button"
@@ -562,14 +596,26 @@
             const currentAvatar = document.querySelector("[data-current-player-avatar]");
             const avatarSourceButton = document.querySelector("[data-use-player-avatar]");
             const imageSourceButton = document.querySelector("[data-use-player-image]");
+            const webcamUrlSourceButton = document.querySelector(
+                "[data-use-player-webcam-url]");
             const uploadImageButton = document.querySelector("[data-upload-player-image]");
             const imageInput = document.querySelector("[data-player-image-input]");
+            const webcamUrlInput = document.querySelector("[data-player-webcam-url]");
+            const webcamUrlPreview = document.querySelector(
+                "[data-player-webcam-url-preview]");
+            const activateWebcamUrlButton = document.querySelector(
+                "[data-activate-player-webcam-url]");
             let storedAvatarId = lobby.dataset.avatarId ||
                 localStorage.getItem(avatarPreferenceKey) || "";
             let storedImageDataUrl = localStorage.getItem(imagePreferenceKey) || "";
+            const webcamUrlPreferenceKey =
+                `badwolfquiz:webcam-url:${normalizedPlayerName}`;
+            let storedWebcamUrl = lobby.dataset.webcamUrl ||
+                localStorage.getItem(webcamUrlPreferenceKey) || "";
             let selectedImageSource =
                 localStorage.getItem(imageSourcePreferenceKey) ||
-                (storedImageDataUrl ? "image" : "avatar");
+                (storedWebcamUrl ? "webcam-url" :
+                    storedImageDataUrl ? "image" : "avatar");
             const webcamButton = document.querySelector(
                 "[data-toggle-player-webcam]");
             const webcam = window.BadWolfWebcam.createPlayer({
@@ -585,10 +631,12 @@
             const avatarDialog = document.querySelector("[data-avatar-picker]");
             let pendingAvatarId;
             let pendingImageDataUrl;
+            let pendingWebcamUrl;
 
             const setSourceButtonState = () => {
                 avatarSourceButton.disabled = !storedAvatarId;
                 imageSourceButton.disabled = !storedImageDataUrl;
+                webcamUrlSourceButton.disabled = !storedWebcamUrl;
                 const updateButton = (button, isSelected) => {
                     button.classList.toggle("button-primary", isSelected);
                     button.classList.toggle("button-secondary", !isSelected);
@@ -602,12 +650,25 @@
                     imageSourceButton,
                     selectedImageSource === "image"
                 );
+                updateButton(
+                    webcamUrlSourceButton,
+                    selectedImageSource === "webcam-url"
+                );
             };
 
             const showSelectedPlayerImage = () => {
                 const source = selectedImageSource === "image"
                     ? storedImageDataUrl
-                    : storedAvatarId ? `/avatars/${storedAvatarId}` : "";
+                    : selectedImageSource === "avatar" && storedAvatarId
+                        ? `/avatars/${storedAvatarId}` : "";
+
+                if (selectedImageSource === "webcam-url" && storedWebcamUrl) {
+                    webcamUrlPreview.src = withMutedWebcamAudio(storedWebcamUrl);
+                    webcamUrlPreview.hidden = false;
+                } else {
+                    webcamUrlPreview.removeAttribute("src");
+                    webcamUrlPreview.hidden = true;
+                }
 
                 if (source) {
                     currentAvatar.src = source;
@@ -618,6 +679,19 @@
                 }
 
                 setSourceButtonState();
+            };
+
+            const withMutedWebcamAudio = value => {
+                const url = new URL(value);
+                url.searchParams.set("deafen", "1");
+                url.searchParams.set("noaudio", "");
+                if (url.hash.length > 1) {
+                    const fragment = new URLSearchParams(url.hash.slice(1));
+                    fragment.set("deafen", "1");
+                    fragment.set("noaudio", "");
+                    url.hash = fragment.toString();
+                }
+                return url.toString();
             };
 
             const activateAvatar = async () => {
@@ -654,6 +728,37 @@
                         storedImageDataUrl
                     );
                     pendingImageDataUrl = undefined;
+                }
+            };
+
+            const isValidWebcamUrl = value => {
+                try {
+                    const url = new URL(value);
+                    return url.protocol === "https:" &&
+                        !url.username && !url.password;
+                } catch {
+                    return false;
+                }
+            };
+
+            const activateWebcamUrl = async () => {
+                const value = webcamUrlInput.value.trim();
+                if (!isValidWebcamUrl(value)) {
+                    alert(lobby.dataset.playerWebcamUrlInvalidLabel);
+                    return;
+                }
+
+                await webcam.disable();
+                storedWebcamUrl = value;
+                selectedImageSource = "webcam-url";
+                localStorage.setItem(webcamUrlPreferenceKey, storedWebcamUrl);
+                localStorage.setItem(imageSourcePreferenceKey, selectedImageSource);
+                showSelectedPlayerImage();
+                pendingWebcamUrl = storedWebcamUrl;
+
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    await connection.invoke("SetPlayerWebcamUrl", storedWebcamUrl);
+                    pendingWebcamUrl = undefined;
                 }
             };
 
@@ -708,6 +813,20 @@
             imageSourceButton?.addEventListener("click", () => {
                 activateUploadedImage().catch(console.error);
             });
+            webcamUrlSourceButton?.addEventListener("click", () => {
+                webcamUrlInput.value = storedWebcamUrl;
+                activateWebcamUrl().catch(console.error);
+            });
+            activateWebcamUrlButton?.addEventListener("click", () => {
+                activateWebcamUrl().catch(console.error);
+            });
+            webcamButton?.addEventListener("click", () => {
+                selectedImageSource = storedImageDataUrl ? "image" : "avatar";
+                localStorage.setItem(imageSourcePreferenceKey, selectedImageSource);
+                webcamUrlPreview.removeAttribute("src");
+                webcamUrlPreview.hidden = true;
+                setSourceButtonState();
+            });
             uploadImageButton?.addEventListener("click", () => imageInput?.click());
             imageInput?.addEventListener("change", async () => {
                 const file = imageInput.files?.[0];
@@ -745,9 +864,15 @@
             if (selectedImageSource === "avatar" && !storedAvatarId && storedImageDataUrl) {
                 selectedImageSource = "image";
             }
+            if (selectedImageSource === "webcam-url" && !storedWebcamUrl) {
+                selectedImageSource = storedImageDataUrl ? "image" : "avatar";
+            }
             localStorage.setItem(imageSourcePreferenceKey, selectedImageSource);
+            webcamUrlInput.value = storedWebcamUrl;
             showSelectedPlayerImage();
-            if (selectedImageSource === "image") {
+            if (selectedImageSource === "webcam-url") {
+                pendingWebcamUrl = storedWebcamUrl;
+            } else if (selectedImageSource === "image") {
                 pendingImageDataUrl = storedImageDataUrl;
             } else if (storedAvatarId) {
                 pendingAvatarId = storedAvatarId;
@@ -1076,7 +1201,11 @@
                     );
                     pendingImageDataUrl = undefined;
                 }
-                if (!storedAvatarId && !storedImageDataUrl) {
+                if (pendingWebcamUrl) {
+                    await connection.invoke("SetPlayerWebcamUrl", pendingWebcamUrl);
+                    pendingWebcamUrl = undefined;
+                }
+                if (!storedAvatarId && !storedImageDataUrl && !storedWebcamUrl) {
                     document.querySelector("[data-open-avatar-picker]")?.click();
                 }
             }).catch(() => {

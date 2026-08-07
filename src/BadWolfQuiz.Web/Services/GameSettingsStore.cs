@@ -192,6 +192,7 @@ public sealed class GameSettingsStore(
         public byte[]? HostImageData { get; set; }
         public string? HostImageContentType { get; set; }
         public string? HostAvatarId { get; set; }
+        public string? HostWebcamUrl { get; set; }
         public byte[]? BrandLogoData { get; set; }
         public string? BrandLogoContentType { get; set; }
         public string SiteThemeId { get; set; } = SiteThemeCatalog.DefaultId;
@@ -212,7 +213,8 @@ public sealed class GameSettingsStore(
             BrandLogoData,
             BrandLogoContentType,
             SiteThemeCatalog.Normalize(SiteThemeId),
-            SiteThemeCatalog.Normalize(CustomThemeColors));
+            SiteThemeCatalog.Normalize(CustomThemeColors),
+            HostWebcamUrl);
 
         public static StoredGameSettings From(GameSessionSettings settings) => new()
         {
@@ -227,6 +229,7 @@ public sealed class GameSettingsStore(
             HostImageData = settings.HostImageData,
             HostImageContentType = settings.HostImageContentType,
             HostAvatarId = settings.HostAvatarId,
+            HostWebcamUrl = settings.HostWebcamUrl,
             BrandLogoData = settings.BrandLogoData,
             BrandLogoContentType = settings.BrandLogoContentType,
             SiteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId),
@@ -253,6 +256,8 @@ public sealed class GameSettingsInput
     public string? HostName { get; set; }
     public HostVisualSource HostVisualSource { get; set; }
     public string? HostAvatarId { get; set; }
+    [MaxLength(2048)]
+    public string? HostWebcamUrl { get; set; }
     public string SiteThemeId { get; set; } = SiteThemeCatalog.DefaultId;
     public SiteThemeColors CustomThemeColors { get; set; } = SiteThemeColors.Default;
 
@@ -262,6 +267,8 @@ public sealed class GameSettingsInput
         Enum.IsDefined(RegularQuestionBuzzerStartMode) &&
         Enum.IsDefined(WagerQuestionAnswerTimerStartMode) &&
         Enum.IsDefined(HostVisualSource) &&
+        (HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.WebcamUrl ||
+            IsValidWebcamUrl(HostWebcamUrl)) &&
         SiteThemeCatalog.IsValid(SiteThemeId) &&
         SiteThemeCatalog.AreValid(CustomThemeColors);
 
@@ -296,7 +303,8 @@ public sealed class GameSettingsInput
             brandLogoData,
             brandLogoContentType,
             SiteThemeCatalog.Normalize(siteThemeId ?? SiteThemeId),
-            SiteThemeCatalog.Normalize(customThemeColors ?? CustomThemeColors));
+            SiteThemeCatalog.Normalize(customThemeColors ?? CustomThemeColors),
+            HostWebcamUrl);
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)
@@ -315,8 +323,15 @@ public sealed class GameSettingsInput
             HostName = settings.HostName,
             HostVisualSource = settings.HostVisualSource,
             HostAvatarId = settings.HostAvatarId,
+            HostWebcamUrl = settings.HostWebcamUrl,
             SiteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId),
             CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors)
         };
     }
+
+    public static bool IsValidWebcamUrl(string? value) =>
+        Uri.TryCreate(value?.Trim(), UriKind.Absolute, out var uri) &&
+        string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) &&
+        !string.IsNullOrWhiteSpace(uri.Host) &&
+        string.IsNullOrEmpty(uri.UserInfo);
 }

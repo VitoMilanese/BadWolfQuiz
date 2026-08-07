@@ -10,7 +10,8 @@ public sealed record PlayerLobbyEntry(
     string? UploadedImageDataUrl,
     bool UsesUploadedImage,
     bool IsWebcamEnabled,
-    PlayerPresenceStatus Presence);
+    PlayerPresenceStatus Presence,
+    string? WebcamUrl);
 
 public sealed record PlayerConnectionResult(
     GameSessionRegistration Game,

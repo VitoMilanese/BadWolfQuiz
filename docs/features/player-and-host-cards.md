@@ -39,8 +39,9 @@ Player registration is not required. The selected avatar or uploaded image is st
 A player may optionally replace the static avatar with a live visual source:
 
 - a webcam feed;
+- an HTTPS webcam page URL, including a VDO.Ninja viewer link;
 
-The browser publishes the webcam stream to the host while the player is connected and active. A failed, disabled, or unavailable stream falls back to the player's uploaded image, selected avatar, or default card appearance.
+The browser publishes a local webcam stream to the host while the player is connected and active. Alternatively, the player can send a validated HTTPS viewer URL that the host embeds directly in the player card. A failed, disabled, or unavailable local stream falls back to the player's uploaded image, selected avatar, or default card appearance.
 
 ## Host card
 
@@ -51,15 +52,18 @@ The optional host card displays the host name and visual source:
 - a static image;
 - a built-in avatar;
 - a webcam feed;
+- an HTTPS webcam page URL, including a VDO.Ninja viewer link;
 
 A setting controls whether the host card is visible. When disabled, it must not reserve empty space in the card row.
 
-Global settings provide defaults that are copied into a new game. The lobby may override them for that game. A visible host card requires a host name and a selected image, avatar, or webcam source.
+Global settings provide defaults that are copied into a new game. The lobby may override them for that game. A visible host card requires a host name or a selected image, avatar, webcam, or webcam URL source. Webcam URLs are embedded only when they use HTTPS.
 
 On wide boards the host card may move into a dedicated side position so it does
 not reduce the playable board area. A host-adjusted card width and height are
 stored in that browser and restored after page reloads, viewport changes, and
-movement between the card row and side position.
+movement between the card row and side position. When horizontal space becomes
+tight, the host card returns to the bottom row first; the compact player score
+list on the right remains visible until the viewport becomes narrower still.
 
 The board uses all available width for its configured category count. Category
 headers are synchronized to the tallest rendered heading, while question rows

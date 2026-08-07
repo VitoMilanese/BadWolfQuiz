@@ -37,6 +37,7 @@
         settings?.BrandLogoData is not null &&
         !string.IsNullOrWhiteSpace(settings.BrandLogoContentType);
     var hidePortalFooter = ViewData["HidePortalFooter"] is true;
+    var isEmbeddedDiscordSettings = ViewData["EmbeddedDiscordSettings"] is true;
 }
 
 <!DOCTYPE html>
@@ -47,7 +48,9 @@
     <title>@ViewData["Title"] - BAD WOLF QUIZ</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="@(hidePortalFooter ? "gameplay-layout" : "portal-layout")">
+<body class="@(hidePortalFooter ? "gameplay-layout" : "portal-layout") @(isEmbeddedDiscordSettings ? "embedded-discord-settings" : null)">
+    @if (!isEmbeddedDiscordSettings)
+    {
     <header class="topbar">
         <a class="brand" asp-page="/Index">
             @if (hasBrandLogo)
@@ -141,12 +144,34 @@
             </div>
         </div>
     </header>
+    }
 
     <main class="page-shell">
         @RenderBody()
     </main>
 
-    @if (!hidePortalFooter)
+    @if (isAuthenticated && !isEmbeddedDiscordSettings)
+    {
+        <dialog class="app-dialog discord-settings-dialog"
+                data-discord-settings-dialog
+                aria-labelledby="discord-settings-dialog-title">
+            <div class="dialog-card discord-settings-dialog-card">
+                <div class="dialog-heading">
+                    <h2 id="discord-settings-dialog-title">@Localizer["Discord_SettingsTitle"]</h2>
+                    <button class="dialog-close"
+                            type="button"
+                            data-close-discord-settings
+                            aria-label="@Localizer["Button_Close"]">×</button>
+                </div>
+                <iframe class="discord-settings-frame"
+                        data-discord-settings-frame
+                        data-src="@Url.Page("/Admin/Settings/Discord", new { embedded = true })"
+                        title="@Localizer["Discord_SettingsTitle"]"></iframe>
+            </div>
+        </dialog>
+    }
+
+    @if (!hidePortalFooter && !isEmbeddedDiscordSettings)
     {
         @await Component.InvokeAsync("PortalFooter")
     }
@@ -155,6 +180,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/youtube-auto-expand.js" asp-append-version="true"></script>
     <script src="~/js/portal-footer.js" asp-append-version="true"></script>
+    <script src="~/js/discord-settings-dialog.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

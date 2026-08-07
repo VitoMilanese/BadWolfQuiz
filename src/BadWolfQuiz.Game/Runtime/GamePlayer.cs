@@ -21,6 +21,8 @@ public sealed class GamePlayer
 
     public bool UsesUploadedImage { get; private set; }
 
+    public string? WebcamUrl { get; private set; }
+
     public DateTimeOffset JoinedAtUtc { get; }
 
     internal void ApplyScore(int points)
@@ -35,7 +37,8 @@ public sealed class GamePlayer
         AvatarId,
         UploadedImageDataUrl,
         UsesUploadedImage,
-        JoinedAtUtc);
+        JoinedAtUtc,
+        WebcamUrl);
 
     internal static GamePlayer Restore(GamePlayerState state)
     {
@@ -44,7 +47,8 @@ public sealed class GamePlayer
             Score = state.Score,
             AvatarId = state.AvatarId,
             UploadedImageDataUrl = state.UploadedImageDataUrl,
-            UsesUploadedImage = state.UsesUploadedImage
+            UsesUploadedImage = state.UsesUploadedImage,
+            WebcamUrl = state.WebcamUrl
         };
         return player;
     }
@@ -54,6 +58,7 @@ public sealed class GamePlayer
         ArgumentException.ThrowIfNullOrWhiteSpace(avatarId);
         AvatarId = avatarId;
         UsesUploadedImage = false;
+        WebcamUrl = null;
     }
 
     public void SetUploadedImage(string imageDataUrl)
@@ -61,5 +66,15 @@ public sealed class GamePlayer
         ArgumentException.ThrowIfNullOrWhiteSpace(imageDataUrl);
         UploadedImageDataUrl = imageDataUrl;
         UsesUploadedImage = true;
+        WebcamUrl = null;
     }
+
+    public void SetWebcamUrl(string webcamUrl)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(webcamUrl);
+        WebcamUrl = webcamUrl;
+        UsesUploadedImage = false;
+    }
+
+    public void ClearWebcamUrl() => WebcamUrl = null;
 }

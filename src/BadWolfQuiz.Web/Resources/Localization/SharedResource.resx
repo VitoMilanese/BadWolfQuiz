@@ -1480,7 +1480,7 @@
     <value>Host image (up to {0} MB)</value>
   </data>
   <data name="HostCard_InvalidSettings" xml:space="preserve">
-    <value>To show the host card, enter a name and select an image or webcam.</value>
+    <value>Choose a valid host card source. Webcam page URLs must use HTTPS.</value>
   </data>
   <data name="GameBoard_ResizePlayerPanel" xml:space="preserve">
     <value>Resize player panel</value>
@@ -1491,6 +1491,9 @@
   <data name="HostCard_Avatar" xml:space="preserve">
     <value>Host avatar</value>
   </data>
+  <data name="HostCard_SourceWebcamUrl" xml:space="preserve"><value>Webcam URL</value></data>
+  <data name="HostCard_WebcamUrl" xml:space="preserve"><value>Webcam page URL</value></data>
+  <data name="HostCard_WebcamUrlHintPrefix" xml:space="preserve"><value>Paste an HTTPS viewer URL, for example from</value></data>
   <data name="AvatarPicker_Title" xml:space="preserve">
     <value>Choose an avatar</value>
   </data>
@@ -1527,6 +1530,9 @@
   <data name="PlayerWebcam_AccessFailed" xml:space="preserve">
     <value>Unable to access the camera. Check the browser permission.</value>
   </data>
+  <data name="PlayerWebcam_Url" xml:space="preserve"><value>Webcam URL</value></data>
+  <data name="PlayerWebcam_UseUrl" xml:space="preserve"><value>Use URL webcam</value></data>
+  <data name="PlayerWebcam_InvalidUrl" xml:space="preserve"><value>Enter a valid HTTPS webcam viewer URL.</value></data>
   <data name="GameBoard_ResizeHostCard" xml:space="preserve">
     <value>Resize the host card width and height</value>
   </data>
@@ -2124,4 +2130,44 @@
   <data name="GameBoard_NextRound" xml:space="preserve">
     <value>Next round</value>
   </data>
+  <data name="Discord_Menu" xml:space="preserve"><value>Discord voice</value></data>
+  <data name="Discord_SettingsTitle" xml:space="preserve"><value>Discord voice moderation</value></data>
+  <data name="Discord_NotEnabled" xml:space="preserve"><value>Discord integration is not enabled on this server.</value></data>
+  <data name="Discord_ConnectDescription" xml:space="preserve"><value>Connect your Discord account to select a server and voice channel.</value></data>
+  <data name="Discord_Connect" xml:space="preserve"><value>Connect Discord</value></data>
+  <data name="Discord_Account" xml:space="preserve"><value>Discord account</value></data>
+  <data name="Discord_Server" xml:space="preserve"><value>Server</value></data>
+  <data name="Discord_VoiceChannel" xml:space="preserve"><value>Voice channel</value></data>
+  <data name="Discord_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Discord_Ready" xml:space="preserve"><value>Ready</value></data>
+  <data name="Discord_NeedsAttention" xml:space="preserve"><value>Check the bot and its permissions</value></data>
+  <data name="Discord_ReauthorizeHint" xml:space="preserve"><value>Authorize Discord again after installing the bot or when your session expires.</value></data>
+  <data name="Discord_Reauthorize" xml:space="preserve"><value>Authorize again</value></data>
+  <data name="Discord_InstallBot" xml:space="preserve"><value>Install bot</value></data>
+  <data name="Discord_SelectServer" xml:space="preserve"><value>Select a server</value></data>
+  <data name="Discord_SelectChannel" xml:space="preserve"><value>Select a voice channel</value></data>
+  <data name="Discord_AutoMute" xml:space="preserve"><value>Automatically mute participants while media is playing</value></data>
+  <data name="Discord_Test" xml:space="preserve"><value>Test mute</value></data>
+  <data name="Discord_TestRunning" xml:space="preserve"><value>Testing…</value></data>
+  <data name="Discord_TestComplete" xml:space="preserve"><value>Test complete</value></data>
+  <data name="Discord_TestFailed" xml:space="preserve"><value>Test failed</value></data>
+  <data name="Discord_Disconnect" xml:space="preserve"><value>Disconnect Discord</value></data>
+  <data name="Discord_MuteParticipants" xml:space="preserve"><value>Mute Discord participants</value></data>
+  <data name="Discord_UnmuteParticipants" xml:space="preserve"><value>Unmute Discord participants</value></data>
+  <data name="Discord_NotReady" xml:space="preserve"><value>Discord voice moderation is not ready.</value></data>
+  <data name="Discord_OperationComplete" xml:space="preserve"><value>Discord operation complete: {0} changed, {1} skipped.</value></data>
+  <data name="Discord_OperationPartial" xml:space="preserve"><value>Discord operation partially complete: {0} changed, {1} failed, {2} skipped.</value></data>
+  <data name="Discord_ChannelSaved" xml:space="preserve"><value>Discord voice channel saved.</value></data>
+  <data name="Discord_AutomaticMuteSaved" xml:space="preserve"><value>Automatic Discord media mute setting saved.</value></data>
+  <data name="Discord_AuthorizationCancelled" xml:space="preserve"><value>Discord authorization was cancelled or expired.</value></data>
+  <data name="Discord_AccountConnected" xml:space="preserve"><value>Discord account connected.</value></data>
+  <data name="Discord_AuthorizationFailed" xml:space="preserve"><value>Discord authorization failed.</value></data>
+  <data name="Discord_AuthorizationExpired" xml:space="preserve"><value>Discord authorization expired. Authorize Discord again.</value></data>
+  <data name="Discord_SelectServerAndChannel" xml:space="preserve"><value>Select a Discord server and voice channel.</value></data>
+  <data name="Discord_Disconnected" xml:space="preserve"><value>Discord disconnected.</value></data>
+  <data name="Discord_AutoMuteHint" xml:space="preserve"><value>All participants in the selected voice channel except the host will be muted while question media is playing.</value></data>
+  <data name="Discord_BotStatus" xml:space="preserve"><value>Bot</value></data>
+  <data name="Discord_MutePermission" xml:space="preserve"><value>Mute Members permission</value></data>
+  <data name="Discord_Available" xml:space="preserve"><value>Available</value></data>
+  <data name="Discord_Unavailable" xml:space="preserve"><value>Unavailable</value></data>
 </root>

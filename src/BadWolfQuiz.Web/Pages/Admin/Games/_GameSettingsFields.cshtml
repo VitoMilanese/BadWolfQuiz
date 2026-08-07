@@ -40,10 +40,22 @@
         <span>@Localizer["HostCard_Source"]</span>
         <select asp-for="SettingsInput.HostVisualSource">
             <option value="0">@Localizer["HostCard_SourceNone"]</option>
+            <option value="3">@Localizer["HostCard_SourceAvatar"]</option>
             <option value="1">@Localizer["HostCard_SourceImage"]</option>
             <option value="2">@Localizer["HostCard_SourceWebcam"]</option>
-            <option value="3">@Localizer["HostCard_SourceAvatar"]</option>
+            <option value="4">@Localizer["HostCard_SourceWebcamUrl"]</option>
         </select>
+    </label>
+    <label class="host-webcam-url-field">
+        <span>@Localizer["HostCard_WebcamUrl"]</span>
+        <input asp-for="SettingsInput.HostWebcamUrl"
+               type="url"
+               maxlength="2048"
+               placeholder="https://vdo.ninja/?view=..." />
+        <small class="form-hint">
+            @Localizer["HostCard_WebcamUrlHintPrefix"]
+            <a href="https://vdo.ninja/" target="_blank" rel="noopener noreferrer">vdo.ninja</a>.
+        </small>
     </label>
     <label class="host-avatar-field">
         <span>@Localizer["HostCard_Avatar"]</span>

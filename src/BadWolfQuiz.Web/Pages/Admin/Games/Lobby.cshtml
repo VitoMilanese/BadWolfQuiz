@@ -69,9 +69,17 @@
                             data-open-game-settings>
                         @Localizer["GameSettings_LobbyTitle"]
                     </button>
+
                 </div>
                 </details>
             }
+            <button class="button button-secondary icon-button"
+                    type="button"
+                    data-open-discord-settings
+                    title="@Localizer["Discord_SettingsTitle"]"
+                    aria-label="@Localizer["Discord_SettingsTitle"]">
+                <span aria-hidden="true">🎙️</span>
+            </button>
         </div>
     }
 }
@@ -242,6 +250,8 @@
 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
 {
     <section class="host-game-board"
+             data-game-id="@Model.Game.Session.Id.Value"
+             data-discord-auto-mute="@((Model.DiscordConnection?.AutoMuteDuringMedia ?? false).ToString().ToLowerInvariant())"
              data-game-code="@Model.Game.PublicCode"
              data-resize-player-card-label="@Localizer["GameBoard_ResizePlayerCards"]"
              data-status-active="@Localizer["PlayerPresence_Active"]"
@@ -271,6 +281,9 @@
              class="message message-error"
              role="alert"
              hidden></div>
+        <div class="discord-operation-status form-status"
+             role="status"
+             data-discord-operation-status></div>
 
         @if (Model.PreviewQuestion is { } previewQuestion)
         {
@@ -813,22 +826,42 @@
             </div>
         }
 
-        <form class="player-join-lock-form"
-              method="post"
-              asp-page-handler="TogglePlayerJoining"
-              data-open-label="@Localizer["GameBoard_OpenPlayerJoining"]"
-              data-close-label="@Localizer["GameBoard_ClosePlayerJoining"]">
-            <button class="player-join-lock @(Model.Game.AllowsNewPlayers ? "is-open" : "is-closed")"
-                    type="submit"
-                    title="@(Model.Game.AllowsNewPlayers
-                        ? Localizer["GameBoard_ClosePlayerJoining"]
-                        : Localizer["GameBoard_OpenPlayerJoining"])"
-                    aria-label="@(Model.Game.AllowsNewPlayers
-                        ? Localizer["GameBoard_ClosePlayerJoining"]
-                        : Localizer["GameBoard_OpenPlayerJoining"])">
-                <span aria-hidden="true">@(Model.Game.AllowsNewPlayers ? "🔓" : "🔒")</span>
-            </button>
-        </form>
+        <div class="game-side-controls">
+            @if (Model.IsDiscordVoiceReady)
+            {
+                <button class="game-side-control discord-mute-control"
+                        type="button"
+                        data-discord-mute="true"
+                        title="@Localizer["Discord_MuteParticipants"]"
+                        aria-label="@Localizer["Discord_MuteParticipants"]">
+                    <span aria-hidden="true">🔇</span>
+                </button>
+                <button class="game-side-control discord-unmute-control"
+                        type="button"
+                        data-discord-mute="false"
+                        title="@Localizer["Discord_UnmuteParticipants"]"
+                        aria-label="@Localizer["Discord_UnmuteParticipants"]">
+                    <span aria-hidden="true">🔊</span>
+                </button>
+            }
+
+            <form class="player-join-lock-form"
+                  method="post"
+                  asp-page-handler="TogglePlayerJoining"
+                  data-open-label="@Localizer["GameBoard_OpenPlayerJoining"]"
+                  data-close-label="@Localizer["GameBoard_ClosePlayerJoining"]">
+                <button class="player-join-lock @(Model.Game.AllowsNewPlayers ? "is-open" : "is-closed")"
+                        type="submit"
+                        title="@(Model.Game.AllowsNewPlayers
+                            ? Localizer["GameBoard_ClosePlayerJoining"]
+                            : Localizer["GameBoard_OpenPlayerJoining"])"
+                        aria-label="@(Model.Game.AllowsNewPlayers
+                            ? Localizer["GameBoard_ClosePlayerJoining"]
+                            : Localizer["GameBoard_OpenPlayerJoining"])">
+                    <span aria-hidden="true">@(Model.Game.AllowsNewPlayers ? "🔓" : "🔒")</span>
+                </button>
+            </form>
+        </div>
 
         <div class="game-scoreboard-resizer"
              data-scoreboard-resizer
@@ -875,6 +908,17 @@
                                  alt="@Model.Game.Session.Settings.HostName" />
                         }
                         <video class="host-card-media" data-host-webcam autoplay muted playsinline hidden></video>
+                    }
+                    else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.WebcamUrl &&
+                             !string.IsNullOrWhiteSpace(Model.Game.Session.Settings.HostWebcamUrl))
+                    {
+                        <iframe class="host-card-media"
+                                src="@BadWolfQuiz.Web.Services.WebcamUrlUtility.MuteAudio(Model.Game.Session.Settings.HostWebcamUrl)"
+                                title="@Model.Game.Session.Settings.HostName"
+                                allow="autoplay; fullscreen; picture-in-picture"
+                                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
+                                referrerpolicy="no-referrer"
+                                allowfullscreen></iframe>
                     }
                 </li>
             }
@@ -960,6 +1004,8 @@
         Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging;
 
     <section class="host-game-board final-question-host"
+             data-game-id="@Model.Game.Session.Id.Value"
+             data-discord-auto-mute="@((Model.DiscordConnection?.AutoMuteDuringMedia ?? false).ToString().ToLowerInvariant())"
              data-game-code="@Model.Game.PublicCode"
              data-resize-player-card-label="@Localizer["GameBoard_ResizePlayerCards"]"
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
@@ -1205,6 +1251,17 @@
                         }
                         <video class="host-card-media" data-host-webcam autoplay muted playsinline hidden></video>
                     }
+                    else if (Model.Game.Session.Settings.HostVisualSource == BadWolfQuiz.Game.Runtime.HostVisualSource.WebcamUrl &&
+                             !string.IsNullOrWhiteSpace(Model.Game.Session.Settings.HostWebcamUrl))
+                    {
+                        <iframe class="host-card-media"
+                                src="@BadWolfQuiz.Web.Services.WebcamUrlUtility.MuteAudio(Model.Game.Session.Settings.HostWebcamUrl)"
+                                title="@Model.Game.Session.Settings.HostName"
+                                allow="autoplay; fullscreen; picture-in-picture"
+                                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
+                                referrerpolicy="no-referrer"
+                                allowfullscreen></iframe>
+                    }
                 </li>
             }
             @foreach (var player in Model.Players)
@@ -1398,6 +1455,8 @@
 
 @section Scripts {
     <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
+    <script src="~/js/discord-media-state.js" asp-append-version="true"></script>
+    <script src="~/js/discord-media-mute.js" asp-append-version="true"></script>
     <script>
         (() => {
             const titles = [...document.querySelectorAll(".host-board-column h3")];
@@ -1761,7 +1820,7 @@
                         return;
                     }
 
-                    applyWidth(startWidth + moveEvent.clientX - startX, isHost);
+                    applyWidth(startWidth - (moveEvent.clientX - startX), isHost);
                 };
                 const stop = stopEvent => {
                     if (stopEvent.pointerId !== pointerId) {
@@ -1803,7 +1862,7 @@
                 const current = Number.parseFloat(
                     getComputedStyle(board).getPropertyValue(property));
                 const width = applyWidth(
-                    current + (event.key === "ArrowRight" ? 12 : -12),
+                    current + (event.key === "ArrowLeft" ? 12 : -12),
                     isHost);
                 localStorage.setItem(
                     isHost ? hostStorageKey : playerStorageKey,
@@ -1834,7 +1893,7 @@
                 "[data-board-host-card-resizer]");
             const hostCardDragHandle = document.querySelector(
                 "[data-board-host-card-drag-handle]");
-            const wideHostLayout = window.matchMedia("(min-width: 1400px)");
+            const wideHostLayout = window.matchMedia("(min-width: 1700px)");
 
             if (!lobby || !playerList || typeof signalR === "undefined") {
                 return;
@@ -1856,8 +1915,7 @@
             const canPositionHostCard = () =>
                 hostSlot &&
                 boardGrid &&
-                wideHostLayout.matches &&
-                boardGrid.getBoundingClientRect().left >= 120;
+                wideHostLayout.matches;
 
             const getHostCardVerticalBounds = () => {
                 const boardBounds = boardGrid.getBoundingClientRect();
@@ -2100,6 +2158,18 @@
             const getPlayerImageSource = player =>
                 player.imageDataUrl ||
                 (player.avatarId ? `/avatars/${player.avatarId}` : "");
+            const withMutedWebcamAudio = value => {
+                const url = new URL(value);
+                url.searchParams.set("deafen", "1");
+                url.searchParams.set("noaudio", "");
+                if (url.hash.length > 1) {
+                    const fragment = new URLSearchParams(url.hash.slice(1));
+                    fragment.set("deafen", "1");
+                    fragment.set("noaudio", "");
+                    url.hash = fragment.toString();
+                }
+                return url.toString();
+            };
             const gameStatus = document.getElementById("game-status");
             const startGameForm = document.getElementById("start-game-form");
             const approveForm = document.getElementById("approve-rejoin-form");
@@ -2424,6 +2494,7 @@
                 presence: player.presence,
                 isActive: player.isActive,
                 webcamEnabled: player.webcamEnabled,
+                webcamUrl: player.webcamUrl,
                 avatarId: player.avatarId,
                 usesUploadedImage: player.usesUploadedImage,
                 uploadedImageVersion: player.uploadedImageDataUrl
@@ -2461,7 +2532,17 @@
                         name.textContent = player.name;
 
                         const playerImageSource = getPlayerImageSource(player);
-                        if (player.webcamEnabled) {
+                        if (player.webcamUrl) {
+                            const frame = document.createElement("iframe");
+                            frame.className = "player-card-avatar player-webcam-url-frame";
+                            frame.src = withMutedWebcamAudio(player.webcamUrl);
+                            frame.title = player.name;
+                            frame.allow = "autoplay; fullscreen; picture-in-picture";
+                            frame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation");
+                            frame.referrerPolicy = "no-referrer";
+                            frame.allowFullscreen = true;
+                            item.append(frame);
+                        } else if (player.webcamEnabled) {
                             if (playerImageSource) {
                                 const fallback = document.createElement("img");
                                 fallback.className = "player-card-avatar";
@@ -2549,7 +2630,19 @@
                     name.textContent = player.name;
 
                     const playerImageSource = getPlayerImageSource(player);
-                    if (player.webcamEnabled) {
+                    if (player.webcamUrl) {
+                        const frame = document.createElement("iframe");
+                        frame.className = isRunning
+                            ? "player-card-avatar player-webcam-url-frame"
+                            : "player-list-avatar player-webcam-url-frame";
+                        frame.src = withMutedWebcamAudio(player.webcamUrl);
+                        frame.title = player.name;
+                        frame.allow = "autoplay; fullscreen; picture-in-picture";
+                        frame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation");
+                        frame.referrerPolicy = "no-referrer";
+                        frame.allowFullscreen = true;
+                        item.append(frame);
+                    } else if (player.webcamEnabled) {
                         if (playerImageSource) {
                             const fallback = document.createElement("img");
                             fallback.className = isRunning
