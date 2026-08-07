@@ -1491,9 +1491,15 @@
   <data name="HostCard_Avatar" xml:space="preserve">
     <value>Аватар хоста</value>
   </data>
-  <data name="HostCard_SourceWebcamUrl" xml:space="preserve"><value>URL вебкамера</value></data>
-  <data name="HostCard_WebcamUrl" xml:space="preserve"><value>URL сторінки вебкамери</value></data>
-  <data name="HostCard_WebcamUrlHintPrefix" xml:space="preserve"><value>Вставте HTTPS-посилання для перегляду, наприклад із</value></data>
+  <data name="HostCard_SourceWebcamUrl" xml:space="preserve">
+    <value>URL вебкамера</value>
+  </data>
+  <data name="HostCard_WebcamUrl" xml:space="preserve">
+    <value>URL сторінки вебкамери</value>
+  </data>
+  <data name="HostCard_WebcamUrlHintPrefix" xml:space="preserve">
+    <value>Вставте HTTPS-посилання для перегляду, наприклад із</value>
+  </data>
   <data name="AvatarPicker_Title" xml:space="preserve">
     <value>Вибір аватара</value>
   </data>
@@ -1530,9 +1536,15 @@
   <data name="PlayerWebcam_AccessFailed" xml:space="preserve">
     <value>Не вдалося отримати доступ до камери. Перевірте дозвіл браузера.</value>
   </data>
-  <data name="PlayerWebcam_Url" xml:space="preserve"><value>URL вебкамера</value></data>
-  <data name="PlayerWebcam_UseUrl" xml:space="preserve"><value>Використати URL вебкамеру</value></data>
-  <data name="PlayerWebcam_InvalidUrl" xml:space="preserve"><value>Введіть коректне HTTPS-посилання для перегляду вебкамери.</value></data>
+  <data name="PlayerWebcam_Url" xml:space="preserve">
+    <value>URL вебкамера</value>
+  </data>
+  <data name="PlayerWebcam_UseUrl" xml:space="preserve">
+    <value>Використати URL вебкамеру</value>
+  </data>
+  <data name="PlayerWebcam_InvalidUrl" xml:space="preserve">
+    <value>Введіть коректне HTTPS-посилання для перегляду вебкамери.</value>
+  </data>
   <data name="GameBoard_ResizeHostCard" xml:space="preserve">
     <value>Змінити ширину та висоту картки хоста</value>
   </data>
@@ -2130,44 +2142,211 @@
   <data name="GameBoard_NextRound" xml:space="preserve">
     <value>Наступний раунд</value>
   </data>
-  <data name="Discord_Menu" xml:space="preserve"><value>Голосовий Discord</value></data>
-  <data name="Discord_SettingsTitle" xml:space="preserve"><value>Керування голосовим каналом Discord</value></data>
-  <data name="Discord_NotEnabled" xml:space="preserve"><value>Інтеграцію Discord не ввімкнено на цьому сервері.</value></data>
-  <data name="Discord_ConnectDescription" xml:space="preserve"><value>Під’єднайте обліковий запис Discord, щоб вибрати сервер і голосовий канал.</value></data>
-  <data name="Discord_Connect" xml:space="preserve"><value>Під’єднати Discord</value></data>
-  <data name="Discord_Account" xml:space="preserve"><value>Обліковий запис Discord</value></data>
-  <data name="Discord_Server" xml:space="preserve"><value>Сервер</value></data>
-  <data name="Discord_VoiceChannel" xml:space="preserve"><value>Голосовий канал</value></data>
-  <data name="Discord_Status" xml:space="preserve"><value>Стан</value></data>
-  <data name="Discord_Ready" xml:space="preserve"><value>Готово</value></data>
-  <data name="Discord_NeedsAttention" xml:space="preserve"><value>Перевірте бота та його дозволи</value></data>
-  <data name="Discord_ReauthorizeHint" xml:space="preserve"><value>Авторизуйте Discord ще раз після встановлення бота або завершення сесії.</value></data>
-  <data name="Discord_Reauthorize" xml:space="preserve"><value>Авторизувати знову</value></data>
-  <data name="Discord_InstallBot" xml:space="preserve"><value>Встановити бота</value></data>
-  <data name="Discord_SelectServer" xml:space="preserve"><value>Виберіть сервер</value></data>
-  <data name="Discord_SelectChannel" xml:space="preserve"><value>Виберіть голосовий канал</value></data>
-  <data name="Discord_AutoMute" xml:space="preserve"><value>Автоматично приглушувати учасників під час відтворення медіа</value></data>
-  <data name="Discord_Test" xml:space="preserve"><value>Перевірити mute</value></data>
-  <data name="Discord_TestRunning" xml:space="preserve"><value>Перевірка…</value></data>
-  <data name="Discord_TestComplete" xml:space="preserve"><value>Перевірку завершено</value></data>
-  <data name="Discord_TestFailed" xml:space="preserve"><value>Не вдалося виконати перевірку</value></data>
-  <data name="Discord_Disconnect" xml:space="preserve"><value>Від’єднати Discord</value></data>
-  <data name="Discord_MuteParticipants" xml:space="preserve"><value>Приглушити учасників Discord</value></data>
-  <data name="Discord_UnmuteParticipants" xml:space="preserve"><value>Увімкнути звук учасників Discord</value></data>
-  <data name="Discord_NotReady" xml:space="preserve"><value>Керування голосовим Discord ще не готове.</value></data>
-  <data name="Discord_OperationComplete" xml:space="preserve"><value>Операцію Discord завершено: змінено {0}, пропущено {1}.</value></data>
-  <data name="Discord_OperationPartial" xml:space="preserve"><value>Операцію Discord виконано частково: змінено {0}, помилок {1}, пропущено {2}.</value></data>
-  <data name="Discord_ChannelSaved" xml:space="preserve"><value>Голосовий канал Discord збережено.</value></data>
-  <data name="Discord_AutomaticMuteSaved" xml:space="preserve"><value>Налаштування автоматичного приглушення Discord збережено.</value></data>
-  <data name="Discord_AuthorizationCancelled" xml:space="preserve"><value>Авторизацію Discord скасовано або термін її дії минув.</value></data>
-  <data name="Discord_AccountConnected" xml:space="preserve"><value>Обліковий запис Discord під’єднано.</value></data>
-  <data name="Discord_AuthorizationFailed" xml:space="preserve"><value>Не вдалося авторизувати Discord.</value></data>
-  <data name="Discord_AuthorizationExpired" xml:space="preserve"><value>Термін авторизації Discord минув. Авторизуйте Discord знову.</value></data>
-  <data name="Discord_SelectServerAndChannel" xml:space="preserve"><value>Виберіть сервер Discord і голосовий канал.</value></data>
-  <data name="Discord_Disconnected" xml:space="preserve"><value>Discord від’єднано.</value></data>
-  <data name="Discord_AutoMuteHint" xml:space="preserve"><value>Усі учасники вибраного голосового каналу, крім хоста, будуть автоматично приглушені під час відтворення медіа в питанні.</value></data>
-  <data name="Discord_BotStatus" xml:space="preserve"><value>Бот</value></data>
-  <data name="Discord_MutePermission" xml:space="preserve"><value>Дозвіл Mute Members</value></data>
-  <data name="Discord_Available" xml:space="preserve"><value>Доступний</value></data>
-  <data name="Discord_Unavailable" xml:space="preserve"><value>Недоступний</value></data>
+  <data name="Discord_Menu" xml:space="preserve">
+    <value>Голосовий Discord</value>
+  </data>
+  <data name="Discord_SettingsTitle" xml:space="preserve">
+    <value>Керування голосовим каналом Discord</value>
+  </data>
+  <data name="Discord_NotEnabled" xml:space="preserve">
+    <value>Інтеграцію Discord не ввімкнено на цьому сервері.</value>
+  </data>
+  <data name="Discord_ConnectDescription" xml:space="preserve">
+    <value>Під’єднайте обліковий запис Discord, щоб вибрати сервер і голосовий канал.</value>
+  </data>
+  <data name="Discord_Connect" xml:space="preserve">
+    <value>Під’єднати Discord</value>
+  </data>
+  <data name="Discord_Account" xml:space="preserve">
+    <value>Обліковий запис Discord</value>
+  </data>
+  <data name="Discord_Server" xml:space="preserve">
+    <value>Сервер</value>
+  </data>
+  <data name="Discord_VoiceChannel" xml:space="preserve">
+    <value>Голосовий канал</value>
+  </data>
+  <data name="Discord_Status" xml:space="preserve">
+    <value>Стан</value>
+  </data>
+  <data name="Discord_Ready" xml:space="preserve">
+    <value>Готово</value>
+  </data>
+  <data name="Discord_NeedsAttention" xml:space="preserve">
+    <value>Перевірте бота та його дозволи</value>
+  </data>
+  <data name="Discord_ReauthorizeHint" xml:space="preserve">
+    <value>Авторизуйте Discord ще раз після встановлення бота або завершення сесії.</value>
+  </data>
+  <data name="Discord_Reauthorize" xml:space="preserve">
+    <value>Авторизувати знову</value>
+  </data>
+  <data name="Discord_InstallBot" xml:space="preserve">
+    <value>Встановити бота</value>
+  </data>
+  <data name="Discord_SelectServer" xml:space="preserve">
+    <value>Виберіть сервер</value>
+  </data>
+  <data name="Discord_SelectChannel" xml:space="preserve">
+    <value>Виберіть голосовий канал</value>
+  </data>
+  <data name="Discord_AutoMute" xml:space="preserve">
+    <value>Автоматично приглушувати учасників під час відтворення медіа</value>
+  </data>
+  <data name="Discord_Test" xml:space="preserve">
+    <value>Перевірити mute</value>
+  </data>
+  <data name="Discord_TestRunning" xml:space="preserve">
+    <value>Перевірка…</value>
+  </data>
+  <data name="Discord_TestComplete" xml:space="preserve">
+    <value>Перевірку завершено</value>
+  </data>
+  <data name="Discord_TestFailed" xml:space="preserve">
+    <value>Не вдалося виконати перевірку</value>
+  </data>
+  <data name="Discord_Disconnect" xml:space="preserve">
+    <value>Від’єднати Discord</value>
+  </data>
+  <data name="Discord_MuteParticipants" xml:space="preserve">
+    <value>Приглушити учасників Discord</value>
+  </data>
+  <data name="Discord_UnmuteParticipants" xml:space="preserve">
+    <value>Увімкнути звук учасників Discord</value>
+  </data>
+  <data name="Discord_NotReady" xml:space="preserve">
+    <value>Керування голосовим Discord ще не готове.</value>
+  </data>
+  <data name="Discord_OperationComplete" xml:space="preserve">
+    <value>Операцію Discord завершено: змінено {0}, пропущено {1}.</value>
+  </data>
+  <data name="Discord_OperationPartial" xml:space="preserve">
+    <value>Операцію Discord виконано частково: змінено {0}, помилок {1}, пропущено {2}.</value>
+  </data>
+  <data name="Discord_ChannelSaved" xml:space="preserve">
+    <value>Голосовий канал Discord збережено.</value>
+  </data>
+  <data name="Discord_AutomaticMuteSaved" xml:space="preserve">
+    <value>Налаштування автоматичного приглушення Discord збережено.</value>
+  </data>
+  <data name="Discord_AuthorizationCancelled" xml:space="preserve">
+    <value>Авторизацію Discord скасовано або термін її дії минув.</value>
+  </data>
+  <data name="Discord_AccountConnected" xml:space="preserve">
+    <value>Обліковий запис Discord під’єднано.</value>
+  </data>
+  <data name="Discord_AuthorizationFailed" xml:space="preserve">
+    <value>Не вдалося авторизувати Discord.</value>
+  </data>
+  <data name="Discord_AuthorizationExpired" xml:space="preserve">
+    <value>Термін авторизації Discord минув. Авторизуйте Discord знову.</value>
+  </data>
+  <data name="Discord_SelectServerAndChannel" xml:space="preserve">
+    <value>Виберіть сервер Discord і голосовий канал.</value>
+  </data>
+  <data name="Discord_Disconnected" xml:space="preserve">
+    <value>Discord від’єднано.</value>
+  </data>
+  <data name="Discord_AutoMuteHint" xml:space="preserve">
+    <value>Усі учасники вибраного голосового каналу, крім хоста, будуть автоматично приглушені під час відтворення медіа в питанні.</value>
+  </data>
+  <data name="Discord_BotStatus" xml:space="preserve">
+    <value>Бот</value>
+  </data>
+  <data name="Discord_MutePermission" xml:space="preserve">
+    <value>Дозвіл Mute Members</value>
+  </data>
+  <data name="Discord_Available" xml:space="preserve">
+    <value>Доступний</value>
+  </data>
+  <data name="Discord_Unavailable" xml:space="preserve">
+    <value>Недоступний</value>
+  </data>
+  <data name="Menu_QuestionInbox" xml:space="preserve">
+    <value>Питання користувачів</value>
+  </data>
+  <data name="QuestionBot_Title" xml:space="preserve">
+    <value>Discord-бот для питань</value>
+  </data>
+  <data name="QuestionBot_DiscordServer" xml:space="preserve">
+    <value>Discord-сервер</value>
+  </data>
+  <data name="QuestionBot_SelectServer" xml:space="preserve">
+    <value>Виберіть сервер</value>
+  </data>
+  <data name="QuestionBot_TextChannel" xml:space="preserve">
+    <value>Текстовий канал</value>
+  </data>
+  <data name="QuestionBot_SelectChannel" xml:space="preserve">
+    <value>Виберіть канал</value>
+  </data>
+  <data name="QuestionBot_SelectServerAndChannel" xml:space="preserve">
+    <value>Виберіть Discord-сервер і текстовий канал.</value>
+  </data>
+  <data name="QuestionBot_Saved" xml:space="preserve">
+    <value>Discord-канал для питань збережено.</value>
+  </data>
+  <data name="Question_Title" xml:space="preserve">
+    <value>Ваше питання</value>
+  </data>
+  <data name="Question_Name" xml:space="preserve">
+    <value>Ім’я</value>
+  </data>
+  <data name="Question_You" xml:space="preserve">
+    <value>Ви</value>
+  </data>
+  <data name="Question_Developer" xml:space="preserve">
+    <value>Розробник</value>
+  </data>
+  <data name="Question_Status" xml:space="preserve">
+    <value>Статус</value>
+  </data>
+  <data name="Button_Send" xml:space="preserve">
+    <value>Надіслати</value>
+  </data>
+  <data name="QuestionInbox_Title" xml:space="preserve">
+    <value>Питання користувачів</value>
+  </data>
+  <data name="QuestionInbox_Empty" xml:space="preserve">
+    <value>Питань поки немає.</value>
+  </data>
+  <data name="QuestionInbox_From" xml:space="preserve">
+    <value>Від</value>
+  </data>
+  <data name="QuestionInbox_Question" xml:space="preserve">
+    <value>Питання</value>
+  </data>
+  <data name="QuestionInbox_User" xml:space="preserve">
+    <value>Користувач</value>
+  </data>
+  <data name="QuestionInbox_Developer" xml:space="preserve">
+    <value>Розробник</value>
+  </data>
+  <data name="QuestionInbox_Answer" xml:space="preserve">
+    <value>Відповідь</value>
+  </data>
+  <data name="QuestionInbox_Reply" xml:space="preserve">
+    <value>Відповісти</value>
+  </data>
+  <data name="Question_InvalidMessage" xml:space="preserve">
+    <value>Повідомлення має містити від 1 до 5000 символів.</value>
+  </data>
+  <data name="Question_DiscordSendFailed" xml:space="preserve">
+    <value>Не вдалося надіслати повідомлення в Discord.</value>
+  </data>
+  <data name="Question_ContinueConversation" xml:space="preserve">
+    <value>Продовжити розмову</value>
+  </data>
+  <data name="Question_AwaitingAnswer" xml:space="preserve">
+    <value>Очікує відповіді</value>
+  </data>
+  <data name="DiscordQuestion_NewMessageFrom" xml:space="preserve">
+    <value>Нове повідомлення від {0}:</value>
+  </data>
+  <data name="DiscordQuestion_Anonymous" xml:space="preserve">
+    <value>Анонім</value>
+  </data>
+  <data name="DiscordQuestion_Reply" xml:space="preserve">
+    <value>Відповісти</value>
+  </data>
 </root>

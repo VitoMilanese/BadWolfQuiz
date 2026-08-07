@@ -99,6 +99,13 @@
                 <a class="action-menu-item" asp-page="/Faq">@Localizer["Menu_FAQ"]</a>
                 <a class="action-menu-item" asp-page="/AskQuestion">@Localizer["Menu_AskQuestion"]</a>
 
+                @if (isMasterHost)
+                {
+                    <a class="action-menu-item" asp-page="/Admin/QuestionInbox">
+                        @Localizer["Menu_QuestionInbox"]
+                    </a>
+                }
+
                 <div class="action-menu-separator"></div>
                 @if (isAuthenticated)
                 {

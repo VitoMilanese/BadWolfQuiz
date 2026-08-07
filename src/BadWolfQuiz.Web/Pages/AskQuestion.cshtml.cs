@@ -59,9 +59,10 @@ public sealed class AskQuestionModel(
         await db.SaveChangesAsync(cancellationToken);
 
         if (!await questionSender.SendAsync(
-                SenderName,
-                Question,
-                cancellationToken))
+            userQuestion.Id,
+            SenderName,
+            Question,
+            cancellationToken))
         {
             db.UserQuestions.Remove(userQuestion);
             await db.SaveChangesAsync(cancellationToken);

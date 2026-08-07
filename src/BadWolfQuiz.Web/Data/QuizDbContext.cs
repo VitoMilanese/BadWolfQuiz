@@ -37,6 +37,7 @@ public sealed class QuizDbContext : DbContext
     public DbSet<HostDiscordConnection> HostDiscordConnections => Set<HostDiscordConnection>();
     public DbSet<UserQuestion> UserQuestions => Set<UserQuestion>();
     public DbSet<UserQuestionMessage> UserQuestionMessages => Set<UserQuestionMessage>();
+    public DbSet<DiscordQuestionBotSettings> DiscordQuestionBotSettings => Set<DiscordQuestionBotSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

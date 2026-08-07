@@ -1,12 +1,18 @@
 using BadWolfQuiz.Web.Data;
+using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Models;
+using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace BadWolfQuiz.Web.Pages;
 
-public sealed class QuestionModel(QuizDbContext db) : PageModel
+public sealed class QuestionModel(
+    QuizDbContext db,
+    DiscordQuestionSender questionSender,
+    IStringLocalizer<SharedResource> localizer) : PageModel
 {
     public UserQuestion UserQuestion { get; private set; } = null!;
 
@@ -37,7 +43,7 @@ public sealed class QuestionModel(QuizDbContext db) : PageModel
         {
             ModelState.AddModelError(
                 string.Empty,
-                "Повідомлення має містити від 1 до 5000 символів.");
+                localizer["Question_InvalidMessage"].Value);
 
             await LoadQuestionAsync(token, cancellationToken);
             return Page();
@@ -77,6 +83,20 @@ public sealed class QuestionModel(QuizDbContext db) : PageModel
         question.UpdatedAtUtc = now;
 
         await db.SaveChangesAsync(cancellationToken);
+
+        if (!await questionSender.SendAsync(
+                question.Id,
+                question.SenderName,
+                message,
+                cancellationToken))
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                localizer["Question_DiscordSendFailed"].Value);
+
+            await LoadQuestionAsync(token, cancellationToken);
+            return Page();
+        }
 
         return RedirectToPage(new { token });
     }

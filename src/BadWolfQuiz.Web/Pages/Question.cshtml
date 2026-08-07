@@ -1,17 +1,20 @@
 ﻿@page
 @model BadWolfQuiz.Web.Pages.QuestionModel
+@using BadWolfQuiz.Web.Localization
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> Localizer
 @{
-    ViewData["Title"] = "Ваше питання";
+    ViewData["Title"] = Localizer["Question_Title"];
 }
 @using BadWolfQuiz.Web.Models
 
 <section class="page-section">
-    <h1>Ваше питання</h1>
+    <h1>@Localizer["Question_Title"]</h1>
 
     @if (!string.IsNullOrWhiteSpace(Model.UserQuestion.SenderName))
     {
         <p>
-            <strong>Ім’я:</strong>
+            <strong>@Localizer["Question_Name"]:</strong>
             @Model.UserQuestion.SenderName
         </p>
     }
@@ -24,8 +27,8 @@
             <div>
                 <h2>
                     @(message.AuthorType == UserQuestionAuthorType.User
-                        ? "Ви"
-                        : "Розробник")
+                        ? Localizer["Question_You"].Value
+                        : Localizer["Question_Developer"].Value)
             </h2>
 
                 <p>@message.Text</p>
@@ -49,8 +52,8 @@
     @if (awaitingDeveloper)
     {
         <p>
-            <strong>Статус:</strong>
-            Очікує відповіді
+            <strong>@Localizer["Question_Status"]:</strong>
+            @Localizer["Question_AwaitingAnswer"]
         </p>
     }
 
@@ -64,7 +67,7 @@
                    value="@Model.UserQuestion.PublicToken" />
 
             <label for="message">
-                <strong>Продовжити розмову</strong>
+                <strong>@Localizer["Question_ContinueConversation"]</strong>
             </label>
 
             <textarea id="message"
@@ -75,7 +78,7 @@
 
             <div>
                 <button type="submit">
-                    Надіслати
+                    @Localizer["Button_Send"]
                 </button>
             </div>
         </form>

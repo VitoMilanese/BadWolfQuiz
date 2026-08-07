@@ -1,18 +1,21 @@
 @page
 @model BadWolfQuiz.Web.Pages.Admin.QuestionInboxModel
+@using BadWolfQuiz.Web.Localization
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> Localizer
 @{
-    ViewData["Title"] = "Питання користувачів";
+    ViewData["Title"] = Localizer["QuestionInbox_Title"];
 }
 @using BadWolfQuiz.Web.Models
 
 <section class="page-section">
-    <h1>Питання користувачів</h1>
+    <h1>@Localizer["QuestionInbox_Title"]</h1>
 
     <div asp-validation-summary="ModelOnly"></div>
 
     @if (Model.Questions.Count == 0)
     {
-        <p>Питань поки немає.</p>
+        <p>@Localizer["QuestionInbox_Empty"]</p>
     }
     else
     {
@@ -22,13 +25,13 @@
                 @if (!string.IsNullOrWhiteSpace(question.SenderName))
                 {
                     <p>
-                        <strong>Від:</strong>
+                        <strong>@Localizer["QuestionInbox_From"]:</strong>
                         @question.SenderName
                     </p>
                 }
 
                 <p>
-                    <strong>Питання:</strong>
+                    <strong>@Localizer["QuestionInbox_Question"]:</strong>
                 </p>
 
                 @foreach (var message in question.Messages
@@ -38,8 +41,8 @@
                     <div>
                         <strong>
                             @(message.AuthorType == UserQuestionAuthorType.User
-                                ? "Користувач"
-                                : "Розробник"):
+                                ? Localizer["QuestionInbox_User"].Value
+                                : Localizer["QuestionInbox_Developer"].Value):
                         </strong>
 
                         <p>@message.Text</p>
@@ -65,7 +68,7 @@
                                value="@question.Id" />
 
                         <label for="answer-@question.Id">
-                            <strong>Відповідь</strong>
+                            <strong>@Localizer["QuestionInbox_Answer"]</strong>
                         </label>
 
                         <textarea id="answer-@question.Id"
@@ -76,7 +79,7 @@
 
                         <div>
                             <button type="submit">
-                                Відповісти
+                                @Localizer["QuestionInbox_Reply"]
                             </button>
                         </div>
                     </form>

@@ -10,6 +10,9 @@ public sealed class QuestionInboxModel(QuizDbContext db) : PageModel
 {
     public IReadOnlyList<UserQuestion> Questions { get; private set; } = [];
 
+    [BindProperty(SupportsGet = true)]
+    public int? QuestionId { get; set; }
+
     public async Task OnGetAsync(CancellationToken cancellationToken)
     {
         await LoadQuestionsAsync(cancellationToken);
@@ -56,20 +59,28 @@ public sealed class QuestionInboxModel(QuizDbContext db) : PageModel
 
         await db.SaveChangesAsync(cancellationToken);
 
-        return RedirectToPage();
+        return RedirectToPage(new { questionId = id });
     }
 
     private async Task LoadQuestionsAsync(CancellationToken cancellationToken)
     {
-        var questions = await db.UserQuestions
+        var query = db.UserQuestions
             .AsNoTracking()
             .Include(x => x.Messages)
-            .ToListAsync(cancellationToken);
+            .AsQueryable();
+
+        if (QuestionId is not null)
+        {
+            query = query.Where(x => x.Id == QuestionId.Value);
+        }
+
+        var questions = await query.ToListAsync(cancellationToken);
 
         Questions = questions
             .OrderBy(x =>
                 x.Messages
                     .OrderByDescending(message => message.CreatedAtUtc)
+                    .ThenByDescending(message => message.Id)
                     .FirstOrDefault()?.AuthorType
                 == UserQuestionAuthorType.Developer)
             .ThenByDescending(x => x.UpdatedAtUtc)
