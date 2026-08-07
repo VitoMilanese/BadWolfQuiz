@@ -61,7 +61,9 @@ Global settings provide defaults that are copied into a new game. The lobby may 
 On wide boards the host card may move into a dedicated side position so it does
 not reduce the playable board area. A host-adjusted card width and height are
 stored in that browser and restored after page reloads, viewport changes, and
-movement between the card row and side position.
+movement between the card row and side position. When horizontal space becomes
+tight, the host card returns to the bottom row first; the compact player score
+list on the right remains visible until the viewport becomes narrower still.
 
 The board uses all available width for its configured category count. Category
 headers are synchronized to the tallest rendered heading, while question rows

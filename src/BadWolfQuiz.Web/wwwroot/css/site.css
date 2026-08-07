@@ -2451,7 +2451,7 @@ textarea {
     }
 }
 
-@media (min-width: 1500px) {
+@media (min-width: 1300px) {
     .host-board-layout {
         grid-template-columns: minmax(0, 1fr) 250px;
         align-items: stretch;
@@ -2470,7 +2470,7 @@ textarea {
     }
 }
 
-@media (min-width: 1400px) {
+@media (min-width: 1700px) {
     .host-game-board:has(.board-host-sidebar.is-positioned) .host-board-layout {
         padding-left: calc(var(--board-host-width, 190px) + 24px);
     }
