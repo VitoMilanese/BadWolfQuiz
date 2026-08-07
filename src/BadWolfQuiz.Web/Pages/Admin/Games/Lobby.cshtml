@@ -1820,7 +1820,7 @@
                         return;
                     }
 
-                    applyWidth(startWidth + moveEvent.clientX - startX, isHost);
+                    applyWidth(startWidth - (moveEvent.clientX - startX), isHost);
                 };
                 const stop = stopEvent => {
                     if (stopEvent.pointerId !== pointerId) {
@@ -1862,7 +1862,7 @@
                 const current = Number.parseFloat(
                     getComputedStyle(board).getPropertyValue(property));
                 const width = applyWidth(
-                    current + (event.key === "ArrowRight" ? 12 : -12),
+                    current + (event.key === "ArrowLeft" ? 12 : -12),
                     isHost);
                 localStorage.setItem(
                     isHost ? hostStorageKey : playerStorageKey,
