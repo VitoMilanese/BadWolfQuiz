@@ -111,7 +111,7 @@
         <iframe class="player-avatar-current player-webcam-url-preview"
                 data-player-webcam-url-preview
                 title="@Model.CurrentPlayer.Name"
-                allow="autoplay; camera; microphone; fullscreen; picture-in-picture"
+                allow="autoplay; fullscreen; picture-in-picture"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
                 referrerpolicy="no-referrer"
                 allowfullscreen
@@ -663,7 +663,7 @@
                         ? `/avatars/${storedAvatarId}` : "";
 
                 if (selectedImageSource === "webcam-url" && storedWebcamUrl) {
-                    webcamUrlPreview.src = storedWebcamUrl;
+                    webcamUrlPreview.src = withMutedWebcamAudio(storedWebcamUrl);
                     webcamUrlPreview.hidden = false;
                 } else {
                     webcamUrlPreview.removeAttribute("src");
@@ -679,6 +679,19 @@
                 }
 
                 setSourceButtonState();
+            };
+
+            const withMutedWebcamAudio = value => {
+                const url = new URL(value);
+                url.searchParams.set("deafen", "1");
+                url.searchParams.set("noaudio", "");
+                if (url.hash.length > 1) {
+                    const fragment = new URLSearchParams(url.hash.slice(1));
+                    fragment.set("deafen", "1");
+                    fragment.set("noaudio", "");
+                    url.hash = fragment.toString();
+                }
+                return url.toString();
             };
 
             const activateAvatar = async () => {

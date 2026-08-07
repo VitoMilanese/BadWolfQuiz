@@ -2158,6 +2158,18 @@
             const getPlayerImageSource = player =>
                 player.imageDataUrl ||
                 (player.avatarId ? `/avatars/${player.avatarId}` : "");
+            const withMutedWebcamAudio = value => {
+                const url = new URL(value);
+                url.searchParams.set("deafen", "1");
+                url.searchParams.set("noaudio", "");
+                if (url.hash.length > 1) {
+                    const fragment = new URLSearchParams(url.hash.slice(1));
+                    fragment.set("deafen", "1");
+                    fragment.set("noaudio", "");
+                    url.hash = fragment.toString();
+                }
+                return url.toString();
+            };
             const gameStatus = document.getElementById("game-status");
             const startGameForm = document.getElementById("start-game-form");
             const approveForm = document.getElementById("approve-rejoin-form");
@@ -2523,9 +2535,9 @@
                         if (player.webcamUrl) {
                             const frame = document.createElement("iframe");
                             frame.className = "player-card-avatar player-webcam-url-frame";
-                            frame.src = player.webcamUrl;
+                            frame.src = withMutedWebcamAudio(player.webcamUrl);
                             frame.title = player.name;
-                            frame.allow = "autoplay; camera; microphone; fullscreen; picture-in-picture";
+                            frame.allow = "autoplay; fullscreen; picture-in-picture";
                             frame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation");
                             frame.referrerPolicy = "no-referrer";
                             frame.allowFullscreen = true;
@@ -2623,9 +2635,9 @@
                         frame.className = isRunning
                             ? "player-card-avatar player-webcam-url-frame"
                             : "player-list-avatar player-webcam-url-frame";
-                        frame.src = player.webcamUrl;
+                        frame.src = withMutedWebcamAudio(player.webcamUrl);
                         frame.title = player.name;
-                        frame.allow = "autoplay; camera; microphone; fullscreen; picture-in-picture";
+                        frame.allow = "autoplay; fullscreen; picture-in-picture";
                         frame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation");
                         frame.referrerPolicy = "no-referrer";
                         frame.allowFullscreen = true;
