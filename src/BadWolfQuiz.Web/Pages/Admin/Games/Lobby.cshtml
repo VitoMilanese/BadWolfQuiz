@@ -2444,7 +2444,7 @@
                     "answer-timer",
                     update.mode === "answer");
                 timerValue.textContent =
-                    Math.floor(update.remainingMilliseconds / 1000);
+                    Math.ceil(update.remainingMilliseconds / 1000);
 
                 if (timerPause) {
                     timerPause.hidden = update.status !== "running";
