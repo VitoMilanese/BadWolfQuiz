@@ -612,7 +612,7 @@ public sealed class GameSession
         return timer;
     }
 
-    public QuestionTimerOutcome ProcessQuestionTimers()
+    public QuestionTimerProcessResult ProcessQuestionTimers()
     {
         EnsureRunning();
 
@@ -622,7 +622,9 @@ public sealed class GameSession
 
         if (question is null)
         {
-            return QuestionTimerOutcome.None;
+            return new QuestionTimerProcessResult(
+                QuestionTimerOutcome.None,
+                null);
         }
 
         _ = AnswerTimer.Remaining;
@@ -630,12 +632,14 @@ public sealed class GameSession
         if (AnswerTimer.Status == GameTimerStatus.Expired &&
             question.AnsweringPlayerId is { } answeringPlayerId)
         {
-            JudgeQuestionAnswer(
+            var attempt = JudgeQuestionAnswer(
                 question.SourceQuestionId,
                 answeringPlayerId,
                 false);
 
-            return QuestionTimerOutcome.AnswerExpired;
+            return new QuestionTimerProcessResult(
+                QuestionTimerOutcome.AnswerExpired,
+                attempt);
         }
 
         _ = Timer.Remaining;
@@ -647,14 +651,21 @@ public sealed class GameSession
             {
                 RevealNextClue(question.SourceQuestionId);
 
-                return QuestionTimerOutcome.ClueRevealed;
+                return new QuestionTimerProcessResult(
+                    QuestionTimerOutcome.ClueRevealed,
+                    null);
             }
 
             ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
-            return QuestionTimerOutcome.BuzzerExpired;
+
+            return new QuestionTimerProcessResult(
+                QuestionTimerOutcome.BuzzerExpired,
+                null);
         }
 
-        return QuestionTimerOutcome.None;
+        return new QuestionTimerProcessResult(
+            QuestionTimerOutcome.None,
+            null);
     }
 
     public QuizRoundSnapshot AdvanceToNextRound()
@@ -1206,7 +1217,6 @@ public enum GameSessionStatus
     Completed = 6
 }
 
-
 public enum QuestionTimerOutcome
 {
     None = 0,
@@ -1215,6 +1225,9 @@ public enum QuestionTimerOutcome
     ClueRevealed = 3
 }
 
+public sealed record QuestionTimerProcessResult(
+    QuestionTimerOutcome Outcome,
+    QuestionAnswerAttempt? AnswerAttempt);
 
 public sealed record GameResultStanding(
     int Position,

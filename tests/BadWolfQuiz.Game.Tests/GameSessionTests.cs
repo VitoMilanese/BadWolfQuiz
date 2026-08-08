@@ -462,7 +462,7 @@ public sealed class GameSessionTests
 
         var outcome = session.ProcessQuestionTimers();
 
-        Assert.Equal(QuestionTimerOutcome.AnswerExpired, outcome);
+        Assert.Equal(QuestionTimerOutcome.AnswerExpired, outcome.Outcome);
         Assert.Equal(-150, player.Score);
         Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
         Assert.Equal(GameTimerStatus.Stopped, session.AnswerTimer.Status);
@@ -618,7 +618,7 @@ public sealed class GameSessionTests
 
         Assert.Equal(
             QuestionTimerOutcome.AnswerExpired,
-            session.ProcessQuestionTimers());
+            session.ProcessQuestionTimers().Outcome);
         Assert.Equal(-100, rose.Score);
         Assert.Equal(GameTimerStatus.Running, session.Timer.Status);
         Assert.Equal(TimeSpan.FromSeconds(23), session.Timer.Remaining);
@@ -661,7 +661,7 @@ public sealed class GameSessionTests
 
         var outcome = session.ProcessQuestionTimers();
 
-        Assert.Equal(QuestionTimerOutcome.BuzzerExpired, outcome);
+        Assert.Equal(QuestionTimerOutcome.BuzzerExpired, outcome.Outcome);
         Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
         Assert.Equal(GameTimerStatus.Stopped, session.Timer.Status);
     }

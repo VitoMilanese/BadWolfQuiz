@@ -900,6 +900,28 @@
              aria-valuemin="130"
              aria-valuenow="230"
              tabindex="0"><span></span></div>
+
+        @if (Model.AnswerResultOverlay is { } answerResultOverlay)
+        {
+            var scoreText = answerResultOverlay.ScoreDelta > 0
+                ? $"+{answerResultOverlay.ScoreDelta}"
+                : answerResultOverlay.ScoreDelta.ToString();
+
+            <aside class="buzzer-race-overlay answer-result-overlay"
+                   data-answer-result-overlay
+                   role="status"
+                   aria-live="polite">
+                <div class="buzzer-race-card answer-result-card">
+                    <p class="answer-result-player-name">
+                        @answerResultOverlay.PlayerName
+                    </p>
+                    <strong class="answer-result-score @(answerResultOverlay.ScoreDelta < 0 ? "score-negative" : null)">
+                        @scoreText
+                    </strong>
+                </div>
+            </aside>
+        }
+
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
             @if (Model.Game.Session.Settings.HasHostCard)
             {
@@ -1777,6 +1799,18 @@
                 preview.src = previewUrl;
                 preview.hidden = false;
             });
+        })();
+
+        (() => {
+            const overlay = document.querySelector("[data-answer-result-overlay]");
+
+            if (!overlay) {
+                return;
+            }
+
+            window.setTimeout(() => {
+                overlay.remove();
+            }, 1500);
         })();
 
         (() => {

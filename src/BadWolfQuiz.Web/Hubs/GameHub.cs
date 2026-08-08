@@ -339,6 +339,19 @@ public sealed class GameHub(
             return;
         }
 
+        if (tick.Outcome == QuestionTimerOutcome.AnswerExpired &&
+            tick.AnswerAttempt is { } attempt)
+        {
+            var player = tick.Game.Session.Players.Single(
+                item => item.Id == attempt.PlayerId);
+
+            sessionRegistry.SetAnswerResultOverlay(
+                tick.Game,
+                player,
+                attempt,
+                "timeout");
+        }
+
         await group.SendAsync(
             "BuzzerStateChanged",
             CreateBuzzerUpdate(tick.Game));
@@ -416,6 +429,20 @@ public sealed class GameHub(
                 isActive = game.Session.ActivePlayerId == player.Id,
                 presence = player.Presence.ToString().ToLowerInvariant()
             })
+        };
+    }
+
+    public static object CreateQuestionAnswerResult(
+        GamePlayer player,
+        QuestionAnswerAttempt attempt,
+        string reason)
+    {
+        return new
+        {
+            playerId = player.Id.Value,
+            playerName = player.Name,
+            scoreDelta = attempt.ScoreDelta,
+            reason
         };
     }
 

@@ -12,6 +12,8 @@ public sealed class GameSessionRegistry
     private static readonly TimeSpan BuzzerRaceWindow = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan PlayerTransitionTokenLifetime =
         TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan AnswerResultOverlayLifetime =
+        TimeSpan.FromSeconds(5);
     private readonly IGameCodeGenerator _gameCodeGenerator;
     private readonly TimeProvider _timeProvider;
     private readonly ConcurrentDictionary<GameSessionId, GameSessionRegistration> _sessionsById = new();
@@ -21,6 +23,8 @@ public sealed class GameSessionRegistry
     private readonly ConcurrentDictionary<string, PlayerTransitionAccess>
         _playerTransitionAccessByTokenHash = new();
     private readonly Dictionary<string, PlayerConnection> _playerConnections = new();
+    private readonly ConcurrentDictionary<GameSessionId, AnswerResultOverlay>
+        _answerResultOverlays = new();
     private readonly object _presenceSync = new();
 
     public GameSessionRegistry(
@@ -856,15 +860,18 @@ public sealed class GameSessionRegistry
 
         lock (game)
         {
-            var outcome = game.Session.ProcessQuestionTimers();
+            var result = game.Session.ProcessQuestionTimers();
 
-            if (outcome != QuestionTimerOutcome.None)
+            if (result.Outcome != QuestionTimerOutcome.None)
             {
                 game.BuzzerRace = null;
                 game.MarkPersistenceChanged();
             }
 
-            return new QuestionTimerTickResult(game, outcome);
+            return new QuestionTimerTickResult(
+                game,
+                result.Outcome,
+                result.AnswerAttempt);
         }
     }
 
@@ -1350,6 +1357,36 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public void SetAnswerResultOverlay(
+        GameSessionRegistration game,
+        GamePlayer player,
+        QuestionAnswerAttempt attempt,
+        string reason)
+    {
+        _answerResultOverlays[game.Session.Id] = new AnswerResultOverlay(
+            player.Id,
+            player.Name,
+            attempt.ScoreDelta,
+            reason,
+            _timeProvider.GetUtcNow());
+    }
+
+    public AnswerResultOverlay? ConsumeAnswerResultOverlay(
+        GameSessionRegistration game)
+    {
+        if (!_answerResultOverlays.TryRemove(
+                game.Session.Id,
+                out var overlay))
+        {
+            return null;
+        }
+
+        return _timeProvider.GetUtcNow() - overlay.CreatedAtUtc <=
+            AnswerResultOverlayLifetime
+                ? overlay
+                : null;
+    }
+
     private sealed record PlayerAccess(
         GameSessionRegistration Game,
         GamePlayer Player);
@@ -1363,6 +1400,7 @@ public sealed class GameSessionRegistry
     private sealed record PlayerTransitionAccess(
         PlayerAccess Access,
         DateTimeOffset ExpiresAtUtc);
+
 }
 
 
@@ -1375,7 +1413,16 @@ public sealed record BuzzerClaimResult(
 
 public sealed record QuestionTimerTickResult(
     GameSessionRegistration Game,
-    QuestionTimerOutcome Outcome);
+    QuestionTimerOutcome Outcome,
+    QuestionAnswerAttempt? AnswerAttempt);
+
+
+public sealed record AnswerResultOverlay(
+    GamePlayerId PlayerId,
+    string PlayerName,
+    int ScoreDelta,
+    string Reason,
+    DateTimeOffset CreatedAtUtc);
 
 
 public sealed record FinalPlayerActionResult(
