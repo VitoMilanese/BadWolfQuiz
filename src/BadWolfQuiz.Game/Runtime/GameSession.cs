@@ -477,15 +477,20 @@ public sealed class GameSession
         {
             Timer.Stop();
         }
-        else if (_players.All(candidate =>
-                     question.AnswerAttempts.Any(answer => answer.PlayerId == candidate.Id)))
+        else
         {
-            question.ResolveWithoutCorrectAnswer();
-            Timer.Stop();
-        }
-        else if (Timer.IsPaused)
-        {
-            Timer.Resume();
+            var hasEligiblePlayer = _players.Any(candidate =>
+                question.AnswerAttempts.All(answer => answer.PlayerId != candidate.Id));
+
+            if (!hasEligiblePlayer)
+            {
+                question.ResolveWithoutCorrectAnswer();
+                Timer.Stop();
+            }
+            else if (Timer.IsPaused)
+            {
+                Timer.Resume();
+            }
         }
 
         return attempt;
