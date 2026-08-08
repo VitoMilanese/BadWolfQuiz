@@ -478,7 +478,20 @@
                         : Model.CurrentQuestion.QuestionBlocks;
 
                     <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation")">
-                        <p class="eyebrow">
+                        <p class="eyebrow"
+                           data-question-heading
+                           data-reward-full="@Localizer[
+                                "GameBoard_QuestionWithCategoryAndPoints",
+                                Model.CurrentQuestion.CategoryTitle,
+                                Model.CurrentQuestion.Points]"
+                           data-reward-half="@Localizer[
+                                "GameBoard_QuestionWithCategoryAndPoints",
+                                Model.CurrentQuestion.CategoryTitle,
+                                Model.CurrentQuestion.Points / 2]"
+                           data-reward-quarter="@Localizer[
+                                "GameBoard_QuestionWithCategoryAndPoints",
+                                Model.CurrentQuestion.CategoryTitle,
+                                Model.CurrentQuestion.Points / 4]">
                             @(isShowingAnswer
                                 ? Localizer[
                                     "GameBoard_AnswerWithCategory",
@@ -2354,6 +2367,7 @@
             const gameBoardError = document.getElementById("game-board-error");
             const revealClueForm = document.querySelector("[data-reveal-clue-form]");
             const questionClues = document.querySelector("[data-question-clues]");
+            const questionHeading = document.querySelector("[data-question-heading]");
 
             let gameBoardErrorDismissHandle = null;
 
@@ -2440,6 +2454,16 @@
                         "question-clue-hidden",
                         index >= update.revealedClueCount);
                 });
+
+                if (questionHeading) {
+                    if (update.revealedClueCount >= 4) {
+                        questionHeading.textContent = questionHeading.dataset.rewardQuarter;
+                    } else if (update.revealedClueCount >= 3) {
+                        questionHeading.textContent = questionHeading.dataset.rewardHalf;
+                    } else {
+                        questionHeading.textContent = questionHeading.dataset.rewardFull;
+                    }
+                }
 
                 if (revealClueForm && !update.canRevealClue) {
                     revealClueForm.remove();
