@@ -5368,7 +5368,7 @@ body.youtube-auto-expanded-open {
 
 .discord-settings-dialog-card {
     width: 100%;
-    height: min(725px, calc(100vh - 36px));
+    height: min(800px, calc(100vh - 36px));
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     padding: 0;
@@ -5390,12 +5390,13 @@ body.youtube-auto-expanded-open {
 .embedded-discord-settings .page-shell {
     width: 100%;
     max-width: none;
-    padding: 18px;
+    padding: 12px 18px;
 }
 
 .embedded-discord-settings .discord-settings {
     width: 100%;
     max-width: none;
+    margin: 0;
 }
 
 .discord-settings .settings-summary > div {
