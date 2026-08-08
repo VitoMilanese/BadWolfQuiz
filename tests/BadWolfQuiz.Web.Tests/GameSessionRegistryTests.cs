@@ -550,15 +550,13 @@ public sealed class GameSessionRegistryTests
             1,
             player.Id,
             false);
-        var question = registry.ResolveQuestionWithoutCorrectAnswer(
-            "ABC123",
-            1);
+        var question = game.Session.Board.Questions.Single();
 
         Assert.Equal(-100, attempt!.ScoreDelta);
         Assert.Equal(-100, player.Score);
         Assert.Equal(
             BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.ShowingAnswer,
-            question!.Status);
+            question.Status);
 
         var closed = registry.CloseQuestionAnswer("ABC123", 1);
 
