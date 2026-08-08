@@ -151,7 +151,7 @@
                     event.preventDefault();
                     const form = event.currentTarget;
                     const checkbox = form.querySelector('[name="AutoMuteDuringMedia"]');
-                    const button = form.querySelector('button[type="submit"]');
+                    const button = root.querySelector('button[type="submit"][form="discord-auto-mute-form"]');
                     const requested = checkbox.checked;
                     button.disabled = true;
                     try {
