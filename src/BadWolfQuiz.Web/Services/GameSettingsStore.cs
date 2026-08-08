@@ -198,6 +198,14 @@ public sealed class GameSettingsStore(
         public string SiteThemeId { get; set; } = SiteThemeCatalog.DefaultId;
         public SiteThemeColors CustomThemeColors { get; set; } = SiteThemeColors.Default;
 
+        public bool AnswerRewardDecayEnabled { get; set; }
+
+        public int AnswerRewardDecayStartAfterSeconds { get; set; } =
+            GameSessionSettings.DefaultAnswerRewardDecayStartAfterSeconds;
+
+        public int AnswerRewardDecayMinimumPercent { get; set; } =
+            GameSessionSettings.DefaultAnswerRewardDecayMinimumPercent;
+
         public GameSessionSettings ToRuntimeSettings() => new(
             BuzzerDuration,
             AnswerDuration,
@@ -214,7 +222,10 @@ public sealed class GameSettingsStore(
             BrandLogoContentType,
             SiteThemeCatalog.Normalize(SiteThemeId),
             SiteThemeCatalog.Normalize(CustomThemeColors),
-            HostWebcamUrl);
+            HostWebcamUrl,
+            AnswerRewardDecayEnabled,
+            AnswerRewardDecayStartAfterSeconds,
+            AnswerRewardDecayMinimumPercent);
 
         public static StoredGameSettings From(GameSessionSettings settings) => new()
         {
@@ -233,7 +244,12 @@ public sealed class GameSettingsStore(
             BrandLogoData = settings.BrandLogoData,
             BrandLogoContentType = settings.BrandLogoContentType,
             SiteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId),
-            CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors)
+            CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors),
+            AnswerRewardDecayEnabled = settings.AnswerRewardDecayEnabled,
+            AnswerRewardDecayStartAfterSeconds =
+                settings.AnswerRewardDecayStartAfterSeconds,
+            AnswerRewardDecayMinimumPercent =
+                settings.AnswerRewardDecayMinimumPercent
         };
     }
 }
@@ -261,7 +277,26 @@ public sealed class GameSettingsInput
     public string SiteThemeId { get; set; } = SiteThemeCatalog.DefaultId;
     public SiteThemeColors CustomThemeColors { get; set; } = SiteThemeColors.Default;
 
+    public bool AnswerRewardDecayEnabled { get; set; }
+
+    public int AnswerRewardDecayStartAfterSeconds { get; set; } =
+        GameSessionSettings.DefaultAnswerRewardDecayStartAfterSeconds;
+
+    public int AnswerRewardDecayMinimumPercent { get; set; } =
+        GameSessionSettings.DefaultAnswerRewardDecayMinimumPercent;
+
     public bool IsValid =>
+        AnswerRewardDecayStartAfterSeconds is >=
+            GameSessionSettings.MinimumAnswerRewardDecayStartAfterSeconds and <=
+            GameSessionSettings.MaximumAnswerRewardDecayStartAfterSeconds &&
+
+        AnswerRewardDecayMinimumPercent is >=
+            GameSessionSettings.MinimumAnswerRewardDecayMinimumPercent and <=
+            GameSessionSettings.MaximumAnswerRewardDecayMinimumPercent &&
+
+        (!AnswerRewardDecayEnabled ||
+            AnswerRewardDecayStartAfterSeconds < AnswerDurationSeconds) &&
+
         BuzzerDurationSeconds is >= 1 and <= 3600 &&
         AnswerDurationSeconds is >= 1 and <= 3600 &&
         Enum.IsDefined(RegularQuestionBuzzerStartMode) &&
@@ -304,7 +339,10 @@ public sealed class GameSettingsInput
             brandLogoContentType,
             SiteThemeCatalog.Normalize(siteThemeId ?? SiteThemeId),
             SiteThemeCatalog.Normalize(customThemeColors ?? CustomThemeColors),
-            HostWebcamUrl);
+            HostWebcamUrl,
+            AnswerRewardDecayEnabled,
+            AnswerRewardDecayStartAfterSeconds,
+            AnswerRewardDecayMinimumPercent);
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)
@@ -325,7 +363,10 @@ public sealed class GameSettingsInput
             HostAvatarId = settings.HostAvatarId,
             HostWebcamUrl = settings.HostWebcamUrl,
             SiteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId),
-            CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors)
+            CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors),
+            AnswerRewardDecayEnabled = settings.AnswerRewardDecayEnabled,
+            AnswerRewardDecayStartAfterSeconds = settings.AnswerRewardDecayStartAfterSeconds,
+            AnswerRewardDecayMinimumPercent = settings.AnswerRewardDecayMinimumPercent
         };
     }
 

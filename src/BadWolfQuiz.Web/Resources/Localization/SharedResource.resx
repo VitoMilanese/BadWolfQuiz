@@ -2448,4 +2448,19 @@
   <data name="Menu_HostSignIn" xml:space="preserve">
     <value>Host sign in</value>
   </data>
+  <data name="GameSettings_AnswerRewardDecayEnabled" xml:space="preserve">
+    <value>Reduce reward during the answer timer</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayStartAfter" xml:space="preserve">
+    <value>Start reducing reward after</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayStartAfterHint" xml:space="preserve">
+    <value>Seconds after the individual answer timer starts (5–45).</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayMinimum" xml:space="preserve">
+    <value>Minimum correct-answer reward</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayMinimumHint" xml:space="preserve">
+    <value>Percentage of the available reward remaining at 1 second (10–90%).</value>
+  </data>
 </root>

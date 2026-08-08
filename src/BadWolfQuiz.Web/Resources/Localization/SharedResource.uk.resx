@@ -2448,4 +2448,19 @@
   <data name="Menu_HostSignIn" xml:space="preserve">
     <value>Вхід для хоста</value>
   </data>
+  <data name="GameSettings_AnswerRewardDecayEnabled" xml:space="preserve">
+    <value>Зменшувати нагороду під час таймера відповіді</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayStartAfter" xml:space="preserve">
+    <value>Почати зменшення нагороди через</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayStartAfterHint" xml:space="preserve">
+    <value>Секунд після запуску індивідуального таймера відповіді (5–45).</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayMinimum" xml:space="preserve">
+    <value>Мінімальна нагорода за правильну відповідь</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayMinimumHint" xml:space="preserve">
+    <value>Відсоток доступної нагороди, що залишиться на 1 секунді таймера (10–90%).</value>
+  </data>
 </root>

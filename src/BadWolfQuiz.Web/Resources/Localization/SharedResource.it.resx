@@ -2448,4 +2448,19 @@
   <data name="Menu_HostSignIn" xml:space="preserve">
     <value>Accesso host</value>
   </data>
+  <data name="GameSettings_AnswerRewardDecayEnabled" xml:space="preserve">
+    <value>Riduci la ricompensa durante il timer di risposta</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayStartAfter" xml:space="preserve">
+    <value>Inizia a ridurre la ricompensa dopo</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayStartAfterHint" xml:space="preserve">
+    <value>Secondi dall'avvio del timer di risposta individuale (5–45).</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayMinimum" xml:space="preserve">
+    <value>Ricompensa minima per la risposta corretta</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayMinimumHint" xml:space="preserve">
+    <value>Percentuale della ricompensa disponibile rimanente a 1 secondo (10–90%).</value>
+  </data>
 </root>

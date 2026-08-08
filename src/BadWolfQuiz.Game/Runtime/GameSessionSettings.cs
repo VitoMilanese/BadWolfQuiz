@@ -2,6 +2,14 @@ namespace BadWolfQuiz.Game.Runtime;
 
 public sealed record GameSessionSettings
 {
+    public const int DefaultAnswerRewardDecayStartAfterSeconds = 10;
+    public const int MinimumAnswerRewardDecayStartAfterSeconds = 5;
+    public const int MaximumAnswerRewardDecayStartAfterSeconds = 45;
+
+    public const int DefaultAnswerRewardDecayMinimumPercent = 25;
+    public const int MinimumAnswerRewardDecayMinimumPercent = 10;
+    public const int MaximumAnswerRewardDecayMinimumPercent = 90;
+
     public static GameSessionSettings Default { get; } = new(
         GameSession.DefaultBuzzerDuration,
         GameSession.DefaultAnswerDuration,
@@ -25,7 +33,12 @@ public sealed record GameSessionSettings
         string? brandLogoContentType = null,
         string siteThemeId = "classic-wolf",
         SiteThemeColors? customThemeColors = null,
-        string? hostWebcamUrl = null)
+        string? hostWebcamUrl = null,
+        bool answerRewardDecayEnabled = false,
+        int answerRewardDecayStartAfterSeconds =
+            DefaultAnswerRewardDecayStartAfterSeconds,
+        int answerRewardDecayMinimumPercent =
+            DefaultAnswerRewardDecayMinimumPercent)
     {
         if (buzzerDuration <= TimeSpan.Zero)
         {
@@ -39,6 +52,30 @@ public sealed record GameSessionSettings
             throw new ArgumentOutOfRangeException(
                 nameof(answerDuration),
                 "Answer duration must be positive.");
+        }
+
+        if (answerRewardDecayStartAfterSeconds is
+            < MinimumAnswerRewardDecayStartAfterSeconds or
+            > MaximumAnswerRewardDecayStartAfterSeconds)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(answerRewardDecayStartAfterSeconds));
+        }
+
+        if (answerRewardDecayMinimumPercent is
+            < MinimumAnswerRewardDecayMinimumPercent or
+            > MaximumAnswerRewardDecayMinimumPercent)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(answerRewardDecayMinimumPercent));
+        }
+
+        if (answerRewardDecayEnabled &&
+            answerRewardDecayStartAfterSeconds >= answerDuration.TotalSeconds)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(answerRewardDecayStartAfterSeconds),
+                "Reward decay must start before the answer timer expires.");
         }
 
         BuzzerDuration = buzzerDuration;
@@ -57,6 +94,9 @@ public sealed record GameSessionSettings
         BrandLogoContentType = brandLogoContentType;
         SiteThemeId = siteThemeId;
         CustomThemeColors = customThemeColors ?? SiteThemeColors.Default;
+        AnswerRewardDecayEnabled = answerRewardDecayEnabled;
+        AnswerRewardDecayStartAfterSeconds = answerRewardDecayStartAfterSeconds;
+        AnswerRewardDecayMinimumPercent = answerRewardDecayMinimumPercent;
     }
 
     public TimeSpan BuzzerDuration { get; }
@@ -68,6 +108,12 @@ public sealed record GameSessionSettings
     public GamePhaseStartMode WagerQuestionAnswerTimerStartMode { get; }
 
     public bool AllowNegativeScoreFinalPlayers { get; }
+
+    public bool AnswerRewardDecayEnabled { get; }
+
+    public int AnswerRewardDecayStartAfterSeconds { get; }
+
+    public int AnswerRewardDecayMinimumPercent { get; }
 
     public bool DisplayHostCard { get; }
     public string? HostName { get; }

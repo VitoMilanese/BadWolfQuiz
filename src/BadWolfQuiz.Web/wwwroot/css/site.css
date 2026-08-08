@@ -5779,3 +5779,11 @@ body.youtube-auto-expanded-open {
         flex: 1 1 auto;
     }
 }
+
+.answer-reward-decay-setting-disabled {
+    opacity: 0.55;
+}
+
+    .answer-reward-decay-setting-disabled input {
+        cursor: not-allowed;
+    }
