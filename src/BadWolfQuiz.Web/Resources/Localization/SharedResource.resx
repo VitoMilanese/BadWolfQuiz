@@ -1491,9 +1491,15 @@
   <data name="HostCard_Avatar" xml:space="preserve">
     <value>Host avatar</value>
   </data>
-  <data name="HostCard_SourceWebcamUrl" xml:space="preserve"><value>Webcam URL</value></data>
-  <data name="HostCard_WebcamUrl" xml:space="preserve"><value>Webcam page URL</value></data>
-  <data name="HostCard_WebcamUrlHintPrefix" xml:space="preserve"><value>Paste an HTTPS viewer URL, for example from</value></data>
+  <data name="HostCard_SourceWebcamUrl" xml:space="preserve">
+    <value>Webcam URL</value>
+  </data>
+  <data name="HostCard_WebcamUrl" xml:space="preserve">
+    <value>Webcam page URL</value>
+  </data>
+  <data name="HostCard_WebcamUrlHintPrefix" xml:space="preserve">
+    <value>Paste an HTTPS viewer URL, for example from</value>
+  </data>
   <data name="AvatarPicker_Title" xml:space="preserve">
     <value>Choose an avatar</value>
   </data>
@@ -1530,9 +1536,15 @@
   <data name="PlayerWebcam_AccessFailed" xml:space="preserve">
     <value>Unable to access the camera. Check the browser permission.</value>
   </data>
-  <data name="PlayerWebcam_Url" xml:space="preserve"><value>Webcam URL</value></data>
-  <data name="PlayerWebcam_UseUrl" xml:space="preserve"><value>Use URL webcam</value></data>
-  <data name="PlayerWebcam_InvalidUrl" xml:space="preserve"><value>Enter a valid HTTPS webcam viewer URL.</value></data>
+  <data name="PlayerWebcam_Url" xml:space="preserve">
+    <value>Webcam URL</value>
+  </data>
+  <data name="PlayerWebcam_UseUrl" xml:space="preserve">
+    <value>Use URL webcam</value>
+  </data>
+  <data name="PlayerWebcam_InvalidUrl" xml:space="preserve">
+    <value>Enter a valid HTTPS webcam viewer URL.</value>
+  </data>
   <data name="GameBoard_ResizeHostCard" xml:space="preserve">
     <value>Resize the host card width and height</value>
   </data>
@@ -1555,16 +1567,16 @@
     <value>Play with us</value>
   </data>
   <data name="Menu_AskQuestion" xml:space="preserve">
-    <value>Ask a question</value>
+    <value>Contact the developer</value>
   </data>
   <data name="AskQuestion_Eyebrow" xml:space="preserve">
     <value>CONTACT US</value>
   </data>
   <data name="AskQuestion_Title" xml:space="preserve">
-    <value>Ask a question</value>
+    <value>Contact the developer</value>
   </data>
   <data name="AskQuestion_Description" xml:space="preserve">
-    <value>Send us a question. It will be delivered to the BAD WOLF QUIZ Discord channel.</value>
+    <value>Ask a question, suggest an idea, report a problem, or leave feedback — your message will be sent to the Bad Wolf Quiz developer.</value>
   </data>
   <data name="AskQuestion_Name" xml:space="preserve">
     <value>Your name</value>
@@ -2130,44 +2142,310 @@
   <data name="GameBoard_NextRound" xml:space="preserve">
     <value>Next round</value>
   </data>
-  <data name="Discord_Menu" xml:space="preserve"><value>Discord voice</value></data>
-  <data name="Discord_SettingsTitle" xml:space="preserve"><value>Discord voice moderation</value></data>
-  <data name="Discord_NotEnabled" xml:space="preserve"><value>Discord integration is not enabled on this server.</value></data>
-  <data name="Discord_ConnectDescription" xml:space="preserve"><value>Connect your Discord account to select a server and voice channel.</value></data>
-  <data name="Discord_Connect" xml:space="preserve"><value>Connect Discord</value></data>
-  <data name="Discord_Account" xml:space="preserve"><value>Discord account</value></data>
-  <data name="Discord_Server" xml:space="preserve"><value>Server</value></data>
-  <data name="Discord_VoiceChannel" xml:space="preserve"><value>Voice channel</value></data>
-  <data name="Discord_Status" xml:space="preserve"><value>Status</value></data>
-  <data name="Discord_Ready" xml:space="preserve"><value>Ready</value></data>
-  <data name="Discord_NeedsAttention" xml:space="preserve"><value>Check the bot and its permissions</value></data>
-  <data name="Discord_ReauthorizeHint" xml:space="preserve"><value>Authorize Discord again after installing the bot or when your session expires.</value></data>
-  <data name="Discord_Reauthorize" xml:space="preserve"><value>Authorize again</value></data>
-  <data name="Discord_InstallBot" xml:space="preserve"><value>Install bot</value></data>
-  <data name="Discord_SelectServer" xml:space="preserve"><value>Select a server</value></data>
-  <data name="Discord_SelectChannel" xml:space="preserve"><value>Select a voice channel</value></data>
-  <data name="Discord_AutoMute" xml:space="preserve"><value>Automatically mute participants while media is playing</value></data>
-  <data name="Discord_Test" xml:space="preserve"><value>Test mute</value></data>
-  <data name="Discord_TestRunning" xml:space="preserve"><value>Testing…</value></data>
-  <data name="Discord_TestComplete" xml:space="preserve"><value>Test complete</value></data>
-  <data name="Discord_TestFailed" xml:space="preserve"><value>Test failed</value></data>
-  <data name="Discord_Disconnect" xml:space="preserve"><value>Disconnect Discord</value></data>
-  <data name="Discord_MuteParticipants" xml:space="preserve"><value>Mute Discord participants</value></data>
-  <data name="Discord_UnmuteParticipants" xml:space="preserve"><value>Unmute Discord participants</value></data>
-  <data name="Discord_NotReady" xml:space="preserve"><value>Discord voice moderation is not ready.</value></data>
-  <data name="Discord_OperationComplete" xml:space="preserve"><value>Discord operation complete: {0} changed, {1} skipped.</value></data>
-  <data name="Discord_OperationPartial" xml:space="preserve"><value>Discord operation partially complete: {0} changed, {1} failed, {2} skipped.</value></data>
-  <data name="Discord_ChannelSaved" xml:space="preserve"><value>Discord voice channel saved.</value></data>
-  <data name="Discord_AutomaticMuteSaved" xml:space="preserve"><value>Automatic Discord media mute setting saved.</value></data>
-  <data name="Discord_AuthorizationCancelled" xml:space="preserve"><value>Discord authorization was cancelled or expired.</value></data>
-  <data name="Discord_AccountConnected" xml:space="preserve"><value>Discord account connected.</value></data>
-  <data name="Discord_AuthorizationFailed" xml:space="preserve"><value>Discord authorization failed.</value></data>
-  <data name="Discord_AuthorizationExpired" xml:space="preserve"><value>Discord authorization expired. Authorize Discord again.</value></data>
-  <data name="Discord_SelectServerAndChannel" xml:space="preserve"><value>Select a Discord server and voice channel.</value></data>
-  <data name="Discord_Disconnected" xml:space="preserve"><value>Discord disconnected.</value></data>
-  <data name="Discord_AutoMuteHint" xml:space="preserve"><value>All participants in the selected voice channel except the host will be muted while question media is playing.</value></data>
-  <data name="Discord_BotStatus" xml:space="preserve"><value>Bot</value></data>
-  <data name="Discord_MutePermission" xml:space="preserve"><value>Mute Members permission</value></data>
-  <data name="Discord_Available" xml:space="preserve"><value>Available</value></data>
-  <data name="Discord_Unavailable" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="Discord_Menu" xml:space="preserve">
+    <value>Discord voice</value>
+  </data>
+  <data name="Discord_SettingsTitle" xml:space="preserve">
+    <value>Discord voice moderation</value>
+  </data>
+  <data name="Discord_NotEnabled" xml:space="preserve">
+    <value>Discord integration is not enabled on this server.</value>
+  </data>
+  <data name="Discord_ConnectDescription" xml:space="preserve">
+    <value>Connect your Discord account to select a server and voice channel.</value>
+  </data>
+  <data name="Discord_Connect" xml:space="preserve">
+    <value>Connect Discord</value>
+  </data>
+  <data name="Discord_Account" xml:space="preserve">
+    <value>Discord account</value>
+  </data>
+  <data name="Discord_Server" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="Discord_VoiceChannel" xml:space="preserve">
+    <value>Voice channel</value>
+  </data>
+  <data name="Discord_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Discord_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Discord_NeedsAttention" xml:space="preserve">
+    <value>Check the bot and its permissions</value>
+  </data>
+  <data name="Discord_ReauthorizeHint" xml:space="preserve">
+    <value>Authorize Discord again after installing the bot or when your session expires.</value>
+  </data>
+  <data name="Discord_Reauthorize" xml:space="preserve">
+    <value>Authorize again</value>
+  </data>
+  <data name="Discord_InstallBot" xml:space="preserve">
+    <value>Install bot</value>
+  </data>
+  <data name="Discord_SelectServer" xml:space="preserve">
+    <value>Select a server</value>
+  </data>
+  <data name="Discord_SelectChannel" xml:space="preserve">
+    <value>Select a voice channel</value>
+  </data>
+  <data name="Discord_AutoMute" xml:space="preserve">
+    <value>Automatically mute participants while media is playing</value>
+  </data>
+  <data name="Discord_Test" xml:space="preserve">
+    <value>Test mute</value>
+  </data>
+  <data name="Discord_TestRunning" xml:space="preserve">
+    <value>Testing…</value>
+  </data>
+  <data name="Discord_TestComplete" xml:space="preserve">
+    <value>Test complete</value>
+  </data>
+  <data name="Discord_TestFailed" xml:space="preserve">
+    <value>Test failed</value>
+  </data>
+  <data name="Discord_Disconnect" xml:space="preserve">
+    <value>Disconnect Discord</value>
+  </data>
+  <data name="Discord_MuteParticipants" xml:space="preserve">
+    <value>Mute Discord participants</value>
+  </data>
+  <data name="Discord_UnmuteParticipants" xml:space="preserve">
+    <value>Unmute Discord participants</value>
+  </data>
+  <data name="Discord_NotReady" xml:space="preserve">
+    <value>Discord voice moderation is not ready.</value>
+  </data>
+  <data name="Discord_OperationComplete" xml:space="preserve">
+    <value>Discord operation complete: {0} changed, {1} skipped.</value>
+  </data>
+  <data name="Discord_OperationPartial" xml:space="preserve">
+    <value>Discord operation partially complete: {0} changed, {1} failed, {2} skipped.</value>
+  </data>
+  <data name="Discord_ChannelSaved" xml:space="preserve">
+    <value>Discord voice channel saved.</value>
+  </data>
+  <data name="Discord_AutomaticMuteSaved" xml:space="preserve">
+    <value>Automatic Discord media mute setting saved.</value>
+  </data>
+  <data name="Discord_AuthorizationCancelled" xml:space="preserve">
+    <value>Discord authorization was cancelled or expired.</value>
+  </data>
+  <data name="Discord_AccountConnected" xml:space="preserve">
+    <value>Discord account connected.</value>
+  </data>
+  <data name="Discord_AuthorizationFailed" xml:space="preserve">
+    <value>Discord authorization failed.</value>
+  </data>
+  <data name="Discord_AuthorizationExpired" xml:space="preserve">
+    <value>Discord authorization expired. Authorize Discord again.</value>
+  </data>
+  <data name="Discord_SelectServerAndChannel" xml:space="preserve">
+    <value>Select a Discord server and voice channel.</value>
+  </data>
+  <data name="Discord_Disconnected" xml:space="preserve">
+    <value>Discord disconnected.</value>
+  </data>
+  <data name="Discord_AutoMuteHint" xml:space="preserve">
+    <value>All participants in the selected voice channel except the host will be muted while question media is playing.</value>
+  </data>
+  <data name="Discord_BotStatus" xml:space="preserve">
+    <value>Bot</value>
+  </data>
+  <data name="Discord_MutePermission" xml:space="preserve">
+    <value>Mute Members permission</value>
+  </data>
+  <data name="Discord_Available" xml:space="preserve">
+    <value>Available</value>
+  </data>
+  <data name="Discord_Unavailable" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="Menu_QuestionInbox" xml:space="preserve">
+    <value>User messages</value>
+  </data>
+  <data name="QuestionBot_Title" xml:space="preserve">
+    <value>Discord question bot</value>
+  </data>
+  <data name="QuestionBot_DiscordServer" xml:space="preserve">
+    <value>Discord server</value>
+  </data>
+  <data name="QuestionBot_SelectServer" xml:space="preserve">
+    <value>Select server</value>
+  </data>
+  <data name="QuestionBot_TextChannel" xml:space="preserve">
+    <value>Text channel</value>
+  </data>
+  <data name="QuestionBot_SelectChannel" xml:space="preserve">
+    <value>Select channel</value>
+  </data>
+  <data name="QuestionBot_SelectServerAndChannel" xml:space="preserve">
+    <value>Select a Discord server and text channel.</value>
+  </data>
+  <data name="QuestionBot_Saved" xml:space="preserve">
+    <value>Discord question channel saved.</value>
+  </data>
+  <data name="Question_Title" xml:space="preserve">
+    <value>Your question</value>
+  </data>
+  <data name="Question_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Question_You" xml:space="preserve">
+    <value>You</value>
+  </data>
+  <data name="Question_Developer" xml:space="preserve">
+    <value>Developer</value>
+  </data>
+  <data name="Question_Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Button_Send" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="QuestionInbox_Title" xml:space="preserve">
+    <value>User messages</value>
+  </data>
+  <data name="QuestionInbox_Empty" xml:space="preserve">
+    <value>There are no questions yet.</value>
+  </data>
+  <data name="QuestionInbox_From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="QuestionInbox_Question" xml:space="preserve">
+    <value>Question</value>
+  </data>
+  <data name="QuestionInbox_User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="QuestionInbox_Developer" xml:space="preserve">
+    <value>Developer</value>
+  </data>
+  <data name="QuestionInbox_Answer" xml:space="preserve">
+    <value>Answer</value>
+  </data>
+  <data name="QuestionInbox_Reply" xml:space="preserve">
+    <value>Reply</value>
+  </data>
+  <data name="Question_InvalidMessage" xml:space="preserve">
+    <value>Message must contain between 1 and 5000 characters.</value>
+  </data>
+  <data name="Question_DiscordSendFailed" xml:space="preserve">
+    <value>Failed to send the message to Discord.</value>
+  </data>
+  <data name="Question_ContinueConversation" xml:space="preserve">
+    <value>Continue conversation</value>
+  </data>
+  <data name="Question_AwaitingAnswer" xml:space="preserve">
+    <value>Awaiting answer</value>
+  </data>
+  <data name="DiscordQuestion_NewMessageFrom" xml:space="preserve">
+    <value>New message from {0}:</value>
+  </data>
+  <data name="DiscordQuestion_Anonymous" xml:space="preserve">
+    <value>Anonymous</value>
+  </data>
+  <data name="DiscordQuestion_Reply" xml:space="preserve">
+    <value>Reply</value>
+  </data>
+  <data name="QuestionInbox_DeleteConfirmTitle" xml:space="preserve">
+    <value>Delete conversation?</value>
+  </data>
+  <data name="QuestionInbox_DeleteConfirmText" xml:space="preserve">
+    <value>This conversation will be permanently deleted. This action cannot be undone.</value>
+  </data>
+  <data name="QuestionInbox_DeleteNotFound" xml:space="preserve">
+    <value>This conversation no longer exists.</value>
+  </data>
+  <data name="Menu_MyQuestions" xml:space="preserve">
+    <value>My messages</value>
+  </data>
+  <data name="MyQuestions_Title" xml:space="preserve">
+    <value>My messages</value>
+  </data>
+  <data name="MyQuestions_Empty" xml:space="preserve">
+    <value>You have no saved questions yet.</value>
+  </data>
+  <data name="MyQuestions_Updated" xml:space="preserve">
+    <value>Updated</value>
+  </data>
+  <data name="MyQuestions_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Footer_PrivacyCookies" xml:space="preserve">
+    <value>Privacy &amp; Cookies</value>
+  </data>
+  <data name="Privacy_Title" xml:space="preserve">
+    <value>Privacy &amp; Cookies</value>
+  </data>
+  <data name="Privacy_Intro" xml:space="preserve">
+    <value>This page explains how Bad Wolf Quiz uses cookies and processes information when you use the website.</value>
+  </data>
+  <data name="Privacy_CookiesTitle" xml:space="preserve">
+    <value>Cookies</value>
+  </data>
+  <data name="Privacy_CookiesIntro" xml:space="preserve">
+    <value>Bad Wolf Quiz uses first-party cookies required for website functionality, security and features explicitly requested by the user.</value>
+  </data>
+  <data name="Privacy_QuestionHistoryTitle" xml:space="preserve">
+    <value>Question history</value>
+  </data>
+  <data name="Privacy_QuestionHistoryText" xml:space="preserve">
+    <value>When you submit a question, we store conversation identifiers in a cookie on your browser so you can return to your previous questions. The cookie does not contain the text of your questions and is retained for up to 12 months.</value>
+  </data>
+  <data name="Privacy_LanguageTitle" xml:space="preserve">
+    <value>Language preference</value>
+  </data>
+  <data name="Privacy_LanguageText" xml:space="preserve">
+    <value>We use a cookie to remember the language you select on the website.</value>
+  </data>
+  <data name="Privacy_SecurityTitle" xml:space="preserve">
+    <value>Security and authentication</value>
+  </data>
+  <data name="Privacy_SecurityText" xml:space="preserve">
+    <value>The website may use cookies required for security, protection against forged requests and authentication of hosts.</value>
+  </data>
+  <data name="Privacy_YouTubeTitle" xml:space="preserve">
+    <value>YouTube videos</value>
+  </data>
+  <data name="Privacy_YouTubeText" xml:space="preserve">
+    <value>Quiz questions may contain embedded YouTube videos. We use YouTube's privacy-enhanced mode when embedding these videos.</value>
+  </data>
+  <data name="Privacy_NoAdvertisingTitle" xml:space="preserve">
+    <value>Advertising and tracking</value>
+  </data>
+  <data name="Privacy_NoAdvertisingText" xml:space="preserve">
+    <value>Bad Wolf Quiz does not use advertising cookies or cookies for cross-site tracking.</value>
+  </data>
+  <data name="Privacy_LocalStorageTitle" xml:space="preserve">
+    <value>Local browser data</value>
+  </data>
+  <data name="Privacy_LocalStorageText" xml:space="preserve">
+    <value>Some game features may temporarily store information in your browser to maintain the state of an active game or session.</value>
+  </data>
+  <data name="Privacy_ControlTitle" xml:space="preserve">
+    <value>Managing browser data</value>
+  </data>
+  <data name="Privacy_ControlText" xml:space="preserve">
+    <value>You can delete cookies and locally stored website data through your browser settings. Doing so may reset your language preference, question history or active game state.</value>
+  </data>
+  <data name="Menu_PublicQuizzes" xml:space="preserve">
+    <value>Public quizzes</value>
+  </data>
+  <data name="Menu_Join" xml:space="preserve">
+    <value>Join</value>
+  </data>
+  <data name="Menu_ActiveGames" xml:space="preserve">
+    <value>Active games</value>
+  </data>
+  <data name="Menu_ChangePassword" xml:space="preserve">
+    <value>Change password</value>
+  </data>
+  <data name="Menu_SignOut" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Menu_HostSignIn" xml:space="preserve">
+    <value>Host sign in</value>
+  </data>
 </root>

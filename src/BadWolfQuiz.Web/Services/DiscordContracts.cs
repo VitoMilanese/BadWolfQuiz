@@ -11,6 +11,7 @@ public enum DiscordMuteReason
 
 public sealed record DiscordGuildOption(string Id, string Name);
 public sealed record DiscordVoiceChannelOption(string Id, string Name);
+public sealed record DiscordTextChannelOption(string Id, string Name);
 public sealed record DiscordConnectionHealth(
     bool BotOnline,
     bool GuildAvailable,

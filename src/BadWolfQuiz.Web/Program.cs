@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Threading.RateLimiting;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Hubs;
@@ -32,6 +32,8 @@ builder.Services
     {
         options.Conventions.AuthorizeFolder("/Admin");
         options.Conventions.AuthorizePage("/Admin/MasterGames", "MasterHost");
+        options.Conventions.AuthorizePage("/Admin/QuestionInbox", "MasterHost");
+        options.Conventions.AuthorizePage("/Admin/Settings/QuestionBot", "MasterHost");
     })
     .AddViewLocalization()
     .AddDataAnnotationsLocalization(options =>
@@ -68,7 +70,7 @@ builder.Services.AddHttpClient<ResendClient>();
 builder.Services.Configure<ResendClientOptions>(options =>
     options.ApiToken = builder.Configuration["Resend:ApiToken"] ?? string.Empty);
 builder.Services.AddTransient<IResend, ResendClient>();
-builder.Services.AddHttpClient<DiscordQuestionSender>();
+builder.Services.AddScoped<DiscordQuestionSender>();
 builder.Services.AddHttpClient<DiscordOAuthService>();
 builder.Services.AddRateLimiter(options =>
 {
@@ -125,11 +127,19 @@ builder.Services.AddOptions<DiscordIntegrationOptions>()
     .Bind(builder.Configuration.GetSection(DiscordIntegrationOptions.SectionName))
     .Validate(options => options.IsValid, "Discord integration settings are invalid.")
     .ValidateOnStart();
+builder.Services.AddOptions<DiscordQuestionBotOptions>()
+    .Bind(builder.Configuration.GetSection(DiscordQuestionBotOptions.SectionName))
+    .Validate(options => options.IsValid, "Discord question bot settings are invalid.")
+    .ValidateOnStart();
 builder.Services.Configure<FooterOptions>(
     builder.Configuration.GetSection(FooterOptions.SectionName));
 builder.Services.AddOptions<MediaArchiveOptions>()
     .Bind(builder.Configuration.GetSection(MediaArchiveOptions.SectionName))
     .Validate(options => options.IsValid, "Media archive settings are invalid.")
+    .ValidateOnStart();
+builder.Services.AddOptions<UserQuestionOptions>()
+    .Bind(builder.Configuration.GetSection(UserQuestionOptions.SectionName))
+    .Validate(options => options.IsValid, "User question settings are invalid.")
     .ValidateOnStart();
 
 var defaultCulture = builder.Configuration[
@@ -211,6 +221,13 @@ builder.Services.AddHostedService(provider =>
 builder.Services.AddSingleton<DiscordMuteCoordinator>();
 builder.Services.AddHostedService<DiscordMuteTimeoutService>();
 builder.Services.AddScoped<DiscordConnectionRepository>();
+builder.Services.AddScoped<DiscordQuestionBotSettingsRepository>();
+builder.Services.AddScoped<UserQuestionCleanupService>();
+builder.Services.AddScoped<UserQuestionDeletionService>();
+builder.Services.AddSingleton<UserQuestionHistoryService>();
+builder.Services.AddSingleton<DiscordQuestionBotService>();
+builder.Services.AddHostedService(
+    sp => sp.GetRequiredService<DiscordQuestionBotService>());
 
 var app = builder.Build();
 
@@ -308,8 +325,13 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<QuizDbContext>();
     await DatabaseMigrationService.MigrateAsync(db);
+
     var archiveDb = scope.ServiceProvider.GetRequiredService<ArchiveDbContext>();
     await archiveDb.Database.MigrateAsync();
+
+    var questionCleanup = scope.ServiceProvider
+        .GetRequiredService<UserQuestionCleanupService>();
+    await questionCleanup.CleanupAsync();
 
     var seed = scope.ServiceProvider.GetRequiredService<QuizSeedService>();
     await seed.SeedAsync();

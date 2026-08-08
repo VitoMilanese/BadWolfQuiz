@@ -1,7 +1,8 @@
-﻿@using System.Globalization
+@using System.Globalization
 @using BadWolfQuiz.Web.Services
 @inject GameSettingsStore SettingsStore
 @inject CurrentHost CurrentHost
+@inject UserQuestionHistoryService UserQuestionHistory
 @inject IConfiguration Configuration
 @inject Microsoft.Extensions.Options.IOptions<SiteDefaultsOptions> SiteDefaults
 
@@ -18,6 +19,7 @@
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
     var discordInviteUrl = Configuration["Discord:InviteUrl"];
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var hasUserQuestionHistory = UserQuestionHistory.HasAny(Context.Request);
     var isMasterHost = isAuthenticated &&
         !string.IsNullOrWhiteSpace(Configuration["MasterHostId"]) &&
         string.Equals(
@@ -78,37 +80,56 @@
                 @if (isAuthenticated)
                 {
                     <a class="action-menu-item" asp-page="/Admin/Quizzes/Index">@Localizer["Menu_Quizzes"]</a>
-                    <a class="action-menu-item" asp-page="/Admin/Games/History">@Localizer["Menu_GameHistory"]</a>
-                    <a class="action-menu-item" asp-page="/Admin/Games/Statistics">@Localizer["Menu_PlayerStatistics"]</a>
-                    @if (isMasterHost)
-                    {
-                        <a class="action-menu-item" asp-page="/Admin/MasterGames">@Localizer["MasterGames_Title"]</a>
-                    }
-                    <a class="action-menu-item" asp-page="/Admin/Settings/Index">@Localizer["Menu_Settings"]</a>
-                    <a class="action-menu-item" asp-page="/Account/ChangePassword">@Localizer["Account_ChangePassword"]</a>
                 }
 
-                <a class="action-menu-item" asp-page="/Join/Index">@Localizer["Button_Join"]</a>
-                <a class="action-menu-item" asp-page="/PublicQuizzes">@Localizer["PublicQuizzes_Title"]</a>
+                <a class="action-menu-item" asp-page="/PublicQuizzes">@Localizer["Menu_PublicQuizzes"]</a>
                 @if (!string.IsNullOrWhiteSpace(discordInviteUrl))
                 {
                     <a class="action-menu-item" href="@discordInviteUrl" target="_blank" rel="noopener noreferrer">
                         @Localizer["Menu_PlayWithUs"]
                     </a>
                 }
-                <a class="action-menu-item" asp-page="/Faq">@Localizer["Menu_FAQ"]</a>
+                <a class="action-menu-item" asp-page="/Join/Index">@Localizer["Menu_Join"]</a>
+
+                @if (isAuthenticated)
+                {
+                    <a class="action-menu-item" asp-page="/Admin/Games/History">@Localizer["Menu_GameHistory"]</a>
+                    <a class="action-menu-item" asp-page="/Admin/Games/Statistics">@Localizer["Menu_PlayerStatistics"]</a>
+                    @if (isMasterHost)
+                    {
+                        <a class="action-menu-item" asp-page="/Admin/MasterGames">@Localizer["Menu_ActiveGames"]</a>
+                    }
+                }
+
                 <a class="action-menu-item" asp-page="/AskQuestion">@Localizer["Menu_AskQuestion"]</a>
+                @if (hasUserQuestionHistory)
+                {
+                    <a class="action-menu-item" asp-page="/MyQuestions">@Localizer["Menu_MyQuestions"]</a>
+                }
+                @if (isMasterHost)
+                {
+                    <a class="action-menu-item" asp-page="/Admin/QuestionInbox">
+                        @Localizer["Menu_QuestionInbox"]
+                    </a>
+                }
+                <a class="action-menu-item" asp-page="/Faq">@Localizer["Menu_FAQ"]</a>
+
+                @if (isAuthenticated)
+                {
+                    <a class="action-menu-item" asp-page="/Admin/Settings/Index">@Localizer["Menu_Settings"]</a>
+                    <a class="action-menu-item" asp-page="/Account/ChangePassword">@Localizer["Menu_ChangePassword"]</a>
+                }
 
                 <div class="action-menu-separator"></div>
                 @if (isAuthenticated)
                 {
                     <form method="post" asp-page="/Account/Logout">
-                        <button type="submit" class="action-menu-item">@Localizer["Account_SignOut"]</button>
+                        <button type="submit" class="action-menu-item">@Localizer["Menu_SignOut"]</button>
                     </form>
                 }
                 else
                 {
-                    <a class="action-menu-item" asp-page="/Account/Login">@Localizer["Account_HostSignIn"]</a>
+                    <a class="action-menu-item" asp-page="/Account/Login">@Localizer["Menu_HostSignIn"]</a>
                 }
             </div>
         </details>

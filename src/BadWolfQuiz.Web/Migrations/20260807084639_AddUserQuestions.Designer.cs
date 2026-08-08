@@ -3,6 +3,7 @@ using System;
 using BadWolfQuiz.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BadWolfQuiz.Web.Migrations
 {
     [DbContext(typeof(QuizDbContext))]
-    partial class QuizDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260807084639_AddUserQuestions")]
+    partial class AddUserQuestions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.29");
@@ -64,32 +67,6 @@ namespace BadWolfQuiz.Web.Migrations
                     b.HasIndex("QuizQuestionId");
 
                     b.ToTable("AnswerContentBlocks");
-                });
-
-            modelBuilder.Entity("BadWolfQuiz.Web.Models.DiscordQuestionBotSettings", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ChannelId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ChannelName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("GuildId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("GuildName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DiscordQuestionBotSettings");
                 });
 
             modelBuilder.Entity("BadWolfQuiz.Web.Models.FinalAnswerContentBlock", b =>
@@ -747,17 +724,27 @@ namespace BadWolfQuiz.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Answer")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("AnsweredAtUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("TEXT");
+
+                    b.Property<ulong?>("DiscordMessageId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("PublicToken")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("SenderName")
+                    b.Property<string>("Question")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                    b.Property<string>("SenderName")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -766,35 +753,6 @@ namespace BadWolfQuiz.Web.Migrations
                         .IsUnique();
 
                     b.ToTable("UserQuestions");
-                });
-
-            modelBuilder.Entity("BadWolfQuiz.Web.Models.UserQuestionMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AuthorType")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<ulong?>("DiscordMessageId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("UserQuestionId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserQuestionId");
-
-                    b.ToTable("UserQuestionMessages");
                 });
 
             modelBuilder.Entity("BadWolfQuiz.Web.Models.AnswerContentBlock", b =>
@@ -1011,17 +969,6 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Navigation("Round");
                 });
 
-            modelBuilder.Entity("BadWolfQuiz.Web.Models.UserQuestionMessage", b =>
-                {
-                    b.HasOne("BadWolfQuiz.Web.Models.UserQuestion", "UserQuestion")
-                        .WithMany("Messages")
-                        .HasForeignKey("UserQuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("UserQuestion");
-                });
-
             modelBuilder.Entity("BadWolfQuiz.Web.Models.GamePlayer", b =>
                 {
                     b.Navigation("Results");
@@ -1080,11 +1027,6 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Navigation("Categories");
 
                     b.Navigation("Rows");
-                });
-
-            modelBuilder.Entity("BadWolfQuiz.Web.Models.UserQuestion", b =>
-                {
-                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

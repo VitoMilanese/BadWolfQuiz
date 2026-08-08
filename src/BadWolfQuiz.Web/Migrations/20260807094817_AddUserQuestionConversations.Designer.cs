@@ -3,6 +3,7 @@ using System;
 using BadWolfQuiz.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BadWolfQuiz.Web.Migrations
 {
     [DbContext(typeof(QuizDbContext))]
-    partial class QuizDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260807094817_AddUserQuestionConversations")]
+    partial class AddUserQuestionConversations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.29");
@@ -64,32 +67,6 @@ namespace BadWolfQuiz.Web.Migrations
                     b.HasIndex("QuizQuestionId");
 
                     b.ToTable("AnswerContentBlocks");
-                });
-
-            modelBuilder.Entity("BadWolfQuiz.Web.Models.DiscordQuestionBotSettings", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ChannelId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ChannelName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("GuildId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("GuildName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DiscordQuestionBotSettings");
                 });
 
             modelBuilder.Entity("BadWolfQuiz.Web.Models.FinalAnswerContentBlock", b =>
@@ -750,6 +727,9 @@ namespace BadWolfQuiz.Web.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<ulong?>("DiscordMessageId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("PublicToken")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -779,9 +759,6 @@ namespace BadWolfQuiz.Web.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("TEXT");
-
-                    b.Property<ulong?>("DiscordMessageId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Text")
                         .IsRequired()

@@ -1,68 +1,116 @@
-using System.Net.Http.Json;
+using BadWolfQuiz.Web.Localization;
+using Discord;
+using Discord.WebSocket;
+using Microsoft.Extensions.Localization;
 
 namespace BadWolfQuiz.Web.Services;
 
 public sealed class DiscordQuestionSender(
-    HttpClient httpClient,
+    DiscordQuestionBotService bot,
+    DiscordQuestionBotSettingsRepository settingsRepository,
     IConfiguration configuration,
+    IStringLocalizer<SharedResource> localizer,
     ILogger<DiscordQuestionSender> logger)
 {
-    public async Task<bool> SendAsync(
+    public async Task<ulong?> SendAsync(
+        int questionId,
         string? senderName,
-        string question,
+        string message,
+        bool isFirstMessage,
         CancellationToken cancellationToken = default)
     {
-        var webhookUrl = configuration["Discord:QuestionWebhookUrl"];
-        if (!Uri.TryCreate(webhookUrl, UriKind.Absolute, out var webhookUri) ||
-            !string.Equals(webhookUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ||
-            !string.Equals(webhookUri.Host, "discord.com", StringComparison.OrdinalIgnoreCase))
+        var settings =
+            await settingsRepository.GetAsync(cancellationToken);
+
+        if (settings is null ||
+            string.IsNullOrWhiteSpace(settings.GuildId) ||
+            string.IsNullOrWhiteSpace(settings.ChannelId))
         {
-            logger.LogWarning("The Discord question webhook is not configured.");
-            return false;
+            logger.LogWarning(
+                "The Discord question bot channel is not configured.");
+
+            return null;
+        }
+
+        if (bot.Client?.ConnectionState != ConnectionState.Connected)
+        {
+            logger.LogWarning(
+                "The Discord question bot is not connected.");
+
+            return null;
+        }
+
+        if (!ulong.TryParse(settings.GuildId, out var guildId) ||
+            !ulong.TryParse(settings.ChannelId, out var channelId))
+        {
+            logger.LogWarning(
+                "The Discord question bot channel configuration is invalid.");
+
+            return null;
+        }
+
+        var guild = bot.Client.GetGuild(guildId);
+        var channel = guild?.GetTextChannel(channelId);
+
+        if (channel is null)
+        {
+            logger.LogWarning(
+                "The configured Discord question channel is unavailable.");
+
+            return null;
         }
 
         var author = string.IsNullOrWhiteSpace(senderName)
-            ? "Anonymous"
+            ? localizer["DiscordQuestion_Anonymous"].Value
             : senderName.Trim();
-        var content = $"**Question from {author}:**\n{question.Trim()}";
+
+        var heading = localizer["DiscordQuestion_NewMessageFrom", author].Value;
+        var content = $"**{heading}**\n{message.Trim()}";
+
+        var publicBaseUrl = configuration["Game:PublicBaseUrl"]?.TrimEnd('/');
+
+        if (string.IsNullOrWhiteSpace(publicBaseUrl))
+        {
+            logger.LogWarning("Game:PublicBaseUrl is not configured.");
+            return null;
+        }
+
+        var replyUrl =
+            $"{publicBaseUrl}/Admin/QuestionInbox?questionId={questionId}";
+
+        var componentBuilder = new ComponentBuilder()
+            .WithButton(
+                localizer["DiscordQuestion_Reply"].Value,
+                style: ButtonStyle.Link,
+                url: replyUrl);
+
+        if (isFirstMessage)
+        {
+            componentBuilder.WithButton(
+                localizer["Button_Delete"].Value,
+                customId: $"question-delete:{questionId}",
+                style: ButtonStyle.Danger);
+        }
+
+        var components = componentBuilder.Build();
 
         try
         {
-            using var response = await httpClient.PostAsJsonAsync(
-                webhookUri,
-                new
-                {
-                    content,
-                    allowed_mentions = new { parse = Array.Empty<string>() }
-                },
-                cancellationToken);
+            var discordMessage = await channel.SendMessageAsync(
+                text: content,
+                components: components,
+                allowedMentions: AllowedMentions.None);
 
-            if (response.IsSuccessStatusCode)
-            {
-                return true;
-            }
-
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-            if (responseBody.Length > 500)
-            {
-                responseBody = responseBody[..500];
-            }
-
+            return discordMessage.Id;
+        }
+        catch (Exception exception)
+        {
             logger.LogWarning(
-                "Discord rejected a question with status code {StatusCode}: {ResponseBody}",
-                response.StatusCode,
-                responseBody);
-            return false;
-        }
-        catch (HttpRequestException exception)
-        {
-            logger.LogWarning(exception, "Failed to send a question to Discord.");
-            return false;
-        }
-        catch (TaskCanceledException exception) when (!cancellationToken.IsCancellationRequested)
-        {
-            logger.LogWarning(exception, "The Discord webhook request timed out.");
-            return false;
+                exception,
+                "Failed to send question {QuestionId} to Discord.",
+                questionId);
+
+            return null;
         }
     }
 }

@@ -268,32 +268,44 @@ public sealed class LobbyModel(
             return value;
         }
 
-        if (uri.AbsolutePath.StartsWith("/embed/", StringComparison.OrdinalIgnoreCase))
-        {
-            return QueryHelpers.AddQueryString(value, "enablejsapi", "1");
-        }
-
         string? videoId = null;
 
         if (uri.Host.EndsWith("youtu.be", StringComparison.OrdinalIgnoreCase))
         {
-            videoId = uri.AbsolutePath.Trim('/');
+            videoId = uri.AbsolutePath
+                .Trim('/')
+                .Split('/', StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault();
         }
-        else if (uri.Host.Contains("youtube.com", StringComparison.OrdinalIgnoreCase))
+        else if (uri.Host.EndsWith("youtube.com", StringComparison.OrdinalIgnoreCase) ||
+                 uri.Host.EndsWith("youtube-nocookie.com", StringComparison.OrdinalIgnoreCase))
         {
-            videoId = uri.Query
-                .TrimStart('?')
-                .Split('&', StringSplitOptions.RemoveEmptyEntries)
-                .Select(item => item.Split('=', 2))
-                .FirstOrDefault(item =>
-                    item.Length == 2 &&
-                    string.Equals(item[0], "v", StringComparison.OrdinalIgnoreCase))?
-                .ElementAtOrDefault(1);
+            var pathSegments = uri.AbsolutePath
+                .Trim('/')
+                .Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            if (pathSegments.Length >= 2 &&
+                (string.Equals(pathSegments[0], "embed", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(pathSegments[0], "shorts", StringComparison.OrdinalIgnoreCase)))
+            {
+                videoId = pathSegments[1];
+            }
+            else
+            {
+                videoId = uri.Query
+                    .TrimStart('?')
+                    .Split('&', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(item => item.Split('=', 2))
+                    .FirstOrDefault(item =>
+                        item.Length == 2 &&
+                        string.Equals(item[0], "v", StringComparison.OrdinalIgnoreCase))?
+                    .ElementAtOrDefault(1);
+            }
         }
 
         return string.IsNullOrWhiteSpace(videoId)
             ? value
-            : $"https://www.youtube.com/embed/{Uri.EscapeDataString(videoId)}?enablejsapi=1";
+            : $"https://www.youtube-nocookie.com/embed/{Uri.EscapeDataString(videoId)}?enablejsapi=1";
     }
 
     public async Task<IActionResult> OnPostUpdateSettingsAsync(
@@ -771,8 +783,6 @@ public sealed class LobbyModel(
                         question.CanRevealClue
                     },
                     cancellationToken);
-
-            await BroadcastTimerAsync(game, cancellationToken);
         }
         catch (GameRuleViolationException)
         {

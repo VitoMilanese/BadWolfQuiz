@@ -4,12 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Localization;
+using BadWolfQuiz.Web.Data;
+using BadWolfQuiz.Web.Models;
 
 namespace BadWolfQuiz.Web.Pages;
 
 [EnableRateLimiting("discord-questions")]
 public sealed class AskQuestionModel(
+    QuizDbContext db,
     DiscordQuestionSender questionSender,
+    UserQuestionHistoryService questionHistory,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty]
@@ -26,17 +30,60 @@ public sealed class AskQuestionModel(
         if (SenderName?.Length > 80 ||
             Question.Length is < 1 or > 1500)
         {
-            ModelState.AddModelError(string.Empty, localizer["AskQuestion_Invalid"].Value);
+            ModelState.AddModelError(
+                string.Empty,
+                localizer["AskQuestion_Invalid"].Value);
+
             return Page();
         }
 
-        if (!await questionSender.SendAsync(SenderName, Question, cancellationToken))
+        var now = DateTimeOffset.UtcNow;
+
+        var userMessage = new UserQuestionMessage
         {
-            ModelState.AddModelError(string.Empty, localizer["AskQuestion_Failed"].Value);
+            AuthorType = UserQuestionAuthorType.User,
+            Text = Question,
+            CreatedAtUtc = now
+        };
+
+        var userQuestion = new UserQuestion
+        {
+            PublicToken = Guid.NewGuid().ToString("N"),
+            SenderName = SenderName,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
+            Messages = [userMessage]
+        };
+
+        db.UserQuestions.Add(userQuestion);
+        await db.SaveChangesAsync(cancellationToken);
+
+        var discordMessageId = await questionSender.SendAsync(
+            userQuestion.Id,
+            SenderName,
+            Question,
+            isFirstMessage: true,
+            cancellationToken: cancellationToken);
+
+        if (discordMessageId is null)
+        {
+            db.UserQuestions.Remove(userQuestion);
+            await db.SaveChangesAsync(cancellationToken);
+
+            ModelState.AddModelError(
+                string.Empty,
+                localizer["AskQuestion_Failed"].Value);
+
             return Page();
         }
 
-        TempData["SuccessMessage"] = localizer["AskQuestion_Sent"].Value;
-        return RedirectToPage();
+        userMessage.DiscordMessageId = discordMessageId.Value;
+        await db.SaveChangesAsync(cancellationToken);
+
+        questionHistory.Add(Request, Response, userQuestion.PublicToken);
+
+        return RedirectToPage(
+            "/Question",
+            new { token = userQuestion.PublicToken });
     }
 }
