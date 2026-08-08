@@ -16,15 +16,20 @@ This directory contains product vision, gameplay architecture, feature specifica
 ## Features
 
 - [Quiz and question editing](features/quiz-editor.md)
+- [Quiz import and export](features/quiz-import-export.md)
 - [Wagering and active player rules](features/wagering.md)
 - [Question judging](features/question-judging.md)
+- [Four-clue questions](features/four-clue-questions.md)
 - [Final question](features/final-question.md)
 - [Answer history editing](features/answer-history-editing.md)
 - [Game settings](features/game-settings.md)
 - [Player and host cards](features/player-and-host-cards.md)
 - [QR player join and player-device behavior](features/qr-player-join.md)
 - [Active game recovery](features/active-game-recovery.md)
+- [Game history](features/game-history.md)
+- [Host accounts](features/host-accounts.md)
 - [Discord voice moderation](features/discord-voice-moderation.md)
+- [User feedback conversations](features/user-feedback-conversations.md)
 
 ## Documentation principles
 

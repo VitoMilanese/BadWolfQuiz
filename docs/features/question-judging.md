@@ -29,7 +29,7 @@ error instead of a full-page reload.
 
 A four-clue question is a regular buzzer question with a different presentation and scoring rule. Its immutable definition contains exactly four ordered clues. A clue may be text, an image, or audio; video and YouTube blocks are not supported.
 
-The first two clues are revealed when the question opens. The host may reveal the third and fourth clues one at a time. The number of revealed clues is part of the recoverable runtime state.
+The first two clues are revealed when the question opens. The third and fourth clues are revealed one at a time, either manually by the host or automatically when the question timer expires. Every successful clue reveal starts a new full question-timer interval. The number of revealed clues is part of the recoverable runtime state. After the final clue has been revealed, a later timer expiration follows the normal unresolved-question timeout flow.
 
 - A correct answer with two visible clues awards 100% of the question value.
 - A correct answer with three visible clues awards 50%.
@@ -63,7 +63,7 @@ Attempts remain attached to the runtime question. Repeated judging of the same p
 
 The current host UI presents immutable question content while a question is active and immutable answer content after the question is resolved. The board remains hidden until the host closes the answer presentation. Player score lists remain visible and receive real-time updates.
 
-The host still chooses an eligible player and judges that player's answer. A future integration will replace this temporary player selection with the buzzer winner and timed answer phases.
+For regular buzzer questions, the answering player is established by the buzzer winner and the Engine-controlled timed answer phase. The host judges that player's answer while the question remains active.
 
 ## Target question presentation flow
 
@@ -151,7 +151,7 @@ round because there is no leaderboard to present or active player to select.
 
 ## Runtime timer orchestration
 
-The initial Engine defaults are 30 seconds for the buzzer window and 10 seconds for an individual answer. These constants will be replaced by global and per-game settings.
+The buzzer-window and individual-answer durations come from the effective game settings, which are copied from global defaults when the game is created and may be overridden for that game.
 
 Activating the buzzer starts the buzzer timer. A valid buzzer claim pauses that timer and starts the answer timer. If the answer timer expires, the Engine records an incorrect answer and resumes the buzzer timer with the exact time that remained when the player claimed the buzzer.
 

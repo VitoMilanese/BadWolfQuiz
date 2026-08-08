@@ -5,7 +5,8 @@
 Проєкт складається з двох основних частин:
 
 - редактора квізів;
-- real-time ігрової платформи для ведучого та гравців.
+- real-time ігрової платформи для ведучого та гравців;
+- системи зворотного зв'язку між користувачами та розробником.
 
 Детальні специфікації та архітектурні рішення зберігаються в [docs](docs/README.md).
 
@@ -84,7 +85,7 @@ Each question contains independent:
 - Question blocks
 - Answer blocks
 
-Questions may use the standard presentation or the four-clue presentation. A four-clue question contains exactly four text, image, or audio clues: two are visible initially and the host may reveal the remaining clues one at a time. Correct answers are worth 100%, 50%, or 25% of the question value depending on how many clues were revealed; an incorrect answer always deducts the full value.
+Questions may use the standard presentation or the four-clue presentation. A four-clue question contains exactly four text, image, or audio clues: two are visible initially and the remaining clues are revealed one at a time either by the host or automatically when the question timer expires. Every successful clue reveal starts a new full question-timer interval. Correct answers are worth 100%, 50%, or 25% of the question value depending on how many clues were revealed; an incorrect answer always deducts the full value. See [`docs/features/four-clue-questions.md`](docs/features/four-clue-questions.md) for the complete flow.
 
 The quiz also has a dedicated final-question editor with independent question and answer blocks.
 
@@ -123,6 +124,7 @@ Currently implemented:
 - Compact player-page navigation and mobile screen-wake protection while the buzzer page is open
 - Near-simultaneous buzzer results with millisecond differences
 - Synchronized buzzer and answer countdown timers displayed as whole seconds
+- Four-clue timer progression with real-time clue reveal and timer restart after each new clue
 - Persistent global game defaults and per-game settings editable in the lobby or during regular play
 - Compact icon-only player-card controls
 - Built-in player avatars and uploaded player images, restored by player name
@@ -168,6 +170,23 @@ for setup and operational details.
 
 ---
 
+## User Feedback
+
+Users can contact the developer to ask questions, suggest ideas, report problems, or leave feedback. Submissions are stored as persistent conversation threads instead of one-time question/answer records.
+
+- Multiple user and developer messages per conversation
+- Local browser history for returning to previously submitted conversations without requiring an account
+- **My messages** page for reopening and deleting locally saved conversations
+- Developer inbox for reviewing, replying to, and deleting user conversations
+- Discord bot notifications for new user messages
+- Discord actions and cleanup tied to individual conversation messages
+- Responsive conversation UI for light and dark themes
+- Privacy and cookie information for locally stored conversation history
+
+Question notifications use the configured Discord bot; the legacy question webhook configuration is no longer used. See [`docs/features/user-feedback-conversations.md`](docs/features/user-feedback-conversations.md) for the complete workflow.
+
+---
+
 ## Media
 
 Implemented:
@@ -179,6 +198,9 @@ Implemented:
 - Preview inside editor
 - Caption support
 - Stored file preview
+- Coordinated audio, video, and YouTube playback so starting one media source pauses competing playback
+- YouTube auto-expand/auto-collapse behavior preserved during coordinated playback
+- Privacy-enhanced YouTube embeds using `youtube-nocookie.com` while accepting normal supported YouTube URLs from hosts
 
 ---
 
@@ -213,6 +235,7 @@ The configured port must be forwarded by the router and allowed by the firewall.
 - Server-side validation
 - Localized UI
 - Razor Pages architecture
+- Server-authoritative runtime game model for timer, clue progression, judging, scoring, and final-game state
 
 ---
 

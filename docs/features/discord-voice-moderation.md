@@ -135,6 +135,14 @@ and select a server and standard voice channel. Only servers where the user can
 manage the server and where the bot is present are offered. The dialog reports
 bot, server, channel, and permission health.
 
+The dialog keeps its configuration actions in one compact action area. On desktop,
+the Discord connection/install action, automatic-mute **Save** action, and close
+action remain on one row when space allows. The page-level heading and redundant
+**Back** action are omitted because the content is already hosted inside a dialog.
+The dialog is sized to its actual content so it does not introduce unnecessary
+empty space or scrolling, while the action layout remains responsive on smaller
+screens.
+
 OAuth access tokens and CSRF state are kept only in short-lived server memory.
 Only stable Discord IDs, display names, and the automatic-media preference are
 stored in the application database.
