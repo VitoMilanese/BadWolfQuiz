@@ -151,10 +151,13 @@ At the beginning of every later round, the Engine transfers the right to select 
 ### Completing a round early
 
 When another round exists, the host action menu can complete the current round
-without opening every remaining question. The Engine force-resolves every
-unresolved question in the current round, closes any buzzer state, clears the
-answering player, and stops both timers. No score is awarded or deducted for the
-skipped questions.
+without opening every remaining question. Because this action skips all
+unresolved questions in the round, the host must confirm it before the action
+is submitted.
+
+The Engine force-resolves every unresolved question in the current round,
+closes any buzzer state, clears the answering player, and stops both timers.
+No score is awarded or deducted for the skipped questions.
 
 With connected players, the normal inter-round standings remain visible before
 the host advances. In an empty game, the session advances directly to the next
