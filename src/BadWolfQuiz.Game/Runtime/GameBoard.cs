@@ -265,7 +265,8 @@ public sealed class RuntimeQuestion
     internal QuestionAnswerAttempt JudgeAnswer(
         GamePlayerId playerId,
         bool isCorrect,
-        DateTimeOffset judgedAtUtc)
+        DateTimeOffset judgedAtUtc,
+        int? correctAnswerValue = null)
     {
         if (Status is not RuntimeQuestionStatus.Selected and
             not RuntimeQuestionStatus.Active)
@@ -289,8 +290,14 @@ public sealed class RuntimeQuestion
         var value = IsSpecial
             ? Wager?.Amount ?? throw new GameRuleViolationException(
                 "A wager question cannot be judged before its wager is accepted.")
-            : CorrectAnswerValue;
-        var scoreDelta = isCorrect ? value : IsSpecial ? -value : -Points;
+            : correctAnswerValue ?? CorrectAnswerValue;
+
+        var scoreDelta = isCorrect
+            ? value
+            : IsSpecial
+                ? -value
+                : -Points;
+
         var attempt = new QuestionAnswerAttempt(
             playerId,
             isCorrect,
