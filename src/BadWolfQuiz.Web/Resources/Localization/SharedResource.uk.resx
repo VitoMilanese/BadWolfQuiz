@@ -2466,4 +2466,10 @@
   <data name="GameBoard_ForceAdvanceRoundConfirm" xml:space="preserve">
     <value>Ви впевнені, що хочете завершити поточний раунд і перейти до наступного?</value>
   </data>
+  <data name="FinalQuestion_Advance" xml:space="preserve">
+    <value>Перейти до фінального питання</value>
+  </data>
+  <data name="FinalQuestion_ForceAdvanceConfirm" xml:space="preserve">
+    <value>Ви впевнені, що хочете пропустити решту питань і перейти до фінального питання?</value>
+  </data>
 </root>

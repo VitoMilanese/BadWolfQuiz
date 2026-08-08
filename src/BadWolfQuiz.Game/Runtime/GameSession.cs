@@ -740,6 +740,30 @@ public sealed class GameSession
         return CreateStandings(CreateCurrentResultMetrics());
     }
 
+    public FinalQuestion ForceAdvanceToFinalQuestion()
+    {
+        EnsureRunning();
+
+        if (Quiz.FinalQuestion is null)
+        {
+            throw new GameRuleViolationException(
+                "This quiz does not contain a final question.");
+        }
+
+        foreach (var question in Board.Questions.Where(question =>
+                     question.Status != RuntimeQuestionStatus.Resolved))
+        {
+            question.ForceResolve();
+        }
+
+        CurrentRoundIndex = Quiz.Rounds.Count - 1;
+        CaptureRoundStartScores();
+        Timer.Stop();
+        AnswerTimer.Stop();
+
+        return StartFinalQuestion();
+    }
+
     public FinalQuestion StartFinalQuestion()
     {
         EnsureRunning();

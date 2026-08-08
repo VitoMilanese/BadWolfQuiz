@@ -670,6 +670,24 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public FinalQuestion? ForceAdvanceToFinalQuestion(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            var finalQuestion = game.Session.ForceAdvanceToFinalQuestion();
+            game.MarkPersistenceChanged();
+            return finalQuestion;
+        }
+    }
+
     public FinalQuestion? StartFinalQuestion(string publicCode)
     {
         var game = Find(publicCode);
