@@ -59,8 +59,15 @@ Lock and periodically reacquires it if the browser releases it. A media-based
 fallback starts after player interaction for Safari and browsers where the
 standard API is unavailable.
 
-Wake prevention is a best-effort browser feature rather than a server guarantee.
-Trusted HTTPS provides the most reliable behavior. Safari may require one or
-more touches before its media fallback becomes active, especially over plain
-HTTP, and the operating system can still override the page in low-power or
-similar restricted modes.
+Unblocking does not add a disconnected card immediately. The next successful
+join restores the original player record, including its identifier, score,
+avatar, and uploaded-image selection. The returning player remains pending until
+the host approves the rejoin.
+
+Rejoin approval is propagated in real time. The host player list updates without
+a full page reload, and the approved player is immediately notified that access
+has been restored.
+
+The browser clears revoked player access when it receives the removal event so
+the next join submits fresh credentials instead of following a stale player-page
+URL.
