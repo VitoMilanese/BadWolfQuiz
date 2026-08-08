@@ -55,9 +55,27 @@ For a regular question, `Automatic` activates the buzzer and starts the shared b
 
 For a wager question, `Automatic` starts the answering player's timer when the question is revealed. `Manual` presents a **Start timer** host control.
 
+## Answer reward decay
+
+Regular-question answer rewards have an optional decay rule configured by:
+
+- `AnswerRewardDecayEnabled`;
+- `AnswerRewardDecayStartAfterSeconds` (5-45 seconds, default 10);
+- `AnswerRewardDecayMinimumPercent` (10-90%, default 25).
+
+When enabled, a correct-answer reward remains at its current full value for the
+configured delay and then decreases linearly until the configured minimum is
+reached at 1 displayed second remaining. Incorrect-answer penalties are not
+reduced. The rule applies only to the individual answer timer of a regular
+buzzer question; wager and final questions are excluded.
+
+For four-clue questions, the current clue-dependent correct-answer value is the
+base value before decay is applied. Returning to the buzzer phase restores that
+base value, and a later buzzer winner starts a new decay window.
+
 ## Ownership and enforcement
 
-The game-specific settings snapshot is part of the runtime session configuration. The Engine currently accepts an immutable `GameSessionSettings` snapshot containing both timer durations and both phase start modes.
+The game-specific settings snapshot is part of the runtime session configuration. The Engine currently accepts an immutable `GameSessionSettings` snapshot containing timer durations, phase start modes, final-player eligibility, and answer-reward-decay configuration.
 
 The Game Engine interprets and enforces gameplay settings. The host and player UIs render the resulting state and submit permitted commands; they are not authoritative sources for settings or timing rules.
 
@@ -82,7 +100,7 @@ setting to the inherited global default.
 
 ## Implementation status
 
-The Engine-level settings snapshot is implemented. It configures buzzer and answer durations, automatically opens the regular-question buzzer when requested, supports explicit start of a wager answer timer in manual mode, and controls whether negative-score players participate in the final question.
+The Engine-level settings snapshot is implemented. It configures buzzer and answer durations, automatically opens the regular-question buzzer when requested, supports explicit start of a wager answer timer in manual mode, controls whether negative-score players participate in the final question, and enforces configurable answer reward decay for regular buzzer questions.
 
 Global defaults are persisted per host in `App_Data/game-settings.json`, keyed by
 the authenticated host identifier. One host cannot read or overwrite another

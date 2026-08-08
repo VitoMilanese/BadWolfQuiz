@@ -10,7 +10,7 @@ A regular question may receive attempts from multiple players.
 
 For each judged attempt:
 
-- a correct answer adds the question point value;
+- a correct answer adds the currently available correct-answer value, including optional answer reward decay;
 - an incorrect answer subtracts the question point value;
 - a player cannot be judged more than once for the same question;
 - an incorrect attempt leaves the question open for another eligible player;
@@ -18,7 +18,7 @@ For each judged attempt:
 
 When a player answers correctly, that player becomes the active player. If the current active player answers correctly, the active player remains unchanged.
 
-The host can explicitly resolve a regular question with no correct answer. In that case no additional score is applied and the existing active player keeps the right to select the next question.
+The host can explicitly resolve a regular question with no correct answer while the buzzer phase is available. The control is hidden while a specific player is answering. In either explicit or automatic no-correct-answer resolution, no additional score is applied and the existing active player keeps the right to select the next question. If an incorrect answer or timeout leaves no eligible players who can still buzz, the Engine performs this resolution automatically.
 
 Question selection is submitted asynchronously. If the Engine rejects the
 selection because the board state changed or the question is no longer
@@ -35,6 +35,8 @@ The first two clues are revealed when the question opens. The third and fourth c
 - A correct answer with three visible clues awards 50%.
 - A correct answer with four visible clues awards 25%.
 - An incorrect answer always deducts 100% of the question value.
+
+When answer reward decay is enabled, the clue-dependent correct-answer value above becomes the base value for decay during an individual player's answer timer. The incorrect-answer penalty remains 100% of the original question value.
 
 Four-clue questions cannot become wager questions, including through random wager selection.
 
@@ -64,6 +66,8 @@ Attempts remain attached to the runtime question. Repeated judging of the same p
 The current host UI presents immutable question content while a question is active and immutable answer content after the question is resolved. The board remains hidden until the host closes the answer presentation. Player score lists remain visible and receive real-time updates.
 
 For regular buzzer questions, the answering player is established by the buzzer winner and the Engine-controlled timed answer phase. The host judges that player's answer while the question remains active.
+
+After correct, incorrect, and timeout outcomes, the host briefly sees the answering player and actual applied score delta over the player-card area. This transient feedback does not delay the authoritative transition to the next gameplay state.
 
 ## Target question presentation flow
 
@@ -100,12 +104,20 @@ When a player wins the buzzer:
 
 The host may judge the answer before the answer timer expires. If the answer timer expires before the player gives a correct answer, the Engine records an incorrect answer automatically.
 
+When answer reward decay is enabled, the available correct-answer reward remains
+at its current full value for the configured delay and then decreases linearly
+during this individual answer phase. The minimum configured percentage is reached
+at 1 displayed second remaining. The rounded value shown to the host is the same
+whole-point value used when a correct answer is judged. Incorrect answers and
+timeouts continue to apply the full normal penalty.
+
 After an incorrect answer:
 
 - the question remains visible;
 - the player is excluded from further attempts for that question;
 - the buzzer becomes available to the remaining eligible players;
-- the buzzer window timer resumes from the exact duration that remained when the previous player buzzed.
+- the buzzer window timer resumes from the exact duration that remained when the previous player buzzed;
+- any decayed correct-answer reward is reset to the normal available value until another player wins the buzzer.
 
 The question moves to answer presentation when any of the following occurs:
 
@@ -153,7 +165,7 @@ round because there is no leaderboard to present or active player to select.
 
 The buzzer-window and individual-answer durations come from the effective game settings, which are copied from global defaults when the game is created and may be overridden for that game.
 
-Activating the buzzer starts the buzzer timer. A valid buzzer claim pauses that timer and starts the answer timer. If the answer timer expires, the Engine records an incorrect answer and resumes the buzzer timer with the exact time that remained when the player claimed the buzzer.
+Activating the buzzer starts the buzzer timer. A valid buzzer claim pauses that timer and starts the answer timer. If answer reward decay is enabled, only this player-owned answer interval affects the available correct-answer reward. If the answer timer expires, the Engine records an incorrect answer and resumes the buzzer timer with the exact time that remained when the player claimed the buzzer, unless no eligible players remain; in that case the question moves directly to answer presentation.
 
 If the buzzer timer expires while no player is answering, the Engine resolves the question without a correct answer and moves to the answer presentation.
 

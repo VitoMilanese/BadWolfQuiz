@@ -93,6 +93,23 @@ The timer state broadcast after a reveal must correspond to the newly started
 full interval so that host and player countdowns remain synchronized with the
 server.
 
+The displayed correct-answer value is also updated in place when a clue reveal
+changes the four-clue base reward. The value change uses the same short emphasis
+animation used by answer reward decay.
+
+## Answer reward decay
+
+Four-clue questions participate in answer reward decay because they are regular
+buzzer questions. Decay is applied only during an individual player answer
+timer, after the clue-dependent value has been determined. Two visible clues use
+100% of the question value as the base, three use 50%, and four use 25%.
+
+An incorrect answer always deducts 100% of the original question value. Returning
+to the buzzer phase removes any player-specific decay and restores the current
+clue-dependent base reward. The **Reveal clue** action is hidden while a player
+is answering and becomes available again only in a buzzer-phase state where a
+clue can still be revealed.
+
 ## Timer display
 
 Client countdowns display remaining whole seconds using ceiling semantics. If a
@@ -152,6 +169,9 @@ At minimum, tests and regression checks should cover:
 - clue visibility updates without a page reload;
 - the displayed correct-answer value updates without a page reload when the
   third or fourth clue is revealed;
+- answer reward decay uses the current clue-dependent value as its base and resets when returning to the buzzer phase;
+- incorrect answers continue to deduct the full original question value while decay is enabled;
+- the reveal action is hidden while a player owns the answer timer;
 - the reveal action is unavailable after the final clue;
 - expiration after the final clue follows the normal unresolved-question timeout;
 - host and player timer displays use consistent ceiling semantics;
