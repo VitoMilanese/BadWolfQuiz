@@ -603,6 +603,16 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostForceAdvanceToFinalQuestionAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return await ExecuteFinalHostCommand(
+            id,
+            game => sessionRegistry.ForceAdvanceToFinalQuestion(game.PublicCode),
+            cancellationToken);
+    }
+
     public async Task<IActionResult> OnPostStartFinalQuestionAsync(
         Guid id,
         CancellationToken cancellationToken)
