@@ -2463,4 +2463,7 @@
   <data name="GameSettings_AnswerRewardDecayMinimumHint" xml:space="preserve">
     <value>Percentuale della ricompensa disponibile rimanente a 1 secondo (10–90%).</value>
   </data>
+  <data name="GameBoard_ForceAdvanceRoundConfirm" xml:space="preserve">
+    <value>Sei sicuro di voler terminare il round corrente e passare a quello successivo?</value>
+  </data>
 </root>

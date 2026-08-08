@@ -38,10 +38,12 @@
 
                     @if (Model.Game.Session.HasNextRound)
                     {
-                        <form method="post"
+                        <form id="force-advance-round-form"
+                                method="post"
                                 asp-page-handler="ForceAdvanceRound">
                             <button class="action-menu-item"
-                                    type="submit">
+                                    type="button"
+                                    data-open-force-advance-round-dialog>
                                 @Localizer["GameBoard_NextRound"]
                             </button>
                         </form>
@@ -1505,6 +1507,42 @@
     </div>
 </dialog>
 
+<dialog id="force-advance-round-dialog"
+        class="app-dialog"
+        aria-labelledby="force-advance-round-dialog-title">
+    <div class="dialog-card dialog-card-danger">
+        <div class="dialog-heading">
+            <h2 id="force-advance-round-dialog-title">
+                @Localizer["GameBoard_NextRound"]
+            </h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-force-advance-round-dialog
+                    aria-label="@Localizer["Button_Close"]">
+                ×
+            </button>
+        </div>
+
+        <p>
+            @Localizer["GameBoard_ForceAdvanceRoundConfirm"]
+        </p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-force-advance-round-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+
+            <button class="button button-danger"
+                    type="button"
+                    data-confirm-force-advance-round>
+                @Localizer["GameBoard_NextRound"]
+            </button>
+        </div>
+    </div>
+</dialog>
+
 @section Scripts {
     <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
     <script src="~/js/discord-media-state.js" asp-append-version="true"></script>
@@ -2310,6 +2348,32 @@
             const removePlayerDialogTarget = document.getElementById("remove-player-dialog-target");
             const confirmRemovePlayer = document.querySelector("[data-confirm-remove-player]");
             const blockedPlayersDialog = document.getElementById("blocked-players-dialog");
+            const forceAdvanceRoundForm = document.getElementById("force-advance-round-form");
+            const forceAdvanceRoundDialog = document.getElementById("force-advance-round-dialog");
+            const confirmForceAdvanceRound = document.querySelector("[data-confirm-force-advance-round]");
+
+            document.querySelector("[data-open-force-advance-round-dialog]")
+                ?.addEventListener("click", () => {
+                    forceAdvanceRoundDialog?.showModal();
+                });
+
+            confirmForceAdvanceRound?.addEventListener("click", () => {
+                forceAdvanceRoundDialog?.close();
+                forceAdvanceRoundForm?.submit();
+            });
+
+            for (const button of document.querySelectorAll(
+                "[data-close-force-advance-round-dialog]")) {
+                button.addEventListener("click", () => {
+                    forceAdvanceRoundDialog?.close();
+                });
+            }
+
+            forceAdvanceRoundDialog?.addEventListener("click", event => {
+                if (event.target === forceAdvanceRoundDialog) {
+                    forceAdvanceRoundDialog.close();
+                }
+            });
 
             document.querySelector("[data-open-blocked-players]")
                 ?.addEventListener("click", () => blockedPlayersDialog?.showModal());
