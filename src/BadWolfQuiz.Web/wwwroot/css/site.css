@@ -5779,3 +5779,68 @@ body.youtube-auto-expanded-open {
         flex: 1 1 auto;
     }
 }
+
+.answer-reward-decay-setting-disabled {
+    opacity: 0.55;
+}
+
+    .answer-reward-decay-setting-disabled input {
+        cursor: not-allowed;
+    }
+
+.question-reward-changed {
+    animation: question-reward-changed 420ms ease-out;
+    transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .question-reward-changed {
+        animation: none;
+    }
+}
+
+@keyframes question-reward-changed {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+
+    35% {
+        transform: scale(1.25);
+        filter: brightness(1.45);
+    }
+
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+}
+
+[data-question-reward] {
+    display: inline-block;
+    transform-origin: center;
+}
+
+[data-question-reward].question-reward-changed {
+    animation: question-reward-changed 420ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-question-reward].question-reward-changed {
+        animation: none;
+    }
+}
+
+.answer-result-player-name {
+    font-size: clamp(1.35rem, 2.7vw, 2rem);
+}
+
+.answer-result-score {
+    font-size: clamp(2.5rem, 5.4vw, 4rem);
+    font-weight: 900;
+    line-height: 1;
+}
+
+.answer-result-overlay-content {
+    gap: 14px;
+}

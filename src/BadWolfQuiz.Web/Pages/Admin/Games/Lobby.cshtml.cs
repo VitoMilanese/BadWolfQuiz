@@ -7,7 +7,6 @@ using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using QRCoder;
@@ -65,6 +64,8 @@ public sealed class LobbyModel(
     public BadWolfQuiz.Web.Models.HostDiscordConnection? DiscordConnection { get; private set; }
     public bool IsDiscordVoiceReady { get; private set; }
 
+    public AnswerResultOverlay? AnswerResultOverlay { get; private set; }
+
     public async Task<IActionResult> OnGetAsync(
         Guid id,
         int? previewQuestionId,
@@ -74,6 +75,9 @@ public sealed class LobbyModel(
         var result = LoadPage(id, previewQuestionId, previewAnswer);
         if (result is PageResult)
         {
+            AnswerResultOverlay =
+                sessionRegistry.ConsumeAnswerResultOverlay(Game);
+
             DiscordConnection = await discordRepository.GetAsync(cancellationToken);
             IsDiscordVoiceReady = DiscordConnection is not null &&
                 discordGateway.GetHealth(
@@ -828,11 +832,23 @@ public sealed class LobbyModel(
 
         try
         {
-            sessionRegistry.JudgeQuestionAnswer(
+            var attempt = sessionRegistry.JudgeQuestionAnswer(
                 game.PublicCode,
                 sourceQuestionId,
                 new GamePlayerId(playerId),
                 isCorrect);
+
+            if (attempt is not null)
+            {
+                var player = game.Session.Players.Single(
+                    item => item.Id == attempt.PlayerId);
+
+                sessionRegistry.SetAnswerResultOverlay(
+                    game,
+                    player,
+                    attempt,
+                    isCorrect ? "correct" : "incorrect");
+            }
         }
         catch (GameRuleViolationException)
         {

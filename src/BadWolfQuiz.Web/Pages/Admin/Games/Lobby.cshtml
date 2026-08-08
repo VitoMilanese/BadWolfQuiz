@@ -480,18 +480,14 @@
                     <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation")">
                         <p class="eyebrow"
                            data-question-heading
-                           data-reward-full="@Localizer[
-                                "GameBoard_QuestionWithCategoryAndPoints",
-                                Model.CurrentQuestion.CategoryTitle,
-                                Model.CurrentQuestion.Points]"
-                           data-reward-half="@Localizer[
-                                "GameBoard_QuestionWithCategoryAndPoints",
-                                Model.CurrentQuestion.CategoryTitle,
-                                Model.CurrentQuestion.Points / 2]"
-                           data-reward-quarter="@Localizer[
-                                "GameBoard_QuestionWithCategoryAndPoints",
-                                Model.CurrentQuestion.CategoryTitle,
-                                Model.CurrentQuestion.Points / 4]">
+                           data-current-reward="@Model.CurrentQuestion.CorrectAnswerValue"
+                           data-reward-full-value="@Model.CurrentQuestion.Points"
+                           data-reward-half-value="@(Model.CurrentQuestion.Points / 2)"
+                           data-reward-quarter-value="@(Model.CurrentQuestion.Points / 4)"
+                           data-reward-template="@Localizer[
+                               "GameBoard_QuestionWithCategoryAndPoints",
+                               Model.CurrentQuestion.CategoryTitle,
+                               "__REWARD__"]">
                             @(isShowingAnswer
                                 ? Localizer[
                                     "GameBoard_AnswerWithCategory",
@@ -700,7 +696,8 @@
                         </form>
                     }
 
-                    @if (!Model.CurrentQuestion.IsSpecial)
+                    @if (!Model.CurrentQuestion.IsSpecial &&
+                        Model.CurrentQuestion.AnsweringPlayerId is null)
                     {
                         <form method="post" asp-page-handler="ResolveQuestion">
                             <input name="sourceQuestionId"
@@ -712,7 +709,9 @@
                         </form>
                     }
 
-                    @if (Model.CurrentQuestion.CanRevealClue)
+                    @if (Model.CurrentQuestion.CanRevealClue &&
+                                Model.CurrentQuestion.BuzzerStatus !=
+                                BadWolfQuiz.Game.Runtime.QuestionBuzzerStatus.Claimed)
                     {
                         <form method="post"
                                 asp-page-handler="RevealClue"
@@ -902,6 +901,28 @@
              aria-valuemin="130"
              aria-valuenow="230"
              tabindex="0"><span></span></div>
+
+        @if (Model.AnswerResultOverlay is { } answerResultOverlay)
+        {
+            var scoreText = answerResultOverlay.ScoreDelta > 0
+                ? $"+{answerResultOverlay.ScoreDelta}"
+                : answerResultOverlay.ScoreDelta.ToString();
+
+            <aside class="buzzer-race-overlay answer-result-overlay"
+                   data-answer-result-overlay
+                   role="status"
+                   aria-live="polite">
+                <div class="buzzer-race-card answer-result-card">
+                    <p class="answer-result-player-name">
+                        @answerResultOverlay.PlayerName
+                    </p>
+                    <strong class="answer-result-score @(answerResultOverlay.ScoreDelta < 0 ? "score-negative" : null)">
+                        @scoreText
+                    </strong>
+                </div>
+            </aside>
+        }
+
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
             @if (Model.Game.Session.Settings.HasHostCard)
             {
@@ -1782,6 +1803,18 @@
         })();
 
         (() => {
+            const overlay = document.querySelector("[data-answer-result-overlay]");
+
+            if (!overlay) {
+                return;
+            }
+
+            window.setTimeout(() => {
+                overlay.remove();
+            }, 1500);
+        })();
+
+        (() => {
             const board = document.querySelector(".host-game-board");
             const resizer = document.querySelector("[data-scoreboard-resizer]");
             const storageKey = "badwolfquiz:player-panel-height";
@@ -2369,6 +2402,68 @@
             const questionClues = document.querySelector("[data-question-clues]");
             const questionHeading = document.querySelector("[data-question-heading]");
 
+            const initializeQuestionReward = () => {
+                if (!questionHeading ||
+                    !questionHeading.dataset.rewardTemplate ||
+                    !questionHeading.dataset.currentReward) {
+                    return;
+                }
+
+                const template = questionHeading.dataset.rewardTemplate;
+                const marker = "__REWARD__";
+                const markerIndex = template.indexOf(marker);
+
+                if (markerIndex < 0) {
+                    return;
+                }
+
+                const prefix = template.slice(0, markerIndex);
+                const suffix = template.slice(markerIndex + marker.length);
+
+                questionHeading.replaceChildren();
+
+                questionHeading.append(document.createTextNode(prefix));
+
+                const reward = document.createElement("span");
+                reward.dataset.questionReward = "";
+                reward.textContent = questionHeading.dataset.currentReward;
+                questionHeading.append(reward);
+
+                questionHeading.append(document.createTextNode(suffix));
+            };
+
+            const updateQuestionReward = value => {
+                if (!questionHeading ||
+                    value === null ||
+                    value === undefined) {
+                    return;
+                }
+
+                const reward =
+                    questionHeading.querySelector("[data-question-reward]");
+
+                if (!reward) {
+                    return;
+                }
+
+                const nextValue = value.toString();
+
+                if (reward.textContent === nextValue) {
+                    return;
+                }
+
+                reward.textContent = nextValue;
+
+                reward.classList.remove("question-reward-changed");
+
+                // Restart the animation when the reward changes again.
+                void reward.offsetWidth;
+
+                reward.classList.add("question-reward-changed");
+            };
+
+            initializeQuestionReward();
+
             let gameBoardErrorDismissHandle = null;
 
             const showGameBoardError = message => {
@@ -2457,11 +2552,14 @@
 
                 if (questionHeading) {
                     if (update.revealedClueCount >= 4) {
-                        questionHeading.textContent = questionHeading.dataset.rewardQuarter;
+                        updateQuestionReward(
+                            Number(questionHeading.dataset.rewardQuarterValue));
                     } else if (update.revealedClueCount >= 3) {
-                        questionHeading.textContent = questionHeading.dataset.rewardHalf;
+                        updateQuestionReward(
+                            Number(questionHeading.dataset.rewardHalfValue));
                     } else {
-                        questionHeading.textContent = questionHeading.dataset.rewardFull;
+                        updateQuestionReward(
+                            Number(questionHeading.dataset.rewardFullValue));
                     }
                 }
 
@@ -2584,6 +2682,13 @@
                 timerValue.textContent =
                     Math.ceil(update.remainingMilliseconds / 1000);
 
+                if (update.sourceQuestionId !== null &&
+                    update.sourceQuestionId !== undefined &&
+                    questionClues?.dataset.sourceQuestionId ===
+                        update.sourceQuestionId.toString()) {
+                    updateQuestionReward(update.currentCorrectAnswerValue);
+                }
+
                 if (timerPause) {
                     timerPause.hidden = update.status !== "running";
                 }
@@ -2613,6 +2718,12 @@
             connection.on("BuzzerStateChanged", update => {
                 buzzerState = update;
                 applyBuzzerPlayerStates();
+
+                if (revealClueForm) {
+                    revealClueForm.hidden =
+                        update.status !== "open" &&
+                        update.status !== "inactive";
+                }
 
                 if (!hasReceivedInitialBuzzerState) {
                     hasReceivedInitialBuzzerState = true;

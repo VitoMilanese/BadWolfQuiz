@@ -462,7 +462,7 @@ public sealed class GameSessionTests
 
         var outcome = session.ProcessQuestionTimers();
 
-        Assert.Equal(QuestionTimerOutcome.AnswerExpired, outcome);
+        Assert.Equal(QuestionTimerOutcome.AnswerExpired, outcome.Outcome);
         Assert.Equal(-150, player.Score);
         Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
         Assert.Equal(GameTimerStatus.Stopped, session.AnswerTimer.Status);
@@ -618,7 +618,7 @@ public sealed class GameSessionTests
 
         Assert.Equal(
             QuestionTimerOutcome.AnswerExpired,
-            session.ProcessQuestionTimers());
+            session.ProcessQuestionTimers().Outcome);
         Assert.Equal(-100, rose.Score);
         Assert.Equal(GameTimerStatus.Running, session.Timer.Status);
         Assert.Equal(TimeSpan.FromSeconds(23), session.Timer.Remaining);
@@ -661,7 +661,7 @@ public sealed class GameSessionTests
 
         var outcome = session.ProcessQuestionTimers();
 
-        Assert.Equal(QuestionTimerOutcome.BuzzerExpired, outcome);
+        Assert.Equal(QuestionTimerOutcome.BuzzerExpired, outcome.Outcome);
         Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
         Assert.Equal(GameTimerStatus.Stopped, session.Timer.Status);
     }
@@ -1383,5 +1383,272 @@ public sealed class GameSessionTests
         return GameSession.Create(
             quiz,
             timeProvider ?? new ManualTimeProvider(InitialTime));
+    }
+
+    private static GameSession CreateRewardDecaySession(
+        ManualTimeProvider timeProvider,
+        int answerDurationSeconds = 30,
+        int startAfterSeconds = 10,
+        int minimumPercent = 25)
+    {
+        var source = CreateSession();
+
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(answerDurationSeconds),
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Automatic,
+            answerRewardDecayEnabled: true,
+            answerRewardDecayStartAfterSeconds: startAfterSeconds,
+            answerRewardDecayMinimumPercent: minimumPercent);
+
+        return GameSession.Create(
+            source.Quiz,
+            settings,
+            timeProvider);
+    }
+
+    [Theory]
+    [InlineData(0, 100)]
+    [InlineData(9, 100)]
+    [InlineData(10, 96)]
+    [InlineData(11, 93)]
+    [InlineData(20, 59)]
+    [InlineData(25, 40)]
+    [InlineData(28, 29)]
+    [InlineData(29, 25)]
+    public void Answer_reward_decay_reduces_correct_answer_value_linearly(
+        int elapsedSeconds,
+        int expectedReward)
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateRewardDecaySession(timeProvider);
+        var player = session.AddPlayer("Rose");
+
+        session.Start();
+        session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, player.Id);
+
+        timeProvider.Advance(TimeSpan.FromSeconds(elapsedSeconds));
+
+        Assert.Equal(
+            expectedReward,
+            session.GetCurrentCorrectAnswerValue(100));
+    }
+
+    [Fact]
+    public void Correct_answer_awards_current_decayed_reward()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateRewardDecaySession(timeProvider);
+        var player = session.AddPlayer("Rose");
+
+        session.Start();
+        session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, player.Id);
+
+        timeProvider.Advance(TimeSpan.FromSeconds(20));
+
+        var expectedReward =
+            session.GetCurrentCorrectAnswerValue(100);
+
+        var attempt = session.JudgeQuestionAnswer(
+            100,
+            player.Id,
+            true);
+
+        Assert.Equal(expectedReward, attempt.ScoreDelta);
+        Assert.Equal(expectedReward, player.Score);
+    }
+
+    [Fact]
+    public void Answer_reward_decay_does_not_reduce_wrong_answer_penalty()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateRewardDecaySession(timeProvider);
+        var player = session.AddPlayer("Rose");
+
+        session.Start();
+        session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, player.Id);
+
+        timeProvider.Advance(TimeSpan.FromSeconds(25));
+
+        Assert.True(session.GetCurrentCorrectAnswerValue(100) < 100);
+
+        var attempt = session.JudgeQuestionAnswer(
+            100,
+            player.Id,
+            false);
+
+        Assert.Equal(-100, attempt.ScoreDelta);
+        Assert.Equal(-100, player.Score);
+    }
+
+    [Fact]
+    public void Answer_reward_decay_resets_when_buzzer_reopens()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateRewardDecaySession(timeProvider);
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+
+        session.Start();
+        session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, rose.Id);
+
+        timeProvider.Advance(TimeSpan.FromSeconds(25));
+
+        Assert.True(session.GetCurrentCorrectAnswerValue(100) < 100);
+
+        session.JudgeQuestionAnswer(
+            100,
+            rose.Id,
+            false);
+
+        Assert.Equal(
+            100,
+            session.GetCurrentCorrectAnswerValue(100));
+
+        session.ClaimQuestionBuzzer(100, mickey.Id);
+
+        Assert.Equal(
+            100,
+            session.GetCurrentCorrectAnswerValue(100));
+    }
+
+    [Fact]
+    public void Pausing_answer_timer_freezes_reward_decay()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateRewardDecaySession(timeProvider);
+        var player = session.AddPlayer("Rose");
+
+        session.Start();
+        session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, player.Id);
+
+        timeProvider.Advance(TimeSpan.FromSeconds(20));
+
+        var rewardBeforePause =
+            session.GetCurrentCorrectAnswerValue(100);
+
+        session.PauseQuestionTimer();
+
+        timeProvider.Advance(TimeSpan.FromSeconds(30));
+
+        Assert.Equal(
+            rewardBeforePause,
+            session.GetCurrentCorrectAnswerValue(100));
+
+        session.ResumeQuestionTimer();
+
+        timeProvider.Advance(TimeSpan.FromSeconds(1));
+
+        Assert.True(
+            session.GetCurrentCorrectAnswerValue(100) <
+            rewardBeforePause);
+    }
+
+    [Fact]
+    public void Disabled_answer_reward_decay_keeps_full_reward()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var source = CreateSession();
+
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(30),
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Automatic,
+            answerRewardDecayEnabled: false);
+
+        var session = GameSession.Create(
+            source.Quiz,
+            settings,
+            timeProvider);
+
+        var player = session.AddPlayer("Rose");
+
+        session.Start();
+        session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, player.Id);
+
+        timeProvider.Advance(TimeSpan.FromSeconds(29));
+
+        Assert.Equal(
+            100,
+            session.GetCurrentCorrectAnswerValue(100));
+    }
+
+    [Fact]
+    public void Answer_reward_decay_does_not_apply_to_wager_questions()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var session = CreateRewardDecaySession(timeProvider);
+        var player = session.AddPlayer("Rose");
+
+        session.Start();
+        session.SelectQuestion(101);
+        session.SubmitQuestionWager(101, 150);
+
+        timeProvider.Advance(TimeSpan.FromSeconds(25));
+
+        Assert.Equal(
+            150,
+            session.GetCurrentCorrectAnswerValue(101));
+
+        var attempt = session.JudgeQuestionAnswer(
+            101,
+            player.Id,
+            true);
+
+        Assert.Equal(150, attempt.ScoreDelta);
+    }
+
+    [Fact]
+    public void Answer_reward_decay_uses_four_clue_adjusted_value_as_its_base()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(30),
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Automatic,
+            answerRewardDecayEnabled: true,
+            answerRewardDecayStartAfterSeconds: 10,
+            answerRewardDecayMinimumPercent: 25);
+
+        var source = CreateFourClueSession();
+        var session = GameSession.Create(
+            source.Quiz,
+            settings,
+            timeProvider);
+
+        var player = session.AddPlayer("Rose");
+
+        session.Start();
+        session.SelectQuestion(100);
+        session.RevealNextClue(100);
+
+        Assert.Equal(
+            50,
+            session.Board.Questions.Single().CorrectAnswerValue);
+
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, player.Id);
+
+        timeProvider.Advance(TimeSpan.FromSeconds(29));
+
+        Assert.Equal(
+            13,
+            session.GetCurrentCorrectAnswerValue(100));
     }
 }

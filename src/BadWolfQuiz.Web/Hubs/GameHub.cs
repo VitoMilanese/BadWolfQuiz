@@ -339,6 +339,19 @@ public sealed class GameHub(
             return;
         }
 
+        if (tick.Outcome == QuestionTimerOutcome.AnswerExpired &&
+            tick.AnswerAttempt is { } attempt)
+        {
+            var player = tick.Game.Session.Players.Single(
+                item => item.Id == attempt.PlayerId);
+
+            sessionRegistry.SetAnswerResultOverlay(
+                tick.Game,
+                player,
+                attempt,
+                "timeout");
+        }
+
         await group.SendAsync(
             "BuzzerStateChanged",
             CreateBuzzerUpdate(tick.Game));
@@ -419,6 +432,20 @@ public sealed class GameHub(
         };
     }
 
+    public static object CreateQuestionAnswerResult(
+        GamePlayer player,
+        QuestionAnswerAttempt attempt,
+        string reason)
+    {
+        return new
+        {
+            playerId = player.Id.Value,
+            playerName = player.Name,
+            scoreDelta = attempt.ScoreDelta,
+            reason
+        };
+    }
+
     public static object CreateStatusUpdate(GameSessionRegistration game)
         => new { status = game.Session.Status.ToString().ToLowerInvariant() };
 
@@ -492,6 +519,10 @@ public sealed class GameHub(
         var isVisible = timer.Status is
             GameTimerStatus.Running or GameTimerStatus.Paused;
 
+        var question = game.Session.Board.Questions.FirstOrDefault(item =>
+            item.Status is RuntimeQuestionStatus.Selected or
+                RuntimeQuestionStatus.Active);
+
         return new
         {
             mode = isAnswerTimerActive ? "answer" : "buzzer",
@@ -500,7 +531,12 @@ public sealed class GameHub(
                 ? Math.Max(0, (int)Math.Ceiling(timer.Remaining.TotalMilliseconds))
                 : 0,
             durationMilliseconds = (int)timer.Duration.TotalMilliseconds,
-            isVisible
+            isVisible,
+            sourceQuestionId = question?.SourceQuestionId,
+            currentCorrectAnswerValue = question is null
+                ? (int?)null
+                : game.Session.GetCurrentCorrectAnswerValue(
+                    question.SourceQuestionId),
         };
     }
 

@@ -173,6 +173,17 @@ another clue can be revealed, the session reveals exactly one clue and reports
 `QuestionTimerOutcome.ClueRevealed` instead of resolving the question. Once no further
 clue is available, a later expiration follows the normal no-correct-answer timeout flow.
 
+Answer reward decay is derived runtime behavior rather than a mutation of the
+question's immutable point value. During a regular-question individual answer
+timer, the Engine derives the current correct-answer value from the effective
+game settings, timer state, and the question's current base reward. Four-clue
+questions first derive their base reward from `RevealedClueCount`. Incorrect
+answer penalties do not use the decayed value.
+
+When an incorrect judgment or answer timeout exhausts the set of players eligible
+to buzz for that question, the Engine resolves the question without a correct
+answer instead of reopening a buzzer phase that nobody can use.
+
 Once resolved, a question cannot become available again during normal play. Administrative correction, if supported later, should be an explicit engine command with defined score and audit consequences rather than a direct property mutation.
 
 ### GameTimer
@@ -249,6 +260,8 @@ The following invariants apply across the runtime aggregate:
 - a wager question cannot become active before a valid wager is confirmed;
 - a resolved question has a complete and internally consistent outcome;
 - scores change only as the result of a validated gameplay or administrative command;
+- answer reward decay affects only correct-answer rewards during a regular-question individual answer timer and never reduces an incorrect-answer penalty;
+- a regular question cannot return to an unusable buzzer phase after every player has exhausted an attempt;
 - pausing a timer does not change the session phase;
 - revealing another clue in a four-clue question restarts the full question timer;
 - timer expiration reveals at most one next clue before the normal unresolved-question timeout can occur;
@@ -331,6 +344,8 @@ At minimum, tests should cover:
 - restarting the full question timer after both automatic and manual clue reveal;
 - using the normal unresolved-question timeout after the final clue has already been revealed;
 - applying score changes exactly once;
+- deriving and clamping answer reward decay from the authoritative answer timer while preserving full incorrect-answer penalties;
+- resolving a regular question automatically when an incorrect answer leaves no eligible buzzer players;
 - final-wager eligibility, validation, confirmation, and locking;
 - preventing early final answers;
 - accepting and locking final answers;

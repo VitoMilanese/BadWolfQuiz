@@ -147,6 +147,7 @@
         <input asp-for="Input.AnswerDurationSeconds" type="number" min="1" max="3600" required />
         <small>@Localizer["GameSettings_SecondsHint"]</small>
     </label>
+
     <label>
         <span>@Localizer["GameSettings_RegularStartMode"]</span>
         <select asp-for="Input.RegularQuestionBuzzerStartMode">
@@ -161,6 +162,34 @@
             <option value="2">@Localizer["GameSettings_Manual"]</option>
         </select>
     </label>
+
+    <label class="settings-checkbox">
+        <input asp-for="Input.AnswerRewardDecayEnabled"
+               type="checkbox"
+               data-answer-reward-decay-toggle />
+        <span>@Localizer["GameSettings_AnswerRewardDecayEnabled"]</span>
+    </label>
+
+    <label data-answer-reward-decay-setting>
+        <span>@Localizer["GameSettings_AnswerRewardDecayStartAfter"]</span>
+        <input asp-for="Input.AnswerRewardDecayStartAfterSeconds"
+               type="number"
+               min="5"
+               max="45"
+               required />
+        <small>@Localizer["GameSettings_AnswerRewardDecayStartAfterHint"]</small>
+    </label>
+
+    <label data-answer-reward-decay-setting>
+        <span>@Localizer["GameSettings_AnswerRewardDecayMinimum"]</span>
+        <input asp-for="Input.AnswerRewardDecayMinimumPercent"
+               type="number"
+               min="10"
+               max="90"
+               required />
+        <small>@Localizer["GameSettings_AnswerRewardDecayMinimumHint"]</small>
+    </label>
+
     <label class="settings-checkbox">
         <input asp-for="Input.AllowNegativeScoreFinalPlayers" type="checkbox" />
         <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
@@ -221,6 +250,29 @@
 <partial name="_AvatarPicker" />
 
 @section Scripts {
+    <script>
+        (() => {
+            const toggle = document.querySelector("[data-answer-reward-decay-toggle]");
+            const settings = document.querySelectorAll("[data-answer-reward-decay-setting]");
+
+            const updateRewardDecaySettings = () => {
+                const enabled = toggle?.checked ?? false;
+
+                settings.forEach(setting => {
+                    setting.style.opacity = enabled ? "" : "0.55";
+
+                    const input = setting.querySelector("input");
+                    if (input) {
+                        input.readOnly = !enabled;
+                        input.style.cursor = enabled ? "" : "not-allowed";
+                    }
+                });
+            };
+
+            toggle?.addEventListener("change", updateRewardDecaySettings);
+            updateRewardDecaySettings();
+        })();
+    </script>
     <script>
         (() => {
             const themeInputs = document.querySelectorAll('input[name="Input.SiteThemeId"]');

@@ -452,11 +452,18 @@ public sealed class GameSession
         EnsureRunning();
 
         var question = FindQuestion(sourceQuestionId);
+        
         var player = FindPlayer(playerId);
+
+        var correctAnswerValue = isCorrect
+            ? GetCurrentCorrectAnswerValue(sourceQuestionId)
+            : (int?)null;
+
         var attempt = question.JudgeAnswer(
             player.Id,
             isCorrect,
-            _timeProvider.GetUtcNow());
+            _timeProvider.GetUtcNow(),
+            correctAnswerValue);
 
         player.ApplyScore(attempt.ScoreDelta);
         AnswerTimer.Stop();
@@ -468,6 +475,12 @@ public sealed class GameSession
         }
         else if (question.IsSpecial)
         {
+            Timer.Stop();
+        }
+        else if (_players.All(candidate =>
+                     question.AnswerAttempts.Any(answer => answer.PlayerId == candidate.Id)))
+        {
+            question.ResolveWithoutCorrectAnswer();
             Timer.Stop();
         }
         else if (Timer.IsPaused)
@@ -605,7 +618,7 @@ public sealed class GameSession
         return timer;
     }
 
-    public QuestionTimerOutcome ProcessQuestionTimers()
+    public QuestionTimerProcessResult ProcessQuestionTimers()
     {
         EnsureRunning();
 
@@ -615,7 +628,9 @@ public sealed class GameSession
 
         if (question is null)
         {
-            return QuestionTimerOutcome.None;
+            return new QuestionTimerProcessResult(
+                QuestionTimerOutcome.None,
+                null);
         }
 
         _ = AnswerTimer.Remaining;
@@ -623,12 +638,14 @@ public sealed class GameSession
         if (AnswerTimer.Status == GameTimerStatus.Expired &&
             question.AnsweringPlayerId is { } answeringPlayerId)
         {
-            JudgeQuestionAnswer(
+            var attempt = JudgeQuestionAnswer(
                 question.SourceQuestionId,
                 answeringPlayerId,
                 false);
 
-            return QuestionTimerOutcome.AnswerExpired;
+            return new QuestionTimerProcessResult(
+                QuestionTimerOutcome.AnswerExpired,
+                attempt);
         }
 
         _ = Timer.Remaining;
@@ -640,14 +657,21 @@ public sealed class GameSession
             {
                 RevealNextClue(question.SourceQuestionId);
 
-                return QuestionTimerOutcome.ClueRevealed;
+                return new QuestionTimerProcessResult(
+                    QuestionTimerOutcome.ClueRevealed,
+                    null);
             }
 
             ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
-            return QuestionTimerOutcome.BuzzerExpired;
+
+            return new QuestionTimerProcessResult(
+                QuestionTimerOutcome.BuzzerExpired,
+                null);
         }
 
-        return QuestionTimerOutcome.None;
+        return new QuestionTimerProcessResult(
+            QuestionTimerOutcome.None,
+            null);
     }
 
     public QuizRoundSnapshot AdvanceToNextRound()
@@ -1128,6 +1152,65 @@ public sealed class GameSession
             throw new GameRuleViolationException("This operation is only available in the lobby.");
         }
     }
+
+    public int GetCurrentCorrectAnswerValue(int sourceQuestionId)
+    {
+        var question = FindQuestion(sourceQuestionId);
+
+        if (!Settings.AnswerRewardDecayEnabled ||
+            question.IsSpecial ||
+            question.AnsweringPlayerId is null ||
+            AnswerTimer.Status is GameTimerStatus.Stopped)
+        {
+            return question.CorrectAnswerValue;
+        }
+
+        return CalculateAnswerReward(question.CorrectAnswerValue);
+    }
+
+    private int CalculateAnswerReward(int baseReward)
+    {
+        var remainingSeconds = (int)Math.Ceiling(
+            AnswerTimer.Remaining.TotalSeconds);
+
+        var answerDurationSeconds = checked(
+            (int)Settings.AnswerDuration.TotalSeconds);
+
+        var fullRewardRemaining =
+            answerDurationSeconds -
+            Settings.AnswerRewardDecayStartAfterSeconds;
+
+        if (remainingSeconds > fullRewardRemaining)
+        {
+            return baseReward;
+        }
+
+        var minimumReward =
+            baseReward *
+            Settings.AnswerRewardDecayMinimumPercent /
+            100.0;
+
+        if (remainingSeconds <= 1)
+        {
+            return (int)Math.Round(
+                minimumReward,
+                MidpointRounding.AwayFromZero);
+        }
+
+        var decaySteps = fullRewardRemaining;
+        var currentStep =
+            fullRewardRemaining - remainingSeconds + 1;
+
+        var reward =
+            baseReward -
+            (baseReward - minimumReward) *
+            currentStep /
+            decaySteps;
+
+        return (int)Math.Round(
+            reward,
+            MidpointRounding.AwayFromZero);
+    }
 }
 
 public enum GameSessionStatus
@@ -1140,7 +1223,6 @@ public enum GameSessionStatus
     Completed = 6
 }
 
-
 public enum QuestionTimerOutcome
 {
     None = 0,
@@ -1149,6 +1231,9 @@ public enum QuestionTimerOutcome
     ClueRevealed = 3
 }
 
+public sealed record QuestionTimerProcessResult(
+    QuestionTimerOutcome Outcome,
+    QuestionAnswerAttempt? AnswerAttempt);
 
 public sealed record GameResultStanding(
     int Position,
