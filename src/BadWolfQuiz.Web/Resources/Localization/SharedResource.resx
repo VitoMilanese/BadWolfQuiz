@@ -2373,4 +2373,61 @@
   <data name="MyQuestions_Open" xml:space="preserve">
     <value>Open</value>
   </data>
+  <data name="Footer_PrivacyCookies" xml:space="preserve">
+    <value>Privacy &amp; Cookies</value>
+  </data>
+  <data name="Privacy_Title" xml:space="preserve">
+    <value>Privacy &amp; Cookies</value>
+  </data>
+  <data name="Privacy_Intro" xml:space="preserve">
+    <value>This page explains how Bad Wolf Quiz uses cookies and processes information when you use the website.</value>
+  </data>
+  <data name="Privacy_CookiesTitle" xml:space="preserve">
+    <value>Cookies</value>
+  </data>
+  <data name="Privacy_CookiesIntro" xml:space="preserve">
+    <value>Bad Wolf Quiz uses first-party cookies required for website functionality, security and features explicitly requested by the user.</value>
+  </data>
+  <data name="Privacy_QuestionHistoryTitle" xml:space="preserve">
+    <value>Question history</value>
+  </data>
+  <data name="Privacy_QuestionHistoryText" xml:space="preserve">
+    <value>When you submit a question, we store conversation identifiers in a cookie on your browser so you can return to your previous questions. The cookie does not contain the text of your questions and is retained for up to 12 months.</value>
+  </data>
+  <data name="Privacy_LanguageTitle" xml:space="preserve">
+    <value>Language preference</value>
+  </data>
+  <data name="Privacy_LanguageText" xml:space="preserve">
+    <value>We use a cookie to remember the language you select on the website.</value>
+  </data>
+  <data name="Privacy_SecurityTitle" xml:space="preserve">
+    <value>Security and authentication</value>
+  </data>
+  <data name="Privacy_SecurityText" xml:space="preserve">
+    <value>The website may use cookies required for security, protection against forged requests and authentication of hosts.</value>
+  </data>
+  <data name="Privacy_YouTubeTitle" xml:space="preserve">
+    <value>YouTube videos</value>
+  </data>
+  <data name="Privacy_YouTubeText" xml:space="preserve">
+    <value>Quiz questions may contain embedded YouTube videos. We use YouTube's privacy-enhanced mode when embedding these videos.</value>
+  </data>
+  <data name="Privacy_NoAdvertisingTitle" xml:space="preserve">
+    <value>Advertising and tracking</value>
+  </data>
+  <data name="Privacy_NoAdvertisingText" xml:space="preserve">
+    <value>Bad Wolf Quiz does not use advertising cookies or cookies for cross-site tracking.</value>
+  </data>
+  <data name="Privacy_LocalStorageTitle" xml:space="preserve">
+    <value>Local browser data</value>
+  </data>
+  <data name="Privacy_LocalStorageText" xml:space="preserve">
+    <value>Some game features may temporarily store information in your browser to maintain the state of an active game or session.</value>
+  </data>
+  <data name="Privacy_ControlTitle" xml:space="preserve">
+    <value>Managing browser data</value>
+  </data>
+  <data name="Privacy_ControlText" xml:space="preserve">
+    <value>You can delete cookies and locally stored website data through your browser settings. Doing so may reset your language preference, question history or active game state.</value>
+  </data>
 </root>

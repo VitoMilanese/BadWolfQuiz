@@ -20,17 +20,25 @@
                     </span>
                 </p>
             }
+
+            <a class="portal-footer-support-link"
+               asp-page="/Privacy">
+                @Localizer["Footer_PrivacyCookies"]
+            </a>
         </div>
 
-        @if (Model.DonationUrl is not null)
-        {
-            <div class="portal-footer-support">
+        <div class="portal-footer-support">
+            @if (Model.DonationUrl is not null)
+            {
                 <span>@Localizer["Footer_FreePlatform"]</span>
                 <button class="portal-footer-support-link" type="button" data-open-donation-dialog>
                     @Localizer["Footer_SupportProject"]
                 </button>
-            </div>
+            }
+        </div>
 
+        @if (Model.DonationUrl is not null)
+        {
             <dialog class="app-dialog portal-footer-dialog" aria-labelledby="footer-donation-title">
                 <div class="dialog-card portal-footer-dialog-card">
                     <div class="dialog-heading">
@@ -38,7 +46,9 @@
                         <button class="dialog-close"
                                 type="button"
                                 data-close-donation-dialog
-                                aria-label="@Localizer["Button_Close"]">×</button>
+                                aria-label="@Localizer["Button_Close"]">
+                            ×
+                        </button>
                     </div>
                     <p>@Localizer["Footer_DonationScanQr"]</p>
                     <img class="portal-footer-qr"

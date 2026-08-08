@@ -1,0 +1,57 @@
+@page
+@{
+    ViewData["Title"] = Localizer["Privacy_Title"];
+}
+
+<section class="content-section privacy-page">
+    <div class="content-card privacy-content">
+        <h1>@Localizer["Privacy_Title"]</h1>
+
+        <p>@Localizer["Privacy_Intro"]</p>
+
+        <h2>@Localizer["Privacy_CookiesTitle"]</h2>
+        <p>@Localizer["Privacy_CookiesIntro"]</p>
+
+        <h3>@Localizer["Privacy_QuestionHistoryTitle"]</h3>
+        <p>@Localizer["Privacy_QuestionHistoryText"]</p>
+
+        <h3>@Localizer["Privacy_LanguageTitle"]</h3>
+        <p>@Localizer["Privacy_LanguageText"]</p>
+
+        <h3>@Localizer["Privacy_SecurityTitle"]</h3>
+        <p>@Localizer["Privacy_SecurityText"]</p>
+
+        <h2>@Localizer["Privacy_YouTubeTitle"]</h2>
+        <p>@Localizer["Privacy_YouTubeText"]</p>
+
+        <h2>@Localizer["Privacy_NoAdvertisingTitle"]</h2>
+        <p>@Localizer["Privacy_NoAdvertisingText"]</p>
+
+        <h2>@Localizer["Privacy_LocalStorageTitle"]</h2>
+        <p>@Localizer["Privacy_LocalStorageText"]</p>
+
+        <h2>@Localizer["Privacy_ControlTitle"]</h2>
+        <p>@Localizer["Privacy_ControlText"]</p>
+    </div>
+</section>
+
+<style>
+    .privacy-content {
+        max-width: 960px;
+    }
+
+        .privacy-content p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .privacy-content h2 {
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .privacy-content h3 {
+            margin-top: 1.4rem;
+            margin-bottom: 0.6rem;
+        }
+</style>

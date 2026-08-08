@@ -2373,4 +2373,61 @@
   <data name="MyQuestions_Open" xml:space="preserve">
     <value>Відкрити</value>
   </data>
+  <data name="Footer_PrivacyCookies" xml:space="preserve">
+    <value>Конфіденційність і cookies</value>
+  </data>
+  <data name="Privacy_Title" xml:space="preserve">
+    <value>Конфіденційність і cookies</value>
+  </data>
+  <data name="Privacy_Intro" xml:space="preserve">
+    <value>На цій сторінці пояснюється, як Bad Wolf Quiz використовує cookies та обробляє інформацію під час користування сайтом.</value>
+  </data>
+  <data name="Privacy_CookiesTitle" xml:space="preserve">
+    <value>Cookies</value>
+  </data>
+  <data name="Privacy_CookiesIntro" xml:space="preserve">
+    <value>Bad Wolf Quiz використовує cookies, необхідні для роботи сайту, безпеки та функцій, які явно використовує користувач.</value>
+  </data>
+  <data name="Privacy_QuestionHistoryTitle" xml:space="preserve">
+    <value>Історія питань</value>
+  </data>
+  <data name="Privacy_QuestionHistoryText" xml:space="preserve">
+    <value>Коли ви надсилаєте питання, ми зберігаємо ідентифікатори обговорень у cookie вашого браузера, щоб ви могли повернутися до своїх попередніх питань. Cookie не містить текст ваших питань і зберігається до 12 місяців.</value>
+  </data>
+  <data name="Privacy_LanguageTitle" xml:space="preserve">
+    <value>Налаштування мови</value>
+  </data>
+  <data name="Privacy_LanguageText" xml:space="preserve">
+    <value>Ми використовуємо cookie, щоб запам'ятати вибрану вами мову сайту.</value>
+  </data>
+  <data name="Privacy_SecurityTitle" xml:space="preserve">
+    <value>Безпека та автентифікація</value>
+  </data>
+  <data name="Privacy_SecurityText" xml:space="preserve">
+    <value>Сайт може використовувати cookies, необхідні для безпеки, захисту від підроблених запитів та автентифікації хостів.</value>
+  </data>
+  <data name="Privacy_YouTubeTitle" xml:space="preserve">
+    <value>Відео YouTube</value>
+  </data>
+  <data name="Privacy_YouTubeText" xml:space="preserve">
+    <value>Питання квізів можуть містити вбудовані відео YouTube. Для їх вбудовування ми використовуємо режим YouTube із підвищеною конфіденційністю.</value>
+  </data>
+  <data name="Privacy_NoAdvertisingTitle" xml:space="preserve">
+    <value>Реклама та відстеження</value>
+  </data>
+  <data name="Privacy_NoAdvertisingText" xml:space="preserve">
+    <value>Bad Wolf Quiz не використовує рекламні cookies або cookies для міжсайтового відстеження.</value>
+  </data>
+  <data name="Privacy_LocalStorageTitle" xml:space="preserve">
+    <value>Локальні дані браузера</value>
+  </data>
+  <data name="Privacy_LocalStorageText" xml:space="preserve">
+    <value>Деякі функції гри можуть тимчасово зберігати інформацію у вашому браузері для підтримання стану активної гри або сесії.</value>
+  </data>
+  <data name="Privacy_ControlTitle" xml:space="preserve">
+    <value>Керування даними браузера</value>
+  </data>
+  <data name="Privacy_ControlText" xml:space="preserve">
+    <value>Ви можете видалити cookies та локально збережені дані сайту через налаштування браузера. Це може скинути вибрану мову, історію питань або стан активної гри.</value>
+  </data>
 </root>
