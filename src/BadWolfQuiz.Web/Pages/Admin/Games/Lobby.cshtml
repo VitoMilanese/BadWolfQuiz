@@ -708,7 +708,9 @@
                         </form>
                     }
 
-                    @if (Model.CurrentQuestion.CanRevealClue)
+                    @if (Model.CurrentQuestion.CanRevealClue &&
+                                Model.CurrentQuestion.BuzzerStatus !=
+                                BadWolfQuiz.Game.Runtime.QuestionBuzzerStatus.Claimed)
                     {
                         <form method="post"
                                 asp-page-handler="RevealClue"
@@ -2681,6 +2683,12 @@
             connection.on("BuzzerStateChanged", update => {
                 buzzerState = update;
                 applyBuzzerPlayerStates();
+
+                if (revealClueForm) {
+                    revealClueForm.hidden =
+                        update.status !== "open" &&
+                        update.status !== "inactive";
+                }
 
                 if (!hasReceivedInitialBuzzerState) {
                     hasReceivedInitialBuzzerState = true;
