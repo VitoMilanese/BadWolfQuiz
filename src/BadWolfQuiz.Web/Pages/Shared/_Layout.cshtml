@@ -1,7 +1,8 @@
-﻿@using System.Globalization
+@using System.Globalization
 @using BadWolfQuiz.Web.Services
 @inject GameSettingsStore SettingsStore
 @inject CurrentHost CurrentHost
+@inject UserQuestionHistoryService UserQuestionHistory
 @inject IConfiguration Configuration
 @inject Microsoft.Extensions.Options.IOptions<SiteDefaultsOptions> SiteDefaults
 
@@ -18,6 +19,7 @@
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
     var discordInviteUrl = Configuration["Discord:InviteUrl"];
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var hasUserQuestionHistory = UserQuestionHistory.HasAny(Context.Request);
     var isMasterHost = isAuthenticated &&
         !string.IsNullOrWhiteSpace(Configuration["MasterHostId"]) &&
         string.Equals(
@@ -98,6 +100,10 @@
                 }
                 <a class="action-menu-item" asp-page="/Faq">@Localizer["Menu_FAQ"]</a>
                 <a class="action-menu-item" asp-page="/AskQuestion">@Localizer["Menu_AskQuestion"]</a>
+                @if (hasUserQuestionHistory)
+                {
+                    <a class="action-menu-item" asp-page="/MyQuestions">@Localizer["Menu_MyQuestions"]</a>
+                }
 
                 @if (isMasterHost)
                 {

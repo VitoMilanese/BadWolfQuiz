@@ -13,6 +13,7 @@ namespace BadWolfQuiz.Web.Pages;
 public sealed class AskQuestionModel(
     QuizDbContext db,
     DiscordQuestionSender questionSender,
+    UserQuestionHistoryService questionHistory,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty]
@@ -78,6 +79,8 @@ public sealed class AskQuestionModel(
 
         userMessage.DiscordMessageId = discordMessageId.Value;
         await db.SaveChangesAsync(cancellationToken);
+
+        questionHistory.Add(Request, Response, userQuestion.PublicToken);
 
         return RedirectToPage(
             "/Question",

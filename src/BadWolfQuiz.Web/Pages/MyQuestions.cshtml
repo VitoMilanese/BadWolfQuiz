@@ -1,0 +1,106 @@
+@page
+@model BadWolfQuiz.Web.Pages.MyQuestionsModel
+@{
+    ViewData["Title"] = Localizer["MyQuestions_Title"];
+}
+
+<section class="panel">
+    <div class="page-heading">
+        <div>
+            <h1>@Localizer["MyQuestions_Title"]</h1>
+        </div>
+    </div>
+
+    @if (Model.Questions.Count == 0)
+    {
+        <p>@Localizer["MyQuestions_Empty"]</p>
+    }
+    else
+    {
+        <div class="master-game-list">
+            @foreach (var question in Model.Questions)
+            {
+                <article class="master-game-card panel">
+                    <p>@question.Preview</p>
+
+                    <p class="muted">
+                        @Localizer["MyQuestions_Updated"]:
+                        @question.UpdatedAtUtc.ToLocalTime().ToString("g")
+                    </p>
+
+                    <p>
+                        <strong>@Localizer["Question_Status"]:</strong>
+                        @(question.AwaitingDeveloper
+                            ? Localizer["Question_AwaitingAnswer"]
+                            : Localizer["Question_ContinueConversation"])
+                    </p>
+
+                    <div class="form-actions">
+                        <a class="button button-primary"
+                           asp-page="/Question"
+                           asp-route-token="@question.Token">
+                            @Localizer["MyQuestions_Open"]
+                        </a>
+
+                        <button type="button"
+                                class="button button-danger-outline"
+                                data-delete-question
+                                data-question-token="@question.Token">
+                            @Localizer["Button_Delete"]
+                        </button>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>
+
+<dialog id="delete-question-dialog" class="app-dialog">
+    <form method="post"
+          asp-page-handler="Delete"
+          class="dialog-card dialog-card-danger">
+        <input type="hidden" id="delete-question-token" name="token" />
+
+        <div class="dialog-heading">
+            <div>
+                <h2>@Localizer["QuestionInbox_DeleteConfirmTitle"]</h2>
+                <p class="dialog-warning">
+                    @Localizer["QuestionInbox_DeleteConfirmText"]
+                </p>
+            </div>
+        </div>
+
+        <div class="form-actions dialog-actions">
+            <button type="button"
+                    id="cancel-delete-question"
+                    class="button button-secondary">
+                @Localizer["Button_Cancel"]
+            </button>
+
+            <button type="submit" class="button button-danger">
+                @Localizer["Button_Delete"]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+    (() => {
+        const dialog = document.getElementById("delete-question-dialog");
+        const tokenInput = document.getElementById("delete-question-token");
+        const cancelButton = document.getElementById("cancel-delete-question");
+
+        if (!dialog || !tokenInput || !cancelButton) {
+            return;
+        }
+
+        document.querySelectorAll("[data-delete-question]").forEach(button => {
+            button.addEventListener("click", () => {
+                tokenInput.value = button.dataset.questionToken;
+                dialog.showModal();
+            });
+        });
+
+        cancelButton.addEventListener("click", () => dialog.close());
+    })();
+</script>

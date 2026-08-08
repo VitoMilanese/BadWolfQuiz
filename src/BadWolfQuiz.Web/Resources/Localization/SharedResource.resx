@@ -2358,4 +2358,19 @@
   <data name="QuestionInbox_DeleteNotFound" xml:space="preserve">
     <value>This conversation no longer exists.</value>
   </data>
+  <data name="Menu_MyQuestions" xml:space="preserve">
+    <value>My questions</value>
+  </data>
+  <data name="MyQuestions_Title" xml:space="preserve">
+    <value>My questions</value>
+  </data>
+  <data name="MyQuestions_Empty" xml:space="preserve">
+    <value>You have no saved questions yet.</value>
+  </data>
+  <data name="MyQuestions_Updated" xml:space="preserve">
+    <value>Updated</value>
+  </data>
+  <data name="MyQuestions_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
 </root>

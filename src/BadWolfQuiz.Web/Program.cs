@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Threading.RateLimiting;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Hubs;
@@ -224,6 +224,7 @@ builder.Services.AddScoped<DiscordConnectionRepository>();
 builder.Services.AddScoped<DiscordQuestionBotSettingsRepository>();
 builder.Services.AddScoped<UserQuestionCleanupService>();
 builder.Services.AddScoped<UserQuestionDeletionService>();
+builder.Services.AddSingleton<UserQuestionHistoryService>();
 builder.Services.AddSingleton<DiscordQuestionBotService>();
 builder.Services.AddHostedService(
     sp => sp.GetRequiredService<DiscordQuestionBotService>());

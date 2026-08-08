@@ -2358,4 +2358,19 @@
   <data name="QuestionInbox_DeleteNotFound" xml:space="preserve">
     <value>Це обговорення більше не існує.</value>
   </data>
+  <data name="Menu_MyQuestions" xml:space="preserve">
+    <value>Мої питання</value>
+  </data>
+  <data name="MyQuestions_Title" xml:space="preserve">
+    <value>Мої питання</value>
+  </data>
+  <data name="MyQuestions_Empty" xml:space="preserve">
+    <value>У вас поки немає збережених питань.</value>
+  </data>
+  <data name="MyQuestions_Updated" xml:space="preserve">
+    <value>Оновлено</value>
+  </data>
+  <data name="MyQuestions_Open" xml:space="preserve">
+    <value>Відкрити</value>
+  </data>
 </root>
