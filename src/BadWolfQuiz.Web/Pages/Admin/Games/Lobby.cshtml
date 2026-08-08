@@ -480,6 +480,10 @@
                     <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation")">
                         <p class="eyebrow"
                            data-question-heading
+                           data-reward-template="@Localizer[
+                               "GameBoard_QuestionWithCategoryAndPoints",
+                               Model.CurrentQuestion.CategoryTitle,
+                               "__REWARD__"]"
                            data-reward-full="@Localizer[
                                 "GameBoard_QuestionWithCategoryAndPoints",
                                 Model.CurrentQuestion.CategoryTitle,
@@ -2369,6 +2373,20 @@
             const questionClues = document.querySelector("[data-question-clues]");
             const questionHeading = document.querySelector("[data-question-heading]");
 
+            const updateQuestionReward = value => {
+                if (!questionHeading ||
+                    value === null ||
+                    value === undefined ||
+                    !questionHeading.dataset.rewardTemplate) {
+                    return;
+                }
+
+                questionHeading.textContent =
+                    questionHeading.dataset.rewardTemplate.replace(
+                        "__REWARD__",
+                        value.toString());
+            };
+
             let gameBoardErrorDismissHandle = null;
 
             const showGameBoardError = message => {
@@ -2583,6 +2601,13 @@
                     update.mode === "answer");
                 timerValue.textContent =
                     Math.ceil(update.remainingMilliseconds / 1000);
+
+                if (update.sourceQuestionId !== null &&
+                    update.sourceQuestionId !== undefined &&
+                    questionClues?.dataset.sourceQuestionId ===
+                        update.sourceQuestionId.toString()) {
+                    updateQuestionReward(update.currentCorrectAnswerValue);
+                }
 
                 if (timerPause) {
                     timerPause.hidden = update.status !== "running";

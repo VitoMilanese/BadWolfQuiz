@@ -492,6 +492,10 @@ public sealed class GameHub(
         var isVisible = timer.Status is
             GameTimerStatus.Running or GameTimerStatus.Paused;
 
+        var question = game.Session.Board.Questions.FirstOrDefault(item =>
+            item.Status is RuntimeQuestionStatus.Selected or
+                RuntimeQuestionStatus.Active);
+
         return new
         {
             mode = isAnswerTimerActive ? "answer" : "buzzer",
@@ -500,7 +504,12 @@ public sealed class GameHub(
                 ? Math.Max(0, (int)Math.Ceiling(timer.Remaining.TotalMilliseconds))
                 : 0,
             durationMilliseconds = (int)timer.Duration.TotalMilliseconds,
-            isVisible
+            isVisible,
+            sourceQuestionId = question?.SourceQuestionId,
+            currentCorrectAnswerValue = question is null
+                ? (int?)null
+                : game.Session.GetCurrentCorrectAnswerValue(
+                    question.SourceQuestionId),
         };
     }
 
