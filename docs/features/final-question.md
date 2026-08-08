@@ -38,6 +38,10 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 ## Web presentation
 
 - The last round summary offers the final phase only when the immutable quiz snapshot contains complete final question and answer content.
+- When a final question is available, the host action menu provides a shortcut
+  to skip the remaining regular questions and advance directly to the final
+  phase. The host must confirm the action before the remaining questions are
+  force-resolved and final wagering begins.
 - During wagering, the host sees submission progress but not the wager amounts.
 - Locking wagers releases the final question to participating player devices.
 - During answering, the host sees submission progress but not answer text.
@@ -49,6 +53,7 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 ## Commands
 
 - `StartFinalQuestion()`
+- `ForceAdvanceToFinalQuestion()`
 - `SubmitFinalWager()`
 - `LockFinalWagers()`
 - `SubmitFinalAnswer()`

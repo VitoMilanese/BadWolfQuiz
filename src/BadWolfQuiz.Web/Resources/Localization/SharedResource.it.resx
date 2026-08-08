@@ -2466,4 +2466,10 @@
   <data name="GameBoard_ForceAdvanceRoundConfirm" xml:space="preserve">
     <value>Sei sicuro di voler terminare il round corrente e passare a quello successivo?</value>
   </data>
+  <data name="FinalQuestion_Advance" xml:space="preserve">
+    <value>Vai alla domanda finale</value>
+  </data>
+  <data name="FinalQuestion_ForceAdvanceConfirm" xml:space="preserve">
+    <value>Sei sicuro di voler saltare le domande rimanenti e passare alla domanda finale?</value>
+  </data>
 </root>
