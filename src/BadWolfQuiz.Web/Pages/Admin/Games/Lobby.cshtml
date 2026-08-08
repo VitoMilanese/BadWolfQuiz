@@ -480,22 +480,14 @@
                     <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation")">
                         <p class="eyebrow"
                            data-question-heading
+                           data-current-reward="@Model.CurrentQuestion.CorrectAnswerValue"
+                           data-reward-full-value="@Model.CurrentQuestion.Points"
+                           data-reward-half-value="@(Model.CurrentQuestion.Points / 2)"
+                           data-reward-quarter-value="@(Model.CurrentQuestion.Points / 4)"
                            data-reward-template="@Localizer[
                                "GameBoard_QuestionWithCategoryAndPoints",
                                Model.CurrentQuestion.CategoryTitle,
-                               "__REWARD__"]"
-                           data-reward-full="@Localizer[
-                                "GameBoard_QuestionWithCategoryAndPoints",
-                                Model.CurrentQuestion.CategoryTitle,
-                                Model.CurrentQuestion.Points]"
-                           data-reward-half="@Localizer[
-                                "GameBoard_QuestionWithCategoryAndPoints",
-                                Model.CurrentQuestion.CategoryTitle,
-                                Model.CurrentQuestion.Points / 2]"
-                           data-reward-quarter="@Localizer[
-                                "GameBoard_QuestionWithCategoryAndPoints",
-                                Model.CurrentQuestion.CategoryTitle,
-                                Model.CurrentQuestion.Points / 4]">
+                               "__REWARD__"]">
                             @(isShowingAnswer
                                 ? Localizer[
                                     "GameBoard_AnswerWithCategory",
@@ -2373,19 +2365,67 @@
             const questionClues = document.querySelector("[data-question-clues]");
             const questionHeading = document.querySelector("[data-question-heading]");
 
-            const updateQuestionReward = value => {
+            const initializeQuestionReward = () => {
                 if (!questionHeading ||
-                    value === null ||
-                    value === undefined ||
-                    !questionHeading.dataset.rewardTemplate) {
+                    !questionHeading.dataset.rewardTemplate ||
+                    !questionHeading.dataset.currentReward) {
                     return;
                 }
 
-                questionHeading.textContent =
-                    questionHeading.dataset.rewardTemplate.replace(
-                        "__REWARD__",
-                        value.toString());
+                const template = questionHeading.dataset.rewardTemplate;
+                const marker = "__REWARD__";
+                const markerIndex = template.indexOf(marker);
+
+                if (markerIndex < 0) {
+                    return;
+                }
+
+                const prefix = template.slice(0, markerIndex);
+                const suffix = template.slice(markerIndex + marker.length);
+
+                questionHeading.replaceChildren();
+
+                questionHeading.append(document.createTextNode(prefix));
+
+                const reward = document.createElement("span");
+                reward.dataset.questionReward = "";
+                reward.textContent = questionHeading.dataset.currentReward;
+                questionHeading.append(reward);
+
+                questionHeading.append(document.createTextNode(suffix));
             };
+
+            const updateQuestionReward = value => {
+                if (!questionHeading ||
+                    value === null ||
+                    value === undefined) {
+                    return;
+                }
+
+                const reward =
+                    questionHeading.querySelector("[data-question-reward]");
+
+                if (!reward) {
+                    return;
+                }
+
+                const nextValue = value.toString();
+
+                if (reward.textContent === nextValue) {
+                    return;
+                }
+
+                reward.textContent = nextValue;
+
+                reward.classList.remove("question-reward-changed");
+
+                // Restart the animation when the reward changes again.
+                void reward.offsetWidth;
+
+                reward.classList.add("question-reward-changed");
+            };
+
+            initializeQuestionReward();
 
             let gameBoardErrorDismissHandle = null;
 
@@ -2475,11 +2515,14 @@
 
                 if (questionHeading) {
                     if (update.revealedClueCount >= 4) {
-                        questionHeading.textContent = questionHeading.dataset.rewardQuarter;
+                        updateQuestionReward(
+                            Number(questionHeading.dataset.rewardQuarterValue));
                     } else if (update.revealedClueCount >= 3) {
-                        questionHeading.textContent = questionHeading.dataset.rewardHalf;
+                        updateQuestionReward(
+                            Number(questionHeading.dataset.rewardHalfValue));
                     } else {
-                        questionHeading.textContent = questionHeading.dataset.rewardFull;
+                        updateQuestionReward(
+                            Number(questionHeading.dataset.rewardFullValue));
                     }
                 }
 

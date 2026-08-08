@@ -5787,3 +5787,46 @@ body.youtube-auto-expanded-open {
     .answer-reward-decay-setting-disabled input {
         cursor: not-allowed;
     }
+
+.question-reward-changed {
+    animation: question-reward-changed 420ms ease-out;
+    transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .question-reward-changed {
+        animation: none;
+    }
+}
+
+@keyframes question-reward-changed {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+
+    35% {
+        transform: scale(1.25);
+        filter: brightness(1.45);
+    }
+
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+}
+
+[data-question-reward] {
+    display: inline-block;
+    transform-origin: center;
+}
+
+[data-question-reward].question-reward-changed {
+    animation: question-reward-changed 420ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-question-reward].question-reward-changed {
+        animation: none;
+    }
+}
