@@ -13,4 +13,6 @@ public sealed class UserQuestionMessage
     public string Text { get; set; } = string.Empty;
 
     public DateTimeOffset CreatedAtUtc { get; set; }
+
+    public ulong? DiscordMessageId { get; set; }
 }

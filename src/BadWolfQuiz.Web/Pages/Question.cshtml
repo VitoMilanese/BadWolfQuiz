@@ -21,26 +21,26 @@
 
     <div>
         @foreach (var message in Model.UserQuestion.Messages
-            .OrderBy(x => x.CreatedAtUtc)
-            .ThenBy(x => x.Id))
+                .OrderBy(x => x.CreatedAtUtc)
+                .ThenBy(x => x.Id))
         {
             <div>
                 <h2>
                     @(message.AuthorType == UserQuestionAuthorType.User
-                        ? Localizer["Question_You"].Value
-                        : Localizer["Question_Developer"].Value)
+                                    ? Localizer["Question_You"].Value
+                                    : Localizer["Question_Developer"].Value)
             </h2>
 
                 <p>@message.Text</p>
             </div>
-        }
+                }
     </div>
 
     @{
         var lastMessage = Model.UserQuestion.Messages
-            .OrderBy(x => x.CreatedAtUtc)
-            .ThenBy(x => x.Id)
-            .LastOrDefault();
+        .OrderBy(x => x.CreatedAtUtc)
+        .ThenBy(x => x.Id)
+        .LastOrDefault();
 
         var awaitingDeveloper =
         lastMessage?.AuthorType == UserQuestionAuthorType.User;
@@ -76,8 +76,8 @@
                   maxlength="5000"
                   required></textarea>
 
-            <div>
-                <button type="submit">
+            <div class="form-actions">
+                <button type="submit" class="button button-primary">
                     @Localizer["Button_Send"]
                 </button>
             </div>

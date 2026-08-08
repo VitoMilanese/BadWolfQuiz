@@ -38,31 +38,33 @@ public sealed class AskQuestionModel(
 
         var now = DateTimeOffset.UtcNow;
 
+        var userMessage = new UserQuestionMessage
+        {
+            AuthorType = UserQuestionAuthorType.User,
+            Text = Question,
+            CreatedAtUtc = now
+        };
+
         var userQuestion = new UserQuestion
         {
             PublicToken = Guid.NewGuid().ToString("N"),
             SenderName = SenderName,
             CreatedAtUtc = now,
             UpdatedAtUtc = now,
-            Messages =
-            [
-                new UserQuestionMessage
-                {
-                    AuthorType = UserQuestionAuthorType.User,
-                    Text = Question,
-                    CreatedAtUtc = now
-                }
-            ]
+            Messages = [userMessage]
         };
 
         db.UserQuestions.Add(userQuestion);
         await db.SaveChangesAsync(cancellationToken);
 
-        if (!await questionSender.SendAsync(
+        var discordMessageId = await questionSender.SendAsync(
             userQuestion.Id,
             SenderName,
             Question,
-            cancellationToken))
+            isFirstMessage: true,
+            cancellationToken: cancellationToken);
+
+        if (discordMessageId is null)
         {
             db.UserQuestions.Remove(userQuestion);
             await db.SaveChangesAsync(cancellationToken);
@@ -73,6 +75,9 @@ public sealed class AskQuestionModel(
 
             return Page();
         }
+
+        userMessage.DiscordMessageId = discordMessageId.Value;
+        await db.SaveChangesAsync(cancellationToken);
 
         return RedirectToPage(
             "/Question",

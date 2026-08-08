@@ -12,7 +12,5 @@ public sealed class UserQuestion
 
     public DateTimeOffset UpdatedAtUtc { get; set; }
 
-    public ulong? DiscordMessageId { get; set; }
-
     public ICollection<UserQuestionMessage> Messages { get; set; } = [];
 }

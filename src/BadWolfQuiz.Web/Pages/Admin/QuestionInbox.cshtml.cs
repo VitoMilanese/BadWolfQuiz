@@ -1,12 +1,16 @@
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Models;
+using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using BadWolfQuiz.Web.Services;
 
 namespace BadWolfQuiz.Web.Pages.Admin;
 
-public sealed class QuestionInboxModel(QuizDbContext db) : PageModel
+public sealed class QuestionInboxModel(
+    QuizDbContext db,
+    UserQuestionDeletionService deletionService) : PageModel
 {
     public IReadOnlyList<UserQuestion> Questions { get; private set; } = [];
 
@@ -60,6 +64,22 @@ public sealed class QuestionInboxModel(QuizDbContext db) : PageModel
         await db.SaveChangesAsync(cancellationToken);
 
         return RedirectToPage(new { questionId = id });
+    }
+
+    public async Task<IActionResult> OnPostDeleteAsync(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var deleted = await deletionService.DeleteAsync(
+            id,
+            cancellationToken);
+
+        if (!deleted)
+        {
+            return NotFound();
+        }
+
+        return RedirectToPage();
     }
 
     private async Task LoadQuestionsAsync(CancellationToken cancellationToken)

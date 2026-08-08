@@ -12,10 +12,11 @@ public sealed class DiscordQuestionSender(
     IStringLocalizer<SharedResource> localizer,
     ILogger<DiscordQuestionSender> logger)
 {
-    public async Task<bool> SendAsync(
+    public async Task<ulong?> SendAsync(
         int questionId,
         string? senderName,
         string message,
+        bool isFirstMessage,
         CancellationToken cancellationToken = default)
     {
         var settings =
@@ -28,7 +29,7 @@ public sealed class DiscordQuestionSender(
             logger.LogWarning(
                 "The Discord question bot channel is not configured.");
 
-            return false;
+            return null;
         }
 
         if (bot.Client?.ConnectionState != ConnectionState.Connected)
@@ -36,7 +37,7 @@ public sealed class DiscordQuestionSender(
             logger.LogWarning(
                 "The Discord question bot is not connected.");
 
-            return false;
+            return null;
         }
 
         if (!ulong.TryParse(settings.GuildId, out var guildId) ||
@@ -45,7 +46,7 @@ public sealed class DiscordQuestionSender(
             logger.LogWarning(
                 "The Discord question bot channel configuration is invalid.");
 
-            return false;
+            return null;
         }
 
         var guild = bot.Client.GetGuild(guildId);
@@ -56,7 +57,7 @@ public sealed class DiscordQuestionSender(
             logger.LogWarning(
                 "The configured Discord question channel is unavailable.");
 
-            return false;
+            return null;
         }
 
         var author = string.IsNullOrWhiteSpace(senderName)
@@ -71,27 +72,36 @@ public sealed class DiscordQuestionSender(
         if (string.IsNullOrWhiteSpace(publicBaseUrl))
         {
             logger.LogWarning("Game:PublicBaseUrl is not configured.");
-            return false;
+            return null;
         }
 
         var replyUrl =
             $"{publicBaseUrl}/Admin/QuestionInbox?questionId={questionId}";
 
-        var components = new ComponentBuilder()
+        var componentBuilder = new ComponentBuilder()
             .WithButton(
                 localizer["DiscordQuestion_Reply"].Value,
                 style: ButtonStyle.Link,
-                url: replyUrl)
-            .Build();
+                url: replyUrl);
+
+        if (isFirstMessage)
+        {
+            componentBuilder.WithButton(
+                localizer["Button_Delete"].Value,
+                customId: $"question-delete:{questionId}",
+                style: ButtonStyle.Danger);
+        }
+
+        var components = componentBuilder.Build();
 
         try
         {
-            await channel.SendMessageAsync(
+            var discordMessage = await channel.SendMessageAsync(
                 text: content,
                 components: components,
                 allowedMentions: AllowedMentions.None);
 
-            return true;
+            return discordMessage.Id;
         }
         catch (Exception exception)
         {
@@ -100,7 +110,7 @@ public sealed class DiscordQuestionSender(
                 "Failed to send question {QuestionId} to Discord.",
                 questionId);
 
-            return false;
+            return null;
         }
     }
 }

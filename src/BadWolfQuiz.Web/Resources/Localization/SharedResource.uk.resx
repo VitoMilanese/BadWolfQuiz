@@ -2308,7 +2308,7 @@
     <value>Питання користувачів</value>
   </data>
   <data name="QuestionInbox_Empty" xml:space="preserve">
-    <value>Питань поки немає.</value>
+    <value>Питання є? Питань нема.</value>
   </data>
   <data name="QuestionInbox_From" xml:space="preserve">
     <value>Від</value>
@@ -2348,5 +2348,14 @@
   </data>
   <data name="DiscordQuestion_Reply" xml:space="preserve">
     <value>Відповісти</value>
+  </data>
+  <data name="QuestionInbox_DeleteConfirmTitle" xml:space="preserve">
+    <value>Видалити обговорення?</value>
+  </data>
+  <data name="QuestionInbox_DeleteConfirmText" xml:space="preserve">
+    <value>Це обговорення буде видалено назавжди. Цю дію неможливо скасувати.</value>
+  </data>
+  <data name="QuestionInbox_DeleteNotFound" xml:space="preserve">
+    <value>Це обговорення більше не існує.</value>
   </data>
 </root>

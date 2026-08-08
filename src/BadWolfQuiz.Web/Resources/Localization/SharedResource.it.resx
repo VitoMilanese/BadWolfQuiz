@@ -2349,4 +2349,13 @@
   <data name="DiscordQuestion_Reply" xml:space="preserve">
     <value>Rispondi</value>
   </data>
+  <data name="QuestionInbox_DeleteConfirmTitle" xml:space="preserve">
+    <value>Eliminare la conversazione?</value>
+  </data>
+  <data name="QuestionInbox_DeleteConfirmText" xml:space="preserve">
+    <value>Questa conversazione verrà eliminata definitivamente. Questa azione non può essere annullata.</value>
+  </data>
+  <data name="QuestionInbox_DeleteNotFound" xml:space="preserve">
+    <value>Questa conversazione non esiste più.</value>
+  </data>
 </root>

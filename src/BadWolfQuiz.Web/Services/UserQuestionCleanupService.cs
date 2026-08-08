@@ -19,12 +19,12 @@ public sealed class UserQuestionCleanupService(
             .Select(x => new
             {
                 x.Id,
-                x.CreatedAtUtc
+                x.UpdatedAtUtc
             })
             .ToListAsync(cancellationToken);
 
         var expiredIds = questions
-            .Where(x => x.CreatedAtUtc < cutoff)
+            .Where(x => x.UpdatedAtUtc < cutoff)
             .Select(x => x.Id)
             .ToList();
 

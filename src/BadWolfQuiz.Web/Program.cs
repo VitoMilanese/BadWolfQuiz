@@ -223,6 +223,7 @@ builder.Services.AddHostedService<DiscordMuteTimeoutService>();
 builder.Services.AddScoped<DiscordConnectionRepository>();
 builder.Services.AddScoped<DiscordQuestionBotSettingsRepository>();
 builder.Services.AddScoped<UserQuestionCleanupService>();
+builder.Services.AddScoped<UserQuestionDeletionService>();
 builder.Services.AddSingleton<DiscordQuestionBotService>();
 builder.Services.AddHostedService(
     sp => sp.GetRequiredService<DiscordQuestionBotService>());
