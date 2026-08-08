@@ -13,7 +13,7 @@ The saved session contains:
 - the immutable quiz snapshot and game-specific settings;
 - the public join code and whether new players may join;
 - the current game phase and round;
-- available, active, and resolved question states;
+- available, active, and resolved question states, including revealed-clue progress for four-clue questions;
 - randomly selected wager questions and submitted wagers;
 - active and removed players, their scores, and their selected visual fallback;
 - the active player and round-start scores used by standings;

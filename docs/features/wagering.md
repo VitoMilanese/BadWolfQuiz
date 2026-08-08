@@ -62,10 +62,11 @@ The host also requires an explicit administrative score-correction tool. Correct
 
 The intended host controls also include selecting the active player with the highest aggregate score since a chosen date. The default start date is January 1 of the current year.
 
-This requires functionality that is not yet implemented:
+Host-scoped lifetime player statistics and aggregate final scores are already available through persistent game history. The remaining work for this strategy is the active-player selection workflow itself:
 
-- host-scoped aggregation of persisted final net scores, including negative results;
-- a date-range query and host control.
+- a date-range query beginning from the chosen start date;
+- an Engine/application command that selects the highest-scoring eligible player from that range;
+- a host control that submits the selection request and handles ties or unavailable history consistently.
 
 ### Persistent player identity
 

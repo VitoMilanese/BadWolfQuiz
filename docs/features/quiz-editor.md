@@ -43,6 +43,14 @@ Deleting clears every existing question and answer block, then creates exactly
 one empty text block for each side. The board cell stays in place because its
 question entity and row/category position are part of the board structure.
 
+After an asynchronous deletion, board-size validation uses the current board
+state in the DOM rather than the state captured when the page was rendered. A
+cell is treated as filled when it contains a `.question-completion-item.complete`
+marker. When reducing the number of categories or question rows, the destructive
+confirmation is therefore shown only if content still exists in the part of the
+board that would actually be removed. No page refresh is required after deleting
+a question for these checks to become accurate.
+
 ## Final question
 
 Final question and answer blocks are stored directly on the quiz and edited in a

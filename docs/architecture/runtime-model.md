@@ -90,6 +90,7 @@ Typical responsibilities include:
 - owning the ordered collection of players;
 - identifying the current round and board;
 - tracking the active question, if any;
+- tracking revealed-clue progress for clue-based questions;
 - owning the shared game timer;
 - owning final-question state when a final question exists;
 - recording creation and significant transition timestamps;
@@ -159,6 +160,18 @@ Available -> Selected -> AwaitingWager -> Active -> AwaitingJudgment -> Resolved
 Not every question passes through every status. A normal question can move directly from `Selected` to `Active`; a wager question enters `AwaitingWager` first. Exact commands and transitions are defined by the game engine.
 
 Question content and the canonical correct answer remain part of the immutable quiz snapshot. The runtime question may expose them through an associated definition reference, but it does not own editable copies.
+
+For a four-clue question, clue progress is runtime state. `RevealedClueCount` determines
+which immutable clue blocks are currently public, and `CanRevealClue` indicates whether
+another clue remains available. Revealing a clue is a domain transition rather than a
+client-only visibility change.
+
+A successful `RevealNextClue()` starts a new full question-timer interval. Timer restart
+therefore belongs to the domain operation itself, so automatic timer-driven reveal and
+manual host reveal have identical timing semantics. When the question timer expires and
+another clue can be revealed, the session reveals exactly one clue and reports
+`QuestionTimerOutcome.ClueRevealed` instead of resolving the question. Once no further
+clue is available, a later expiration follows the normal no-correct-answer timeout flow.
 
 Once resolved, a question cannot become available again during normal play. Administrative correction, if supported later, should be an explicit engine command with defined score and audit consequences rather than a direct property mutation.
 
@@ -237,6 +250,8 @@ The following invariants apply across the runtime aggregate:
 - a resolved question has a complete and internally consistent outcome;
 - scores change only as the result of a validated gameplay or administrative command;
 - pausing a timer does not change the session phase;
+- revealing another clue in a four-clue question restarts the full question timer;
+- timer expiration reveals at most one next clue before the normal unresolved-question timeout can occur;
 - only eligible players participate in the final question;
 - a final answer cannot be submitted before final wagering is locked and the question is released;
 - a final submission cannot be judged more than once;
@@ -254,6 +269,7 @@ Representative commands include:
 ```csharp
 SelectQuestion(...)
 SubmitQuestionWager(...)
+RevealNextClue(...)
 StartTimer(...)
 PauseTimer(...)
 ResumeTimer(...)
@@ -311,6 +327,9 @@ At minimum, tests should cover:
 - selecting available questions and rejecting repeated selection;
 - requiring a valid wager for a special question;
 - starting, pausing, resuming, and expiring the timer without changing session phase;
+- revealing exactly one next clue when a four-clue question timer expires;
+- restarting the full question timer after both automatic and manual clue reveal;
+- using the normal unresolved-question timeout after the final clue has already been revealed;
 - applying score changes exactly once;
 - final-wager eligibility, validation, confirmation, and locking;
 - preventing early final answers;

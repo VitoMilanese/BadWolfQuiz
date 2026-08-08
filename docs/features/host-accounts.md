@@ -32,7 +32,8 @@ accounts existed. During the first successful registration, all quizzes and game
 history without an owner are assigned to that first host in the same database
 transaction. Later registrations never claim existing data.
 
-## Next step
+## Player access
 
-Player QR joining will encode the public `/Join/{code}` URL and does not require
-a player account.
+Player joining does not require a player account. The host game screen exposes
+the public `/Join/{code}` route through both the six-character join code and a QR
+code, while host administration remains protected by host authentication.
