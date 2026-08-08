@@ -603,6 +603,7 @@ public sealed class GameSessionTests
         var timeProvider = new ManualTimeProvider(InitialTime);
         var session = CreateSession(timeProvider);
         var rose = session.AddPlayer("Rose");
+        session.AddPlayer("Mickey");
         session.Start();
         session.SelectQuestion(100);
 
