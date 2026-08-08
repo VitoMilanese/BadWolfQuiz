@@ -82,7 +82,8 @@ After the final clue is visible, the action is removed or disabled.
 
 Clue revelation is propagated to connected clients without requiring a page
 reload. The host view updates the existing clue content in place when the server
-reports the reveal.
+reports the reveal. It also updates the displayed correct-answer value to
+match the newly revealed clue count without requiring a page reload.
 
 The notification is a transport mechanism, not the source of truth. A refreshed
 or reconnected client reconstructs clue visibility from the current authoritative
@@ -149,6 +150,8 @@ At minimum, tests and regression checks should cover:
 - automatic reveal restarts the full question timer;
 - manual reveal restarts the same full timer;
 - clue visibility updates without a page reload;
+- the displayed correct-answer value updates without a page reload when the
+  third or fourth clue is revealed;
 - the reveal action is unavailable after the final clue;
 - expiration after the final clue follows the normal unresolved-question timeout;
 - host and player timer displays use consistent ceiling semantics;
