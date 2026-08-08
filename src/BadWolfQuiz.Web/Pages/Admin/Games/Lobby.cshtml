@@ -696,7 +696,8 @@
                         </form>
                     }
 
-                    @if (!Model.CurrentQuestion.IsSpecial)
+                    @if (!Model.CurrentQuestion.IsSpecial &&
+                        Model.CurrentQuestion.AnsweringPlayerId is null)
                     {
                         <form method="post" asp-page-handler="ResolveQuestion">
                             <input name="sourceQuestionId"
