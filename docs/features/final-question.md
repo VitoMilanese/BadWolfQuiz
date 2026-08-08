@@ -13,9 +13,13 @@ Final content is stored separately from round questions and copied into the immu
 ## Runtime flow
 
 1. The host starts the final phase after the last board round is complete.
-2. Every participating player submits and confirms a private wager.
+2. Every participating player submits and confirms a private wager. If an inactive
+   player does not submit a wager, the host can submit the minimum allowed wager
+   on that player's behalf.
 3. The Engine locks wagering only after every wager is present.
-4. The question is released and players submit private answers.
+4. The question is released and players submit private answers. If an inactive
+   player does not submit an answer, the host can submit `-` on that player's
+   behalf.
 5. The Engine locks answering only after every answer is present.
 6. The host judges each answer.
 7. The wager is added for a correct answer and subtracted for an incorrect answer.
@@ -43,8 +47,15 @@ Other players' wagers and answers are not exposed by player projections. SignalR
   phase. The host must confirm the action before the remaining questions are
   force-resolved and final wagering begins.
 - During wagering, the host sees submission progress but not the wager amounts.
+- For an inactive player who has not submitted a wager, the host can submit the
+  minimum allowed wager on the player's behalf.
 - Locking wagers releases the final question to participating player devices.
 - During answering, the host sees submission progress but not answer text.
+- For an inactive player who has not submitted an answer, the host can submit
+  `-` on the player's behalf.
+- Host-submitted wagers and answers are propagated to the affected player's
+  page in real time, so the player interface reflects the submission as if the
+  player had submitted it directly.
 - Locking answers starts a sequential presentation of player submissions. The host sees one player name and answer at a time, judges it as correct or incorrect, and then advances automatically to the next submission.
 - The broadcast-facing game screen never reveals the configured correct answer. The host can open a separate live answer-key tab on another display; it follows regular, wager, and final questions automatically.
 - The game finishes only after every participating answer is judged, then shows the authoritative final standings.
