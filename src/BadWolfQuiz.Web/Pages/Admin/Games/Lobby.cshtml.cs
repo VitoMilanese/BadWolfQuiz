@@ -1045,6 +1045,11 @@ public sealed class LobbyModel(
                 GameHub.CreatePlayersUpdate(sessionRegistry, game),
                 cancellationToken);
 
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new { success = true });
+        }
+
         return RedirectToPage(new { id });
     }
 
