@@ -1567,16 +1567,16 @@
     <value>Gioca con noi</value>
   </data>
   <data name="Menu_AskQuestion" xml:space="preserve">
-    <value>Fai una domanda</value>
+    <value>Contatta lo sviluppatore</value>
   </data>
   <data name="AskQuestion_Eyebrow" xml:space="preserve">
     <value>CONTATTACI</value>
   </data>
   <data name="AskQuestion_Title" xml:space="preserve">
-    <value>Fai una domanda</value>
+    <value>Contatta lo sviluppatore</value>
   </data>
   <data name="AskQuestion_Description" xml:space="preserve">
-    <value>Inviaci una domanda. Verrà recapitata nel canale Discord di BAD WOLF QUIZ.</value>
+    <value>Fai una domanda, proponi un'idea, segnala un problema o lascia un feedback — il tuo messaggio verrà inviato allo sviluppatore di Bad Wolf Quiz.</value>
   </data>
   <data name="AskQuestion_Name" xml:space="preserve">
     <value>Il tuo nome</value>
@@ -2263,7 +2263,7 @@
     <value>Non disponibile</value>
   </data>
   <data name="Menu_QuestionInbox" xml:space="preserve">
-    <value>Domande degli utenti</value>
+    <value>Messaggi degli utenti</value>
   </data>
   <data name="QuestionBot_Title" xml:space="preserve">
     <value>Bot Discord per le domande</value>
@@ -2305,7 +2305,7 @@
     <value>Invia</value>
   </data>
   <data name="QuestionInbox_Title" xml:space="preserve">
-    <value>Domande degli utenti</value>
+    <value>Messaggi degli utenti</value>
   </data>
   <data name="QuestionInbox_Empty" xml:space="preserve">
     <value>Non ci sono ancora domande.</value>
@@ -2359,10 +2359,10 @@
     <value>Questa conversazione non esiste più.</value>
   </data>
   <data name="Menu_MyQuestions" xml:space="preserve">
-    <value>Le mie domande</value>
+    <value>I miei messaggi</value>
   </data>
   <data name="MyQuestions_Title" xml:space="preserve">
-    <value>Le mie domande</value>
+    <value>I miei messaggi</value>
   </data>
   <data name="MyQuestions_Empty" xml:space="preserve">
     <value>Non hai ancora domande salvate.</value>
@@ -2429,5 +2429,23 @@
   </data>
   <data name="Privacy_ControlText" xml:space="preserve">
     <value>Puoi eliminare i cookie e i dati del sito memorizzati localmente tramite le impostazioni del browser. Questa operazione può reimpostare la lingua selezionata, la cronologia delle domande o lo stato della partita attiva.</value>
+  </data>
+  <data name="Menu_PublicQuizzes" xml:space="preserve">
+    <value>Quiz pubblici</value>
+  </data>
+  <data name="Menu_Join" xml:space="preserve">
+    <value>Partecipa</value>
+  </data>
+  <data name="Menu_ActiveGames" xml:space="preserve">
+    <value>Partite attive</value>
+  </data>
+  <data name="Menu_ChangePassword" xml:space="preserve">
+    <value>Cambia password</value>
+  </data>
+  <data name="Menu_SignOut" xml:space="preserve">
+    <value>Esci</value>
+  </data>
+  <data name="Menu_HostSignIn" xml:space="preserve">
+    <value>Accesso host</value>
   </data>
 </root>

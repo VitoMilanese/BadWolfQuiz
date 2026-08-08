@@ -1567,16 +1567,16 @@
     <value>Грати з нами</value>
   </data>
   <data name="Menu_AskQuestion" xml:space="preserve">
-    <value>Задати питання</value>
+    <value>Написати розробнику</value>
   </data>
   <data name="AskQuestion_Eyebrow" xml:space="preserve">
     <value>ЗВ’ЯЗАТИСЯ З НАМИ</value>
   </data>
   <data name="AskQuestion_Title" xml:space="preserve">
-    <value>Задати питання</value>
+    <value>Написати розробнику</value>
   </data>
   <data name="AskQuestion_Description" xml:space="preserve">
-    <value>Надішліть нам питання. Воно потрапить у Discord-канал BAD WOLF QUIZ.</value>
+    <value>Поставте питання, запропонуйте ідею, повідомте про проблему або залиште відгук — ваше повідомлення отримає розробник Bad Wolf Quiz.</value>
   </data>
   <data name="AskQuestion_Name" xml:space="preserve">
     <value>Ваше ім’я</value>
@@ -2263,7 +2263,7 @@
     <value>Недоступний</value>
   </data>
   <data name="Menu_QuestionInbox" xml:space="preserve">
-    <value>Питання користувачів</value>
+    <value>Звернення користувачів</value>
   </data>
   <data name="QuestionBot_Title" xml:space="preserve">
     <value>Discord-бот для питань</value>
@@ -2305,7 +2305,7 @@
     <value>Надіслати</value>
   </data>
   <data name="QuestionInbox_Title" xml:space="preserve">
-    <value>Питання користувачів</value>
+    <value>Звернення користувачів</value>
   </data>
   <data name="QuestionInbox_Empty" xml:space="preserve">
     <value>Питання є? Питань нема.</value>
@@ -2359,10 +2359,10 @@
     <value>Це обговорення більше не існує.</value>
   </data>
   <data name="Menu_MyQuestions" xml:space="preserve">
-    <value>Мої питання</value>
+    <value>Мої звернення</value>
   </data>
   <data name="MyQuestions_Title" xml:space="preserve">
-    <value>Мої питання</value>
+    <value>Мої звернення</value>
   </data>
   <data name="MyQuestions_Empty" xml:space="preserve">
     <value>У вас поки немає збережених питань.</value>
@@ -2429,5 +2429,23 @@
   </data>
   <data name="Privacy_ControlText" xml:space="preserve">
     <value>Ви можете видалити cookies та локально збережені дані сайту через налаштування браузера. Це може скинути вибрану мову, історію питань або стан активної гри.</value>
+  </data>
+  <data name="Menu_PublicQuizzes" xml:space="preserve">
+    <value>Публічні квізи</value>
+  </data>
+  <data name="Menu_Join" xml:space="preserve">
+    <value>Приєднатися</value>
+  </data>
+  <data name="Menu_ActiveGames" xml:space="preserve">
+    <value>Активні ігри</value>
+  </data>
+  <data name="Menu_ChangePassword" xml:space="preserve">
+    <value>Змінити пароль</value>
+  </data>
+  <data name="Menu_SignOut" xml:space="preserve">
+    <value>Вийти</value>
+  </data>
+  <data name="Menu_HostSignIn" xml:space="preserve">
+    <value>Вхід для хоста</value>
   </data>
 </root>

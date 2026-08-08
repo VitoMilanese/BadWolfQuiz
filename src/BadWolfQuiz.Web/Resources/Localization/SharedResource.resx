@@ -1567,16 +1567,16 @@
     <value>Play with us</value>
   </data>
   <data name="Menu_AskQuestion" xml:space="preserve">
-    <value>Ask a question</value>
+    <value>Contact the developer</value>
   </data>
   <data name="AskQuestion_Eyebrow" xml:space="preserve">
     <value>CONTACT US</value>
   </data>
   <data name="AskQuestion_Title" xml:space="preserve">
-    <value>Ask a question</value>
+    <value>Contact the developer</value>
   </data>
   <data name="AskQuestion_Description" xml:space="preserve">
-    <value>Send us a question. It will be delivered to the BAD WOLF QUIZ Discord channel.</value>
+    <value>Ask a question, suggest an idea, report a problem, or leave feedback — your message will be sent to the Bad Wolf Quiz developer.</value>
   </data>
   <data name="AskQuestion_Name" xml:space="preserve">
     <value>Your name</value>
@@ -2263,7 +2263,7 @@
     <value>Unavailable</value>
   </data>
   <data name="Menu_QuestionInbox" xml:space="preserve">
-    <value>User questions</value>
+    <value>User messages</value>
   </data>
   <data name="QuestionBot_Title" xml:space="preserve">
     <value>Discord question bot</value>
@@ -2305,7 +2305,7 @@
     <value>Send</value>
   </data>
   <data name="QuestionInbox_Title" xml:space="preserve">
-    <value>User questions</value>
+    <value>User messages</value>
   </data>
   <data name="QuestionInbox_Empty" xml:space="preserve">
     <value>There are no questions yet.</value>
@@ -2359,10 +2359,10 @@
     <value>This conversation no longer exists.</value>
   </data>
   <data name="Menu_MyQuestions" xml:space="preserve">
-    <value>My questions</value>
+    <value>My messages</value>
   </data>
   <data name="MyQuestions_Title" xml:space="preserve">
-    <value>My questions</value>
+    <value>My messages</value>
   </data>
   <data name="MyQuestions_Empty" xml:space="preserve">
     <value>You have no saved questions yet.</value>
@@ -2429,5 +2429,23 @@
   </data>
   <data name="Privacy_ControlText" xml:space="preserve">
     <value>You can delete cookies and locally stored website data through your browser settings. Doing so may reset your language preference, question history or active game state.</value>
+  </data>
+  <data name="Menu_PublicQuizzes" xml:space="preserve">
+    <value>Public quizzes</value>
+  </data>
+  <data name="Menu_Join" xml:space="preserve">
+    <value>Join</value>
+  </data>
+  <data name="Menu_ActiveGames" xml:space="preserve">
+    <value>Active games</value>
+  </data>
+  <data name="Menu_ChangePassword" xml:space="preserve">
+    <value>Change password</value>
+  </data>
+  <data name="Menu_SignOut" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Menu_HostSignIn" xml:space="preserve">
+    <value>Host sign in</value>
   </data>
 </root>
