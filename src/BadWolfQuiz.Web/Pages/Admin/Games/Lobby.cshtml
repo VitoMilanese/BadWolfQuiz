@@ -1116,6 +1116,19 @@
                                     ? Localizer["FinalQuestion_NotSubmitted"]
                                     : Localizer["FinalQuestion_Submitted"])
                             </span>
+                            @if (submission.Wager is null &&
+                                 Model.IsPlayerInactive(submission.PlayerId))
+                            {
+                                <form method="post" asp-page-handler="SubmitMinimumFinalWager">
+                                    <input type="hidden" name="playerId" value="@submission.PlayerId.Value" />
+                                    <button class="button button-secondary final-player-action-icon"
+                                            type="submit"
+                                            title="@Localizer["FinalQuestion_SubmitMinimumWager"]"
+                                            aria-label="@Localizer["FinalQuestion_SubmitMinimumWager"]">
+                                        <span aria-hidden="true">⇩</span>
+                                    </button>
+                                </form>
+                            }
                         </li>
                     }
                 </ul>
@@ -1199,6 +1212,19 @@
                                         ? Localizer["FinalQuestion_NotSubmitted"]
                                         : Localizer["FinalQuestion_Submitted"])
                                 </span>
+                                @if (submission.Answer is null &&
+                                     Model.IsPlayerInactive(submission.PlayerId))
+                                {
+                                    <form method="post" asp-page-handler="SubmitEmptyFinalAnswer">
+                                        <input type="hidden" name="playerId" value="@submission.PlayerId.Value" />
+                                        <button class="button button-secondary final-player-action-icon"
+                                                type="submit"
+                                                title="@Localizer["FinalQuestion_SubmitEmptyAnswer"]"
+                                                aria-label="@Localizer["FinalQuestion_SubmitEmptyAnswer"]">
+                                            <span aria-hidden="true">∅</span>
+                                        </button>
+                                    </form>
+                                }
                             </li>
                         }
                     </ul>

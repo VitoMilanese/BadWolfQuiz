@@ -5844,3 +5844,14 @@ body.youtube-auto-expanded-open {
 .answer-result-overlay-content {
     gap: 14px;
 }
+
+.final-player-action-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    line-height: 1;
+}

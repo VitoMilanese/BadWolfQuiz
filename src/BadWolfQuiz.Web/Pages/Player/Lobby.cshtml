@@ -994,6 +994,10 @@
                 reloadForGameTransition().catch(console.error);
             });
 
+            connection.on("FinalQuestionProgressChanged", () => {
+                reloadForGameTransition().catch(console.error);
+            });
+
             connection.on("FinalQuestionActionRejected", update => {
                 if (finalError) {
                     finalError.textContent =

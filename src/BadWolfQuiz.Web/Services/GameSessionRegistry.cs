@@ -714,6 +714,29 @@ public sealed class GameSessionRegistry
             (game, player) => game.Session.SubmitFinalWager(player.Id, amount));
     }
 
+    public FinalPlayerSubmission? SubmitMinimumFinalWagerForInactivePlayer(
+        string publicCode,
+        GamePlayerId playerId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        EnsurePlayerInactive(game, playerId);
+
+        lock (game)
+        {
+            var submission = game.Session.SubmitFinalWager(
+                playerId,
+                FinalQuestion.MinimumWager);
+            game.MarkPersistenceChanged();
+            return submission;
+        }
+    }
+
     public GameSessionRegistration? LockFinalWagers(string publicCode)
     {
         var game = Find(publicCode);
@@ -738,6 +761,27 @@ public sealed class GameSessionRegistry
         return ExecuteApprovedPlayerAction(
             connectionId,
             (game, player) => game.Session.SubmitFinalAnswer(player.Id, answer));
+    }
+
+    public FinalPlayerSubmission? SubmitEmptyFinalAnswerForInactivePlayer(
+        string publicCode,
+        GamePlayerId playerId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        EnsurePlayerInactive(game, playerId);
+
+        lock (game)
+        {
+            var submission = game.Session.SubmitFinalAnswer(playerId, "-");
+            game.MarkPersistenceChanged();
+            return submission;
+        }
     }
 
     public GameSessionRegistration? LockFinalAnswers(string publicCode)
@@ -1337,6 +1381,30 @@ public sealed class GameSessionRegistry
 
         return transition.Access == access &&
             transition.ExpiresAtUtc >= _timeProvider.GetUtcNow();
+    }
+
+    private void EnsurePlayerInactive(
+        GameSessionRegistration game,
+        GamePlayerId playerId)
+    {
+        lock (_presenceSync)
+        {
+            var isInactive = _playerConnections.Values.Any(connection =>
+                connection.Access.Game == game &&
+                connection.Access.Player.Id == playerId &&
+                connection.IsApproved) &&
+                !_playerConnections.Values.Any(connection =>
+                    connection.Access.Game == game &&
+                    connection.Access.Player.Id == playerId &&
+                    connection.IsApproved &&
+                    connection.IsVisible);
+
+            if (!isInactive)
+            {
+                throw new GameRuleViolationException(
+                    "Only an inactive player can be overridden by the host during the final question.");
+            }
+        }
     }
 
     private PlayerPresenceStatus GetPresence(GamePlayerId playerId)
