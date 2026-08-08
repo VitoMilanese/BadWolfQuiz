@@ -2463,4 +2463,7 @@
   <data name="GameSettings_AnswerRewardDecayMinimumHint" xml:space="preserve">
     <value>Відсоток доступної нагороди, що залишиться на 1 секунді таймера (10–90%).</value>
   </data>
+  <data name="GameBoard_ForceAdvanceRoundConfirm" xml:space="preserve">
+    <value>Ви впевнені, що хочете завершити поточний раунд і перейти до наступного?</value>
+  </data>
 </root>
