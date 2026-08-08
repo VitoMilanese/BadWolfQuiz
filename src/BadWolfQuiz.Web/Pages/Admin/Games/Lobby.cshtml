@@ -2340,6 +2340,27 @@
             const startGameForm = document.getElementById("start-game-form");
             const approveForm = document.getElementById("approve-rejoin-form");
             const approvePlayerId = document.getElementById("approve-player-id");
+
+            const approveRejoin = async playerId => {
+                if (!approveForm || !approvePlayerId) {
+                    return;
+                }
+
+                approvePlayerId.value = playerId;
+
+                const response = await fetch(approveForm.action, {
+                    method: "POST",
+                    body: new FormData(approveForm),
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+            };
             const activePlayerForm = document.getElementById("set-active-player-form");
             const activePlayerId = document.getElementById("active-player-id");
             const removePlayerForm = document.getElementById("remove-player-form");
@@ -2906,9 +2927,12 @@
                             approve.title = lobby.dataset.approveLabel;
                             approve.setAttribute("aria-label", lobby.dataset.approveLabel);
                             approve.textContent = "✓";
-                            approve.addEventListener("click", () => {
-                                approvePlayerId.value = player.id;
-                                approveForm.submit();
+                            approve.addEventListener("click", async () => {
+                                try {
+                                    await approveRejoin(player.id);
+                                } catch (error) {
+                                    console.error("Failed to approve player rejoin.", error);
+                                }
                             });
                             details.append(approve);
                         }
@@ -3043,9 +3067,12 @@
                         approve.title = lobby.dataset.approveLabel;
                         approve.setAttribute("aria-label", lobby.dataset.approveLabel);
                         approve.textContent = "✓";
-                        approve.addEventListener("click", () => {
-                            approvePlayerId.value = player.id;
-                            approveForm.submit();
+                        approve.addEventListener("click", async () => {
+                            try {
+                                await approveRejoin(player.id);
+                            } catch (error) {
+                                console.error("Failed to approve player rejoin.", error);
+                            }
                         });
                         actions.append(approve);
                     }
