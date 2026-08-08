@@ -87,7 +87,7 @@ public sealed class MyQuestionsModel(
 
                 return new QuestionListItem(
                     question.PublicToken,
-                    firstMessage?.Text ?? string.Empty,
+                    firstMessage?.Text.Trim() ?? string.Empty,
                     question.UpdatedAtUtc,
                     lastMessage?.AuthorType == UserQuestionAuthorType.User);
             })

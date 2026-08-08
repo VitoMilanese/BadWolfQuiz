@@ -4,7 +4,7 @@
     ViewData["Title"] = Localizer["MyQuestions_Title"];
 }
 
-<section class="panel">
+<section class="my-questions-page">
     <div class="page-heading">
         <div>
             <h1>@Localizer["MyQuestions_Title"]</h1>
@@ -13,29 +13,34 @@
 
     @if (Model.Questions.Count == 0)
     {
-        <p>@Localizer["MyQuestions_Empty"]</p>
+        <div class="my-questions-empty">
+            <p>@Localizer["MyQuestions_Empty"]</p>
+        </div>
     }
     else
     {
-        <div class="master-game-list">
+        <div class="my-questions-list">
             @foreach (var question in Model.Questions)
             {
-                <article class="master-game-card panel">
-                    <p>@question.Preview</p>
+                <article class="my-question-card">
+                    <div class="my-question-card-main">
+                        <div class="my-question-preview">@question.Preview</div>
 
-                    <p class="muted">
-                        @Localizer["MyQuestions_Updated"]:
-                        @question.UpdatedAtUtc.ToLocalTime().ToString("g")
-                    </p>
+                        <div class="my-question-meta">
+                            <span>
+                                @Localizer["MyQuestions_Updated"]:
+                                <strong>@question.UpdatedAtUtc.ToLocalTime().ToString("g")</strong>
+                            </span>
 
-                    <p>
-                        <strong>@Localizer["Question_Status"]:</strong>
-                        @(question.AwaitingDeveloper
-                            ? Localizer["Question_AwaitingAnswer"]
-                            : Localizer["Question_ContinueConversation"])
-                    </p>
+                            <span class="my-question-status @(question.AwaitingDeveloper ? "is-waiting" : "is-replyable")">
+                                @(question.AwaitingDeveloper
+                                    ? Localizer["Question_AwaitingAnswer"]
+                                    : Localizer["Question_ContinueConversation"])
+                            </span>
+                        </div>
+                    </div>
 
-                    <div class="form-actions">
+                    <div class="my-question-actions">
                         <a class="button button-primary"
                            asp-page="/Question"
                            asp-route-token="@question.Token">

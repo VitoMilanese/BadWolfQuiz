@@ -8,79 +8,86 @@
 }
 @using BadWolfQuiz.Web.Models
 
-<section class="page-section">
-    <h1>@Localizer["Question_Title"]</h1>
+<section class="page-section question-conversation-page">
+    <div class="question-conversation-heading">
+        <h1>@Localizer["Question_Title"]</h1>
 
-    @if (!string.IsNullOrWhiteSpace(Model.UserQuestion.SenderName))
-    {
-        <p>
-            <strong>@Localizer["Question_Name"]:</strong>
-            @Model.UserQuestion.SenderName
-        </p>
-    }
-
-    <div>
-        @foreach (var message in Model.UserQuestion.Messages
-                .OrderBy(x => x.CreatedAtUtc)
-                .ThenBy(x => x.Id))
+        @if (!string.IsNullOrWhiteSpace(Model.UserQuestion.SenderName))
         {
-            <div>
-                <h2>
-                    @(message.AuthorType == UserQuestionAuthorType.User
-                                    ? Localizer["Question_You"].Value
-                                    : Localizer["Question_Developer"].Value)
-            </h2>
-
-                <p>@message.Text</p>
-            </div>
-                }
+            <p class="question-conversation-meta">
+                <strong>@Localizer["Question_Name"]:</strong>
+                <span>@Model.UserQuestion.SenderName</span>
+            </p>
+        }
     </div>
 
-    @{
-        var lastMessage = Model.UserQuestion.Messages
-        .OrderBy(x => x.CreatedAtUtc)
-        .ThenBy(x => x.Id)
-        .LastOrDefault();
+    <div class="question-conversation">
+        <div class="question-messages">
+            @foreach (var message in Model.UserQuestion.Messages
+                .OrderBy(x => x.CreatedAtUtc)
+                .ThenBy(x => x.Id))
+            {
+                var isUserMessage = message.AuthorType == UserQuestionAuthorType.User;
 
-        var awaitingDeveloper =
-        lastMessage?.AuthorType == UserQuestionAuthorType.User;
+                <article class="question-message @(isUserMessage ? "question-message-user" : "question-message-developer")">
+                    <div class="question-message-author">
+                        @(isUserMessage
+                            ? Localizer["Question_You"].Value
+                            : Localizer["Question_Developer"].Value)
+                    </div>
+                    <p class="question-message-body">@message.Text</p>
+                </article>
+            }
+        </div>
 
-        var canReply =
-        lastMessage?.AuthorType == UserQuestionAuthorType.Developer;
-    }
+        @{
+            var lastMessage = Model.UserQuestion.Messages
+                .OrderBy(x => x.CreatedAtUtc)
+                .ThenBy(x => x.Id)
+                .LastOrDefault();
 
-    @if (awaitingDeveloper)
-    {
-        <p>
-            <strong>@Localizer["Question_Status"]:</strong>
-            @Localizer["Question_AwaitingAnswer"]
-        </p>
-    }
+            var awaitingDeveloper =
+                lastMessage?.AuthorType == UserQuestionAuthorType.User;
 
-    @if (canReply)
-    {
-        <div asp-validation-summary="ModelOnly"></div>
+            var canReply =
+                lastMessage?.AuthorType == UserQuestionAuthorType.Developer;
+        }
 
-        <form method="post" asp-page-handler="Reply">
-            <input type="hidden"
-                   name="token"
-                   value="@Model.UserQuestion.PublicToken" />
-
-            <label for="message">
-                <strong>@Localizer["Question_ContinueConversation"]</strong>
-            </label>
-
-            <textarea id="message"
-                  name="message"
-                  rows="5"
-                  maxlength="5000"
-                  required></textarea>
-
-            <div class="form-actions">
-                <button type="submit" class="button button-primary">
-                    @Localizer["Button_Send"]
-                </button>
+        @if (awaitingDeveloper)
+        {
+            <div class="question-status" role="status">
+                <strong>@Localizer["Question_Status"]:</strong>
+                <span>@Localizer["Question_AwaitingAnswer"]</span>
             </div>
-        </form>
-    }
+        }
+
+        @if (canReply)
+        {
+            <div class="question-reply-panel">
+                <div asp-validation-summary="ModelOnly"></div>
+
+                <form method="post" asp-page-handler="Reply" class="question-reply-form">
+                    <input type="hidden"
+                           name="token"
+                           value="@Model.UserQuestion.PublicToken" />
+
+                    <label for="message">
+                        @Localizer["Question_ContinueConversation"]
+                    </label>
+
+                    <textarea id="message"
+                              name="message"
+                              rows="5"
+                              maxlength="5000"
+                              required></textarea>
+
+                    <div class="form-actions">
+                        <button type="submit" class="button button-primary">
+                            @Localizer["Button_Send"]
+                        </button>
+                    </div>
+                </form>
+            </div>
+        }
+    </div>
 </section>

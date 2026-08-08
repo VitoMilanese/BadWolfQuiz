@@ -1,4 +1,4 @@
-@page
+﻿@page
 @model BadWolfQuiz.Web.Pages.Admin.QuestionInboxModel
 @using BadWolfQuiz.Web.Localization
 @using Microsoft.Extensions.Localization
@@ -8,7 +8,7 @@
 }
 @using BadWolfQuiz.Web.Models
 
-<section class="page-section">
+<section class="page-section question-inbox-page">
     <h1>@Localizer["QuestionInbox_Title"]</h1>
 
     <div asp-validation-summary="ModelOnly"></div>
@@ -19,92 +19,102 @@
     }
     else
     {
-        @foreach (var question in Model.Questions)
-        {
-            <article class="panel">
-                @if (!string.IsNullOrWhiteSpace(question.SenderName))
-                {
-                    <p>
-                        <strong>@Localizer["QuestionInbox_From"]:</strong>
-                        @question.SenderName
-                    </p>
-                }
+        <div class="question-inbox-list">
+            @foreach (var question in Model.Questions)
+            {
+                <article class="question-inbox-card">
+                    <header class="question-inbox-card-header">
+                        <div>
+                            <span class="question-inbox-card-label">@Localizer["QuestionInbox_Question"]</span>
 
-                <p>
-                    <strong>@Localizer["QuestionInbox_Question"]:</strong>
-                </p>
-
-                @foreach (var message in question.Messages
-                        .OrderBy(x => x.CreatedAtUtc)
-                        .ThenBy(x => x.Id))
-                {
-                    <div>
-                        <strong>
-                            @(message.AuthorType == UserQuestionAuthorType.User
-                                            ? Localizer["QuestionInbox_User"].Value
-                                            : Localizer["QuestionInbox_Developer"].Value):
-            </strong>
-
-                        <p>@message.Text</p>
-                    </div>
-                }
-
-                @{
-                    var lastMessage = question.Messages
-                    .OrderBy(x => x.CreatedAtUtc)
-                    .ThenBy(x => x.Id)
-                    .LastOrDefault();
-
-                    var awaitingDeveloper = lastMessage?.AuthorType == UserQuestionAuthorType.User;
-                }
-
-                @if (awaitingDeveloper)
-                {
-                    <form method="post"
-                          asp-page-handler="Answer">
-
-                        <input type="hidden"
-                               name="id"
-                               value="@question.Id" />
-
-                        <label for="answer-@question.Id">
-                            <strong>@Localizer["QuestionInbox_Answer"]</strong>
-                        </label>
-
-                        <textarea id="answer-@question.Id"
-                      name="answer"
-                      rows="5"
-                      maxlength="5000"
-                      required></textarea>
-
-                        <div class="form-actions">
-                            <button type="submit"
-                                    class="button button-primary">
-                                @Localizer["QuestionInbox_Reply"]
-                            </button>
-
-                            <button type="button"
-                                    class="button button-danger-outline"
-                                    data-delete-question
-                                    data-question-id="@question.Id">
-                                @Localizer["Button_Delete"]
-                            </button>
+                            @if (!string.IsNullOrWhiteSpace(question.SenderName))
+                            {
+                                <p class="question-conversation-meta">
+                                    <strong>@Localizer["QuestionInbox_From"]:</strong>
+                                    <span>@question.SenderName</span>
+                                </p>
+                            }
                         </div>
-                    </form>
-                }
-                else
-                {
-                    <div class="form-actions">
-                        <button type="button"
-                                class="button button-danger-outline"
-                                data-delete-question
-                                data-question-id="@question.Id">
-                            @Localizer["Button_Delete"]
-                        </button>
+                    </header>
+
+                    <div class="question-messages">
+                        @foreach (var message in question.Messages
+                            .OrderBy(x => x.CreatedAtUtc)
+                            .ThenBy(x => x.Id))
+                        {
+                            var isUserMessage = message.AuthorType == UserQuestionAuthorType.User;
+
+                            <article class="question-message @(isUserMessage ? "question-message-user" : "question-message-developer")">
+                                <div class="question-message-author">
+                                    @(isUserMessage
+                                        ? Localizer["QuestionInbox_User"].Value
+                                        : Localizer["QuestionInbox_Developer"].Value)
+                                </div>
+                                <p class="question-message-body">@message.Text</p>
+                            </article>
+                        }
                     </div>
-                }
-            </article>
-        }
+
+                    @{
+                        var lastMessage = question.Messages
+                            .OrderBy(x => x.CreatedAtUtc)
+                            .ThenBy(x => x.Id)
+                            .LastOrDefault();
+
+                        var awaitingDeveloper = lastMessage?.AuthorType == UserQuestionAuthorType.User;
+                    }
+
+                    <div class="question-reply-panel question-inbox-actions-panel">
+                        @if (awaitingDeveloper)
+                        {
+                            <form method="post"
+                                  asp-page-handler="Answer"
+                                  class="question-reply-form">
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@question.Id" />
+
+                                <label for="answer-@question.Id">
+                                    @Localizer["QuestionInbox_Answer"]
+                                </label>
+
+                                <textarea id="answer-@question.Id"
+                                          name="answer"
+                                          rows="5"
+                                          maxlength="5000"
+                                          required></textarea>
+
+                                <div class="form-actions">
+                                    <button type="submit"
+                                            class="button button-primary">
+                                        @Localizer["QuestionInbox_Reply"]
+                                    </button>
+
+                                    <button type="button"
+                                            class="button button-danger-outline"
+                                            data-delete-question
+                                            data-question-id="@question.Id">
+                                        @Localizer["Button_Delete"]
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="form-actions">
+                                <button type="button"
+                                        class="button button-danger-outline"
+                                        data-delete-question
+                                        data-question-id="@question.Id">
+                                    @Localizer["Button_Delete"]
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
 
         <dialog id="delete-question-dialog"
                 class="app-dialog">
