@@ -623,6 +623,19 @@ public sealed class LobbyModel(
             cancellationToken);
     }
 
+    public async Task<IActionResult> OnPostSubmitMinimumFinalWagerAsync(
+        Guid id,
+        Guid playerId,
+        CancellationToken cancellationToken)
+    {
+        return await ExecuteFinalHostCommand(
+            id,
+            game => sessionRegistry.SubmitMinimumFinalWagerForInactivePlayer(
+                game.PublicCode,
+                new GamePlayerId(playerId)),
+            cancellationToken);
+    }
+
     public async Task<IActionResult> OnPostLockFinalWagersAsync(
         Guid id,
         CancellationToken cancellationToken)
@@ -630,6 +643,19 @@ public sealed class LobbyModel(
         return await ExecuteFinalHostCommand(
             id,
             game => sessionRegistry.LockFinalWagers(game.PublicCode),
+            cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostSubmitEmptyFinalAnswerAsync(
+        Guid id,
+        Guid playerId,
+        CancellationToken cancellationToken)
+    {
+        return await ExecuteFinalHostCommand(
+            id,
+            game => sessionRegistry.SubmitEmptyFinalAnswerForInactivePlayer(
+                game.PublicCode,
+                new GamePlayerId(playerId)),
             cancellationToken);
     }
 
@@ -1271,6 +1297,13 @@ public sealed class LobbyModel(
         }
 
         return RedirectToPage(new { id });
+    }
+
+    public bool IsPlayerInactive(GamePlayerId playerId)
+    {
+        return Players.Any(player =>
+            player.Id == playerId &&
+            player.Presence == PlayerPresenceStatus.Inactive);
     }
 
     private IActionResult LoadPage(

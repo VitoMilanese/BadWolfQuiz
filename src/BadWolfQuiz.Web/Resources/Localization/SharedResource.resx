@@ -2472,4 +2472,10 @@
   <data name="FinalQuestion_ForceAdvanceConfirm" xml:space="preserve">
     <value>Are you sure you want to skip the remaining questions and go to the final question?</value>
   </data>
+  <data name="FinalQuestion_SubmitMinimumWager" xml:space="preserve">
+    <value>Set minimum wager</value>
+  </data>
+  <data name="FinalQuestion_SubmitEmptyAnswer" xml:space="preserve">
+    <value>Submit empty answer</value>
+  </data>
 </root>

@@ -2472,4 +2472,10 @@
   <data name="FinalQuestion_ForceAdvanceConfirm" xml:space="preserve">
     <value>Sei sicuro di voler saltare le domande rimanenti e passare alla domanda finale?</value>
   </data>
+  <data name="FinalQuestion_SubmitMinimumWager" xml:space="preserve">
+    <value>Imposta la puntata minima</value>
+  </data>
+  <data name="FinalQuestion_SubmitEmptyAnswer" xml:space="preserve">
+    <value>Invia una risposta vuota</value>
+  </data>
 </root>
