@@ -167,11 +167,45 @@
             <partial name="_AvatarPicker" />
 
             <div class="lobby-secondary-actions">
-                <button class="button button-secondary"
-                        type="button"
-                        data-open-join-code>
-                    @Localizer["GameBoard_ShowJoinCode"]
-                </button>
+                <div class="lobby-join-access"
+                     data-lobby-join-access
+                     data-game-code="@Model.Game.PublicCode"
+                     data-join-path="/Join?code=@Uri.EscapeDataString(Model.Game.PublicCode)">
+                    <details class="lobby-join-details">
+                        <summary class="button button-secondary lobby-join-reveal">
+                            @Localizer["GameBoard_ShowJoinCode"]
+                        </summary>
+                        <div class="lobby-join-reveal-content">
+                            <img class="join-qr-code lobby-join-qr"
+                                 src="@Url.Page("/Admin/Games/Lobby", "JoinQrCode", new { id = Model.Game.Session.Id.Value })"
+                                 width="280"
+                                 height="280"
+                                 alt="@Localizer["GameBoard_JoinQrAlt"]" />
+                            <strong class="join-code-value lobby-join-code-value">@Model.Game.PublicCode</strong>
+                        </div>
+                    </details>
+
+                    <div class="lobby-join-copy-actions">
+                        <span class="lobby-join-copy-status"
+                              role="status"
+                              aria-live="polite"
+                              data-join-copy-status></span>
+                        <button class="button button-secondary icon-button"
+                                type="button"
+                                data-copy-join-code
+                                title="@Localizer["GameBoard_CopyJoinCode"]"
+                                aria-label="@Localizer["GameBoard_CopyJoinCode"]">
+                            <span aria-hidden="true">⧉</span>
+                        </button>
+                        <button class="button button-secondary icon-button"
+                                type="button"
+                                data-copy-join-link
+                                title="@Localizer["GameBoard_CopyJoinLink"]"
+                                aria-label="@Localizer["GameBoard_CopyJoinLink"]">
+                            <span aria-hidden="true">🔗</span>
+                        </button>
+                    </div>
+                </div>
 
                 <form method="post" asp-page-handler="RandomActivePlayer">
                     <button class="button button-secondary" type="submit">
@@ -1831,6 +1865,58 @@
                 if (event.target === dialog) {
                     dialog.close();
                 }
+            });
+        })();
+
+        (() => {
+            const joinAccess = document.querySelector("[data-lobby-join-access]");
+
+            if (!joinAccess) {
+                return;
+            }
+
+            const copyCodeButton = joinAccess.querySelector("[data-copy-join-code]");
+            const copyLinkButton = joinAccess.querySelector("[data-copy-join-link]");
+            const copyStatus = joinAccess.querySelector("[data-join-copy-status]");
+            const copiedLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["GameBoard_JoinCopied"].Value));
+
+            const copyText = async value => {
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(value);
+                    return;
+                }
+
+                const textarea = document.createElement("textarea");
+                textarea.value = value;
+                textarea.setAttribute("readonly", "");
+                textarea.style.position = "fixed";
+                textarea.style.opacity = "0";
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand("copy");
+                textarea.remove();
+            };
+
+            const showCopied = () => {
+                if (!copyStatus) {
+                    return;
+                }
+
+                copyStatus.textContent = copiedLabel;
+                window.setTimeout(() => {
+                    copyStatus.textContent = "";
+                }, 1500);
+            };
+
+            copyCodeButton?.addEventListener("click", async () => {
+                await copyText(joinAccess.dataset.gameCode ?? "");
+                showCopied();
+            });
+
+            copyLinkButton?.addEventListener("click", async () => {
+                const joinUrl = new URL(joinAccess.dataset.joinPath ?? "/Join", window.location.origin);
+                await copyText(joinUrl.href);
+                showCopied();
             });
         })();
 
