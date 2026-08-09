@@ -1630,6 +1630,37 @@
             }
         };
 
+        const showRoundSummaryIfComplete = async result => {
+            if (!result?.roundComplete) {
+                return false;
+            }
+
+            const response = await fetch(window.location.href, {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                cache: "no-store"
+            });
+
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            const documentText = await response.text();
+            const parsed = new DOMParser().parseFromString(documentText, "text/html");
+            const nextSummary = parsed.querySelector(".host-game-board .round-summary");
+            const currentLayout = document.querySelector(".host-game-board .host-board-layout");
+
+            if (!nextSummary || !currentLayout) {
+                return false;
+            }
+
+            currentLayout.replaceWith(document.importNode(nextSummary, true));
+            document.querySelector(".board-action-menu")?.remove();
+            return true;
+        };
+
         const recordAttempt = (sourceQuestionId, playerId) => {
             const addId = current => {
                 const ids = new Set((current ?? "").split(",").filter(Boolean));
@@ -1650,7 +1681,7 @@
             }
         };
 
-        return { submit, markQuestionResolved, recordAttempt };
+        return { submit, markQuestionResolved, recordAttempt, showRoundSummaryIfComplete };
     })();
 </script>
 
@@ -1759,6 +1790,7 @@
                 for (const questionId of result.resolvedQuestionIds ?? []) {
                     window.BadWolfContextActions.markQuestionResolved(questionId);
                 }
+                await window.BadWolfContextActions.showRoundSummaryIfComplete(result);
                 selectedCategory = null;
             } catch (error) {
                 console.error(error);
@@ -2020,6 +2052,7 @@
                 if (result.questionResolved) {
                     window.BadWolfContextActions.markQuestionResolved(result.sourceQuestionId);
                 }
+                await window.BadWolfContextActions.showRoundSummaryIfComplete(result);
                 selectedQuestion = null;
             } catch (error) {
                 console.error(error);
@@ -2036,6 +2069,7 @@
                 const result = await window.BadWolfContextActions.submit(closeForm);
                 closeDialog?.close();
                 window.BadWolfContextActions.markQuestionResolved(result.sourceQuestionId);
+                await window.BadWolfContextActions.showRoundSummaryIfComplete(result);
                 selectedQuestion = null;
             } catch (error) {
                 console.error(error);
@@ -2376,6 +2410,7 @@
                 if (result.questionResolved) {
                     window.BadWolfContextActions.markQuestionResolved(result.sourceQuestionId);
                 }
+                await window.BadWolfContextActions.showRoundSummaryIfComplete(result);
                 resolveDecisionMade = false;
                 updateQuestions();
             } catch (error) {

@@ -1046,7 +1046,8 @@ public sealed class LobbyModel(
                 success = true,
                 sourceQuestionId,
                 playerId,
-                questionResolved = question.Status == RuntimeQuestionStatus.Resolved
+                questionResolved = question.Status == RuntimeQuestionStatus.Resolved,
+                roundComplete = game.Session.IsCurrentRoundComplete
             });
         }
 
@@ -1083,7 +1084,12 @@ public sealed class LobbyModel(
 
         if (IsAjaxRequest())
         {
-            return new JsonResult(new { success = true, sourceQuestionId });
+            return new JsonResult(new
+            {
+                success = true,
+                sourceQuestionId,
+                roundComplete = game.Session.IsCurrentRoundComplete
+            });
         }
 
         return RedirectToPage(new { id });
@@ -1133,7 +1139,8 @@ public sealed class LobbyModel(
             {
                 success = true,
                 sourceCategoryId,
-                resolvedQuestionIds
+                resolvedQuestionIds,
+                roundComplete = game.Session.IsCurrentRoundComplete
             });
         }
 
@@ -1212,7 +1219,8 @@ public sealed class LobbyModel(
                 success = true,
                 sourceQuestionId,
                 playerId,
-                questionResolved = question.Status == RuntimeQuestionStatus.Resolved
+                questionResolved = question.Status == RuntimeQuestionStatus.Resolved,
+                roundComplete = game.Session.IsCurrentRoundComplete
             });
         }
 
