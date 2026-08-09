@@ -15,7 +15,8 @@ allow the host to:
 - reassign an existing entry to another player;
 - change its correct/incorrect result;
 - replace its reward or penalty value;
-- add a missing entry to a question that has already been played;
+- add a missing entry to any question in the current or an earlier round;
+- keep an unopened question available when adding a manual entry, or explicitly resolve it as part of the same operation;
 - delete an erroneous entry after explicit host confirmation.
 
 Each change reverses the previous score contribution and applies the corrected
@@ -25,8 +26,15 @@ When a previous round is corrected, its score difference is also applied to the
 current round's starting-score snapshot so it is not misreported as current
 round score gain.
 
-Final-question history, persistent audit storage, filters, score previews, and
-confirmation dialogs for non-destructive edits remain future extensions.
+New history entries default to a correct answer. The add form preselects the
+question's nominal point value, uses a 100-point spinner step, and accepts any
+positive manually entered value. Zero and negative values are rejected. When an
+unopened question is selected, the host is asked whether that question should
+also be resolved; declining keeps the question available while still recording
+the history entry.
+
+Final-question history, persistent audit storage, filters, and score previews
+remain future extensions.
 
 ## Host capabilities
 
@@ -60,7 +68,7 @@ Editing a historical entry is an Engine command, not a direct database or UI mut
 
 Changing an entry must reverse the previous contribution and apply the replacement contribution atomically. Adding an entry applies its contribution exactly once. Deleting an entry reverses its score contribution before removing it. Repeating the same command must not duplicate score changes.
 
-Manual corrections are allowed even when the player did not originally attempt the question. They do not reopen a resolved question or change the live question flow unless a separate command explicitly requests that behavior.
+Manual corrections are allowed even when the player did not originally attempt the question. Adding an entry may target an unopened question in the current or an earlier round. The host explicitly chooses whether an unopened question is resolved; otherwise it remains available while the manual attempt is retained and remains editable in history. Existing resolved questions are never reopened by a history correction.
 
 ## Derived results
 
@@ -79,13 +87,13 @@ The ranking logic must consume the corrected answer history rather than stale ca
 
 The host interface should provide:
 
-- filters by round, question, and player;
 - a chronological list of answer records;
 - an edit action for every record;
-- an **Add answer record** action;
-- a preview of score changes before confirmation;
-- clear marking of manually created or edited records;
-- a confirmation step for changes that alter standings.
+- an **Add answer record** action with **Correct answer** enabled by default;
+- a single question selector that identifies round, category, and question value;
+- a positive score-value input with a 100-point spinner step;
+- automatic prefill of the selected question's nominal value;
+- a confirmation dialog when a new entry targets an unopened question, allowing the host to resolve it or leave it available.
 
 The tool must remain available during the game without exposing the correct answer or administrative controls to player clients.
 

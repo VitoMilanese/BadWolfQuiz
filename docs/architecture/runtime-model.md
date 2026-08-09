@@ -157,7 +157,7 @@ A useful status progression is:
 Available -> Selected -> AwaitingWager -> Active -> AwaitingJudgment -> Resolved
 ```
 
-Not every question passes through every status. A normal question can move directly from `Selected` to `Active`; a wager question enters `AwaitingWager` first. Exact commands and transitions are defined by the game engine.
+Not every question passes through every status. A normal question can move directly from `Selected` to `Active`; a wager question enters `AwaitingWager` first. Administrative board commands may also resolve an `Available` question directly without opening it, either with no answer or together with a manually created answer-history attempt. Exact commands and transitions are defined by the game engine.
 
 Question content and the canonical correct answer remain part of the immutable quiz snapshot. The runtime question may expose them through an associated definition reference, but it does not own editable copies.
 
@@ -184,7 +184,7 @@ When an incorrect judgment or answer timeout exhausts the set of players eligibl
 to buzz for that question, the Engine resolves the question without a correct
 answer instead of reopening a buzzer phase that nobody can use.
 
-Once resolved, a question cannot become available again during normal play. Administrative correction, if supported later, should be an explicit engine command with defined score and audit consequences rather than a direct property mutation.
+Once resolved, a question cannot become available again during normal play. Administrative history correction and board-closing operations are explicit engine commands with defined score consequences; they never mutate runtime properties directly. A manual history attempt may be attached to an `Available` question while intentionally leaving it available. Round completion is still derived from question state: when the final question in the current round becomes `Resolved`, the round is complete regardless of whether resolution came from normal play, a gift operation, a single-question close, or a category close.
 
 ### GameTimer
 
