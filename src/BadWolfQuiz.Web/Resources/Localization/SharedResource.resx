@@ -2478,4 +2478,13 @@
   <data name="FinalQuestion_SubmitEmptyAnswer" xml:space="preserve">
     <value>Submit empty answer</value>
   </data>
+  <data name="GameBoard_CopyJoinCode" xml:space="preserve">
+    <value>Copy join code</value>
+  </data>
+  <data name="GameBoard_CopyJoinLink" xml:space="preserve">
+    <value>Copy lobby link</value>
+  </data>
+  <data name="GameBoard_JoinCopied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
 </root>

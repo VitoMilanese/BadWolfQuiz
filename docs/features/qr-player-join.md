@@ -1,13 +1,26 @@
 # QR Player Join
 
-The host game screen shows a QR code together with the existing six-character
-join code. The QR payload is the direct player URL `/Join/{code}`. After scanning,
-the join page keeps the game code in a hidden field and asks only for the player
-name. Manual code entry remains available from the regular join page.
+The host lobby keeps the six-character join code hidden behind a reveal control
+by default. The host can reveal the existing QR code and join code when needed.
+Dedicated actions allow the host to copy either the join code or the direct
+player join link.
 
-The in-game join overlay constrains its title, QR image, and six-character code
-to the current viewport. On short or narrow displays the dialog itself scrolls
-instead of allowing the code or QR image to overflow its frame.
+The QR payload is the direct player URL `/Join/{code}`. After scanning, the join
+page keeps the game code in a hidden field and asks only for the player name.
+Manual code entry remains available from the regular join page.
+
+During a running game, the host can open the join information from the **Tools**
+menu as a floating panel instead of a modal dialog. The panel can be moved and
+resized so the host can place it in an unused part of the game screen.
+
+The panel position, size, and visibility are persisted in the browser and
+restored after a page reload. Its title, QR code, and six-character join code
+scale with the available panel size so the content remains visible when the
+panel is resized.
+
+The floating join panel is temporarily hidden while a question or answer is
+being displayed so it does not obstruct gameplay. When the game returns to a
+state where the panel can be shown, an open panel becomes visible again.
 
 ## Public address
 

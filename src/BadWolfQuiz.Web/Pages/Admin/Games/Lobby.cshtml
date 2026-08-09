@@ -167,11 +167,45 @@
             <partial name="_AvatarPicker" />
 
             <div class="lobby-secondary-actions">
-                <button class="button button-secondary"
-                        type="button"
-                        data-open-join-code>
-                    @Localizer["GameBoard_ShowJoinCode"]
-                </button>
+                <div class="lobby-join-access"
+                     data-lobby-join-access
+                     data-game-code="@Model.Game.PublicCode"
+                     data-join-path="/Join?code=@Uri.EscapeDataString(Model.Game.PublicCode)">
+                    <details class="lobby-join-details">
+                        <summary class="button button-secondary lobby-join-reveal">
+                            @Localizer["GameBoard_ShowJoinCode"]
+                        </summary>
+                        <div class="lobby-join-reveal-content">
+                            <img class="join-qr-code lobby-join-qr"
+                                 src="@Url.Page("/Admin/Games/Lobby", "JoinQrCode", new { id = Model.Game.Session.Id.Value })"
+                                 width="280"
+                                 height="280"
+                                 alt="@Localizer["GameBoard_JoinQrAlt"]" />
+                            <strong class="join-code-value lobby-join-code-value">@Model.Game.PublicCode</strong>
+                        </div>
+                    </details>
+
+                    <div class="lobby-join-copy-actions">
+                        <span class="lobby-join-copy-status"
+                              role="status"
+                              aria-live="polite"
+                              data-join-copy-status></span>
+                        <button class="button button-secondary icon-button"
+                                type="button"
+                                data-copy-join-code
+                                title="@Localizer["GameBoard_CopyJoinCode"]"
+                                aria-label="@Localizer["GameBoard_CopyJoinCode"]">
+                            <span aria-hidden="true">⧉</span>
+                        </button>
+                        <button class="button button-secondary icon-button"
+                                type="button"
+                                data-copy-join-link
+                                title="@Localizer["GameBoard_CopyJoinLink"]"
+                                aria-label="@Localizer["GameBoard_CopyJoinLink"]">
+                            <span aria-hidden="true">🔗</span>
+                        </button>
+                    </div>
+                </div>
 
                 <form method="post" asp-page-handler="RandomActivePlayer">
                     <button class="button button-secondary" type="submit">
@@ -1431,18 +1465,25 @@
     <input id="remove-player-id" name="playerId" type="hidden" />
 </form>
 
-<dialog id="join-code-dialog"
-        class="join-code-dialog"
-        aria-labelledby="join-code-title">
-    <div class="join-code-card">
+<aside id="join-code-panel"
+       class="join-code-floating-panel"
+       data-join-code-panel
+       data-game-code="@Model.Game.PublicCode"
+       aria-labelledby="join-code-title"
+       hidden>
+    <div class="join-code-floating-toolbar"
+         data-join-code-drag-handle
+         title="@Localizer["GameBoard_MoveJoinCodePanel"]">
+        <span class="join-code-floating-grip" aria-hidden="true">•••</span>
         <button class="join-code-close"
                 type="button"
                 data-close-join-code
                 aria-label="@Localizer["Button_Close"]">
             ×
         </button>
+    </div>
 
-        <p class="eyebrow">@Localizer["GameBoard_JoinOverlayHint"]</p>
+    <div class="join-code-floating-content">
         <h2 id="join-code-title">@Localizer["GameBoard_JoinOverlayTitle"]</h2>
         <img class="join-qr-code"
              src="@Url.Page("/Admin/Games/Lobby", "JoinQrCode", new { id = Model.Game.Session.Id.Value })"
@@ -1451,7 +1492,14 @@
              alt="@Localizer["GameBoard_JoinQrAlt"]" />
         <strong class="join-code-value">@Model.Game.PublicCode</strong>
     </div>
-</dialog>
+
+    <div class="join-code-floating-resizer"
+         data-join-code-resizer
+         role="separator"
+         tabindex="0"
+         title="@Localizer["GameBoard_ResizeJoinCodePanel"]"
+         aria-label="@Localizer["GameBoard_ResizeJoinCodePanel"]"></div>
+</aside>
 
 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
 {
@@ -1818,19 +1866,256 @@
         })();
 
         (() => {
-            const dialog = document.getElementById("join-code-dialog");
+            const panel = document.querySelector("[data-join-code-panel]");
             const openButtons = document.querySelectorAll("[data-open-join-code]");
-            const closeButton = document.querySelector("[data-close-join-code]");
+            const closeButton = panel?.querySelector("[data-close-join-code]");
+            const dragHandle = panel?.querySelector("[data-join-code-drag-handle]");
+            const resizer = panel?.querySelector("[data-join-code-resizer]");
+
+            if (!panel) {
+                return;
+            }
+
+            const gameCode = panel.dataset.gameCode;
+            const visibleKey = `badwolfquiz:${gameCode}:join-code-panel-visible`;
+            const geometryKey = `badwolfquiz:${gameCode}:join-code-panel-geometry`;
+            const minimumWidth = 240;
+            const minimumHeight = 300;
+
+            const isTemporarilyHidden = () => {
+                const activeQuestion = document.querySelector(".current-question-summary");
+                const gameStatus = document.querySelector(".host-game-board")?.dataset.gameStatus;
+                const canShowInStatus =
+                    gameStatus === "running" || gameStatus === "finalwagering";
+
+                return !canShowInStatus || activeQuestion !== null;
+            };
+
+            const clampGeometry = geometry => {
+                const width = Math.min(
+                    Math.max(geometry.width, minimumWidth),
+                    Math.max(minimumWidth, window.innerWidth - 16));
+                const height = Math.min(
+                    Math.max(geometry.height, minimumHeight),
+                    Math.max(minimumHeight, window.innerHeight - 16));
+                const left = Math.min(
+                    Math.max(geometry.left, 8),
+                    Math.max(8, window.innerWidth - width - 8));
+                const top = Math.min(
+                    Math.max(geometry.top, 8),
+                    Math.max(8, window.innerHeight - height - 8));
+
+                return { left, top, width, height };
+            };
+
+            const applyGeometry = geometry => {
+                const value = clampGeometry(geometry);
+                panel.style.left = `${value.left}px`;
+                panel.style.top = `${value.top}px`;
+                panel.style.width = `${value.width}px`;
+                panel.style.height = `${value.height}px`;
+                return value;
+            };
+
+            const saveGeometry = () => {
+                const bounds = panel.getBoundingClientRect();
+                const value = applyGeometry({
+                    left: bounds.left,
+                    top: bounds.top,
+                    width: bounds.width,
+                    height: bounds.height
+                });
+                localStorage.setItem(geometryKey, JSON.stringify(value));
+            };
+
+            const restoreGeometry = () => {
+                let geometry = {
+                    left: Math.max(8, window.innerWidth - 360),
+                    top: 88,
+                    width: 320,
+                    height: 430
+                };
+
+                try {
+                    const saved = JSON.parse(localStorage.getItem(geometryKey));
+                    if (saved &&
+                        Number.isFinite(saved.left) &&
+                        Number.isFinite(saved.top) &&
+                        Number.isFinite(saved.width) &&
+                        Number.isFinite(saved.height)) {
+                        geometry = saved;
+                    }
+                } catch {
+                    localStorage.removeItem(geometryKey);
+                }
+
+                applyGeometry(geometry);
+            };
+
+            const setVisible = visible => {
+                localStorage.setItem(visibleKey, visible ? "true" : "false");
+                panel.hidden = !visible || isTemporarilyHidden();
+            };
+
+            restoreGeometry();
+            setVisible(localStorage.getItem(visibleKey) === "true");
 
             for (const openButton of openButtons) {
-                openButton.addEventListener("click", () => dialog?.showModal());
+                openButton.addEventListener("click", () => setVisible(true));
             }
-            closeButton?.addEventListener("click", () => dialog?.close());
 
-            dialog?.addEventListener("click", event => {
-                if (event.target === dialog) {
-                    dialog.close();
+            closeButton?.addEventListener("click", () => setVisible(false));
+
+            dragHandle?.addEventListener("pointerdown", event => {
+                if (event.target.closest("button")) {
+                    return;
                 }
+
+                event.preventDefault();
+                const startX = event.clientX;
+                const startY = event.clientY;
+                const startBounds = panel.getBoundingClientRect();
+                dragHandle.setPointerCapture(event.pointerId);
+                document.body.classList.add("is-moving-join-code-panel");
+
+                const move = moveEvent => {
+                    if (!dragHandle.hasPointerCapture(moveEvent.pointerId)) {
+                        return;
+                    }
+
+                    applyGeometry({
+                        left: startBounds.left + moveEvent.clientX - startX,
+                        top: startBounds.top + moveEvent.clientY - startY,
+                        width: startBounds.width,
+                        height: startBounds.height
+                    });
+                };
+
+                const stop = stopEvent => {
+                    if (!dragHandle.hasPointerCapture(stopEvent.pointerId)) {
+                        return;
+                    }
+
+                    dragHandle.releasePointerCapture(stopEvent.pointerId);
+                    dragHandle.removeEventListener("pointermove", move);
+                    dragHandle.removeEventListener("pointerup", stop);
+                    dragHandle.removeEventListener("pointercancel", stop);
+                    document.body.classList.remove("is-moving-join-code-panel");
+                    saveGeometry();
+                };
+
+                dragHandle.addEventListener("pointermove", move);
+                dragHandle.addEventListener("pointerup", stop);
+                dragHandle.addEventListener("pointercancel", stop);
+            });
+
+            resizer?.addEventListener("pointerdown", event => {
+                event.preventDefault();
+                const startX = event.clientX;
+                const startY = event.clientY;
+                const startBounds = panel.getBoundingClientRect();
+                resizer.setPointerCapture(event.pointerId);
+                document.body.classList.add("is-resizing-join-code-panel");
+
+                const move = moveEvent => {
+                    if (!resizer.hasPointerCapture(moveEvent.pointerId)) {
+                        return;
+                    }
+
+                    applyGeometry({
+                        left: startBounds.left,
+                        top: startBounds.top,
+                        width: startBounds.width + moveEvent.clientX - startX,
+                        height: startBounds.height + moveEvent.clientY - startY
+                    });
+                };
+
+                const stop = stopEvent => {
+                    if (!resizer.hasPointerCapture(stopEvent.pointerId)) {
+                        return;
+                    }
+
+                    resizer.releasePointerCapture(stopEvent.pointerId);
+                    resizer.removeEventListener("pointermove", move);
+                    resizer.removeEventListener("pointerup", stop);
+                    resizer.removeEventListener("pointercancel", stop);
+                    document.body.classList.remove("is-resizing-join-code-panel");
+                    saveGeometry();
+                };
+
+                resizer.addEventListener("pointermove", move);
+                resizer.addEventListener("pointerup", stop);
+                resizer.addEventListener("pointercancel", stop);
+            });
+
+            resizer?.addEventListener("keydown", event => {
+                if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+                    return;
+                }
+
+                event.preventDefault();
+                const bounds = panel.getBoundingClientRect();
+                applyGeometry({
+                    left: bounds.left,
+                    top: bounds.top,
+                    width: bounds.width + (event.key === "ArrowRight" ? 24 : event.key === "ArrowLeft" ? -24 : 0),
+                    height: bounds.height + (event.key === "ArrowDown" ? 24 : event.key === "ArrowUp" ? -24 : 0)
+                });
+                saveGeometry();
+            });
+
+            window.addEventListener("resize", () => saveGeometry());
+        })();
+
+        (() => {
+            const joinAccess = document.querySelector("[data-lobby-join-access]");
+
+            if (!joinAccess) {
+                return;
+            }
+
+            const copyCodeButton = joinAccess.querySelector("[data-copy-join-code]");
+            const copyLinkButton = joinAccess.querySelector("[data-copy-join-link]");
+            const copyStatus = joinAccess.querySelector("[data-join-copy-status]");
+            const copiedLabel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["GameBoard_JoinCopied"].Value));
+
+            const copyText = async value => {
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(value);
+                    return;
+                }
+
+                const textarea = document.createElement("textarea");
+                textarea.value = value;
+                textarea.setAttribute("readonly", "");
+                textarea.style.position = "fixed";
+                textarea.style.opacity = "0";
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand("copy");
+                textarea.remove();
+            };
+
+            const showCopied = () => {
+                if (!copyStatus) {
+                    return;
+                }
+
+                copyStatus.textContent = copiedLabel;
+                window.setTimeout(() => {
+                    copyStatus.textContent = "";
+                }, 1500);
+            };
+
+            copyCodeButton?.addEventListener("click", async () => {
+                await copyText(joinAccess.dataset.gameCode ?? "");
+                showCopied();
+            });
+
+            copyLinkButton?.addEventListener("click", async () => {
+                const joinUrl = new URL(joinAccess.dataset.joinPath ?? "/Join", window.location.origin);
+                await copyText(joinUrl.href);
+                showCopied();
             });
         })();
 
