@@ -299,6 +299,25 @@
 }
 
 
+<script>
+    (() => {
+        const storageKey = "badwolfquiz:player-panel-height";
+        const savedHeight = Number.parseInt(localStorage.getItem(storageKey), 10);
+
+        if (!Number.isFinite(savedHeight)) {
+            return;
+        }
+
+        const minimum = 130;
+        const maximum = Math.max(130, Math.floor(window.innerHeight * 0.65));
+        const height = Math.min(maximum, Math.max(minimum, savedHeight));
+        const style = document.createElement("style");
+
+        style.textContent = `.host-game-board { --game-scoreboard-space: ${height}px; }`;
+        document.head.appendChild(style);
+    })();
+</script>
+
 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
 {
     <section class="host-game-board"
