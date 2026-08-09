@@ -2538,4 +2538,10 @@
   <data name="GameBoard_QuestionCloseConfirmation" xml:space="preserve">
     <value>Це питання буде закрите без відповіді. Продовжити?</value>
   </data>
+  <data name="GameBoard_CategoryCloseTitle" xml:space="preserve">
+    <value>Закрити категорію?</value>
+  </data>
+  <data name="GameBoard_CategoryCloseConfirmation" xml:space="preserve">
+    <value>Усі ще не відкриті питання цієї категорії будуть закриті без відповіді. Продовжити?</value>
+  </data>
 </root>

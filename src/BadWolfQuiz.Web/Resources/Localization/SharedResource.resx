@@ -2538,4 +2538,10 @@
   <data name="GameBoard_QuestionCloseConfirmation" xml:space="preserve">
     <value>This question will be closed without an answer. Continue?</value>
   </data>
+  <data name="GameBoard_CategoryCloseTitle" xml:space="preserve">
+    <value>Close category?</value>
+  </data>
+  <data name="GameBoard_CategoryCloseConfirmation" xml:space="preserve">
+    <value>All unopened questions in this category will be closed without an answer. Continue?</value>
+  </data>
 </root>

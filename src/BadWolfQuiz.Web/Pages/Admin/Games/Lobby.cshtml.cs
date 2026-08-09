@@ -1054,6 +1054,35 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostCloseAvailableCategoryQuestionsAsync(
+        Guid id,
+        int sourceCategoryId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.CloseAvailableCategoryQuestions(
+                game.PublicCode,
+                sourceCategoryId);
+            await gameHistoryStore.SaveCompletedGameAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_SelectionRejected"].Value;
+        }
+
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostQuickScoreAdjustmentAsync(
         Guid id,
         int sourceQuestionId,

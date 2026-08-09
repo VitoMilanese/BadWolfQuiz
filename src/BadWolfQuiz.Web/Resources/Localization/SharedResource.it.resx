@@ -2538,4 +2538,10 @@
   <data name="GameBoard_QuestionCloseConfirmation" xml:space="preserve">
     <value>Questa domanda verrà chiusa senza risposta. Continuare?</value>
   </data>
+  <data name="GameBoard_CategoryCloseTitle" xml:space="preserve">
+    <value>Chiudere la categoria?</value>
+  </data>
+  <data name="GameBoard_CategoryCloseConfirmation" xml:space="preserve">
+    <value>Tutte le domande non ancora aperte di questa categoria verranno chiuse senza risposta. Continuare?</value>
+  </data>
 </root>

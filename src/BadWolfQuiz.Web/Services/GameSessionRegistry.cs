@@ -1175,6 +1175,26 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public IReadOnlyList<RuntimeQuestion>? CloseAvailableCategoryQuestions(
+        string publicCode,
+        int sourceCategoryId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            var questions = game.Session.CloseAvailableCategoryQuestions(sourceCategoryId);
+            game.BuzzerRace = null;
+            game.MarkPersistenceChanged();
+            return questions;
+        }
+    }
+
     public RuntimeQuestion? ResolveQuestionWithoutCorrectAnswer(
         string publicCode,
         int sourceQuestionId)

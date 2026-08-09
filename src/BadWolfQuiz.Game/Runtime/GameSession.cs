@@ -595,6 +595,41 @@ public sealed class GameSession
         return question;
     }
 
+    public IReadOnlyList<RuntimeQuestion> CloseAvailableCategoryQuestions(
+        int sourceCategoryId)
+    {
+        EnsureRunning();
+
+        var questions = Board.Questions
+            .Where(question =>
+                question.SourceRoundId == CurrentRound.SourceRoundId &&
+                question.SourceCategoryId == sourceCategoryId)
+            .ToArray();
+
+        if (questions.Length == 0)
+        {
+            throw new GameRuleViolationException(
+                "The selected category does not belong to the current round.");
+        }
+
+        var availableQuestions = questions
+            .Where(question => question.Status == RuntimeQuestionStatus.Available)
+            .ToArray();
+
+        if (availableQuestions.Length == 0)
+        {
+            throw new GameRuleViolationException(
+                "The selected category has no available questions to close.");
+        }
+
+        foreach (var question in availableQuestions)
+        {
+            question.ForceResolve();
+        }
+
+        return availableQuestions;
+    }
+
     public RuntimeQuestion ResolveQuestionWithoutCorrectAnswer(
         int sourceQuestionId)
     {

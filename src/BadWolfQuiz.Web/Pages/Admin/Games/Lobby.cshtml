@@ -873,7 +873,12 @@
             @foreach (var category in Model.BoardCategories)
             {
                 <section class="host-board-column">
-                    <h3>@category.Title</h3>
+                    <h3 data-category-context
+                        data-source-category-id="@category.SourceCategoryId"
+                        data-category-label="@category.Title"
+                        data-has-available-questions="@category.Questions.Any(question => question.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Available).ToString().ToLowerInvariant()">
+                        @category.Title
+                    </h3>
 
                     @foreach (var question in category.Questions)
                     {
@@ -1556,6 +1561,119 @@
     </dialog>
     <partial name="_AvatarPicker" />
 }
+
+
+<div id="category-context-menu"
+     class="category-context-menu"
+     role="menu"
+     hidden>
+    <button class="category-context-action category-context-close"
+            type="button"
+            data-category-close
+            role="menuitem"
+            title="@Localizer["GameBoard_QuestionClose"]"
+            aria-label="@Localizer["GameBoard_QuestionClose"]">
+        <span aria-hidden="true">✕</span>
+    </button>
+</div>
+
+<dialog id="category-close-dialog"
+        class="app-dialog"
+        aria-labelledby="category-close-dialog-title">
+    <form method="post"
+          asp-page-handler="CloseAvailableCategoryQuestions"
+          class="dialog-card dialog-card-danger"
+          data-category-close-form>
+        <input name="sourceCategoryId" type="hidden" data-category-close-id />
+
+        <div class="dialog-heading">
+            <h2 id="category-close-dialog-title">@Localizer["GameBoard_CategoryCloseTitle"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-category-close-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <p class="dialog-target" data-category-close-label></p>
+        <p class="dialog-warning">@Localizer["GameBoard_CategoryCloseConfirmation"]</p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-category-close-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-danger" type="submit">
+                @Localizer["GameBoard_QuestionClose"]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+    (() => {
+        const menu = document.getElementById("category-context-menu");
+        const dialog = document.getElementById("category-close-dialog");
+        const categoryId = dialog?.querySelector("[data-category-close-id]");
+        const categoryLabel = dialog?.querySelector("[data-category-close-label]");
+        let selectedCategory = null;
+
+        const hide = () => {
+            if (menu) menu.hidden = true;
+        };
+
+        const position = event => {
+            if (!menu) return;
+            menu.hidden = false;
+            const rect = menu.getBoundingClientRect();
+            const left = Math.min(event.clientX, Math.max(8, window.innerWidth - rect.width - 8));
+            const top = Math.min(event.clientY, Math.max(8, window.innerHeight - rect.height - 8));
+            menu.style.left = `${Math.max(8, left)}px`;
+            menu.style.top = `${Math.max(8, top)}px`;
+        };
+
+        document.addEventListener("contextmenu", event => {
+            const target = event.target instanceof Element ? event.target : null;
+            const category = target?.closest("[data-category-context]");
+            if (!category) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            hide();
+
+            if (category.dataset.hasAvailableQuestions !== "true") {
+                selectedCategory = null;
+                return;
+            }
+
+            selectedCategory = category;
+            position(event);
+        }, true);
+
+        menu?.querySelector("[data-category-close]")?.addEventListener("click", () => {
+            hide();
+            if (!selectedCategory || !dialog || !categoryId || !categoryLabel) return;
+            categoryId.value = selectedCategory.dataset.sourceCategoryId || "";
+            categoryLabel.textContent = selectedCategory.dataset.categoryLabel || "";
+            dialog.showModal();
+        });
+
+        for (const button of dialog?.querySelectorAll("[data-close-category-close-dialog]") || []) {
+            button.addEventListener("click", () => dialog.close());
+        }
+        dialog?.addEventListener("click", event => {
+            if (event.target === dialog) dialog.close();
+        });
+
+        document.addEventListener("pointerdown", event => {
+            if (menu && !menu.hidden && !menu.contains(event.target)) hide();
+        }, true);
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") hide();
+        });
+        window.addEventListener("resize", hide);
+    })();
+</script>
 
 <div id="question-context-menu"
      class="question-context-menu"
