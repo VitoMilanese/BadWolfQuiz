@@ -6,6 +6,11 @@ The fixed card row at the bottom of the host screen keeps participants visible t
 
 Player cards communicate score and temporary question state. A separate optional host card provides a visual presence for the host without treating the host as a participant.
 
+The host may resize the fixed player-card row vertically. The selected height is
+stored in the browser and restored before the gameplay layout is first painted
+after a page reload, preventing a visible jump from the default height to the
+saved height.
+
 ## Current question states
 
 While a question is active:
