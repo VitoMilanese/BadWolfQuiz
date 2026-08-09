@@ -27,7 +27,8 @@ public sealed class LobbyModel(
     DiscordMuteCoordinator discordMuteCoordinator,
     IDiscordVoiceGateway discordGateway,
     IHubContext<GameHub> gameHub,
-    IStringLocalizer<SharedResource> localizer) : PageModel
+    IStringLocalizer<SharedResource> localizer,
+    ILogger<LobbyModel> logger) : PageModel
 {
     public GameSessionRegistration Game { get; private set; } = null!;
 
@@ -477,6 +478,12 @@ public sealed class LobbyModel(
 
         if (game is null)
         {
+            logger.LogWarning(
+                "Host gameplay session lookup failed. Handler={Handler} GameSessionId={GameSessionId} HostId={HostId} TraceIdentifier={TraceIdentifier}",
+                "PauseQuestionTimer",
+                id,
+                currentHost.RequiredId,
+                HttpContext.TraceIdentifier);
             return NotFound();
         }
 
@@ -513,6 +520,12 @@ public sealed class LobbyModel(
 
         if (game is null)
         {
+            logger.LogWarning(
+                "Host gameplay session lookup failed. Handler={Handler} GameSessionId={GameSessionId} HostId={HostId} TraceIdentifier={TraceIdentifier}",
+                "ResumeQuestionTimer",
+                id,
+                currentHost.RequiredId,
+                HttpContext.TraceIdentifier);
             return NotFound();
         }
 
@@ -693,6 +706,12 @@ public sealed class LobbyModel(
 
         if (game is null)
         {
+            logger.LogWarning(
+                "Host gameplay session lookup failed. Handler={Handler} GameSessionId={GameSessionId} HostId={HostId} TraceIdentifier={TraceIdentifier}",
+                "SelectQuestion",
+                id,
+                currentHost.RequiredId,
+                HttpContext.TraceIdentifier);
             return NotFound();
         }
 
@@ -863,6 +882,12 @@ public sealed class LobbyModel(
 
         if (game is null)
         {
+            logger.LogWarning(
+                "Host gameplay session lookup failed. Handler={Handler} GameSessionId={GameSessionId} HostId={HostId} TraceIdentifier={TraceIdentifier}",
+                "JudgeQuestionAnswer",
+                id,
+                currentHost.RequiredId,
+                HttpContext.TraceIdentifier);
             return NotFound();
         }
 
@@ -888,13 +913,25 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException)
         {
-            TempData["ErrorMessage"] =
-                localizer["GameBoard_JudgmentRejected"].Value;
+            var errorMessage = localizer["GameBoard_JudgmentRejected"].Value;
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
         }
 
         await BroadcastPlayersAsync(game, cancellationToken);
         await BroadcastBuzzerAsync(game, cancellationToken);
         await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new { success = true });
+        }
+
         return RedirectToPage(new { id });
     }
 
@@ -1263,6 +1300,12 @@ public sealed class LobbyModel(
 
         if (game is null)
         {
+            logger.LogWarning(
+                "Host gameplay session lookup failed. Handler={Handler} GameSessionId={GameSessionId} HostId={HostId} TraceIdentifier={TraceIdentifier}",
+                "RandomActivePlayer",
+                id,
+                currentHost.RequiredId,
+                HttpContext.TraceIdentifier);
             return NotFound();
         }
 
@@ -1272,11 +1315,23 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException)
         {
-            TempData["ErrorMessage"] =
-                localizer["GameBoard_ActivePlayerRejected"].Value;
+            var errorMessage = localizer["GameBoard_ActivePlayerRejected"].Value;
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
         }
 
         await BroadcastPlayersAsync(game, cancellationToken);
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new { success = true });
+        }
+
         return RedirectToPage(new { id });
     }
 
