@@ -299,6 +299,25 @@
 }
 
 
+<script>
+    (() => {
+        const storageKey = "badwolfquiz:player-panel-height";
+        const savedHeight = Number.parseInt(localStorage.getItem(storageKey), 10);
+
+        if (!Number.isFinite(savedHeight)) {
+            return;
+        }
+
+        const minimum = 130;
+        const maximum = Math.max(130, Math.floor(window.innerHeight * 0.65));
+        const height = Math.min(maximum, Math.max(minimum, savedHeight));
+        const style = document.createElement("style");
+
+        style.textContent = `.host-game-board { --game-scoreboard-space: ${height}px; }`;
+        document.head.appendChild(style);
+    })();
+</script>
+
 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
 {
     <section class="host-game-board"
@@ -665,7 +684,7 @@
                     buzzerRace.SourceQuestionId == Model.CurrentQuestion.SourceQuestionId)
                 {
                     <aside class="buzzer-race-overlay" role="status" aria-live="polite">
-                        <div class="buzzer-race-card">
+                        <div class="buzzer-race-card" data-auto-fit-overlay>
                             <p>@Localizer["GameBoard_BuzzerRaceWinner", buzzerRace.WinnerPlayerName]</p>
                             <ul>
                                 @foreach (var latePlayer in buzzerRace.LatePlayers)
@@ -961,7 +980,7 @@
                    data-answer-result-overlay
                    role="status"
                    aria-live="polite">
-                <div class="buzzer-race-card answer-result-card">
+                <div class="buzzer-race-card answer-result-card" data-auto-fit-overlay>
                     <p class="answer-result-player-name">
                         @answerResultOverlay.PlayerName
                     </p>
@@ -2198,6 +2217,63 @@
                 preview.src = previewUrl;
                 preview.hidden = false;
             });
+        })();
+
+        (() => {
+            const cards = [...document.querySelectorAll("[data-auto-fit-overlay]")];
+
+            if (cards.length === 0) {
+                return;
+            }
+
+            const fitCard = card => {
+                const elements = [...card.querySelectorAll(
+                    "p, li, .answer-result-score")];
+
+                if (elements.length === 0) {
+                    return;
+                }
+
+                for (const element of elements) {
+                    element.style.removeProperty("font-size");
+                }
+
+                const baseSizes = elements.map(element =>
+                    Number.parseFloat(getComputedStyle(element).fontSize));
+
+                const fits = () => {
+                    if (card.scrollHeight > card.clientHeight + 1) {
+                        return false;
+                    }
+
+                    return elements.every(element =>
+                        element.scrollWidth <= element.clientWidth + 1);
+                };
+
+                let scale = 1;
+                while (scale > 0.35 && !fits()) {
+                    scale -= 0.025;
+                    elements.forEach((element, index) => {
+                        element.style.fontSize = `${baseSizes[index] * scale}px`;
+                    });
+                }
+            };
+
+            const fitCards = () => {
+                for (const card of cards) {
+                    fitCard(card);
+                    card.classList.add("is-auto-fit-ready");
+                }
+            };
+
+            fitCards();
+
+            if (typeof ResizeObserver !== "undefined") {
+                const observer = new ResizeObserver(fitCards);
+                cards.forEach(card => observer.observe(card));
+            } else {
+                window.addEventListener("resize", fitCards);
+            }
         })();
 
         (() => {

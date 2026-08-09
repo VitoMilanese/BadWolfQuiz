@@ -69,6 +69,15 @@ For regular buzzer questions, the answering player is established by the buzzer 
 
 After correct, incorrect, and timeout outcomes, the host briefly sees the answering player and actual applied score delta over the player-card area. This transient feedback does not delay the authoritative transition to the next gameplay state.
 
+The transient score-result overlay automatically scales the player name and applied
+score delta to the available card area. Both values remain fully visible without
+overflow, and the fitted text is revealed only after its initial layout pass to
+avoid visible font-size jumps.
+
+The near-simultaneous buzzer overlay applies the same fitting behavior to the
+winner and later buzzer entries. Later entries remain readable at a size close to
+the winner text and shrink only when required to fit the available width.
+
 ## Target question presentation flow
 
 The final host experience replaces the temporary player-selection panel with a full question presentation state.

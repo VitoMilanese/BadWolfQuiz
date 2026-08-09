@@ -3615,6 +3615,13 @@ body:has(.player-lobby) > .page-shell {
     font-weight: 800;
 }
 
+.buzzer-race-card li {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 @media (max-width: 700px) {
     .wager-entry-panel {
         grid-template-columns: 1fr;
@@ -4325,14 +4332,25 @@ body.youtube-auto-expanded-open {
     height: var(--game-scoreboard-space, 230px);
     display: grid;
     place-items: center;
-    padding: 24px;
+    padding: clamp(6px, 1.4vh, 14px);
     pointer-events: none;
     animation: buzzer-race-overlay-life 5s ease forwards;
 }
 
+.buzzer-race-card[data-auto-fit-overlay] {
+    visibility: hidden;
+}
+
+.buzzer-race-card[data-auto-fit-overlay].is-auto-fit-ready {
+    visibility: visible;
+}
+
 .buzzer-race-card {
     width: min(900px, 94vw);
-    padding: clamp(24px, 4vw, 42px);
+    max-height: 100%;
+    box-sizing: border-box;
+    padding: clamp(10px, 2vh, 24px);
+    overflow: hidden;
     border: 2px solid var(--gold);
     border-radius: 22px;
     color: var(--text);
@@ -4341,8 +4359,17 @@ body.youtube-auto-expanded-open {
     text-align: center;
 }
 
+.buzzer-race-card:not(.answer-result-card) {
+    display: grid;
+    align-content: center;
+    gap: clamp(4px, 1vh, 10px);
+}
+
 .buzzer-race-card p {
-    margin: 0 0 18px;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    margin: 0;
     color: var(--gold);
     font-size: clamp(1.5rem, 3vw, 2.6rem);
     font-weight: 950;
@@ -4350,13 +4377,16 @@ body.youtube-auto-expanded-open {
 }
 
 .buzzer-race-card ul {
+    min-width: 0;
+    max-width: 100%;
     display: grid;
-    gap: 10px;
+    gap: clamp(2px, .55vh, 6px);
     margin: 0;
     padding: 0;
     list-style: none;
-    font-size: clamp(1rem, 2vw, 1.4rem);
-    font-weight: 800;
+    font-size: clamp(1.25rem, 2.5vw, 2rem);
+    font-weight: 850;
+    line-height: 1.12;
 }
 
 @media (max-width: 700px) {
@@ -5987,13 +6017,22 @@ body.youtube-auto-expanded-open {
     }
 }
 
-.answer-result-player-name {
-    font-size: clamp(1.35rem, 2.7vw, 2rem);
+.answer-result-card .answer-result-player-name {
+    max-width: 100%;
+    margin-bottom: clamp(4px, 1vh, 10px);
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: clamp(1.5rem, 3vw, 2.6rem);
+    line-height: 1.02;
 }
 
-.answer-result-score {
-    font-size: clamp(2.5rem, 5.4vw, 4rem);
-    font-weight: 900;
+.answer-result-card .answer-result-score {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: clamp(3.25rem, 6vw, 5rem);
+    font-weight: 950;
     line-height: 1;
 }
 
