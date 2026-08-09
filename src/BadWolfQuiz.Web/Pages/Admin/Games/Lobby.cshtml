@@ -886,7 +886,12 @@
                                        type="hidden"
                                        value="@question.SourceQuestionId" />
                                 <button class="host-board-question status-available"
-                                        type="submit">
+                                        type="submit"
+                                        data-question-context
+                                        data-source-question-id="@question.SourceQuestionId"
+                                        data-question-points="@question.Points"
+                                        data-question-label="@Model.Game.Session.CurrentRound.Title — @question.CategoryTitle — @question.Points"
+                                        data-attempted-player-ids="@string.Join(',', question.AnswerAttempts.Select(attempt => attempt.PlayerId.Value))">
                                     @question.Points
                                 </button>
                             </form>
@@ -894,6 +899,7 @@
                         else if (question.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Resolved)
                         {
                             <a class="host-board-question status-resolved"
+                               data-question-resolved
                                asp-page="/Admin/Games/Lobby"
                                asp-route-id="@Model.Game.Session.Id.Value"
                                asp-route-previewQuestionId="@question.SourceQuestionId"
@@ -1550,6 +1556,258 @@
     </dialog>
     <partial name="_AvatarPicker" />
 }
+
+<div id="question-context-menu"
+     class="question-context-menu"
+     role="menu"
+     hidden>
+    <button class="question-context-action question-context-gift"
+            type="button"
+            data-question-gift
+            role="menuitem"
+            title="@Localizer["GameBoard_QuestionGift"]"
+            aria-label="@Localizer["GameBoard_QuestionGift"]">
+        <span aria-hidden="true">🎁</span>
+    </button>
+    <button class="question-context-action question-context-close"
+            type="button"
+            data-question-close
+            role="menuitem"
+            title="@Localizer["GameBoard_QuestionClose"]"
+            aria-label="@Localizer["GameBoard_QuestionClose"]">
+        <span aria-hidden="true">✕</span>
+    </button>
+</div>
+
+<dialog id="question-gift-dialog"
+        class="app-dialog"
+        aria-labelledby="question-gift-dialog-title">
+    <form method="post"
+          asp-page-handler="GiftQuestion"
+          class="dialog-card stack-form"
+          novalidate
+          data-question-gift-form>
+        <input name="sourceQuestionId" type="hidden" data-question-gift-id />
+
+        <div class="dialog-heading">
+            <h2 id="question-gift-dialog-title">@Localizer["GameBoard_QuestionGift"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-question-gift
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <label>
+            <span>@Localizer["AnswerHistory_Question"]</span>
+            <input type="text" readonly data-question-gift-label />
+        </label>
+
+        <label>
+            <span>@Localizer["AnswerHistory_Player"]</span>
+            <select name="playerId" required data-question-gift-player>
+                @foreach (var player in Model.Game.Session.Players)
+                {
+                    <option value="@player.Id.Value">@player.Name</option>
+                }
+            </select>
+        </label>
+
+        <label>
+            <span>@Localizer["GameBoard_QuickScoreRewardAmount"]</span>
+            <input name="value"
+                   type="number"
+                   min="0"
+                   step="100"
+                   value="100"
+                   required
+                   data-question-gift-value />
+        </label>
+
+        <label class="answer-history-correct">
+            <input name="resolveQuestionIfAvailable"
+                   type="checkbox"
+                   value="true"
+                   data-question-gift-resolve />
+            <span>@Localizer["GameBoard_QuestionGiftCloseAfter"]</span>
+        </label>
+
+        <p class="message message-error quick-score-warning"
+           data-question-gift-warning
+           hidden></p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-question-gift>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-primary"
+                    type="submit"
+                    data-question-gift-submit>
+                @Localizer["GameBoard_QuestionGift"]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="question-close-dialog"
+        class="app-dialog"
+        aria-labelledby="question-close-dialog-title">
+    <form method="post"
+          asp-page-handler="CloseAvailableQuestion"
+          class="dialog-card dialog-card-danger"
+          data-question-close-form>
+        <input name="sourceQuestionId" type="hidden" data-question-close-id />
+
+        <div class="dialog-heading">
+            <h2 id="question-close-dialog-title">@Localizer["GameBoard_QuestionCloseTitle"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-question-close-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <p class="dialog-target" data-question-close-label></p>
+        <p class="dialog-warning">@Localizer["GameBoard_QuestionCloseConfirmation"]</p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-question-close-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-danger" type="submit">
+                @Localizer["GameBoard_QuestionClose"]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+    (() => {
+        const menu = document.getElementById("question-context-menu");
+        const giftDialog = document.getElementById("question-gift-dialog");
+        const giftForm = giftDialog?.querySelector("[data-question-gift-form]");
+        const giftId = giftDialog?.querySelector("[data-question-gift-id]");
+        const giftLabel = giftDialog?.querySelector("[data-question-gift-label]");
+        const giftPlayer = giftDialog?.querySelector("[data-question-gift-player]");
+        const giftValue = giftDialog?.querySelector("[data-question-gift-value]");
+        const giftResolve = giftDialog?.querySelector("[data-question-gift-resolve]");
+        const giftWarning = giftDialog?.querySelector("[data-question-gift-warning]");
+        const giftSubmit = giftDialog?.querySelector("[data-question-gift-submit]");
+        const closeDialog = document.getElementById("question-close-dialog");
+        const closeForm = closeDialog?.querySelector("[data-question-close-form]");
+        const closeId = closeDialog?.querySelector("[data-question-close-id]");
+        const closeLabel = closeDialog?.querySelector("[data-question-close-label]");
+        let selectedQuestion = null;
+
+        const invalidValueMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["GameBoard_QuickScoreInvalidValue"].Value));
+        const noPlayersMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["AnswerHistory_NoEligiblePlayers"].Value));
+
+        const hide = () => {
+            if (menu) menu.hidden = true;
+        };
+
+        const position = event => {
+            if (!menu) return;
+            menu.hidden = false;
+            const rect = menu.getBoundingClientRect();
+            const left = Math.min(event.clientX, Math.max(8, window.innerWidth - rect.width - 8));
+            const top = Math.min(event.clientY, Math.max(8, window.innerHeight - rect.height - 8));
+            menu.style.left = `${Math.max(8, left)}px`;
+            menu.style.top = `${Math.max(8, top)}px`;
+        };
+
+        const syncPlayers = () => {
+            if (!selectedQuestion || !giftPlayer) return false;
+            const attempted = new Set((selectedQuestion.dataset.attemptedPlayerIds || "").split(",").filter(Boolean));
+            let first = null;
+            for (const option of giftPlayer.options) {
+                option.disabled = attempted.has(option.value);
+                if (!option.disabled && !first) first = option;
+            }
+            if (first) giftPlayer.value = first.value;
+            if (giftWarning) {
+                giftWarning.hidden = !!first;
+                giftWarning.textContent = first ? "" : noPlayersMessage;
+            }
+            if (giftSubmit) {
+                giftSubmit.disabled = !first;
+            }
+            return !!first;
+        };
+
+        document.addEventListener("contextmenu", event => {
+            const target = event.target instanceof Element ? event.target : null;
+            const resolved = target?.closest(".host-board-question.status-resolved[data-question-resolved]");
+            if (resolved) {
+                event.preventDefault();
+                hide();
+                return;
+            }
+
+            const question = target?.closest(".host-board-question.status-available[data-question-context]");
+            if (!question) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            selectedQuestion = question;
+            position(event);
+        }, true);
+
+        menu?.querySelector("[data-question-gift]")?.addEventListener("click", () => {
+            hide();
+            if (!selectedQuestion || !giftDialog || !giftId || !giftLabel || !giftValue || !giftResolve) return;
+            giftId.value = selectedQuestion.dataset.sourceQuestionId || "";
+            giftLabel.value = selectedQuestion.dataset.questionLabel || "";
+            giftValue.value = selectedQuestion.dataset.questionPoints || "100";
+            giftResolve.checked = false;
+            syncPlayers();
+            giftDialog.showModal();
+        });
+
+        menu?.querySelector("[data-question-close]")?.addEventListener("click", () => {
+            hide();
+            if (!selectedQuestion || !closeDialog || !closeId || !closeLabel) return;
+            closeId.value = selectedQuestion.dataset.sourceQuestionId || "";
+            closeLabel.textContent = selectedQuestion.dataset.questionLabel || "";
+            closeDialog.showModal();
+        });
+
+        giftForm?.addEventListener("submit", event => {
+            const value = Number(giftValue?.value);
+            if (!Number.isInteger(value) || value <= 0) {
+                event.preventDefault();
+                if (giftWarning) {
+                    giftWarning.hidden = false;
+                    giftWarning.textContent = invalidValueMessage;
+                }
+            }
+        });
+
+        for (const button of giftDialog?.querySelectorAll("[data-close-question-gift]") || []) {
+            button.addEventListener("click", () => giftDialog.close());
+        }
+        giftDialog?.addEventListener("click", event => {
+            if (event.target === giftDialog) giftDialog.close();
+        });
+
+        for (const button of closeDialog?.querySelectorAll("[data-close-question-close-dialog]") || []) {
+            button.addEventListener("click", () => closeDialog.close());
+        }
+        closeDialog?.addEventListener("click", event => {
+            if (event.target === closeDialog) closeDialog.close();
+        });
+
+        document.addEventListener("pointerdown", event => {
+            if (menu && !menu.hidden && !menu.contains(event.target)) hide();
+        }, true);
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") hide();
+        });
+        window.addEventListener("resize", hide);
+    })();
+</script>
 
 <div id="player-score-context-menu"
      class="player-score-context-menu"

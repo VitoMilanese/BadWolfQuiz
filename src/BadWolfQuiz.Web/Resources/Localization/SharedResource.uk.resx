@@ -2523,4 +2523,19 @@
   <data name="GameBoard_QuickScoreMarkQuestionClosed" xml:space="preserve">
     <value>Позначити закритим</value>
   </data>
+  <data name="GameBoard_QuestionGift" xml:space="preserve">
+    <value>Подарувати</value>
+  </data>
+  <data name="GameBoard_QuestionClose" xml:space="preserve">
+    <value>Закрити</value>
+  </data>
+  <data name="GameBoard_QuestionGiftCloseAfter" xml:space="preserve">
+    <value>Закрити це питання після нарахування балів</value>
+  </data>
+  <data name="GameBoard_QuestionCloseTitle" xml:space="preserve">
+    <value>Закрити питання?</value>
+  </data>
+  <data name="GameBoard_QuestionCloseConfirmation" xml:space="preserve">
+    <value>Це питання буде закрите без відповіді. Продовжити?</value>
+  </data>
 </root>

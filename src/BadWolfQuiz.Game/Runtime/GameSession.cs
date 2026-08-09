@@ -574,6 +574,27 @@ public sealed class GameSession
         return removed;
     }
 
+    public RuntimeQuestion CloseAvailableQuestion(int sourceQuestionId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        if (question.SourceRoundId != CurrentRound.SourceRoundId)
+        {
+            throw new GameRuleViolationException(
+                "Only a question from the current round can be closed.");
+        }
+
+        if (question.Status != RuntimeQuestionStatus.Available)
+        {
+            throw new GameRuleViolationException(
+                "Only an available question can be closed directly.");
+        }
+
+        question.ForceResolve();
+        return question;
+    }
+
     public RuntimeQuestion ResolveQuestionWithoutCorrectAnswer(
         int sourceQuestionId)
     {

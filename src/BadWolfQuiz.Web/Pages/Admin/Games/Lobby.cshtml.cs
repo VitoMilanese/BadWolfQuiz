@@ -975,6 +975,85 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostGiftQuestionAsync(
+        Guid id,
+        int sourceQuestionId,
+        Guid playerId,
+        int value,
+        bool resolveQuestionIfAvailable,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            if (value <= 0)
+            {
+                TempData["ErrorMessage"] =
+                    localizer["GameBoard_QuickScoreInvalidValue"].Value;
+                return RedirectToPage(new { id });
+            }
+
+            sessionRegistry.AddQuestionAnswerHistoryEntry(
+                game.PublicCode,
+                sourceQuestionId,
+                new GamePlayerId(playerId),
+                true,
+                value,
+                resolveQuestionIfAvailable);
+
+            await gameHistoryStore.SaveCompletedGameAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException exception)
+        {
+            TempData["ErrorMessage"] = exception.Message switch
+            {
+                "This player already has an answer entry for the selected question." =>
+                    localizer["AnswerHistory_PlayerAlreadyRecorded"].Value,
+                "Answer history cannot be added to a question that has not been played." =>
+                    localizer["AnswerHistory_QuestionNotPlayed"].Value,
+                "An answer history value cannot be negative." =>
+                    localizer["AnswerHistory_InvalidValue"].Value,
+                _ => localizer["AnswerHistory_Rejected"].Value
+            };
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostCloseAvailableQuestionAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.CloseAvailableQuestion(game.PublicCode, sourceQuestionId);
+            await gameHistoryStore.SaveCompletedGameAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_SelectionRejected"].Value;
+        }
+
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostQuickScoreAdjustmentAsync(
         Guid id,
         int sourceQuestionId,

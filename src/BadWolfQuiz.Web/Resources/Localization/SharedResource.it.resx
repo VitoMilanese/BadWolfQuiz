@@ -2523,4 +2523,19 @@
   <data name="GameBoard_QuickScoreMarkQuestionClosed" xml:space="preserve">
     <value>Contrassegna come chiusa</value>
   </data>
+  <data name="GameBoard_QuestionGift" xml:space="preserve">
+    <value>Regalare</value>
+  </data>
+  <data name="GameBoard_QuestionClose" xml:space="preserve">
+    <value>Chiudi</value>
+  </data>
+  <data name="GameBoard_QuestionGiftCloseAfter" xml:space="preserve">
+    <value>Chiudi questa domanda dopo aver assegnato i punti</value>
+  </data>
+  <data name="GameBoard_QuestionCloseTitle" xml:space="preserve">
+    <value>Chiudere la domanda?</value>
+  </data>
+  <data name="GameBoard_QuestionCloseConfirmation" xml:space="preserve">
+    <value>Questa domanda verrà chiusa senza risposta. Continuare?</value>
+  </data>
 </root>

@@ -6148,3 +6148,55 @@ body.youtube-auto-expanded-open {
     color: color-mix(in srgb, #ef233c 84%, var(--text));
     background: color-mix(in srgb, #ef233c 14%, var(--panel));
 }
+
+/* Question card context menu */
+.question-context-menu {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    z-index: 10000;
+    display: grid;
+    grid-template-columns: repeat(2, 42px);
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-glass);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .5);
+}
+
+.question-context-menu[hidden] {
+    display: none !important;
+}
+
+.question-context-action {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--text);
+    background: transparent;
+    font: inherit;
+    font-size: 1.15rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.question-context-action:hover,
+.question-context-action:focus-visible {
+    border-color: var(--gold);
+    background: var(--panel-2);
+    outline: none;
+}
+
+.question-context-gift {
+    font-size: 1.2rem;
+}
+
+.question-context-close {
+    color: color-mix(in srgb, #ef233c 82%, var(--text));
+}
