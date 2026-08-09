@@ -500,7 +500,8 @@ public sealed class GameSession
         int sourceQuestionId,
         GamePlayerId playerId,
         bool isCorrect,
-        int value)
+        int value,
+        bool resolveQuestionIfAvailable = true)
     {
         EnsureHistoryEditingAllowed();
 
@@ -512,7 +513,10 @@ public sealed class GameSession
             isCorrect,
             value,
             _timeProvider.GetUtcNow());
-        question.ResolveFromHistory();
+        if (resolveQuestionIfAvailable)
+        {
+            question.ResolveFromHistory();
+        }
 
         player.ApplyScore(attempt.ScoreDelta);
         ApplyHistoricalScoreCorrection(question, player.Id, attempt.ScoreDelta);
@@ -958,7 +962,8 @@ public sealed class GameSession
 
     private static void EnsureQuestionHasBeenPlayed(RuntimeQuestion question)
     {
-        if (question.Status == RuntimeQuestionStatus.Available)
+        if (question.Status == RuntimeQuestionStatus.Available &&
+            question.AnswerAttempts.Count == 0)
         {
             throw new GameRuleViolationException(
                 "Answer history cannot be edited for a question that has not been played.");

@@ -148,7 +148,9 @@ public sealed class AnswerHistoryModel(
             .ToHashSet();
 
         Questions = game.Session.Board.Questions
-            .Where(question => question.Status != RuntimeQuestionStatus.Available)
+            .Where(question =>
+                question.Status != RuntimeQuestionStatus.Available ||
+                question.AnswerAttempts.Count > 0)
             .OrderByDescending(question => question.AnswerAttempts.Count > 0
                 ? question.AnswerAttempts.Max(attempt => attempt.JudgedAtUtc)
                 : DateTimeOffset.MinValue)

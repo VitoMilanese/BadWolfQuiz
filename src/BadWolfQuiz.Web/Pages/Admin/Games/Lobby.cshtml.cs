@@ -975,6 +975,59 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostQuickScoreAdjustmentAsync(
+        Guid id,
+        int sourceQuestionId,
+        Guid playerId,
+        bool isCorrect,
+        int value,
+        bool resolveQuestionIfAvailable,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            if (value <= 0 || value % 100 != 0)
+            {
+                TempData["ErrorMessage"] =
+                    localizer["GameBoard_QuickScoreInvalidValue"].Value;
+                return RedirectToPage(new { id });
+            }
+
+            sessionRegistry.AddQuestionAnswerHistoryEntry(
+                game.PublicCode,
+                sourceQuestionId,
+                new GamePlayerId(playerId),
+                isCorrect,
+                value,
+                resolveQuestionIfAvailable);
+
+            await gameHistoryStore.SaveCompletedGameAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException exception)
+        {
+            TempData["ErrorMessage"] = exception.Message switch
+            {
+                "This player already has an answer entry for the selected question." =>
+                    localizer["AnswerHistory_PlayerAlreadyRecorded"].Value,
+                "Answer history cannot be added to a question that has not been played." =>
+                    localizer["AnswerHistory_QuestionNotPlayed"].Value,
+                "An answer history value cannot be negative." =>
+                    localizer["AnswerHistory_InvalidValue"].Value,
+                _ => localizer["AnswerHistory_Rejected"].Value
+            };
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostSetActivePlayerAsync(
         Guid id,
         Guid playerId,

@@ -2487,4 +2487,40 @@
   <data name="GameBoard_JoinCopied" xml:space="preserve">
     <value>Скопійовано</value>
   </data>
+  <data name="GameBoard_QuickScoreAdd" xml:space="preserve">
+    <value>Додати бали</value>
+  </data>
+  <data name="GameBoard_QuickScoreSubtract" xml:space="preserve">
+    <value>Відняти бали</value>
+  </data>
+  <data name="GameBoard_QuickScoreTitle" xml:space="preserve">
+    <value>Швидка зміна балів</value>
+  </data>
+  <data name="GameBoard_QuickScoreApply" xml:space="preserve">
+    <value>Застосувати</value>
+  </data>
+  <data name="GameBoard_QuickScoreNoQuestions" xml:space="preserve">
+    <value>Для цього гравця немає доступних питань.</value>
+  </data>
+  <data name="GameBoard_QuickScoreRewardAmount" xml:space="preserve">
+    <value>Розмір нагороди</value>
+  </data>
+  <data name="GameBoard_QuickScorePenaltyAmount" xml:space="preserve">
+    <value>Розмір штрафу</value>
+  </data>
+  <data name="GameBoard_QuickScoreInvalidValue" xml:space="preserve">
+    <value>Значення має бути більшим за нуль і кратним 100.</value>
+  </data>
+  <data name="GameBoard_QuickScoreResolveQuestionTitle" xml:space="preserve">
+    <value>Закрити це питання?</value>
+  </data>
+  <data name="GameBoard_QuickScoreResolveQuestionPrompt" xml:space="preserve">
+    <value>Це питання ще не було відкрито. Позначити його також як закрите?</value>
+  </data>
+  <data name="GameBoard_QuickScoreKeepQuestionOpen" xml:space="preserve">
+    <value>Залишити відкритим</value>
+  </data>
+  <data name="GameBoard_QuickScoreMarkQuestionClosed" xml:space="preserve">
+    <value>Позначити закритим</value>
+  </data>
 </root>

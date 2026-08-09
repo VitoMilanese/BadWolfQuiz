@@ -1082,7 +1082,8 @@ public sealed class GameSessionRegistry
         int sourceQuestionId,
         GamePlayerId playerId,
         bool isCorrect,
-        int value)
+        int value,
+        bool resolveQuestionIfAvailable = true)
     {
         var game = Find(publicCode);
 
@@ -1097,7 +1098,8 @@ public sealed class GameSessionRegistry
                 sourceQuestionId,
                 playerId,
                 isCorrect,
-                value);
+                value,
+                resolveQuestionIfAvailable);
             game.MarkPersistenceChanged();
             return attempt;
         }
