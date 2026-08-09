@@ -4337,6 +4337,14 @@ body.youtube-auto-expanded-open {
     animation: buzzer-race-overlay-life 5s ease forwards;
 }
 
+.buzzer-race-card[data-auto-fit-overlay] {
+    visibility: hidden;
+}
+
+.buzzer-race-card[data-auto-fit-overlay].is-auto-fit-ready {
+    visibility: visible;
+}
+
 .buzzer-race-card {
     width: min(900px, 94vw);
     max-height: 100%;
