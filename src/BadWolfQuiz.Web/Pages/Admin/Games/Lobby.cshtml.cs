@@ -993,7 +993,7 @@ public sealed class LobbyModel(
 
         try
         {
-            if (value <= 0 || value % 100 != 0)
+            if (value <= 0)
             {
                 TempData["ErrorMessage"] =
                     localizer["GameBoard_QuickScoreInvalidValue"].Value;

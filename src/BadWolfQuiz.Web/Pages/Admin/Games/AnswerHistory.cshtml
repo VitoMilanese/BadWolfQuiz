@@ -29,6 +29,7 @@
             <summary>@Localizer["AnswerHistory_AddEntry"]</summary>
             <form class="answer-history-form answer-history-add-form"
                   method="post"
+                  novalidate
                   asp-page-handler="Add"
                   data-no-eligible-players="@Localizer["AnswerHistory_NoEligiblePlayers"]">
             <label>
@@ -37,6 +38,8 @@
                     @foreach (var question in Model.AddableQuestions)
                     {
                         <option value="@question.SourceQuestionId"
+                                data-points="@question.Points"
+                                data-is-available="@question.IsAvailable.ToString().ToLowerInvariant()"
                                 data-attempted-player-ids="@string.Join(',', question.AnswerAttempts.Select(attempt => attempt.PlayerId.Value))">
                             @question.RoundTitle — @question.CategoryTitle — @question.Points
                         </option>
@@ -54,7 +57,7 @@
             </label>
             <label>
                 <span>@Localizer["AnswerHistory_Value"]</span>
-                <input name="value" type="number" min="0" value="0" required />
+                <input name="value" type="number" min="100" step="100" value="100" required />
             </label>
             <label class="answer-history-correct">
                 <input name="isCorrect" type="checkbox" value="true" checked />
@@ -86,6 +89,7 @@
                     {
                         <form class="answer-history-form answer-history-entry-form"
                               method="post"
+                              novalidate
                               asp-page-handler="Update">
                             <input name="sourceQuestionId"
                                    type="hidden"
@@ -109,7 +113,8 @@
                                 <span>@Localizer["AnswerHistory_Value"]</span>
                                 <input name="value"
                                        type="number"
-                                       min="0"
+                                       min="100"
+                                       step="100"
                                        value="@Math.Abs(attempt.ScoreDelta)"
                                        required />
                             </label>
@@ -178,6 +183,33 @@
     </form>
 </dialog>
 
+<dialog id="answer-history-resolve-question-dialog"
+        class="app-dialog"
+        aria-labelledby="answer-history-resolve-question-title">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2 id="answer-history-resolve-question-title">@Localizer["GameBoard_QuickScoreResolveQuestionTitle"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-answer-history-resolve-cancel
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+        <p>@Localizer["GameBoard_QuickScoreResolveQuestionPrompt"]</p>
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-answer-history-resolve-no>
+                @Localizer["GameBoard_QuickScoreKeepQuestionOpen"]
+            </button>
+            <button class="button button-primary"
+                    type="button"
+                    data-answer-history-resolve-yes>
+                @Localizer["GameBoard_QuickScoreMarkQuestionClosed"]
+            </button>
+        </div>
+    </div>
+</dialog>
+
 @section Scripts {
     <script>
         (() => {
@@ -191,6 +223,21 @@
             const player = form.querySelector('[name="playerId"]');
             const submit = form.querySelector("[data-add-answer-history]");
             const warning = form.querySelector("[data-add-answer-history-warning]");
+            const value = form.querySelector('[name="value"]');
+            const resolveDialog = document.getElementById("answer-history-resolve-question-dialog");
+            const resolveYesButton = resolveDialog?.querySelector("[data-answer-history-resolve-yes]");
+            const resolveNoButton = resolveDialog?.querySelector("[data-answer-history-resolve-no]");
+            const resolveCancelButton = resolveDialog?.querySelector("[data-answer-history-resolve-cancel]");
+            let resolveDecisionMade = false;
+
+            const syncValueToQuestion = () => {
+                const selectedOption = question.selectedOptions[0];
+                const points = Number.parseInt(selectedOption?.dataset.points ?? "", 10);
+
+                if (value && Number.isFinite(points) && points > 0) {
+                    value.value = points.toString();
+                }
+            };
 
             const updateAvailablePlayers = () => {
                 const attemptedIds = new Set(
@@ -216,8 +263,51 @@
                     : form.dataset.noEligiblePlayers;
             };
 
-            question.addEventListener("change", updateAvailablePlayers);
+            question.addEventListener("change", () => {
+                resolveDecisionMade = false;
+                updateAvailablePlayers();
+                syncValueToQuestion();
+            });
             updateAvailablePlayers();
+            syncValueToQuestion();
+
+            form.addEventListener("submit", event => {
+                if (!resolveDialog || resolveDecisionMade) {
+                    return;
+                }
+
+                const selectedOption = question.selectedOptions[0];
+                if (selectedOption?.dataset.isAvailable !== "true") {
+                    return;
+                }
+
+                event.preventDefault();
+                resolveDialog.showModal();
+            });
+
+            const continueSubmit = resolveQuestion => {
+                let input = form.querySelector('[name="resolveQuestionIfAvailable"]');
+                if (!input) {
+                    input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "resolveQuestionIfAvailable";
+                    form.append(input);
+                }
+
+                input.value = resolveQuestion ? "true" : "false";
+                resolveDecisionMade = true;
+                resolveDialog?.close();
+                form.requestSubmit(submit);
+            };
+
+            resolveYesButton?.addEventListener("click", () => continueSubmit(true));
+            resolveNoButton?.addEventListener("click", () => continueSubmit(false));
+            resolveCancelButton?.addEventListener("click", () => resolveDialog?.close());
+            resolveDialog?.addEventListener("click", event => {
+                if (event.target === resolveDialog) {
+                    resolveDialog.close();
+                }
+            });
 
             const deleteDialog = document.getElementById("delete-answer-history-dialog");
             const deleteQuestionId = document.getElementById("delete-answer-history-question-id");

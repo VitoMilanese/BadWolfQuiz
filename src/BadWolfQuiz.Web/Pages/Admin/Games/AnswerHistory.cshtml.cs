@@ -33,8 +33,15 @@ public sealed class AnswerHistoryModel(
         Guid playerId,
         bool isCorrect,
         int value,
-        CancellationToken cancellationToken)
+        bool resolveQuestionIfAvailable = true,
+        CancellationToken cancellationToken = default)
     {
+        if (!IsValidHistoryValue(value))
+        {
+            TempData["ErrorMessage"] = localizer["GameBoard_QuickScoreInvalidValue"].Value;
+            return RedirectToPage(new { id });
+        }
+
         return await ExecuteAsync(
             id,
             game => sessionRegistry.AddQuestionAnswerHistoryEntry(
@@ -42,7 +49,8 @@ public sealed class AnswerHistoryModel(
                 sourceQuestionId,
                 new GamePlayerId(playerId),
                 isCorrect,
-                value),
+                value,
+                resolveQuestionIfAvailable),
             cancellationToken);
     }
 
@@ -55,6 +63,12 @@ public sealed class AnswerHistoryModel(
         int value,
         CancellationToken cancellationToken)
     {
+        if (!IsValidHistoryValue(value))
+        {
+            TempData["ErrorMessage"] = localizer["GameBoard_QuickScoreInvalidValue"].Value;
+            return RedirectToPage(new { id });
+        }
+
         return await ExecuteAsync(
             id,
             game => sessionRegistry.UpdateQuestionAnswerHistoryEntry(
@@ -110,7 +124,7 @@ public sealed class AnswerHistoryModel(
                 "Answer history cannot be added to a question that has not been played." =>
                     localizer["AnswerHistory_QuestionNotPlayed"].Value,
                 "An answer history value cannot be negative." =>
-                    localizer["AnswerHistory_InvalidValue"].Value,
+                    localizer["GameBoard_QuickScoreInvalidValue"].Value,
                 _ => localizer["AnswerHistory_Rejected"].Value
             };
         }
@@ -130,6 +144,9 @@ public sealed class AnswerHistoryModel(
 
         return RedirectToPage(new { id });
     }
+
+    private static bool IsValidHistoryValue(int value) =>
+        value > 0;
 
     private IActionResult LoadPage(Guid id)
     {
@@ -181,6 +198,7 @@ public sealed class AnswerHistoryModel(
             .Title,
         question.CategoryTitle,
         question.Points,
+        question.Status == RuntimeQuestionStatus.Available,
         question.AnswerAttempts
             .OrderByDescending(attempt => attempt.JudgedAtUtc)
             .ToArray());
@@ -191,4 +209,5 @@ public sealed record AnswerHistoryQuestion(
     string RoundTitle,
     string CategoryTitle,
     int Points,
+    bool IsAvailable,
     IReadOnlyList<QuestionAnswerAttempt> AnswerAttempts);
