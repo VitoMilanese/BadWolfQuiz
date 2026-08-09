@@ -994,8 +994,13 @@ public sealed class LobbyModel(
         {
             if (value <= 0)
             {
-                TempData["ErrorMessage"] =
-                    localizer["GameBoard_QuickScoreInvalidValue"].Value;
+                var errorMessage = localizer["GameBoard_QuickScoreInvalidValue"].Value;
+                if (IsAjaxRequest())
+                {
+                    return BadRequest(new { success = false, error = errorMessage });
+                }
+
+                TempData["ErrorMessage"] = errorMessage;
                 return RedirectToPage(new { id });
             }
 
@@ -1011,7 +1016,7 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException exception)
         {
-            TempData["ErrorMessage"] = exception.Message switch
+            var errorMessage = exception.Message switch
             {
                 "This player already has an answer entry for the selected question." =>
                     localizer["AnswerHistory_PlayerAlreadyRecorded"].Value,
@@ -1021,9 +1026,30 @@ public sealed class LobbyModel(
                     localizer["AnswerHistory_InvalidValue"].Value,
                 _ => localizer["AnswerHistory_Rejected"].Value
             };
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
         }
 
         await BroadcastPlayersAsync(game, cancellationToken);
+
+        if (IsAjaxRequest())
+        {
+            var question = game.Session.Board.Questions.Single(item =>
+                item.SourceQuestionId == sourceQuestionId);
+            return new JsonResult(new
+            {
+                success = true,
+                sourceQuestionId,
+                playerId,
+                questionResolved = question.Status == RuntimeQuestionStatus.Resolved
+            });
+        }
+
         return RedirectToPage(new { id });
     }
 
@@ -1046,11 +1072,20 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException)
         {
-            TempData["ErrorMessage"] =
-                localizer["GameBoard_SelectionRejected"].Value;
+            var errorMessage = localizer["GameBoard_SelectionRejected"].Value;
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
         }
 
-        await BroadcastBuzzerAsync(game, cancellationToken);
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new { success = true, sourceQuestionId });
+        }
+
         return RedirectToPage(new { id });
     }
 
@@ -1066,6 +1101,14 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
+        var resolvedQuestionIds = game.Session.Board.Questions
+            .Where(question =>
+                question.SourceRoundId == game.Session.CurrentRound.SourceRoundId &&
+                question.SourceCategoryId == sourceCategoryId &&
+                question.Status == RuntimeQuestionStatus.Available)
+            .Select(question => question.SourceQuestionId)
+            .ToArray();
+
         try
         {
             sessionRegistry.CloseAvailableCategoryQuestions(
@@ -1075,11 +1118,25 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException)
         {
-            TempData["ErrorMessage"] =
-                localizer["GameBoard_SelectionRejected"].Value;
+            var errorMessage = localizer["GameBoard_SelectionRejected"].Value;
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
         }
 
-        await BroadcastBuzzerAsync(game, cancellationToken);
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                sourceCategoryId,
+                resolvedQuestionIds
+            });
+        }
+
         return RedirectToPage(new { id });
     }
 
@@ -1103,8 +1160,13 @@ public sealed class LobbyModel(
         {
             if (value <= 0)
             {
-                TempData["ErrorMessage"] =
-                    localizer["GameBoard_QuickScoreInvalidValue"].Value;
+                var errorMessage = localizer["GameBoard_QuickScoreInvalidValue"].Value;
+                if (IsAjaxRequest())
+                {
+                    return BadRequest(new { success = false, error = errorMessage });
+                }
+
+                TempData["ErrorMessage"] = errorMessage;
                 return RedirectToPage(new { id });
             }
 
@@ -1120,7 +1182,7 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException exception)
         {
-            TempData["ErrorMessage"] = exception.Message switch
+            var errorMessage = exception.Message switch
             {
                 "This player already has an answer entry for the selected question." =>
                     localizer["AnswerHistory_PlayerAlreadyRecorded"].Value,
@@ -1130,9 +1192,30 @@ public sealed class LobbyModel(
                     localizer["AnswerHistory_InvalidValue"].Value,
                 _ => localizer["AnswerHistory_Rejected"].Value
             };
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
         }
 
         await BroadcastPlayersAsync(game, cancellationToken);
+
+        if (IsAjaxRequest())
+        {
+            var question = game.Session.Board.Questions.Single(item =>
+                item.SourceQuestionId == sourceQuestionId);
+            return new JsonResult(new
+            {
+                success = true,
+                sourceQuestionId,
+                playerId,
+                questionResolved = question.Status == RuntimeQuestionStatus.Resolved
+            });
+        }
+
         return RedirectToPage(new { id });
     }
 

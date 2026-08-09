@@ -1563,6 +1563,98 @@
 }
 
 
+<script>
+    window.BadWolfContextActions = (() => {
+        const submit = async form => {
+            const submitButton = form?.querySelector("button[type='submit']");
+            submitButton?.setAttribute("disabled", "disabled");
+
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+                const contentType = response.headers.get("content-type") ?? "";
+                const result = contentType.includes("application/json")
+                    ? await response.json()
+                    : null;
+
+                if (!response.ok || !result?.success) {
+                    throw new Error(result?.error ?? response.statusText);
+                }
+
+                return result;
+            } finally {
+                submitButton?.removeAttribute("disabled");
+            }
+        };
+
+        const updateCategoryAvailability = element => {
+            const column = element?.closest(".host-board-column");
+            const category = column?.querySelector("[data-category-context]");
+            if (!category) return;
+            category.dataset.hasAvailableQuestions = column.querySelector(
+                ".host-board-question.status-available[data-question-context]")
+                ? "true"
+                : "false";
+        };
+
+        const markQuestionResolved = sourceQuestionId => {
+            const button = document.querySelector(
+                `.host-board-question.status-available[data-source-question-id="${sourceQuestionId}"]`);
+            if (!button) return;
+
+            const form = button.closest("form.question-selection-form");
+            const link = document.createElement("a");
+            link.className = "host-board-question status-resolved";
+            link.dataset.questionResolved = "";
+            link.textContent = button.textContent;
+
+            const url = new URL(window.location.href);
+            url.searchParams.set("previewQuestionId", sourceQuestionId.toString());
+            url.searchParams.delete("previewAnswer");
+            link.href = url.toString();
+            link.setAttribute("aria-label", button.getAttribute("aria-label") ?? button.textContent.trim());
+
+            const replacementTarget = form ?? button;
+            replacementTarget.replaceWith(link);
+            updateCategoryAvailability(link);
+
+            for (const option of document.querySelectorAll(
+                `[data-quick-score-question] option[value="${sourceQuestionId}"]`)) {
+                option.dataset.status = "resolved";
+            }
+        };
+
+        const recordAttempt = (sourceQuestionId, playerId) => {
+            const addId = current => {
+                const ids = new Set((current ?? "").split(",").filter(Boolean));
+                ids.add(playerId);
+                return Array.from(ids).join(",");
+            };
+
+            const boardQuestion = document.querySelector(
+                `.host-board-question[data-source-question-id="${sourceQuestionId}"]`);
+            if (boardQuestion) {
+                boardQuestion.dataset.attemptedPlayerIds = addId(
+                    boardQuestion.dataset.attemptedPlayerIds);
+            }
+
+            for (const option of document.querySelectorAll(
+                `[data-quick-score-question] option[value="${sourceQuestionId}"]`)) {
+                option.dataset.attemptedPlayerIds = addId(option.dataset.attemptedPlayerIds);
+            }
+        };
+
+        return { submit, markQuestionResolved, recordAttempt };
+    })();
+</script>
+
+
 <div id="category-context-menu"
      class="category-context-menu"
      role="menu"
@@ -1616,6 +1708,7 @@
         const dialog = document.getElementById("category-close-dialog");
         const categoryId = dialog?.querySelector("[data-category-close-id]");
         const categoryLabel = dialog?.querySelector("[data-category-close-label]");
+        const form = dialog?.querySelector("[data-category-close-form]");
         let selectedCategory = null;
 
         const hide = () => {
@@ -1656,6 +1749,21 @@
             categoryId.value = selectedCategory.dataset.sourceCategoryId || "";
             categoryLabel.textContent = selectedCategory.dataset.categoryLabel || "";
             dialog.showModal();
+        });
+
+        form?.addEventListener("submit", async event => {
+            event.preventDefault();
+            try {
+                const result = await window.BadWolfContextActions.submit(form);
+                dialog?.close();
+                for (const questionId of result.resolvedQuestionIds ?? []) {
+                    window.BadWolfContextActions.markQuestionResolved(questionId);
+                }
+                selectedCategory = null;
+            } catch (error) {
+                console.error(error);
+                window.alert(error.message);
+            }
         });
 
         for (const button of dialog?.querySelectorAll("[data-close-category-close-dialog]") || []) {
@@ -1892,14 +2000,46 @@
             closeDialog.showModal();
         });
 
-        giftForm?.addEventListener("submit", event => {
+        giftForm?.addEventListener("submit", async event => {
+            event.preventDefault();
             const value = Number(giftValue?.value);
             if (!Number.isInteger(value) || value <= 0) {
-                event.preventDefault();
                 if (giftWarning) {
                     giftWarning.hidden = false;
                     giftWarning.textContent = invalidValueMessage;
                 }
+                return;
+            }
+
+            try {
+                const result = await window.BadWolfContextActions.submit(giftForm);
+                giftDialog?.close();
+                window.BadWolfContextActions.recordAttempt(
+                    result.sourceQuestionId,
+                    result.playerId);
+                if (result.questionResolved) {
+                    window.BadWolfContextActions.markQuestionResolved(result.sourceQuestionId);
+                }
+                selectedQuestion = null;
+            } catch (error) {
+                console.error(error);
+                if (giftWarning) {
+                    giftWarning.hidden = false;
+                    giftWarning.textContent = error.message;
+                }
+            }
+        });
+
+        closeForm?.addEventListener("submit", async event => {
+            event.preventDefault();
+            try {
+                const result = await window.BadWolfContextActions.submit(closeForm);
+                closeDialog?.close();
+                window.BadWolfContextActions.markQuestionResolved(result.sourceQuestionId);
+                selectedQuestion = null;
+            } catch (error) {
+                console.error(error);
+                window.alert(error.message);
             }
         });
 
@@ -2210,19 +2350,42 @@
 
         questionSelect?.addEventListener("change", syncValueToQuestion);
 
-        dialog?.querySelector("[data-quick-score-form]")?.addEventListener("submit", event => {
-            if (!questionSelect || !resolveQuestionInput || !resolveDialog || resolveDecisionMade) {
+        const quickScoreForm = dialog?.querySelector("[data-quick-score-form]");
+        quickScoreForm?.addEventListener("submit", async event => {
+            event.preventDefault();
+            if (!questionSelect || !resolveQuestionInput || !resolveDialog) {
                 return;
             }
 
             const selectedOption = questionSelect.selectedOptions[0];
-            if (selectedOption?.dataset.status !== "available") {
-                resolveQuestionInput.value = "true";
+            if (!selectedOption) {
                 return;
             }
 
-            event.preventDefault();
-            resolveDialog.showModal();
+            if (selectedOption.dataset.status === "available" && !resolveDecisionMade) {
+                resolveDialog.showModal();
+                return;
+            }
+
+            try {
+                const result = await window.BadWolfContextActions.submit(quickScoreForm);
+                dialog?.close();
+                window.BadWolfContextActions.recordAttempt(
+                    result.sourceQuestionId,
+                    result.playerId);
+                if (result.questionResolved) {
+                    window.BadWolfContextActions.markQuestionResolved(result.sourceQuestionId);
+                }
+                resolveDecisionMade = false;
+                updateQuestions();
+            } catch (error) {
+                console.error(error);
+                if (warning) {
+                    warning.hidden = false;
+                    warning.textContent = error.message;
+                }
+                resolveDecisionMade = false;
+            }
         });
 
         const continueQuickScoreSubmit = resolveQuestion => {
