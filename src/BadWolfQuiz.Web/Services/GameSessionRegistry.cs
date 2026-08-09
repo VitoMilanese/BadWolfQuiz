@@ -1082,7 +1082,8 @@ public sealed class GameSessionRegistry
         int sourceQuestionId,
         GamePlayerId playerId,
         bool isCorrect,
-        int value)
+        int value,
+        bool resolveQuestionIfAvailable = true)
     {
         var game = Find(publicCode);
 
@@ -1097,7 +1098,8 @@ public sealed class GameSessionRegistry
                 sourceQuestionId,
                 playerId,
                 isCorrect,
-                value);
+                value,
+                resolveQuestionIfAvailable);
             game.MarkPersistenceChanged();
             return attempt;
         }
@@ -1150,6 +1152,46 @@ public sealed class GameSessionRegistry
                 attemptId);
             game.MarkPersistenceChanged();
             return attempt;
+        }
+    }
+
+    public RuntimeQuestion? CloseAvailableQuestion(
+        string publicCode,
+        int sourceQuestionId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            var question = game.Session.CloseAvailableQuestion(sourceQuestionId);
+            game.BuzzerRace = null;
+            game.MarkPersistenceChanged();
+            return question;
+        }
+    }
+
+    public IReadOnlyList<RuntimeQuestion>? CloseAvailableCategoryQuestions(
+        string publicCode,
+        int sourceCategoryId)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            var questions = game.Session.CloseAvailableCategoryQuestions(sourceCategoryId);
+            game.BuzzerRace = null;
+            game.MarkPersistenceChanged();
+            return questions;
         }
     }
 

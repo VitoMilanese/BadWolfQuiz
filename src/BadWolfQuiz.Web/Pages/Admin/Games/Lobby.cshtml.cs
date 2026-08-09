@@ -975,6 +975,258 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostGiftQuestionAsync(
+        Guid id,
+        int sourceQuestionId,
+        Guid playerId,
+        int value,
+        bool resolveQuestionIfAvailable,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            if (value <= 0)
+            {
+                var errorMessage = localizer["GameBoard_QuickScoreInvalidValue"].Value;
+                if (IsAjaxRequest())
+                {
+                    return BadRequest(new { success = false, error = errorMessage });
+                }
+
+                TempData["ErrorMessage"] = errorMessage;
+                return RedirectToPage(new { id });
+            }
+
+            sessionRegistry.AddQuestionAnswerHistoryEntry(
+                game.PublicCode,
+                sourceQuestionId,
+                new GamePlayerId(playerId),
+                true,
+                value,
+                resolveQuestionIfAvailable);
+
+            await gameHistoryStore.SaveCompletedGameAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException exception)
+        {
+            var errorMessage = exception.Message switch
+            {
+                "This player already has an answer entry for the selected question." =>
+                    localizer["AnswerHistory_PlayerAlreadyRecorded"].Value,
+                "Answer history cannot be added to a question that has not been played." =>
+                    localizer["AnswerHistory_QuestionNotPlayed"].Value,
+                "An answer history value cannot be negative." =>
+                    localizer["AnswerHistory_InvalidValue"].Value,
+                _ => localizer["AnswerHistory_Rejected"].Value
+            };
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+
+        if (IsAjaxRequest())
+        {
+            var question = game.Session.Board.Questions.Single(item =>
+                item.SourceQuestionId == sourceQuestionId);
+            return new JsonResult(new
+            {
+                success = true,
+                sourceQuestionId,
+                playerId,
+                questionResolved = question.Status == RuntimeQuestionStatus.Resolved,
+                roundComplete = game.Session.IsCurrentRoundComplete
+            });
+        }
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostCloseAvailableQuestionAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.CloseAvailableQuestion(game.PublicCode, sourceQuestionId);
+            await gameHistoryStore.SaveCompletedGameAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            var errorMessage = localizer["GameBoard_SelectionRejected"].Value;
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+        }
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                sourceQuestionId,
+                roundComplete = game.Session.IsCurrentRoundComplete
+            });
+        }
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostCloseAvailableCategoryQuestionsAsync(
+        Guid id,
+        int sourceCategoryId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var resolvedQuestionIds = game.Session.Board.Questions
+            .Where(question =>
+                question.SourceRoundId == game.Session.CurrentRound.SourceRoundId &&
+                question.SourceCategoryId == sourceCategoryId &&
+                question.Status == RuntimeQuestionStatus.Available)
+            .Select(question => question.SourceQuestionId)
+            .ToArray();
+
+        try
+        {
+            sessionRegistry.CloseAvailableCategoryQuestions(
+                game.PublicCode,
+                sourceCategoryId);
+            await gameHistoryStore.SaveCompletedGameAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            var errorMessage = localizer["GameBoard_SelectionRejected"].Value;
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+        }
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                sourceCategoryId,
+                resolvedQuestionIds,
+                roundComplete = game.Session.IsCurrentRoundComplete
+            });
+        }
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostQuickScoreAdjustmentAsync(
+        Guid id,
+        int sourceQuestionId,
+        Guid playerId,
+        bool isCorrect,
+        int value,
+        bool resolveQuestionIfAvailable,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            if (value <= 0)
+            {
+                var errorMessage = localizer["GameBoard_QuickScoreInvalidValue"].Value;
+                if (IsAjaxRequest())
+                {
+                    return BadRequest(new { success = false, error = errorMessage });
+                }
+
+                TempData["ErrorMessage"] = errorMessage;
+                return RedirectToPage(new { id });
+            }
+
+            sessionRegistry.AddQuestionAnswerHistoryEntry(
+                game.PublicCode,
+                sourceQuestionId,
+                new GamePlayerId(playerId),
+                isCorrect,
+                value,
+                resolveQuestionIfAvailable);
+
+            await gameHistoryStore.SaveCompletedGameAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException exception)
+        {
+            var errorMessage = exception.Message switch
+            {
+                "This player already has an answer entry for the selected question." =>
+                    localizer["AnswerHistory_PlayerAlreadyRecorded"].Value,
+                "Answer history cannot be added to a question that has not been played." =>
+                    localizer["AnswerHistory_QuestionNotPlayed"].Value,
+                "An answer history value cannot be negative." =>
+                    localizer["AnswerHistory_InvalidValue"].Value,
+                _ => localizer["AnswerHistory_Rejected"].Value
+            };
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false, error = errorMessage });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+
+        if (IsAjaxRequest())
+        {
+            var question = game.Session.Board.Questions.Single(item =>
+                item.SourceQuestionId == sourceQuestionId);
+            return new JsonResult(new
+            {
+                success = true,
+                sourceQuestionId,
+                playerId,
+                questionResolved = question.Status == RuntimeQuestionStatus.Resolved,
+                roundComplete = game.Session.IsCurrentRoundComplete
+            });
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostSetActivePlayerAsync(
         Guid id,
         Guid playerId,

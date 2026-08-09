@@ -500,7 +500,8 @@ public sealed class GameSession
         int sourceQuestionId,
         GamePlayerId playerId,
         bool isCorrect,
-        int value)
+        int value,
+        bool resolveQuestionIfAvailable = true)
     {
         EnsureHistoryEditingAllowed();
 
@@ -512,7 +513,10 @@ public sealed class GameSession
             isCorrect,
             value,
             _timeProvider.GetUtcNow());
-        question.ResolveFromHistory();
+        if (resolveQuestionIfAvailable)
+        {
+            question.ResolveFromHistory();
+        }
 
         player.ApplyScore(attempt.ScoreDelta);
         ApplyHistoricalScoreCorrection(question, player.Id, attempt.ScoreDelta);
@@ -568,6 +572,62 @@ public sealed class GameSession
             player.Id,
             -removed.ScoreDelta);
         return removed;
+    }
+
+    public RuntimeQuestion CloseAvailableQuestion(int sourceQuestionId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        if (question.SourceRoundId != CurrentRound.SourceRoundId)
+        {
+            throw new GameRuleViolationException(
+                "Only a question from the current round can be closed.");
+        }
+
+        if (question.Status != RuntimeQuestionStatus.Available)
+        {
+            throw new GameRuleViolationException(
+                "Only an available question can be closed directly.");
+        }
+
+        question.ForceResolve();
+        return question;
+    }
+
+    public IReadOnlyList<RuntimeQuestion> CloseAvailableCategoryQuestions(
+        int sourceCategoryId)
+    {
+        EnsureRunning();
+
+        var questions = Board.Questions
+            .Where(question =>
+                question.SourceRoundId == CurrentRound.SourceRoundId &&
+                question.SourceCategoryId == sourceCategoryId)
+            .ToArray();
+
+        if (questions.Length == 0)
+        {
+            throw new GameRuleViolationException(
+                "The selected category does not belong to the current round.");
+        }
+
+        var availableQuestions = questions
+            .Where(question => question.Status == RuntimeQuestionStatus.Available)
+            .ToArray();
+
+        if (availableQuestions.Length == 0)
+        {
+            throw new GameRuleViolationException(
+                "The selected category has no available questions to close.");
+        }
+
+        foreach (var question in availableQuestions)
+        {
+            question.ForceResolve();
+        }
+
+        return availableQuestions;
     }
 
     public RuntimeQuestion ResolveQuestionWithoutCorrectAnswer(
@@ -958,7 +1018,8 @@ public sealed class GameSession
 
     private static void EnsureQuestionHasBeenPlayed(RuntimeQuestion question)
     {
-        if (question.Status == RuntimeQuestionStatus.Available)
+        if (question.Status == RuntimeQuestionStatus.Available &&
+            question.AnswerAttempts.Count == 0)
         {
             throw new GameRuleViolationException(
                 "Answer history cannot be edited for a question that has not been played.");

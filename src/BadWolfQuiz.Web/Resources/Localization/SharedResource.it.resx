@@ -2487,4 +2487,61 @@
   <data name="GameBoard_JoinCopied" xml:space="preserve">
     <value>Copiato</value>
   </data>
+  <data name="GameBoard_QuickScoreAdd" xml:space="preserve">
+    <value>Aggiungi punti</value>
+  </data>
+  <data name="GameBoard_QuickScoreSubtract" xml:space="preserve">
+    <value>Sottrai punti</value>
+  </data>
+  <data name="GameBoard_QuickScoreTitle" xml:space="preserve">
+    <value>Modifica rapida del punteggio</value>
+  </data>
+  <data name="GameBoard_QuickScoreApply" xml:space="preserve">
+    <value>Applica modifica</value>
+  </data>
+  <data name="GameBoard_QuickScoreNoQuestions" xml:space="preserve">
+    <value>Non ci sono domande disponibili per questo giocatore.</value>
+  </data>
+  <data name="GameBoard_QuickScoreRewardAmount" xml:space="preserve">
+    <value>Importo della ricompensa</value>
+  </data>
+  <data name="GameBoard_QuickScorePenaltyAmount" xml:space="preserve">
+    <value>Importo della penalità</value>
+  </data>
+  <data name="GameBoard_QuickScoreInvalidValue" xml:space="preserve">
+    <value>L'importo deve essere maggiore di zero e divisibile per 100.</value>
+  </data>
+  <data name="GameBoard_QuickScoreResolveQuestionTitle" xml:space="preserve">
+    <value>Chiudere questa domanda?</value>
+  </data>
+  <data name="GameBoard_QuickScoreResolveQuestionPrompt" xml:space="preserve">
+    <value>Questa domanda non è ancora stata aperta. Vuoi contrassegnarla anche come chiusa?</value>
+  </data>
+  <data name="GameBoard_QuickScoreKeepQuestionOpen" xml:space="preserve">
+    <value>Lascia aperta</value>
+  </data>
+  <data name="GameBoard_QuickScoreMarkQuestionClosed" xml:space="preserve">
+    <value>Contrassegna come chiusa</value>
+  </data>
+  <data name="GameBoard_QuestionGift" xml:space="preserve">
+    <value>Regalare</value>
+  </data>
+  <data name="GameBoard_QuestionClose" xml:space="preserve">
+    <value>Chiudi</value>
+  </data>
+  <data name="GameBoard_QuestionGiftCloseAfter" xml:space="preserve">
+    <value>Chiudi questa domanda dopo aver assegnato i punti</value>
+  </data>
+  <data name="GameBoard_QuestionCloseTitle" xml:space="preserve">
+    <value>Chiudere la domanda?</value>
+  </data>
+  <data name="GameBoard_QuestionCloseConfirmation" xml:space="preserve">
+    <value>Questa domanda verrà chiusa senza risposta. Continuare?</value>
+  </data>
+  <data name="GameBoard_CategoryCloseTitle" xml:space="preserve">
+    <value>Chiudere la categoria?</value>
+  </data>
+  <data name="GameBoard_CategoryCloseConfirmation" xml:space="preserve">
+    <value>Tutte le domande non ancora aperte di questa categoria verranno chiuse senza risposta. Continuare?</value>
+  </data>
 </root>

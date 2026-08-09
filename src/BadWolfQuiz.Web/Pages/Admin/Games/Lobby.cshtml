@@ -873,7 +873,12 @@
             @foreach (var category in Model.BoardCategories)
             {
                 <section class="host-board-column">
-                    <h3>@category.Title</h3>
+                    <h3 data-category-context
+                        data-source-category-id="@category.SourceCategoryId"
+                        data-category-label="@category.Title"
+                        data-has-available-questions="@category.Questions.Any(question => question.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Available).ToString().ToLowerInvariant()">
+                        @category.Title
+                    </h3>
 
                     @foreach (var question in category.Questions)
                     {
@@ -886,7 +891,12 @@
                                        type="hidden"
                                        value="@question.SourceQuestionId" />
                                 <button class="host-board-question status-available"
-                                        type="submit">
+                                        type="submit"
+                                        data-question-context
+                                        data-source-question-id="@question.SourceQuestionId"
+                                        data-question-points="@question.Points"
+                                        data-question-label="@Model.Game.Session.CurrentRound.Title — @question.CategoryTitle — @question.Points"
+                                        data-attempted-player-ids="@string.Join(',', question.AnswerAttempts.Select(attempt => attempt.PlayerId.Value))">
                                     @question.Points
                                 </button>
                             </form>
@@ -894,6 +904,7 @@
                         else if (question.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Resolved)
                         {
                             <a class="host-board-question status-resolved"
+                               data-question-resolved
                                asp-page="/Admin/Games/Lobby"
                                asp-route-id="@Model.Game.Session.Id.Value"
                                asp-route-previewQuestionId="@question.SourceQuestionId"
@@ -1057,7 +1068,8 @@
                            @(Model.Game.Session.ActivePlayerId == player.Id ? "active-player" : null)
                            @(isAnswering ? "question-answering-player" : null)
                            @(hasAttempted ? "question-attempted-player" : null)"
-                    data-player-id="@player.Id.Value">
+                    data-player-id="@player.Id.Value"
+                    data-player-name="@player.Name">
                     <span class="player-card-width-resizer"
                           data-player-card-width-resizer
                           role="separator"
@@ -1412,7 +1424,9 @@
             }
             @foreach (var player in Model.Players)
             {
-                <li class="scoreboard-player" data-player-id="@player.Id.Value">
+                <li class="scoreboard-player"
+                    data-player-id="@player.Id.Value"
+                    data-player-name="@player.Name">
                     <span class="player-card-width-resizer"
                           data-player-card-width-resizer
                           role="separator"
@@ -1547,6 +1561,923 @@
     </dialog>
     <partial name="_AvatarPicker" />
 }
+
+
+<script>
+    window.BadWolfContextActions = (() => {
+        const submit = async form => {
+            const submitButton = form?.querySelector("button[type='submit']");
+            submitButton?.setAttribute("disabled", "disabled");
+
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+                const contentType = response.headers.get("content-type") ?? "";
+                const result = contentType.includes("application/json")
+                    ? await response.json()
+                    : null;
+
+                if (!response.ok || !result?.success) {
+                    throw new Error(result?.error ?? response.statusText);
+                }
+
+                return result;
+            } finally {
+                submitButton?.removeAttribute("disabled");
+            }
+        };
+
+        const updateCategoryAvailability = element => {
+            const column = element?.closest(".host-board-column");
+            const category = column?.querySelector("[data-category-context]");
+            if (!category) return;
+            category.dataset.hasAvailableQuestions = column.querySelector(
+                ".host-board-question.status-available[data-question-context]")
+                ? "true"
+                : "false";
+        };
+
+        const markQuestionResolved = sourceQuestionId => {
+            const button = document.querySelector(
+                `.host-board-question.status-available[data-source-question-id="${sourceQuestionId}"]`);
+            if (!button) return;
+
+            const form = button.closest("form.question-selection-form");
+            const link = document.createElement("a");
+            link.className = "host-board-question status-resolved";
+            link.dataset.questionResolved = "";
+            link.textContent = button.textContent;
+
+            const url = new URL(window.location.href);
+            url.searchParams.set("previewQuestionId", sourceQuestionId.toString());
+            url.searchParams.delete("previewAnswer");
+            link.href = url.toString();
+            link.setAttribute("aria-label", button.getAttribute("aria-label") ?? button.textContent.trim());
+
+            const replacementTarget = form ?? button;
+            replacementTarget.replaceWith(link);
+            updateCategoryAvailability(link);
+
+            for (const option of document.querySelectorAll(
+                `[data-quick-score-question] option[value="${sourceQuestionId}"]`)) {
+                option.dataset.status = "resolved";
+            }
+        };
+
+        const showRoundSummaryIfComplete = async result => {
+            if (!result?.roundComplete) {
+                return false;
+            }
+
+            const response = await fetch(window.location.href, {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                cache: "no-store"
+            });
+
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            const documentText = await response.text();
+            const parsed = new DOMParser().parseFromString(documentText, "text/html");
+            const nextSummary = parsed.querySelector(".host-game-board .round-summary");
+            const currentLayout = document.querySelector(".host-game-board .host-board-layout");
+
+            if (!nextSummary || !currentLayout) {
+                return false;
+            }
+
+            currentLayout.replaceWith(document.importNode(nextSummary, true));
+            document.querySelector(".board-action-menu")?.remove();
+            return true;
+        };
+
+        const recordAttempt = (sourceQuestionId, playerId) => {
+            const addId = current => {
+                const ids = new Set((current ?? "").split(",").filter(Boolean));
+                ids.add(playerId);
+                return Array.from(ids).join(",");
+            };
+
+            const boardQuestion = document.querySelector(
+                `.host-board-question[data-source-question-id="${sourceQuestionId}"]`);
+            if (boardQuestion) {
+                boardQuestion.dataset.attemptedPlayerIds = addId(
+                    boardQuestion.dataset.attemptedPlayerIds);
+            }
+
+            for (const option of document.querySelectorAll(
+                `[data-quick-score-question] option[value="${sourceQuestionId}"]`)) {
+                option.dataset.attemptedPlayerIds = addId(option.dataset.attemptedPlayerIds);
+            }
+        };
+
+        return { submit, markQuestionResolved, recordAttempt, showRoundSummaryIfComplete };
+    })();
+</script>
+
+
+<div id="category-context-menu"
+     class="category-context-menu"
+     role="menu"
+     hidden>
+    <button class="category-context-action category-context-close"
+            type="button"
+            data-category-close
+            role="menuitem"
+            title="@Localizer["GameBoard_QuestionClose"]"
+            aria-label="@Localizer["GameBoard_QuestionClose"]">
+        <span aria-hidden="true">✕</span>
+    </button>
+</div>
+
+<dialog id="category-close-dialog"
+        class="app-dialog"
+        aria-labelledby="category-close-dialog-title">
+    <form method="post"
+          asp-page-handler="CloseAvailableCategoryQuestions"
+          class="dialog-card dialog-card-danger"
+          data-category-close-form>
+        <input name="sourceCategoryId" type="hidden" data-category-close-id />
+
+        <div class="dialog-heading">
+            <h2 id="category-close-dialog-title">@Localizer["GameBoard_CategoryCloseTitle"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-category-close-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <p class="dialog-target" data-category-close-label></p>
+        <p class="dialog-warning">@Localizer["GameBoard_CategoryCloseConfirmation"]</p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-category-close-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-danger" type="submit">
+                @Localizer["GameBoard_QuestionClose"]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+    (() => {
+        const menu = document.getElementById("category-context-menu");
+        const dialog = document.getElementById("category-close-dialog");
+        const categoryId = dialog?.querySelector("[data-category-close-id]");
+        const categoryLabel = dialog?.querySelector("[data-category-close-label]");
+        const form = dialog?.querySelector("[data-category-close-form]");
+        let selectedCategory = null;
+
+        const hide = () => {
+            if (menu) menu.hidden = true;
+        };
+
+        const position = event => {
+            if (!menu) return;
+            menu.hidden = false;
+            const rect = menu.getBoundingClientRect();
+            const left = Math.min(event.clientX, Math.max(8, window.innerWidth - rect.width - 8));
+            const top = Math.min(event.clientY, Math.max(8, window.innerHeight - rect.height - 8));
+            menu.style.left = `${Math.max(8, left)}px`;
+            menu.style.top = `${Math.max(8, top)}px`;
+        };
+
+        document.addEventListener("contextmenu", event => {
+            const target = event.target instanceof Element ? event.target : null;
+            const category = target?.closest("[data-category-context]");
+            if (!category) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            hide();
+
+            if (category.dataset.hasAvailableQuestions !== "true") {
+                selectedCategory = null;
+                return;
+            }
+
+            selectedCategory = category;
+            position(event);
+        }, true);
+
+        menu?.querySelector("[data-category-close]")?.addEventListener("click", () => {
+            hide();
+            if (!selectedCategory || !dialog || !categoryId || !categoryLabel) return;
+            categoryId.value = selectedCategory.dataset.sourceCategoryId || "";
+            categoryLabel.textContent = selectedCategory.dataset.categoryLabel || "";
+            dialog.showModal();
+        });
+
+        form?.addEventListener("submit", async event => {
+            event.preventDefault();
+            try {
+                const result = await window.BadWolfContextActions.submit(form);
+                dialog?.close();
+                for (const questionId of result.resolvedQuestionIds ?? []) {
+                    window.BadWolfContextActions.markQuestionResolved(questionId);
+                }
+                await window.BadWolfContextActions.showRoundSummaryIfComplete(result);
+                selectedCategory = null;
+            } catch (error) {
+                console.error(error);
+                window.alert(error.message);
+            }
+        });
+
+        for (const button of dialog?.querySelectorAll("[data-close-category-close-dialog]") || []) {
+            button.addEventListener("click", () => dialog.close());
+        }
+        dialog?.addEventListener("click", event => {
+            if (event.target === dialog) dialog.close();
+        });
+
+        document.addEventListener("pointerdown", event => {
+            if (menu && !menu.hidden && !menu.contains(event.target)) hide();
+        }, true);
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") hide();
+        });
+        window.addEventListener("resize", hide);
+    })();
+</script>
+
+<div id="question-context-menu"
+     class="question-context-menu"
+     role="menu"
+     hidden>
+    <button class="question-context-action question-context-gift"
+            type="button"
+            data-question-gift
+            role="menuitem"
+            title="@Localizer["GameBoard_QuestionGift"]"
+            aria-label="@Localizer["GameBoard_QuestionGift"]">
+        <span aria-hidden="true">🎁</span>
+    </button>
+    <button class="question-context-action question-context-close"
+            type="button"
+            data-question-close
+            role="menuitem"
+            title="@Localizer["GameBoard_QuestionClose"]"
+            aria-label="@Localizer["GameBoard_QuestionClose"]">
+        <span aria-hidden="true">✕</span>
+    </button>
+</div>
+
+<dialog id="question-gift-dialog"
+        class="app-dialog"
+        aria-labelledby="question-gift-dialog-title">
+    <form method="post"
+          asp-page-handler="GiftQuestion"
+          class="dialog-card stack-form"
+          novalidate
+          data-question-gift-form>
+        <input name="sourceQuestionId" type="hidden" data-question-gift-id />
+
+        <div class="dialog-heading">
+            <h2 id="question-gift-dialog-title">@Localizer["GameBoard_QuestionGift"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-question-gift
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <label>
+            <span>@Localizer["AnswerHistory_Question"]</span>
+            <input type="text" readonly data-question-gift-label />
+        </label>
+
+        <label>
+            <span>@Localizer["AnswerHistory_Player"]</span>
+            <select name="playerId" required data-question-gift-player>
+                @foreach (var player in Model.Game.Session.Players)
+                {
+                    <option value="@player.Id.Value">@player.Name</option>
+                }
+            </select>
+        </label>
+
+        <label>
+            <span>@Localizer["GameBoard_QuickScoreRewardAmount"]</span>
+            <input name="value"
+                   type="number"
+                   min="0"
+                   step="100"
+                   value="100"
+                   required
+                   data-question-gift-value />
+        </label>
+
+        <label class="answer-history-correct">
+            <input name="resolveQuestionIfAvailable"
+                   type="checkbox"
+                   value="true"
+                   data-question-gift-resolve />
+            <span>@Localizer["GameBoard_QuestionGiftCloseAfter"]</span>
+        </label>
+
+        <p class="message message-error quick-score-warning"
+           data-question-gift-warning
+           hidden></p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-question-gift>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-primary"
+                    type="submit"
+                    data-question-gift-submit>
+                @Localizer["GameBoard_QuestionGift"]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="question-close-dialog"
+        class="app-dialog"
+        aria-labelledby="question-close-dialog-title">
+    <form method="post"
+          asp-page-handler="CloseAvailableQuestion"
+          class="dialog-card dialog-card-danger"
+          data-question-close-form>
+        <input name="sourceQuestionId" type="hidden" data-question-close-id />
+
+        <div class="dialog-heading">
+            <h2 id="question-close-dialog-title">@Localizer["GameBoard_QuestionCloseTitle"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-question-close-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <p class="dialog-target" data-question-close-label></p>
+        <p class="dialog-warning">@Localizer["GameBoard_QuestionCloseConfirmation"]</p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-question-close-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-danger" type="submit">
+                @Localizer["GameBoard_QuestionClose"]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+    (() => {
+        const menu = document.getElementById("question-context-menu");
+        const giftDialog = document.getElementById("question-gift-dialog");
+        const giftForm = giftDialog?.querySelector("[data-question-gift-form]");
+        const giftId = giftDialog?.querySelector("[data-question-gift-id]");
+        const giftLabel = giftDialog?.querySelector("[data-question-gift-label]");
+        const giftPlayer = giftDialog?.querySelector("[data-question-gift-player]");
+        const giftValue = giftDialog?.querySelector("[data-question-gift-value]");
+        const giftResolve = giftDialog?.querySelector("[data-question-gift-resolve]");
+        const giftWarning = giftDialog?.querySelector("[data-question-gift-warning]");
+        const giftSubmit = giftDialog?.querySelector("[data-question-gift-submit]");
+        const closeDialog = document.getElementById("question-close-dialog");
+        const closeForm = closeDialog?.querySelector("[data-question-close-form]");
+        const closeId = closeDialog?.querySelector("[data-question-close-id]");
+        const closeLabel = closeDialog?.querySelector("[data-question-close-label]");
+        let selectedQuestion = null;
+
+        const invalidValueMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["GameBoard_QuickScoreInvalidValue"].Value));
+        const noPlayersMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["AnswerHistory_NoEligiblePlayers"].Value));
+
+        const hide = () => {
+            if (menu) menu.hidden = true;
+        };
+
+        const position = event => {
+            if (!menu) return;
+            menu.hidden = false;
+            const rect = menu.getBoundingClientRect();
+            const left = Math.min(event.clientX, Math.max(8, window.innerWidth - rect.width - 8));
+            const top = Math.min(event.clientY, Math.max(8, window.innerHeight - rect.height - 8));
+            menu.style.left = `${Math.max(8, left)}px`;
+            menu.style.top = `${Math.max(8, top)}px`;
+        };
+
+        const syncPlayers = () => {
+            if (!selectedQuestion || !giftPlayer) return false;
+            const attempted = new Set((selectedQuestion.dataset.attemptedPlayerIds || "").split(",").filter(Boolean));
+            let first = null;
+            for (const option of giftPlayer.options) {
+                option.disabled = attempted.has(option.value);
+                if (!option.disabled && !first) first = option;
+            }
+            if (first) giftPlayer.value = first.value;
+            if (giftWarning) {
+                giftWarning.hidden = !!first;
+                giftWarning.textContent = first ? "" : noPlayersMessage;
+            }
+            if (giftSubmit) {
+                giftSubmit.disabled = !first;
+            }
+            return !!first;
+        };
+
+        document.addEventListener("contextmenu", event => {
+            const target = event.target instanceof Element ? event.target : null;
+            const resolved = target?.closest(".host-board-question.status-resolved[data-question-resolved]");
+            if (resolved) {
+                event.preventDefault();
+                hide();
+                return;
+            }
+
+            const question = target?.closest(".host-board-question.status-available[data-question-context]");
+            if (!question) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            selectedQuestion = question;
+            position(event);
+        }, true);
+
+        menu?.querySelector("[data-question-gift]")?.addEventListener("click", () => {
+            hide();
+            if (!selectedQuestion || !giftDialog || !giftId || !giftLabel || !giftValue || !giftResolve) return;
+            giftId.value = selectedQuestion.dataset.sourceQuestionId || "";
+            giftLabel.value = selectedQuestion.dataset.questionLabel || "";
+            giftValue.value = selectedQuestion.dataset.questionPoints || "100";
+            giftResolve.checked = false;
+            syncPlayers();
+            giftDialog.showModal();
+        });
+
+        menu?.querySelector("[data-question-close]")?.addEventListener("click", () => {
+            hide();
+            if (!selectedQuestion || !closeDialog || !closeId || !closeLabel) return;
+            closeId.value = selectedQuestion.dataset.sourceQuestionId || "";
+            closeLabel.textContent = selectedQuestion.dataset.questionLabel || "";
+            closeDialog.showModal();
+        });
+
+        giftForm?.addEventListener("submit", async event => {
+            event.preventDefault();
+            const value = Number(giftValue?.value);
+            if (!Number.isInteger(value) || value <= 0) {
+                if (giftWarning) {
+                    giftWarning.hidden = false;
+                    giftWarning.textContent = invalidValueMessage;
+                }
+                return;
+            }
+
+            try {
+                const result = await window.BadWolfContextActions.submit(giftForm);
+                giftDialog?.close();
+                window.BadWolfContextActions.recordAttempt(
+                    result.sourceQuestionId,
+                    result.playerId);
+                if (result.questionResolved) {
+                    window.BadWolfContextActions.markQuestionResolved(result.sourceQuestionId);
+                }
+                await window.BadWolfContextActions.showRoundSummaryIfComplete(result);
+                selectedQuestion = null;
+            } catch (error) {
+                console.error(error);
+                if (giftWarning) {
+                    giftWarning.hidden = false;
+                    giftWarning.textContent = error.message;
+                }
+            }
+        });
+
+        closeForm?.addEventListener("submit", async event => {
+            event.preventDefault();
+            try {
+                const result = await window.BadWolfContextActions.submit(closeForm);
+                closeDialog?.close();
+                window.BadWolfContextActions.markQuestionResolved(result.sourceQuestionId);
+                await window.BadWolfContextActions.showRoundSummaryIfComplete(result);
+                selectedQuestion = null;
+            } catch (error) {
+                console.error(error);
+                window.alert(error.message);
+            }
+        });
+
+        for (const button of giftDialog?.querySelectorAll("[data-close-question-gift]") || []) {
+            button.addEventListener("click", () => giftDialog.close());
+        }
+        giftDialog?.addEventListener("click", event => {
+            if (event.target === giftDialog) giftDialog.close();
+        });
+
+        for (const button of closeDialog?.querySelectorAll("[data-close-question-close-dialog]") || []) {
+            button.addEventListener("click", () => closeDialog.close());
+        }
+        closeDialog?.addEventListener("click", event => {
+            if (event.target === closeDialog) closeDialog.close();
+        });
+
+        document.addEventListener("pointerdown", event => {
+            if (menu && !menu.hidden && !menu.contains(event.target)) hide();
+        }, true);
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") hide();
+        });
+        window.addEventListener("resize", hide);
+    })();
+</script>
+
+<div id="player-score-context-menu"
+     class="player-score-context-menu"
+     role="menu"
+     hidden>
+    <button class="player-score-context-action player-score-context-add"
+            type="button"
+            data-quick-score-mode="add"
+            role="menuitem"
+            title="@Localizer["GameBoard_QuickScoreAdd"]"
+            aria-label="@Localizer["GameBoard_QuickScoreAdd"]">+</button>
+    <button class="player-score-context-action player-score-context-subtract"
+            type="button"
+            data-quick-score-mode="subtract"
+            role="menuitem"
+            title="@Localizer["GameBoard_QuickScoreSubtract"]"
+            aria-label="@Localizer["GameBoard_QuickScoreSubtract"]">−</button>
+</div>
+
+<dialog id="quick-score-dialog"
+        class="app-dialog"
+        aria-labelledby="quick-score-dialog-title"
+        data-add-title="@Localizer["GameBoard_QuickScoreAdd"]"
+        data-subtract-title="@Localizer["GameBoard_QuickScoreSubtract"]"
+        data-add-value-label="@Localizer["GameBoard_QuickScoreRewardAmount"]"
+        data-subtract-value-label="@Localizer["GameBoard_QuickScorePenaltyAmount"]">
+    <form method="post"
+          asp-page-handler="QuickScoreAdjustment"
+          class="dialog-card stack-form quick-score-dialog-card"
+          novalidate
+          data-quick-score-form>
+        <input name="playerId" type="hidden" data-quick-score-player-id />
+        <input name="isCorrect" type="hidden" data-quick-score-is-correct />
+        <input name="resolveQuestionIfAvailable"
+               type="hidden"
+               value="true"
+               data-quick-score-resolve-question />
+
+        <div class="dialog-heading quick-score-dialog-heading">
+            <div class="quick-score-dialog-title-row">
+                <span class="quick-score-mode-badge" data-quick-score-mode-badge aria-hidden="true">+</span>
+                <h2 id="quick-score-dialog-title" data-quick-score-title>@Localizer["GameBoard_QuickScoreAdd"]</h2>
+            </div>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-quick-score-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+
+        <p class="dialog-target" data-quick-score-player-name></p>
+
+        @{
+            var quickScoreAvailableRoundIds = Model.Game.Session.Quiz.Rounds
+                .OrderBy(round => round.SortOrder)
+                .Take(Model.Game.Session.CurrentRoundIndex + 1)
+                .Select(round => round.SourceRoundId)
+                .ToHashSet();
+
+            var quickScoreQuestions = Model.Game.Session.Board.Questions
+                .Where(question => quickScoreAvailableRoundIds.Contains(question.SourceRoundId))
+                .OrderBy(question => Model.Game.Session.Quiz.Rounds
+                    .Single(round => round.SourceRoundId == question.SourceRoundId).SortOrder)
+                .ThenBy(question => question.RowIndex)
+                .ThenBy(question => question.SourceCategoryId)
+                .ToArray();
+        }
+
+        <label>
+            <span>@Localizer["AnswerHistory_Question"]</span>
+            <select name="sourceQuestionId" data-quick-score-question required>
+                @foreach (var question in quickScoreQuestions)
+                {
+                    var roundTitle = Model.Game.Session.Quiz.Rounds
+                        .Single(round => round.SourceRoundId == question.SourceRoundId).Title;
+                    <option value="@question.SourceQuestionId"
+                            data-points="@question.Points"
+                            data-status="@question.Status.ToString().ToLowerInvariant()"
+                            data-attempted-player-ids="@string.Join(',', question.AnswerAttempts.Select(attempt => attempt.PlayerId.Value))">
+                        @roundTitle — @question.CategoryTitle — @question.Points
+                    </option>
+                }
+            </select>
+        </label>
+
+        <label>
+            <span data-quick-score-value-label>@Localizer["GameBoard_QuickScoreRewardAmount"]</span>
+            <input name="value"
+                   type="number"
+                   min="100"
+                   step="100"
+                   value="100"
+                   required
+                   data-quick-score-value />
+        </label>
+
+        <p class="message message-error quick-score-warning"
+           data-quick-score-warning
+           hidden></p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-quick-score-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-primary"
+                    type="submit"
+                    data-quick-score-submit>
+                @Localizer["GameBoard_QuickScoreApply"]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="quick-score-resolve-question-dialog"
+        class="app-dialog"
+        aria-labelledby="quick-score-resolve-question-title">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2 id="quick-score-resolve-question-title">@Localizer["GameBoard_QuickScoreResolveQuestionTitle"]</h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-quick-score-resolve-cancel
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+        <p>@Localizer["GameBoard_QuickScoreResolveQuestionPrompt"]</p>
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-quick-score-resolve-no>
+                @Localizer["GameBoard_QuickScoreKeepQuestionOpen"]
+            </button>
+            <button class="button button-primary"
+                    type="button"
+                    data-quick-score-resolve-yes>
+                @Localizer["GameBoard_QuickScoreMarkQuestionClosed"]
+            </button>
+        </div>
+    </div>
+</dialog>
+
+<script>
+    window.BadWolfQuickScore = (() => {
+        const contextMenu = document.getElementById("player-score-context-menu");
+        const dialog = document.getElementById("quick-score-dialog");
+        const playerIdInput = dialog?.querySelector("[data-quick-score-player-id]");
+        const isCorrectInput = dialog?.querySelector("[data-quick-score-is-correct]");
+        const resolveQuestionInput = dialog?.querySelector("[data-quick-score-resolve-question]");
+        const playerNameTarget = dialog?.querySelector("[data-quick-score-player-name]");
+        const questionSelect = dialog?.querySelector("[data-quick-score-question]");
+        const valueInput = dialog?.querySelector("[data-quick-score-value]");
+        const valueLabel = dialog?.querySelector("[data-quick-score-value-label]");
+        const submitButton = dialog?.querySelector("[data-quick-score-submit]");
+        const warning = dialog?.querySelector("[data-quick-score-warning]");
+        const titleTarget = dialog?.querySelector("[data-quick-score-title]");
+        const modeBadge = dialog?.querySelector("[data-quick-score-mode-badge]");
+        const resolveDialog = document.getElementById("quick-score-resolve-question-dialog");
+        const resolveYesButton = resolveDialog?.querySelector("[data-quick-score-resolve-yes]");
+        const resolveNoButton = resolveDialog?.querySelector("[data-quick-score-resolve-no]");
+        const resolveCancelButton = resolveDialog?.querySelector("[data-quick-score-resolve-cancel]");
+        const noQuestionsMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["GameBoard_QuickScoreNoQuestions"].Value));
+
+        let selectedPlayerId = "";
+        let selectedPlayerName = "";
+        let resolveDecisionMade = false;
+
+        const hide = () => {
+            if (contextMenu) {
+                contextMenu.hidden = true;
+            }
+        };
+
+        const syncValueToQuestion = () => {
+            if (!questionSelect || !valueInput) {
+                return;
+            }
+
+            const selectedOption = questionSelect.selectedOptions[0];
+            const points = Number.parseInt(selectedOption?.dataset.points ?? "", 10);
+
+            if (Number.isFinite(points) && points > 0) {
+                valueInput.value = points.toString();
+            }
+        };
+
+        const updateQuestions = () => {
+            if (!questionSelect || !submitButton || !warning) {
+                return;
+            }
+
+            let firstAvailable = null;
+
+            for (const option of questionSelect.options) {
+                const attemptedIds = option.dataset.attemptedPlayerIds
+                    ?.split(",")
+                    .filter(Boolean) ?? [];
+                const available = !attemptedIds.includes(selectedPlayerId);
+
+                option.hidden = !available;
+                option.disabled = !available;
+                firstAvailable ??= available ? option : null;
+            }
+
+            if (firstAvailable) {
+                questionSelect.value = firstAvailable.value;
+            } else {
+                questionSelect.selectedIndex = -1;
+            }
+
+            const hasQuestion = firstAvailable !== null;
+            submitButton.disabled = !hasQuestion;
+            warning.hidden = hasQuestion;
+            warning.textContent = hasQuestion ? "" : noQuestionsMessage;
+
+            if (hasQuestion) {
+                syncValueToQuestion();
+            }
+        };
+
+        const openDialog = isCorrect => {
+            hide();
+
+            if (!dialog || !playerIdInput || !isCorrectInput || !resolveQuestionInput ||
+                !playerNameTarget || !questionSelect || !valueInput || !valueLabel ||
+                !submitButton || !warning || !titleTarget || !modeBadge) {
+                return;
+            }
+
+            playerIdInput.value = selectedPlayerId;
+            isCorrectInput.value = isCorrect ? "true" : "false";
+            playerNameTarget.textContent = selectedPlayerName;
+            titleTarget.textContent = isCorrect ? dialog.dataset.addTitle : dialog.dataset.subtractTitle;
+            submitButton.textContent = titleTarget.textContent;
+            valueLabel.textContent = isCorrect
+                ? dialog.dataset.addValueLabel
+                : dialog.dataset.subtractValueLabel;
+            modeBadge.textContent = isCorrect ? "+" : "−";
+            dialog.dataset.quickScoreMode = isCorrect ? "add" : "subtract";
+            resolveQuestionInput.value = "true";
+            resolveDecisionMade = false;
+            updateQuestions();
+            dialog.showModal();
+            valueInput.focus();
+        };
+
+        const show = (event, card) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (!contextMenu || !card) {
+                return false;
+            }
+
+            selectedPlayerId = card.dataset.playerId ?? "";
+            selectedPlayerName = card.dataset.playerName ??
+                card.querySelector("strong")?.textContent?.trim() ?? "";
+
+            contextMenu.hidden = false;
+            contextMenu.style.left = "0px";
+            contextMenu.style.top = "0px";
+
+            const rect = contextMenu.getBoundingClientRect();
+            const left = Math.max(8, Math.min(event.clientX, window.innerWidth - rect.width - 8));
+            const top = Math.max(8, Math.min(event.clientY, window.innerHeight - rect.height - 8));
+
+            contextMenu.style.left = `${left}px`;
+            contextMenu.style.top = `${top}px`;
+            contextMenu.querySelector("button")?.focus({ preventScroll: true });
+            return false;
+        };
+
+        document.addEventListener("contextmenu", event => {
+            const target = event.target instanceof Element ? event.target : null;
+            const card = target?.closest(".scoreboard-player[data-player-id]");
+
+            if (!card || card.hasAttribute("data-host-card")) {
+                return;
+            }
+
+            show(event, card);
+        }, true);
+
+        questionSelect?.addEventListener("change", syncValueToQuestion);
+
+        const quickScoreForm = dialog?.querySelector("[data-quick-score-form]");
+        quickScoreForm?.addEventListener("submit", async event => {
+            event.preventDefault();
+            if (!questionSelect || !resolveQuestionInput || !resolveDialog) {
+                return;
+            }
+
+            const selectedOption = questionSelect.selectedOptions[0];
+            if (!selectedOption) {
+                return;
+            }
+
+            if (selectedOption.dataset.status === "available" && !resolveDecisionMade) {
+                resolveDialog.showModal();
+                return;
+            }
+
+            try {
+                const result = await window.BadWolfContextActions.submit(quickScoreForm);
+                dialog?.close();
+                window.BadWolfContextActions.recordAttempt(
+                    result.sourceQuestionId,
+                    result.playerId);
+                if (result.questionResolved) {
+                    window.BadWolfContextActions.markQuestionResolved(result.sourceQuestionId);
+                }
+                await window.BadWolfContextActions.showRoundSummaryIfComplete(result);
+                resolveDecisionMade = false;
+                updateQuestions();
+            } catch (error) {
+                console.error(error);
+                if (warning) {
+                    warning.hidden = false;
+                    warning.textContent = error.message;
+                }
+                resolveDecisionMade = false;
+            }
+        });
+
+        const continueQuickScoreSubmit = resolveQuestion => {
+            if (!dialog || !resolveDialog || !resolveQuestionInput || !submitButton) {
+                return;
+            }
+
+            resolveQuestionInput.value = resolveQuestion ? "true" : "false";
+            resolveDecisionMade = true;
+            resolveDialog.close();
+            dialog.querySelector("[data-quick-score-form]")?.requestSubmit(submitButton);
+        };
+
+        resolveYesButton?.addEventListener("click", () => continueQuickScoreSubmit(true));
+        resolveNoButton?.addEventListener("click", () => continueQuickScoreSubmit(false));
+        resolveCancelButton?.addEventListener("click", () => resolveDialog?.close());
+        resolveDialog?.addEventListener("click", event => {
+            if (event.target === resolveDialog) {
+                resolveDialog.close();
+            }
+        });
+
+        contextMenu?.addEventListener("click", event => {
+            const action = event.target.closest("[data-quick-score-mode]");
+            if (action) {
+                openDialog(action.dataset.quickScoreMode === "add");
+            }
+        });
+
+        document.addEventListener("pointerdown", event => {
+            if (contextMenu && !contextMenu.hidden && !contextMenu.contains(event.target)) {
+                hide();
+            }
+        }, true);
+
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape" && contextMenu && !contextMenu.hidden) {
+                hide();
+            }
+        });
+
+        window.addEventListener("blur", hide);
+        window.addEventListener("resize", hide);
+
+        dialog?.querySelectorAll("[data-close-quick-score-dialog]").forEach(button => {
+            button.addEventListener("click", () => dialog.close());
+        });
+
+        dialog?.addEventListener("click", event => {
+            if (event.target === dialog) {
+                dialog.close();
+            }
+        });
+
+        return { show, hide };
+    })();
+</script>
 
 <dialog id="remove-player-dialog"
         class="app-dialog"

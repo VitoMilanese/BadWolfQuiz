@@ -6050,3 +6050,198 @@ body.youtube-auto-expanded-open {
     font-size: 1.15rem;
     line-height: 1;
 }
+
+
+/* Player card quick score context menu */
+.player-score-context-menu {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    z-index: 10000;
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-glass);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .5);
+}
+
+.player-score-context-menu[hidden] {
+    display: none !important;
+}
+
+.player-score-context-action {
+    width: 42px;
+    height: 42px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    background: var(--panel-2);
+    font-size: 1.7rem;
+    font-weight: 950;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.player-score-context-add {
+    color: color-mix(in srgb, #3fb950 76%, var(--text));
+}
+
+.player-score-context-subtract {
+    color: color-mix(in srgb, #ef233c 82%, var(--text));
+}
+
+.player-score-context-action:hover,
+.player-score-context-action:focus-visible {
+    border-color: var(--gold);
+    outline: none;
+}
+
+.quick-score-warning {
+    margin: 0;
+}
+
+
+/* Quick score adjustment dialog mode */
+.quick-score-dialog-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.quick-score-dialog-title-row h2 {
+    margin: 0;
+}
+
+.quick-score-mode-badge {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    display: grid;
+    place-items: center;
+    border: 1px solid currentColor;
+    border-radius: 10px;
+    font-size: 1.75rem;
+    font-weight: 950;
+    line-height: 1;
+}
+
+#quick-score-dialog[data-quick-score-mode="add"] .quick-score-dialog-card {
+    border-color: color-mix(in srgb, #3fb950 65%, var(--line));
+}
+
+#quick-score-dialog[data-quick-score-mode="add"] .quick-score-mode-badge {
+    color: color-mix(in srgb, #3fb950 82%, var(--text));
+    background: color-mix(in srgb, #3fb950 14%, var(--panel));
+}
+
+#quick-score-dialog[data-quick-score-mode="subtract"] .quick-score-dialog-card {
+    border-color: color-mix(in srgb, #ef233c 68%, var(--line));
+}
+
+#quick-score-dialog[data-quick-score-mode="subtract"] .quick-score-mode-badge {
+    color: color-mix(in srgb, #ef233c 84%, var(--text));
+    background: color-mix(in srgb, #ef233c 14%, var(--panel));
+}
+
+/* Question card context menu */
+.question-context-menu {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    z-index: 10000;
+    display: grid;
+    grid-template-columns: repeat(2, 42px);
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-glass);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .5);
+}
+
+.question-context-menu[hidden] {
+    display: none !important;
+}
+
+.question-context-action {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--text);
+    background: transparent;
+    font: inherit;
+    font-size: 1.15rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.question-context-action:hover,
+.question-context-action:focus-visible {
+    border-color: var(--gold);
+    background: var(--panel-2);
+    outline: none;
+}
+
+.question-context-gift {
+    font-size: 1.2rem;
+}
+
+.question-context-close {
+    color: color-mix(in srgb, #ef233c 82%, var(--text));
+}
+
+
+/* Category context menu */
+.category-context-menu {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    z-index: 10000;
+    display: grid;
+    grid-template-columns: 42px;
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-glass);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .5);
+}
+
+.category-context-menu[hidden] {
+    display: none !important;
+}
+
+.category-context-action {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: color-mix(in srgb, #ef233c 82%, var(--text));
+    background: transparent;
+    font: inherit;
+    font-size: 1.15rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.category-context-action:hover,
+.category-context-action:focus-visible {
+    border-color: var(--gold);
+    background: var(--panel-2);
+    outline: none;
+}

@@ -2487,4 +2487,61 @@
   <data name="GameBoard_JoinCopied" xml:space="preserve">
     <value>Copied</value>
   </data>
+  <data name="GameBoard_QuickScoreAdd" xml:space="preserve">
+    <value>Add score</value>
+  </data>
+  <data name="GameBoard_QuickScoreSubtract" xml:space="preserve">
+    <value>Subtract score</value>
+  </data>
+  <data name="GameBoard_QuickScoreTitle" xml:space="preserve">
+    <value>Quick score adjustment</value>
+  </data>
+  <data name="GameBoard_QuickScoreApply" xml:space="preserve">
+    <value>Apply adjustment</value>
+  </data>
+  <data name="GameBoard_QuickScoreNoQuestions" xml:space="preserve">
+    <value>No eligible questions are available for this player.</value>
+  </data>
+  <data name="GameBoard_QuickScoreRewardAmount" xml:space="preserve">
+    <value>Reward amount</value>
+  </data>
+  <data name="GameBoard_QuickScorePenaltyAmount" xml:space="preserve">
+    <value>Penalty amount</value>
+  </data>
+  <data name="GameBoard_QuickScoreInvalidValue" xml:space="preserve">
+    <value>The amount must be greater than zero and divisible by 100.</value>
+  </data>
+  <data name="GameBoard_QuickScoreResolveQuestionTitle" xml:space="preserve">
+    <value>Close this question?</value>
+  </data>
+  <data name="GameBoard_QuickScoreResolveQuestionPrompt" xml:space="preserve">
+    <value>This question has not been opened yet. Do you also want to mark it as closed?</value>
+  </data>
+  <data name="GameBoard_QuickScoreKeepQuestionOpen" xml:space="preserve">
+    <value>Keep open</value>
+  </data>
+  <data name="GameBoard_QuickScoreMarkQuestionClosed" xml:space="preserve">
+    <value>Mark as closed</value>
+  </data>
+  <data name="GameBoard_QuestionGift" xml:space="preserve">
+    <value>Gift</value>
+  </data>
+  <data name="GameBoard_QuestionClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="GameBoard_QuestionGiftCloseAfter" xml:space="preserve">
+    <value>Close this question after awarding the points</value>
+  </data>
+  <data name="GameBoard_QuestionCloseTitle" xml:space="preserve">
+    <value>Close question?</value>
+  </data>
+  <data name="GameBoard_QuestionCloseConfirmation" xml:space="preserve">
+    <value>This question will be closed without an answer. Continue?</value>
+  </data>
+  <data name="GameBoard_CategoryCloseTitle" xml:space="preserve">
+    <value>Close category?</value>
+  </data>
+  <data name="GameBoard_CategoryCloseConfirmation" xml:space="preserve">
+    <value>All unopened questions in this category will be closed without an answer. Continue?</value>
+  </data>
 </root>

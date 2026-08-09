@@ -25,6 +25,36 @@ selection because the board state changed or the question is no longer
 available, the host remains on the current board and receives a temporary inline
 error instead of a full-page reload.
 
+
+## Board context actions
+
+The host can administer unopened board content without entering the normal
+question presentation flow. These commands are available only for questions in
+`Available` state. Resolved questions do not expose a context menu.
+
+Right-clicking an unopened question shows icon-only actions for:
+
+- **Gift**: create a positive, correct answer-history entry for a selected player;
+- **Close**: after confirmation, resolve the question with no answer and no score change.
+
+The Gift dialog shows the selected question as read-only, lets the host choose an
+eligible player, and pre-fills the question's nominal value. The reward must be
+positive. The spinner changes it in 100-point steps, but manually entered
+positive values do not need to be divisible by 100. A checkbox, disabled by
+default, controls whether the question is also resolved after the reward is
+applied.
+
+Right-clicking a category heading exposes the same close icon when that category
+contains at least one unopened question. After confirmation, every still-available
+question in that category is resolved with no answer and no score change. A
+category with no available questions exposes no context action.
+
+These board context operations are asynchronous. They update scores and board
+state without reloading the Lobby page. If one of them resolves the final
+available question in the current round, the host view immediately transitions
+to the normal round-summary state, preserving the same round-completion behavior
+as the standard judging flow.
+
 ## Four-clue questions
 
 A four-clue question is a regular buzzer question with a different presentation and scoring rule. Its immutable definition contains exactly four ordered clues. A clue may be text, an image, or audio; video and YouTube blocks are not supported.

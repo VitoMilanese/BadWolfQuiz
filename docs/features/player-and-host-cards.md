@@ -27,6 +27,30 @@ Administrative actions use a compact vertical icon strip anchored to the right e
 
 Every icon control must remain accessible through a localized label or tooltip and keyboard focus.
 
+## Player-card quick score corrections
+
+While the game board is visible, right-clicking a player card opens a compact
+context menu with **add** and **subtract** actions. The host can use these
+actions to create an answer-history entry for that player without leaving the
+board.
+
+The quick adjustment dialog uses the same question history rules as the full
+editor:
+
+- the host selects a question from the current or an earlier round;
+- questions that already contain an entry for that player are excluded;
+- the reward or penalty is always entered as a positive value;
+- the numeric spinner advances in 100-point steps, while any positive value may
+  still be typed manually;
+- choosing a question pre-fills its nominal point value;
+- if the selected question is still unopened, the host chooses whether to
+  resolve it or keep it available.
+
+Adding points creates a correct history entry; subtracting points creates an
+incorrect history entry. These actions are submitted asynchronously, so the
+host board does not reload. Player scores are updated through the normal live
+player-state broadcast.
+
 ## Player avatars
 
 A player card may display an avatar below the player's name.
