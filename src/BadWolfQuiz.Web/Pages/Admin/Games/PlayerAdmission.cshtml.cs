@@ -1,11 +1,12 @@
-using System.Globalization;
 using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Hubs;
+using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Localization;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Games;
 
@@ -13,7 +14,8 @@ namespace BadWolfQuiz.Web.Pages.Admin.Games;
 public sealed class PlayerAdmissionModel(
     GameSessionRegistry sessionRegistry,
     CurrentHost currentHost,
-    IHubContext<GameHub> gameHub) : PageModel
+    IHubContext<GameHub> gameHub,
+    IStringLocalizer<PlayerAdmissionResource> localizer) : PageModel
 {
     public IActionResult OnGet(Guid id)
     {
@@ -26,7 +28,6 @@ public sealed class PlayerAdmissionModel(
         var waitingCount = sessionRegistry
             .GetPlayerLobbyEntries(game)
             .Count(player => player.Presence == PlayerPresenceStatus.RejoinPending);
-        var labels = GetLabels();
 
         return new JsonResult(new
         {
@@ -35,12 +36,12 @@ public sealed class PlayerAdmissionModel(
             game.AllowsNewPlayers,
             labels = new
             {
-                acceptAllWaiting = labels.AcceptAllWaiting,
-                automaticAcceptance = labels.AutomaticAcceptance,
-                allowNewConnections = labels.AllowNewConnections,
-                denyNewConnections = labels.DenyNewConnections,
-                enabled = labels.Enabled,
-                disabled = labels.Disabled
+                acceptAllWaiting = localizer["AcceptAllWaiting"].Value,
+                automaticAcceptance = localizer["AutomaticAcceptance"].Value,
+                allowNewConnections = localizer["AllowNewConnections"].Value,
+                denyNewConnections = localizer["DenyNewConnections"].Value,
+                enabled = localizer["Enabled"].Value,
+                disabled = localizer["Disabled"].Value
             }
         });
     }
@@ -87,38 +88,4 @@ public sealed class PlayerAdmissionModel(
 
     private GameSessionRegistration? FindOwnedGame(Guid id) =>
         sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
-
-    private static PlayerAdmissionLabels GetLabels() =>
-        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName switch
-        {
-            "uk" => new(
-                "Прийняти всіх гравців, які очікують",
-                "Автоматично приймати нових гравців",
-                "Дозволити під’єднання нових гравців",
-                "Заборонити під’єднання нових гравців",
-                "увімкнено",
-                "вимкнено"),
-            "it" => new(
-                "Accetta tutti i giocatori in attesa",
-                "Accetta automaticamente i nuovi giocatori",
-                "Consenti connessioni di nuovi giocatori",
-                "Impedisci connessioni di nuovi giocatori",
-                "attivo",
-                "disattivo"),
-            _ => new(
-                "Accept all waiting players",
-                "Automatically accept new players",
-                "Allow new player connections",
-                "Deny new player connections",
-                "enabled",
-                "disabled")
-        };
-
-    private sealed record PlayerAdmissionLabels(
-        string AcceptAllWaiting,
-        string AutomaticAcceptance,
-        string AllowNewConnections,
-        string DenyNewConnections,
-        string Enabled,
-        string Disabled);
 }
