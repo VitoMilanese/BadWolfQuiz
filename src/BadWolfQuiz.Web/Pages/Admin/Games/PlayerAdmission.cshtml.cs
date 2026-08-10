@@ -40,8 +40,8 @@ public sealed class PlayerAdmissionModel(
                 automaticAcceptance = localizer["AutomaticAcceptance"].Value,
                 allowNewConnections = localizer["AllowNewConnections"].Value,
                 denyNewConnections = localizer["DenyNewConnections"].Value,
-                enabled = localizer["Enabled"].Value,
-                disabled = localizer["Disabled"].Value
+                enabled = localizer["Enabled"].Value.ToUpper(),
+                disabled = localizer["Disabled"].Value.ToUpper()
             }
         });
     }
