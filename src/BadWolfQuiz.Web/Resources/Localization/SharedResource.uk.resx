@@ -663,6 +663,9 @@
   <data name="QuizEditor_RoundCreated" xml:space="preserve">
     <value>Раунд успішно створено.</value>
   </data>
+  <data name="QuizEditor_RoundSettings" xml:space="preserve">
+    <value>Налаштування раунду</value>
+  </data>
   <data name="QuizEditor_AddRound" xml:space="preserve">
     <value>Додати раунд</value>
   </data>
