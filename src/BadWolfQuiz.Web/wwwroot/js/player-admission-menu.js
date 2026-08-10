@@ -31,7 +31,6 @@
     autoAction.type = "button";
     autoAction.className = "button button-secondary player-admission-menu-action";
     autoAction.dataset.playerAdmissionAuto = "";
-    autoAction.hidden = true;
     autoAction.setAttribute("role", "menuitem");
 
     const autoActionLabel = document.createElement("span");
@@ -77,9 +76,7 @@
         }
 
         const state = await response.json();
-        const hasWaitingPlayers = state.waitingCount > 0;
-        waitingAction.hidden = !hasWaitingPlayers;
-        autoAction.hidden = !hasWaitingPlayers && !state.automaticallyAcceptNewPlayers;
+        waitingAction.hidden = state.waitingCount === 0;
         waitingAction.textContent = state.labels.acceptAllWaiting;
         autoActionLabel.textContent = `${state.labels.automaticAcceptance}:`;
         autoActionState.textContent = state.automaticallyAcceptNewPlayers
