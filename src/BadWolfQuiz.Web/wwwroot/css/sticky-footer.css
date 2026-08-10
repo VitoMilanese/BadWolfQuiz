@@ -13,11 +13,14 @@ body.portal-layout {
 
 @media (max-width: 900px) {
     .quiz-editor-toolbar .round-navigation {
-        align-self: flex-end;
-        align-items: flex-end;
+        width: 100%;
+        margin-left: auto;
     }
 
     .quiz-editor-toolbar .round-tabs {
+        width: fit-content;
+        max-width: 100%;
+        margin-left: auto;
         justify-content: flex-end;
     }
 }
