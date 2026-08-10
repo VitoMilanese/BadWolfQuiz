@@ -11,139 +11,39 @@
 <section class="page-section question-inbox-page">
     <div class="page-heading">
         <h1>@Localizer["QuestionInbox_Title"]</h1>
-        <button type="button"
-                class="button button-secondary"
-                data-open-question-bot-settings>
-            @Localizer["QuestionBot_Title"]
-        </button>
+        <button type="button" class="button button-secondary" data-open-question-bot-settings>@Localizer["QuestionBot_Title"]</button>
     </div>
-
     <div asp-validation-summary="ModelOnly"></div>
-
-    @if (Model.Questions.Count == 0)
-    {
-        <p>@Localizer["QuestionInbox_Empty"]</p>
-    }
+    @if (Model.Questions.Count == 0) { <p>@Localizer["QuestionInbox_Empty"]</p> }
     else
     {
         <div class="question-inbox-list">
             @foreach (var question in Model.Questions)
             {
                 <article class="question-inbox-card">
-                    <header class="question-inbox-card-header">
-                        <div>
-                            <span class="question-inbox-card-label">@Localizer["QuestionInbox_Question"]</span>
-                            @if (!string.IsNullOrWhiteSpace(question.SenderName))
-                            {
-                                <p class="question-conversation-meta">
-                                    <strong>@Localizer["QuestionInbox_From"]:</strong>
-                                    <span>@question.SenderName</span>
-                                </p>
-                            }
-                        </div>
-                    </header>
-
-                    <div class="question-messages">
-                        @foreach (var message in question.Messages.OrderBy(x => x.CreatedAtUtc).ThenBy(x => x.Id))
-                        {
-                            var isUserMessage = message.AuthorType == UserQuestionAuthorType.User;
-                            <article class="question-message @(isUserMessage ? "question-message-user" : "question-message-developer")">
-                                <div class="question-message-author">
-                                    @(isUserMessage ? Localizer["QuestionInbox_User"].Value : Localizer["QuestionInbox_Developer"].Value)
-                                </div>
-                                <p class="question-message-body">@message.Text</p>
-                            </article>
-                        }
-                    </div>
-
-                    @{
-                        var lastMessage = question.Messages.OrderBy(x => x.CreatedAtUtc).ThenBy(x => x.Id).LastOrDefault();
-                        var awaitingDeveloper = lastMessage?.AuthorType == UserQuestionAuthorType.User;
-                    }
-
-                    <div class="question-reply-panel question-inbox-actions-panel">
-                        @if (awaitingDeveloper)
-                        {
-                            <form method="post" asp-page-handler="Answer" class="question-reply-form">
-                                <input type="hidden" name="id" value="@question.Id" />
-                                <label for="answer-@question.Id">@Localizer["QuestionInbox_Answer"]</label>
-                                <textarea id="answer-@question.Id" name="answer" rows="5" maxlength="5000" required></textarea>
-                                <div class="form-actions">
-                                    <button type="submit" class="button button-primary">@Localizer["QuestionInbox_Reply"]</button>
-                                    <button type="button" class="button button-danger-outline" data-delete-question data-question-id="@question.Id">@Localizer["Button_Delete"]</button>
-                                </div>
-                            </form>
-                        }
-                        else
-                        {
-                            <div class="form-actions">
-                                <button type="button" class="button button-danger-outline" data-delete-question data-question-id="@question.Id">@Localizer["Button_Delete"]</button>
-                            </div>
-                        }
-                    </div>
+                    <header class="question-inbox-card-header"><div><span class="question-inbox-card-label">@Localizer["QuestionInbox_Question"]</span>@if (!string.IsNullOrWhiteSpace(question.SenderName)){<p class="question-conversation-meta"><strong>@Localizer["QuestionInbox_From"]:</strong> <span>@question.SenderName</span></p>}</div></header>
+                    <div class="question-messages">@foreach (var message in question.Messages.OrderBy(x => x.CreatedAtUtc).ThenBy(x => x.Id)){var isUserMessage = message.AuthorType == UserQuestionAuthorType.User;<article class="question-message @(isUserMessage ? "question-message-user" : "question-message-developer")"><div class="question-message-author">@(isUserMessage ? Localizer["QuestionInbox_User"].Value : Localizer["QuestionInbox_Developer"].Value)</div><p class="question-message-body">@message.Text</p></article>}</div>
+                    @{ var lastMessage = question.Messages.OrderBy(x => x.CreatedAtUtc).ThenBy(x => x.Id).LastOrDefault(); var awaitingDeveloper = lastMessage?.AuthorType == UserQuestionAuthorType.User; }
+                    <div class="question-reply-panel question-inbox-actions-panel">@if (awaitingDeveloper){<form method="post" asp-page-handler="Answer" class="question-reply-form"><input type="hidden" name="id" value="@question.Id" /><label for="answer-@question.Id">@Localizer["QuestionInbox_Answer"]</label><textarea id="answer-@question.Id" name="answer" rows="5" maxlength="5000" required></textarea><div class="form-actions"><button type="submit" class="button button-primary">@Localizer["QuestionInbox_Reply"]</button><button type="button" class="button button-danger-outline" data-delete-question data-question-id="@question.Id">@Localizer["Button_Delete"]</button></div></form>}else{<div class="form-actions"><button type="button" class="button button-danger-outline" data-delete-question data-question-id="@question.Id">@Localizer["Button_Delete"]</button></div>}</div>
                 </article>
             }
         </div>
     }
-
-    <dialog id="question-bot-settings-dialog" class="app-dialog">
-        <div class="dialog-card">
-            <div class="dialog-heading">
-                <h2>@Localizer["QuestionBot_Title"]</h2>
-                <button type="button" class="button button-secondary" data-close-question-bot-settings>@Localizer["Button_Cancel"]</button>
-            </div>
-            <iframe class="question-bot-settings-frame"
-                    title="@Localizer["QuestionBot_Title"]"
-                    data-question-bot-settings-frame
-                    data-src="@Url.Page("/Admin/Settings/QuestionBot", new { embedded = true })"></iframe>
-        </div>
-    </dialog>
-
-    <dialog id="delete-question-dialog" class="app-dialog">
-        <form method="post" asp-page-handler="Delete" class="dialog-card dialog-card-danger">
-            <input type="hidden" id="delete-question-id" name="id" />
-            <div class="dialog-heading">
-                <div>
-                    <h2>@Localizer["QuestionInbox_DeleteConfirmTitle"]</h2>
-                    <p class="dialog-warning">@Localizer["QuestionInbox_DeleteConfirmText"]</p>
-                </div>
-            </div>
-            <div class="form-actions dialog-actions">
-                <button type="button" id="cancel-delete-question" class="button button-secondary">@Localizer["Button_Cancel"]</button>
-                <button type="submit" class="button button-danger">@Localizer["Button_Delete"]</button>
-            </div>
-        </form>
-    </dialog>
+    <dialog id="question-bot-settings-dialog" class="app-dialog"><div class="dialog-card question-bot-dialog-card"><div class="dialog-heading"><h2>@Localizer["QuestionBot_Title"]</h2><button type="button" class="button button-secondary" data-close-question-bot-settings>@Localizer["Button_Cancel"]</button></div><iframe class="question-bot-settings-frame" title="@Localizer["QuestionBot_Title"]" data-question-bot-settings-frame data-src="@Url.Page("/Admin/Settings/QuestionBot", new { embedded = true })"></iframe></div></dialog>
+    <dialog id="delete-question-dialog" class="app-dialog"><form method="post" asp-page-handler="Delete" class="dialog-card dialog-card-danger"><input type="hidden" id="delete-question-id" name="id" /><div class="dialog-heading"><div><h2>@Localizer["QuestionInbox_DeleteConfirmTitle"]</h2><p class="dialog-warning">@Localizer["QuestionInbox_DeleteConfirmText"]</p></div></div><div class="form-actions dialog-actions"><button type="button" id="cancel-delete-question" class="button button-secondary">@Localizer["Button_Cancel"]</button><button type="submit" class="button button-danger">@Localizer["Button_Delete"]</button></div></form></dialog>
 </section>
-
+<style>
+.question-bot-dialog-card{width:min(46rem,92vw)}
+.question-bot-settings-frame{width:100%;min-height:25rem;border:0;background:var(--bg);border-radius:.75rem}
+@media(max-width:640px){.question-inbox-page>.page-heading{align-items:stretch;flex-direction:column}.question-bot-settings-frame{min-height:29rem}}
+</style>
 <script>
-    (() => {
-        const settingsDialog = document.getElementById("question-bot-settings-dialog");
-        const settingsFrame = document.querySelector("[data-question-bot-settings-frame]");
-        const openSettingsButton = document.querySelector("[data-open-question-bot-settings]");
-        const closeSettingsButton = document.querySelector("[data-close-question-bot-settings]");
-
-        openSettingsButton?.addEventListener("click", () => {
-            if (settingsFrame && !settingsFrame.src) {
-                settingsFrame.src = settingsFrame.dataset.src;
-            }
-            settingsDialog?.showModal();
-        });
-
-        closeSettingsButton?.addEventListener("click", () => settingsDialog?.close());
-
-        const deleteDialog = document.getElementById("delete-question-dialog");
-        const questionIdInput = document.getElementById("delete-question-id");
-        const cancelButton = document.getElementById("cancel-delete-question");
-
-        document.querySelectorAll("[data-delete-question]").forEach(button => {
-            button.addEventListener("click", () => {
-                if (!deleteDialog || !questionIdInput) return;
-                questionIdInput.value = button.dataset.questionId;
-                deleteDialog.showModal();
-            });
-        });
-
-        cancelButton?.addEventListener("click", () => deleteDialog?.close());
-    })();
+(() => {
+ const settingsDialog=document.getElementById("question-bot-settings-dialog"),settingsFrame=document.querySelector("[data-question-bot-settings-frame]"),openSettingsButton=document.querySelector("[data-open-question-bot-settings]"),closeSettingsButton=document.querySelector("[data-close-question-bot-settings]");
+ openSettingsButton?.addEventListener("click",()=>{if(settingsFrame&&!settingsFrame.src)settingsFrame.src=settingsFrame.dataset.src;settingsDialog?.showModal();});
+ closeSettingsButton?.addEventListener("click",()=>settingsDialog?.close());
+ const deleteDialog=document.getElementById("delete-question-dialog"),questionIdInput=document.getElementById("delete-question-id"),cancelButton=document.getElementById("cancel-delete-question");
+ document.querySelectorAll("[data-delete-question]").forEach(button=>button.addEventListener("click",()=>{if(!deleteDialog||!questionIdInput)return;questionIdInput.value=button.dataset.questionId;deleteDialog.showModal();}));
+ cancelButton?.addEventListener("click",()=>deleteDialog?.close());
+})();
 </script>
