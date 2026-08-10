@@ -7,26 +7,33 @@
     ViewData["Title"] = Localizer["QuestionBot_Title"];
 }
 
-<h1>@Localizer["QuestionBot_Title"]</h1>
+<div class="page-heading">
+    <div>
+        <h1>@Localizer["QuestionBot_Title"]</h1>
+    </div>
+</div>
 
 @if (TempData["QuestionBotSuccess"] is string success)
 {
     <div id="questionBotSuccess"
-         class="alert alert-success">
+         class="message message-success"
+         role="status">
         @success
     </div>
 }
 
 @if (TempData["QuestionBotError"] is string error)
 {
-    <div class="alert alert-danger">
+    <div class="message message-error" role="alert">
         @error
     </div>
 }
 
-<form method="post" asp-page-handler="Save">
-    <div>
-        <label asp-for="GuildId">@Localizer["QuestionBot_DiscordServer"]</label>
+<form method="post"
+      asp-page-handler="Save"
+      class="form-card narrow stack-form">
+    <label class="field-group">
+        <span>@Localizer["QuestionBot_DiscordServer"]</span>
 
         <select asp-for="GuildId" id="questionBotGuild">
             <option value="">@Localizer["QuestionBot_SelectServer"]</option>
@@ -36,10 +43,10 @@
                 <option value="@guild.Id">@guild.Name</option>
             }
         </select>
-    </div>
+    </label>
 
-    <div>
-        <label asp-for="ChannelId">@Localizer["QuestionBot_TextChannel"]</label>
+    <label class="field-group">
+        <span>@Localizer["QuestionBot_TextChannel"]</span>
 
         <select asp-for="ChannelId" id="questionBotChannel">
             <option value="">@Localizer["QuestionBot_SelectChannel"]</option>
@@ -49,11 +56,13 @@
                 <option value="@channel.Id">@channel.Name</option>
             }
         </select>
-    </div>
+    </label>
 
-    <button type="submit">
-        @Localizer["Button_Save"]
-    </button>
+    <div class="form-actions">
+        <button type="submit" class="button button-primary">
+            @Localizer["Button_Save"]
+        </button>
+    </div>
 </form>
 
 @section Scripts {
