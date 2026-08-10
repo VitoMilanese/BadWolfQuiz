@@ -203,8 +203,31 @@
                         Content="Stop service"
                         Click="StopServiceButton_Click"
                         IsEnabled="False"
+                        Margin="0,0,18,0"
                         Foreground="{DynamicResource AppForegroundBrush}"
                         Style="{StaticResource MaterialDesignOutlinedButton}"/>
+
+                <Separator Width="1" Height="28" Margin="0,0,18,0"/>
+
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="Backups:"
+                               Foreground="{DynamicResource AppForegroundBrush}"
+                               FontWeight="SemiBold"
+                               Margin="0,0,8,0"
+                               VerticalAlignment="Center"/>
+                    <Button x:Name="BackupAppDataButton"
+                            Content="Backup App_Data"
+                            Click="BackupAppDataButton_Click"
+                            Margin="0,0,8,0"
+                            Foreground="{DynamicResource AccentForegroundBrush}"
+                            Style="{StaticResource MaterialDesignRaisedButton}"/>
+                    <Button x:Name="BackupServiceFolderButton"
+                            Content="Backup service folder"
+                            Click="BackupServiceFolderButton_Click"
+                            Foreground="{DynamicResource AppForegroundBrush}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                </StackPanel>
             </WrapPanel>
         </Border>
 

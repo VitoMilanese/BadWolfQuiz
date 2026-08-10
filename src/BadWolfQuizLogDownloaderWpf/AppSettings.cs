@@ -12,6 +12,9 @@ internal sealed class AppSettings
     public string ServiceName { get; set; } = "badwolfquiz.service";
     public bool UseSudo { get; set; } = true;
     public string OutputDirectory { get; set; } = "Logs";
+    public string RemoteAppDataPath { get; set; } = "";
+    public string RemoteServiceDirectoryPath { get; set; } = "";
+    public string RemoteBackupDirectory { get; set; } = "";
 
     public static AppSettings Load()
     {
