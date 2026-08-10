@@ -6,9 +6,9 @@ Issue #114 groups the in-game player-admission controls behind the existing lock
 
 During a running game, clicking the lock button opens a context menu instead of immediately changing the new-player connection policy. The menu opens upward and to the left of the lock button and contains these actions in order:
 
-1. **Accept all waiting players** — immediately approves every player currently waiting for host approval. This action is hidden when no players are waiting.
+1. **Allow / deny new player connections** — preserves the existing connection-policy toggle and keeps the lock icon synchronized with the current policy.
 2. **Automatically accept new players** — enables or disables automatic approval for newly connected players who would otherwise enter the waiting-for-approval state. This action remains available regardless of whether players are currently waiting.
-3. **Allow / deny new player connections** — preserves the existing connection-policy toggle and keeps the lock icon synchronized with the current policy.
+3. **Accept all waiting players** — immediately approves every player currently waiting for host approval. This action is hidden when no players are waiting.
 
 The menu closes on an outside click or Escape without changing state. Selecting an action performs only that action.
 
