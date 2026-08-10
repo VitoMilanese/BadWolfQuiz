@@ -1,0 +1,122 @@
+using System.IO;
+using System.Windows;
+
+namespace BadWolfQuizLogDownloaderWpf;
+
+public partial class MainWindow
+{
+    private async void BackupAppDataButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_settings is null)
+        {
+            return;
+        }
+
+        await CreateBackupAsync(
+            "app-data",
+            _settings.RemoteAppDataPath,
+            "App_Data");
+    }
+
+    private async void BackupServiceFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_settings is null)
+        {
+            return;
+        }
+
+        await CreateBackupAsync(
+            "service-folder",
+            _settings.RemoteServiceDirectoryPath,
+            "service folder");
+    }
+
+    private async Task CreateBackupAsync(
+        string backupType,
+        string remotePath,
+        string displayName)
+    {
+        if (_settings is null ||
+            _operationCancellation is not null ||
+            _liveCancellation is not null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(remotePath))
+        {
+            MessageBox.Show(
+                this,
+                $"The remote {displayName} path is not configured in appsettings.json.",
+                "Backup configuration",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        _operationCancellation = new CancellationTokenSource();
+        SetBusy(true);
+        SetBackupControlsEnabled(false);
+
+        var backupDirectory = GetBackupOutputDirectory();
+        Directory.CreateDirectory(backupDirectory);
+
+        var fileName =
+            $"badwolfquiz-{backupType}-{DateTime.Now:yyyyMMdd-HHmmss}.tar.gz";
+        var localPath = Path.Combine(backupDirectory, fileName);
+
+        try
+        {
+            var progress = new Progress<string>(message => StatusText.Text = message);
+            var client = new SshLogClient(_settings);
+
+            await client.DownloadDirectoryBackupAsync(
+                remotePath,
+                localPath,
+                progress,
+                _operationCancellation.Token);
+
+            StatusText.Text = $"Backup saved: {localPath}";
+        }
+        catch (OperationCanceledException)
+        {
+            StatusText.Text = "Backup cancelled.";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = "Backup failed.";
+            MessageBox.Show(
+                this,
+                ex.Message,
+                "Backup error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+        finally
+        {
+            _operationCancellation?.Dispose();
+            _operationCancellation = null;
+            SetBusy(false);
+            SetBackupControlsEnabled(true);
+        }
+    }
+
+    private string GetBackupOutputDirectory()
+    {
+        var configured = _settings?.BackupOutputDirectory;
+        if (string.IsNullOrWhiteSpace(configured))
+        {
+            configured = "Backups";
+        }
+
+        return Path.IsPathRooted(configured)
+            ? configured
+            : Path.Combine(AppContext.BaseDirectory, configured);
+    }
+
+    private void SetBackupControlsEnabled(bool enabled)
+    {
+        BackupAppDataButton.IsEnabled = enabled;
+        BackupServiceFolderButton.IsEnabled = enabled;
+    }
+}
