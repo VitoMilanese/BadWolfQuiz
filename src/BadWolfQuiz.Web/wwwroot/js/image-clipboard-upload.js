@@ -137,7 +137,7 @@
     }
 
     function initializeQuestionEditorTabs() {
-        const form = document.querySelector(".question-editor[data-ajax-question-editor]");
+        const form = document.querySelector(".question-editor");
         const questionSection = document.getElementById("question-blocks");
         const answerSection = document.getElementById("answer-blocks");
 
