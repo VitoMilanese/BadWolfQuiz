@@ -33,6 +33,10 @@
     white-space: normal;
 }
 
+.player-admission-menu-action[hidden] {
+    display: none;
+}
+
 .player-admission-menu-action-state {
     margin-left: auto;
     font-weight: 700;
