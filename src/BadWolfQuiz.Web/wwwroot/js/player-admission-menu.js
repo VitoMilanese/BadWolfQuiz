@@ -33,6 +33,11 @@
     autoAction.dataset.playerAdmissionAuto = "";
     autoAction.setAttribute("role", "menuitem");
 
+    const autoActionLabel = document.createElement("span");
+    const autoActionState = document.createElement("span");
+    autoActionState.className = "player-admission-menu-action-state";
+    autoAction.append(autoActionLabel, autoActionState);
+
     const joinAction = document.createElement("button");
     joinAction.type = "button";
     joinAction.className = "button button-secondary player-admission-menu-action";
@@ -73,7 +78,10 @@
         const state = await response.json();
         waitingAction.hidden = state.waitingCount === 0;
         waitingAction.textContent = state.labels.acceptAllWaiting;
-        autoAction.textContent = `${state.labels.automaticAcceptance}: ${state.automaticallyAcceptNewPlayers ? state.labels.enabled : state.labels.disabled}`;
+        autoActionLabel.textContent = `${state.labels.automaticAcceptance}:`;
+        autoActionState.textContent = state.automaticallyAcceptNewPlayers
+            ? state.labels.enabled
+            : state.labels.disabled;
         joinAction.textContent = state.allowsNewPlayers
             ? state.labels.denyNewConnections
             : state.labels.allowNewConnections;
@@ -141,8 +149,12 @@
     waitingAction.addEventListener("click", () => runAction(() =>
         post(`/Admin/Games/PlayerAdmission?id=${encodeURIComponent(gameId)}&handler=AcceptAllWaiting`)));
 
-    autoAction.addEventListener("click", () => runAction(() =>
-        post(`/Admin/Games/PlayerAdmission?id=${encodeURIComponent(gameId)}&handler=ToggleAutomaticAcceptance`)));
+    autoAction.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        runAction(() =>
+            post(`/Admin/Games/PlayerAdmission?id=${encodeURIComponent(gameId)}&handler=ToggleAutomaticAcceptance`));
+    });
 
     joinAction.addEventListener("click", () => runAction(async () => {
         const action = form.getAttribute("action");
