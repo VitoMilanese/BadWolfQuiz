@@ -11,16 +11,22 @@ body.portal-layout {
     overscroll-behavior-y: contain;
 }
 
+.quiz-editor-toolbar .round-navigation {
+    margin-left: auto;
+}
+
+.quiz-editor-toolbar .round-tabs {
+    justify-content: flex-end;
+}
+
 @media (max-width: 900px) {
     .quiz-editor-toolbar .round-navigation {
         width: 100%;
-        margin-left: auto;
     }
 
     .quiz-editor-toolbar .round-tabs {
         width: fit-content;
         max-width: 100%;
         margin-left: auto;
-        justify-content: flex-end;
     }
 }
