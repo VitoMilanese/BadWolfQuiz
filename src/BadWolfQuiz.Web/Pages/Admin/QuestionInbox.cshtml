@@ -113,20 +113,23 @@
               class="dialog-card question-bot-dialog-card stack-form">
             <div class="dialog-heading">
                 <h2>@Localizer["QuestionBot_Title"]</h2>
-                <button type="button"
-                        class="button button-secondary"
-                        data-close-question-bot-settings>
-                    @Localizer["Button_Cancel"]
-                </button>
             </div>
 
             @if (TempData["QuestionBotSuccess"] is string questionBotSuccess)
             {
-                <div class="message message-success" role="status">@questionBotSuccess</div>
+                <div class="message message-success"
+                     role="status"
+                     data-question-bot-message>
+                    @questionBotSuccess
+                </div>
             }
             @if (TempData["QuestionBotError"] is string questionBotError)
             {
-                <div class="message message-error" role="alert">@questionBotError</div>
+                <div class="message message-error"
+                     role="alert"
+                     data-question-bot-message>
+                    @questionBotError
+                </div>
             }
 
             <input type="hidden" asp-for="QuestionId" />
@@ -155,6 +158,11 @@
 
             <div class="form-actions dialog-actions">
                 <button type="submit" class="button button-primary">@Localizer["Button_Save"]</button>
+                <button type="button"
+                        class="button button-secondary"
+                        data-close-question-bot-settings>
+                    @Localizer["Button_Close"]
+                </button>
             </div>
         </form>
     </dialog>
@@ -227,6 +235,10 @@
     if (settingsDialog?.dataset.openOnLoad === "true") {
         settingsDialog.showModal();
     }
+
+    document.querySelectorAll("[data-question-bot-message]").forEach(message => {
+        window.setTimeout(() => message.remove(), 3000);
+    });
 
     guildSelect?.addEventListener("change", async () => {
         if (!channelSelect) return;
