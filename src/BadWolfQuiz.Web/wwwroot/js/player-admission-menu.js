@@ -44,7 +44,7 @@
     joinAction.dataset.playerAdmissionJoining = "";
     joinAction.setAttribute("role", "menuitem");
 
-    popover.append(waitingAction, autoAction, joinAction);
+    popover.append(joinAction, autoAction, waitingAction);
     form.parentNode.insertBefore(menu, form);
     menu.append(form, popover);
 
