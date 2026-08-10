@@ -1,0 +1,48 @@
+<Application x:Class="BadWolfQuizLogDownloaderWpf.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <materialDesign:BundledTheme BaseTheme="Light"
+                                             PrimaryColor="Blue"
+                                             SecondaryColor="Amber" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#FFF5F5F5" />
+            <SolidColorBrush x:Key="PanelBrush" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="ViewerBrush" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="AppForegroundBrush" Color="#FF202124" />
+            <SolidColorBrush x:Key="HeaderForegroundBrush" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="ThemeComboBackgroundBrush" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="ThemeComboForegroundBrush" Color="#FF202124" />
+            <SolidColorBrush x:Key="AccentBrush" Color="#FF1565C0" />
+            <SolidColorBrush x:Key="ThemeDecorationBrush" Color="#FF1565C0" />
+            <SolidColorBrush x:Key="TraceBrush" Color="#FF666666" />
+            <SolidColorBrush x:Key="DebugBrush" Color="#FF657786" />
+            <SolidColorBrush x:Key="InfoBrush" Color="#FF1565C0" />
+            <SolidColorBrush x:Key="WarningBrush" Color="#FF9A6700" />
+            <SolidColorBrush x:Key="ErrorBrush" Color="#FFC62828" />
+            <SolidColorBrush x:Key="CriticalBrush" Color="#FF8E0000" />
+
+            <Style TargetType="Window">
+                <Setter Property="Background" Value="{DynamicResource AppBackgroundBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+            </Style>
+
+            <Style TargetType="Label">
+                <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+            </Style>
+            <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
+                <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+            </Style>
+            <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignComboBox}">
+                <Setter Property="Foreground" Value="{DynamicResource AppForegroundBrush}" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
