@@ -7,14 +7,13 @@
     ViewData["Title"] = Localizer["QuestionInbox_Title"];
 }
 @using BadWolfQuiz.Web.Models
-
 <section class="page-section question-inbox-page">
-    <div class="page-heading">
-        <h1>@Localizer["QuestionInbox_Title"]</h1>
-        <button type="button" class="button button-secondary" data-open-question-bot-settings>@Localizer["QuestionBot_Title"]</button>
-    </div>
+    <div class="page-heading"><h1>@Localizer["QuestionInbox_Title"]</h1><button type="button" class="button button-secondary" data-open-question-bot-settings>@Localizer["QuestionBot_Title"]</button></div>
     <div asp-validation-summary="ModelOnly"></div>
-    @if (Model.Questions.Count == 0) { <p>@Localizer["QuestionInbox_Empty"]</p> }
+    @if (Model.Questions.Count == 0)
+    {
+        <p>@Localizer["QuestionInbox_Empty"]</p>
+    }
     else
     {
         <div class="question-inbox-list">
@@ -23,7 +22,7 @@
                 <article class="question-inbox-card">
                     <header class="question-inbox-card-header"><div><span class="question-inbox-card-label">@Localizer["QuestionInbox_Question"]</span>@if (!string.IsNullOrWhiteSpace(question.SenderName)){<p class="question-conversation-meta"><strong>@Localizer["QuestionInbox_From"]:</strong> <span>@question.SenderName</span></p>}</div></header>
                     <div class="question-messages">@foreach (var message in question.Messages.OrderBy(x => x.CreatedAtUtc).ThenBy(x => x.Id)){var isUserMessage = message.AuthorType == UserQuestionAuthorType.User;<article class="question-message @(isUserMessage ? "question-message-user" : "question-message-developer")"><div class="question-message-author">@(isUserMessage ? Localizer["QuestionInbox_User"].Value : Localizer["QuestionInbox_Developer"].Value)</div><p class="question-message-body">@message.Text</p></article>}</div>
-                    @{ var lastMessage = question.Messages.OrderBy(x => x.CreatedAtUtc).ThenBy(x => x.Id).LastOrDefault(); var awaitingDeveloper = lastMessage?.AuthorType == UserQuestionAuthorType.User; }
+                    @{var lastMessage = question.Messages.OrderBy(x => x.CreatedAtUtc).ThenBy(x => x.Id).LastOrDefault(); var awaitingDeveloper = lastMessage?.AuthorType == UserQuestionAuthorType.User;}
                     <div class="question-reply-panel question-inbox-actions-panel">@if (awaitingDeveloper){<form method="post" asp-page-handler="Answer" class="question-reply-form"><input type="hidden" name="id" value="@question.Id" /><label for="answer-@question.Id">@Localizer["QuestionInbox_Answer"]</label><textarea id="answer-@question.Id" name="answer" rows="5" maxlength="5000" required></textarea><div class="form-actions"><button type="submit" class="button button-primary">@Localizer["QuestionInbox_Reply"]</button><button type="button" class="button button-danger-outline" data-delete-question data-question-id="@question.Id">@Localizer["Button_Delete"]</button></div></form>}else{<div class="form-actions"><button type="button" class="button button-danger-outline" data-delete-question data-question-id="@question.Id">@Localizer["Button_Delete"]</button></div>}</div>
                 </article>
             }
@@ -35,7 +34,7 @@
 <style>
 .question-bot-dialog-card{width:min(46rem,92vw)}
 .question-bot-settings-frame{width:100%;min-height:25rem;border:0;background:var(--bg);border-radius:.75rem}
-@media(max-width:640px){.question-inbox-page>.page-heading{align-items:stretch;flex-direction:column}.question-bot-settings-frame{min-height:29rem}}
+@@media(max-width:640px){.question-inbox-page>.page-heading{align-items:stretch;flex-direction:column}.question-bot-settings-frame{min-height:29rem}}
 </style>
 <script>
 (() => {
