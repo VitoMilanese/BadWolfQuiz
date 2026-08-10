@@ -56,6 +56,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - BAD WOLF QUIZ</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/player-admission-menu.css" asp-append-version="true" />
     @if (!hidePortalFooter && !isEmbeddedDiscordSettings)
     {
         <link rel="stylesheet" href="~/css/sticky-footer.css" asp-append-version="true" />
@@ -220,6 +221,7 @@
     <script src="~/js/youtube-auto-expand.js" asp-append-version="true"></script>
     <script src="~/js/portal-footer.js" asp-append-version="true"></script>
     <script src="~/js/discord-settings-dialog.js" asp-append-version="true"></script>
+    <script src="~/js/player-admission-menu.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
