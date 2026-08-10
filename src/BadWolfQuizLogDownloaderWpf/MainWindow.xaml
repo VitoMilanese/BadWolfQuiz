@@ -10,7 +10,8 @@
         Height="820"
         MinWidth="900"
         MinHeight="600"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Loaded="MainWindow_ServiceLoaded">
 
     <Grid Background="{DynamicResource AppBackgroundBrush}">
         <Grid.RowDefinitions>
@@ -154,7 +155,53 @@
                 <CheckBox Foreground="{DynamicResource AppForegroundBrush}" x:Name="SaveLiveCheck"
                           Content="Save live to file"
                           IsChecked="True"
+                          Margin="0,0,18,0"
                           VerticalAlignment="Center"/>
+
+                <Separator Width="1" Height="28" Margin="0,0,18,0"/>
+
+                <TextBlock Text="Service:"
+                           Foreground="{DynamicResource AppForegroundBrush}"
+                           FontWeight="SemiBold"
+                           Margin="0,0,6,0"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="ServiceNameText"
+                           Text="badwolfquiz.service"
+                           Foreground="{DynamicResource AppForegroundBrush}"
+                           Margin="0,0,6,0"
+                           VerticalAlignment="Center"/>
+                <TextBlock Text="—"
+                           Foreground="{DynamicResource AppForegroundBrush}"
+                           Margin="0,0,6,0"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="ServiceStatusText"
+                           Text="Unknown"
+                           Foreground="{DynamicResource AppForegroundBrush}"
+                           FontWeight="SemiBold"
+                           Margin="0,0,10,0"
+                           VerticalAlignment="Center"/>
+
+                <Button x:Name="RefreshServiceButton"
+                        Content="Refresh"
+                        Click="RefreshServiceButton_Click"
+                        Margin="0,0,8,0"
+                        Foreground="{DynamicResource AppForegroundBrush}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
+
+                <Button x:Name="StartServiceButton"
+                        Content="Start service"
+                        Click="StartServiceButton_Click"
+                        IsEnabled="False"
+                        Margin="0,0,8,0"
+                        Foreground="{DynamicResource AccentForegroundBrush}"
+                        Style="{StaticResource MaterialDesignRaisedButton}"/>
+
+                <Button x:Name="StopServiceButton"
+                        Content="Stop service"
+                        Click="StopServiceButton_Click"
+                        IsEnabled="False"
+                        Foreground="{DynamicResource AppForegroundBrush}"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
             </WrapPanel>
         </Border>
 
