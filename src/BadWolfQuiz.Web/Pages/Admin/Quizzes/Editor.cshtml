@@ -110,24 +110,6 @@
                     onclick="openAddRoundDialog()">
                 + @Localizer["QuizEditor_AddRound"]
             </button>
-        </div>
-
-        <div class="round-actions">
-            <a class="button button-secondary round-action-button"
-               asp-page="FinalQuestionEditor"
-               asp-route-id="@Model.Quiz.Id">
-                @Localizer["Button_EditFinalQuestion"]
-            </a>
-
-            @if (Model.Quiz.FinalQuestionBlocks.Any(HasBlockContent) ||
-                Model.Quiz.FinalAnswerBlocks.Any(HasBlockContent))
-            {
-                <button type="button"
-                        class="button button-danger-outline round-action-button"
-                        onclick="openDeleteFinalQuestionDialog()">
-                    @Localizer["Button_DeleteFinalQuestion"]
-                </button>
-            }
 
             @if (rounds.Count > 1)
             {
@@ -438,6 +420,25 @@
            asp-page="Index">
             @Localizer["Title_MyQuizzes"]
         </a>
+
+        <div class="round-actions">
+            <a class="button button-secondary round-action-button"
+               asp-page="FinalQuestionEditor"
+               asp-route-id="@Model.Quiz.Id">
+                @Localizer["Button_EditFinalQuestion"]
+            </a>
+
+            @if (Model.Quiz.FinalQuestionBlocks.Any(HasBlockContent) ||
+                        Model.Quiz.FinalAnswerBlocks.Any(HasBlockContent))
+            {
+                <button type="button"
+                        class="button button-danger-outline round-action-button"
+                        onclick="openDeleteFinalQuestionDialog()">
+                    @Localizer["Button_DeleteFinalQuestion"]
+                </button>
+            }
+        </div>
+
         <div class="quiz-board-primary-actions">
             <span class="alert ajax-save-status" role="status"
                   data-quiz-save-status hidden></span>
