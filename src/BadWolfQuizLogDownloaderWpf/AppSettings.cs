@@ -14,7 +14,7 @@ internal sealed class AppSettings
     public string OutputDirectory { get; set; } = "Logs";
     public string RemoteAppDataPath { get; set; } = "";
     public string RemoteServiceDirectoryPath { get; set; } = "";
-    public string BackupOutputDirectory { get; set; } = "Backups";
+    public string RemoteBackupDirectory { get; set; } = "";
 
     public static AppSettings Load()
     {
