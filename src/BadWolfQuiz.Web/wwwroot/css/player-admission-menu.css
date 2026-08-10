@@ -25,9 +25,18 @@
 .player-admission-menu-action {
     width: 100%;
     min-height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     justify-content: flex-start;
     text-align: left;
     white-space: normal;
+}
+
+.player-admission-menu-action-state {
+    margin-left: auto;
+    font-weight: 700;
+    pointer-events: none;
 }
 
 @media (max-width: 640px) {
