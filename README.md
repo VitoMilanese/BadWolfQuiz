@@ -226,6 +226,24 @@ The configured port must be forwarded by the router and allowed by the firewall.
 
 ---
 
+## BadWolfQuiz Log Downloader
+
+The solution also includes **BadWolfQuizLogDownloader**, a separate .NET 8 WPF operations utility for Windows.
+
+It connects to the production Ubuntu server over SSH and can download or monitor `journalctl` output for `badwolfquiz.service`. The utility supports local log viewing, live `journalctl -f`, optional live recording, log-level filtering, paging, newest-first display, and selectable UI themes.
+
+The project lives in:
+
+```
+src/BadWolfQuizLogDownloaderWpf
+```
+
+For build instructions, SSH configuration, available features, and UI details, see [`src/BadWolfQuizLogDownloaderWpf/README.md`](src/BadWolfQuizLogDownloaderWpf/README.md).
+
+Do not commit real SSH credentials from the downloader's `appsettings.json`.
+
+---
+
 ## Architecture
 
 - Entity Framework Core data model
@@ -262,8 +280,8 @@ Quiz
 
 1. Open `BadWolfQuiz.sln`
 2. Restore NuGet packages
-3. Set **BadWolfQuiz.Web** as Startup Project
-4. Run using **https** or **http**
+3. Set **BadWolfQuiz.Web** as Startup Project to run the quiz platform, or **BadWolfQuizLogDownloaderWpf** to run the Windows log utility
+4. Run using **https** or **http** for the web application
 
 SQLite database is automatically created in:
 
@@ -282,3 +300,6 @@ behavior and snapshot scope.
 
 For Linux OOM investigation and cgroup commands, see
 [Production OOM Diagnostics](docs/operations/oom-diagnostics.md).
+
+For downloading and monitoring production systemd logs from Windows, see
+[BadWolfQuiz Log Downloader](src/BadWolfQuizLogDownloaderWpf/README.md).
