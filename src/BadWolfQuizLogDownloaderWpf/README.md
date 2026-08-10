@@ -16,7 +16,7 @@ Features:
 - multi-row log selection and plain-text copy with `Ctrl+C`
 - current systemd service status with refresh support
 - start/stop controls for the configured systemd service over SSH
-- App_Data and full service-folder backups downloaded as timestamped `.tar.gz` archives
+- App_Data and full service-folder backups stored as timestamped `.tar.gz` archives on the remote server
 - themes: Light, Dark, Matrix, Obsidian, Ukrainian, UPA, Italian, Warm Parchment, Mint Fog, LGBTQ+
 - supplied Bad Wolf logger artwork as application/window icon
 - independent semantic product version displayed in the window title bar
@@ -58,13 +58,15 @@ Edit `appsettings.json` next to the executable.
   "OutputDirectory": "Logs",
   "RemoteAppDataPath": "/srv/badwolfquiz/App_Data",
   "RemoteServiceDirectoryPath": "/srv/badwolfquiz",
-  "BackupOutputDirectory": "Backups"
+  "RemoteBackupDirectory": "/opt/badwolfquiz/backup"
 }
 ```
 
 `ServiceName` is used both for journal access and for service status/start/stop commands. When `UseSudo` is enabled, the configured SSH password is also supplied to `sudo` for the remote command.
 
-`RemoteAppDataPath` and `RemoteServiceDirectoryPath` specify the server directories used by the two backup actions. `BackupOutputDirectory` controls where downloaded backup archives are stored locally; relative paths are resolved next to the executable.
+`RemoteAppDataPath` and `RemoteServiceDirectoryPath` specify the server directories used by the two backup actions. `RemoteBackupDirectory` specifies the server directory in which generated backup archives are stored.
+
+If `RemoteBackupDirectory` does not exist, the utility creates it automatically with `mkdir -p` before creating the archive. It also ensures owner read/write/execute access with `chmod u+rwx`. When `UseSudo` is enabled, these preparation and archive commands run through the same sudo path as the other privileged remote operations. Permission or directory-creation failures are surfaced to the user.
 
 The password is intentionally read from `appsettings.json`. Do not commit a real password.
 
@@ -76,13 +78,13 @@ Service commands run over the same SSH connection settings as log downloads. SSH
 
 ## Backups
 
-Use **Backup App_Data** to archive and download the configured `RemoteAppDataPath`, or **Backup service folder** to archive and download the entire configured service directory.
+Use **Backup App_Data** to archive the configured `RemoteAppDataPath`, or **Backup service folder** to archive the entire configured service directory.
 
-The remote source directory is streamed through `tar` over SSH into a local `.tar.gz` file. No source files are modified or deleted. Backup filenames identify the backup type and include a timestamp, for example:
+The archive is created directly on the remote server inside `RemoteBackupDirectory`. Source files are only read; they are not modified or deleted. Backup filenames identify the backup type and include a timestamp, for example:
 
-`badwolfquiz-app-data-20260810-143000.tar.gz`
+`/opt/badwolfquiz/backup/badwolfquiz-app-data-20260810-143000.tar.gz`
 
-Only one backup/log operation can run at a time, and the existing **Cancel** button can cancel a running backup. Partial local archives are removed when a backup fails or is cancelled.
+Only one backup/log operation can run at a time, and the existing **Cancel** button can cancel a running backup operation. SSH, missing-path, directory-creation, permission, and archive failures are reported to the user.
 
 ## WPF icon loading
 
