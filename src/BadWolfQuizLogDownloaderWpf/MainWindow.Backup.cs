@@ -1,4 +1,3 @@
-using System.IO;
 using System.Windows;
 
 namespace BadWolfQuizLogDownloaderWpf;
@@ -54,29 +53,37 @@ public partial class MainWindow
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(_settings.RemoteBackupDirectory))
+        {
+            MessageBox.Show(
+                this,
+                "The remote backup directory is not configured in appsettings.json.",
+                "Backup configuration",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
         _operationCancellation = new CancellationTokenSource();
         SetBusy(true);
         SetBackupControlsEnabled(false);
 
-        var backupDirectory = GetBackupOutputDirectory();
-        Directory.CreateDirectory(backupDirectory);
-
         var fileName =
             $"badwolfquiz-{backupType}-{DateTime.Now:yyyyMMdd-HHmmss}.tar.gz";
-        var localPath = Path.Combine(backupDirectory, fileName);
 
         try
         {
             var progress = new Progress<string>(message => StatusText.Text = message);
             var client = new SshLogClient(_settings);
 
-            await client.DownloadDirectoryBackupAsync(
+            var remoteBackupPath = await client.CreateDirectoryBackupAsync(
                 remotePath,
-                localPath,
+                _settings.RemoteBackupDirectory,
+                fileName,
                 progress,
                 _operationCancellation.Token);
 
-            StatusText.Text = $"Backup saved: {localPath}";
+            StatusText.Text = $"Backup saved: {remoteBackupPath}";
         }
         catch (OperationCanceledException)
         {
@@ -99,19 +106,6 @@ public partial class MainWindow
             SetBusy(false);
             SetBackupControlsEnabled(true);
         }
-    }
-
-    private string GetBackupOutputDirectory()
-    {
-        var configured = _settings?.BackupOutputDirectory;
-        if (string.IsNullOrWhiteSpace(configured))
-        {
-            configured = "Backups";
-        }
-
-        return Path.IsPathRooted(configured)
-            ? configured
-            : Path.Combine(AppContext.BaseDirectory, configured);
     }
 
     private void SetBackupControlsEnabled(bool enabled)
