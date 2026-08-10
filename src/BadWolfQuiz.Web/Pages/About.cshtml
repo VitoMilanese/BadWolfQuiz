@@ -1,0 +1,41 @@
+@page
+@using BadWolfQuiz.Web.Localization
+@using BadWolfQuiz.Web.Services
+@inject IStringLocalizer<ProductVersionResource> ProductVersionLocalizer
+@{
+    var productVersion = ProductVersionInfo.Current;
+    ViewData["Title"] = ProductVersionLocalizer["AboutTitle"];
+}
+
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">@ProductVersionLocalizer["AboutEyebrow"]</p>
+        <h1>@ProductVersionLocalizer["AboutTitle"]</h1>
+    </div>
+</div>
+
+<section class="form-card narrow stack-form">
+    <p class="settings-description">@ProductVersionLocalizer["AboutDescription"]</p>
+
+    <div class="field-group">
+        <label>@ProductVersionLocalizer["VersionLabel"]</label>
+        <code class="host-id-value">@productVersion.Version</code>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(productVersion.Commit))
+    {
+        <div class="field-group">
+            <label>@ProductVersionLocalizer["BuildLabel"]</label>
+            <code class="host-id-value">@productVersion.Commit</code>
+        </div>
+    }
+
+    <div class="form-actions">
+        <a class="button button-secondary"
+           href="https://github.com/VitoMilanese/BadWolfQuiz"
+           target="_blank"
+           rel="noopener noreferrer">
+            @ProductVersionLocalizer["RepositoryLink"]
+        </a>
+    </div>
+</section>

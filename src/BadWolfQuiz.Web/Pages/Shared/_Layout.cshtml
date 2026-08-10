@@ -5,6 +5,7 @@
 @inject UserQuestionHistoryService UserQuestionHistory
 @inject IConfiguration Configuration
 @inject Microsoft.Extensions.Options.IOptions<SiteDefaultsOptions> SiteDefaults
+@inject IStringLocalizer<ProductVersionResource> ProductVersionLocalizer
 
 @{
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
@@ -40,6 +41,9 @@
         !string.IsNullOrWhiteSpace(settings.BrandLogoContentType);
     var hidePortalFooter = ViewData["HidePortalFooter"] is true;
     var isEmbeddedDiscordSettings = ViewData["EmbeddedDiscordSettings"] is true;
+    var productVersion = ProductVersionInfo.Current;
+    var isSettingsPage = isAuthenticated &&
+        Context.Request.Path.Equals("/Admin/Settings", StringComparison.OrdinalIgnoreCase);
 }
 
 <!DOCTYPE html>
@@ -58,7 +62,9 @@
     @if (!isEmbeddedDiscordSettings)
     {
     <header class="topbar">
-        <a class="brand" asp-page="/Index">
+        <a class="brand"
+           asp-page="/Index"
+           title="@ProductVersionLocalizer["LogoTooltip", productVersion.Version]">
             @if (hasBrandLogo)
             {
                 <img class="brand-logo"
@@ -73,6 +79,10 @@
 
         <div class="topbar-page-context">
             @await RenderSectionAsync("HeaderContext", required: false)
+            @if (isSettingsPage)
+            {
+                <small>@ProductVersionLocalizer["VersionLabel"]: @productVersion.Version</small>
+            }
         </div>
 
         <details class="action-menu header-action-menu">
@@ -117,6 +127,7 @@
                     </a>
                 }
                 <a class="action-menu-item" asp-page="/Faq">@Localizer["Menu_FAQ"]</a>
+                <a class="action-menu-item" asp-page="/About">@ProductVersionLocalizer["MenuAbout"]</a>
 
                 @if (isAuthenticated)
                 {

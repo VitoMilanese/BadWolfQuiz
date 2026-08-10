@@ -5,6 +5,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 ## Product
 
 - [Product vision](vision.md)
+- [Product versioning and release tags](versioning.md)
 
 ## Architecture
 
