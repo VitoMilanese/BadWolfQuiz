@@ -231,6 +231,11 @@
 
     openSettingsButton?.addEventListener("click", () => settingsDialog?.showModal());
     closeSettingsButton?.addEventListener("click", () => settingsDialog?.close());
+    settingsDialog?.addEventListener("click", event => {
+        if (event.target === settingsDialog) {
+            settingsDialog.close();
+        }
+    });
 
     if (settingsDialog?.dataset.openOnLoad === "true") {
         settingsDialog.showModal();
