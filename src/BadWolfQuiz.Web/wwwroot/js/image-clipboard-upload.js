@@ -149,18 +149,15 @@
         const questionValidation = questionSection.nextElementSibling;
         const answerHeading = answerSection.previousElementSibling;
         const answerValidation = answerSection.nextElementSibling;
+        const questionTypeSetting = form.querySelector(".question-type-setting");
 
         if (questionHeading?.tagName !== "H2" ||
             answerHeading?.tagName !== "H2") {
             return;
         }
 
-        const questionTitle = questionSection.querySelector(
-            ".content-block-section-header h2")?.textContent?.trim() ||
-            questionHeading.textContent.trim();
-        const answerTitle = answerSection.querySelector(
-            ".content-block-section-header h2")?.textContent?.trim() ||
-            answerHeading.textContent.trim();
+        const questionTitle = questionHeading.textContent.trim();
+        const answerTitle = answerHeading.textContent.trim();
 
         const tabs = document.createElement("div");
         tabs.className = "editor-actions question-answer-tabs";
@@ -182,11 +179,16 @@
         const questionTab = createTab("question", questionTitle, true);
         const answerTab = createTab("answer", answerTitle, false);
         tabs.append(questionTab, answerTab);
-        questionHeading.before(tabs);
+
+        const tabsAnchor = questionTypeSetting || questionHeading;
+        tabsAnchor.before(tabs);
+
+        questionHeading.hidden = true;
+        answerHeading.hidden = true;
 
         const groups = {
-            question: [questionHeading, questionSection, questionValidation],
-            answer: [answerHeading, answerSection, answerValidation]
+            question: [questionTypeSetting, questionSection, questionValidation],
+            answer: [answerSection, answerValidation]
         };
 
         const selectTab = name => {

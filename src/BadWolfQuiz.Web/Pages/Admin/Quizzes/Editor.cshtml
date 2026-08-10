@@ -77,7 +77,7 @@
     </div>
 }
 
-<div class="editor-toolbar">
+<div class="editor-toolbar quiz-editor-toolbar">
     <div>
         <p class="eyebrow">@Localizer["Title_QuizEditor"]</p>
         <h1>@Model.Quiz.Title</h1>
@@ -110,30 +110,6 @@
                     onclick="openAddRoundDialog()">
                 + @Localizer["QuizEditor_AddRound"]
             </button>
-        </div>
-
-        <div class="round-actions">
-            <a class="button button-secondary round-action-button"
-               asp-page="FinalQuestionEditor"
-               asp-route-id="@Model.Quiz.Id">
-                @Localizer["Button_EditFinalQuestion"]
-            </a>
-
-            @if (Model.Quiz.FinalQuestionBlocks.Any(HasBlockContent) ||
-                Model.Quiz.FinalAnswerBlocks.Any(HasBlockContent))
-            {
-                <button type="button"
-                        class="button button-danger-outline round-action-button"
-                        onclick="openDeleteFinalQuestionDialog()">
-                    @Localizer["Button_DeleteFinalQuestion"]
-                </button>
-            }
-
-            <button type="button"
-                    class="button button-secondary round-action-button"
-                    onclick="openRenameRoundDialog()">
-                @Localizer["QuizEditor_RenameRound"]
-            </button>
 
             @if (rounds.Count > 1)
             {
@@ -159,73 +135,89 @@
            type="hidden"
            value="@round.Id" />
 
-    <section class="content-panel round-wager-settings">
-        <div id="round-category-count-setting">
-            <label asp-for="RoundRows.CategoryCount">
-                @Localizer["QuizEditor_CategoryCount"]
-            </label>
-            <select asp-for="RoundRows.CategoryCount"
-                    data-initial-count="@categories.Count"
-                    data-filled-items="@string.Join(",", filledCategoryPositions)"
-                    data-delete-confirmation="@Localizer["QuizEditor_CategoryCountDeleteConfirmation"]">
-                @for (var categoryCount = Model.MinimumCategoryCount;
-                      categoryCount <= Model.MaximumCategoryCount;
-                      categoryCount++)
-                {
-                    <option value="@categoryCount">@categoryCount</option>
-                }
-            </select>
-            <small>
-                @Localizer["QuizEditor_CategoryCountDescription",
-                    Model.MinimumCategoryCount,
-                    Model.MaximumCategoryCount]
-            </small>
-        </div>
+    <details class="round-settings-disclosure"
+             style="width: 100%;">
+        <summary style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; list-style: none;">
+            <button type="button"
+                    class="button button-secondary"
+                    onclick="event.preventDefault(); event.stopPropagation(); openRenameRoundDialog()">
+                @Localizer["QuizEditor_RenameRound"]
+            </button>
 
-        <div id="round-question-count-setting">
-            <label asp-for="RoundRows.QuestionCount">
-                @Localizer["QuizEditor_QuestionCount"]
-            </label>
-            <select asp-for="RoundRows.QuestionCount"
-                    data-initial-count="@roundRows.Count"
-                    data-filled-items="@string.Join(",", rowsWithQuestionContent)"
-                    data-delete-confirmation="@Localizer["QuizEditor_QuestionCountDeleteConfirmation"]">
-                @for (var questionCount = Model.MinimumQuestionCount;
-                      questionCount <= Model.MaximumQuestionCount;
-                      questionCount++)
-                {
-                    <option value="@questionCount">@questionCount</option>
-                }
-            </select>
-            <small>
-                @Localizer["QuizEditor_QuestionCountDescription",
-                    Model.MinimumQuestionCount,
-                    Model.MaximumQuestionCount]
-            </small>
-        </div>
-
-        <label class="checkbox-row">
-            <input asp-for="RoundRows.UseRandomWagerQuestions" />
-            <span>
-                <strong>@Localizer["QuizEditor_UseRandomWagerQuestions"]</strong>
-                <small>@Localizer["QuizEditor_RandomWagerDescription"]</small>
+            <span class="button button-secondary">
+                @Localizer["QuizEditor_RoundSettings"]
             </span>
-        </label>
+        </summary>
 
-        <div id="random-wager-count-setting">
-            <label asp-for="RoundRows.RandomWagerQuestionCount">
-                @Localizer["QuizEditor_RandomWagerQuestionCount"]
+        <section class="content-panel round-wager-settings"
+                 style="width: 100%;">
+            <div id="round-category-count-setting">
+                <label asp-for="RoundRows.CategoryCount">
+                    @Localizer["QuizEditor_CategoryCount"]
+                </label>
+                <select asp-for="RoundRows.CategoryCount"
+                        data-initial-count="@categories.Count"
+                        data-filled-items="@string.Join(",", filledCategoryPositions)"
+                        data-delete-confirmation="@Localizer["QuizEditor_CategoryCountDeleteConfirmation"]">
+                    @for (var categoryCount = Model.MinimumCategoryCount;
+                          categoryCount <= Model.MaximumCategoryCount;
+                          categoryCount++)
+                    {
+                        <option value="@categoryCount">@categoryCount</option>
+                    }
+                </select>
+                <small>
+                    @Localizer["QuizEditor_CategoryCountDescription",
+                        Model.MinimumCategoryCount,
+                        Model.MaximumCategoryCount]
+                </small>
+            </div>
+
+            <div id="round-question-count-setting">
+                <label asp-for="RoundRows.QuestionCount">
+                    @Localizer["QuizEditor_QuestionCount"]
+                </label>
+                <select asp-for="RoundRows.QuestionCount"
+                        data-initial-count="@roundRows.Count"
+                        data-filled-items="@string.Join(",", rowsWithQuestionContent)"
+                        data-delete-confirmation="@Localizer["QuizEditor_QuestionCountDeleteConfirmation"]">
+                    @for (var questionCount = Model.MinimumQuestionCount;
+                          questionCount <= Model.MaximumQuestionCount;
+                          questionCount++)
+                    {
+                        <option value="@questionCount">@questionCount</option>
+                    }
+                </select>
+                <small>
+                    @Localizer["QuizEditor_QuestionCountDescription",
+                        Model.MinimumQuestionCount,
+                        Model.MaximumQuestionCount]
+                </small>
+            </div>
+
+            <label class="checkbox-row">
+                <input asp-for="RoundRows.UseRandomWagerQuestions" />
+                <span>
+                    <strong>@Localizer["QuizEditor_UseRandomWagerQuestions"]</strong>
+                    <small>@Localizer["QuizEditor_RandomWagerDescription"]</small>
+                </span>
             </label>
-            <input asp-for="RoundRows.RandomWagerQuestionCount"
-                   type="number"
-                   min="0"
-                   max="@eligibleRandomWagerQuestionCount" />
-            <small>
-                @Localizer["QuizEditor_EligibleRandomWagerQuestions",
-                    eligibleRandomWagerQuestionCount]
-            </small>
-        </div>
-    </section>
+
+            <div id="random-wager-count-setting">
+                <label asp-for="RoundRows.RandomWagerQuestionCount">
+                    @Localizer["QuizEditor_RandomWagerQuestionCount"]
+                </label>
+                <input asp-for="RoundRows.RandomWagerQuestionCount"
+                       type="number"
+                       min="0"
+                       max="@eligibleRandomWagerQuestionCount" />
+                <small>
+                    @Localizer["QuizEditor_EligibleRandomWagerQuestions",
+                        eligibleRandomWagerQuestionCount]
+                </small>
+            </div>
+        </section>
+    </details>
 
     <div class="quiz-board-scroll">
         <div class="quiz-board" style="--row-count:@roundRows.Count;">
@@ -428,6 +420,25 @@
            asp-page="Index">
             @Localizer["Title_MyQuizzes"]
         </a>
+
+        <div class="round-actions">
+            <a class="button button-secondary round-action-button"
+               asp-page="FinalQuestionEditor"
+               asp-route-id="@Model.Quiz.Id">
+                @Localizer["Button_EditFinalQuestion"]
+            </a>
+
+            @if (Model.Quiz.FinalQuestionBlocks.Any(HasBlockContent) ||
+                        Model.Quiz.FinalAnswerBlocks.Any(HasBlockContent))
+            {
+                <button type="button"
+                        class="button button-danger-outline round-action-button"
+                        onclick="openDeleteFinalQuestionDialog()">
+                    @Localizer["Button_DeleteFinalQuestion"]
+                </button>
+            }
+        </div>
+
         <div class="quiz-board-primary-actions">
             <span class="alert ajax-save-status" role="status"
                   data-quiz-save-status hidden></span>

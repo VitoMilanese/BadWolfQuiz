@@ -42,6 +42,8 @@
 - Individual point values for every row
 - Automatic creation of questions for newly created rounds
 - Automatic category cloning when creating new rounds
+- Collapsible round settings that stay out of the way during normal board editing
+- Right-aligned round controls that remain consistent across responsive layouts
 
 ---
 
@@ -65,6 +67,7 @@
 - Asynchronous board-setting saves that preserve the current scroll position
 - Question-card deletion with confirmation and immediate board updates
 - Final-question deletion that removes all final question and answer blocks
+- Final-question actions grouped with the board actions below the question grid
 
 ---
 
@@ -84,6 +87,8 @@ Each question contains independent:
 
 - Question blocks
 - Answer blocks
+
+Question and answer blocks are edited through dedicated tabs. The question-type controls are shown only while the question tab is active, keeping the answer editor focused on answer content.
 
 Questions may use the standard presentation or the four-clue presentation. A four-clue question contains exactly four text, image, or audio clues: two are visible initially and the remaining clues are revealed one at a time either by the host or automatically when the question timer expires. Every successful clue reveal starts a new full question-timer interval. Correct answers are worth 100%, 50%, or 25% of the question value depending on how many clues were revealed; an incorrect answer always deducts the full value. See [`docs/features/four-clue-questions.md`](docs/features/four-clue-questions.md) for the complete flow.
 

@@ -804,6 +804,10 @@ select {
     margin-bottom: 28px;
 }
 
+.quiz-editor-toolbar {
+    margin-bottom: 12px;
+}
+
 h1,
 h2,
 p {

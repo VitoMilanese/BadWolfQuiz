@@ -663,6 +663,9 @@
   <data name="QuizEditor_RoundCreated" xml:space="preserve">
     <value>Round creato correttamente.</value>
   </data>
+  <data name="QuizEditor_RoundSettings" xml:space="preserve">
+    <value>Impostazioni del round</value>
+  </data>
   <data name="QuizEditor_AddRound" xml:space="preserve">
     <value>Aggiungi round</value>
   </data>
