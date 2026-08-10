@@ -153,21 +153,23 @@
            type="hidden"
            value="@round.Id" />
 
-    <div style="display: flex; align-items: flex-start; gap: 8px;">
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: start; gap: 8px;">
         <button type="button"
-                class="button button-secondary round-action-button"
+                class="button button-secondary"
+                style="grid-column: 2;"
                 onclick="openRenameRoundDialog()">
             @Localizer["QuizEditor_RenameRound"]
         </button>
 
         <details class="round-settings-disclosure"
-                 style="flex: 1 1 auto; min-width: 0;">
+                 style="display: contents;">
             <summary class="button button-secondary"
-                     style="width: max-content; margin-left: auto;">
+                     style="grid-column: 3;">
                 @Localizer["QuizEditor_RoundSettings"]
             </summary>
 
-            <section class="content-panel round-wager-settings">
+            <section class="content-panel round-wager-settings"
+                     style="grid-column: 1 / -1; width: 100%;">
                 <div id="round-category-count-setting">
                     <label asp-for="RoundRows.CategoryCount">
                         @Localizer["QuizEditor_CategoryCount"]
@@ -374,7 +376,7 @@
                                                 })
                                             </span>
                                             <span class="question-editor-preview-type">
-                                                @Localizer[$"Content_{previewBlock.BlockType}"]
+                                                @Localizer[$"Content_{previewBlock.BlockType"]
                                             </span>
                                         }
                                     </span>
