@@ -10,3 +10,14 @@ body.portal-layout {
     overflow-y: auto;
     overscroll-behavior-y: contain;
 }
+
+@media (max-width: 900px) {
+    .quiz-editor-toolbar .round-navigation {
+        align-self: flex-end;
+        align-items: flex-end;
+    }
+
+    .quiz-editor-toolbar .round-tabs {
+        justify-content: flex-end;
+    }
+}
