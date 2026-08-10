@@ -6,9 +6,12 @@
 @{
     ViewData["Title"] = Localizer["QuestionBot_Title"];
     var embedded = string.Equals(Request.Query["embedded"], "true", StringComparison.OrdinalIgnoreCase);
+    if (embedded)
+    {
+        Layout = null;
+    }
 }
 
-<section class="question-bot-settings-page @(embedded ? "question-bot-settings-embedded" : string.Empty)">
 @if (!embedded)
 {
     <div class="page-heading">
@@ -50,37 +53,39 @@
         <button type="submit" class="button button-primary">@Localizer["Button_Save"]</button>
     </div>
 </form>
-</section>
 
-@section Scripts {
-    <script>
-        (() => {
-            const guildSelect = document.getElementById("questionBotGuild");
-            const channelSelect = document.getElementById("questionBotChannel");
-            const successMessage = document.getElementById("questionBotSuccess");
-
-            if (successMessage) window.setTimeout(() => successMessage.remove(), 3000);
-            if (!guildSelect || !channelSelect) return;
-
-            guildSelect.addEventListener("change", async () => {
-                channelSelect.innerHTML = "";
-                const emptyOption = document.createElement("option");
-                emptyOption.value = "";
-                emptyOption.textContent = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["QuestionBot_SelectChannel"].Value));
-                channelSelect.appendChild(emptyOption);
-                if (!guildSelect.value) return;
-
-                const url = `?handler=Channels&guildId=${encodeURIComponent(guildSelect.value)}&embedded=@embedded.ToString().ToLowerInvariant()`;
-                const response = await fetch(url);
-                if (!response.ok) return;
-                const channels = await response.json();
-                for (const channel of channels) {
-                    const option = document.createElement("option");
-                    option.value = channel.id;
-                    option.textContent = channel.name;
-                    channelSelect.appendChild(option);
-                }
-            });
-        })();
-    </script>
+@if (embedded)
+{
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 }
+
+<script>
+    (() => {
+        const guildSelect = document.getElementById("questionBotGuild");
+        const channelSelect = document.getElementById("questionBotChannel");
+        const successMessage = document.getElementById("questionBotSuccess");
+
+        if (successMessage) window.setTimeout(() => successMessage.remove(), 3000);
+        if (!guildSelect || !channelSelect) return;
+
+        guildSelect.addEventListener("change", async () => {
+            channelSelect.innerHTML = "";
+            const emptyOption = document.createElement("option");
+            emptyOption.value = "";
+            emptyOption.textContent = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["QuestionBot_SelectChannel"].Value));
+            channelSelect.appendChild(emptyOption);
+            if (!guildSelect.value) return;
+
+            const url = `?handler=Channels&guildId=${encodeURIComponent(guildSelect.value)}&embedded=@embedded.ToString().ToLowerInvariant()`;
+            const response = await fetch(url);
+            if (!response.ok) return;
+            const channels = await response.json();
+            for (const channel of channels) {
+                const option = document.createElement("option");
+                option.value = channel.id;
+                option.textContent = channel.name;
+                channelSelect.appendChild(option);
+            }
+        });
+    })();
+</script>
