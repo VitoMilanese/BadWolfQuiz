@@ -223,7 +223,35 @@
         selectTab("question");
     }
 
+    function initializeRoundSettingsDisclosure() {
+        const settings = document.querySelector(
+            ".quiz-board-form .round-wager-settings");
+        if (!settings || settings.closest("details")) {
+            return;
+        }
+
+        const language = document.documentElement.lang
+            .toLowerCase()
+            .split("-")[0];
+        const titles = {
+            en: "Round settings",
+            it: "Impostazioni del round",
+            uk: "Налаштування раунду"
+        };
+
+        const details = document.createElement("details");
+        details.className = "round-settings-disclosure";
+
+        const summary = document.createElement("summary");
+        summary.className = "button button-secondary";
+        summary.textContent = titles[language] || titles.en;
+
+        settings.before(details);
+        details.append(summary, settings);
+    }
+
     initializeQuestionEditorTabs();
+    initializeRoundSettingsDisclosure();
 
     document.addEventListener("click", async event => {
         const button = event.target.closest("[data-media-clipboard-button]");
