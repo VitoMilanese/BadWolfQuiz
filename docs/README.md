@@ -28,6 +28,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Game settings](features/game-settings.md)
 - [Player and host cards](features/player-and-host-cards.md)
 - [QR player join and player-device behavior](features/qr-player-join.md)
+- [Player admission controls](features/player-admission-controls.md)
 - [Active game recovery](features/active-game-recovery.md)
 - [Game history](features/game-history.md)
 - [Host accounts](features/host-accounts.md)

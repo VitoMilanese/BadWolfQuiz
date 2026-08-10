@@ -1,0 +1,50 @@
+.player-admission-menu {
+    position: relative;
+    display: inline-flex;
+}
+
+.player-admission-menu-popover {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 8px);
+    z-index: 1200;
+    display: grid;
+    min-width: min(320px, calc(100vw - 32px));
+    gap: 4px;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 24%);
+}
+
+.player-admission-menu-popover[hidden] {
+    display: none;
+}
+
+.player-admission-menu-action {
+    width: 100%;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-start;
+    text-align: left;
+    white-space: normal;
+}
+
+.player-admission-menu-action[hidden] {
+    display: none;
+}
+
+.player-admission-menu-action-state {
+    margin-left: auto;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+@media (max-width: 640px) {
+    .player-admission-menu-popover {
+        min-width: min(280px, calc(100vw - 24px));
+    }
+}
