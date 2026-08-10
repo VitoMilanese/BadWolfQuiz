@@ -25,6 +25,19 @@ selection because the board state changed or the question is no longer
 available, the host remains on the current board and receives a temporary inline
 error instead of a full-page reload.
 
+Host gameplay commands that are submitted asynchronously are protected from
+SignalR-driven reload races. While a host command is in flight, a live update
+that would normally reload the Lobby defers that reload until the request has
+finished. This prevents a successful gameplay command from being reported by the
+browser as a fetch/network failure merely because the resulting state broadcast
+arrived before the HTTP response.
+
+Failed host-owned runtime-session lookups for key gameplay commands are logged
+with command, game-session, host, request-path, and request-trace context. This
+diagnostic logging is intended to make intermittent `404 Not Found` responses
+actionable without changing the normal gameplay rules or exposing participant
+data.
+
 
 ## Board context actions
 

@@ -3966,14 +3966,32 @@
                 }, 3000);
             };
 
-            const submitGameControl = async form => {
-                const button = form.querySelector("button[type='submit']");
+            let hostCommandDepth = 0;
+            let hostReloadPending = false;
+
+            const requestHostReload = () => {
+                if (hostCommandDepth > 0) {
+                    hostReloadPending = true;
+                    return;
+                }
+
+                window.location.reload();
+            };
+
+            const submitGameControl = async (form, submitter = null) => {
+                const button = submitter ?? form.querySelector("button[type='submit']");
                 button?.setAttribute("disabled", "disabled");
+                hostCommandDepth += 1;
 
                 try {
+                    const formData = new FormData(form);
+                    if (submitter?.name) {
+                        formData.append(submitter.name, submitter.value);
+                    }
+
                     const response = await fetch(form.action, {
                         method: "POST",
-                        body: new FormData(form),
+                        body: formData,
                         headers: {
                             "Accept": "application/json",
                             "X-Requested-With": "XMLHttpRequest"
@@ -3991,6 +4009,12 @@
                     return result;
                 } finally {
                     button?.removeAttribute("disabled");
+                    hostCommandDepth = Math.max(0, hostCommandDepth - 1);
+
+                    if (hostCommandDepth === 0 && hostReloadPending) {
+                        hostReloadPending = false;
+                        window.location.reload();
+                    }
                 }
             };
 
@@ -4000,7 +4024,35 @@
 
                     try {
                         await submitGameControl(form);
-                        window.location.reload();
+                        requestHostReload();
+                    } catch (error) {
+                        console.error(error);
+                        showGameBoardError(error.message);
+                    }
+                });
+            }
+
+            for (const form of document.querySelectorAll(".question-judge-actions")) {
+                form.addEventListener("submit", async event => {
+                    event.preventDefault();
+
+                    try {
+                        await submitGameControl(form, event.submitter);
+                        requestHostReload();
+                    } catch (error) {
+                        console.error(error);
+                        showGameBoardError(error.message);
+                    }
+                });
+            }
+
+            for (const form of document.querySelectorAll(
+                "form[action*='handler=RandomActivePlayer']")) {
+                form.addEventListener("submit", async event => {
+                    event.preventDefault();
+
+                    try {
+                        await submitGameControl(form, event.submitter);
                     } catch (error) {
                         console.error(error);
                         showGameBoardError(error.message);
@@ -4210,7 +4262,7 @@
                 }
 
                 if (lobby.classList.contains("host-game-board")) {
-                    window.location.reload();
+                    requestHostReload();
                 }
             });
 
@@ -4498,13 +4550,13 @@
                 if (previousStatus &&
                     previousStatus !== update.status &&
                     lobby.classList.contains("host-game-board")) {
-                    window.location.reload();
+                    requestHostReload();
                 }
             });
 
             connection.on("FinalQuestionProgressChanged", () => {
                 if (lobby.classList.contains("final-question-host")) {
-                    window.location.reload();
+                    requestHostReload();
                 }
             });
 
