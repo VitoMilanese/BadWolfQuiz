@@ -136,6 +136,95 @@
             { type: blob.type });
     }
 
+    function initializeQuestionEditorTabs() {
+        const form = document.querySelector(".question-editor[data-ajax-question-editor]");
+        const questionSection = document.getElementById("question-blocks");
+        const answerSection = document.getElementById("answer-blocks");
+
+        if (!form || !questionSection || !answerSection) {
+            return;
+        }
+
+        const questionHeading = questionSection.previousElementSibling;
+        const questionValidation = questionSection.nextElementSibling;
+        const answerHeading = answerSection.previousElementSibling;
+        const answerValidation = answerSection.nextElementSibling;
+
+        if (questionHeading?.tagName !== "H2" ||
+            answerHeading?.tagName !== "H2") {
+            return;
+        }
+
+        const questionTitle = questionSection.querySelector(
+            ".content-block-section-header h2")?.textContent?.trim() ||
+            questionHeading.textContent.trim();
+        const answerTitle = answerSection.querySelector(
+            ".content-block-section-header h2")?.textContent?.trim() ||
+            answerHeading.textContent.trim();
+
+        const tabs = document.createElement("div");
+        tabs.className = "editor-actions question-answer-tabs";
+        tabs.setAttribute("role", "tablist");
+
+        const createTab = (name, title, active) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = active
+                ? "button button-primary"
+                : "button button-secondary";
+            button.textContent = title;
+            button.dataset.questionEditorTab = name;
+            button.setAttribute("role", "tab");
+            button.setAttribute("aria-selected", active ? "true" : "false");
+            return button;
+        };
+
+        const questionTab = createTab("question", questionTitle, true);
+        const answerTab = createTab("answer", answerTitle, false);
+        tabs.append(questionTab, answerTab);
+        questionHeading.before(tabs);
+
+        const groups = {
+            question: [questionHeading, questionSection, questionValidation],
+            answer: [answerHeading, answerSection, answerValidation]
+        };
+
+        const selectTab = name => {
+            const questionActive = name === "question";
+
+            questionTab.classList.toggle("button-primary", questionActive);
+            questionTab.classList.toggle("button-secondary", !questionActive);
+            questionTab.setAttribute(
+                "aria-selected",
+                questionActive ? "true" : "false");
+
+            answerTab.classList.toggle("button-primary", !questionActive);
+            answerTab.classList.toggle("button-secondary", questionActive);
+            answerTab.setAttribute(
+                "aria-selected",
+                questionActive ? "false" : "true");
+
+            for (const element of groups.question) {
+                if (element) {
+                    element.hidden = !questionActive;
+                }
+            }
+
+            for (const element of groups.answer) {
+                if (element) {
+                    element.hidden = questionActive;
+                }
+            }
+        };
+
+        questionTab.addEventListener("click", () => selectTab("question"));
+        answerTab.addEventListener("click", () => selectTab("answer"));
+
+        selectTab("question");
+    }
+
+    initializeQuestionEditorTabs();
+
     document.addEventListener("click", async event => {
         const button = event.target.closest("[data-media-clipboard-button]");
         if (!button) {
