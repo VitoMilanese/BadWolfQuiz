@@ -21,7 +21,6 @@ public static class PlayerAdmissionAutomation
         if (Loops.TryRemove(game.Session.Id, out var existing))
         {
             existing.Cancel();
-            existing.Dispose();
             return false;
         }
 
