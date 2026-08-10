@@ -163,6 +163,69 @@ internal sealed class SshLogClient(AppSettings settings)
         }
     }
 
+    public Task<string> GetServiceStatusAsync(CancellationToken cancellationToken) =>
+        ExecuteServiceCommandAsync("is-active", allowNonZeroExit: true, cancellationToken);
+
+    public async Task StartServiceAsync(CancellationToken cancellationToken)
+    {
+        await ExecuteServiceCommandAsync("start", allowNonZeroExit: false, cancellationToken);
+    }
+
+    public async Task StopServiceAsync(CancellationToken cancellationToken)
+    {
+        await ExecuteServiceCommandAsync("stop", allowNonZeroExit: false, cancellationToken);
+    }
+
+    private async Task<string> ExecuteServiceCommandAsync(
+        string action,
+        bool allowNonZeroExit,
+        CancellationToken cancellationToken)
+    {
+        return await Task.Run(() =>
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using var client = CreateClient();
+            using var cancellationRegistration =
+                cancellationToken.Register(() => SafeDispose(client));
+
+            try
+            {
+                client.Connect();
+                cancellationToken.ThrowIfCancellationRequested();
+
+                using var command = client.CreateCommand(BuildServiceCommand(action));
+                var output = command.Execute().Trim();
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (command.ExitStatus != 0 && !allowNonZeroExit)
+                {
+                    throw CreateRemoteCommandException(command);
+                }
+
+                if (command.ExitStatus != 0 &&
+                    allowNonZeroExit &&
+                    string.IsNullOrWhiteSpace(output))
+                {
+                    throw CreateRemoteCommandException(command);
+                }
+
+                return output;
+            }
+            catch (Exception) when (cancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException(cancellationToken);
+            }
+            finally
+            {
+                if (client.IsConnected)
+                {
+                    client.Disconnect();
+                }
+            }
+        }, cancellationToken);
+    }
+
     private SshClient CreateClient() =>
         new(settings.Host, settings.Port, settings.Username, settings.Password);
 
@@ -192,9 +255,25 @@ internal sealed class SshLogClient(AppSettings settings)
             : journalCommand;
     }
 
-    private string BuildSudoCommand(string journalCommand) =>
+    private string BuildServiceCommand(string action)
+    {
+        var serviceCommand =
+            $"systemctl {action} {ShellQuote(settings.ServiceName)}";
+
+        return settings.UseSudo
+            ? BuildSudoCommand(serviceCommand)
+            : serviceCommand;
+    }
+
+    private string BuildSudoCommand(string command) =>
         $"printf '%s\\n' {ShellQuote(settings.Password)} | " +
-        $"sudo -S -p '' sh -c {ShellQuote(journalCommand)}";
+        $"sudo -S -p '' sh -c {ShellQuote(command)}";
+
+    private static InvalidOperationException CreateRemoteCommandException(SshCommand command) =>
+        new(
+            string.IsNullOrWhiteSpace(command.Error)
+                ? $"Remote command failed with exit code {command.ExitStatus}."
+                : command.Error.Trim());
 
     private static string ShellQuote(string value) =>
         "'" + value.Replace("'", "'\"'\"'") + "'";
