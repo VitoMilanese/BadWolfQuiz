@@ -5,11 +5,22 @@
 @inject IStringLocalizer<SharedResource> Localizer
 @{
     ViewData["Title"] = Localizer["QuestionInbox_Title"];
+    var openQuestionBotSettings = string.Equals(
+        Request.Query["openQuestionBotSettings"],
+        "true",
+        StringComparison.OrdinalIgnoreCase);
 }
 @using BadWolfQuiz.Web.Models
 
 <section class="page-section question-inbox-page">
-    <h1>@Localizer["QuestionInbox_Title"]</h1>
+    <div class="page-heading">
+        <h1>@Localizer["QuestionInbox_Title"]</h1>
+        <button type="button"
+                class="button button-secondary"
+                data-open-question-bot-settings>
+            @Localizer["QuestionBot_Title"]
+        </button>
+    </div>
 
     <div asp-validation-summary="ModelOnly"></div>
 
@@ -26,7 +37,6 @@
                     <header class="question-inbox-card-header">
                         <div>
                             <span class="question-inbox-card-label">@Localizer["QuestionInbox_Question"]</span>
-
                             @if (!string.IsNullOrWhiteSpace(question.SenderName))
                             {
                                 <p class="question-conversation-meta">
@@ -38,12 +48,9 @@
                     </header>
 
                     <div class="question-messages">
-                        @foreach (var message in question.Messages
-                            .OrderBy(x => x.CreatedAtUtc)
-                            .ThenBy(x => x.Id))
+                        @foreach (var message in question.Messages.OrderBy(x => x.CreatedAtUtc).ThenBy(x => x.Id))
                         {
                             var isUserMessage = message.AuthorType == UserQuestionAuthorType.User;
-
                             <article class="question-message @(isUserMessage ? "question-message-user" : "question-message-developer")">
                                 <div class="question-message-author">
                                     @(isUserMessage
@@ -60,43 +67,26 @@
                             .OrderBy(x => x.CreatedAtUtc)
                             .ThenBy(x => x.Id)
                             .LastOrDefault();
-
                         var awaitingDeveloper = lastMessage?.AuthorType == UserQuestionAuthorType.User;
                     }
 
                     <div class="question-reply-panel question-inbox-actions-panel">
                         @if (awaitingDeveloper)
                         {
-                            <form method="post"
-                                  asp-page-handler="Answer"
-                                  class="question-reply-form">
-
-                                <input type="hidden"
-                                       name="id"
-                                       value="@question.Id" />
-
-                                <label for="answer-@question.Id">
-                                    @Localizer["QuestionInbox_Answer"]
-                                </label>
-
+                            <form method="post" asp-page-handler="Answer" class="question-reply-form">
+                                <input type="hidden" name="id" value="@question.Id" />
+                                <label for="answer-@question.Id">@Localizer["QuestionInbox_Answer"]</label>
                                 <textarea id="answer-@question.Id"
                                           name="answer"
                                           rows="5"
                                           maxlength="5000"
                                           required></textarea>
-
                                 <div class="form-actions">
-                                    <button type="submit"
-                                            class="button button-primary">
-                                        @Localizer["QuestionInbox_Reply"]
-                                    </button>
-
+                                    <button type="submit" class="button button-primary">@Localizer["QuestionInbox_Reply"]</button>
                                     <button type="button"
                                             class="button button-danger-outline"
                                             data-delete-question
-                                            data-question-id="@question.Id">
-                                        @Localizer["Button_Delete"]
-                                    </button>
+                                            data-question-id="@question.Id">@Localizer["Button_Delete"]</button>
                                 </div>
                             </form>
                         }
@@ -106,72 +96,193 @@
                                 <button type="button"
                                         class="button button-danger-outline"
                                         data-delete-question
-                                        data-question-id="@question.Id">
-                                    @Localizer["Button_Delete"]
-                                </button>
+                                        data-question-id="@question.Id">@Localizer["Button_Delete"]</button>
                             </div>
                         }
                     </div>
                 </article>
             }
         </div>
-
-        <dialog id="delete-question-dialog"
-                class="app-dialog">
-
-            <form method="post"
-                  asp-page-handler="Delete"
-                  class="dialog-card dialog-card-danger">
-
-                <input type="hidden"
-                       id="delete-question-id"
-                       name="id" />
-
-                <div class="dialog-heading">
-                    <div>
-                        <h2>@Localizer["QuestionInbox_DeleteConfirmTitle"]</h2>
-                        <p class="dialog-warning">
-                            @Localizer["QuestionInbox_DeleteConfirmText"]
-                        </p>
-                    </div>
-                </div>
-
-                <div class="form-actions dialog-actions">
-                    <button type="button"
-                            id="cancel-delete-question"
-                            class="button button-secondary">
-                        @Localizer["Button_Cancel"]
-                    </button>
-
-                    <button type="submit"
-                            class="button button-danger">
-                        @Localizer["Button_Delete"]
-                    </button>
-                </div>
-            </form>
-        </dialog>
     }
+
+    <dialog id="question-bot-settings-dialog"
+            class="app-dialog"
+            data-open-on-load="@openQuestionBotSettings.ToString().ToLowerInvariant()">
+        <form method="post"
+              asp-page-handler="SaveQuestionBot"
+              class="dialog-card question-bot-dialog-card stack-form">
+            <div class="dialog-heading">
+                <h2>@Localizer["QuestionBot_Title"]</h2>
+            </div>
+
+            @if (TempData["QuestionBotSuccess"] is string questionBotSuccess)
+            {
+                <div class="message message-success"
+                     role="status"
+                     data-question-bot-message>
+                    @questionBotSuccess
+                </div>
+            }
+            @if (TempData["QuestionBotError"] is string questionBotError)
+            {
+                <div class="message message-error"
+                     role="alert"
+                     data-question-bot-message>
+                    @questionBotError
+                </div>
+            }
+
+            <input type="hidden" asp-for="QuestionId" />
+
+            <label class="field-group">
+                <span>@Localizer["QuestionBot_DiscordServer"]</span>
+                <select asp-for="QuestionBotGuildId" data-question-bot-guild>
+                    <option value="">@Localizer["QuestionBot_SelectServer"]</option>
+                    @foreach (var guild in Model.QuestionBotGuilds)
+                    {
+                        <option value="@guild.Id">@guild.Name</option>
+                    }
+                </select>
+            </label>
+
+            <label class="field-group">
+                <span>@Localizer["QuestionBot_TextChannel"]</span>
+                <select asp-for="QuestionBotChannelId" data-question-bot-channel>
+                    <option value="">@Localizer["QuestionBot_SelectChannel"]</option>
+                    @foreach (var channel in Model.QuestionBotChannels)
+                    {
+                        <option value="@channel.Id">@channel.Name</option>
+                    }
+                </select>
+            </label>
+
+            <div class="form-actions dialog-actions">
+                <button type="submit" class="button button-primary">@Localizer["Button_Save"]</button>
+                <button type="button"
+                        class="button button-secondary"
+                        data-close-question-bot-settings>
+                    @Localizer["Button_Close"]
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="delete-question-dialog" class="app-dialog">
+        <form method="post" asp-page-handler="Delete" class="dialog-card dialog-card-danger">
+            <input type="hidden" id="delete-question-id" name="id" />
+            <div class="dialog-heading">
+                <div>
+                    <h2>@Localizer["QuestionInbox_DeleteConfirmTitle"]</h2>
+                    <p class="dialog-warning">@Localizer["QuestionInbox_DeleteConfirmText"]</p>
+                </div>
+            </div>
+            <div class="form-actions dialog-actions">
+                <button type="button" id="cancel-delete-question" class="button button-secondary">@Localizer["Button_Cancel"]</button>
+                <button type="submit" class="button button-danger">@Localizer["Button_Delete"]</button>
+            </div>
+        </form>
+    </dialog>
 </section>
 
+<style>
+#question-bot-settings-dialog {
+    width: min(56rem, calc(100vw - 3rem));
+    max-width: calc(100vw - 3rem);
+    padding: 0;
+    overflow: visible;
+}
+
+.question-bot-dialog-card {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    box-sizing: border-box;
+    max-height: none;
+    overflow: visible;
+}
+
+.question-bot-dialog-card .field-group,
+.question-bot-dialog-card select {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+@@media (max-width: 640px) {
+    .question-inbox-page > .page-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    #question-bot-settings-dialog {
+        width: calc(100vw - 1.5rem);
+        max-width: calc(100vw - 1.5rem);
+    }
+}
+</style>
+
 <script>
-    (() => {
-        const dialog = document.getElementById("delete-question-dialog");
-        const questionIdInput = document.getElementById("delete-question-id");
-        const cancelButton = document.getElementById("cancel-delete-question");
+(() => {
+    const settingsDialog = document.getElementById("question-bot-settings-dialog");
+    const openSettingsButton = document.querySelector("[data-open-question-bot-settings]");
+    const closeSettingsButton = document.querySelector("[data-close-question-bot-settings]");
+    const guildSelect = document.querySelector("[data-question-bot-guild]");
+    const channelSelect = document.querySelector("[data-question-bot-channel]");
 
-        if (!dialog || !questionIdInput || !cancelButton) {
-            return;
+    openSettingsButton?.addEventListener("click", () => settingsDialog?.showModal());
+    closeSettingsButton?.addEventListener("click", () => settingsDialog?.close());
+    settingsDialog?.addEventListener("click", event => {
+        if (event.target === settingsDialog) {
+            settingsDialog.close();
         }
+    });
 
-        document.querySelectorAll("[data-delete-question]").forEach(button => {
-            button.addEventListener("click", () => {
-                questionIdInput.value = button.dataset.questionId;
-                dialog.showModal();
-            });
-        });
+    if (settingsDialog?.dataset.openOnLoad === "true") {
+        settingsDialog.showModal();
+    }
 
-        cancelButton.addEventListener("click", () => {
-            dialog.close();
+    document.querySelectorAll("[data-question-bot-message]").forEach(message => {
+        window.setTimeout(() => message.remove(), 3000);
+    });
+
+    guildSelect?.addEventListener("change", async () => {
+        if (!channelSelect) return;
+
+        channelSelect.innerHTML = "";
+        const emptyOption = document.createElement("option");
+        emptyOption.value = "";
+        emptyOption.textContent = @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(
+                Localizer["QuestionBot_SelectChannel"].Value));
+        channelSelect.appendChild(emptyOption);
+
+        if (!guildSelect.value) return;
+
+        const response = await fetch(
+            `?handler=QuestionBotChannels&guildId=${encodeURIComponent(guildSelect.value)}`);
+        if (!response.ok) return;
+
+        const channels = await response.json();
+        for (const channel of channels) {
+            const option = document.createElement("option");
+            option.value = channel.id;
+            option.textContent = channel.name;
+            channelSelect.appendChild(option);
+        }
+    });
+
+    const deleteDialog = document.getElementById("delete-question-dialog");
+    const questionIdInput = document.getElementById("delete-question-id");
+    const cancelButton = document.getElementById("cancel-delete-question");
+
+    document.querySelectorAll("[data-delete-question]").forEach(button => {
+        button.addEventListener("click", () => {
+            if (!deleteDialog || !questionIdInput) return;
+            questionIdInput.value = button.dataset.questionId;
+            deleteDialog.showModal();
         });
-    })();
+    });
+
+    cancelButton?.addEventListener("click", () => deleteDialog?.close());
+})();
 </script>

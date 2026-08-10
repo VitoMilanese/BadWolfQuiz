@@ -5,102 +5,87 @@
 @inject IStringLocalizer<SharedResource> Localizer
 @{
     ViewData["Title"] = Localizer["QuestionBot_Title"];
+    var embedded = string.Equals(Request.Query["embedded"], "true", StringComparison.OrdinalIgnoreCase);
+    if (embedded)
+    {
+        Layout = null;
+    }
 }
 
-<h1>@Localizer["QuestionBot_Title"]</h1>
+@if (!embedded)
+{
+    <div class="page-heading">
+        <div><h1>@Localizer["QuestionBot_Title"]</h1></div>
+    </div>
+}
 
 @if (TempData["QuestionBotSuccess"] is string success)
 {
-    <div id="questionBotSuccess"
-         class="alert alert-success">
-        @success
-    </div>
+    <div id="questionBotSuccess" class="message message-success" role="status">@success</div>
 }
-
 @if (TempData["QuestionBotError"] is string error)
 {
-    <div class="alert alert-danger">
-        @error
-    </div>
+    <div class="message message-error" role="alert">@error</div>
 }
 
-<form method="post" asp-page-handler="Save">
-    <div>
-        <label asp-for="GuildId">@Localizer["QuestionBot_DiscordServer"]</label>
-
+<form method="post" asp-page-handler="Save" asp-route-embedded="@embedded" class="form-card narrow stack-form question-bot-settings-form">
+    <label class="field-group">
+        <span>@Localizer["QuestionBot_DiscordServer"]</span>
         <select asp-for="GuildId" id="questionBotGuild">
             <option value="">@Localizer["QuestionBot_SelectServer"]</option>
-
             @foreach (var guild in Model.Guilds)
             {
                 <option value="@guild.Id">@guild.Name</option>
             }
         </select>
-    </div>
-
-    <div>
-        <label asp-for="ChannelId">@Localizer["QuestionBot_TextChannel"]</label>
-
+    </label>
+    <label class="field-group">
+        <span>@Localizer["QuestionBot_TextChannel"]</span>
         <select asp-for="ChannelId" id="questionBotChannel">
             <option value="">@Localizer["QuestionBot_SelectChannel"]</option>
-
             @foreach (var channel in Model.Channels)
             {
                 <option value="@channel.Id">@channel.Name</option>
             }
         </select>
+    </label>
+    <div class="form-actions">
+        <button type="submit" class="button button-primary">@Localizer["Button_Save"]</button>
     </div>
-
-    <button type="submit">
-        @Localizer["Button_Save"]
-    </button>
 </form>
 
-@section Scripts {
-    <script>
-        (() => {
-            const guildSelect = document.getElementById("questionBotGuild");
-            const channelSelect = document.getElementById("questionBotChannel");
-            const successMessage = document.getElementById("questionBotSuccess");
-
-            if (successMessage) {
-                window.setTimeout(() => {
-                    successMessage.remove();
-                }, 3000);
-            }
-
-            guildSelect.addEventListener("change", async () => {
-                channelSelect.innerHTML = "";
-
-                const emptyOption = document.createElement("option");
-                emptyOption.value = "";
-                emptyOption.textContent = @Html.Raw(
-                    System.Text.Json.JsonSerializer.Serialize(
-                        Localizer["QuestionBot_SelectChannel"].Value));
-                channelSelect.appendChild(emptyOption);
-
-                if (!guildSelect.value) {
-                    return;
-                }
-
-                const url =
-                    `?handler=Channels&guildId=${encodeURIComponent(guildSelect.value)}`;
-
-                const response = await fetch(url);
-
-                if (!response.ok) {
-                    return;
-                }
-
-                const channels = await response.json();
-
-                for (const channel of channels) {
-                    const option = document.createElement("option");
-                    option.value = channel.id;
-                    option.textContent = channel.name;
-                    channelSelect.appendChild(option);
-                }
-            });
-        })();
-    </script>
+@if (embedded)
+{
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 }
+
+<script>
+    (() => {
+        const guildSelect = document.getElementById("questionBotGuild");
+        const channelSelect = document.getElementById("questionBotChannel");
+        const successMessage = document.getElementById("questionBotSuccess");
+
+        if (successMessage) window.setTimeout(() => successMessage.remove(), 3000);
+        if (!guildSelect || !channelSelect) return;
+
+        guildSelect.addEventListener("change", async () => {
+            channelSelect.innerHTML = "";
+            const emptyOption = document.createElement("option");
+            emptyOption.value = "";
+            emptyOption.textContent = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Localizer["QuestionBot_SelectChannel"].Value));
+            channelSelect.appendChild(emptyOption);
+            if (!guildSelect.value) return;
+
+            const url = `?handler=Channels&guildId=${encodeURIComponent(guildSelect.value)}&embedded=@embedded.ToString().ToLowerInvariant()`;
+            const response = await fetch(url);
+            if (!response.ok) return;
+            const channels = await response.json();
+            for (const channel of channels) {
+                const option = document.createElement("option");
+                option.value = channel.id;
+                option.textContent = channel.name;
+                channelSelect.appendChild(option);
+            }
+        });
+    })();
+</script>

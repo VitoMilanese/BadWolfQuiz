@@ -31,6 +31,7 @@ public sealed class QuestionBotModel(
     }
 
     public async Task<IActionResult> OnPostSaveAsync(
+        bool embedded,
         CancellationToken cancellationToken)
     {
         var guild = GuildId is null
@@ -39,15 +40,12 @@ public sealed class QuestionBotModel(
 
         var channel = GuildId is null || ChannelId is null
             ? null
-            : bot.GetTextChannels(GuildId)
-                .SingleOrDefault(x => x.Id == ChannelId);
+            : bot.GetTextChannels(GuildId).SingleOrDefault(x => x.Id == ChannelId);
 
         if (guild is null || channel is null)
         {
-            TempData["QuestionBotError"] =
-                localizer["QuestionBot_SelectServerAndChannel"].Value;
-
-            return RedirectToPage();
+            TempData["QuestionBotError"] = localizer["QuestionBot_SelectServerAndChannel"].Value;
+            return RedirectToPage(new { embedded });
         }
 
         await repository.SaveAsync(
@@ -57,23 +55,16 @@ public sealed class QuestionBotModel(
             channel.Name,
             cancellationToken);
 
-        TempData["QuestionBotSuccess"] =
-           localizer["QuestionBot_Saved"].Value;
-
-        return RedirectToPage();
+        TempData["QuestionBotSuccess"] = localizer["QuestionBot_Saved"].Value;
+        return RedirectToPage(new { embedded });
     }
 
     private async Task LoadAsync(CancellationToken cancellationToken)
     {
         var settings = await repository.GetAsync(cancellationToken);
-
         GuildId = settings?.GuildId;
         ChannelId = settings?.ChannelId;
-
         Guilds = bot.GetGuilds();
-
-        Channels = GuildId is null
-            ? []
-            : bot.GetTextChannels(GuildId);
+        Channels = GuildId is null ? [] : bot.GetTextChannels(GuildId);
     }
 }
