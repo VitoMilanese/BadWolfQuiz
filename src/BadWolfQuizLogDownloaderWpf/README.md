@@ -16,6 +16,7 @@ Features:
 - multi-row log selection and plain-text copy with `Ctrl+C`
 - current systemd service status with refresh support
 - start/stop controls for the configured systemd service over SSH
+- App_Data and full service-folder backups downloaded as timestamped `.tar.gz` archives
 - themes: Light, Dark, Matrix, Obsidian, Ukrainian, UPA, Italian, Warm Parchment, Mint Fog, LGBTQ+
 - supplied Bad Wolf logger artwork as application/window icon
 - independent semantic product version displayed in the window title bar
@@ -38,7 +39,7 @@ dotnet build
 
 The product version is defined once in `BadWolfQuizLogDownloaderWpf.csproj` through the `<Version>` property and is read from the built assembly at runtime. The main window title therefore displays the actual product version, for example:
 
-`BadWolfQuiz Log Downloader v1.1.0`
+`BadWolfQuiz Log Downloader v1.2.0`
 
 Use PATCH releases for compatible fixes, MINOR releases for backwards-compatible features, and MAJOR releases for major/breaking release milestones. Downloader release tags should be distinguishable from web application release tags when both products are published from this repository.
 
@@ -54,11 +55,16 @@ Edit `appsettings.json` next to the executable.
   "Password": "your-password",
   "ServiceName": "badwolfquiz.service",
   "UseSudo": true,
-  "OutputDirectory": "Logs"
+  "OutputDirectory": "Logs",
+  "RemoteAppDataPath": "/srv/badwolfquiz/App_Data",
+  "RemoteServiceDirectoryPath": "/srv/badwolfquiz",
+  "BackupOutputDirectory": "Backups"
 }
 ```
 
 `ServiceName` is used both for journal access and for service status/start/stop commands. When `UseSudo` is enabled, the configured SSH password is also supplied to `sudo` for the remote command.
+
+`RemoteAppDataPath` and `RemoteServiceDirectoryPath` specify the server directories used by the two backup actions. `BackupOutputDirectory` controls where downloaded backup archives are stored locally; relative paths are resolved next to the executable.
 
 The password is intentionally read from `appsettings.json`. Do not commit a real password.
 
@@ -67,6 +73,16 @@ The password is intentionally read from `appsettings.json`. Do not commit a real
 The main window displays the current state of the configured systemd service. Use **Refresh** to query the state again, **Start service** when the service is not active, and **Stop service** while it is active.
 
 Service commands run over the same SSH connection settings as log downloads. SSH, permission, and systemd command failures are surfaced to the user and do not overwrite the last known state with a successful state.
+
+## Backups
+
+Use **Backup App_Data** to archive and download the configured `RemoteAppDataPath`, or **Backup service folder** to archive and download the entire configured service directory.
+
+The remote source directory is streamed through `tar` over SSH into a local `.tar.gz` file. No source files are modified or deleted. Backup filenames identify the backup type and include a timestamp, for example:
+
+`badwolfquiz-app-data-20260810-143000.tar.gz`
+
+Only one backup/log operation can run at a time, and the existing **Cancel** button can cancel a running backup. Partial local archives are removed when a backup fails or is cancelled.
 
 ## WPF icon loading
 
