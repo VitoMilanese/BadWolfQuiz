@@ -2,13 +2,23 @@
 
 **Bad Wolf Quiz** — це сучасна real-time платформа для проведення квізів, написана на **ASP.NET Core 8**.
 
-Проєкт складається з двох основних частин:
+Основні складові проєкту:
 
-- редактора квізів;
-- real-time ігрової платформи для ведучого та гравців;
-- системи зворотного зв'язку між користувачами та розробником.
+- редактор квізів;
+- real-time ігрова платформа для ведучого та гравців;
+- система зворотного зв'язку між користувачами та розробником.
 
 Детальні специфікації та архітектурні рішення зберігаються в [docs](docs/README.md).
+
+**Bad Wolf Quiz** is a modern real-time quiz platform built with **ASP.NET Core 8**.
+
+The main components of the project are:
+
+- a quiz editor;
+- a real-time game platform for the host and players;
+- a feedback system between users and the developer.
+
+Detailed specifications and architectural decisions are available in [docs](docs/README.md).
 
 ---
 
