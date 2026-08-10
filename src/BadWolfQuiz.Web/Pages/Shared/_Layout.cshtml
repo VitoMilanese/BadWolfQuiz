@@ -43,7 +43,10 @@
     var isEmbeddedDiscordSettings = ViewData["EmbeddedDiscordSettings"] is true;
     var productVersion = ProductVersionInfo.Current;
     var isSettingsPage = isAuthenticated &&
-        Context.Request.Path.Equals("/Admin/Settings", StringComparison.OrdinalIgnoreCase);
+        string.Equals(
+            Context.Request.Path.Value,
+            "/Admin/Settings",
+            StringComparison.OrdinalIgnoreCase);
 }
 
 <!DOCTYPE html>
