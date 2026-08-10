@@ -45,7 +45,7 @@
         <small id="four-clues-help" hidden>@Localizer["FourClues_EditorHint"]</small>
     </section>
 
-    <h2>@Localizer["Label_QuestionBlocks"]</h2>
+    <h2>@Localizer["Label_Question"]</h2>
 
     <partial name="Shared/_ContentBlockCollection"
              model="questionBlockCollection" />
@@ -53,7 +53,7 @@
     <span asp-validation-for="Input.QuestionBlocks"
           class="text-danger"></span>
 
-    <h2>@Localizer["Label_AnswerBlocks"]</h2>
+    <h2>@Localizer["Label_CorrectAnswer"]</h2>
 
     <partial name="Shared/_ContentBlockCollection"
              model="answerBlockCollection" />
@@ -897,7 +897,6 @@
             if (section) {
                 updateContentBlockIndexes(section);
             }
-
             draggedContentBlock = null;
         });
 
