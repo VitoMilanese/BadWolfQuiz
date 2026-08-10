@@ -130,13 +130,13 @@
                     </a>
                 }
                 <a class="action-menu-item" asp-page="/Faq">@Localizer["Menu_FAQ"]</a>
-                <a class="action-menu-item" asp-page="/About">@ProductVersionLocalizer["MenuAbout"]</a>
 
                 @if (isAuthenticated)
                 {
                     <a class="action-menu-item" asp-page="/Admin/Settings/Index">@Localizer["Menu_Settings"]</a>
                     <a class="action-menu-item" asp-page="/Account/ChangePassword">@Localizer["Menu_ChangePassword"]</a>
                 }
+                <a class="action-menu-item" asp-page="/About">@ProductVersionLocalizer["MenuAbout"]</a>
 
                 <div class="action-menu-separator"></div>
                 @if (isAuthenticated)
