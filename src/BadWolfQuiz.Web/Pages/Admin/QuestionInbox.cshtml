@@ -177,9 +177,18 @@
 </section>
 
 <style>
-.question-bot-dialog-card {
+#question-bot-settings-dialog {
     width: min(56rem, calc(100vw - 3rem));
     max-width: calc(100vw - 3rem);
+    padding: 0;
+    overflow: visible;
+}
+
+.question-bot-dialog-card {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    box-sizing: border-box;
     max-height: none;
     overflow: visible;
 }
@@ -188,6 +197,7 @@
 .question-bot-dialog-card select {
     width: 100%;
     min-width: 0;
+    box-sizing: border-box;
 }
 
 @@media (max-width: 640px) {
@@ -196,7 +206,7 @@
         flex-direction: column;
     }
 
-    .question-bot-dialog-card {
+    #question-bot-settings-dialog {
         width: calc(100vw - 1.5rem);
         max-width: calc(100vw - 1.5rem);
     }
