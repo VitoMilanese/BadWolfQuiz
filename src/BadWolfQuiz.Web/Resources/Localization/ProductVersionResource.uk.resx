@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AboutEyebrow" xml:space="preserve"><value>BAD WOLF QUIZ</value></data>
+  <data name="AboutTitle" xml:space="preserve"><value>Про програму</value></data>
+  <data name="AboutDescription" xml:space="preserve"><value>Bad Wolf Quiz — браузерна гра-вікторина для ведучих і гравців.</value></data>
+  <data name="VersionLabel" xml:space="preserve"><value>Версія</value></data>
+  <data name="BuildLabel" xml:space="preserve"><value>Збірка</value></data>
+  <data name="LogoTooltip" xml:space="preserve"><value>Bad Wolf Quiz v{0}</value></data>
+  <data name="MenuAbout" xml:space="preserve"><value>Про програму</value></data>
+  <data name="RepositoryLink" xml:space="preserve"><value>Проєкт на GitHub</value></data>
+</root>

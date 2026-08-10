@@ -5,6 +5,7 @@
 @inject UserQuestionHistoryService UserQuestionHistory
 @inject IConfiguration Configuration
 @inject Microsoft.Extensions.Options.IOptions<SiteDefaultsOptions> SiteDefaults
+@inject IStringLocalizer<ProductVersionResource> ProductVersionLocalizer
 
 @{
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
@@ -40,6 +41,12 @@
         !string.IsNullOrWhiteSpace(settings.BrandLogoContentType);
     var hidePortalFooter = ViewData["HidePortalFooter"] is true;
     var isEmbeddedDiscordSettings = ViewData["EmbeddedDiscordSettings"] is true;
+    var productVersion = ProductVersionInfo.Current;
+    var isSettingsPage = isAuthenticated &&
+        string.Equals(
+            Context.Request.Path.Value,
+            "/Admin/Settings",
+            StringComparison.OrdinalIgnoreCase);
 }
 
 <!DOCTYPE html>
@@ -58,7 +65,9 @@
     @if (!isEmbeddedDiscordSettings)
     {
     <header class="topbar">
-        <a class="brand" asp-page="/Index">
+        <a class="brand"
+           asp-page="/Index"
+           title="@ProductVersionLocalizer["LogoTooltip", productVersion.Version]">
             @if (hasBrandLogo)
             {
                 <img class="brand-logo"
@@ -73,6 +82,10 @@
 
         <div class="topbar-page-context">
             @await RenderSectionAsync("HeaderContext", required: false)
+            @if (isSettingsPage)
+            {
+                <small>@ProductVersionLocalizer["VersionLabel"]: @productVersion.Version</small>
+            }
         </div>
 
         <details class="action-menu header-action-menu">
@@ -123,6 +136,7 @@
                     <a class="action-menu-item" asp-page="/Admin/Settings/Index">@Localizer["Menu_Settings"]</a>
                     <a class="action-menu-item" asp-page="/Account/ChangePassword">@Localizer["Menu_ChangePassword"]</a>
                 }
+                <a class="action-menu-item" asp-page="/About">@ProductVersionLocalizer["MenuAbout"]</a>
 
                 <div class="action-menu-separator"></div>
                 @if (isAuthenticated)
