@@ -49,6 +49,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - BAD WOLF QUIZ</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @if (!hidePortalFooter && !isEmbeddedDiscordSettings)
+    {
+        <link rel="stylesheet" href="~/css/sticky-footer.css" asp-append-version="true" />
+    }
 </head>
 <body class="@(hidePortalFooter ? "gameplay-layout" : "portal-layout") @(isEmbeddedDiscordSettings ? "embedded-discord-settings" : null)">
     @if (!isEmbeddedDiscordSettings)
