@@ -15,6 +15,7 @@ Features:
 - multi-line log entries stay grouped
 - themes: Light, Dark, Matrix, Obsidian, Ukrainian, UPA, Italian, Warm Parchment, Mint Fog, LGBTQ+
 - supplied Bad Wolf logger artwork as application/window icon
+- independent semantic product version displayed in the window title bar
 
 ## Packages
 
@@ -27,6 +28,16 @@ Features:
 dotnet restore
 dotnet build
 ```
+
+## Versioning
+
+`BadWolfQuizLogDownloaderWpf` has its own semantic version and release lifecycle, independent from `BadWolfQuiz.Web`.
+
+The product version is defined once in `BadWolfQuizLogDownloaderWpf.csproj` through the `<Version>` property and is read from the built assembly at runtime. The main window title therefore displays the actual product version, for example:
+
+`BadWolfQuiz Log Downloader v1.0.0`
+
+Use PATCH releases for compatible fixes, MINOR releases for backwards-compatible features, and MAJOR releases for major/breaking release milestones. Downloader release tags should be distinguishable from web application release tags when both products are published from this repository.
 
 ## Configuration
 
