@@ -173,101 +173,73 @@ internal sealed class SshLogClient(AppSettings settings)
         await ExecuteServiceCommandAsync("stop", allowNonZeroExit: false, cancellationToken);
     }
 
-    public async Task DownloadDirectoryBackupAsync(
-        string remotePath,
-        string localPath,
+    public async Task<string> CreateDirectoryBackupAsync(
+        string remoteSourcePath,
+        string remoteBackupDirectory,
+        string fileName,
         IProgress<string>? progress,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(remotePath))
+        if (string.IsNullOrWhiteSpace(remoteSourcePath))
         {
-            throw new InvalidOperationException("The remote backup path is not configured.");
+            throw new InvalidOperationException("The remote backup source path is not configured.");
+        }
+
+        if (string.IsNullOrWhiteSpace(remoteBackupDirectory))
+        {
+            throw new InvalidOperationException("The remote backup directory is not configured.");
         }
 
         progress?.Report("Connecting to server for backup...");
 
-        using var client = CreateClient();
-        await Task.Run(client.Connect, cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
-
-        using var command = client.CreateCommand(BuildArchiveCommand(remotePath));
-        using var output = command.OutputStream;
-
-        var asyncResult = command.BeginExecute();
-        using var cancellationRegistration = cancellationToken.Register(() =>
+        return await Task.Run(() =>
         {
-            try
-            {
-                command.CancelAsync();
-            }
-            catch
-            {
-            }
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using var client = CreateClient();
+            using var cancellationRegistration =
+                cancellationToken.Register(() => SafeDispose(client));
 
             try
+            {
+                client.Connect();
+                cancellationToken.ThrowIfCancellationRequested();
+
+                progress?.Report("Preparing remote backup directory...");
+
+                var remoteArchivePath =
+                    remoteBackupDirectory.Trim().TrimEnd('/') + "/" + fileName;
+
+                using var command = client.CreateCommand(
+                    BuildArchiveCommand(
+                        remoteSourcePath,
+                        remoteBackupDirectory,
+                        remoteArchivePath));
+
+                progress?.Report("Creating backup archive on server...");
+                command.Execute();
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (command.ExitStatus != 0)
+                {
+                    throw CreateRemoteCommandException(command);
+                }
+
+                progress?.Report("Backup created on server.");
+                return remoteArchivePath;
+            }
+            catch (Exception) when (cancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException(cancellationToken);
+            }
+            finally
             {
                 if (client.IsConnected)
                 {
                     client.Disconnect();
                 }
             }
-            catch
-            {
-            }
-        });
-
-        try
-        {
-            progress?.Report("Creating and downloading backup archive...");
-
-            await using var file = new FileStream(
-                localPath,
-                FileMode.Create,
-                FileAccess.Write,
-                FileShare.None,
-                bufferSize: 81920,
-                useAsync: true);
-
-            await output.CopyToAsync(file, cancellationToken);
-            await file.FlushAsync(cancellationToken);
-
-            while (!asyncResult.IsCompleted)
-            {
-                await Task.Delay(50, cancellationToken);
-            }
-
-            command.EndExecute(asyncResult);
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (command.ExitStatus != 0)
-            {
-                throw CreateRemoteCommandException(command);
-            }
-
-            progress?.Report("Backup downloaded.");
-        }
-        catch
-        {
-            try
-            {
-                if (File.Exists(localPath))
-                {
-                    File.Delete(localPath);
-                }
-            }
-            catch
-            {
-            }
-
-            throw;
-        }
-        finally
-        {
-            if (client.IsConnected)
-            {
-                client.Disconnect();
-            }
-        }
+        }, cancellationToken);
     }
 
     private async Task<string> ExecuteServiceCommandAsync(
@@ -359,26 +331,43 @@ internal sealed class SshLogClient(AppSettings settings)
             : serviceCommand;
     }
 
-    private string BuildArchiveCommand(string remotePath)
+    private string BuildArchiveCommand(
+        string remoteSourcePath,
+        string remoteBackupDirectory,
+        string remoteArchivePath)
     {
-        var normalizedPath = remotePath.Trim().TrimEnd('/');
-        if (string.IsNullOrWhiteSpace(normalizedPath) || normalizedPath == "/")
+        var normalizedSourcePath = remoteSourcePath.Trim().TrimEnd('/');
+        if (string.IsNullOrWhiteSpace(normalizedSourcePath) || normalizedSourcePath == "/")
         {
-            throw new InvalidOperationException("The configured backup path must point to a directory, not the filesystem root.");
+            throw new InvalidOperationException(
+                "The configured backup source path must point to a directory, not the filesystem root.");
         }
 
-        var parent = Path.GetDirectoryName(normalizedPath.Replace('/', Path.DirectorySeparatorChar))
+        var normalizedBackupDirectory = remoteBackupDirectory.Trim().TrimEnd('/');
+        if (string.IsNullOrWhiteSpace(normalizedBackupDirectory) || normalizedBackupDirectory == "/")
+        {
+            throw new InvalidOperationException(
+                "The configured backup directory must not be the filesystem root.");
+        }
+
+        var parent = Path.GetDirectoryName(
+                normalizedSourcePath.Replace('/', Path.DirectorySeparatorChar))
             ?.Replace(Path.DirectorySeparatorChar, '/');
-        var name = Path.GetFileName(normalizedPath.Replace('/', Path.DirectorySeparatorChar));
+        var name = Path.GetFileName(
+            normalizedSourcePath.Replace('/', Path.DirectorySeparatorChar));
 
         if (string.IsNullOrWhiteSpace(parent) || string.IsNullOrWhiteSpace(name))
         {
-            throw new InvalidOperationException($"Invalid remote backup path: {remotePath}");
+            throw new InvalidOperationException(
+                $"Invalid remote backup source path: {remoteSourcePath}");
         }
 
         var archiveCommand =
-            $"test -d {ShellQuote(normalizedPath)} && " +
-            $"tar -czf - -C {ShellQuote(parent)} {ShellQuote(name)}";
+            $"test -d {ShellQuote(normalizedSourcePath)} && " +
+            $"mkdir -p {ShellQuote(normalizedBackupDirectory)} && " +
+            $"chmod u+rwx {ShellQuote(normalizedBackupDirectory)} && " +
+            $"tar -czf {ShellQuote(remoteArchivePath)} " +
+            $"-C {ShellQuote(parent)} {ShellQuote(name)}";
 
         return settings.UseSudo
             ? BuildSudoCommand(archiveCommand)
