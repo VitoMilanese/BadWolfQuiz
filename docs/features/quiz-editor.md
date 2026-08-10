@@ -25,6 +25,12 @@ audio files. The response returns identifiers for newly created blocks; the
 browser writes those identifiers back into the form so another save updates the
 same entities instead of creating duplicates.
 
+Question and answer blocks are edited in separate tabs. The question tab is
+selected by default, and switching tabs changes only which block collection is
+visible. Both collections stay in the same form, so unsaved edits are preserved
+when moving between tabs. The question-type controls belong to the question side
+and are hidden while the answer tab is active.
+
 After a successful save, the editor clears consumed file inputs and remove-file
 flags. Localized success feedback disappears automatically, while validation
 feedback remains beside the editor actions. A **Next question** action is shown
@@ -54,8 +60,13 @@ a question for these checks to become accurate.
 ## Final question
 
 Final question and answer blocks are stored directly on the quiz and edited in a
-dedicated editor. The board toolbar shows **Delete final question** only when at
-least one final question or answer block contains content.
+dedicated editor. The final-question editor uses the same question/answer tab
+behavior as the regular question editor: the question tab opens by default and
+only the active block collection is shown, while both collections remain in the
+same form so switching tabs does not discard unsaved edits.
+
+The board toolbar shows **Delete final question** only when at least one final
+question or answer block contains content.
 
 Deletion requires confirmation and removes every final question and answer block.
 Unlike regular-question deletion, it does not create empty replacement blocks.
