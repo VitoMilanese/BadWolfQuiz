@@ -10,27 +10,30 @@
     modal.classList.add("description-preview-modal");
     const style = document.createElement("style");
     style.textContent = `
-        .description-preview-modal .question-preview-shell { justify-content: center; }
+        .description-preview-modal .question-preview-screen {
+            grid-template-rows: auto auto;
+            align-content: center;
+        }
         .description-preview-modal .question-preview-title {
-            margin: 0 0 clamp(20px, 3vh, 36px);
+            margin: 0 0 clamp(14px, 2vh, 24px);
             font-size: clamp(2.4rem, 6vw, 6.5rem);
             line-height: 1;
             letter-spacing: 0.06em;
             font-weight: 950;
+            text-align: center;
         }
-        .description-preview-modal.description-preview-empty .question-preview-shell {
-            justify-content: center;
+        .description-preview-modal .question-preview-content {
+            min-height: 0;
+            max-height: 72vh;
+            align-self: auto;
+            align-content: center;
+            padding-top: 0;
         }
         .description-preview-modal.description-preview-empty .question-preview-title {
             margin-bottom: 0;
-            text-align: center;
         }
-        .description-preview-modal.description-preview-has-content .question-preview-shell {
-            justify-content: center;
-        }
-        .description-preview-modal.description-preview-has-content .question-preview-title {
-            align-self: stretch;
-            text-align: center;
+        .description-preview-modal.description-preview-empty .question-preview-content {
+            display: none;
         }
     `;
     document.head.appendChild(style);
