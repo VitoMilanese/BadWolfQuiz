@@ -1520,7 +1520,11 @@
          aria-label="@Localizer["GameBoard_ResizeJoinCodePanel"]"></div>
 </aside>
 
-@if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
+@if (Model.Game.Session.Status is
+    BadWolfQuiz.Game.Runtime.GameSessionStatus.Running or
+    BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalWagering or
+    BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
+    BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging)
 {
     <dialog id="game-settings-dialog"
             class="app-dialog game-settings-dialog"
