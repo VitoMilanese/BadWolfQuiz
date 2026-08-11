@@ -105,7 +105,7 @@
             @await RenderSectionAsync("HeaderContext", required: false)
             @if (showLimitedGameTools && finalQuestionGame is not null)
             {
-                <details class="action-menu board-action-menu">
+                <details class="action-menu board-action-menu limited-game-tools">
                     <summary class="button button-secondary action-menu-trigger">
                         @Localizer["Menu_Tools"]
                     </summary>
@@ -149,6 +149,20 @@
                 <small>@ProductVersionLocalizer["VersionLabel"]: @productVersion.Version</small>
             }
         </div>
+
+        @if (showLimitedGameTools)
+        {
+            <script>
+                (() => {
+                    const menu = document.querySelector('.limited-game-tools');
+                    const gameHeader = document.querySelector('.game-header-context');
+                    const discordButton = gameHeader?.querySelector('[data-open-discord-settings]');
+                    if (menu && gameHeader && discordButton) {
+                        gameHeader.insertBefore(menu, discordButton);
+                    }
+                })();
+            </script>
+        }
 
         <details class="action-menu header-action-menu">
             <summary class="button button-secondary action-menu-trigger">
