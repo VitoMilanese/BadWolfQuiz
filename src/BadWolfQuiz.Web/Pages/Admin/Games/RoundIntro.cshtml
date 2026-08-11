@@ -158,7 +158,7 @@
         animation: game-intro-actions-leave 130ms ease-in both;
     }
 
-    @keyframes game-intro-enter {
+    @@keyframes game-intro-enter {
         from {
             opacity: 0;
             transform: translate3d(7vw, 0, 0) scale(.965);
@@ -171,7 +171,7 @@
         }
     }
 
-    @keyframes game-intro-leave {
+    @@keyframes game-intro-leave {
         from {
             opacity: 1;
             transform: translate3d(0, 0, 0) scale(1);
@@ -184,17 +184,17 @@
         }
     }
 
-    @keyframes game-intro-actions-enter {
+    @@keyframes game-intro-actions-enter {
         from { opacity: 0; transform: translateY(8px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes game-intro-actions-leave {
+    @@keyframes game-intro-actions-leave {
         from { opacity: 1; }
         to { opacity: 0; }
     }
 
-    @media (prefers-reduced-motion: reduce) {
+    @@media (prefers-reduced-motion: reduce) {
         .game-intro-group,
         .game-intro-actions,
         .game-intro-page.is-leaving .game-intro-group,
