@@ -54,6 +54,7 @@ Detailed specifications and architectural decisions are available in [docs](docs
 - Automatic category cloning when creating new rounds
 - Collapsible round settings that stay out of the way during normal board editing
 - Right-aligned round controls that remain consistent across responsive layouts
+- Optional Text/Image description blocks with dedicated editing and preview
 
 ---
 
@@ -62,6 +63,7 @@ Detailed specifications and architectural decisions are available in [docs](docs
 - Rename categories
 - Exchange categories between rounds
 - Drag & Drop category reordering inside a round
+- Optional Text/Image description blocks opened from the category header cell
 
 ---
 
@@ -154,12 +156,14 @@ Currently implemented:
 - Read-only question and answer previews for resolved board cells
 - Player scoreboard with answering and ineligible states
 - Multi-round progression
+- Animated round/category intro sequence before every round board
 - Host action to resolve all remaining questions and complete the current round
 - Animated top-three inter-round leaderboard
 - Adaptive game-board sizing with equal-height category headers
 - Host-card dimensions preserved across reloads and responsive layout changes
 - Deterministic final standings with score-growth, correct-answer, and attempt tie-breakers
 - Private final wagers and answers submitted from player devices
+- Localized 3-second Final question transition before normal or forced final-phase entry
 - Host-controlled final question reveal, judging, and final results
 - Separate live answer-key screen for the host's second display
 - Host answer-history editing with immediate score and standings recalculation
@@ -168,6 +172,8 @@ Currently implemented:
 - Portable quiz import and export packages with embedded media
 - Self-service host accounts with private quiz and game-history ownership
 - QR player joining with direct game links
+
+See [`docs/features/round-category-intros.md`](docs/features/round-category-intros.md) for the complete round/category intro flow.
 
 ### Discord voice moderation
 
@@ -279,8 +285,10 @@ Quiz
  ├── Final Question Blocks
  ├── Final Answer Blocks
  ├── Round
+ │     ├── Description Blocks
  │     ├── Rows
  │     ├── Categories
+ │     │      ├── Description Blocks
  │     │      ├── Questions
  │     │      │      ├── Question Blocks
  │     │      │      └── Answer Blocks
