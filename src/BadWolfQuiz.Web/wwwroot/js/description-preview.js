@@ -125,13 +125,6 @@
                             : null;
             if (element) content.appendChild(element);
         }
-
-        if (!content.childElementCount) {
-            const empty = document.createElement("div");
-            empty.className = "question-preview-empty";
-            empty.textContent = "—";
-            content.appendChild(empty);
-        }
     };
 
     const open = () => {
