@@ -1,7 +1,5 @@
 (() => {
     const script = document.currentScript;
-    const editLabel = script?.dataset.editLabel || "Edit";
-    const roundLabel = script?.dataset.roundLabel || "Round";
 
     const language = document.documentElement.lang?.toLowerCase() || "en";
     const labels = language.startsWith("uk")
@@ -51,10 +49,6 @@
                 border-radius: 10px;
                 background: var(--panel-bg, var(--surface, #181818));
                 box-shadow: 0 12px 32px rgba(0,0,0,.28);
-            }
-
-            .quiz-editor-context-menu[hidden] {
-                display: none;
             }
 
             .quiz-editor-context-menu-item {
@@ -167,6 +161,16 @@
         });
     }
 
+    function triggerOriginalCategoryRename(renameButton) {
+        renameButton.dataset.allowOriginalRename = "true";
+        renameButton.dispatchEvent(new MouseEvent("click", {
+            bubbles: true,
+            cancelable: true,
+            view: window
+        }));
+        delete renameButton.dataset.allowOriginalRename;
+    }
+
     function initializeCategoryMenus() {
         document.querySelectorAll(".quiz-board-category-column[data-category-id]").forEach(column => {
             const categoryId = column.dataset.categoryId;
@@ -180,21 +184,17 @@
             renameButton.setAttribute("aria-label", labels.renameCategory);
 
             renameButton.addEventListener("click", event => {
+                if (renameButton.dataset.allowOriginalRename === "true") {
+                    return;
+                }
+
                 event.preventDefault();
                 event.stopImmediatePropagation();
 
                 openContextMenu(renameButton, [
                     {
                         label: labels.renameCategory,
-                        action: () => {
-                            const event = new CustomEvent("quiz-editor-rename-category", {
-                                detail: {
-                                    categoryId,
-                                    categoryTitle: renameButton.dataset.categoryTitle || ""
-                                }
-                            });
-                            document.dispatchEvent(event);
-                        }
+                        action: () => triggerOriginalCategoryRename(renameButton)
                     },
                     {
                         label: labels.editCategoryDescription,
@@ -204,23 +204,6 @@
                     }
                 ]);
             }, true);
-        });
-    }
-
-    function initializeCategoryRenameBridge() {
-        document.addEventListener("quiz-editor-rename-category", event => {
-            const detail = event.detail;
-            if (!detail) return;
-
-            const button = document.querySelector(
-                `.js-category-rename[data-category-id="${CSS.escape(String(detail.categoryId))}"]`);
-            if (!button) return;
-
-            button.dispatchEvent(new MouseEvent("click", {
-                bubbles: true,
-                cancelable: true,
-                view: window
-            }));
         });
     }
 
