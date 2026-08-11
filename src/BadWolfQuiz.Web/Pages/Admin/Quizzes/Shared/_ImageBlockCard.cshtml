@@ -15,15 +15,9 @@
 
     if (hasStoredFile)
     {
-        imageUrl = Model.IsAnswerBlock
-            ? Url.Page(
-                null,
-                "AnswerBlockFile",
-                new { id = Model.Id!.Value })
-            : Url.Page(
-                null,
-                "QuestionBlockFile",
-                new { id = Model.Id!.Value });
+        var handler = Model.StoredFileHandler ??
+            (Model.IsAnswerBlock ? "AnswerBlockFile" : "QuestionBlockFile");
+        imageUrl = Url.Page(null, handler, new { id = Model.Id!.Value });
     }
 }
 
