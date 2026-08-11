@@ -121,6 +121,7 @@ const configureGameRoundIntroRoutes = () => {
     }
 
     const encodedGameId = encodeURIComponent(gameId);
+    const runningIntroBase = `/Admin/Games/RunningRoundIntro/${encodedGameId}`;
     const startButton = document.querySelector('.lobby-start-button[form="start-game-form"]');
     if (startButton) {
         startButton.formAction = `/Admin/Games/RoundIntro/${encodedGameId}?handler=Prepare`;
@@ -135,13 +136,48 @@ const configureGameRoundIntroRoutes = () => {
         const handler = action.searchParams.get("handler");
 
         if (form.id === "force-advance-round-form" || handler === "ForceAdvanceRound") {
-            form.action = `/Admin/Games/RunningRoundIntro/${encodedGameId}?handler=ForceAdvance`;
+            form.action = `${runningIntroBase}?handler=ForceAdvance`;
             return;
         }
 
         if (handler === "AdvanceRound") {
-            form.action = `/Admin/Games/RunningRoundIntro/${encodedGameId}?handler=Advance`;
+            form.action = `${runningIntroBase}?handler=Advance`;
         }
+    };
+
+    const submitRoutedForm = form => {
+        if (!(form instanceof HTMLFormElement)) {
+            return;
+        }
+
+        routeRoundForm(form);
+        HTMLFormElement.prototype.submit.call(form);
+    };
+
+    const advanceEmptyRoundSummary = () => {
+        const summary = document.querySelector(".host-game-board .round-summary");
+        if (!summary || summary.querySelector(".round-podium-player")) {
+            return false;
+        }
+
+        const form = summary.querySelector("form");
+        if (!(form instanceof HTMLFormElement)) {
+            return false;
+        }
+
+        const action = new URL(form.action, window.location.origin);
+        if (action.searchParams.get("handler") !== "AdvanceRound" &&
+            !action.pathname.includes("/RunningRoundIntro/")) {
+            return false;
+        }
+
+        if (summary.dataset.autoAdvanceStarted === "true") {
+            return true;
+        }
+
+        summary.dataset.autoAdvanceStarted = "true";
+        submitRoutedForm(form);
+        return true;
     };
 
     document.querySelectorAll("form").forEach(routeRoundForm);
@@ -160,6 +196,21 @@ const configureGameRoundIntroRoutes = () => {
 
     document.addEventListener("click", event => {
         const target = event.target instanceof Element ? event.target : null;
+
+        if (target?.closest("[data-confirm-force-advance-round]")) {
+            const form = document.getElementById("force-advance-round-form");
+            if (!(form instanceof HTMLFormElement)) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            document.getElementById("force-advance-round-dialog")?.close();
+            form.action = `${runningIntroBase}?handler=ForceAdvance`;
+            HTMLFormElement.prototype.submit.call(form);
+            return;
+        }
+
         const submitter = target?.closest("button, input[type='submit']");
         if (!submitter?.form) {
             return;
@@ -176,8 +227,13 @@ const configureGameRoundIntroRoutes = () => {
         routeRoundForm(event.target);
     }, true);
 
+    if (advanceEmptyRoundSummary()) {
+        return;
+    }
+
     const observer = new MutationObserver(() => {
         document.querySelectorAll("form").forEach(routeRoundForm);
+        advanceEmptyRoundSummary();
     });
     observer.observe(document.body, { childList: true, subtree: true });
 };
