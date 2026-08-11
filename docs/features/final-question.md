@@ -56,11 +56,15 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 - Locking wagers releases the final question to participating player devices.
 - During answering, the host sees submission progress but not answer text.
 - For an inactive player who has not submitted an answer, the host can submit
-  `-` on the player's behalf.
+  `-` on that player's behalf.
 - Host-submitted wagers and answers are propagated to the affected player's
   page in real time, so the player interface reflects the submission as if the
   player had submitted it directly.
 - Locking answers starts a sequential presentation of player submissions. The host sees one player name and answer at a time, judges it as correct or incorrect, and then advances automatically to the next submission.
+- The host **Tools** menu remains available on the inter-round leaderboard and throughout final wagering, answering, and judging. In these limited states, **Choose random player**, **Next round**, and **Advance to final question** are hidden, while applicable tools such as answer history, answer key, join code, blocked-player management, and game settings remain available.
+- The final-question host panel uses the same viewport-width presentation as an active regular question.
+- Answer history and answer-key actions are exposed through **Tools** rather than duplicated as standalone buttons on the final-question page.
+- The game-settings dialog remains available during final wagering, answering, and judging.
 - The broadcast-facing game screen never reveals the configured correct answer. The host can open a separate live answer-key tab on another display; it follows regular, wager, and final questions automatically.
 - The game finishes only after every participating answer is judged, then shows the authoritative final standings.
 - Players excluded by the negative-score setting remain connected as spectators.
