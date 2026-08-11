@@ -222,6 +222,11 @@
     <script src="~/js/portal-footer.js" asp-append-version="true"></script>
     <script src="~/js/discord-settings-dialog.js" asp-append-version="true"></script>
     <script src="~/js/player-admission-menu.js" asp-append-version="true"></script>
+    <script src="~/js/quiz-description-editor-links.js"
+            asp-append-version="true"
+            data-edit-label="@Localizer["Button_Edit"]"
+            data-round-label="@Localizer["Label_Round"]"
+            data-category-label="@Localizer["Label_Category"]"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
