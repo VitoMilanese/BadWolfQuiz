@@ -27,6 +27,10 @@ public sealed class ContentBlockInputModel
     public string? FileContentType { get; set; }
 
     public string? FileName { get; set; }
-    
+
     public bool IsAnswerBlock { get; set; }
+
+    public string? StoredFileHandler { get; set; }
+
+    public string? StoredAudioHandler { get; set; }
 }
