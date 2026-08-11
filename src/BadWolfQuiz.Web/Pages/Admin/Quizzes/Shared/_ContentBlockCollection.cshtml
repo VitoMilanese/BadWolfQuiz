@@ -3,7 +3,10 @@
 @inject IStringLocalizer<SharedResource> localizer
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockCollectionViewModel
 @{
-    var allowed = Model.AllowedBlockTypes;
+    var allowed = Model.AllowedBlockTypes ??
+        (Model.FieldPrefix == "Input.Blocks"
+            ? new[] { ContentBlockType.Text, ContentBlockType.Image }
+            : null);
     bool CanAdd(ContentBlockType type) => allowed is null || allowed.Contains(type);
 }
 
