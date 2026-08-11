@@ -59,12 +59,14 @@
             CurrentHost.RequiredId);
     }
 
-    var showFinalQuestionTools =
-        finalQuestionGame?.Session.FinalQuestion is not null &&
-        finalQuestionGame.Session.Status is
-            BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalWagering or
-            BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
-            BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging;
+    var showLimitedGameTools = finalQuestionGame is not null &&
+        ((finalQuestionGame.Session.FinalQuestion is not null &&
+          finalQuestionGame.Session.Status is
+              BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalWagering or
+              BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
+              BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging) ||
+         (finalQuestionGame.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running &&
+          finalQuestionGame.Session.IsCurrentRoundComplete));
 }
 
 <!DOCTYPE html>
@@ -101,7 +103,7 @@
 
         <div class="topbar-page-context">
             @await RenderSectionAsync("HeaderContext", required: false)
-            @if (showFinalQuestionTools && finalQuestionGame is not null)
+            @if (showLimitedGameTools && finalQuestionGame is not null)
             {
                 <details class="action-menu board-action-menu">
                     <summary class="button button-secondary action-menu-trigger">
