@@ -118,4 +118,44 @@ if (window.location.pathname.includes("/Admin/Games/Lobby/")) {
     if (gameId && startButton) {
         startButton.formAction = `/Admin/Games/RoundIntro/${encodeURIComponent(gameId)}?handler=Prepare`;
     }
+
+    if (gameId) {
+        document.querySelectorAll("form").forEach(form => {
+            if (!form.action) {
+                return;
+            }
+
+            const action = new URL(form.action, window.location.origin);
+            if (action.searchParams.get("handler") !== "AdvanceRound") {
+                return;
+            }
+
+            form.addEventListener("submit", async event => {
+                event.preventDefault();
+
+                const submitter = event.submitter;
+                if (submitter) {
+                    submitter.disabled = true;
+                }
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        body: new FormData(form),
+                        credentials: "same-origin",
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Round advance failed.");
+                    }
+
+                    window.location.assign(
+                        `/Admin/Games/RunningRoundIntro/${encodeURIComponent(gameId)}`);
+                } catch {
+                    form.submit();
+                }
+            });
+        });
+    }
 }
