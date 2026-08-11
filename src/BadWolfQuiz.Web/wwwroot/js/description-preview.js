@@ -8,8 +8,80 @@
 
     if (!trigger || !modal || !title || !content || !section) return;
 
+    modal.classList.add("description-preview-modal");
+
+    const style = document.createElement("style");
+    style.textContent = `
+        .description-preview-modal .question-preview-title {
+            margin: 0 0 clamp(20px, 3vh, 36px);
+            font-size: clamp(2.4rem, 6vw, 6.5rem);
+            line-height: 1;
+            letter-spacing: 0.06em;
+            font-weight: 950;
+        }
+    `;
+    document.head.appendChild(style);
+
     const value = (card, property) =>
         card.querySelector(`[name$=".${property}"]`)?.value?.trim() ?? "";
+
+    const revokeTemporaryImageUrl = preview => {
+        const objectUrl = preview?.dataset.objectUrl;
+        if (!objectUrl) return;
+        URL.revokeObjectURL(objectUrl);
+        delete preview.dataset.objectUrl;
+    };
+
+    const updateImageEditorPreview = input => {
+        const editor = input.closest(".image-block-editor");
+        const preview = editor?.querySelector(".unified-file-preview");
+        const image = editor?.querySelector(".unified-image-preview-element");
+        const fileLabel = editor?.querySelector(".file-preview-label");
+        const fileName = editor?.querySelector(".file-preview-name");
+        const removeFile = editor?.querySelector(".remove-file-value");
+        const removeButton = editor?.querySelector(".remove-stored-file-button");
+        const cancelButton = editor?.querySelector(".cancel-file-change-button");
+        const file = input.files?.[0];
+
+        if (!editor || !preview || !image) return;
+
+        revokeTemporaryImageUrl(preview);
+
+        if (!file) {
+            if (preview.dataset.hasOriginal === "true") {
+                image.src = preview.dataset.originalSrc ?? "";
+                image.alt = preview.dataset.originalName ?? "";
+                if (fileLabel) fileLabel.textContent = preview.dataset.originalLabel ?? "";
+                if (fileName) fileName.textContent = preview.dataset.originalName ?? "";
+                preview.hidden = false;
+                if (removeButton) removeButton.hidden = false;
+            } else {
+                image.removeAttribute("src");
+                image.alt = "";
+                preview.hidden = true;
+                if (removeButton) removeButton.hidden = true;
+            }
+            if (cancelButton) cancelButton.style.setProperty("display", "none", "important");
+            return;
+        }
+
+        const objectUrl = URL.createObjectURL(file);
+        preview.dataset.objectUrl = objectUrl;
+        image.src = objectUrl;
+        image.alt = file.name;
+        preview.hidden = false;
+        if (fileLabel) fileLabel.textContent = preview.dataset.pendingLabel ?? "";
+        if (fileName) fileName.textContent = file.name;
+        if (removeFile) removeFile.value = "false";
+        if (removeButton) removeButton.hidden = true;
+        if (cancelButton) cancelButton.style.setProperty("display", "inline-flex", "important");
+    };
+
+    document.addEventListener("change", event => {
+        if (event.target.matches(".image-block-editor .uploaded-file-input")) {
+            updateImageEditorPreview(event.target);
+        }
+    });
 
     const caption = (container, text) => {
         if (!text) return;
@@ -156,4 +228,8 @@
             close();
         }
     }, true);
+
+    window.addEventListener("beforeunload", () => {
+        section.querySelectorAll(".unified-file-preview").forEach(revokeTemporaryImageUrl);
+    });
 })();
