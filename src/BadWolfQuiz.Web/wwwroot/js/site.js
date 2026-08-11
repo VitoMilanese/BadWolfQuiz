@@ -111,31 +111,66 @@ document.addEventListener("keydown", event => {
     }
 });
 
-const gameBoard = document.querySelector(".host-game-board[data-game-id]");
-const pathGameId = window.location.pathname.split("/").filter(Boolean).at(-1);
-const gameId = gameBoard?.dataset.gameId || pathGameId;
+const configureGameRoundIntroRoutes = () => {
+    const gameBoard = document.querySelector(".host-game-board[data-game-id]");
+    const pathGameId = window.location.pathname.split("/").filter(Boolean).at(-1);
+    const gameId = gameBoard?.dataset.gameId || pathGameId;
 
-if (gameId) {
+    if (!gameId || !window.location.pathname.includes("/Admin/Games/Lobby/")) {
+        return;
+    }
+
     const encodedGameId = encodeURIComponent(gameId);
     const startButton = document.querySelector('.lobby-start-button[form="start-game-form"]');
-
     if (startButton) {
         startButton.formAction = `/Admin/Games/RoundIntro/${encodedGameId}?handler=Prepare`;
     }
 
-    const forceAdvanceForm = document.getElementById("force-advance-round-form");
-    if (forceAdvanceForm) {
-        forceAdvanceForm.action = `/Admin/Games/RunningRoundIntro/${encodedGameId}?handler=ForceAdvance`;
-    }
-
-    document.querySelectorAll("form").forEach(form => {
-        if (!form.action) {
+    const routeRoundForm = form => {
+        if (!(form instanceof HTMLFormElement) || !form.action) {
             return;
         }
 
         const action = new URL(form.action, window.location.origin);
-        if (action.searchParams.get("handler") === "AdvanceRound") {
+        const handler = action.searchParams.get("handler");
+
+        if (form.id === "force-advance-round-form" || handler === "ForceAdvanceRound") {
+            form.action = `/Admin/Games/RunningRoundIntro/${encodedGameId}?handler=ForceAdvance`;
+            return;
+        }
+
+        if (handler === "AdvanceRound") {
             form.action = `/Admin/Games/RunningRoundIntro/${encodedGameId}?handler=Advance`;
         }
+    };
+
+    document.querySelectorAll("form").forEach(routeRoundForm);
+
+    document.addEventListener("click", event => {
+        const submitter = event.target.closest?.("button, input[type='submit']");
+        if (!submitter?.form) {
+            return;
+        }
+
+        routeRoundForm(submitter.form);
+        const action = new URL(submitter.form.action, window.location.origin);
+        if (action.pathname.includes("/Admin/Games/RunningRoundIntro/")) {
+            submitter.formAction = submitter.form.action;
+        }
+    }, true);
+
+    document.addEventListener("submit", event => {
+        routeRoundForm(event.target);
+    }, true);
+
+    const observer = new MutationObserver(() => {
+        document.querySelectorAll("form").forEach(routeRoundForm);
     });
+    observer.observe(document.body, { childList: true, subtree: true });
+};
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", configureGameRoundIntroRoutes, { once: true });
+} else {
+    configureGameRoundIntroRoutes();
 }
