@@ -110,3 +110,22 @@ document.addEventListener("keydown", event => {
         languageButton?.setAttribute("aria-expanded", "false");
     }
 });
+
+if (window.location.pathname.includes("/Admin/Games/Lobby/")) {
+    const gameId = window.location.pathname.split("/").filter(Boolean).at(-1);
+
+    if (gameId) {
+        document.querySelectorAll("form").forEach(form => {
+            if (!form.action) {
+                return;
+            }
+
+            const action = new URL(form.action, window.location.origin);
+            if (action.searchParams.get("handler") !== "Start") {
+                return;
+            }
+
+            form.action = `/Admin/Games/RoundIntro/${encodeURIComponent(gameId)}?handler=Prepare`;
+        });
+    }
+}
