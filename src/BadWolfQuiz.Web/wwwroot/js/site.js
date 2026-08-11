@@ -147,7 +147,13 @@ const configureGameRoundIntroRoutes = () => {
     document.querySelectorAll("form").forEach(routeRoundForm);
 
     document.addEventListener("click", event => {
-        const submitter = event.target.closest?.("button, input[type='submit']");
+        const target = event.target instanceof Element ? event.target : null;
+        if (target?.closest("[data-confirm-force-advance-round]")) {
+            routeRoundForm(document.getElementById("force-advance-round-form"));
+            return;
+        }
+
+        const submitter = target?.closest("button, input[type='submit']");
         if (!submitter?.form) {
             return;
         }
