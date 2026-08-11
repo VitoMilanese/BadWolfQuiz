@@ -39,11 +39,19 @@
            asp-route-selectedRoundId="@Model.Input.RoundId">
             @Localizer["Button_Back"]
         </a>
+        <button class="button button-secondary"
+                type="button"
+                data-open-description-preview
+                data-preview-title="@Model.EntityTitle">
+            @Localizer["Button_Preview"]
+        </button>
         <button class="button button-primary" type="submit">
             @Localizer["Button_Save"]
         </button>
     </div>
 </form>
+
+<partial name="Shared/_QuestionPreviewModal" />
 
 @section Scripts {
     <script src="~/js/image-clipboard-upload.js" asp-append-version="true"></script>
@@ -176,6 +184,8 @@
 
             document.addEventListener("keydown", event => {
                 if (event.key !== "Escape" || !backLink) return;
+                const previewModal = document.getElementById("question-preview-modal");
+                if (previewModal && !previewModal.hidden) return;
                 event.preventDefault();
                 window.location.href = backLink.href;
             });
@@ -183,4 +193,5 @@
             reindex();
         })();
     </script>
+    <script src="~/js/description-preview.js" asp-append-version="true"></script>
 }
