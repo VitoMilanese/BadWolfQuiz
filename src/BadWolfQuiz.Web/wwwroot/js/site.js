@@ -111,60 +111,31 @@ document.addEventListener("keydown", event => {
     }
 });
 
-if (window.location.pathname.includes("/Admin/Games/Lobby/")) {
-    const gameId = window.location.pathname.split("/").filter(Boolean).at(-1);
+const gameBoard = document.querySelector(".host-game-board[data-game-id]");
+const pathGameId = window.location.pathname.split("/").filter(Boolean).at(-1);
+const gameId = gameBoard?.dataset.gameId || pathGameId;
+
+if (gameId) {
+    const encodedGameId = encodeURIComponent(gameId);
     const startButton = document.querySelector('.lobby-start-button[form="start-game-form"]');
 
-    if (gameId && startButton) {
-        startButton.formAction = `/Admin/Games/RoundIntro/${encodeURIComponent(gameId)}?handler=Prepare`;
+    if (startButton) {
+        startButton.formAction = `/Admin/Games/RoundIntro/${encodedGameId}?handler=Prepare`;
     }
 
-    if (gameId) {
-        document.addEventListener("submit", async event => {
-            const form = event.target;
-            if (!(form instanceof HTMLFormElement)) {
-                return;
-            }
-
-            const submitter = event.submitter;
-            const targetUrl = new URL(
-                submitter?.formAction || form.action || window.location.href,
-                window.location.origin);
-            const handler = targetUrl.searchParams.get("handler");
-            const isAdvance = handler === "AdvanceRound";
-            const isForceAdvanceWithoutPlayers =
-                handler === "ForceAdvanceRound" &&
-                document.querySelectorAll("#board-player-list > li").length === 0;
-
-            if (!isAdvance && !isForceAdvanceWithoutPlayers) {
-                return;
-            }
-
-            event.preventDefault();
-            if (submitter) {
-                submitter.disabled = true;
-            }
-
-            try {
-                const response = await fetch(targetUrl, {
-                    method: "POST",
-                    body: new FormData(form),
-                    credentials: "same-origin",
-                    headers: { "X-Requested-With": "XMLHttpRequest" }
-                });
-
-                if (!response.ok) {
-                    throw new Error("Round transition failed.");
-                }
-
-                window.location.assign(
-                    `/Admin/Games/RunningRoundIntro/${encodeURIComponent(gameId)}`);
-            } catch {
-                if (submitter) {
-                    submitter.disabled = false;
-                }
-                form.submit();
-            }
-        }, true);
+    const forceAdvanceForm = document.getElementById("force-advance-round-form");
+    if (forceAdvanceForm) {
+        forceAdvanceForm.action = `/Admin/Games/RunningRoundIntro/${encodedGameId}?handler=ForceAdvance`;
     }
+
+    document.querySelectorAll("form").forEach(form => {
+        if (!form.action) {
+            return;
+        }
+
+        const action = new URL(form.action, window.location.origin);
+        if (action.searchParams.get("handler") === "AdvanceRound") {
+            form.action = `/Admin/Games/RunningRoundIntro/${encodedGameId}?handler=Advance`;
+        }
+    });
 }
