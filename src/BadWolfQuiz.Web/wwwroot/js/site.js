@@ -113,19 +113,9 @@ document.addEventListener("keydown", event => {
 
 if (window.location.pathname.includes("/Admin/Games/Lobby/")) {
     const gameId = window.location.pathname.split("/").filter(Boolean).at(-1);
+    const startButton = document.querySelector('.lobby-start-button[form="start-game-form"]');
 
-    if (gameId) {
-        document.querySelectorAll("form").forEach(form => {
-            if (!form.action) {
-                return;
-            }
-
-            const action = new URL(form.action, window.location.origin);
-            if (action.searchParams.get("handler") !== "Start") {
-                return;
-            }
-
-            form.action = `/Admin/Games/RoundIntro/${encodeURIComponent(gameId)}?handler=Prepare`;
-        });
+    if (gameId && startButton) {
+        startButton.formAction = `/Admin/Games/RoundIntro/${encodeURIComponent(gameId)}?handler=Prepare`;
     }
 }
