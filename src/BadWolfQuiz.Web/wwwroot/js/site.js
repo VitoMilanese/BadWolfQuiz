@@ -182,18 +182,6 @@ const configureGameRoundIntroRoutes = () => {
 
     document.querySelectorAll("form").forEach(routeRoundForm);
 
-    const forceAdvanceRoundForm = document.getElementById("force-advance-round-form");
-    if (forceAdvanceRoundForm instanceof HTMLFormElement) {
-        const nativeSubmit = HTMLFormElement.prototype.submit;
-        Object.defineProperty(forceAdvanceRoundForm, "submit", {
-            configurable: true,
-            value: () => {
-                routeRoundForm(forceAdvanceRoundForm);
-                nativeSubmit.call(forceAdvanceRoundForm);
-            }
-        });
-    }
-
     document.addEventListener("click", event => {
         const target = event.target instanceof Element ? event.target : null;
 
@@ -203,12 +191,31 @@ const configureGameRoundIntroRoutes = () => {
                 return;
             }
 
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            document.getElementById("force-advance-round-dialog")?.close();
-            form.action = `${runningIntroBase}?handler=ForceAdvance`;
-            HTMLFormElement.prototype.submit.call(form);
-            return;
+            const hasPlayers = document.querySelector(
+                ".scoreboard-player[data-player-id]:not([data-host-card])") !== null;
+
+            if (!hasPlayers) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                document.getElementById("force-advance-round-dialog")?.close();
+
+                fetch(`${runningIntroBase}?handler=ForceAdvance`, {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(response.statusText);
+                        }
+                        window.location.assign(runningIntroBase);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        window.location.reload();
+                    });
+                return;
+            }
         }
 
         const submitter = target?.closest("button, input[type='submit']");
