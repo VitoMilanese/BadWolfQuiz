@@ -14,6 +14,10 @@ body.portal-layout {
     overscroll-behavior-y: contain;
 }
 
+.portal-layout > .page-shell:has(> .hero) {
+    padding-inline: max(34px, calc((100% - 1800px) / 2 + 34px));
+}
+
 .quiz-editor-toolbar .round-navigation {
     margin-left: auto;
 }
@@ -23,6 +27,10 @@ body.portal-layout {
 }
 
 @media (max-width: 900px) {
+    .portal-layout > .page-shell:has(> .hero) {
+        padding-inline: 20px;
+    }
+
     .quiz-editor-toolbar .round-navigation {
         width: 100%;
     }
