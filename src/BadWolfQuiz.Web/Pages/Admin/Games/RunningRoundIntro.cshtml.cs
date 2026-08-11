@@ -156,7 +156,7 @@ public sealed class RunningRoundIntroModel(
         {
             sessionRegistry.ForceCompleteCurrentRound(game.PublicCode);
 
-            if (!sessionRegistry.HasConnectedPlayer(game))
+            if (game.Session.Players.Count == 0)
             {
                 sessionRegistry.AdvanceToNextRound(game.PublicCode);
                 advancedImmediately = true;
