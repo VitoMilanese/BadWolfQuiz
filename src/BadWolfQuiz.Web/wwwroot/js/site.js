@@ -122,10 +122,25 @@ const configureGameRoundIntroRoutes = () => {
 
     const encodedGameId = encodeURIComponent(gameId);
     const runningIntroBase = `/Admin/Games/RunningRoundIntro/${encodedGameId}`;
+    const finalTransitionBase = `/Admin/Games/FinalQuestionTransition/${encodedGameId}`;
     const startButton = document.querySelector('.lobby-start-button[form="start-game-form"]');
     if (startButton) {
         startButton.formAction = `/Admin/Games/RoundIntro/${encodedGameId}?handler=Prepare`;
     }
+
+    const getFormHandler = form => {
+        if (!(form instanceof HTMLFormElement) || !form.action) {
+            return null;
+        }
+
+        return new URL(form.action, window.location.origin).searchParams.get("handler");
+    };
+
+    const openFinalTransition = force => {
+        window.location.assign(force
+            ? `${finalTransitionBase}?force=true`
+            : finalTransitionBase);
+    };
 
     const routeRoundForm = form => {
         if (!(form instanceof HTMLFormElement) || !form.action) {
@@ -182,6 +197,14 @@ const configureGameRoundIntroRoutes = () => {
 
     document.querySelectorAll("form").forEach(routeRoundForm);
 
+    const forceAdvanceFinalForm = document.getElementById("force-advance-final-form");
+    if (forceAdvanceFinalForm instanceof HTMLFormElement) {
+        Object.defineProperty(forceAdvanceFinalForm, "submit", {
+            configurable: true,
+            value: () => openFinalTransition(true)
+        });
+    }
+
     document.addEventListener("click", event => {
         const target = event.target instanceof Element ? event.target : null;
 
@@ -231,7 +254,17 @@ const configureGameRoundIntroRoutes = () => {
     }, true);
 
     document.addEventListener("submit", event => {
-        routeRoundForm(event.target);
+        const form = event.target;
+        const handler = getFormHandler(form);
+
+        if (handler === "StartFinalQuestion" || handler === "ForceAdvanceToFinalQuestion") {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            openFinalTransition(handler === "ForceAdvanceToFinalQuestion");
+            return;
+        }
+
+        routeRoundForm(form);
     }, true);
 
     if (advanceEmptyRoundSummary()) {
