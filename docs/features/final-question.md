@@ -12,18 +12,21 @@ Final content is stored separately from round questions and copied into the immu
 
 ## Runtime flow
 
-1. The host starts the final phase after the last board round is complete.
-2. Every participating player submits and confirms a private wager. If an inactive
+1. After the last board round is complete, the host enters a localized **Final question** transition page.
+2. The transition has no manual controls and automatically continues after 3 seconds.
+3. Every participating player submits and confirms a private wager. If an inactive
    player does not submit a wager, the host can submit the minimum allowed wager
    on that player's behalf.
-3. The Engine locks wagering only after every wager is present.
-4. The question is released and players submit private answers. If an inactive
+4. The Engine locks wagering only after every wager is present.
+5. The question is released and players submit private answers. If an inactive
    player does not submit an answer, the host can submit `-` on that player's
    behalf.
-5. The Engine locks answering only after every answer is present.
-6. The host judges each answer.
-7. The wager is added for a correct answer and subtracted for an incorrect answer.
-8. After every submission is judged, the game is completed and final standings are available.
+6. The Engine locks answering only after every answer is present.
+7. The host judges each answer.
+8. The wager is added for a correct answer and subtracted for an incorrect answer.
+9. After every submission is judged, the game is completed and final standings are available.
+
+The same 3-second transition is used when the host forces advancement directly to the final question. A quiz without a final question never shows this transition.
 
 ## Initial eligibility and wager rule
 
@@ -42,10 +45,11 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 ## Web presentation
 
 - The last round summary offers the final phase only when the immutable quiz snapshot contains complete final question and answer content.
+- Normal and forced entry into the final phase first show the localized, automatic 3-second **Final question** transition.
 - When a final question is available, the host action menu provides a shortcut
   to skip the remaining regular questions and advance directly to the final
   phase. The host must confirm the action before the remaining questions are
-  force-resolved and final wagering begins.
+  force-resolved and the transition begins.
 - During wagering, the host sees submission progress but not the wager amounts.
 - For an inactive player who has not submitted a wager, the host can submit the
   minimum allowed wager on the player's behalf.
