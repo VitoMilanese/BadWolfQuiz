@@ -1,0 +1,143 @@
+@page "{id:guid}"
+@model BadWolfQuiz.Web.Pages.Admin.Games.RunningRoundIntroModel
+@using BadWolfQuiz.Game.Definitions
+@{
+    ViewData["Title"] = Model.Heading;
+    ViewData["HidePortalFooter"] = true;
+}
+
+<div class="game-intro-page">
+    <div class="game-intro-group @(Model.Blocks.Count == 0 ? "game-intro-group-empty" : null)">
+        <h1 class="game-intro-heading">@Model.Heading</h1>
+
+        @if (Model.Blocks.Count > 0)
+        {
+            <div class="game-intro-blocks">
+                @foreach (var block in Model.Blocks)
+                {
+                    if (block.Kind == ContentBlockKind.Text && !string.IsNullOrWhiteSpace(block.TextContent))
+                    {
+                        <div class="game-content-block game-content-text game-intro-text">@block.TextContent</div>
+                    }
+                    else if (block.Kind == ContentBlockKind.Image &&
+                             (block.FileData is { Length: > 0 } || !string.IsNullOrWhiteSpace(block.MediaPath)))
+                    {
+                        <figure class="game-content-block game-intro-image-block">
+                            @if (!string.IsNullOrWhiteSpace(block.TopCaption))
+                            {
+                                <figcaption class="game-intro-caption">@block.TopCaption</figcaption>
+                            }
+                            <img class="game-intro-image"
+                                 src="@(block.FileData is { Length: > 0 }
+                                     ? Url.Page("RunningRoundIntro", "ContentBlock", new { id = Model.GameId, category = Model.CategoryIndex, sourceContentBlockId = block.SourceContentBlockId })
+                                     : block.MediaPath)"
+                                 alt="@(block.FileName ?? Model.Heading)" />
+                            @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
+                            {
+                                <figcaption class="game-intro-caption">@block.BottomCaption</figcaption>
+                            }
+                        </figure>
+                    }
+                }
+            </div>
+        }
+    </div>
+
+    <div class="game-intro-actions">
+        @if (Model.IsFinalCategory || Model.CategoryCount == 0)
+        {
+            <a class="button button-primary"
+               asp-page="Lobby"
+               asp-route-id="@Model.GameId">
+                @Model.StartGameLabel
+            </a>
+        }
+        else
+        {
+            <a class="button button-secondary"
+               asp-page="Lobby"
+               asp-route-id="@Model.GameId">
+                @Model.SkipLabel
+            </a>
+
+            <a class="button button-primary"
+               asp-page="RunningRoundIntro"
+               asp-route-id="@Model.GameId"
+               asp-route-category="@Model.NextCategoryIndex">
+                @Model.NextLabel
+            </a>
+        }
+    </div>
+</div>
+
+<style>
+    .game-intro-page {
+        min-height: calc(100vh - var(--topbar-height, 0px));
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        gap: clamp(24px, 4vh, 48px);
+        padding: clamp(24px, 5vw, 72px);
+    }
+
+    .game-intro-group {
+        align-self: center;
+        justify-self: stretch;
+        display: grid;
+        justify-items: center;
+        gap: clamp(20px, 3vh, 36px);
+        width: min(1100px, 100%);
+        margin-inline: auto;
+    }
+
+    .game-intro-heading {
+        margin: 0;
+        text-align: center;
+        font-size: clamp(2.8rem, 7vw, 7rem);
+        line-height: 0.95;
+        letter-spacing: 0.04em;
+        font-weight: 950;
+    }
+
+    .game-intro-blocks {
+        width: min(980px, 100%);
+        display: grid;
+        justify-items: center;
+        gap: clamp(18px, 2.5vh, 30px);
+    }
+
+    .game-intro-text {
+        width: 100%;
+        text-align: center;
+        white-space: pre-wrap;
+        font-size: clamp(1.2rem, 2.2vw, 2rem);
+    }
+
+    .game-intro-image-block {
+        margin: 0;
+        display: grid;
+        justify-items: center;
+        gap: 10px;
+        max-width: 100%;
+    }
+
+    .game-intro-image {
+        display: block;
+        max-width: min(900px, 100%);
+        max-height: 52vh;
+        object-fit: contain;
+        border-radius: 12px;
+    }
+
+    .game-intro-caption {
+        text-align: center;
+        font-size: clamp(1rem, 1.6vw, 1.35rem);
+    }
+
+    .game-intro-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+</style>
