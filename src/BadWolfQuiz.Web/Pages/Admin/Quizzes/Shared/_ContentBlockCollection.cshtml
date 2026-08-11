@@ -1,6 +1,11 @@
 ﻿@using Microsoft.Extensions.Localization
+@using BadWolfQuiz.Web.Models
 @inject IStringLocalizer<SharedResource> localizer
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockCollectionViewModel
+@{
+    var allowed = Model.AllowedBlockTypes;
+    bool CanAdd(ContentBlockType type) => allowed is null || allowed.Contains(type);
+}
 
 <section id="@Model.CollectionId"
          class="content-panel content-block-section"
@@ -16,29 +21,41 @@
             </button>
 
             <div class="content-block-type-menu" hidden>
-                <button type="button"
-                        class="content-block-type-option"
-                        data-block-type="Text">
-                    @localizer["ContentBlockType_Text"]
-                </button>
+                @if (CanAdd(ContentBlockType.Text))
+                {
+                    <button type="button"
+                            class="content-block-type-option"
+                            data-block-type="Text">
+                        @localizer["ContentBlockType_Text"]
+                    </button>
+                }
 
-                <button type="button"
-                        class="content-block-type-option"
-                        data-block-type="Image">
-                    @localizer["ContentBlockType_Image"]
-                </button>
+                @if (CanAdd(ContentBlockType.Image))
+                {
+                    <button type="button"
+                            class="content-block-type-option"
+                            data-block-type="Image">
+                        @localizer["ContentBlockType_Image"]
+                    </button>
+                }
 
-                <button type="button"
-                        class="content-block-type-option"
-                        data-block-type="Audio">
-                    @localizer["ContentBlockType_Audio"]
-                </button>
+                @if (CanAdd(ContentBlockType.Audio))
+                {
+                    <button type="button"
+                            class="content-block-type-option"
+                            data-block-type="Audio">
+                        @localizer["ContentBlockType_Audio"]
+                    </button>
+                }
 
-                <button type="button"
-                        class="content-block-type-option"
-                        data-block-type="YouTube">
-                    @localizer["ContentBlockType_YouTube"]
-                </button>
+                @if (CanAdd(ContentBlockType.YouTube))
+                {
+                    <button type="button"
+                            class="content-block-type-option"
+                            data-block-type="YouTube">
+                        @localizer["ContentBlockType_YouTube"]
+                    </button>
+                }
             </div>
         </div>
     </div>
