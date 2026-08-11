@@ -1,10 +1,12 @@
 using System.Globalization;
 using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
+using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Localization;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Games;
@@ -12,6 +14,9 @@ namespace BadWolfQuiz.Web.Pages.Admin.Games;
 public sealed class RunningRoundIntroModel(
     GameSessionRegistry sessionRegistry,
     CurrentHost currentHost,
+    DiscordConnectionRepository discordRepository,
+    DiscordMuteCoordinator discordMuteCoordinator,
+    IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     public Guid GameId { get; private set; }
@@ -108,6 +113,69 @@ public sealed class RunningRoundIntroModel(
         {
             EnableRangeProcessing = true
         };
+    }
+
+    public async Task<IActionResult> OnPostAdvanceAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = FindOwned(id);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.AdvanceToNextRound(game.PublicCode);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] = localizer["GameBoard_AdvanceRoundRejected"].Value;
+            return RedirectToPage("Lobby", new { id });
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostForceAdvanceAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = FindOwned(id);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var advancedImmediately = false;
+
+        try
+        {
+            sessionRegistry.ForceCompleteCurrentRound(game.PublicCode);
+
+            if (game.Session.Players.Count == 0)
+            {
+                sessionRegistry.AdvanceToNextRound(game.PublicCode);
+                advancedImmediately = true;
+            }
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] = localizer["GameBoard_AdvanceRoundRejected"].Value;
+            return RedirectToPage("Lobby", new { id });
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+
+        return advancedImmediately
+            ? RedirectToPage(new { id })
+            : RedirectToPage("Lobby", new { id });
     }
 
     private void LoadIntro(
@@ -211,6 +279,54 @@ public sealed class RunningRoundIntroModel(
 
         var next = title[label.Length];
         return char.IsWhiteSpace(next) || char.IsPunctuation(next) || char.IsDigit(next);
+    }
+
+    private Task BroadcastTimerAsync(
+        GameSessionRegistration game,
+        CancellationToken cancellationToken) =>
+        gameHub.Clients
+            .Group(GameHub.GroupName(game.PublicCode))
+            .SendAsync(
+                "TimerStateChanged",
+                GameHub.CreateTimerUpdate(game),
+                cancellationToken);
+
+    private Task BroadcastBuzzerAsync(
+        GameSessionRegistration game,
+        CancellationToken cancellationToken)
+    {
+        var update = GameHub.CreateBuzzerUpdate(game);
+        return update is null
+            ? Task.CompletedTask
+            : gameHub.Clients
+                .Group(GameHub.GroupName(game.PublicCode))
+                .SendAsync("BuzzerStateChanged", update, cancellationToken);
+    }
+
+    private Task BroadcastPlayersAsync(
+        GameSessionRegistration game,
+        CancellationToken cancellationToken) =>
+        gameHub.Clients
+            .Group(GameHub.GroupName(game.PublicCode))
+            .SendAsync(
+                "PlayersChanged",
+                GameHub.CreatePlayersUpdate(sessionRegistry, game),
+                cancellationToken);
+
+    private async Task StopAutomaticDiscordMuteAsync(
+        Guid gameId,
+        CancellationToken cancellationToken)
+    {
+        var connection = await discordRepository.GetAsync(cancellationToken);
+        if (connection is not null)
+        {
+            await discordMuteCoordinator.SetAutomaticAsync(
+                gameId,
+                currentHost.RequiredId,
+                connection,
+                false,
+                cancellationToken);
+        }
     }
 
     private GameSessionRegistration? FindOwned(Guid id) =>
