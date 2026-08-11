@@ -1,6 +1,4 @@
 (() => {
-    const script = document.currentScript;
-
     const language = document.documentElement.lang?.toLowerCase() || "en";
     const labels = language.startsWith("uk")
         ? {
@@ -8,8 +6,7 @@
             renameRound: "Перейменувати раунд",
             editRoundDescription: "Змінити опис",
             deleteRound: "Видалити раунд",
-            renameCategory: "Перейменувати категорію",
-            editCategoryDescription: "Редагувати опис"
+            editCategoryDescription: "Редагувати опис категорії"
         }
         : language.startsWith("it")
             ? {
@@ -17,16 +14,14 @@
                 renameRound: "Rinomina round",
                 editRoundDescription: "Modifica descrizione",
                 deleteRound: "Elimina round",
-                renameCategory: "Rinomina categoria",
-                editCategoryDescription: "Modifica descrizione"
+                editCategoryDescription: "Modifica descrizione categoria"
             }
             : {
                 editRound: "Edit round",
                 renameRound: "Rename round",
                 editRoundDescription: "Edit description",
                 deleteRound: "Delete round",
-                renameCategory: "Rename category",
-                editCategoryDescription: "Edit description"
+                editCategoryDescription: "Edit category description"
             };
 
     let openMenu = null;
@@ -56,6 +51,17 @@
                 justify-content: flex-start;
                 text-align: left;
                 white-space: nowrap;
+            }
+
+            .category-description-link {
+                color: inherit;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            .category-description-link:hover .category-title,
+            .category-description-link:focus-visible .category-title {
+                text-decoration: underline;
             }
         `;
         document.head.appendChild(style);
@@ -161,49 +167,21 @@
         });
     }
 
-    function triggerOriginalCategoryRename(renameButton) {
-        renameButton.dataset.allowOriginalRename = "true";
-        renameButton.dispatchEvent(new MouseEvent("click", {
-            bubbles: true,
-            cancelable: true,
-            view: window
-        }));
-        delete renameButton.dataset.allowOriginalRename;
-    }
+    function initializeCategoryDescriptionLinks() {
+        ensureStyles();
 
-    function initializeCategoryMenus() {
         document.querySelectorAll(".quiz-board-category-column[data-category-id]").forEach(column => {
             const categoryId = column.dataset.categoryId;
-            const actions = column.querySelector(".category-actions");
-            const renameButton = actions?.querySelector(".js-category-rename");
-            if (!categoryId || !actions || !renameButton || renameButton.dataset.categoryEditMenu !== undefined) return;
+            const title = column.querySelector(".category-cell > .category-title");
+            if (!categoryId || !title || title.closest(".category-description-link")) return;
 
-            actions.querySelector("[data-edit-category-description]")?.remove();
-            renameButton.dataset.categoryEditMenu = "";
-            renameButton.title = labels.renameCategory;
-            renameButton.setAttribute("aria-label", labels.renameCategory);
-
-            renameButton.addEventListener("click", event => {
-                if (renameButton.dataset.allowOriginalRename === "true") {
-                    return;
-                }
-
-                event.preventDefault();
-                event.stopImmediatePropagation();
-
-                openContextMenu(renameButton, [
-                    {
-                        label: labels.renameCategory,
-                        action: () => triggerOriginalCategoryRename(renameButton)
-                    },
-                    {
-                        label: labels.editCategoryDescription,
-                        action: () => {
-                            window.location.href = `/Admin/Quizzes/DescriptionEditor?categoryId=${encodeURIComponent(categoryId)}`;
-                        }
-                    }
-                ]);
-            }, true);
+            const link = document.createElement("a");
+            link.href = `/Admin/Quizzes/DescriptionEditor?categoryId=${encodeURIComponent(categoryId)}`;
+            link.className = "category-description-link";
+            link.title = labels.editCategoryDescription;
+            link.setAttribute("aria-label", `${labels.editCategoryDescription}: ${title.textContent?.trim() || ""}`);
+            title.parentNode.insertBefore(link, title);
+            link.appendChild(title);
         });
     }
 
@@ -212,7 +190,7 @@
         if (!roundIdInput) return;
 
         initializeRoundMenu(roundIdInput.value);
-        initializeCategoryMenus();
+        initializeCategoryDescriptionLinks();
     }
 
     document.addEventListener("click", event => {
