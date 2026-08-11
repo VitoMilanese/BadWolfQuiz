@@ -60,8 +60,11 @@
     }
 
     var showFinalQuestionTools =
-        finalQuestionGame?.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running &&
-        finalQuestionGame.Session.FinalQuestion is not null;
+        finalQuestionGame?.Session.FinalQuestion is not null &&
+        finalQuestionGame.Session.Status is
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalWagering or
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging;
 }
 
 <!DOCTYPE html>
