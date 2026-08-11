@@ -4,6 +4,7 @@ using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 
@@ -42,6 +43,7 @@ public sealed class DescriptionEditorModel(
                 .AsNoTracking()
                 .Include(x => x.DescriptionBlocks)
                 .Include(x => x.Round)
+                    .ThenInclude(x => x.Quiz)
                 .SingleOrDefaultAsync(x => x.Id == categoryId.Value, cancellationToken);
 
             if (category is null)
@@ -62,7 +64,10 @@ public sealed class DescriptionEditorModel(
                 CategoryId = category.Id,
                 Blocks = category.DescriptionBlocks
                     .OrderBy(x => x.SortOrder)
-                    .Select(ToInputModel)
+                    .Select(x => ToInputModel(
+                        x,
+                        "CategoryDescriptionBlockFile",
+                        "CategoryDescriptionBlockAudio"))
                     .ToList()
             };
             EntityTitle = category.Title;
@@ -97,7 +102,10 @@ public sealed class DescriptionEditorModel(
             RoundId = round.Id,
             Blocks = round.DescriptionBlocks
                 .OrderBy(x => x.SortOrder)
-                .Select(ToInputModel)
+                .Select(x => ToInputModel(
+                    x,
+                    "RoundDescriptionBlockFile",
+                    "RoundDescriptionBlockAudio"))
                 .ToList()
         };
         EntityTitle = round.Title;
@@ -135,6 +143,10 @@ public sealed class DescriptionEditorModel(
             EntityTitle = category.Title;
             if (!await SyncBlocksAsync(category.DescriptionBlocks, cancellationToken))
             {
+                ApplyStoredHandlers(
+                    Input.Blocks,
+                    "CategoryDescriptionBlockFile",
+                    "CategoryDescriptionBlockAudio");
                 return Page();
             }
         }
@@ -154,6 +166,10 @@ public sealed class DescriptionEditorModel(
             EntityTitle = round.Title;
             if (!await SyncBlocksAsync(round.DescriptionBlocks, cancellationToken))
             {
+                ApplyStoredHandlers(
+                    Input.Blocks,
+                    "RoundDescriptionBlockFile",
+                    "RoundDescriptionBlockAudio");
                 return Page();
             }
         }
@@ -162,12 +178,68 @@ public sealed class DescriptionEditorModel(
         quiz.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
 
-        TempData["SuccessMessage"] = localizer["Success_Saved"].Value;
         return RedirectToPage(new
         {
             roundId = Input.CategoryId.HasValue ? (int?)null : Input.RoundId,
-            categoryId = Input.CategoryId
+            categoryId = Input.CategoryId,
+            saved = true
         });
+    }
+
+    public PartialViewResult OnGetContentBlock(
+        string fieldPrefix,
+        ContentBlockType blockType,
+        int index)
+    {
+        var model = new ContentBlockInputModel
+        {
+            BlockType = blockType,
+            SortOrder = index + 1
+        };
+
+        var viewData = new ViewDataDictionary<ContentBlockInputModel>(ViewData, model);
+        viewData.TemplateInfo.HtmlFieldPrefix = $"{fieldPrefix}[{index}]";
+
+        return new PartialViewResult
+        {
+            ViewName = "Shared/_ContentBlockCard",
+            ViewData = viewData
+        };
+    }
+
+    public Task<IActionResult> OnGetRoundDescriptionBlockFileAsync(int id) =>
+        GetStoredBlockFileAsync(db.RoundDescriptionContentBlocks, id, false);
+
+    public Task<IActionResult> OnGetRoundDescriptionBlockAudioAsync(int id) =>
+        GetStoredBlockFileAsync(db.RoundDescriptionContentBlocks, id, true);
+
+    public Task<IActionResult> OnGetCategoryDescriptionBlockFileAsync(int id) =>
+        GetStoredBlockFileAsync(db.CategoryDescriptionContentBlocks, id, false);
+
+    public Task<IActionResult> OnGetCategoryDescriptionBlockAudioAsync(int id) =>
+        GetStoredBlockFileAsync(db.CategoryDescriptionContentBlocks, id, true);
+
+    private async Task<IActionResult> GetStoredBlockFileAsync<TBlock>(
+        DbSet<TBlock> blocks,
+        int id,
+        bool inline)
+        where TBlock : ContentBlockBase
+    {
+        var block = await blocks
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == id);
+
+        if (block is null ||
+            block.FileData is null ||
+            block.FileData.Length == 0 ||
+            string.IsNullOrWhiteSpace(block.FileContentType))
+        {
+            return NotFound();
+        }
+
+        return inline
+            ? File(block.FileData, block.FileContentType)
+            : File(block.FileData, block.FileContentType, block.FileName);
     }
 
     private async Task<bool> SyncBlocksAsync<TBlock>(
@@ -244,7 +316,10 @@ public sealed class DescriptionEditorModel(
         return true;
     }
 
-    private static ContentBlockInputModel ToInputModel(ContentBlockBase block) => new()
+    private static ContentBlockInputModel ToInputModel(
+        ContentBlockBase block,
+        string fileHandler,
+        string audioHandler) => new()
     {
         Id = block.Id,
         SortOrder = block.SortOrder,
@@ -255,6 +330,20 @@ public sealed class DescriptionEditorModel(
         ExternalUrl = block.ExternalUrl,
         AudioOnly = block.AudioOnly,
         FileContentType = block.FileContentType,
-        FileName = block.FileName
+        FileName = block.FileName,
+        StoredFileHandler = fileHandler,
+        StoredAudioHandler = audioHandler
     };
+
+    private static void ApplyStoredHandlers(
+        IEnumerable<ContentBlockInputModel> blocks,
+        string fileHandler,
+        string audioHandler)
+    {
+        foreach (var block in blocks)
+        {
+            block.StoredFileHandler = fileHandler;
+            block.StoredAudioHandler = audioHandler;
+        }
+    }
 }
