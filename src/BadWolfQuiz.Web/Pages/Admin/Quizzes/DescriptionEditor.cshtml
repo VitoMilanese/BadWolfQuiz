@@ -1,0 +1,178 @@
+@page
+@model BadWolfQuiz.Web.Pages.Admin.Quizzes.DescriptionEditorModel
+@{
+    ViewData["Title"] = $"{Model.EntityTitle} — {Localizer["Label_Description"]}";
+
+    var blockCollection = new BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockCollectionViewModel
+    {
+        CollectionId = "description-blocks",
+        Title = Localizer["Label_Description"].Value,
+        FieldPrefix = "Input.Blocks",
+        Blocks = Model.Input.Blocks
+    };
+}
+
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">@Localizer["Label_Description"]</p>
+        <h1>@Model.EntityTitle</h1>
+    </div>
+</div>
+
+<form method="post"
+      enctype="multipart/form-data"
+      class="question-editor description-editor">
+    <input type="hidden" asp-for="Input.QuizId" />
+    <input type="hidden" asp-for="Input.RoundId" />
+    <input type="hidden" asp-for="Input.CategoryId" />
+
+    <partial name="Shared/_ContentBlockCollection"
+             model="blockCollection" />
+
+    <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+    <div class="editor-actions">
+        <a class="button button-secondary"
+           asp-page="Editor"
+           asp-route-id="@Model.Input.QuizId"
+           asp-route-selectedRoundId="@Model.Input.RoundId">
+            @Localizer["Button_Back"]
+        </a>
+        <button class="button button-primary" type="submit">
+            @Localizer["Button_Save"]
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/js/image-clipboard-upload.js" asp-append-version="true"></script>
+    <script>
+        (() => {
+            const section = document.getElementById("description-blocks");
+            if (!section) return;
+
+            const list = section.querySelector("[data-content-block-list]");
+            const addButton = section.querySelector(".content-block-add-button");
+            const typeMenu = section.querySelector(".content-block-type-menu");
+            const fieldPrefix = section.dataset.blockCollection;
+            let draggedCard = null;
+
+            const reindex = () => {
+                list.querySelectorAll(".content-block-card").forEach((card, index) => {
+                    card.querySelectorAll("[name]").forEach(input => {
+                        input.name = input.name.replace(
+                            /Input\.Blocks\[\d+\]/g,
+                            `Input.Blocks[${index}]`);
+                    });
+
+                    const sortOrder = card.querySelector('input[name$=".SortOrder"]');
+                    if (sortOrder) sortOrder.value = index + 1;
+                });
+            };
+
+            const wireStoredFileActions = root => {
+                root.querySelectorAll(".remove-stored-file-button").forEach(button => {
+                    if (button.dataset.descriptionWired === "true") return;
+                    button.dataset.descriptionWired = "true";
+                    button.addEventListener("click", () => {
+                        const card = button.closest(".content-block-card");
+                        const preview = button.closest(".unified-file-preview");
+                        const removeFile = card?.querySelector(".remove-file-value");
+                        const cancel = card?.querySelector(".cancel-file-change-button");
+                        if (removeFile) removeFile.value = "true";
+                        if (preview) preview.hidden = true;
+                        if (cancel) cancel.style.setProperty("display", "inline-flex", "important");
+                    });
+                });
+
+                root.querySelectorAll(".cancel-file-change-button").forEach(button => {
+                    if (button.dataset.descriptionWired === "true") return;
+                    button.dataset.descriptionWired = "true";
+                    button.addEventListener("click", () => {
+                        const card = button.closest(".content-block-card");
+                        const preview = card?.querySelector(".unified-file-preview");
+                        const removeFile = card?.querySelector(".remove-file-value");
+                        const uploadedFile = card?.querySelector(".uploaded-file-input");
+                        if (removeFile) removeFile.value = "false";
+                        if (uploadedFile) uploadedFile.value = "";
+                        if (preview?.dataset.hasOriginal === "true") preview.hidden = false;
+                        button.style.setProperty("display", "none", "important");
+                    });
+                });
+            };
+
+            const wireCard = card => {
+                const remove = card.querySelector(".content-block-remove-button");
+                remove?.addEventListener("click", () => {
+                    card.remove();
+                    reindex();
+                });
+                wireStoredFileActions(card);
+            };
+
+            const addContentBlock = async blockType => {
+                const index = list.querySelectorAll(".content-block-card").length;
+                const url = `${window.location.pathname}?handler=ContentBlock` +
+                    `&fieldPrefix=${encodeURIComponent(fieldPrefix)}` +
+                    `&blockType=${encodeURIComponent(blockType)}` +
+                    `&index=${index}`;
+                const response = await fetch(url);
+                if (!response.ok) return;
+
+                const template = document.createElement("template");
+                template.innerHTML = (await response.text()).trim();
+                const card = template.content.firstElementChild;
+                if (!card) return;
+                list.appendChild(card);
+                wireCard(card);
+                reindex();
+            };
+
+            addButton?.addEventListener("click", () => {
+                typeMenu.hidden = !typeMenu.hidden;
+            });
+
+            typeMenu?.querySelectorAll("[data-block-type]").forEach(option => {
+                option.addEventListener("click", async () => {
+                    typeMenu.hidden = true;
+                    await addContentBlock(option.dataset.blockType);
+                });
+            });
+
+            list.querySelectorAll(".content-block-card").forEach(wireCard);
+
+            list.addEventListener("dragstart", event => {
+                const handle = event.target.closest(".content-block-drag-handle");
+                if (!handle) return;
+                draggedCard = handle.closest(".content-block-card");
+                draggedCard?.classList.add("dragging");
+            });
+
+            list.addEventListener("dragover", event => {
+                if (!draggedCard) return;
+                event.preventDefault();
+                const target = event.target.closest(".content-block-card");
+                if (!target || target === draggedCard) return;
+                const rect = target.getBoundingClientRect();
+                const before = event.clientY < rect.top + rect.height / 2;
+                list.insertBefore(draggedCard, before ? target : target.nextSibling);
+            });
+
+            list.addEventListener("dragend", () => {
+                draggedCard?.classList.remove("dragging");
+                draggedCard = null;
+                reindex();
+            });
+
+            document.addEventListener("click", event => {
+                if (typeMenu && addButton &&
+                    !typeMenu.contains(event.target) &&
+                    !addButton.contains(event.target)) {
+                    typeMenu.hidden = true;
+                }
+            });
+
+            reindex();
+        })();
+    </script>
+}
