@@ -32,7 +32,8 @@
     <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
     <div class="editor-actions">
-        <a class="button button-secondary"
+        <a id="description-editor-back"
+           class="button button-secondary"
            asp-page="Editor"
            asp-route-id="@Model.Input.QuizId"
            asp-route-selectedRoundId="@Model.Input.RoundId">
@@ -49,6 +50,7 @@
     <script>
         (() => {
             const section = document.getElementById("description-blocks");
+            const backLink = document.getElementById("description-editor-back");
             if (!section) return;
 
             const list = section.querySelector("[data-content-block-list]");
@@ -170,6 +172,12 @@
                     !addButton.contains(event.target)) {
                     typeMenu.hidden = true;
                 }
+            });
+
+            document.addEventListener("keydown", event => {
+                if (event.key !== "Escape" || !backLink) return;
+                event.preventDefault();
+                window.location.href = backLink.href;
             });
 
             reindex();
