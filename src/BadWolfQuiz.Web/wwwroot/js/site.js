@@ -146,22 +146,20 @@ const configureGameRoundIntroRoutes = () => {
 
     document.querySelectorAll("form").forEach(routeRoundForm);
 
+    const forceAdvanceRoundForm = document.getElementById("force-advance-round-form");
+    if (forceAdvanceRoundForm instanceof HTMLFormElement) {
+        const nativeSubmit = HTMLFormElement.prototype.submit;
+        Object.defineProperty(forceAdvanceRoundForm, "submit", {
+            configurable: true,
+            value: () => {
+                routeRoundForm(forceAdvanceRoundForm);
+                nativeSubmit.call(forceAdvanceRoundForm);
+            }
+        });
+    }
+
     document.addEventListener("click", event => {
         const target = event.target instanceof Element ? event.target : null;
-        if (target?.closest("[data-confirm-force-advance-round]")) {
-            const form = document.getElementById("force-advance-round-form");
-            if (!(form instanceof HTMLFormElement)) {
-                return;
-            }
-
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            routeRoundForm(form);
-            document.getElementById("force-advance-round-dialog")?.close();
-            form.requestSubmit();
-            return;
-        }
-
         const submitter = target?.closest("button, input[type='submit']");
         if (!submitter?.form) {
             return;
