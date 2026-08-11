@@ -53,15 +53,8 @@
                 white-space: nowrap;
             }
 
-            .category-description-link {
-                color: inherit;
-                text-decoration: none;
+            .category-cell[data-edit-category-description] {
                 cursor: pointer;
-            }
-
-            .category-description-link:hover .category-title,
-            .category-description-link:focus-visible .category-title {
-                text-decoration: underline;
             }
         `;
         document.head.appendChild(style);
@@ -167,21 +160,24 @@
         });
     }
 
-    function initializeCategoryDescriptionLinks() {
+    function initializeCategoryDescriptionCells() {
         ensureStyles();
 
         document.querySelectorAll(".quiz-board-category-column[data-category-id]").forEach(column => {
             const categoryId = column.dataset.categoryId;
-            const title = column.querySelector(".category-cell > .category-title");
-            if (!categoryId || !title || title.closest(".category-description-link")) return;
+            const cell = column.querySelector(".category-cell");
+            if (!categoryId || !cell || cell.dataset.editCategoryDescription !== undefined) return;
 
-            const link = document.createElement("a");
-            link.href = `/Admin/Quizzes/DescriptionEditor?categoryId=${encodeURIComponent(categoryId)}`;
-            link.className = "category-description-link";
-            link.title = labels.editCategoryDescription;
-            link.setAttribute("aria-label", `${labels.editCategoryDescription}: ${title.textContent?.trim() || ""}`);
-            title.parentNode.insertBefore(link, title);
-            link.appendChild(title);
+            cell.dataset.editCategoryDescription = "";
+            cell.title = labels.editCategoryDescription;
+
+            cell.addEventListener("click", event => {
+                if (event.target.closest("button, a, .category-actions, .category-drag-handle")) {
+                    return;
+                }
+
+                window.location.href = `/Admin/Quizzes/DescriptionEditor?categoryId=${encodeURIComponent(categoryId)}`;
+            });
         });
     }
 
@@ -190,7 +186,7 @@
         if (!roundIdInput) return;
 
         initializeRoundMenu(roundIdInput.value);
-        initializeCategoryDescriptionLinks();
+        initializeCategoryDescriptionCells();
     }
 
     document.addEventListener("click", event => {
