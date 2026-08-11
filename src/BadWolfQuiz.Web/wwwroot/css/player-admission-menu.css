@@ -43,6 +43,19 @@
     pointer-events: none;
 }
 
+/*
+ * The quiz editor upgrades these legacy server-rendered controls into the
+ * round edit context menu. Keep them out of the first paint so users never
+ * see controls that disappear or change meaning once JavaScript initializes.
+ * Removing the rename button's onclick attribute makes the upgraded trigger
+ * visible automatically; the standalone delete button is removed by the same
+ * initializer.
+ */
+.round-settings-disclosure > summary button[onclick*="openRenameRoundDialog"],
+.round-tabs > button[onclick*="openDeleteRoundDialog"] {
+    visibility: hidden;
+}
+
 @media (max-width: 640px) {
     .player-admission-menu-popover {
         min-width: min(280px, calc(100vw - 24px));
