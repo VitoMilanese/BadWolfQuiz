@@ -12,13 +12,20 @@ The portal body is constrained to the viewport height. The standard `.page-shell
 becomes the flexible scrollable region between the top navigation and the footer,
 while the footer remains outside that scrolling region.
 
+For portal pages, the scrollable `.page-shell` spans the full available viewport
+width instead of inheriting the generic centered `max-width`. This keeps the
+primary vertical scrollbar at the outer right edge of the browser and lets portal
+pages use the available horizontal space. Individual forms, cards, and other
+components may still use intentional max-widths where that improves readability.
+
 The layout uses `100dvh` for modern responsive viewport sizing with `100vh` as a
 fallback. The page shell is allowed to shrink with `min-height: 0` and owns the
 vertical overflow, so long page content scrolls without moving the footer out of
 view.
 
 Short pages continue to fill the available space without introducing unnecessary
-body scrolling.
+body scrolling. Nested scrolling areas should be avoided unless a specific
+control genuinely needs its own scroll container.
 
 ## Scope
 
