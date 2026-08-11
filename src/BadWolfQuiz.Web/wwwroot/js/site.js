@@ -120,42 +120,51 @@ if (window.location.pathname.includes("/Admin/Games/Lobby/")) {
     }
 
     if (gameId) {
-        document.querySelectorAll("form").forEach(form => {
-            if (!form.action) {
+        document.addEventListener("submit", async event => {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement)) {
                 return;
             }
 
-            const action = new URL(form.action, window.location.origin);
-            if (action.searchParams.get("handler") !== "AdvanceRound") {
+            const submitter = event.submitter;
+            const targetUrl = new URL(
+                submitter?.formAction || form.action || window.location.href,
+                window.location.origin);
+            const handler = targetUrl.searchParams.get("handler");
+            const isAdvance = handler === "AdvanceRound";
+            const isForceAdvanceWithoutPlayers =
+                handler === "ForceAdvanceRound" &&
+                document.querySelectorAll("#board-player-list > li").length === 0;
+
+            if (!isAdvance && !isForceAdvanceWithoutPlayers) {
                 return;
             }
 
-            form.addEventListener("submit", async event => {
-                event.preventDefault();
+            event.preventDefault();
+            if (submitter) {
+                submitter.disabled = true;
+            }
 
-                const submitter = event.submitter;
+            try {
+                const response = await fetch(targetUrl, {
+                    method: "POST",
+                    body: new FormData(form),
+                    credentials: "same-origin",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+
+                if (!response.ok) {
+                    throw new Error("Round transition failed.");
+                }
+
+                window.location.assign(
+                    `/Admin/Games/RunningRoundIntro/${encodeURIComponent(gameId)}`);
+            } catch {
                 if (submitter) {
-                    submitter.disabled = true;
+                    submitter.disabled = false;
                 }
-
-                try {
-                    const response = await fetch(form.action, {
-                        method: "POST",
-                        body: new FormData(form),
-                        credentials: "same-origin",
-                        headers: { "X-Requested-With": "XMLHttpRequest" }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error("Round advance failed.");
-                    }
-
-                    window.location.assign(
-                        `/Admin/Games/RunningRoundIntro/${encodeURIComponent(gameId)}`);
-                } catch {
-                    form.submit();
-                }
-            });
-        });
+                form.submit();
+            }
+        }, true);
     }
 }
