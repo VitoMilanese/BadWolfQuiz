@@ -68,9 +68,38 @@ public sealed class FinalQuestionSnapshot
     public IReadOnlyList<ContentBlockSnapshot> AnswerBlocks { get; }
 }
 
+public sealed class QuizCategoryIntroSnapshot
+{
+    public QuizCategoryIntroSnapshot(
+        int sourceCategoryId,
+        string title,
+        int sortOrder,
+        IEnumerable<ContentBlockSnapshot>? descriptionBlocks = null)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceCategoryId);
+        ArgumentOutOfRangeException.ThrowIfNegative(sortOrder);
+
+        SourceCategoryId = sourceCategoryId;
+        Title = title?.Trim() ?? string.Empty;
+        SortOrder = sortOrder;
+        DescriptionBlocks = (descriptionBlocks ?? [])
+            .OrderBy(block => block.SortOrder)
+            .ToArray();
+    }
+
+    public int SourceCategoryId { get; }
+
+    public string Title { get; }
+
+    public int SortOrder { get; }
+
+    public IReadOnlyList<ContentBlockSnapshot> DescriptionBlocks { get; }
+}
+
 public sealed class QuizRoundSnapshot
 {
     private readonly ReadOnlyCollection<QuizQuestionSnapshot> _questions;
+    private readonly ReadOnlyCollection<QuizCategoryIntroSnapshot> _categoryIntros;
 
     public QuizRoundSnapshot(
         int sourceRoundId,
@@ -78,10 +107,11 @@ public sealed class QuizRoundSnapshot
         int sortOrder,
         IEnumerable<QuizQuestionSnapshot> questions,
         bool useRandomWagerQuestions = false,
-        int randomWagerQuestionCount = 0)
+        int randomWagerQuestionCount = 0,
+        IEnumerable<ContentBlockSnapshot>? descriptionBlocks = null,
+        IEnumerable<QuizCategoryIntroSnapshot>? categoryIntros = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceRoundId);
-        ArgumentException.ThrowIfNullOrWhiteSpace(title);
         ArgumentOutOfRangeException.ThrowIfNegative(sortOrder);
         ArgumentNullException.ThrowIfNull(questions);
 
@@ -110,11 +140,26 @@ public sealed class QuizRoundSnapshot
                 "Random wager question count must be between zero and the number of eligible questions.");
         }
 
+        var categoryIntroList = (categoryIntros ?? [])
+            .OrderBy(category => category.SortOrder)
+            .ToList();
+
+        if (categoryIntroList.Select(x => x.SourceCategoryId).Distinct().Count() != categoryIntroList.Count)
+        {
+            throw new ArgumentException(
+                "Category identifiers must be unique within a round.",
+                nameof(categoryIntros));
+        }
+
         SourceRoundId = sourceRoundId;
-        Title = title.Trim();
+        Title = title?.Trim() ?? string.Empty;
         SortOrder = sortOrder;
         UseRandomWagerQuestions = useRandomWagerQuestions;
         RandomWagerQuestionCount = randomWagerQuestionCount;
+        DescriptionBlocks = (descriptionBlocks ?? [])
+            .OrderBy(block => block.SortOrder)
+            .ToArray();
+        _categoryIntros = categoryIntroList.AsReadOnly();
         _questions = questionList.AsReadOnly();
     }
 
@@ -127,6 +172,10 @@ public sealed class QuizRoundSnapshot
     public bool UseRandomWagerQuestions { get; }
 
     public int RandomWagerQuestionCount { get; }
+
+    public IReadOnlyList<ContentBlockSnapshot> DescriptionBlocks { get; }
+
+    public IReadOnlyList<QuizCategoryIntroSnapshot> CategoryIntros => _categoryIntros;
 
     public IReadOnlyList<QuizQuestionSnapshot> Questions => _questions;
 }

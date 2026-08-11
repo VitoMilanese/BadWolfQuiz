@@ -110,3 +110,176 @@ document.addEventListener("keydown", event => {
         languageButton?.setAttribute("aria-expanded", "false");
     }
 });
+
+const configureGameRoundIntroRoutes = () => {
+    const gameBoard = document.querySelector(".host-game-board[data-game-id]");
+    const pathGameId = window.location.pathname.split("/").filter(Boolean).at(-1);
+    const gameId = gameBoard?.dataset.gameId || pathGameId;
+
+    if (!gameId || !window.location.pathname.includes("/Admin/Games/Lobby/")) {
+        return;
+    }
+
+    const encodedGameId = encodeURIComponent(gameId);
+    const runningIntroBase = `/Admin/Games/RunningRoundIntro/${encodedGameId}`;
+    const finalTransitionBase = `/Admin/Games/FinalQuestionTransition/${encodedGameId}`;
+    const startButton = document.querySelector('.lobby-start-button[form="start-game-form"]');
+    if (startButton) {
+        startButton.formAction = `/Admin/Games/RoundIntro/${encodedGameId}?handler=Prepare`;
+    }
+
+    const getFormHandler = form => {
+        if (!(form instanceof HTMLFormElement) || !form.action) {
+            return null;
+        }
+
+        return new URL(form.action, window.location.origin).searchParams.get("handler");
+    };
+
+    const openFinalTransition = force => {
+        window.location.assign(force
+            ? `${finalTransitionBase}?force=true`
+            : finalTransitionBase);
+    };
+
+    const routeRoundForm = form => {
+        if (!(form instanceof HTMLFormElement) || !form.action) {
+            return;
+        }
+
+        const action = new URL(form.action, window.location.origin);
+        const handler = action.searchParams.get("handler");
+
+        if (form.id === "force-advance-round-form" || handler === "ForceAdvanceRound") {
+            form.action = `${runningIntroBase}?handler=ForceAdvance`;
+            return;
+        }
+
+        if (handler === "AdvanceRound") {
+            form.action = `${runningIntroBase}?handler=Advance`;
+        }
+    };
+
+    const submitRoutedForm = form => {
+        if (!(form instanceof HTMLFormElement)) {
+            return;
+        }
+
+        routeRoundForm(form);
+        HTMLFormElement.prototype.submit.call(form);
+    };
+
+    const advanceEmptyRoundSummary = () => {
+        const summary = document.querySelector(".host-game-board .round-summary");
+        if (!summary || summary.querySelector(".round-podium-player")) {
+            return false;
+        }
+
+        const form = summary.querySelector("form");
+        if (!(form instanceof HTMLFormElement)) {
+            return false;
+        }
+
+        const action = new URL(form.action, window.location.origin);
+        if (action.searchParams.get("handler") !== "AdvanceRound" &&
+            !action.pathname.includes("/RunningRoundIntro/")) {
+            return false;
+        }
+
+        if (summary.dataset.autoAdvanceStarted === "true") {
+            return true;
+        }
+
+        summary.dataset.autoAdvanceStarted = "true";
+        submitRoutedForm(form);
+        return true;
+    };
+
+    document.querySelectorAll("form").forEach(routeRoundForm);
+
+    const forceAdvanceFinalForm = document.getElementById("force-advance-final-form");
+    if (forceAdvanceFinalForm instanceof HTMLFormElement) {
+        Object.defineProperty(forceAdvanceFinalForm, "submit", {
+            configurable: true,
+            value: () => openFinalTransition(true)
+        });
+    }
+
+    document.addEventListener("click", event => {
+        const target = event.target instanceof Element ? event.target : null;
+
+        if (target?.closest("[data-confirm-force-advance-round]")) {
+            const form = document.getElementById("force-advance-round-form");
+            if (!(form instanceof HTMLFormElement)) {
+                return;
+            }
+
+            const hasPlayers = document.querySelector(
+                ".scoreboard-player[data-player-id]:not([data-host-card])") !== null;
+
+            if (!hasPlayers) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                document.getElementById("force-advance-round-dialog")?.close();
+
+                fetch(`${runningIntroBase}?handler=ForceAdvance`, {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(response.statusText);
+                        }
+                        window.location.assign(runningIntroBase);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        window.location.reload();
+                    });
+                return;
+            }
+        }
+
+        const submitter = target?.closest("button, input[type='submit']");
+        if (!submitter?.form) {
+            return;
+        }
+
+        routeRoundForm(submitter.form);
+        const action = new URL(submitter.form.action, window.location.origin);
+        if (action.pathname.includes("/Admin/Games/RunningRoundIntro/")) {
+            submitter.formAction = submitter.form.action;
+        }
+    }, true);
+
+    document.addEventListener("submit", event => {
+        const form = event.target;
+        const handler = getFormHandler(form);
+
+        if (handler === "StartFinalQuestion" || handler === "ForceAdvanceToFinalQuestion") {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            openFinalTransition(handler === "ForceAdvanceToFinalQuestion");
+            return;
+        }
+
+        routeRoundForm(form);
+    }, true);
+
+    if (advanceEmptyRoundSummary()) {
+        return;
+    }
+
+    const observer = new MutationObserver(() => {
+        document.querySelectorAll("form").forEach(routeRoundForm);
+        advanceEmptyRoundSummary();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+};
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", configureGameRoundIntroRoutes, { once: true });
+} else {
+    configureGameRoundIntroRoutes();
+}

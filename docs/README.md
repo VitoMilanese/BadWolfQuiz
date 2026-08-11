@@ -18,6 +18,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 ## Features
 
 - [Quiz and question editing](features/quiz-editor.md)
+- [Round and category intros](features/round-category-intros.md)
 - [Quiz import and export](features/quiz-import-export.md)
 - [Wagering and active player rules](features/wagering.md)
 - [Question judging](features/question-judging.md)

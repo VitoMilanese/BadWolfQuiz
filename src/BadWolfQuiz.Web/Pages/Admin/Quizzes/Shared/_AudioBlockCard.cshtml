@@ -15,15 +15,9 @@
 
     if (hasStoredFile)
     {
-        audioUrl = Model.IsAnswerBlock
-            ? Url.Page(
-                null,
-                "AnswerBlockAudio",
-                new { id = Model.Id!.Value })
-            : Url.Page(
-                null,
-                "QuestionBlockAudio",
-                new { id = Model.Id!.Value });
+        var handler = Model.StoredAudioHandler ??
+            (Model.IsAnswerBlock ? "AnswerBlockAudio" : "QuestionBlockAudio");
+        audioUrl = Url.Page(null, handler, new { id = Model.Id!.Value });
     }
 }
 

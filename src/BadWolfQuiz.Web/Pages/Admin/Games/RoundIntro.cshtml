@@ -1,0 +1,227 @@
+@page "{id:guid}"
+@model BadWolfQuiz.Web.Pages.Admin.Games.RoundIntroModel
+@using BadWolfQuiz.Game.Definitions
+@{
+    ViewData["Title"] = Model.Heading;
+    ViewData["HidePortalFooter"] = true;
+}
+
+<div class="game-intro-page" data-game-intro-page>
+    <div class="game-intro-group @(Model.Blocks.Count == 0 ? "game-intro-group-empty" : null)" data-game-intro-group>
+        <h1 class="game-intro-heading">@Model.Heading</h1>
+
+        @if (Model.Blocks.Count > 0)
+        {
+            <div class="game-intro-blocks">
+                @foreach (var block in Model.Blocks)
+                {
+                    if (block.Kind == ContentBlockKind.Text && !string.IsNullOrWhiteSpace(block.TextContent))
+                    {
+                        <div class="game-content-block game-content-text game-intro-text">@block.TextContent</div>
+                    }
+                    else if (block.Kind == ContentBlockKind.Image &&
+                             (block.FileData is { Length: > 0 } || !string.IsNullOrWhiteSpace(block.MediaPath)))
+                    {
+                        <figure class="game-content-block game-intro-image-block">
+                            @if (!string.IsNullOrWhiteSpace(block.TopCaption))
+                            {
+                                <figcaption class="game-intro-caption">@block.TopCaption</figcaption>
+                            }
+                            <img class="game-intro-image"
+                                 src="@(block.FileData is { Length: > 0 }
+                                     ? Url.Page("RoundIntro", "ContentBlock", new { id = Model.GameId, sourceContentBlockId = block.SourceContentBlockId })
+                                     : block.MediaPath)"
+                                 alt="@(block.FileName ?? Model.Heading)" />
+                            @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
+                            {
+                                <figcaption class="game-intro-caption">@block.BottomCaption</figcaption>
+                            }
+                        </figure>
+                    }
+                }
+            </div>
+        }
+    </div>
+
+    <div class="game-intro-actions" data-game-intro-actions>
+        @if (Model.IsFinalCategory || Model.CategoryCount == 0)
+        {
+            <form method="post" asp-page-handler="Start" asp-route-id="@Model.GameId">
+                <button type="submit" class="button button-primary">@Model.StartGameLabel</button>
+            </form>
+        }
+        else
+        {
+            <form method="post" asp-page-handler="Start" asp-route-id="@Model.GameId">
+                <button type="submit" class="button button-secondary">@Model.SkipLabel</button>
+            </form>
+
+            <a class="button button-primary"
+               data-game-intro-next
+               asp-page="RoundIntro"
+               asp-route-id="@Model.GameId"
+               asp-route-category="@Model.NextCategoryIndex">
+                @Model.NextLabel
+            </a>
+        }
+    </div>
+</div>
+
+<style>
+    .game-intro-page {
+        min-height: calc(100vh - var(--topbar-height, 0px));
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        gap: clamp(24px, 4vh, 48px);
+        padding: clamp(24px, 5vw, 72px);
+        overflow: hidden;
+    }
+
+    .game-intro-group {
+        align-self: center;
+        justify-self: stretch;
+        display: grid;
+        justify-items: center;
+        gap: clamp(20px, 3vh, 36px);
+        width: min(1100px, 100%);
+        margin-inline: auto;
+        animation: game-intro-enter 260ms cubic-bezier(.2,.85,.3,1) both;
+        will-change: transform, opacity, filter;
+    }
+
+    .game-intro-group-empty {
+        align-self: center;
+    }
+
+    .game-intro-heading {
+        margin: 0;
+        text-align: center;
+        font-size: clamp(2.8rem, 7vw, 7rem);
+        line-height: 0.95;
+        letter-spacing: 0.04em;
+        font-weight: 950;
+    }
+
+    .game-intro-blocks {
+        width: min(980px, 100%);
+        display: grid;
+        justify-items: center;
+        gap: clamp(18px, 2.5vh, 30px);
+    }
+
+    .game-intro-text {
+        width: 100%;
+        text-align: center;
+        white-space: pre-wrap;
+        font-size: clamp(1.2rem, 2.2vw, 2rem);
+    }
+
+    .game-intro-image-block {
+        margin: 0;
+        display: grid;
+        justify-items: center;
+        gap: 10px;
+        max-width: 100%;
+    }
+
+    .game-intro-image {
+        display: block;
+        max-width: min(900px, 100%);
+        max-height: 52vh;
+        object-fit: contain;
+        border-radius: 12px;
+    }
+
+    .game-intro-caption {
+        text-align: center;
+        font-size: clamp(1rem, 1.6vw, 1.35rem);
+    }
+
+    .game-intro-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        animation: game-intro-actions-enter 220ms 70ms ease-out both;
+    }
+
+    .game-intro-actions form {
+        margin: 0;
+    }
+
+    .game-intro-page.is-leaving .game-intro-group {
+        animation: game-intro-leave 170ms cubic-bezier(.55,.05,.85,.45) both;
+    }
+
+    .game-intro-page.is-leaving .game-intro-actions {
+        animation: game-intro-actions-leave 130ms ease-in both;
+    }
+
+    @@keyframes game-intro-enter {
+        from {
+            opacity: 0;
+            transform: translate3d(7vw, 0, 0) scale(.965);
+            filter: blur(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+            filter: blur(0);
+        }
+    }
+
+    @@keyframes game-intro-leave {
+        from {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+            filter: blur(0);
+        }
+        to {
+            opacity: 0;
+            transform: translate3d(-7vw, 0, 0) scale(.965);
+            filter: blur(7px);
+        }
+    }
+
+    @@keyframes game-intro-actions-enter {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@keyframes game-intro-actions-leave {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .game-intro-group,
+        .game-intro-actions,
+        .game-intro-page.is-leaving .game-intro-group,
+        .game-intro-page.is-leaving .game-intro-actions {
+            animation: none;
+        }
+    }
+</style>
+
+<script>
+    (() => {
+        const page = document.querySelector("[data-game-intro-page]");
+        const next = document.querySelector("[data-game-intro-next]");
+        if (!page || !next || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            return;
+        }
+
+        next.addEventListener("click", event => {
+            if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                return;
+            }
+
+            event.preventDefault();
+            page.classList.add("is-leaving");
+            window.setTimeout(() => {
+                window.location.href = next.href;
+            }, 165);
+        });
+    })();
+</script>

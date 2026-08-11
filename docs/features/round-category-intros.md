@@ -1,0 +1,53 @@
+# Round and Category Intros
+
+## Purpose
+
+Rounds and categories can contain optional presentation descriptions that are shown before a round board opens. The descriptions let a quiz author introduce the round and each category without turning that content into a playable question.
+
+## Editor
+
+Round and category descriptions use ordered content blocks. These description editors support **Text** and **Image** blocks only; Audio and YouTube blocks are not offered.
+
+Round actions are grouped under **Edit round**. From that menu the author can rename the round, edit its description, or delete it. Category renaming remains a direct action, while clicking the category header cell opens the category description editor.
+
+Both description editors provide a preview. Escape returns to the quiz board editor. Uploaded image blocks are rendered in both the editor and preview.
+
+## Heading rules
+
+The intro and editor preview use the same heading rules.
+
+For rounds:
+
+- a normal non-numeric title is shown as-is;
+- an untitled round uses localized **Round N**, where `N` is its 1-based position;
+- a numeric-only title uses localized **Round {title}**;
+- a title that already begins with the localized Round label is not prefixed again.
+
+For categories:
+
+- a normal non-numeric title uses localized **Category: {title}**;
+- an untitled category uses localized **Category N**, based on the editor/game ordering;
+- a numeric-only title uses localized **Category {title}**;
+- a title that already begins with the localized Category label is not prefixed again.
+
+When non-empty description blocks exist, the heading and blocks form one centered composition. When the description is empty, only the heading is shown and it is centered vertically.
+
+## Gameplay flow
+
+Every round starts with the same intro sequence:
+
+1. round intro;
+2. category intros in category order;
+3. round board.
+
+The sequence is used when the first round starts and when later rounds are reached through normal completion, the inter-round leaderboard, forced advancement, or no-player advancement.
+
+Every category receives an intro page even when its description is empty. **Next** advances through the sequence, **Skip** opens the round board immediately, and the final category replaces those actions with **Start game**.
+
+When no players are present, the game does not show an empty inter-round leaderboard before the next intro.
+
+Intro pages use short slide/fade/scale transitions. The first intro also animates in. `prefers-reduced-motion` disables these animations.
+
+## Persistence
+
+Round and category description blocks are persisted with the quiz definition and copied into the immutable quiz snapshot used by a running game. Starting or skipping an intro does not modify quiz data.

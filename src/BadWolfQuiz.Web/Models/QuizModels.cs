@@ -176,6 +176,8 @@ public sealed class QuizRound
     public Quiz Quiz { get; set; } = null!;
     public ICollection<QuizRoundRow> Rows { get; set; } = new List<QuizRoundRow>();
     public ICollection<QuizCategory> Categories { get; set; } = new List<QuizCategory>();
+    public ICollection<RoundDescriptionContentBlock> DescriptionBlocks { get; set; } =
+        new List<RoundDescriptionContentBlock>();
 }
 
 public sealed class QuizRoundRow
@@ -200,6 +202,8 @@ public sealed class QuizCategory
 
     public QuizRound Round { get; set; } = null!;
     public ICollection<QuizQuestion> Questions { get; set; } = new List<QuizQuestion>();
+    public ICollection<CategoryDescriptionContentBlock> DescriptionBlocks { get; set; } =
+        new List<CategoryDescriptionContentBlock>();
 }
 
 public sealed class QuizQuestion
@@ -246,6 +250,18 @@ public sealed class FinalAnswerContentBlock : ContentBlockBase
 {
     public int QuizId { get; set; }
     public Quiz Quiz { get; set; } = null!;
+}
+
+public sealed class RoundDescriptionContentBlock : ContentBlockBase
+{
+    public int QuizRoundId { get; set; }
+    public QuizRound Round { get; set; } = null!;
+}
+
+public sealed class CategoryDescriptionContentBlock : ContentBlockBase
+{
+    public int QuizCategoryId { get; set; }
+    public QuizCategory Category { get; set; } = null!;
 }
 
 public sealed class QuestionContentBlock : ContentBlockBase

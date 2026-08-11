@@ -26,6 +26,10 @@ public sealed class QuizDbContext : DbContext
         Set<FinalQuestionContentBlock>();
     public DbSet<FinalAnswerContentBlock> FinalAnswerContentBlocks =>
         Set<FinalAnswerContentBlock>();
+    public DbSet<RoundDescriptionContentBlock> RoundDescriptionContentBlocks =>
+        Set<RoundDescriptionContentBlock>();
+    public DbSet<CategoryDescriptionContentBlock> CategoryDescriptionContentBlocks =>
+        Set<CategoryDescriptionContentBlock>();
     public DbSet<QuestionContentBlock> QuestionContentBlocks => Set<QuestionContentBlock>();
     public DbSet<AnswerContentBlock> AnswerContentBlocks => Set<AnswerContentBlock>();
     public DbSet<GameSession> GameSessions => Set<GameSession>();
@@ -92,6 +96,10 @@ public sealed class QuizDbContext : DbContext
             .HasQueryFilter(x => x.Quiz.HostId == CurrentHostId);
         modelBuilder.Entity<FinalAnswerContentBlock>()
             .HasQueryFilter(x => x.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<RoundDescriptionContentBlock>()
+            .HasQueryFilter(x => x.Round.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<CategoryDescriptionContentBlock>()
+            .HasQueryFilter(x => x.Category.Round.Quiz.HostId == CurrentHostId);
         modelBuilder.Entity<QuestionContentBlock>()
             .HasQueryFilter(x => x.Question.Category.Round.Quiz.HostId == CurrentHostId);
         modelBuilder.Entity<AnswerContentBlock>()
@@ -154,6 +162,5 @@ public sealed class QuizDbContext : DbContext
             .WithMany()
             .HasForeignKey(x => x.GameSessionId)
             .OnDelete(DeleteBehavior.Cascade);
-
     }
 }

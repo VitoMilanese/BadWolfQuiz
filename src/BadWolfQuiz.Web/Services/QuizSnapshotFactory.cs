@@ -28,11 +28,22 @@ public sealed class QuizSnapshotFactory
     {
         var pointsByRow = round.Rows.ToDictionary(row => row.RowIndex, row => row.Points);
 
-        var questions = round.Categories
+        var categories = round.Categories
             .OrderBy(category => category.SortOrder)
+            .ToList();
+
+        var questions = categories
             .SelectMany(category => category.Questions
                 .OrderBy(question => question.RowIndex)
                 .Select(question => CreateQuestion(question, pointsByRow)))
+            .ToList();
+
+        var categoryIntros = categories
+            .Select(category => new QuizCategoryIntroSnapshot(
+                category.Id,
+                category.Title,
+                category.SortOrder,
+                category.DescriptionBlocks.Select(CreateContentBlock)))
             .ToList();
 
         return new QuizRoundSnapshot(
@@ -41,7 +52,9 @@ public sealed class QuizSnapshotFactory
             round.SortOrder,
             questions,
             round.UseRandomWagerQuestions,
-            round.RandomWagerQuestionCount);
+            round.RandomWagerQuestionCount,
+            round.DescriptionBlocks.Select(CreateContentBlock),
+            categoryIntros);
     }
 
     private static QuizQuestionSnapshot CreateQuestion(
