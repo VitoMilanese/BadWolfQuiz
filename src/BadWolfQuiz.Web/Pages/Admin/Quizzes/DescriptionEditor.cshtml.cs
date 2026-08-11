@@ -21,6 +21,7 @@ public sealed class DescriptionEditorModel(
     public InputModel Input { get; set; } = new();
 
     public string EntityTitle { get; private set; } = string.Empty;
+    public string PreviewTitle { get; private set; } = string.Empty;
 
     public bool IsCategory => Input.CategoryId.HasValue;
 
@@ -71,6 +72,11 @@ public sealed class DescriptionEditorModel(
                     .ToList()
             };
             EntityTitle = category.Title;
+            PreviewTitle = await BuildPreviewTitleAsync(
+                category.Round.Id,
+                category.Id,
+                category.Title,
+                cancellationToken);
             return Page();
         }
 
@@ -109,6 +115,11 @@ public sealed class DescriptionEditorModel(
                 .ToList()
         };
         EntityTitle = round.Title;
+        PreviewTitle = await BuildPreviewTitleAsync(
+            round.Id,
+            null,
+            round.Title,
+            cancellationToken);
         return Page();
     }
 
@@ -141,6 +152,11 @@ public sealed class DescriptionEditorModel(
             }
 
             EntityTitle = category.Title;
+            PreviewTitle = await BuildPreviewTitleAsync(
+                category.Round.Id,
+                category.Id,
+                category.Title,
+                cancellationToken);
             if (!await SyncBlocksAsync(category.DescriptionBlocks, cancellationToken))
             {
                 ApplyStoredHandlers(
@@ -164,6 +180,11 @@ public sealed class DescriptionEditorModel(
             }
 
             EntityTitle = round.Title;
+            PreviewTitle = await BuildPreviewTitleAsync(
+                round.Id,
+                null,
+                round.Title,
+                cancellationToken);
             if (!await SyncBlocksAsync(round.DescriptionBlocks, cancellationToken))
             {
                 ApplyStoredHandlers(
@@ -314,6 +335,64 @@ public sealed class DescriptionEditorModel(
         }
 
         return true;
+    }
+
+    private async Task<string> BuildPreviewTitleAsync(
+        int roundId,
+        int? categoryId,
+        string? title,
+        CancellationToken cancellationToken)
+    {
+        var trimmedTitle = title?.Trim() ?? string.Empty;
+        var isNumericTitle = trimmedTitle.Length > 0 && trimmedTitle.All(char.IsDigit);
+
+        if (categoryId.HasValue)
+        {
+            if (isNumericTitle)
+            {
+                return $"{localizer["Label_Category"]} {trimmedTitle}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(trimmedTitle))
+            {
+                return $"{localizer["Label_Category"]}: {trimmedTitle}";
+            }
+
+            var categoryIds = await db.QuizCategories
+                .AsNoTracking()
+                .Where(x => x.QuizRoundId == roundId)
+                .OrderBy(x => x.SortOrder)
+                .ThenBy(x => x.Id)
+                .Select(x => x.Id)
+                .ToListAsync(cancellationToken);
+            var position = categoryIds.IndexOf(categoryId.Value) + 1;
+            return $"{localizer["Label_Category"]} {Math.Max(position, 1)}";
+        }
+
+        if (isNumericTitle)
+        {
+            return $"{localizer["Label_Round"]} {trimmedTitle}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(trimmedTitle))
+        {
+            return trimmedTitle;
+        }
+
+        var quizId = await db.QuizRounds
+            .AsNoTracking()
+            .Where(x => x.Id == roundId)
+            .Select(x => x.QuizId)
+            .SingleAsync(cancellationToken);
+        var roundIds = await db.QuizRounds
+            .AsNoTracking()
+            .Where(x => x.QuizId == quizId)
+            .OrderBy(x => x.SortOrder)
+            .ThenBy(x => x.Id)
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+        var roundPosition = roundIds.IndexOf(roundId) + 1;
+        return $"{localizer["Label_Round"]} {Math.Max(roundPosition, 1)}";
     }
 
     private static ContentBlockInputModel ToInputModel(
