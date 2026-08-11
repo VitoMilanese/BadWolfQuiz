@@ -56,6 +56,11 @@
             .category-cell[data-edit-category-description] {
                 cursor: pointer;
             }
+
+            .category-cell[data-edit-category-description]:hover {
+                border-color: var(--red-bright);
+                transform: translateY(-1px);
+            }
         `;
         document.head.appendChild(style);
     }
