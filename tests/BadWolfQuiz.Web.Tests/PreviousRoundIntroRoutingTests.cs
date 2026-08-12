@@ -98,6 +98,8 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.Contains("target?.closest(\"[data-category-preview-url]\")", script);
         Assert.Contains("event.key !== \"Enter\" && event.key !== \" \"", script);
         Assert.Contains("h3[data-category-preview-url]:hover", styles);
+        Assert.Contains("h3[data-category-preview-url] {", styles);
+        Assert.Contains("border: 1px solid var(--line)", styles);
         Assert.Contains("border-color: var(--red-bright)", styles);
     }
 
