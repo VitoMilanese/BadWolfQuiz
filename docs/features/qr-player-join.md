@@ -23,10 +23,11 @@ join panel.
 
 The QR header button and Discord microphone button are fixed-size squares with
 matching dimensions so Final Question and leaderboard layouts cannot enlarge the
-QR control or the header. The QR image fills its button without padding. On dark
-site themes the decorative QR uses a dark background with white modules; on
-light themes it uses a light background with black modules. Custom themes choose
-the QR treatment from the configured background brightness.
+QR control or the header. The QR image fills its button without padding. The QR
+background uses the current theme's normal secondary-button background color.
+The QR modules are rendered white when that button background is dark and black
+when it is light, with the contrast chosen from the computed theme color so
+custom themes follow the same rule automatically.
 
 The panel position, size, and visibility are persisted in the browser and
 restored after a page reload. Its title, QR code, and six-character join code

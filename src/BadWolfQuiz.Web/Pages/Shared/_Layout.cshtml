@@ -10,22 +10,6 @@
 @inject IStringLocalizer<ProductVersionResource> ProductVersionLocalizer
 
 @{
-    static bool IsLightHexColor(string? color)
-    {
-        if (string.IsNullOrWhiteSpace(color) ||
-            color.Length != 7 ||
-            color[0] != '#' ||
-            !int.TryParse(color.AsSpan(1, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var red) ||
-            !int.TryParse(color.AsSpan(3, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var green) ||
-            !int.TryParse(color.AsSpan(5, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var blue))
-        {
-            return false;
-        }
-
-        var brightness = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255d;
-        return brightness >= 0.55;
-    }
-
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
 
     var currentFlag = currentCulture switch
@@ -92,13 +76,6 @@
             BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
             BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging;
 
-    var useLightHeaderQr = siteThemeId switch
-    {
-        "daylight" or "warm-parchment" or "mint-fog" => true,
-        "custom" => IsLightHexColor(settings?.CustomThemeColors?.Background),
-        _ => false
-    };
-
     string? gameHeaderQrDataUri = null;
     if (showGameHeaderQr)
     {
@@ -151,15 +128,25 @@
             overflow: hidden;
         }
 
+        .game-header-join-qr {
+            background: var(--panel);
+        }
+
         .game-header-join-qr img {
             display: block;
             width: 100%;
             height: 100%;
             object-fit: fill;
+            image-rendering: pixelated;
         }
 
-        .game-header-join-qr.qr-dark img {
+        .game-header-join-qr.qr-modules-dark img {
+            mix-blend-mode: multiply;
+        }
+
+        .game-header-join-qr.qr-modules-light img {
             filter: invert(1);
+            mix-blend-mode: screen;
         }
     </style>
     @if (!hidePortalFooter && !isEmbeddedDiscordSettings)
@@ -225,7 +212,7 @@
             }
             @if (gameHeaderQrDataUri is not null)
             {
-                <button class="button button-secondary game-header-square-button game-header-join-qr @(useLightHeaderQr ? "qr-light" : "qr-dark")"
+                <button class="button button-secondary game-header-square-button game-header-join-qr"
                         type="button"
                         data-open-join-code
                         hidden
@@ -254,6 +241,16 @@
                     gameHeader
                         .querySelectorAll('.board-action-menu .action-menu-item[data-open-join-code]')
                         .forEach(item => item.remove());
+
+                    const channels = getComputedStyle(qrButton)
+                        .backgroundColor
+                        .match(/[\d.]+/g)
+                        ?.slice(0, 3)
+                        .map(Number);
+                    const backgroundIsLight = channels?.length === 3 &&
+                        ((0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]) / 255) >= 0.55;
+                    qrButton.classList.add(
+                        backgroundIsLight ? 'qr-modules-dark' : 'qr-modules-light');
 
                     discordButton.classList.add('game-header-square-button');
                     gameHeader.insertBefore(qrButton, discordButton);
