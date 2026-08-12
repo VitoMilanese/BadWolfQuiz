@@ -12,7 +12,8 @@ public sealed record GameSessionState(
     IReadOnlyList<GamePlayerState> RemovedPlayers,
     IReadOnlyList<RuntimeQuestionState> Questions,
     FinalQuestionState? FinalQuestion,
-    bool IsForcedRoundAdvancePending = false);
+    bool IsForcedRoundAdvancePending = false,
+    int FurthestVisitedRoundIndex = 0);
 
 public sealed record PlayerRoundStartScoreState(GamePlayerId PlayerId, int Score);
 

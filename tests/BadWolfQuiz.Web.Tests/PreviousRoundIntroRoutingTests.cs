@@ -28,6 +28,17 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.Contains("hostBoard?.classList.add(\"host-game-board\")", script);
     }
 
+    [Fact]
+    public void Forced_next_round_filters_completed_category_intros()
+    {
+        var intro = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RunningRoundIntro.cshtml.cs"));
+
+        Assert.Contains("filterCompletedCategories = game.Session.IsForcedRoundAdvancePending", intro);
+        Assert.Contains("returning = filterCompletedCategories", intro);
+        Assert.Contains("RedirectToPage(new { id, returning = true })", intro);
+        Assert.Contains("!returning || session.Board.Questions.Any", intro);
+    }
+
     private static string FindFile(params string[] path)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

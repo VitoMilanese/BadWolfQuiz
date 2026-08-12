@@ -152,6 +152,8 @@ public sealed class RunningRoundIntroModel(
             return NotFound();
         }
 
+        var filterCompletedCategories = game.Session.IsForcedRoundAdvancePending;
+
         try
         {
             sessionRegistry.AdvanceToNextRound(game.PublicCode);
@@ -164,7 +166,7 @@ public sealed class RunningRoundIntroModel(
 
         await BroadcastPlayersAsync(game, cancellationToken);
         await StopAutomaticDiscordMuteAsync(id, cancellationToken);
-        return RedirectToPage(new { id });
+        return RedirectToPage(new { id, returning = filterCompletedCategories });
     }
 
     public async Task<IActionResult> OnPostForceAdvanceAsync(
@@ -201,7 +203,7 @@ public sealed class RunningRoundIntroModel(
         await StopAutomaticDiscordMuteAsync(id, cancellationToken);
 
         return advancedImmediately
-            ? RedirectToPage(new { id })
+            ? RedirectToPage(new { id, returning = true })
             : RedirectToPage("Lobby", new { id });
     }
 

@@ -55,6 +55,8 @@ public sealed class GameSession
 
     public int CurrentRoundIndex { get; private set; }
 
+    public int FurthestVisitedRoundIndex { get; private set; }
+
     public bool IsForcedRoundAdvancePending { get; private set; }
 
     public int CurrentRoundNumber => CurrentRoundIndex + 1;
@@ -78,7 +80,7 @@ public sealed class GameSession
         Enumerable.Range(0, Quiz.Rounds.Count).Any(index => !IsRoundComplete(index));
 
     public bool HasUnfinishedRegularRoundExcludingCurrent =>
-        Enumerable.Range(0, Quiz.Rounds.Count).Any(index =>
+        Enumerable.Range(0, FurthestVisitedRoundIndex + 1).Any(index =>
             index != CurrentRoundIndex && !IsRoundComplete(index));
 
     public bool IsActivePlayerChangeLocked => Board.Questions.Any(question =>
@@ -119,7 +121,8 @@ public sealed class GameSession
         _removedPlayers.Select(player => player.CaptureState()).ToArray(),
         Board.Questions.Select(question => question.CaptureState()).ToArray(),
         FinalQuestion?.CaptureState(),
-        IsForcedRoundAdvancePending);
+        IsForcedRoundAdvancePending,
+        FurthestVisitedRoundIndex);
 
     public static GameSession Restore(
         QuizSnapshot quiz,
@@ -137,6 +140,9 @@ public sealed class GameSession
             Status = state.Status,
             ActivePlayerId = state.ActivePlayerId,
             CurrentRoundIndex = state.CurrentRoundIndex,
+            FurthestVisitedRoundIndex = Math.Max(
+                state.FurthestVisitedRoundIndex,
+                state.CurrentRoundIndex),
             IsForcedRoundAdvancePending = state.IsForcedRoundAdvancePending,
             CreatedAtUtc = state.CreatedAtUtc,
             StartedAtUtc = state.StartedAtUtc
@@ -809,7 +815,7 @@ public sealed class GameSession
         EnsureRunning();
         ResolveInProgressQuestionsForRound(CurrentRoundIndex);
 
-        var candidates = Enumerable.Range(0, Quiz.Rounds.Count)
+        var candidates = Enumerable.Range(0, FurthestVisitedRoundIndex + 1)
             .Where(index => index != CurrentRoundIndex && !IsRoundComplete(index))
             .OrderBy(index => Math.Abs(index - CurrentRoundIndex))
             .ThenBy(index => index > CurrentRoundIndex ? 1 : 0)
@@ -1061,6 +1067,7 @@ public sealed class GameSession
         int roundIndex,
         GamePlayerId? activePlayerId)
     {
+        FurthestVisitedRoundIndex = Math.Max(FurthestVisitedRoundIndex, roundIndex);
         CurrentRoundIndex = roundIndex;
         IsForcedRoundAdvancePending = false;
         CaptureRoundStartScores();

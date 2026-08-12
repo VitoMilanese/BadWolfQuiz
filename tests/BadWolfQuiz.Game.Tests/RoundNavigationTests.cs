@@ -165,6 +165,109 @@ public sealed class RoundNavigationTests
     }
 
     [Fact]
+    public void Forced_final_guard_ignores_unvisited_future_rounds()
+    {
+        var session = RestoreAtRound(
+            [false, false, false],
+            0,
+            hasFinalQuestion: true,
+            furthestVisitedRoundIndex: 0);
+
+        Assert.False(session.HasUnfinishedRegularRoundExcludingCurrent);
+    }
+
+    [Fact]
+    public void Forced_final_guard_sees_unfinished_previous_round_but_not_unvisited_future_round()
+    {
+        var session = RestoreAtRound(
+            [false, false, false],
+            1,
+            hasFinalQuestion: true,
+            furthestVisitedRoundIndex: 1);
+
+        Assert.True(session.HasUnfinishedRegularRoundExcludingCurrent);
+        Assert.Equal(1, session.ReturnToNearestUnfinishedRoundExcludingCurrent().SourceRoundId);
+    }
+
+    [Fact]
+    public void Forced_final_guard_returns_to_a_visited_future_round_after_going_back()
+    {
+        var session = RestoreAtRound(
+            [false, false, false],
+            0,
+            hasFinalQuestion: true,
+            furthestVisitedRoundIndex: 1);
+
+        Assert.True(session.HasUnfinishedRegularRoundExcludingCurrent);
+        Assert.Equal(2, session.ReturnToNearestUnfinishedRoundExcludingCurrent().SourceRoundId);
+    }
+
+    [Fact]
+    public void Forced_final_guard_prefers_unfinished_previous_round_on_equal_distance()
+    {
+        var session = RestoreAtRound(
+            [false, false, false],
+            1,
+            hasFinalQuestion: true,
+            furthestVisitedRoundIndex: 2);
+
+        Assert.True(session.HasUnfinishedRegularRoundExcludingCurrent);
+        Assert.Equal(1, session.ReturnToNearestUnfinishedRoundExcludingCurrent().SourceRoundId);
+    }
+
+    [Fact]
+    public void Forced_final_guard_returns_to_nearest_unfinished_visited_round()
+    {
+        var session = RestoreAtRound(
+            [false, false, false],
+            0,
+            hasFinalQuestion: true,
+            furthestVisitedRoundIndex: 2);
+
+        Assert.Equal(2, session.ReturnToNearestUnfinishedRoundExcludingCurrent().SourceRoundId);
+    }
+
+    [Fact]
+    public void Forced_final_guard_skips_closed_visited_round_when_returning_forward()
+    {
+        var session = RestoreAtRound(
+            [false, true, false],
+            0,
+            hasFinalQuestion: true,
+            furthestVisitedRoundIndex: 2);
+
+        Assert.Equal(3, session.ReturnToNearestUnfinishedRoundExcludingCurrent().SourceRoundId);
+    }
+
+    [Fact]
+    public void Forced_final_guard_returns_forward_when_previous_rounds_are_closed()
+    {
+        var session = RestoreAtRound(
+            [true, false, false],
+            1,
+            hasFinalQuestion: true,
+            furthestVisitedRoundIndex: 2);
+
+        Assert.Equal(3, session.ReturnToNearestUnfinishedRoundExcludingCurrent().SourceRoundId);
+    }
+
+    [Fact]
+    public void Furthest_visited_round_survives_state_capture_and_restore()
+    {
+        var session = RestoreAtRound(
+            [false, false, false],
+            0,
+            furthestVisitedRoundIndex: 2);
+
+        var restored = GameSession.Restore(
+            session.Quiz,
+            session.Settings,
+            session.CaptureState());
+
+        Assert.Equal(2, restored.FurthestVisitedRoundIndex);
+    }
+
+    [Fact]
     public void Forced_next_after_return_skips_a_fully_closed_round()
     {
         var session = RestoreAtRound([false, false, true, false], 1);
@@ -252,7 +355,8 @@ public sealed class RoundNavigationTests
     private static GameSession RestoreAtRound(
         bool[] complete,
         int currentRoundIndex,
-        bool hasFinalQuestion = false)
+        bool hasFinalQuestion = false,
+        int? furthestVisitedRoundIndex = null)
     {
         var rounds = complete.Select((_, index) => new QuizRoundSnapshot(
   index + 1,
@@ -277,7 +381,12 @@ public sealed class RoundNavigationTests
         return GameSession.Restore(
   quiz,
   seed.Settings,
-  state with { CurrentRoundIndex = currentRoundIndex, Questions = questionStates });
+  state with
+  {
+      CurrentRoundIndex = currentRoundIndex,
+      FurthestVisitedRoundIndex = furthestVisitedRoundIndex ?? currentRoundIndex,
+      Questions = questionStates
+  });
     }
 
     private static void CloseCurrentRound(GameSession session)
