@@ -952,11 +952,16 @@ public sealed class GameSession
     {
         EnsureRunning();
 
-        if (HasNextRound || !IsCurrentRoundComplete)
+        if (HasAnyUnfinishedRegularRound)
         {
             throw new GameRuleViolationException(
-                "The final question can only start after the last round is complete.");
+                "The final question can only start after all regular rounds are complete.");
         }
+
+        CurrentRoundIndex = Quiz.Rounds.Count - 1;
+        FurthestVisitedRoundIndex = Math.Max(
+            FurthestVisitedRoundIndex,
+            CurrentRoundIndex);
 
         var definition = Quiz.FinalQuestion
             ?? throw new GameRuleViolationException(

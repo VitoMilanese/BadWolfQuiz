@@ -377,6 +377,26 @@ public sealed class RoundNavigationTests
     }
 
     [Fact]
+    public void Natural_final_can_start_after_finishing_a_returned_unfinished_round()
+    {
+        var session = RestoreAtRound(
+            [true, false, true],
+            2,
+            hasFinalQuestion: true,
+            furthestVisitedRoundIndex: 2);
+        session.AddPlayer("Rose");
+
+        session.ReturnToNearestUnfinishedRoundExcludingCurrent();
+        CloseCurrentRound(session);
+
+        session.StartFinalQuestion();
+
+        Assert.Equal(GameSessionStatus.FinalWagering, session.Status);
+        Assert.Equal(2, session.CurrentRoundIndex);
+        Assert.False(session.HasAnyUnfinishedRegularRound);
+    }
+
+    [Fact]
     public void Final_question_state_has_no_regular_round_navigation()
     {
         var session = RestoreAtRound([true], 0, hasFinalQuestion: true);
