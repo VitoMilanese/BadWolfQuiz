@@ -6253,6 +6253,7 @@ body.youtube-auto-expanded-open {
 
 .host-board-column h3[data-category-preview-url] {
     border: 1px solid var(--line);
+    border-radius: 8px 8px 0 0;
     cursor: pointer;
     transition: border-color 120ms ease, transform 120ms ease;
 }

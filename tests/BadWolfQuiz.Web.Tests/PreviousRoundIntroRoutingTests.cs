@@ -100,6 +100,7 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.Contains("h3[data-category-preview-url]:hover", styles);
         Assert.Contains("h3[data-category-preview-url] {", styles);
         Assert.Contains("border: 1px solid var(--line)", styles);
+        Assert.Contains("border-radius: 8px 8px 0 0", styles);
         Assert.Contains("border-color: var(--red-bright)", styles);
     }
 
