@@ -1,5 +1,6 @@
 @using System.Globalization
 @using BadWolfQuiz.Web.Services
+@using QRCoder
 @inject GameSettingsStore SettingsStore
 @inject GameSessionRegistry GameSessions
 @inject CurrentHost CurrentHost
@@ -67,6 +68,28 @@
               BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging) ||
          (finalQuestionGame.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running &&
           finalQuestionGame.Session.IsCurrentRoundComplete));
+
+    var showGameHeaderQr = finalQuestionGame is not null &&
+        finalQuestionGame.Session.Status is
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.Running or
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalWagering or
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging;
+
+    string? gameHeaderQrDataUri = null;
+    if (showGameHeaderQr)
+    {
+        var qrPayload = Configuration["Game:HeaderQrPayload"];
+        if (string.IsNullOrWhiteSpace(qrPayload))
+        {
+            qrPayload = "Чупа";
+        }
+
+        using var qrGenerator = new QRCodeGenerator();
+        using var qrData = qrGenerator.CreateQrCode(qrPayload, QRCodeGenerator.ECCLevel.Q);
+        using var qrCode = new PngByteQRCode(qrData);
+        gameHeaderQrDataUri = $"data:image/png;base64,{Convert.ToBase64String(qrCode.GetGraphic(4))}";
+    }
 }
 
 <!DOCTYPE html>
@@ -83,6 +106,47 @@
             max-width: none;
             margin-left: calc(50% - 50vw + 16px);
             margin-right: calc(50% - 50vw + 16px);
+        }
+
+        .game-header-context .board-action-menu .action-menu-item[data-open-join-code] {
+            display: none;
+        }
+
+        .game-header-square-button {
+            display: inline-flex;
+            flex: 0 0 44px;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            width: 44px;
+            min-width: 44px;
+            max-width: 44px;
+            height: 44px;
+            min-height: 44px;
+            max-height: 44px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .game-header-join-qr {
+            background: var(--panel);
+        }
+
+        .game-header-join-qr img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            image-rendering: pixelated;
+        }
+
+        .game-header-join-qr.qr-modules-dark img {
+            mix-blend-mode: multiply;
+        }
+
+        .game-header-join-qr.qr-modules-light img {
+            filter: invert(1);
+            mix-blend-mode: screen;
         }
     </style>
     @if (!hidePortalFooter && !isEmbeddedDiscordSettings)
@@ -134,12 +198,6 @@
 
                         <button class="action-menu-item"
                                 type="button"
-                                data-open-join-code>
-                            @Localizer["GameBoard_ShowJoinCode"]
-                        </button>
-
-                        <button class="action-menu-item"
-                                type="button"
                                 data-open-blocked-players>
                             @Localizer["GameBoard_ManageBlockedPlayers"]
                         </button>
@@ -152,22 +210,57 @@
                     </div>
                 </details>
             }
+            @if (gameHeaderQrDataUri is not null)
+            {
+                <button class="button button-secondary game-header-square-button game-header-join-qr"
+                        type="button"
+                        data-open-join-code
+                        hidden
+                        title="@Localizer["GameBoard_ShowJoinCode"]"
+                        aria-label="@Localizer["GameBoard_ShowJoinCode"]">
+                    <img src="@gameHeaderQrDataUri" alt="" aria-hidden="true" />
+                </button>
+            }
             @if (isSettingsPage)
             {
                 <small>@ProductVersionLocalizer["VersionLabel"]: @productVersion.Version</small>
             }
         </div>
 
-        @if (showLimitedGameTools)
+        @if (gameHeaderQrDataUri is not null)
         {
             <script>
                 (() => {
-                    const menu = document.querySelector('.limited-game-tools');
                     const gameHeader = document.querySelector('.game-header-context');
+                    const qrButton = document.querySelector('.game-header-join-qr');
                     const discordButton = gameHeader?.querySelector('[data-open-discord-settings]');
-                    if (menu && gameHeader && discordButton) {
-                        gameHeader.insertBefore(menu, discordButton);
+                    if (!gameHeader || !qrButton || !discordButton) {
+                        return;
                     }
+
+                    gameHeader
+                        .querySelectorAll('.board-action-menu .action-menu-item[data-open-join-code]')
+                        .forEach(item => item.remove());
+
+                    const channels = getComputedStyle(qrButton)
+                        .backgroundColor
+                        .match(/[\d.]+/g)
+                        ?.slice(0, 3)
+                        .map(Number);
+                    const backgroundIsLight = channels?.length === 3 &&
+                        ((0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]) / 255) >= 0.55;
+                    qrButton.classList.add(
+                        backgroundIsLight ? 'qr-modules-dark' : 'qr-modules-light');
+
+                    discordButton.classList.add('game-header-square-button');
+                    gameHeader.insertBefore(qrButton, discordButton);
+
+                    const menu = document.querySelector('.limited-game-tools');
+                    if (menu) {
+                        gameHeader.insertBefore(menu, qrButton);
+                    }
+
+                    qrButton.hidden = false;
                 })();
             </script>
         }
