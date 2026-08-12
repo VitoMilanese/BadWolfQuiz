@@ -155,6 +155,49 @@ public sealed class RunningRoundIntroModel(
             : RedirectToPage(new { id, returning = true });
     }
 
+    public async Task<IActionResult> OnPostReturnToUnfinishedAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = FindOwned(id);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var showLeaderboard =
+            game.Session.Players.Count > 0 &&
+            !game.Session.IsUnfinishedRoundReturnPending;
+
+        try
+        {
+            if (showLeaderboard)
+            {
+                sessionRegistry.PrepareReturnToNearestUnfinishedRoundExcludingCurrent(
+                    game.PublicCode);
+            }
+            else
+            {
+                sessionRegistry.ReturnToNearestUnfinishedRoundExcludingCurrent(
+                    game.PublicCode);
+            }
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] = localizer["GameBoard_PreviousRoundRejected"].Value;
+            return RedirectToPage("Lobby", new { id });
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+
+        return showLeaderboard
+            ? RedirectToPage("Lobby", new { id })
+            : RedirectToPage(new { id, returning = true });
+    }
+
     public async Task<IActionResult> OnPostAdvanceAsync(
         Guid id,
         bool filterCompletedCategories,

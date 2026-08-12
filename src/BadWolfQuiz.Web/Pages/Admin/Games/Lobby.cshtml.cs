@@ -623,10 +623,22 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
+        var showLeaderboard =
+            game.Session.Players.Count > 0 &&
+            !game.Session.IsUnfinishedRoundReturnPending;
+
         try
         {
-            sessionRegistry.ReturnToNearestUnfinishedRoundExcludingCurrent(
-                game.PublicCode);
+            if (showLeaderboard)
+            {
+                sessionRegistry.PrepareReturnToNearestUnfinishedRoundExcludingCurrent(
+                    game.PublicCode);
+            }
+            else
+            {
+                sessionRegistry.ReturnToNearestUnfinishedRoundExcludingCurrent(
+                    game.PublicCode);
+            }
         }
         catch (GameRuleViolationException)
         {
@@ -638,7 +650,9 @@ public sealed class LobbyModel(
         await BroadcastBuzzerAsync(game, cancellationToken);
         await BroadcastTimerAsync(game, cancellationToken);
         await StopAutomaticDiscordMuteAsync(id, cancellationToken);
-        return RedirectToPage(new { id });
+        return showLeaderboard
+            ? RedirectToPage(new { id })
+            : LocalRedirect($"/Admin/Games/RunningRoundIntro/{id:D}?returning=true");
     }
 
     public async Task<IActionResult> OnPostForceAdvanceRoundAsync(

@@ -20,7 +20,8 @@ public sealed class PreviousRoundIntroRoutingTests
     {
         var script = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "wwwroot", "js", "site.js"));
 
-        Assert.Contains("handler === \"Previous\" || handler === \"PreviousRound\"", script);
+        Assert.Contains("handler === \"Previous\"", script);
+        Assert.Contains("handler === \"PreviousRound\"", script);
         Assert.Contains("event.stopImmediatePropagation();", script);
         Assert.Contains("hostBoard?.classList.remove(\"host-game-board\")", script);
         Assert.Contains("fetch(form.action", script);
@@ -37,6 +38,20 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.Contains("PrepareReturnToPreviousUnfinishedRound", intro);
         Assert.Contains("RedirectToPage(\"Lobby\", new { id })", intro);
         Assert.Contains("RedirectToPage(new { id, returning = true })", intro);
+    }
+
+    [Fact]
+    public void Final_guard_return_with_players_stages_leaderboard_then_replays_intro()
+    {
+        var intro = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RunningRoundIntro.cshtml.cs"));
+        var script = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "wwwroot", "js", "site.js"));
+
+        Assert.Contains("OnPostReturnToUnfinishedAsync", intro);
+        Assert.Contains("PrepareReturnToNearestUnfinishedRoundExcludingCurrent", intro);
+        Assert.Contains("IsUnfinishedRoundReturnPending", intro);
+        Assert.Contains("RedirectToPage(new { id, returning = true })", intro);
+        Assert.Contains("handler === \"ReturnToUnfinishedRound\"", script);
+        Assert.Contains("handler=ReturnToUnfinished", script);
     }
 
     [Fact]

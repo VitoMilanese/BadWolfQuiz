@@ -286,6 +286,33 @@ public sealed class RoundNavigationTests
     }
 
     [Fact]
+    public void Final_guard_return_can_show_leaderboard_before_returning_to_unfinished_round()
+    {
+        var session = RestoreAtRound(
+            [false, false, false],
+            1,
+            furthestVisitedRoundIndex: 2,
+            hasFinalQuestion: true);
+
+        session.PrepareReturnToNearestUnfinishedRoundExcludingCurrent();
+
+        Assert.True(session.IsUnfinishedRoundReturnPending);
+        Assert.True(session.IsCurrentRoundComplete);
+        Assert.Empty(session.GetCurrentRoundStandings());
+        Assert.Equal(1, session.CurrentRoundIndex);
+
+        var restored = GameSession.Restore(
+            session.Quiz,
+            session.Settings,
+            session.CaptureState());
+
+        Assert.True(restored.IsUnfinishedRoundReturnPending);
+        restored.ReturnToNearestUnfinishedRoundExcludingCurrent();
+        Assert.False(restored.IsUnfinishedRoundReturnPending);
+        Assert.NotEqual(1, restored.CurrentRoundIndex);
+    }
+
+    [Fact]
     public void Forced_final_transition_can_show_leaderboard_before_starting_final()
     {
         var session = RestoreAtRound([false], 0, hasFinalQuestion: true);

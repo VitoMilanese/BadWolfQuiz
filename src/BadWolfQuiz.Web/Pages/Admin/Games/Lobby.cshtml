@@ -837,6 +837,14 @@
                         </button>
                     </form>
                 }
+                else if (Model.Game.Session.IsUnfinishedRoundReturnPending)
+                {
+                    <form method="post" asp-page-handler="ReturnToUnfinishedRound">
+                        <button class="button button-primary" type="submit">
+                            @Localizer["GameBoard_ReturnToUnfinishedRound"]
+                        </button>
+                    </form>
+                }
                 else if (Model.Game.Session.HasNextUnfinishedRound)
                 {
                     <form method="post" asp-page-handler="AdvanceRound">

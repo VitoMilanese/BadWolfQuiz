@@ -45,6 +45,7 @@ public sealed class RoundNavigationMarkupTests
         Assert.Contains("asp-page-handler=\"ReturnToUnfinishedRound\"", dialog);
         Assert.Contains("data-confirm-force-advance-final", dialog);
         Assert.Contains("GameBoard_StayInCurrentRound", dialog);
+        Assert.Contains("asp-page-handler=\"ReturnToUnfinishedRound\"", dialog);
     }
 
     [Fact]

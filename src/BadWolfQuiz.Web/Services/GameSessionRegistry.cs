@@ -680,6 +680,21 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public GameSessionRegistration? PrepareReturnToNearestUnfinishedRoundExcludingCurrent(
+        string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            game.Session.PrepareReturnToNearestUnfinishedRoundExcludingCurrent();
+            game.MarkPersistenceChanged();
+            return game;
+        }
+    }
+
     public GameSessionRegistration? PrepareFinalQuestionAdvance(string publicCode)
     {
         var game = Find(publicCode);

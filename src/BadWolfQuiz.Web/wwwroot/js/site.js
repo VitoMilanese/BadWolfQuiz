@@ -160,6 +160,11 @@ const configureGameRoundIntroRoutes = () => {
             return;
         }
 
+        if (handler === "ReturnToUnfinishedRound") {
+            form.action = `${runningIntroBase}?handler=ReturnToUnfinished`;
+            return;
+        }
+
         if (handler === "AdvanceRound") {
             form.action = `${runningIntroBase}?handler=Advance`;
         }
@@ -261,7 +266,10 @@ const configureGameRoundIntroRoutes = () => {
             return;
         }
 
-        if (handler === "Previous" || handler === "PreviousRound") {
+        if (handler === "Previous" ||
+            handler === "PreviousRound" ||
+            handler === "ReturnToUnfinished" ||
+            handler === "ReturnToUnfinishedRound") {
             event.preventDefault();
             event.stopImmediatePropagation();
             routeRoundForm(form);

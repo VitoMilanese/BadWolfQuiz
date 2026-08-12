@@ -15,7 +15,8 @@ public sealed record GameSessionState(
     bool IsForcedRoundAdvancePending = false,
     int FurthestVisitedRoundIndex = 0,
     bool IsPreviousRoundReturnPending = false,
-    bool IsFinalQuestionAdvancePending = false);
+    bool IsFinalQuestionAdvancePending = false,
+    bool IsUnfinishedRoundReturnPending = false);
 
 public sealed record PlayerRoundStartScoreState(GamePlayerId PlayerId, int Score);
 
