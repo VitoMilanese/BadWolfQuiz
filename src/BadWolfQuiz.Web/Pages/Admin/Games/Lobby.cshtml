@@ -63,20 +63,11 @@
                         <form id="force-advance-final-form"
                               method="post"
                               asp-page-handler="ForceAdvanceToFinalQuestion">
-                            @if (Model.Game.Session.HasUnfinishedRegularRoundExcludingCurrent)
-                            {
-                                <button class="action-menu-item"
-                                        type="button"
-                                        data-open-force-advance-final-dialog>
-                                    @Localizer["FinalQuestion_Advance"]
-                                </button>
-                            }
-                            else
-                            {
-                                <button class="action-menu-item" type="submit">
-                                    @Localizer["FinalQuestion_Advance"]
-                                </button>
-                            }
+                            <button class="action-menu-item"
+                                    type="button"
+                                    data-open-force-advance-final-dialog>
+                                @Localizer["FinalQuestion_Advance"]
+                            </button>
                         </form>
                     }
 
@@ -833,6 +824,9 @@
                 @if (Model.Game.Session.HasNextUnfinishedRound)
                 {
                     <form method="post" asp-page-handler="AdvanceRound">
+                        <input type="hidden"
+                               name="filterCompletedCategories"
+                               value="@Model.Game.Session.IsForcedRoundAdvancePending.ToString().ToLowerInvariant()" />
                         <button class="button button-primary" type="submit">
                             @Localizer["GameBoard_StartNextRound"]
                         </button>
@@ -2694,11 +2688,14 @@
                 @Localizer["GameBoard_StayInCurrentRound"]
             </button>
 
-            <form method="post" asp-page-handler="ReturnToUnfinishedRound">
-                <button class="button button-secondary" type="submit">
-                    @Localizer["GameBoard_ReturnToUnfinishedRound"]
-                </button>
-            </form>
+            @if (Model.Game.Session.HasUnfinishedRegularRoundExcludingCurrent)
+            {
+                <form method="post" asp-page-handler="ReturnToUnfinishedRound">
+                    <button class="button button-secondary" type="submit">
+                        @Localizer["GameBoard_ReturnToUnfinishedRound"]
+                    </button>
+                </form>
+            }
 
             <button class="button button-danger"
                     type="button"

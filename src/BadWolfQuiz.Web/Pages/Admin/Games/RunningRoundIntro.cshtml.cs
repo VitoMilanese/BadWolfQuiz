@@ -144,6 +144,7 @@ public sealed class RunningRoundIntroModel(
 
     public async Task<IActionResult> OnPostAdvanceAsync(
         Guid id,
+        bool filterCompletedCategories,
         CancellationToken cancellationToken)
     {
         var game = FindOwned(id);
@@ -152,7 +153,8 @@ public sealed class RunningRoundIntroModel(
             return NotFound();
         }
 
-        var filterCompletedCategories = game.Session.IsForcedRoundAdvancePending;
+        filterCompletedCategories =
+            filterCompletedCategories || game.Session.IsForcedRoundAdvancePending;
 
         try
         {

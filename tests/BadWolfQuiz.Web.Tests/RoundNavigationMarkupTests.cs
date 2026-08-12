@@ -27,11 +27,24 @@ public sealed class RoundNavigationMarkupTests
     }
 
     [Fact]
-    public void Manual_final_warning_is_only_opened_when_other_rounds_are_unfinished()
+    public void Manual_final_always_requires_confirmation_and_only_offers_return_when_available()
     {
         var markup = File.ReadAllText(FindLobbyView());
-        Assert.Contains("HasUnfinishedRegularRoundExcludingCurrent", markup);
-        Assert.Contains("data-open-force-advance-final-dialog", markup);
+        var finalFormStart = markup.IndexOf("id=\"force-advance-final-form\"", StringComparison.Ordinal);
+        var finalFormEnd = markup.IndexOf("</form>", finalFormStart, StringComparison.Ordinal);
+        var finalForm = markup[finalFormStart..finalFormEnd];
+
+        Assert.Contains("type=\"button\"", finalForm);
+        Assert.Contains("data-open-force-advance-final-dialog", finalForm);
+        Assert.DoesNotContain("type=\"submit\"", finalForm);
+
+        var dialogStart = markup.IndexOf("id=\"force-advance-final-dialog\"", StringComparison.Ordinal);
+        var dialogEnd = markup.IndexOf("</dialog>", dialogStart, StringComparison.Ordinal);
+        var dialog = markup[dialogStart..dialogEnd];
+        Assert.Contains("HasUnfinishedRegularRoundExcludingCurrent", dialog);
+        Assert.Contains("asp-page-handler=\"ReturnToUnfinishedRound\"", dialog);
+        Assert.Contains("data-confirm-force-advance-final", dialog);
+        Assert.Contains("GameBoard_StayInCurrentRound", dialog);
     }
 
     [Fact]

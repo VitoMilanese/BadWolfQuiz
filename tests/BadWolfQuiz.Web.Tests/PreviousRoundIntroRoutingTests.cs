@@ -33,10 +33,13 @@ public sealed class PreviousRoundIntroRoutingTests
     {
         var intro = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RunningRoundIntro.cshtml.cs"));
 
-        Assert.Contains("filterCompletedCategories = game.Session.IsForcedRoundAdvancePending", intro);
+        Assert.Contains("filterCompletedCategories || game.Session.IsForcedRoundAdvancePending", intro);
         Assert.Contains("returning = filterCompletedCategories", intro);
         Assert.Contains("RedirectToPage(new { id, returning = true })", intro);
         Assert.Contains("!returning || session.Board.Questions.Any", intro);
+        var markup = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml"));
+        Assert.Contains("name=\"filterCompletedCategories\"", markup);
+        Assert.Contains("IsForcedRoundAdvancePending.ToString().ToLowerInvariant()", markup);
     }
 
     private static string FindFile(params string[] path)
