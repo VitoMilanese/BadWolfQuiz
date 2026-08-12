@@ -691,6 +691,30 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public IActionResult OnPostStartNaturalFinalTransition(Guid id)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        if (game.Session.Status != GameSessionStatus.Running ||
+            game.Session.Quiz.FinalQuestion is null ||
+            !game.Session.IsCurrentRoundComplete ||
+            game.Session.HasNextUnfinishedRound ||
+            game.Session.HasAnyUnfinishedRegularRound)
+        {
+            TempData["ErrorMessage"] = localizer["FinalQuestion_ActionRejected"].Value;
+            return RedirectToPage(new { id });
+        }
+
+        return RedirectToPage("FinalQuestionTransition", new { id, force = false });
+    }
+
     public async Task<IActionResult> OnPostPrepareFinalQuestionLeaderboardAsync(
         Guid id,
         CancellationToken cancellationToken)

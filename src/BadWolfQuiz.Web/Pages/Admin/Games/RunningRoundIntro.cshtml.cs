@@ -309,7 +309,7 @@ public sealed class RunningRoundIntroModel(
         .Where(category => !returning || session.Board.Questions.Any(question =>
             question.SourceRoundId == round.SourceRoundId &&
             question.SourceCategoryId == category.SourceCategoryId &&
-            question.Status != RuntimeQuestionStatus.Resolved))
+            question.Status == RuntimeQuestionStatus.Available))
         .OrderBy(category => category.SortOrder)
         .ToArray();
 

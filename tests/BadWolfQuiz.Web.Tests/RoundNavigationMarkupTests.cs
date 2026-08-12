@@ -65,12 +65,14 @@ public sealed class RoundNavigationMarkupTests
     }
 
     [Fact]
-    public void Last_completed_round_opens_the_natural_final_transition()
+    public void Last_completed_round_posts_to_the_natural_final_transition_handler()
     {
         var markup = File.ReadAllText(FindLobbyView());
+        var model = File.ReadAllText(FindLobbyModel());
 
-        Assert.Contains("asp-page=\"/Admin/Games/FinalQuestionTransition\"", markup);
-        Assert.Contains("asp-route-force=\"false\"", markup);
+        Assert.Contains("asp-page-handler=\"StartNaturalFinalTransition\"", markup);
+        Assert.Contains("OnPostStartNaturalFinalTransition", model);
+        Assert.Contains("RedirectToPage(\"FinalQuestionTransition\", new { id, force = false })", model);
     }
 
     [Fact]
@@ -94,7 +96,7 @@ public sealed class RoundNavigationMarkupTests
         Assert.Contains("LocalRedirect($\"/Admin/Games/RunningRoundIntro/{id:D}?returning=true\")", model);
         Assert.Contains("GetIntroCategories(game.Session, round, returning)", intro);
         Assert.Contains("!returning || session.Board.Questions.Any", intro);
-        Assert.Contains("question.Status != RuntimeQuestionStatus.Resolved", intro);
+        Assert.Contains("question.Status == RuntimeQuestionStatus.Available", intro);
     }
 
     private static string FindSiteScript()
