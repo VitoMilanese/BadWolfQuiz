@@ -52,7 +52,7 @@ public sealed class RoundNavigationMarkupTests
         var intro = File.ReadAllText(FindRunningRoundIntroModel());
 
         Assert.Contains("<button class=\"button button-danger\" type=\"submit\">", markup);
-        Assert.Contains("RedirectToPage(\"/Admin/Games/RunningRoundIntro\", new { id, returning = true })", model);
+        Assert.Contains("LocalRedirect($\"/Admin/Games/RunningRoundIntro/{id:D}?returning=true\")", model);
         Assert.Contains("GetIntroCategories(game.Session, round, returning)", intro);
         Assert.Contains("!returning || session.Board.Questions.Any", intro);
         Assert.Contains("question.Status != RuntimeQuestionStatus.Resolved", intro);

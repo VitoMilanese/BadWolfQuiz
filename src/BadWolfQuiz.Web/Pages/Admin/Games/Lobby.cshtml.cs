@@ -607,7 +607,7 @@ public sealed class LobbyModel(
         await BroadcastBuzzerAsync(game, cancellationToken);
         await BroadcastTimerAsync(game, cancellationToken);
         await StopAutomaticDiscordMuteAsync(id, cancellationToken);
-        return RedirectToPage("/Admin/Games/RunningRoundIntro", new { id, returning = true });
+        return LocalRedirect($"/Admin/Games/RunningRoundIntro/{id:D}?returning=true");
     }
 
     public async Task<IActionResult> OnPostReturnToUnfinishedRoundAsync(
