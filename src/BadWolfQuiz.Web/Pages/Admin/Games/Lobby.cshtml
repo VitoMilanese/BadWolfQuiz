@@ -1482,6 +1482,7 @@
 
 <form id="remove-player-form" method="post" asp-page-handler="RemovePlayer">
     <input id="remove-player-id" name="playerId" type="hidden" />
+    <input id="remove-player-block" name="blockPlayer" type="hidden" value="false" />
 </form>
 
 <aside id="join-code-panel"
@@ -2469,6 +2470,34 @@
     })();
 </script>
 
+<style>
+    #remove-player-dialog {
+        width: min(760px, calc(100vw - 24px));
+        max-width: 760px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        overflow: visible;
+    }
+
+    #remove-player-dialog .dialog-card {
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+    }
+
+    #remove-player-dialog .dialog-actions {
+        flex-wrap: nowrap;
+        gap: 10px;
+    }
+
+    #remove-player-dialog .dialog-actions .button {
+        min-width: 0;
+        padding-inline: 14px;
+        white-space: nowrap;
+    }
+</style>
+
 <dialog id="remove-player-dialog"
         class="app-dialog"
         aria-labelledby="remove-player-dialog-title">
@@ -2493,6 +2522,11 @@
                     type="button"
                     data-confirm-remove-player>
                 @Localizer["GameBoard_RemovePlayer"]
+            </button>
+            <button class="button button-danger"
+                    type="button"
+                    data-confirm-block-player>
+                @Localizer["GameBoard_BlockPlayer"]
             </button>
         </div>
     </div>
@@ -3722,9 +3756,11 @@
             const activePlayerId = document.getElementById("active-player-id");
             const removePlayerForm = document.getElementById("remove-player-form");
             const removePlayerId = document.getElementById("remove-player-id");
+            const removePlayerBlock = document.getElementById("remove-player-block");
             const removePlayerDialog = document.getElementById("remove-player-dialog");
             const removePlayerDialogTarget = document.getElementById("remove-player-dialog-target");
             const confirmRemovePlayer = document.querySelector("[data-confirm-remove-player]");
+            const confirmBlockPlayer = document.querySelector("[data-confirm-block-player]");
             const blockedPlayersDialog = document.getElementById("blocked-players-dialog");
             const forceAdvanceRoundForm = document.getElementById("force-advance-round-form");
             const forceAdvanceRoundDialog = document.getElementById("force-advance-round-dialog");
@@ -3808,6 +3844,17 @@
             };
 
             confirmRemovePlayer?.addEventListener("click", () => {
+                if (removePlayerBlock) {
+                    removePlayerBlock.value = "false";
+                }
+                removePlayerDialog?.close();
+                removePlayerForm?.submit();
+            });
+
+            confirmBlockPlayer?.addEventListener("click", () => {
+                if (removePlayerBlock) {
+                    removePlayerBlock.value = "true";
+                }
                 removePlayerDialog?.close();
                 removePlayerForm?.submit();
             });

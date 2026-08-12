@@ -49,16 +49,20 @@ players appear as pending until the host approves their connection.
 
 ## Removed and blocked players
 
-Removing a player revokes every active access token and removes the player from
-the active card list. The player remains blocked from joining the same game with
-the same case-insensitive name. The host can open **Blocked players** from the
-in-game **Tools** menu and explicitly unblock that player.
+The player-removal dialog gives the host two choices. **Remove player** revokes
+every active access token, disconnects the player, and removes their active card
+without blocking the name from joining again. **Block player** performs the same
+removal but keeps the player blocked from joining the same game with the same
+case-insensitive name until the host explicitly unblocks them from **Blocked
+players** in the in-game **Tools** menu.
 
-Unblocking does not add a disconnected card immediately. The next successful
-join restores the original player record, including its identifier, score,
-avatar, and uploaded-image selection. The browser clears revoked player access
-when it receives the removal event so the next join submits fresh credentials
-instead of following a stale player-page URL.
+A removed-only player does not appear in **Blocked players** and may immediately
+submit a fresh join request. After a blocked player is unblocked, the next
+successful join follows the same restoration flow. In both cases, rejoining
+restores the original player record, including its identifier, score, avatar,
+and uploaded-image selection. The browser clears revoked player access when it
+receives the removal event so the next join submits fresh credentials instead of
+following a stale player-page URL.
 
 ## Player-device navigation and screen wake behavior
 

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -1428,8 +1428,11 @@
   <data name="GameBoard_PlayerJoiningToggleRejected" xml:space="preserve">
     <value>Зараз неможливо змінити доступ до гри.</value>
   </data>
+  <data name="GameBoard_BlockPlayer" xml:space="preserve">
+    <value>Заблокувати гравця</value>
+  </data>
   <data name="GameBoard_RemovePlayer" xml:space="preserve">
-    <value>Виключити гравця</value>
+<value>Виключити гравця</value>
   </data>
   <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve">
     <value>Виключити гравця {0} з гри?</value>

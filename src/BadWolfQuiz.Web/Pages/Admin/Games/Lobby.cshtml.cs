@@ -1399,6 +1399,7 @@ public sealed class LobbyModel(
     public async Task<IActionResult> OnPostRemovePlayerAsync(
         Guid id,
         Guid playerId,
+        bool blockPlayer,
         CancellationToken cancellationToken)
     {
         var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
@@ -1410,11 +1411,18 @@ public sealed class LobbyModel(
 
         try
         {
+            var gamePlayerId = new GamePlayerId(playerId);
             var removal = sessionRegistry.RemovePlayer(
                 game.PublicCode,
-                new GamePlayerId(playerId));
+                gamePlayerId);
 
             if (removal is null)
+            {
+                return NotFound();
+            }
+
+            if (!blockPlayer &&
+                !sessionRegistry.UnblockPlayer(game.PublicCode, gamePlayerId))
             {
                 return NotFound();
             }
