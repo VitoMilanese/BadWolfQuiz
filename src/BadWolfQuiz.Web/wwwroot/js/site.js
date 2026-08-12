@@ -155,6 +155,11 @@ const configureGameRoundIntroRoutes = () => {
             return;
         }
 
+        if (handler === "PreviousRound") {
+            form.action = `${runningIntroBase}?handler=Previous`;
+            return;
+        }
+
         if (handler === "AdvanceRound") {
             form.action = `${runningIntroBase}?handler=Advance`;
         }

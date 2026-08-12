@@ -115,6 +115,33 @@ public sealed class RunningRoundIntroModel(
         };
     }
 
+    public async Task<IActionResult> OnPostPreviousAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = FindOwned(id);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.ReturnToPreviousUnfinishedRound(game.PublicCode);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] = localizer["GameBoard_PreviousRoundRejected"].Value;
+            return RedirectToPage("Lobby", new { id });
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+        return RedirectToPage(new { id, returning = true });
+    }
+
     public async Task<IActionResult> OnPostAdvanceAsync(
         Guid id,
         CancellationToken cancellationToken)
