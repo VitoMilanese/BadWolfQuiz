@@ -65,6 +65,15 @@ public sealed class RoundNavigationMarkupTests
     }
 
     [Fact]
+    public void Last_completed_round_opens_the_natural_final_transition()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+
+        Assert.Contains("asp-page=\"/Admin/Games/FinalQuestionTransition\"", markup);
+        Assert.Contains("asp-route-force=\"false\"", markup);
+    }
+
+    [Fact]
     public void Forced_next_handler_preserves_the_existing_leaderboard_flow()
     {
         var model = File.ReadAllText(FindLobbyModel());

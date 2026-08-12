@@ -866,11 +866,12 @@
                     }
                     else
                     {
-                        <form method="post" asp-page-handler="ForceAdvanceToFinalQuestion">
-                            <button class="button button-primary" type="submit">
-                                @Localizer["FinalQuestion_Start"]
-                            </button>
-                        </form>
+                        <a class="button button-primary"
+                           asp-page="/Admin/Games/FinalQuestionTransition"
+                           asp-route-id="@Model.Game.Session.Id.Value"
+                           asp-route-force="false">
+                            @Localizer["FinalQuestion_Start"]
+                        </a>
                     }
                 }
                 else
