@@ -2571,4 +2571,7 @@
   <data name="GameBoard_UnfinishedRoundsBeforeFinish" xml:space="preserve">
     <value>Alcuni round normali contengono ancora domande non chiuse. Termina comunque la partita oppure torna a un round incompleto.</value>
   </data>
+  <data name="GameBoard_PreviousRoundConfirm" xml:space="preserve">
+    <value>Tornare al round precedente più vicino che contiene ancora domande non chiuse?</value>
+  </data>
 </root>

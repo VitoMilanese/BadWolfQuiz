@@ -2571,4 +2571,7 @@
   <data name="GameBoard_UnfinishedRoundsBeforeFinish" xml:space="preserve">
     <value>У деяких звичайних раундах залишилися незакриті питання. Завершіть гру або поверніться до незавершеного раунду.</value>
   </data>
+  <data name="GameBoard_PreviousRoundConfirm" xml:space="preserve">
+    <value>Повернутися до найближчого попереднього раунду, у якому ще залишилися незакриті питання?</value>
+  </data>
 </root>

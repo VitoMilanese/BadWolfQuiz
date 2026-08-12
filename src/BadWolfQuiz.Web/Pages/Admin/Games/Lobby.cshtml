@@ -38,11 +38,11 @@
 
                     @if (Model.Game.Session.HasPreviousUnfinishedRound)
                     {
-                        <form method="post" asp-page-handler="PreviousRound">
-                            <button class="action-menu-item" type="submit">
-                                @Localizer["GameBoard_PreviousRound"]
-                            </button>
-                        </form>
+                        <button class="action-menu-item"
+                                type="button"
+                                data-open-previous-round-dialog>
+                            @Localizer["GameBoard_PreviousRound"]
+                        </button>
                     }
 
                     @if (Model.Game.Session.HasNextUnfinishedRound)
@@ -2600,6 +2600,37 @@
     </div>
 </dialog>
 
+<dialog id="previous-round-dialog"
+        class="app-dialog"
+        aria-labelledby="previous-round-dialog-title">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2 id="previous-round-dialog-title">
+                @Localizer["GameBoard_PreviousRound"]
+            </h2>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-previous-round-dialog
+                    aria-label="@Localizer["Button_Close"]">
+                ×
+            </button>
+        </div>
+        <p>@Localizer["GameBoard_PreviousRoundConfirm"]</p>
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-close-previous-round-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <form method="post" asp-page-handler="PreviousRound">
+                <button class="button button-primary" type="submit">
+                    @Localizer["GameBoard_PreviousRound"]
+                </button>
+            </form>
+        </div>
+    </div>
+</dialog>
+
 <dialog id="force-advance-round-dialog"
         class="app-dialog"
         aria-labelledby="force-advance-round-dialog-title">
@@ -2715,12 +2746,16 @@
 
 <script>
     (() => {
+        const previousRoundDialog = document.getElementById("previous-round-dialog");
         const naturalFinalDialog = document.getElementById("natural-final-warning-dialog");
         const finishGameDialog = document.getElementById("finish-game-warning-dialog");
+        document.querySelector("[data-open-previous-round-dialog]")?.addEventListener("click", () => previousRoundDialog?.showModal());
         document.querySelector("[data-open-natural-final-warning]")?.addEventListener("click", () => naturalFinalDialog?.showModal());
         document.querySelector("[data-open-finish-game-warning]")?.addEventListener("click", () => finishGameDialog?.showModal());
+        document.querySelectorAll("[data-close-previous-round-dialog]").forEach(button => button.addEventListener("click", () => previousRoundDialog?.close()));
         document.querySelectorAll("[data-close-natural-final-warning]").forEach(button => button.addEventListener("click", () => naturalFinalDialog?.close()));
         document.querySelectorAll("[data-close-finish-game-warning]").forEach(button => button.addEventListener("click", () => finishGameDialog?.close()));
+        previousRoundDialog?.addEventListener("click", event => { if (event.target === previousRoundDialog) previousRoundDialog.close(); });
         naturalFinalDialog?.addEventListener("click", event => { if (event.target === naturalFinalDialog) naturalFinalDialog.close(); });
         finishGameDialog?.addEventListener("click", event => { if (event.target === finishGameDialog) finishGameDialog.close(); });
     })();

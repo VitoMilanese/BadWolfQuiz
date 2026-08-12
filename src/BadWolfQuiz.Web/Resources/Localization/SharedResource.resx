@@ -2571,4 +2571,7 @@
   <data name="GameBoard_UnfinishedRoundsBeforeFinish" xml:space="preserve">
     <value>Some regular rounds still contain unclosed questions. Finish the game anyway or return to an unfinished round.</value>
   </data>
+  <data name="GameBoard_PreviousRoundConfirm" xml:space="preserve">
+    <value>Return to the nearest previous round that still has unclosed questions?</value>
+  </data>
 </root>

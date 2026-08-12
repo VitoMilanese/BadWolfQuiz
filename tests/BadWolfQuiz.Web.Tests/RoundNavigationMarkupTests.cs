@@ -16,6 +16,17 @@ public sealed class RoundNavigationMarkupTests
     }
 
     [Fact]
+    public void Previous_round_requires_confirmation_before_posting()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        Assert.Contains("data-open-previous-round-dialog", markup);
+        Assert.Contains("id=\"previous-round-dialog\"", markup);
+        Assert.Contains("data-close-previous-round-dialog", markup);
+        Assert.Contains("GameBoard_PreviousRoundConfirm", markup);
+        Assert.Contains("<form method=\"post\" asp-page-handler=\"PreviousRound\">", markup);
+    }
+
+    [Fact]
     public void Manual_final_warning_is_only_opened_when_other_rounds_are_unfinished()
     {
         var markup = File.ReadAllText(FindLobbyView());
