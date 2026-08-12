@@ -48,6 +48,22 @@ public sealed class RoundNavigationMarkupTests
     }
 
     [Fact]
+    public void Previous_and_forced_final_transitions_use_round_leaderboard()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var model = File.ReadAllText(FindLobbyModel());
+        var script = File.ReadAllText(FindSiteScript());
+
+        Assert.Contains("IsPreviousRoundReturnPending", markup);
+        Assert.Contains("IsFinalQuestionAdvancePending", markup);
+        Assert.Contains("asp-page-handler=\"PrepareFinalQuestionLeaderboard\"", markup);
+        Assert.Contains("asp-page-handler=\"ForceAdvanceToFinalQuestion\"", markup);
+        Assert.Contains("OnPostPrepareFinalQuestionLeaderboardAsync", model);
+        Assert.Contains("PrepareFinalQuestionAdvance", model);
+        Assert.DoesNotContain("Object.defineProperty(forceAdvanceFinalForm", script);
+    }
+
+    [Fact]
     public void Forced_next_handler_preserves_the_existing_leaderboard_flow()
     {
         var model = File.ReadAllText(FindLobbyModel());
@@ -69,6 +85,18 @@ public sealed class RoundNavigationMarkupTests
         Assert.Contains("GetIntroCategories(game.Session, round, returning)", intro);
         Assert.Contains("!returning || session.Board.Questions.Any", intro);
         Assert.Contains("question.Status != RuntimeQuestionStatus.Resolved", intro);
+    }
+
+    private static string FindSiteScript()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(directory.FullName, "src", "BadWolfQuiz.Web", "wwwroot", "js", "site.js");
+            if (File.Exists(candidate)) return candidate;
+            directory = directory.Parent;
+        }
+        throw new FileNotFoundException("Could not locate site.js from the test output directory.");
     }
 
     private static string FindRunningRoundIntroModel()

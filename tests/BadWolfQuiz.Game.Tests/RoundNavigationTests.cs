@@ -268,6 +268,44 @@ public sealed class RoundNavigationTests
     }
 
     [Fact]
+    public void Previous_round_transition_can_show_leaderboard_before_returning()
+    {
+        var session = RestoreAtRound([false, false], 1);
+
+        session.PrepareReturnToPreviousUnfinishedRound();
+
+        Assert.True(session.IsPreviousRoundReturnPending);
+        Assert.True(session.IsCurrentRoundComplete);
+        Assert.Empty(session.GetCurrentRoundStandings());
+        Assert.Equal(1, session.CurrentRoundIndex);
+
+        session.ReturnToPreviousUnfinishedRound();
+
+        Assert.False(session.IsPreviousRoundReturnPending);
+        Assert.Equal(0, session.CurrentRoundIndex);
+    }
+
+    [Fact]
+    public void Forced_final_transition_can_show_leaderboard_before_starting_final()
+    {
+        var session = RestoreAtRound([false], 0, hasFinalQuestion: true);
+
+        session.PrepareFinalQuestionAdvance();
+
+        Assert.True(session.IsFinalQuestionAdvancePending);
+        Assert.True(session.IsCurrentRoundComplete);
+        Assert.Empty(session.GetCurrentRoundStandings());
+
+        var restored = GameSession.Restore(
+            session.Quiz,
+            session.Settings,
+            session.CaptureState());
+
+        Assert.True(restored.IsFinalQuestionAdvancePending);
+        Assert.Equal(GameSessionStatus.Running, restored.Status);
+    }
+
+    [Fact]
     public void Forced_next_after_return_skips_a_fully_closed_round()
     {
         var session = RestoreAtRound([false, false, true, false], 1);

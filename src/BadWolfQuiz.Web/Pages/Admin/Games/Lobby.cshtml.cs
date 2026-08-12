@@ -677,6 +677,40 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostPrepareFinalQuestionLeaderboardAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        if (game.Session.Players.Count == 0)
+        {
+            return RedirectToPage("FinalQuestionTransition", new { id, force = true });
+        }
+
+        try
+        {
+            sessionRegistry.PrepareFinalQuestionAdvance(game.PublicCode);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] = localizer["FinalQuestion_ActionRejected"].Value;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostForceAdvanceToFinalQuestionAsync(
         Guid id,
         CancellationToken cancellationToken)

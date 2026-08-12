@@ -13,7 +13,9 @@ public sealed record GameSessionState(
     IReadOnlyList<RuntimeQuestionState> Questions,
     FinalQuestionState? FinalQuestion,
     bool IsForcedRoundAdvancePending = false,
-    int FurthestVisitedRoundIndex = 0);
+    int FurthestVisitedRoundIndex = 0,
+    bool IsPreviousRoundReturnPending = false,
+    bool IsFinalQuestionAdvancePending = false);
 
 public sealed record PlayerRoundStartScoreState(GamePlayerId PlayerId, int Score);
 

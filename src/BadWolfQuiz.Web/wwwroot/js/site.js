@@ -202,14 +202,6 @@ const configureGameRoundIntroRoutes = () => {
 
     document.querySelectorAll("form").forEach(routeRoundForm);
 
-    const forceAdvanceFinalForm = document.getElementById("force-advance-final-form");
-    if (forceAdvanceFinalForm instanceof HTMLFormElement) {
-        Object.defineProperty(forceAdvanceFinalForm, "submit", {
-            configurable: true,
-            value: () => openFinalTransition(true)
-        });
-    }
-
     document.addEventListener("click", event => {
         const target = event.target instanceof Element ? event.target : null;
 

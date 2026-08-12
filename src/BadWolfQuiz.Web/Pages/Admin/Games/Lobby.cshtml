@@ -62,7 +62,7 @@
                     {
                         <form id="force-advance-final-form"
                               method="post"
-                              asp-page-handler="ForceAdvanceToFinalQuestion">
+                              asp-page-handler="PrepareFinalQuestionLeaderboard">
                             <button class="action-menu-item"
                                     type="button"
                                     data-open-force-advance-final-dialog>
@@ -821,7 +821,23 @@
                         </li>
                     }
                 </ol>
-                @if (Model.Game.Session.HasNextUnfinishedRound)
+                @if (Model.Game.Session.IsPreviousRoundReturnPending)
+                {
+                    <form method="post" asp-page-handler="PreviousRound">
+                        <button class="button button-primary" type="submit">
+                            @Localizer["GameBoard_PreviousRound"]
+                        </button>
+                    </form>
+                }
+                else if (Model.Game.Session.IsFinalQuestionAdvancePending)
+                {
+                    <form method="post" asp-page-handler="ForceAdvanceToFinalQuestion">
+                        <button class="button button-primary" type="submit">
+                            @Localizer["FinalQuestion_Start"]
+                        </button>
+                    </form>
+                }
+                else if (Model.Game.Session.HasNextUnfinishedRound)
                 {
                     <form method="post" asp-page-handler="AdvanceRound">
                         <input type="hidden"

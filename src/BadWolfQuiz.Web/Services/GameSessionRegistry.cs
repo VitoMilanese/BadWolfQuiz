@@ -665,6 +665,35 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public GameSessionRegistration? PrepareReturnToPreviousUnfinishedRound(
+        string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            game.Session.PrepareReturnToPreviousUnfinishedRound();
+            game.MarkPersistenceChanged();
+            return game;
+        }
+    }
+
+    public GameSessionRegistration? PrepareFinalQuestionAdvance(string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            game.Session.PrepareFinalQuestionAdvance();
+            game.MarkPersistenceChanged();
+            return game;
+        }
+    }
+
     public QuizRoundSnapshot? ReturnToPreviousUnfinishedRound(string publicCode)
     {
         var game = Find(publicCode);

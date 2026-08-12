@@ -125,9 +125,20 @@ public sealed class RunningRoundIntroModel(
             return NotFound();
         }
 
+        var showLeaderboard =
+            game.Session.Players.Count > 0 &&
+            !game.Session.IsPreviousRoundReturnPending;
+
         try
         {
-            sessionRegistry.ReturnToPreviousUnfinishedRound(game.PublicCode);
+            if (showLeaderboard)
+            {
+                sessionRegistry.PrepareReturnToPreviousUnfinishedRound(game.PublicCode);
+            }
+            else
+            {
+                sessionRegistry.ReturnToPreviousUnfinishedRound(game.PublicCode);
+            }
         }
         catch (GameRuleViolationException)
         {
@@ -139,7 +150,9 @@ public sealed class RunningRoundIntroModel(
         await BroadcastBuzzerAsync(game, cancellationToken);
         await BroadcastTimerAsync(game, cancellationToken);
         await StopAutomaticDiscordMuteAsync(id, cancellationToken);
-        return RedirectToPage(new { id, returning = true });
+        return showLeaderboard
+            ? RedirectToPage("Lobby", new { id })
+            : RedirectToPage(new { id, returning = true });
     }
 
     public async Task<IActionResult> OnPostAdvanceAsync(

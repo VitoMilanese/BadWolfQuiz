@@ -59,6 +59,10 @@ public sealed class GameSession
 
     public bool IsForcedRoundAdvancePending { get; private set; }
 
+    public bool IsPreviousRoundReturnPending { get; private set; }
+
+    public bool IsFinalQuestionAdvancePending { get; private set; }
+
     public int CurrentRoundNumber => CurrentRoundIndex + 1;
 
     public QuizRoundSnapshot CurrentRound => Quiz.Rounds
@@ -66,7 +70,10 @@ public sealed class GameSession
         .ElementAt(CurrentRoundIndex);
 
     public bool IsCurrentRoundComplete =>
-        IsForcedRoundAdvancePending || IsRoundComplete(CurrentRoundIndex);
+        IsForcedRoundAdvancePending ||
+        IsPreviousRoundReturnPending ||
+        IsFinalQuestionAdvancePending ||
+        IsRoundComplete(CurrentRoundIndex);
 
     public bool HasNextRound => CurrentRoundIndex < Quiz.Rounds.Count - 1;
 
@@ -122,7 +129,9 @@ public sealed class GameSession
         Board.Questions.Select(question => question.CaptureState()).ToArray(),
         FinalQuestion?.CaptureState(),
         IsForcedRoundAdvancePending,
-        FurthestVisitedRoundIndex);
+        FurthestVisitedRoundIndex,
+        IsPreviousRoundReturnPending,
+        IsFinalQuestionAdvancePending);
 
     public static GameSession Restore(
         QuizSnapshot quiz,
@@ -144,6 +153,8 @@ public sealed class GameSession
                 state.FurthestVisitedRoundIndex,
                 state.CurrentRoundIndex),
             IsForcedRoundAdvancePending = state.IsForcedRoundAdvancePending,
+            IsPreviousRoundReturnPending = state.IsPreviousRoundReturnPending,
+            IsFinalQuestionAdvancePending = state.IsFinalQuestionAdvancePending,
             CreatedAtUtc = state.CreatedAtUtc,
             StartedAtUtc = state.StartedAtUtc
         };
@@ -798,6 +809,38 @@ public sealed class GameSession
         return MoveToRound(nextRoundIndex, nextActivePlayerId);
     }
 
+    public void PrepareReturnToPreviousUnfinishedRound()
+    {
+        EnsureRunning();
+        ResolveInProgressQuestionsForRound(CurrentRoundIndex);
+
+        if (FindPreviousUnfinishedRoundIndex() is null)
+        {
+            throw new GameRuleViolationException(
+                "The game does not have an unfinished previous round.");
+        }
+
+        IsForcedRoundAdvancePending = false;
+        IsPreviousRoundReturnPending = true;
+        IsFinalQuestionAdvancePending = false;
+    }
+
+    public void PrepareFinalQuestionAdvance()
+    {
+        EnsureRunning();
+
+        if (Quiz.FinalQuestion is null)
+        {
+            throw new GameRuleViolationException(
+                "This quiz does not contain a final question.");
+        }
+
+        ResolveInProgressQuestionsForRound(CurrentRoundIndex);
+        IsForcedRoundAdvancePending = false;
+        IsPreviousRoundReturnPending = false;
+        IsFinalQuestionAdvancePending = true;
+    }
+
     public QuizRoundSnapshot ReturnToPreviousUnfinishedRound()
     {
         EnsureRunning();
@@ -843,6 +886,8 @@ public sealed class GameSession
 
         ResolveInProgressQuestionsForRound(CurrentRoundIndex);
         IsForcedRoundAdvancePending = true;
+        IsPreviousRoundReturnPending = false;
+        IsFinalQuestionAdvancePending = false;
     }
 
     public IReadOnlyList<GameResultStanding> GetCurrentRoundStandings()
@@ -895,6 +940,8 @@ public sealed class GameSession
     private FinalQuestion StartFinalQuestionCore(FinalQuestionSnapshot definition)
     {
         IsForcedRoundAdvancePending = false;
+        IsPreviousRoundReturnPending = false;
+        IsFinalQuestionAdvancePending = false;
         var eligiblePlayers = Settings.AllowNegativeScoreFinalPlayers
             ? _players.ToArray()
             : _players.Where(player => player.Score >= 0).ToArray();
@@ -1070,6 +1117,8 @@ public sealed class GameSession
         FurthestVisitedRoundIndex = Math.Max(FurthestVisitedRoundIndex, roundIndex);
         CurrentRoundIndex = roundIndex;
         IsForcedRoundAdvancePending = false;
+        IsPreviousRoundReturnPending = false;
+        IsFinalQuestionAdvancePending = false;
         CaptureRoundStartScores();
         ActivePlayerId = activePlayerId;
         Timer.Stop();

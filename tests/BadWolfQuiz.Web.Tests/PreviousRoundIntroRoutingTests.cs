@@ -29,6 +29,17 @@ public sealed class PreviousRoundIntroRoutingTests
     }
 
     [Fact]
+    public void Previous_round_with_players_stages_leaderboard_before_intro()
+    {
+        var intro = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RunningRoundIntro.cshtml.cs"));
+
+        Assert.Contains("IsPreviousRoundReturnPending", intro);
+        Assert.Contains("PrepareReturnToPreviousUnfinishedRound", intro);
+        Assert.Contains("RedirectToPage(\"Lobby\", new { id })", intro);
+        Assert.Contains("RedirectToPage(new { id, returning = true })", intro);
+    }
+
+    [Fact]
     public void Forced_next_round_filters_completed_category_intros()
     {
         var intro = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RunningRoundIntro.cshtml.cs"));
