@@ -44,6 +44,31 @@ public sealed class RoundNavigationMarkupTests
         Assert.DoesNotContain("sessionRegistry.ForceAdvanceToNextRound(game.PublicCode);", model);
     }
 
+    [Fact]
+    public void Previous_round_confirmation_uses_danger_action_and_restarts_filtered_intro()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var model = File.ReadAllText(FindLobbyModel());
+        var intro = File.ReadAllText(FindRunningRoundIntroModel());
+
+        Assert.Contains("<button class=\"button button-danger\" type=\"submit\">", markup);
+        Assert.Contains("RedirectToPage(\"RunningRoundIntro\", new { id })", model);
+        Assert.Contains("GetUnfinishedCategories(game.Session, round)", intro);
+        Assert.Contains("question.Status != RuntimeQuestionStatus.Resolved", intro);
+    }
+
+    private static string FindRunningRoundIntroModel()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(directory.FullName, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RunningRoundIntro.cshtml.cs");
+            if (File.Exists(candidate)) return candidate;
+            directory = directory.Parent;
+        }
+        throw new FileNotFoundException("Could not locate RunningRoundIntro.cshtml.cs from the test output directory.");
+    }
+
     private static string FindLobbyModel()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

@@ -84,9 +84,7 @@ public sealed class RunningRoundIntroModel(
 
         if (category.HasValue)
         {
-            var categories = round.CategoryIntros
-                .OrderBy(item => item.SortOrder)
-                .ToArray();
+            var categories = GetUnfinishedCategories(game.Session, round);
             if (category.Value < 0 || category.Value >= categories.Length)
             {
                 return NotFound();
@@ -186,9 +184,7 @@ public sealed class RunningRoundIntroModel(
         GameId = id;
         var session = game.Session;
         var round = session.CurrentRound;
-        var categories = round.CategoryIntros
-            .OrderBy(category => category.SortOrder)
-            .ToArray();
+        var categories = GetUnfinishedCategories(session, round);
         CategoryCount = categories.Length;
 
         if (!categoryIndex.HasValue)
@@ -214,6 +210,16 @@ public sealed class RunningRoundIntroModel(
         IsFinalCategory = categoryIndex.Value == categories.Length - 1;
         NextCategoryIndex = IsFinalCategory ? null : categoryIndex.Value + 1;
     }
+
+    private static QuizCategoryIntroSnapshot[] GetUnfinishedCategories(
+        GameSession session,
+        QuizRoundSnapshot round) => round.CategoryIntros
+        .Where(category => session.Board.Questions.Any(question =>
+            question.SourceRoundId == round.SourceRoundId &&
+            question.SourceCategoryId == category.SourceCategoryId &&
+            question.Status != RuntimeQuestionStatus.Resolved))
+        .OrderBy(category => category.SortOrder)
+        .ToArray();
 
     private static IReadOnlyList<ContentBlockSnapshot> FilterDisplayBlocks(
         IEnumerable<ContentBlockSnapshot> blocks) => blocks
