@@ -243,7 +243,7 @@ const configureGameRoundIntroRoutes = () => {
                         if (!response.ok) {
                             throw new Error(response.statusText);
                         }
-                        window.location.assign(runningIntroBase);
+                        window.location.assign(response.url || `${runningIntroBase}?returning=true`);
                     })
                     .catch(error => {
                         console.error(error);

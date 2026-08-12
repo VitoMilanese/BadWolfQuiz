@@ -66,6 +66,19 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.Contains("question.Status == RuntimeQuestionStatus.Available", intro);
     }
 
+    [Fact]
+    public void Forced_next_without_players_keeps_filtered_intro_redirect()
+    {
+        var script = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "wwwroot", "js", "site.js"));
+        var noPlayerBranchStart = script.IndexOf("if (!hasPlayers)", StringComparison.Ordinal);
+        var noPlayerBranchEnd = script.IndexOf("const submitter", noPlayerBranchStart, StringComparison.Ordinal);
+        var noPlayerBranch = script[noPlayerBranchStart..noPlayerBranchEnd];
+
+        Assert.Contains("fetch(`${runningIntroBase}?handler=ForceAdvance`", noPlayerBranch);
+        Assert.Contains("window.location.assign(response.url || `${runningIntroBase}?returning=true`)", noPlayerBranch);
+        Assert.DoesNotContain("window.location.assign(runningIntroBase);", noPlayerBranch);
+    }
+
     private static string FindFile(params string[] path)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
