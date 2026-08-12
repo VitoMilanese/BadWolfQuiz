@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -1428,8 +1428,11 @@
   <data name="GameBoard_PlayerJoiningToggleRejected" xml:space="preserve">
     <value>Al momento non è possibile modificare l’accesso alla partita.</value>
   </data>
+  <data name="GameBoard_BlockPlayer" xml:space="preserve">
+    <value>Blocca giocatore</value>
+  </data>
   <data name="GameBoard_RemovePlayer" xml:space="preserve">
-    <value>Espelli giocatore</value>
+<value>Espelli giocatore</value>
   </data>
   <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve">
     <value>Espellere {0} dalla partita?</value>
