@@ -3,15 +3,30 @@
 The host lobby keeps the six-character join code hidden behind a reveal control
 by default. The host can reveal the existing QR code and join code when needed.
 Dedicated actions allow the host to copy either the join code or the direct
-player join link.
+player join link. The decorative header QR button is not shown in the lobby
+because the lobby already provides this join-code reveal control.
 
 The QR payload is the direct player URL `/Join/{code}`. After scanning, the join
 page keeps the game code in a hidden field and asks only for the player name.
 Manual code entry remains available from the regular join page.
 
-During a running game, the host can open the join information from the **Tools**
-menu as a floating panel instead of a modal dialog. The panel can be moved and
-resized so the host can place it in an unused part of the game screen.
+During a running game, the host opens the join information from a dedicated QR
+button in the game header instead of from the **Tools** menu. The button sits
+between **Tools** and the Discord microphone control and opens the same movable,
+resizable floating join panel as before.
+
+The header button itself contains a decorative QR code rather than the real game
+join URL. Its payload comes from `Game:HeaderQrPayload`; if the setting is
+missing, null, empty, or whitespace, the application uses `Чупа`. This decorative
+QR payload does not affect the real QR code or six-character code shown in the
+join panel.
+
+The QR header button and Discord microphone button are fixed-size squares with
+matching dimensions so Final Question and leaderboard layouts cannot enlarge the
+QR control or the header. The QR image fills its button without padding. On dark
+site themes the decorative QR uses a dark background with white modules; on
+light themes it uses a light background with black modules. Custom themes choose
+the QR treatment from the configured background brightness.
 
 The panel position, size, and visibility are persisted in the browser and
 restored after a page reload. Its title, QR code, and six-character join code
@@ -24,16 +39,18 @@ state where the panel can be shown, an open panel becomes visible again.
 
 ## Public address
 
-`Game:PublicBaseUrl` controls the origin encoded in the QR code. When it is empty,
-the application uses the scheme, host, port, and path base of the current host
-request. Set it when the host opens the site through `localhost`, behind a reverse
-proxy, or at an address that player phones cannot reach directly.
+`Game:PublicBaseUrl` controls the origin encoded in the real player-join QR code.
+When it is empty, the application uses the scheme, host, port, and path base of
+the current host request. Set it when the host opens the site through
+`localhost`, behind a reverse proxy, or at an address that player phones cannot
+reach directly.
 
 Example:
 
 ```json
 "Game": {
-  "PublicBaseUrl": "https://quiz.example.com"
+  "PublicBaseUrl": "https://quiz.example.com",
+  "HeaderQrPayload": "Чупа"
 }
 ```
 
