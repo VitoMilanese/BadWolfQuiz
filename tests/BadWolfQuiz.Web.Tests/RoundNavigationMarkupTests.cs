@@ -23,6 +23,28 @@ public sealed class RoundNavigationMarkupTests
         Assert.Contains("data-open-force-advance-final-dialog", markup);
     }
 
+    [Fact]
+    public void Forced_next_handler_preserves_the_existing_leaderboard_flow()
+    {
+        var model = File.ReadAllText(FindLobbyModel());
+        Assert.Contains("sessionRegistry.ForceCompleteCurrentRound(game.PublicCode);", model);
+        Assert.Contains("if (game.Session.Players.Count == 0)", model);
+        Assert.Contains("sessionRegistry.AdvanceToNextRound(game.PublicCode);", model);
+        Assert.DoesNotContain("sessionRegistry.ForceAdvanceToNextRound(game.PublicCode);", model);
+    }
+
+    private static string FindLobbyModel()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(directory.FullName, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml.cs");
+            if (File.Exists(candidate)) return candidate;
+            directory = directory.Parent;
+        }
+        throw new FileNotFoundException("Could not locate Lobby.cshtml.cs from the test output directory.");
+    }
+
     private static string FindLobbyView()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

@@ -11,7 +11,8 @@ public sealed record GameSessionState(
     IReadOnlyList<GamePlayerState> Players,
     IReadOnlyList<GamePlayerState> RemovedPlayers,
     IReadOnlyList<RuntimeQuestionState> Questions,
-    FinalQuestionState? FinalQuestion);
+    FinalQuestionState? FinalQuestion,
+    bool IsForcedRoundAdvancePending = false);
 
 public sealed record PlayerRoundStartScoreState(GamePlayerId PlayerId, int Score);
 

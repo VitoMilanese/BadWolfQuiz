@@ -58,6 +58,42 @@ public sealed class RoundNavigationTests
     }
 
     [Fact]
+    public void Forced_round_summary_then_start_next_round_keeps_previous_round_unfinished()
+    {
+        var session = RestoreAtRound([false, false], 0);
+        session.AddPlayer("Rose");
+        var firstQuestion = session.Board.Questions.Single(q => q.SourceQuestionId == 101);
+
+        session.ForceCompleteCurrentRound();
+
+        Assert.True(session.IsCurrentRoundComplete);
+        Assert.True(session.IsForcedRoundAdvancePending);
+        Assert.Equal(RuntimeQuestionStatus.Available, firstQuestion.Status);
+        Assert.Equal(0, session.CurrentRoundIndex);
+
+        session.AdvanceToNextRound();
+
+        Assert.Equal(1, session.CurrentRoundIndex);
+        Assert.False(session.IsForcedRoundAdvancePending);
+        Assert.True(session.HasPreviousUnfinishedRound);
+        Assert.Equal(RuntimeQuestionStatus.Available, firstQuestion.Status);
+    }
+
+    [Fact]
+    public void Forced_round_without_players_can_advance_immediately_and_keeps_previous_round_unfinished()
+    {
+        var session = RestoreAtRound([false, false], 0);
+        var firstQuestion = session.Board.Questions.Single(q => q.SourceQuestionId == 101);
+
+        session.ForceCompleteCurrentRound();
+        session.AdvanceToNextRound();
+
+        Assert.Equal(1, session.CurrentRoundIndex);
+        Assert.True(session.HasPreviousUnfinishedRound);
+        Assert.Equal(RuntimeQuestionStatus.Available, firstQuestion.Status);
+    }
+
+    [Fact]
     public void Forced_next_round_preserves_unopened_questions()
     {
         var session = RestoreAtRound([false, false], 0);

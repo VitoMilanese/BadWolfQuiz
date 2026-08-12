@@ -656,7 +656,12 @@ public sealed class LobbyModel(
 
         try
         {
-            sessionRegistry.ForceAdvanceToNextRound(game.PublicCode);
+            sessionRegistry.ForceCompleteCurrentRound(game.PublicCode);
+
+            if (game.Session.Players.Count == 0)
+            {
+                sessionRegistry.AdvanceToNextRound(game.PublicCode);
+            }
         }
         catch (GameRuleViolationException)
         {
