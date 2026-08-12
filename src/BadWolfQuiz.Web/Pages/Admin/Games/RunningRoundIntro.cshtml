@@ -29,7 +29,7 @@
                             }
                             <img class="game-intro-image"
                                  src="@(block.FileData is { Length: > 0 }
-                                     ? Url.Page("RunningRoundIntro", "ContentBlock", new { id = Model.GameId, category = Model.CategoryIndex, sourceContentBlockId = block.SourceContentBlockId })
+                                     ? Url.Page("RunningRoundIntro", "ContentBlock", new { id = Model.GameId, category = Model.CategoryIndex, sourceContentBlockId = block.SourceContentBlockId, returning = Model.IsReturning })
                                      : block.MediaPath)"
                                  alt="@(block.FileName ?? Model.Heading)" />
                             @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
@@ -64,7 +64,8 @@
                data-game-intro-next
                asp-page="RunningRoundIntro"
                asp-route-id="@Model.GameId"
-               asp-route-category="@Model.NextCategoryIndex">
+               asp-route-category="@Model.NextCategoryIndex"
+               asp-route-returning="@Model.IsReturning">
                 @Model.NextLabel
             </a>
         }

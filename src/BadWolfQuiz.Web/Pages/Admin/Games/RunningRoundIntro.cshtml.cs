@@ -26,6 +26,7 @@ public sealed class RunningRoundIntroModel(
     public int? CategoryIndex { get; private set; }
     public int? NextCategoryIndex { get; private set; }
     public bool IsFinalCategory { get; private set; }
+    public bool IsReturning { get; private set; }
 
     public string SkipLabel => CurrentLanguage switch
     {
@@ -51,7 +52,7 @@ public sealed class RunningRoundIntroModel(
     private static string CurrentLanguage =>
         CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
 
-    public IActionResult OnGet(Guid id, int? category)
+    public IActionResult OnGet(Guid id, int? category, bool returning = false)
     {
         var game = FindOwned(id);
         if (game is null)
@@ -64,14 +65,15 @@ public sealed class RunningRoundIntroModel(
             return RedirectToPage("Lobby", new { id });
         }
 
-        LoadIntro(game, id, category);
+        LoadIntro(game, id, category, returning);
         return Page();
     }
 
     public IActionResult OnGetContentBlock(
         Guid id,
         int? category,
-        int sourceContentBlockId)
+        int sourceContentBlockId,
+        bool returning = false)
     {
         var game = FindOwned(id);
         if (game is null)
@@ -84,7 +86,7 @@ public sealed class RunningRoundIntroModel(
 
         if (category.HasValue)
         {
-            var categories = GetUnfinishedCategories(game.Session, round);
+            var categories = GetIntroCategories(game.Session, round, returning);
             if (category.Value < 0 || category.Value >= categories.Length)
             {
                 return NotFound();
@@ -179,12 +181,14 @@ public sealed class RunningRoundIntroModel(
     private void LoadIntro(
         GameSessionRegistration game,
         Guid id,
-        int? categoryIndex)
+        int? categoryIndex,
+        bool returning)
     {
         GameId = id;
+        IsReturning = returning;
         var session = game.Session;
         var round = session.CurrentRound;
-        var categories = GetUnfinishedCategories(session, round);
+        var categories = GetIntroCategories(session, round, returning);
         CategoryCount = categories.Length;
 
         if (!categoryIndex.HasValue)
@@ -211,10 +215,11 @@ public sealed class RunningRoundIntroModel(
         NextCategoryIndex = IsFinalCategory ? null : categoryIndex.Value + 1;
     }
 
-    private static QuizCategoryIntroSnapshot[] GetUnfinishedCategories(
+    private static QuizCategoryIntroSnapshot[] GetIntroCategories(
         GameSession session,
-        QuizRoundSnapshot round) => round.CategoryIntros
-        .Where(category => session.Board.Questions.Any(question =>
+        QuizRoundSnapshot round,
+        bool returning) => round.CategoryIntros
+        .Where(category => !returning || session.Board.Questions.Any(question =>
             question.SourceRoundId == round.SourceRoundId &&
             question.SourceCategoryId == category.SourceCategoryId &&
             question.Status != RuntimeQuestionStatus.Resolved))
