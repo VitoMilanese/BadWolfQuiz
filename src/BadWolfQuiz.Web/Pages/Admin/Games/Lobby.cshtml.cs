@@ -580,6 +580,67 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostPreviousRoundAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.ReturnToPreviousUnfinishedRound(game.PublicCode);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_PreviousRoundRejected"].Value;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostReturnToUnfinishedRoundAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.ReturnToNearestUnfinishedRoundExcludingCurrent(
+                game.PublicCode);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_PreviousRoundRejected"].Value;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostForceAdvanceRoundAsync(
         Guid id,
         CancellationToken cancellationToken)
@@ -595,12 +656,7 @@ public sealed class LobbyModel(
 
         try
         {
-            sessionRegistry.ForceCompleteCurrentRound(game.PublicCode);
-
-            if (game.Session.Players.Count == 0)
-            {
-                sessionRegistry.AdvanceToNextRound(game.PublicCode);
-            }
+            sessionRegistry.ForceAdvanceToNextRound(game.PublicCode);
         }
         catch (GameRuleViolationException)
         {

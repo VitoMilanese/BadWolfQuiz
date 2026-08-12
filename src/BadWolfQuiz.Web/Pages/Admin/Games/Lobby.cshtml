@@ -36,7 +36,16 @@
                         </form>
                     }
 
-                    @if (Model.Game.Session.HasNextRound)
+                    @if (Model.Game.Session.HasPreviousUnfinishedRound)
+                    {
+                        <form method="post" asp-page-handler="PreviousRound">
+                            <button class="action-menu-item" type="submit">
+                                @Localizer["GameBoard_PreviousRound"]
+                            </button>
+                        </form>
+                    }
+
+                    @if (Model.Game.Session.HasNextUnfinishedRound)
                     {
                         <form id="force-advance-round-form"
                                 method="post"
@@ -54,11 +63,20 @@
                         <form id="force-advance-final-form"
                               method="post"
                               asp-page-handler="ForceAdvanceToFinalQuestion">
-                            <button class="action-menu-item"
-                                    type="button"
-                                    data-open-force-advance-final-dialog>
-                                @Localizer["FinalQuestion_Advance"]
-                            </button>
+                            @if (Model.Game.Session.HasUnfinishedRegularRoundExcludingCurrent)
+                            {
+                                <button class="action-menu-item"
+                                        type="button"
+                                        data-open-force-advance-final-dialog>
+                                    @Localizer["FinalQuestion_Advance"]
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="action-menu-item" type="submit">
+                                    @Localizer["FinalQuestion_Advance"]
+                                </button>
+                            }
                         </form>
                     }
 
@@ -812,7 +830,7 @@
                         </li>
                     }
                 </ol>
-                @if (Model.Game.Session.HasNextRound)
+                @if (Model.Game.Session.HasNextUnfinishedRound)
                 {
                     <form method="post" asp-page-handler="AdvanceRound">
                         <button class="button button-primary" type="submit">
@@ -820,26 +838,40 @@
                         </button>
                     </form>
                 }
-                else
+                else if (Model.Game.Session.Quiz.FinalQuestion is not null)
                 {
-                    @if (Model.Game.Session.Quiz.FinalQuestion is not null)
+                    @if (Model.Game.Session.HasAnyUnfinishedRegularRound)
                     {
-                        <form method="post" asp-page-handler="StartFinalQuestion">
+                        <button class="button button-primary" type="button" data-open-natural-final-warning>
+                            @Localizer["FinalQuestion_Start"]
+                        </button>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="ForceAdvanceToFinalQuestion">
                             <button class="button button-primary" type="submit">
                                 @Localizer["FinalQuestion_Start"]
                             </button>
                         </form>
                     }
-                    else
-                    {
-                        <p class="round-summary-finished">@Localizer["GameBoard_AllRoundsComplete"]</p>
-                        <div class="form-actions final-finish-actions">
-                            <a class="button button-primary"
-                               asp-page="/Admin/Quizzes/Index">
+                }
+                else
+                {
+                    <p class="round-summary-finished">@Localizer["GameBoard_AllRoundsComplete"]</p>
+                    <div class="form-actions final-finish-actions">
+                        @if (Model.Game.Session.HasAnyUnfinishedRegularRound)
+                        {
+                            <button class="button button-primary" type="button" data-open-finish-game-warning>
+                                @Localizer["GameBoard_FinishGame"]
+                            </button>
+                        }
+                        else
+                        {
+                            <a class="button button-primary" asp-page="/Admin/Quizzes/Index">
                                 @Localizer["GameBoard_FinishGame"]
                             </a>
-                        </div>
-                    }
+                        }
+                    </div>
                 }
             </section>
         }
@@ -2621,15 +2653,21 @@
         </div>
 
         <p>
-            @Localizer["FinalQuestion_ForceAdvanceConfirm"]
+            @Localizer["FinalQuestion_UnfinishedOtherRoundsWarning"]
         </p>
 
         <div class="form-actions dialog-actions">
             <button class="button button-secondary"
                     type="button"
                     data-close-force-advance-final-dialog>
-                @Localizer["Button_Cancel"]
+                @Localizer["GameBoard_StayInCurrentRound"]
             </button>
+
+            <form method="post" asp-page-handler="ReturnToUnfinishedRound">
+                <button class="button button-secondary" type="submit">
+                    @Localizer["GameBoard_ReturnToUnfinishedRound"]
+                </button>
+            </form>
 
             <button class="button button-danger"
                     type="button"
@@ -2639,6 +2677,54 @@
         </div>
     </div>
 </dialog>
+
+
+<dialog id="natural-final-warning-dialog" class="app-dialog" aria-labelledby="natural-final-warning-title">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2 id="natural-final-warning-title">@Localizer["FinalQuestion_Start"]</h2>
+            <button class="dialog-close" type="button" data-close-natural-final-warning aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+        <p>@Localizer["FinalQuestion_UnfinishedRoundsWarning"]</p>
+        <div class="form-actions dialog-actions">
+            <form method="post" asp-page-handler="ReturnToUnfinishedRound">
+                <button class="button button-secondary" type="submit">@Localizer["GameBoard_ReturnToUnfinishedRound"]</button>
+            </form>
+            <form method="post" asp-page-handler="ForceAdvanceToFinalQuestion">
+                <button class="button button-danger" type="submit">@Localizer["FinalQuestion_Advance"]</button>
+            </form>
+        </div>
+    </div>
+</dialog>
+
+<dialog id="finish-game-warning-dialog" class="app-dialog" aria-labelledby="finish-game-warning-title">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2 id="finish-game-warning-title">@Localizer["GameBoard_FinishGame"]</h2>
+            <button class="dialog-close" type="button" data-close-finish-game-warning aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+        <p>@Localizer["GameBoard_UnfinishedRoundsBeforeFinish"]</p>
+        <div class="form-actions dialog-actions">
+            <form method="post" asp-page-handler="ReturnToUnfinishedRound">
+                <button class="button button-secondary" type="submit">@Localizer["GameBoard_ReturnToUnfinishedRound"]</button>
+            </form>
+            <a class="button button-danger" asp-page="/Admin/Quizzes/Index">@Localizer["GameBoard_FinishGame"]</a>
+        </div>
+    </div>
+</dialog>
+
+<script>
+    (() => {
+        const naturalFinalDialog = document.getElementById("natural-final-warning-dialog");
+        const finishGameDialog = document.getElementById("finish-game-warning-dialog");
+        document.querySelector("[data-open-natural-final-warning]")?.addEventListener("click", () => naturalFinalDialog?.showModal());
+        document.querySelector("[data-open-finish-game-warning]")?.addEventListener("click", () => finishGameDialog?.showModal());
+        document.querySelectorAll("[data-close-natural-final-warning]").forEach(button => button.addEventListener("click", () => naturalFinalDialog?.close()));
+        document.querySelectorAll("[data-close-finish-game-warning]").forEach(button => button.addEventListener("click", () => finishGameDialog?.close()));
+        naturalFinalDialog?.addEventListener("click", event => { if (event.target === naturalFinalDialog) naturalFinalDialog.close(); });
+        finishGameDialog?.addEventListener("click", event => { if (event.target === finishGameDialog) finishGameDialog.close(); });
+    })();
+</script>
 
 @section Scripts {
     <script src="~/js/webcam-streams.js" asp-append-version="true"></script>

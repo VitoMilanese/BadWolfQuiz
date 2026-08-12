@@ -2550,4 +2550,25 @@
   <data name="GameBoard_CategoryCloseConfirmation" xml:space="preserve">
     <value>Усі ще не відкриті питання цієї категорії будуть закриті без відповіді. Продовжити?</value>
   </data>
+  <data name="GameBoard_PreviousRound" xml:space="preserve">
+    <value>Попередній раунд</value>
+  </data>
+  <data name="GameBoard_PreviousRoundRejected" xml:space="preserve">
+    <value>Попередній незавершений раунд більше недоступний.</value>
+  </data>
+  <data name="GameBoard_ReturnToUnfinishedRound" xml:space="preserve">
+    <value>Повернутися до незавершеного раунду</value>
+  </data>
+  <data name="GameBoard_StayInCurrentRound" xml:space="preserve">
+    <value>Залишитися у цьому раунді</value>
+  </data>
+  <data name="FinalQuestion_UnfinishedRoundsWarning" xml:space="preserve">
+    <value>У деяких звичайних раундах залишилися незакриті питання. Перейдіть до фінального питання або поверніться до незавершеного раунду.</value>
+  </data>
+  <data name="FinalQuestion_UnfinishedOtherRoundsWarning" xml:space="preserve">
+    <value>В інших звичайних раундах залишилися незакриті питання. Можна перейти до фінального питання, повернутися до незавершеного раунду або залишитися в цьому раунді.</value>
+  </data>
+  <data name="GameBoard_UnfinishedRoundsBeforeFinish" xml:space="preserve">
+    <value>У деяких звичайних раундах залишилися незакриті питання. Завершіть гру або поверніться до незавершеного раунду.</value>
+  </data>
 </root>

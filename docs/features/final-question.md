@@ -81,3 +81,8 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 - `JudgeFinalAnswer()`
 
 Each command validates the current phase and rejects duplicate or out-of-order submissions.
+## Unfinished round guard
+
+Before entering the Final Question through normal progression, the host is warned if any regular round still contains unclosed questions and can either continue to the Final Question or return to an unfinished round. A forced Final Question action from **Tools** ignores the current round when deciding whether to warn, and its dedicated dialog also lets the host stay in the current round.
+
+Regular-round navigation can move backward to the nearest unfinished round and skips fully completed rounds in either direction. Forced **Next round** navigation leaves unopened questions available so the host can return to them later.

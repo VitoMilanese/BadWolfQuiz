@@ -651,6 +651,49 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public QuizRoundSnapshot? ForceAdvanceToNextRound(string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            var round = game.Session.ForceAdvanceToNextRound();
+            game.MarkPersistenceChanged();
+            return round;
+        }
+    }
+
+    public QuizRoundSnapshot? ReturnToPreviousUnfinishedRound(string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            var round = game.Session.ReturnToPreviousUnfinishedRound();
+            game.MarkPersistenceChanged();
+            return round;
+        }
+    }
+
+    public QuizRoundSnapshot? ReturnToNearestUnfinishedRoundExcludingCurrent(
+        string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            var round = game.Session.ReturnToNearestUnfinishedRoundExcludingCurrent();
+            game.MarkPersistenceChanged();
+            return round;
+        }
+    }
+
     public GameSessionRegistration? ForceCompleteCurrentRound(
     string publicCode)
     {
