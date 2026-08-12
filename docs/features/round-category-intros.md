@@ -42,7 +42,9 @@ Every round starts with the same intro sequence:
 
 The sequence is used when the first round starts and when later rounds are reached through normal completion, the inter-round leaderboard, forced advancement, or no-player advancement.
 
-Returning to an earlier unfinished round first shows the current round leaderboard when players are present, then restarts the target round intro. On return paths and after a forced **Next round** transition, category intro pages for categories whose questions are already fully resolved are skipped; only categories that still contain unresolved questions are presented before the board.
+When an already visited unfinished round is entered again through normal completion, a return action, or a forced **Next round** transition, category intro pages are filtered to categories that still contain `Available` questions. Categories whose playable questions are already fully closed are skipped. Untouched rounds still show every category because all of their questions are available.
+
+Returning to an earlier unfinished round first shows the current round leaderboard when players are present, then restarts the target round intro.
 
 Every category receives an intro page even when its description is empty. **Next** advances through the sequence, **Skip** opens the round board immediately, and the final category replaces those actions with **Start game**.
 

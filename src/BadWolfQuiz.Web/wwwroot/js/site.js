@@ -210,6 +210,16 @@ const configureGameRoundIntroRoutes = () => {
     document.addEventListener("click", event => {
         const target = event.target instanceof Element ? event.target : null;
 
+        if (target?.closest("[data-open-natural-final-warning]")) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            const dialog = document.getElementById("natural-final-warning-dialog");
+            if (dialog instanceof HTMLDialogElement && !dialog.open) {
+                dialog.showModal();
+            }
+            return;
+        }
+
         if (target?.closest("[data-confirm-force-advance-round]")) {
             const form = document.getElementById("force-advance-round-form");
             if (!(form instanceof HTMLFormElement)) {

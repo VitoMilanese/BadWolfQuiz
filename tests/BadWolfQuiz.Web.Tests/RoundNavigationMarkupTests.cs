@@ -65,14 +65,20 @@ public sealed class RoundNavigationMarkupTests
     }
 
     [Fact]
-    public void Last_completed_round_posts_to_the_natural_final_transition_handler()
+    public void Last_completed_round_uses_dynamic_natural_final_warning_and_transition_flow()
     {
         var markup = File.ReadAllText(FindLobbyView());
         var model = File.ReadAllText(FindLobbyModel());
+        var script = File.ReadAllText(FindSiteScript());
 
+        Assert.Contains("data-open-natural-final-warning", markup);
+        Assert.Contains("id=\"natural-final-warning-dialog\"", markup);
         Assert.Contains("asp-page-handler=\"StartNaturalFinalTransition\"", markup);
         Assert.Contains("OnPostStartNaturalFinalTransition", model);
         Assert.Contains("RedirectToPage(\"FinalQuestionTransition\", new { id, force = false })", model);
+        Assert.Contains("target?.closest(\"[data-open-natural-final-warning]\")", script);
+        Assert.Contains("document.getElementById(\"natural-final-warning-dialog\")", script);
+        Assert.Contains("dialog.showModal();", script);
     }
 
     [Fact]
@@ -83,6 +89,16 @@ public sealed class RoundNavigationMarkupTests
         Assert.Contains("if (game.Session.Players.Count == 0)", model);
         Assert.Contains("sessionRegistry.AdvanceToNextRound(game.PublicCode);", model);
         Assert.DoesNotContain("sessionRegistry.ForceAdvanceToNextRound(game.PublicCode);", model);
+    }
+
+    [Fact]
+    public void Natural_and_forced_next_round_intros_filter_completed_categories()
+    {
+        var intro = File.ReadAllText(FindRunningRoundIntroModel());
+
+        Assert.Contains("filterCompletedCategories = true;", intro);
+        Assert.Contains("return RedirectToPage(new { id, returning = filterCompletedCategories });", intro);
+        Assert.Contains("question.Status == RuntimeQuestionStatus.Available", intro);
     }
 
     [Fact]

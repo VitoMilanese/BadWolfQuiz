@@ -55,17 +55,15 @@ public sealed class PreviousRoundIntroRoutingTests
     }
 
     [Fact]
-    public void Forced_next_round_filters_completed_category_intros()
+    public void Next_round_filters_completed_category_intros_for_natural_and_forced_progression()
     {
         var intro = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RunningRoundIntro.cshtml.cs"));
 
-        Assert.Contains("filterCompletedCategories || game.Session.IsForcedRoundAdvancePending", intro);
+        Assert.Contains("filterCompletedCategories = true;", intro);
         Assert.Contains("returning = filterCompletedCategories", intro);
         Assert.Contains("RedirectToPage(new { id, returning = true })", intro);
         Assert.Contains("!returning || session.Board.Questions.Any", intro);
-        var markup = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml"));
-        Assert.Contains("name=\"filterCompletedCategories\"", markup);
-        Assert.Contains("IsForcedRoundAdvancePending.ToString().ToLowerInvariant()", markup);
+        Assert.Contains("question.Status == RuntimeQuestionStatus.Available", intro);
     }
 
     private static string FindFile(params string[] path)

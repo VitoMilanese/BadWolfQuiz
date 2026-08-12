@@ -209,8 +209,7 @@ public sealed class RunningRoundIntroModel(
             return NotFound();
         }
 
-        filterCompletedCategories =
-            filterCompletedCategories || game.Session.IsForcedRoundAdvancePending;
+        filterCompletedCategories = true;
 
         try
         {
