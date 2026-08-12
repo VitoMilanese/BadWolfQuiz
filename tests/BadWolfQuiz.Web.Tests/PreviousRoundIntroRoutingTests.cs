@@ -15,6 +15,19 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.Contains("RedirectToPage(new { id, returning = true })", intro);
     }
 
+    [Fact]
+    public void Previous_round_navigation_cannot_be_interrupted_by_host_signalr_reload()
+    {
+        var script = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "wwwroot", "js", "site.js"));
+
+        Assert.Contains("handler === \"Previous\" || handler === \"PreviousRound\"", script);
+        Assert.Contains("event.stopImmediatePropagation();", script);
+        Assert.Contains("hostBoard?.classList.remove(\"host-game-board\")", script);
+        Assert.Contains("fetch(form.action", script);
+        Assert.Contains("window.location.assign(response.url || `${runningIntroBase}?returning=true`)", script);
+        Assert.Contains("hostBoard?.classList.add(\"host-game-board\")", script);
+    }
+
     private static string FindFile(params string[] path)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

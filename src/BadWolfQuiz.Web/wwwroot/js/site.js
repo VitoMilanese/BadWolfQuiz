@@ -269,6 +269,34 @@ const configureGameRoundIntroRoutes = () => {
             return;
         }
 
+        if (handler === "Previous" || handler === "PreviousRound") {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            routeRoundForm(form);
+
+            const hostBoard = document.querySelector(".host-game-board");
+            hostBoard?.classList.remove("host-game-board");
+
+            fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(response.statusText);
+                    }
+
+                    window.location.assign(response.url || `${runningIntroBase}?returning=true`);
+                })
+                .catch(error => {
+                    console.error(error);
+                    hostBoard?.classList.add("host-game-board");
+                    window.location.reload();
+                });
+            return;
+        }
+
         routeRoundForm(form);
     }, true);
 
