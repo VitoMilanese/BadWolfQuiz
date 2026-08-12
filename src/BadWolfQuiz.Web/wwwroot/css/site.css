@@ -6249,3 +6249,16 @@ body.youtube-auto-expanded-open {
     background: var(--panel-2);
     outline: none;
 }
+
+
+.host-board-column h3[data-category-preview-url] {
+    cursor: pointer;
+    transition: border-color 120ms ease, transform 120ms ease;
+}
+
+.host-board-column h3[data-category-preview-url]:hover,
+.host-board-column h3[data-category-preview-url]:focus-visible {
+    border-color: var(--red-bright);
+    transform: translateY(-1px);
+    outline: none;
+}

@@ -79,6 +79,28 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.DoesNotContain("window.location.assign(runningIntroBase);", noPlayerBranch);
     }
 
+    [Fact]
+    public void Category_header_opens_single_category_intro_and_returns_to_board()
+    {
+        var markup = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml"));
+        var intro = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RunningRoundIntro.cshtml.cs"));
+        var introMarkup = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RunningRoundIntro.cshtml"));
+        var script = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "wwwroot", "js", "site.js"));
+        var styles = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "wwwroot", "css", "site.css"));
+
+        Assert.Contains("data-category-preview-url", markup);
+        Assert.Contains("sourceCategoryId = category.SourceCategoryId", markup);
+        Assert.Contains("role=\"link\"", markup);
+        Assert.Contains("tabindex=\"0\"", markup);
+        Assert.Contains("LoadBoardCategoryPreview", intro);
+        Assert.Contains("IsBoardCategoryPreview", introMarkup);
+        Assert.Contains("ReturnToBoardLabel", introMarkup);
+        Assert.Contains("target?.closest(\"[data-category-preview-url]\")", script);
+        Assert.Contains("event.key !== \"Enter\" && event.key !== \" \"", script);
+        Assert.Contains("h3[data-category-preview-url]:hover", styles);
+        Assert.Contains("border-color: var(--red-bright)", styles);
+    }
+
     private static string FindFile(params string[] path)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

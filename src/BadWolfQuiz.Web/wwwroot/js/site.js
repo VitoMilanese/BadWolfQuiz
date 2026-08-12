@@ -210,6 +210,14 @@ const configureGameRoundIntroRoutes = () => {
     document.addEventListener("click", event => {
         const target = event.target instanceof Element ? event.target : null;
 
+        const categoryPreview = target?.closest("[data-category-preview-url]");
+        if (categoryPreview) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.location.assign(categoryPreview.dataset.categoryPreviewUrl);
+            return;
+        }
+
         if (target?.closest("[data-open-natural-final-warning]")) {
             event.preventDefault();
             event.stopImmediatePropagation();
@@ -264,6 +272,22 @@ const configureGameRoundIntroRoutes = () => {
             submitter.formAction = submitter.form.action;
         }
     }, true);
+
+    document.addEventListener("keydown", event => {
+        if (event.key !== "Enter" && event.key !== " ") {
+            return;
+        }
+
+        const categoryPreview = event.target instanceof Element
+            ? event.target.closest("[data-category-preview-url]")
+            : null;
+        if (!categoryPreview) {
+            return;
+        }
+
+        event.preventDefault();
+        window.location.assign(categoryPreview.dataset.categoryPreviewUrl);
+    });
 
     document.addEventListener("submit", event => {
         const form = event.target;

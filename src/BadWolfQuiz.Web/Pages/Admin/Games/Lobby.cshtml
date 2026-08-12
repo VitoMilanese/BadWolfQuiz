@@ -926,7 +926,10 @@
                     <h3 data-category-context
                         data-source-category-id="@category.SourceCategoryId"
                         data-category-label="@category.Title"
-                        data-has-available-questions="@category.Questions.Any(question => question.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Available).ToString().ToLowerInvariant()">
+                        data-has-available-questions="@category.Questions.Any(question => question.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Available).ToString().ToLowerInvariant()"
+                        data-category-preview-url="@Url.Page("RunningRoundIntro", new { id = Model.Game.Session.Id.Value, sourceCategoryId = category.SourceCategoryId })"
+                        role="link"
+                        tabindex="0">
                         @category.Title
                     </h3>
 

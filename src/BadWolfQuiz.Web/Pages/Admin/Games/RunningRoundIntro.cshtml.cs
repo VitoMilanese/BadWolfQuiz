@@ -27,6 +27,7 @@ public sealed class RunningRoundIntroModel(
     public int? NextCategoryIndex { get; private set; }
     public bool IsFinalCategory { get; private set; }
     public bool IsReturning { get; private set; }
+    public bool IsBoardCategoryPreview { get; private set; }
 
     public string SkipLabel => CurrentLanguage switch
     {
@@ -42,6 +43,8 @@ public sealed class RunningRoundIntroModel(
         _ => "Next"
     };
 
+    public string ReturnToBoardLabel => localizer["GameBoard_ReturnToBoard"].Value;
+
     public string StartGameLabel => CurrentLanguage switch
     {
         "uk" => "Почати гру",
@@ -52,7 +55,11 @@ public sealed class RunningRoundIntroModel(
     private static string CurrentLanguage =>
         CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
 
-    public IActionResult OnGet(Guid id, int? category, bool returning = false)
+    public IActionResult OnGet(
+        Guid id,
+        int? category,
+        bool returning = false,
+        int? sourceCategoryId = null)
     {
         var game = FindOwned(id);
         if (game is null)
@@ -63,6 +70,16 @@ public sealed class RunningRoundIntroModel(
         if (game.Session.Status != GameSessionStatus.Running)
         {
             return RedirectToPage("Lobby", new { id });
+        }
+
+        if (sourceCategoryId.HasValue)
+        {
+            if (!LoadBoardCategoryPreview(game, id, sourceCategoryId.Value))
+            {
+                return RedirectToPage("Lobby", new { id });
+            }
+
+            return Page();
         }
 
         LoadIntro(game, id, category, returning);
@@ -262,6 +279,36 @@ public sealed class RunningRoundIntroModel(
         return advancedImmediately
             ? RedirectToPage(new { id, returning = true })
             : RedirectToPage("Lobby", new { id });
+    }
+
+    private bool LoadBoardCategoryPreview(
+        GameSessionRegistration game,
+        Guid id,
+        int sourceCategoryId)
+    {
+        var session = game.Session;
+        var round = session.CurrentRound;
+        var categories = round.CategoryIntros
+            .OrderBy(category => category.SortOrder)
+            .ToArray();
+        var categoryIndex = Array.FindIndex(
+            categories,
+            category => category.SourceCategoryId == sourceCategoryId);
+
+        if (categoryIndex < 0)
+        {
+            return false;
+        }
+
+        var category = categories[categoryIndex];
+        GameId = id;
+        IsBoardCategoryPreview = true;
+        CategoryCount = 1;
+        CategoryIndex = categoryIndex;
+        Heading = ResolveCategoryHeading(category, categoryIndex + 1);
+        Blocks = FilterDisplayBlocks(category.DescriptionBlocks);
+        IsFinalCategory = true;
+        return true;
     }
 
     private void LoadIntro(

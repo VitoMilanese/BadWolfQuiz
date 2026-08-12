@@ -44,7 +44,15 @@
     </div>
 
     <div class="game-intro-actions" data-game-intro-actions>
-        @if (Model.IsFinalCategory || Model.CategoryCount == 0)
+        @if (Model.IsBoardCategoryPreview)
+        {
+            <a class="button button-primary"
+               asp-page="Lobby"
+               asp-route-id="@Model.GameId">
+                @Model.ReturnToBoardLabel
+            </a>
+        }
+        else if (Model.IsFinalCategory || Model.CategoryCount == 0)
         {
             <a class="button button-primary"
                asp-page="Lobby"

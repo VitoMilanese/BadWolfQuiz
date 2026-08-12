@@ -48,6 +48,8 @@ Returning to an earlier unfinished round first shows the current round leaderboa
 
 Every category receives an intro page even when its description is empty. **Next** advances through the sequence, **Skip** opens the round board immediately, and the final category replaces those actions with **Start game**.
 
+During regular round-board play, the host can click the full category header cell to reopen only that category's intro presentation. Closing that presentation returns directly to the current round board without changing game state. The category header uses the same hover emphasis as playable question cells.
+
 When no players are present, the game does not show an empty inter-round leaderboard before the next intro.
 
 Intro pages use short slide/fade/scale transitions. The first intro also animates in. `prefers-reduced-motion` disables these animations.
