@@ -106,3 +106,5 @@ has been restored.
 The browser clears revoked player access when it receives the removal event so
 the next join submits fresh credentials instead of following a stale player-page
 URL.
+
+- During a running game, the header QR button toggles the floating join-code panel: press once to show it and press again to hide it.

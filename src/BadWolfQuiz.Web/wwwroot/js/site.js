@@ -38,6 +38,23 @@ document.addEventListener("keydown", event => {
     }
 });
 
+// Toggle the floating join-code panel from any join-code trigger, including the header QR button.
+document.addEventListener("click", event => {
+    const trigger = event.target.closest?.("[data-open-join-code]");
+    if (!trigger) {
+        return;
+    }
+
+    const panel = document.querySelector("[data-join-code-panel]");
+    if (!panel) {
+        return;
+    }
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    panel.hidden = !panel.hidden;
+}, true);
+
 document.querySelectorAll("[data-auto-rating-form]").forEach(form => {
     form.addEventListener("submit", event => event.preventDefault());
     const inputs = form.querySelectorAll('input[name="score"]');

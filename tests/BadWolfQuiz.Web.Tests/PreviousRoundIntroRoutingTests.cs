@@ -104,6 +104,17 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.Contains("border-color: var(--red-bright)", styles);
     }
 
+    [Fact]
+    public void Header_join_code_button_toggles_the_floating_panel()
+    {
+        var script = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "wwwroot", "js", "site.js"));
+
+        Assert.Contains("[data-open-join-code]", script);
+        Assert.Contains("[data-join-code-panel]", script);
+        Assert.Contains("event.stopImmediatePropagation()", script);
+        Assert.Contains("panel.hidden = !panel.hidden", script);
+    }
+
     private static string FindFile(params string[] path)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
