@@ -5,13 +5,13 @@ using System.Text.RegularExpressions;
 
 namespace BadWolfQuizLogDownloaderWpf;
 
-internal enum RemoteBackupType
+public enum RemoteBackupType
 {
     AppData,
     FullSite
 }
 
-internal sealed record RemoteBackupInfo(
+public sealed record RemoteBackupInfo(
     string FileName,
     string RemotePath,
     RemoteBackupType Type,
@@ -53,8 +53,7 @@ internal sealed class RemoteBackupClient(AppSettings settings)
         "^badwolfquiz-service-folder-(?<date>\\d{8})-(?<time>\\d{6})\\.tar\\.gz$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
-    public async Task<IReadOnlyList<RemoteBackupInfo>> ListAsync(
-        CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<RemoteBackupInfo>> ListAsync(CancellationToken cancellationToken)
     {
         EnsureBackupDirectoryConfigured();
 
@@ -109,26 +108,25 @@ internal sealed class RemoteBackupClient(AppSettings settings)
                 cancellationToken.ThrowIfCancellationRequested();
 
                 using var client = CreateClient();
-                using var cancellationRegistration =
-                    cancellationToken.Register(() => SafeDispose(client));
+                using var cancellationRegistration = cancellationToken.Register(() => SafeDispose(client));
 
-                client.Connect();
-                cancellationToken.ThrowIfCancellationRequested();
-
-                using var command = client.CreateCommand(
-                    BuildCommand($"test -f {ShellQuote(backup.RemotePath)} && cat -- {ShellQuote(backup.RemotePath)}"));
-                using var output = command.OutputStream;
-                await using var destination = new FileStream(
-                    localPath,
-                    FileMode.Create,
-                    FileAccess.Write,
-                    FileShare.None,
-                    81920,
-                    useAsync: true);
-
-                var asyncResult = command.BeginExecute();
                 try
                 {
+                    client.Connect();
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    using var command = client.CreateCommand(
+                        BuildCommand($"test -f {ShellQuote(backup.RemotePath)} && cat -- {ShellQuote(backup.RemotePath)}"));
+                    using var output = command.OutputStream;
+                    await using var destination = new FileStream(
+                        localPath,
+                        FileMode.Create,
+                        FileAccess.Write,
+                        FileShare.None,
+                        81920,
+                        useAsync: true);
+
+                    var asyncResult = command.BeginExecute();
                     await output.CopyToAsync(destination, cancellationToken);
                     command.EndExecute(asyncResult);
                     cancellationToken.ThrowIfCancellationRequested();
@@ -137,6 +135,10 @@ internal sealed class RemoteBackupClient(AppSettings settings)
                     {
                         throw CreateRemoteCommandException(command);
                     }
+                }
+                catch (Exception) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException(cancellationToken);
                 }
                 finally
                 {
@@ -210,17 +212,14 @@ internal sealed class RemoteBackupClient(AppSettings settings)
         progress?.Report("Restore completed.");
     }
 
-    private async Task<string> ExecuteCommandAsync(
-        string commandText,
-        CancellationToken cancellationToken)
+    private async Task<string> ExecuteCommandAsync(string commandText, CancellationToken cancellationToken)
     {
         return await Task.Run(() =>
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             using var client = CreateClient();
-            using var cancellationRegistration =
-                cancellationToken.Register(() => SafeDispose(client));
+            using var cancellationRegistration = cancellationToken.Register(() => SafeDispose(client));
 
             try
             {
@@ -252,10 +251,7 @@ internal sealed class RemoteBackupClient(AppSettings settings)
         }, cancellationToken);
     }
 
-    private static bool TryClassify(
-        string fileName,
-        out RemoteBackupType type,
-        out DateTime? backupTime)
+    private static bool TryClassify(string fileName, out RemoteBackupType type, out DateTime? backupTime)
     {
         var appDataMatch = AppDataPattern.Match(fileName);
         if (appDataMatch.Success)
@@ -296,8 +292,7 @@ internal sealed class RemoteBackupClient(AppSettings settings)
         }
     }
 
-    private SshClient CreateClient() =>
-        new(settings.Host, settings.Port, settings.Username, settings.Password);
+    private SshClient CreateClient() => new(settings.Host, settings.Port, settings.Username, settings.Password);
 
     private string BuildCommand(string command) =>
         settings.UseSudo
@@ -317,10 +312,9 @@ internal sealed class RemoteBackupClient(AppSettings settings)
     }
 
     private static InvalidOperationException CreateRemoteCommandException(SshCommand command) =>
-        new(
-            string.IsNullOrWhiteSpace(command.Error)
-                ? $"Remote command failed with exit code {command.ExitStatus}."
-                : command.Error.Trim());
+        new(string.IsNullOrWhiteSpace(command.Error)
+            ? $"Remote command failed with exit code {command.ExitStatus}."
+            : command.Error.Trim());
 
     private static string ShellQuote(string value) =>
         "'" + value.Replace("'", "'\"'\"'") + "'";
