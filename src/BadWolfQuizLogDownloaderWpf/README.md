@@ -16,6 +16,8 @@ Features:
 - multi-row log selection and plain-text copy with `Ctrl+C`
 - current systemd service status with refresh support
 - start/stop controls for the configured systemd service over SSH
+- service-control recovery after failed start/stop commands
+- local service-state diagnostics for intermittent systemd state issues
 - App_Data and full service-folder backups stored as timestamped `.tar.gz` archives on the remote server
 - themes: Light, Dark, Matrix, Obsidian, Ukrainian, UPA, Italian, Warm Parchment, Mint Fog, LGBTQ+
 - supplied Bad Wolf logger artwork as application/window icon
@@ -39,7 +41,7 @@ dotnet build
 
 The product version is defined once in `BadWolfQuizLogDownloaderWpf.csproj` through the `<Version>` property and is read from the built assembly at runtime. The main window title therefore displays the actual product version, for example:
 
-`BadWolfQuiz Log Downloader v1.2.0`
+`BadWolfQuiz Log Downloader v1.2.2`
 
 Use PATCH releases for compatible fixes, MINOR releases for backwards-compatible features, and MAJOR releases for major/breaking release milestones. Downloader release tags should be distinguishable from web application release tags when both products are published from this repository.
 
@@ -74,7 +76,11 @@ The password is intentionally read from `appsettings.json`. Do not commit a real
 
 The main window displays the current state of the configured systemd service. Use **Refresh** to query the state again, **Start service** when the service is not active, and **Stop service** while it is active.
 
-Service commands run over the same SSH connection settings as log downloads. SSH, permission, and systemd command failures are surfaced to the user and do not overwrite the last known state with a successful state.
+Service commands run over the same SSH connection settings as log downloads. SSH, permission, and systemd command failures are surfaced to the user. After every start/stop attempt, including failed commands, the utility refreshes the actual remote service state before restoring the service-control buttons. A failed operation therefore does not require restarting the utility before another start/stop attempt can be made.
+
+Each service-state refresh and service-control/status error is also written to `service-diagnostics.log` in the configured output directory (normally `Logs`). The diagnostic file includes timestamps, the configured service name, the raw state returned by the status query, and the normalized state shown in the UI. This is intended for investigating intermittent systemd states such as an unexpected `Failed` result without requiring a separate manual SSH session.
+
+Diagnostic logging is best-effort: a local diagnostic-file write failure does not block service control or replace the normal UI error handling.
 
 ## Backups
 

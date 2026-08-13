@@ -1,3 +1,5 @@
+using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -45,14 +47,15 @@ public partial class MainWindow
         UpdateServiceButtons(ServiceStatusText.Text);
         StatusText.Text = progressMessage;
 
+        var client = new SshLogClient(_settings);
+
         try
         {
-            var client = new SshLogClient(_settings);
             await action(client, CancellationToken.None);
-            await RefreshServiceStateCoreAsync(client);
         }
         catch (Exception ex)
         {
+            await AppendServiceDiagnosticAsync($"command-error message={SanitizeDiagnosticValue(ex.Message)}");
             StatusText.Text = "Service command failed.";
             MessageBox.Show(
                 this,
@@ -63,8 +66,27 @@ public partial class MainWindow
         }
         finally
         {
-            _serviceOperationInProgress = false;
-            UpdateServiceButtons(ServiceStatusText.Text);
+            try
+            {
+                await RefreshServiceStateCoreAsync(client);
+            }
+            catch (Exception ex)
+            {
+                await AppendServiceDiagnosticAsync($"status-error message={SanitizeDiagnosticValue(ex.Message)}");
+                ServiceStatusText.Text = "Unavailable";
+                StatusText.Text = "Could not read service status after the service command.";
+                MessageBox.Show(
+                    this,
+                    ex.Message,
+                    "Service status error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                _serviceOperationInProgress = false;
+                UpdateServiceButtons(ServiceStatusText.Text);
+            }
         }
     }
 
@@ -87,6 +109,7 @@ public partial class MainWindow
         }
         catch (Exception ex)
         {
+            await AppendServiceDiagnosticAsync($"status-error message={SanitizeDiagnosticValue(ex.Message)}");
             ServiceStatusText.Text = "Unavailable";
             StatusText.Text = "Could not read service status.";
             MessageBox.Show(
@@ -106,9 +129,36 @@ public partial class MainWindow
     private async Task RefreshServiceStateCoreAsync(SshLogClient client)
     {
         var state = await client.GetServiceStatusAsync(CancellationToken.None);
-        ServiceStatusText.Text = NormalizeServiceState(state);
-        StatusText.Text = $"Service {_settings!.ServiceName}: {ServiceStatusText.Text}.";
+        var normalizedState = NormalizeServiceState(state);
+
+        ServiceStatusText.Text = normalizedState;
+        StatusText.Text = $"Service {_settings!.ServiceName}: {normalizedState}.";
+        await AppendServiceDiagnosticAsync(
+            $"status raw={SanitizeDiagnosticValue(state)} normalized={SanitizeDiagnosticValue(normalizedState)}");
     }
+
+    private async Task AppendServiceDiagnosticAsync(string message)
+    {
+        try
+        {
+            var directory = GetOutputDirectory();
+            Directory.CreateDirectory(directory);
+
+            var path = Path.Combine(directory, "service-diagnostics.log");
+            var line = $"{DateTimeOffset.Now:O} service={_settings?.ServiceName ?? "unknown"} {message}{Environment.NewLine}";
+
+            await File.AppendAllTextAsync(path, line, new UTF8Encoding(false));
+        }
+        catch
+        {
+        }
+    }
+
+    private static string SanitizeDiagnosticValue(string value) =>
+        value
+            .Replace("\r", " ", StringComparison.Ordinal)
+            .Replace("\n", " ", StringComparison.Ordinal)
+            .Trim();
 
     private void UpdateServiceButtons(string state)
     {

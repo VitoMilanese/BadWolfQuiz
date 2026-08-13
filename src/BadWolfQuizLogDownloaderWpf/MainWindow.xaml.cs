@@ -625,7 +625,7 @@ public partial class MainWindow : Window
         PeriodCombo.IsEnabled = !live;
         GameplayOnlyCheck.IsEnabled = !live;
         SaveLiveCheck.IsEnabled = !live;
-        ThemeCombo.IsEnabled = !live;
+        ThemeCombo.IsEnabled = true;
     }
 
     private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
