@@ -50,6 +50,109 @@
     const mediaState = new BadWolfDiscordMediaState(reconcileAutomaticMute);
     const activate = media => mediaState.start(media);
     const deactivate = media => mediaState.stop(media);
+    const nativeMediaSelector =
+        "audio.game-content-audio, video.game-content-video";
+    const youtubeSelector = "iframe.youtube-auto-expand";
+    const boundNativeMedia = new WeakSet();
+    const boundYouTubeFrames = new WeakSet();
+    const youtubeKeys = new WeakMap();
+    const youtubeWindows = new WeakMap();
+    const youtubePlayers = new Map();
+    let nextYouTubeKey = 0;
+
+    const connectYouTubeFrame = iframe => {
+        if (!board.contains(iframe)) {
+            return;
+        }
+
+        const key = youtubeKeys.get(iframe);
+        const contentWindow = iframe.contentWindow;
+        if (!key || !contentWindow) {
+            return;
+        }
+
+        const previousWindow = youtubeWindows.get(iframe);
+        if (previousWindow && previousWindow !== contentWindow) {
+            youtubePlayers.delete(previousWindow);
+        }
+
+        youtubeWindows.set(iframe, contentWindow);
+        youtubePlayers.set(contentWindow, key);
+        contentWindow.postMessage(JSON.stringify({
+            event: "listening",
+            id: key,
+            channel: "badwolfquiz"
+        }), "https://www.youtube.com");
+        contentWindow.postMessage(JSON.stringify({
+            event: "command",
+            func: "addEventListener",
+            args: ["onStateChange"]
+        }), "https://www.youtube.com");
+    };
+
+    const bindNativeMedia = media => {
+        if (boundNativeMedia.has(media)) {
+            return;
+        }
+
+        boundNativeMedia.add(media);
+        BadWolfDiscordMediaState.bindNativeMedia(media, mediaState, media);
+    };
+
+    const bindYouTubeFrame = iframe => {
+        if (!youtubeKeys.has(iframe)) {
+            youtubeKeys.set(iframe, `youtube-${nextYouTubeKey++}`);
+        }
+
+        if (!boundYouTubeFrames.has(iframe)) {
+            boundYouTubeFrames.add(iframe);
+            iframe.addEventListener("load", () => connectYouTubeFrame(iframe));
+        }
+
+        connectYouTubeFrame(iframe);
+    };
+
+    const forEachMedia = (root, selector, callback) => {
+        if (!(root instanceof Element)) {
+            return;
+        }
+
+        if (root.matches(selector)) {
+            callback(root);
+        }
+        root.querySelectorAll(selector).forEach(callback);
+    };
+
+    const bindMediaTree = root => {
+        forEachMedia(root, nativeMediaSelector, bindNativeMedia);
+        forEachMedia(root, youtubeSelector, bindYouTubeFrame);
+    };
+
+    const unbindMediaTree = root => {
+        forEachMedia(root, nativeMediaSelector, media => deactivate(media));
+        forEachMedia(root, youtubeSelector, iframe => {
+            const key = youtubeKeys.get(iframe);
+            if (key) {
+                deactivate(key);
+            }
+
+            const contentWindow = youtubeWindows.get(iframe);
+            if (contentWindow) {
+                youtubePlayers.delete(contentWindow);
+                youtubeWindows.delete(iframe);
+            }
+        });
+    };
+
+    bindMediaTree(board);
+
+    const mediaObserver = new MutationObserver(mutations => {
+        for (const mutation of mutations) {
+            mutation.removedNodes.forEach(unbindMediaTree);
+            mutation.addedNodes.forEach(bindMediaTree);
+        }
+    });
+    mediaObserver.observe(board, { childList: true, subtree: true });
 
     window.addEventListener("badwolfquiz:discord-auto-mute-changed", event => {
         const enabled = event.detail?.enabled === true;
@@ -72,27 +175,6 @@
             });
     }, 60_000);
 
-    board.querySelectorAll("audio.game-content-audio, video.game-content-video")
-        .forEach(media => BadWolfDiscordMediaState.bindNativeMedia(
-            media, mediaState, media));
-
-    const youtubePlayers = new Map();
-    board.querySelectorAll("iframe.youtube-auto-expand").forEach((iframe, index) => {
-        const key = `youtube-${index}`;
-        youtubePlayers.set(iframe.contentWindow, key);
-        iframe.addEventListener("load", () => {
-            iframe.contentWindow?.postMessage(JSON.stringify({
-                event: "listening",
-                id: key,
-                channel: "badwolfquiz"
-            }), "https://www.youtube.com");
-            iframe.contentWindow?.postMessage(JSON.stringify({
-                event: "command",
-                func: "addEventListener",
-                args: ["onStateChange"]
-            }), "https://www.youtube.com");
-        });
-    });
     window.addEventListener("message", event => {
         if (event.origin !== "https://www.youtube.com" ||
             !youtubePlayers.has(event.source)) {
@@ -142,6 +224,7 @@
     });
 
     window.addEventListener("pagehide", () => {
+        mediaObserver.disconnect();
         if (automaticRequestActive) {
             post("DiscordMedia", { active: "false" }, true).catch(() => {});
         }
