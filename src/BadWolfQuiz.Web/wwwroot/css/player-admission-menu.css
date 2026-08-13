@@ -77,3 +77,33 @@
     margin-left: calc(50% - 50vw + 16px);
     margin-right: calc(50% - 50vw + 16px);
 }
+
+.host-game-board:has(> [data-host-gameplay-view] > .question-review-preview),
+.host-game-board:has(> [data-host-gameplay-view] > [data-game-intro-page]),
+.host-game-board:has(> [data-host-gameplay-view] > [data-final-question-transition]) {
+    width: calc(100vw - 32px);
+    max-width: none;
+    margin-left: calc(50% - 50vw + 16px);
+    margin-right: calc(50% - 50vw + 16px);
+}
+
+[data-host-gameplay-view] > .question-review-preview {
+    min-height: calc(100vh - var(--topbar-height) - 16px);
+    grid-template-rows: auto minmax(0, 1fr);
+    margin-bottom: 0;
+}
+
+[data-host-gameplay-view] > .question-review-preview > .question-review-content {
+    min-height: 0;
+}
+
+[data-host-gameplay-view] > .question-review-preview .game-content-presentation {
+    min-height: 100%;
+    height: 100%;
+}
+
+@media (max-width: 900px) {
+    [data-host-gameplay-view] > .question-review-preview {
+        min-height: calc(100vh - var(--topbar-height) - 10px);
+    }
+}

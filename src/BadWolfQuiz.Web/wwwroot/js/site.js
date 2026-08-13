@@ -138,9 +138,19 @@ const configureGameRoundIntroRoutes = () => {
     };
 
     const openFinalTransition = force => {
-        window.location.assign(force
+        const target = force
             ? `${finalTransitionBase}?force=true`
-            : finalTransitionBase);
+            : finalTransitionBase;
+        if (window.BadWolfHostFlowNavigation) {
+            window.BadWolfHostFlowNavigation.navigate(target)
+                .catch(error => {
+                    console.error(error);
+                    window.location.assign(target);
+                });
+            return;
+        }
+
+        window.location.assign(target);
     };
 
     const routeRoundForm = form => {
@@ -177,7 +187,7 @@ const configureGameRoundIntroRoutes = () => {
         }
 
         routeRoundForm(form);
-        HTMLFormElement.prototype.submit.call(form);
+        form.requestSubmit();
     };
 
     const advanceEmptyRoundSummary = () => {
@@ -202,7 +212,7 @@ const configureGameRoundIntroRoutes = () => {
         }
 
         summary.dataset.autoAdvanceStarted = "true";
-        submitRoutedForm(form);
+        window.setTimeout(() => submitRoutedForm(form), 0);
         return true;
     };
 
@@ -215,7 +225,16 @@ const configureGameRoundIntroRoutes = () => {
         if (categoryPreview) {
             event.preventDefault();
             event.stopImmediatePropagation();
-            window.location.assign(categoryPreview.dataset.categoryPreviewUrl);
+            const targetUrl = categoryPreview.dataset.categoryPreviewUrl;
+            if (window.BadWolfHostFlowNavigation && targetUrl) {
+                window.BadWolfHostFlowNavigation.navigate(targetUrl)
+                    .catch(error => {
+                        console.error(error);
+                        window.location.assign(targetUrl);
+                    });
+            } else if (targetUrl) {
+                window.location.assign(targetUrl);
+            }
             return;
         }
 
@@ -246,13 +265,22 @@ const configureGameRoundIntroRoutes = () => {
                 fetch(`${runningIntroBase}?handler=ForceAdvance`, {
                     method: "POST",
                     body: new FormData(form),
-                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                    headers: { Accept: "text/html" }
                 })
-                    .then(response => {
+                    .then(async response => {
                         if (!response.ok) {
                             throw new Error(response.statusText);
                         }
-                        window.location.assign(response.url || `${runningIntroBase}?returning=true`);
+
+                        const responseUrl = response.url ||
+                            `${runningIntroBase}?returning=true`;
+                        if (window.BadWolfHostFlowNavigation) {
+                            const markup = await response.text();
+                            await window.BadWolfHostFlowNavigation.applyMarkup(
+                                markup, responseUrl);
+                        } else {
+                            window.location.assign(responseUrl);
+                        }
                     })
                     .catch(error => {
                         console.error(error);
@@ -287,14 +315,25 @@ const configureGameRoundIntroRoutes = () => {
         }
 
         event.preventDefault();
-        window.location.assign(categoryPreview.dataset.categoryPreviewUrl);
+        const targetUrl = categoryPreview.dataset.categoryPreviewUrl;
+        if (window.BadWolfHostFlowNavigation && targetUrl) {
+            window.BadWolfHostFlowNavigation.navigate(targetUrl)
+                .catch(error => {
+                    console.error(error);
+                    window.location.assign(targetUrl);
+                });
+        } else if (targetUrl) {
+            window.location.assign(targetUrl);
+        }
     });
 
     document.addEventListener("submit", event => {
         const form = event.target;
         const handler = getFormHandler(form);
 
-        if (handler === "StartFinalQuestion" || handler === "ForceAdvanceToFinalQuestion") {
+        if ((handler === "StartFinalQuestion" ||
+             handler === "ForceAdvanceToFinalQuestion") &&
+            !form.matches("[data-final-question-transition-form]")) {
             event.preventDefault();
             event.stopImmediatePropagation();
             openFinalTransition(handler === "ForceAdvanceToFinalQuestion");
@@ -309,24 +348,28 @@ const configureGameRoundIntroRoutes = () => {
             event.stopImmediatePropagation();
             routeRoundForm(form);
 
-            const hostBoard = document.querySelector(".host-game-board");
-            hostBoard?.classList.remove("host-game-board");
-
             fetch(form.action, {
                 method: "POST",
                 body: new FormData(form),
-                headers: { "X-Requested-With": "XMLHttpRequest" }
+                headers: { Accept: "text/html" }
             })
-                .then(response => {
+                .then(async response => {
                     if (!response.ok) {
                         throw new Error(response.statusText);
                     }
 
-                    window.location.assign(response.url || `${runningIntroBase}?returning=true`);
+                    const responseUrl = response.url ||
+                        `${runningIntroBase}?returning=true`;
+                    if (window.BadWolfHostFlowNavigation) {
+                        const markup = await response.text();
+                        await window.BadWolfHostFlowNavigation.applyMarkup(
+                            markup, responseUrl);
+                    } else {
+                        window.location.assign(responseUrl);
+                    }
                 })
                 .catch(error => {
                     console.error(error);
-                    hostBoard?.classList.add("host-game-board");
                     window.location.reload();
                 });
             return;
@@ -352,12 +395,302 @@ const configureHostGameplayFormNavigation = () => {
         return;
     }
 
-    const currentUrl = new URL(window.location.href);
+    const lobbyUrl = new URL(window.location.href);
+    const gameId = board.dataset.gameId;
+    const flowPaths = new Set([
+        `/Admin/Games/RoundIntro/${encodeURIComponent(gameId)}`,
+        `/Admin/Games/RunningRoundIntro/${encodeURIComponent(gameId)}`,
+        `/Admin/Games/FinalQuestionTransition/${encodeURIComponent(gameId)}`
+    ].map(path => path.toLowerCase()));
+    const viewSelector = "[data-host-gameplay-view]";
+    const boardSelector = "[data-host-gameplay-board]";
+    const transientSelector = "[data-host-gameplay-transient]";
     let submissionInProgress = false;
+    let finalTransitionTimer = null;
+
+    const isLobbyUrl = url =>
+        url.origin === lobbyUrl.origin &&
+        url.pathname.toLowerCase() === lobbyUrl.pathname.toLowerCase();
+
+    const canNavigate = url =>
+        url.origin === lobbyUrl.origin &&
+        (isLobbyUrl(url) || flowPaths.has(url.pathname.toLowerCase()));
+
+    const getQuestionId = question => {
+        if (!(question instanceof Element)) {
+            return null;
+        }
+
+        if (question.dataset.sourceQuestionId) {
+            return question.dataset.sourceQuestionId;
+        }
+
+        if (question instanceof HTMLAnchorElement) {
+            const href = question.getAttribute("href");
+            return href
+                ? new URL(href, lobbyUrl.href)
+                    .searchParams.get("previewQuestionId")
+                : null;
+        }
+
+        return null;
+    };
+
+    const getQuestionContainer = question =>
+        question.closest("form.question-selection-form") ?? question;
+
+    const fitBoardTitles = grid => {
+        if (!grid) {
+            return;
+        }
+
+        for (const title of grid.querySelectorAll(".host-board-column h3")) {
+            let size = 30;
+            title.style.setProperty("--category-title-size", `${size}px`);
+            while (size > 12 &&
+                (title.scrollWidth > title.clientWidth ||
+                 title.scrollHeight > title.clientHeight)) {
+                size -= 1;
+                title.style.setProperty("--category-title-size", `${size}px`);
+            }
+        }
+    };
+
+    const syncBoardQuestions = nextBoard => {
+        const currentBoard = document.querySelector(boardSelector);
+        const currentGrid = currentBoard?.querySelector(".host-board-grid");
+        const nextGrid = nextBoard?.querySelector(".host-board-grid");
+        if (!currentBoard || !nextBoard || !currentGrid || !nextGrid) {
+            return;
+        }
+
+        const currentCategoryIds = Array.from(currentGrid.querySelectorAll(
+            "[data-category-context]"), category => category.dataset.sourceCategoryId);
+        const nextCategoryIds = Array.from(nextGrid.querySelectorAll(
+            "[data-category-context]"), category => category.dataset.sourceCategoryId);
+        const sameRound = currentCategoryIds.length === nextCategoryIds.length &&
+            currentCategoryIds.every((id, index) => id === nextCategoryIds[index]);
+
+        if (!sameRound) {
+            currentGrid.replaceChildren(
+                ...Array.from(nextGrid.childNodes, node =>
+                    document.importNode(node, true)));
+            const nextStyle = nextGrid.getAttribute("style");
+            if (nextStyle === null) {
+                currentGrid.removeAttribute("style");
+            } else {
+                currentGrid.setAttribute("style", nextStyle);
+            }
+            fitBoardTitles(currentGrid);
+            return;
+        }
+
+        const currentById = new Map(
+            Array.from(currentBoard.querySelectorAll(".host-board-question"))
+                .map(question => [getQuestionId(question), question])
+                .filter(([id]) => id));
+
+        for (const nextQuestion of nextBoard.querySelectorAll(
+            ".host-board-question")) {
+            const questionId = getQuestionId(nextQuestion);
+            const currentQuestion = questionId
+                ? currentById.get(questionId)
+                : null;
+            if (!currentQuestion) {
+                continue;
+            }
+
+            getQuestionContainer(currentQuestion).replaceWith(
+                document.importNode(
+                    getQuestionContainer(nextQuestion),
+                    true));
+        }
+
+        for (const column of currentBoard.querySelectorAll(
+            ".host-board-column")) {
+            const category = column.querySelector("[data-category-context]");
+            if (category) {
+                category.dataset.hasAvailableQuestions = column.querySelector(
+                    ".host-board-question.status-available[data-question-context]")
+                    ? "true"
+                    : "false";
+            }
+        }
+        fitBoardTitles(currentGrid);
+    };
+
+    const syncHeaderState = () => {
+        const view = document.querySelector(viewSelector);
+        if (!view) {
+            return;
+        }
+
+        const hasActiveQuestion =
+            view.querySelector(".current-question-summary") !== null;
+        const isRoundSummary = view.querySelector(".round-summary") !== null;
+        const isExternalFlow = view.querySelector(
+            "[data-game-intro-page], [data-final-question-transition]") !== null;
+        const menu = document.querySelector(".board-action-menu");
+        if (menu) {
+            menu.hidden = isRoundSummary || isExternalFlow;
+        }
+
+        for (const action of document.querySelectorAll(
+            ".board-action-menu a[href*='/Admin/Games/AnswerHistory'], " +
+            ".board-action-menu form[action*='handler=RandomActivePlayer']")) {
+            action.hidden = hasActiveQuestion || isExternalFlow;
+        }
+    };
+
+    const initializeExternalFlow = currentView => {
+        if (finalTransitionTimer !== null) {
+            window.clearTimeout(finalTransitionTimer);
+            finalTransitionTimer = null;
+        }
+
+        const finalForm = currentView.querySelector(
+            "[data-final-question-transition-form]");
+        if (finalForm instanceof HTMLFormElement) {
+            finalTransitionTimer = window.setTimeout(() => {
+                finalTransitionTimer = null;
+                finalForm.requestSubmit();
+            }, 3000);
+        }
+    };
+
+    const renderExternalFlow = parsed => {
+        const currentView = document.querySelector(viewSelector);
+        const currentBoard = document.querySelector(boardSelector);
+        const currentTransient = document.querySelector(transientSelector);
+        const flow = parsed.querySelector(
+            "[data-game-intro-page], [data-final-question-transition]");
+        if (!currentView || !currentBoard || !flow) {
+            return false;
+        }
+
+        const styles = Array.from(parsed.querySelectorAll(
+            "main.page-shell > style"));
+        currentView.replaceChildren(
+            document.importNode(flow, true),
+            ...styles.map(style => document.importNode(style, true)));
+        currentBoard.hidden = true;
+        currentTransient?.replaceChildren();
+        syncHeaderState();
+        initializeExternalFlow(currentView);
+        document.dispatchEvent(new CustomEvent(
+            "badwolf:host-gameplay-updated"));
+        return true;
+    };
+
+    const applyMarkup = async (markup, url) => {
+        const targetUrl = new URL(url, lobbyUrl.href);
+        if (!canNavigate(targetUrl)) {
+            throw new Error(
+                "Host gameplay navigation cannot leave the current game flow.");
+        }
+
+        const parsed = new DOMParser().parseFromString(markup, "text/html");
+        const nextView = parsed.querySelector(viewSelector);
+        const nextBoard = parsed.querySelector(boardSelector);
+        if (nextView && nextBoard) {
+            syncBoardQuestions(nextBoard);
+            await window.BadWolfHostGameplay.navigate(targetUrl.href, "none");
+            return;
+        }
+
+        if (renderExternalFlow(parsed)) {
+            return;
+        }
+
+        throw new Error("The host gameplay response is unsupported.");
+    };
+
+    const navigate = async url => {
+        const targetUrl = new URL(url, lobbyUrl.href);
+        if (!canNavigate(targetUrl)) {
+            window.location.assign(targetUrl.href);
+            return;
+        }
+
+        const response = await fetch(targetUrl.href, {
+            method: "GET",
+            credentials: "same-origin",
+            headers: {
+                Accept: "text/html",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            cache: "no-store"
+        });
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
+
+        await applyMarkup(await response.text(), response.url || targetUrl.href);
+    };
+
+    window.BadWolfHostFlowNavigation = {
+        applyMarkup,
+        canNavigate,
+        navigate
+    };
 
     const isGameplayForm = form =>
         form.matches(".question-selection-form") ||
-        form.closest("[data-host-gameplay-view]") !== null;
+        form.id === "remove-player-form" ||
+        form.closest(viewSelector) !== null;
+
+    document.addEventListener("click", event => {
+        const target = event.target instanceof Element ? event.target : null;
+        const blockPlayer = target?.closest("[data-confirm-block-player]");
+        const removePlayer = target?.closest("[data-confirm-remove-player]");
+        if (blockPlayer || removePlayer) {
+            const form = document.getElementById("remove-player-form");
+            const blockInput = document.getElementById("remove-player-block");
+            if (form instanceof HTMLFormElement &&
+                blockInput instanceof HTMLInputElement) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                blockInput.value = blockPlayer ? "true" : "false";
+                document.getElementById("remove-player-dialog")?.close();
+                form.requestSubmit();
+            }
+            return;
+        }
+
+        const flowLink = target?.closest(
+            `${viewSelector} [data-game-intro-page] a`);
+        if (!flowLink ||
+            flowLink.target ||
+            flowLink.hasAttribute("download") ||
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey) {
+            return;
+        }
+
+        const targetUrl = new URL(flowLink.href, lobbyUrl.href);
+        if (!canNavigate(targetUrl)) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const flowPage = flowLink.closest("[data-game-intro-page]");
+        const navigateToFlow = () => navigate(targetUrl)
+            .catch(error => {
+                console.error("Host game flow navigation failed.", error);
+                window.location.assign(targetUrl.href);
+            });
+        if (flowPage &&
+            !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            flowPage.classList.add("is-leaving");
+            window.setTimeout(navigateToFlow, 165);
+        } else {
+            void navigateToFlow();
+        }
+    }, true);
 
     document.addEventListener("submit", async event => {
         const form = event.target instanceof HTMLFormElement
@@ -376,8 +709,7 @@ const configureHostGameplayFormNavigation = () => {
             submitterHasFormAction ? submitter.formAction : form.action,
             window.location.href);
 
-        if (action.origin !== currentUrl.origin ||
-            action.pathname !== currentUrl.pathname) {
+        if (!canNavigate(action)) {
             return;
         }
 
@@ -405,15 +737,14 @@ const configureHostGameplayFormNavigation = () => {
             }
 
             const responseUrl = new URL(
-                response.url || window.location.href,
+                response.url || action.href,
                 window.location.href);
-            if (responseUrl.origin !== currentUrl.origin ||
-                responseUrl.pathname !== currentUrl.pathname) {
+            if (!canNavigate(responseUrl)) {
                 window.location.assign(responseUrl.href);
                 return;
             }
 
-            await window.BadWolfHostGameplay.navigate(responseUrl.href, "none");
+            await applyMarkup(await response.text(), responseUrl);
         } catch (error) {
             console.error("Host gameplay command failed.", error);
             window.location.reload();

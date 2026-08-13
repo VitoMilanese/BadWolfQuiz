@@ -23,10 +23,10 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.Contains("handler === \"Previous\"", script);
         Assert.Contains("handler === \"PreviousRound\"", script);
         Assert.Contains("event.stopImmediatePropagation();", script);
-        Assert.Contains("hostBoard?.classList.remove(\"host-game-board\")", script);
         Assert.Contains("fetch(form.action", script);
-        Assert.Contains("window.location.assign(response.url || `${runningIntroBase}?returning=true`)", script);
-        Assert.Contains("hostBoard?.classList.add(\"host-game-board\")", script);
+        Assert.Contains("await window.BadWolfHostFlowNavigation.applyMarkup(", script);
+        Assert.DoesNotContain("hostBoard?.classList.remove(\"host-game-board\")", script);
+        Assert.DoesNotContain("hostBoard?.classList.add(\"host-game-board\")", script);
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public sealed class PreviousRoundIntroRoutingTests
         var noPlayerBranch = script[noPlayerBranchStart..noPlayerBranchEnd];
 
         Assert.Contains("fetch(`${runningIntroBase}?handler=ForceAdvance`", noPlayerBranch);
-        Assert.Contains("window.location.assign(response.url || `${runningIntroBase}?returning=true`)", noPlayerBranch);
+        Assert.Contains("await window.BadWolfHostFlowNavigation.applyMarkup(", noPlayerBranch);
         Assert.DoesNotContain("window.location.assign(runningIntroBase);", noPlayerBranch);
     }
 

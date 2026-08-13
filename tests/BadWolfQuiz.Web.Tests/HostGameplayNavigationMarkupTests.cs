@@ -105,10 +105,75 @@ public sealed class HostGameplayNavigationMarkupTests
 
         Assert.Contains("configureHostGameplayFormNavigation", script);
         Assert.Contains("form.matches(\".question-selection-form\")", script);
-        Assert.Contains("form.closest(\"[data-host-gameplay-view]\")", script);
+        Assert.Contains("form.closest(viewSelector)", script);
         Assert.Contains("event.stopImmediatePropagation();", script);
         Assert.Contains("headers: { Accept: \"text/html\" }", script);
-        Assert.Contains("window.BadWolfHostGameplay.navigate(responseUrl.href, \"none\")", script);
+        Assert.Contains("await applyMarkup(await response.text(), responseUrl);", script);
+        Assert.Contains("if (!canNavigate(action))", script);
+    }
+
+    [Fact]
+    public void Partial_refresh_synchronizes_resolved_question_tiles_from_server_markup()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+
+        Assert.Contains("const syncBoardQuestions = nextBoard =>", script);
+        Assert.Contains("getQuestionContainer(currentQuestion).replaceWith(", script);
+        Assert.Contains("syncBoardQuestions(nextBoard);", script);
+        Assert.Contains("currentGrid.replaceChildren(", script);
+        Assert.Contains("const sameRound =", script);
+        Assert.Contains("previewQuestionId", script);
+    }
+
+    [Fact]
+    public void Player_blocking_uses_partial_form_submission()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+
+        Assert.Contains("form.id === \"remove-player-form\"", script);
+        Assert.Contains("[data-confirm-block-player]", script);
+        Assert.Contains("blockInput.value = blockPlayer ? \"true\" : \"false\";", script);
+        Assert.Contains("form.requestSubmit();", script);
+    }
+
+    [Fact]
+    public void Running_round_and_final_transition_pages_can_render_inside_the_gameplay_region()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+
+        Assert.Contains("/Admin/Games/RunningRoundIntro/", script);
+        Assert.Contains("/Admin/Games/FinalQuestionTransition/", script);
+        Assert.Contains("const renderExternalFlow = parsed =>", script);
+        Assert.Contains("[data-game-intro-page], [data-final-question-transition]", script);
+        Assert.Contains("window.BadWolfHostFlowNavigation.navigate(targetUrl)", script);
+        Assert.Contains("await window.BadWolfHostFlowNavigation.applyMarkup(", script);
+    }
+
+    [Fact]
+    public void Resolved_question_preview_uses_the_full_host_viewport()
+    {
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "player-admission-menu.css"));
+
+        Assert.Contains(
+            ".host-game-board:has(> [data-host-gameplay-view] > .question-review-preview)",
+            css);
+        Assert.Contains(
+            "[data-host-gameplay-view] > .question-review-preview",
+            css);
+        Assert.Contains("min-height: calc(100vh - var(--topbar-height) - 16px);", css);
+        Assert.Contains("margin-bottom: 0;", css);
     }
 
     private static string FindLobbyView() => FindWebFile(
