@@ -2574,4 +2574,7 @@
   <data name="GameBoard_PreviousRoundConfirm" xml:space="preserve">
     <value>Return to the nearest previous round that still has unclosed questions?</value>
   </data>
+  <data name="GameBoard_HideJoinCode" xml:space="preserve">
+    <value>Hide join code</value>
+  </data>
 </root>

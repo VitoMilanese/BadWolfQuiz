@@ -2574,4 +2574,7 @@
   <data name="GameBoard_PreviousRoundConfirm" xml:space="preserve">
     <value>Повернутися до найближчого попереднього раунду, у якому ще залишилися незакриті питання?</value>
   </data>
+  <data name="GameBoard_HideJoinCode" xml:space="preserve">
+    <value>Приховати код приєднання</value>
+  </data>
 </root>

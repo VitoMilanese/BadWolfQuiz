@@ -107,4 +107,4 @@ The browser clears revoked player access when it receives the removal event so
 the next join submits fresh credentials instead of following a stale player-page
 URL.
 
-- During a running game, the header QR button toggles the floating join-code panel: press once to show it and press again to hide it.
+- During a running game, the header QR button toggles the floating join-code panel. Its enabled state is preserved while gameplay temporarily hides the panel (for example during questions, intros, or leaderboards), so the panel reappears automatically when the board can show it again. The button tooltip switches between **Show join code** and **Hide join code** to match that state.

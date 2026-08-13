@@ -3071,16 +3071,32 @@
                 applyGeometry(geometry);
             };
 
+            const syncOpenButtonLabels = visible => {
+                for (const openButton of openButtons) {
+                    const label = visible
+                        ? openButton.dataset.hideJoinCodeLabel
+                        : openButton.dataset.showJoinCodeLabel;
+                    if (!label) {
+                        continue;
+                    }
+
+                    openButton.title = label;
+                    openButton.setAttribute("aria-label", label);
+                }
+            };
+
             const setVisible = visible => {
                 localStorage.setItem(visibleKey, visible ? "true" : "false");
                 panel.hidden = !visible || isTemporarilyHidden();
+                syncOpenButtonLabels(visible);
             };
 
             restoreGeometry();
             setVisible(localStorage.getItem(visibleKey) === "true");
 
             for (const openButton of openButtons) {
-                openButton.addEventListener("click", () => setVisible(true));
+                openButton.addEventListener("click", () =>
+                    setVisible(localStorage.getItem(visibleKey) !== "true"));
             }
 
             closeButton?.addEventListener("click", () => setVisible(false));

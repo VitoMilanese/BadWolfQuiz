@@ -105,14 +105,17 @@ public sealed class PreviousRoundIntroRoutingTests
     }
 
     [Fact]
-    public void Header_join_code_button_toggles_the_floating_panel()
+    public void Header_join_code_button_toggles_persisted_visibility_and_labels()
     {
+        var page = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml"));
+        var layout = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Shared", "_Layout.cshtml"));
         var script = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "wwwroot", "js", "site.js"));
 
-        Assert.Contains("[data-open-join-code]", script);
-        Assert.Contains("[data-join-code-panel]", script);
-        Assert.Contains("event.stopImmediatePropagation()", script);
-        Assert.Contains("panel.hidden = !panel.hidden", script);
+        Assert.Contains("setVisible(localStorage.getItem(visibleKey) !== \"true\")", page);
+        Assert.Contains("syncOpenButtonLabels(visible)", page);
+        Assert.Contains("data-show-join-code-label", layout);
+        Assert.Contains("data-hide-join-code-label", layout);
+        Assert.DoesNotContain("panel.hidden = !panel.hidden", script);
     }
 
     private static string FindFile(params string[] path)
