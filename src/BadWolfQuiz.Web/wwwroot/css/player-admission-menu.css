@@ -61,3 +61,19 @@
         min-width: min(280px, calc(100vw - 24px));
     }
 }
+
+/* Host gameplay partial navigation must not change the original board layout. */
+[data-host-gameplay-view] {
+    display: contents;
+}
+
+.host-board-layout[hidden] {
+    display: none;
+}
+
+.host-game-board:has(> [data-host-gameplay-view] > .current-question-summary:not(.wager-mode)) {
+    width: calc(100vw - 32px);
+    max-width: none;
+    margin-left: calc(50% - 50vw + 16px);
+    margin-right: calc(50% - 50vw + 16px);
+}

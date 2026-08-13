@@ -77,24 +77,63 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains("refreshScrollingNames();", markup);
     }
 
-    private static string FindLobbyView()
+    [Fact]
+    public void Partial_gameplay_layout_preserves_full_bleed_and_hides_the_board()
+    {
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "player-admission-menu.css"));
+
+        Assert.Contains("[data-host-gameplay-view]", css);
+        Assert.Contains("display: contents;", css);
+        Assert.Contains(".host-board-layout[hidden]", css);
+        Assert.Contains("display: none;", css);
+        Assert.Contains(
+            ".host-game-board:has(> [data-host-gameplay-view] > .current-question-summary:not(.wager-mode))",
+            css);
+        Assert.Contains("width: calc(100vw - 32px);", css);
+    }
+
+    [Fact]
+    public void Gameplay_forms_use_partial_navigation_after_dynamic_replacement()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+
+        Assert.Contains("configureHostGameplayFormNavigation", script);
+        Assert.Contains("form.matches(\".question-selection-form\")", script);
+        Assert.Contains("form.closest(\"[data-host-gameplay-view]\")", script);
+        Assert.Contains("event.stopImmediatePropagation();", script);
+        Assert.Contains("headers: { Accept: \"text/html\" }", script);
+        Assert.Contains("window.BadWolfHostGameplay.navigate(responseUrl.href, \"none\")", script);
+    }
+
+    private static string FindLobbyView() => FindWebFile(
+        "Pages",
+        "Admin",
+        "Games",
+        "Lobby.cshtml");
+
+    private static string FindWebFile(params string[] parts)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            var candidate = Path.Combine(
+            var candidateParts = new[]
+            {
                 directory.FullName,
                 "src",
-                "BadWolfQuiz.Web",
-                "Pages",
-                "Admin",
-                "Games",
-                "Lobby.cshtml");
+                "BadWolfQuiz.Web"
+            }.Concat(parts).ToArray();
+            var candidate = Path.Combine(candidateParts);
             if (File.Exists(candidate)) return candidate;
             directory = directory.Parent;
         }
 
         throw new FileNotFoundException(
-            "Could not locate Lobby.cshtml from the test output directory.");
+            $"Could not locate BadWolfQuiz.Web file: {Path.Combine(parts)}");
     }
 }
