@@ -102,6 +102,14 @@
     height: 100%;
 }
 
+[data-host-gameplay-view] > [data-game-intro-page] {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    box-sizing: border-box;
+}
+
 .host-game-board.host-gameplay-presentation-mode {
     --game-scoreboard-space: 0px !important;
     padding-bottom: 0;

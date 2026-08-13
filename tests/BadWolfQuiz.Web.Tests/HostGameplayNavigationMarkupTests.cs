@@ -129,6 +129,24 @@ public sealed class HostGameplayNavigationMarkupTests
     }
 
     [Fact]
+    public void Partial_refresh_uses_round_identity_when_category_ids_repeat_between_rounds()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+
+        Assert.Contains(
+            "data-source-round-id=",
+            markup);
+        Assert.Contains("const currentRoundId = currentGrid.dataset.sourceRoundId;", script);
+        Assert.Contains("const nextRoundId = nextGrid.dataset.sourceRoundId;", script);
+        Assert.Contains("? currentRoundId === nextRoundId", script);
+        Assert.Contains("currentGrid.dataset.sourceRoundId = nextRoundId;", script);
+    }
+
+    [Fact]
     public void Player_blocking_uses_partial_form_submission()
     {
         var script = File.ReadAllText(FindWebFile(
@@ -174,6 +192,24 @@ public sealed class HostGameplayNavigationMarkupTests
             css);
         Assert.Contains("height: 100%;", css);
         Assert.Contains("margin-bottom: 0;", css);
+    }
+
+    [Fact]
+    public void Embedded_category_intro_is_constrained_to_the_host_viewport()
+    {
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "player-admission-menu.css"));
+        var selector = "[data-host-gameplay-view] > [data-game-intro-page]";
+        var blockStart = css.LastIndexOf(selector, StringComparison.Ordinal);
+        var blockEnd = css.IndexOf('}', blockStart);
+        var block = css[blockStart..blockEnd];
+
+        Assert.Contains("flex: 1 1 auto;", block);
+        Assert.Contains("min-height: 0;", block);
+        Assert.Contains("height: 100%;", block);
+        Assert.Contains("max-height: 100%;", block);
     }
 
     [Fact]

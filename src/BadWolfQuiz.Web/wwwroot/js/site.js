@@ -505,17 +505,26 @@ const configureHostGameplayFormNavigation = () => {
             return;
         }
 
+        const currentRoundId = currentGrid.dataset.sourceRoundId;
+        const nextRoundId = nextGrid.dataset.sourceRoundId;
         const currentCategoryIds = Array.from(currentGrid.querySelectorAll(
             "[data-category-context]"), category => category.dataset.sourceCategoryId);
         const nextCategoryIds = Array.from(nextGrid.querySelectorAll(
             "[data-category-context]"), category => category.dataset.sourceCategoryId);
-        const sameRound = currentCategoryIds.length === nextCategoryIds.length &&
-            currentCategoryIds.every((id, index) => id === nextCategoryIds[index]);
+        const sameRound = currentRoundId && nextRoundId
+            ? currentRoundId === nextRoundId
+            : currentCategoryIds.length === nextCategoryIds.length &&
+                currentCategoryIds.every((id, index) => id === nextCategoryIds[index]);
 
         if (!sameRound) {
             currentGrid.replaceChildren(
                 ...Array.from(nextGrid.childNodes, node =>
                     document.importNode(node, true)));
+            if (nextRoundId) {
+                currentGrid.dataset.sourceRoundId = nextRoundId;
+            } else {
+                delete currentGrid.dataset.sourceRoundId;
+            }
             const nextStyle = nextGrid.getAttribute("style");
             if (nextStyle === null) {
                 currentGrid.removeAttribute("style");

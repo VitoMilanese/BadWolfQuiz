@@ -927,6 +927,7 @@
                 </aside>
             }
             <div class="host-board-grid"
+                 data-source-round-id="@Model.Game.Session.CurrentRound.SourceRoundId"
                  style="--board-columns: @Model.BoardCategories.Count">
             @foreach (var category in Model.BoardCategories)
             {
