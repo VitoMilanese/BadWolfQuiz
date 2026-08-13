@@ -23,3 +23,7 @@ When automatic approval is enabled, a newly connected player that would normally
 - #82 — accept all waiting players
 - #83 — automatically accept newly connected waiting players
 - #114 — grouped player-admission menu
+## Closed-game join behavior
+
+Once the game has moved beyond the regular running state, including the Final Question wagering phase, new players are no longer admitted. Join attempts through either a manually entered room code or the QR join link stay on the normal join page and show a localized explanation instead of exposing a domain exception or developer stack trace.
+

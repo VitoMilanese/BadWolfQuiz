@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class LateJoinHandlingTests
 {
     [Fact]
-    public void Join_page_handles_game_rule_violations_as_a_user_facing_error()
+    public void Join_page_maps_closed_game_status_to_a_user_facing_error()
     {
         var source = File.ReadAllText(FindFile(
             "src",
@@ -12,9 +12,9 @@ public sealed class LateJoinHandlingTests
             "Join",
             "Index.cshtml.cs"));
 
-        Assert.Contains("catch (GameRuleViolationException)", source);
+        Assert.Contains("case PlayerJoinStatus.GameClosed:", source);
         Assert.Contains("localizer[\"Error_GameNoLongerAcceptsPlayers\"]", source);
-        Assert.Contains("return Page();", source);
+        Assert.DoesNotContain("catch (GameRuleViolationException)", source);
         Assert.Contains("Error_GameNoLongerAcceptsPlayers", File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Resources", "Localization", "SharedResource.resx")));
         Assert.Contains("Error_GameNoLongerAcceptsPlayers", File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Resources", "Localization", "SharedResource.uk.resx")));
         Assert.Contains("Error_GameNoLongerAcceptsPlayers", File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Resources", "Localization", "SharedResource.it.resx")));
@@ -35,6 +35,7 @@ public sealed class LateJoinHandlingTests
         Assert.Contains("case PlayerJoinStatus.NameAlreadyUsed:", source);
         Assert.Contains("case PlayerJoinStatus.GameAlreadyStarted:", source);
         Assert.Contains("case PlayerJoinStatus.PlayerBlocked:", source);
+        Assert.Contains("case PlayerJoinStatus.GameClosed:", source);
     }
 
     private static string FindFile(params string[] path)

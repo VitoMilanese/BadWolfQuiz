@@ -219,6 +219,12 @@ public sealed class GameSessionRegistry
                 return PlayerJoinResult.Failed(PlayerJoinStatus.NameAlreadyUsed);
             }
 
+            if (game.Session.Status is not GameSessionStatus.Lobby and
+                not GameSessionStatus.Running)
+            {
+                return PlayerJoinResult.Failed(PlayerJoinStatus.GameClosed);
+            }
+
             var removedPlayer = game.Session.RemovedPlayers.FirstOrDefault(player =>
                 string.Equals(
                     player.Name,

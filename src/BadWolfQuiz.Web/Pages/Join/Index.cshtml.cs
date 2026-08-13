@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
@@ -46,22 +45,10 @@ public sealed class IndexModel(
         var avatarId = avatarCatalog.IsValid(Input.AvatarId)
             ? Input.AvatarId
             : null;
-        PlayerJoinResult result;
-
-        try
-        {
-            result = sessionRegistry.JoinPlayer(
-                Input.GameCode,
-                Input.PlayerName,
-                avatarId);
-        }
-        catch (GameRuleViolationException)
-        {
-            ModelState.AddModelError(
-                string.Empty,
-                localizer["Error_GameNoLongerAcceptsPlayers"]);
-            return Page();
-        }
+        var result = sessionRegistry.JoinPlayer(
+            Input.GameCode,
+            Input.PlayerName,
+            avatarId);
 
         switch (result.Status)
         {
@@ -98,6 +85,12 @@ public sealed class IndexModel(
                 ModelState.AddModelError(
                     string.Empty,
                     localizer["Message_GameStarted"]);
+                break;
+
+            case PlayerJoinStatus.GameClosed:
+                ModelState.AddModelError(
+                    string.Empty,
+                    localizer["Error_GameNoLongerAcceptsPlayers"]);
                 break;
 
             case PlayerJoinStatus.PlayerBlocked:
