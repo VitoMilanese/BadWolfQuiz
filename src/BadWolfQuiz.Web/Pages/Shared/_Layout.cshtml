@@ -76,7 +76,8 @@
             BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
             BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging;
 
-    string? gameHeaderQrDataUri = null;
+    string? gameHeaderQrDarkDataUri = null;
+    string? gameHeaderQrLightDataUri = null;
     if (showGameHeaderQr)
     {
         var qrPayload = Configuration["Game:HeaderQrPayload"];
@@ -88,7 +89,8 @@
         using var qrGenerator = new QRCodeGenerator();
         using var qrData = qrGenerator.CreateQrCode(qrPayload, QRCodeGenerator.ECCLevel.Q);
         using var qrCode = new PngByteQRCode(qrData);
-        gameHeaderQrDataUri = $"data:image/png;base64,{Convert.ToBase64String(qrCode.GetGraphic(4))}";
+        gameHeaderQrDarkDataUri = $"data:image/png;base64,{Convert.ToBase64String(qrCode.GetGraphic(4, new byte[] { 0, 0, 0, 255 }, new byte[] { 0, 0, 0, 0 }))}";
+        gameHeaderQrLightDataUri = $"data:image/png;base64,{Convert.ToBase64String(qrCode.GetGraphic(4, new byte[] { 255, 255, 255, 255 }, new byte[] { 0, 0, 0, 0 }))}";
     }
 }
 
@@ -109,6 +111,10 @@
         }
 
         .game-header-context .board-action-menu .action-menu-item[data-open-join-code] {
+            display: none;
+        }
+
+        .game-header-square-button[hidden] {
             display: none;
         }
 
@@ -140,14 +146,6 @@
             image-rendering: pixelated;
         }
 
-        .game-header-join-qr.qr-modules-dark img {
-            mix-blend-mode: multiply;
-        }
-
-        .game-header-join-qr.qr-modules-light img {
-            filter: invert(1);
-            mix-blend-mode: screen;
-        }
     </style>
     @if (!hidePortalFooter && !isEmbeddedDiscordSettings)
     {
@@ -210,7 +208,7 @@
                     </div>
                 </details>
             }
-            @if (gameHeaderQrDataUri is not null)
+            @if (gameHeaderQrDarkDataUri is not null && gameHeaderQrLightDataUri is not null)
             {
                 <button class="button button-secondary game-header-square-button game-header-join-qr"
                         type="button"
@@ -220,7 +218,11 @@
                         hidden
                         title="@Localizer["GameBoard_ShowJoinCode"]"
                         aria-label="@Localizer["GameBoard_ShowJoinCode"]">
-                    <img src="@gameHeaderQrDataUri" alt="" aria-hidden="true" />
+                    <img src="@gameHeaderQrDarkDataUri"
+                         data-dark-src="@gameHeaderQrDarkDataUri"
+                         data-light-src="@gameHeaderQrLightDataUri"
+                         alt=""
+                         aria-hidden="true" />
                 </button>
             }
             @if (isSettingsPage)
@@ -229,14 +231,15 @@
             }
         </div>
 
-        @if (gameHeaderQrDataUri is not null)
+        @if (gameHeaderQrDarkDataUri is not null && gameHeaderQrLightDataUri is not null)
         {
             <script>
                 (() => {
                     const gameHeader = document.querySelector('.game-header-context');
                     const qrButton = document.querySelector('.game-header-join-qr');
+                    const qrImage = qrButton?.querySelector('img');
                     const discordButton = gameHeader?.querySelector('[data-open-discord-settings]');
-                    if (!gameHeader || !qrButton || !discordButton) {
+                    if (!gameHeader || !qrButton || !qrImage || !discordButton) {
                         return;
                     }
 
@@ -244,15 +247,18 @@
                         .querySelectorAll('.board-action-menu .action-menu-item[data-open-join-code]')
                         .forEach(item => item.remove());
 
-                    const channels = getComputedStyle(qrButton)
-                        .backgroundColor
+                    const buttonBackground = getComputedStyle(discordButton).backgroundColor;
+                    qrButton.style.backgroundColor = buttonBackground;
+
+                    const channels = buttonBackground
                         .match(/[\d.]+/g)
                         ?.slice(0, 3)
                         .map(Number);
                     const backgroundIsLight = channels?.length === 3 &&
                         ((0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]) / 255) >= 0.55;
-                    qrButton.classList.add(
-                        backgroundIsLight ? 'qr-modules-dark' : 'qr-modules-light');
+                    qrImage.src = backgroundIsLight
+                        ? qrImage.dataset.darkSrc
+                        : qrImage.dataset.lightSrc;
 
                     discordButton.classList.add('game-header-square-button');
                     gameHeader.insertBefore(qrButton, discordButton);

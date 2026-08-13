@@ -15,6 +15,10 @@ button in the game header instead of from the **Tools** menu. The button sits
 between **Tools** and the Discord microphone control and opens the same movable,
 resizable floating join panel as before.
 
+The same gameplay header context is reused during Final Question states, so the
+header QR button follows the same theme-aware rendering path there as it does
+during regular gameplay.
+
 The header button itself contains a decorative QR code rather than the real game
 join URL. Its payload comes from `Game:HeaderQrPayload`; if the setting is
 missing, null, empty, or whitespace, the application uses `Чупа`. This decorative
@@ -104,7 +108,6 @@ a full page reload, and the approved player is immediately notified that access
 has been restored.
 
 The browser clears revoked player access when it receives the removal event so
-the next join submits fresh credentials instead of following a stale player-page
-URL.
+the next join submits fresh credentials instead of following a stale player-page URL.
 
 - During a running game, the header QR button toggles the floating join-code panel. Its enabled state is preserved while gameplay temporarily hides the panel (for example during questions, intros, or leaderboards), so the panel reappears automatically when the board can show it again. The button tooltip switches between **Show join code** and **Hide join code** to match that state.
