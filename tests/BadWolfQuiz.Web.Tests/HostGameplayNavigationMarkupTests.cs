@@ -309,6 +309,36 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.DoesNotContain("requestHostReload();", progressHandler);
     }
 
+    [Fact]
+    public void Partial_round_refresh_synchronizes_tools_navigation_visibility()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+
+        Assert.Contains("!Model.Game.Session.HasPreviousUnfinishedRound", markup);
+        Assert.Contains("!Model.Game.Session.HasNextUnfinishedRound", markup);
+        Assert.Contains("const syncRoundNavigationActions = parsed =>", markup);
+        Assert.Contains("[data-open-previous-round-dialog]", markup);
+        Assert.Contains("#force-advance-round-form", markup);
+        Assert.Contains("currentAction.hidden = nextAction.hidden;", markup);
+        Assert.Contains("syncRoundNavigationActions(parsed);", markup);
+    }
+
+    [Fact]
+    public void Previous_round_intro_is_protected_from_stale_buzzer_refreshes()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+
+        Assert.Contains("const isExternalHostFlowActive = () =>", markup);
+        Assert.Contains("!isExternalHostFlowActive()", markup);
+        Assert.Contains("const cancelPending = () =>", markup);
+        Assert.Contains("return { cancelPending, refresh, navigate, updatedEventName };", markup);
+        Assert.Contains("window.BadWolfHostGameplay?.cancelPending?.();", script);
+    }
+
     private static string FindLobbyView() => FindWebFile(
         "Pages",
         "Admin",

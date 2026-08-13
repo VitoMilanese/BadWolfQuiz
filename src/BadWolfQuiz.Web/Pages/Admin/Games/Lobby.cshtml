@@ -42,27 +42,23 @@
                         </form>
                     }
 
-                    @if (Model.Game.Session.HasPreviousUnfinishedRound)
-                    {
+                    <button class="action-menu-item"
+                            type="button"
+                            data-open-previous-round-dialog
+                            hidden="@(!Model.Game.Session.HasPreviousUnfinishedRound ? "hidden" : null)">
+                        @Localizer["GameBoard_PreviousRound"]
+                    </button>
+
+                    <form id="force-advance-round-form"
+                            method="post"
+                            asp-page-handler="ForceAdvanceRound"
+                            hidden="@(!Model.Game.Session.HasNextUnfinishedRound ? "hidden" : null)">
                         <button class="action-menu-item"
                                 type="button"
-                                data-open-previous-round-dialog>
-                            @Localizer["GameBoard_PreviousRound"]
+                                data-open-force-advance-round-dialog>
+                            @Localizer["GameBoard_NextRound"]
                         </button>
-                    }
-
-                    @if (Model.Game.Session.HasNextUnfinishedRound)
-                    {
-                        <form id="force-advance-round-form"
-                                method="post"
-                                asp-page-handler="ForceAdvanceRound">
-                            <button class="action-menu-item"
-                                    type="button"
-                                    data-open-force-advance-round-dialog>
-                                @Localizer["GameBoard_NextRound"]
-                            </button>
-                        </form>
-                    }
+                    </form>
 
                     @if (Model.Game.Session.Quiz.FinalQuestion is not null)
                     {
@@ -1725,6 +1721,19 @@
             }
         };
 
+        const syncRoundNavigationActions = parsed => {
+            for (const selector of [
+                "[data-open-previous-round-dialog]",
+                "#force-advance-round-form"
+            ]) {
+                const currentAction = document.querySelector(selector);
+                const nextAction = parsed.querySelector(selector);
+                if (currentAction && nextAction) {
+                    currentAction.hidden = nextAction.hidden;
+                }
+            }
+        };
+
         const applyDocument = (parsed, targetUrl, historyMode) => {
             const currentView = document.querySelector(viewSelector);
             const currentBoard = document.querySelector(boardSelector);
@@ -1747,6 +1756,7 @@
                 currentRoundHeading.textContent = nextRoundHeading.textContent;
                 currentRoundHeading.title = nextRoundHeading.title;
             }
+            syncRoundNavigationActions(parsed);
 
             const currentHostBoard = currentView.closest(
                 ".host-game-board[data-game-id]");
@@ -1814,6 +1824,10 @@
             return true;
         };
 
+        const cancelPending = () => {
+            requestSequence += 1;
+        };
+
         const refresh = () => {
             if (refreshPromise) {
                 return refreshPromise;
@@ -1873,7 +1887,7 @@
         });
 
         syncHeaderState();
-        return { refresh, navigate, updatedEventName };
+        return { cancelPending, refresh, navigate, updatedEventName };
     })();
 
     window.BadWolfContextActions = (() => {
@@ -4447,6 +4461,11 @@
                 }, 3000);
             };
 
+            const isExternalHostFlowActive = () =>
+                document.querySelector(
+                    "[data-host-gameplay-view] [data-game-intro-page], " +
+                    "[data-host-gameplay-view] [data-final-question-transition]") !== null;
+
             let hostCommandDepth = 0;
             let hostReloadPending = false;
             let hostGameplayRefreshPending = false;
@@ -4788,7 +4807,8 @@
                     return;
                 }
 
-                if (lobby.classList.contains("host-game-board")) {
+                if (lobby.classList.contains("host-game-board") &&
+                    !isExternalHostFlowActive()) {
                     void requestHostGameplayRefresh();
                 }
             });

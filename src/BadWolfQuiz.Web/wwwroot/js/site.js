@@ -635,6 +635,7 @@ const configureHostGameplayFormNavigation = () => {
             return false;
         }
 
+        window.BadWolfHostGameplay?.cancelPending?.();
         const styles = Array.from(parsed.querySelectorAll(
             "main.page-shell > style"));
         currentView.replaceChildren(
