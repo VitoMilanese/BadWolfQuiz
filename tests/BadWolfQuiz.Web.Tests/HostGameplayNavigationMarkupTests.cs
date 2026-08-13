@@ -313,6 +313,10 @@ public sealed class HostGameplayNavigationMarkupTests
     public void Partial_round_refresh_synchronizes_tools_navigation_visibility()
     {
         var markup = File.ReadAllText(FindLobbyView());
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "site.css"));
 
         Assert.Contains("!Model.Game.Session.HasPreviousUnfinishedRound", markup);
         Assert.Contains("!Model.Game.Session.HasNextUnfinishedRound", markup);
@@ -321,6 +325,9 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains("#force-advance-round-form", markup);
         Assert.Contains("currentAction.hidden = nextAction.hidden;", markup);
         Assert.Contains("syncRoundNavigationActions(parsed);", markup);
+        Assert.Contains(".action-menu-popover form[hidden]", css);
+        Assert.Contains(".action-menu-popover .action-menu-item[hidden]", css);
+        Assert.Contains("display: none !important;", css);
     }
 
     [Fact]
