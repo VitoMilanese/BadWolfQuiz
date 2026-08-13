@@ -26,6 +26,8 @@ public sealed class RunningRoundIntroModel(
     public int? CategoryIndex { get; private set; }
     public int? NextCategoryIndex { get; private set; }
     public bool IsFinalCategory { get; private set; }
+    public bool IsReturning { get; private set; }
+    public bool IsBoardCategoryPreview { get; private set; }
 
     public string SkipLabel => CurrentLanguage switch
     {
@@ -41,6 +43,8 @@ public sealed class RunningRoundIntroModel(
         _ => "Next"
     };
 
+    public string ReturnToBoardLabel => localizer["GameBoard_ReturnToBoard"].Value;
+
     public string StartGameLabel => CurrentLanguage switch
     {
         "uk" => "Почати гру",
@@ -51,7 +55,11 @@ public sealed class RunningRoundIntroModel(
     private static string CurrentLanguage =>
         CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
 
-    public IActionResult OnGet(Guid id, int? category)
+    public IActionResult OnGet(
+        Guid id,
+        int? category,
+        bool returning = false,
+        int? sourceCategoryId = null)
     {
         var game = FindOwned(id);
         if (game is null)
@@ -64,14 +72,25 @@ public sealed class RunningRoundIntroModel(
             return RedirectToPage("Lobby", new { id });
         }
 
-        LoadIntro(game, id, category);
+        if (sourceCategoryId.HasValue)
+        {
+            if (!LoadBoardCategoryPreview(game, id, sourceCategoryId.Value))
+            {
+                return RedirectToPage("Lobby", new { id });
+            }
+
+            return Page();
+        }
+
+        LoadIntro(game, id, category, returning);
         return Page();
     }
 
     public IActionResult OnGetContentBlock(
         Guid id,
         int? category,
-        int sourceContentBlockId)
+        int sourceContentBlockId,
+        bool returning = false)
     {
         var game = FindOwned(id);
         if (game is null)
@@ -84,9 +103,7 @@ public sealed class RunningRoundIntroModel(
 
         if (category.HasValue)
         {
-            var categories = round.CategoryIntros
-                .OrderBy(item => item.SortOrder)
-                .ToArray();
+            var categories = GetIntroCategories(game.Session, round, returning);
             if (category.Value < 0 || category.Value >= categories.Length)
             {
                 return NotFound();
@@ -115,7 +132,7 @@ public sealed class RunningRoundIntroModel(
         };
     }
 
-    public async Task<IActionResult> OnPostAdvanceAsync(
+    public async Task<IActionResult> OnPostPreviousAsync(
         Guid id,
         CancellationToken cancellationToken)
     {
@@ -124,6 +141,92 @@ public sealed class RunningRoundIntroModel(
         {
             return NotFound();
         }
+
+        var showLeaderboard =
+            game.Session.Players.Count > 0 &&
+            !game.Session.IsPreviousRoundReturnPending;
+
+        try
+        {
+            if (showLeaderboard)
+            {
+                sessionRegistry.PrepareReturnToPreviousUnfinishedRound(game.PublicCode);
+            }
+            else
+            {
+                sessionRegistry.ReturnToPreviousUnfinishedRound(game.PublicCode);
+            }
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] = localizer["GameBoard_PreviousRoundRejected"].Value;
+            return RedirectToPage("Lobby", new { id });
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+        return showLeaderboard
+            ? RedirectToPage("Lobby", new { id })
+            : RedirectToPage(new { id, returning = true });
+    }
+
+    public async Task<IActionResult> OnPostReturnToUnfinishedAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = FindOwned(id);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var showLeaderboard =
+            game.Session.Players.Count > 0 &&
+            !game.Session.IsUnfinishedRoundReturnPending;
+
+        try
+        {
+            if (showLeaderboard)
+            {
+                sessionRegistry.PrepareReturnToNearestUnfinishedRoundExcludingCurrent(
+                    game.PublicCode);
+            }
+            else
+            {
+                sessionRegistry.ReturnToNearestUnfinishedRoundExcludingCurrent(
+                    game.PublicCode);
+            }
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] = localizer["GameBoard_PreviousRoundRejected"].Value;
+            return RedirectToPage("Lobby", new { id });
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+
+        return showLeaderboard
+            ? RedirectToPage("Lobby", new { id })
+            : RedirectToPage(new { id, returning = true });
+    }
+
+    public async Task<IActionResult> OnPostAdvanceAsync(
+        Guid id,
+        bool filterCompletedCategories,
+        CancellationToken cancellationToken)
+    {
+        var game = FindOwned(id);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        filterCompletedCategories = true;
 
         try
         {
@@ -137,7 +240,7 @@ public sealed class RunningRoundIntroModel(
 
         await BroadcastPlayersAsync(game, cancellationToken);
         await StopAutomaticDiscordMuteAsync(id, cancellationToken);
-        return RedirectToPage(new { id });
+        return RedirectToPage(new { id, returning = filterCompletedCategories });
     }
 
     public async Task<IActionResult> OnPostForceAdvanceAsync(
@@ -174,21 +277,51 @@ public sealed class RunningRoundIntroModel(
         await StopAutomaticDiscordMuteAsync(id, cancellationToken);
 
         return advancedImmediately
-            ? RedirectToPage(new { id })
+            ? RedirectToPage(new { id, returning = true })
             : RedirectToPage("Lobby", new { id });
     }
 
-    private void LoadIntro(
+    private bool LoadBoardCategoryPreview(
         GameSessionRegistration game,
         Guid id,
-        int? categoryIndex)
+        int sourceCategoryId)
     {
-        GameId = id;
         var session = game.Session;
         var round = session.CurrentRound;
         var categories = round.CategoryIntros
             .OrderBy(category => category.SortOrder)
             .ToArray();
+        var categoryIndex = Array.FindIndex(
+            categories,
+            category => category.SourceCategoryId == sourceCategoryId);
+
+        if (categoryIndex < 0)
+        {
+            return false;
+        }
+
+        var category = categories[categoryIndex];
+        GameId = id;
+        IsBoardCategoryPreview = true;
+        CategoryCount = 1;
+        CategoryIndex = categoryIndex;
+        Heading = ResolveCategoryHeading(category, categoryIndex + 1);
+        Blocks = FilterDisplayBlocks(category.DescriptionBlocks);
+        IsFinalCategory = true;
+        return true;
+    }
+
+    private void LoadIntro(
+        GameSessionRegistration game,
+        Guid id,
+        int? categoryIndex,
+        bool returning)
+    {
+        GameId = id;
+        IsReturning = returning;
+        var session = game.Session;
+        var round = session.CurrentRound;
+        var categories = GetIntroCategories(session, round, returning);
         CategoryCount = categories.Length;
 
         if (!categoryIndex.HasValue)
@@ -214,6 +347,17 @@ public sealed class RunningRoundIntroModel(
         IsFinalCategory = categoryIndex.Value == categories.Length - 1;
         NextCategoryIndex = IsFinalCategory ? null : categoryIndex.Value + 1;
     }
+
+    private static QuizCategoryIntroSnapshot[] GetIntroCategories(
+        GameSession session,
+        QuizRoundSnapshot round,
+        bool returning) => round.CategoryIntros
+        .Where(category => !returning || session.Board.Questions.Any(question =>
+            question.SourceRoundId == round.SourceRoundId &&
+            question.SourceCategoryId == category.SourceCategoryId &&
+            question.Status == RuntimeQuestionStatus.Available))
+        .OrderBy(category => category.SortOrder)
+        .ToArray();
 
     private static IReadOnlyList<ContentBlockSnapshot> FilterDisplayBlocks(
         IEnumerable<ContentBlockSnapshot> blocks) => blocks

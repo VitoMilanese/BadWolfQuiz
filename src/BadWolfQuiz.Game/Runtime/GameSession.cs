@@ -55,17 +55,43 @@ public sealed class GameSession
 
     public int CurrentRoundIndex { get; private set; }
 
+    public int FurthestVisitedRoundIndex { get; private set; }
+
+    public bool IsForcedRoundAdvancePending { get; private set; }
+
+    public bool IsPreviousRoundReturnPending { get; private set; }
+
+    public bool IsFinalQuestionAdvancePending { get; private set; }
+
+    public bool IsUnfinishedRoundReturnPending { get; private set; }
+
     public int CurrentRoundNumber => CurrentRoundIndex + 1;
 
     public QuizRoundSnapshot CurrentRound => Quiz.Rounds
         .OrderBy(round => round.SortOrder)
         .ElementAt(CurrentRoundIndex);
 
-    public bool IsCurrentRoundComplete => Board.Questions
-        .Where(question => question.SourceRoundId == CurrentRound.SourceRoundId)
-        .All(question => question.Status == RuntimeQuestionStatus.Resolved);
+    public bool IsCurrentRoundComplete =>
+        IsForcedRoundAdvancePending ||
+        IsPreviousRoundReturnPending ||
+        IsFinalQuestionAdvancePending ||
+        IsUnfinishedRoundReturnPending ||
+        IsRoundComplete(CurrentRoundIndex);
 
     public bool HasNextRound => CurrentRoundIndex < Quiz.Rounds.Count - 1;
+
+    public bool HasPreviousUnfinishedRound =>
+        FindPreviousUnfinishedRoundIndex() is not null;
+
+    public bool HasNextUnfinishedRound =>
+        FindNextUnfinishedRoundIndex() is not null;
+
+    public bool HasAnyUnfinishedRegularRound =>
+        Enumerable.Range(0, Quiz.Rounds.Count).Any(index => !IsRoundComplete(index));
+
+    public bool HasUnfinishedRegularRoundExcludingCurrent =>
+        Enumerable.Range(0, FurthestVisitedRoundIndex + 1).Any(index =>
+            index != CurrentRoundIndex && !IsRoundComplete(index));
 
     public bool IsActivePlayerChangeLocked => Board.Questions.Any(question =>
         question.IsSpecial &&
@@ -104,7 +130,12 @@ public sealed class GameSession
         _players.Select(player => player.CaptureState()).ToArray(),
         _removedPlayers.Select(player => player.CaptureState()).ToArray(),
         Board.Questions.Select(question => question.CaptureState()).ToArray(),
-        FinalQuestion?.CaptureState());
+        FinalQuestion?.CaptureState(),
+        IsForcedRoundAdvancePending,
+        FurthestVisitedRoundIndex,
+        IsPreviousRoundReturnPending,
+        IsFinalQuestionAdvancePending,
+        IsUnfinishedRoundReturnPending);
 
     public static GameSession Restore(
         QuizSnapshot quiz,
@@ -122,6 +153,13 @@ public sealed class GameSession
             Status = state.Status,
             ActivePlayerId = state.ActivePlayerId,
             CurrentRoundIndex = state.CurrentRoundIndex,
+            FurthestVisitedRoundIndex = Math.Max(
+                state.FurthestVisitedRoundIndex,
+                state.CurrentRoundIndex),
+            IsForcedRoundAdvancePending = state.IsForcedRoundAdvancePending,
+            IsPreviousRoundReturnPending = state.IsPreviousRoundReturnPending,
+            IsFinalQuestionAdvancePending = state.IsFinalQuestionAdvancePending,
+            IsUnfinishedRoundReturnPending = state.IsUnfinishedRoundReturnPending,
             CreatedAtUtc = state.CreatedAtUtc,
             StartedAtUtc = state.StartedAtUtc
         };
@@ -749,42 +787,135 @@ public sealed class GameSession
                 "The current round must be completed before advancing.");
         }
 
-        if (!HasNextRound)
-        {
-            throw new GameRuleViolationException(
-                "The game does not have another round.");
-        }
+        var nextRoundIndex = FindNextUnfinishedRoundIndex()
+            ?? throw new GameRuleViolationException(
+                "The game does not have another unfinished round.");
 
         GamePlayerId? nextActivePlayerId = _players.Count > 0
             ? GetWeakestCurrentRoundPlayerId()
             : null;
 
-        CurrentRoundIndex++;
-        CaptureRoundStartScores();
-        ActivePlayerId = nextActivePlayerId;
+        return MoveToRound(nextRoundIndex, nextActivePlayerId);
+    }
 
-        return CurrentRound;
+    public QuizRoundSnapshot ForceAdvanceToNextRound()
+    {
+        EnsureRunning();
+        ResolveInProgressQuestionsForRound(CurrentRoundIndex);
+
+        var nextRoundIndex = FindNextUnfinishedRoundIndex()
+            ?? throw new GameRuleViolationException(
+                "The game does not have another unfinished round.");
+
+        GamePlayerId? nextActivePlayerId = _players.Count > 0
+            ? GetWeakestCurrentRoundPlayerId()
+            : null;
+
+        return MoveToRound(nextRoundIndex, nextActivePlayerId);
+    }
+
+    public void PrepareReturnToPreviousUnfinishedRound()
+    {
+        EnsureRunning();
+        ResolveInProgressQuestionsForRound(CurrentRoundIndex);
+
+        if (FindPreviousUnfinishedRoundIndex() is null)
+        {
+            throw new GameRuleViolationException(
+                "The game does not have an unfinished previous round.");
+        }
+
+        IsForcedRoundAdvancePending = false;
+        IsPreviousRoundReturnPending = true;
+        IsFinalQuestionAdvancePending = false;
+        IsUnfinishedRoundReturnPending = false;
+    }
+
+    public void PrepareReturnToNearestUnfinishedRoundExcludingCurrent()
+    {
+        EnsureRunning();
+        ResolveInProgressQuestionsForRound(CurrentRoundIndex);
+
+        var hasTarget = Enumerable.Range(0, FurthestVisitedRoundIndex + 1).Any(index =>
+            index != CurrentRoundIndex && !IsRoundComplete(index));
+
+        if (!hasTarget)
+        {
+            throw new GameRuleViolationException(
+                "The game does not have another unfinished round.");
+        }
+
+        IsForcedRoundAdvancePending = false;
+        IsPreviousRoundReturnPending = false;
+        IsFinalQuestionAdvancePending = false;
+        IsUnfinishedRoundReturnPending = true;
+    }
+
+    public void PrepareFinalQuestionAdvance()
+    {
+        EnsureRunning();
+
+        if (Quiz.FinalQuestion is null)
+        {
+            throw new GameRuleViolationException(
+                "This quiz does not contain a final question.");
+        }
+
+        ResolveInProgressQuestionsForRound(CurrentRoundIndex);
+        IsForcedRoundAdvancePending = false;
+        IsPreviousRoundReturnPending = false;
+        IsFinalQuestionAdvancePending = true;
+        IsUnfinishedRoundReturnPending = false;
+    }
+
+    public QuizRoundSnapshot ReturnToPreviousUnfinishedRound()
+    {
+        EnsureRunning();
+        ResolveInProgressQuestionsForRound(CurrentRoundIndex);
+
+        var previousRoundIndex = FindPreviousUnfinishedRoundIndex()
+            ?? throw new GameRuleViolationException(
+                "The game does not have an unfinished previous round.");
+
+        return MoveToRound(previousRoundIndex, ActivePlayerId);
+    }
+
+    public QuizRoundSnapshot ReturnToNearestUnfinishedRoundExcludingCurrent()
+    {
+        EnsureRunning();
+        ResolveInProgressQuestionsForRound(CurrentRoundIndex);
+
+        var candidates = Enumerable.Range(0, FurthestVisitedRoundIndex + 1)
+            .Where(index => index != CurrentRoundIndex && !IsRoundComplete(index))
+            .OrderBy(index => Math.Abs(index - CurrentRoundIndex))
+            .ThenBy(index => index > CurrentRoundIndex ? 1 : 0)
+            .ThenBy(index => index)
+            .ToArray();
+
+        if (candidates.Length == 0)
+        {
+            throw new GameRuleViolationException(
+                "The game does not have another unfinished round.");
+        }
+
+        return MoveToRound(candidates[0], ActivePlayerId);
     }
 
     public void ForceCompleteCurrentRound()
     {
         EnsureRunning();
 
-        if (!HasNextRound)
+        if (FindNextUnfinishedRoundIndex() is null)
         {
             throw new GameRuleViolationException(
-                "The game does not have another round.");
+                "The game does not have another unfinished round.");
         }
 
-        foreach (var question in Board.Questions.Where(question =>
-                     question.SourceRoundId == CurrentRound.SourceRoundId &&
-                     question.Status != RuntimeQuestionStatus.Resolved))
-        {
-            question.ForceResolve();
-        }
-
-        Timer.Stop();
-        AnswerTimer.Stop();
+        ResolveInProgressQuestionsForRound(CurrentRoundIndex);
+        IsForcedRoundAdvancePending = true;
+        IsPreviousRoundReturnPending = false;
+        IsFinalQuestionAdvancePending = false;
+        IsUnfinishedRoundReturnPending = false;
     }
 
     public IReadOnlyList<GameResultStanding> GetCurrentRoundStandings()
@@ -804,40 +935,47 @@ public sealed class GameSession
     {
         EnsureRunning();
 
-        if (Quiz.FinalQuestion is null)
-        {
-            throw new GameRuleViolationException(
+        var definition = Quiz.FinalQuestion
+            ?? throw new GameRuleViolationException(
                 "This quiz does not contain a final question.");
-        }
 
-        foreach (var question in Board.Questions.Where(question =>
-                     question.Status != RuntimeQuestionStatus.Resolved))
-        {
-            question.ForceResolve();
-        }
-
+        ResolveInProgressQuestionsForRound(CurrentRoundIndex);
         CurrentRoundIndex = Quiz.Rounds.Count - 1;
         CaptureRoundStartScores();
         Timer.Stop();
         AnswerTimer.Stop();
 
-        return StartFinalQuestion();
+        return StartFinalQuestionCore(definition);
     }
 
     public FinalQuestion StartFinalQuestion()
     {
         EnsureRunning();
 
-        if (HasNextRound || !IsCurrentRoundComplete)
+        if (HasAnyUnfinishedRegularRound)
         {
             throw new GameRuleViolationException(
-                "The final question can only start after the last round is complete.");
+                "The final question can only start after all regular rounds are complete.");
         }
+
+        CurrentRoundIndex = Quiz.Rounds.Count - 1;
+        FurthestVisitedRoundIndex = Math.Max(
+            FurthestVisitedRoundIndex,
+            CurrentRoundIndex);
 
         var definition = Quiz.FinalQuestion
             ?? throw new GameRuleViolationException(
                 "This quiz does not contain a final question.");
 
+        return StartFinalQuestionCore(definition);
+    }
+
+    private FinalQuestion StartFinalQuestionCore(FinalQuestionSnapshot definition)
+    {
+        IsForcedRoundAdvancePending = false;
+        IsPreviousRoundReturnPending = false;
+        IsFinalQuestionAdvancePending = false;
+        IsUnfinishedRoundReturnPending = false;
         var eligiblePlayers = Settings.AllowNegativeScoreFinalPlayers
             ? _players.ToArray()
             : _players.Where(player => player.Score >= 0).ToArray();
@@ -966,6 +1104,80 @@ public sealed class GameSession
         }
 
         return SetActivePlayer(_players[Random.Shared.Next(_players.Count)].Id);
+    }
+
+    private int? FindPreviousUnfinishedRoundIndex()
+    {
+        for (var index = CurrentRoundIndex - 1; index >= 0; index--)
+        {
+            if (!IsRoundComplete(index))
+            {
+                return index;
+            }
+        }
+
+        return null;
+    }
+
+    private int? FindNextUnfinishedRoundIndex()
+    {
+        for (var index = CurrentRoundIndex + 1; index < Quiz.Rounds.Count; index++)
+        {
+            if (!IsRoundComplete(index))
+            {
+                return index;
+            }
+        }
+
+        return null;
+    }
+
+    private bool IsRoundComplete(int roundIndex)
+    {
+        var sourceRoundId = Quiz.Rounds
+            .OrderBy(round => round.SortOrder)
+            .ElementAt(roundIndex)
+            .SourceRoundId;
+
+        return Board.Questions
+            .Where(question => question.SourceRoundId == sourceRoundId)
+            .All(question => question.Status == RuntimeQuestionStatus.Resolved);
+    }
+
+    private QuizRoundSnapshot MoveToRound(
+        int roundIndex,
+        GamePlayerId? activePlayerId)
+    {
+        FurthestVisitedRoundIndex = Math.Max(FurthestVisitedRoundIndex, roundIndex);
+        CurrentRoundIndex = roundIndex;
+        IsForcedRoundAdvancePending = false;
+        IsPreviousRoundReturnPending = false;
+        IsFinalQuestionAdvancePending = false;
+        IsUnfinishedRoundReturnPending = false;
+        CaptureRoundStartScores();
+        ActivePlayerId = activePlayerId;
+        Timer.Stop();
+        AnswerTimer.Stop();
+        return CurrentRound;
+    }
+
+    private void ResolveInProgressQuestionsForRound(int roundIndex)
+    {
+        var sourceRoundId = Quiz.Rounds
+            .OrderBy(round => round.SortOrder)
+            .ElementAt(roundIndex)
+            .SourceRoundId;
+
+        foreach (var question in Board.Questions.Where(question =>
+                     question.SourceRoundId == sourceRoundId &&
+                     question.Status != RuntimeQuestionStatus.Available &&
+                     question.Status != RuntimeQuestionStatus.Resolved))
+        {
+            question.ForceResolve();
+        }
+
+        Timer.Stop();
+        AnswerTimer.Stop();
     }
 
     private void CaptureRoundStartScores()

@@ -2550,4 +2550,31 @@
   <data name="GameBoard_CategoryCloseConfirmation" xml:space="preserve">
     <value>Tutte le domande non ancora aperte di questa categoria verranno chiuse senza risposta. Continuare?</value>
   </data>
+  <data name="GameBoard_PreviousRound" xml:space="preserve">
+    <value>Round precedente</value>
+  </data>
+  <data name="GameBoard_PreviousRoundRejected" xml:space="preserve">
+    <value>Il round precedente incompleto non è più disponibile.</value>
+  </data>
+  <data name="GameBoard_ReturnToUnfinishedRound" xml:space="preserve">
+    <value>Torna a un round incompleto</value>
+  </data>
+  <data name="GameBoard_StayInCurrentRound" xml:space="preserve">
+    <value>Resta in questo round</value>
+  </data>
+  <data name="FinalQuestion_UnfinishedRoundsWarning" xml:space="preserve">
+    <value>Alcuni round normali contengono ancora domande non chiuse. Continua alla domanda finale oppure torna a un round incompleto.</value>
+  </data>
+  <data name="FinalQuestion_UnfinishedOtherRoundsWarning" xml:space="preserve">
+    <value>Altri round normali contengono ancora domande non chiuse. Puoi continuare alla domanda finale, tornare a un round incompleto oppure restare in questo round.</value>
+  </data>
+  <data name="GameBoard_UnfinishedRoundsBeforeFinish" xml:space="preserve">
+    <value>Alcuni round normali contengono ancora domande non chiuse. Termina comunque la partita oppure torna a un round incompleto.</value>
+  </data>
+  <data name="GameBoard_PreviousRoundConfirm" xml:space="preserve">
+    <value>Tornare al round precedente più vicino che contiene ancora domande non chiuse?</value>
+  </data>
+  <data name="GameBoard_HideJoinCode" xml:space="preserve">
+    <value>Nascondi codice di accesso</value>
+  </data>
 </root>

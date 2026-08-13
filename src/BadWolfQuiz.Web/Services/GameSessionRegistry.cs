@@ -651,6 +651,93 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public QuizRoundSnapshot? ForceAdvanceToNextRound(string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            var round = game.Session.ForceAdvanceToNextRound();
+            game.MarkPersistenceChanged();
+            return round;
+        }
+    }
+
+    public GameSessionRegistration? PrepareReturnToPreviousUnfinishedRound(
+        string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            game.Session.PrepareReturnToPreviousUnfinishedRound();
+            game.MarkPersistenceChanged();
+            return game;
+        }
+    }
+
+    public GameSessionRegistration? PrepareReturnToNearestUnfinishedRoundExcludingCurrent(
+        string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            game.Session.PrepareReturnToNearestUnfinishedRoundExcludingCurrent();
+            game.MarkPersistenceChanged();
+            return game;
+        }
+    }
+
+    public GameSessionRegistration? PrepareFinalQuestionAdvance(string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            game.Session.PrepareFinalQuestionAdvance();
+            game.MarkPersistenceChanged();
+            return game;
+        }
+    }
+
+    public QuizRoundSnapshot? ReturnToPreviousUnfinishedRound(string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            var round = game.Session.ReturnToPreviousUnfinishedRound();
+            game.MarkPersistenceChanged();
+            return round;
+        }
+    }
+
+    public QuizRoundSnapshot? ReturnToNearestUnfinishedRoundExcludingCurrent(
+        string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null) return null;
+
+        lock (game)
+        {
+            game.BuzzerRace = null;
+            var round = game.Session.ReturnToNearestUnfinishedRoundExcludingCurrent();
+            game.MarkPersistenceChanged();
+            return round;
+        }
+    }
+
     public GameSessionRegistration? ForceCompleteCurrentRound(
     string publicCode)
     {

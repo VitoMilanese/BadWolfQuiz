@@ -38,6 +38,7 @@ document.addEventListener("keydown", event => {
     }
 });
 
+
 document.querySelectorAll("[data-auto-rating-form]").forEach(form => {
     form.addEventListener("submit", event => event.preventDefault());
     const inputs = form.querySelectorAll('input[name="score"]');
@@ -155,6 +156,16 @@ const configureGameRoundIntroRoutes = () => {
             return;
         }
 
+        if (handler === "PreviousRound") {
+            form.action = `${runningIntroBase}?handler=Previous`;
+            return;
+        }
+
+        if (handler === "ReturnToUnfinishedRound") {
+            form.action = `${runningIntroBase}?handler=ReturnToUnfinished`;
+            return;
+        }
+
         if (handler === "AdvanceRound") {
             form.action = `${runningIntroBase}?handler=Advance`;
         }
@@ -197,16 +208,26 @@ const configureGameRoundIntroRoutes = () => {
 
     document.querySelectorAll("form").forEach(routeRoundForm);
 
-    const forceAdvanceFinalForm = document.getElementById("force-advance-final-form");
-    if (forceAdvanceFinalForm instanceof HTMLFormElement) {
-        Object.defineProperty(forceAdvanceFinalForm, "submit", {
-            configurable: true,
-            value: () => openFinalTransition(true)
-        });
-    }
-
     document.addEventListener("click", event => {
         const target = event.target instanceof Element ? event.target : null;
+
+        const categoryPreview = target?.closest("[data-category-preview-url]");
+        if (categoryPreview) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.location.assign(categoryPreview.dataset.categoryPreviewUrl);
+            return;
+        }
+
+        if (target?.closest("[data-open-natural-final-warning]")) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            const dialog = document.getElementById("natural-final-warning-dialog");
+            if (dialog instanceof HTMLDialogElement && !dialog.open) {
+                dialog.showModal();
+            }
+            return;
+        }
 
         if (target?.closest("[data-confirm-force-advance-round]")) {
             const form = document.getElementById("force-advance-round-form");
@@ -231,7 +252,7 @@ const configureGameRoundIntroRoutes = () => {
                         if (!response.ok) {
                             throw new Error(response.statusText);
                         }
-                        window.location.assign(runningIntroBase);
+                        window.location.assign(response.url || `${runningIntroBase}?returning=true`);
                     })
                     .catch(error => {
                         console.error(error);
@@ -253,6 +274,22 @@ const configureGameRoundIntroRoutes = () => {
         }
     }, true);
 
+    document.addEventListener("keydown", event => {
+        if (event.key !== "Enter" && event.key !== " ") {
+            return;
+        }
+
+        const categoryPreview = event.target instanceof Element
+            ? event.target.closest("[data-category-preview-url]")
+            : null;
+        if (!categoryPreview) {
+            return;
+        }
+
+        event.preventDefault();
+        window.location.assign(categoryPreview.dataset.categoryPreviewUrl);
+    });
+
     document.addEventListener("submit", event => {
         const form = event.target;
         const handler = getFormHandler(form);
@@ -261,6 +298,37 @@ const configureGameRoundIntroRoutes = () => {
             event.preventDefault();
             event.stopImmediatePropagation();
             openFinalTransition(handler === "ForceAdvanceToFinalQuestion");
+            return;
+        }
+
+        if (handler === "Previous" ||
+            handler === "PreviousRound" ||
+            handler === "ReturnToUnfinished" ||
+            handler === "ReturnToUnfinishedRound") {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            routeRoundForm(form);
+
+            const hostBoard = document.querySelector(".host-game-board");
+            hostBoard?.classList.remove("host-game-board");
+
+            fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(response.statusText);
+                    }
+
+                    window.location.assign(response.url || `${runningIntroBase}?returning=true`);
+                })
+                .catch(error => {
+                    console.error(error);
+                    hostBoard?.classList.add("host-game-board");
+                    window.location.reload();
+                });
             return;
         }
 

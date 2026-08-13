@@ -580,6 +580,81 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostPreviousRoundAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.ReturnToPreviousUnfinishedRound(game.PublicCode);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_PreviousRoundRejected"].Value;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+        return LocalRedirect($"/Admin/Games/RunningRoundIntro/{id:D}?returning=true");
+    }
+
+    public async Task<IActionResult> OnPostReturnToUnfinishedRoundAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var showLeaderboard =
+            game.Session.Players.Count > 0 &&
+            !game.Session.IsUnfinishedRoundReturnPending;
+
+        try
+        {
+            if (showLeaderboard)
+            {
+                sessionRegistry.PrepareReturnToNearestUnfinishedRoundExcludingCurrent(
+                    game.PublicCode);
+            }
+            else
+            {
+                sessionRegistry.ReturnToNearestUnfinishedRoundExcludingCurrent(
+                    game.PublicCode);
+            }
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_PreviousRoundRejected"].Value;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
+        return showLeaderboard
+            ? RedirectToPage(new { id })
+            : LocalRedirect($"/Admin/Games/RunningRoundIntro/{id:D}?returning=true");
+    }
+
     public async Task<IActionResult> OnPostForceAdvanceRoundAsync(
         Guid id,
         CancellationToken cancellationToken)
@@ -613,6 +688,64 @@ public sealed class LobbyModel(
         await BroadcastTimerAsync(game, cancellationToken);
         await StopAutomaticDiscordMuteAsync(id, cancellationToken);
 
+        return RedirectToPage(new { id });
+    }
+
+    public IActionResult OnPostStartNaturalFinalTransition(Guid id)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        if (game.Session.Status != GameSessionStatus.Running ||
+            game.Session.Quiz.FinalQuestion is null ||
+            !game.Session.IsCurrentRoundComplete ||
+            game.Session.HasNextUnfinishedRound ||
+            game.Session.HasAnyUnfinishedRegularRound)
+        {
+            TempData["ErrorMessage"] = localizer["FinalQuestion_ActionRejected"].Value;
+            return RedirectToPage(new { id });
+        }
+
+        return RedirectToPage("FinalQuestionTransition", new { id, force = false });
+    }
+
+    public async Task<IActionResult> OnPostPrepareFinalQuestionLeaderboardAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        if (game.Session.Players.Count == 0)
+        {
+            return RedirectToPage("FinalQuestionTransition", new { id, force = true });
+        }
+
+        try
+        {
+            sessionRegistry.PrepareFinalQuestionAdvance(game.PublicCode);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] = localizer["FinalQuestion_ActionRejected"].Value;
+        }
+
+        await BroadcastPlayersAsync(game, cancellationToken);
+        await BroadcastBuzzerAsync(game, cancellationToken);
+        await BroadcastTimerAsync(game, cancellationToken);
+        await StopAutomaticDiscordMuteAsync(id, cancellationToken);
         return RedirectToPage(new { id });
     }
 

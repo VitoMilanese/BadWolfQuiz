@@ -2550,4 +2550,31 @@
   <data name="GameBoard_CategoryCloseConfirmation" xml:space="preserve">
     <value>All unopened questions in this category will be closed without an answer. Continue?</value>
   </data>
+  <data name="GameBoard_PreviousRound" xml:space="preserve">
+    <value>Previous round</value>
+  </data>
+  <data name="GameBoard_PreviousRoundRejected" xml:space="preserve">
+    <value>The previous unfinished round is no longer available.</value>
+  </data>
+  <data name="GameBoard_ReturnToUnfinishedRound" xml:space="preserve">
+    <value>Return to an unfinished round</value>
+  </data>
+  <data name="GameBoard_StayInCurrentRound" xml:space="preserve">
+    <value>Stay in this round</value>
+  </data>
+  <data name="FinalQuestion_UnfinishedRoundsWarning" xml:space="preserve">
+    <value>Some regular rounds still contain unclosed questions. Continue to the Final Question or return to an unfinished round.</value>
+  </data>
+  <data name="FinalQuestion_UnfinishedOtherRoundsWarning" xml:space="preserve">
+    <value>Other regular rounds still contain unclosed questions. You can continue to the Final Question, return to an unfinished round, or stay in this round.</value>
+  </data>
+  <data name="GameBoard_UnfinishedRoundsBeforeFinish" xml:space="preserve">
+    <value>Some regular rounds still contain unclosed questions. Finish the game anyway or return to an unfinished round.</value>
+  </data>
+  <data name="GameBoard_PreviousRoundConfirm" xml:space="preserve">
+    <value>Return to the nearest previous round that still has unclosed questions?</value>
+  </data>
+  <data name="GameBoard_HideJoinCode" xml:space="preserve">
+    <value>Hide join code</value>
+  </data>
 </root>
