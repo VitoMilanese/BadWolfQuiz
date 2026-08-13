@@ -105,6 +105,20 @@ public sealed class PreviousRoundIntroRoutingTests
     }
 
     [Fact]
+    public void Final_question_header_qr_uses_secondary_button_background_for_theme_contrast()
+    {
+        var layout = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Shared", "_Layout.cshtml"));
+
+        Assert.Contains("const buttonBackground = getComputedStyle(discordButton).backgroundColor;", layout);
+        Assert.Contains("qrButton.style.backgroundColor = buttonBackground;", layout);
+        Assert.Contains("const channels = buttonBackground", layout);
+        Assert.DoesNotContain("const channels = getComputedStyle(qrButton)", layout);
+        Assert.Contains("GameSessionStatus.FinalWagering", layout);
+        Assert.Contains("GameSessionStatus.FinalAnswering", layout);
+        Assert.Contains("GameSessionStatus.FinalJudging", layout);
+    }
+
+    [Fact]
     public void Header_join_code_button_toggles_persisted_visibility_and_labels()
     {
         var page = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml"));

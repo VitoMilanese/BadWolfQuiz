@@ -244,8 +244,10 @@
                         .querySelectorAll('.board-action-menu .action-menu-item[data-open-join-code]')
                         .forEach(item => item.remove());
 
-                    const channels = getComputedStyle(qrButton)
-                        .backgroundColor
+                    const buttonBackground = getComputedStyle(discordButton).backgroundColor;
+                    qrButton.style.backgroundColor = buttonBackground;
+
+                    const channels = buttonBackground
                         .match(/[\d.]+/g)
                         ?.slice(0, 3)
                         .map(Number);
