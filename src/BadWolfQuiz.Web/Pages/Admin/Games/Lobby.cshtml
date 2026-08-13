@@ -409,16 +409,14 @@
                     </div>
                 </header>
 
-                <div class="question-review-content">
-                    <partial name="_GameContentPreview"
-                             model="@(new GameContentPreviewModel(
-                                 Model.Game.Session.Id.Value,
-                                 previewQuestion.SourceQuestionId,
-                                 Model.IsPreviewingAnswer,
-                                 Model.IsPreviewingAnswer
-                                     ? previewQuestion.AnswerBlocks
-                                     : previewQuestion.QuestionBlocks))" />
-                </div>
+                <partial name="_GameContentPreview"
+                         model="@(new GameContentPreviewModel(
+                             Model.Game.Session.Id.Value,
+                             previewQuestion.SourceQuestionId,
+                             Model.IsPreviewingAnswer,
+                             Model.IsPreviewingAnswer
+                                 ? previewQuestion.AnswerBlocks
+                                 : previewQuestion.QuestionBlocks))" />
             </section>
         }
 
@@ -3199,11 +3197,16 @@
 
             const isTemporarilyHidden = () => {
                 const activeQuestion = document.querySelector(".current-question-summary");
+                const gameplayView = document.querySelector("[data-host-gameplay-view]");
+                const exclusiveGameplayView = gameplayView?.querySelector(
+                    ".question-review-preview, [data-game-intro-page], [data-final-question-transition]") !== null;
                 const gameStatus = document.querySelector(".host-game-board")?.dataset.gameStatus;
                 const canShowInStatus =
                     gameStatus === "running" || gameStatus === "finalwagering";
 
-                return !canShowInStatus || activeQuestion !== null;
+                return !canShowInStatus ||
+                    activeQuestion !== null ||
+                    exclusiveGameplayView;
             };
 
             const clampGeometry = geometry => {

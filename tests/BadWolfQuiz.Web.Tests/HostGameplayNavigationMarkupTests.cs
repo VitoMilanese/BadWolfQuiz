@@ -172,8 +172,62 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains(
             "[data-host-gameplay-view] > .question-review-preview",
             css);
-        Assert.Contains("min-height: calc(100vh - var(--topbar-height) - 16px);", css);
+        Assert.Contains("height: 100%;", css);
         Assert.Contains("margin-bottom: 0;", css);
+    }
+
+    [Fact]
+    public void Presentation_views_hide_persistent_player_cards_and_join_code_panel()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "player-admission-menu.css"));
+
+        Assert.Contains("const syncPersistentHostChrome = () =>", script);
+        Assert.Contains("host-gameplay-presentation-mode", script);
+        Assert.Contains(".question-review-preview, [data-game-intro-page], [data-final-question-transition]", script);
+        Assert.Contains("--game-scoreboard-space: 0px !important;", css);
+        Assert.Contains("host-gameplay-presentation-mode > .game-scoreboard", css);
+        Assert.Contains("const exclusiveGameplayView = gameplayView?.querySelector(", markup);
+        Assert.Contains("exclusiveGameplayView;", markup);
+    }
+
+    [Fact]
+    public void Blocked_player_dialog_is_synchronized_after_partial_player_commands()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+
+        Assert.Contains("const syncBlockedPlayers = parsed =>", script);
+        Assert.Contains("parsed.getElementById(\"blocked-players-dialog\")", script);
+        Assert.Contains("syncBlockedPlayers(parsed);", script);
+        Assert.Contains("form.closest(\"#blocked-players-dialog\") !== null", script);
+    }
+
+    [Fact]
+    public void Resolved_preview_renders_content_directly_inside_the_outer_preview_panel()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "player-admission-menu.css"));
+
+        Assert.DoesNotContain("<div class=\"question-review-content\">", markup);
+        Assert.Contains("<section class=\"content-panel question-review-preview\">", markup);
+        Assert.Contains("<partial name=\"_GameContentPreview\"", markup);
+        Assert.Contains(
+            "[data-host-gameplay-view] > .question-review-preview > .game-content-presentation",
+            css);
+        Assert.Contains("max-width: none;", css);
     }
 
     private static string FindLobbyView() => FindWebFile(

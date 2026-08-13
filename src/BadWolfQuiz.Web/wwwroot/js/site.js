@@ -408,6 +408,36 @@ const configureHostGameplayFormNavigation = () => {
     let submissionInProgress = false;
     let finalTransitionTimer = null;
 
+    const syncPersistentHostChrome = () => {
+        const view = document.querySelector(viewSelector);
+        const hidesPlayerPanel = view?.querySelector(
+            ".question-review-preview, [data-game-intro-page], [data-final-question-transition]") !== null;
+        board.classList.toggle(
+            "host-gameplay-presentation-mode",
+            hidesPlayerPanel);
+    };
+
+    const syncBlockedPlayers = parsed => {
+        const currentDialog = document.getElementById("blocked-players-dialog");
+        const nextDialog = parsed.getElementById("blocked-players-dialog");
+        const currentCard = currentDialog?.querySelector(":scope > .dialog-card");
+        const nextCard = nextDialog?.querySelector(":scope > .dialog-card");
+        if (!currentCard || !nextCard) {
+            return;
+        }
+
+        for (const child of Array.from(currentCard.children)) {
+            if (!child.classList.contains("dialog-heading")) {
+                child.remove();
+            }
+        }
+        for (const child of Array.from(nextCard.children)) {
+            if (!child.classList.contains("dialog-heading")) {
+                currentCard.append(document.importNode(child, true));
+            }
+        }
+    };
+
     const isLobbyUrl = url =>
         url.origin === lobbyUrl.origin &&
         url.pathname.toLowerCase() === lobbyUrl.pathname.toLowerCase();
@@ -590,6 +620,7 @@ const configureHostGameplayFormNavigation = () => {
         }
 
         const parsed = new DOMParser().parseFromString(markup, "text/html");
+        syncBlockedPlayers(parsed);
         const nextView = parsed.querySelector(viewSelector);
         const nextBoard = parsed.querySelector(boardSelector);
         if (nextView && nextBoard) {
@@ -637,6 +668,7 @@ const configureHostGameplayFormNavigation = () => {
     const isGameplayForm = form =>
         form.matches(".question-selection-form") ||
         form.id === "remove-player-form" ||
+        form.closest("#blocked-players-dialog") !== null ||
         form.closest(viewSelector) !== null;
 
     document.addEventListener("click", event => {
@@ -753,6 +785,11 @@ const configureHostGameplayFormNavigation = () => {
             submissionInProgress = false;
         }
     }, true);
+
+    document.addEventListener(
+        "badwolf:host-gameplay-updated",
+        syncPersistentHostChrome);
+    syncPersistentHostChrome();
 };
 
 if (document.readyState === "loading") {
