@@ -140,13 +140,6 @@
             image-rendering: pixelated;
         }
 
-        .game-header-join-qr.qr-modules-dark img {
-            filter: none;
-        }
-
-        .game-header-join-qr.qr-modules-light img {
-            filter: invert(1);
-        }
     </style>
     @if (!hidePortalFooter && !isEmbeddedDiscordSettings)
     {
@@ -234,8 +227,9 @@
                 (() => {
                     const gameHeader = document.querySelector('.game-header-context');
                     const qrButton = document.querySelector('.game-header-join-qr');
+                    const qrImage = qrButton?.querySelector('img');
                     const discordButton = gameHeader?.querySelector('[data-open-discord-settings]');
-                    if (!gameHeader || !qrButton || !discordButton) {
+                    if (!gameHeader || !qrButton || !qrImage || !discordButton) {
                         return;
                     }
 
@@ -252,8 +246,9 @@
                         .map(Number);
                     const backgroundIsLight = channels?.length === 3 &&
                         ((0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]) / 255) >= 0.55;
-                    qrButton.classList.add(
-                        backgroundIsLight ? 'qr-modules-dark' : 'qr-modules-light');
+                    qrImage.style.filter = backgroundIsLight
+                        ? 'none'
+                        : 'invert(1)';
 
                     discordButton.classList.add('game-header-square-button');
                     gameHeader.insertBefore(qrButton, discordButton);

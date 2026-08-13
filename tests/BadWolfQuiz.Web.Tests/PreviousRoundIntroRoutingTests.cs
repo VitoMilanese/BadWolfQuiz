@@ -113,6 +113,11 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.Contains("const buttonBackground = getComputedStyle(discordButton).backgroundColor;", layout);
         Assert.Contains("qrButton.style.backgroundColor = buttonBackground;", layout);
         Assert.Contains("const channels = buttonBackground", layout);
+        Assert.Contains("const qrImage = qrButton?.querySelector('img');", layout);
+        Assert.Contains("qrImage.style.filter = backgroundIsLight", layout);
+        Assert.Contains("? 'none'", layout);
+        Assert.Contains(": 'invert(1)'", layout);
+        Assert.DoesNotContain("qrButton.classList.add(", layout);
         Assert.DoesNotContain("mix-blend-mode: multiply", layout);
         Assert.DoesNotContain("mix-blend-mode: screen", layout);
         Assert.Contains("GameSessionStatus.FinalWagering", layout);
