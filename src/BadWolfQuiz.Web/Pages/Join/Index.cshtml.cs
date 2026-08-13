@@ -87,6 +87,12 @@ public sealed class IndexModel(
                     localizer["Message_GameStarted"]);
                 break;
 
+            case PlayerJoinStatus.GameClosed:
+                ModelState.AddModelError(
+                    string.Empty,
+                    localizer["Error_GameNoLongerAcceptsPlayers"]);
+                break;
+
             case PlayerJoinStatus.PlayerBlocked:
                 ModelState.AddModelError(
                     string.Empty,

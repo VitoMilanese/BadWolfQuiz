@@ -2577,4 +2577,7 @@
   <data name="GameBoard_HideJoinCode" xml:space="preserve">
     <value>Nascondi codice di accesso</value>
   </data>
+  <data name="Error_GameNoLongerAcceptsPlayers" xml:space="preserve">
+    <value>Questa partita non accetta più nuovi giocatori.</value>
+  </data>
 </root>

@@ -32,6 +32,8 @@ public sealed class GameSessionRegistration
 
     internal HashSet<GamePlayerId> RecoveredPlayerIdsAwaitingReconnect { get; }
 
+    internal HashSet<GamePlayerId> DisconnectedPlayerIdsAwaitingReconnect { get; } = [];
+
     internal HashSet<GamePlayerId> UnblockedPlayerIdsAwaitingReconnect { get; } = [];
 
     public bool AllowsNewPlayers { get; internal set; } = true;
