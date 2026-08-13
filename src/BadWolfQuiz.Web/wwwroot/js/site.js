@@ -275,9 +275,7 @@ const configureGameRoundIntroRoutes = () => {
                     const responseUrl = response.url ||
                         `${runningIntroBase}?returning=true`;
                     if (window.BadWolfHostFlowNavigation) {
-                        const markup = await response.text();
-                        await window.BadWolfHostFlowNavigation.applyMarkup(
-                            markup, responseUrl);
+                        await window.BadWolfHostFlowNavigation.navigate(responseUrl);
                     } else {
                         window.location.assign(responseUrl);
                     }
@@ -368,9 +366,7 @@ const configureGameRoundIntroRoutes = () => {
                     const responseUrl = response.url ||
                         `${runningIntroBase}?returning=true`;
                     if (window.BadWolfHostFlowNavigation) {
-                        const markup = await response.text();
-                        await window.BadWolfHostFlowNavigation.applyMarkup(
-                            markup, responseUrl);
+                        await window.BadWolfHostFlowNavigation.navigate(responseUrl);
                     } else {
                         window.location.assign(responseUrl);
                     }
@@ -417,6 +413,27 @@ const configureHostGameplayFormNavigation = () => {
     const transientSelector = "[data-host-gameplay-transient]";
     let submissionInProgress = false;
     let finalTransitionTimer = null;
+    let gameplayErrorDismissHandle = null;
+
+    const showHostGameplayError = message => {
+        const target = document.getElementById("game-board-error");
+        if (!target) {
+            window.alert(message);
+            return;
+        }
+
+        window.clearTimeout(gameplayErrorDismissHandle);
+        target.textContent = message;
+        target.hidden = false;
+        target.classList.remove("message-hidden");
+        gameplayErrorDismissHandle = window.setTimeout(() => {
+            target.classList.add("message-hidden");
+            window.setTimeout(() => {
+                target.hidden = true;
+                target.classList.remove("message-hidden");
+            }, 300);
+        }, 3000);
+    };
 
     const syncPersistentHostChrome = () => {
         const view = document.querySelector(viewSelector);
@@ -781,12 +798,35 @@ const configureHostGameplayFormNavigation = () => {
                 formData.append(submitter.name, submitter.value);
             }
 
+            const expectsJson = form.matches(".question-selection-form");
             const response = await fetch(action.href, {
                 method: "POST",
                 body: formData,
                 credentials: "same-origin",
-                headers: { Accept: "text/html" }
+                headers: expectsJson
+                    ? {
+                        Accept: "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                    : { Accept: "text/html" }
             });
+
+            if (expectsJson) {
+                const contentType = response.headers.get("content-type") ?? "";
+                const result = contentType.includes("application/json")
+                    ? await response.json()
+                    : null;
+
+                if (!response.ok || !result?.success) {
+                    showHostGameplayError(
+                        result?.error ?? response.statusText);
+                    return;
+                }
+
+                await window.BadWolfHostGameplay.refresh();
+                return;
+            }
+
             if (!response.ok) {
                 throw new Error(response.statusText);
             }

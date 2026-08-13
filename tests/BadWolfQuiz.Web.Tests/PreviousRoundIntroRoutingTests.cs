@@ -24,7 +24,7 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.Contains("handler === \"PreviousRound\"", script);
         Assert.Contains("event.stopImmediatePropagation();", script);
         Assert.Contains("fetch(form.action", script);
-        Assert.Contains("await window.BadWolfHostFlowNavigation.applyMarkup(", script);
+        Assert.Contains("await window.BadWolfHostFlowNavigation.navigate(responseUrl);", script);
         Assert.DoesNotContain("hostBoard?.classList.remove(\"host-game-board\")", script);
         Assert.DoesNotContain("hostBoard?.classList.add(\"host-game-board\")", script);
     }
@@ -100,7 +100,7 @@ public sealed class PreviousRoundIntroRoutingTests
         Assert.Contains("force-advance-round-dialog", handler);
         Assert.Contains("routeRoundForm(form);", handler);
         Assert.Contains("fetch(form.action", handler);
-        Assert.Contains("await window.BadWolfHostFlowNavigation.applyMarkup(", handler);
+        Assert.Contains("await window.BadWolfHostFlowNavigation.navigate(responseUrl);", handler);
         Assert.Contains("forceAdvanceButton.disabled = false;", handler);
         Assert.DoesNotContain("if (!hasPlayers)", handler);
     }

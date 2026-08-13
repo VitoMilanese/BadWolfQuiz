@@ -107,7 +107,11 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains("form.matches(\".question-selection-form\")", script);
         Assert.Contains("form.closest(viewSelector)", script);
         Assert.Contains("event.stopImmediatePropagation();", script);
-        Assert.Contains("headers: { Accept: \"text/html\" }", script);
+        Assert.Contains("expectsJson", script);
+        Assert.Contains("Accept: \"application/json\"", script);
+        Assert.Contains("\"X-Requested-With\": \"XMLHttpRequest\"", script);
+        Assert.Contains("showHostGameplayError", script);
+        Assert.Contains("await window.BadWolfHostGameplay.refresh();", script);
         Assert.Contains("await applyMarkup(await response.text(), responseUrl);", script);
         Assert.Contains("if (!canNavigate(action))", script);
     }
@@ -144,6 +148,9 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains("const nextRoundId = nextGrid.dataset.sourceRoundId;", script);
         Assert.Contains("? currentRoundId === nextRoundId", script);
         Assert.Contains("currentGrid.dataset.sourceRoundId = nextRoundId;", script);
+        Assert.Contains("const syncPersistentRoundBoard = (currentBoard, nextBoard) =>", markup);
+        Assert.Contains("syncPersistentRoundBoard(currentBoard, nextBoard);", markup);
+        Assert.Contains("currentRoundHeading.textContent = nextRoundHeading.textContent;", markup);
     }
 
     [Fact]
@@ -173,7 +180,7 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains("const renderExternalFlow = parsed =>", script);
         Assert.Contains("[data-game-intro-page], [data-final-question-transition]", script);
         Assert.Contains("window.BadWolfHostFlowNavigation.navigate(targetUrl)", script);
-        Assert.Contains("await window.BadWolfHostFlowNavigation.applyMarkup(", script);
+        Assert.Contains("await window.BadWolfHostFlowNavigation.navigate(responseUrl);", script);
     }
 
     [Fact]

@@ -1697,6 +1697,34 @@
             }
         };
 
+        const syncPersistentRoundBoard = (currentBoard, nextBoard) => {
+            const currentGrid = currentBoard.querySelector(".host-board-grid");
+            const nextGrid = nextBoard.querySelector(".host-board-grid");
+            if (!currentGrid || !nextGrid) {
+                return;
+            }
+
+            const currentRoundId = currentGrid.dataset.sourceRoundId;
+            const nextRoundId = nextGrid.dataset.sourceRoundId;
+            if (!currentRoundId ||
+                !nextRoundId ||
+                currentRoundId === nextRoundId) {
+                return;
+            }
+
+            currentGrid.replaceChildren(
+                ...Array.from(nextGrid.childNodes, node =>
+                    document.importNode(node, true)));
+            currentGrid.dataset.sourceRoundId = nextRoundId;
+
+            const nextStyle = nextGrid.getAttribute("style");
+            if (nextStyle === null) {
+                currentGrid.removeAttribute("style");
+            } else {
+                currentGrid.setAttribute("style", nextStyle);
+            }
+        };
+
         const applyDocument = (parsed, targetUrl, historyMode) => {
             const currentView = document.querySelector(viewSelector);
             const currentBoard = document.querySelector(boardSelector);
@@ -1707,6 +1735,17 @@
 
             if (!currentView || !currentBoard || !nextView || !nextBoard) {
                 throw new Error("The host gameplay region is unavailable.");
+            }
+
+            syncPersistentRoundBoard(currentBoard, nextBoard);
+
+            const currentRoundHeading =
+                document.querySelector(".game-header-context h2");
+            const nextRoundHeading =
+                parsed.querySelector(".game-header-context h2");
+            if (currentRoundHeading && nextRoundHeading) {
+                currentRoundHeading.textContent = nextRoundHeading.textContent;
+                currentRoundHeading.title = nextRoundHeading.title;
             }
 
             const currentHostBoard = currentView.closest(
