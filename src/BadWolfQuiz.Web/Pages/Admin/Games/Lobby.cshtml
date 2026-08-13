@@ -6,9 +6,15 @@
 }
 
 @section HeaderContext {
-    @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
+    @if (Model.Game.Session.Status is
+        BadWolfQuiz.Game.Runtime.GameSessionStatus.Running or
+        BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalWagering or
+        BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
+        BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging)
     {
         <div class="game-header-context">
+            @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
+            {
             <h2 title="@Model.Game.Session.CurrentRound.Title">
                 @Model.Game.Session.CurrentRound.Title
             </h2>
@@ -99,6 +105,7 @@
 
                 </div>
                 </details>
+            }
             }
             <button class="button button-secondary icon-button"
                     type="button"

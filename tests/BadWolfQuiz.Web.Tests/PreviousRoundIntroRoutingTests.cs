@@ -132,6 +132,23 @@ public sealed class PreviousRoundIntroRoutingTests
     }
 
     [Fact]
+    public void Final_question_uses_the_same_game_header_context_as_running_gameplay()
+    {
+        var lobby = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml"));
+        var layout = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Shared", "_Layout.cshtml"));
+
+        Assert.Contains("GameSessionStatus.FinalWagering or", lobby);
+        Assert.Contains("GameSessionStatus.FinalAnswering or", lobby);
+        Assert.Contains("GameSessionStatus.FinalJudging", lobby);
+        Assert.Contains("<div class=\"game-header-context\">", lobby);
+        Assert.Contains("data-open-discord-settings", lobby);
+        Assert.Contains("@if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)", lobby);
+        Assert.Contains(".game-header-square-button[hidden]", layout);
+        Assert.Contains("const gameHeader = document.querySelector('.game-header-context');", layout);
+        Assert.Contains("const discordButton = gameHeader?.querySelector('[data-open-discord-settings]');", layout);
+    }
+
+    [Fact]
     public void Header_join_code_button_toggles_persisted_visibility_and_labels()
     {
         var page = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml"));
