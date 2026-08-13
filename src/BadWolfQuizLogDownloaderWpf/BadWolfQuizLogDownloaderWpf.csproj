@@ -9,7 +9,7 @@
     <ApplicationIcon>logger.ico</ApplicationIcon>
     <AssemblyName>BadWolfQuizLogDownloader</AssemblyName>
     <RootNamespace>BadWolfQuizLogDownloaderWpf</RootNamespace>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
