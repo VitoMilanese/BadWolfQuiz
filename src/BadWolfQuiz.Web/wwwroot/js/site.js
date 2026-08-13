@@ -370,8 +370,10 @@ const configureHostGameplayFormNavigation = () => {
         const submitter = event.submitter instanceof HTMLElement
             ? event.submitter
             : null;
+        const submitterHasFormAction =
+            submitter?.hasAttribute("formaction") === true;
         const action = new URL(
-            submitter?.formAction || form.action,
+            submitterHasFormAction ? submitter.formAction : form.action,
             window.location.href);
 
         if (action.origin !== currentUrl.origin ||
