@@ -216,7 +216,16 @@ public sealed class GameSessionRegistry
 
             if (existingPlayer is not null)
             {
-                return PlayerJoinResult.Failed(PlayerJoinStatus.NameAlreadyUsed);
+                if (!game.DisconnectedPlayerIdsAwaitingReconnect.Remove(existingPlayer.Id))
+                {
+                    return PlayerJoinResult.Failed(PlayerJoinStatus.NameAlreadyUsed);
+                }
+
+                var reconnectAccessToken = CreatePlayerAccess(game, existingPlayer);
+                return PlayerJoinResult.Succeeded(
+                    game,
+                    existingPlayer,
+                    reconnectAccessToken);
             }
 
             if (game.Session.Status is not GameSessionStatus.Lobby and
@@ -405,6 +414,11 @@ public sealed class GameSessionRegistry
                 false);
         }
 
+        lock (access.Game)
+        {
+            access.Game.DisconnectedPlayerIdsAwaitingReconnect.Remove(access.Player.Id);
+        }
+
         return new PlayerConnectionResult(access.Game, access.Player, requiresApproval);
     }
 
@@ -589,18 +603,36 @@ public sealed class GameSessionRegistry
 
     public PlayerConnectionResult? DisconnectPlayer(string connectionId)
     {
+        PlayerConnection connection;
+
         lock (_presenceSync)
         {
-            if (!_playerConnections.Remove(connectionId, out var connection))
+            if (!_playerConnections.Remove(connectionId, out connection))
             {
                 return null;
             }
-
-            return new PlayerConnectionResult(
-                connection.Access.Game,
-                connection.Access.Player,
-                !connection.IsApproved);
         }
+
+        lock (connection.Access.Game)
+        {
+            lock (_presenceSync)
+            {
+                var hasRemainingConnection = _playerConnections.Values.Any(item =>
+                    item.Access.Game == connection.Access.Game &&
+                    item.Access.Player.Id == connection.Access.Player.Id);
+
+                if (!hasRemainingConnection)
+                {
+                    connection.Access.Game.DisconnectedPlayerIdsAwaitingReconnect.Add(
+                        connection.Access.Player.Id);
+                }
+            }
+        }
+
+        return new PlayerConnectionResult(
+            connection.Access.Game,
+            connection.Access.Player,
+            !connection.IsApproved);
     }
 
     public GameSessionRegistration? UpdateSettings(

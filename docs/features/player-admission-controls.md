@@ -25,5 +25,5 @@ When automatic approval is enabled, a newly connected player that would normally
 - #114 — grouped player-admission menu
 ## Closed-game join behavior
 
-Once the game has moved beyond the regular running state, including the Final Question wagering phase, new players are no longer admitted. Join attempts through either a manually entered room code or the QR join link stay on the normal join page and show a localized explanation instead of exposing a domain exception or developer stack trace.
+Once the game has moved beyond the regular running state, including the Final Question wagering phase, new players are no longer admitted. Join attempts through either a manually entered room code or the QR join link stay on the normal join page and show a localized explanation instead of exposing a domain exception or developer stack trace. Existing players who lose their last active connection may rejoin with the same name on the first attempt; the same player record is reused and the normal host-approval flow applies.
 

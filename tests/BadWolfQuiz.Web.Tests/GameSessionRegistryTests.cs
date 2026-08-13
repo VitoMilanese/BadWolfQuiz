@@ -322,6 +322,82 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void Disconnected_player_can_rejoin_by_name_on_the_first_attempt()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-1",
+            true);
+        registry.StartGame("ABC123");
+        registry.DisconnectPlayer("connection-1");
+
+        var rejoined = registry.JoinPlayer("ABC123", "rose");
+        var connected = registry.ConnectPlayer(
+            "ABC123",
+            rejoined.AccessToken!,
+            "connection-2",
+            true);
+
+        Assert.Equal(PlayerJoinStatus.Success, rejoined.Status);
+        Assert.Same(joined.Player, rejoined.Player);
+        Assert.Single(game.Session.Players);
+        Assert.True(connected!.RequiresApproval);
+    }
+
+    [Fact]
+    public void Disconnected_player_reconnect_token_is_single_use()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-1",
+            true);
+        registry.StartGame("ABC123");
+        registry.DisconnectPlayer("connection-1");
+
+        var first = registry.JoinPlayer("ABC123", "Rose");
+        var second = registry.JoinPlayer("ABC123", "Rose");
+
+        Assert.Equal(PlayerJoinStatus.Success, first.Status);
+        Assert.Equal(PlayerJoinStatus.NameAlreadyUsed, second.Status);
+    }
+
+    [Fact]
+    public void Disconnected_player_can_rejoin_during_final_question()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateFinalQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "connection-1",
+            true);
+        CompleteOnlyQuestion(registry, joined.Player!);
+        registry.StartFinalQuestion("ABC123");
+        registry.DisconnectPlayer("connection-1");
+
+        var rejoined = registry.JoinPlayer("ABC123", "Rose");
+        var connected = registry.ConnectPlayer(
+            "ABC123",
+            rejoined.AccessToken!,
+            "connection-2",
+            true);
+
+        Assert.Equal(PlayerJoinStatus.Success, rejoined.Status);
+        Assert.Same(joined.Player, rejoined.Player);
+        Assert.Single(game.Session.Players);
+        Assert.True(connected!.RequiresApproval);
+    }
+
+    [Fact]
     public void Running_game_requires_host_approval_before_player_rejoins()
     {
         var registry = CreateRegistry("ABC123");
