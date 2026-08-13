@@ -108,6 +108,11 @@
 }
 
 .host-game-board.host-gameplay-presentation-mode > .game-scoreboard,
-.host-game-board.host-gameplay-presentation-mode > .game-scoreboard-resizer {
+.host-game-board.host-gameplay-presentation-mode > .game-scoreboard-resizer,
+.host-game-board.host-gameplay-presentation-mode > .game-side-controls {
+    display: none;
+}
+
+.host-game-board.final-question-host > .game-side-controls {
     display: none;
 }

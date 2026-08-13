@@ -248,46 +248,48 @@ const configureGameRoundIntroRoutes = () => {
             return;
         }
 
-        if (target?.closest("[data-confirm-force-advance-round]")) {
+        const forceAdvanceButton = target?.closest(
+            "[data-confirm-force-advance-round]");
+        if (forceAdvanceButton) {
             const form = document.getElementById("force-advance-round-form");
-            if (!(form instanceof HTMLFormElement)) {
+            if (!(form instanceof HTMLFormElement) || forceAdvanceButton.disabled) {
                 return;
             }
 
-            const hasPlayers = document.querySelector(
-                ".scoreboard-player[data-player-id]:not([data-host-card])") !== null;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            forceAdvanceButton.disabled = true;
+            document.getElementById("force-advance-round-dialog")?.close();
+            routeRoundForm(form);
 
-            if (!hasPlayers) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                document.getElementById("force-advance-round-dialog")?.close();
+            fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: { Accept: "text/html" }
+            })
+                .then(async response => {
+                    if (!response.ok) {
+                        throw new Error(response.statusText);
+                    }
 
-                fetch(`${runningIntroBase}?handler=ForceAdvance`, {
-                    method: "POST",
-                    body: new FormData(form),
-                    headers: { Accept: "text/html" }
+                    const responseUrl = response.url ||
+                        `${runningIntroBase}?returning=true`;
+                    if (window.BadWolfHostFlowNavigation) {
+                        const markup = await response.text();
+                        await window.BadWolfHostFlowNavigation.applyMarkup(
+                            markup, responseUrl);
+                    } else {
+                        window.location.assign(responseUrl);
+                    }
                 })
-                    .then(async response => {
-                        if (!response.ok) {
-                            throw new Error(response.statusText);
-                        }
-
-                        const responseUrl = response.url ||
-                            `${runningIntroBase}?returning=true`;
-                        if (window.BadWolfHostFlowNavigation) {
-                            const markup = await response.text();
-                            await window.BadWolfHostFlowNavigation.applyMarkup(
-                                markup, responseUrl);
-                        } else {
-                            window.location.assign(responseUrl);
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        window.location.reload();
-                    });
-                return;
-            }
+                .catch(error => {
+                    console.error(error);
+                    window.location.reload();
+                })
+                .finally(() => {
+                    forceAdvanceButton.disabled = false;
+                });
+            return;
         }
 
         const submitter = target?.closest("button, input[type='submit']");
@@ -346,6 +348,11 @@ const configureGameRoundIntroRoutes = () => {
             handler === "ReturnToUnfinishedRound") {
             event.preventDefault();
             event.stopImmediatePropagation();
+            const submitter = event.submitter instanceof HTMLElement
+                ? event.submitter
+                : null;
+            submitter?.setAttribute("disabled", "disabled");
+            form.closest("dialog")?.close();
             routeRoundForm(form);
 
             fetch(form.action, {
@@ -371,6 +378,9 @@ const configureGameRoundIntroRoutes = () => {
                 .catch(error => {
                     console.error(error);
                     window.location.reload();
+                })
+                .finally(() => {
+                    submitter?.removeAttribute("disabled");
                 });
             return;
         }
@@ -410,8 +420,9 @@ const configureHostGameplayFormNavigation = () => {
 
     const syncPersistentHostChrome = () => {
         const view = document.querySelector(viewSelector);
-        const hidesPlayerPanel = view?.querySelector(
-            ".question-review-preview, [data-game-intro-page], [data-final-question-transition]") !== null;
+        const hidesPlayerPanel = view !== null &&
+            view.querySelector(
+                ".question-review-preview, [data-game-intro-page], [data-final-question-transition]") !== null;
         board.classList.toggle(
             "host-gameplay-presentation-mode",
             hidesPlayerPanel);
@@ -728,7 +739,10 @@ const configureHostGameplayFormNavigation = () => {
         const form = event.target instanceof HTMLFormElement
             ? event.target
             : null;
-        if (!form || !isGameplayForm(form) || submissionInProgress) {
+        if (event.defaultPrevented ||
+            !form ||
+            !isGameplayForm(form) ||
+            submissionInProgress) {
             return;
         }
 

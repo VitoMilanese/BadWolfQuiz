@@ -30,6 +30,23 @@ public sealed class PreviousRoundIntroRoutingTests
     }
 
     [Fact]
+    public void Previous_round_confirmation_closes_and_disables_repeat_submission()
+    {
+        var script = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "wwwroot", "js", "site.js"));
+        var handlerStart = script.IndexOf(
+            "if (handler === \"Previous\" ||",
+            StringComparison.Ordinal);
+        var handlerEnd = script.IndexOf(
+            "routeRoundForm(form);",
+            handlerStart,
+            StringComparison.Ordinal);
+        var handler = script[handlerStart..handlerEnd];
+
+        Assert.Contains("submitter?.setAttribute(\"disabled\", \"disabled\")", handler);
+        Assert.Contains("form.closest(\"dialog\")?.close();", handler);
+    }
+
+    [Fact]
     public void Previous_round_with_players_stages_leaderboard_before_intro()
     {
         var intro = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RunningRoundIntro.cshtml.cs"));
@@ -67,16 +84,25 @@ public sealed class PreviousRoundIntroRoutingTests
     }
 
     [Fact]
-    public void Forced_next_without_players_keeps_filtered_intro_redirect()
+    public void Forced_next_round_closes_confirmation_and_submits_once_through_partial_flow()
     {
         var script = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "wwwroot", "js", "site.js"));
-        var noPlayerBranchStart = script.IndexOf("if (!hasPlayers)", StringComparison.Ordinal);
-        var noPlayerBranchEnd = script.IndexOf("const submitter", noPlayerBranchStart, StringComparison.Ordinal);
-        var noPlayerBranch = script[noPlayerBranchStart..noPlayerBranchEnd];
+        var handlerStart = script.IndexOf(
+            "const forceAdvanceButton = target?.closest(",
+            StringComparison.Ordinal);
+        var handlerEnd = script.IndexOf(
+            "const submitter = target?.closest",
+            handlerStart,
+            StringComparison.Ordinal);
+        var handler = script[handlerStart..handlerEnd];
 
-        Assert.Contains("fetch(`${runningIntroBase}?handler=ForceAdvance`", noPlayerBranch);
-        Assert.Contains("await window.BadWolfHostFlowNavigation.applyMarkup(", noPlayerBranch);
-        Assert.DoesNotContain("window.location.assign(runningIntroBase);", noPlayerBranch);
+        Assert.Contains("forceAdvanceButton.disabled = true;", handler);
+        Assert.Contains("force-advance-round-dialog", handler);
+        Assert.Contains("routeRoundForm(form);", handler);
+        Assert.Contains("fetch(form.action", handler);
+        Assert.Contains("await window.BadWolfHostFlowNavigation.applyMarkup(", handler);
+        Assert.Contains("forceAdvanceButton.disabled = false;", handler);
+        Assert.DoesNotContain("if (!hasPlayers)", handler);
     }
 
     [Fact]

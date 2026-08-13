@@ -194,7 +194,9 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains(".question-review-preview, [data-game-intro-page], [data-final-question-transition]", script);
         Assert.Contains("--game-scoreboard-space: 0px !important;", css);
         Assert.Contains("host-gameplay-presentation-mode > .game-scoreboard", css);
-        Assert.Contains("const exclusiveGameplayView = gameplayView?.querySelector(", markup);
+        Assert.Contains("host-gameplay-presentation-mode > .game-side-controls", css);
+        Assert.Contains("const hidesPlayerPanel = view !== null &&", script);
+        Assert.Contains("const exclusiveGameplayView = gameplayView !== null &&", markup);
         Assert.Contains("exclusiveGameplayView;", markup);
     }
 
@@ -228,6 +230,40 @@ public sealed class HostGameplayNavigationMarkupTests
             "[data-host-gameplay-view] > .question-review-preview > .game-content-presentation",
             css);
         Assert.Contains("max-width: none;", css);
+    }
+
+    [Fact]
+    public void Final_question_uses_partial_gameplay_refresh_and_keeps_player_cards_visible()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "player-admission-menu.css"));
+
+        Assert.True(
+            markup.Split("id=\"host-gameplay-view\" data-host-gameplay-view", StringSplitOptions.None).Length >= 3);
+        Assert.Contains("<div data-host-gameplay-board hidden></div>", markup);
+        Assert.Contains("currentHostBoard.classList.toggle(", markup);
+        Assert.Contains("nextHostBoard.classList.contains(\"final-question-host\")", markup);
+        Assert.Contains("currentHostBoard.dataset.gameStatus", markup);
+        Assert.Contains("event.defaultPrevented ||", script);
+        Assert.Contains(".host-game-board.final-question-host > .game-side-controls", css);
+
+        var progressStart = markup.IndexOf(
+            "connection.on(\"FinalQuestionProgressChanged\"",
+            StringComparison.Ordinal);
+        var progressEnd = markup.IndexOf(
+            "const joinSession",
+            progressStart,
+            StringComparison.Ordinal);
+        var progressHandler = markup[progressStart..progressEnd];
+        Assert.Contains("void requestHostGameplayRefresh();", progressHandler);
+        Assert.DoesNotContain("requestHostReload();", progressHandler);
     }
 
     private static string FindLobbyView() => FindWebFile(
