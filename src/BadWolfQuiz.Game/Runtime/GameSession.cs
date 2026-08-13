@@ -1064,7 +1064,8 @@ public sealed class GameSession
                 "Final standings are available after final judging is complete.");
         }
 
-        if (HasNextRound || !IsCurrentRoundComplete)
+        if (Status == GameSessionStatus.Running &&
+            (HasNextRound || !IsCurrentRoundComplete))
         {
             throw new GameRuleViolationException(
                 "Final standings are only available after the last round is complete.");
