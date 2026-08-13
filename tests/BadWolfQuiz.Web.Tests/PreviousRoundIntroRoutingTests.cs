@@ -109,10 +109,12 @@ public sealed class PreviousRoundIntroRoutingTests
     {
         var layout = File.ReadAllText(FindFile("src", "BadWolfQuiz.Web", "Pages", "Shared", "_Layout.cshtml"));
 
+        Assert.Contains("qrCode.GetGraphic(4, new byte[] { 0, 0, 0, 255 }, new byte[] { 0, 0, 0, 0 })", layout);
         Assert.Contains("const buttonBackground = getComputedStyle(discordButton).backgroundColor;", layout);
         Assert.Contains("qrButton.style.backgroundColor = buttonBackground;", layout);
         Assert.Contains("const channels = buttonBackground", layout);
-        Assert.DoesNotContain("const channels = getComputedStyle(qrButton)", layout);
+        Assert.DoesNotContain("mix-blend-mode: multiply", layout);
+        Assert.DoesNotContain("mix-blend-mode: screen", layout);
         Assert.Contains("GameSessionStatus.FinalWagering", layout);
         Assert.Contains("GameSessionStatus.FinalAnswering", layout);
         Assert.Contains("GameSessionStatus.FinalJudging", layout);

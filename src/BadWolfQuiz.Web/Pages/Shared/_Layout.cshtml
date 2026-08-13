@@ -88,7 +88,7 @@
         using var qrGenerator = new QRCodeGenerator();
         using var qrData = qrGenerator.CreateQrCode(qrPayload, QRCodeGenerator.ECCLevel.Q);
         using var qrCode = new PngByteQRCode(qrData);
-        gameHeaderQrDataUri = $"data:image/png;base64,{Convert.ToBase64String(qrCode.GetGraphic(4))}";
+        gameHeaderQrDataUri = $"data:image/png;base64,{Convert.ToBase64String(qrCode.GetGraphic(4, new byte[] { 0, 0, 0, 255 }, new byte[] { 0, 0, 0, 0 }))}";
     }
 }
 
@@ -141,12 +141,11 @@
         }
 
         .game-header-join-qr.qr-modules-dark img {
-            mix-blend-mode: multiply;
+            filter: none;
         }
 
         .game-header-join-qr.qr-modules-light img {
             filter: invert(1);
-            mix-blend-mode: screen;
         }
     </style>
     @if (!hidePortalFooter && !isEmbeddedDiscordSettings)
