@@ -1,5 +1,6 @@
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -14,13 +15,14 @@ public partial class RemoteBackupBrowserWindow : Window
     private CancellationTokenSource? _operationCancellation;
     private bool _busy;
 
-    public RemoteBackupBrowserWindow(AppSettings settings)
+    internal RemoteBackupBrowserWindow(AppSettings settings)
     {
         InitializeComponent();
         _settings = settings;
         _backupClient = new RemoteBackupClient(settings);
         DataContext = this;
         Loaded += async (_, _) => await RefreshAsync();
+        Closing += RemoteBackupBrowserWindow_Closing;
     }
 
     public ObservableCollection<RemoteBackupInfo> Backups => _backups;
@@ -174,6 +176,22 @@ public partial class RemoteBackupBrowserWindow : Window
         {
             Close();
         }
+    }
+
+    private void RemoteBackupBrowserWindow_Closing(object? sender, CancelEventArgs e)
+    {
+        if (!_busy)
+        {
+            return;
+        }
+
+        e.Cancel = true;
+        MessageBox.Show(
+            this,
+            "A remote backup operation is still running. Cancel it or wait for it to finish before closing this window.",
+            "Operation in progress",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 
     private async Task RefreshAsync()
