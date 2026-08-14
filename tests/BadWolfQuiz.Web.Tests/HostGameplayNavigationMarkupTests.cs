@@ -460,6 +460,40 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains("window.BadWolfHostGameplay?.cancelPending?.();", script);
     }
 
+    [Fact]
+    public void YouTube_auto_expand_rebinds_dynamic_gameplay_and_editor_previews()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "youtube-auto-expand.js"));
+        var previewMarkup = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "_GameContentPreview.cshtml"));
+        var questionEditor = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Quizzes",
+            "QuestionEditor.cshtml"));
+        var finalQuestionEditor = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Quizzes",
+            "FinalQuestionEditor.cshtml"));
+
+        Assert.Contains("new MutationObserver", script);
+        Assert.Contains("mutation.addedNodes.forEach(bindMediaTree);", script);
+        Assert.Contains("pauseYouTubeFrames(iframe);", script);
+        Assert.Contains("pauseNativeMedia(null);", script);
+        Assert.Contains("window.YT.PlayerState.PLAYING", script);
+        Assert.Contains("window.YT.PlayerState.ENDED", script);
+        Assert.Contains("game-content-video youtube-auto-expand", previewMarkup);
+        Assert.Contains("iframe.className = \"youtube-auto-expand\";", questionEditor);
+        Assert.Contains("iframe.className = \"youtube-auto-expand\";", finalQuestionEditor);
+    }
+
     private static string FindLobbyView() => FindWebFile(
         "Pages",
         "Admin",

@@ -55,9 +55,10 @@
                         </video>
                         break;
                     case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
-                        <iframe class="game-content-video"
+                        <iframe class="game-content-video youtube-auto-expand"
                                 src="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
                                 title="@Localizer["GameBoard_MediaContent"]"
+                                data-close-label="@Localizer["GameBoard_CloseVideo"]"
                                 allowfullscreen>
                         </iframe>
                         break;
