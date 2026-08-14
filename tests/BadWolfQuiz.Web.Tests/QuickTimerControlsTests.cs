@@ -33,7 +33,12 @@ public sealed class QuickTimerControlsTests
         Assert.Contains("display: contents", css);
         Assert.DoesNotContain(".host-game-timer {\n    position: relative;", css);
         Assert.Contains("event.target.matches(\".game-timer-adjust\")", markup);
-        Assert.Contains("quickTimerControlsPinned = true", markup);
+        Assert.Contains("quickTimerPinnedStorageKey", markup);
+        Assert.Contains("sessionStorage.getItem(quickTimerPinnedStorageKey)", markup);
+        Assert.Contains("sessionStorage.setItem(quickTimerPinnedStorageKey, \"true\")", markup);
+        Assert.Contains("sessionStorage.removeItem(quickTimerPinnedStorageKey)", markup);
+        Assert.Contains("setQuickTimerControlsPinned(true)", markup);
+        Assert.Contains("setQuickTimerControlsPinned(false)", markup);
         Assert.Contains("is-quick-actions-pinned", markup);
         Assert.Contains("document.addEventListener(\"pointerdown\"", markup);
         Assert.DoesNotContain("document.addEventListener(\"pointermove\"", markup);
