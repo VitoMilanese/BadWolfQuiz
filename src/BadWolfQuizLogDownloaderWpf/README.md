@@ -19,6 +19,7 @@ Features:
 - service-control recovery after failed start/stop commands
 - local service-state diagnostics for intermittent systemd state issues
 - App_Data and full service-folder backups stored as timestamped `.tar.gz` archives on the remote server
+- remote backup browser with type filtering, download, delete, and restore actions
 - themes: Light, Dark, Matrix, Obsidian, Ukrainian, UPA, Italian, Warm Parchment, Mint Fog, LGBTQ+
 - supplied Bad Wolf logger artwork as application/window icon
 - independent semantic product version displayed in the window title bar
@@ -41,7 +42,7 @@ dotnet build
 
 The product version is defined once in `BadWolfQuizLogDownloaderWpf.csproj` through the `<Version>` property and is read from the built assembly at runtime. The main window title therefore displays the actual product version, for example:
 
-`BadWolfQuiz Log Downloader v1.2.2`
+`BadWolfQuiz Log Downloader v1.3.0`
 
 Use PATCH releases for compatible fixes, MINOR releases for backwards-compatible features, and MAJOR releases for major/breaking release milestones. Downloader release tags should be distinguishable from web application release tags when both products are published from this repository.
 
@@ -89,6 +90,20 @@ Use **Backup App_Data** to archive the configured `RemoteAppDataPath`, or **Back
 The archive is created directly on the remote server inside `RemoteBackupDirectory`. Source files are only read; they are not modified or deleted. Backup filenames identify the backup type and include a timestamp, for example:
 
 `/opt/badwolfquiz/backup/badwolfquiz-app-data-20260810-143000.tar.gz`
+
+Use **Browse backups** to open the remote backup browser. It lists supported archives from `RemoteBackupDirectory`, identifies **App_Data** and **Full site** backups from their filenames, shows the backup timestamp and remote size, and can filter the list by backup type. Unknown or malformed archive filenames are ignored.
+
+For a selected archive, the browser supports:
+
+- **Download** to a user-selected local destination without modifying the remote archive;
+- **Delete** after explicit confirmation, followed by an automatic list refresh;
+- **Restore** after explicit confirmation. App_Data archives restore `RemoteAppDataPath`, while full-site archives restore `RemoteServiceDirectoryPath`.
+
+Restore validates the archive before replacing the target. The configured service is stopped when required and restarted after a successful restore. The source archive remains in `RemoteBackupDirectory` after restore.
+
+Remote archive downloads are cancelable through **Cancel operation**. Cancellation also terminates the active remote SSH command and removes an incomplete local destination file instead of waiting for the entire archive transfer to finish.
+
+The backup browser is modal, and conflicting operations are disabled while a remote operation is in progress. SSH, sudo, permission, missing-file, invalid-archive, extraction, transfer, local I/O, and service-control failures are surfaced to the user.
 
 Only one backup/log operation can run at a time, and the existing **Cancel** button can cancel a running backup operation. SSH, missing-path, directory-creation, permission, and archive failures are reported to the user.
 

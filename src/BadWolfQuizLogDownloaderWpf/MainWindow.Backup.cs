@@ -11,10 +11,7 @@ public partial class MainWindow
             return;
         }
 
-        await CreateBackupAsync(
-            "app-data",
-            _settings.RemoteAppDataPath,
-            "App_Data");
+        await CreateBackupAsync("app-data", _settings.RemoteAppDataPath, "App_Data");
     }
 
     private async void BackupServiceFolderButton_Click(object sender, RoutedEventArgs e)
@@ -24,43 +21,43 @@ public partial class MainWindow
             return;
         }
 
-        await CreateBackupAsync(
-            "service-folder",
-            _settings.RemoteServiceDirectoryPath,
-            "service folder");
+        await CreateBackupAsync("service-folder", _settings.RemoteServiceDirectoryPath, "service folder");
     }
 
-    private async Task CreateBackupAsync(
-        string backupType,
-        string remotePath,
-        string displayName)
+    private async void BrowseBackupsButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_settings is null ||
-            _operationCancellation is not null ||
-            _liveCancellation is not null)
+        if (_settings is null || _operationCancellation is not null || _liveCancellation is not null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_settings.RemoteBackupDirectory))
+        {
+            MessageBox.Show(this, "The remote backup directory is not configured in appsettings.json.", "Backup configuration", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var browser = new RemoteBackupBrowserWindow(_settings) { Owner = this };
+        browser.ShowDialog();
+        await RefreshServiceStateAsync();
+    }
+
+    private async Task CreateBackupAsync(string backupType, string remotePath, string displayName)
+    {
+        if (_settings is null || _operationCancellation is not null || _liveCancellation is not null)
         {
             return;
         }
 
         if (string.IsNullOrWhiteSpace(remotePath))
         {
-            MessageBox.Show(
-                this,
-                $"The remote {displayName} path is not configured in appsettings.json.",
-                "Backup configuration",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            MessageBox.Show(this, $"The remote {displayName} path is not configured in appsettings.json.", "Backup configuration", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(_settings.RemoteBackupDirectory))
         {
-            MessageBox.Show(
-                this,
-                "The remote backup directory is not configured in appsettings.json.",
-                "Backup configuration",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            MessageBox.Show(this, "The remote backup directory is not configured in appsettings.json.", "Backup configuration", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -68,21 +65,13 @@ public partial class MainWindow
         SetBusy(true);
         SetBackupControlsEnabled(false);
 
-        var fileName =
-            $"badwolfquiz-{backupType}-{DateTime.Now:yyyyMMdd-HHmmss}.tar.gz";
+        var fileName = $"badwolfquiz-{backupType}-{DateTime.Now:yyyyMMdd-HHmmss}.tar.gz";
 
         try
         {
             var progress = new Progress<string>(message => StatusText.Text = message);
             var client = new SshLogClient(_settings);
-
-            var remoteBackupPath = await client.CreateDirectoryBackupAsync(
-                remotePath,
-                _settings.RemoteBackupDirectory,
-                fileName,
-                progress,
-                _operationCancellation.Token);
-
+            var remoteBackupPath = await client.CreateDirectoryBackupAsync(remotePath, _settings.RemoteBackupDirectory, fileName, progress, _operationCancellation.Token);
             StatusText.Text = $"Backup saved: {remoteBackupPath}";
         }
         catch (OperationCanceledException)
@@ -92,12 +81,7 @@ public partial class MainWindow
         catch (Exception ex)
         {
             StatusText.Text = "Backup failed.";
-            MessageBox.Show(
-                this,
-                ex.Message,
-                "Backup error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            MessageBox.Show(this, ex.Message, "Backup error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
@@ -112,5 +96,6 @@ public partial class MainWindow
     {
         BackupAppDataButton.IsEnabled = enabled;
         BackupServiceFolderButton.IsEnabled = enabled;
+        BrowseBackupsButton.IsEnabled = enabled;
     }
 }
