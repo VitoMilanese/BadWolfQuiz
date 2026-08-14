@@ -92,7 +92,7 @@ public sealed class QuickTimerControlsTests
             if (Directory.Exists(Path.Combine(directory.FullName, "src")) &&
                 Directory.Exists(Path.Combine(directory.FullName, "tests")))
             {
-                return directory;
+                return directory.FullName;
             }
 
             directory = directory.Parent;
