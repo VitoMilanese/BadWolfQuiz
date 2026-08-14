@@ -4241,7 +4241,7 @@
 
             confirmForceAdvanceFinal?.addEventListener("click", () => {
                 forceAdvanceFinalDialog?.close();
-                forceAdvanceFinalForm?.submit();
+                forceAdvanceFinalForm?.requestSubmit();
             });
 
             for (const button of document.querySelectorAll(

@@ -331,6 +331,23 @@ public sealed class HostGameplayNavigationMarkupTests
     }
 
     [Fact]
+    public void Forced_final_confirmation_uses_partial_host_flow_navigation()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+
+        Assert.Contains("forceAdvanceFinalForm?.requestSubmit();", markup);
+        Assert.DoesNotContain("forceAdvanceFinalForm?.submit();", markup);
+        Assert.Contains("handler === \"PrepareFinalQuestionLeaderboard\"", script);
+        Assert.Contains("[data-confirm-force-advance-final]", script);
+        Assert.Contains("fetch(form.action", script);
+        Assert.Contains("await window.BadWolfHostFlowNavigation.navigate(responseUrl);", script);
+    }
+
+    [Fact]
     public void First_round_soft_mount_reinitializes_host_navigation_and_repairs_incomplete_board_dom()
     {
         var script = File.ReadAllText(FindWebFile(

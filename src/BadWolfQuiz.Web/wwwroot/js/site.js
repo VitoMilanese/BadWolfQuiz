@@ -346,6 +346,41 @@ const configureGameRoundIntroRoutes = () => {
         const form = event.target;
         const handler = getFormHandler(form);
 
+        if (handler === "PrepareFinalQuestionLeaderboard") {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            const confirmButton = document.querySelector(
+                "[data-confirm-force-advance-final]");
+            confirmButton?.setAttribute("disabled", "disabled");
+            document.getElementById("force-advance-final-dialog")?.close();
+
+            fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: { Accept: "text/html" }
+            })
+                .then(async response => {
+                    if (!response.ok) {
+                        throw new Error(response.statusText);
+                    }
+
+                    const responseUrl = response.url || window.location.href;
+                    if (window.BadWolfHostFlowNavigation) {
+                        await window.BadWolfHostFlowNavigation.navigate(responseUrl);
+                    } else {
+                        window.location.assign(responseUrl);
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    window.location.reload();
+                })
+                .finally(() => {
+                    confirmButton?.removeAttribute("disabled");
+                });
+            return;
+        }
+
         if ((handler === "StartFinalQuestion" ||
              handler === "ForceAdvanceToFinalQuestion") &&
             !form.matches("[data-final-question-transition-form]")) {
