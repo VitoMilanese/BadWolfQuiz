@@ -3,7 +3,21 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class InitialRoundIntroNavigationMarkupTests
 {
     [Fact]
-    public void Standalone_first_round_intro_advances_frames_without_reload_and_fits_viewport()
+    public void Initial_round_intro_advances_category_frames_without_reload_and_fits_viewport()
+    {
+        var markup = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "RoundIntro.cshtml"));
+
+        AssertStandaloneIntroNavigation(markup);
+        Assert.Contains("badWolfInitialRoundIntroNavigationInitialized", markup);
+        Assert.Contains("badWolfInitialRoundIntro", markup);
+    }
+
+    [Fact]
+    public void Standalone_running_round_intro_advances_frames_without_reload_and_fits_viewport()
     {
         var markup = File.ReadAllText(FindWebFile(
             "Pages",
@@ -11,6 +25,11 @@ public sealed class InitialRoundIntroNavigationMarkupTests
             "Games",
             "RunningRoundIntro.cshtml"));
 
+        AssertStandaloneIntroNavigation(markup);
+    }
+
+    private static void AssertStandaloneIntroNavigation(string markup)
+    {
         Assert.Contains("main.page-shell:has(> .game-intro-page)", markup);
         Assert.Contains("height: calc(100dvh - var(--topbar-height, 0px));", markup);
         Assert.Contains("main.page-shell:has(> .game-intro-page) > .game-intro-page", markup);
