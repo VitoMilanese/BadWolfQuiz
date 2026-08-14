@@ -16,6 +16,18 @@ The board itself remains mounted whenever possible. When the active round does n
 
 If the persistent board and the server-rendered board claim the same round but contain different question-id sets, the whole grid is rebuilt from the fresh server markup. This is a recovery path for incomplete client board state and prevents a resolved question cell from disappearing until a manual refresh.
 
+## Header gameplay controls
+
+The running-game header keeps the gameplay controls in a single horizontal row with consistent spacing: Tools, join QR, Discord settings when available, manual Discord mute/unmute when available, and the player join lock.
+
+Mute, unmute, and lock use the same compact square control sizing and icon scale as the Discord settings button. The lock control keeps its existing state-dependent background, and its player-admission menu opens downward from the header.
+
+Manual mute/unmute controls are rendered only while Discord voice control is configured, enabled, connected, and ready. If the game page was loaded before Discord became ready, the host does not require a browser refresh: when readiness changes, it fetches fresh server-rendered Lobby markup, hydrates the missing mute/unmute buttons into the existing header, and adopts the fresh anti-forgery token before enabling manual Discord operations. Dynamically hydrated buttons use the same delegated command path as initially rendered controls.
+
+If Discord later becomes unavailable, already-mounted mute/unmute controls are hidden immediately. The lock control remains independent from Discord and continues to work even when the Discord settings button is not rendered.
+
+Manual Discord operation status messages are temporary and clear automatically after a short delay. Discord mute/media requests explicitly target the Lobby handlers so they remain valid when persistent host navigation leaves another host-flow URL in the browser address bar.
+
 ## Supported navigation flows
 
 The in-place host flow covers the common running-game transitions, including:

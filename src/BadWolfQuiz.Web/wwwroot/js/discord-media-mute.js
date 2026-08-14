@@ -5,22 +5,184 @@
     }
 
     const gameId = board.dataset.gameId;
+    let token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+    const styleHeaderGameControl = button => {
+        button.classList.add(
+            "button",
+            "button-secondary",
+            "icon-button",
+            "game-header-square-button");
+    };
+
+    const moveGameControlsToHeader = () => {
+        const controls = document.querySelector(".game-side-controls");
+        const header = document.querySelector(".game-header-context");
+        if (!controls || !header) {
+            return;
+        }
+
+        const syncVisibility = () => {
+            controls.style.display = board.classList.contains(
+                "host-gameplay-presentation-mode")
+                ? "none"
+                : "flex";
+        };
+
+        controls.style.position = "static";
+        controls.style.right = "auto";
+        controls.style.bottom = "auto";
+        controls.style.zIndex = "auto";
+        controls.style.transform = "none";
+        controls.dataset.headerGameControls = "";
+        controls
+            .querySelectorAll(".game-side-control, .player-join-lock")
+            .forEach(styleHeaderGameControl);
+
+        const discordSettings = header.querySelector("[data-open-discord-settings]");
+        if (discordSettings) {
+            discordSettings.after(controls);
+        } else {
+            header.append(controls);
+        }
+        syncVisibility();
+
+        const visibilityObserver = new MutationObserver(syncVisibility);
+        visibilityObserver.observe(board, {
+            attributes: true,
+            attributeFilter: ["class"]
+        });
+    };
+
+    const getLobbyUrl = () => {
+        const url = new URL(window.location.href);
+        const gamesSegment = "/Admin/Games/";
+        const gamesIndex = url.pathname.indexOf(gamesSegment);
+        const basePath = gamesIndex >= 0
+            ? url.pathname.slice(0, gamesIndex)
+            : "";
+        url.pathname = `${basePath}${gamesSegment}Lobby/${encodeURIComponent(gameId)}`;
+        url.search = "";
+        url.hash = "";
+        return url;
+    };
+
+    const getLobbyHandlerUrl = handler => {
+        const url = getLobbyUrl();
+        url.search = `?handler=${encodeURIComponent(handler)}`;
+        return url.toString();
+    };
+
+    const setManualMuteControlsVisible = ready => {
+        document.querySelectorAll("[data-discord-mute]").forEach(button => {
+            button.hidden = !ready;
+        });
+    };
+
+    let manualMuteSyncPromise = null;
+
+    const ensureManualMuteControls = async ready => {
+        if (!ready) {
+            setManualMuteControlsVisible(false);
+            return;
+        }
+
+        if (manualMuteSyncPromise) {
+            await manualMuteSyncPromise;
+            return;
+        }
+
+        manualMuteSyncPromise = (async () => {
+            try {
+                const response = await fetch(getLobbyUrl(), { cache: "no-store" });
+                if (!response.ok) {
+                    return;
+                }
+
+                const markup = await response.text();
+                const parsed = new DOMParser().parseFromString(markup, "text/html");
+                const freshToken = parsed.querySelector(
+                    'input[name="__RequestVerificationToken"]')?.value;
+                if (freshToken) {
+                    token = freshToken;
+                }
+
+                const existingButtons = document.querySelectorAll("[data-discord-mute]");
+                if (existingButtons.length > 0) {
+                    setManualMuteControlsVisible(true);
+                    return;
+                }
+
+                const freshButtons = parsed.querySelectorAll(
+                    ".game-side-controls [data-discord-mute]");
+                const controls = document.querySelector(".game-side-controls");
+                if (!controls || freshButtons.length === 0) {
+                    return;
+                }
+
+                const lockMenu = controls.querySelector(".player-admission-menu");
+                const insertionPoint = lockMenu?.parentElement === controls
+                    ? lockMenu
+                    : null;
+                freshButtons.forEach(sourceButton => {
+                    const button = document.importNode(sourceButton, true);
+                    styleHeaderGameControl(button);
+                    button.hidden = false;
+                    controls.insertBefore(button, insertionPoint);
+                });
+            } finally {
+                manualMuteSyncPromise = null;
+            }
+        })();
+
+        await manualMuteSyncPromise;
+    };
+
+    moveGameControlsToHeader();
+
+    window.addEventListener("badwolfquiz:discord-voice-ready-changed", event => {
+        void ensureManualMuteControls(event.detail?.ready === true);
+    });
+
     const status = document.querySelector("[data-discord-operation-status]");
-    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
     let automaticRequestActive = false;
     let requestInFlight = Promise.resolve();
+    let statusClearTimer = null;
+
+    const setOperationStatus = (message, autoClear = false) => {
+        if (!status) {
+            return;
+        }
+
+        window.clearTimeout(statusClearTimer);
+        status.textContent = message;
+        if (autoClear && message) {
+            statusClearTimer = window.setTimeout(() => {
+                status.textContent = "";
+                statusClearTimer = null;
+            }, 4000);
+        }
+    };
 
     const post = async (handler, values, keepalive = false) => {
         const body = new FormData();
         body.append("id", gameId);
         Object.entries(values).forEach(([key, value]) => body.append(key, value));
-        const response = await fetch(`?handler=${handler}`, {
+        const response = await fetch(getLobbyHandlerUrl(handler), {
             method: "POST",
             headers: token ? { "RequestVerificationToken": token } : {},
             body,
             keepalive
         });
-        const result = await response.json();
+        const responseText = await response.text();
+        let result = {};
+        if (responseText) {
+            try {
+                result = JSON.parse(responseText);
+            } catch {
+                throw new Error("Discord voice operation failed.");
+            }
+        }
         if (!response.ok) {
             throw new Error(result.error ?? "Discord voice operation failed.");
         }
@@ -41,9 +203,7 @@
             .then(() => post("DiscordMedia", { active: shouldBeActive.toString() }))
             .catch(error => {
                 automaticRequestActive = !shouldBeActive;
-                if (status) {
-                    status.textContent = error.message;
-                }
+                setOperationStatus(error.message);
             });
     };
 
@@ -169,9 +329,7 @@
         requestInFlight = requestInFlight
             .then(() => post("DiscordMedia", { active: "true" }))
             .catch(error => {
-                if (status) {
-                    status.textContent = error.message;
-                }
+                setOperationStatus(error.message);
             });
     }, 60_000);
 
@@ -199,32 +357,32 @@
         }
     });
 
-    document.querySelectorAll("[data-discord-mute]").forEach(button => {
-        button.addEventListener("click", async () => {
-            const buttons = document.querySelectorAll("[data-discord-mute]");
-            buttons.forEach(item => item.disabled = true);
-            if (status) {
-                status.textContent = "…";
-            }
-            try {
-                const result = await post("DiscordMute", {
-                    muted: button.dataset.discordMute
-                });
-                if (status) {
-                    status.textContent = result.message;
-                }
-            } catch (error) {
-                if (status) {
-                    status.textContent = error.message;
-                }
-            } finally {
-                buttons.forEach(item => item.disabled = false);
-            }
-        });
+    document.addEventListener("click", async event => {
+        const button = event.target instanceof Element
+            ? event.target.closest("[data-discord-mute]")
+            : null;
+        if (!button) {
+            return;
+        }
+
+        const buttons = document.querySelectorAll("[data-discord-mute]");
+        buttons.forEach(item => item.disabled = true);
+        setOperationStatus("…");
+        try {
+            const result = await post("DiscordMute", {
+                muted: button.dataset.discordMute
+            });
+            setOperationStatus(result.message, true);
+        } catch (error) {
+            setOperationStatus(error.message, true);
+        } finally {
+            buttons.forEach(item => item.disabled = false);
+        }
     });
 
     window.addEventListener("pagehide", () => {
         mediaObserver.disconnect();
+        window.clearTimeout(statusClearTimer);
         if (automaticRequestActive) {
             post("DiscordMedia", { active: "false" }, true).catch(() => {});
         }

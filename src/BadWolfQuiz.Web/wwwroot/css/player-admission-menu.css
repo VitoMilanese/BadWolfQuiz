@@ -43,6 +43,34 @@
     pointer-events: none;
 }
 
+.game-side-controls[data-header-game-controls] {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.game-side-controls[data-header-game-controls] :is(.game-side-control, .player-join-lock) {
+    border-radius: 10px;
+    box-shadow: none;
+    font-size: 1rem;
+}
+
+.game-side-controls[data-header-game-controls] .game-side-control {
+    border-color: var(--line);
+    background: var(--panel);
+    color: var(--text);
+}
+
+.game-side-controls[data-header-game-controls] :is(.game-side-control, .player-join-lock):hover {
+    transform: none;
+    filter: none;
+}
+
+.game-side-controls[data-header-game-controls] .player-admission-menu-popover {
+    top: calc(100% + 8px);
+    bottom: auto;
+}
+
 /*
  * The quiz editor upgrades these legacy server-rendered controls into the
  * round edit context menu. Keep them out of the first paint so users never
