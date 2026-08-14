@@ -554,6 +554,38 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostAddQuestionTimerTimeAsync(
+        Guid id,
+        int seconds,
+        CancellationToken cancellationToken)
+    {
+        if (seconds is not (10 or 15 or 20 or 30))
+        {
+            return BadRequest();
+        }
+
+        var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.AddQuestionTimerTime(
+                game.PublicCode,
+                TimeSpan.FromSeconds(seconds));
+            await BroadcastTimerAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            return BadRequest();
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostAdvanceRoundAsync(
         Guid id,
         CancellationToken cancellationToken)

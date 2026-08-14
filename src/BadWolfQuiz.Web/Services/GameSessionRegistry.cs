@@ -1036,6 +1036,23 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public GameTimer? AddQuestionTimerTime(
+        string publicCode,
+        TimeSpan additionalTime)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            return game.Session.AddQuestionTimerTime(additionalTime);
+        }
+    }
+
     public QuestionTimerTickResult? ProcessQuestionTimers(string publicCode)
     {
         var game = Find(publicCode);

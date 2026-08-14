@@ -424,20 +424,35 @@
             <div class="content-panel current-question-summary @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager ? "wager-mode" : null)">
                 <div id="game-timer" class="game-timer host-game-timer" hidden>
                     <strong id="game-timer-value">0.0</strong>
-                    <form class="game-timer-control game-timer-pause"
-                          method="post"
-                          asp-page-handler="PauseQuestionTimer">
-                        <button type="submit"
-                                title="@Localizer["GameTimer_Pause"]"
-                                aria-label="@Localizer["GameTimer_Pause"]">⏸</button>
-                    </form>
-                    <form class="game-timer-control game-timer-resume"
-                          method="post"
-                          asp-page-handler="ResumeQuestionTimer">
-                        <button type="submit"
-                                title="@Localizer["GameTimer_Resume"]"
-                                aria-label="@Localizer["GameTimer_Resume"]">▶</button>
-                    </form>
+                    <div class="game-timer-actions">
+                        <div class="game-timer-primary-control">
+                            <form class="game-timer-control game-timer-pause"
+                                  method="post"
+                                  asp-page-handler="PauseQuestionTimer">
+                                <button type="submit"
+                                        title="@Localizer["GameTimer_Pause"]"
+                                        aria-label="@Localizer["GameTimer_Pause"]">⏸</button>
+                            </form>
+                            <form class="game-timer-control game-timer-resume"
+                                  method="post"
+                                  asp-page-handler="ResumeQuestionTimer">
+                                <button type="submit"
+                                        title="@Localizer["GameTimer_Resume"]"
+                                        aria-label="@Localizer["GameTimer_Resume"]">▶</button>
+                            </form>
+                        </div>
+                        <div class="game-timer-quick-actions">
+                            @foreach (var seconds in new[] { 10, 15, 20, 30 })
+                            {
+                                <form class="game-timer-control game-timer-adjust"
+                                      method="post"
+                                      asp-page-handler="AddQuestionTimerTime">
+                                    <input type="hidden" name="seconds" value="@seconds" />
+                                    <button type="submit">+@seconds</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
                 </div>
                 @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
                 {
@@ -4378,6 +4393,7 @@
             let timerValue = document.getElementById("game-timer-value");
             let timerPause = document.querySelector(".game-timer-pause");
             let timerResume = document.querySelector(".game-timer-resume");
+            let quickTimerControlsPinned = false;
             const playerJoinLockForm = document.querySelector(".player-join-lock-form");
             const playerJoinLockButton = playerJoinLockForm?.querySelector(".player-join-lock");
             const questionSelectionForms = document.querySelectorAll(".question-selection-form");
@@ -4453,6 +4469,9 @@
                 timerValue = document.getElementById("game-timer-value");
                 timerPause = document.querySelector(".game-timer-pause");
                 timerResume = document.querySelector(".game-timer-resume");
+                if (quickTimerControlsPinned) {
+                    timerPanel?.classList.add("is-quick-actions-pinned");
+                }
                 revealClueForm = document.querySelector("[data-reveal-clue-form]");
                 questionClues = document.querySelector("[data-question-clues]");
                 questionHeading = document.querySelector("[data-question-heading]");
@@ -4683,7 +4702,8 @@
             document.addEventListener("submit", async event => {
                 const form = event.target instanceof HTMLFormElement &&
                     (event.target.matches(".game-timer-pause") ||
-                     event.target.matches(".game-timer-resume"))
+                     event.target.matches(".game-timer-resume") ||
+                     event.target.matches(".game-timer-adjust"))
                     ? event.target
                     : null;
                 if (!form) {
@@ -4691,11 +4711,35 @@
                 }
 
                 event.preventDefault();
+                const isQuickAdjustment = form.matches(".game-timer-adjust");
+                if (isQuickAdjustment) {
+                    quickTimerControlsPinned = true;
+                    timerPanel?.classList.add("is-quick-actions-pinned");
+                }
+
                 try {
                     await submitGameControl(form);
                 } catch (error) {
                     handleGameControlError(error);
+                } finally {
+                    if (isQuickAdjustment && quickTimerControlsPinned) {
+                        timerPanel?.classList.add("is-quick-actions-pinned");
+                    }
                 }
+            });
+
+            document.addEventListener("pointermove", event => {
+                if (!quickTimerControlsPinned) {
+                    return;
+                }
+
+                const target = event.target instanceof Element ? event.target : null;
+                if (target?.closest(".host-game-timer")) {
+                    return;
+                }
+
+                quickTimerControlsPinned = false;
+                timerPanel?.classList.remove("is-quick-actions-pinned");
             });
 
             playerJoinLockForm?.addEventListener("submit", async event => {

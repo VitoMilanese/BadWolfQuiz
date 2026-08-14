@@ -6269,3 +6269,54 @@ body.youtube-auto-expanded-open {
     transform: translateY(-1px);
     outline: none;
 }
+
+
+/* Issue 165: quick timer time controls */
+.host-game-timer {
+    position: relative;
+}
+
+.game-timer-actions {
+    position: static;
+    display: grid;
+    place-items: center;
+}
+
+.game-timer-primary-control {
+    display: grid;
+    place-items: center;
+}
+
+.game-timer-quick-actions {
+    position: absolute;
+    z-index: 12;
+    top: calc(100% + 8px);
+    left: 50%;
+    width: max-content;
+    display: grid;
+    grid-template-columns: repeat(2, 44px);
+    gap: 5px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(-2px);
+    transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+}
+
+.host-game-timer:hover .game-timer-quick-actions,
+.host-game-timer:focus-within .game-timer-quick-actions,
+.host-game-timer.is-quick-actions-pinned .game-timer-quick-actions {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+.game-timer-quick-actions .game-timer-control {
+    margin: 0;
+}
+
+.game-timer-quick-actions button {
+    min-width: 44px;
+    font-size: .75rem;
+}
