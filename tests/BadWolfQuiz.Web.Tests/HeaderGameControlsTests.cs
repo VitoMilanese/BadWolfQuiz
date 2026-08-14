@@ -139,6 +139,25 @@ public sealed class HeaderGameControlsTests
     }
 
     [Fact]
+    public void Discord_request_token_is_refreshed_when_voice_becomes_ready_after_setup()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "discord-media-mute.js"));
+
+        Assert.Contains(
+            "let token = document.querySelector('input[name=\"__RequestVerificationToken\"]')?.value;",
+            script);
+        Assert.Contains("const freshToken = parsed.querySelector(", script);
+        Assert.Contains("token = freshToken;", script);
+        Assert.Contains("headers: token ? { \"RequestVerificationToken\": token } : {}", script);
+        Assert.DoesNotContain(
+            "const token = document.querySelector('input[name=\"__RequestVerificationToken\"]')?.value;",
+            script);
+    }
+
+    [Fact]
     public void Discord_operations_target_lobby_handlers_after_soft_navigation()
     {
         var script = File.ReadAllText(FindWebFile(

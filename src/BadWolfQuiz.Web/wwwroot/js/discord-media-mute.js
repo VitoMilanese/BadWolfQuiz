@@ -5,6 +5,7 @@
     }
 
     const gameId = board.dataset.gameId;
+    let token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
     const styleHeaderGameControl = button => {
         button.classList.add(
@@ -81,14 +82,8 @@
     let manualMuteSyncPromise = null;
 
     const ensureManualMuteControls = async ready => {
-        const existingButtons = document.querySelectorAll("[data-discord-mute]");
         if (!ready) {
             setManualMuteControlsVisible(false);
-            return;
-        }
-
-        if (existingButtons.length > 0) {
-            setManualMuteControlsVisible(true);
             return;
         }
 
@@ -106,6 +101,18 @@
 
                 const markup = await response.text();
                 const parsed = new DOMParser().parseFromString(markup, "text/html");
+                const freshToken = parsed.querySelector(
+                    'input[name="__RequestVerificationToken"]')?.value;
+                if (freshToken) {
+                    token = freshToken;
+                }
+
+                const existingButtons = document.querySelectorAll("[data-discord-mute]");
+                if (existingButtons.length > 0) {
+                    setManualMuteControlsVisible(true);
+                    return;
+                }
+
                 const freshButtons = parsed.querySelectorAll(
                     ".game-side-controls [data-discord-mute]");
                 const controls = document.querySelector(".game-side-controls");
@@ -138,7 +145,6 @@
     });
 
     const status = document.querySelector("[data-discord-operation-status]");
-    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
     let automaticRequestActive = false;
     let requestInFlight = Promise.resolve();
     let statusClearTimer = null;
