@@ -121,6 +121,11 @@ The near-simultaneous buzzer overlay applies the same fitting behavior to the
 winner and later buzzer entries. Later entries remain readable at a size close to
 the winner text and shrink only when required to fit the available width.
 
+Both gameplay overlays use a five-second visual lifetime. Because the host gameplay
+view is updated through partial navigation, newly inserted overlay cards are
+reinitialized for auto-fitting after each host gameplay update instead of relying
+only on the initial page-load fitting pass.
+
 ## Target question presentation flow
 
 The final host experience replaces the temporary player-selection panel with a full question presentation state.

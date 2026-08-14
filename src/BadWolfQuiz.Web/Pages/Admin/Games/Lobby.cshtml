@@ -1651,45 +1651,70 @@
             return url.origin === current.origin && url.pathname === current.pathname;
         };
 
-        const initializeTransientOverlay = () => {
+        const initializeAutoFitCard = card => {
+            if (!card ||
+                card.dataset.hostGameplayAutoFitInitialized === "true") {
+                return;
+            }
+
+            card.dataset.hostGameplayAutoFitInitialized = "true";
+            const elements = [...card.querySelectorAll(
+                "p, li, .answer-result-score")];
+
+            const fit = () => {
+                if (elements.length === 0) {
+                    card.classList.add("is-auto-fit-ready");
+                    return;
+                }
+
+                for (const element of elements) {
+                    element.style.removeProperty("font-size");
+                }
+
+                const baseSizes = elements.map(element =>
+                    Number.parseFloat(getComputedStyle(element).fontSize));
+
+                const fits = () => {
+                    if (card.scrollHeight > card.clientHeight + 1) {
+                        return false;
+                    }
+
+                    return elements.every(element =>
+                        element.scrollWidth <= element.clientWidth + 1);
+                };
+
+                let scale = 1;
+                while (scale > 0.35 && !fits()) {
+                    scale -= 0.025;
+                    elements.forEach((element, index) => {
+                        element.style.fontSize =
+                            `${baseSizes[index] * scale}px`;
+                    });
+                }
+
+                card.classList.add("is-auto-fit-ready");
+            };
+
+            fit();
+
+            if (typeof ResizeObserver !== "undefined") {
+                new ResizeObserver(fit).observe(card);
+            }
+        };
+
+        const initializeGameplayOverlays = () => {
+            document.querySelectorAll("[data-auto-fit-overlay]").forEach(
+                initializeAutoFitCard);
+
             const overlay = document.querySelector(
                 `${transientSelector} [data-answer-result-overlay]`);
-            if (!overlay || overlay.dataset.hostGameplayInitialized === "true") {
+            if (!overlay ||
+                overlay.dataset.hostGameplayInitialized === "true") {
                 return;
             }
 
             overlay.dataset.hostGameplayInitialized = "true";
-            const card = overlay.querySelector("[data-auto-fit-overlay]");
-            if (card) {
-                const elements = [...card.querySelectorAll(
-                    "p, li, .answer-result-score")];
-                const fit = () => {
-                    if (elements.length === 0) return;
-                    elements.forEach(element =>
-                        element.style.removeProperty("font-size"));
-                    const baseSizes = elements.map(element =>
-                        Number.parseFloat(getComputedStyle(element).fontSize));
-                    const fits = () =>
-                        card.scrollHeight <= card.clientHeight + 1 &&
-                        elements.every(element =>
-                            element.scrollWidth <= element.clientWidth + 1);
-                    let scale = 1;
-                    while (scale > 0.35 && !fits()) {
-                        scale -= 0.025;
-                        elements.forEach((element, index) => {
-                            element.style.fontSize =
-                                `${baseSizes[index] * scale}px`;
-                        });
-                    }
-                    card.classList.add("is-auto-fit-ready");
-                };
-                requestAnimationFrame(fit);
-                if (typeof ResizeObserver !== "undefined") {
-                    new ResizeObserver(fit).observe(card);
-                }
-            }
-
-            window.setTimeout(() => overlay.remove(), 1500);
+            window.setTimeout(() => overlay.remove(), 5000);
         };
 
         const syncHeaderState = () => {
@@ -1825,7 +1850,7 @@
             }
 
             syncHeaderState();
-            initializeTransientOverlay();
+            initializeGameplayOverlays();
 
             if (historyMode === "push") {
                 history.pushState({ hostGameplay: true }, "", targetUrl.href);
@@ -3722,7 +3747,7 @@
 
             window.setTimeout(() => {
                 overlay.remove();
-            }, 1500);
+            }, 5000);
         })();
 
         (() => {
