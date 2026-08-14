@@ -48,6 +48,23 @@
     align-items: center;
 }
 
+.game-side-controls[data-header-game-controls] :is(.game-side-control, .player-join-lock) {
+    border-radius: 10px;
+    box-shadow: none;
+    font-size: 1rem;
+}
+
+.game-side-controls[data-header-game-controls] .game-side-control {
+    border-color: var(--line);
+    background: var(--panel);
+    color: var(--text);
+}
+
+.game-side-controls[data-header-game-controls] :is(.game-side-control, .player-join-lock):hover {
+    transform: none;
+    filter: none;
+}
+
 .game-side-controls[data-header-game-controls] .player-admission-menu-popover {
     top: calc(100% + 8px);
     bottom: auto;

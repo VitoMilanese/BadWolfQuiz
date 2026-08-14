@@ -53,16 +53,47 @@ public sealed class HeaderGameControlsTests
     }
 
     [Fact]
-    public void Discord_mute_success_status_is_dismissed_automatically()
+    public void Header_controls_match_the_microphone_button_style_without_requiring_it()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "discord-media-mute.js"));
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "player-admission-menu.css"));
+
+        Assert.Contains(
+            ".querySelectorAll(\".game-side-control, .player-join-lock\")",
+            script);
+        Assert.Contains("\"button\",", script);
+        Assert.Contains("\"button-secondary\",", script);
+        Assert.Contains("\"icon-button\",", script);
+        Assert.Contains("\"game-header-square-button\");", script);
+        Assert.Contains("if (discordSettings)", script);
+        Assert.Contains("header.append(controls);", script);
+        Assert.Contains(
+            ":is(.game-side-control, .player-join-lock)",
+            css);
+        Assert.Contains("border-radius: 10px;", css);
+        Assert.Contains("font-size: 1rem;", css);
+        Assert.Contains("background: var(--panel);", css);
+    }
+
+    [Fact]
+    public void Successful_manual_discord_status_is_auto_dismissed()
     {
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
             "discord-media-mute.js"));
 
+        Assert.Contains("let statusClearTimer = null;", script);
         Assert.Contains("const setOperationStatus = (message, autoClear = false) =>", script);
-        Assert.Contains("setOperationStatus(result.message, true);", script);
         Assert.Contains("}, 4000);", script);
+        Assert.Contains("setOperationStatus(result.message, true);", script);
+        Assert.Contains("setOperationStatus(error.message);", script);
     }
 
     private static int CountOccurrences(string value, string fragment)

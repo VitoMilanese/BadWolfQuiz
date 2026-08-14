@@ -24,6 +24,15 @@
         controls.style.zIndex = "auto";
         controls.style.transform = "none";
         controls.dataset.headerGameControls = "";
+        controls
+            .querySelectorAll(".game-side-control, .player-join-lock")
+            .forEach(button => {
+                button.classList.add(
+                    "button",
+                    "button-secondary",
+                    "icon-button",
+                    "game-header-square-button");
+            });
 
         const discordSettings = header.querySelector("[data-open-discord-settings]");
         if (discordSettings) {
