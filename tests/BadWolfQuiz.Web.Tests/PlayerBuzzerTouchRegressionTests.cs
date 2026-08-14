@@ -22,6 +22,10 @@ public sealed class PlayerBuzzerTouchRegressionTests
         var root = FindRepositoryRoot();
         var css = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "player-admission-menu.css"));
 
+        Assert.Contains("position: fixed;", css);
+        Assert.Contains("height: 100dvh;", css);
+        Assert.Contains("flex: 1 1 0;", css);
+        Assert.Contains("height: 0;", css);
         Assert.Contains("grid-template-rows: minmax(0, 1fr) auto;", css);
         Assert.Contains("aspect-ratio: auto;", css);
         Assert.Contains("border-radius: clamp(24px, 8vw, 56px);", css);
