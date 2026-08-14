@@ -120,7 +120,23 @@ public sealed class HeaderGameControlsTests
     }
 
     [Fact]
-    public void Successful_manual_discord_status_is_auto_dismissed()
+    public void Discord_operations_target_lobby_handlers_after_soft_navigation()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "discord-media-mute.js"));
+
+        Assert.Contains("const getLobbyHandlerUrl = handler =>", script);
+        Assert.Contains("const gamesSegment = \"/Admin/Games/\";", script);
+        Assert.Contains("Lobby/${encodeURIComponent(gameId)}", script);
+        Assert.Contains("?handler=${encodeURIComponent(handler)}", script);
+        Assert.Contains("fetch(getLobbyHandlerUrl(handler)", script);
+        Assert.DoesNotContain("fetch(`?handler=${handler}`", script);
+    }
+
+    [Fact]
+    public void Manual_discord_status_is_auto_dismissed_and_malformed_responses_are_sanitized()
     {
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
@@ -130,8 +146,11 @@ public sealed class HeaderGameControlsTests
         Assert.Contains("let statusClearTimer = null;", script);
         Assert.Contains("const setOperationStatus = (message, autoClear = false) =>", script);
         Assert.Contains("}, 4000);", script);
+        Assert.Contains("const responseText = await response.text();", script);
+        Assert.Contains("result = JSON.parse(responseText);", script);
+        Assert.Contains("throw new Error(\"Discord voice operation failed.\");", script);
         Assert.Contains("setOperationStatus(result.message, true);", script);
-        Assert.Contains("setOperationStatus(error.message);", script);
+        Assert.Contains("setOperationStatus(error.message, true);", script);
     }
 
     private static int CountOccurrences(string value, string fragment)

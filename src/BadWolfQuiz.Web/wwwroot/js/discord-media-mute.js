@@ -83,17 +83,38 @@
         }
     };
 
+    const getLobbyHandlerUrl = handler => {
+        const url = new URL(window.location.href);
+        const gamesSegment = "/Admin/Games/";
+        const gamesIndex = url.pathname.indexOf(gamesSegment);
+        const basePath = gamesIndex >= 0
+            ? url.pathname.slice(0, gamesIndex)
+            : "";
+        url.pathname = `${basePath}${gamesSegment}Lobby/${encodeURIComponent(gameId)}`;
+        url.search = `?handler=${encodeURIComponent(handler)}`;
+        url.hash = "";
+        return url.toString();
+    };
+
     const post = async (handler, values, keepalive = false) => {
         const body = new FormData();
         body.append("id", gameId);
         Object.entries(values).forEach(([key, value]) => body.append(key, value));
-        const response = await fetch(`?handler=${handler}`, {
+        const response = await fetch(getLobbyHandlerUrl(handler), {
             method: "POST",
             headers: token ? { "RequestVerificationToken": token } : {},
             body,
             keepalive
         });
-        const result = await response.json();
+        const responseText = await response.text();
+        let result = {};
+        if (responseText) {
+            try {
+                result = JSON.parse(responseText);
+            } catch {
+                throw new Error("Discord voice operation failed.");
+            }
+        }
         if (!response.ok) {
             throw new Error(result.error ?? "Discord voice operation failed.");
         }
@@ -279,7 +300,7 @@
                 });
                 setOperationStatus(result.message, true);
             } catch (error) {
-                setOperationStatus(error.message);
+                setOperationStatus(error.message, true);
             } finally {
                 buttons.forEach(item => item.disabled = false);
             }
