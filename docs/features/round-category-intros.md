@@ -54,6 +54,14 @@ When no players are present, the game does not show an empty inter-round leaderb
 
 Intro pages use short slide/fade/scale transitions. The first intro also animates in. `prefers-reduced-motion` disables these animations.
 
+### Host navigation behavior
+
+Later-round intros are rendered inside the persistent host gameplay shell when the surrounding game state can remain mounted. Entering an intro invalidates stale in-flight Lobby refreshes so a previous response cannot immediately overwrite the presentation.
+
+The first round is a special bootstrap case because the running-game host shell does not exist yet. `RoundIntro.cshtml` remains the standalone server-rendered source, but its category frames replace `[data-game-intro-page]` asynchronously. **Skip** and **Start game** also submit through `fetch`; after the server redirects to the running Lobby, that Lobby is mounted into the existing browser document and initializes the persistent host navigation without a second browser navigation.
+
+If an asynchronous intro transition fails or returns an unsupported route, normal browser navigation remains the fallback.
+
 ## Persistence
 
 Round and category description blocks are persisted with the quiz definition and copied into the immutable quiz snapshot used by a running game. Starting or skipping an intro does not modify quiz data.

@@ -47,16 +47,16 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 - The last round summary offers the final phase only when the immutable quiz snapshot contains complete final question and answer content.
 - Normal and forced entry into the final phase first show the localized, automatic 3-second **Final question** transition.
 - When a final question is available, the host action menu provides a shortcut
-  to skip the remaining regular questions and advance directly to the final
-  phase. The host must confirm the action before the remaining questions are
-  force-resolved and the transition begins.
+  to leave the current regular round and advance directly to the final phase.
+  The host must confirm the action. Unclosed regular-round questions are left
+  unchanged rather than being force-resolved by this navigation action.
 - During wagering, the host sees submission progress but not the wager amounts.
 - For an inactive player who has not submitted a wager, the host can submit the
   minimum allowed wager on the player's behalf.
 - Locking wagers releases the final question to participating player devices.
 - During answering, the host sees submission progress but not answer text.
 - For an inactive player who has not submitted an answer, the host can submit
-  `-` on that player's behalf.
+  `-` on the player's behalf.
 - Host-submitted wagers and answers are propagated to the affected player's
   page in real time, so the player interface reflects the submission as if the
   player had submitted it directly.
@@ -70,6 +70,14 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 - The game finishes only after every participating answer is judged, then shows the authoritative final standings.
 - Players excluded by the negative-score setting remain connected as spectators.
 
+### Persistent host navigation
+
+When the host is already inside the running-game shell, the normal and forced Final Question transition is mounted into the existing gameplay region rather than replacing the browser document. Final Wagering, Final Answering, Final Judging, and final standings continue through the same persistent host navigation path, preserving the long-lived SignalR connection, player cards, header controls, and other host state.
+
+The forced Final Question confirmation submits through the asynchronous host flow. The natural unfinished-round warning closes before the host advances; choosing **Return to an unfinished round** performs the actual return in one action. Unsupported or failed transitions retain normal browser navigation as a fallback.
+
+Repeated live refreshes of the same final-results podium do not recreate the existing podium DOM, so its entrance animation is not restarted by duplicate state updates.
+
 ## Commands
 
 - `StartFinalQuestion()`
@@ -81,6 +89,7 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 - `JudgeFinalAnswer()`
 
 Each command validates the current phase and rejects duplicate or out-of-order submissions.
+
 ## Unfinished round guard
 
 Before entering the Final Question through normal progression, the host is warned if any regular round still contains unclosed questions and can either continue to the Final Question or return to an unfinished round. A forced Final Question action from **Tools** always requires confirmation and, when players are present, shows the current round leaderboard before the Final Question transition. It ignores the current round when deciding whether to offer a return option. The return option considers only unfinished rounds that have already been visited: all earlier visited rounds plus later rounds reached before the host returned backward. Rounds the game has never entered are ignored. When players are present, choosing the return option shows the current round leaderboard before the selected unfinished round intro; without players, the intro opens directly. The dedicated dialog also lets the host stay in the current round.
