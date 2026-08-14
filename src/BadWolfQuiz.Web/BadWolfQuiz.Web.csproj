@@ -4,11 +4,11 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>BadWolfQuiz.Web</RootNamespace>
-    <Version>1.4.1</Version>
+    <Version>1.5.0</Version>
   </PropertyGroup>
 
   <PropertyGroup>
-    <SatelliteResourceLanguages>uk;en;it</SatelliteResourceLanguages>
+    <SatelliteResourceLanguages>uk;ru;en;it</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>

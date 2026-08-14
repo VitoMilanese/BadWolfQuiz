@@ -10,6 +10,7 @@ public class SetLanguageModel : PageModel
     [
         "en",
         "uk",
+        "ru",
         "it"
     ];
 
