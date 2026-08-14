@@ -721,6 +721,21 @@ public sealed class GameSession
         return timer;
     }
 
+    public GameTimer AddQuestionTimerTime(TimeSpan additionalTime)
+    {
+        EnsureRunning();
+
+        var timer = AnswerTimer.Status is GameTimerStatus.Running or GameTimerStatus.Paused
+            ? AnswerTimer
+            : Timer.Status is GameTimerStatus.Running or GameTimerStatus.Paused
+                ? Timer
+                : throw new GameRuleViolationException(
+                    "There is no active question timer to extend.");
+
+        timer.Add(additionalTime);
+        return timer;
+    }
+
     public QuestionTimerProcessResult ProcessQuestionTimers()
     {
         EnsureRunning();

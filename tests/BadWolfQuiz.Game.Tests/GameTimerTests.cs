@@ -32,6 +32,63 @@ public sealed class GameTimerTests
     }
 
     [Fact]
+    public void Add_preserves_running_state_and_extends_remaining_time()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var timer = new GameTimer(TimeSpan.FromSeconds(30), timeProvider);
+
+        timer.Start();
+        timeProvider.Advance(TimeSpan.FromSeconds(8));
+        timer.Add(TimeSpan.FromSeconds(15));
+
+        Assert.Equal(GameTimerStatus.Running, timer.Status);
+        Assert.Equal(TimeSpan.FromSeconds(37), timer.Remaining);
+
+        timeProvider.Advance(TimeSpan.FromSeconds(2));
+        Assert.Equal(TimeSpan.FromSeconds(35), timer.Remaining);
+    }
+
+    [Fact]
+    public void Add_preserves_paused_state_and_extends_remaining_time()
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var timer = new GameTimer(TimeSpan.FromSeconds(30), timeProvider);
+
+        timer.Start();
+        timeProvider.Advance(TimeSpan.FromSeconds(8));
+        timer.Pause();
+        timer.Add(TimeSpan.FromSeconds(20));
+
+        Assert.Equal(GameTimerStatus.Paused, timer.Status);
+        Assert.Equal(TimeSpan.FromSeconds(42), timer.Remaining);
+
+        timeProvider.Advance(TimeSpan.FromSeconds(5));
+        Assert.Equal(TimeSpan.FromSeconds(42), timer.Remaining);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Add_caps_remaining_time_at_999_seconds(bool pauseBeforeAdding)
+    {
+        var timeProvider = new ManualTimeProvider(InitialTime);
+        var timer = new GameTimer(TimeSpan.FromSeconds(995), timeProvider);
+
+        timer.Start();
+        if (pauseBeforeAdding)
+        {
+            timer.Pause();
+        }
+
+        timer.Add(TimeSpan.FromSeconds(30));
+
+        Assert.Equal(TimeSpan.FromSeconds(999), timer.Remaining);
+        Assert.Equal(
+            pauseBeforeAdding ? GameTimerStatus.Paused : GameTimerStatus.Running,
+            timer.Status);
+    }
+
+    [Fact]
     public void Restart_and_stop_reset_timer_from_any_state()
     {
         var timeProvider = new ManualTimeProvider(InitialTime);

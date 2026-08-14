@@ -2,6 +2,7 @@ namespace BadWolfQuiz.Game.Runtime;
 
 public sealed class GameTimer
 {
+    private static readonly TimeSpan MaximumRemaining = TimeSpan.FromSeconds(999);
     private readonly TimeProvider _timeProvider;
     private DateTimeOffset? _lastStartedAtUtc;
     private TimeSpan _remaining;
@@ -80,6 +81,36 @@ public sealed class GameTimer
 
         _lastStartedAtUtc = _timeProvider.GetUtcNow();
         Status = GameTimerStatus.Running;
+    }
+
+    public void Add(TimeSpan additionalTime)
+    {
+        if (additionalTime <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(additionalTime),
+                "Additional timer time must be positive.");
+        }
+
+        RefreshExpiration();
+
+        if (Status is not GameTimerStatus.Running and not GameTimerStatus.Paused)
+        {
+            throw new GameRuleViolationException(
+                "Time can only be added to a running or paused timer.");
+        }
+
+        var updatedRemaining =
+            (Status == GameTimerStatus.Running ? CalculateRemaining() : _remaining) +
+            additionalTime;
+        _remaining = updatedRemaining > MaximumRemaining
+            ? MaximumRemaining
+            : updatedRemaining;
+
+        if (Status == GameTimerStatus.Running)
+        {
+            _lastStartedAtUtc = _timeProvider.GetUtcNow();
+        }
     }
 
     private TimeSpan CalculateRemaining()
