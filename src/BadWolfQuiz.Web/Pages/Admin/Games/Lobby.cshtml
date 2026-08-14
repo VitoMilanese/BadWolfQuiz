@@ -4393,51 +4393,6 @@
             let timerValue = document.getElementById("game-timer-value");
             let timerPause = document.querySelector(".game-timer-pause");
             let timerResume = document.querySelector(".game-timer-resume");
-            const quickTimerPinnedStorageKey = "badwolfquiz:quick-timer-controls-pinned";
-            let quickTimerControlsPinned =
-                sessionStorage.getItem(quickTimerPinnedStorageKey) === "true";
-
-            const setQuickTimerControlsPinned = pinned => {
-                quickTimerControlsPinned = pinned;
-                if (pinned) {
-                    sessionStorage.setItem(quickTimerPinnedStorageKey, "true");
-                    timerPanel?.classList.add("is-quick-actions-pinned");
-                } else {
-                    sessionStorage.removeItem(quickTimerPinnedStorageKey);
-                    timerPanel?.classList.remove("is-quick-actions-pinned");
-                }
-            };
-
-            const bindQuickTimerPointerLeave = () => {
-                if (!timerPanel || timerPanel.dataset.quickTimerPointerLeaveBound === "true") {
-                    return;
-                }
-
-                timerPanel.dataset.quickTimerPointerLeaveBound = "true";
-                const boundTimerPanel = timerPanel;
-                boundTimerPanel.addEventListener("pointerleave", event => {
-                    const { clientX, clientY } = event;
-                    requestAnimationFrame(() => {
-                        if (!quickTimerControlsPinned ||
-                            !boundTimerPanel.isConnected ||
-                            boundTimerPanel !== timerPanel) {
-                            return;
-                        }
-
-                        const pointerTarget = document.elementFromPoint(clientX, clientY);
-                        if (pointerTarget?.closest(".host-game-timer")) {
-                            return;
-                        }
-
-                        setQuickTimerControlsPinned(false);
-                    });
-                });
-            };
-
-            if (quickTimerControlsPinned) {
-                timerPanel?.classList.add("is-quick-actions-pinned");
-            }
-            bindQuickTimerPointerLeave();
             const playerJoinLockForm = document.querySelector(".player-join-lock-form");
             const playerJoinLockButton = playerJoinLockForm?.querySelector(".player-join-lock");
             const questionSelectionForms = document.querySelectorAll(".question-selection-form");
@@ -4513,10 +4468,6 @@
                 timerValue = document.getElementById("game-timer-value");
                 timerPause = document.querySelector(".game-timer-pause");
                 timerResume = document.querySelector(".game-timer-resume");
-                if (quickTimerControlsPinned) {
-                    timerPanel?.classList.add("is-quick-actions-pinned");
-                }
-                bindQuickTimerPointerLeave();
                 revealClueForm = document.querySelector("[data-reveal-clue-form]");
                 questionClues = document.querySelector("[data-question-clues]");
                 questionHeading = document.querySelector("[data-question-heading]");
@@ -4588,9 +4539,14 @@
                     });
             };
 
-            const submitGameControl = async (form, submitter = null) => {
+            const submitGameControl = async (
+                form,
+                submitter = null,
+                disableSubmitter = true) => {
                 const button = submitter ?? form.querySelector("button[type='submit']");
-                button?.setAttribute("disabled", "disabled");
+                if (disableSubmitter) {
+                    button?.setAttribute("disabled", "disabled");
+                }
                 hostCommandDepth += 1;
 
                 try {
@@ -4618,7 +4574,9 @@
 
                     return result;
                 } finally {
-                    button?.removeAttribute("disabled");
+                    if (disableSubmitter) {
+                        button?.removeAttribute("disabled");
+                    }
                     hostCommandDepth = Math.max(0, hostCommandDepth - 1);
 
                     if (hostCommandDepth === 0 && hostReloadPending) {
@@ -4757,40 +4715,23 @@
 
                 event.preventDefault();
                 const isQuickAdjustment = form.matches(".game-timer-adjust");
-                if (isQuickAdjustment) {
-                    setQuickTimerControlsPinned(true);
-                }
+                const submitter = event.submitter instanceof HTMLButtonElement
+                    ? event.submitter
+                    : null;
+                const submittedWithPointer =
+                    isQuickAdjustment && submitter?.matches(":hover") === true;
 
                 try {
-                    await submitGameControl(form);
+                    await submitGameControl(
+                        form,
+                        submitter,
+                        !isQuickAdjustment);
+                    if (submittedWithPointer) {
+                        submitter?.blur();
+                    }
                 } catch (error) {
                     handleGameControlError(error);
-                } finally {
-                    if (isQuickAdjustment && quickTimerControlsPinned) {
-                        timerPanel?.classList.add("is-quick-actions-pinned");
-                    }
                 }
-            });
-
-            document.addEventListener("pointerdown", event => {
-                if (!quickTimerControlsPinned) {
-                    return;
-                }
-
-                const target = event.target instanceof Element ? event.target : null;
-                if (target?.closest(".host-game-timer")) {
-                    return;
-                }
-
-                setQuickTimerControlsPinned(false);
-            });
-
-            document.addEventListener("keydown", event => {
-                if (event.key !== "Escape" || !quickTimerControlsPinned) {
-                    return;
-                }
-
-                setQuickTimerControlsPinned(false);
             });
 
             playerJoinLockForm?.addEventListener("submit", async event => {

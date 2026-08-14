@@ -6295,8 +6295,7 @@ body.youtube-auto-expanded-open {
 }
 
 .host-game-timer:hover .game-timer-quick-actions,
-.host-game-timer:focus-within .game-timer-quick-actions,
-.host-game-timer.is-quick-actions-pinned .game-timer-quick-actions {
+.host-game-timer:focus-within .game-timer-quick-actions {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
