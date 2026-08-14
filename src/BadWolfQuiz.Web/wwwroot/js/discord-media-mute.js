@@ -4,6 +4,40 @@
         return;
     }
 
+    const moveGameControlsToHeader = () => {
+        const controls = document.querySelector(".game-side-controls");
+        const header = document.querySelector(".game-header-context");
+        if (!controls || !header) {
+            return;
+        }
+
+        const syncVisibility = () => {
+            controls.style.display = board.classList.contains(
+                "host-gameplay-presentation-mode")
+                ? "none"
+                : "flex";
+        };
+
+        controls.style.position = "static";
+        controls.style.right = "auto";
+        controls.style.bottom = "auto";
+        controls.style.zIndex = "auto";
+        controls.style.transform = "none";
+        controls.dataset.headerGameControls = "";
+
+        const discordSettings = header.querySelector("[data-open-discord-settings]");
+        header.insertBefore(controls, discordSettings ?? null);
+        syncVisibility();
+
+        const visibilityObserver = new MutationObserver(syncVisibility);
+        visibilityObserver.observe(board, {
+            attributes: true,
+            attributeFilter: ["class"]
+        });
+    };
+
+    moveGameControlsToHeader();
+
     const gameId = board.dataset.gameId;
     const status = document.querySelector("[data-discord-operation-status]");
     const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
