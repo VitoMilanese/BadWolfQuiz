@@ -4408,9 +4408,36 @@
                 }
             };
 
+            const bindQuickTimerPointerLeave = () => {
+                if (!timerPanel || timerPanel.dataset.quickTimerPointerLeaveBound === "true") {
+                    return;
+                }
+
+                timerPanel.dataset.quickTimerPointerLeaveBound = "true";
+                const boundTimerPanel = timerPanel;
+                boundTimerPanel.addEventListener("pointerleave", event => {
+                    const { clientX, clientY } = event;
+                    requestAnimationFrame(() => {
+                        if (!quickTimerControlsPinned ||
+                            !boundTimerPanel.isConnected ||
+                            boundTimerPanel !== timerPanel) {
+                            return;
+                        }
+
+                        const pointerTarget = document.elementFromPoint(clientX, clientY);
+                        if (pointerTarget?.closest(".host-game-timer")) {
+                            return;
+                        }
+
+                        setQuickTimerControlsPinned(false);
+                    });
+                });
+            };
+
             if (quickTimerControlsPinned) {
                 timerPanel?.classList.add("is-quick-actions-pinned");
             }
+            bindQuickTimerPointerLeave();
             const playerJoinLockForm = document.querySelector(".player-join-lock-form");
             const playerJoinLockButton = playerJoinLockForm?.querySelector(".player-join-lock");
             const questionSelectionForms = document.querySelectorAll(".question-selection-form");
@@ -4489,6 +4516,7 @@
                 if (quickTimerControlsPinned) {
                     timerPanel?.classList.add("is-quick-actions-pinned");
                 }
+                bindQuickTimerPointerLeave();
                 revealClueForm = document.querySelector("[data-reveal-clue-form]");
                 questionClues = document.querySelector("[data-question-clues]");
                 questionHeading = document.querySelector("[data-question-heading]");

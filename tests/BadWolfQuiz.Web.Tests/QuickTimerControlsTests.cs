@@ -42,6 +42,11 @@ public sealed class QuickTimerControlsTests
         Assert.Contains("is-quick-actions-pinned", markup);
         Assert.Contains("document.addEventListener(\"pointerdown\"", markup);
         Assert.DoesNotContain("document.addEventListener(\"pointermove\"", markup);
+        Assert.Contains("boundTimerPanel.addEventListener(\"pointerleave\"", markup);
+        Assert.Contains("!boundTimerPanel.isConnected", markup);
+        Assert.Contains("boundTimerPanel !== timerPanel", markup);
+        Assert.Contains("document.elementFromPoint(clientX, clientY)", markup);
+        Assert.Contains("bindQuickTimerPointerLeave();", markup);
         Assert.Contains("pointer-events: auto", css);
     }
 
