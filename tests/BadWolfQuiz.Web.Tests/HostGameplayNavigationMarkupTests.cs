@@ -348,6 +348,65 @@ public sealed class HostGameplayNavigationMarkupTests
     }
 
     [Fact]
+    public void Repeated_leaderboard_refresh_does_not_restart_podium_animation()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+
+        Assert.Contains("const animatedLeaderboardSignature = view =>", markup);
+        Assert.Contains("const preserveAnimatedLeaderboard =", markup);
+        Assert.Contains("currentLeaderboardSignature === nextLeaderboardSignature", markup);
+        Assert.Contains("if (!preserveAnimatedLeaderboard)", markup);
+    }
+
+    [Fact]
+    public void Natural_final_warning_actions_close_and_return_without_a_second_click()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+        var runningIntro = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "RunningRoundIntro.cshtml.cs"));
+
+        var naturalDialogStart = markup.IndexOf(
+            "<dialog id=\"natural-final-warning-dialog\"",
+            StringComparison.Ordinal);
+        var naturalDialogEnd = markup.IndexOf(
+            "</dialog>",
+            naturalDialogStart,
+            StringComparison.Ordinal);
+        var naturalDialog = markup[naturalDialogStart..naturalDialogEnd];
+        Assert.Contains(
+            "name=\"skipLeaderboard\" value=\"true\"",
+            naturalDialog);
+
+        var finishDialogStart = markup.IndexOf(
+            "<dialog id=\"finish-game-warning-dialog\"",
+            StringComparison.Ordinal);
+        var finishDialogEnd = markup.IndexOf(
+            "</dialog>",
+            finishDialogStart,
+            StringComparison.Ordinal);
+        var finishDialog = markup[finishDialogStart..finishDialogEnd];
+        Assert.DoesNotContain("name=\"skipLeaderboard\"", finishDialog);
+        var finalHandlerStart = script.IndexOf(
+            "if ((handler === \"StartFinalQuestion\" ||",
+            StringComparison.Ordinal);
+        var finalHandlerEnd = script.IndexOf(
+            "if (handler === \"Previous\" ||",
+            finalHandlerStart,
+            StringComparison.Ordinal);
+        var finalHandler = script[finalHandlerStart..finalHandlerEnd];
+        Assert.Contains("form.closest(\"dialog\")?.close();", finalHandler);
+        Assert.Contains("bool skipLeaderboard", runningIntro);
+        Assert.Contains("!skipLeaderboard &&", runningIntro);
+    }
+
+    [Fact]
     public void First_round_soft_mount_reinitializes_host_navigation_and_repairs_incomplete_board_dom()
     {
         var script = File.ReadAllText(FindWebFile(

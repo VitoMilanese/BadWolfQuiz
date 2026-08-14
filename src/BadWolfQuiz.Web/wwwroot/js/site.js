@@ -386,6 +386,7 @@ const configureGameRoundIntroRoutes = () => {
             !form.matches("[data-final-question-transition-form]")) {
             event.preventDefault();
             event.stopImmediatePropagation();
+            form.closest("dialog")?.close();
             openFinalTransition(handler === "ForceAdvanceToFinalQuestion");
             return;
         }

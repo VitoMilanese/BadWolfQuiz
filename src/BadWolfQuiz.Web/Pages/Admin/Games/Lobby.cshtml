@@ -1693,6 +1693,19 @@
             }
         };
 
+        const animatedLeaderboardSignature = view => {
+            const podium = view?.querySelector(".round-podium");
+            const scope = podium?.closest(
+                ".round-summary, .final-question-panel");
+            if (!scope) {
+                return null;
+            }
+
+            return scope.textContent
+                .replace(/\s+/g, " ")
+                .trim();
+        };
+
         const syncPersistentRoundBoard = (currentBoard, nextBoard) => {
             const currentGrid = currentBoard.querySelector(".host-board-grid");
             const nextGrid = nextBoard.querySelector(".host-board-grid");
@@ -1772,9 +1785,19 @@
                 }
             }
 
-            currentView.replaceChildren(
-                ...Array.from(nextView.childNodes, node =>
-                    document.importNode(node, true)));
+            const currentLeaderboardSignature =
+                animatedLeaderboardSignature(currentView);
+            const nextLeaderboardSignature =
+                animatedLeaderboardSignature(nextView);
+            const preserveAnimatedLeaderboard =
+                currentLeaderboardSignature !== null &&
+                currentLeaderboardSignature === nextLeaderboardSignature;
+
+            if (!preserveAnimatedLeaderboard) {
+                currentView.replaceChildren(
+                    ...Array.from(nextView.childNodes, node =>
+                        document.importNode(node, true)));
+            }
             currentBoard.hidden = nextBoard.hidden;
 
             if (currentTransient) {
@@ -3004,6 +3027,7 @@
         <p>@Localizer["FinalQuestion_UnfinishedRoundsWarning"]</p>
         <div class="form-actions dialog-actions">
             <form method="post" asp-page-handler="ReturnToUnfinishedRound">
+                <input type="hidden" name="skipLeaderboard" value="true" />
                 <button class="button button-secondary" type="submit">@Localizer["GameBoard_ReturnToUnfinishedRound"]</button>
             </form>
             <form method="post" asp-page-handler="ForceAdvanceToFinalQuestion">

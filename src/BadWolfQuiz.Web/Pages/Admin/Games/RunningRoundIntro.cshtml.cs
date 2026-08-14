@@ -174,6 +174,7 @@ public sealed class RunningRoundIntroModel(
 
     public async Task<IActionResult> OnPostReturnToUnfinishedAsync(
         Guid id,
+        bool skipLeaderboard,
         CancellationToken cancellationToken)
     {
         var game = FindOwned(id);
@@ -183,6 +184,7 @@ public sealed class RunningRoundIntroModel(
         }
 
         var showLeaderboard =
+            !skipLeaderboard &&
             game.Session.Players.Count > 0 &&
             !game.Session.IsUnfinishedRoundReturnPending;
 
