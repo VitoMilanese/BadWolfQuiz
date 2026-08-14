@@ -12,6 +12,7 @@
     let expandedIframe = null;
     let closeButton = null;
     let shouldResumeTimer = false;
+    let timerPlaybackOwner = null;
     let apiCallbackInstalled = false;
 
     const pauseRunningTimer = () => {
@@ -38,6 +39,24 @@
         document.querySelector(".game-timer-resume")?.requestSubmit();
     };
 
+    const beginTimedPlayback = iframe => {
+        const alreadyTrackingPlayback = timerPlaybackOwner !== null;
+        timerPlaybackOwner = iframe;
+
+        if (!alreadyTrackingPlayback) {
+            pauseRunningTimer();
+        }
+    };
+
+    const endTimedPlayback = iframe => {
+        if (timerPlaybackOwner !== iframe) {
+            return;
+        }
+
+        timerPlaybackOwner = null;
+        resumePausedTimer();
+    };
+
     const clearExpandedPresentation = () => {
         expandedIframe?.classList.remove("youtube-auto-expanded");
         expandedIframe = null;
@@ -46,29 +65,15 @@
         document.body.classList.remove("youtube-auto-expanded-open");
     };
 
-    const collapseVideo = () => {
-        const wasExpanded = expandedIframe !== null;
-        clearExpandedPresentation();
-
-        if (wasExpanded) {
-            resumePausedTimer();
-        }
-    };
-
     const expandVideo = iframe => {
         if (expandedIframe === iframe) {
             return;
         }
 
-        const wasAlreadyExpanded = expandedIframe !== null;
         clearExpandedPresentation();
         expandedIframe = iframe;
         iframe.classList.add("youtube-auto-expanded");
         document.body.classList.add("youtube-auto-expanded-open");
-
-        if (!wasAlreadyExpanded) {
-            pauseRunningTimer();
-        }
 
         closeButton = document.createElement("button");
         closeButton.type = "button";
@@ -76,8 +81,9 @@
         closeButton.textContent = "×";
         closeButton.title = iframe.dataset.closeLabel ?? "Close video";
         closeButton.setAttribute("aria-label", closeButton.title);
-        closeButton.addEventListener("click", collapseVideo);
+        closeButton.addEventListener("click", clearExpandedPresentation);
         document.body.appendChild(closeButton);
+        closeButton.focus({ preventScroll: true });
     };
 
     const pauseNativeMedia = exceptMedia => {
@@ -116,15 +122,28 @@
 
     const handleStateChange = (iframe, event) => {
         if (event.data === window.YT.PlayerState.PLAYING) {
+            beginTimedPlayback(iframe);
             pauseNativeMedia(null);
             pauseYouTubeFrames(iframe);
             expandVideo(iframe);
             return;
         }
 
+        const playbackStopped =
+            event.data === window.YT.PlayerState.PAUSED ||
+            event.data === window.YT.PlayerState.ENDED ||
+            event.data === window.YT.PlayerState.CUED ||
+            event.data === window.YT.PlayerState.UNSTARTED;
+
+        if (!playbackStopped) {
+            return;
+        }
+
+        endTimedPlayback(iframe);
+
         if (event.data === window.YT.PlayerState.ENDED &&
             expandedIframe === iframe) {
-            collapseVideo();
+            clearExpandedPresentation();
         }
     };
 
@@ -227,9 +246,10 @@
         forEachFrame(rootNode, iframe => {
             pendingFrames.delete(iframe);
             players.delete(iframe);
+            endTimedPlayback(iframe);
 
             if (expandedIframe === iframe) {
-                collapseVideo();
+                clearExpandedPresentation();
             }
         });
     };
@@ -239,10 +259,14 @@
     };
 
     document.addEventListener("keydown", event => {
-        if (event.key === "Escape" && expandedIframe) {
-            collapseVideo();
+        if (event.key !== "Escape" || !expandedIframe) {
+            return;
         }
-    });
+
+        event.preventDefault();
+        event.stopPropagation();
+        clearExpandedPresentation();
+    }, true);
 
     document.addEventListener("play", event => {
         const media = event.target;
