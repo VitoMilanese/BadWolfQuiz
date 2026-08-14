@@ -108,7 +108,6 @@ internal sealed class RemoteBackupClient(AppSettings settings)
                 cancellationToken.ThrowIfCancellationRequested();
 
                 using var client = CreateClient();
-                using var cancellationRegistration = cancellationToken.Register(() => SafeDispose(client));
 
                 try
                 {
@@ -126,9 +125,26 @@ internal sealed class RemoteBackupClient(AppSettings settings)
                         81920,
                         useAsync: true);
 
-                    var asyncResult = command.BeginExecute();
-                    await output.CopyToAsync(destination, cancellationToken);
-                    command.EndExecute(asyncResult);
+                    var executeTask = command.ExecuteAsync(cancellationToken);
+
+                    try
+                    {
+                        await output.CopyToAsync(destination, cancellationToken);
+                        await executeTask;
+                    }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        try
+                        {
+                            await executeTask;
+                        }
+                        catch (OperationCanceledException)
+                        {
+                        }
+
+                        throw;
+                    }
+
                     cancellationToken.ThrowIfCancellationRequested();
 
                     if (command.ExitStatus != 0)
