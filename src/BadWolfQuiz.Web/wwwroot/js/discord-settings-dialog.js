@@ -21,8 +21,22 @@
         });
     };
 
+    const publishVoiceReadiness = () => {
+        const frameDocument = frame.contentDocument;
+        if (!frameDocument) {
+            return;
+        }
+
+        window.dispatchEvent(new CustomEvent("badwolfquiz:discord-voice-ready-changed", {
+            detail: {
+                ready: frameDocument.querySelector("[data-discord-test]") !== null
+            }
+        }));
+    };
+
     bindOpenButtons();
     document.addEventListener("badwolf:host-shell-mounted", bindOpenButtons);
+    frame.addEventListener("load", publishVoiceReadiness);
 
     dialog.querySelector("[data-close-discord-settings]")
         ?.addEventListener("click", () => dialog.close());

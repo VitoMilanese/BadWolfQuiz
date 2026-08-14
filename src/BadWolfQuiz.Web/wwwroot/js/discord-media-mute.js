@@ -49,7 +49,17 @@
         });
     };
 
+    const setManualMuteControlsVisible = ready => {
+        document.querySelectorAll("[data-discord-mute]").forEach(button => {
+            button.hidden = !ready;
+        });
+    };
+
     moveGameControlsToHeader();
+
+    window.addEventListener("badwolfquiz:discord-voice-ready-changed", event => {
+        setManualMuteControlsVisible(event.detail?.ready === true);
+    });
 
     const gameId = board.dataset.gameId;
     const status = document.querySelector("[data-discord-operation-status]");

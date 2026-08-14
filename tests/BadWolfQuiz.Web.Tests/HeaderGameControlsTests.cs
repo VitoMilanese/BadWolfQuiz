@@ -83,6 +83,43 @@ public sealed class HeaderGameControlsTests
     }
 
     [Fact]
+    public void Manual_discord_controls_are_only_available_when_voice_control_is_ready()
+    {
+        var lobby = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "Lobby.cshtml"));
+        var lobbyModel = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "Lobby.cshtml.cs"));
+        var gateway = File.ReadAllText(FindWebFile(
+            "Services",
+            "DiscordVoiceGateway.cs"));
+        var dialogScript = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "discord-settings-dialog.js"));
+        var muteScript = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "discord-media-mute.js"));
+
+        Assert.Contains("@if (Model.IsDiscordVoiceReady)", lobby);
+        Assert.Contains("IsDiscordVoiceReady = DiscordConnection is not null &&", lobbyModel);
+        Assert.Contains("DiscordConnection.VoiceChannelId).IsReady;", lobbyModel);
+        Assert.Contains(
+            "public bool IsReady => settings.Enabled && client.ConnectionState == ConnectionState.Connected;",
+            gateway);
+        Assert.Contains("const publishVoiceReadiness = () =>", dialogScript);
+        Assert.Contains("frameDocument.querySelector(\"[data-discord-test]\") !== null", dialogScript);
+        Assert.Contains("badwolfquiz:discord-voice-ready-changed", muteScript);
+        Assert.Contains("button.hidden = !ready;", muteScript);
+    }
+
+    [Fact]
     public void Successful_manual_discord_status_is_auto_dismissed()
     {
         var script = File.ReadAllText(FindWebFile(
