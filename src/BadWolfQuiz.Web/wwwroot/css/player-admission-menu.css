@@ -43,6 +43,16 @@
     pointer-events: none;
 }
 
+.game-side-controls[data-header-game-controls] {
+    flex-direction: row;
+    align-items: center;
+}
+
+.game-side-controls[data-header-game-controls] .player-admission-menu-popover {
+    top: calc(100% + 8px);
+    bottom: auto;
+}
+
 /*
  * The quiz editor upgrades these legacy server-rendered controls into the
  * round edit context menu. Keep them out of the first paint so users never

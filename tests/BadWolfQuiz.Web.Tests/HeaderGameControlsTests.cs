@@ -35,6 +35,23 @@ public sealed class HeaderGameControlsTests
         Assert.Contains(": \"flex\";", script);
     }
 
+    [Fact]
+    public void Header_controls_are_horizontal_and_admission_menu_opens_downward()
+    {
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "player-admission-menu.css"));
+
+        Assert.Contains(".game-side-controls[data-header-game-controls]", css);
+        Assert.Contains("flex-direction: row;", css);
+        Assert.Contains(
+            ".game-side-controls[data-header-game-controls] .player-admission-menu-popover",
+            css);
+        Assert.Contains("top: calc(100% + 8px);", css);
+        Assert.Contains("bottom: auto;", css);
+    }
+
     private static int CountOccurrences(string value, string fragment)
     {
         var count = 0;
