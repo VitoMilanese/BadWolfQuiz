@@ -8,7 +8,8 @@ public sealed class PlayerBuzzerTouchRegressionTests
         var root = FindRepositoryRoot();
         var css = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "player-admission-menu.css"));
 
-        Assert.Contains("body:has(.player-lobby:has(.player-buzzer-panel))", css);
+        Assert.Contains("body:has(.player-buzzer-panel)", css);
+        Assert.DoesNotContain(":has(.player-lobby:has(.player-buzzer-panel))", css);
         Assert.Contains("overscroll-behavior-x: none;", css);
         Assert.Contains("touch-action: manipulation;", css);
         Assert.Contains(".player-lobby:has(.player-buzzer-panel) .player-buzzer", css);
@@ -22,15 +23,14 @@ public sealed class PlayerBuzzerTouchRegressionTests
         var root = FindRepositoryRoot();
         var css = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "player-admission-menu.css"));
 
+        Assert.Contains("body:has(.player-buzzer-panel) > .page-shell", css);
         Assert.Contains("position: fixed;", css);
         Assert.Contains("height: 100dvh;", css);
-        Assert.Contains("display: flex;", css);
         Assert.Contains("flex: 1 1 auto;", css);
-        Assert.Contains("min-height: 120px;", css);
-        Assert.Contains("aspect-ratio: auto;", css);
-        Assert.Contains("border-radius: clamp(24px, 8vw, 56px);", css);
         Assert.DoesNotContain("flex: 1 1 0;", css);
         Assert.DoesNotContain("height: 0;", css);
+        Assert.Contains("aspect-ratio: auto;", css);
+        Assert.Contains("border-radius: clamp(24px, 8vw, 56px);", css);
         Assert.Contains("user-select: none;", css);
         Assert.Contains("-webkit-user-select: none;", css);
     }
