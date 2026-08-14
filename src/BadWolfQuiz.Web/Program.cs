@@ -91,6 +91,7 @@ var supportedCultures = new[]
 {
     new CultureInfo("en"),
     new CultureInfo("uk"),
+    new CultureInfo("ru"),
     new CultureInfo("it")
 };
 

@@ -84,6 +84,10 @@
                        asp-page="/SetLanguage"
                        asp-route-culture="en"
                        asp-route-returnUrl="@returnUrl">🇬🇧 English</a>
+                    <a class="button button-secondary @(currentCulture == "ru" ? "is-selected" : null)"
+                       asp-page="/SetLanguage"
+                       asp-route-culture="ru"
+                       asp-route-returnUrl="@returnUrl">🇷🇺 Кацапська</a>
                     <a class="button button-secondary @(currentCulture == "it" ? "is-selected" : null)"
                        asp-page="/SetLanguage"
                        asp-route-culture="it"

@@ -1,0 +1,2583 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>Україна</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>Україна</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>Україна</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Label_Category" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_CorrectAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_CreateQuiz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Players" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Preview" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Quiz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Quizzes" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Round" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Save" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_NextQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Score" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Add" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Edit" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Delete" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Cancel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Close" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Back" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Create" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_CreateCategory" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_CreateQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Preview" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Start" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Stop" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Finish" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Reset" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Duplicate" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Copy" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Move" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Import" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Export" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Upload" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Remove" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Join" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Play" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_ShowAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_OpenBuzz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_CloseBuzz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Home" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Games" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_History" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Settings" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Players" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Statistics" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Help" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Title_QuizEditor" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Title_QuestionEditor" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Title_GameControl" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Title_NewQuiz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Title_EditQuiz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Title_Settings" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_QuizName" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Description" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_CategoryName" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Question" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_QuestionBlocks" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_AnswerBlocks" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Points" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Timer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_TimeLimit" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Player" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Status" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Game" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_GameCode" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_QrCode" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Media" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Image" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Audio" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Video" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_YouTube" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_File" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_FileName" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_TopCaption" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_BottomCaption" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_BuzzMode" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_BuzzDelay" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_SpecialQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Hint_WagerQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_WagerQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_ExcludeFromRandomWagerSelection" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Hint_ExcludeFromRandomWagerSelection" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Created" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Modified" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_Saved" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_Deleted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_Created" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_Updated" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_GameStarted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_GameFinished" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_PlayerJoined" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_PlayerLeft" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_WaitingPlayers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_WaitingHost" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_Correct" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_Wrong" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_Required" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_InvalidFile" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_InvalidImage" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_InvalidAudio" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_InvalidVideo" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_QuizNotFound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_GameNotFound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_PlayerExists" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_ConnectionLost" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_DeleteQuiz_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_DeleteQuiz_Text" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_DeleteQuestion_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_DeleteQuestion_Text" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_QuestionDeleted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_DeleteCategory_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_DeleteCategory_Text" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_ExitGame_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_ExitGame_Text" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Content_Text" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Content_Image" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Content_Audio" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Content_Video" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Content_YouTube" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameStatus_Waiting" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameStatus_Paused" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameStatus_Finished" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Home_Eyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Home_TitleLine1" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Home_TitleLine2" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Home_Description" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_OpenEditor" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_JoinGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Title_Error" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_Unexpected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_CheckLogsAndRetry" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Join_Eyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Title_JoinGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_LobbyComingSoon" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Placeholder_GameCode" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_PlayerName" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Placeholder_PlayerName" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="CreateQuiz_Eyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Title_CreateQuiz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Admin_Eyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Title_MyQuizzes" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Quiz_RoundCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Final" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Status_Ready" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Placeholder_QuestionText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="DropZone_Image" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_FileUploadComingSoon" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="DropZone_Audio" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Audio_SupportedFormats" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_YouTubeLink" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_AudioOnly" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="BuzzMode_UseRoundDefault" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="BuzzMode_Manual" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="BuzzMode_Immediately" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="BuzzMode_AfterMedia" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="BuzzMode_AfterDelay" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="BuzzMode_Disabled" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_PreviewComingSoon" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Default_RoundTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Default_CategoryTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_QuizNameRequired" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Seed_DemoQuizTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Seed_DemoQuizDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Seed_TestQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Seed_TestAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_QuizCreated" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_QuestionSaved" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_MaxLength" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_InvalidUrl" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionBlocksRequired" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerBlocksRequired" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FileSizeLimitExceeded" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="InvalidImageFile" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="InvalidAudioFile" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_RemoveFile" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_StoredFile" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Rename" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_RenameQuiz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_DeleteQuiz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_DeleteQuizConfirmation" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_QuizRenamed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_QuizDeleted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Round_DefaultTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RoundCreated" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RoundSettings" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_AddRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_NewRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RenameRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_DeleteRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RoundTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_DeleteRoundWarning" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RoundRenamed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RoundDeleted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RoundTitleRequired" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_CannotDeleteOnlyRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_UseRandomWagerQuestions" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RandomWagerDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RandomWagerQuestionCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_EligibleRandomWagerQuestions" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_InvalidRandomWagerCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RoundRowsSaved" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_QuestionCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_QuestionCountDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_QuestionCountDeleteConfirmation" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_CategoryCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_CategoryCountDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_CategoryCountDeleteConfirmation" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RowPoints" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RowPointsDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RowNumber" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_ExchangeCategory" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_SelectedCategory" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_TargetRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_TargetCategory" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_Exchange" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RenameCategory" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_CategoryTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_CategoryRenamed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_CreateGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_ContinueGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_BackToQuizzes" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameLobby_Eyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameLobby_StatusLabel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameLobby_StatusLobby" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameLobby_PlayerCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameLobby_QuestionCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameLobby_SessionId" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameLobby_TransientNotice" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_QuizCannotStart" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerPresence_Active" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerPresence_Inactive" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerPresence_Disconnected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerPresence_MonitoringNotice" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerPresence_InactiveWarning" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerPresence_RejoinPending" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerPresence_RejoinApprovalRequired" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameLobby_ApproveRejoin" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameLobby_StartGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameLobby_StatusRunning" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameLobby_StartRequiresPlayer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ShowJoinCode" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_JoinOverlayTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_JoinOverlayHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_Eyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuestionSelected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_AwaitingWager" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_SelectionRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_SelectWagerPlayer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_WagerAmount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_AcceptWager" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_WagerAccepted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_AcceptedWagerSummary" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_WagerRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ActivePlayer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_MakeActivePlayer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_RandomActivePlayer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ActivePlayerRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_WagerPlayer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_WagerLimits" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_WagerKeypad" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ClearWager" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_DeleteWagerDigit" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_WagerValid" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_WagerOutsideLimits" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_MaximumWager" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_JudgeAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_NoCorrectAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_JudgmentRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_Question" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_Answer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuestionWithCategory" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_AnswerWithCategory" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerMedia_Settings" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Language_Label" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ReturnToBoard" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_MediaContent" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_AudioUnsupported" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_CloseVideo" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_CloseAnswerRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ActivateBuzzer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_WaitingForBuzz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_AnsweringPlayer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_BuzzerActivationRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerGame_Buzz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerGame_BuzzerOpen" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerGame_BuzzerAlreadyAnswered" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerGame_BuzzerClaimedByYou" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerGame_BuzzerClaimed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerGame_BuzzerClosed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerGame_BuzzRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_BuzzerRaceWinner" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_BuzzerRaceLatePlayer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_RoundComplete" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_StartNextRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_AllRoundsComplete" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_AdvanceRoundRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameTimer_Buzzer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameTimer_Answer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameTimer_Pause" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameTimer_Resume" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameTimer_PauseRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameTimer_ResumeRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_Eyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_GlobalDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_BuzzerDuration" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_AnswerDuration" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_SecondsHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_RegularStartMode" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_WagerStartMode" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_InvalidDuration" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_GlobalSaved" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_CreateGameTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_GameEyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_GameDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_StartAnswerTimer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameTimer_StartRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_LobbyTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_LobbyDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_Automatic" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_Manual" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_SaveForGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_GameSaved" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_GameLocked" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_AllowNegativeFinalPlayers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Title_FinalQuestionEditor" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_EditFinalQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_DeleteFinalQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_DeleteFinalQuestion_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Dialog_DeleteFinalQuestion_Text" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_FinalQuestionDeleted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Message_FinalQuestionSaved" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_Start" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_WaitingForWagers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_NotSubmitted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_Submitted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_ShowQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_StartJudging" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_Results" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_NotEligible" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_YourWager" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_WagerLimits" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_ConfirmWager" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_WagerConfirmed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_YourAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_ConfirmAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_AnswerConfirmed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_WaitingForJudging" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_YourAnswerCorrect" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_YourAnswerWrong" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_ActionRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_JudgingProgress" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerKey_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerKey_Eyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerKey_Open" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerKey_Waiting" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Open" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Eyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Description" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_BackToGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_AddEntry" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Question" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Player" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Value" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Correct" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Add" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Save" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_NoEntries" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Rejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_PlayerAlreadyRecorded" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_QuestionNotPlayed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_InvalidValue" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_NoEligiblePlayers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_Delete" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_DeleteTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AnswerHistory_DeleteConfirmation" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuestionPreview" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_PreviewResolvedQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ShowQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ShowAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_GameHistory" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Description" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Empty" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_FinishedAt" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_PlayerCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_View" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_DetailsTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Back" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Players" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Answers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_NoAnswers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Question" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Player" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Result" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_ScoreChange" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Correct" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Incorrect" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_HostSignIn" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_SignOut" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_RegisterHost" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_Email" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_Password" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_ConfirmPassword" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_RememberMe" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_SignIn" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_Register" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_NoAccount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_AlreadyRegistered" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_InvalidCredentials" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_EmailAlreadyUsed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_Required" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_InvalidEmail" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_PasswordMinLength" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_PasswordMismatch" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_ForgotPassword" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_ForgotPasswordDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_SendResetLink" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_CheckEmail" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_CheckEmailDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_EmailSendFailed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_ResetPassword" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_NewPassword" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_InvalidResetLink" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_PasswordResetComplete" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_ChangePassword" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_CurrentPassword" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_PasswordChanged" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_CurrentPasswordInvalid" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_EmailSubject" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_EmailIntro" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_EmailExpiry" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_JoinQrAlt" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Join_SelectedGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ClosePlayerJoining" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_OpenPlayerJoining" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_PlayerJoiningToggleRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_BlockPlayer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_RemovePlayer" xml:space="preserve">
+<value>Україна</value>
+  </data>
+  <data name="GameBoard_RemovePlayerConfirm" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_RemovePlayerRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ManageBlockedPlayers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_BlockedPlayersTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_NoBlockedPlayers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_UnblockPlayer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_UnblockPlayerRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_PlayerBlocked" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerGame_RemovedFromGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerGame_RemovedFromGameTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_Display" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_Name" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_Source" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_SourceNone" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_SourceImage" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_SourceWebcam" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_Image" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_InvalidSettings" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ResizePlayerPanel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_SourceAvatar" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_Avatar" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_SourceWebcamUrl" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_WebcamUrl" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HostCard_WebcamUrlHintPrefix" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AvatarPicker_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AvatarPicker_SelectGender" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AvatarPicker_Female" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AvatarPicker_Male" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AvatarPicker_Individual" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ResizePlayerCards" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AvatarPicker_Choose" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AvatarPicker_ChooseOrChange" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerWebcam_Enable" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerWebcam_Disable" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerWebcam_RequiresHttps" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerWebcam_AccessFailed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerWebcam_Url" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerWebcam_UseUrl" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerWebcam_InvalidUrl" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ResizeHostCard" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_MoveHostCard" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="BrandLogo_Label" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="BrandLogo_Hint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="BrandLogo_PreviewAlt" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="BrandLogo_Remove" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_PlayWithUs" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_AskQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AskQuestion_Eyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AskQuestion_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AskQuestion_Description" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AskQuestion_Name" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AskQuestion_NameHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AskQuestion_Question" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AskQuestion_Send" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AskQuestion_Invalid" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AskQuestion_Failed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AskQuestion_Sent" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_Label" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_Hint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_ClassicWolf" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_CrimsonNight" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_ArcticNeon" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_EmeraldStage" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_RoyalViolet" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_SunsetOrange" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_Daylight" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_WarmParchment" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_MintFog" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_UkrainianSky" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_ItalianSpirit" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_PrideSpectrum" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_RetroArcade" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_Custom" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_Background" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_Panel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_PanelSecondary" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_Text" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_MutedText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_Accent" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_AccentBright" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_Highlight" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="SiteTheme_Invalid" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_DragQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_MoveQuestionToRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_ExchangeQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_SelectedQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_TargetQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_NoQuestionForExchange" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerImage_Source" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerImage_Avatar" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerImage_Picture" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerImage_UploadOrChange" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerImage_Invalid" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_FAQ" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Eyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Description" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q1" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A1" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q2" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A2" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q3" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A3" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q4" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A4" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q5" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A5" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q6" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A6" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q7" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A7" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q8" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A8" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q9" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A9" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q10" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A10" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q11" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A11" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_Q12" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_A12" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_ContactTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Faq_ContactDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_QuestionType" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionType_Standard" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionType_FourClues" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FourClues_EditorHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FourClues_ExactlyFourRequired" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_RevealOneClue" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_RevealClueRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuestionWithCategoryAndPoints" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_PlayerStatistics" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_Description" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_Empty" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_Games" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_TotalScore" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_Correct" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_Attempts" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_Accuracy" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_LastPlayed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_NotAvailable" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_PerRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_Round" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerStatistics_NoRoundAnswers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Actions" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Tools" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlayerMenu_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Winner" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameHistory_Winners" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_ImportQuiz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_ExportQuiz" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizImport_Success" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizImport_InvalidFile" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_FinishGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PublicQuizzes_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PublicQuizzes_Description" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PublicQuizzes_SearchLabel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PublicQuizzes_SearchPlaceholder" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PublicQuizzes_Search" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PublicQuizzes_EmptyTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PublicQuizzes_EmptyDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizPublication_Public" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizPublication_Publish" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizPublication_Unpublish" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizPublication_Published" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizPublication_Unpublished" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizRating_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizRating_Description" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizRating_ScoreLabel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizRating_Stars" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizRating_NotReady" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizRating_Count" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizRating_AccessibleSummary" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PublicQuizzes_Author" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="ContentBlock_Add" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="ContentBlockType_Text" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="ContentBlockType_Image" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="ContentBlockType_Audio" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="ContentBlockType_Video" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="ContentBlockType_YouTube" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="ImageClipboard_Button" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="ImageClipboard_Empty" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="ImageClipboard_Error" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AudioClipboard_Button" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AudioClipboard_Empty" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AudioClipboard_Error" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_HostName" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Account_HostNameHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_CountReductionTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="InvalidMediaFile" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AudioConversionUnavailable" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FileUploadLimit" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Settings_HostId" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Settings_HostIdHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MasterGames_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MasterGames_Empty" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MasterGames_InLobby" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MasterGames_Playing" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MasterGames_SessionId" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MasterGames_HostId" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MasterGames_HostName" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MasterGames_Round" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MasterGames_Players" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MasterGames_NoPlayers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_State_Active" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_State_Archiving" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_State_Archived" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_State_Restoring" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_State_Failed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_ArchivedOn" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_MediaSize" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_ArchiveMedia" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_RestoreMedia" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_PreventAutomatic" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_AllowAutomatic" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_ConfirmTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_ConfirmText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_Archived" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_Restored" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_Failed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_RestoreFailed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_RestoreBeforeEditing" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_PublicRestoreTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_PublicRestoreText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_RestoreAndPlay" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_PublicRestoreUnavailable" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MediaArchive_NoMedia" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Footer_MadeWith" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Footer_SpecialThanks" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Footer_FreePlatform" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Footer_SupportProject" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Footer_DonationTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Footer_DonationScanQr" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Footer_DonationQrAlt" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Footer_OpenDonationPage" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_NextRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Menu" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_SettingsTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_NotEnabled" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_ConnectDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Connect" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Account" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Server" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_VoiceChannel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Status" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Ready" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_NeedsAttention" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_ReauthorizeHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Reauthorize" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_InstallBot" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_SelectServer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_SelectChannel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_AutoMute" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Test" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_TestRunning" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_TestComplete" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_TestFailed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Disconnect" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_MuteParticipants" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_UnmuteParticipants" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_NotReady" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_OperationComplete" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_OperationPartial" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_ChannelSaved" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_AutomaticMuteSaved" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_AuthorizationCancelled" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_AccountConnected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_AuthorizationFailed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_AuthorizationExpired" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_SelectServerAndChannel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Disconnected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_AutoMuteHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_BotStatus" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_MutePermission" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Available" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Discord_Unavailable" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_QuestionInbox" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionBot_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionBot_DiscordServer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionBot_SelectServer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionBot_TextChannel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionBot_SelectChannel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionBot_SelectServerAndChannel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionBot_Saved" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Question_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Question_Name" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Question_You" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Question_Developer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Question_Status" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_Send" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionInbox_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionInbox_Empty" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionInbox_From" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionInbox_Question" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionInbox_User" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionInbox_Developer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionInbox_Answer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionInbox_Reply" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Question_InvalidMessage" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Question_DiscordSendFailed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Question_ContinueConversation" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Question_AwaitingAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="DiscordQuestion_NewMessageFrom" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="DiscordQuestion_Anonymous" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="DiscordQuestion_Reply" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionInbox_DeleteConfirmTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionInbox_DeleteConfirmText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionInbox_DeleteNotFound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_MyQuestions" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MyQuestions_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MyQuestions_Empty" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MyQuestions_Updated" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="MyQuestions_Open" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Footer_PrivacyCookies" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_Intro" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_CookiesTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_CookiesIntro" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_QuestionHistoryTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_QuestionHistoryText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_LanguageTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_LanguageText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_SecurityTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_SecurityText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_YouTubeTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_YouTubeText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_NoAdvertisingTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_NoAdvertisingText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_LocalStorageTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_LocalStorageText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_ControlTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Privacy_ControlText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_PublicQuizzes" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_Join" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_ActiveGames" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_ChangePassword" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_SignOut" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Menu_HostSignIn" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayEnabled" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayStartAfter" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayStartAfterHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayMinimum" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameSettings_AnswerRewardDecayMinimumHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ForceAdvanceRoundConfirm" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_Advance" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_ForceAdvanceConfirm" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_SubmitMinimumWager" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_SubmitEmptyAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_CopyJoinCode" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_CopyJoinLink" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_JoinCopied" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScoreAdd" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScoreSubtract" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScoreTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScoreApply" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScoreNoQuestions" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScoreRewardAmount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScorePenaltyAmount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScoreInvalidValue" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScoreResolveQuestionTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScoreResolveQuestionPrompt" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScoreKeepQuestionOpen" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuickScoreMarkQuestionClosed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuestionGift" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuestionClose" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuestionGiftCloseAfter" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuestionCloseTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_QuestionCloseConfirmation" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_CategoryCloseTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_CategoryCloseConfirmation" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_PreviousRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_PreviousRoundRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ReturnToUnfinishedRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_StayInCurrentRound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_UnfinishedRoundsWarning" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="FinalQuestion_UnfinishedOtherRoundsWarning" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_UnfinishedRoundsBeforeFinish" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_PreviousRoundConfirm" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_HideJoinCode" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_GameNoLongerAcceptsPlayers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+</root>

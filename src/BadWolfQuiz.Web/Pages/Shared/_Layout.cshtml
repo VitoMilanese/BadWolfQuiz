@@ -10,11 +10,12 @@
 @inject IStringLocalizer<ProductVersionResource> ProductVersionLocalizer
 
 @{
-    var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+    var currentCulture = CultureInfo.CurrentUICulture.Name;
 
     var currentFlag = currentCulture switch
     {
         "uk" => "🇺🇦",
+        "ru" => "🇷🇺",
         "it" => "🇮🇹",
         _ => "🇬🇧"
     };
@@ -358,6 +359,12 @@
                    asp-route-returnUrl="@returnUrl"
                    class="@(currentCulture == "en" ? "active" : null)">
                     🇬🇧 English
+                </a>
+                <a asp-page="/SetLanguage"
+                   asp-route-culture="ru"
+                   asp-route-returnUrl="@returnUrl"
+                   class="@(currentCulture == "ru" ? "active" : null)">
+                    🇷🇺 Кацапська
                 </a>
                 <a asp-page="/SetLanguage"
                    asp-route-culture="it"
