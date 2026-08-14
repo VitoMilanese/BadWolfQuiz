@@ -1,7 +1,7 @@
 @model BadWolfQuiz.Web.Pages.Admin.Games.GameContentPreviewModel
 
 <section class="game-content-presentation @(Model.IsAnswer ? "answer-presentation" : "question-presentation")">
-    <div class="game-content-blocks">
+    <div class="game-content-blocks @(Model.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !Model.IsAnswer ? "four-clue-grid" : null)">
         @foreach (var block in Model.Blocks)
         {
             <article class="game-content-block">

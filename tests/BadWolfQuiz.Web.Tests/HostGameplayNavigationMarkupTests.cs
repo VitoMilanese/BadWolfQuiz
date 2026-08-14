@@ -277,6 +277,10 @@ public sealed class HostGameplayNavigationMarkupTests
             markup);
         Assert.Contains("Localizer[\"GameBoard_Question\"]", markup);
         Assert.Contains("Localizer[\"GameBoard_Answer\"]", markup);
+        Assert.Contains("previewQuestion.PresentationType,", markup);
+        Assert.Contains(
+            "QuestionPresentationType.FourClues && !Model.IsAnswer ? \"four-clue-grid\" : null",
+            previewMarkup);
         Assert.DoesNotContain("<p class=\"eyebrow\">", previewMarkup);
         Assert.Contains("<section class=\"content-panel question-review-preview\">", markup);
         Assert.Contains("<partial name=\"_GameContentPreview\"", markup);
