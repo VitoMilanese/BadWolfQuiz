@@ -42,27 +42,23 @@
                         </form>
                     }
 
-                    @if (Model.Game.Session.HasPreviousUnfinishedRound)
-                    {
+                    <button class="action-menu-item"
+                            type="button"
+                            data-open-previous-round-dialog
+                            hidden="@(!Model.Game.Session.HasPreviousUnfinishedRound ? "hidden" : null)">
+                        @Localizer["GameBoard_PreviousRound"]
+                    </button>
+
+                    <form id="force-advance-round-form"
+                            method="post"
+                            asp-page-handler="ForceAdvanceRound"
+                            hidden="@(!Model.Game.Session.HasNextUnfinishedRound ? "hidden" : null)">
                         <button class="action-menu-item"
                                 type="button"
-                                data-open-previous-round-dialog>
-                            @Localizer["GameBoard_PreviousRound"]
+                                data-open-force-advance-round-dialog>
+                            @Localizer["GameBoard_NextRound"]
                         </button>
-                    }
-
-                    @if (Model.Game.Session.HasNextUnfinishedRound)
-                    {
-                        <form id="force-advance-round-form"
-                                method="post"
-                                asp-page-handler="ForceAdvanceRound">
-                            <button class="action-menu-item"
-                                    type="button"
-                                    data-open-force-advance-round-dialog>
-                                @Localizer["GameBoard_NextRound"]
-                            </button>
-                        </form>
-                    }
+                    </form>
 
                     @if (Model.Game.Session.Quiz.FinalQuestion is not null)
                     {
@@ -372,13 +368,16 @@
              role="status"
              data-discord-operation-status></div>
 
+        <div id="host-gameplay-view" data-host-gameplay-view>
         @if (Model.PreviewQuestion is { } previewQuestion)
         {
             <section class="content-panel question-review-preview">
                 <header class="question-review-heading">
                     <div>
                         <p class="eyebrow">@Localizer["GameBoard_QuestionPreview"]</p>
-                        <h2>@previewQuestion.CategoryTitle — @previewQuestion.Points</h2>
+                        <h2>@previewQuestion.CategoryTitle — @previewQuestion.Points — @(Model.IsPreviewingAnswer
+                    ? Localizer["GameBoard_Answer"]
+                    : Localizer["GameBoard_Question"])</h2>
                     </div>
                     <div class="form-actions question-review-actions">
                         @if (Model.IsPreviewingAnswer)
@@ -408,16 +407,15 @@
                     </div>
                 </header>
 
-                <div class="question-review-content">
-                    <partial name="_GameContentPreview"
-                             model="@(new GameContentPreviewModel(
-                                 Model.Game.Session.Id.Value,
-                                 previewQuestion.SourceQuestionId,
-                                 Model.IsPreviewingAnswer,
-                                 Model.IsPreviewingAnswer
-                                     ? previewQuestion.AnswerBlocks
-                                     : previewQuestion.QuestionBlocks))" />
-                </div>
+                <partial name="_GameContentPreview"
+                         model="@(new GameContentPreviewModel(
+                             Model.Game.Session.Id.Value,
+                             previewQuestion.SourceQuestionId,
+                             previewQuestion.PresentationType,
+                             Model.IsPreviewingAnswer,
+                             Model.IsPreviewingAnswer
+                                 ? previewQuestion.AnswerBlocks
+                                 : previewQuestion.QuestionBlocks))" />
             </section>
         }
 
@@ -901,11 +899,13 @@
             </section>
         }
 
-        @if (Model.CurrentQuestion is null &&
-            Model.PreviewQuestion is null &&
-            !Model.IsRoundSummaryVisible)
-        {
-            <div class="host-board-layout">
+        </div>
+
+        <div class="host-board-layout"
+             data-host-gameplay-board
+             hidden="@(Model.CurrentQuestion is not null ||
+                 Model.PreviewQuestion is not null ||
+                 Model.IsRoundSummaryVisible ? "hidden" : null)">
             @if (Model.Game.Session.Settings.HasHostCard)
             {
                 <aside class="board-host-sidebar"
@@ -926,6 +926,7 @@
                 </aside>
             }
             <div class="host-board-grid"
+                 data-source-round-id="@Model.Game.Session.CurrentRound.SourceRoundId"
                  style="--board-columns: @Model.BoardCategories.Count">
             @foreach (var category in Model.BoardCategories)
             {
@@ -993,7 +994,6 @@
                 </ul>
             </aside>
             </div>
-        }
 
         <div class="game-side-controls">
             @if (Model.IsDiscordVoiceReady)
@@ -1041,6 +1041,7 @@
              aria-valuenow="230"
              tabindex="0"><span></span></div>
 
+        <div data-host-gameplay-transient>
         @if (Model.AnswerResultOverlay is { } answerResultOverlay)
         {
             var scoreText = answerResultOverlay.ScoreDelta > 0
@@ -1061,6 +1062,8 @@
                 </div>
             </aside>
         }
+
+        </div>
 
         <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
             @if (Model.Game.Session.Settings.HasHostCard)
@@ -1211,6 +1214,7 @@
             <div class="message message-error">@errorMessage</div>
         }
 
+        <div id="host-gameplay-view" data-host-gameplay-view>
         <div class="content-panel final-question-panel @(showAnswer ? "final-judging-mode" : null)">
             <p class="eyebrow">@Localizer["FinalQuestion_Title"]</p>
 
@@ -1408,6 +1412,10 @@
                 </div>
             }
         </div>
+
+        </div>
+
+        <div data-host-gameplay-board hidden></div>
 
         <div class="game-scoreboard-resizer"
              data-scoreboard-resizer
@@ -1615,6 +1623,299 @@
 
 
 <script>
+    window.BadWolfHostGameplay = (() => {
+        const viewSelector = "[data-host-gameplay-view]";
+        const boardSelector = "[data-host-gameplay-board]";
+        const transientSelector = "[data-host-gameplay-transient]";
+        const updatedEventName = "badwolf:host-gameplay-updated";
+        let requestSequence = 0;
+        let refreshPromise = null;
+
+        const isSameLobbyUrl = url => {
+            const current = new URL(window.location.href);
+            return url.origin === current.origin && url.pathname === current.pathname;
+        };
+
+        const initializeTransientOverlay = () => {
+            const overlay = document.querySelector(
+                `${transientSelector} [data-answer-result-overlay]`);
+            if (!overlay || overlay.dataset.hostGameplayInitialized === "true") {
+                return;
+            }
+
+            overlay.dataset.hostGameplayInitialized = "true";
+            const card = overlay.querySelector("[data-auto-fit-overlay]");
+            if (card) {
+                const elements = [...card.querySelectorAll(
+                    "p, li, .answer-result-score")];
+                const fit = () => {
+                    if (elements.length === 0) return;
+                    elements.forEach(element =>
+                        element.style.removeProperty("font-size"));
+                    const baseSizes = elements.map(element =>
+                        Number.parseFloat(getComputedStyle(element).fontSize));
+                    const fits = () =>
+                        card.scrollHeight <= card.clientHeight + 1 &&
+                        elements.every(element =>
+                            element.scrollWidth <= element.clientWidth + 1);
+                    let scale = 1;
+                    while (scale > 0.35 && !fits()) {
+                        scale -= 0.025;
+                        elements.forEach((element, index) => {
+                            element.style.fontSize =
+                                `${baseSizes[index] * scale}px`;
+                        });
+                    }
+                    card.classList.add("is-auto-fit-ready");
+                };
+                requestAnimationFrame(fit);
+                if (typeof ResizeObserver !== "undefined") {
+                    new ResizeObserver(fit).observe(card);
+                }
+            }
+
+            window.setTimeout(() => overlay.remove(), 1500);
+        };
+
+        const syncHeaderState = () => {
+            const view = document.querySelector(viewSelector);
+            if (!view) return;
+
+            const hasActiveQuestion =
+                view.querySelector(".current-question-summary") !== null;
+            const isRoundSummary = view.querySelector(".round-summary") !== null;
+            const menu = document.querySelector(".board-action-menu");
+            if (menu) {
+                menu.hidden = isRoundSummary;
+            }
+
+            for (const action of document.querySelectorAll(
+                ".board-action-menu a[href*='/Admin/Games/AnswerHistory'], " +
+                ".board-action-menu form[action*='handler=RandomActivePlayer']")) {
+                action.hidden = hasActiveQuestion;
+            }
+        };
+
+        const animatedLeaderboardSignature = view => {
+            const podium = view?.querySelector(".round-podium");
+            const scope = podium?.closest(
+                ".round-summary, .final-question-panel");
+            if (!scope) {
+                return null;
+            }
+
+            return scope.textContent
+                .replace(/\s+/g, " ")
+                .trim();
+        };
+
+        const syncPersistentRoundBoard = (currentBoard, nextBoard) => {
+            const currentGrid = currentBoard.querySelector(".host-board-grid");
+            const nextGrid = nextBoard.querySelector(".host-board-grid");
+            if (!currentGrid || !nextGrid) {
+                return;
+            }
+
+            const currentRoundId = currentGrid.dataset.sourceRoundId;
+            const nextRoundId = nextGrid.dataset.sourceRoundId;
+            if (!currentRoundId ||
+                !nextRoundId ||
+                currentRoundId === nextRoundId) {
+                return;
+            }
+
+            currentGrid.replaceChildren(
+                ...Array.from(nextGrid.childNodes, node =>
+                    document.importNode(node, true)));
+            currentGrid.dataset.sourceRoundId = nextRoundId;
+
+            const nextStyle = nextGrid.getAttribute("style");
+            if (nextStyle === null) {
+                currentGrid.removeAttribute("style");
+            } else {
+                currentGrid.setAttribute("style", nextStyle);
+            }
+        };
+
+        const syncRoundNavigationActions = parsed => {
+            for (const selector of [
+                "[data-open-previous-round-dialog]",
+                "#force-advance-round-form"
+            ]) {
+                const currentAction = document.querySelector(selector);
+                const nextAction = parsed.querySelector(selector);
+                if (currentAction && nextAction) {
+                    currentAction.hidden = nextAction.hidden;
+                }
+            }
+        };
+
+        const applyDocument = (parsed, targetUrl, historyMode) => {
+            const currentView = document.querySelector(viewSelector);
+            const currentBoard = document.querySelector(boardSelector);
+            const currentTransient = document.querySelector(transientSelector);
+            const nextView = parsed.querySelector(viewSelector);
+            const nextBoard = parsed.querySelector(boardSelector);
+            const nextTransient = parsed.querySelector(transientSelector);
+
+            if (!currentView || !currentBoard || !nextView || !nextBoard) {
+                throw new Error("The host gameplay region is unavailable.");
+            }
+
+            syncPersistentRoundBoard(currentBoard, nextBoard);
+
+            const currentRoundHeading =
+                document.querySelector(".game-header-context h2");
+            const nextRoundHeading =
+                parsed.querySelector(".game-header-context h2");
+            if (currentRoundHeading && nextRoundHeading) {
+                currentRoundHeading.textContent = nextRoundHeading.textContent;
+                currentRoundHeading.title = nextRoundHeading.title;
+            }
+            syncRoundNavigationActions(parsed);
+
+            const currentHostBoard = currentView.closest(
+                ".host-game-board[data-game-id]");
+            const nextHostBoard = nextView.closest(
+                ".host-game-board[data-game-id]");
+            if (currentHostBoard && nextHostBoard) {
+                currentHostBoard.classList.toggle(
+                    "final-question-host",
+                    nextHostBoard.classList.contains("final-question-host"));
+                if (nextHostBoard.dataset.gameStatus) {
+                    currentHostBoard.dataset.gameStatus =
+                        nextHostBoard.dataset.gameStatus;
+                }
+            }
+
+            const currentLeaderboardSignature =
+                animatedLeaderboardSignature(currentView);
+            const nextLeaderboardSignature =
+                animatedLeaderboardSignature(nextView);
+            const preserveAnimatedLeaderboard =
+                currentLeaderboardSignature !== null &&
+                currentLeaderboardSignature === nextLeaderboardSignature;
+
+            if (!preserveAnimatedLeaderboard) {
+                currentView.replaceChildren(
+                    ...Array.from(nextView.childNodes, node =>
+                        document.importNode(node, true)));
+            }
+            currentBoard.hidden = nextBoard.hidden;
+
+            if (currentTransient) {
+                currentTransient.replaceChildren(
+                    ...Array.from(nextTransient?.childNodes ?? [], node =>
+                        document.importNode(node, true)));
+            }
+
+            syncHeaderState();
+            initializeTransientOverlay();
+
+            if (historyMode === "push") {
+                history.pushState({ hostGameplay: true }, "", targetUrl.href);
+            } else if (historyMode === "replace") {
+                history.replaceState({ hostGameplay: true }, "", targetUrl.href);
+            }
+
+            document.dispatchEvent(new CustomEvent(updatedEventName));
+        };
+
+        const load = async (url, historyMode = "none") => {
+            const targetUrl = new URL(url, window.location.href);
+            if (!isSameLobbyUrl(targetUrl)) {
+                throw new Error(
+                    "Host gameplay navigation cannot leave the current lobby.");
+            }
+
+            const requestId = ++requestSequence;
+            const response = await fetch(targetUrl.href, {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                cache: "no-store"
+            });
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            const markup = await response.text();
+            if (requestId !== requestSequence) {
+                return false;
+            }
+
+            const parsed = new DOMParser().parseFromString(markup, "text/html");
+            applyDocument(parsed, targetUrl, historyMode);
+            return true;
+        };
+
+        const cancelPending = () => {
+            requestSequence += 1;
+        };
+
+        const refresh = () => {
+            if (refreshPromise) {
+                return refreshPromise;
+            }
+
+            refreshPromise = load(window.location.href)
+                .finally(() => {
+                    refreshPromise = null;
+                });
+            return refreshPromise;
+        };
+
+        const navigate = (url, historyMode = "push") =>
+            load(url, historyMode);
+
+        document.addEventListener("click", event => {
+            if (event.defaultPrevented ||
+                event.button !== 0 ||
+                event.metaKey ||
+                event.ctrlKey ||
+                event.shiftKey ||
+                event.altKey) {
+                return;
+            }
+
+            const target = event.target instanceof Element ? event.target : null;
+            const link = target?.closest(
+                "a.host-board-question.status-resolved, .question-review-actions a");
+            if (!link || link.target || link.hasAttribute("download")) {
+                return;
+            }
+
+            const targetUrl = new URL(link.href, window.location.href);
+            if (!isSameLobbyUrl(targetUrl)) {
+                return;
+            }
+
+            event.preventDefault();
+            navigate(targetUrl, "push")
+                .catch(error => {
+                    console.error("Host gameplay navigation failed.", error);
+                    window.location.assign(targetUrl.href);
+                });
+        });
+
+        window.addEventListener("popstate", () => {
+            if (!document.querySelector(viewSelector)) {
+                return;
+            }
+
+            navigate(window.location.href, "none")
+                .catch(error => {
+                    console.error(
+                        "Host gameplay history navigation failed.", error);
+                    window.location.reload();
+                });
+        });
+
+        syncHeaderState();
+        return { cancelPending, refresh, navigate, updatedEventName };
+    })();
+
     window.BadWolfContextActions = (() => {
         const submit = async form => {
             const submitButton = form?.querySelector("button[type='submit']");
@@ -1686,30 +1987,9 @@
                 return false;
             }
 
-            const response = await fetch(window.location.href, {
-                method: "GET",
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest"
-                },
-                cache: "no-store"
-            });
-
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
-
-            const documentText = await response.text();
-            const parsed = new DOMParser().parseFromString(documentText, "text/html");
-            const nextSummary = parsed.querySelector(".host-game-board .round-summary");
-            const currentLayout = document.querySelector(".host-game-board .host-board-layout");
-
-            if (!nextSummary || !currentLayout) {
-                return false;
-            }
-
-            currentLayout.replaceWith(document.importNode(nextSummary, true));
-            document.querySelector(".board-action-menu")?.remove();
-            return true;
+            await window.BadWolfHostGameplay.refresh();
+            return document.querySelector(
+                "[data-host-gameplay-view] .round-summary") !== null;
         };
 
         const recordAttempt = (sourceQuestionId, playerId) => {
@@ -2750,6 +3030,7 @@
         <p>@Localizer["FinalQuestion_UnfinishedRoundsWarning"]</p>
         <div class="form-actions dialog-actions">
             <form method="post" asp-page-handler="ReturnToUnfinishedRound">
+                <input type="hidden" name="skipLeaderboard" value="true" />
                 <button class="button button-secondary" type="submit">@Localizer["GameBoard_ReturnToUnfinishedRound"]</button>
             </form>
             <form method="post" asp-page-handler="ForceAdvanceToFinalQuestion">
@@ -2853,12 +3134,18 @@
                 }
             };
 
-            for (const media of document.querySelectorAll(nativeMediaSelector)) {
-                media.addEventListener("play", () => {
-                    pauseNativeMedia(media);
-                    pauseYouTubeFrames(null);
-                });
-            }
+            document.addEventListener("play", event => {
+                const media = event.target instanceof Element &&
+                    event.target.matches(nativeMediaSelector)
+                    ? event.target
+                    : null;
+                if (!media) {
+                    return;
+                }
+
+                pauseNativeMedia(media);
+                pauseYouTubeFrames(null);
+            }, true);
 
             window.addEventListener("message", event => {
                 let payload = event.data;
@@ -3010,11 +3297,17 @@
 
             const isTemporarilyHidden = () => {
                 const activeQuestion = document.querySelector(".current-question-summary");
+                const gameplayView = document.querySelector("[data-host-gameplay-view]");
+                const exclusiveGameplayView = gameplayView !== null &&
+                    gameplayView.querySelector(
+                        ".question-review-preview, [data-game-intro-page], [data-final-question-transition]") !== null;
                 const gameStatus = document.querySelector(".host-game-board")?.dataset.gameStatus;
                 const canShowInStatus =
                     gameStatus === "running" || gameStatus === "finalwagering";
 
-                return !canShowInStatus || activeQuestion !== null;
+                return !canShowInStatus ||
+                    activeQuestion !== null ||
+                    exclusiveGameplayView;
             };
 
             const clampGeometry = geometry => {
@@ -3207,6 +3500,8 @@
             });
 
             window.addEventListener("resize", () => saveGeometry());
+            document.addEventListener("badwolf:host-gameplay-updated", () =>
+                setVisible(localStorage.getItem(visibleKey) === "true"));
         })();
 
         (() => {
@@ -3262,63 +3557,67 @@
         })();
 
         (() => {
-            const form = document.querySelector("[data-wager-form]");
+            const initializeWagerForm = () => {
+                const form = document.querySelector("[data-wager-form]");
+                if (!form || form.dataset.hostGameplayInitialized === "true") {
+                    return;
+                }
+                form.dataset.hostGameplayInitialized = "true";
 
-            if (!form) {
-                return;
-            }
+                const display = form.querySelector(".wager-display");
+                const validation = form.querySelector("[data-wager-validation]");
+                const submit = form.querySelector("[data-wager-submit]");
+                const minimum = Number(form.dataset.minimum);
+                const maximum = Number(form.dataset.maximum);
 
-            const display = form.querySelector(".wager-display");
-            const validation = form.querySelector("[data-wager-validation]");
-            const submit = form.querySelector("[data-wager-submit]");
-            const minimum = Number(form.dataset.minimum);
-            const maximum = Number(form.dataset.maximum);
+                const refresh = () => {
+                    const amount = Number(display.value);
+                    const isValid = display.value !== "" &&
+                        amount >= minimum &&
+                        amount <= maximum;
 
-            const refresh = () => {
-                const amount = Number(display.value);
-                const isValid = display.value !== "" &&
-                    amount >= minimum &&
-                    amount <= maximum;
+                    submit.disabled = !isValid;
+                    validation.textContent = isValid
+                        ? validation.dataset.validLabel
+                        : validation.dataset.invalidLabel;
+                    validation.classList.toggle("wager-valid", isValid);
+                };
 
-                submit.disabled = !isValid;
-                validation.textContent = isValid
-                    ? validation.dataset.validLabel
-                    : validation.dataset.invalidLabel;
-                validation.classList.toggle("wager-valid", isValid);
+                form.querySelectorAll("[data-wager-digit]").forEach(button => {
+                    button.addEventListener("click", () => {
+                        const nextValue =
+                            (display.value + button.dataset.wagerDigit)
+                                .replace(/^0+(?=\d)/, "");
+
+                        display.value = Math.min(
+                            Number(nextValue), maximum).toString();
+                        refresh();
+                    });
+                });
+
+                form.querySelector("[data-wager-max]")
+                    ?.addEventListener("click", () => {
+                        display.value = maximum.toString();
+                        refresh();
+                    });
+                form.querySelector("[data-wager-clear]")
+                    ?.addEventListener("click", () => {
+                        display.value = "";
+                        refresh();
+                    });
+                form.querySelector("[data-wager-backspace]")
+                    ?.addEventListener("click", () => {
+                        display.value = display.value.slice(0, -1);
+                        refresh();
+                    });
+
+                refresh();
             };
 
-            form.querySelectorAll("[data-wager-digit]").forEach(button => {
-                button.addEventListener("click", () => {
-                    const nextValue = (display.value + button.dataset.wagerDigit)
-                        .replace(/^0+(?=\d)/, "");
-
-                    display.value = Math.min(
-                        Number(nextValue),
-                        maximum).toString();
-
-                    refresh();
-                });
-            });
-
-            form.querySelector("[data-wager-max]")
-                ?.addEventListener("click", () => {
-                    display.value = maximum.toString();
-                    refresh();
-                });
-
-            form.querySelector("[data-wager-clear]")
-                ?.addEventListener("click", () => {
-                    display.value = "";
-                    refresh();
-                });
-
-            form.querySelector("[data-wager-backspace]")
-                ?.addEventListener("click", () => {
-                    display.value = display.value.slice(0, -1);
-                    refresh();
-                });
-
-            refresh();
+            initializeWagerForm();
+            document.addEventListener(
+                "badwolf:host-gameplay-updated",
+                initializeWagerForm);
         })();
 
         (() => {
@@ -3640,6 +3939,7 @@
             const canPositionHostCard = () =>
                 hostSlot &&
                 boardGrid &&
+                document.querySelector("[data-host-gameplay-board]")?.hidden === false &&
                 wideHostLayout.matches;
 
             const getHostCardVerticalBounds = () => {
@@ -3968,7 +4268,7 @@
 
             confirmForceAdvanceFinal?.addEventListener("click", () => {
                 forceAdvanceFinalDialog?.close();
-                forceAdvanceFinalForm?.submit();
+                forceAdvanceFinalForm?.requestSubmit();
             });
 
             for (const button of document.querySelectorAll(
@@ -4074,17 +4374,17 @@
             let hasReceivedInitialBuzzerState = false;
             let buzzerState = null;
             
-            const timerPanel = document.getElementById("game-timer");
-            const timerValue = document.getElementById("game-timer-value");
-            const timerPause = document.querySelector(".game-timer-pause");
-            const timerResume = document.querySelector(".game-timer-resume");
+            let timerPanel = document.getElementById("game-timer");
+            let timerValue = document.getElementById("game-timer-value");
+            let timerPause = document.querySelector(".game-timer-pause");
+            let timerResume = document.querySelector(".game-timer-resume");
             const playerJoinLockForm = document.querySelector(".player-join-lock-form");
             const playerJoinLockButton = playerJoinLockForm?.querySelector(".player-join-lock");
             const questionSelectionForms = document.querySelectorAll(".question-selection-form");
             const gameBoardError = document.getElementById("game-board-error");
-            const revealClueForm = document.querySelector("[data-reveal-clue-form]");
-            const questionClues = document.querySelector("[data-question-clues]");
-            const questionHeading = document.querySelector("[data-question-heading]");
+            let revealClueForm = document.querySelector("[data-reveal-clue-form]");
+            let questionClues = document.querySelector("[data-question-clues]");
+            let questionHeading = document.querySelector("[data-question-heading]");
 
             const initializeQuestionReward = () => {
                 if (!questionHeading ||
@@ -4148,6 +4448,23 @@
 
             initializeQuestionReward();
 
+            document.addEventListener("badwolf:host-gameplay-updated", () => {
+                timerPanel = document.getElementById("game-timer");
+                timerValue = document.getElementById("game-timer-value");
+                timerPause = document.querySelector(".game-timer-pause");
+                timerResume = document.querySelector(".game-timer-resume");
+                revealClueForm = document.querySelector("[data-reveal-clue-form]");
+                questionClues = document.querySelector("[data-question-clues]");
+                questionHeading = document.querySelector("[data-question-heading]");
+                initializeQuestionReward();
+
+                requestAnimationFrame(() => {
+                    relocateAndRestoreHostCard();
+                    refreshScrollingNames();
+                    syncBoardHeaderHeights();
+                });
+            });
+
             let gameBoardErrorDismissHandle = null;
 
             const showGameBoardError = message => {
@@ -4171,8 +4488,14 @@
                 }, 3000);
             };
 
+            const isExternalHostFlowActive = () =>
+                document.querySelector(
+                    "[data-host-gameplay-view] [data-game-intro-page], " +
+                    "[data-host-gameplay-view] [data-final-question-transition]") !== null;
+
             let hostCommandDepth = 0;
             let hostReloadPending = false;
+            let hostGameplayRefreshPending = false;
 
             const requestHostReload = () => {
                 if (hostCommandDepth > 0) {
@@ -4181,6 +4504,24 @@
                 }
 
                 window.location.reload();
+            };
+
+            const requestHostGameplayRefresh = () => {
+                if (hostCommandDepth > 0) {
+                    hostGameplayRefreshPending = true;
+                    return Promise.resolve();
+                }
+
+                if (!window.BadWolfHostGameplay) {
+                    window.location.reload();
+                    return Promise.resolve();
+                }
+
+                return window.BadWolfHostGameplay.refresh()
+                    .catch(error => {
+                        console.error("Host gameplay refresh failed.", error);
+                        window.location.reload();
+                    });
             };
 
             const submitGameControl = async (form, submitter = null) => {
@@ -4219,6 +4560,9 @@
                     if (hostCommandDepth === 0 && hostReloadPending) {
                         hostReloadPending = false;
                         window.location.reload();
+                    } else if (hostCommandDepth === 0 && hostGameplayRefreshPending) {
+                        hostGameplayRefreshPending = false;
+                        void requestHostGameplayRefresh();
                     }
                 }
             };
@@ -4229,7 +4573,7 @@
 
                     try {
                         await submitGameControl(form);
-                        requestHostReload();
+                        await requestHostGameplayRefresh();
                     } catch (error) {
                         console.error(error);
                         showGameBoardError(error.message);
@@ -4237,19 +4581,30 @@
                 });
             }
 
-            for (const form of document.querySelectorAll(".question-judge-actions")) {
-                form.addEventListener("submit", async event => {
-                    event.preventDefault();
+            document.addEventListener("submit", async event => {
+                const form = event.target instanceof HTMLFormElement &&
+                    event.target.matches(".question-judge-actions")
+                    ? event.target
+                    : null;
+                if (!form) {
+                    return;
+                }
 
-                    try {
-                        await submitGameControl(form, event.submitter);
+                event.preventDefault();
+                try {
+                    await submitGameControl(form, event.submitter);
+                    const gameplayView = document.querySelector(
+                        "[data-host-gameplay-view]");
+                    if (gameplayView?.contains(form)) {
+                        await requestHostGameplayRefresh();
+                    } else {
                         requestHostReload();
-                    } catch (error) {
-                        console.error(error);
-                        showGameBoardError(error.message);
                     }
-                });
-            }
+                } catch (error) {
+                    console.error(error);
+                    showGameBoardError(error.message);
+                }
+            });
 
             for (const form of document.querySelectorAll(
                 "form[action*='handler=RandomActivePlayer']")) {
@@ -4304,11 +4659,18 @@
                 }
             };
 
-            revealClueForm?.addEventListener("submit", async event => {
-                event.preventDefault();
+            document.addEventListener("submit", async event => {
+                const form = event.target instanceof HTMLFormElement &&
+                    event.target.matches("[data-reveal-clue-form]")
+                    ? event.target
+                    : null;
+                if (!form) {
+                    return;
+                }
 
+                event.preventDefault();
                 try {
-                    await submitGameControl(revealClueForm);
+                    await submitGameControl(form);
                 } catch (error) {
                     handleGameControlError(error);
                 }
@@ -4318,17 +4680,23 @@
                 applyClueReveal(update);
             });
 
-            for (const timerForm of [timerPause, timerResume]) {
-                timerForm?.addEventListener("submit", async event => {
-                    event.preventDefault();
+            document.addEventListener("submit", async event => {
+                const form = event.target instanceof HTMLFormElement &&
+                    (event.target.matches(".game-timer-pause") ||
+                     event.target.matches(".game-timer-resume"))
+                    ? event.target
+                    : null;
+                if (!form) {
+                    return;
+                }
 
-                    try {
-                        await submitGameControl(timerForm);
-                    } catch (error) {
-                        handleGameControlError(error);
-                    }
-                });
-            }
+                event.preventDefault();
+                try {
+                    await submitGameControl(form);
+                } catch (error) {
+                    handleGameControlError(error);
+                }
+            });
 
             playerJoinLockForm?.addEventListener("submit", async event => {
                 event.preventDefault();
@@ -4466,8 +4834,9 @@
                     return;
                 }
 
-                if (lobby.classList.contains("host-game-board")) {
-                    requestHostReload();
+                if (lobby.classList.contains("host-game-board") &&
+                    !isExternalHostFlowActive()) {
+                    void requestHostGameplayRefresh();
                 }
             });
 
@@ -4755,13 +5124,13 @@
                 if (previousStatus &&
                     previousStatus !== update.status &&
                     lobby.classList.contains("host-game-board")) {
-                    requestHostReload();
+                    void requestHostGameplayRefresh();
                 }
             });
 
             connection.on("FinalQuestionProgressChanged", () => {
                 if (lobby.classList.contains("final-question-host")) {
-                    requestHostReload();
+                    void requestHostGameplayRefresh();
                 }
             });
 

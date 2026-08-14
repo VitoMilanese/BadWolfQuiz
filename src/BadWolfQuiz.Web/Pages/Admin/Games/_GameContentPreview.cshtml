@@ -1,13 +1,7 @@
 @model BadWolfQuiz.Web.Pages.Admin.Games.GameContentPreviewModel
 
 <section class="game-content-presentation @(Model.IsAnswer ? "answer-presentation" : "question-presentation")">
-    <p class="eyebrow">
-        @(Model.IsAnswer
-            ? Localizer["GameBoard_Answer"]
-            : Localizer["GameBoard_Question"])
-    </p>
-
-    <div class="game-content-blocks">
+    <div class="game-content-blocks @(Model.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !Model.IsAnswer ? "four-clue-grid" : null)">
         @foreach (var block in Model.Blocks)
         {
             <article class="game-content-block">
@@ -61,9 +55,10 @@
                         </video>
                         break;
                     case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
-                        <iframe class="game-content-video"
+                        <iframe class="game-content-video youtube-auto-expand"
                                 src="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
                                 title="@Localizer["GameBoard_MediaContent"]"
+                                data-close-label="@Localizer["GameBoard_CloseVideo"]"
                                 allowfullscreen>
                         </iframe>
                         break;

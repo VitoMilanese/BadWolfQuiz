@@ -46,13 +46,19 @@
     <div class="game-intro-actions" data-game-intro-actions>
         @if (Model.IsFinalCategory || Model.CategoryCount == 0)
         {
-            <form method="post" asp-page-handler="Start" asp-route-id="@Model.GameId">
+            <form method="post"
+                  asp-page-handler="Start"
+                  asp-route-id="@Model.GameId"
+                  data-game-intro-start>
                 <button type="submit" class="button button-primary">@Model.StartGameLabel</button>
             </form>
         }
         else
         {
-            <form method="post" asp-page-handler="Start" asp-route-id="@Model.GameId">
+            <form method="post"
+                  asp-page-handler="Start"
+                  asp-route-id="@Model.GameId"
+                  data-game-intro-start>
                 <button type="submit" class="button button-secondary">@Model.SkipLabel</button>
             </form>
 
@@ -68,6 +74,17 @@
 </div>
 
 <style>
+    main.page-shell:has(> .game-intro-page) {
+        height: calc(100dvh - var(--topbar-height, 0px));
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    main.page-shell:has(> .game-intro-page) > .game-intro-page {
+        height: 100%;
+        min-height: 0;
+    }
+
     .game-intro-page {
         min-height: calc(100vh - var(--topbar-height, 0px));
         display: grid;
@@ -206,22 +223,259 @@
 
 <script>
     (() => {
-        const page = document.querySelector("[data-game-intro-page]");
-        const next = document.querySelector("[data-game-intro-next]");
-        if (!page || !next || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        if (window.badWolfInitialRoundIntroNavigationInitialized) {
             return;
         }
 
-        next.addEventListener("click", event => {
-            if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+        window.badWolfInitialRoundIntroNavigationInitialized = true;
+        const introSelector = "[data-game-intro-page]";
+        const nextSelector = "[data-game-intro-next]";
+        const startFormSelector = "form[data-game-intro-start]";
+        let navigationInProgress = false;
+
+        const loadFrame = async targetUrl => {
+            const response = await fetch(targetUrl.href, {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    Accept: "text/html",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                cache: "no-store"
+            });
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            const parsed = new DOMParser().parseFromString(
+                await response.text(),
+                "text/html");
+            const currentPage = document.querySelector(introSelector);
+            const nextPage = parsed.querySelector(introSelector);
+            if (!currentPage || !nextPage) {
+                throw new Error("The next first-round intro frame is unavailable.");
+            }
+
+            currentPage.replaceWith(document.importNode(nextPage, true));
+            const nextTitle = parsed.querySelector("title")?.textContent;
+            if (nextTitle) {
+                document.title = nextTitle;
+            }
+
+            history.replaceState(
+                { badWolfInitialRoundIntro: true },
+                "",
+                response.url || targetUrl.href);
+        };
+
+        const hostShellMountedEventName = "badwolf:host-shell-mounted";
+        const rerunnableScriptPaths = new Set([
+            "/js/player-admission-menu.js"
+        ]);
+
+        const executePageScript = async (source, baseUrl, loadedScriptUrls) => {
+            const sourcePath = source.getAttribute("src");
+            if (sourcePath) {
+                const sourceUrl = new URL(sourcePath, baseUrl).href;
+                const pathname = new URL(sourceUrl).pathname.toLowerCase();
+                const canRerun = rerunnableScriptPaths.has(pathname);
+                if (loadedScriptUrls.has(sourceUrl) && !canRerun) {
+                    return;
+                }
+
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement("script");
+                    for (const attribute of source.attributes) {
+                        if (attribute.name.toLowerCase() !== "src") {
+                            script.setAttribute(attribute.name, attribute.value);
+                        }
+                    }
+                    script.src = sourceUrl;
+                    script.async = false;
+                    script.addEventListener("load", resolve, { once: true });
+                    script.addEventListener("error", () =>
+                        reject(new Error(`Could not load ${sourceUrl}.`)),
+                    { once: true });
+                    document.body.append(script);
+                });
+                loadedScriptUrls.add(sourceUrl);
+                return;
+            }
+
+            if (!source.textContent?.trim()) {
+                return;
+            }
+
+            const script = document.createElement("script");
+            for (const attribute of source.attributes) {
+                script.setAttribute(attribute.name, attribute.value);
+            }
+            script.textContent = source.textContent;
+            document.body.append(script);
+            script.remove();
+        };
+
+        const importWithoutScripts = element => {
+            const clone = document.importNode(element, true);
+            clone.querySelectorAll("script").forEach(script => script.remove());
+            return clone;
+        };
+
+        const installLobby = async (markup, targetUrl) => {
+            const parsed = new DOMParser().parseFromString(markup, "text/html");
+            const currentMain = document.querySelector("main.page-shell");
+            const nextMain = parsed.querySelector("main.page-shell");
+            const currentHeaderContext = document.querySelector(".topbar-page-context");
+            const nextHeaderContext = parsed.querySelector(".topbar-page-context");
+            if (!currentMain || !nextMain || !currentHeaderContext || !nextHeaderContext) {
+                throw new Error("The running game shell is unavailable.");
+            }
+
+            const pageScripts = Array.from(parsed.body.querySelectorAll("script"));
+            const loadedScriptUrls = new Set(
+                Array.from(document.scripts, script => script.src)
+                    .filter(Boolean));
+
+            const nextMainClone = importWithoutScripts(nextMain);
+            currentMain.replaceChildren(...Array.from(nextMainClone.childNodes));
+
+            const nextHeaderContextClone = importWithoutScripts(nextHeaderContext);
+            currentHeaderContext.replaceChildren(
+                ...Array.from(nextHeaderContextClone.childNodes));
+
+            document.body.className = parsed.body.className;
+            const nextTheme = parsed.documentElement.getAttribute("data-theme");
+            if (nextTheme === null) {
+                document.documentElement.removeAttribute("data-theme");
+            } else {
+                document.documentElement.setAttribute("data-theme", nextTheme);
+            }
+            const nextRootStyle = parsed.documentElement.getAttribute("style");
+            if (nextRootStyle === null) {
+                document.documentElement.removeAttribute("style");
+            } else {
+                document.documentElement.setAttribute("style", nextRootStyle);
+            }
+
+            const nextTitle = parsed.querySelector("title")?.textContent;
+            if (nextTitle) {
+                document.title = nextTitle;
+            }
+            history.replaceState(
+                { badWolfInitialRoundStarted: true },
+                "",
+                targetUrl.href);
+
+            for (const source of pageScripts) {
+                await executePageScript(source, targetUrl.href, loadedScriptUrls);
+            }
+
+            document.dispatchEvent(new CustomEvent(hostShellMountedEventName));
+        };
+
+        const startGame = async form => {
+            const response = await fetch(form.action, {
+                method: "POST",
+                credentials: "same-origin",
+                body: new FormData(form),
+                headers: {
+                    Accept: "text/html",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                cache: "no-store"
+            });
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            const targetUrl = new URL(response.url || form.action, window.location.href);
+            const currentUrl = new URL(window.location.href);
+            if (targetUrl.origin !== currentUrl.origin ||
+                !targetUrl.pathname.toLowerCase().includes("/admin/games/lobby/")) {
+                throw new Error("The first-round intro did not finish in the game lobby.");
+            }
+
+            await installLobby(await response.text(), targetUrl);
+        };
+
+        document.addEventListener("click", event => {
+            if (navigationInProgress ||
+                event.defaultPrevented ||
+                event.button !== 0 ||
+                event.metaKey ||
+                event.ctrlKey ||
+                event.shiftKey ||
+                event.altKey) {
+                return;
+            }
+
+            const target = event.target instanceof Element ? event.target : null;
+            const next = target?.closest(nextSelector);
+            if (!(next instanceof HTMLAnchorElement)) {
+                return;
+            }
+
+            const targetUrl = new URL(next.href, window.location.href);
+            const currentUrl = new URL(window.location.href);
+            if (targetUrl.origin !== currentUrl.origin ||
+                targetUrl.pathname.toLowerCase() !== currentUrl.pathname.toLowerCase()) {
                 return;
             }
 
             event.preventDefault();
-            page.classList.add("is-leaving");
-            window.setTimeout(() => {
-                window.location.href = next.href;
-            }, 165);
-        });
+            event.stopImmediatePropagation();
+            navigationInProgress = true;
+            const page = next.closest(introSelector);
+            const navigate = () => loadFrame(targetUrl)
+                .catch(error => {
+                    console.error("Initial round intro frame navigation failed.", error);
+                    window.location.assign(targetUrl.href);
+                })
+                .finally(() => {
+                    navigationInProgress = false;
+                });
+
+            if (page &&
+                !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                page.classList.add("is-leaving");
+                window.setTimeout(() => void navigate(), 165);
+            } else {
+                void navigate();
+            }
+        }, true);
+
+        document.addEventListener("submit", event => {
+            const form = event.target instanceof HTMLFormElement
+                ? event.target
+                : null;
+            if (!form?.matches(startFormSelector) || navigationInProgress) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            navigationInProgress = true;
+            const submitter = event.submitter instanceof HTMLElement
+                ? event.submitter
+                : null;
+            submitter?.setAttribute("disabled", "disabled");
+            const page = form.closest(introSelector);
+            const navigate = () => startGame(form)
+                .catch(error => {
+                    console.error("Initial round intro start failed.", error);
+                    page?.classList.remove("is-leaving");
+                    submitter?.removeAttribute("disabled");
+                    navigationInProgress = false;
+                    form.submit();
+                });
+
+            if (page &&
+                !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                page.classList.add("is-leaving");
+                window.setTimeout(() => void navigate(), 165);
+            } else {
+                void navigate();
+            }
+        }, true);
     })();
 </script>

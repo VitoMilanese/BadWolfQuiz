@@ -61,3 +61,72 @@
         min-width: min(280px, calc(100vw - 24px));
     }
 }
+
+/* Host gameplay partial navigation must not change the original board layout. */
+[data-host-gameplay-view] {
+    display: contents;
+}
+
+.host-board-layout[hidden] {
+    display: none;
+}
+
+.host-game-board:has(> [data-host-gameplay-view] > .current-question-summary:not(.wager-mode)) {
+    width: calc(100vw - 32px);
+    max-width: none;
+    margin-left: calc(50% - 50vw + 16px);
+    margin-right: calc(50% - 50vw + 16px);
+}
+
+.host-game-board:has(> [data-host-gameplay-view] > .question-review-preview),
+.host-game-board:has(> [data-host-gameplay-view] > [data-game-intro-page]),
+.host-game-board:has(> [data-host-gameplay-view] > [data-final-question-transition]) {
+    width: calc(100vw - 32px);
+    max-width: none;
+    margin-left: calc(50% - 50vw + 16px);
+    margin-right: calc(50% - 50vw + 16px);
+}
+
+[data-host-gameplay-view] > .question-review-preview {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    grid-template-rows: auto minmax(0, 1fr);
+    margin-bottom: 0;
+}
+
+[data-host-gameplay-view] > .question-review-preview > .game-content-presentation {
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    height: 100%;
+    grid-template-rows: minmax(0, 1fr);
+}
+
+[data-host-gameplay-view] > .question-review-preview > .game-content-presentation > .game-content-blocks {
+    align-self: safe center;
+    max-height: 100%;
+}
+
+[data-host-gameplay-view] > [data-game-intro-page] {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    box-sizing: border-box;
+}
+
+.host-game-board.host-gameplay-presentation-mode {
+    --game-scoreboard-space: 0px !important;
+    padding-bottom: 0;
+}
+
+.host-game-board.host-gameplay-presentation-mode > .game-scoreboard,
+.host-game-board.host-gameplay-presentation-mode > .game-scoreboard-resizer,
+.host-game-board.host-gameplay-presentation-mode > .game-side-controls {
+    display: none;
+}
+
+.host-game-board.final-question-host > .game-side-controls {
+    display: none;
+}

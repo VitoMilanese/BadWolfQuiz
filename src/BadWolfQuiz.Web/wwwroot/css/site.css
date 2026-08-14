@@ -512,6 +512,11 @@ select {
     display: contents;
 }
 
+.action-menu-popover form[hidden],
+.action-menu-popover .action-menu-item[hidden] {
+    display: none !important;
+}
+
 .action-menu-item {
     display: block;
     width: 100%;

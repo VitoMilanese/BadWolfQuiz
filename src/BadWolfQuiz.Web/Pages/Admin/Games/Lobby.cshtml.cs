@@ -1854,5 +1854,6 @@ public sealed record RoundLeaderboardEntry(
 public sealed record GameContentPreviewModel(
     Guid GameSessionId,
     int SourceQuestionId,
+    QuestionPresentationType PresentationType,
     bool IsAnswer,
     IReadOnlyList<ContentBlockSnapshot> Blocks);
