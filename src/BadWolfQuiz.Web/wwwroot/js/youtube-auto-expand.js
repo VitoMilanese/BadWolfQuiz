@@ -37,7 +37,12 @@
         }
 
         shouldResumeTimer = false;
-        document.querySelector(".game-timer-resume")?.requestSubmit();
+        const resumeForm = document.querySelector(".game-timer-resume");
+        if (!resumeForm || resumeForm.hidden) {
+            return;
+        }
+
+        resumeForm.requestSubmit();
     };
 
     const beginTimedPlayback = iframe => {
@@ -258,6 +263,19 @@
     window.BadWolfYouTubeAutoExpand = {
         scan: bindMediaTree
     };
+
+    document.addEventListener("submit", event => {
+        const form = event.target instanceof HTMLFormElement &&
+            event.target.matches(".game-timer-resume")
+            ? event.target
+            : null;
+
+        if (!form || !shouldResumeTimer) {
+            return;
+        }
+
+        shouldResumeTimer = false;
+    }, true);
 
     document.addEventListener("keydown", event => {
         if (event.key !== "Escape" || !expandedIframe) {

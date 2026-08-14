@@ -16,6 +16,25 @@ public sealed class YouTubeEscapePropagationTests
         Assert.Contains("event.stopImmediatePropagation();", script);
     }
 
+    [Fact]
+    public void Manual_timer_resume_cancels_pending_youtube_auto_resume()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "youtube-auto-expand.js"));
+
+        Assert.Contains(
+            "const resumeForm = document.querySelector(\".game-timer-resume\");",
+            script);
+        Assert.Contains("if (!resumeForm || resumeForm.hidden)", script);
+        Assert.Contains("resumeForm.requestSubmit();", script);
+        Assert.Contains(
+            "event.target.matches(\".game-timer-resume\")",
+            script);
+        Assert.Contains("if (!form || !shouldResumeTimer)", script);
+    }
+
     private static string FindWebFile(params string[] parts)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
