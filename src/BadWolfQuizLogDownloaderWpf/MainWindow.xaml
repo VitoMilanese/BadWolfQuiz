@@ -34,26 +34,13 @@
                                       Foreground="{DynamicResource HeaderForegroundBrush}"
                                       Padding="16,12">
             <DockPanel LastChildFill="False">
-                <StackPanel DockPanel.Dock="Left"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="TextBoxSearchOutline"
-                                             Width="28"
-                                             Height="28"
-                                             Margin="0,0,12,0"/>
-                    <TextBlock Text="BadWolfQuiz Log Downloader"
-                               Foreground="{DynamicResource HeaderForegroundBrush}"
-                               FontSize="20"
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center"/>
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                    <materialDesign:PackIcon Kind="TextBoxSearchOutline" Width="28" Height="28" Margin="0,0,12,0"/>
+                    <TextBlock Text="BadWolfQuiz Log Downloader" Foreground="{DynamicResource HeaderForegroundBrush}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <StackPanel DockPanel.Dock="Right"
-                            Orientation="Horizontal">
-                    <TextBlock Text="Theme"
-                               Foreground="{DynamicResource HeaderForegroundBrush}"
-                               Margin="0,0,8,0"
-                               VerticalAlignment="Center"/>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <TextBlock Text="Theme" Foreground="{DynamicResource HeaderForegroundBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <ComboBox Foreground="{DynamicResource ThemeComboForegroundBrush}"
                               Background="{DynamicResource ThemeComboBackgroundBrush}"
                               x:Name="ThemeCombo"
@@ -79,8 +66,7 @@
                 </DockPanel>
             </materialDesign:ColorZone>
 
-            <Border Grid.Row="1"
-                    Background="{DynamicResource ThemeDecorationBrush}"/>
+            <Border Grid.Row="1" Background="{DynamicResource ThemeDecorationBrush}"/>
         </Grid>
 
         <Border Grid.Row="1"
@@ -91,9 +77,7 @@
                 materialDesign:ElevationAssist.Elevation="Dp2">
             <WrapPanel VerticalAlignment="Center">
                 <ComboBox Foreground="{DynamicResource AppForegroundBrush}" x:Name="PeriodCombo"
-                          Width="120"
-                          Margin="0,0,12,0"
-                          materialDesign:HintAssist.Hint="Period">
+                          Width="120" Margin="0,0,12,0" materialDesign:HintAssist.Hint="Period">
                     <ComboBoxItem Content="1 hour"/>
                     <ComboBoxItem Content="6 hours"/>
                     <ComboBoxItem Content="24 hours" IsSelected="True"/>
@@ -102,147 +86,59 @@
                 </ComboBox>
 
                 <CheckBox Foreground="{DynamicResource AppForegroundBrush}" x:Name="GameplayOnlyCheck"
-                          Content="Only gameplay lookup failures"
-                          Margin="0,0,16,0"
-                          VerticalAlignment="Center"/>
+                          Content="Only gameplay lookup failures" Margin="0,0,16,0" VerticalAlignment="Center"/>
 
-                <Button x:Name="DownloadButton"
-                        Content="Download"
-                        Click="DownloadButton_Click"
-                        Margin="0,0,8,0"
-                        Foreground="{DynamicResource AccentForegroundBrush}"
-                        Style="{StaticResource MaterialDesignRaisedButton}"/>
-
-                <Button x:Name="CancelButton"
-                        Content="Cancel"
-                        Click="CancelButton_Click"
-                        IsEnabled="False"
-                        Margin="0,0,8,0"
-                        Foreground="{DynamicResource AppForegroundBrush}"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
-
-                <Button x:Name="OpenFileButton"
-                        Content="Open file"
-                        Click="OpenFileButton_Click"
-                        Margin="0,0,8,0"
-                        Foreground="{DynamicResource AppForegroundBrush}"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
-
-                <Button x:Name="OpenFolderButton"
-                        Content="Open Logs"
-                        Click="OpenFolderButton_Click"
-                        Margin="0,0,18,0"
-                        Foreground="{DynamicResource AppForegroundBrush}"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                <Button x:Name="DownloadButton" Content="Download" Click="DownloadButton_Click" Margin="0,0,8,0"
+                        Foreground="{DynamicResource AccentForegroundBrush}" Style="{StaticResource MaterialDesignRaisedButton}"/>
+                <Button x:Name="CancelButton" Content="Cancel" Click="CancelButton_Click" IsEnabled="False" Margin="0,0,8,0"
+                        Foreground="{DynamicResource AppForegroundBrush}" Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                <Button x:Name="OpenFileButton" Content="Open file" Click="OpenFileButton_Click" Margin="0,0,8,0"
+                        Foreground="{DynamicResource AppForegroundBrush}" Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                <Button x:Name="OpenFolderButton" Content="Open Logs" Click="OpenFolderButton_Click" Margin="0,0,18,0"
+                        Foreground="{DynamicResource AppForegroundBrush}" Style="{StaticResource MaterialDesignOutlinedButton}"/>
 
                 <Separator Width="1" Height="28" Margin="0,0,18,0"/>
 
-                <Button x:Name="StartLiveButton"
-                        Content="Start live"
-                        Click="StartLiveButton_Click"
-                        Margin="0,0,8,0"
-                        Foreground="{DynamicResource AccentForegroundBrush}"
-                        Style="{StaticResource MaterialDesignRaisedButton}"/>
-
-                <Button x:Name="StopLiveButton"
-                        Content="Stop live"
-                        Click="StopLiveButton_Click"
-                        IsEnabled="False"
-                        Margin="0,0,8,0"
-                        Foreground="{DynamicResource AppForegroundBrush}"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
-
-                <CheckBox Foreground="{DynamicResource AppForegroundBrush}" x:Name="SaveLiveCheck"
-                          Content="Save live to file"
-                          IsChecked="True"
-                          Margin="0,0,18,0"
-                          VerticalAlignment="Center"/>
+                <Button x:Name="StartLiveButton" Content="Start live" Click="StartLiveButton_Click" Margin="0,0,8,0"
+                        Foreground="{DynamicResource AccentForegroundBrush}" Style="{StaticResource MaterialDesignRaisedButton}"/>
+                <Button x:Name="StopLiveButton" Content="Stop live" Click="StopLiveButton_Click" IsEnabled="False" Margin="0,0,8,0"
+                        Foreground="{DynamicResource AppForegroundBrush}" Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                <CheckBox Foreground="{DynamicResource AppForegroundBrush}" x:Name="SaveLiveCheck" Content="Save live to file"
+                          IsChecked="True" Margin="0,0,18,0" VerticalAlignment="Center"/>
 
                 <Separator Width="1" Height="28" Margin="0,0,18,0"/>
 
-                <StackPanel Orientation="Horizontal"
-                            VerticalAlignment="Center">
-                    <TextBlock Text="Service:"
-                               Foreground="{DynamicResource AppForegroundBrush}"
-                               FontWeight="SemiBold"
-                               Margin="0,0,6,0"
-                               VerticalAlignment="Center"/>
-                    <TextBlock x:Name="ServiceNameText"
-                               Text="badwolfquiz.service"
-                               Foreground="{DynamicResource AppForegroundBrush}"
-                               Margin="0,0,6,0"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Text="—"
-                               Foreground="{DynamicResource AppForegroundBrush}"
-                               Margin="0,0,6,0"
-                               VerticalAlignment="Center"/>
-                    <TextBlock x:Name="ServiceStatusText"
-                               Text="Unknown"
-                               Foreground="{DynamicResource AppForegroundBrush}"
-                               FontWeight="SemiBold"
-                               Margin="0,0,10,0"
-                               VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Service:" Foreground="{DynamicResource AppForegroundBrush}" FontWeight="SemiBold" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="ServiceNameText" Text="badwolfquiz.service" Foreground="{DynamicResource AppForegroundBrush}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="—" Foreground="{DynamicResource AppForegroundBrush}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="ServiceStatusText" Text="Unknown" Foreground="{DynamicResource AppForegroundBrush}" FontWeight="SemiBold" Margin="0,0,10,0" VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <Button x:Name="RefreshServiceButton"
-                        Content="Refresh"
-                        Click="RefreshServiceButton_Click"
-                        Margin="0,0,8,0"
-                        Foreground="{DynamicResource AppForegroundBrush}"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
-
-                <Button x:Name="StartServiceButton"
-                        Content="Start service"
-                        Click="StartServiceButton_Click"
-                        IsEnabled="False"
-                        Margin="0,0,8,0"
-                        Foreground="{DynamicResource AccentForegroundBrush}"
-                        Style="{StaticResource MaterialDesignRaisedButton}"/>
-
-                <Button x:Name="StopServiceButton"
-                        Content="Stop service"
-                        Click="StopServiceButton_Click"
-                        IsEnabled="False"
-                        Margin="0,0,18,0"
-                        Foreground="{DynamicResource AppForegroundBrush}"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                <Button x:Name="RefreshServiceButton" Content="Refresh" Click="RefreshServiceButton_Click" Margin="0,0,8,0"
+                        Foreground="{DynamicResource AppForegroundBrush}" Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                <Button x:Name="StartServiceButton" Content="Start service" Click="StartServiceButton_Click" IsEnabled="False" Margin="0,0,8,0"
+                        Foreground="{DynamicResource AccentForegroundBrush}" Style="{StaticResource MaterialDesignRaisedButton}"/>
+                <Button x:Name="StopServiceButton" Content="Stop service" Click="StopServiceButton_Click" IsEnabled="False" Margin="0,0,18,0"
+                        Foreground="{DynamicResource AppForegroundBrush}" Style="{StaticResource MaterialDesignOutlinedButton}"/>
 
                 <Separator Width="1" Height="28" Margin="0,0,18,0"/>
 
-                <StackPanel Orientation="Horizontal"
-                            VerticalAlignment="Center">
-                    <TextBlock Text="Backups:"
-                               Foreground="{DynamicResource AppForegroundBrush}"
-                               FontWeight="SemiBold"
-                               Margin="0,0,8,0"
-                               VerticalAlignment="Center"/>
-                    <Button x:Name="BackupAppDataButton"
-                            Content="Backup App_Data"
-                            Click="BackupAppDataButton_Click"
-                            Margin="0,0,8,0"
-                            Foreground="{DynamicResource AccentForegroundBrush}"
-                            Style="{StaticResource MaterialDesignRaisedButton}"/>
-                    <Button x:Name="BackupServiceFolderButton"
-                            Content="Backup service folder"
-                            Click="BackupServiceFolderButton_Click"
-                            Foreground="{DynamicResource AppForegroundBrush}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Backups:" Foreground="{DynamicResource AppForegroundBrush}" FontWeight="SemiBold" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <Button x:Name="BackupAppDataButton" Content="Backup App_Data" Click="BackupAppDataButton_Click" Margin="0,0,8,0"
+                            Foreground="{DynamicResource AccentForegroundBrush}" Style="{StaticResource MaterialDesignRaisedButton}"/>
+                    <Button x:Name="BackupServiceFolderButton" Content="Backup service folder" Click="BackupServiceFolderButton_Click" Margin="0,0,8,0"
+                            Foreground="{DynamicResource AppForegroundBrush}" Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                    <Button x:Name="BrowseBackupsButton" Content="Browse backups" Click="BrowseBackupsButton_Click"
+                            Foreground="{DynamicResource AppForegroundBrush}" Style="{StaticResource MaterialDesignOutlinedButton}"/>
                 </StackPanel>
             </WrapPanel>
         </Border>
 
-        <Border Grid.Row="2"
-                Margin="16,0,16,8"
-                Padding="12,8"
-                Background="{DynamicResource PanelBrush}"
-                CornerRadius="10"
-                materialDesign:ElevationAssist.Elevation="Dp1">
+        <Border Grid.Row="2" Margin="16,0,16,8" Padding="12,8" Background="{DynamicResource PanelBrush}" CornerRadius="10" materialDesign:ElevationAssist.Elevation="Dp1">
             <WrapPanel>
-                <TextBlock Text="Levels:"
-                           Foreground="{DynamicResource AppForegroundBrush}"
-                           FontWeight="SemiBold"
-                           VerticalAlignment="Center"
-                           Margin="0,0,10,0"/>
+                <TextBlock Text="Levels:" Foreground="{DynamicResource AppForegroundBrush}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <CheckBox Foreground="{DynamicResource AppForegroundBrush}" x:Name="TraceCheck" Content="Trace" IsChecked="True" Checked="FilterChanged" Unchecked="FilterChanged" Margin="0,0,10,0"/>
                 <CheckBox Foreground="{DynamicResource AppForegroundBrush}" x:Name="DebugCheck" Content="Debug" IsChecked="True" Checked="FilterChanged" Unchecked="FilterChanged" Margin="0,0,10,0"/>
                 <CheckBox Foreground="{DynamicResource AppForegroundBrush}" x:Name="InfoCheck" Content="Info" IsChecked="True" Checked="FilterChanged" Unchecked="FilterChanged" Margin="0,0,10,0"/>
@@ -253,26 +149,15 @@
             </WrapPanel>
         </Border>
 
-        <Border Grid.Row="3"
-                Margin="16,0,16,8"
-                Padding="10"
-                Background="{DynamicResource PanelBrush}"
-                CornerRadius="10">
+        <Border Grid.Row="3" Margin="16,0,16,8" Padding="10" Background="{DynamicResource PanelBrush}" CornerRadius="10">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
                     <Button Content="|&lt;" Width="44" Click="FirstPage_Click" Margin="0,0,5,0" Foreground="{DynamicResource AccentForegroundBrush}"/>
                     <Button Content="&lt;" Width="44" Click="PreviousPage_Click" Margin="0,0,5,0" Foreground="{DynamicResource AccentForegroundBrush}"/>
                     <Button Content="&gt;" Width="44" Click="NextPage_Click" Margin="0,0,5,0" Foreground="{DynamicResource AccentForegroundBrush}"/>
                     <Button Content="&gt;|" Width="44" Click="LastPage_Click" Margin="0,0,12,0" Foreground="{DynamicResource AccentForegroundBrush}"/>
-                    <TextBlock x:Name="PageLabel"
-                               Text="Page 0 / 0"
-                               Foreground="{DynamicResource AppForegroundBrush}"
-                               VerticalAlignment="Center"
-                               Margin="0,0,16,0"/>
-                    <ComboBox Foreground="{DynamicResource AppForegroundBrush}" x:Name="PageSizeCombo"
-                              Width="110"
-                              SelectionChanged="PageSizeCombo_SelectionChanged"
-                              materialDesign:HintAssist.Hint="Entries/page">
+                    <TextBlock x:Name="PageLabel" Text="Page 0 / 0" Foreground="{DynamicResource AppForegroundBrush}" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                    <ComboBox Foreground="{DynamicResource AppForegroundBrush}" x:Name="PageSizeCombo" Width="110" SelectionChanged="PageSizeCombo_SelectionChanged" materialDesign:HintAssist.Hint="Entries/page">
                         <ComboBoxItem Content="100"/>
                         <ComboBoxItem Content="250" IsSelected="True"/>
                         <ComboBoxItem Content="500"/>
@@ -280,21 +165,11 @@
                     </ComboBox>
                 </StackPanel>
 
-                <ProgressBar x:Name="BusyProgress"
-                             DockPanel.Dock="Right"
-                             Width="180"
-                             Height="6"
-                             IsIndeterminate="True"
-                             Visibility="Collapsed"
-                             VerticalAlignment="Center"/>
+                <ProgressBar x:Name="BusyProgress" DockPanel.Dock="Right" Width="180" Height="6" IsIndeterminate="True" Visibility="Collapsed" VerticalAlignment="Center"/>
             </DockPanel>
         </Border>
 
-        <Border Grid.Row="4"
-                Margin="16,0,16,8"
-                Background="{DynamicResource ViewerBrush}"
-                CornerRadius="10"
-                materialDesign:ElevationAssist.Elevation="Dp2">
+        <Border Grid.Row="4" Margin="16,0,16,8" Background="{DynamicResource ViewerBrush}" CornerRadius="10" materialDesign:ElevationAssist.Elevation="Dp2">
             <ListBox x:Name="LogList"
                      Background="Transparent"
                      BorderThickness="0"
@@ -316,24 +191,14 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Text}"
-                                   Foreground="{Binding Brush}"
-                                   FontFamily="Consolas"
-                                   FontSize="13"
-                                   TextWrapping="NoWrap"/>
+                        <TextBlock Text="{Binding Text}" Foreground="{Binding Brush}" FontFamily="Consolas" FontSize="13" TextWrapping="NoWrap"/>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
         </Border>
 
-        <Border Grid.Row="5"
-                Margin="16,0,16,14"
-                Padding="10,6"
-                Background="{DynamicResource PanelBrush}"
-                CornerRadius="8">
-            <TextBlock x:Name="StatusText"
-                       Text="Ready."
-                       Foreground="{DynamicResource AppForegroundBrush}"/>
+        <Border Grid.Row="5" Margin="16,0,16,14" Padding="10,6" Background="{DynamicResource PanelBrush}" CornerRadius="8">
+            <TextBlock x:Name="StatusText" Text="Ready." Foreground="{DynamicResource AppForegroundBrush}"/>
         </Border>
     </Grid>
 </Window>
