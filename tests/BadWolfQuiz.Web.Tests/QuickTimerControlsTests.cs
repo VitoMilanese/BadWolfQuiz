@@ -21,6 +21,20 @@ public sealed class QuickTimerControlsTests
             "wwwroot",
             "css",
             "site.css"));
+        var layout = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Shared",
+            "_Layout.cshtml"));
+        var quickTimerScript = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "quick-timer-controls.js"));
 
         Assert.Contains("game-timer-quick-actions", markup);
         Assert.Contains("asp-page-handler=\"AddQuestionTimerTime\"", markup);
@@ -40,6 +54,14 @@ public sealed class QuickTimerControlsTests
         Assert.Contains("!isQuickAdjustment", markup);
         Assert.Contains("submitter?.matches(\":hover\")", markup);
         Assert.Contains("submitter?.blur();", markup);
+
+        Assert.Contains("~/js/quick-timer-controls.js", layout);
+        Assert.Contains("is-quick-actions-engaged", quickTimerScript);
+        Assert.Contains("document.addEventListener(\"pointerdown\"", quickTimerScript);
+        Assert.Contains("document.addEventListener(\"pointermove\"", quickTimerScript);
+        Assert.Contains("document.elementFromPoint(event.clientX, event.clientY)", quickTimerScript);
+        Assert.Contains("pointerTarget?.closest(timerSelector) === engagedTimer", quickTimerScript);
+        Assert.Contains("clearEngagedTimer();", quickTimerScript);
 
         var handler = File.ReadAllText(Path.Combine(
             root,
@@ -70,7 +92,7 @@ public sealed class QuickTimerControlsTests
             if (Directory.Exists(Path.Combine(directory.FullName, "src")) &&
                 Directory.Exists(Path.Combine(directory.FullName, "tests")))
             {
-                return directory.FullName;
+                return directory;
             }
 
             directory = directory.Parent;
