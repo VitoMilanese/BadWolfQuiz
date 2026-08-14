@@ -1,12 +1,6 @@
 @model BadWolfQuiz.Web.Pages.Admin.Games.GameContentPreviewModel
 
 <section class="game-content-presentation @(Model.IsAnswer ? "answer-presentation" : "question-presentation")">
-    <p class="eyebrow">
-        @(Model.IsAnswer
-            ? Localizer["GameBoard_Answer"]
-            : Localizer["GameBoard_Question"])
-    </p>
-
     <div class="game-content-blocks">
         @foreach (var block in Model.Blocks)
         {

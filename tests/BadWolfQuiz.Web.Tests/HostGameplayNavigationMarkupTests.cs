@@ -265,8 +265,19 @@ public sealed class HostGameplayNavigationMarkupTests
             "wwwroot",
             "css",
             "player-admission-menu.css"));
+        var previewMarkup = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "_GameContentPreview.cshtml"));
 
         Assert.DoesNotContain("<div class=\"question-review-content\">", markup);
+        Assert.Contains(
+            "@previewQuestion.CategoryTitle — @previewQuestion.Points —",
+            markup);
+        Assert.Contains("Localizer[\"GameBoard_Question\"]", markup);
+        Assert.Contains("Localizer[\"GameBoard_Answer\"]", markup);
+        Assert.DoesNotContain("<p class=\"eyebrow\">", previewMarkup);
         Assert.Contains("<section class=\"content-panel question-review-preview\">", markup);
         Assert.Contains("<partial name=\"_GameContentPreview\"", markup);
         Assert.Contains(

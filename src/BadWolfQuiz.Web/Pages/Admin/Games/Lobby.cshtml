@@ -375,7 +375,9 @@
                 <header class="question-review-heading">
                     <div>
                         <p class="eyebrow">@Localizer["GameBoard_QuestionPreview"]</p>
-                        <h2>@previewQuestion.CategoryTitle — @previewQuestion.Points</h2>
+                        <h2>@previewQuestion.CategoryTitle — @previewQuestion.Points — @(Model.IsPreviewingAnswer
+                    ? Localizer["GameBoard_Answer"]
+                    : Localizer["GameBoard_Question"])</h2>
                     </div>
                     <div class="form-actions question-review-actions">
                         @if (Model.IsPreviewingAnswer)
