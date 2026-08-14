@@ -580,7 +580,17 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException)
         {
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new { success = false });
+            }
+
             return BadRequest();
+        }
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new { success = true });
         }
 
         return RedirectToPage(new { id });

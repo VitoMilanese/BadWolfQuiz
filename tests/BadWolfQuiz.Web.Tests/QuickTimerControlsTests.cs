@@ -48,6 +48,25 @@ public sealed class QuickTimerControlsTests
         Assert.Contains("document.elementFromPoint(clientX, clientY)", markup);
         Assert.Contains("bindQuickTimerPointerLeave();", markup);
         Assert.Contains("pointer-events: auto", css);
+
+        var handler = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Games",
+            "Lobby.cshtml.cs"));
+        var addHandlerStart = handler.IndexOf(
+            "OnPostAddQuestionTimerTimeAsync",
+            StringComparison.Ordinal);
+        var addHandlerEnd = handler.IndexOf(
+            "OnPostAdvanceRoundAsync",
+            addHandlerStart,
+            StringComparison.Ordinal);
+        var addHandler = handler[addHandlerStart..addHandlerEnd];
+        Assert.Contains("if (IsAjaxRequest())", addHandler);
+        Assert.Contains("return new JsonResult(new { success = true });", addHandler);
     }
 
     private static string FindRepositoryRoot()
