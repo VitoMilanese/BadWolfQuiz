@@ -4728,13 +4728,22 @@
                 }
             });
 
-            document.addEventListener("pointermove", event => {
+            document.addEventListener("pointerdown", event => {
                 if (!quickTimerControlsPinned) {
                     return;
                 }
 
                 const target = event.target instanceof Element ? event.target : null;
                 if (target?.closest(".host-game-timer")) {
+                    return;
+                }
+
+                quickTimerControlsPinned = false;
+                timerPanel?.classList.remove("is-quick-actions-pinned");
+            });
+
+            document.addEventListener("keydown", event => {
+                if (event.key !== "Escape" || !quickTimerControlsPinned) {
                     return;
                 }
 

@@ -28,11 +28,15 @@ public sealed class QuickTimerControlsTests
         Assert.Contains("host-game-timer:hover .game-timer-quick-actions", css);
         Assert.Contains("host-game-timer:focus-within .game-timer-quick-actions", css);
         Assert.Contains("host-game-timer.is-quick-actions-pinned", css);
-        Assert.Contains("top: calc(100% + 8px)", css);
-        Assert.Contains("position: static", css);
+        Assert.Contains("top: 100%", css);
+        Assert.Contains("padding-top: 6px", css);
+        Assert.Contains("display: contents", css);
+        Assert.DoesNotContain(".host-game-timer {\n    position: relative;", css);
         Assert.Contains("event.target.matches(\".game-timer-adjust\")", markup);
         Assert.Contains("quickTimerControlsPinned = true", markup);
         Assert.Contains("is-quick-actions-pinned", markup);
+        Assert.Contains("document.addEventListener(\"pointerdown\"", markup);
+        Assert.DoesNotContain("document.addEventListener(\"pointermove\"", markup);
         Assert.Contains("pointer-events: auto", css);
     }
 

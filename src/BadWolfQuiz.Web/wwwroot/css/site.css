@@ -6272,35 +6272,26 @@ body.youtube-auto-expanded-open {
 
 
 /* Issue 165: quick timer time controls */
-.host-game-timer {
-    position: relative;
-}
-
-.game-timer-actions {
-    position: static;
-    display: grid;
-    place-items: center;
-}
-
+.game-timer-actions,
 .game-timer-primary-control {
-    display: grid;
-    place-items: center;
+    display: contents;
 }
 
 .game-timer-quick-actions {
     position: absolute;
     z-index: 12;
-    top: calc(100% + 8px);
+    top: 100%;
     left: 50%;
     width: max-content;
     display: grid;
     grid-template-columns: repeat(2, 44px);
     gap: 5px;
+    padding-top: 6px;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transform: translateX(-50%) translateY(-2px);
-    transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+    transform: translateX(-50%);
+    transition: opacity 120ms ease, visibility 120ms ease;
 }
 
 .host-game-timer:hover .game-timer-quick-actions,
@@ -6309,7 +6300,6 @@ body.youtube-auto-expanded-open {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
 }
 
 .game-timer-quick-actions .game-timer-control {
@@ -6318,5 +6308,4 @@ body.youtube-auto-expanded-open {
 
 .game-timer-quick-actions button {
     min-width: 44px;
-    font-size: .75rem;
 }
