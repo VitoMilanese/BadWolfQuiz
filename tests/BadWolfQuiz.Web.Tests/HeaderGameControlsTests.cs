@@ -65,6 +65,7 @@ public sealed class HeaderGameControlsTests
             "css",
             "player-admission-menu.css"));
 
+        Assert.Contains("const styleHeaderGameControl = button =>", script);
         Assert.Contains(
             ".querySelectorAll(\".game-side-control, .player-join-lock\")",
             script);
@@ -120,6 +121,24 @@ public sealed class HeaderGameControlsTests
     }
 
     [Fact]
+    public void Manual_discord_controls_are_hydrated_when_voice_becomes_ready_after_page_load()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "discord-media-mute.js"));
+
+        Assert.Contains("const ensureManualMuteControls = async ready =>", script);
+        Assert.Contains("const response = await fetch(getLobbyUrl(), { cache: \"no-store\" });", script);
+        Assert.Contains(".game-side-controls [data-discord-mute]", script);
+        Assert.Contains("document.importNode(sourceButton, true)", script);
+        Assert.Contains("styleHeaderGameControl(button);", script);
+        Assert.Contains("controls.insertBefore(button, insertionPoint);", script);
+        Assert.Contains("void ensureManualMuteControls(event.detail?.ready === true);", script);
+        Assert.Contains("event.target.closest(\"[data-discord-mute]\")", script);
+    }
+
+    [Fact]
     public void Discord_operations_target_lobby_handlers_after_soft_navigation()
     {
         var script = File.ReadAllText(FindWebFile(
@@ -127,6 +146,7 @@ public sealed class HeaderGameControlsTests
             "js",
             "discord-media-mute.js"));
 
+        Assert.Contains("const getLobbyUrl = () =>", script);
         Assert.Contains("const getLobbyHandlerUrl = handler =>", script);
         Assert.Contains("const gamesSegment = \"/Admin/Games/\";", script);
         Assert.Contains("Lobby/${encodeURIComponent(gameId)}", script);
