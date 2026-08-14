@@ -18,179 +18,34 @@
     box-shadow: 0 12px 32px rgb(0 0 0 / 24%);
 }
 
-.player-admission-menu-popover[hidden] {
-    display: none;
-}
-
-.player-admission-menu-action {
-    width: 100%;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    justify-content: flex-start;
-    text-align: left;
-    white-space: normal;
-}
-
-.player-admission-menu-action[hidden] {
-    display: none;
-}
-
-.player-admission-menu-action-state {
-    margin-left: auto;
-    font-weight: 700;
-    pointer-events: none;
-}
-
-.game-side-controls[data-header-game-controls] {
-    flex-direction: row;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.game-side-controls[data-header-game-controls] :is(.game-side-control, .player-join-lock) {
-    border-radius: 10px;
-    box-shadow: none;
-    font-size: 1rem;
-}
-
-.game-side-controls[data-header-game-controls] .game-side-control {
-    border-color: var(--line);
-    background: var(--panel);
-    color: var(--text);
-}
-
-.game-side-controls[data-header-game-controls] :is(.game-side-control, .player-join-lock):hover {
-    transform: none;
-    filter: none;
-}
-
-.game-side-controls[data-header-game-controls] .player-admission-menu-popover {
-    top: calc(100% + 8px);
-    bottom: auto;
-}
-
-/*
- * The quiz editor upgrades these legacy server-rendered controls into the
- * round edit context menu. Keep them out of the first paint so users never
- * see controls that disappear or change meaning once JavaScript initializes.
- * Removing the rename button's onclick attribute makes the upgraded trigger
- * visible automatically; the standalone delete button is removed by the same
- * initializer.
- */
-.round-settings-disclosure > summary button[onclick*="openRenameRoundDialog"],
-.round-tabs > button[onclick*="openDeleteRoundDialog"] {
-    visibility: hidden;
-}
-
-@media (max-width: 640px) {
-    .player-admission-menu-popover {
-        min-width: min(280px, calc(100vw - 24px));
-    }
-}
-
-/* Host gameplay partial navigation must not change the original board layout. */
-[data-host-gameplay-view] {
-    display: contents;
-}
-
-.host-board-layout[hidden] {
-    display: none;
-}
-
-.host-game-board:has(> [data-host-gameplay-view] > .current-question-summary:not(.wager-mode)) {
-    width: calc(100vw - 32px);
-    max-width: none;
-    margin-left: calc(50% - 50vw + 16px);
-    margin-right: calc(50% - 50vw + 16px);
-}
-
-.host-game-board:has(> [data-host-gameplay-view] > .question-review-preview),
-.host-game-board:has(> [data-host-gameplay-view] > [data-game-intro-page]),
-.host-game-board:has(> [data-host-gameplay-view] > [data-final-question-transition]) {
-    width: calc(100vw - 32px);
-    max-width: none;
-    margin-left: calc(50% - 50vw + 16px);
-    margin-right: calc(50% - 50vw + 16px);
-}
-
-[data-host-gameplay-view] > .question-review-preview {
-    flex: 1 1 auto;
-    min-height: 0;
-    height: 100%;
-    grid-template-rows: auto minmax(0, 1fr);
-    margin-bottom: 0;
-}
-
-[data-host-gameplay-view] > .question-review-preview > .game-content-presentation {
-    width: 100%;
-    max-width: none;
-    min-height: 0;
-    height: 100%;
-    grid-template-rows: minmax(0, 1fr);
-}
-
-[data-host-gameplay-view] > .question-review-preview > .game-content-presentation > .game-content-blocks {
-    align-self: safe center;
-    max-height: 100%;
-}
-
-[data-host-gameplay-view] > [data-game-intro-page] {
-    flex: 1 1 auto;
-    min-height: 0;
-    height: 100%;
-    max-height: 100%;
-    box-sizing: border-box;
-}
-
-.host-game-board.host-gameplay-presentation-mode {
-    --game-scoreboard-space: 0px !important;
-    padding-bottom: 0;
-}
-
-.host-game-board.host-gameplay-presentation-mode > .game-scoreboard,
-.host-game-board.host-gameplay-presentation-mode > .game-scoreboard-resizer,
-.host-game-board.host-gameplay-presentation-mode > .game-side-controls {
-    display: none;
-}
-
-.host-game-board.final-question-host > .game-side-controls {
-    display: none;
-}
-
-/* Player buzzer: keep mobile touches from turning into page panning. */
-body:has(.player-lobby:has(.player-buzzer-panel)) {
-    overflow-x: hidden;
-    overflow-x: clip;
-    overscroll-behavior-x: none;
-    touch-action: pan-y;
-}
-
-.player-lobby:has(.player-buzzer-panel),
-.player-lobby:has(.player-buzzer-panel) .player-buzzer-panel {
-    max-width: 100%;
-    overflow-x: hidden;
-    overflow-x: clip;
-    overscroll-behavior-x: none;
-}
-
-.player-lobby:has(.player-buzzer-panel) .player-buzzer {
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
+.player-admission-menu-popover[hidden] { display: none; }
+.player-admission-menu-action { width: 100%; min-height: 40px; display: flex; align-items: center; gap: 8px; justify-content: flex-start; text-align: left; white-space: normal; }
+.player-admission-menu-action[hidden] { display: none; }
+.player-admission-menu-action-state { margin-left: auto; font-weight: 700; pointer-events: none; }
+.game-side-controls[data-header-game-controls] { flex-direction: row; align-items: center; gap: 0.75rem; }
+.game-side-controls[data-header-game-controls] :is(.game-side-control, .player-join-lock) { border-radius: 10px; box-shadow: none; font-size: 1rem; }
+.game-side-controls[data-header-game-controls] .game-side-control { border-color: var(--line); background: var(--panel); color: var(--text); }
+.game-side-controls[data-header-game-controls] :is(.game-side-control, .player-join-lock):hover { transform: none; filter: none; }
+.game-side-controls[data-header-game-controls] .player-admission-menu-popover { top: calc(100% + 8px); bottom: auto; }
+.round-settings-disclosure > summary button[onclick*="openRenameRoundDialog"], .round-tabs > button[onclick*="openDeleteRoundDialog"] { visibility: hidden; }
+@media (max-width: 640px) { .player-admission-menu-popover { min-width: min(280px, calc(100vw - 24px)); } }
+[data-host-gameplay-view] { display: contents; }
+.host-board-layout[hidden] { display: none; }
+.host-game-board:has(> [data-host-gameplay-view] > .current-question-summary:not(.wager-mode)) { width: calc(100vw - 32px); max-width: none; margin-left: calc(50% - 50vw + 16px); margin-right: calc(50% - 50vw + 16px); }
+.host-game-board:has(> [data-host-gameplay-view] > .question-review-preview), .host-game-board:has(> [data-host-gameplay-view] > [data-game-intro-page]), .host-game-board:has(> [data-host-gameplay-view] > [data-final-question-transition]) { width: calc(100vw - 32px); max-width: none; margin-left: calc(50% - 50vw + 16px); margin-right: calc(50% - 50vw + 16px); }
+[data-host-gameplay-view] > .question-review-preview { flex: 1 1 auto; min-height: 0; height: 100%; grid-template-rows: auto minmax(0, 1fr); margin-bottom: 0; }
+[data-host-gameplay-view] > .question-review-preview > .game-content-presentation { width: 100%; max-width: none; min-height: 0; height: 100%; grid-template-rows: minmax(0, 1fr); }
+[data-host-gameplay-view] > .question-review-preview > .game-content-presentation > .game-content-blocks { align-self: safe center; max-height: 100%; }
+[data-host-gameplay-view] > [data-game-intro-page] { flex: 1 1 auto; min-height: 0; height: 100%; max-height: 100%; box-sizing: border-box; }
+.host-game-board.host-gameplay-presentation-mode { --game-scoreboard-space: 0px !important; padding-bottom: 0; }
+.host-game-board.host-gameplay-presentation-mode > .game-scoreboard, .host-game-board.host-gameplay-presentation-mode > .game-scoreboard-resizer, .host-game-board.host-gameplay-presentation-mode > .game-side-controls { display: none; }
+.host-game-board.final-question-host > .game-side-controls { display: none; }
+body:has(.player-lobby:has(.player-buzzer-panel)) { overflow-x: hidden; overflow-x: clip; overscroll-behavior-x: none; touch-action: pan-y; }
+.player-lobby:has(.player-buzzer-panel), .player-lobby:has(.player-buzzer-panel) .player-buzzer-panel { max-width: 100%; overflow-x: hidden; overflow-x: clip; overscroll-behavior-x: none; }
+.player-lobby:has(.player-buzzer-panel) .player-buzzer { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
 @media (max-width: 700px) {
-    html:has(.player-lobby:has(.player-buzzer-panel)),
-    body:has(.player-lobby:has(.player-buzzer-panel)),
-    body:has(.player-lobby:has(.player-buzzer-panel)) > .page-shell {
-        width: 100%;
-        max-width: 100%;
-        overflow-x: hidden;
-        overflow-x: clip;
-        overscroll-behavior-x: none;
-    }
+    html:has(.player-lobby:has(.player-buzzer-panel)), body:has(.player-lobby:has(.player-buzzer-panel)), body:has(.player-lobby:has(.player-buzzer-panel)) > .page-shell { width: 100%; max-width: 100%; overflow: hidden; overscroll-behavior: none; }
+    body:has(.player-lobby:has(.player-buzzer-panel)) { touch-action: manipulation; }
+    .player-lobby:has(.player-buzzer-panel) .player-buzzer-panel { width: 100%; min-height: 0; grid-template-rows: minmax(0, 1fr) auto; align-items: stretch; justify-items: stretch; }
+    .player-lobby:has(.player-buzzer-panel) .player-buzzer { width: 100%; height: 100%; max-width: none; max-height: none; min-width: 0; min-height: 0; aspect-ratio: auto; border-radius: clamp(24px, 8vw, 56px); user-select: none; -webkit-user-select: none; }
 }
