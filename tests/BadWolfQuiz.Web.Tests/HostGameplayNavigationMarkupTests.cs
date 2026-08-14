@@ -461,6 +461,26 @@ public sealed class HostGameplayNavigationMarkupTests
     }
 
     [Fact]
+    public void Timer_controls_bypass_host_markup_replacement()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+        var markup = File.ReadAllText(FindLobbyView());
+
+        Assert.Contains(
+            "!form.matches(\".game-timer-pause, .game-timer-resume\")",
+            script);
+        Assert.Contains(
+            "event.target.matches(\".game-timer-pause\")",
+            markup);
+        Assert.Contains(
+            "event.target.matches(\".game-timer-resume\")",
+            markup);
+    }
+
+    [Fact]
     public void YouTube_auto_expand_rebinds_dynamic_gameplay_and_editor_previews()
     {
         var script = File.ReadAllText(FindWebFile(

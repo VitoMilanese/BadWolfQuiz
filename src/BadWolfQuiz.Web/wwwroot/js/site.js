@@ -771,10 +771,11 @@ const configureHostGameplayFormNavigation = () => {
     };
 
     const isGameplayForm = form =>
-        form.matches(".question-selection-form") ||
-        form.id === "remove-player-form" ||
-        form.closest("#blocked-players-dialog") !== null ||
-        form.closest(viewSelector) !== null;
+        !form.matches(".game-timer-pause, .game-timer-resume") &&
+        (form.matches(".question-selection-form") ||
+         form.id === "remove-player-form" ||
+         form.closest("#blocked-players-dialog") !== null ||
+         form.closest(viewSelector) !== null);
 
     document.addEventListener("click", event => {
         const target = event.target instanceof Element ? event.target : null;
