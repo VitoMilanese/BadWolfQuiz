@@ -7,6 +7,7 @@
         Height="620"
         MinWidth="760"
         MinHeight="460"
+        Background="{DynamicResource AppBackgroundBrush}"
         WindowStartupLocation="CenterOwner">
     <Grid Background="{DynamicResource AppBackgroundBrush}" Margin="16">
         <Grid.RowDefinitions>
