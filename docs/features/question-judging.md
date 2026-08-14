@@ -121,10 +121,12 @@ The near-simultaneous buzzer overlay applies the same fitting behavior to the
 winner and later buzzer entries. Later entries remain readable at a size close to
 the winner text and shrink only when required to fit the available width.
 
-Both gameplay overlays use a five-second visual lifetime. Because the host gameplay
-view is updated through partial navigation, newly inserted overlay cards are
-reinitialized for auto-fitting after each host gameplay update instead of relying
-only on the initial page-load fitting pass.
+Both gameplay overlays use a five-second visual lifetime. The near-simultaneous
+buzzer result is rendered directly from the live `BuzzerStateChanged` payload so
+its first-press feedback is not coupled to a partial gameplay GET. Answer-result
+feedback is rendered from the host gameplay refresh after the JSON judgment
+command completes. Dynamically inserted overlay cards are reinitialized for
+auto-fitting instead of relying only on the initial page-load fitting pass.
 
 ## Target question presentation flow
 

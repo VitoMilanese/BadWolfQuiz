@@ -13,17 +13,6 @@ public sealed class GameplayOverlayRegressionTests
             "document.querySelectorAll(\"[data-auto-fit-overlay]\").forEach(",
             markup);
         Assert.Contains("card.classList.add(\"is-auto-fit-ready\");", markup);
-
-        var transientReplace = markup.IndexOf(
-            "currentTransient.replaceChildren(",
-            StringComparison.Ordinal);
-        var overlayInitialization = markup.IndexOf(
-            "initializeGameplayOverlays();",
-            transientReplace,
-            StringComparison.Ordinal);
-
-        Assert.True(transientReplace >= 0);
-        Assert.True(overlayInitialization > transientReplace);
     }
 
     [Fact]
@@ -36,7 +25,7 @@ public sealed class GameplayOverlayRegressionTests
             "const initializeGameplayOverlays = () =>",
             StringComparison.Ordinal);
         var dynamicEnd = markup.IndexOf(
-            "const syncHeaderState = () =>",
+            "const showBuzzerRace = race =>",
             dynamicStart,
             StringComparison.Ordinal);
         var dynamicInitializer = markup[dynamicStart..dynamicEnd];
@@ -55,14 +44,53 @@ public sealed class GameplayOverlayRegressionTests
     }
 
     [Fact]
-    public void Buzzer_overlay_keeps_winner_and_late_player_names_in_server_markup()
+    public void Question_judging_bypasses_global_html_navigation()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var script = File.ReadAllText(FindWebFile("wwwroot", "js", "site.js"));
+
+        var gameplayFormStart = script.IndexOf(
+            "const isGameplayForm = form =>",
+            StringComparison.Ordinal);
+        var gameplayFormEnd = script.IndexOf(
+            "document.addEventListener(\"click\"",
+            gameplayFormStart,
+            StringComparison.Ordinal);
+        var gameplayFormBlock = script[gameplayFormStart..gameplayFormEnd];
+
+        Assert.Contains(
+            "!form.matches(\".question-judge-actions\")",
+            gameplayFormBlock);
+        Assert.Contains("event.target.matches(\".question-judge-actions\")", markup);
+        Assert.Contains("await submitGameControl(form, event.submitter);", markup);
+    }
+
+    [Fact]
+    public void Buzzer_race_is_rendered_directly_from_signalr_state()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var hub = File.ReadAllText(FindWebFile("Hubs", "GameHub.cs"));
+
+        Assert.Contains("const showBuzzerRace = race =>", markup);
+        Assert.Contains("container.replaceChildren(overlay);", markup);
+        Assert.Contains("initializeAutoFitCard(card);", markup);
+        Assert.Contains("badwolf:buzzer-race", markup);
+        Assert.Contains("{ detail: update.buzzerRace }", markup);
+        Assert.Contains(".then(showBuzzerRaceOverlay);", markup);
+        Assert.DoesNotContain("Model.Game.BuzzerRace is { } buzzerRace", markup);
+
+        Assert.Contains("buzzerRace = game.BuzzerRace is { } race &&", hub);
+        Assert.DoesNotContain("LatePlayers.Count: > 0", hub);
+    }
+
+    [Fact]
+    public void Buzzer_and_score_overlays_share_the_five_second_visual_lifetime()
     {
         var markup = File.ReadAllText(FindLobbyView());
 
-        Assert.Contains("Model.Game.BuzzerRace is { } buzzerRace", markup);
-        Assert.Contains("buzzerRace.WinnerPlayerName", markup);
-        Assert.Contains("buzzerRace.LatePlayers", markup);
-        Assert.Contains("<div class=\"buzzer-race-card\" data-auto-fit-overlay>", markup);
+        Assert.Contains("buzzerOverlayDismissHandle = window.setTimeout(() =>", markup);
+        Assert.Contains("}, 5000);", markup);
+        Assert.Contains("data-answer-result-overlay", markup);
     }
 
     private static string FindLobbyView() =>
