@@ -81,11 +81,15 @@ Escape or the close control leaves only the expanded presentation. Playback cont
 
 If the host manually resumes the timer while the video is still playing, the YouTube manager relinquishes its pending automatic resume. When playback later ends, it does not submit a second Resume command and the already-running timer continues normally.
 
-## Live updates and commands
+## Live updates and timer commands
 
 Host commands and SignalR updates share the same persistent shell. A command in flight defers refresh work that would conflict with the command response, avoiding races where a live state broadcast replaces content before the HTTP request finishes.
 
-Timer pause/resume commands stay on their lightweight command handler and are excluded from the general gameplay-view replacement path. Timer state itself is updated from SignalR without remounting the current question or media player.
+Timer pause, resume, and quick-adjust commands stay on their lightweight timer-command path and are explicitly excluded from the general host gameplay form-navigation interceptor. Timer state itself is updated from SignalR without remounting the current question, timer, or media player.
+
+The host timer exposes `+10`, `+15`, `+20`, and `+30` quick adjustments while the timer container is hovered or focused. These controls extend the active regular or answer timer without changing whether it is running or paused. Remaining time is capped at 999 seconds, and the updated timer state is broadcast immediately.
+
+Quick-adjust forms use the same AJAX contract as pause/resume and must not enter the HTML gameplay-navigation path. Keeping `.game-timer-adjust` outside the general gameplay form interceptor is important: routing a quick adjustment through that interceptor would rebuild the gameplay DOM, briefly remove the timer, and close the quick-actions panel. With the lightweight command path, repeated additions can be made while the pointer remains over the timer/action area and the timer DOM stays mounted.
 
 ## Failure model
 
