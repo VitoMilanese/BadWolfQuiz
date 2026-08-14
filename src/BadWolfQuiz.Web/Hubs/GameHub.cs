@@ -575,7 +575,7 @@ public sealed class GameHub(
             ineligiblePlayerIds = question.AnswerAttempts
                 .Select(attempt => attempt.PlayerId.Value)
                 .ToArray(),
-            buzzerRace = game.BuzzerRace is { LatePlayers.Count: > 0 } race &&
+            buzzerRace = game.BuzzerRace is { } race &&
                 race.SourceQuestionId == question.SourceQuestionId
                     ? new
                     {

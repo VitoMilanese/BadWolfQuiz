@@ -772,6 +772,7 @@ const configureHostGameplayFormNavigation = () => {
 
     const isGameplayForm = form =>
         !form.matches(".game-timer-pause, .game-timer-resume, .game-timer-adjust") &&
+        !form.matches(".question-judge-actions") &&
         (form.matches(".question-selection-form") ||
          form.id === "remove-player-form" ||
          form.closest("#blocked-players-dialog") !== null ||

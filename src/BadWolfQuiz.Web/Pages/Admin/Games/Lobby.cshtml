@@ -708,28 +708,6 @@
                         ? Model.Players.Where(player => player.Id == answeringPlayerId)
                         : Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>();
 
-                @if (!Model.CurrentQuestion.IsSpecial &&
-                    Model.Game.BuzzerRace is { } buzzerRace &&
-                    buzzerRace.SourceQuestionId == Model.CurrentQuestion.SourceQuestionId)
-                {
-                    <aside class="buzzer-race-overlay" role="status" aria-live="polite">
-                        <div class="buzzer-race-card" data-auto-fit-overlay>
-                            <p>@Localizer["GameBoard_BuzzerRaceWinner", buzzerRace.WinnerPlayerName]</p>
-                            <ul>
-                                @foreach (var latePlayer in buzzerRace.LatePlayers)
-                                {
-                                    <li>
-                                        @Localizer[
-                                            "GameBoard_BuzzerRaceLatePlayer",
-                                            latePlayer.PlayerName,
-                                            latePlayer.DelayMilliseconds]
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                    </aside>
-                }
-
                 <section class="question-controls">
                     @if (!Model.CurrentQuestion.IsSpecial &&
                         Model.CurrentQuestion.BuzzerStatus ==
@@ -1645,52 +1623,129 @@
         const updatedEventName = "badwolf:host-gameplay-updated";
         let requestSequence = 0;
         let refreshPromise = null;
+        let buzzerOverlayDismissHandle = null;
+        const buzzerWinnerTemplate = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Localizer["GameBoard_BuzzerRaceWinner", "__PLAYER__"].Value));
+        const buzzerLateTemplate = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Localizer["GameBoard_BuzzerRaceLatePlayer", "__PLAYER__", "__DELAY__"].Value));
 
         const isSameLobbyUrl = url => {
             const current = new URL(window.location.href);
             return url.origin === current.origin && url.pathname === current.pathname;
         };
 
-        const initializeTransientOverlay = () => {
+        const initializeAutoFitCard = card => {
+            if (!card ||
+                card.dataset.hostGameplayAutoFitInitialized === "true") {
+                return;
+            }
+
+            card.dataset.hostGameplayAutoFitInitialized = "true";
+            const elements = [...card.querySelectorAll(
+                "p, li, .answer-result-score")];
+
+            const fit = () => {
+                if (elements.length === 0) {
+                    card.classList.add("is-auto-fit-ready");
+                    return;
+                }
+
+                for (const element of elements) {
+                    element.style.removeProperty("font-size");
+                }
+
+                const baseSizes = elements.map(element =>
+                    Number.parseFloat(getComputedStyle(element).fontSize));
+
+                const fits = () => {
+                    if (card.scrollHeight > card.clientHeight + 1) {
+                        return false;
+                    }
+
+                    return elements.every(element =>
+                        element.scrollWidth <= element.clientWidth + 1);
+                };
+
+                let scale = 1;
+                while (scale > 0.35 && !fits()) {
+                    scale -= 0.025;
+                    elements.forEach((element, index) => {
+                        element.style.fontSize =
+                            `${baseSizes[index] * scale}px`;
+                    });
+                }
+
+                card.classList.add("is-auto-fit-ready");
+            };
+
+            fit();
+
+            if (typeof ResizeObserver !== "undefined") {
+                new ResizeObserver(fit).observe(card);
+            }
+        };
+
+        const initializeGameplayOverlays = () => {
+            document.querySelectorAll("[data-auto-fit-overlay]").forEach(
+                initializeAutoFitCard);
+
             const overlay = document.querySelector(
                 `${transientSelector} [data-answer-result-overlay]`);
-            if (!overlay || overlay.dataset.hostGameplayInitialized === "true") {
+            if (!overlay ||
+                overlay.dataset.hostGameplayInitialized === "true") {
                 return;
             }
 
             overlay.dataset.hostGameplayInitialized = "true";
-            const card = overlay.querySelector("[data-auto-fit-overlay]");
-            if (card) {
-                const elements = [...card.querySelectorAll(
-                    "p, li, .answer-result-score")];
-                const fit = () => {
-                    if (elements.length === 0) return;
-                    elements.forEach(element =>
-                        element.style.removeProperty("font-size"));
-                    const baseSizes = elements.map(element =>
-                        Number.parseFloat(getComputedStyle(element).fontSize));
-                    const fits = () =>
-                        card.scrollHeight <= card.clientHeight + 1 &&
-                        elements.every(element =>
-                            element.scrollWidth <= element.clientWidth + 1);
-                    let scale = 1;
-                    while (scale > 0.35 && !fits()) {
-                        scale -= 0.025;
-                        elements.forEach((element, index) => {
-                            element.style.fontSize =
-                                `${baseSizes[index] * scale}px`;
-                        });
-                    }
-                    card.classList.add("is-auto-fit-ready");
-                };
-                requestAnimationFrame(fit);
-                if (typeof ResizeObserver !== "undefined") {
-                    new ResizeObserver(fit).observe(card);
-                }
+            window.setTimeout(() => overlay.remove(), 5000);
+        };
+
+        const showBuzzerRace = race => {
+            const container = document.querySelector(transientSelector);
+            if (!container || !race?.winnerPlayerName) {
+                return;
             }
 
-            window.setTimeout(() => overlay.remove(), 1500);
+            const overlay = document.createElement("aside");
+            overlay.className = "buzzer-race-overlay";
+            overlay.setAttribute("role", "status");
+            overlay.setAttribute("aria-live", "polite");
+
+            const card = document.createElement("div");
+            card.className = "buzzer-race-card";
+            card.dataset.autoFitOverlay = "";
+
+            const winner = document.createElement("p");
+            winner.textContent = buzzerWinnerTemplate.replace(
+                "__PLAYER__",
+                race.winnerPlayerName);
+            card.append(winner);
+
+            const latePlayers = document.createElement("ul");
+            for (const latePlayer of race.latePlayers ?? []) {
+                const item = document.createElement("li");
+                item.textContent = buzzerLateTemplate
+                    .replace("__PLAYER__", latePlayer.playerName)
+                    .replace("__DELAY__", latePlayer.delayMilliseconds.toString());
+                latePlayers.append(item);
+            }
+            card.append(latePlayers);
+            overlay.append(card);
+
+            window.clearTimeout(buzzerOverlayDismissHandle);
+            container.replaceChildren(overlay);
+            initializeAutoFitCard(card);
+            buzzerOverlayDismissHandle = window.setTimeout(() => {
+                if (overlay.isConnected) {
+                    overlay.remove();
+                }
+                buzzerOverlayDismissHandle = null;
+            }, 5000);
         };
+
+        document.addEventListener("badwolf:buzzer-race", event => {
+            showBuzzerRace(event.detail);
+        });
 
         const syncHeaderState = () => {
             const view = document.querySelector(viewSelector);
@@ -1825,7 +1880,7 @@
             }
 
             syncHeaderState();
-            initializeTransientOverlay();
+            initializeGameplayOverlays();
 
             if (historyMode === "push") {
                 history.pushState({ hostGameplay: true }, "", targetUrl.href);
@@ -3722,7 +3777,7 @@
 
             window.setTimeout(() => {
                 overlay.remove();
-            }, 1500);
+            }, 5000);
         })();
 
         (() => {
@@ -4865,14 +4920,28 @@
                         update.status !== "inactive";
                 }
 
+                const showBuzzerRaceOverlay = () => {
+                    if (!update.buzzerRace) {
+                        return;
+                    }
+
+                    document.dispatchEvent(new CustomEvent(
+                        "badwolf:buzzer-race",
+                        { detail: update.buzzerRace }));
+                };
+
                 if (!hasReceivedInitialBuzzerState) {
                     hasReceivedInitialBuzzerState = true;
+                    showBuzzerRaceOverlay();
                     return;
                 }
 
                 if (lobby.classList.contains("host-game-board") &&
                     !isExternalHostFlowActive()) {
-                    void requestHostGameplayRefresh();
+                    void requestHostGameplayRefresh()
+                        .then(showBuzzerRaceOverlay);
+                } else {
+                    showBuzzerRaceOverlay();
                 }
             });
 
