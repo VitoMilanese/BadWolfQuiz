@@ -36,6 +36,19 @@ public sealed class PlayerBuzzerTouchRegressionTests
     }
 
     [Fact]
+    public void Player_buzzer_lobby_allows_vertical_scrolling_for_expanded_settings()
+    {
+        var root = FindRepositoryRoot();
+        var css = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "player-admission-menu.css"));
+
+        Assert.Contains("overflow-y: auto;", css);
+        Assert.Contains("overscroll-behavior-y: contain;", css);
+        Assert.Contains("touch-action: pan-y;", css);
+        Assert.Contains("-webkit-overflow-scrolling: touch;", css);
+        Assert.Contains(".player-lobby:has(.player-buzzer-panel) .player-buzzer { touch-action: none;", css);
+    }
+
+    [Fact]
     public void Player_buzzer_fires_on_primary_pointer_down()
     {
         var root = FindRepositoryRoot();
