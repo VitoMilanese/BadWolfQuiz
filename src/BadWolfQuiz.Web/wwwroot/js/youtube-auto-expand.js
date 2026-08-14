@@ -14,6 +14,7 @@
     let shouldResumeTimer = false;
     let timerPlaybackOwner = null;
     let apiCallbackInstalled = false;
+    let suppressNextEscapeKeyUp = false;
 
     const pauseRunningTimer = () => {
         const timerPanel = document.getElementById("game-timer");
@@ -263,9 +264,20 @@
             return;
         }
 
+        suppressNextEscapeKeyUp = true;
         event.preventDefault();
-        event.stopPropagation();
+        event.stopImmediatePropagation();
         clearExpandedPresentation();
+    }, true);
+
+    window.addEventListener("keyup", event => {
+        if (event.key !== "Escape" || !suppressNextEscapeKeyUp) {
+            return;
+        }
+
+        suppressNextEscapeKeyUp = false;
+        event.preventDefault();
+        event.stopImmediatePropagation();
     }, true);
 
     document.addEventListener("play", event => {
