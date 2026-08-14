@@ -36,7 +36,7 @@ public sealed class HeaderGameControlsTests
     }
 
     [Fact]
-    public void Header_controls_are_horizontal_and_admission_menu_opens_downward()
+    public void Header_controls_are_horizontal_evenly_spaced_and_admission_menu_opens_downward()
     {
         var css = File.ReadAllText(FindWebFile(
             "wwwroot",
@@ -45,6 +45,7 @@ public sealed class HeaderGameControlsTests
 
         Assert.Contains(".game-side-controls[data-header-game-controls]", css);
         Assert.Contains("flex-direction: row;", css);
+        Assert.Contains("gap: 0.75rem;", css);
         Assert.Contains(
             ".game-side-controls[data-header-game-controls] .player-admission-menu-popover",
             css);

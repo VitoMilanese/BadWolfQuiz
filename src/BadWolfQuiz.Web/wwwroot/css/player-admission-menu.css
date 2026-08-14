@@ -46,6 +46,7 @@
 .game-side-controls[data-header-game-controls] {
     flex-direction: row;
     align-items: center;
+    gap: 0.75rem;
 }
 
 .game-side-controls[data-header-game-controls] :is(.game-side-control, .player-join-lock) {
