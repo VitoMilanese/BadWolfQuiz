@@ -5,14 +5,24 @@
         return;
     }
 
-    document.querySelectorAll("[data-open-discord-settings]").forEach(button => {
-        button.addEventListener("click", () => {
-            if (!frame.src) {
-                frame.src = frame.dataset.src;
+    const bindOpenButtons = () => {
+        document.querySelectorAll("[data-open-discord-settings]").forEach(button => {
+            if (button.dataset.discordSettingsDialogInitialized === "true") {
+                return;
             }
-            dialog.showModal();
+
+            button.dataset.discordSettingsDialogInitialized = "true";
+            button.addEventListener("click", () => {
+                if (!frame.src) {
+                    frame.src = frame.dataset.src;
+                }
+                dialog.showModal();
+            });
         });
-    });
+    };
+
+    bindOpenButtons();
+    document.addEventListener("badwolf:host-shell-mounted", bindOpenButtons);
 
     dialog.querySelector("[data-close-discord-settings]")
         ?.addEventListener("click", () => dialog.close());

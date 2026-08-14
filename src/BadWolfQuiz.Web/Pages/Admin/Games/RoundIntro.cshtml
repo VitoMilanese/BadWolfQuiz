@@ -268,6 +268,111 @@
                 response.url || targetUrl.href);
         };
 
+        const hostShellMountedEventName = "badwolf:host-shell-mounted";
+        const rerunnableScriptPaths = new Set([
+            "/js/player-admission-menu.js"
+        ]);
+
+        const executePageScript = async (source, baseUrl, loadedScriptUrls) => {
+            const sourcePath = source.getAttribute("src");
+            if (sourcePath) {
+                const sourceUrl = new URL(sourcePath, baseUrl).href;
+                const pathname = new URL(sourceUrl).pathname.toLowerCase();
+                const canRerun = rerunnableScriptPaths.has(pathname);
+                if (loadedScriptUrls.has(sourceUrl) && !canRerun) {
+                    return;
+                }
+
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement("script");
+                    for (const attribute of source.attributes) {
+                        if (attribute.name.toLowerCase() !== "src") {
+                            script.setAttribute(attribute.name, attribute.value);
+                        }
+                    }
+                    script.src = sourceUrl;
+                    script.async = false;
+                    script.addEventListener("load", resolve, { once: true });
+                    script.addEventListener("error", () =>
+                        reject(new Error(`Could not load ${sourceUrl}.`)),
+                    { once: true });
+                    document.body.append(script);
+                });
+                loadedScriptUrls.add(sourceUrl);
+                return;
+            }
+
+            if (!source.textContent?.trim()) {
+                return;
+            }
+
+            const script = document.createElement("script");
+            for (const attribute of source.attributes) {
+                script.setAttribute(attribute.name, attribute.value);
+            }
+            script.textContent = source.textContent;
+            document.body.append(script);
+            script.remove();
+        };
+
+        const importWithoutScripts = element => {
+            const clone = document.importNode(element, true);
+            clone.querySelectorAll("script").forEach(script => script.remove());
+            return clone;
+        };
+
+        const installLobby = async (markup, targetUrl) => {
+            const parsed = new DOMParser().parseFromString(markup, "text/html");
+            const currentMain = document.querySelector("main.page-shell");
+            const nextMain = parsed.querySelector("main.page-shell");
+            const currentHeaderContext = document.querySelector(".topbar-page-context");
+            const nextHeaderContext = parsed.querySelector(".topbar-page-context");
+            if (!currentMain || !nextMain || !currentHeaderContext || !nextHeaderContext) {
+                throw new Error("The running game shell is unavailable.");
+            }
+
+            const pageScripts = Array.from(parsed.body.querySelectorAll("script"));
+            const loadedScriptUrls = new Set(
+                Array.from(document.scripts, script => script.src)
+                    .filter(Boolean));
+
+            const nextMainClone = importWithoutScripts(nextMain);
+            currentMain.replaceChildren(...Array.from(nextMainClone.childNodes));
+
+            const nextHeaderContextClone = importWithoutScripts(nextHeaderContext);
+            currentHeaderContext.replaceChildren(
+                ...Array.from(nextHeaderContextClone.childNodes));
+
+            document.body.className = parsed.body.className;
+            const nextTheme = parsed.documentElement.getAttribute("data-theme");
+            if (nextTheme === null) {
+                document.documentElement.removeAttribute("data-theme");
+            } else {
+                document.documentElement.setAttribute("data-theme", nextTheme);
+            }
+            const nextRootStyle = parsed.documentElement.getAttribute("style");
+            if (nextRootStyle === null) {
+                document.documentElement.removeAttribute("style");
+            } else {
+                document.documentElement.setAttribute("style", nextRootStyle);
+            }
+
+            const nextTitle = parsed.querySelector("title")?.textContent;
+            if (nextTitle) {
+                document.title = nextTitle;
+            }
+            history.replaceState(
+                { badWolfInitialRoundStarted: true },
+                "",
+                targetUrl.href);
+
+            for (const source of pageScripts) {
+                await executePageScript(source, targetUrl.href, loadedScriptUrls);
+            }
+
+            document.dispatchEvent(new CustomEvent(hostShellMountedEventName));
+        };
+
         const startGame = async form => {
             const response = await fetch(form.action, {
                 method: "POST",
@@ -290,14 +395,7 @@
                 throw new Error("The first-round intro did not finish in the game lobby.");
             }
 
-            const markup = await response.text();
-            history.replaceState(
-                { badWolfInitialRoundStarted: true },
-                "",
-                targetUrl.href);
-            document.open();
-            document.write(markup);
-            document.close();
+            await installLobby(await response.text(), targetUrl);
         };
 
         document.addEventListener("click", event => {

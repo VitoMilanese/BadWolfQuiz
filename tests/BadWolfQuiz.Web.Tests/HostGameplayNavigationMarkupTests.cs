@@ -331,6 +331,29 @@ public sealed class HostGameplayNavigationMarkupTests
     }
 
     [Fact]
+    public void First_round_soft_mount_reinitializes_host_navigation_and_repairs_incomplete_board_dom()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+        var discordScript = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "discord-settings-dialog.js"));
+
+        Assert.Contains("badwolf:host-shell-mounted", script);
+        Assert.Contains("configureDynamicHostShell", script);
+        Assert.Contains("gameRoundIntroRoutesConfigured", script);
+        Assert.Contains("hostGameplayFormNavigationConfigured", script);
+        Assert.Contains("const nextById = new Map(", script);
+        Assert.Contains("currentById.size !== nextById.size", script);
+        Assert.Contains("replaceGrid();", script);
+        Assert.Contains("badwolf:host-shell-mounted", discordScript);
+        Assert.Contains("discordSettingsDialogInitialized", discordScript);
+    }
+
+    [Fact]
     public void Previous_round_intro_is_protected_from_stale_buzzer_refreshes()
     {
         var markup = File.ReadAllText(FindLobbyView());

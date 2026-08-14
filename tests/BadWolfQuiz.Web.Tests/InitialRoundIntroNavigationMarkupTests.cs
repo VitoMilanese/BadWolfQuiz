@@ -30,9 +30,14 @@ public sealed class InitialRoundIntroNavigationMarkupTests
         Assert.Contains("method: \"POST\"", markup);
         Assert.Contains("body: new FormData(form)", markup);
         Assert.Contains("badWolfInitialRoundStarted", markup);
-        Assert.Contains("document.open();", markup);
-        Assert.Contains("document.write(markup);", markup);
-        Assert.Contains("document.close();", markup);
+        Assert.Contains("const installLobby = async (markup, targetUrl) =>", markup);
+        Assert.Contains("currentMain.replaceChildren(", markup);
+        Assert.Contains("currentHeaderContext.replaceChildren(", markup);
+        Assert.Contains("await executePageScript(source, targetUrl.href, loadedScriptUrls);", markup);
+        Assert.Contains("badwolf:host-shell-mounted", markup);
+        Assert.DoesNotContain("document.open();", markup);
+        Assert.DoesNotContain("document.write(markup);", markup);
+        Assert.DoesNotContain("document.close();", markup);
     }
 
     [Fact]

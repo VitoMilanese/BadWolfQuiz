@@ -5,19 +5,28 @@ for (const message of document.querySelectorAll("[data-auto-dismiss]")) {
     }, 4000);
 }
 
-document.querySelectorAll("details.action-menu").forEach(menu => {
-    menu.addEventListener("toggle", () => {
-        if (!menu.open) {
+const initializeActionMenus = () => {
+    document.querySelectorAll("details.action-menu").forEach(menu => {
+        if (menu.dataset.actionMenuInitialized === "true") {
             return;
         }
 
-        document.querySelectorAll("details.action-menu[open]").forEach(other => {
-            if (other !== menu) {
-                other.removeAttribute("open");
+        menu.dataset.actionMenuInitialized = "true";
+        menu.addEventListener("toggle", () => {
+            if (!menu.open) {
+                return;
             }
+
+            document.querySelectorAll("details.action-menu[open]").forEach(other => {
+                if (other !== menu) {
+                    other.removeAttribute("open");
+                }
+            });
         });
     });
-});
+};
+
+initializeActionMenus();
 
 document.addEventListener("click", event => {
     const selectedItem = event.target.closest?.(".action-menu-item");
@@ -112,6 +121,8 @@ document.addEventListener("keydown", event => {
     }
 });
 
+let gameRoundIntroRoutesConfigured = false;
+
 const configureGameRoundIntroRoutes = () => {
     const gameBoard = document.querySelector(".host-game-board[data-game-id]");
     const pathGameId = window.location.pathname.split("/").filter(Boolean).at(-1);
@@ -120,6 +131,10 @@ const configureGameRoundIntroRoutes = () => {
     if (!gameId || !window.location.pathname.includes("/Admin/Games/Lobby/")) {
         return;
     }
+    if (gameRoundIntroRoutesConfigured) {
+        return;
+    }
+    gameRoundIntroRoutesConfigured = true;
 
     const encodedGameId = encodeURIComponent(gameId);
     const runningIntroBase = `/Admin/Games/RunningRoundIntro/${encodedGameId}`;
@@ -395,11 +410,17 @@ const configureGameRoundIntroRoutes = () => {
     observer.observe(document.body, { childList: true, subtree: true });
 };
 
+let hostGameplayFormNavigationConfigured = false;
+
 const configureHostGameplayFormNavigation = () => {
     const board = document.querySelector(".host-game-board[data-game-id]");
     if (!board || !window.BadWolfHostGameplay) {
         return;
     }
+    if (hostGameplayFormNavigationConfigured) {
+        return;
+    }
+    hostGameplayFormNavigationConfigured = true;
 
     const lobbyUrl = new URL(window.location.href);
     const gameId = board.dataset.gameId;
@@ -533,7 +554,7 @@ const configureHostGameplayFormNavigation = () => {
             : currentCategoryIds.length === nextCategoryIds.length &&
                 currentCategoryIds.every((id, index) => id === nextCategoryIds[index]);
 
-        if (!sameRound) {
+        const replaceGrid = () => {
             currentGrid.replaceChildren(
                 ...Array.from(nextGrid.childNodes, node =>
                     document.importNode(node, true)));
@@ -549,6 +570,10 @@ const configureHostGameplayFormNavigation = () => {
                 currentGrid.setAttribute("style", nextStyle);
             }
             fitBoardTitles(currentGrid);
+        };
+
+        if (!sameRound) {
+            replaceGrid();
             return;
         }
 
@@ -556,13 +581,19 @@ const configureHostGameplayFormNavigation = () => {
             Array.from(currentBoard.querySelectorAll(".host-board-question"))
                 .map(question => [getQuestionId(question), question])
                 .filter(([id]) => id));
+        const nextById = new Map(
+            Array.from(nextBoard.querySelectorAll(".host-board-question"))
+                .map(question => [getQuestionId(question), question])
+                .filter(([id]) => id));
 
-        for (const nextQuestion of nextBoard.querySelectorAll(
-            ".host-board-question")) {
-            const questionId = getQuestionId(nextQuestion);
-            const currentQuestion = questionId
-                ? currentById.get(questionId)
-                : null;
+        if (currentById.size !== nextById.size ||
+            Array.from(nextById.keys()).some(id => !currentById.has(id))) {
+            replaceGrid();
+            return;
+        }
+
+        for (const [questionId, nextQuestion] of nextById) {
+            const currentQuestion = currentById.get(questionId);
             if (!currentQuestion) {
                 continue;
             }
@@ -855,6 +886,14 @@ const configureHostGameplayFormNavigation = () => {
         syncPersistentHostChrome);
     syncPersistentHostChrome();
 };
+
+const configureDynamicHostShell = () => {
+    initializeActionMenus();
+    configureGameRoundIntroRoutes();
+    configureHostGameplayFormNavigation();
+};
+
+document.addEventListener("badwolf:host-shell-mounted", configureDynamicHostShell);
 
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", configureGameRoundIntroRoutes, { once: true });
