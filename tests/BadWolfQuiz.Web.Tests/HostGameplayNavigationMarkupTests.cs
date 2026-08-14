@@ -470,13 +470,16 @@ public sealed class HostGameplayNavigationMarkupTests
         var markup = File.ReadAllText(FindLobbyView());
 
         Assert.Contains(
-            "!form.matches(\".game-timer-pause, .game-timer-resume\")",
+            "!form.matches(\".game-timer-pause, .game-timer-resume, .game-timer-adjust\")",
             script);
         Assert.Contains(
             "event.target.matches(\".game-timer-pause\")",
             markup);
         Assert.Contains(
             "event.target.matches(\".game-timer-resume\")",
+            markup);
+        Assert.Contains(
+            "event.target.matches(\".game-timer-adjust\")",
             markup);
     }
 

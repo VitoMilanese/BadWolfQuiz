@@ -35,6 +35,13 @@ public sealed class QuickTimerControlsTests
             "wwwroot",
             "js",
             "quick-timer-controls.js"));
+        var siteScript = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "site.js"));
 
         Assert.Contains("game-timer-quick-actions", markup);
         Assert.Contains("asp-page-handler=\"AddQuestionTimerTime\"", markup);
@@ -62,6 +69,9 @@ public sealed class QuickTimerControlsTests
         Assert.Contains("document.elementFromPoint(event.clientX, event.clientY)", quickTimerScript);
         Assert.Contains("pointerTarget?.closest(timerSelector) === engagedTimer", quickTimerScript);
         Assert.Contains("clearEngagedTimer();", quickTimerScript);
+        Assert.Contains(
+            "!form.matches(\".game-timer-pause, .game-timer-resume, .game-timer-adjust\")",
+            siteScript);
 
         var handler = File.ReadAllText(Path.Combine(
             root,
