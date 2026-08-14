@@ -46,13 +46,19 @@
     <div class="game-intro-actions" data-game-intro-actions>
         @if (Model.IsFinalCategory || Model.CategoryCount == 0)
         {
-            <form method="post" asp-page-handler="Start" asp-route-id="@Model.GameId">
+            <form method="post"
+                  asp-page-handler="Start"
+                  asp-route-id="@Model.GameId"
+                  data-game-intro-start>
                 <button type="submit" class="button button-primary">@Model.StartGameLabel</button>
             </form>
         }
         else
         {
-            <form method="post" asp-page-handler="Start" asp-route-id="@Model.GameId">
+            <form method="post"
+                  asp-page-handler="Start"
+                  asp-route-id="@Model.GameId"
+                  data-game-intro-start>
                 <button type="submit" class="button button-secondary">@Model.SkipLabel</button>
             </form>
 
@@ -224,6 +230,7 @@
         window.badWolfInitialRoundIntroNavigationInitialized = true;
         const introSelector = "[data-game-intro-page]";
         const nextSelector = "[data-game-intro-next]";
+        const startFormSelector = "form[data-game-intro-start]";
         let navigationInProgress = false;
 
         const loadFrame = async targetUrl => {
@@ -261,6 +268,38 @@
                 response.url || targetUrl.href);
         };
 
+        const startGame = async form => {
+            const response = await fetch(form.action, {
+                method: "POST",
+                credentials: "same-origin",
+                body: new FormData(form),
+                headers: {
+                    Accept: "text/html",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                cache: "no-store"
+            });
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            const targetUrl = new URL(response.url || form.action, window.location.href);
+            const currentUrl = new URL(window.location.href);
+            if (targetUrl.origin !== currentUrl.origin ||
+                !targetUrl.pathname.toLowerCase().includes("/admin/games/lobby/")) {
+                throw new Error("The first-round intro did not finish in the game lobby.");
+            }
+
+            const markup = await response.text();
+            history.replaceState(
+                { badWolfInitialRoundStarted: true },
+                "",
+                targetUrl.href);
+            document.open();
+            document.write(markup);
+            document.close();
+        };
+
         document.addEventListener("click", event => {
             if (navigationInProgress ||
                 event.defaultPrevented ||
@@ -296,6 +335,40 @@
                 })
                 .finally(() => {
                     navigationInProgress = false;
+                });
+
+            if (page &&
+                !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                page.classList.add("is-leaving");
+                window.setTimeout(() => void navigate(), 165);
+            } else {
+                void navigate();
+            }
+        }, true);
+
+        document.addEventListener("submit", event => {
+            const form = event.target instanceof HTMLFormElement
+                ? event.target
+                : null;
+            if (!form?.matches(startFormSelector) || navigationInProgress) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            navigationInProgress = true;
+            const submitter = event.submitter instanceof HTMLElement
+                ? event.submitter
+                : null;
+            submitter?.setAttribute("disabled", "disabled");
+            const page = form.closest(introSelector);
+            const navigate = () => startGame(form)
+                .catch(error => {
+                    console.error("Initial round intro start failed.", error);
+                    page?.classList.remove("is-leaving");
+                    submitter?.removeAttribute("disabled");
+                    navigationInProgress = false;
+                    form.submit();
                 });
 
             if (page &&

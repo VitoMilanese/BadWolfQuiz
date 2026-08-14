@@ -17,6 +17,25 @@ public sealed class InitialRoundIntroNavigationMarkupTests
     }
 
     [Fact]
+    public void Initial_round_intro_starts_or_skips_without_browser_navigation()
+    {
+        var markup = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "RoundIntro.cshtml"));
+
+        Assert.Contains("data-game-intro-start", markup);
+        Assert.Contains("const startGame = async form =>", markup);
+        Assert.Contains("method: \"POST\"", markup);
+        Assert.Contains("body: new FormData(form)", markup);
+        Assert.Contains("badWolfInitialRoundStarted", markup);
+        Assert.Contains("document.open();", markup);
+        Assert.Contains("document.write(markup);", markup);
+        Assert.Contains("document.close();", markup);
+    }
+
+    [Fact]
     public void Standalone_running_round_intro_advances_frames_without_reload_and_fits_viewport()
     {
         var markup = File.ReadAllText(FindWebFile(
