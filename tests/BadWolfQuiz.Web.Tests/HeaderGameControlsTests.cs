@@ -17,7 +17,7 @@ public sealed class HeaderGameControlsTests
 
         Assert.Equal(1, CountOccurrences(lobby, "class=\"game-side-controls\""));
         Assert.Contains("const moveGameControlsToHeader = () =>", script);
-        Assert.Contains("header.insertBefore(controls, discordSettings ?? null);", script);
+        Assert.Contains("discordSettings.after(controls);", script);
         Assert.Contains("controls.dataset.headerGameControls = \"\";", script);
     }
 
@@ -50,6 +50,19 @@ public sealed class HeaderGameControlsTests
             css);
         Assert.Contains("top: calc(100% + 8px);", css);
         Assert.Contains("bottom: auto;", css);
+    }
+
+    [Fact]
+    public void Discord_mute_success_status_is_dismissed_automatically()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "discord-media-mute.js"));
+
+        Assert.Contains("const setOperationStatus = (message, autoClear = false) =>", script);
+        Assert.Contains("setOperationStatus(result.message, true);", script);
+        Assert.Contains("}, 4000);", script);
     }
 
     private static int CountOccurrences(string value, string fragment)

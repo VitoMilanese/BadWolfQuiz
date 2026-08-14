@@ -26,7 +26,11 @@
         controls.dataset.headerGameControls = "";
 
         const discordSettings = header.querySelector("[data-open-discord-settings]");
-        header.insertBefore(controls, discordSettings ?? null);
+        if (discordSettings) {
+            discordSettings.after(controls);
+        } else {
+            header.append(controls);
+        }
         syncVisibility();
 
         const visibilityObserver = new MutationObserver(syncVisibility);
@@ -43,6 +47,22 @@
     const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
     let automaticRequestActive = false;
     let requestInFlight = Promise.resolve();
+    let statusClearTimer = null;
+
+    const setOperationStatus = (message, autoClear = false) => {
+        if (!status) {
+            return;
+        }
+
+        window.clearTimeout(statusClearTimer);
+        status.textContent = message;
+        if (autoClear && message) {
+            statusClearTimer = window.setTimeout(() => {
+                status.textContent = "";
+                statusClearTimer = null;
+            }, 4000);
+        }
+    };
 
     const post = async (handler, values, keepalive = false) => {
         const body = new FormData();
@@ -75,9 +95,7 @@
             .then(() => post("DiscordMedia", { active: shouldBeActive.toString() }))
             .catch(error => {
                 automaticRequestActive = !shouldBeActive;
-                if (status) {
-                    status.textContent = error.message;
-                }
+                setOperationStatus(error.message);
             });
     };
 
@@ -203,9 +221,7 @@
         requestInFlight = requestInFlight
             .then(() => post("DiscordMedia", { active: "true" }))
             .catch(error => {
-                if (status) {
-                    status.textContent = error.message;
-                }
+                setOperationStatus(error.message);
             });
     }, 60_000);
 
@@ -237,20 +253,14 @@
         button.addEventListener("click", async () => {
             const buttons = document.querySelectorAll("[data-discord-mute]");
             buttons.forEach(item => item.disabled = true);
-            if (status) {
-                status.textContent = "…";
-            }
+            setOperationStatus("…");
             try {
                 const result = await post("DiscordMute", {
                     muted: button.dataset.discordMute
                 });
-                if (status) {
-                    status.textContent = result.message;
-                }
+                setOperationStatus(result.message, true);
             } catch (error) {
-                if (status) {
-                    status.textContent = error.message;
-                }
+                setOperationStatus(error.message);
             } finally {
                 buttons.forEach(item => item.disabled = false);
             }
@@ -259,6 +269,7 @@
 
     window.addEventListener("pagehide", () => {
         mediaObserver.disconnect();
+        window.clearTimeout(statusClearTimer);
         if (automaticRequestActive) {
             post("DiscordMedia", { active: "false" }, true).catch(() => {});
         }
