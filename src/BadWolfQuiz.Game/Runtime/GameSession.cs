@@ -573,6 +573,48 @@ public sealed class GameSession
         return attempt;
     }
 
+    public QuestionAnswerAttempt AdjustQuestionAnswerHistoryEntry(
+        int sourceQuestionId,
+        GamePlayerId playerId,
+        int scoreDelta,
+        bool resolveQuestionIfAvailable = true)
+    {
+        if (scoreDelta == 0)
+        {
+            throw new GameRuleViolationException(
+                "A score adjustment cannot be zero.");
+        }
+
+        var question = FindQuestion(sourceQuestionId);
+        var existing = question.AnswerAttempts.SingleOrDefault(
+            attempt => attempt.PlayerId == playerId);
+
+        if (existing is null)
+        {
+            return AddQuestionAnswerHistoryEntry(
+                sourceQuestionId,
+                playerId,
+                scoreDelta > 0,
+                Math.Abs(scoreDelta),
+                resolveQuestionIfAvailable);
+        }
+
+        var updatedScoreDelta = checked(existing.ScoreDelta + scoreDelta);
+        var isCorrect = updatedScoreDelta switch
+        {
+            > 0 => true,
+            < 0 => false,
+            _ => existing.IsCorrect
+        };
+
+        return UpdateQuestionAnswerHistoryEntry(
+            sourceQuestionId,
+            existing.Id,
+            playerId,
+            isCorrect,
+            Math.Abs(updatedScoreDelta));
+    }
+
     public QuestionAnswerAttempt UpdateQuestionAnswerHistoryEntry(
         int sourceQuestionId,
         Guid attemptId,

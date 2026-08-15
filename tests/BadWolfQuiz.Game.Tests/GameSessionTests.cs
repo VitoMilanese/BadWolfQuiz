@@ -714,6 +714,46 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void AdjustQuestionAnswerHistoryEntry_accumulates_on_existing_entry()
+    {
+        var session = CreateSession();
+        var player = session.AddPlayer("Rose");
+        session.Start();
+        session.AddQuestionAnswerHistoryEntry(100, player.Id, true, 100);
+
+        var increased = session.AdjustQuestionAnswerHistoryEntry(
+            100, player.Id, 25);
+        var decreased = session.AdjustQuestionAnswerHistoryEntry(
+            100, player.Id, -40);
+
+        var question = session.Board.Questions.Single(item =>
+            item.SourceQuestionId == 100);
+        Assert.Single(question.AnswerAttempts);
+        Assert.Equal(increased.Id, decreased.Id);
+        Assert.Equal(85, decreased.ScoreDelta);
+        Assert.Equal(85, player.Score);
+    }
+
+    [Fact]
+    public void AdjustQuestionAnswerHistoryEntry_can_cross_zero_without_duplicate_entry()
+    {
+        var session = CreateSession();
+        var player = session.AddPlayer("Rose");
+        session.Start();
+        session.AddQuestionAnswerHistoryEntry(100, player.Id, false, 100);
+
+        var updated = session.AdjustQuestionAnswerHistoryEntry(
+            100, player.Id, 150);
+
+        var question = session.Board.Questions.Single(item =>
+            item.SourceQuestionId == 100);
+        Assert.Single(question.AnswerAttempts);
+        Assert.True(updated.IsCorrect);
+        Assert.Equal(50, updated.ScoreDelta);
+        Assert.Equal(50, player.Score);
+    }
+
+    [Fact]
     public void UpdateQuestionAnswerHistoryEntry_recalculates_players_and_attempt()
     {
         var session = CreateSession();

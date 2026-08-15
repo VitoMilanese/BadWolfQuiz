@@ -1247,6 +1247,32 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public QuestionAnswerAttempt? AdjustQuestionAnswerHistoryEntry(
+        string publicCode,
+        int sourceQuestionId,
+        GamePlayerId playerId,
+        int scoreDelta,
+        bool resolveQuestionIfAvailable = true)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            var attempt = game.Session.AdjustQuestionAnswerHistoryEntry(
+                sourceQuestionId,
+                playerId,
+                scoreDelta,
+                resolveQuestionIfAvailable);
+            game.MarkPersistenceChanged();
+            return attempt;
+        }
+    }
+
     public QuestionAnswerAttempt? UpdateQuestionAnswerHistoryEntry(
         string publicCode,
         int sourceQuestionId,

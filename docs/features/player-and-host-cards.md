@@ -38,7 +38,7 @@ The quick adjustment dialog uses the same question history rules as the full
 editor:
 
 - the host selects a question from the current or an earlier round;
-- questions that already contain an entry for that player are excluded;
+- questions that already contain an entry for that player remain selectable; repeated adjustments update that existing entry instead of creating a duplicate;
 - the reward or penalty is always entered as a positive value;
 - the numeric spinner advances in 100-point steps, while any positive value may
   still be typed manually;
@@ -46,10 +46,12 @@ editor:
 - if the selected question is still unopened, the host chooses whether to
   resolve it or keep it available.
 
-Adding points creates a correct history entry; subtracting points creates an
-incorrect history entry. These actions are submitted asynchronously, so the
-host board does not reload. Player scores are updated through the normal live
-player-state broadcast.
+For a player/question pair without history, adding points creates a correct history
+entry and subtracting points creates an incorrect history entry. When an entry
+already exists, the adjustment is applied to its current score contribution and
+the same entry is updated, including when repeated adjustments cross zero. These
+actions are submitted asynchronously, so the host board does not reload. Player
+scores are updated through the normal live player-state broadcast.
 
 ## Player avatars
 
