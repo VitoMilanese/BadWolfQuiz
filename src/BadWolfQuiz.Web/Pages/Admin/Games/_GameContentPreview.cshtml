@@ -1,5 +1,7 @@
 @model BadWolfQuiz.Web.Pages.Admin.Games.GameContentPreviewModel
 
+<link rel="stylesheet" href="~/css/youtube-placeholder.css" asp-append-version="true" />
+
 <section class="game-content-presentation @(Model.IsAnswer ? "answer-presentation" : "question-presentation")">
     <div class="game-content-blocks @(Model.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !Model.IsAnswer ? "four-clue-grid" : null)">
         @foreach (var block in Model.Blocks)
@@ -55,12 +57,21 @@
                         </video>
                         break;
                     case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
-                        <iframe class="game-content-video youtube-auto-expand"
-                                src="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
-                                title="@Localizer["GameBoard_MediaContent"]"
-                                data-close-label="@Localizer["GameBoard_CloseVideo"]"
-                                allowfullscreen>
-                        </iframe>
+                        <button class="youtube-placeholder"
+                                type="button"
+                                data-youtube-placeholder
+                                data-youtube-embed-url="@(LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl) + "&fs=0")"
+                                data-youtube-frame-class="game-content-video youtube-auto-expand"
+                                data-youtube-title="@Localizer["GameBoard_MediaContent"]"
+                                data-youtube-close-label="@Localizer["GameBoard_CloseVideo"]"
+                                data-youtube-allow-fullscreen="false"
+                                aria-label="@Localizer["GameBoard_MediaContent"]">
+                            <img class="youtube-placeholder-image"
+                                 src="~/images/youtube-placeholder.svg"
+                                 alt=""
+                                 aria-hidden="true" />
+                            <span class="youtube-placeholder-play" aria-hidden="true"></span>
+                        </button>
                         break;
                 }
 
