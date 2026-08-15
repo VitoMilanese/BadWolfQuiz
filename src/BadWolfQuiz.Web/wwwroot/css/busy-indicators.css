@@ -1,0 +1,138 @@
+body[aria-busy="true"] {
+    overflow: hidden;
+    touch-action: none;
+}
+
+.app-busy-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    max-width: none;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    overflow: hidden;
+}
+
+.app-busy-overlay[open] {
+    display: grid;
+    place-items: center;
+}
+
+.app-busy-overlay::backdrop {
+    background: rgba(7, 7, 9, 0.72);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    -webkit-backdrop-filter: blur(7px) saturate(0.82);
+    backdrop-filter: blur(7px) saturate(0.82);
+    animation: app-busy-backdrop-in 140ms ease-out both;
+}
+
+.app-busy-visual {
+    position: relative;
+    width: clamp(92px, 14vw, 132px);
+    aspect-ratio: 1;
+    animation: app-busy-visual-in 160ms ease-out both;
+    filter: drop-shadow(0 0 24px color-mix(in srgb, var(--red-bright) 34%, transparent));
+}
+
+.app-busy-orbit {
+    position: absolute;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.app-busy-orbit-outer {
+    inset: 0;
+    border: 4px solid color-mix(in srgb, var(--text) 16%, transparent);
+    border-top-color: var(--red-bright);
+    border-right-color: color-mix(in srgb, var(--red-bright) 70%, transparent);
+    border-bottom-color: transparent;
+    animation: app-busy-spin 1.05s cubic-bezier(0.55, 0.16, 0.38, 0.82) infinite;
+}
+
+.app-busy-orbit-inner {
+    inset: 18%;
+    border: 3px solid color-mix(in srgb, var(--text) 12%, transparent);
+    border-top-color: transparent;
+    border-left-color: var(--red);
+    border-bottom-color: color-mix(in srgb, var(--red-bright) 72%, transparent);
+    animation: app-busy-spin-reverse 1.45s cubic-bezier(0.55, 0.16, 0.38, 0.82) infinite;
+}
+
+.app-busy-core {
+    position: absolute;
+    inset: 37%;
+    background: linear-gradient(135deg, var(--red-bright), var(--red));
+    clip-path: polygon(50% 0, 100% 38%, 78% 100%, 22% 100%, 0 38%);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--red-bright) 72%, transparent);
+    animation: app-busy-core-pulse 1.15s ease-in-out infinite;
+}
+
+@keyframes app-busy-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes app-busy-spin-reverse {
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+@keyframes app-busy-core-pulse {
+    0%, 100% {
+        transform: scale(0.86);
+        opacity: 0.66;
+    }
+    50% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+}
+
+@keyframes app-busy-backdrop-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes app-busy-visual-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-busy-overlay::backdrop,
+    .app-busy-visual,
+    .app-busy-orbit,
+    .app-busy-core {
+        animation: none;
+    }
+
+    .app-busy-orbit-outer {
+        transform: rotate(38deg);
+    }
+
+    .app-busy-orbit-inner {
+        transform: rotate(-28deg);
+    }
+
+    .app-busy-core {
+        opacity: 0.86;
+    }
+}

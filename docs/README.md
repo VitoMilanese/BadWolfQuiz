@@ -18,6 +18,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 ## Features
 
 - [Quiz and question editing](features/quiz-editor.md)
+- [Fullscreen busy feedback](features/busy-indicators.md)
 - [Round and category intros](features/round-category-intros.md)
 - [Host gameplay navigation](features/host-gameplay-navigation.md)
 - [Quiz import and export](features/quiz-import-export.md)
