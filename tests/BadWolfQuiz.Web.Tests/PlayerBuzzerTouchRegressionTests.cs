@@ -30,7 +30,16 @@ public sealed class PlayerBuzzerTouchRegressionTests
         Assert.DoesNotContain("flex: 1 1 0;", css);
         Assert.DoesNotContain("height: 0;", css);
         Assert.Contains("aspect-ratio: auto;", css);
-        Assert.Contains("border-radius: clamp(24px, 8vw, 56px);", css);
+        Assert.Contains("border-radius: clamp(28px, 9vw, 64px);", css);
+    }
+
+    [Fact]
+    public void Player_buzzer_page_text_is_not_selectable()
+    {
+        var root = FindRepositoryRoot();
+        var css = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "player-admission-menu.css"));
+
+        Assert.Contains(".player-lobby:has(.player-buzzer-panel), .player-lobby:has(.player-buzzer-panel) *", css);
         Assert.Contains("user-select: none;", css);
         Assert.Contains("-webkit-user-select: none;", css);
     }
