@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace BadWolfQuiz.Web.Tests;
 
 public sealed class FinalTransitionPlayerCardRegressionTests
@@ -18,9 +20,10 @@ public sealed class FinalTransitionPlayerCardRegressionTests
         Assert.True(handlerEnd > handlerStart);
 
         var handler = markup[handlerStart..handlerEnd];
-        var guard = handler.IndexOf(
-            "if (isExternalHostFlowActive())",
-            StringComparison.Ordinal);
+        var guardMatch = Regex.Match(
+            handler,
+            @"if\s*\(isExternalHostFlowActive\(\)\)\s*\{\s*return;\s*\}",
+            RegexOptions.CultureInvariant);
         var fingerprint = handler.IndexOf(
             "const fingerprint = playerFingerprint(update.players);",
             StringComparison.Ordinal);
@@ -31,13 +34,10 @@ public sealed class FinalTransitionPlayerCardRegressionTests
             "playerList.replaceChildren();",
             StringComparison.Ordinal);
 
-        Assert.True(guard >= 0);
-        Assert.Contains(
-            "if (isExternalHostFlowActive()) {\n                    return;\n                }",
-            handler);
-        Assert.True(fingerprint > guard);
-        Assert.True(boardRender > guard);
-        Assert.True(listReplacement > guard);
+        Assert.True(guardMatch.Success);
+        Assert.True(fingerprint > guardMatch.Index);
+        Assert.True(boardRender > guardMatch.Index);
+        Assert.True(listReplacement > guardMatch.Index);
     }
 
     private static string FindLobbyView() => FindWebFile(

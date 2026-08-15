@@ -38,7 +38,7 @@ public sealed class HostTimeoutNotificationRegressionTests
     {
         var root = FindRepositoryRoot();
         var markup = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml"));
-        var css = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "site.css"));
+        var css = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "busy-indicators.css"));
 
         Assert.Contains("Math.ceil(update.remainingMilliseconds / 500)", markup);
         Assert.Contains("warningSlot >= 1", markup);
@@ -49,7 +49,7 @@ public sealed class HostTimeoutNotificationRegressionTests
         Assert.Contains("playQuestionTimerWarningTick(warningSlot, update.remainingMilliseconds)", markup);
         Assert.Contains("playQuestionTimerWarningAlternatingTick(warningSlot % 2 === 0)", markup);
         Assert.Contains("const baseFrequency = isHighPitch ? 1380 : 980", markup);
-        Assert.Contains("host-game-timer.timer-warning.timer-warning-pulse", css);
+        Assert.Contains(".host-game-timer.timer-warning.timer-warning-pulse", css);
         Assert.Contains("animation: game-timer-warning-pulse 500ms ease-out 1", css);
         Assert.Contains("@keyframes game-timer-warning-pulse", css);
     }
@@ -62,7 +62,7 @@ public sealed class HostTimeoutNotificationRegressionTests
         var model = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml.cs"));
         var markup = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml"));
 
-        Assert.Contains("\"QuestionTimerWarningSound\": \"Alternating\"", appsettings);
+        Assert.Contains("\"QuestionTimerWarningSound\": \"Rising\"", appsettings);
         Assert.Contains("Game:QuestionTimerWarningSound", model);
         Assert.Contains("data-question-timer-warning-sound=\"@Model.QuestionTimerWarningSound\"", markup);
         Assert.Contains("playQuestionTimerWarningRisingTick", markup);

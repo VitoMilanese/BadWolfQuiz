@@ -166,6 +166,31 @@ body[aria-busy="true"] {
     font-size: clamp(0.84rem, 1.54vw, 1.4rem);
 }
 
+/* Keep the final five-second host timer warning visible and synchronized with the 500 ms warning cadence. */
+.host-game-timer.timer-warning.timer-warning-pulse {
+    animation: game-timer-warning-pulse 500ms ease-out 1;
+}
+
+@keyframes game-timer-warning-pulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: none;
+    }
+    45% {
+        transform: scale(1.09);
+        filter:
+            brightness(1.45)
+            drop-shadow(0 0 18px color-mix(in srgb, var(--red-bright) 86%, transparent));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .host-game-timer.timer-warning.timer-warning-pulse {
+        animation: none;
+        filter: brightness(1.3);
+    }
+}
+
 /* Let small image blocks grow into the available content area while preserving the existing bounds. */
 .game-content-presentation .game-content-blocks:not(.four-clue-grid) > .game-content-block {
     width: 100%;
