@@ -839,7 +839,7 @@ public sealed class GameSessionRegistry
             (game, player) => game.Session.SubmitFinalWager(player.Id, amount));
     }
 
-    public FinalPlayerSubmission? SubmitMinimumFinalWagerForInactivePlayer(
+    public FinalPlayerSubmission? SubmitMinimumFinalWagerForPlayer(
         string publicCode,
         GamePlayerId playerId)
     {
@@ -888,7 +888,7 @@ public sealed class GameSessionRegistry
             (game, player) => game.Session.SubmitFinalAnswer(player.Id, answer));
     }
 
-    public FinalPlayerSubmission? SubmitEmptyFinalAnswerForInactivePlayer(
+    public FinalPlayerSubmission? SubmitEmptyFinalAnswerForPlayer(
         string publicCode,
         GamePlayerId playerId)
     {

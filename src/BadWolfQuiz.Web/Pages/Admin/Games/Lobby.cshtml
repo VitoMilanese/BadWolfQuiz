@@ -1227,8 +1227,7 @@
                                     ? Localizer["FinalQuestion_NotSubmitted"]
                                     : Localizer["FinalQuestion_Submitted"])
                             </span>
-                            @if (submission.Wager is null &&
-                                 Model.IsPlayerUnavailableForFinalAction(submission.PlayerId))
+                            @if (submission.Wager is null)
                             {
                                 <form method="post" asp-page-handler="SubmitMinimumFinalWager">
                                     <input type="hidden" name="playerId" value="@submission.PlayerId.Value" />
@@ -1323,8 +1322,7 @@
                                         ? Localizer["FinalQuestion_NotSubmitted"]
                                         : Localizer["FinalQuestion_Submitted"])
                                 </span>
-                                @if (submission.Answer is null &&
-                                     Model.IsPlayerUnavailableForFinalAction(submission.PlayerId))
+                                @if (submission.Answer is null)
                                 {
                                     <form method="post" asp-page-handler="SubmitEmptyFinalAnswer">
                                         <input type="hidden" name="playerId" value="@submission.PlayerId.Value" />

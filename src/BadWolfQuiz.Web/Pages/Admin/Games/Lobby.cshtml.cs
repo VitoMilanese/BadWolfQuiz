@@ -818,7 +818,7 @@ public sealed class LobbyModel(
     {
         return await ExecuteFinalHostCommand(
             id,
-            game => sessionRegistry.SubmitMinimumFinalWagerForInactivePlayer(
+            game => sessionRegistry.SubmitMinimumFinalWagerForPlayer(
                 game.PublicCode,
                 new GamePlayerId(playerId)),
             cancellationToken);
@@ -841,7 +841,7 @@ public sealed class LobbyModel(
     {
         return await ExecuteFinalHostCommand(
             id,
-            game => sessionRegistry.SubmitEmptyFinalAnswerForInactivePlayer(
+            game => sessionRegistry.SubmitEmptyFinalAnswerForPlayer(
                 game.PublicCode,
                 new GamePlayerId(playerId)),
             cancellationToken);
@@ -1802,13 +1802,6 @@ public sealed class LobbyModel(
         }
 
         return RedirectToPage(new { id });
-    }
-
-    public bool IsPlayerUnavailableForFinalAction(GamePlayerId playerId)
-    {
-        return Players.Any(player =>
-            player.Id == playerId &&
-            player.Presence != PlayerPresenceStatus.Active);
     }
 
     private IActionResult LoadPage(

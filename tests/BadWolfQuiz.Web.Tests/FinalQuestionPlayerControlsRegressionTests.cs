@@ -38,36 +38,25 @@ public sealed class FinalQuestionPlayerControlsRegressionTests
         Assert.Contains("PlayersChanged", markup, StringComparison.Ordinal);
         Assert.Contains("asp-page-handler=\"SubmitMinimumFinalWager\"", markup, StringComparison.Ordinal);
         Assert.Contains("asp-page-handler=\"SubmitEmptyFinalAnswer\"", markup, StringComparison.Ordinal);
-        Assert.Equal(
-            2,
-            CountOccurrences(
-                markup,
-                "Model.IsPlayerUnavailableForFinalAction(submission.PlayerId)"));
     }
 
     [Fact]
-    public void Final_fallback_actions_are_available_for_every_non_active_presence()
+    public void Final_fallback_actions_do_not_depend_on_player_presence()
     {
+        var markup = File.ReadAllText(FindLobbyView());
         var pageModel = File.ReadAllText(FindPageModel());
-        var helperStart = pageModel.IndexOf(
-            "IsPlayerUnavailableForFinalAction",
-            StringComparison.Ordinal);
-        Assert.True(helperStart >= 0);
-        var helperEnd = pageModel.IndexOf(
-            "    }",
-            helperStart,
-            StringComparison.Ordinal);
-        Assert.True(helperEnd > helperStart);
-        var helper = pageModel[helperStart..(helperEnd + 5)];
+        var registry = File.ReadAllText(FindRegistry());
 
-        Assert.Contains(
-            "player.Presence != PlayerPresenceStatus.Active",
-            helper,
-            StringComparison.Ordinal);
-        Assert.DoesNotContain(
-            "player.Presence == PlayerPresenceStatus.Inactive",
-            helper,
-            StringComparison.Ordinal);
+        Assert.Contains("@if (submission.Wager is null)", markup, StringComparison.Ordinal);
+        Assert.Contains("@if (submission.Answer is null)", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("IsPlayerUnavailableForFinalAction", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("IsPlayerUnavailableForFinalAction", pageModel, StringComparison.Ordinal);
+        Assert.Contains("SubmitMinimumFinalWagerForPlayer", pageModel, StringComparison.Ordinal);
+        Assert.Contains("SubmitEmptyFinalAnswerForPlayer", pageModel, StringComparison.Ordinal);
+        Assert.Contains("SubmitMinimumFinalWagerForPlayer", registry, StringComparison.Ordinal);
+        Assert.Contains("SubmitEmptyFinalAnswerForPlayer", registry, StringComparison.Ordinal);
+        Assert.DoesNotContain("ForInactivePlayer", pageModel, StringComparison.Ordinal);
+        Assert.DoesNotContain("ForInactivePlayer", registry, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -90,27 +79,14 @@ public sealed class FinalQuestionPlayerControlsRegressionTests
         Assert.Contains("BroadcastPlayersAsync", handler, StringComparison.Ordinal);
     }
 
-    private static int CountOccurrences(string value, string fragment)
-    {
-        var count = 0;
-        var startIndex = 0;
-        while ((startIndex = value.IndexOf(
-                   fragment,
-                   startIndex,
-                   StringComparison.Ordinal)) >= 0)
-        {
-            count++;
-            startIndex += fragment.Length;
-        }
-
-        return count;
-    }
-
     private static string FindLobbyView() =>
         Path.Combine(FindRepositoryRoot(), "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml");
 
     private static string FindPageModel() =>
         Path.Combine(FindRepositoryRoot(), "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml.cs");
+
+    private static string FindRegistry() =>
+        Path.Combine(FindRepositoryRoot(), "src", "BadWolfQuiz.Web", "Services", "GameSessionRegistry.cs");
 
     private static string FindRepositoryRoot()
     {
