@@ -1,0 +1,81 @@
+.buzzer-race-collecting-overlay {
+    animation: none;
+}
+
+.buzzer-race-loading-card {
+    min-height: clamp(92px, 14vh, 132px);
+    display: grid;
+    place-items: center;
+}
+
+.buzzer-race-loading-indicator {
+    position: relative;
+    width: clamp(64px, 8vw, 92px);
+    aspect-ratio: 1;
+    filter: drop-shadow(0 0 18px color-mix(in srgb, var(--red-bright) 36%, transparent));
+}
+
+.buzzer-race-loading-orbit {
+    position: absolute;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.buzzer-race-loading-orbit-outer {
+    inset: 0;
+    border: 3px solid color-mix(in srgb, var(--text) 16%, transparent);
+    border-top-color: var(--red-bright);
+    border-right-color: color-mix(in srgb, var(--red-bright) 70%, transparent);
+    border-bottom-color: transparent;
+    animation: buzzer-race-loading-spin 0.9s cubic-bezier(0.55, 0.16, 0.38, 0.82) infinite;
+}
+
+.buzzer-race-loading-orbit-inner {
+    inset: 20%;
+    border: 3px solid color-mix(in srgb, var(--text) 12%, transparent);
+    border-top-color: transparent;
+    border-left-color: var(--red);
+    border-bottom-color: color-mix(in srgb, var(--red-bright) 72%, transparent);
+    animation: buzzer-race-loading-spin-reverse 1.2s cubic-bezier(0.55, 0.16, 0.38, 0.82) infinite;
+}
+
+.buzzer-race-loading-core {
+    position: absolute;
+    inset: 38%;
+    background: linear-gradient(135deg, var(--red-bright), var(--red));
+    clip-path: polygon(50% 0, 100% 38%, 78% 100%, 22% 100%, 0 38%);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--red-bright) 72%, transparent);
+    animation: buzzer-race-loading-pulse 0.95s ease-in-out infinite;
+}
+
+@keyframes buzzer-race-loading-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes buzzer-race-loading-spin-reverse {
+    to { transform: rotate(-360deg); }
+}
+
+@keyframes buzzer-race-loading-pulse {
+    0%, 100% { transform: scale(0.82); opacity: 0.62; }
+    50% { transform: scale(1.08); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .buzzer-race-loading-orbit,
+    .buzzer-race-loading-core {
+        animation: none;
+    }
+
+    .buzzer-race-loading-orbit-outer {
+        transform: rotate(38deg);
+    }
+
+    .buzzer-race-loading-orbit-inner {
+        transform: rotate(-28deg);
+    }
+
+    .buzzer-race-loading-core {
+        opacity: 0.88;
+    }
+}

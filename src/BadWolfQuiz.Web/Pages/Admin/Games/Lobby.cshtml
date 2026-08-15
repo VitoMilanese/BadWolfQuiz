@@ -1707,8 +1707,12 @@
                 return;
             }
 
-            const overlay = document.createElement("aside");
+            const overlay =
+                container.querySelector("[data-buzzer-race-collecting]") ??
+                document.createElement("aside");
             overlay.className = "buzzer-race-overlay";
+            delete overlay.dataset.buzzerRaceCollecting;
+            overlay.removeAttribute("aria-busy");
             overlay.setAttribute("role", "status");
             overlay.setAttribute("aria-live", "polite");
 
@@ -1731,10 +1735,12 @@
                 latePlayers.append(item);
             }
             card.append(latePlayers);
-            overlay.append(card);
+            overlay.replaceChildren(card);
 
             window.clearTimeout(buzzerOverlayDismissHandle);
-            container.replaceChildren(overlay);
+            if (!overlay.isConnected) {
+                container.replaceChildren(overlay);
+            }
             initializeAutoFitCard(card);
             buzzerOverlayDismissHandle = window.setTimeout(() => {
                 if (overlay.isConnected) {
@@ -1874,7 +1880,11 @@
             }
             currentBoard.hidden = nextBoard.hidden;
 
-            if (currentTransient) {
+            const preserveCollectingBuzzerOverlay =
+                currentTransient?.querySelector(
+                    "[data-buzzer-race-collecting]") !== null;
+
+            if (currentTransient && !preserveCollectingBuzzerOverlay) {
                 currentTransient.replaceChildren(
                     ...Array.from(nextTransient?.childNodes ?? [], node =>
                         document.importNode(node, true)));
@@ -4933,6 +4943,14 @@
 
                 if (!hasReceivedInitialBuzzerState) {
                     hasReceivedInitialBuzzerState = true;
+                    showBuzzerRaceOverlay();
+                    return;
+                }
+
+                // The host-only collecting update must render immediately. A
+                // gameplay refresh here would hide the one-second loading state
+                // behind an HTTP round trip and defeat the instant feedback.
+                if (update.buzzerRace?.isCollecting) {
                     showBuzzerRaceOverlay();
                     return;
                 }
