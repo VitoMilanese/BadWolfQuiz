@@ -178,3 +178,21 @@
         }
     });
 })();
+
+(() => {
+    const buzzerButton = document.getElementById("player-buzzer");
+    if (!buzzerButton) {
+        return;
+    }
+
+    buzzerButton.addEventListener("pointerdown", event => {
+        const isPrimaryMouseButton =
+            event.pointerType !== "mouse" || event.button === 0;
+        if (!event.isPrimary || !isPrimaryMouseButton || buzzerButton.disabled) {
+            return;
+        }
+
+        event.preventDefault();
+        buzzerButton.click();
+    }, { passive: false });
+})();
