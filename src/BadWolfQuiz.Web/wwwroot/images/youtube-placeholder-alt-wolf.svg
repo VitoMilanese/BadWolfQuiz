@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#17181d" />
+      <stop offset="0.5" stop-color="#08090c" />
+      <stop offset="1" stop-color="#19060a" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="47%" r="48%">
+      <stop offset="0" stop-color="#ef233c" stop-opacity="0.24" />
+      <stop offset="1" stop-color="#ef233c" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="fur" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a2b31" />
+      <stop offset="1" stop-color="#0c0d11" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)" />
+  <ellipse cx="800" cy="430" rx="560" ry="340" fill="url(#glow)" />
+  <g transform="translate(800 445) scale(1.58)" opacity="0.82">
+    <path d="M-205-82-120-215-55-122-20-162 0-132 20-162 55-122 120-215 205-82 154 110 78 180 0 215-78 180-154 110Z" fill="url(#fur)" stroke="#ef233c" stroke-opacity="0.62" stroke-width="5" />
+    <path d="M-154-78-76-42-28 0-88-4Z" fill="#ef233c" fill-opacity="0.82" />
+    <path d="M154-78 76-42 28 0 88-4Z" fill="#ef233c" fill-opacity="0.82" />
+    <path d="M-125 62-54 38-18 70-76 106Z" fill="#d7d7dc" fill-opacity="0.11" />
+    <path d="M125 62 54 38 18 70 76 106Z" fill="#d7d7dc" fill-opacity="0.11" />
+    <path d="M-40 112 0 135 40 112 0 164Z" fill="#f4f4f5" fill-opacity="0.72" />
+    <path d="M-135-138-112-198-72-142Z" fill="#ef233c" fill-opacity="0.2" />
+    <path d="M135-138 112-198 72-142Z" fill="#ef233c" fill-opacity="0.2" />
+  </g>
+  <path d="M270 744H1330" stroke="#ffffff" stroke-opacity="0.045" stroke-width="2" />
+</svg>
