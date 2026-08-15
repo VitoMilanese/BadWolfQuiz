@@ -88,3 +88,39 @@ test("YouTube player states map playing, paused, ended, and cued", () => {
     assert.equal(DiscordMediaState.getYouTubePlaybackState(3), null);
     assert.equal(DiscordMediaState.getYouTubePlaybackState(-1), null);
 });
+
+test("quick-score question sync replaces stale round options and preserves a valid selection", () => {
+    const clone = node => ({ ...node });
+    const ownerDocument = { importNode: node => clone(node) };
+    const currentSelect = {
+        ownerDocument,
+        value: "round-1-question",
+        childNodes: [
+            { value: "round-1-question", disabled: false }
+        ],
+        options: [
+            { value: "round-1-question", disabled: false }
+        ],
+        replaceChildren(...nodes) {
+            this.childNodes = nodes;
+            this.options = nodes;
+        }
+    };
+    const nextSelect = {
+        childNodes: [
+            { value: "round-1-question", disabled: false },
+            { value: "round-2-question", disabled: false },
+            { value: "round-3-question", disabled: false }
+        ]
+    };
+
+    const synced = DiscordMediaState.syncQuickScoreQuestions(
+        currentSelect,
+        nextSelect);
+
+    assert.equal(synced, true);
+    assert.deepEqual(
+        currentSelect.options.map(option => option.value),
+        ["round-1-question", "round-2-question", "round-3-question"]);
+    assert.equal(currentSelect.value, "round-1-question");
+});
