@@ -4,11 +4,20 @@
         return;
     }
 
-    const youtubeFrameSelector = "iframe.youtube-auto-expand";
+    const youtubeFrameSelector =
+        "iframe.youtube-auto-expand[data-youtube-launched]";
+    const youtubeSourceFrameSelector =
+        "iframe.youtube-auto-expand:not([data-youtube-launched])";
+    const youtubePlaceholderSelector = "[data-youtube-placeholder]";
     const nativeMediaSelector = "audio, video";
     const players = new Map();
     const pendingFrames = new Set();
     const boundFrames = new WeakSet();
+    const boundPlaceholders = new WeakSet();
+    const scriptUrl = document.currentScript?.src ?? "";
+    const placeholderImageUrl = scriptUrl
+        ? new URL("../images/youtube-placeholder.svg", scriptUrl).toString()
+        : "/images/youtube-placeholder.svg";
     let expandedIframe = null;
     let closeButton = null;
     let shouldResumeTimer = false;
@@ -84,7 +93,7 @@
         closeButton = document.createElement("button");
         closeButton.type = "button";
         closeButton.className = "youtube-auto-expand-close";
-        closeButton.textContent = "×";
+        closeButton.textContent = "\u00d7";
         closeButton.title = iframe.dataset.closeLabel ?? "Close video";
         closeButton.setAttribute("aria-label", closeButton.title);
         closeButton.addEventListener("click", clearExpandedPresentation);
@@ -185,6 +194,18 @@
         try {
             const player = new window.YT.Player(iframe, {
                 events: {
+                    onReady: event => {
+                        if (iframe.dataset.youtubeAutoplay !== "true") {
+                            return;
+                        }
+
+                        delete iframe.dataset.youtubeAutoplay;
+                        try {
+                            event.target.playVideo();
+                        } catch {
+                            // The autoplay query parameter remains as a fallback.
+                        }
+                    },
                     onStateChange: event => handleStateChange(iframe, event)
                 }
             });
@@ -236,15 +257,154 @@
         initializeFrame(iframe);
     };
 
-    const forEachFrame = (rootNode, callback) => {
-        if (rootNode instanceof Element && rootNode.matches(youtubeFrameSelector)) {
+    const createPlaceholder = ({
+        embedUrl,
+        frameClass = "youtube-auto-expand",
+        title = "YouTube",
+        closeLabel = "",
+        allow = "",
+        allowFullscreen = true
+    } = {}) => {
+        if (!embedUrl) {
+            return null;
+        }
+
+        const placeholder = document.createElement("button");
+        placeholder.type = "button";
+        placeholder.className = "youtube-placeholder";
+        placeholder.dataset.youtubePlaceholder = "";
+        placeholder.dataset.youtubeEmbedUrl = embedUrl;
+        placeholder.dataset.youtubeFrameClass = frameClass;
+        placeholder.dataset.youtubeTitle = title;
+        placeholder.dataset.youtubeAllowFullscreen = allowFullscreen
+            ? "true"
+            : "false";
+        if (closeLabel) {
+            placeholder.dataset.youtubeCloseLabel = closeLabel;
+        }
+        if (allow) {
+            placeholder.dataset.youtubeAllow = allow;
+        }
+        placeholder.setAttribute("aria-label", title);
+
+        const image = document.createElement("img");
+        image.className = "youtube-placeholder-image";
+        image.src = placeholderImageUrl;
+        image.alt = "";
+        image.setAttribute("aria-hidden", "true");
+
+        const play = document.createElement("span");
+        play.className = "youtube-placeholder-play";
+        play.setAttribute("aria-hidden", "true");
+
+        placeholder.append(image, play);
+        return placeholder;
+    };
+
+    const buildLaunchUrl = value => {
+        try {
+            const url = new URL(value, document.baseURI);
+            url.searchParams.set("enablejsapi", "1");
+            url.searchParams.set("autoplay", "1");
+            return url.toString();
+        } catch {
+            return value;
+        }
+    };
+
+    const launchPlaceholder = placeholder => {
+        if (!placeholder.isConnected ||
+            placeholder.dataset.youtubeLaunching === "true") {
+            return;
+        }
+
+        const embedUrl = placeholder.dataset.youtubeEmbedUrl;
+        if (!embedUrl) {
+            return;
+        }
+
+        placeholder.dataset.youtubeLaunching = "true";
+
+        const iframe = document.createElement("iframe");
+        iframe.className = placeholder.dataset.youtubeFrameClass ?? "";
+        iframe.dataset.youtubeLaunched = "true";
+        iframe.dataset.youtubeAutoplay = "true";
+        iframe.src = buildLaunchUrl(embedUrl);
+        iframe.title = placeholder.dataset.youtubeTitle ?? "YouTube";
+        iframe.allow = placeholder.dataset.youtubeAllow ||
+            "accelerometer; autoplay; clipboard-write; encrypted-media; " +
+            "gyroscope; picture-in-picture; web-share";
+        iframe.allowFullscreen =
+            placeholder.dataset.youtubeAllowFullscreen !== "false";
+
+        const closeLabel = placeholder.dataset.youtubeCloseLabel;
+        if (closeLabel) {
+            iframe.dataset.closeLabel = closeLabel;
+        }
+
+        placeholder.replaceWith(iframe);
+
+        if (iframe.matches(youtubeFrameSelector)) {
+            bindFrame(iframe);
+        }
+    };
+
+    const bindPlaceholder = placeholder => {
+        if (boundPlaceholders.has(placeholder)) {
+            return;
+        }
+
+        boundPlaceholders.add(placeholder);
+        placeholder.addEventListener("click", () => {
+            launchPlaceholder(placeholder);
+        });
+    };
+
+    const replaceSourceFrameWithPlaceholder = iframe => {
+        if (!iframe.isConnected || iframe.dataset.youtubeLaunched === "true") {
+            return;
+        }
+
+        const placeholder = createPlaceholder({
+            embedUrl: iframe.getAttribute("src") ?? iframe.src,
+            frameClass: iframe.className,
+            title: iframe.title || "YouTube",
+            closeLabel: iframe.dataset.closeLabel ?? "",
+            allow: iframe.getAttribute("allow") ?? "",
+            allowFullscreen: iframe.hasAttribute("allowfullscreen")
+        });
+
+        if (!placeholder) {
+            return;
+        }
+
+        iframe.replaceWith(placeholder);
+        bindPlaceholder(placeholder);
+    };
+
+    const forEachMatching = (rootNode, selector, callback) => {
+        if (rootNode instanceof Element && rootNode.matches(selector)) {
             callback(rootNode);
         }
 
-        rootNode.querySelectorAll?.(youtubeFrameSelector).forEach(callback);
+        rootNode.querySelectorAll?.(selector).forEach(callback);
+    };
+
+    const forEachFrame = (rootNode, callback) => {
+        forEachMatching(rootNode, youtubeFrameSelector, callback);
+    };
+
+    const forEachSourceFrame = (rootNode, callback) => {
+        forEachMatching(rootNode, youtubeSourceFrameSelector, callback);
+    };
+
+    const forEachPlaceholder = (rootNode, callback) => {
+        forEachMatching(rootNode, youtubePlaceholderSelector, callback);
     };
 
     const bindMediaTree = rootNode => {
+        forEachSourceFrame(rootNode, replaceSourceFrameWithPlaceholder);
+        forEachPlaceholder(rootNode, bindPlaceholder);
         forEachFrame(rootNode, bindFrame);
     };
 
@@ -261,7 +421,8 @@
     };
 
     window.BadWolfYouTubeAutoExpand = {
-        scan: bindMediaTree
+        scan: bindMediaTree,
+        createPlaceholder
     };
 
     document.addEventListener("submit", event => {

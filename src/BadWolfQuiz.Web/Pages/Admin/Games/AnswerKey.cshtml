@@ -4,6 +4,8 @@
     ViewData["Title"] = Localizer["AnswerKey_Title"];
 }
 
+<link rel="stylesheet" href="~/css/youtube-placeholder.css" asp-append-version="true" />
+
 <section class="answer-key-page"
          data-game-code="@Model.Game.PublicCode">
     <header class="answer-key-header">
@@ -77,11 +79,19 @@
                                 </video>
                                 break;
                             case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
-                                <iframe class="game-content-video"
-                                        src="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
-                                        title="@Localizer["GameBoard_MediaContent"]"
-                                        allowfullscreen>
-                                </iframe>
+                                <button class="youtube-placeholder"
+                                        type="button"
+                                        data-youtube-placeholder
+                                        data-youtube-embed-url="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
+                                        data-youtube-frame-class="game-content-video"
+                                        data-youtube-title="@Localizer["GameBoard_MediaContent"]"
+                                        aria-label="@Localizer["GameBoard_MediaContent"]">
+                                    <img class="youtube-placeholder-image"
+                                         src="~/images/youtube-placeholder.svg"
+                                         alt=""
+                                         aria-hidden="true" />
+                                    <span class="youtube-placeholder-play" aria-hidden="true"></span>
+                                </button>
                                 break;
                         }
 
