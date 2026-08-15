@@ -252,10 +252,10 @@ public sealed class GameSession
 
     public GamePlayer RemovePlayer(GamePlayerId playerId)
     {
-        if (Status is not GameSessionStatus.Lobby and not GameSessionStatus.Running)
+        if (Status == GameSessionStatus.Completed)
         {
             throw new GameRuleViolationException(
-                "Players cannot be removed during or after the final question.");
+                "Players cannot be removed after the game has completed.");
         }
 
         var player = FindPlayer(playerId);
@@ -270,6 +270,18 @@ public sealed class GameSession
         {
             throw new GameRuleViolationException(
                 "A player involved in the current question cannot be removed.");
+        }
+
+        if (Status is
+            GameSessionStatus.FinalWagering or
+            GameSessionStatus.FinalAnswering or
+            GameSessionStatus.FinalJudging)
+        {
+            FinalQuestion!.RemovePlayer(playerId);
+            if (FinalQuestion.Status == FinalQuestionStatus.Completed)
+            {
+                Status = GameSessionStatus.Completed;
+            }
         }
 
         _players.Remove(player);
