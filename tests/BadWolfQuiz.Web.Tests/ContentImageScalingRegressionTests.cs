@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace BadWolfQuiz.Web.Tests;
 
 public sealed class ContentImageScalingRegressionTests
@@ -9,14 +11,15 @@ public sealed class ContentImageScalingRegressionTests
         var overrides = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "busy-indicators.css"));
         var siteStyles = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "site.css"));
 
-        Assert.Contains(
-            ".game-content-presentation .game-content-blocks:not(.four-clue-grid) > .game-content-block {\n    width: 100%;\n}",
+        AssertCssRuleContains(
             overrides,
-            StringComparison.Ordinal);
-        Assert.Contains(
-            ".game-content-presentation .game-content-blocks:not(.four-clue-grid) > .game-content-block > .game-content-image {\n    width: 100%;\n    height: auto;\n}",
+            ".game-content-presentation .game-content-blocks:not(.four-clue-grid) > .game-content-block",
+            "width: 100%;");
+        AssertCssRuleContains(
             overrides,
-            StringComparison.Ordinal);
+            ".game-content-presentation .game-content-blocks:not(.four-clue-grid) > .game-content-block > .game-content-image",
+            "width: 100%;",
+            "height: auto;");
         Assert.Contains("max-height: min(62vh, 680px);", siteStyles, StringComparison.Ordinal);
         Assert.Contains("object-fit: contain;", siteStyles, StringComparison.Ordinal);
         Assert.Contains(".four-clue-grid .game-content-image", siteStyles, StringComparison.Ordinal);
@@ -33,10 +36,11 @@ public sealed class ContentImageScalingRegressionTests
         var finalQuestionEditor = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Quizzes", "FinalQuestionEditor.cshtml"));
         var descriptionPreview = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "description-preview.js"));
 
-        Assert.Contains(
-            ".question-preview-modal .question-preview-content:not(.four-clue-grid) .question-preview-image {\n    width: 100%;\n    height: auto;\n}",
+        AssertCssRuleContains(
             overrides,
-            StringComparison.Ordinal);
+            ".question-preview-modal .question-preview-content:not(.four-clue-grid) .question-preview-image",
+            "width: 100%;",
+            "height: auto;");
         Assert.Contains(".question-preview-media {", previewModal, StringComparison.Ordinal);
         Assert.Contains("width: min(980px, 100%);", previewModal, StringComparison.Ordinal);
         Assert.Contains("max-height: min(62vh, 680px);", previewModal, StringComparison.Ordinal);
@@ -54,20 +58,39 @@ public sealed class ContentImageScalingRegressionTests
         var roundIntro = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RoundIntro.cshtml"));
         var runningRoundIntro = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "RunningRoundIntro.cshtml"));
 
-        Assert.Contains(
-            ".game-intro-page .game-intro-image-block {\n    width: 100%;\n}",
+        AssertCssRuleContains(
             overrides,
-            StringComparison.Ordinal);
-        Assert.Contains(
-            ".game-intro-page .game-intro-image {\n    width: min(900px, 100%);\n    height: auto;\n}",
+            ".game-intro-page .game-intro-image-block",
+            "width: 100%;");
+        AssertCssRuleContains(
             overrides,
-            StringComparison.Ordinal);
+            ".game-intro-page .game-intro-image",
+            "width: min(900px, 100%);",
+            "height: auto;");
 
         foreach (var introMarkup in new[] { roundIntro, runningRoundIntro })
         {
             Assert.Contains("max-width: min(900px, 100%);", introMarkup, StringComparison.Ordinal);
             Assert.Contains("max-height: 52vh;", introMarkup, StringComparison.Ordinal);
             Assert.Contains("object-fit: contain;", introMarkup, StringComparison.Ordinal);
+        }
+    }
+
+    private static void AssertCssRuleContains(
+        string css,
+        string selector,
+        params string[] declarations)
+    {
+        var match = Regex.Match(
+            css,
+            $@"{Regex.Escape(selector)}\s*\{{(?<body>[^}}]*)\}}",
+            RegexOptions.CultureInvariant);
+
+        Assert.True(match.Success, $"CSS rule was not found: {selector}");
+        var body = match.Groups["body"].Value;
+        foreach (var declaration in declarations)
+        {
+            Assert.Contains(declaration, body, StringComparison.Ordinal);
         }
     }
 
