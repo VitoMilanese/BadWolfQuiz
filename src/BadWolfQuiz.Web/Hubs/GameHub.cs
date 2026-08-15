@@ -339,25 +339,21 @@ public sealed class GameHub(
             return;
         }
 
-        if (tick.Outcome == QuestionTimerOutcome.AnswerExpired &&
-            tick.AnswerAttempt is { } attempt)
+        if (tick.Outcome is
+            QuestionTimerOutcome.AnswerExpired or
+            QuestionTimerOutcome.BuzzerExpired)
         {
-            var player = tick.Game.Session.Players.Single(
-                item => item.Id == attempt.PlayerId);
-
-            sessionRegistry.SetAnswerResultOverlay(
-                tick.Game,
-                player,
-                attempt,
-                "timeout");
+            await Clients
+                .Group(HostGroupName(tick.Game.PublicCode))
+                .SendAsync(
+                    "QuestionTimerExpired",
+                    new
+                    {
+                        mode = tick.Outcome == QuestionTimerOutcome.AnswerExpired
+                            ? "answer"
+                            : "buzzer"
+                    });
         }
-
-        await group.SendAsync(
-            "BuzzerStateChanged",
-            CreateBuzzerUpdate(tick.Game));
-        await group.SendAsync(
-            "PlayersChanged",
-            CreatePlayersUpdate(sessionRegistry, tick.Game));
     }
 
     public async Task Buzz(int sourceQuestionId)
@@ -537,10 +533,14 @@ public sealed class GameHub(
         var answerTimer = game.Session.AnswerTimer;
         var buzzerTimer = game.Session.Timer;
         var isAnswerTimerActive = answerTimer.Status is
-            GameTimerStatus.Running or GameTimerStatus.Paused;
+            GameTimerStatus.Running or
+            GameTimerStatus.Paused or
+            GameTimerStatus.Expired;
         var timer = isAnswerTimerActive ? answerTimer : buzzerTimer;
         var isVisible = timer.Status is
-            GameTimerStatus.Running or GameTimerStatus.Paused;
+            GameTimerStatus.Running or
+            GameTimerStatus.Paused or
+            GameTimerStatus.Expired;
 
         var question = game.Session.Board.Questions.FirstOrDefault(item =>
             item.Status is RuntimeQuestionStatus.Selected or

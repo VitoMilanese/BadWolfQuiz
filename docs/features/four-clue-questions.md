@@ -31,33 +31,20 @@ until the server reports their reveal.
 
 ## Timer expiration flow
 
-Question timer expiration has two possible outcomes.
+Timer expiration is informational only. Reaching zero never reveals another clue,
+resolves the question, or judges an answer.
 
-If another clue is available:
+When the timer expires:
 
-1. the Engine reveals exactly one next clue;
-2. the question remains active;
-3. a new full question-timer interval starts;
-4. the expiration result is `QuestionTimerOutcome.ClueRevealed`;
-5. clients are notified of the newly revealed clue and restarted timer.
+1. the current question and clue visibility remain unchanged;
+2. the timer remains at zero;
+3. the host receives the normal timeout notification;
+4. the host may reveal the next clue, add more time, judge an answer when applicable,
+   resolve the question, or use another valid gameplay control.
 
-If no further clue is available, expiration follows the normal unresolved-question
-timeout flow. The final clue therefore receives the same full timer interval as
-each earlier clue.
-
-Conceptually:
-
-```text
-timer expires
-    |
-    +-- another clue exists --> reveal one clue --> restart full timer
-    |                              |
-    |                              +--> question remains active
-    |
-    +-- no clue remains -------> normal unresolved-question timeout
-```
-
-A single expiration must never reveal multiple clues.
+A manual **Reveal clue** action still reveals exactly one clue and starts a new full
+timer interval. This keeps clue progression under host control while preserving the
+same timing semantics after each explicit reveal.
 
 ## Manual clue reveal
 

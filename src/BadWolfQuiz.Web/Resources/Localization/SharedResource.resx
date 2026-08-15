@@ -2580,4 +2580,16 @@
   <data name="Error_GameNoLongerAcceptsPlayers" xml:space="preserve">
     <value>This game no longer accepts new players.</value>
   </data>
+  <data name="GameTimer_ExpiredKicker" xml:space="preserve">
+    <value>Time expired</value>
+  </data>
+  <data name="GameTimer_ExpiredTitle" xml:space="preserve">
+    <value>TIME'S UP</value>
+  </data>
+  <data name="GameTimer_ExpiredBuzzer" xml:space="preserve">
+    <value>Buzzer time has expired. You decide what happens next.</value>
+  </data>
+  <data name="GameTimer_ExpiredAnswer" xml:space="preserve">
+    <value>Answer time has expired. Judge when you're ready.</value>
+  </data>
 </root>

@@ -166,12 +166,7 @@ which immutable clue blocks are currently public, and `CanRevealClue` indicates 
 another clue remains available. Revealing a clue is a domain transition rather than a
 client-only visibility change.
 
-A successful `RevealNextClue()` starts a new full question-timer interval. Timer restart
-therefore belongs to the domain operation itself, so automatic timer-driven reveal and
-manual host reveal have identical timing semantics. When the question timer expires and
-another clue can be revealed, the session reveals exactly one clue and reports
-`QuestionTimerOutcome.ClueRevealed` instead of resolving the question. Once no further
-clue is available, a later expiration follows the normal no-correct-answer timeout flow.
+A successful `RevealNextClue()` starts a new full question-timer interval. Timer restart therefore belongs to the domain operation itself. Timer expiration is informational: it does not reveal a clue, judge an answer, or resolve the question. The session reports the expiration once and leaves the current question state unchanged so the host can explicitly choose the next gameplay action.
 
 Answer reward decay is derived runtime behavior rather than a mutation of the
 question's immutable point value. During a regular-question individual answer
@@ -180,9 +175,7 @@ game settings, timer state, and the question's current base reward. Four-clue
 questions first derive their base reward from `RevealedClueCount`. Incorrect
 answer penalties do not use the decayed value.
 
-When an incorrect judgment or answer timeout exhausts the set of players eligible
-to buzz for that question, the Engine resolves the question without a correct
-answer instead of reopening a buzzer phase that nobody can use.
+When a host-judged incorrect answer exhausts the set of players eligible to buzz for that question, the Engine may resolve the question without a correct answer instead of reopening a buzzer phase that nobody can use. Timer expiration by itself never performs that gameplay decision.
 
 Once resolved, a question cannot become available again during normal play. Administrative history correction and board-closing operations are explicit engine commands with defined score consequences; they never mutate runtime properties directly. A manual history attempt may be attached to an `Available` question while intentionally leaving it available. Round completion is still derived from question state: when the final question in the current round becomes `Resolved`, the round is complete regardless of whether resolution came from normal play, a gift operation, a single-question close, or a category close.
 

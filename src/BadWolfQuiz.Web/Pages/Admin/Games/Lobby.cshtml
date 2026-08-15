@@ -368,6 +368,22 @@
              role="status"
              data-discord-operation-status></div>
 
+        <div class="question-timeout-notification"
+             data-question-timeout-notification
+             data-buzzer-message="@Localizer["GameTimer_ExpiredBuzzer"]"
+             data-answer-message="@Localizer["GameTimer_ExpiredAnswer"]"
+             role="status"
+             aria-live="assertive"
+             hidden>
+            <div class="question-timeout-notification-glow" aria-hidden="true"></div>
+            <div class="question-timeout-notification-icon" aria-hidden="true">⏱</div>
+            <div class="question-timeout-notification-copy">
+                <span class="question-timeout-notification-kicker">@Localizer["GameTimer_ExpiredKicker"]</span>
+                <strong>@Localizer["GameTimer_ExpiredTitle"]</strong>
+                <span data-question-timeout-message></span>
+            </div>
+        </div>
+
         <div id="host-gameplay-view" data-host-gameplay-view>
         @if (Model.PreviewQuestion is { } previewQuestion)
         {
@@ -4949,6 +4965,92 @@
 
             refreshScrollingNames();
             window.addEventListener("resize", refreshScrollingNames);
+
+            let questionTimeoutAudioContext = null;
+
+            const playQuestionTimeoutSting = () => {
+                const AudioContextType =
+                    window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextType) {
+                    return;
+                }
+
+                try {
+                    questionTimeoutAudioContext ??= new AudioContextType();
+                    const context = questionTimeoutAudioContext;
+                    if (context.state === "suspended") {
+                        void context.resume();
+                    }
+
+                    const now = context.currentTime;
+                    const master = context.createGain();
+                    master.gain.setValueAtTime(0.0001, now);
+                    master.gain.exponentialRampToValueAtTime(0.34, now + 0.008);
+                    master.gain.exponentialRampToValueAtTime(0.0001, now + 1.35);
+                    master.connect(context.destination);
+
+                    const ringBell = (startTime, side) => {
+                        const partials = side === 0
+                            ? [1020, 1540, 2230, 3070]
+                            : [1080, 1620, 2350, 3210];
+                        const levels = [0.55, 0.34, 0.22, 0.12];
+
+                        partials.forEach((frequency, index) => {
+                            const oscillator = context.createOscillator();
+                            const gain = context.createGain();
+                            oscillator.type = "sine";
+                            oscillator.frequency.setValueAtTime(frequency, startTime);
+                            oscillator.detune.setValueAtTime(index % 2 === 0 ? -7 : 9, startTime);
+
+                            gain.gain.setValueAtTime(0.0001, startTime);
+                            gain.gain.exponentialRampToValueAtTime(levels[index], startTime + 0.003);
+                            gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.22 + index * 0.025);
+
+                            oscillator.connect(gain).connect(master);
+                            oscillator.start(startTime);
+                            oscillator.stop(startTime + 0.34);
+                        });
+                    };
+
+                    for (let strike = 0; strike < 8; strike += 1) {
+                        ringBell(now + strike * 0.13, strike % 2);
+                    }
+                } catch (error) {
+                    console.debug("Question timeout audio is unavailable.", error);
+                }
+            };
+
+            connection.on("QuestionTimerExpired", update => {
+                const notification = document.querySelector(
+                    "[data-question-timeout-notification]");
+                if (!notification) {
+                    return;
+                }
+
+                const message = notification.querySelector(
+                    "[data-question-timeout-message]");
+                if (message) {
+                    message.textContent = update?.mode === "answer"
+                        ? notification.dataset.answerMessage
+                        : notification.dataset.buzzerMessage;
+                }
+
+                window.clearTimeout(notification._hideTimer);
+                window.clearTimeout(notification._removeTimer);
+                notification.hidden = false;
+                notification.classList.remove("is-visible", "is-leaving");
+                void notification.offsetWidth;
+                notification.classList.add("is-visible");
+                playQuestionTimeoutSting();
+                notification._hideTimer = window.setTimeout(() => {
+                    notification.classList.remove("is-visible");
+                    notification.classList.add("is-leaving");
+                    notification._removeTimer = window.setTimeout(() => {
+                        notification.hidden = true;
+                        notification.classList.remove("is-leaving");
+                    }, 420);
+                }, 4600);
+            });
 
             connection.on("TimerStateChanged", update => {
                 if (!timerPanel || !timerValue) {
