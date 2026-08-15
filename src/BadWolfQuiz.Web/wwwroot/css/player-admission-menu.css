@@ -42,6 +42,7 @@
 .host-game-board.final-question-host > .game-side-controls { display: none; }
 body:has(.player-buzzer-panel) { overflow-x: hidden; overflow-x: clip; overscroll-behavior-x: none; touch-action: pan-y; }
 .player-lobby:has(.player-buzzer-panel), .player-lobby:has(.player-buzzer-panel) .player-buzzer-panel { max-width: 100%; overflow-x: hidden; overflow-x: clip; overscroll-behavior-x: none; }
+.player-lobby:has(.player-buzzer-panel), .player-lobby:has(.player-buzzer-panel) * { user-select: none; -webkit-user-select: none; }
 .player-lobby:has(.player-buzzer-panel) .player-buzzer { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
 @media (max-width: 700px) {
     html:has(.player-buzzer-panel),
@@ -103,7 +104,7 @@ body:has(.player-buzzer-panel) { overflow-x: hidden; overflow-x: clip; overscrol
         min-height: 120px;
         flex: 1 1 auto;
         aspect-ratio: auto;
-        border-radius: clamp(24px, 8vw, 56px);
+        border-radius: clamp(28px, 9vw, 64px);
         user-select: none;
         -webkit-user-select: none;
     }
