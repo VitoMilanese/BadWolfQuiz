@@ -337,6 +337,8 @@
              data-discord-auto-mute="@((Model.DiscordConnection?.AutoMuteDuringMedia ?? false).ToString().ToLowerInvariant())"
              data-game-code="@Model.Game.PublicCode"
              data-question-timer-warning-sound="@Model.QuestionTimerWarningSound"
+             data-correct-answer-sound="@Model.CorrectAnswerSound"
+             data-incorrect-answer-sound="@Model.IncorrectAnswerSound"
              data-resize-player-card-label="@Localizer["GameBoard_ResizePlayerCards"]"
              data-status-active="@Localizer["PlayerPresence_Active"]"
              data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
@@ -1213,6 +1215,8 @@
              data-game-id="@Model.Game.Session.Id.Value"
              data-discord-auto-mute="@((Model.DiscordConnection?.AutoMuteDuringMedia ?? false).ToString().ToLowerInvariant())"
              data-game-code="@Model.Game.PublicCode"
+             data-correct-answer-sound="@Model.CorrectAnswerSound"
+             data-incorrect-answer-sound="@Model.IncorrectAnswerSound"
              data-resize-player-card-label="@Localizer["GameBoard_ResizePlayerCards"]"
              data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
              data-status-active="@Localizer["PlayerPresence_Active"]"
@@ -4772,6 +4776,12 @@
                 event.preventDefault();
                 try {
                     await submitGameControl(form, event.submitter);
+                    const judgingButton = event.submitter instanceof HTMLButtonElement
+                        ? event.submitter
+                        : null;
+                    if (judgingButton?.name === "isCorrect") {
+                        playAnswerFeedbackSound(judgingButton.value === "true");
+                    }
                     const gameplayView = document.querySelector(
                         "[data-host-gameplay-view]");
                     if (gameplayView?.contains(form)) {
@@ -4969,6 +4979,7 @@
 
             let questionTimeoutAudioContext = null;
             let questionTimerWarningAudioContext = null;
+            let answerFeedbackAudioContext = null;
             let questionTimerWarningKey = null;
 
             const createQuestionTimerWarningAudioContext = () => {
@@ -5061,6 +5072,193 @@
                 }
 
                 playQuestionTimerWarningAlternatingTick(warningSlot % 2 === 0);
+            };
+
+            const createAnswerFeedbackAudioContext = () => {
+                const AudioContextType =
+                    window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextType) {
+                    return null;
+                }
+
+                answerFeedbackAudioContext ??= new AudioContextType();
+                if (answerFeedbackAudioContext.state === "suspended") {
+                    void answerFeedbackAudioContext.resume();
+                }
+                return answerFeedbackAudioContext;
+            };
+
+            const playCorrectAnswerTriumph = context => {
+                const now = context.currentTime;
+                const master = context.createGain();
+                master.gain.setValueAtTime(0.0001, now);
+                master.gain.exponentialRampToValueAtTime(0.18, now + 0.012);
+                master.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+                master.connect(context.destination);
+
+                [523.25, 659.25, 783.99, 1046.5].forEach((frequency, index) => {
+                    const start = now + index * 0.105;
+                    const oscillator = context.createOscillator();
+                    const gain = context.createGain();
+                    oscillator.type = index === 3 ? "sine" : "triangle";
+                    oscillator.frequency.setValueAtTime(frequency, start);
+                    gain.gain.setValueAtTime(0.0001, start);
+                    gain.gain.exponentialRampToValueAtTime(0.72, start + 0.012);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.42);
+                    oscillator.connect(gain).connect(master);
+                    oscillator.start(start);
+                    oscillator.stop(start + 0.48);
+                });
+            };
+
+            const playCorrectAnswerArcade = context => {
+                const now = context.currentTime;
+                const master = context.createGain();
+                master.gain.setValueAtTime(0.0001, now);
+                master.gain.exponentialRampToValueAtTime(0.12, now + 0.008);
+                master.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
+                master.connect(context.destination);
+
+                [659.25, 880, 1318.51].forEach((frequency, index) => {
+                    const start = now + index * 0.095;
+                    const oscillator = context.createOscillator();
+                    const gain = context.createGain();
+                    oscillator.type = "square";
+                    oscillator.frequency.setValueAtTime(frequency, start);
+                    gain.gain.setValueAtTime(0.0001, start);
+                    gain.gain.linearRampToValueAtTime(0.42, start + 0.006);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.14);
+                    oscillator.connect(gain).connect(master);
+                    oscillator.start(start);
+                    oscillator.stop(start + 0.17);
+                });
+            };
+
+            const playCorrectAnswerChime = context => {
+                const now = context.currentTime;
+                const master = context.createGain();
+                master.gain.setValueAtTime(0.0001, now);
+                master.gain.exponentialRampToValueAtTime(0.16, now + 0.006);
+                master.gain.exponentialRampToValueAtTime(0.0001, now + 1.05);
+                master.connect(context.destination);
+
+                [880, 1327, 1769, 2341].forEach((frequency, index) => {
+                    const oscillator = context.createOscillator();
+                    const gain = context.createGain();
+                    oscillator.type = "sine";
+                    oscillator.frequency.setValueAtTime(frequency, now);
+                    oscillator.detune.setValueAtTime(index % 2 === 0 ? -5 : 7, now);
+                    gain.gain.setValueAtTime(0.0001, now);
+                    gain.gain.exponentialRampToValueAtTime(0.6 / (index + 1), now + 0.004);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.58 + index * 0.1);
+                    oscillator.connect(gain).connect(master);
+                    oscillator.start(now);
+                    oscillator.stop(now + 1.0);
+                });
+            };
+
+            const playIncorrectAnswerDescent = context => {
+                const now = context.currentTime;
+                const master = context.createGain();
+                master.gain.setValueAtTime(0.0001, now);
+                master.gain.exponentialRampToValueAtTime(0.18, now + 0.012);
+                master.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+                master.connect(context.destination);
+
+                [1046.5, 783.99, 659.25, 523.25].forEach((frequency, index) => {
+                    const start = now + index * 0.105;
+                    const oscillator = context.createOscillator();
+                    const gain = context.createGain();
+                    oscillator.type = index === 3 ? "sine" : "triangle";
+                    oscillator.frequency.setValueAtTime(frequency, start);
+                    gain.gain.setValueAtTime(0.0001, start);
+                    gain.gain.exponentialRampToValueAtTime(0.72, start + 0.012);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.42);
+                    oscillator.connect(gain).connect(master);
+                    oscillator.start(start);
+                    oscillator.stop(start + 0.48);
+                });
+            };
+
+            const playIncorrectAnswerArcadeFall = context => {
+                const now = context.currentTime;
+                const master = context.createGain();
+                master.gain.setValueAtTime(0.0001, now);
+                master.gain.exponentialRampToValueAtTime(0.12, now + 0.008);
+                master.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
+                master.connect(context.destination);
+
+                [1318.51, 880, 659.25].forEach((frequency, index) => {
+                    const start = now + index * 0.095;
+                    const oscillator = context.createOscillator();
+                    const gain = context.createGain();
+                    oscillator.type = "square";
+                    oscillator.frequency.setValueAtTime(frequency, start);
+                    gain.gain.setValueAtTime(0.0001, start);
+                    gain.gain.linearRampToValueAtTime(0.42, start + 0.006);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.14);
+                    oscillator.connect(gain).connect(master);
+                    oscillator.start(start);
+                    oscillator.stop(start + 0.17);
+                });
+            };
+
+            const playIncorrectAnswerChimeFall = context => {
+                const now = context.currentTime;
+                const master = context.createGain();
+                master.gain.setValueAtTime(0.0001, now);
+                master.gain.exponentialRampToValueAtTime(0.16, now + 0.006);
+                master.gain.exponentialRampToValueAtTime(0.0001, now + 1.05);
+                master.connect(context.destination);
+
+                [2341, 1769, 1327, 880].forEach((frequency, index) => {
+                    const start = now + index * 0.08;
+                    const oscillator = context.createOscillator();
+                    const gain = context.createGain();
+                    oscillator.type = "sine";
+                    oscillator.frequency.setValueAtTime(frequency, start);
+                    oscillator.detune.setValueAtTime(index % 2 === 0 ? -5 : 7, start);
+                    gain.gain.setValueAtTime(0.0001, start);
+                    gain.gain.exponentialRampToValueAtTime(0.6 / (index + 1), start + 0.004);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.48 + index * 0.08);
+                    oscillator.connect(gain).connect(master);
+                    oscillator.start(start);
+                    oscillator.stop(start + 0.82);
+                });
+            };
+
+            const playAnswerFeedbackSound = isCorrect => {
+                try {
+                    const context = createAnswerFeedbackAudioContext();
+                    if (!context) {
+                        return;
+                    }
+
+                    const mode = isCorrect
+                        ? lobby.dataset.correctAnswerSound
+                        : lobby.dataset.incorrectAnswerSound;
+
+                    if (isCorrect) {
+                        if (mode === "Arcade") {
+                            playCorrectAnswerArcade(context);
+                        } else if (mode === "Chime") {
+                            playCorrectAnswerChime(context);
+                        } else {
+                            playCorrectAnswerTriumph(context);
+                        }
+                        return;
+                    }
+
+                    if (mode === "ArcadeFall") {
+                        playIncorrectAnswerArcadeFall(context);
+                    } else if (mode === "ChimeFall") {
+                        playIncorrectAnswerChimeFall(context);
+                    } else {
+                        playIncorrectAnswerDescent(context);
+                    }
+                } catch (error) {
+                    console.debug("Answer feedback audio is unavailable.", error);
+                }
             };
 
             const playQuestionTimeoutSting = () => {

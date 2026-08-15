@@ -74,7 +74,27 @@ public sealed class LobbyModel(
             ? "Rising"
             : "Alternating";
 
+    public string CorrectAnswerSound => NormalizeAnswerFeedbackSound(
+        configuration["Game:CorrectAnswerSound"],
+        "Triumph",
+        "Arcade",
+        "Chime");
+
+    public string IncorrectAnswerSound => NormalizeAnswerFeedbackSound(
+        configuration["Game:IncorrectAnswerSound"],
+        "Descent",
+        "ArcadeFall",
+        "ChimeFall");
+
     public AnswerResultOverlay? AnswerResultOverlay { get; private set; }
+
+    private static string NormalizeAnswerFeedbackSound(
+        string? configured,
+        string fallback,
+        params string[] supported) =>
+        supported.FirstOrDefault(option =>
+            string.Equals(option, configured, StringComparison.OrdinalIgnoreCase))
+        ?? fallback;
 
     public async Task<IActionResult> OnGetAsync(
         Guid id,
