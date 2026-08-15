@@ -112,6 +112,8 @@ For regular buzzer questions, the answering player is established by the buzzer 
 
 After correct and incorrect outcomes, the host briefly sees the answering player and actual applied score delta over the player-card area. This transient feedback does not delay the authoritative transition to the next gameplay state.
 
+From 5.0 seconds through 0.5 seconds remaining on any visible running host question timer, the host receives a synchronized warning every 500 ms: one visual timer pulse and one short Web Audio tick. `Game:QuestionTimerWarningSound` selects the warning sound generator: `Alternating` (the default) alternates a higher and lower tick every 500 ms, while `Rising` restores the original once-per-second rising tick whose base pitch increases as time runs down. The visual warning continues to pulse every 500 ms in both modes. No warning pulse or tick is emitted at 0.0 seconds, where the dedicated timeout notification and timeout sound take over. The warning is presentation-only: it does not pause, reset, judge, reveal, or resolve anything.
+
 Timer expiration instead shows the host-only animated `TIME'S UP` notification and plays a short synthesized mechanical alarm-bell timeout sting. The cue is generated in the browser without a shipped audio asset, plays once for each `QuestionTimerExpired` event, and does not change gameplay state or block host controls. Extending an expired timer and reaching zero again produces a new visual and audio cue.
 
 The transient score-result overlay automatically scales the player name and applied

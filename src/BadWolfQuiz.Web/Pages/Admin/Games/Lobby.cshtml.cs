@@ -27,6 +27,7 @@ public sealed class LobbyModel(
     DiscordMuteCoordinator discordMuteCoordinator,
     IDiscordVoiceGateway discordGateway,
     IHubContext<GameHub> gameHub,
+    IConfiguration configuration,
     IStringLocalizer<SharedResource> localizer,
     ILogger<LobbyModel> logger) : PageModel
 {
@@ -64,6 +65,14 @@ public sealed class LobbyModel(
             premiumHostAccess.IsPremium(currentHost.RequiredId));
     public BadWolfQuiz.Web.Models.HostDiscordConnection? DiscordConnection { get; private set; }
     public bool IsDiscordVoiceReady { get; private set; }
+
+    public string QuestionTimerWarningSound =>
+        string.Equals(
+            configuration["Game:QuestionTimerWarningSound"],
+            "Rising",
+            StringComparison.OrdinalIgnoreCase)
+            ? "Rising"
+            : "Alternating";
 
     public AnswerResultOverlay? AnswerResultOverlay { get; private set; }
 

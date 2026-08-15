@@ -336,6 +336,7 @@
              data-game-id="@Model.Game.Session.Id.Value"
              data-discord-auto-mute="@((Model.DiscordConnection?.AutoMuteDuringMedia ?? false).ToString().ToLowerInvariant())"
              data-game-code="@Model.Game.PublicCode"
+             data-question-timer-warning-sound="@Model.QuestionTimerWarningSound"
              data-resize-player-card-label="@Localizer["GameBoard_ResizePlayerCards"]"
              data-status-active="@Localizer["PlayerPresence_Active"]"
              data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
@@ -4967,6 +4968,100 @@
             window.addEventListener("resize", refreshScrollingNames);
 
             let questionTimeoutAudioContext = null;
+            let questionTimerWarningAudioContext = null;
+            let questionTimerWarningKey = null;
+
+            const createQuestionTimerWarningAudioContext = () => {
+                const AudioContextType =
+                    window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextType) {
+                    return null;
+                }
+
+                questionTimerWarningAudioContext ??= new AudioContextType();
+                if (questionTimerWarningAudioContext.state === "suspended") {
+                    void questionTimerWarningAudioContext.resume();
+                }
+                return questionTimerWarningAudioContext;
+            };
+
+            const playQuestionTimerWarningRisingTick = remainingSeconds => {
+                try {
+                    const context = createQuestionTimerWarningAudioContext();
+                    if (!context) {
+                        return;
+                    }
+
+                    const now = context.currentTime;
+                    const baseFrequency = 1180 + (5 - remainingSeconds) * 90;
+                    const master = context.createGain();
+                    master.gain.setValueAtTime(0.0001, now);
+                    master.gain.exponentialRampToValueAtTime(0.12, now + 0.004);
+                    master.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+                    master.connect(context.destination);
+
+                    [1, 1.47, 2.11].forEach((ratio, index) => {
+                        const oscillator = context.createOscillator();
+                        const gain = context.createGain();
+                        oscillator.type = "sine";
+                        oscillator.frequency.setValueAtTime(baseFrequency * ratio, now);
+                        gain.gain.setValueAtTime(0.0001, now);
+                        gain.gain.exponentialRampToValueAtTime(0.7 / (index + 1), now + 0.003);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11 + index * 0.02);
+                        oscillator.connect(gain).connect(master);
+                        oscillator.start(now);
+                        oscillator.stop(now + 0.18);
+                    });
+                } catch (error) {
+                    console.debug("Question timer warning audio is unavailable.", error);
+                }
+            };
+
+            const playQuestionTimerWarningAlternatingTick = isHighPitch => {
+                try {
+                    const context = createQuestionTimerWarningAudioContext();
+                    if (!context) {
+                        return;
+                    }
+
+                    const now = context.currentTime;
+                    const baseFrequency = isHighPitch ? 1380 : 980;
+                    const master = context.createGain();
+                    master.gain.setValueAtTime(0.0001, now);
+                    master.gain.exponentialRampToValueAtTime(0.12, now + 0.004);
+                    master.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+                    master.connect(context.destination);
+
+                    [1, 1.43].forEach((ratio, index) => {
+                        const oscillator = context.createOscillator();
+                        const gain = context.createGain();
+                        oscillator.type = "sine";
+                        oscillator.frequency.setValueAtTime(baseFrequency * ratio, now);
+                        gain.gain.setValueAtTime(0.0001, now);
+                        gain.gain.exponentialRampToValueAtTime(0.72 / (index + 1), now + 0.003);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09 + index * 0.02);
+                        oscillator.connect(gain).connect(master);
+                        oscillator.start(now);
+                        oscillator.stop(now + 0.16);
+                    });
+                } catch (error) {
+                    console.debug("Question timer warning audio is unavailable.", error);
+                }
+            };
+
+            const playQuestionTimerWarningTick = (warningSlot, remainingMilliseconds) => {
+                const soundMode = document.querySelector(
+                    ".host-game-board[data-game-id]")?.dataset.questionTimerWarningSound;
+                if (soundMode === "Rising") {
+                    if (warningSlot % 2 === 0) {
+                        playQuestionTimerWarningRisingTick(
+                            Math.ceil(remainingMilliseconds / 1000));
+                    }
+                    return;
+                }
+
+                playQuestionTimerWarningAlternatingTick(warningSlot % 2 === 0);
+            };
 
             const playQuestionTimeoutSting = () => {
                 const AudioContextType =
@@ -5061,8 +5156,33 @@
                 timerPanel.classList.toggle(
                     "answer-timer",
                     update.mode === "answer");
-                timerValue.textContent =
+                const remainingSeconds =
                     Math.ceil(update.remainingMilliseconds / 1000);
+                timerValue.textContent = remainingSeconds;
+
+                const warningSlot =
+                    Math.ceil(update.remainingMilliseconds / 500);
+                const isWarning =
+                    update.isVisible &&
+                    update.status === "running" &&
+                    warningSlot >= 1 &&
+                    warningSlot <= 10;
+                timerPanel.classList.toggle("timer-warning", isWarning);
+
+                if (isWarning) {
+                    const warningKey =
+                        `${update.sourceQuestionId ?? "none"}:${update.mode}:${warningSlot}`;
+                    if (questionTimerWarningKey !== warningKey) {
+                        questionTimerWarningKey = warningKey;
+                        timerPanel.classList.remove("timer-warning-pulse");
+                        void timerPanel.offsetWidth;
+                        timerPanel.classList.add("timer-warning-pulse");
+                        playQuestionTimerWarningTick(warningSlot, update.remainingMilliseconds);
+                    }
+                } else {
+                    questionTimerWarningKey = null;
+                    timerPanel.classList.remove("timer-warning-pulse");
+                }
 
                 if (update.sourceQuestionId !== null &&
                     update.sourceQuestionId !== undefined &&
