@@ -113,6 +113,26 @@ public sealed class FinalQuestion
         return submission;
     }
 
+    internal bool RemovePlayer(GamePlayerId playerId)
+    {
+        var submission = _submissions.SingleOrDefault(item => item.PlayerId == playerId);
+        if (submission is null)
+        {
+            return false;
+        }
+
+        _submissions.Remove(submission);
+
+        if (_submissions.Count == 0 ||
+            (Status == FinalQuestionStatus.Judging &&
+             _submissions.All(item => item.IsCorrect.HasValue)))
+        {
+            Status = FinalQuestionStatus.Completed;
+        }
+
+        return true;
+    }
+
     private FinalPlayerSubmission FindSubmission(GamePlayerId playerId)
     {
         return _submissions.SingleOrDefault(item => item.PlayerId == playerId)

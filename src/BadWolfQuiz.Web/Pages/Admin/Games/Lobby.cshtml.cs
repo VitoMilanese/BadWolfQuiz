@@ -818,7 +818,7 @@ public sealed class LobbyModel(
     {
         return await ExecuteFinalHostCommand(
             id,
-            game => sessionRegistry.SubmitMinimumFinalWagerForInactivePlayer(
+            game => sessionRegistry.SubmitMinimumFinalWagerForPlayer(
                 game.PublicCode,
                 new GamePlayerId(playerId)),
             cancellationToken);
@@ -841,7 +841,7 @@ public sealed class LobbyModel(
     {
         return await ExecuteFinalHostCommand(
             id,
-            game => sessionRegistry.SubmitEmptyFinalAnswerForInactivePlayer(
+            game => sessionRegistry.SubmitEmptyFinalAnswerForPlayer(
                 game.PublicCode,
                 new GamePlayerId(playerId)),
             cancellationToken);
@@ -1584,6 +1584,8 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
+        var previousStatus = game.Session.Status;
+
         try
         {
             var gamePlayerId = new GamePlayerId(playerId);
@@ -1610,6 +1612,19 @@ public sealed class LobbyModel(
             }
 
             await BroadcastPlayersAsync(game, cancellationToken);
+
+            if (previousStatus != game.Session.Status)
+            {
+                await gameHub.Clients
+                    .Group(GameHub.GroupName(game.PublicCode))
+                    .SendAsync(
+                        "GameStatusChanged",
+                        GameHub.CreateStatusUpdate(game),
+                        cancellationToken);
+                await gameHub.Clients
+                    .Group(GameHub.GroupName(game.PublicCode))
+                    .SendAsync("FinalQuestionProgressChanged", cancellationToken);
+            }
         }
         catch (GameRuleViolationException)
         {
@@ -1787,13 +1802,6 @@ public sealed class LobbyModel(
         }
 
         return RedirectToPage(new { id });
-    }
-
-    public bool IsPlayerInactive(GamePlayerId playerId)
-    {
-        return Players.Any(player =>
-            player.Id == playerId &&
-            player.Presence == PlayerPresenceStatus.Inactive);
     }
 
     private IActionResult LoadPage(

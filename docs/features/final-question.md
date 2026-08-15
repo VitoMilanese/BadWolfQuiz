@@ -14,17 +14,15 @@ Final content is stored separately from round questions and copied into the immu
 
 1. After the last board round is complete, the host enters a localized **Final question** transition page.
 2. The transition has no manual controls and automatically continues after 3 seconds.
-3. Every participating player submits and confirms a private wager. If an inactive
-   player does not submit a wager, the host can submit the minimum allowed wager
-   on that player's behalf.
+3. Every participating player submits and confirms a private wager. While a wager is missing, the host can submit the minimum allowed wager on that player's behalf, regardless of connection or presence state.
 4. The Engine locks wagering only after every wager is present.
-5. The question is released and players submit private answers. If an inactive
-   player does not submit an answer, the host can submit `-` on that player's
-   behalf.
+5. The question is released and players submit private answers. While an answer is missing, the host can submit `-` on that player's behalf, regardless of connection or presence state.
 6. The Engine locks answering only after every answer is present.
 7. The host judges each answer.
 8. The wager is added for a correct answer and subtracted for an incorrect answer.
 9. After every submission is judged, the game is completed and final standings are available.
+
+The host can remove a player during final wagering, answering, or judging. Removal also removes that player's final-question submission so the removed player cannot block phase progression. If the last remaining player is removed during any final-question phase, the final question and game complete immediately with empty final standings.
 
 The same 3-second transition is used when the host forces advancement directly to the final question. A quiz without a final question never shows this transition.
 
@@ -51,15 +49,15 @@ Other players' wagers and answers are not exposed by player projections. SignalR
   The host must confirm the action. Unclosed regular-round questions are left
   unchanged rather than being force-resolved by this navigation action.
 - During wagering, the host sees submission progress but not the wager amounts.
-- For an inactive player who has not submitted a wager, the host can submit the
-  minimum allowed wager on the player's behalf.
+- For every player whose wager is still missing, the host can submit the minimum allowed wager on the player's behalf. This action is available even when the player is `Active`, because an active connection can still be AFK.
 - Locking wagers releases the final question to participating player devices.
 - During answering, the host sees submission progress but not answer text.
-- For an inactive player who has not submitted an answer, the host can submit
-  `-` on the player's behalf.
+- For every player whose answer is still missing, the host can submit `-` on the player's behalf. This action is also independent of player presence.
 - Host-submitted wagers and answers are propagated to the affected player's
   page in real time, so the player interface reflects the submission as if the
   player had submitted it directly.
+- The host can remove a player throughout final wagering, answering, and judging. The final-question state and host controls refresh immediately after player changes.
+- Removing the final remaining player completes the game immediately. The completed host screen keeps **Finish game** available but does not render **Final results** or an empty podium when `FinalStandings` is empty.
 - Locking answers starts a sequential presentation of player submissions. The host sees one player name and answer at a time, judges it as correct or incorrect, and then advances automatically to the next submission.
 - The host **Tools** menu remains available on the inter-round leaderboard and throughout final wagering, answering, and judging. In these limited states, **Choose random player**, **Next round**, and **Advance to final question** are hidden, while applicable tools such as answer history, answer key, blocked-player management, and game settings remain available.
 - Join information is exposed as a dedicated QR button in the game header between **Tools** and the Discord microphone button rather than as an item inside **Tools**. The button opens the existing join-information panel.
@@ -67,7 +65,7 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 - Answer history and answer-key actions are exposed through **Tools** rather than duplicated as standalone buttons on the final-question page.
 - The game-settings dialog remains available during final wagering, answering, and judging.
 - The broadcast-facing game screen never reveals the configured correct answer. The host can open a separate live answer-key tab on another display; it follows regular, wager, and final questions automatically.
-- The game finishes only after every participating answer is judged, then shows the authoritative final standings.
+- The game normally finishes after every participating answer is judged, then shows the authoritative final standings. The zero-player removal case completes immediately with no standings.
 - Players excluded by the negative-score setting remain connected as spectators.
 
 ### Persistent host navigation

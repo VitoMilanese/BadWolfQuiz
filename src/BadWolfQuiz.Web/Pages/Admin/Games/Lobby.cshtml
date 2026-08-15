@@ -1202,7 +1202,9 @@
              data-status-inactive="@Localizer["PlayerPresence_Inactive"]"
              data-status-disconnected="@Localizer["PlayerPresence_Disconnected"]"
              data-status-rejoinpending="@Localizer["PlayerPresence_RejoinPending"]"
-             data-approve-label="@Localizer["GameLobby_ApproveRejoin"]">
+             data-approve-label="@Localizer["GameLobby_ApproveRejoin"]"
+             data-remove-player-label="@Localizer["GameBoard_RemovePlayer"]"
+             data-remove-player-confirm="@Localizer["GameBoard_RemovePlayerConfirm"]">
         @if (TempData["ErrorMessage"] is string errorMessage)
         {
             <div class="message message-error">@errorMessage</div>
@@ -1225,8 +1227,7 @@
                                     ? Localizer["FinalQuestion_NotSubmitted"]
                                     : Localizer["FinalQuestion_Submitted"])
                             </span>
-                            @if (submission.Wager is null &&
-                                 Model.IsPlayerInactive(submission.PlayerId))
+                            @if (submission.Wager is null)
                             {
                                 <form method="post" asp-page-handler="SubmitMinimumFinalWager">
                                     <input type="hidden" name="playerId" value="@submission.PlayerId.Value" />
@@ -1321,8 +1322,7 @@
                                         ? Localizer["FinalQuestion_NotSubmitted"]
                                         : Localizer["FinalQuestion_Submitted"])
                                 </span>
-                                @if (submission.Answer is null &&
-                                     Model.IsPlayerInactive(submission.PlayerId))
+                                @if (submission.Answer is null)
                                 {
                                     <form method="post" asp-page-handler="SubmitEmptyFinalAnswer">
                                         <input type="hidden" name="playerId" value="@submission.PlayerId.Value" />
@@ -1387,17 +1387,20 @@
             }
             else
             {
-                <h2>@Localizer["FinalQuestion_Results"]</h2>
-                <ol class="round-podium">
-                    @foreach (var standing in Model.FinalStandings.Take(3))
-                    {
-                        <li class="round-podium-player @(standing.Position == 1 ? "round-winner" : null)">
-                            <span class="round-podium-position">@standing.Position</span>
-                            <strong>@standing.PlayerName</strong>
-                            <span class="round-podium-score">@standing.Score</span>
-                        </li>
-                    }
-                </ol>
+                @if (Model.FinalStandings.Count > 0)
+                {
+                    <h2>@Localizer["FinalQuestion_Results"]</h2>
+                    <ol class="round-podium">
+                        @foreach (var standing in Model.FinalStandings.Take(3))
+                        {
+                            <li class="round-podium-player @(standing.Position == 1 ? "round-winner" : null)">
+                                <span class="round-podium-position">@standing.Position</span>
+                                <strong>@standing.PlayerName</strong>
+                                <span class="round-podium-score">@standing.Score</span>
+                            </li>
+                        }
+                    </ol>
+                }
                 <div class="form-actions final-finish-actions">
                     <a class="button button-primary"
                        asp-page="/Admin/Quizzes/Index">
@@ -1499,6 +1502,15 @@
                     }
                     <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
                         @player.Score
+                    </span>
+                    <span class="player-card-actions">
+                        <button class="button button-danger icon-button player-action-button scoreboard-remove-player"
+                                type="button"
+                                data-remove-player="@player.Id.Value"
+                                title="@Localizer["GameBoard_RemovePlayer"]"
+                                aria-label="@Localizer["GameBoard_RemovePlayer"]">
+                            <span aria-hidden="true">✕</span>
+                        </button>
                     </span>
                 </li>
             }
@@ -5066,6 +5078,7 @@
                 renderBoardPlayers(update.players);
 
                 if (lobby.classList.contains("final-question-host")) {
+                    void requestHostGameplayRefresh();
                     playerList.replaceChildren();
                     if (hostCard) {
                         playerList.append(hostCard);
@@ -5125,6 +5138,21 @@
                             `scoreboard-score ${player.score < 0 ? "score-negative" : ""}`;
                         details.append(score);
 
+                        const actions = document.createElement("span");
+                        actions.className = "player-card-actions";
+
+                        const remove = document.createElement("button");
+                        remove.type = "button";
+                        remove.className =
+                            "button button-danger icon-button player-action-button scoreboard-remove-player";
+                        remove.dataset.removePlayer = player.id;
+                        remove.title = lobby.dataset.removePlayerLabel;
+                        remove.setAttribute(
+                            "aria-label",
+                            lobby.dataset.removePlayerLabel);
+                        remove.textContent = "✕";
+                        actions.append(remove);
+
                         if (player.presence !== "active") {
                             const presence = document.createElement("span");
                             presence.className =
@@ -5149,9 +5177,10 @@
                                     console.error("Failed to approve player rejoin.", error);
                                 }
                             });
-                            details.append(approve);
+                            actions.append(approve);
                         }
 
+                        details.append(actions);
                         item.append(name, details);
                         playerList.append(item);
                     }
