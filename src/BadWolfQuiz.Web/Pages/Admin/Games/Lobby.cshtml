@@ -1701,16 +1701,54 @@
             window.setTimeout(() => overlay.remove(), 5000);
         };
 
+        const buzzerOverlayLifetimeMilliseconds = 3000;
+
         const showBuzzerRace = race => {
             const container = document.querySelector(transientSelector);
             if (!container || !race?.winnerPlayerName) {
                 return;
             }
 
-            const overlay = document.createElement("aside");
-            overlay.className = "buzzer-race-overlay";
-            overlay.setAttribute("role", "status");
-            overlay.setAttribute("aria-live", "polite");
+            const sourceQuestionId = race.sourceQuestionId?.toString() ?? "";
+            let overlay = container.querySelector("[data-buzzer-race-live]");
+            const isSameRace = overlay?.dataset.buzzerRaceSourceQuestionId ===
+                sourceQuestionId;
+            const previousLatePlayers = isSameRace
+                ? new Map(Array.from(
+                    overlay.querySelectorAll("[data-buzzer-race-player-id]"),
+                    item => [
+                        item.dataset.buzzerRacePlayerId,
+                        {
+                            playerId: item.dataset.buzzerRacePlayerId,
+                            playerName: item.dataset.buzzerRacePlayerName,
+                            delayMilliseconds: Number.parseInt(
+                                item.dataset.buzzerRaceDelayMilliseconds ?? "0",
+                                10)
+                        }
+                    ]))
+                : new Map();
+
+            if (!isSameRace) {
+                overlay = document.createElement("aside");
+                overlay.className = "buzzer-race-overlay buzzer-race-live-overlay";
+                overlay.dataset.buzzerRaceLive = "";
+                overlay.dataset.buzzerRaceSourceQuestionId = sourceQuestionId;
+                overlay.dataset.buzzerRaceShownAt = Date.now().toString();
+                overlay.setAttribute("role", "status");
+                overlay.setAttribute("aria-live", "polite");
+            }
+
+            const wasFinalized =
+                overlay.dataset.buzzerRaceFinalized === "true";
+            if (!race.isCollecting) {
+                overlay.dataset.buzzerRaceFinalized = "true";
+            }
+
+            if (race.isCollecting && !wasFinalized) {
+                overlay.dataset.buzzerRaceCollecting = "";
+            } else {
+                delete overlay.dataset.buzzerRaceCollecting;
+            }
 
             const card = document.createElement("div");
             card.className = "buzzer-race-card";
@@ -1720,28 +1758,63 @@
             winner.textContent = buzzerWinnerTemplate.replace(
                 "__PLAYER__",
                 race.winnerPlayerName);
+            if (!isSameRace) {
+                winner.classList.add("buzzer-race-live-winner-new");
+            }
             card.append(winner);
 
-            const latePlayers = document.createElement("ul");
+            const latePlayerMap = new Map(previousLatePlayers);
             for (const latePlayer of race.latePlayers ?? []) {
+                latePlayerMap.set(latePlayer.playerId, latePlayer);
+            }
+
+            const latePlayers = document.createElement("ul");
+            const orderedLatePlayers = Array.from(latePlayerMap.values())
+                .sort((left, right) =>
+                    left.delayMilliseconds - right.delayMilliseconds);
+            for (const latePlayer of orderedLatePlayers) {
                 const item = document.createElement("li");
+                item.dataset.buzzerRacePlayerId = latePlayer.playerId;
+                item.dataset.buzzerRacePlayerName = latePlayer.playerName;
+                item.dataset.buzzerRaceDelayMilliseconds =
+                    latePlayer.delayMilliseconds.toString();
                 item.textContent = buzzerLateTemplate
                     .replace("__PLAYER__", latePlayer.playerName)
                     .replace("__DELAY__", latePlayer.delayMilliseconds.toString());
+                if (!previousLatePlayers.has(latePlayer.playerId)) {
+                    item.classList.add("buzzer-race-live-entry-new");
+                }
                 latePlayers.append(item);
             }
             card.append(latePlayers);
-            overlay.append(card);
+            overlay.replaceChildren(card);
 
             window.clearTimeout(buzzerOverlayDismissHandle);
-            container.replaceChildren(overlay);
+            if (!overlay.isConnected) {
+                container.replaceChildren(overlay);
+            }
             initializeAutoFitCard(card);
+
+            const shownAt = Number.parseInt(
+                overlay.dataset.buzzerRaceShownAt ?? "0",
+                10);
+            const elapsed = Math.max(0, Date.now() - shownAt);
+            const remaining = Math.max(
+                0,
+                buzzerOverlayLifetimeMilliseconds - elapsed);
+
+            if (remaining === 0) {
+                overlay.remove();
+                buzzerOverlayDismissHandle = null;
+                return;
+            }
+
             buzzerOverlayDismissHandle = window.setTimeout(() => {
                 if (overlay.isConnected) {
                     overlay.remove();
                 }
                 buzzerOverlayDismissHandle = null;
-            }, 5000);
+            }, remaining);
         };
 
         document.addEventListener("badwolf:buzzer-race", event => {
@@ -1874,7 +1947,11 @@
             }
             currentBoard.hidden = nextBoard.hidden;
 
-            if (currentTransient) {
+            const preserveCollectingBuzzerOverlay =
+                currentTransient?.querySelector(
+                    "[data-buzzer-race-collecting]") !== null;
+
+            if (currentTransient && !preserveCollectingBuzzerOverlay) {
                 currentTransient.replaceChildren(
                     ...Array.from(nextTransient?.childNodes ?? [], node =>
                         document.importNode(node, true)));
@@ -4928,11 +5005,23 @@
 
                     document.dispatchEvent(new CustomEvent(
                         "badwolf:buzzer-race",
-                        { detail: update.buzzerRace }));
+                        {
+                            detail: {
+                                ...update.buzzerRace,
+                                sourceQuestionId: update.sourceQuestionId
+                            }
+                        }));
                 };
 
                 if (!hasReceivedInitialBuzzerState) {
                     hasReceivedInitialBuzzerState = true;
+                    showBuzzerRaceOverlay();
+                    return;
+                }
+
+                // Every host-only collecting update renders immediately so
+                // winner and late-player entries appear as each press arrives.
+                if (update.buzzerRace?.isCollecting) {
                     showBuzzerRaceOverlay();
                     return;
                 }

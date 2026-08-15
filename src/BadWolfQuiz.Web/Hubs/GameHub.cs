@@ -383,13 +383,23 @@ public sealed class GameHub(
             return;
         }
 
+        // Stream every accepted press to host connections so the visible
+        // race grows in real time. Player clients do not receive the interim
+        // claimed state and keep the existing late-press collection window.
+        await Clients
+            .Group(HostGroupName(claim.Game.PublicCode))
+            .SendAsync(
+                "BuzzerStateChanged",
+                CreateBuzzerUpdate(
+                    claim.Game,
+                    isBuzzerRaceCollecting: true));
+
         if (!claim.IsWinner)
         {
             return;
         }
 
-        // Keep the buzzer visually open while the server collects presses
-        // that arrive within the near-simultaneous one-second window.
+        // The winning call owns the existing one-second collection window.
         await Task.Delay(TimeSpan.FromSeconds(1));
 
         await Clients
@@ -540,7 +550,9 @@ public sealed class GameHub(
         };
     }
 
-    public static object CreateBuzzerUpdate(GameSessionRegistration game)
+    public static object CreateBuzzerUpdate(
+        GameSessionRegistration game,
+        bool isBuzzerRaceCollecting = false)
     {
         var question = game.Session.Board.Questions.FirstOrDefault(item =>
             item.Status is not RuntimeQuestionStatus.Available and
@@ -579,6 +591,7 @@ public sealed class GameHub(
                 race.SourceQuestionId == question.SourceQuestionId
                     ? new
                     {
+                        isCollecting = isBuzzerRaceCollecting,
                         winnerPlayerId = race.WinnerPlayerId.Value,
                         winnerPlayerName = race.WinnerPlayerName,
                         latePlayers = race.LatePlayers.Select(player => new
