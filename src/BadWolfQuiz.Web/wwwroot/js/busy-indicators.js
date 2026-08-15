@@ -219,6 +219,10 @@
     const getEscapeBackLink = () => {
         const currentPath = normalisePath(window.location.pathname);
 
+        if (pathMatches(currentPath, routes.editor)) {
+            return document.getElementById("quiz-editor-my-quizzes");
+        }
+
         if (pathMatches(currentPath, routes.questionEditor)) {
             return document.getElementById("question-editor-back-link");
         }
@@ -334,8 +338,18 @@
         navigate(link.href);
     });
 
-    window.addEventListener("keyup", event => {
-        if (event.key !== "Escape" || busy || hasOpenEditorModal()) {
+    window.addEventListener("keydown", event => {
+        if (event.key !== "Escape") {
+            return;
+        }
+
+        if (busy || navigationScheduled) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return;
+        }
+
+        if (hasOpenEditorModal()) {
             return;
         }
 
@@ -347,6 +361,15 @@
         event.preventDefault();
         event.stopImmediatePropagation();
         navigate(backLink.href);
+    }, true);
+
+    window.addEventListener("keyup", event => {
+        if (event.key !== "Escape" || (!busy && !navigationScheduled)) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
     }, true);
 
     window.addEventListener("pageshow", hide);

@@ -65,13 +65,14 @@ public sealed class BusyIndicatorRegressionTests
     }
 
     [Fact]
-    public void BusyIndicatorHandlesEscapeBackNavigationAfterPainting()
+    public void BusyIndicatorHandlesEscapeBackNavigationBeforePageSpecificHandlers()
     {
         var root = FindRepositoryRoot();
         var script = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "busy-indicators.js"));
 
+        Assert.Contains("window.addEventListener(\"keydown\"", script, StringComparison.Ordinal);
         Assert.Contains("window.addEventListener(\"keyup\"", script, StringComparison.Ordinal);
-        Assert.Contains("event.key !== \"Escape\"", script, StringComparison.Ordinal);
+        Assert.Contains("quiz-editor-my-quizzes", script, StringComparison.Ordinal);
         Assert.Contains("question-editor-back-link", script, StringComparison.Ordinal);
         Assert.Contains("final-question-editor-back-link", script, StringComparison.Ordinal);
         Assert.Contains("description-editor-back", script, StringComparison.Ordinal);
@@ -79,6 +80,7 @@ public sealed class BusyIndicatorRegressionTests
         Assert.Contains("runAfterPaint", script, StringComparison.Ordinal);
         Assert.Contains("window.requestAnimationFrame(() =>", script, StringComparison.Ordinal);
         Assert.Contains("navigate(backLink.href)", script, StringComparison.Ordinal);
+        Assert.Contains("event.stopImmediatePropagation();", script, StringComparison.Ordinal);
     }
 
     [Fact]
