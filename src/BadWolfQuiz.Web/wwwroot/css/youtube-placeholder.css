@@ -9,12 +9,13 @@ body.youtube-auto-expanded-open::before {
     left: 0;
     right: 0;
     z-index: 10001;
-    height: clamp(86px, 11vh, 124px);
+    height: max(132px, 15vh);
     background: linear-gradient(
         180deg,
         #000 0%,
-        #000 68%,
-        rgba(0, 0, 0, 0.96) 82%,
+        #000 72%,
+        rgba(0, 0, 0, 0.98) 84%,
+        rgba(0, 0, 0, 0.9) 91%,
         transparent 100%);
     pointer-events: auto;
 }
@@ -23,13 +24,18 @@ body.youtube-auto-expanded-open::before {
     z-index: 10002 !important;
 }
 
+.game-content-block:has(> .youtube-placeholder) {
+    width: 100%;
+}
+
 .youtube-placeholder {
     position: relative;
     display: block;
-    width: min(100%, 960px);
+    width: 100%;
+    max-width: 960px;
     aspect-ratio: 16 / 9;
-    max-width: 100%;
     max-height: min(62vh, 680px);
+    min-width: 0;
     padding: 0;
     overflow: hidden;
     appearance: none;

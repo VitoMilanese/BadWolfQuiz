@@ -129,6 +129,69 @@ public sealed class YouTubePlaceholderRegressionTests
     }
 
     [Fact]
+    public void Placeholder_layout_and_styles_remain_available_after_ajax_gameplay_refresh()
+    {
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "youtube-placeholder.css"));
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "youtube-auto-expand.js"));
+
+        Assert.Contains(
+            ".game-content-block:has(> .youtube-placeholder)",
+            css,
+            StringComparison.Ordinal);
+        Assert.Contains("max-width: 960px;", css, StringComparison.Ordinal);
+        Assert.Contains(
+            "placeholderStylesheetUrl",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "ensurePlaceholderStylesheet();",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "document.head.appendChild(stylesheet);",
+            script,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Managed_launch_expands_immediately_and_pauses_other_media_before_api_state_events()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "youtube-auto-expand.js"));
+        var launchStart = script.IndexOf(
+            "const launchPlaceholder =",
+            StringComparison.Ordinal);
+        var launchEnd = script.IndexOf(
+            "const bindPlaceholder =",
+            launchStart,
+            StringComparison.Ordinal);
+
+        Assert.True(launchStart >= 0);
+        Assert.True(launchEnd > launchStart);
+
+        var launch = script[launchStart..launchEnd];
+        Assert.Contains(
+            "const managedFullscreen = iframe.classList.contains(\"youtube-auto-expand\");",
+            launch,
+            StringComparison.Ordinal);
+        Assert.Contains("pauseNativeMedia(null);", launch, StringComparison.Ordinal);
+        Assert.Contains("pauseYouTubeFrames(iframe);", launch, StringComparison.Ordinal);
+        Assert.Contains("expandVideo(iframe);", launch, StringComparison.Ordinal);
+
+        var expandIndex = launch.IndexOf("expandVideo(iframe);", StringComparison.Ordinal);
+        var bindIndex = launch.IndexOf("bindFrame(iframe);", StringComparison.Ordinal);
+        Assert.True(expandIndex >= 0 && bindIndex > expandIndex);
+    }
+
+    [Fact]
     public void Managed_fullscreen_masks_youtube_metadata_and_disables_native_fullscreen()
     {
         var gameplay = File.ReadAllText(FindWebFile(
@@ -140,6 +203,10 @@ public sealed class YouTubePlaceholderRegressionTests
             "wwwroot",
             "css",
             "youtube-placeholder.css"));
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "youtube-auto-expand.js"));
 
         Assert.Contains("&fs=0", gameplay, StringComparison.Ordinal);
         Assert.Contains(
@@ -147,9 +214,18 @@ public sealed class YouTubePlaceholderRegressionTests
             gameplay,
             StringComparison.Ordinal);
         Assert.Contains(
+            "url.searchParams.set(\"fs\", \"0\");",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "iframe.allowFullscreen = managedFullscreen",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
             "body.youtube-auto-expanded-open::before",
             css,
             StringComparison.Ordinal);
+        Assert.Contains("height: max(132px, 15vh);", css, StringComparison.Ordinal);
         Assert.Contains("z-index: 10001;", css, StringComparison.Ordinal);
         Assert.Contains(
             ".youtube-auto-expand-close",

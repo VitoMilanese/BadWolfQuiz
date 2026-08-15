@@ -18,12 +18,40 @@
     const placeholderImageUrl = scriptUrl
         ? new URL("../images/youtube-placeholder.svg", scriptUrl).toString()
         : "/images/youtube-placeholder.svg";
+    const placeholderStylesheetUrl = scriptUrl
+        ? new URL("../css/youtube-placeholder.css", scriptUrl).toString()
+        : "/css/youtube-placeholder.css";
     let expandedIframe = null;
     let closeButton = null;
     let shouldResumeTimer = false;
     let timerPlaybackOwner = null;
     let apiCallbackInstalled = false;
     let suppressNextEscapeKeyUp = false;
+
+    const ensurePlaceholderStylesheet = () => {
+        const existing = Array.from(
+            document.querySelectorAll('link[rel="stylesheet"]'))
+            .some(link => {
+                try {
+                    return new URL(link.href, document.baseURI)
+                        .pathname.endsWith("/css/youtube-placeholder.css");
+                } catch {
+                    return false;
+                }
+            });
+
+        if (existing) {
+            return;
+        }
+
+        const stylesheet = document.createElement("link");
+        stylesheet.rel = "stylesheet";
+        stylesheet.href = placeholderStylesheetUrl;
+        stylesheet.dataset.youtubePlaceholderStyles = "true";
+        document.head.appendChild(stylesheet);
+    };
+
+    ensurePlaceholderStylesheet();
 
     const pauseRunningTimer = () => {
         const timerPanel = document.getElementById("game-timer");
@@ -301,11 +329,14 @@
         return placeholder;
     };
 
-    const buildLaunchUrl = value => {
+    const buildLaunchUrl = (value, managedFullscreen) => {
         try {
             const url = new URL(value, document.baseURI);
             url.searchParams.set("enablejsapi", "1");
             url.searchParams.set("autoplay", "1");
+            if (managedFullscreen) {
+                url.searchParams.set("fs", "0");
+            }
             return url.toString();
         } catch {
             return value;
@@ -327,15 +358,17 @@
 
         const iframe = document.createElement("iframe");
         iframe.className = placeholder.dataset.youtubeFrameClass ?? "";
+        const managedFullscreen = iframe.classList.contains("youtube-auto-expand");
         iframe.dataset.youtubeLaunched = "true";
         iframe.dataset.youtubeAutoplay = "true";
-        iframe.src = buildLaunchUrl(embedUrl);
+        iframe.src = buildLaunchUrl(embedUrl, managedFullscreen);
         iframe.title = placeholder.dataset.youtubeTitle ?? "YouTube";
         iframe.allow = placeholder.dataset.youtubeAllow ||
             "accelerometer; autoplay; clipboard-write; encrypted-media; " +
             "gyroscope; picture-in-picture; web-share";
-        iframe.allowFullscreen =
-            placeholder.dataset.youtubeAllowFullscreen !== "false";
+        iframe.allowFullscreen = managedFullscreen
+            ? false
+            : placeholder.dataset.youtubeAllowFullscreen !== "false";
 
         const closeLabel = placeholder.dataset.youtubeCloseLabel;
         if (closeLabel) {
@@ -343,6 +376,12 @@
         }
 
         placeholder.replaceWith(iframe);
+
+        if (managedFullscreen) {
+            pauseNativeMedia(null);
+            pauseYouTubeFrames(iframe);
+            expandVideo(iframe);
+        }
 
         if (iframe.matches(youtubeFrameSelector)) {
             bindFrame(iframe);
