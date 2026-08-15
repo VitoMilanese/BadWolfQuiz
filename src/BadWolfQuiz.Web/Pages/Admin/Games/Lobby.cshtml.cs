@@ -1389,12 +1389,11 @@ public sealed class LobbyModel(
                 return RedirectToPage(new { id });
             }
 
-            sessionRegistry.AddQuestionAnswerHistoryEntry(
+            sessionRegistry.AdjustQuestionAnswerHistoryEntry(
                 game.PublicCode,
                 sourceQuestionId,
                 new GamePlayerId(playerId),
-                isCorrect,
-                value,
+                isCorrect ? value : -value,
                 resolveQuestionIfAvailable);
 
             await gameHistoryStore.SaveCompletedGameAsync(game, cancellationToken);

@@ -2784,14 +2784,9 @@
             let firstAvailable = null;
 
             for (const option of questionSelect.options) {
-                const attemptedIds = option.dataset.attemptedPlayerIds
-                    ?.split(",")
-                    .filter(Boolean) ?? [];
-                const available = !attemptedIds.includes(selectedPlayerId);
-
-                option.hidden = !available;
-                option.disabled = !available;
-                firstAvailable ??= available ? option : null;
+                option.hidden = false;
+                option.disabled = false;
+                firstAvailable ??= option;
             }
 
             if (firstAvailable) {
