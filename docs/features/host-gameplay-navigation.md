@@ -68,18 +68,22 @@ Four-clue question previews preserve the same horizontal clue layout used during
 
 ## YouTube and media behavior
 
-YouTube playback is managed for the lifetime of the browser document rather than only for frames present during initial page load. A `MutationObserver` discovers YouTube players inserted by host partial navigation and by the regular/final-question editor previews.
+Before playback starts, supported YouTube blocks render a local placeholder instead of exposing the embedded YouTube iframe. The placeholder keeps the normal video aspect ratio, includes a play affordance, and does not expose YouTube title/channel metadata. Gameplay, resolved previews, and the regular/final-question editor previews use the shared YouTube manager; the Answer Key launches its YouTube player inline without the managed fullscreen presentation.
 
-When a tracked YouTube video starts:
+YouTube playback is managed for the lifetime of the browser document rather than only for frames present during initial page load. A `MutationObserver` discovers YouTube placeholders and players inserted by host partial navigation and editor previews. The manager also ensures the placeholder stylesheet is present in the active document head so AJAX gameplay refreshes cannot leave the placeholder without its sizing rules.
 
-- the player expands to the full-viewport presentation;
-- other YouTube players and native audio/video elements are paused;
+When a managed placeholder is launched:
+
+- the real YouTube iframe is created only after the user activates the placeholder and autoplay is requested;
+- the player immediately enters the app-controlled full-viewport presentation instead of relying on a later YouTube API state event;
+- native YouTube fullscreen is disabled for managed gameplay/editor players;
+- other YouTube players and native audio/video elements are paused immediately;
 - a running question timer is paused through the lightweight timer command path rather than by replacing the gameplay view;
-- the expanded presentation collapses automatically when playback ends.
+- the app-controlled top mask covers YouTube title/channel metadata during playback, including common browser zoom levels.
 
-Escape or the close control leaves only the expanded presentation. Playback continues and the timer remains paused until the video actually pauses, stops, ends, or is removed. The paired Escape `keyup` is consumed so the same key press cannot also trigger question-editor or final-question-editor Escape navigation.
+Escape, the app close control, and normal playback completion stop the managed player, remove its iframe, and restore the local placeholder. If the YouTube manager paused the question timer, leaving playback resumes that timer. The paired Escape `keyup` is consumed so the same key press cannot also trigger question-editor or final-question-editor Escape navigation.
 
-If the host manually resumes the timer while the video is still playing, the YouTube manager relinquishes its pending automatic resume. When playback later ends, it does not submit a second Resume command and the already-running timer continues normally.
+If a playing iframe is removed because the host gameplay region advances to another state, such as judging the question or resolving it with no correct answer, the manager abandons its pending timer resume instead of submitting a stale Resume command for a question that is no longer active. Likewise, if the host manually resumes the timer while a video is still playing, the manager relinquishes its pending automatic resume so later cleanup cannot submit a duplicate command.
 
 ## Live updates and timer commands
 
