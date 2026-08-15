@@ -459,6 +459,19 @@ public sealed class GameHub(
     public static object CreateStatusUpdate(GameSessionRegistration game)
         => new { status = game.Session.Status.ToString().ToLowerInvariant() };
 
+    public static object CreateThemeUpdate(GameSessionSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        var siteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId);
+        return new
+        {
+            siteThemeId,
+            customThemeStyle = siteThemeId == "custom"
+                ? SiteThemeCatalog.BuildCssVariables(settings.CustomThemeColors)
+                : null
+        };
+    }
+
     private static bool IsValidPlayerImage(string? imageDataUrl)
     {
         if (string.IsNullOrWhiteSpace(imageDataUrl) ||

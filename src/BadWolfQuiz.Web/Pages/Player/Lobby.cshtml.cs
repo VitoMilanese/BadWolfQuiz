@@ -7,6 +7,7 @@ namespace BadWolfQuiz.Web.Pages.Player;
 
 public sealed class LobbyModel(
     GameSessionRegistry sessionRegistry,
+    GameSettingsStore settingsStore,
     QuizRatingService quizRatingService) : PageModel
 {
     public GameSessionRegistration Game { get; private set; } = null!;
@@ -53,7 +54,10 @@ public sealed class LobbyModel(
                 currentPlayer.Id,
                 cancellationToken);
         }
-        ViewData["GameThemeSettings"] = game.Session.Settings;
+        var themeSettings = !string.IsNullOrWhiteSpace(game.HostId)
+            ? await settingsStore.LoadAsync(game.HostId, cancellationToken)
+            : game.Session.Settings;
+        ViewData["GameThemeSettings"] = themeSettings;
         return Page();
     }
 

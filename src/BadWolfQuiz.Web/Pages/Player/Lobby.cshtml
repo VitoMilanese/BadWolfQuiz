@@ -971,6 +971,18 @@
                 }
             });
 
+            const applySiteTheme = update => {
+                if (!update?.siteThemeId) {
+                    return;
+                }
+
+                const root = document.documentElement;
+                root.dataset.theme = update.siteThemeId;
+                root.style.cssText = update.customThemeStyle || "";
+            };
+
+            connection.on("SiteThemeChanged", applySiteTheme);
+
             connection.on("GameStatusChanged", update => {
                 const finalStatuses = [
                     "finalwagering",
