@@ -5068,6 +5068,10 @@
                     playerCount.textContent = update.playerCount.toString();
                 }
 
+                if (isExternalHostFlowActive()) {
+                    return;
+                }
+
                 const fingerprint = playerFingerprint(update.players);
                 if (fingerprint === renderedPlayersFingerprint) {
                     webcam.refresh(update.players);
