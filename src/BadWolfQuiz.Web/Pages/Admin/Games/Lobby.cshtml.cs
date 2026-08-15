@@ -1804,11 +1804,11 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
-    public bool IsPlayerInactive(GamePlayerId playerId)
+    public bool IsPlayerUnavailableForFinalAction(GamePlayerId playerId)
     {
         return Players.Any(player =>
             player.Id == playerId &&
-            player.Presence == PlayerPresenceStatus.Inactive);
+            player.Presence != PlayerPresenceStatus.Active);
     }
 
     private IActionResult LoadPage(

@@ -37,7 +37,37 @@ public sealed class FinalQuestionPlayerControlsRegressionTests
         Assert.Contains("requestHostGameplayRefresh()", branch, StringComparison.Ordinal);
         Assert.Contains("PlayersChanged", markup, StringComparison.Ordinal);
         Assert.Contains("asp-page-handler=\"SubmitMinimumFinalWager\"", markup, StringComparison.Ordinal);
-        Assert.Contains("Model.IsPlayerInactive(submission.PlayerId)", markup, StringComparison.Ordinal);
+        Assert.Contains("asp-page-handler=\"SubmitEmptyFinalAnswer\"", markup, StringComparison.Ordinal);
+        Assert.Equal(
+            2,
+            CountOccurrences(
+                markup,
+                "Model.IsPlayerUnavailableForFinalAction(submission.PlayerId)"));
+    }
+
+    [Fact]
+    public void Final_fallback_actions_are_available_for_every_non_active_presence()
+    {
+        var pageModel = File.ReadAllText(FindPageModel());
+        var helperStart = pageModel.IndexOf(
+            "IsPlayerUnavailableForFinalAction",
+            StringComparison.Ordinal);
+        Assert.True(helperStart >= 0);
+        var helperEnd = pageModel.IndexOf(
+            "    }",
+            helperStart,
+            StringComparison.Ordinal);
+        Assert.True(helperEnd > helperStart);
+        var helper = pageModel[helperStart..(helperEnd + 5)];
+
+        Assert.Contains(
+            "player.Presence != PlayerPresenceStatus.Active",
+            helper,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "player.Presence == PlayerPresenceStatus.Inactive",
+            helper,
+            StringComparison.Ordinal);
     }
 
     [Fact]
@@ -58,6 +88,22 @@ public sealed class FinalQuestionPlayerControlsRegressionTests
         Assert.Contains("\"GameStatusChanged\"", handler, StringComparison.Ordinal);
         Assert.Contains("\"FinalQuestionProgressChanged\"", handler, StringComparison.Ordinal);
         Assert.Contains("BroadcastPlayersAsync", handler, StringComparison.Ordinal);
+    }
+
+    private static int CountOccurrences(string value, string fragment)
+    {
+        var count = 0;
+        var startIndex = 0;
+        while ((startIndex = value.IndexOf(
+                   fragment,
+                   startIndex,
+                   StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            startIndex += fragment.Length;
+        }
+
+        return count;
     }
 
     private static string FindLobbyView() =>

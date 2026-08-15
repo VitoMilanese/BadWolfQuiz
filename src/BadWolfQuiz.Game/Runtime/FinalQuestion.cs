@@ -123,8 +123,9 @@ public sealed class FinalQuestion
 
         _submissions.Remove(submission);
 
-        if (Status == FinalQuestionStatus.Judging &&
-            _submissions.All(item => item.IsCorrect.HasValue))
+        if (_submissions.Count == 0 ||
+            (Status == FinalQuestionStatus.Judging &&
+             _submissions.All(item => item.IsCorrect.HasValue)))
         {
             Status = FinalQuestionStatus.Completed;
         }

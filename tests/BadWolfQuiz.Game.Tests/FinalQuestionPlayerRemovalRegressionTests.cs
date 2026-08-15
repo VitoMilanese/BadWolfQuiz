@@ -60,6 +60,45 @@ public sealed class FinalQuestionPlayerRemovalRegressionTests
         Assert.Equal(100, rose.Score);
     }
 
+    [Theory]
+    [InlineData(GameSessionStatus.FinalWagering)]
+    [InlineData(GameSessionStatus.FinalAnswering)]
+    [InlineData(GameSessionStatus.FinalJudging)]
+    public void Removing_only_player_during_final_completes_with_empty_standings(
+        GameSessionStatus finalStatus)
+    {
+        var session = GameSession.Create(CreateQuiz());
+        var rose = session.AddPlayer("Rose");
+        session.Start();
+        session.ForceAdvanceToFinalQuestion();
+
+        switch (finalStatus)
+        {
+            case GameSessionStatus.FinalWagering:
+                break;
+            case GameSessionStatus.FinalAnswering:
+                session.SubmitFinalWager(rose.Id, 100);
+                session.LockFinalWagers();
+                break;
+            case GameSessionStatus.FinalJudging:
+                session.SubmitFinalWager(rose.Id, 100);
+                session.LockFinalWagers();
+                session.SubmitFinalAnswer(rose.Id, "Bad Wolf");
+                session.LockFinalAnswers();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(finalStatus));
+        }
+
+        session.RemovePlayer(rose.Id);
+
+        Assert.Equal(GameSessionStatus.Completed, session.Status);
+        Assert.Equal(FinalQuestionStatus.Completed, session.FinalQuestion!.Status);
+        Assert.Empty(session.Players);
+        Assert.Empty(session.FinalQuestion.Submissions);
+        Assert.Empty(session.GetFinalStandings());
+    }
+
     private static GameSession CreateFinalSession(
         out GamePlayer rose,
         out GamePlayer clara)
