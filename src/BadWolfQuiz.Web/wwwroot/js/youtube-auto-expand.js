@@ -100,6 +100,15 @@
         resumePausedTimer();
     };
 
+    const abandonTimedPlayback = iframe => {
+        if (timerPlaybackOwner !== iframe) {
+            return;
+        }
+
+        timerPlaybackOwner = null;
+        shouldResumeTimer = false;
+    };
+
     const clearExpandedPresentation = () => {
         expandedIframe?.classList.remove("youtube-auto-expanded");
         expandedIframe = null;
@@ -124,7 +133,7 @@
         closeButton.textContent = "\u00d7";
         closeButton.title = iframe.dataset.closeLabel ?? "Close video";
         closeButton.setAttribute("aria-label", closeButton.title);
-        closeButton.addEventListener("click", clearExpandedPresentation);
+        closeButton.addEventListener("click", () => restorePlaceholder(iframe));
         document.body.appendChild(closeButton);
         closeButton.focus({ preventScroll: true });
     };
@@ -186,7 +195,7 @@
 
         if (event.data === window.YT.PlayerState.ENDED &&
             expandedIframe === iframe) {
-            clearExpandedPresentation();
+            restorePlaceholder(iframe);
         }
     };
 
@@ -329,6 +338,41 @@
         return placeholder;
     };
 
+    function restorePlaceholder(iframe) {
+        if (!iframe) {
+            return;
+        }
+
+        const frameClass = Array.from(iframe.classList)
+            .filter(className => className !== "youtube-auto-expanded")
+            .join(" ");
+        const placeholder = createPlaceholder({
+            embedUrl: iframe.dataset.youtubeEmbedUrl ??
+                iframe.getAttribute("src") ??
+                iframe.src,
+            frameClass,
+            title: iframe.title || "YouTube",
+            closeLabel: iframe.dataset.closeLabel ?? "",
+            allow: iframe.getAttribute("allow") ?? "",
+            allowFullscreen: iframe.allowFullscreen
+        });
+
+        if (expandedIframe === iframe) {
+            clearExpandedPresentation();
+        }
+
+        pendingFrames.delete(iframe);
+        players.delete(iframe);
+        endTimedPlayback(iframe);
+
+        if (!placeholder || !iframe.isConnected) {
+            return;
+        }
+
+        iframe.replaceWith(placeholder);
+        bindPlaceholder(placeholder);
+    }
+
     const buildLaunchUrl = (value, managedFullscreen) => {
         try {
             const url = new URL(value, document.baseURI);
@@ -361,6 +405,7 @@
         const managedFullscreen = iframe.classList.contains("youtube-auto-expand");
         iframe.dataset.youtubeLaunched = "true";
         iframe.dataset.youtubeAutoplay = "true";
+        iframe.dataset.youtubeEmbedUrl = embedUrl;
         iframe.src = buildLaunchUrl(embedUrl, managedFullscreen);
         iframe.title = placeholder.dataset.youtubeTitle ?? "YouTube";
         iframe.allow = placeholder.dataset.youtubeAllow ||
@@ -451,7 +496,7 @@
         forEachFrame(rootNode, iframe => {
             pendingFrames.delete(iframe);
             players.delete(iframe);
-            endTimedPlayback(iframe);
+            abandonTimedPlayback(iframe);
 
             if (expandedIframe === iframe) {
                 clearExpandedPresentation();
@@ -485,7 +530,7 @@
         suppressNextEscapeKeyUp = true;
         event.preventDefault();
         event.stopImmediatePropagation();
-        clearExpandedPresentation();
+        restorePlaceholder(expandedIframe);
     }, true);
 
     window.addEventListener("keyup", event => {
