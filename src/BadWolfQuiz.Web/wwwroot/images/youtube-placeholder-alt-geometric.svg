@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#15161b" />
+      <stop offset="0.48" stop-color="#08090c" />
+      <stop offset="1" stop-color="#1b0509" />
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff334f" stop-opacity="0.62" />
+      <stop offset="1" stop-color="#8e0b1d" stop-opacity="0.12" />
+    </linearGradient>
+    <radialGradient id="glow" cx="52%" cy="48%" r="48%">
+      <stop offset="0" stop-color="#ef233c" stop-opacity="0.22" />
+      <stop offset="1" stop-color="#ef233c" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)" />
+  <path d="M0 0H600L280 430 0 610Z" fill="#ffffff" fill-opacity="0.025" />
+  <path d="M1600 0H1160L860 365 1300 260Z" fill="#ffffff" fill-opacity="0.03" />
+  <path d="M0 900V670L520 335 760 510 420 900Z" fill="url(#red)" opacity="0.44" />
+  <path d="M1600 900V540L1130 290 760 565 1125 900Z" fill="url(#red)" opacity="0.28" />
+  <path d="M180 760 555 370 800 545 1050 340 1435 715" fill="none" stroke="#ef233c" stroke-opacity="0.34" stroke-width="7" />
+  <path d="M265 790 575 455 800 625 1040 430 1350 755" fill="none" stroke="#ffffff" stroke-opacity="0.075" stroke-width="2" />
+  <ellipse cx="800" cy="455" rx="470" ry="300" fill="url(#glow)" />
+</svg>
