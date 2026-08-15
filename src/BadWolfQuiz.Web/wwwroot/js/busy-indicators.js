@@ -12,6 +12,7 @@
     let busy = false;
     let lockedForm = null;
     let ajaxObserver = null;
+    let navigationScheduled = false;
 
     const normalisePath = value =>
         (value || "/").replace(/\/$/, "").toLowerCase() || "/";
@@ -62,6 +63,7 @@
         ajaxObserver = null;
         releaseFormLock();
         busy = false;
+        navigationScheduled = false;
         document.body.removeAttribute("aria-busy");
 
         const overlay = document.getElementById(overlayId);
@@ -96,9 +98,38 @@
         return true;
     };
 
+    const runAfterPaint = callback => {
+        if (typeof window.requestAnimationFrame !== "function" ||
+            document.visibilityState !== "visible") {
+            window.setTimeout(callback, 34);
+            return;
+        }
+
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(callback);
+        });
+    };
+
+    const navigate = url => {
+        if (!url || navigationScheduled) {
+            return false;
+        }
+
+        if (!busy) {
+            show();
+        }
+
+        navigationScheduled = true;
+        runAfterPaint(() => {
+            window.location.assign(url);
+        });
+        return true;
+    };
+
     window.BadWolfBusy = Object.freeze({
         show,
         hide,
+        navigate,
         get isBusy() {
             return busy;
         }
@@ -185,6 +216,34 @@
             isEditorNavigationTarget(targetPath);
     };
 
+    const getEscapeBackLink = () => {
+        const currentPath = normalisePath(window.location.pathname);
+
+        if (pathMatches(currentPath, routes.questionEditor)) {
+            return document.getElementById("question-editor-back-link");
+        }
+
+        if (pathMatches(currentPath, routes.finalQuestionEditor)) {
+            return document.getElementById("final-question-editor-back-link");
+        }
+
+        if (pathMatches(currentPath, routes.descriptionEditor)) {
+            return document.getElementById("description-editor-back");
+        }
+
+        return null;
+    };
+
+    const hasOpenEditorModal = () => {
+        const preview = document.getElementById("question-preview-modal");
+        if (preview && !preview.hidden) {
+            return true;
+        }
+
+        return [...document.querySelectorAll("dialog[open]")]
+            .some(dialog => dialog.id !== overlayId);
+    };
+
     const watchAjaxCompletion = submitter => {
         if (!submitter) {
             hide();
@@ -265,19 +324,30 @@
             return;
         }
 
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
         if (busy) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
             return;
         }
 
-        show();
-        window.setTimeout(() => {
-            if (event.defaultPrevented) {
-                hide();
-            }
-        }, 0);
+        navigate(link.href);
     });
+
+    window.addEventListener("keyup", event => {
+        if (event.key !== "Escape" || busy || hasOpenEditorModal()) {
+            return;
+        }
+
+        const backLink = getEscapeBackLink();
+        if (!backLink?.href) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        navigate(backLink.href);
+    }, true);
 
     window.addEventListener("pageshow", hide);
 })();
