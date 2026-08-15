@@ -60,6 +60,26 @@ public sealed class FinalQuestionPlayerControlsRegressionTests
     }
 
     [Fact]
+    public void Empty_final_standings_hide_results_heading_but_keep_finish_action()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var guardStart = markup.IndexOf(
+            "@if (Model.FinalStandings.Count > 0)",
+            StringComparison.Ordinal);
+        Assert.True(guardStart >= 0);
+        var finishStart = markup.IndexOf(
+            "<div class=\"form-actions final-finish-actions\">",
+            guardStart,
+            StringComparison.Ordinal);
+        Assert.True(finishStart > guardStart);
+        var guardedResults = markup[guardStart..finishStart];
+
+        Assert.Contains("FinalQuestion_Results", guardedResults, StringComparison.Ordinal);
+        Assert.Contains("round-podium", guardedResults, StringComparison.Ordinal);
+        Assert.Contains("GameBoard_FinishGame", markup[finishStart..], StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Removal_handler_broadcasts_status_when_final_removal_completes_game()
     {
         var pageModel = File.ReadAllText(FindPageModel());

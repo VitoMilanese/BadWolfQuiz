@@ -1387,17 +1387,20 @@
             }
             else
             {
-                <h2>@Localizer["FinalQuestion_Results"]</h2>
-                <ol class="round-podium">
-                    @foreach (var standing in Model.FinalStandings.Take(3))
-                    {
-                        <li class="round-podium-player @(standing.Position == 1 ? "round-winner" : null)">
-                            <span class="round-podium-position">@standing.Position</span>
-                            <strong>@standing.PlayerName</strong>
-                            <span class="round-podium-score">@standing.Score</span>
-                        </li>
-                    }
-                </ol>
+                @if (Model.FinalStandings.Count > 0)
+                {
+                    <h2>@Localizer["FinalQuestion_Results"]</h2>
+                    <ol class="round-podium">
+                        @foreach (var standing in Model.FinalStandings.Take(3))
+                        {
+                            <li class="round-podium-player @(standing.Position == 1 ? "round-winner" : null)">
+                                <span class="round-podium-position">@standing.Position</span>
+                                <strong>@standing.PlayerName</strong>
+                                <span class="round-podium-score">@standing.Score</span>
+                            </li>
+                        }
+                    </ol>
+                }
                 <div class="form-actions final-finish-actions">
                     <a class="button button-primary"
                        asp-page="/Admin/Quizzes/Index">
