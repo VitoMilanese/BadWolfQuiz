@@ -18,7 +18,7 @@ For each judged attempt:
 
 When a player answers correctly, that player becomes the active player. If the current active player answers correctly, the active player remains unchanged.
 
-The host can explicitly resolve a regular question with no correct answer while the buzzer phase is available. The control is hidden while a specific player is answering. In either explicit or automatic no-correct-answer resolution, no additional score is applied and the existing active player keeps the right to select the next question. If an incorrect answer or timeout leaves no eligible players who can still buzz, the Engine performs this resolution automatically.
+The host can explicitly resolve a regular question with no correct answer while the buzzer phase is available. The control is hidden while a specific player is answering. Explicit no-correct-answer resolution applies no additional score and the existing active player keeps the right to select the next question. Timer expiration never performs this resolution automatically; it only notifies the host, who remains responsible for the next gameplay action.
 
 Question selection is submitted asynchronously. If the Engine rejects the
 selection because the board state changed or the question is no longer
@@ -72,7 +72,7 @@ as the standard judging flow.
 
 A four-clue question is a regular buzzer question with a different presentation and scoring rule. Its immutable definition contains exactly four ordered clues. A clue may be text, an image, or audio; video and YouTube blocks are not supported.
 
-The first two clues are revealed when the question opens. The third and fourth clues are revealed one at a time, either manually by the host or automatically when the question timer expires. Every successful clue reveal starts a new full question-timer interval. The number of revealed clues is part of the recoverable runtime state. After the final clue has been revealed, a later timer expiration follows the normal unresolved-question timeout flow.
+The first two clues are revealed when the question opens. The third and fourth clues are revealed one at a time only when the host chooses **Reveal clue**. Every successful clue reveal starts a new full question-timer interval. Timer expiration does not reveal a clue or resolve the question; it only notifies the host. The number of revealed clues is part of the recoverable runtime state.
 
 - A correct answer with two visible clues awards 100% of the question value.
 - A correct answer with three visible clues awards 50%.
@@ -110,7 +110,9 @@ The current host UI presents immutable question content while a question is acti
 
 For regular buzzer questions, the answering player is established by the buzzer winner and the Engine-controlled timed answer phase. The host judges that player's answer while the question remains active.
 
-After correct, incorrect, and timeout outcomes, the host briefly sees the answering player and actual applied score delta over the player-card area. This transient feedback does not delay the authoritative transition to the next gameplay state.
+After correct and incorrect outcomes, the host briefly sees the answering player and actual applied score delta over the player-card area. This transient feedback does not delay the authoritative transition to the next gameplay state.
+
+Timer expiration instead shows the host-only animated `TIME'S UP` notification and plays a short synthesized mechanical alarm-bell timeout sting. The cue is generated in the browser without a shipped audio asset, plays once for each `QuestionTimerExpired` event, and does not change gameplay state or block host controls. Extending an expired timer and reaching zero again produces a new visual and audio cue.
 
 The transient score-result overlay automatically scales the player name and applied
 score delta to the available card area. Both values remain fully visible without
@@ -171,14 +173,13 @@ When a player wins the buzzer:
 - the host view highlights the answering player;
 - a separate **answer timer** starts for that player.
 
-The host may judge the answer before the answer timer expires. If the answer timer expires before the player gives a correct answer, the Engine records an incorrect answer automatically.
+The host may judge the answer before or after the answer timer expires. Expiration records no answer and applies no score; the answering player remains in place until the host judges the attempt or chooses another valid gameplay action.
 
 When answer reward decay is enabled, the available correct-answer reward remains
 at its current full value for the configured delay and then decreases linearly
 during this individual answer phase. The minimum configured percentage is reached
 at 1 displayed second remaining. The rounded value shown to the host is the same
-whole-point value used when a correct answer is judged. Incorrect answers and
-timeouts continue to apply the full normal penalty.
+whole-point value used when a correct answer is judged. Incorrect answers continue to apply the full normal penalty. Timer expiration itself applies no penalty.
 
 After an incorrect answer:
 
@@ -192,8 +193,9 @@ The question moves to answer presentation when any of the following occurs:
 
 - a player answers correctly;
 - the host chooses **No correct answer**;
-- the buzzer window timer expires without another eligible player buzzing;
 - no eligible players remain.
+
+Buzzer-window expiration alone does not move the question to answer presentation. The timer remains visible at zero and the host chooses the next action.
 
 ### Wager question flow
 
@@ -206,7 +208,7 @@ The wager answer timer start mode is configurable:
 
 The **Correct** and **Incorrect** judgment controls become available when the answer phase starts. In automatic mode they appear with the running timer. In manual mode they appear after the host starts the timer.
 
-If the wager answer timer expires before a correct answer is accepted, the Engine records an incorrect answer automatically.
+If the wager answer timer expires, the wager question remains active and no score is applied automatically. The host explicitly judges the answer when ready.
 
 After the wager answer is judged correct or incorrect, the correct answer is displayed. The host then closes the answer presentation to return to the board.
 
@@ -237,9 +239,9 @@ round because there is no leaderboard to present or active player to select.
 
 The buzzer-window and individual-answer durations come from the effective game settings, which are copied from global defaults when the game is created and may be overridden for that game.
 
-Activating the buzzer starts the buzzer timer. A valid buzzer claim pauses that timer and starts the answer timer. If answer reward decay is enabled, only this player-owned answer interval affects the available correct-answer reward. If the answer timer expires, the Engine records an incorrect answer and resumes the buzzer timer with the exact time that remained when the player claimed the buzzer, unless no eligible players remain; in that case the question moves directly to answer presentation.
+Activating the buzzer starts the buzzer timer. A valid buzzer claim pauses that timer and starts the answer timer. If answer reward decay is enabled, only this player-owned answer interval affects the available correct-answer reward. When either timer reaches zero, it expires in place: the Engine applies no score, performs no judgment, reveals no clue, and does not resolve the question. The Web layer sends the host a one-shot timeout notification while keeping the expired timer visible at zero.
 
-If the buzzer timer expires while no player is answering, the Engine resolves the question without a correct answer and moves to the answer presentation.
+The host may judge the current answering player after answer-timer expiration, explicitly resolve a regular question, reveal another four-clue clue when allowed, or add time to an expired timer. Adding positive time to an expired timer makes it running again; a later expiration emits a fresh host notification.
 
 The Engine exposes timer processing as an explicit command. Real-time scheduling, SignalR broadcasts, and visible countdown controls are connected in the Web layer separately.
 
@@ -248,7 +250,7 @@ The Engine exposes timer processing as an explicit command. Real-time scheduling
 
 Accepting a wager immediately starts the individual answer timer for the wager player. The buzzer timer is not used because no other player may claim the question.
 
-If the answer timer expires, the Engine records the wager answer as incorrect, subtracts the wager amount, and moves directly to the answer presentation.
+If the answer timer expires, the wager question remains active at zero with no automatic score change. The host explicitly judges the wager answer when ready or may add time and resume the timer.
 
 
 ## Round and final standings tie-breaking

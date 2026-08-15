@@ -6308,3 +6308,132 @@ body.youtube-auto-expanded-open {
 .game-timer-quick-actions button {
     min-width: 44px;
 }
+
+
+/* Host-only timer expiration impact notification. */
+.question-timeout-notification {
+    position: fixed;
+    z-index: 1300;
+    top: clamp(82px, 13vh, 150px);
+    left: 50%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(14px, 2vw, 24px);
+    width: min(760px, calc(100vw - 32px));
+    padding: clamp(18px, 3vw, 30px) clamp(22px, 4vw, 38px);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--red-bright) 78%, white 22%);
+    border-radius: 22px;
+    background: linear-gradient(115deg, rgba(193, 18, 31, 0.94), rgba(42, 6, 12, 0.97) 58%, rgba(9, 9, 12, 0.98)), var(--panel);
+    box-shadow: 0 26px 80px rgba(0, 0, 0, 0.52), 0 0 46px color-mix(in srgb, var(--red-bright) 40%, transparent), inset 0 1px rgba(255, 255, 255, 0.12);
+    color: var(--text);
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -24px) scale(0.88);
+    transform-origin: 50% 35%;
+    isolation: isolate;
+}
+
+.question-timeout-notification::before,
+.question-timeout-notification::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.question-timeout-notification::before {
+    z-index: -2;
+    background: repeating-linear-gradient(120deg, transparent 0 28px, rgba(255, 255, 255, 0.035) 28px 30px);
+}
+
+.question-timeout-notification::after {
+    z-index: -1;
+    inset: auto -12% -80% 28%;
+    height: 190%;
+    background: radial-gradient(circle, rgba(242, 177, 52, 0.24), transparent 62%);
+}
+
+.question-timeout-notification.is-visible {
+    animation: question-timeout-impact 620ms cubic-bezier(.16, 1.2, .3, 1) both;
+}
+
+.question-timeout-notification.is-leaving {
+    animation: question-timeout-exit 420ms ease both;
+}
+
+.question-timeout-notification-glow {
+    position: absolute;
+    inset: -50%;
+    z-index: -1;
+    background: conic-gradient(from 90deg, transparent, rgba(239, 35, 60, 0.28), transparent 34%, rgba(242, 177, 52, 0.18), transparent 70%);
+    animation: question-timeout-glow 3.8s linear infinite;
+}
+
+.question-timeout-notification-icon {
+    display: grid;
+    place-items: center;
+    width: clamp(58px, 8vw, 82px);
+    aspect-ratio: 1;
+    border: 2px solid rgba(255, 255, 255, 0.72);
+    border-radius: 50%;
+    background: rgba(7, 7, 9, 0.34);
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.05), 0 0 30px rgba(242, 177, 52, 0.28);
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1;
+}
+
+.question-timeout-notification-copy {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.question-timeout-notification-kicker {
+    color: var(--gold);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.question-timeout-notification-copy strong {
+    font-size: clamp(2rem, 7vw, 4.6rem);
+    font-weight: 950;
+    letter-spacing: -0.055em;
+    line-height: 0.95;
+    text-shadow: 0 4px 22px rgba(0, 0, 0, 0.4);
+}
+
+.question-timeout-notification-copy [data-question-timeout-message] {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: clamp(0.9rem, 2vw, 1.08rem);
+    font-weight: 650;
+}
+
+@keyframes question-timeout-impact {
+    0% { opacity: 0; transform: translate(-50%, -34px) scale(0.76) rotate(-1.5deg); filter: brightness(1.7); }
+    52% { opacity: 1; transform: translate(-50%, 5px) scale(1.035) rotate(0.5deg); }
+    72% { transform: translate(-50%, -2px) scale(0.99); }
+    100% { opacity: 1; transform: translate(-50%, 0) scale(1); filter: brightness(1); }
+}
+
+@keyframes question-timeout-exit {
+    from { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    to { opacity: 0; transform: translate(-50%, -18px) scale(0.96); }
+}
+
+@keyframes question-timeout-glow {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .question-timeout-notification.is-visible,
+    .question-timeout-notification.is-leaving,
+    .question-timeout-notification-glow {
+        animation-duration: 1ms;
+        animation-iteration-count: 1;
+    }
+}

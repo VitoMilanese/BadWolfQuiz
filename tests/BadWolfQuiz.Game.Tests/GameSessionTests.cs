@@ -450,7 +450,7 @@ public sealed class GameSessionTests
     }
 
     [Fact]
-    public void Wager_answer_timer_expiration_records_incorrect_answer()
+    public void Wager_answer_timer_expiration_keeps_question_open_for_host_judgment()
     {
         var timeProvider = new ManualTimeProvider(InitialTime);
         var session = CreateSession(timeProvider);
@@ -463,9 +463,10 @@ public sealed class GameSessionTests
         var outcome = session.ProcessQuestionTimers();
 
         Assert.Equal(QuestionTimerOutcome.AnswerExpired, outcome.Outcome);
-        Assert.Equal(-150, player.Score);
-        Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
-        Assert.Equal(GameTimerStatus.Stopped, session.AnswerTimer.Status);
+        Assert.Equal(0, player.Score);
+        Assert.Empty(question.AnswerAttempts);
+        Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
+        Assert.Equal(GameTimerStatus.Expired, session.AnswerTimer.Status);
     }
 
     [Fact]
@@ -620,9 +621,10 @@ public sealed class GameSessionTests
         Assert.Equal(
             QuestionTimerOutcome.AnswerExpired,
             session.ProcessQuestionTimers().Outcome);
-        Assert.Equal(-100, rose.Score);
-        Assert.Equal(GameTimerStatus.Running, session.Timer.Status);
+        Assert.Equal(0, rose.Score);
+        Assert.Equal(GameTimerStatus.Paused, session.Timer.Status);
         Assert.Equal(TimeSpan.FromSeconds(23), session.Timer.Remaining);
+        Assert.Equal(GameTimerStatus.Expired, session.AnswerTimer.Status);
     }
 
     [Fact]
@@ -650,7 +652,7 @@ public sealed class GameSessionTests
     }
 
     [Fact]
-    public void Buzzer_timer_expiration_shows_the_answer()
+    public void Buzzer_timer_expiration_keeps_question_open_for_host_control()
     {
         var timeProvider = new ManualTimeProvider(InitialTime);
         var session = CreateSession(timeProvider);
@@ -663,8 +665,10 @@ public sealed class GameSessionTests
         var outcome = session.ProcessQuestionTimers();
 
         Assert.Equal(QuestionTimerOutcome.BuzzerExpired, outcome.Outcome);
-        Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
-        Assert.Equal(GameTimerStatus.Stopped, session.Timer.Status);
+        Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
+        Assert.Equal(QuestionBuzzerStatus.Open, question.BuzzerStatus);
+        Assert.Equal(GameTimerStatus.Expired, session.Timer.Status);
+        Assert.Equal(QuestionTimerOutcome.None, session.ProcessQuestionTimers().Outcome);
     }
 
     [Fact]

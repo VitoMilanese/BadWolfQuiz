@@ -2580,4 +2580,16 @@
   <data name="Error_GameNoLongerAcceptsPlayers" xml:space="preserve">
     <value>До цієї гри більше не можна приєднатися.</value>
   </data>
+  <data name="GameTimer_ExpiredKicker" xml:space="preserve">
+    <value>Час вийшов</value>
+  </data>
+  <data name="GameTimer_ExpiredTitle" xml:space="preserve">
+    <value>ЧАС ВИЙШОВ</value>
+  </data>
+  <data name="GameTimer_ExpiredBuzzer" xml:space="preserve">
+    <value>Час на кнопку вийшов. Далі вирішує ведучий.</value>
+  </data>
+  <data name="GameTimer_ExpiredAnswer" xml:space="preserve">
+    <value>Час на відповідь вийшов. Оцініть відповідь, коли будете готові.</value>
+  </data>
 </root>

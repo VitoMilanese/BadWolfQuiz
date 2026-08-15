@@ -779,9 +779,15 @@ public sealed class GameSession
     {
         EnsureRunning();
 
-        var timer = AnswerTimer.Status is GameTimerStatus.Running or GameTimerStatus.Paused
+        var timer = AnswerTimer.Status is
+                GameTimerStatus.Running or
+                GameTimerStatus.Paused or
+                GameTimerStatus.Expired
             ? AnswerTimer
-            : Timer.Status is GameTimerStatus.Running or GameTimerStatus.Paused
+            : Timer.Status is
+                GameTimerStatus.Running or
+                GameTimerStatus.Paused or
+                GameTimerStatus.Expired
                 ? Timer
                 : throw new GameRuleViolationException(
                     "There is no active question timer to extend.");
@@ -805,37 +811,17 @@ public sealed class GameSession
                 null);
         }
 
-        _ = AnswerTimer.Remaining;
-
-        if (AnswerTimer.Status == GameTimerStatus.Expired &&
-            question.AnsweringPlayerId is { } answeringPlayerId)
+        if (AnswerTimer.ConsumeExpiration() &&
+            question.AnsweringPlayerId is not null)
         {
-            var attempt = JudgeQuestionAnswer(
-                question.SourceQuestionId,
-                answeringPlayerId,
-                false);
-
             return new QuestionTimerProcessResult(
                 QuestionTimerOutcome.AnswerExpired,
-                attempt);
+                null);
         }
 
-        _ = Timer.Remaining;
-
-        if (Timer.Status == GameTimerStatus.Expired &&
+        if (Timer.ConsumeExpiration() &&
             question.AnsweringPlayerId is null)
         {
-            if (question.CanRevealClue)
-            {
-                RevealNextClue(question.SourceQuestionId);
-
-                return new QuestionTimerProcessResult(
-                    QuestionTimerOutcome.ClueRevealed,
-                    null);
-            }
-
-            ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
-
             return new QuestionTimerProcessResult(
                 QuestionTimerOutcome.BuzzerExpired,
                 null);

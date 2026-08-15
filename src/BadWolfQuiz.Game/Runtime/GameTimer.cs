@@ -6,6 +6,7 @@ public sealed class GameTimer
     private readonly TimeProvider _timeProvider;
     private DateTimeOffset? _lastStartedAtUtc;
     private TimeSpan _remaining;
+    private bool _hasPendingExpirationNotification;
 
     public GameTimer(TimeSpan duration, TimeProvider? timeProvider = null)
     {
@@ -48,6 +49,7 @@ public sealed class GameTimer
     {
         _remaining = Duration;
         _lastStartedAtUtc = _timeProvider.GetUtcNow();
+        _hasPendingExpirationNotification = false;
         Status = GameTimerStatus.Running;
     }
 
@@ -55,6 +57,7 @@ public sealed class GameTimer
     {
         _remaining = Duration;
         _lastStartedAtUtc = null;
+        _hasPendingExpirationNotification = false;
         Status = GameTimerStatus.Stopped;
     }
 
@@ -94,10 +97,13 @@ public sealed class GameTimer
 
         RefreshExpiration();
 
-        if (Status is not GameTimerStatus.Running and not GameTimerStatus.Paused)
+        var wasExpired = Status == GameTimerStatus.Expired;
+        if (Status is not GameTimerStatus.Running and
+            not GameTimerStatus.Paused and
+            not GameTimerStatus.Expired)
         {
             throw new GameRuleViolationException(
-                "Time can only be added to a running or paused timer.");
+                "Time can only be added to a running, paused, or expired timer.");
         }
 
         var updatedRemaining =
@@ -106,11 +112,25 @@ public sealed class GameTimer
         _remaining = updatedRemaining > MaximumRemaining
             ? MaximumRemaining
             : updatedRemaining;
+        _hasPendingExpirationNotification = false;
 
-        if (Status == GameTimerStatus.Running)
+        if (Status == GameTimerStatus.Running || wasExpired)
         {
             _lastStartedAtUtc = _timeProvider.GetUtcNow();
+            Status = GameTimerStatus.Running;
         }
+    }
+
+    public bool ConsumeExpiration()
+    {
+        RefreshExpiration();
+        if (!_hasPendingExpirationNotification)
+        {
+            return false;
+        }
+
+        _hasPendingExpirationNotification = false;
+        return true;
     }
 
     private TimeSpan CalculateRemaining()
@@ -130,6 +150,7 @@ public sealed class GameTimer
         {
             _remaining = TimeSpan.Zero;
             _lastStartedAtUtc = null;
+            _hasPendingExpirationNotification = true;
             Status = GameTimerStatus.Expired;
         }
     }
