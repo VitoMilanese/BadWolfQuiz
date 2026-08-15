@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b1c21" />
+      <stop offset="0.52" stop-color="#090a0d" />
+      <stop offset="1" stop-color="#050507" />
+    </linearGradient>
+    <radialGradient id="spot" cx="50%" cy="45%" r="56%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.075" />
+      <stop offset="0.55" stop-color="#ef233c" stop-opacity="0.08" />
+      <stop offset="1" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ef233c" stop-opacity="0" />
+      <stop offset="0.5" stop-color="#ef233c" stop-opacity="0.42" />
+      <stop offset="1" stop-color="#ef233c" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)" />
+  <rect width="1600" height="900" fill="url(#spot)" />
+  <rect x="84" y="76" width="1432" height="748" rx="28" fill="none" stroke="#ffffff" stroke-opacity="0.055" stroke-width="3" />
+  <path d="M84 215H1516M84 685H1516" stroke="#ffffff" stroke-opacity="0.035" stroke-width="2" />
+  <path d="M84 145H300M84 145V315M1516 145H1300M1516 145V315M84 755H300M84 755V585M1516 755H1300M1516 755V585" fill="none" stroke="#ef233c" stroke-opacity="0.22" stroke-width="4" stroke-linecap="round" />
+  <rect x="415" y="715" width="770" height="3" rx="1.5" fill="url(#bar)" />
+  <circle cx="800" cy="450" r="176" fill="#050507" fill-opacity="0.32" stroke="#ffffff" stroke-opacity="0.04" stroke-width="2" />
+  <circle cx="800" cy="450" r="128" fill="none" stroke="#ef233c" stroke-opacity="0.14" stroke-width="3" />
+</svg>
