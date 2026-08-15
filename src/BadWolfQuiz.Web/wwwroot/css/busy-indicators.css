@@ -165,3 +165,27 @@ body[aria-busy="true"] {
 .game-intro-page .game-intro-caption {
     font-size: clamp(0.84rem, 1.54vw, 1.4rem);
 }
+
+/* Let small image blocks grow into the available content area while preserving the existing bounds. */
+.game-content-presentation .game-content-blocks:not(.four-clue-grid) > .game-content-block {
+    width: 100%;
+}
+
+.game-content-presentation .game-content-blocks:not(.four-clue-grid) > .game-content-block > .game-content-image {
+    width: 100%;
+    height: auto;
+}
+
+.question-preview-modal .question-preview-content:not(.four-clue-grid) .question-preview-image {
+    width: 100%;
+    height: auto;
+}
+
+.game-intro-page .game-intro-image-block {
+    width: 100%;
+}
+
+.game-intro-page .game-intro-image {
+    width: min(900px, 100%);
+    height: auto;
+}
