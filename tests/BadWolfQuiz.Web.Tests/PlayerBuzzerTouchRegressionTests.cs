@@ -28,7 +28,7 @@ public sealed class PlayerBuzzerTouchRegressionTests
         Assert.Contains("height: 100dvh;", css);
         Assert.Contains("flex: 1 1 auto;", css);
         Assert.DoesNotContain("flex: 1 1 0;", css);
-        Assert.DoesNotContain("height: 0;", css);
+        Assert.DoesNotMatch(@"(?<![\w-])height\s*:\s*0\s*;", css);
         Assert.Contains("aspect-ratio: auto;", css);
         Assert.Contains("border-radius: clamp(28px, 9vw, 64px);", css);
     }
