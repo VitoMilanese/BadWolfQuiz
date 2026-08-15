@@ -137,31 +137,31 @@ body[aria-busy="true"] {
     }
 }
 
-/* Keep media captions aligned with the text size used by the matching content view. */
+/* Keep media captions at 70% of the text size used by the matching content view. */
 .game-content-caption {
-    font-size: clamp(1.8rem, 4.5vw, 4rem);
+    font-size: clamp(1.26rem, 3.15vw, 2.8rem);
 }
 
 .question-review-content .game-content-caption {
-    font-size: clamp(1.4rem, 3vw, 2.6rem);
+    font-size: clamp(0.98rem, 2.1vw, 1.82rem);
 }
 
 .final-player-answer-presentation .game-content-caption {
-    font-size: clamp(2rem, 6vw, 5rem);
+    font-size: clamp(1.4rem, 4.2vw, 3.5rem);
 }
 
 .four-clue-grid .game-content-caption {
-    font-size: clamp(1rem, 2.2vw, 2.25rem);
+    font-size: clamp(0.7rem, 1.54vw, 1.575rem);
 }
 
 .question-preview-modal .question-preview-caption {
-    font-size: clamp(1.8rem, 4.2vw, 4.6rem);
+    font-size: clamp(1.26rem, 2.94vw, 3.22rem);
 }
 
 .question-preview-modal .question-preview-content.four-clue-grid .question-preview-caption {
-    font-size: clamp(1rem, 2.2vw, 2.25rem);
+    font-size: clamp(0.7rem, 1.54vw, 1.575rem);
 }
 
 .game-intro-page .game-intro-caption {
-    font-size: clamp(1.2rem, 2.2vw, 2rem);
+    font-size: clamp(0.84rem, 1.54vw, 1.4rem);
 }
