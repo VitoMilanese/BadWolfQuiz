@@ -12,7 +12,7 @@ This model allows a host to keep preferred defaults while personalizing a partic
 
 The host has a global settings menu containing persistent defaults for newly created games.
 
-Changing a global setting affects games created after the change. It does not retroactively modify an existing lobby or running game.
+Changing a global gameplay setting affects games created after the change. It does not retroactively modify an existing lobby or running game. The site theme is a presentation preference rather than a gameplay rule: player-facing pages use the host's current theme, and connected players receive live theme updates when the host changes it. This synchronization does not mutate the game-specific gameplay settings snapshot.
 
 ### Game settings
 

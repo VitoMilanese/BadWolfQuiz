@@ -1,4 +1,6 @@
 using BadWolfQuiz.Web.Localization;
+using BadWolfQuiz.Web.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +17,8 @@ public sealed class IndexModel(
     QuizDbContext db,
     MediaUploadProcessor mediaUploadProcessor,
     PremiumHostAccess premiumHostAccess,
+    GameSessionRegistry sessionRegistry,
+    IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty]
@@ -169,14 +173,31 @@ public sealed class IndexModel(
         Input.HostName = host.DisplayName;
         await db.SaveChangesAsync(cancellationToken);
 
+        var savedSettings = Input.ToRuntimeSettings(
+            imageData,
+            imageContentType,
+            logoData,
+            logoContentType);
         await settingsStore.SaveAsync(
             currentHost.RequiredId,
-            Input.ToRuntimeSettings(
-                imageData,
-                imageContentType,
-                logoData,
-                logoContentType),
+            savedSettings,
             cancellationToken);
+
+        var activeGames = sessionRegistry.GetAll()
+            .Where(game =>
+                string.Equals(
+                    game.HostId,
+                    currentHost.RequiredId,
+                    StringComparison.Ordinal) &&
+                game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Completed)
+            .ToArray();
+        var themeUpdate = GameHub.CreateThemeUpdate(savedSettings);
+        foreach (var game in activeGames)
+        {
+            await gameHub.Clients
+                .Group(GameHub.GroupName(game.PublicCode))
+                .SendAsync("SiteThemeChanged", themeUpdate, cancellationToken);
+        }
         TempData["SuccessMessage"] =
             localizer["GameSettings_GlobalSaved"].Value;
         return RedirectToPage();
