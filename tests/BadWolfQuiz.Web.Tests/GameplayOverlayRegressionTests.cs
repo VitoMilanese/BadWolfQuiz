@@ -75,7 +75,7 @@ public sealed class GameplayOverlayRegressionTests
         Assert.Contains("container.replaceChildren(overlay);", markup);
         Assert.Contains("initializeAutoFitCard(card);", markup);
         Assert.Contains("badwolf:buzzer-race", markup);
-        Assert.Contains("{ detail: update.buzzerRace }", markup);
+        Assert.Contains("sourceQuestionId: update.sourceQuestionId", markup);
         Assert.Contains(".then(showBuzzerRaceOverlay);", markup);
         Assert.DoesNotContain("Model.Game.BuzzerRace is { } buzzerRace", markup);
 
@@ -84,12 +84,13 @@ public sealed class GameplayOverlayRegressionTests
     }
 
     [Fact]
-    public void Buzzer_and_score_overlays_share_the_five_second_visual_lifetime()
+    public void Buzzer_overlay_is_capped_at_three_seconds_while_score_overlay_keeps_five_seconds()
     {
         var markup = File.ReadAllText(FindLobbyView());
 
-        Assert.Contains("buzzerOverlayDismissHandle = window.setTimeout(() =>", markup);
-        Assert.Contains("}, 5000);", markup);
+        Assert.Contains("const buzzerOverlayLifetimeMilliseconds = 3000", markup);
+        Assert.Contains("buzzerOverlayLifetimeMilliseconds - elapsed", markup);
+        Assert.Contains("window.setTimeout(() => overlay.remove(), 5000);", markup);
         Assert.Contains("data-answer-result-overlay", markup);
     }
 

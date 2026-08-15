@@ -122,18 +122,21 @@ winner and later buzzer entries. Later entries remain readable at a size close t
 the winner text and shrink only when required to fit the available width.
 
 The near-simultaneous buzzer overlay opens immediately after the first valid
-buzzer claim. During the existing one-second collection window it shows a compact
-animated loading state without player names. That interim update is sent only to
-host connections, so player clients remain able to submit late presses exactly as
-before. When the collection window closes, the same overlay element transitions
-in place from loading to the existing ordered winner/late-player result.
+buzzer claim and shows that player as the winner. During the existing one-second
+collection window, every accepted additional press is sent immediately to host
+connections and appended to the same overlay with the player's name and delay in
+milliseconds. Player clients do not receive those interim claimed-state updates,
+so their buzzer remains available for late presses exactly as before. When the
+collection window closes, the same overlay remains visible as the final ordered
+winner/late-player result without closing and reopening.
 
-The final buzzer result and answer-result overlays use a five-second visual
-lifetime. The buzzer result continues to come from the live `BuzzerStateChanged`
-payload rather than a partial gameplay GET. Answer-result feedback is rendered
-from the host gameplay refresh after the JSON judgment command completes.
-Dynamically inserted result cards are reinitialized for auto-fitting instead of
-relying only on the initial page-load fitting pass.
+The live buzzer-race overlay is capped at three seconds from its first host-side
+display; incoming race updates do not extend that deadline. Answer-result overlays
+retain their five-second visual lifetime. Buzzer-race data continues to come from
+live `BuzzerStateChanged` payloads rather than a partial gameplay GET.
+Answer-result feedback is rendered from the host gameplay refresh after the JSON
+judgment command completes. Dynamically inserted result cards are reinitialized
+for auto-fitting instead of relying only on the initial page-load fitting pass.
 
 ## Target question presentation flow
 

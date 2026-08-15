@@ -383,13 +383,9 @@ public sealed class GameHub(
             return;
         }
 
-        if (!claim.IsWinner)
-        {
-            return;
-        }
-
-        // Tell only the host that the buzzer race has started. Player clients
-        // must stay visually open during the existing late-press window.
+        // Stream every accepted press to host connections so the visible
+        // race grows in real time. Player clients do not receive the interim
+        // claimed state and keep the existing late-press collection window.
         await Clients
             .Group(HostGroupName(claim.Game.PublicCode))
             .SendAsync(
@@ -398,8 +394,12 @@ public sealed class GameHub(
                     claim.Game,
                     isBuzzerRaceCollecting: true));
 
-        // Keep the player buzzer visually open while the server collects presses
-        // that arrive within the near-simultaneous one-second window.
+        if (!claim.IsWinner)
+        {
+            return;
+        }
+
+        // The winning call owns the existing one-second collection window.
         await Task.Delay(TimeSpan.FromSeconds(1));
 
         await Clients
