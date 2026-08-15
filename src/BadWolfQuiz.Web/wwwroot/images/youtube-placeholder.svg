@@ -1,32 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="">
   <defs>
-    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#17171d" />
-      <stop offset="0.5" stop-color="#09090d" />
-      <stop offset="1" stop-color="#22070c" />
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#17181e" />
+      <stop offset="0.52" stop-color="#090a0d" />
+      <stop offset="1" stop-color="#21070c" />
     </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="50%" r="55%">
-      <stop offset="0" stop-color="#ef233c" stop-opacity="0.22" />
+    <radialGradient id="redGlow" cx="72%" cy="30%" r="48%">
+      <stop offset="0" stop-color="#ef233c" stop-opacity="0.3" />
       <stop offset="1" stop-color="#ef233c" stop-opacity="0" />
     </radialGradient>
-    <pattern id="grid" width="76" height="76" patternUnits="userSpaceOnUse">
-      <path d="M76 0H0V76" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="2" />
-    </pattern>
+    <radialGradient id="whiteGlow" cx="28%" cy="72%" r="46%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.075" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.095" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.018" />
+    </linearGradient>
   </defs>
 
-  <rect width="1600" height="900" fill="url(#background)" />
-  <rect width="1600" height="900" fill="url(#grid)" />
-  <ellipse cx="800" cy="450" rx="620" ry="360" fill="url(#glow)" />
+  <rect width="1600" height="900" fill="url(#bg)" />
+  <rect width="1600" height="900" fill="url(#redGlow)" />
+  <rect width="1600" height="900" fill="url(#whiteGlow)" />
 
-  <g fill="none" stroke="#ef233c" stroke-linecap="round" opacity="0.33">
-    <path d="M180 720 550 350 800 535 1045 330 1420 695" stroke-width="8" />
-    <path d="M110 790 520 410 800 610 1085 390 1490 770" stroke-width="3" opacity="0.65" />
+  <g transform="rotate(-8 800 450)">
+    <rect x="340" y="190" width="920" height="520" rx="54" fill="url(#glass)" stroke="#ffffff" stroke-opacity="0.075" stroke-width="3" />
+    <rect x="410" y="250" width="780" height="400" rx="42" fill="#050507" fill-opacity="0.34" stroke="#ef233c" stroke-opacity="0.11" stroke-width="2" />
   </g>
 
-  <g transform="translate(800 450)" opacity="0.72">
-    <path d="M-128-52-62-142-20-82 0-108 20-82 62-142 128-52 94 86 0 136-94 86Z" fill="#111116" stroke="#ef233c" stroke-width="7" />
-    <path d="M-72-28-24-8-54 18Z" fill="#ef233c" />
-    <path d="M72-28 24-8 54 18Z" fill="#ef233c" />
-    <path d="M-34 58 0 82 34 58 0 112Z" fill="#f4f4f5" opacity="0.8" />
+  <g opacity="0.42">
+    <circle cx="1280" cy="210" r="88" fill="#ef233c" fill-opacity="0.12" stroke="#ef233c" stroke-opacity="0.2" stroke-width="2" />
+    <circle cx="315" cy="700" r="62" fill="#ffffff" fill-opacity="0.025" stroke="#ffffff" stroke-opacity="0.075" stroke-width="2" />
   </g>
+
+  <circle cx="800" cy="450" r="155" fill="#090a0d" fill-opacity="0.62" stroke="#ffffff" stroke-opacity="0.07" stroke-width="2" />
+  <circle cx="800" cy="450" r="112" fill="none" stroke="#ef233c" stroke-opacity="0.18" stroke-width="3" />
 </svg>
