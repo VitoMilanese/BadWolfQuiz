@@ -31,6 +31,8 @@ public sealed class GameRestartRegressionTests
             "src", "BadWolfQuiz.Web", "TagHelpers", "RestartGameToolsTagHelper.cs");
         var restartPage = Read(root,
             "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Restart.cshtml.cs");
+        var playerPage = Read(root,
+            "src", "BadWolfQuiz.Web", "Pages", "Player", "Lobby.cshtml");
         var imports = Read(root,
             "src", "BadWolfQuiz.Web", "Pages", "_ViewImports.cshtml");
 
@@ -49,13 +51,21 @@ public sealed class GameRestartRegressionTests
 
         Assert.Contains("sessionRegistry.FindOwned(", restartPage, StringComparison.Ordinal);
         Assert.Contains("currentHost.RequiredId", restartPage, StringComparison.Ordinal);
+        Assert.Contains("var previousStatus = game.Session.Status;", restartPage, StringComparison.Ordinal);
         Assert.Contains("GameSessionStatus.FinalWagering", restartPage, StringComparison.Ordinal);
         Assert.Contains("GameSessionStatus.FinalAnswering", restartPage, StringComparison.Ordinal);
         Assert.Contains("GameSessionStatus.FinalJudging", restartPage, StringComparison.Ordinal);
+        Assert.Contains("var wasFinalQuestion = previousStatus is", restartPage, StringComparison.Ordinal);
         Assert.Contains("game.RestartSession();", restartPage, StringComparison.Ordinal);
         Assert.Contains("\"PlayersChanged\"", restartPage, StringComparison.Ordinal);
         Assert.Contains("\"TimerStateChanged\"", restartPage, StringComparison.Ordinal);
+        Assert.Contains("\"FinalQuestionProgressChanged\"", restartPage, StringComparison.Ordinal);
         Assert.Contains("RedirectToPage(\"RunningRoundIntro\"", restartPage, StringComparison.Ordinal);
+
+        Assert.Contains("connection.on(\"FinalQuestionProgressChanged\"", playerPage, StringComparison.Ordinal);
+        Assert.Contains("reloadForGameTransition().catch(console.error);", playerPage, StringComparison.Ordinal);
+        Assert.Contains("PreparePlayerTransition", playerPage, StringComparison.Ordinal);
+        Assert.Contains("window.location.reload();", playerPage, StringComparison.Ordinal);
     }
 
     private static string Read(string root, params string[] parts) =>

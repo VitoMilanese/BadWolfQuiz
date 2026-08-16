@@ -25,7 +25,8 @@ public sealed class RestartModel(
             return NotFound();
         }
 
-        if (game.Session.Status is not (
+        var previousStatus = game.Session.Status;
+        if (previousStatus is not (
             GameSessionStatus.Running or
             GameSessionStatus.FinalWagering or
             GameSessionStatus.FinalAnswering or
@@ -33,6 +34,11 @@ public sealed class RestartModel(
         {
             return RedirectToPage("Lobby", new { id });
         }
+
+        var wasFinalQuestion = previousStatus is
+            GameSessionStatus.FinalWagering or
+            GameSessionStatus.FinalAnswering or
+            GameSessionStatus.FinalJudging;
 
         game.RestartSession();
 
@@ -49,6 +55,11 @@ public sealed class RestartModel(
         await group.SendAsync(
             "BuzzerStateChanged",
             GameHub.CreateBuzzerUpdate(game));
+
+        if (wasFinalQuestion)
+        {
+            await group.SendAsync("FinalQuestionProgressChanged");
+        }
 
         return RedirectToPage("RunningRoundIntro", new { id });
     }
