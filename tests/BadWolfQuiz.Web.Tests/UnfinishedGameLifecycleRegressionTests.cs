@@ -90,6 +90,27 @@ public sealed class UnfinishedGameLifecycleRegressionTests
             StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Russian_unfinished_game_resources_follow_project_convention()
+    {
+        var root = FindRepositoryRoot();
+        var resourcePath = Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Resources",
+            "Localization",
+            "UnfinishedGameResource.ru.resx");
+        var document = System.Xml.Linq.XDocument.Load(resourcePath);
+        var values = document.Root!
+            .Elements("data")
+            .Select(data => data.Element("value")?.Value)
+            .ToArray();
+
+        Assert.NotEmpty(values);
+        Assert.All(values, value => Assert.Equal("Україна", value));
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
