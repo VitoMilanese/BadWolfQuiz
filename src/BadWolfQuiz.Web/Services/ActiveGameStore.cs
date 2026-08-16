@@ -20,6 +20,8 @@ public sealed class ActiveGameStore
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly ExternalByteArrayJsonConverter _binaryConverter;
     private readonly JsonSerializerOptions _jsonOptions;
+    private readonly Dictionary<(string HostId, int SourceQuizId), DateTimeOffset>
+        _deletionCutoffs = [];
     private IReadOnlyList<ActiveGameSnapshot> _snapshots;
 
     internal int WriteCount { get; private set; }
@@ -61,34 +63,100 @@ public sealed class ActiveGameStore
         await _gate.WaitAsync(CancellationToken.None);
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
-            var temporaryPath = _path + ".tmp";
-            _binaryConverter.BeginWrite();
-            await using (var stream = new FileStream(
-                temporaryPath,
-                FileMode.Create,
-                FileAccess.Write,
-                FileShare.None,
-                bufferSize: 64 * 1024,
-                useAsync: true))
-            {
-                await JsonSerializer.SerializeAsync(
-                    stream,
-                    snapshots,
-                    _jsonOptions,
-                    CancellationToken.None);
-                await stream.FlushAsync(CancellationToken.None);
-            }
-
-            await ReplaceFileWithRetryAsync(temporaryPath);
-            DeleteUnreferencedBlobs();
-            _snapshots = snapshots;
-            WriteCount++;
+            var accepted = ApplyDeletionCutoffs(snapshots);
+            await WriteSnapshotsAsync(accepted);
         }
         finally
         {
             _gate.Release();
         }
+    }
+
+    public async Task<bool> RemoveAsync(string hostId, int sourceQuizId)
+    {
+        await _gate.WaitAsync(CancellationToken.None);
+        try
+        {
+            var key = (hostId, sourceQuizId);
+            _deletionCutoffs[key] = DateTimeOffset.UtcNow;
+
+            var remaining = _snapshots
+                .Where(snapshot =>
+                    !string.Equals(
+                        snapshot.HostId,
+                        hostId,
+                        StringComparison.Ordinal) ||
+                    snapshot.Quiz.SourceQuizId != sourceQuizId)
+                .ToArray();
+
+            if (remaining.Length == _snapshots.Count)
+            {
+                return false;
+            }
+
+            await WriteSnapshotsAsync(remaining);
+            return true;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    private IReadOnlyList<ActiveGameSnapshot> ApplyDeletionCutoffs(
+        IReadOnlyList<ActiveGameSnapshot> snapshots)
+    {
+        if (_deletionCutoffs.Count == 0)
+        {
+            return snapshots;
+        }
+
+        var accepted = snapshots.Where(snapshot =>
+        {
+            var key = (snapshot.HostId, snapshot.Quiz.SourceQuizId);
+            return !_deletionCutoffs.TryGetValue(key, out var cutoff) ||
+                snapshot.SessionState.CreatedAtUtc > cutoff;
+        }).ToArray();
+
+        foreach (var snapshot in accepted)
+        {
+            var key = (snapshot.HostId, snapshot.Quiz.SourceQuizId);
+            if (_deletionCutoffs.TryGetValue(key, out var cutoff) &&
+                snapshot.SessionState.CreatedAtUtc > cutoff)
+            {
+                _deletionCutoffs.Remove(key);
+            }
+        }
+
+        return accepted;
+    }
+
+    private async Task WriteSnapshotsAsync(
+        IReadOnlyList<ActiveGameSnapshot> snapshots)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
+        var temporaryPath = _path + ".tmp";
+        _binaryConverter.BeginWrite();
+        await using (var stream = new FileStream(
+            temporaryPath,
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.None,
+            bufferSize: 64 * 1024,
+            useAsync: true))
+        {
+            await JsonSerializer.SerializeAsync(
+                stream,
+                snapshots,
+                _jsonOptions,
+                CancellationToken.None);
+            await stream.FlushAsync(CancellationToken.None);
+        }
+
+        await ReplaceFileWithRetryAsync(temporaryPath);
+        DeleteUnreferencedBlobs();
+        _snapshots = snapshots;
+        WriteCount++;
     }
 
     private void DeleteUnreferencedBlobs()

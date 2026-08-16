@@ -1,5 +1,6 @@
 @page
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.IndexModel
+@inject Microsoft.Extensions.Localization.IStringLocalizer<BadWolfQuiz.Web.Localization.UnfinishedGameResource> UnfinishedGameLocalizer
 @{
     ViewData["Title"] = Localizer["Menu_Quizzes"];
 }
@@ -34,6 +35,8 @@
 <div class="quiz-list">
 @foreach (var quiz in Model.Quizzes)
 {
+    var hasResumableGame = Model.ResumableQuizIds.Contains(quiz.Id);
+
     <article class="quiz-card">
         <div class="quiz-card-content">
             <h2>@quiz.Title</h2>
@@ -67,25 +70,56 @@
         <div class="card-actions">
             @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived)
             {
-                <button class="button button-primary"
-                        type="button"
-                        data-open-owned-restore-dialog
-                        data-quiz-id="@quiz.Id"
-                        data-quiz-title="@quiz.Title">
-                    @Localizer["Button_CreateGame"]
-                </button>
+                @if (hasResumableGame)
+                {
+                    <button class="button button-primary"
+                            type="button"
+                            data-open-replace-game-dialog
+                            data-requires-media-restore="true"
+                            data-quiz-id="@quiz.Id"
+                            data-quiz-title="@quiz.Title">
+                        @Localizer["Button_CreateGame"]
+                    </button>
+                }
+                else
+                {
+                    <button class="button button-primary"
+                            type="button"
+                            data-open-owned-restore-dialog
+                            data-quiz-id="@quiz.Id"
+                            data-quiz-title="@quiz.Title">
+                        @Localizer["Button_CreateGame"]
+                    </button>
+                }
+            }
+            else if (hasResumableGame)
+            {
+                <form method="post" asp-page-handler="CreateGame" data-new-game-form>
+                    <input name="quizId" type="hidden" value="@quiz.Id" />
+                    <input name="replaceUnfinished" type="hidden" value="false" data-replace-unfinished />
+                    <button class="button button-primary"
+                            type="button"
+                            disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)"
+                            data-open-replace-game-dialog
+                            data-requires-media-restore="false"
+                            data-quiz-id="@quiz.Id"
+                            data-quiz-title="@quiz.Title">
+                        @Localizer["Button_CreateGame"]
+                    </button>
+                </form>
             }
             else
             {
                 <form method="post" asp-page-handler="CreateGame">
                     <input name="quizId" type="hidden" value="@quiz.Id" />
+                    <input name="replaceUnfinished" type="hidden" value="false" />
                     <button class="button button-primary" type="submit" disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)">
                         @Localizer["Button_CreateGame"]
                     </button>
                 </form>
             }
 
-            @if (Model.ResumableQuizIds.Contains(quiz.Id))
+            @if (hasResumableGame)
             {
                 <form method="post" asp-page-handler="ContinueGame">
                     <input name="quizId" type="hidden" value="@quiz.Id" />
@@ -160,6 +194,17 @@
                         </button>
                     </form>
 
+                    @if (hasResumableGame)
+                    {
+                        <button class="action-menu-item action-menu-danger"
+                                type="button"
+                                data-open-delete-unfinished-dialog
+                                data-quiz-id="@quiz.Id"
+                                data-quiz-title="@quiz.Title">
+                            @UnfinishedGameLocalizer["DeleteAction"]
+                        </button>
+                    }
+
                     <button class="action-menu-item action-menu-danger"
                             type="button"
                             data-open-delete-dialog
@@ -218,6 +263,55 @@
 
 <partial name="_ConfirmDialog" />
 
+<dialog id="deleteUnfinishedGameDialog" class="app-dialog">
+    <form method="post" asp-page-handler="DeleteUnfinishedGame" class="dialog-card dialog-card-danger">
+        <input id="deleteUnfinishedGameQuizId" name="quizId" type="hidden" />
+        <div class="dialog-heading">
+            <div>
+                <h2>@UnfinishedGameLocalizer["DeleteDialogTitle"]</h2>
+            </div>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+        <p class="dialog-target" id="deleteUnfinishedGameQuizTitle"></p>
+        <p class="dialog-warning">@UnfinishedGameLocalizer["DeleteDialogText"]</p>
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary" type="button" data-close-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-danger" type="submit">
+                @UnfinishedGameLocalizer["DeleteAction"]
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="replaceUnfinishedGameDialog" class="app-dialog">
+    <div class="dialog-card dialog-card-danger">
+        <div class="dialog-heading">
+            <div>
+                <h2>@UnfinishedGameLocalizer["ReplaceDialogTitle"]</h2>
+            </div>
+            <button class="dialog-close"
+                    type="button"
+                    data-close-dialog
+                    aria-label="@Localizer["Button_Close"]">×</button>
+        </div>
+        <p class="dialog-target" id="replaceUnfinishedGameQuizTitle"></p>
+        <p class="dialog-warning">@UnfinishedGameLocalizer["ReplaceDialogText"]</p>
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary" type="button" data-close-dialog>
+                @Localizer["Button_Cancel"]
+            </button>
+            <button class="button button-danger" type="button" data-confirm-replace-game>
+                @UnfinishedGameLocalizer["StartNewGame"]
+            </button>
+        </div>
+    </div>
+</dialog>
+
 <dialog id="archiveMediaDialog" class="app-dialog">
     <form method="post" asp-page-handler="ArchiveMedia" class="dialog-card">
         <input id="archiveQuizId" name="quizId" type="hidden" />
@@ -231,6 +325,7 @@
 <dialog id="ownedRestoreDialog" class="app-dialog">
     <form method="post" asp-page-handler="CreateGame" class="dialog-card">
         <input id="ownedRestoreQuizId" name="quizId" type="hidden" />
+        <input id="ownedRestoreReplaceUnfinished" name="replaceUnfinished" type="hidden" value="false" />
         <div class="dialog-heading">
             <div>
                 <p class="eyebrow">BAD WOLF QUIZ</p>
@@ -252,6 +347,8 @@
 (() => {
     const renameDialog = document.getElementById('renameQuizDialog');
     const deleteDialog = document.getElementById('confirmDeleteDialog');
+    const deleteUnfinishedDialog = document.getElementById('deleteUnfinishedGameDialog');
+    const replaceUnfinishedDialog = document.getElementById('replaceUnfinishedGameDialog');
     const archiveDialog = document.getElementById('archiveMediaDialog');
     const ownedRestoreDialog = document.getElementById('ownedRestoreDialog');
 
@@ -261,7 +358,14 @@
 
     const deleteQuizId = document.getElementById('deleteQuizId');
     const deleteQuizTitle = document.getElementById('deleteQuizTitle');
+    const deleteUnfinishedQuizId = document.getElementById('deleteUnfinishedGameQuizId');
+    const deleteUnfinishedQuizTitle = document.getElementById('deleteUnfinishedGameQuizTitle');
+    const replaceUnfinishedQuizTitle = document.getElementById('replaceUnfinishedGameQuizTitle');
+    const ownedRestoreQuizId = document.getElementById('ownedRestoreQuizId');
+    const ownedRestoreQuizTitle = document.getElementById('ownedRestoreQuizTitle');
+    const ownedRestoreReplaceUnfinished = document.getElementById('ownedRestoreReplaceUnfinished');
     const importFile = document.querySelector('[data-quiz-import-file]');
+    let pendingReplacement = null;
 
     document.querySelector('[data-quiz-import-select]')?.addEventListener('click', () => importFile?.click());
     importFile?.addEventListener('change', () => {
@@ -294,6 +398,53 @@
             deleteDialog.showModal();
         });
     });
+
+    document.querySelectorAll('[data-open-delete-unfinished-dialog]').forEach(button => {
+        button.addEventListener('click', () => {
+            button.closest('details')?.removeAttribute('open');
+            deleteUnfinishedQuizId.value = button.dataset.quizId ?? '';
+            deleteUnfinishedQuizTitle.textContent = button.dataset.quizTitle ?? '';
+            deleteUnfinishedDialog.showModal();
+        });
+    });
+
+    document.querySelectorAll('[data-open-replace-game-dialog]').forEach(button => {
+        button.addEventListener('click', () => {
+            pendingReplacement = {
+                button,
+                quizId: button.dataset.quizId ?? '',
+                quizTitle: button.dataset.quizTitle ?? '',
+                requiresMediaRestore: button.dataset.requiresMediaRestore === 'true'
+            };
+            replaceUnfinishedQuizTitle.textContent = pendingReplacement.quizTitle;
+            replaceUnfinishedDialog.showModal();
+        });
+    });
+
+    document.querySelector('[data-confirm-replace-game]')?.addEventListener('click', () => {
+        const request = pendingReplacement;
+        pendingReplacement = null;
+        replaceUnfinishedDialog.close();
+        if (!request) {
+            return;
+        }
+
+        if (request.requiresMediaRestore) {
+            ownedRestoreQuizId.value = request.quizId;
+            ownedRestoreQuizTitle.textContent = request.quizTitle;
+            ownedRestoreReplaceUnfinished.value = 'true';
+            ownedRestoreDialog.showModal();
+            return;
+        }
+
+        const form = request.button.closest('form');
+        const replaceInput = form?.querySelector('[data-replace-unfinished]');
+        if (form && replaceInput) {
+            replaceInput.value = 'true';
+            form.requestSubmit();
+        }
+    });
+
     document.querySelectorAll('[data-open-archive-dialog]').forEach(button => {
         button.addEventListener('click', () => {
             button.closest('details')?.removeAttribute('open');
@@ -302,10 +453,12 @@
             archiveDialog.showModal();
         });
     });
+
     document.querySelectorAll('[data-open-owned-restore-dialog]').forEach(button => {
         button.addEventListener('click', () => {
-            document.getElementById('ownedRestoreQuizId').value = button.dataset.quizId ?? '';
-            document.getElementById('ownedRestoreQuizTitle').textContent = button.dataset.quizTitle ?? '';
+            ownedRestoreQuizId.value = button.dataset.quizId ?? '';
+            ownedRestoreQuizTitle.textContent = button.dataset.quizTitle ?? '';
+            ownedRestoreReplaceUnfinished.value = 'false';
             ownedRestoreDialog.showModal();
         });
     });
