@@ -25,7 +25,11 @@ public sealed class RestartModel(
             return NotFound();
         }
 
-        if (game.Session.Status != GameSessionStatus.Running)
+        if (game.Session.Status is not (
+            GameSessionStatus.Running or
+            GameSessionStatus.FinalWagering or
+            GameSessionStatus.FinalAnswering or
+            GameSessionStatus.FinalJudging))
         {
             return RedirectToPage("Lobby", new { id });
         }

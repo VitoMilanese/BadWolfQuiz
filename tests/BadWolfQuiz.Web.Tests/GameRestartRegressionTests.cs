@@ -24,7 +24,7 @@ public sealed class GameRestartRegressionTests
     }
 
     [Fact]
-    public void Tools_restart_is_confirmed_last_menu_content_and_posts_to_owned_restart_page()
+    public void Tools_restart_uses_app_dialog_and_supports_final_question_states()
     {
         var root = FindRepositoryRoot();
         var tagHelper = Read(root,
@@ -35,15 +35,23 @@ public sealed class GameRestartRegressionTests
             "src", "BadWolfQuiz.Web", "Pages", "_ViewImports.cshtml");
 
         Assert.Contains("Contains(\"action-menu-popover\"", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("output.PostContent.AppendHtml", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("/Admin/Games/Restart/", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("return confirm(", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("Contains(\"game-header-context\"", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("id=\"restart-game-dialog\"", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("class=\"app-dialog\"", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("dialog.showModal();", tagHelper, StringComparison.Ordinal);
+        Assert.DoesNotContain("confirm(", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("data-open-restart-game-dialog", tagHelper, StringComparison.Ordinal);
         Assert.Contains("__RequestVerificationToken", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("GameSessionStatus.FinalWagering", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("GameSessionStatus.FinalAnswering", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("GameSessionStatus.FinalJudging", tagHelper, StringComparison.Ordinal);
         Assert.Contains("RestartGameToolsTagHelper, BadWolfQuiz.Web", imports, StringComparison.Ordinal);
 
         Assert.Contains("sessionRegistry.FindOwned(", restartPage, StringComparison.Ordinal);
         Assert.Contains("currentHost.RequiredId", restartPage, StringComparison.Ordinal);
-        Assert.Contains("game.Session.Status != GameSessionStatus.Running", restartPage, StringComparison.Ordinal);
+        Assert.Contains("GameSessionStatus.FinalWagering", restartPage, StringComparison.Ordinal);
+        Assert.Contains("GameSessionStatus.FinalAnswering", restartPage, StringComparison.Ordinal);
+        Assert.Contains("GameSessionStatus.FinalJudging", restartPage, StringComparison.Ordinal);
         Assert.Contains("game.RestartSession();", restartPage, StringComparison.Ordinal);
         Assert.Contains("\"PlayersChanged\"", restartPage, StringComparison.Ordinal);
         Assert.Contains("\"TimerStateChanged\"", restartPage, StringComparison.Ordinal);

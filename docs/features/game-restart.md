@@ -1,8 +1,8 @@
 # Restart game
 
-The host **Tools** menu includes **Restart game** as its final action during regular gameplay.
+The host **Tools** menu includes **Restart game** as its final action during regular gameplay and while the final question is in progress.
 
-Restarting is destructive and always requires an explicit browser confirmation. Cancelling the confirmation submits nothing and leaves the running game unchanged.
+Restarting is destructive and always requires an explicit in-app confirmation dialog. Cancelling the dialog submits nothing and leaves the current game unchanged.
 
 ## Runtime behavior
 
@@ -16,7 +16,7 @@ A confirmed restart keeps the existing game registration, public join code, host
 - the current active player is preserved when that player is still present, otherwise the first remaining player becomes active;
 - the current round-start score baseline is reset to `0` for every current player.
 
-The host is redirected to the first running-round intro after the reset. Connected clients receive refreshed game status, player/score state, timer state, and buzzer state over the existing SignalR game group.
+The restart action is available from the regular-game Tools menu and from a Tools menu shown during final wagering, final answering, and final judging. The host is redirected to the first running-round intro after the reset. Connected clients receive refreshed game status, player/score state, timer state, and buzzer state over the existing SignalR game group.
 
 ## Persistence
 
