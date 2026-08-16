@@ -19,7 +19,8 @@ public sealed class IndexModel(
     IQuizMediaArchiveService mediaArchiveService,
     CurrentHost currentHost,
     IConfiguration configuration,
-    IStringLocalizer<SharedResource> localizer) : PageModel
+    IStringLocalizer<SharedResource> localizer,
+    IStringLocalizer<UnfinishedGameResource> unfinishedGameLocalizer) : PageModel
 {
     public IReadOnlyList<Quiz> Quizzes { get; private set; } = [];
     public IReadOnlySet<int> ResumableQuizIds { get; private set; } =
@@ -64,10 +65,23 @@ public sealed class IndexModel(
 
     public async Task<IActionResult> OnPostCreateGameAsync(
         int quizId,
+        bool replaceUnfinished,
         CancellationToken cancellationToken)
     {
         try
         {
+            var unfinished = activeGameStore.Find(
+                currentHost.RequiredId,
+                quizId);
+            if (unfinished is not null &&
+                activeGameAvailability.CanResume(unfinished) &&
+                !replaceUnfinished)
+            {
+                TempData["ErrorMessage"] = unfinishedGameLocalizer[
+                    "ReplacementConfirmationRequired"].Value;
+                return RedirectToPage();
+            }
+
             var mediaState = await db.Quizzes
                 .AsNoTracking()
                 .Where(quiz => quiz.Id == quizId && !quiz.IsArchived)
@@ -117,6 +131,36 @@ public sealed class IndexModel(
             TempData["ErrorMessage"] = localizer["Error_QuizCannotStart"].Value;
             return RedirectToPage();
         }
+    }
+
+    public async Task<IActionResult> OnPostDeleteUnfinishedGameAsync(
+        int quizId,
+        CancellationToken cancellationToken)
+    {
+        var quizExists = await db.Quizzes
+            .AsNoTracking()
+            .AnyAsync(
+                quiz => quiz.Id == quizId && !quiz.IsArchived,
+                cancellationToken);
+        if (!quizExists)
+        {
+            return NotFound();
+        }
+
+        var snapshot = activeGameStore.Find(currentHost.RequiredId, quizId);
+        if (snapshot is null || !activeGameAvailability.CanResume(snapshot))
+        {
+            return NotFound();
+        }
+
+        sessionRegistry.RemoveUnfinished(currentHost.RequiredId, quizId);
+        if (!await activeGameStore.RemoveAsync(currentHost.RequiredId, quizId))
+        {
+            return NotFound();
+        }
+
+        TempData["SuccessMessage"] = unfinishedGameLocalizer["Deleted"].Value;
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostArchiveMediaAsync(int quizId, CancellationToken cancellationToken)

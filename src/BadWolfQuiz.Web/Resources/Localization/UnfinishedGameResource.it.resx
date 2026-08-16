@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="DeleteAction" xml:space="preserve"><value>Elimina partita incompleta</value></data>
+  <data name="DeleteDialogTitle" xml:space="preserve"><value>Eliminare la partita incompleta?</value></data>
+  <data name="DeleteDialogText" xml:space="preserve"><value>Eliminare la partita incompleta salvata per questo quiz? Il quiz non verrà eliminato.</value></data>
+  <data name="Deleted" xml:space="preserve"><value>Partita incompleta eliminata.</value></data>
+  <data name="ReplaceDialogTitle" xml:space="preserve"><value>Sostituire la partita incompleta?</value></data>
+  <data name="ReplaceDialogText" xml:space="preserve"><value>Questo quiz ha già una partita incompleta. La nuova partita la sostituirà dopo l'apertura della prima domanda. Fino ad allora, la partita salvata resterà disponibile.</value></data>
+  <data name="StartNewGame" xml:space="preserve"><value>Avvia nuova partita</value></data>
+  <data name="ReplacementConfirmationRequired" xml:space="preserve"><value>Conferma la sostituzione della partita incompleta esistente prima di avviarne una nuova.</value></data>
+</root>

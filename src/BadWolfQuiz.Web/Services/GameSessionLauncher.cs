@@ -60,6 +60,12 @@ public sealed class GameSessionLauncher(
         }
 
         var snapshot = snapshotFactory.Create(quiz);
-        return sessionRegistry.Create(snapshot, settings, currentHost.RequiredId);
+
+        // Register the replacement lobby without a host first so creating it
+        // does not evict the currently persisted unfinished game. The host is
+        // assigned immediately after registration, before the launcher returns.
+        var registration = sessionRegistry.Create(snapshot, settings);
+        registration.AssignHost(currentHost.RequiredId);
+        return registration;
     }
 }

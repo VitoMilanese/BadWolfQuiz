@@ -1,3 +1,4 @@
+using BadWolfQuiz.Game.Runtime;
 using Microsoft.Extensions.Options;
 
 namespace BadWolfQuiz.Web.Services;
@@ -11,6 +12,13 @@ public sealed class ActiveGameAvailability(
 
     public bool CanResume(ActiveGameSnapshot snapshot)
     {
+        var hasOpenedQuestion = snapshot.SessionState.Questions.Any(question =>
+            question.Status != RuntimeQuestionStatus.Available);
+        if (!hasOpenedQuestion)
+        {
+            return false;
+        }
+
         var savedAtUtc = snapshot.SavedAtUtc ?? snapshot.SessionState.CreatedAtUtc;
         return savedAtUtc >= timeProvider.GetUtcNow() - _availability;
     }

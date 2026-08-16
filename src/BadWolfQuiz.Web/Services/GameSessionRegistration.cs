@@ -24,7 +24,7 @@ public sealed class GameSessionRegistration
     public string PublicCode { get; }
 
     public GameSession Session { get; private set; }
-    public string? HostId { get; }
+    public string? HostId { get; private set; }
 
     public string ClientInstanceId { get; } = Guid.NewGuid().ToString("N");
 
@@ -42,6 +42,20 @@ public sealed class GameSessionRegistration
 
     internal void MarkPersistenceChanged() =>
         Interlocked.Increment(ref _persistenceRevision);
+
+    internal void AssignHost(string hostId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(hostId);
+
+        if (!string.IsNullOrWhiteSpace(HostId) &&
+            !string.Equals(HostId, hostId, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "A game session cannot be reassigned to a different host.");
+        }
+
+        HostId = hostId;
+    }
 
     public BuzzerRaceSnapshot? BuzzerRace { get; internal set; }
 

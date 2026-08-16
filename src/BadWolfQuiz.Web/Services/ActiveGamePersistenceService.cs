@@ -10,6 +10,22 @@ public sealed class ActiveGamePersistenceService(
     CrashLog crashLog) : BackgroundService
 {
     private readonly SemaphoreSlim _persistenceGate = new(1, 1);
+    private readonly Dictionary<(string HostId, int SourceQuizId), CommittedGame>
+        _committedGames = store.GetAll()
+            .Where(snapshot => HasOpenedQuestion(snapshot.SessionState))
+            .GroupBy(snapshot =>
+                (snapshot.HostId, snapshot.Quiz.SourceQuizId))
+            .ToDictionary(
+                group => group.Key,
+                group =>
+                {
+                    var snapshot = group
+                        .OrderByDescending(item => item.SessionState.CreatedAtUtc)
+                        .First();
+                    return new CommittedGame(
+                        snapshot.SessionState.Id,
+                        snapshot.SessionState.CreatedAtUtc);
+                });
     private PersistedGameRevision[]? _lastPersistedRevisions;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -66,7 +82,8 @@ public sealed class ActiveGamePersistenceService(
 
     private void RestoreSavedGames()
     {
-        foreach (var snapshot in store.GetAll())
+        foreach (var snapshot in store.GetAll()
+                     .Where(snapshot => HasOpenedQuestion(snapshot.SessionState)))
         {
             try
             {
@@ -98,20 +115,7 @@ public sealed class ActiveGamePersistenceService(
         await _persistenceGate.WaitAsync(CancellationToken.None);
         try
         {
-            var games = registry.GetAll()
-                .Where(game =>
-                    !string.IsNullOrWhiteSpace(game.HostId) &&
-                    !IsComplete(game.Session))
-                .GroupBy(game => new
-                {
-                    HostId = game.HostId!,
-                    game.Session.Quiz.SourceQuizId
-                })
-                .Select(group => group
-                    .OrderByDescending(game => game.Session.CreatedAtUtc)
-                    .First())
-                .OrderBy(game => game.Session.Id.Value)
-                .ToArray();
+            var games = SelectPersistableGames();
 
             var revisions = games
                 .Select(game => new PersistedGameRevision(
@@ -135,6 +139,71 @@ public sealed class ActiveGamePersistenceService(
             _persistenceGate.Release();
         }
     }
+
+    private GameSessionRegistration[] SelectPersistableGames()
+    {
+        var selected = new List<GameSessionRegistration>();
+        var groups = registry.GetAll()
+            .Where(game => !string.IsNullOrWhiteSpace(game.HostId))
+            .GroupBy(game =>
+                (HostId: game.HostId!, game.Session.Quiz.SourceQuizId));
+
+        foreach (var group in groups)
+        {
+            _committedGames.TryGetValue(group.Key, out var committed);
+
+            var persistable = group
+                .Where(game => IsPersistable(game.Session))
+                .OrderByDescending(game => game.Session.CreatedAtUtc)
+                .ToArray();
+
+            if (committed is null)
+            {
+                var first = persistable.FirstOrDefault();
+                if (first is null)
+                {
+                    continue;
+                }
+
+                committed = new CommittedGame(
+                    first.Session.Id,
+                    first.Session.CreatedAtUtc);
+                _committedGames[group.Key] = committed;
+            }
+            else
+            {
+                var replacement = persistable.FirstOrDefault(game =>
+                    game.Session.CreatedAtUtc > committed.CreatedAtUtc);
+                if (replacement is not null)
+                {
+                    committed = new CommittedGame(
+                        replacement.Session.Id,
+                        replacement.Session.CreatedAtUtc);
+                    _committedGames[group.Key] = committed;
+                }
+            }
+
+            var current = persistable.FirstOrDefault(game =>
+                game.Session.Id == committed.SessionId);
+            if (current is not null)
+            {
+                selected.Add(current);
+            }
+        }
+
+        return selected
+            .OrderBy(game => game.Session.Id.Value)
+            .ToArray();
+    }
+
+    private static bool IsPersistable(GameSession session) =>
+        !IsComplete(session) &&
+        session.Board.Questions.Any(question =>
+            question.Status != RuntimeQuestionStatus.Available);
+
+    private static bool HasOpenedQuestion(GameSessionState state) =>
+        state.Questions.Any(question =>
+            question.Status != RuntimeQuestionStatus.Available);
 
     private static bool IsComplete(GameSession session) =>
         session.Status == GameSessionStatus.Completed ||
@@ -162,4 +231,8 @@ public sealed class ActiveGamePersistenceService(
         GameSessionId SessionId,
         long Revision,
         bool AllowsNewPlayers);
+
+    private sealed record CommittedGame(
+        GameSessionId SessionId,
+        DateTimeOffset CreatedAtUtc);
 }

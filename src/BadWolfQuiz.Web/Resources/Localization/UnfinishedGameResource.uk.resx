@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="DeleteAction" xml:space="preserve"><value>Видалити незавершену гру</value></data>
+  <data name="DeleteDialogTitle" xml:space="preserve"><value>Видалити незавершену гру?</value></data>
+  <data name="DeleteDialogText" xml:space="preserve"><value>Видалити збережену незавершену гру для цієї вікторини? Саму вікторину видалено не буде.</value></data>
+  <data name="Deleted" xml:space="preserve"><value>Незавершену гру видалено.</value></data>
+  <data name="ReplaceDialogTitle" xml:space="preserve"><value>Замінити незавершену гру?</value></data>
+  <data name="ReplaceDialogText" xml:space="preserve"><value>Для цієї вікторини вже є незавершена гра. Нова гра замінить її після відкриття першого питання. До цього моменту збережена гра залишатиметься доступною.</value></data>
+  <data name="StartNewGame" xml:space="preserve"><value>Почати нову гру</value></data>
+  <data name="ReplacementConfirmationRequired" xml:space="preserve"><value>Підтвердьте заміну наявної незавершеної гри перед запуском нової.</value></data>
+</root>
