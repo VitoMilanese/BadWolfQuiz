@@ -2,7 +2,7 @@
     display: grid;
     gap: .75rem;
     padding: 1rem;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line);
     border-radius: .75rem;
     background: color-mix(in srgb, var(--panel-2) 78%, transparent);
 }
@@ -11,13 +11,25 @@
     font-size: 1rem;
 }
 
-.contributor-frame-settings label:not(.settings-checkbox) {
+.contributor-frame-choice {
     display: grid;
     gap: .35rem;
 }
 
-.contributor-frame-settings select {
-    width: 100%;
+.contributor-frame-choice-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+
+.contributor-frame-choice-preview {
+    width: 5rem;
+    height: 5rem;
+    object-fit: contain;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--panel) 82%, transparent);
 }
 
 .contributor-frame-status {
@@ -25,31 +37,36 @@
     color: var(--muted);
 }
 
-[data-avatar-frame="gold-fang"] {
-    --contributor-frame-primary: #f2cc69;
-    --contributor-frame-secondary: #9a641f;
-    --contributor-frame-glow: rgba(242, 204, 105, .46);
+.contributor-frame-option-grid {
+    max-height: min(65vh, 38rem);
+    overflow-y: auto;
 }
 
-[data-avatar-frame="moonlight"] {
-    --contributor-frame-primary: #b8c7ff;
-    --contributor-frame-secondary: #6d64c8;
-    --contributor-frame-glow: rgba(140, 155, 255, .48);
+.contributor-frame-option {
+    aspect-ratio: 1;
+    background: color-mix(in srgb, var(--panel-2) 88%, transparent);
 }
 
-[data-avatar-frame="ember"] {
-    --contributor-frame-primary: #ff9363;
-    --contributor-frame-secondary: #a62e24;
-    --contributor-frame-glow: rgba(255, 93, 51, .48);
+.contributor-frame-option img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
-.player-avatar-control[data-avatar-frame] .player-avatar-current,
-.scoreboard-player[data-avatar-frame] .player-card-avatar,
-.player-list > li[data-avatar-frame] .player-list-avatar,
-.scoreboard-player.host-card[data-avatar-frame] .host-card-media {
-    outline: 3px solid var(--contributor-frame-primary);
+.contributor-frame-option.is-selected {
+    outline: 3px solid var(--red-bright);
     outline-offset: -3px;
-    box-shadow:
-        0 0 0 2px var(--contributor-frame-secondary),
-        0 0 18px var(--contributor-frame-glow);
+}
+
+.contributor-frame-owner {
+    position: relative;
+}
+
+.contributor-avatar-frame-overlay {
+    position: absolute;
+    display: block;
+    object-fit: fill;
+    pointer-events: none;
+    user-select: none;
+    z-index: 20;
 }

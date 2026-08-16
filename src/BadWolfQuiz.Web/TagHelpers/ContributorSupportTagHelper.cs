@@ -1,10 +1,12 @@
 using System.Text.Encodings.Web;
+using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 
@@ -16,6 +18,7 @@ public sealed class ContributorSupportTagHelper(
     IAntiforgery antiforgery,
     GameSettingsStore settingsStore,
     CurrentHost currentHost,
+    QuizDbContext db,
     IOptions<FooterOptions> footerOptions,
     IStringLocalizer<ContributorResource> localizer) : TagHelper
 {
@@ -42,16 +45,22 @@ public sealed class ContributorSupportTagHelper(
         var httpContext = ViewContext.HttpContext;
         var isAuthenticated = httpContext.User.Identity?.IsAuthenticated == true;
         BadWolfQuiz.Game.Runtime.GameSessionSettings? settings = null;
+        string? hostDisplayName = null;
         if (isAuthenticated && currentHost.Id is { } hostId)
         {
             settings = await settingsStore.LoadAsync(hostId, httpContext.RequestAborted);
+            hostDisplayName = await db.Hosts
+                .AsNoTracking()
+                .Where(host => host.Id == hostId)
+                .Select(host => host.DisplayName)
+                .SingleOrDefaultAsync(httpContext.RequestAborted);
         }
 
         var hostIsContributor = ViewContext.ViewData["ContributorHost"] is bool hostOverride
             ? hostOverride
             : isAuthenticated && ContributorRecognition.IsContributor(
                 footerOptions.Value,
-                settings?.HostName);
+                hostDisplayName);
         var hostFrameEnabled = hostIsContributor &&
             settings?.HostAvatarFrameEnabled == true;
         var hostFrameId = ContributorAvatarFrameCatalog.Normalize(
@@ -87,10 +96,12 @@ public sealed class ContributorSupportTagHelper(
 
         var html = HtmlEncoder.Default;
         var page = ViewContext.RouteData.Values["page"]?.ToString();
-        if (hostIsContributor && string.Equals(
-                page,
-                "/Admin/Settings/Index",
-                StringComparison.Ordinal))
+        var showHostFrameControls = hostIsContributor && string.Equals(
+            page,
+            "/Admin/Settings/Index",
+            StringComparison.Ordinal);
+
+        if (showHostFrameControls)
         {
             output.PostContent.AppendHtml(BuildHostTemplate(
                 html,
@@ -113,7 +124,15 @@ public sealed class ContributorSupportTagHelper(
             }
         }
 
-        if (ShouldShowThankYou())
+        if (showHostFrameControls || playerIsContributor)
+        {
+            output.PostContent.AppendHtml(BuildFramePicker(html));
+        }
+
+        if (hostIsContributor && ContributorRecognition.ShouldShowThankYou(
+                footerOptions.Value,
+                hostDisplayName,
+                httpContext.Request))
         {
             ContributorRecognition.MarkThankYouShown(
                 httpContext.Response,
@@ -125,19 +144,13 @@ public sealed class ContributorSupportTagHelper(
             "<script src=\"/js/contributor-frames.js\" defer></script>");
     }
 
-    private bool ShouldShowThankYou()
-    {
-        var value = ViewContext.TempData[ContributorRecognition.ThankYouTempDataKey];
-        return value is true ||
-            string.Equals(value?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
-    }
-
     private string BuildHostTemplate(
         HtmlEncoder html,
         bool enabled,
         string frameId)
     {
         var checkedAttribute = enabled ? " checked" : string.Empty;
+        var frameUrl = ContributorAvatarFrameCatalog.GetUrl(frameId);
         return $$"""
             <template id="contributor-host-frame-template">
                 <div class="contributor-frame-settings" data-contributor-host-frame>
@@ -151,12 +164,24 @@ public sealed class ContributorSupportTagHelper(
                                value="false" />
                         <span>{{html.Encode(localizer["ContributorFrame_Enable"].Value)}}</span>
                     </label>
-                    <label>
+                    <div class="contributor-frame-choice">
                         <span>{{html.Encode(localizer["ContributorFrame_Label"].Value)}}</span>
-                        <select name="Input.HostAvatarFrameId">
-                            {{BuildFrameOptions(html, frameId)}}
-                        </select>
-                    </label>
+                        <div class="contributor-frame-choice-row">
+                            <img class="contributor-frame-choice-preview"
+                                 data-contributor-frame-preview
+                                 src="{{html.Encode(frameUrl)}}"
+                                 alt="" />
+                            <button class="button button-secondary"
+                                    type="button"
+                                    data-open-contributor-frame-picker>
+                                {{html.Encode(localizer["ContributorFrame_Label"].Value)}}
+                            </button>
+                        </div>
+                        <input type="hidden"
+                               name="Input.HostAvatarFrameId"
+                               value="{{html.Encode(frameId)}}"
+                               data-contributor-frame-id />
+                    </div>
                     <small>{{html.Encode(localizer["ContributorFrame_Hint"].Value)}}</small>
                 </div>
             </template>
@@ -170,6 +195,7 @@ public sealed class ContributorSupportTagHelper(
         string frameId)
     {
         var checkedAttribute = enabled ? " checked" : string.Empty;
+        var frameUrl = ContributorAvatarFrameCatalog.GetUrl(frameId);
         return $$"""
             <template id="contributor-player-frame-template">
                 <div class="contributor-frame-settings" data-contributor-player-frame>
@@ -179,12 +205,23 @@ public sealed class ContributorSupportTagHelper(
                                data-contributor-frame-enabled{{checkedAttribute}} />
                         <span>{{html.Encode(localizer["ContributorFrame_Enable"].Value)}}</span>
                     </label>
-                    <label>
+                    <div class="contributor-frame-choice">
                         <span>{{html.Encode(localizer["ContributorFrame_Label"].Value)}}</span>
-                        <select data-contributor-frame-id>
-                            {{BuildFrameOptions(html, frameId)}}
-                        </select>
-                    </label>
+                        <div class="contributor-frame-choice-row">
+                            <img class="contributor-frame-choice-preview"
+                                 data-contributor-frame-preview
+                                 src="{{html.Encode(frameUrl)}}"
+                                 alt="" />
+                            <button class="button button-secondary"
+                                    type="button"
+                                    data-open-contributor-frame-picker>
+                                {{html.Encode(localizer["ContributorFrame_Label"].Value)}}
+                            </button>
+                        </div>
+                        <input type="hidden"
+                               value="{{html.Encode(frameId)}}"
+                               data-contributor-frame-id />
+                    </div>
                     <small>{{html.Encode(localizer["ContributorFrame_Hint"].Value)}}</small>
                     <input type="hidden"
                            data-contributor-antiforgery
@@ -197,19 +234,31 @@ public sealed class ContributorSupportTagHelper(
             """;
     }
 
-    private string BuildFrameOptions(HtmlEncoder html, string selectedFrameId)
+    private string BuildFramePicker(HtmlEncoder html)
     {
-        return string.Concat(ContributorAvatarFrameCatalog.Frames.Select(frame =>
-        {
-            var selected = string.Equals(
-                frame.Id,
-                selectedFrameId,
-                StringComparison.Ordinal)
-                    ? " selected"
-                    : string.Empty;
-            return $"<option value=\"{html.Encode(frame.Id)}\"{selected}>" +
-                $"{html.Encode(localizer[frame.ResourceKey].Value)}</option>";
-        }));
+        var options = string.Concat(ContributorAvatarFrameCatalog.Frames.Select(frame =>
+            $"<button type=\"button\" class=\"avatar-option contributor-frame-option\" " +
+            $"data-contributor-frame-option=\"{html.Encode(frame.Id)}\" " +
+            $"data-contributor-frame-url=\"{html.Encode(frame.Url)}\" " +
+            $"aria-label=\"{html.Encode(localizer["ContributorFrame_Label"].Value)} {html.Encode(frame.Id)}\">" +
+            $"<img src=\"{html.Encode(frame.Url)}\" alt=\"\" /></button>"));
+
+        return $$"""
+            <dialog class="avatar-picker contributor-frame-picker" data-contributor-frame-picker>
+                <div class="avatar-picker-card">
+                    <header class="dialog-heading">
+                        <h2>{{html.Encode(localizer["ContributorFrame_Label"].Value)}}</h2>
+                        <button class="dialog-close"
+                                type="button"
+                                data-close-contributor-frame-picker
+                                aria-label="{{html.Encode(localizer["ContributorThanks_Close"].Value)}}">×</button>
+                    </header>
+                    <div class="avatar-option-grid contributor-frame-option-grid">
+                        {{options}}
+                    </div>
+                </div>
+            </dialog>
+            """;
     }
 
     private string BuildThankYouDialog(HtmlEncoder html) => $$"""

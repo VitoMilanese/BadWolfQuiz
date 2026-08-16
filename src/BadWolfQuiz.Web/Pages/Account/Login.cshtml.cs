@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using BadWolfQuiz.Web.Services;
 using BadWolfQuiz.Web.Localization;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +11,6 @@ namespace BadWolfQuiz.Web.Pages.Account;
 
 public sealed class LoginModel(
     HostAccountService accounts,
-    IOptions<FooterOptions> footerOptions,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty] public InputModel Input { get; set; } = new();
@@ -35,10 +33,6 @@ public sealed class LoginModel(
             CookieAuthenticationDefaults.AuthenticationScheme,
             HostAccountService.CreatePrincipal(host),
             new AuthenticationProperties { IsPersistent = Input.RememberMe });
-        if (ContributorRecognition.ShouldShowThankYou(footerOptions.Value, host.DisplayName, Request))
-        {
-            TempData[ContributorRecognition.ThankYouTempDataKey] = true;
-        }
         return LocalRedirect(Url.IsLocalUrl(ReturnUrl) ? ReturnUrl! : "/Admin/Quizzes");
     }
 

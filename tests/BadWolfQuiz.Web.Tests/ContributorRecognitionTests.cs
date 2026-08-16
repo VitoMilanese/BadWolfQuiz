@@ -81,9 +81,10 @@ public sealed class ContributorRecognitionTests
     }
 
     [Theory]
-    [InlineData("gold-fang", "gold-fang")]
-    [InlineData("MOONLIGHT", "moonlight")]
-    [InlineData(" ember ", "ember")]
+    [InlineData("1", "1")]
+    [InlineData("24", "24")]
+    [InlineData(" 7 ", "7")]
+    [InlineData("25", ContributorAvatarFrameCatalog.DefaultId)]
     [InlineData("unknown", ContributorAvatarFrameCatalog.DefaultId)]
     [InlineData(null, ContributorAvatarFrameCatalog.DefaultId)]
     public void Frame_ids_are_normalized_to_the_catalog(string? value, string expected)
@@ -97,7 +98,7 @@ public sealed class ContributorRecognitionTests
         var input = new GameSettingsInput
         {
             HostAvatarFrameEnabled = true,
-            HostAvatarFrameId = "moonlight"
+            HostAvatarFrameId = "12"
         };
 
         Assert.True(input.IsValid);
@@ -105,9 +106,9 @@ public sealed class ContributorRecognitionTests
         var roundTrip = GameSettingsInput.From(settings);
 
         Assert.True(settings.HostAvatarFrameEnabled);
-        Assert.Equal("moonlight", settings.HostAvatarFrameId);
+        Assert.Equal("12", settings.HostAvatarFrameId);
         Assert.True(roundTrip.HostAvatarFrameEnabled);
-        Assert.Equal("moonlight", roundTrip.HostAvatarFrameId);
+        Assert.Equal("12", roundTrip.HostAvatarFrameId);
     }
 
     [Fact]

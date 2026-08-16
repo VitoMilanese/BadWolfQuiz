@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Http;
 
 namespace BadWolfQuiz.Web.Services;
@@ -5,7 +6,6 @@ namespace BadWolfQuiz.Web.Services;
 public static class ContributorRecognition
 {
     public const string RecognitionCookieName = "badwolfquiz.contributor-thanks";
-    public const string ThankYouTempDataKey = "ContributorThankYou";
 
     public static bool IsContributor(FooterOptions options, string? name)
     {
@@ -52,26 +52,47 @@ public static class ContributorRecognition
 
 public static class ContributorAvatarFrameCatalog
 {
-    public const string DefaultId = "gold-fang";
+    public const string DefaultId = "1";
+    private const int FrameCount = 24;
 
     public static IReadOnlyList<ContributorAvatarFrame> Frames { get; } =
-    [
-        new("gold-fang", "ContributorFrame_GoldFang"),
-        new("moonlight", "ContributorFrame_Moonlight"),
-        new("ember", "ContributorFrame_Ember")
-    ];
+        Enumerable.Range(1, FrameCount)
+            .Select(number =>
+            {
+                var id = number.ToString(CultureInfo.InvariantCulture);
+                return new ContributorAvatarFrame(id, $"/frames/{id}.png");
+            })
+            .ToArray();
+
+    public static string ResolveRootPath(IHostEnvironment environment)
+    {
+        var outputRoot = Path.Combine(
+            AppContext.BaseDirectory,
+            "Resources",
+            "Frames");
+
+        return Directory.Exists(outputRoot)
+            ? outputRoot
+            : Path.Combine(
+                environment.ContentRootPath,
+                "Resources",
+                "Frames");
+    }
 
     public static bool IsValid(string? id) =>
         Frames.Any(frame => string.Equals(
             frame.Id,
             id?.Trim(),
-            StringComparison.OrdinalIgnoreCase));
+            StringComparison.Ordinal));
 
     public static string Normalize(string? id) =>
         Frames.FirstOrDefault(frame => string.Equals(
             frame.Id,
             id?.Trim(),
-            StringComparison.OrdinalIgnoreCase))?.Id ?? DefaultId;
+            StringComparison.Ordinal))?.Id ?? DefaultId;
+
+    public static string GetUrl(string? id) =>
+        $"/frames/{Normalize(id)}.png";
 }
 
-public sealed record ContributorAvatarFrame(string Id, string ResourceKey);
+public sealed record ContributorAvatarFrame(string Id, string Url);

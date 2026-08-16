@@ -2,16 +2,148 @@
     const body = document.body;
     if (!body) return;
 
-    const validFrameIds = new Set(["gold-fang", "moonlight", "ember"]);
-    const normalizeFrameId = value => validFrameIds.has(value) ? value : "gold-fang";
-    const setFrame = (element, enabled, frameId) => {
-        if (!element) return;
-        if (enabled) {
-            element.dataset.avatarFrame = normalizeFrameId(frameId);
-        } else {
-            delete element.dataset.avatarFrame;
+    const validFrameIds = new Set(
+        Array.from({ length: 24 }, (_, index) => String(index + 1))
+    );
+    const normalizeFrameId = value => {
+        const id = String(value ?? "").trim();
+        return validFrameIds.has(id) ? id : "1";
+    };
+    const frameUrl = frameId => `/frames/${normalizeFrameId(frameId)}.png`;
+
+    const findFrameMedia = owner => {
+        const selectors = [
+            ".player-avatar-current:not([hidden])",
+            ".player-card-avatar:not([hidden])",
+            ".player-list-avatar:not([hidden])",
+            ".host-card-media:not([hidden])"
+        ];
+        for (const selector of selectors) {
+            const element = owner.querySelector(selector);
+            if (element) return element;
+        }
+        return null;
+    };
+
+    const positionFrameOverlay = owner => {
+        const overlay = owner.querySelector(":scope > .contributor-avatar-frame-overlay");
+        if (!overlay) return;
+        const media = findFrameMedia(owner);
+        if (!media) {
+            overlay.hidden = true;
+            return;
+        }
+
+        const ownerRect = owner.getBoundingClientRect();
+        const mediaRect = media.getBoundingClientRect();
+        if (mediaRect.width <= 0 || mediaRect.height <= 0) {
+            overlay.hidden = true;
+            return;
+        }
+
+        overlay.hidden = false;
+        overlay.style.left = `${mediaRect.left - ownerRect.left}px`;
+        overlay.style.top = `${mediaRect.top - ownerRect.top}px`;
+        overlay.style.width = `${mediaRect.width}px`;
+        overlay.style.height = `${mediaRect.height}px`;
+    };
+
+    const removeFrame = owner => {
+        if (!owner) return;
+        delete owner.dataset.avatarFrame;
+        owner.querySelector(":scope > .contributor-avatar-frame-overlay")?.remove();
+        owner.classList.remove("contributor-frame-owner");
+    };
+
+    const setFrame = (owner, enabled, frameId) => {
+        if (!owner) return;
+        if (!enabled) {
+            removeFrame(owner);
+            return;
+        }
+
+        const normalizedId = normalizeFrameId(frameId);
+        owner.dataset.avatarFrame = normalizedId;
+        owner.classList.add("contributor-frame-owner");
+
+        let overlay = owner.querySelector(":scope > .contributor-avatar-frame-overlay");
+        if (!overlay) {
+            overlay = document.createElement("img");
+            overlay.className = "contributor-avatar-frame-overlay";
+            overlay.alt = "";
+            overlay.setAttribute("aria-hidden", "true");
+            owner.append(overlay);
+        }
+        const url = frameUrl(normalizedId);
+        if (overlay.getAttribute("src") !== url) {
+            overlay.src = url;
+        }
+        window.requestAnimationFrame(() => positionFrameOverlay(owner));
+    };
+
+    const repositionAllFrames = () => {
+        for (const owner of document.querySelectorAll(".contributor-frame-owner")) {
+            positionFrameOverlay(owner);
         }
     };
+    window.addEventListener("resize", repositionAllFrames);
+    document.addEventListener("load", event => {
+        if (event.target instanceof Element &&
+            event.target.matches(".player-avatar-current, .player-card-avatar, .player-list-avatar, .host-card-media")) {
+            repositionAllFrames();
+        }
+    }, true);
+
+    const framePicker = document.querySelector("[data-contributor-frame-picker]");
+    let activeFramePanel = null;
+    if (framePicker) {
+        const refreshSelectedOption = () => {
+            const selectedId = normalizeFrameId(
+                activeFramePanel?.querySelector("[data-contributor-frame-id]")?.value
+            );
+            for (const option of framePicker.querySelectorAll("[data-contributor-frame-option]")) {
+                option.classList.toggle(
+                    "is-selected",
+                    option.dataset.contributorFrameOption === selectedId
+                );
+            }
+        };
+
+        document.addEventListener("click", event => {
+            const opener = event.target.closest?.("[data-open-contributor-frame-picker]");
+            if (!opener) return;
+            activeFramePanel = opener.closest(
+                "[data-contributor-host-frame], [data-contributor-player-frame]"
+            );
+            if (!activeFramePanel) return;
+            refreshSelectedOption();
+            framePicker.showModal();
+        });
+
+        framePicker.querySelector("[data-close-contributor-frame-picker]")
+            ?.addEventListener("click", () => framePicker.close());
+        framePicker.addEventListener("click", event => {
+            if (event.target === framePicker) framePicker.close();
+        });
+
+        for (const option of framePicker.querySelectorAll("[data-contributor-frame-option]")) {
+            option.addEventListener("click", () => {
+                if (!activeFramePanel) return;
+                const input = activeFramePanel.querySelector("[data-contributor-frame-id]");
+                const preview = activeFramePanel.querySelector("[data-contributor-frame-preview]");
+                const id = normalizeFrameId(option.dataset.contributorFrameOption);
+                const url = option.dataset.contributorFrameUrl || frameUrl(id);
+                if (input) {
+                    input.value = id;
+                }
+                if (preview) {
+                    preview.src = url;
+                }
+                input?.dispatchEvent(new Event("change", { bubbles: true }));
+                framePicker.close();
+            });
+        }
+    }
 
     const hostTemplate = document.getElementById("contributor-host-frame-template");
     if (hostTemplate && body.dataset.contributorHost === "true") {
@@ -58,6 +190,7 @@
                 }
             }
             applyHostFrame();
+            repositionAllFrames();
         });
         observer.observe(document.body, { childList: true, subtree: true });
 
@@ -116,10 +249,11 @@
     mediaSettings.append(playerTemplate.content.cloneNode(true));
     const framePanel = mediaSettings.querySelector("[data-contributor-player-frame]");
     const enabledInput = framePanel?.querySelector("[data-contributor-frame-enabled]");
-    const frameSelect = framePanel?.querySelector("[data-contributor-frame-id]");
+    const frameInput = framePanel?.querySelector("[data-contributor-frame-id]");
+    const preview = framePanel?.querySelector("[data-contributor-frame-preview]");
     const status = framePanel?.querySelector("[data-contributor-frame-status]");
     const antiforgery = framePanel?.querySelector("[data-contributor-antiforgery]")?.value;
-    if (!enabledInput || !frameSelect) return;
+    if (!enabledInput || !frameInput) return;
 
     const normalizedPlayerName = playerLobby.dataset.playerName.trim().toLocaleLowerCase();
     const enabledKey = `badwolfquiz:contributor-frame-enabled:${normalizedPlayerName}`;
@@ -131,12 +265,13 @@
     let frameId = normalizeFrameId(
         localStorage.getItem(frameKey) ||
         body.dataset.contributorPlayerFrameId ||
-        frameSelect.value
+        frameInput.value
     );
 
     const applyPlayerFrame = () => {
         enabledInput.checked = frameEnabled;
-        frameSelect.value = frameId;
+        frameInput.value = frameId;
+        if (preview) preview.src = frameUrl(frameId);
         setFrame(avatarControl, frameEnabled, frameId);
     };
 
@@ -178,10 +313,17 @@
         savePreference();
         syncFrame().catch(console.error);
     });
-    frameSelect.addEventListener("change", () => {
-        frameId = normalizeFrameId(frameSelect.value);
+    frameInput.addEventListener("change", () => {
+        frameId = normalizeFrameId(frameInput.value);
         savePreference();
         syncFrame().catch(console.error);
+    });
+
+    const mediaObserver = new MutationObserver(() => applyPlayerFrame());
+    mediaObserver.observe(avatarControl, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: ["hidden"]
     });
 
     savePreference();
