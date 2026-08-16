@@ -23,6 +23,10 @@ public sealed class GamePlayer
 
     public string? WebcamUrl { get; private set; }
 
+    public bool AvatarFrameEnabled { get; private set; }
+
+    public string? AvatarFrameId { get; private set; }
+
     public DateTimeOffset JoinedAtUtc { get; }
 
     internal void ApplyScore(int points)
@@ -74,6 +78,13 @@ public sealed class GamePlayer
         ArgumentException.ThrowIfNullOrWhiteSpace(webcamUrl);
         WebcamUrl = webcamUrl;
         UsesUploadedImage = false;
+    }
+
+    public void SetAvatarFrame(bool enabled, string frameId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(frameId);
+        AvatarFrameEnabled = enabled;
+        AvatarFrameId = frameId;
     }
 
     public void ClearWebcamUrl() => WebcamUrl = null;

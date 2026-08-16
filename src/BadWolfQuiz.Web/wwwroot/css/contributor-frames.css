@@ -1,0 +1,55 @@
+.contributor-frame-settings {
+    display: grid;
+    gap: .75rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    background: color-mix(in srgb, var(--panel-2) 78%, transparent);
+}
+
+.contributor-frame-settings > strong {
+    font-size: 1rem;
+}
+
+.contributor-frame-settings label:not(.settings-checkbox) {
+    display: grid;
+    gap: .35rem;
+}
+
+.contributor-frame-settings select {
+    width: 100%;
+}
+
+.contributor-frame-status {
+    min-height: 1.25em;
+    color: var(--muted);
+}
+
+[data-avatar-frame="gold-fang"] {
+    --contributor-frame-primary: #f2cc69;
+    --contributor-frame-secondary: #9a641f;
+    --contributor-frame-glow: rgba(242, 204, 105, .46);
+}
+
+[data-avatar-frame="moonlight"] {
+    --contributor-frame-primary: #b8c7ff;
+    --contributor-frame-secondary: #6d64c8;
+    --contributor-frame-glow: rgba(140, 155, 255, .48);
+}
+
+[data-avatar-frame="ember"] {
+    --contributor-frame-primary: #ff9363;
+    --contributor-frame-secondary: #a62e24;
+    --contributor-frame-glow: rgba(255, 93, 51, .48);
+}
+
+.player-avatar-control[data-avatar-frame] .player-avatar-current,
+.scoreboard-player[data-avatar-frame] .player-card-avatar,
+.player-list > li[data-avatar-frame] .player-list-avatar,
+.scoreboard-player.host-card[data-avatar-frame] .host-card-media {
+    outline: 3px solid var(--contributor-frame-primary);
+    outline-offset: -3px;
+    box-shadow:
+        0 0 0 2px var(--contributor-frame-secondary),
+        0 0 18px var(--contributor-frame-glow);
+}

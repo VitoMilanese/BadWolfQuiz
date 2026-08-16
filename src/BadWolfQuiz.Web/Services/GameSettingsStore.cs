@@ -193,6 +193,8 @@ public sealed class GameSettingsStore(
         public string? HostImageContentType { get; set; }
         public string? HostAvatarId { get; set; }
         public string? HostWebcamUrl { get; set; }
+        public bool HostAvatarFrameEnabled { get; set; }
+        public string? HostAvatarFrameId { get; set; }
         public byte[]? BrandLogoData { get; set; }
         public string? BrandLogoContentType { get; set; }
         public string SiteThemeId { get; set; } = SiteThemeCatalog.DefaultId;
@@ -225,7 +227,9 @@ public sealed class GameSettingsStore(
             HostWebcamUrl,
             AnswerRewardDecayEnabled,
             AnswerRewardDecayStartAfterSeconds,
-            AnswerRewardDecayMinimumPercent);
+            AnswerRewardDecayMinimumPercent,
+            HostAvatarFrameEnabled,
+            HostAvatarFrameId);
 
         public static StoredGameSettings From(GameSessionSettings settings) => new()
         {
@@ -241,6 +245,8 @@ public sealed class GameSettingsStore(
             HostImageContentType = settings.HostImageContentType,
             HostAvatarId = settings.HostAvatarId,
             HostWebcamUrl = settings.HostWebcamUrl,
+            HostAvatarFrameEnabled = settings.HostAvatarFrameEnabled,
+            HostAvatarFrameId = settings.HostAvatarFrameId,
             BrandLogoData = settings.BrandLogoData,
             BrandLogoContentType = settings.BrandLogoContentType,
             SiteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId),
@@ -274,6 +280,8 @@ public sealed class GameSettingsInput
     public string? HostAvatarId { get; set; }
     [MaxLength(2048)]
     public string? HostWebcamUrl { get; set; }
+    public bool HostAvatarFrameEnabled { get; set; }
+    public string? HostAvatarFrameId { get; set; }
     public string SiteThemeId { get; set; } = SiteThemeCatalog.DefaultId;
     public SiteThemeColors CustomThemeColors { get; set; } = SiteThemeColors.Default;
 
@@ -304,6 +312,8 @@ public sealed class GameSettingsInput
         Enum.IsDefined(HostVisualSource) &&
         (HostVisualSource != BadWolfQuiz.Game.Runtime.HostVisualSource.WebcamUrl ||
             IsValidWebcamUrl(HostWebcamUrl)) &&
+        (!HostAvatarFrameEnabled ||
+            ContributorAvatarFrameCatalog.IsValid(HostAvatarFrameId)) &&
         SiteThemeCatalog.IsValid(SiteThemeId) &&
         SiteThemeCatalog.AreValid(CustomThemeColors);
 
@@ -342,7 +352,9 @@ public sealed class GameSettingsInput
             HostWebcamUrl,
             AnswerRewardDecayEnabled,
             AnswerRewardDecayStartAfterSeconds,
-            AnswerRewardDecayMinimumPercent);
+            AnswerRewardDecayMinimumPercent,
+            HostAvatarFrameEnabled,
+            HostAvatarFrameId);
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)
@@ -362,6 +374,8 @@ public sealed class GameSettingsInput
             HostVisualSource = settings.HostVisualSource,
             HostAvatarId = settings.HostAvatarId,
             HostWebcamUrl = settings.HostWebcamUrl,
+            HostAvatarFrameEnabled = settings.HostAvatarFrameEnabled,
+            HostAvatarFrameId = settings.HostAvatarFrameId,
             SiteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId),
             CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors),
             AnswerRewardDecayEnabled = settings.AnswerRewardDecayEnabled,

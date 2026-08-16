@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Settings;
 
@@ -19,6 +20,7 @@ public sealed class IndexModel(
     PremiumHostAccess premiumHostAccess,
     GameSessionRegistry sessionRegistry,
     IHubContext<GameHub> gameHub,
+    IOptions<FooterOptions> footerOptions,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty]
@@ -35,6 +37,7 @@ public sealed class IndexModel(
 
     public bool HasHostImage { get; private set; }
     public bool HasBrandLogo { get; private set; }
+    public bool IsContributor { get; private set; }
     public string HostId => currentHost.RequiredId;
     public int MaximumImageUploadMegabytes =>
         mediaUploadProcessor.MaximumImageUploadMegabytes(
@@ -57,6 +60,7 @@ public sealed class IndexModel(
         Input.HostName = host.DisplayName;
         HasHostImage = settings.HostImageData is not null;
         HasBrandLogo = settings.BrandLogoData is not null;
+        SetContributorViewData(ContributorRecognition.IsContributor(footerOptions.Value, host.DisplayName));
     }
 
     public async Task<IActionResult> OnGetBrandLogoAsync(
@@ -91,6 +95,21 @@ public sealed class IndexModel(
         var logoData = RemoveBrandLogo ? null : existing.BrandLogoData;
         var logoContentType = RemoveBrandLogo ? null : existing.BrandLogoContentType;
         HasBrandLogo = logoData is not null;
+        var host = await db.Hosts.SingleAsync(
+            item => item.Id == currentHost.RequiredId,
+            cancellationToken);
+        SetContributorViewData(ContributorRecognition.IsContributor(footerOptions.Value, host.DisplayName));
+
+        if (!IsContributor)
+        {
+            Input.HostAvatarFrameEnabled = false;
+            Input.HostAvatarFrameId = null;
+        }
+        else
+        {
+            Input.HostAvatarFrameId = ContributorAvatarFrameCatalog.Normalize(
+                Input.HostAvatarFrameId);
+        }
 
         if (!ModelState.IsValid)
         {
@@ -164,14 +183,22 @@ public sealed class IndexModel(
             return Page();
         }
 
-        var host = await db.Hosts.SingleAsync(
-            item => item.Id == currentHost.RequiredId,
-            cancellationToken);
         host.DisplayName = string.IsNullOrWhiteSpace(Input.HostName)
             ? null
             : Input.HostName.Trim();
         Input.HostName = host.DisplayName;
         await db.SaveChangesAsync(cancellationToken);
+
+        // Re-check after a display-name change. A non-contributor cannot gain
+        // frame access in the same POST, while a contributor who removes their
+        // contributor name loses the frame immediately.
+        IsContributor = IsContributor &&
+            ContributorRecognition.IsContributor(footerOptions.Value, host.DisplayName);
+        if (!IsContributor)
+        {
+            Input.HostAvatarFrameEnabled = false;
+            Input.HostAvatarFrameId = null;
+        }
 
         var savedSettings = Input.ToRuntimeSettings(
             imageData,
@@ -192,14 +219,31 @@ public sealed class IndexModel(
                 game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Completed)
             .ToArray();
         var themeUpdate = GameHub.CreateThemeUpdate(savedSettings);
+        var contributorFrameUpdate = new
+        {
+            enabled = IsContributor && savedSettings.HostAvatarFrameEnabled,
+            frameId = IsContributor ? savedSettings.HostAvatarFrameId : null
+        };
         foreach (var game in activeGames)
         {
             await gameHub.Clients
                 .Group(GameHub.GroupName(game.PublicCode))
                 .SendAsync("SiteThemeChanged", themeUpdate, cancellationToken);
+            await gameHub.Clients
+                .Group(GameHub.GroupName(game.PublicCode))
+                .SendAsync(
+                    "HostContributorFrameChanged",
+                    contributorFrameUpdate,
+                    cancellationToken);
         }
         TempData["SuccessMessage"] =
             localizer["GameSettings_GlobalSaved"].Value;
         return RedirectToPage();
+    }
+
+    private void SetContributorViewData(bool isContributor)
+    {
+        IsContributor = isContributor;
+        ViewData["ContributorHost"] = isContributor;
     }
 }

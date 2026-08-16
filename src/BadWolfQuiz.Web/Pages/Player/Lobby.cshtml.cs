@@ -1,14 +1,19 @@
 using BadWolfQuiz.Game.Runtime;
+using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 
 namespace BadWolfQuiz.Web.Pages.Player;
 
 public sealed class LobbyModel(
     GameSessionRegistry sessionRegistry,
     GameSettingsStore settingsStore,
-    QuizRatingService quizRatingService) : PageModel
+    QuizRatingService quizRatingService,
+    IOptions<FooterOptions> footerOptions,
+    IHubContext<GameHub> gameHub) : PageModel
 {
     public GameSessionRegistration Game { get; private set; } = null!;
 
@@ -19,6 +24,7 @@ public sealed class LobbyModel(
     public string? AccessToken { get; private set; }
     public int? ExistingRating { get; private set; }
     public bool CanRateQuiz { get; private set; }
+    public bool IsContributor { get; private set; }
 
     public async Task<IActionResult> OnGetAsync(
         string code,
@@ -46,6 +52,13 @@ public sealed class LobbyModel(
         CurrentPlayer = currentPlayer;
         Players = players;
         AccessToken = accessToken;
+        IsContributor = ContributorRecognition.IsContributor(footerOptions.Value, currentPlayer.Name);
+        ViewData["ContributorPlayer"] = IsContributor;
+        ViewData["ContributorPlayerFrameEnabled"] =
+            IsContributor && currentPlayer.AvatarFrameEnabled;
+        ViewData["ContributorPlayerFrameId"] = IsContributor
+            ? currentPlayer.AvatarFrameId
+            : null;
         CanRateQuiz = QuizRatingService.IsRatingAvailable(game.Session);
         if (CanRateQuiz)
         {
@@ -59,6 +72,68 @@ public sealed class LobbyModel(
             : game.Session.Settings;
         ViewData["GameThemeSettings"] = themeSettings;
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostAvatarFrameAsync(
+        string code,
+        Guid playerId,
+        string? accessToken,
+        bool enabled,
+        string? frameId,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(accessToken) ||
+            !ContributorAvatarFrameCatalog.IsValid(frameId))
+        {
+            return new JsonResult(new { saved = false }) { StatusCode = 400 };
+        }
+
+        var validationConnectionId = $"contributor-frame:{Guid.NewGuid():N}";
+        var connection = sessionRegistry.ConnectPlayer(
+            code,
+            accessToken,
+            validationConnectionId,
+            isVisible: false);
+
+        if (connection is null)
+        {
+            return new JsonResult(new { saved = false }) { StatusCode = 403 };
+        }
+
+        try
+        {
+            if (connection.RequiresApproval ||
+                connection.Player.Id != new GamePlayerId(playerId) ||
+                !ContributorRecognition.IsContributor(footerOptions.Value, connection.Player.Name))
+            {
+                return new JsonResult(new { saved = false }) { StatusCode = 403 };
+            }
+
+            var normalizedFrameId = ContributorAvatarFrameCatalog.Normalize(frameId);
+            lock (connection.Game)
+            {
+                connection.Player.SetAvatarFrame(enabled, normalizedFrameId);
+                connection.Game.MarkPersistenceChanged();
+            }
+
+            await gameHub.Clients
+                .Group(GameHub.GroupName(connection.Game.PublicCode))
+                .SendAsync(
+                    "PlayersChanged",
+                    GameHub.CreatePlayersUpdate(sessionRegistry, connection.Game),
+                    cancellationToken);
+
+            return new JsonResult(new
+            {
+                saved = true,
+                enabled,
+                frameId = normalizedFrameId
+            });
+        }
+        finally
+        {
+            sessionRegistry.DisconnectPlayer(validationConnectionId);
+        }
     }
 
     public async Task<IActionResult> OnPostRateQuizAsync(
