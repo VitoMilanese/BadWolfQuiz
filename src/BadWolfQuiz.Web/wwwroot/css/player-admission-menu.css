@@ -40,6 +40,7 @@
 .host-game-board.host-gameplay-presentation-mode { --game-scoreboard-space: 0px !important; padding-bottom: 0; }
 .host-game-board.host-gameplay-presentation-mode > .game-scoreboard, .host-game-board.host-gameplay-presentation-mode > .game-scoreboard-resizer, .host-game-board.host-gameplay-presentation-mode > .game-side-controls { display: none; }
 .host-game-board.final-question-host > .game-side-controls { display: none; }
+.player-lobby[data-final-status="finalanswering"] #player-final-panel > .game-content-blocks { display: none; }
 body:has(.player-buzzer-panel) { overflow-x: hidden; overflow-x: clip; overscroll-behavior-x: none; touch-action: pan-y; }
 .player-lobby:has(.player-buzzer-panel), .player-lobby:has(.player-buzzer-panel) .player-buzzer-panel { max-width: 100%; overflow-x: hidden; overflow-x: clip; overscroll-behavior-x: none; }
 .player-lobby:has(.player-buzzer-panel), .player-lobby:has(.player-buzzer-panel) * { user-select: none; -webkit-user-select: none; }
