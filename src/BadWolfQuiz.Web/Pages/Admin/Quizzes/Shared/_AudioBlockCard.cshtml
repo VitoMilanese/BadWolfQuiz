@@ -102,6 +102,14 @@
     <small>@localizer["FileUploadLimit", mediaUploadProcessor.MaximumAudioUploadMegabytes(
         premiumHostAccess.IsPremium(currentHost.RequiredId))]</small>
 
+    <label class="checkbox-row content-block-autoplay-option">
+        <input asp-for="Autoplay" type="checkbox" />
+        <span>
+            <strong>@localizer["Label_MediaAutoplay"]</strong>
+            <small>@localizer["Hint_MediaAutoplay"]</small>
+        </span>
+    </label>
+
     <input asp-for="TopCaption"
            class="form-control"
            placeholder="@localizer["Label_TopCaption"]" />

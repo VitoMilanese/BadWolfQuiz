@@ -235,6 +235,7 @@ public abstract class ContentBlockBase
     public string? ExternalUrl { get; set; }
     public int SortOrder { get; set; }
     public bool AudioOnly { get; set; }
+    public bool Autoplay { get; set; }
     public byte[]? FileData { get; set; }
     public string? FileContentType { get; set; }
     public string? FileName { get; set; }

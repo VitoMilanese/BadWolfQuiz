@@ -2592,4 +2592,10 @@
   <data name="GameTimer_ExpiredAnswer" xml:space="preserve">
     <value>Час на відповідь вийшов. Оцініть відповідь, коли будете готові.</value>
   </data>
+  <data name="Label_MediaAutoplay" xml:space="preserve">
+    <value>Автовідтворення</value>
+  </data>
+  <data name="Hint_MediaAutoplay" xml:space="preserve">
+    <value>Автоматично запускати це медіа, коли блок з'являється під час гри.</value>
+  </data>
 </root>

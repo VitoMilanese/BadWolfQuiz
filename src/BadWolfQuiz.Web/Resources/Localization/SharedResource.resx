@@ -2592,4 +2592,10 @@
   <data name="GameTimer_ExpiredAnswer" xml:space="preserve">
     <value>Answer time has expired. Judge when you're ready.</value>
   </data>
+  <data name="Label_MediaAutoplay" xml:space="preserve">
+    <value>Autoplay</value>
+  </data>
+  <data name="Hint_MediaAutoplay" xml:space="preserve">
+    <value>Start this media automatically when the block is shown during gameplay.</value>
+  </data>
 </root>

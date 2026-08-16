@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2590,6 +2590,12 @@
     <value>Україна</value>
   </data>
   <data name="GameTimer_ExpiredAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_MediaAutoplay" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Hint_MediaAutoplay" xml:space="preserve">
     <value>Україна</value>
   </data>
 </root>

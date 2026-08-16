@@ -7,6 +7,17 @@
        type="url"
        placeholder="Video URL" />
 
+@if (Model.BlockType is BadWolfQuiz.Web.Models.ContentBlockType.Video or BadWolfQuiz.Web.Models.ContentBlockType.YouTube)
+{
+    <label class="checkbox-row content-block-autoplay-option">
+        <input asp-for="Autoplay" type="checkbox" />
+        <span>
+            <strong>@localizer["Label_MediaAutoplay"]</strong>
+            <small>@localizer["Hint_MediaAutoplay"]</small>
+        </span>
+    </label>
+}
+
 <input asp-for="TopCaption"
        class="form-control"
        style="margin-top: 10px;"

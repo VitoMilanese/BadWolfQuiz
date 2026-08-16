@@ -1,4 +1,4 @@
-using BadWolfQuiz.Game.Definitions;
+﻿using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Hubs;
@@ -88,6 +88,33 @@ public sealed class LobbyModel(
 
     public AnswerResultOverlay? AnswerResultOverlay { get; private set; }
 
+    private IReadOnlyDictionary<int, bool> questionContentBlockAutoplay =
+        new Dictionary<int, bool>();
+    private IReadOnlyDictionary<int, bool> answerContentBlockAutoplay =
+        new Dictionary<int, bool>();
+    private IReadOnlyDictionary<int, bool> finalQuestionContentBlockAutoplay =
+        new Dictionary<int, bool>();
+    private IReadOnlyDictionary<int, bool> finalAnswerContentBlockAutoplay =
+        new Dictionary<int, bool>();
+
+    public bool ResolveContentBlockAutoplay(
+        ContentBlockSnapshot block,
+        bool answer = false,
+        bool final = false)
+    {
+        var values = final
+            ? answer
+                ? finalAnswerContentBlockAutoplay
+                : finalQuestionContentBlockAutoplay
+            : answer
+                ? answerContentBlockAutoplay
+                : questionContentBlockAutoplay;
+
+        return values.TryGetValue(block.SourceContentBlockId, out var autoplay)
+            ? autoplay
+            : block.Autoplay;
+    }
+
     private static string NormalizeAnswerFeedbackSound(
         string? configured,
         string fallback,
@@ -105,6 +132,8 @@ public sealed class LobbyModel(
         var result = LoadPage(id, previewQuestionId, previewAnswer);
         if (result is PageResult)
         {
+            await LoadContentBlockAutoplayOverridesAsync(cancellationToken);
+
             AnswerResultOverlay =
                 sessionRegistry.ConsumeAnswerResultOverlay(Game);
 
@@ -121,6 +150,41 @@ public sealed class LobbyModel(
             ExistingRating = rating.Score;
         }
         return result;
+    }
+
+    private async Task LoadContentBlockAutoplayOverridesAsync(
+        CancellationToken cancellationToken)
+    {
+        var quizId = Game.Session.Quiz.SourceQuizId;
+
+        questionContentBlockAutoplay = await db.QuestionContentBlocks
+            .AsNoTracking()
+            .Where(block => block.Question.Category.Round.QuizId == quizId)
+            .ToDictionaryAsync(
+                block => block.Id,
+                block => block.Autoplay,
+                cancellationToken);
+        answerContentBlockAutoplay = await db.AnswerContentBlocks
+            .AsNoTracking()
+            .Where(block => block.Question.Category.Round.QuizId == quizId)
+            .ToDictionaryAsync(
+                block => block.Id,
+                block => block.Autoplay,
+                cancellationToken);
+        finalQuestionContentBlockAutoplay = await db.FinalQuestionContentBlocks
+            .AsNoTracking()
+            .Where(block => block.QuizId == quizId)
+            .ToDictionaryAsync(
+                block => block.Id,
+                block => block.Autoplay,
+                cancellationToken);
+        finalAnswerContentBlockAutoplay = await db.FinalAnswerContentBlocks
+            .AsNoTracking()
+            .Where(block => block.QuizId == quizId)
+            .ToDictionaryAsync(
+                block => block.Id,
+                block => block.Autoplay,
+                cancellationToken);
     }
 
     public async Task<IActionResult> OnPostDiscordMuteAsync(
@@ -1024,6 +1088,9 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
+        var revealedClueCount = 0;
+        var canRevealClue = false;
+
         try
         {
             var question = sessionRegistry.RevealNextClue(
@@ -1035,6 +1102,9 @@ public sealed class LobbyModel(
                 return NotFound();
             }
 
+            revealedClueCount = question.RevealedClueCount;
+            canRevealClue = question.CanRevealClue;
+
             await gameHub.Clients
                 .Group(GameHub.GroupName(game.PublicCode))
                 .SendAsync(
@@ -1042,8 +1112,8 @@ public sealed class LobbyModel(
                     new
                     {
                         sourceQuestionId,
-                        question.RevealedClueCount,
-                        question.CanRevealClue
+                        revealedClueCount,
+                        canRevealClue
                     },
                     cancellationToken);
         }
@@ -1068,7 +1138,10 @@ public sealed class LobbyModel(
         {
             return new JsonResult(new
             {
-                success = true
+                success = true,
+                sourceQuestionId,
+                revealedClueCount,
+                canRevealClue
             });
         }
 

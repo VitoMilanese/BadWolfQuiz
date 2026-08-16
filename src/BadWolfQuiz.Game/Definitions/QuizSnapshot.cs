@@ -255,7 +255,8 @@ public sealed record ContentBlockSnapshot(
     string? FileContentType,
     string? FileName,
     int SortOrder,
-    bool AudioOnly);
+    bool AudioOnly,
+    bool Autoplay = false);
 
 public enum ContentBlockKind
 {
