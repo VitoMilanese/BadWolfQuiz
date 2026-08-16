@@ -35,12 +35,6 @@ public sealed class ContributorSupportTagHelper(
         {
             output.PostContent.AppendHtml(
                 "<link rel=\"stylesheet\" href=\"/css/contributor-frames.css\" />");
-            var frameInsetStyles = BuildFrameInsetStyles(
-                ContributorAvatarFrameCatalog.GetFrames(environment));
-            if (!string.IsNullOrEmpty(frameInsetStyles))
-            {
-                output.PostContent.AppendHtml(frameInsetStyles);
-            }
             return;
         }
 
@@ -114,6 +108,11 @@ public sealed class ContributorSupportTagHelper(
             "data-contributor-frame-default-id",
             defaultFrameId);
         output.Attributes.SetAttribute(
+            "data-contributor-frame-native-insets",
+            string.Join(
+                ";",
+                frames.Select(frame => $"{frame.Id}:{frame.AvatarInsetPixels}")));
+        output.Attributes.SetAttribute(
             "data-contributor-frame-save-failed",
             localizer["ContributorFrame_SaveFailed"].Value);
 
@@ -170,7 +169,8 @@ public sealed class ContributorSupportTagHelper(
         }
 
         output.PostContent.AppendHtml(
-            "<script src=\"/js/contributor-frames.js\" defer></script>");
+            "<script src=\"/js/contributor-frames.js\" defer></script>" +
+            "<script src=\"/js/contributor-frame-insets.js\" defer></script>");
     }
 
     private string BuildHostTemplate(
@@ -294,22 +294,6 @@ public sealed class ContributorSupportTagHelper(
                 </div>
             </dialog>
             """;
-    }
-
-    private static string BuildFrameInsetStyles(
-        IReadOnlyList<ContributorAvatarFrame> frames)
-    {
-        if (frames.Count == 0)
-        {
-            return string.Empty;
-        }
-
-        var rules = string.Concat(frames.Select(frame =>
-            $".contributor-frame-owner[data-avatar-frame=\"{frame.Id}\"] " +
-            ".contributor-frame-avatar-source{" +
-            $"--contributor-frame-avatar-inset:{frame.AvatarInsetPixels}px!important;" +
-            "}"));
-        return $"<style data-contributor-frame-insets>{rules}</style>";
     }
 
     private string BuildThankYouDialog(HtmlEncoder html) => $$"""

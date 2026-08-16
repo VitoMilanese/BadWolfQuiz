@@ -28,13 +28,13 @@ Recognized players get equivalent controls inside the existing player media sett
 
 The server revalidates the player access token, player identifier, and configured contributor name before accepting a frame update. The recognition cookie is not involved.
 
-The selected frame image is rendered as a square overlay over the player's current avatar, uploaded image, webcam preview, or webcam URL preview where that visual is shown. The overlay follows live card resizing. Built-in avatars use the exact pixel inset configured in the selected frame file name so the avatar can be tuned to the decorative frame without automatic safe-area guessing. Host game pages refresh contributor-frame state when the normal player roster changes.
+The selected frame image is rendered as a square overlay over the player's current avatar, uploaded image, webcam preview, or webcam URL preview where that visual is shown. The overlay follows live card resizing. Built-in avatars use the pixel inset configured in the selected frame file name as a native-image reference value. The browser scales that inset proportionally with the rendered frame size, so the avatar-to-frame spacing remains consistent when cards are resized. Host game pages refresh contributor-frame state when the normal player roster changes.
 
 ## Frame assets
 
 Frame PNG files are stored in `src/BadWolfQuiz.Web/Resources/Frames` and copied to both build and publish output. The catalog is discovered from the folder at runtime instead of using a fixed frame count, so additional `.png` files become selectable automatically.
 
-Use the file-name format `<frame-id>-<avatar-inset-px>.png`. For example, `1-10.png` exposes frame ID `1` and applies a `10px` inset to the built-in avatar, while `2-15.png` exposes frame ID `2` with a `15px` inset. The suffix is configuration rather than part of the stored frame ID, so changing `1-10.png` to `1-12.png` updates the inset without breaking saved selections of frame `1`. Legacy files such as `1.png` remain supported and use a default `10px` inset. If both a legacy file and an explicit-inset file exist for the same frame ID, the explicit-inset file is preferred.
+Use the file-name format `<frame-id>-<avatar-inset-px>.png`. The inset is measured at the PNG frame's intrinsic size, not as a fixed CSS value. For example, if `1-10.png` is a 512×512 frame, it uses a 10px inset when rendered at 512px, 5px at 256px, and 15px at 768px. `2-15.png` follows the same proportional rule from its own intrinsic size. The suffix is configuration rather than part of the stored frame ID, so changing `1-10.png` to `1-12.png` updates the inset without breaking saved selections of frame `1`. Legacy files such as `1.png` remain supported and use a default `10px` inset. If both a legacy file and an explicit-inset file exist for the same frame ID, the explicit-inset file is preferred.
 
 Numeric frame IDs are ordered numerically first, followed by other IDs. Frames are served through the stable `/frames/{id}.png` Razor endpoint so the source assets remain outside `wwwroot` even when the physical file name contains the inset suffix.
 

@@ -76,5 +76,7 @@
 
 .contributor-frame-owner .contributor-frame-avatar-source {
     box-sizing: border-box;
-    padding: var(--contributor-frame-avatar-inset, 16%);
+    padding: var(
+        --contributor-frame-scaled-avatar-inset,
+        var(--contributor-frame-avatar-inset, 0px));
 }
