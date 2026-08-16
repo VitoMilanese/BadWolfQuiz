@@ -128,7 +128,7 @@ public sealed class ContributorRecognitionTests
     }
 
     [Fact]
-    public void Frame_catalog_discovers_png_files_without_a_fixed_count()
+    public void Frame_catalog_reads_avatar_inset_from_file_name()
     {
         var contentRoot = Path.Combine(
             Path.GetTempPath(),
@@ -139,8 +139,10 @@ public sealed class ContributorRecognitionTests
         try
         {
             File.WriteAllBytes(Path.Combine(frameRoot, "1.png"), [0]);
-            File.WriteAllBytes(Path.Combine(frameRoot, "25.png"), [0]);
-            File.WriteAllBytes(Path.Combine(frameRoot, "bonus.png"), [0]);
+            File.WriteAllBytes(Path.Combine(frameRoot, "1-10.png"), [0]);
+            File.WriteAllBytes(Path.Combine(frameRoot, "25-15.png"), [0]);
+            File.WriteAllBytes(Path.Combine(frameRoot, "bonus-5.png"), [0]);
+            File.WriteAllBytes(Path.Combine(frameRoot, "legacy.png"), [0]);
             File.WriteAllBytes(Path.Combine(frameRoot, "ignored.jpg"), [0]);
 
             var environment = new TestWebHostEnvironment
@@ -150,14 +152,52 @@ public sealed class ContributorRecognitionTests
             var frames = ContributorAvatarFrameCatalog.GetFrames(environment);
 
             Assert.Equal(
-                new[] { "1", "25", "bonus" },
+                new[] { "1", "25", "bonus", "legacy" },
                 frames.Select(frame => frame.Id).ToArray());
+            Assert.Equal(
+                new[] { 10, 15, 5, ContributorAvatarFrameCatalog.DefaultAvatarInsetPixels },
+                frames.Select(frame => frame.AvatarInsetPixels).ToArray());
             Assert.True(ContributorAvatarFrameCatalog.IsValid(environment, "25"));
             Assert.True(ContributorAvatarFrameCatalog.IsValid(environment, "bonus"));
             Assert.False(ContributorAvatarFrameCatalog.IsValid(environment, "missing"));
             Assert.Equal(
+                "25-15.png",
+                Path.GetFileName(ResolveFramePath(environment, "25")));
+            Assert.Equal(
                 "1",
                 ContributorAvatarFrameCatalog.Normalize(environment, "missing"));
+        }
+        finally
+        {
+            Directory.Delete(contentRoot, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Renaming_only_the_inset_suffix_keeps_the_same_frame_id()
+    {
+        var contentRoot = Path.Combine(
+            Path.GetTempPath(),
+            $"badwolfquiz-frame-catalog-{Guid.NewGuid():N}");
+        var frameRoot = Path.Combine(contentRoot, "Resources", "Frames");
+        Directory.CreateDirectory(frameRoot);
+
+        try
+        {
+            var framePath = Path.Combine(frameRoot, "7-12.png");
+            File.WriteAllBytes(framePath, [0]);
+            var environment = new TestWebHostEnvironment
+            {
+                ContentRootPath = contentRoot
+            };
+
+            Assert.Equal("7", ContributorAvatarFrameCatalog.Normalize(environment, "7"));
+            Assert.Equal(12, ContributorAvatarFrameCatalog.GetAvatarInsetPixels(environment, "7"));
+
+            File.Move(framePath, Path.Combine(frameRoot, "7-6.png"));
+
+            Assert.Equal("7", ContributorAvatarFrameCatalog.Normalize(environment, "7"));
+            Assert.Equal(6, ContributorAvatarFrameCatalog.GetAvatarInsetPixels(environment, "7"));
         }
         finally
         {
@@ -194,6 +234,17 @@ public sealed class ContributorRecognitionTests
         };
 
         Assert.False(input.IsValid);
+    }
+
+    private static string ResolveFramePath(
+        IWebHostEnvironment environment,
+        string id)
+    {
+        Assert.True(ContributorAvatarFrameCatalog.TryResolvePath(
+            environment,
+            id,
+            out var path));
+        return path;
     }
 
     private sealed class TestWebHostEnvironment : IWebHostEnvironment

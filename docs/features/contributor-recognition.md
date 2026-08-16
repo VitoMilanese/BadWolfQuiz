@@ -28,11 +28,15 @@ Recognized players get equivalent controls inside the existing player media sett
 
 The server revalidates the player access token, player identifier, and configured contributor name before accepting a frame update. The recognition cookie is not involved.
 
-The selected frame image is rendered as a square overlay over the player's current avatar, uploaded image, webcam preview, or webcam URL preview where that visual is shown. The overlay follows live card resizing. For built-in avatars, the client measures the transparent center opening of the selected frame PNG and automatically insets the avatar so its artwork stays inside that frame's safe area. Host game pages refresh contributor-frame state when the normal player roster changes.
+The selected frame image is rendered as a square overlay over the player's current avatar, uploaded image, webcam preview, or webcam URL preview where that visual is shown. The overlay follows live card resizing. Built-in avatars use the exact pixel inset configured in the selected frame file name so the avatar can be tuned to the decorative frame without automatic safe-area guessing. Host game pages refresh contributor-frame state when the normal player roster changes.
 
 ## Frame assets
 
-Frame PNG files are stored in `src/BadWolfQuiz.Web/Resources/Frames` and copied to both build and publish output. The catalog is discovered from the folder at runtime instead of using a fixed frame count, so additional `.png` files become selectable automatically. Numeric file names are ordered numerically first, followed by other file names. Frames are served through the `/frames/{id}.png` Razor endpoint so the source assets remain outside `wwwroot`.
+Frame PNG files are stored in `src/BadWolfQuiz.Web/Resources/Frames` and copied to both build and publish output. The catalog is discovered from the folder at runtime instead of using a fixed frame count, so additional `.png` files become selectable automatically.
+
+Use the file-name format `<frame-id>-<avatar-inset-px>.png`. For example, `1-10.png` exposes frame ID `1` and applies a `10px` inset to the built-in avatar, while `2-15.png` exposes frame ID `2` with a `15px` inset. The suffix is configuration rather than part of the stored frame ID, so changing `1-10.png` to `1-12.png` updates the inset without breaking saved selections of frame `1`. Legacy files such as `1.png` remain supported and use a default `10px` inset. If both a legacy file and an explicit-inset file exist for the same frame ID, the explicit-inset file is preferred.
+
+Numeric frame IDs are ordered numerically first, followed by other IDs. Frames are served through the stable `/frames/{id}.png` Razor endpoint so the source assets remain outside `wwwroot` even when the physical file name contains the inset suffix.
 
 ## Localization
 
