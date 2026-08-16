@@ -6,18 +6,12 @@ namespace BadWolfQuiz.Web.Pages;
 
 public sealed class ContributorFrameModel(IWebHostEnvironment environment) : PageModel
 {
-    public IActionResult OnGet(int id)
+    public IActionResult OnGet(string id)
     {
-        var frameId = id.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        if (!ContributorAvatarFrameCatalog.IsValid(frameId))
-        {
-            return NotFound();
-        }
-
-        var path = Path.Combine(
-            ContributorAvatarFrameCatalog.ResolveRootPath(environment),
-            $"{frameId}.png");
-        if (!System.IO.File.Exists(path))
+        if (!ContributorAvatarFrameCatalog.TryResolvePath(
+                environment,
+                id,
+                out var path))
         {
             return NotFound();
         }

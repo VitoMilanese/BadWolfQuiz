@@ -1,5 +1,7 @@
 using BadWolfQuiz.Web.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
 
 namespace BadWolfQuiz.Web.Tests;
 
@@ -125,16 +127,42 @@ public sealed class ContributorRecognitionTests
         Assert.Contains("samesite=lax", cookie, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Theory]
-    [InlineData("1", "1")]
-    [InlineData("24", "24")]
-    [InlineData(" 7 ", "7")]
-    [InlineData("25", ContributorAvatarFrameCatalog.DefaultId)]
-    [InlineData("unknown", ContributorAvatarFrameCatalog.DefaultId)]
-    [InlineData(null, ContributorAvatarFrameCatalog.DefaultId)]
-    public void Frame_ids_are_normalized_to_the_catalog(string? value, string expected)
+    [Fact]
+    public void Frame_catalog_discovers_png_files_without_a_fixed_count()
     {
-        Assert.Equal(expected, ContributorAvatarFrameCatalog.Normalize(value));
+        var contentRoot = Path.Combine(
+            Path.GetTempPath(),
+            $"badwolfquiz-frame-catalog-{Guid.NewGuid():N}");
+        var frameRoot = Path.Combine(contentRoot, "Resources", "Frames");
+        Directory.CreateDirectory(frameRoot);
+
+        try
+        {
+            File.WriteAllBytes(Path.Combine(frameRoot, "1.png"), [0]);
+            File.WriteAllBytes(Path.Combine(frameRoot, "25.png"), [0]);
+            File.WriteAllBytes(Path.Combine(frameRoot, "bonus.png"), [0]);
+            File.WriteAllBytes(Path.Combine(frameRoot, "ignored.jpg"), [0]);
+
+            var environment = new TestWebHostEnvironment
+            {
+                ContentRootPath = contentRoot
+            };
+            var frames = ContributorAvatarFrameCatalog.GetFrames(environment);
+
+            Assert.Equal(
+                new[] { "1", "25", "bonus" },
+                frames.Select(frame => frame.Id).ToArray());
+            Assert.True(ContributorAvatarFrameCatalog.IsValid(environment, "25"));
+            Assert.True(ContributorAvatarFrameCatalog.IsValid(environment, "bonus"));
+            Assert.False(ContributorAvatarFrameCatalog.IsValid(environment, "missing"));
+            Assert.Equal(
+                "1",
+                ContributorAvatarFrameCatalog.Normalize(environment, "missing"));
+        }
+        finally
+        {
+            Directory.Delete(contentRoot, recursive: true);
+        }
     }
 
     [Fact]
@@ -157,14 +185,24 @@ public sealed class ContributorRecognitionTests
     }
 
     [Fact]
-    public void Enabled_host_frame_rejects_unknown_frame_id()
+    public void Enabled_host_frame_rejects_unsafe_frame_id()
     {
         var input = new GameSettingsInput
         {
             HostAvatarFrameEnabled = true,
-            HostAvatarFrameId = "not-a-frame"
+            HostAvatarFrameId = "../12"
         };
 
         Assert.False(input.IsValid);
+    }
+
+    private sealed class TestWebHostEnvironment : IWebHostEnvironment
+    {
+        public string ApplicationName { get; set; } = "BadWolfQuiz.Web.Tests";
+        public IFileProvider WebRootFileProvider { get; set; } = new NullFileProvider();
+        public string WebRootPath { get; set; } = string.Empty;
+        public string EnvironmentName { get; set; } = "Tests";
+        public string ContentRootPath { get; set; } = string.Empty;
+        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
     }
 }

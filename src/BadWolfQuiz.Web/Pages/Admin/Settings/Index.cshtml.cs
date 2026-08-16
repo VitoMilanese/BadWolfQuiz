@@ -21,7 +21,8 @@ public sealed class IndexModel(
     GameSessionRegistry sessionRegistry,
     IHubContext<GameHub> gameHub,
     IOptions<FooterOptions> footerOptions,
-    IStringLocalizer<SharedResource> localizer) : PageModel
+    IStringLocalizer<SharedResource> localizer,
+    IWebHostEnvironment environment) : PageModel
 {
     [BindProperty]
     public GameSettingsInput Input { get; set; } = new();
@@ -47,6 +48,15 @@ public sealed class IndexModel(
     {
         var settings = await settingsStore.LoadAsync(currentHost.RequiredId, cancellationToken);
         Input = GameSettingsInput.From(settings);
+        Input.HostAvatarFrameId = ContributorAvatarFrameCatalog.Normalize(
+            environment,
+            Input.HostAvatarFrameId);
+        if (Input.HostAvatarFrameEnabled &&
+            !ContributorAvatarFrameCatalog.IsValid(environment, Input.HostAvatarFrameId))
+        {
+            Input.HostAvatarFrameEnabled = false;
+        }
+
         var host = await db.Hosts.SingleAsync(
             item => item.Id == currentHost.RequiredId,
             cancellationToken);
@@ -108,7 +118,15 @@ public sealed class IndexModel(
         else
         {
             Input.HostAvatarFrameId = ContributorAvatarFrameCatalog.Normalize(
+                environment,
                 Input.HostAvatarFrameId);
+            if (Input.HostAvatarFrameEnabled &&
+                !ContributorAvatarFrameCatalog.IsValid(environment, Input.HostAvatarFrameId))
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    localizer["HostCard_InvalidSettings"].Value);
+            }
         }
 
         if (!ModelState.IsValid)

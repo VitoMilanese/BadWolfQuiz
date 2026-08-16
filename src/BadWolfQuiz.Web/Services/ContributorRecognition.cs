@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
@@ -66,46 +65,161 @@ public static class ContributorRecognition
 public static class ContributorAvatarFrameCatalog
 {
     public const string DefaultId = "1";
-    private const int FrameCount = 24;
 
-    public static IReadOnlyList<ContributorAvatarFrame> Frames { get; } =
-        Enumerable.Range(1, FrameCount)
-            .Select(number =>
+    public static IReadOnlyList<ContributorAvatarFrame> GetFrames(
+        IHostEnvironment environment)
+    {
+        var root = ResolveRootPath(environment);
+        if (!Directory.Exists(root))
+        {
+            return Array.Empty<ContributorAvatarFrame>();
+        }
+
+        return Directory
+            .EnumerateFiles(root, "*", SearchOption.TopDirectoryOnly)
+            .Where(path => string.Equals(
+                Path.GetExtension(path),
+                ".png",
+                StringComparison.OrdinalIgnoreCase))
+            .Select(path => new
             {
-                var id = number.ToString(CultureInfo.InvariantCulture);
-                return new ContributorAvatarFrame(id, $"/frames/{id}.png");
+                Path = path,
+                Id = Path.GetFileNameWithoutExtension(path)
             })
+            .Where(item => !string.IsNullOrWhiteSpace(item.Id))
+            .OrderBy(
+                item => ParseNumericId(item.Id),
+                Comparer<int?>.Create((left, right) =>
+                    left.HasValue && right.HasValue
+                        ? left.Value.CompareTo(right.Value)
+                        : left.HasValue ? -1 : right.HasValue ? 1 : 0))
+            .ThenBy(item => item.Id, StringComparer.OrdinalIgnoreCase)
+            .Select(item => new ContributorAvatarFrame(
+                item.Id,
+                BuildUrl(item.Id, item.Path)))
             .ToArray();
+    }
 
     public static string ResolveRootPath(IHostEnvironment environment)
     {
-        var outputRoot = Path.Combine(
+        var contentRoot = Path.Combine(
+            environment.ContentRootPath,
+            "Resources",
+            "Frames");
+        if (Directory.Exists(contentRoot))
+        {
+            return contentRoot;
+        }
+
+        return Path.Combine(
             AppContext.BaseDirectory,
             "Resources",
             "Frames");
-
-        return Directory.Exists(outputRoot)
-            ? outputRoot
-            : Path.Combine(
-                environment.ContentRootPath,
-                "Resources",
-                "Frames");
     }
 
-    public static bool IsValid(string? id) =>
-        Frames.Any(frame => string.Equals(
-            frame.Id,
-            id?.Trim(),
-            StringComparison.Ordinal));
+    public static bool IsValid(
+        IHostEnvironment environment,
+        string? id) =>
+        TryResolvePath(environment, id, out _);
 
-    public static string Normalize(string? id) =>
-        Frames.FirstOrDefault(frame => string.Equals(
-            frame.Id,
-            id?.Trim(),
-            StringComparison.Ordinal))?.Id ?? DefaultId;
+    public static bool IsValid(string? id) => IsSafeId(id);
 
-    public static string GetUrl(string? id) =>
-        $"/frames/{Normalize(id)}.png";
+    public static string? Normalize(
+        IHostEnvironment environment,
+        string? id)
+    {
+        if (TryResolvePath(environment, id, out _))
+        {
+            return id!.Trim();
+        }
+
+        return GetFrames(environment).FirstOrDefault()?.Id;
+    }
+
+    public static string? GetUrl(
+        IHostEnvironment environment,
+        string? id)
+    {
+        var normalizedId = Normalize(environment, id);
+        return normalizedId is not null &&
+               TryResolvePath(environment, normalizedId, out var path)
+            ? BuildUrl(normalizedId, path)
+            : null;
+    }
+
+    public static bool TryResolvePath(
+        IHostEnvironment environment,
+        string? id,
+        out string path) =>
+        TryResolvePath(ResolveRootPath(environment), id, out path);
+
+    private static bool TryResolvePath(
+        string root,
+        string? id,
+        out string path)
+    {
+        path = string.Empty;
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return false;
+        }
+
+        if (!IsSafeId(id))
+        {
+            return false;
+        }
+
+        var normalizedId = id!.Trim();
+
+        if (!Directory.Exists(root))
+        {
+            return false;
+        }
+
+        var file = Directory
+            .EnumerateFiles(root, "*", SearchOption.TopDirectoryOnly)
+            .FirstOrDefault(candidate =>
+                string.Equals(
+                    Path.GetExtension(candidate),
+                    ".png",
+                    StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(
+                    Path.GetFileNameWithoutExtension(candidate),
+                    normalizedId,
+                    StringComparison.Ordinal));
+        if (file is null)
+        {
+            return false;
+        }
+
+        path = file;
+        return true;
+    }
+
+    private static bool IsSafeId(string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return false;
+        }
+
+        var normalizedId = id.Trim();
+        return normalizedId is not "." and not ".." &&
+               string.Equals(
+                   Path.GetFileName(normalizedId),
+                   normalizedId,
+                   StringComparison.Ordinal);
+    }
+
+    private static int? ParseNumericId(string id) =>
+        int.TryParse(id, out var number) ? number : null;
+
+    private static string BuildUrl(string id, string path)
+    {
+        var file = new FileInfo(path);
+        var version = $"{file.Length:x}-{file.LastWriteTimeUtc.Ticks:x}";
+        return $"/frames/{Uri.EscapeDataString(id)}.png?v={version}";
+    }
 }
 
 public sealed record ContributorAvatarFrame(string Id, string Url);

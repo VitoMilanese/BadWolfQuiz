@@ -2,14 +2,130 @@
     const body = document.body;
     if (!body) return;
 
-    const validFrameIds = new Set(
-        Array.from({ length: 24 }, (_, index) => String(index + 1))
+    const defaultFrameId = String(
+        body.dataset.contributorFrameDefaultId ?? ""
+    ).trim();
+    const availableFrameIds = new Set(
+        Array.from(document.querySelectorAll("[data-contributor-frame-option]"))
+            .map(option => String(option.dataset.contributorFrameOption ?? "").trim())
+            .filter(Boolean)
     );
     const normalizeFrameId = value => {
         const id = String(value ?? "").trim();
-        return validFrameIds.has(id) ? id : "1";
+        if (!id) return defaultFrameId;
+        if (availableFrameIds.size > 0 && !availableFrameIds.has(id)) {
+            return defaultFrameId;
+        }
+        return id;
     };
-    const frameUrl = frameId => `/frames/${normalizeFrameId(frameId)}.png`;
+    const frameUrl = frameId => {
+        const id = normalizeFrameId(frameId);
+        return id ? `/frames/${encodeURIComponent(id)}.png` : "";
+    };
+
+    const defaultAvatarInsetRatio = 0.16;
+    const minimumAvatarInsetRatio = 0.08;
+    const maximumAvatarInsetRatio = 0.30;
+    const frameAlphaThreshold = 72;
+    const frameInsetMarginRatio = 0.018;
+    const frameInsetRatios = new Map();
+    const frameInsetRequests = new Map();
+
+    const measureFrameInsetRatio = image => {
+        const naturalWidth = image.naturalWidth;
+        const naturalHeight = image.naturalHeight;
+        if (naturalWidth <= 0 || naturalHeight <= 0) {
+            return defaultAvatarInsetRatio;
+        }
+
+        const maximumDimension = 512;
+        const scale = Math.min(
+            1,
+            maximumDimension / Math.max(naturalWidth, naturalHeight)
+        );
+        const width = Math.max(1, Math.round(naturalWidth * scale));
+        const height = Math.max(1, Math.round(naturalHeight * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        if (!context) return defaultAvatarInsetRatio;
+
+        context.clearRect(0, 0, width, height);
+        context.drawImage(image, 0, 0, width, height);
+
+        let pixels;
+        try {
+            pixels = context.getImageData(0, 0, width, height).data;
+        } catch {
+            return defaultAvatarInsetRatio;
+        }
+
+        const centerX = (width - 1) / 2;
+        const centerY = (height - 1) / 2;
+        const minimumSide = Math.min(width, height);
+        const maximumRadius = Math.floor(minimumSide / 2);
+        if (maximumRadius <= 1) return defaultAvatarInsetRatio;
+
+        let safeRadius = maximumRadius;
+        const rayCount = 720;
+        for (let ray = 0; ray < rayCount; ray += 1) {
+            const angle = ray * Math.PI * 2 / rayCount;
+            const cosine = Math.cos(angle);
+            const sine = Math.sin(angle);
+            for (let radius = 1; radius <= maximumRadius; radius += 1) {
+                const x = Math.round(centerX + cosine * radius);
+                const y = Math.round(centerY + sine * radius);
+                if (x < 0 || x >= width || y < 0 || y >= height) break;
+                const alpha = pixels[(y * width + x) * 4 + 3];
+                if (alpha >= frameAlphaThreshold) {
+                    safeRadius = Math.min(safeRadius, radius - 1);
+                    break;
+                }
+            }
+        }
+
+        const measuredInset =
+            0.5 - safeRadius / minimumSide + frameInsetMarginRatio;
+        if (!Number.isFinite(measuredInset)) {
+            return defaultAvatarInsetRatio;
+        }
+
+        return Math.min(
+            maximumAvatarInsetRatio,
+            Math.max(minimumAvatarInsetRatio, measuredInset)
+        );
+    };
+
+    const ensureFrameInsetRatio = frameId => {
+        const id = normalizeFrameId(frameId);
+        if (!id) return Promise.resolve(defaultAvatarInsetRatio);
+        if (frameInsetRatios.has(id)) {
+            return Promise.resolve(frameInsetRatios.get(id));
+        }
+        if (frameInsetRequests.has(id)) {
+            return frameInsetRequests.get(id);
+        }
+
+        const request = new Promise(resolve => {
+            const image = new Image();
+            image.decoding = "async";
+            image.addEventListener("load", () => {
+                resolve(measureFrameInsetRatio(image));
+            }, { once: true });
+            image.addEventListener("error", () => {
+                resolve(defaultAvatarInsetRatio);
+            }, { once: true });
+            image.src = frameUrl(id);
+        }).then(ratio => {
+            frameInsetRatios.set(id, ratio);
+            frameInsetRequests.delete(id);
+            return ratio;
+        });
+
+        frameInsetRequests.set(id, request);
+        return request;
+    };
 
     const findFrameMedia = owner => {
         const selectors = [
@@ -45,7 +161,27 @@
     const clearAvatarInset = owner => {
         for (const media of owner.querySelectorAll(".contributor-frame-avatar-source")) {
             media.classList.remove("contributor-frame-avatar-source");
+            media.style.removeProperty("--contributor-frame-avatar-inset");
         }
+    };
+
+    const updateAvatarInset = (owner, media, frameSize) => {
+        const builtInAvatar = isBuiltInAvatar(media);
+        media.classList.toggle(
+            "contributor-frame-avatar-source",
+            builtInAvatar
+        );
+        if (!builtInAvatar) {
+            media.style.removeProperty("--contributor-frame-avatar-inset");
+            return;
+        }
+
+        const frameId = normalizeFrameId(owner.dataset.avatarFrame);
+        const insetRatio = frameInsetRatios.get(frameId) ?? defaultAvatarInsetRatio;
+        media.style.setProperty(
+            "--contributor-frame-avatar-inset",
+            `${Math.max(2, frameSize * insetRatio)}px`
+        );
     };
 
     const positionFrameOverlay = owner => {
@@ -63,12 +199,9 @@
         )) {
             if (insetMedia !== media) {
                 insetMedia.classList.remove("contributor-frame-avatar-source");
+                insetMedia.style.removeProperty("--contributor-frame-avatar-inset");
             }
         }
-        media.classList.toggle(
-            "contributor-frame-avatar-source",
-            isBuiltInAvatar(media)
-        );
 
         const ownerRect = owner.getBoundingClientRect();
         const mediaRect = media.getBoundingClientRect();
@@ -89,6 +222,7 @@
         const mediaHeight = mediaRect.height / scaleY;
         const frameSize = Math.min(mediaWidth, mediaHeight);
 
+        updateAvatarInset(owner, media, frameSize);
         overlay.hidden = false;
         overlay.style.left = `${mediaLeft + (mediaWidth - frameSize) / 2}px`;
         overlay.style.top = `${mediaTop + (mediaHeight - frameSize) / 2}px`;
@@ -145,12 +279,12 @@
 
     const setFrame = (owner, enabled, frameId) => {
         if (!owner) return;
-        if (!enabled) {
+        const normalizedId = normalizeFrameId(frameId);
+        if (!enabled || !normalizedId) {
             removeFrame(owner);
             return;
         }
 
-        const normalizedId = normalizeFrameId(frameId);
         owner.dataset.avatarFrame = normalizedId;
         owner.classList.add("contributor-frame-owner");
 
@@ -168,6 +302,11 @@
         }
         observeFrameLayout(owner);
         window.requestAnimationFrame(() => positionFrameOverlay(owner));
+        ensureFrameInsetRatio(normalizedId).then(() => {
+            if (owner.isConnected && owner.dataset.avatarFrame === normalizedId) {
+                positionFrameOverlay(owner);
+            }
+        }).catch(console.error);
     };
 
     const repositionAllFrames = () => {
@@ -272,46 +411,47 @@
         }
     };
 
-    const hostGameRoot = document.querySelector(
+    let hostGameConnection = null;
+    let hostGameStarting = false;
+
+    const findHostGameRoot = () => document.querySelector(
         ".host-game-board[data-game-code], .content-panel[data-game-code]"
     );
-    if (hostGameRoot && typeof signalR !== "undefined") {
-        const gameCode = hostGameRoot.dataset.gameCode;
-        const observer = new MutationObserver(records => {
-            for (const record of records) {
-                for (const node of record.addedNodes) {
-                    if (node instanceof Element) applyPlayerFrames(node);
-                }
-            }
-            applyHostFrame();
-            repositionAllFrames();
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
 
+    const refreshPlayerFrames = async gameCode => {
+        const response = await fetch(
+            `/ContributorFrames?code=${encodeURIComponent(gameCode)}`,
+            { headers: { Accept: "application/json" } }
+        );
+        if (!response.ok) return;
+        const update = await response.json();
+        playerFrameMap.clear();
+        for (const player of update?.players ?? []) {
+            playerFrameMap.set(String(player.id), {
+                enabled: player.enabled === true,
+                frameId: normalizeFrameId(player.frameId)
+            });
+        }
+        applyPlayerFrames(document);
+    };
+
+    const startHostGameIntegration = () => {
+        if (hostGameConnection || hostGameStarting || typeof signalR === "undefined") {
+            return;
+        }
+
+        const hostGameRoot = findHostGameRoot();
+        const gameCode = hostGameRoot?.dataset.gameCode;
+        if (!gameCode) return;
+
+        hostGameStarting = true;
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/hubs/game")
             .withAutomaticReconnect()
             .build();
 
-        const refreshPlayerFrames = async () => {
-            const response = await fetch(
-                `/ContributorFrames?code=${encodeURIComponent(gameCode)}`,
-                { headers: { Accept: "application/json" } }
-            );
-            if (!response.ok) return;
-            const update = await response.json();
-            playerFrameMap.clear();
-            for (const player of update?.players ?? []) {
-                playerFrameMap.set(String(player.id), {
-                    enabled: player.enabled === true,
-                    frameId: normalizeFrameId(player.frameId)
-                });
-            }
-            applyPlayerFrames(document);
-        };
-
         connection.on("PlayersChanged", () => {
-            refreshPlayerFrames().catch(console.error);
+            refreshPlayerFrames(gameCode).catch(console.error);
         });
 
         connection.on("HostContributorFrameChanged", update => {
@@ -322,11 +462,44 @@
 
         const join = async () => {
             await connection.invoke("JoinSession", gameCode);
-            await refreshPlayerFrames();
+            await refreshPlayerFrames(gameCode);
+            applyHostFrame();
+            repositionAllFrames();
         };
+
         connection.onreconnected(() => join().catch(console.error));
-        connection.start().then(join).catch(console.error);
-    }
+        connection.start()
+            .then(async () => {
+                hostGameConnection = connection;
+                hostGameStarting = false;
+                await join();
+            })
+            .catch(error => {
+                hostGameStarting = false;
+                console.error(error);
+            });
+    };
+
+    const liveFrameObserver = new MutationObserver(records => {
+        let hasAddedElements = false;
+        for (const record of records) {
+            for (const node of record.addedNodes) {
+                if (!(node instanceof Element)) continue;
+                hasAddedElements = true;
+                if (hostGameConnection) {
+                    applyPlayerFrames(node);
+                }
+            }
+        }
+
+        if (hasAddedElements) {
+            applyHostFrame();
+            repositionAllFrames();
+        }
+        startHostGameIntegration();
+    });
+    liveFrameObserver.observe(document.body, { childList: true, subtree: true });
+    startHostGameIntegration();
 
     const playerTemplate = document.getElementById("contributor-player-frame-template");
     const playerLobby = document.querySelector(".player-lobby");

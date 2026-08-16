@@ -13,7 +13,8 @@ public sealed class LobbyModel(
     GameSettingsStore settingsStore,
     QuizRatingService quizRatingService,
     IOptions<FooterOptions> footerOptions,
-    IHubContext<GameHub> gameHub) : PageModel
+    IHubContext<GameHub> gameHub,
+    IWebHostEnvironment environment) : PageModel
 {
     public GameSessionRegistration Game { get; private set; } = null!;
 
@@ -53,11 +54,17 @@ public sealed class LobbyModel(
         Players = players;
         AccessToken = accessToken;
         IsContributor = ContributorRecognition.IsContributor(footerOptions.Value, currentPlayer.Name);
+        var normalizedFrameId = ContributorAvatarFrameCatalog.Normalize(
+            environment,
+            currentPlayer.AvatarFrameId);
         ViewData["ContributorPlayer"] = IsContributor;
         ViewData["ContributorPlayerFrameEnabled"] =
-            IsContributor && currentPlayer.AvatarFrameEnabled;
+            IsContributor &&
+            currentPlayer.AvatarFrameEnabled &&
+            normalizedFrameId is not null &&
+            ContributorAvatarFrameCatalog.IsValid(environment, normalizedFrameId);
         ViewData["ContributorPlayerFrameId"] = IsContributor
-            ? currentPlayer.AvatarFrameId
+            ? normalizedFrameId
             : null;
         CanRateQuiz = QuizRatingService.IsRatingAvailable(game.Session);
         if (CanRateQuiz)
@@ -83,7 +90,7 @@ public sealed class LobbyModel(
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(accessToken) ||
-            !ContributorAvatarFrameCatalog.IsValid(frameId))
+            !ContributorAvatarFrameCatalog.IsValid(environment, frameId))
         {
             return new JsonResult(new { saved = false }) { StatusCode = 400 };
         }
@@ -109,7 +116,9 @@ public sealed class LobbyModel(
                 return new JsonResult(new { saved = false }) { StatusCode = 403 };
             }
 
-            var normalizedFrameId = ContributorAvatarFrameCatalog.Normalize(frameId);
+            var normalizedFrameId = ContributorAvatarFrameCatalog.Normalize(
+                environment,
+                frameId)!;
             lock (connection.Game)
             {
                 connection.Player.SetAvatarFrame(enabled, normalizedFrameId);

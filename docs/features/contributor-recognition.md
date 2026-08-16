@@ -20,7 +20,7 @@ Recognized hosts get an Avatar frame section on the global Settings page. They c
 
 Host frame preference is persisted with the existing per-host game settings. The server strips contributor-only frame fields from Settings posts made by hosts whose current saved display name is not recognized as a contributor.
 
-When a host frame setting changes, active game pages receive the updated frame state without requiring a game restart. The selected transparent PNG is rendered over the host avatar/image/webcam visual rather than drawing a CSS border.
+When a host frame setting changes, active game pages receive the updated frame state without requiring a game restart. The selected transparent PNG is rendered over the host avatar/image/webcam visual rather than drawing a CSS border. Host cards inserted while a newly created game is initializing are observed and receive the frame immediately, without requiring a page refresh.
 
 ## Player avatar frames
 
@@ -28,11 +28,11 @@ Recognized players get equivalent controls inside the existing player media sett
 
 The server revalidates the player access token, player identifier, and configured contributor name before accepting a frame update. The recognition cookie is not involved.
 
-The selected frame image is rendered as a square overlay over the player's current avatar, uploaded image, webcam preview, or webcam URL preview where that visual is shown. The overlay follows live card resizing, and built-in avatars receive a small inset while a frame is active so the avatar artwork stays inside the decorative frame. Host game pages refresh contributor-frame state when the normal player roster changes.
+The selected frame image is rendered as a square overlay over the player's current avatar, uploaded image, webcam preview, or webcam URL preview where that visual is shown. The overlay follows live card resizing. For built-in avatars, the client measures the transparent center opening of the selected frame PNG and automatically insets the avatar so its artwork stays inside that frame's safe area. Host game pages refresh contributor-frame state when the normal player roster changes.
 
 ## Frame assets
 
-Frame PNG files are stored in `src/BadWolfQuiz.Web/Resources/Frames` and copied to both build and publish output. The current catalog contains `1.png` through `24.png`. They are served through the `/frames/{id}.png` Razor endpoint so the source assets remain outside `wwwroot`.
+Frame PNG files are stored in `src/BadWolfQuiz.Web/Resources/Frames` and copied to both build and publish output. The catalog is discovered from the folder at runtime instead of using a fixed frame count, so additional `.png` files become selectable automatically. Numeric file names are ordered numerically first, followed by other file names. Frames are served through the `/frames/{id}.png` Razor endpoint so the source assets remain outside `wwwroot`.
 
 ## Localization
 

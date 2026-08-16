@@ -20,7 +20,8 @@ public sealed class ContributorSupportTagHelper(
     CurrentHost currentHost,
     QuizDbContext db,
     IOptions<FooterOptions> footerOptions,
-    IStringLocalizer<ContributorResource> localizer) : TagHelper
+    IStringLocalizer<ContributorResource> localizer,
+    IWebHostEnvironment environment) : TagHelper
 {
     [ViewContext]
     [HtmlAttributeNotBound]
@@ -57,21 +58,33 @@ public sealed class ContributorSupportTagHelper(
                 .SingleOrDefaultAsync(httpContext.RequestAborted);
         }
 
+        var frames = ContributorAvatarFrameCatalog.GetFrames(environment);
+        var defaultFrameId = frames.FirstOrDefault()?.Id ?? string.Empty;
         var hostIsContributor = ViewContext.ViewData["ContributorHost"] is bool hostOverride
             ? hostOverride
             : isAuthenticated && ContributorRecognition.IsContributor(
                 footerOptions.Value,
                 hostDisplayName);
         var hostFrameEnabled = hostIsContributor &&
-            settings?.HostAvatarFrameEnabled == true;
+            settings?.HostAvatarFrameEnabled == true &&
+            ContributorAvatarFrameCatalog.IsValid(
+                environment,
+                settings.HostAvatarFrameId);
         var hostFrameId = ContributorAvatarFrameCatalog.Normalize(
-            settings?.HostAvatarFrameId);
+            environment,
+            settings?.HostAvatarFrameId) ?? defaultFrameId;
         var playerIsContributor =
             ViewContext.ViewData["ContributorPlayer"] is true;
+        var playerFrameIdValue =
+            ViewContext.ViewData["ContributorPlayerFrameId"]?.ToString();
         var playerFrameEnabled = playerIsContributor &&
-            ViewContext.ViewData["ContributorPlayerFrameEnabled"] is true;
+            ViewContext.ViewData["ContributorPlayerFrameEnabled"] is true &&
+            ContributorAvatarFrameCatalog.IsValid(
+                environment,
+                playerFrameIdValue);
         var playerFrameId = ContributorAvatarFrameCatalog.Normalize(
-            ViewContext.ViewData["ContributorPlayerFrameId"]?.ToString());
+            environment,
+            playerFrameIdValue) ?? defaultFrameId;
 
         output.Attributes.SetAttribute(
             "data-contributor-host",
@@ -92,25 +105,30 @@ public sealed class ContributorSupportTagHelper(
             "data-contributor-player-frame-id",
             playerFrameId);
         output.Attributes.SetAttribute(
+            "data-contributor-frame-default-id",
+            defaultFrameId);
+        output.Attributes.SetAttribute(
             "data-contributor-frame-save-failed",
             localizer["ContributorFrame_SaveFailed"].Value);
 
         var html = HtmlEncoder.Default;
         var page = ViewContext.RouteData.Values["page"]?.ToString();
-        var showHostFrameControls = hostIsContributor && string.Equals(
-            page,
-            "/Admin/Settings/Index",
-            StringComparison.Ordinal);
+        var showHostFrameControls = frames.Count > 0 &&
+            hostIsContributor &&
+            string.Equals(
+                page,
+                "/Admin/Settings/Index",
+                StringComparison.Ordinal);
 
         if (showHostFrameControls)
         {
             output.PostContent.AppendHtml(BuildHostTemplate(
                 html,
-                settings?.HostAvatarFrameEnabled == true,
+                hostFrameEnabled,
                 hostFrameId));
         }
 
-        if (playerIsContributor)
+        if (playerIsContributor && frames.Count > 0)
         {
             var requestToken = antiforgery
                 .GetAndStoreTokens(httpContext)
@@ -125,9 +143,9 @@ public sealed class ContributorSupportTagHelper(
             }
         }
 
-        if (showHostFrameControls || playerIsContributor)
+        if (showHostFrameControls || (playerIsContributor && frames.Count > 0))
         {
-            output.PostContent.AppendHtml(BuildFramePicker(html));
+            output.PostContent.AppendHtml(BuildFramePicker(html, frames));
         }
 
         if (hostIsContributor &&
@@ -155,7 +173,9 @@ public sealed class ContributorSupportTagHelper(
         string frameId)
     {
         var checkedAttribute = enabled ? " checked" : string.Empty;
-        var frameUrl = ContributorAvatarFrameCatalog.GetUrl(frameId);
+        var frameUrl = ContributorAvatarFrameCatalog.GetUrl(
+            environment,
+            frameId) ?? string.Empty;
         return $$"""
             <template id="contributor-host-frame-template">
                 <div class="contributor-frame-settings" data-contributor-host-frame>
@@ -200,7 +220,9 @@ public sealed class ContributorSupportTagHelper(
         string frameId)
     {
         var checkedAttribute = enabled ? " checked" : string.Empty;
-        var frameUrl = ContributorAvatarFrameCatalog.GetUrl(frameId);
+        var frameUrl = ContributorAvatarFrameCatalog.GetUrl(
+            environment,
+            frameId) ?? string.Empty;
         return $$"""
             <template id="contributor-player-frame-template">
                 <div class="contributor-frame-settings" data-contributor-player-frame>
@@ -239,9 +261,11 @@ public sealed class ContributorSupportTagHelper(
             """;
     }
 
-    private string BuildFramePicker(HtmlEncoder html)
+    private string BuildFramePicker(
+        HtmlEncoder html,
+        IReadOnlyList<ContributorAvatarFrame> frames)
     {
-        var options = string.Concat(ContributorAvatarFrameCatalog.Frames.Select(frame =>
+        var options = string.Concat(frames.Select(frame =>
             $"<button type=\"button\" class=\"avatar-option contributor-frame-option\" " +
             $"data-contributor-frame-option=\"{html.Encode(frame.Id)}\" " +
             $"data-contributor-frame-url=\"{html.Encode(frame.Url)}\" " +
