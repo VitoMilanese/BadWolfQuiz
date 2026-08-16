@@ -16,13 +16,36 @@
             ".player-avatar-current:not([hidden])",
             ".player-card-avatar:not([hidden])",
             ".player-list-avatar:not([hidden])",
+            ".host-card-media video:not([hidden])",
+            ".host-card-media iframe:not([hidden])",
+            ".host-card-media img:not([hidden])",
             ".host-card-media:not([hidden])"
         ];
         for (const selector of selectors) {
-            const element = owner.querySelector(selector);
-            if (element) return element;
+            for (const element of owner.querySelectorAll(selector)) {
+                if (getComputedStyle(element).display !== "none") {
+                    return element;
+                }
+            }
         }
         return null;
+    };
+
+    const isBuiltInAvatar = media => {
+        if (!(media instanceof HTMLImageElement)) return false;
+        const source = media.currentSrc || media.getAttribute("src");
+        if (!source) return false;
+        try {
+            return new URL(source, window.location.href).pathname.startsWith("/avatars/");
+        } catch {
+            return false;
+        }
+    };
+
+    const clearAvatarInset = owner => {
+        for (const media of owner.querySelectorAll(".contributor-frame-avatar-source")) {
+            media.classList.remove("contributor-frame-avatar-source");
+        }
     };
 
     const positionFrameOverlay = owner => {
@@ -30,9 +53,22 @@
         if (!overlay) return;
         const media = findFrameMedia(owner);
         if (!media) {
+            clearAvatarInset(owner);
             overlay.hidden = true;
             return;
         }
+
+        for (const insetMedia of owner.querySelectorAll(
+            ".contributor-frame-avatar-source"
+        )) {
+            if (insetMedia !== media) {
+                insetMedia.classList.remove("contributor-frame-avatar-source");
+            }
+        }
+        media.classList.toggle(
+            "contributor-frame-avatar-source",
+            isBuiltInAvatar(media)
+        );
 
         const ownerRect = owner.getBoundingClientRect();
         const mediaRect = media.getBoundingClientRect();
@@ -41,15 +77,67 @@
             return;
         }
 
+        const scaleX = owner.offsetWidth > 0
+            ? ownerRect.width / owner.offsetWidth
+            : 1;
+        const scaleY = owner.offsetHeight > 0
+            ? ownerRect.height / owner.offsetHeight
+            : 1;
+        const mediaLeft = (mediaRect.left - ownerRect.left) / scaleX - owner.clientLeft;
+        const mediaTop = (mediaRect.top - ownerRect.top) / scaleY - owner.clientTop;
+        const mediaWidth = mediaRect.width / scaleX;
+        const mediaHeight = mediaRect.height / scaleY;
+        const frameSize = Math.min(mediaWidth, mediaHeight);
+
         overlay.hidden = false;
-        overlay.style.left = `${mediaRect.left - ownerRect.left}px`;
-        overlay.style.top = `${mediaRect.top - ownerRect.top}px`;
-        overlay.style.width = `${mediaRect.width}px`;
-        overlay.style.height = `${mediaRect.height}px`;
+        overlay.style.left = `${mediaLeft + (mediaWidth - frameSize) / 2}px`;
+        overlay.style.top = `${mediaTop + (mediaHeight - frameSize) / 2}px`;
+        overlay.style.width = `${frameSize}px`;
+        overlay.style.height = `${frameSize}px`;
+    };
+
+    const observedFrameMedia = new WeakMap();
+    const frameResizeObserver = typeof ResizeObserver === "function"
+        ? new ResizeObserver(entries => {
+            const owners = new Set();
+            for (const entry of entries) {
+                const owner = entry.target.closest?.(".contributor-frame-owner");
+                if (owner) owners.add(owner);
+            }
+            for (const owner of owners) {
+                positionFrameOverlay(owner);
+            }
+        })
+        : null;
+
+    const observeFrameLayout = owner => {
+        if (!frameResizeObserver) return;
+        frameResizeObserver.observe(owner);
+        const media = findFrameMedia(owner);
+        const previousMedia = observedFrameMedia.get(owner);
+        if (previousMedia && previousMedia !== media) {
+            frameResizeObserver.unobserve(previousMedia);
+        }
+        if (media) {
+            frameResizeObserver.observe(media);
+            observedFrameMedia.set(owner, media);
+        } else {
+            observedFrameMedia.delete(owner);
+        }
+    };
+
+    const unobserveFrameLayout = owner => {
+        if (!frameResizeObserver) return;
+        frameResizeObserver.unobserve(owner);
+        const media = observedFrameMedia.get(owner);
+        if (media) frameResizeObserver.unobserve(media);
+        observedFrameMedia.delete(owner);
     };
 
     const removeFrame = owner => {
         if (!owner) return;
+        unobserveFrameLayout(owner);
+        clearAvatarInset(owner);
         delete owner.dataset.avatarFrame;
         owner.querySelector(":scope > .contributor-avatar-frame-overlay")?.remove();
         owner.classList.remove("contributor-frame-owner");
@@ -78,18 +166,24 @@
         if (overlay.getAttribute("src") !== url) {
             overlay.src = url;
         }
+        observeFrameLayout(owner);
         window.requestAnimationFrame(() => positionFrameOverlay(owner));
     };
 
     const repositionAllFrames = () => {
         for (const owner of document.querySelectorAll(".contributor-frame-owner")) {
+            observeFrameLayout(owner);
             positionFrameOverlay(owner);
         }
     };
     window.addEventListener("resize", repositionAllFrames);
     document.addEventListener("load", event => {
         if (event.target instanceof Element &&
-            event.target.matches(".player-avatar-current, .player-card-avatar, .player-list-avatar, .host-card-media")) {
+            event.target.matches(
+                ".player-avatar-current, .player-card-avatar, .player-list-avatar, " +
+                ".host-card-media, .host-card-media img, .host-card-media video, " +
+                ".host-card-media iframe"
+            )) {
             repositionAllFrames();
         }
     }, true);

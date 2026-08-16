@@ -44,9 +44,10 @@ public sealed class ContributorSupportTagHelper(
 
         var httpContext = ViewContext.HttpContext;
         var isAuthenticated = httpContext.User.Identity?.IsAuthenticated == true;
+        var authenticatedHostId = isAuthenticated ? currentHost.Id : null;
         BadWolfQuiz.Game.Runtime.GameSessionSettings? settings = null;
         string? hostDisplayName = null;
-        if (isAuthenticated && currentHost.Id is { } hostId)
+        if (authenticatedHostId is { } hostId)
         {
             settings = await settingsStore.LoadAsync(hostId, httpContext.RequestAborted);
             hostDisplayName = await db.Hosts
@@ -129,13 +130,17 @@ public sealed class ContributorSupportTagHelper(
             output.PostContent.AppendHtml(BuildFramePicker(html));
         }
 
-        if (hostIsContributor && ContributorRecognition.ShouldShowThankYou(
+        if (hostIsContributor &&
+            authenticatedHostId is not null &&
+            ContributorRecognition.ShouldShowThankYou(
                 footerOptions.Value,
                 hostDisplayName,
+                authenticatedHostId,
                 httpContext.Request))
         {
             ContributorRecognition.MarkThankYouShown(
                 httpContext.Response,
+                authenticatedHostId,
                 httpContext.Request.IsHttps);
             output.PostContent.AppendHtml(BuildThankYouDialog(html));
         }

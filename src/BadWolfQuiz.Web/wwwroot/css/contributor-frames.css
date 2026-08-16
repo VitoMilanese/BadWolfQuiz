@@ -65,8 +65,16 @@
 .contributor-avatar-frame-overlay {
     position: absolute;
     display: block;
-    object-fit: fill;
+    width: 0;
+    height: 0;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
     pointer-events: none;
     user-select: none;
     z-index: 20;
+}
+
+.contributor-frame-owner .contributor-frame-avatar-source {
+    box-sizing: border-box;
+    padding: clamp(3px, 5%, 10px);
 }

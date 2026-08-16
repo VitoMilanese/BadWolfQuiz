@@ -34,7 +34,45 @@ public sealed class ContributorRecognitionTests
     }
 
     [Fact]
-    public void Recognition_cookie_only_suppresses_the_thank_you_dialog()
+    public void Recognition_cookie_only_suppresses_the_same_host()
+    {
+        var options = new FooterOptions
+        {
+            Contributors = ["Vitalii Hanych"]
+        };
+        var context = new DefaultHttpContext();
+        const string hostId = "host-1";
+        context.Request.Headers.Cookie =
+            $"{ContributorRecognition.GetRecognitionCookieName(hostId)}=1";
+
+        Assert.True(ContributorRecognition.IsContributor(options, "Vitalii Hanych"));
+        Assert.False(ContributorRecognition.ShouldShowThankYou(
+            options,
+            "Vitalii Hanych",
+            hostId,
+            context.Request));
+    }
+
+    [Fact]
+    public void Recognition_cookie_for_another_host_does_not_suppress_thank_you()
+    {
+        var options = new FooterOptions
+        {
+            Contributors = ["Vitalii Hanych"]
+        };
+        var context = new DefaultHttpContext();
+        context.Request.Headers.Cookie =
+            $"{ContributorRecognition.GetRecognitionCookieName("host-1")}=1";
+
+        Assert.True(ContributorRecognition.ShouldShowThankYou(
+            options,
+            "Vitalii Hanych",
+            "host-2",
+            context.Request));
+    }
+
+    [Fact]
+    public void Legacy_global_recognition_cookie_does_not_suppress_a_host()
     {
         var options = new FooterOptions
         {
@@ -44,10 +82,10 @@ public sealed class ContributorRecognitionTests
         context.Request.Headers.Cookie =
             $"{ContributorRecognition.RecognitionCookieName}=1";
 
-        Assert.True(ContributorRecognition.IsContributor(options, "Vitalii Hanych"));
-        Assert.False(ContributorRecognition.ShouldShowThankYou(
+        Assert.True(ContributorRecognition.ShouldShowThankYou(
             options,
             "Vitalii Hanych",
+            "host-1",
             context.Request));
     }
 
@@ -63,6 +101,7 @@ public sealed class ContributorRecognitionTests
         Assert.True(ContributorRecognition.ShouldShowThankYou(
             options,
             "Vitalii Hanych",
+            "host-1",
             context.Request));
     }
 
@@ -70,11 +109,17 @@ public sealed class ContributorRecognitionTests
     public void Recognition_cookie_is_long_lived_and_http_only()
     {
         var context = new DefaultHttpContext();
+        const string hostId = "host-1";
 
-        ContributorRecognition.MarkThankYouShown(context.Response, secure: true);
+        ContributorRecognition.MarkThankYouShown(
+            context.Response,
+            hostId,
+            secure: true);
 
         var cookie = context.Response.Headers.SetCookie.ToString();
-        Assert.Contains($"{ContributorRecognition.RecognitionCookieName}=1", cookie);
+        Assert.Contains(
+            $"{ContributorRecognition.GetRecognitionCookieName(hostId)}=1",
+            cookie);
         Assert.Contains("httponly", cookie, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("secure", cookie, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("samesite=lax", cookie, StringComparison.OrdinalIgnoreCase);

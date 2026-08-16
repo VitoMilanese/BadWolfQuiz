@@ -12,7 +12,7 @@ The recognition cookie is not an authorization mechanism. Contributor eligibilit
 
 On the first Razor page opened by an authenticated recognized host in a browser that has not seen the contributor acknowledgement before, the application shows a localized thank-you dialog. This also covers hosts whose authentication session already existed before the feature was deployed; they do not need to sign out and sign in again.
 
-A long-lived, HTTP-only cookie records that the acknowledgement was shown so the dialog is not repeated in that browser. Removing or changing the cookie cannot grant contributor-only controls because the cookie is never consulted for eligibility.
+A long-lived, HTTP-only cookie scoped to the authenticated host identifier records that the acknowledgement was shown, so acknowledging one contributor account does not suppress the dialog for another contributor using the same browser. Removing or changing the cookie cannot grant contributor-only controls because the cookie is never consulted for eligibility.
 
 ## Host avatar frames
 
@@ -28,7 +28,7 @@ Recognized players get equivalent controls inside the existing player media sett
 
 The server revalidates the player access token, player identifier, and configured contributor name before accepting a frame update. The recognition cookie is not involved.
 
-The selected frame image is rendered over the player's current avatar, uploaded image, webcam preview, or webcam URL preview where that visual is shown. Host game pages refresh contributor-frame state when the normal player roster changes.
+The selected frame image is rendered as a square overlay over the player's current avatar, uploaded image, webcam preview, or webcam URL preview where that visual is shown. The overlay follows live card resizing, and built-in avatars receive a small inset while a frame is active so the avatar artwork stays inside the decorative frame. Host game pages refresh contributor-frame state when the normal player roster changes.
 
 ## Frame assets
 

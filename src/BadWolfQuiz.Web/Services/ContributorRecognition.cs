@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Http;
 
 namespace BadWolfQuiz.Web.Services;
@@ -22,21 +24,32 @@ public static class ContributorRecognition
                 StringComparison.OrdinalIgnoreCase));
     }
 
+    public static string GetRecognitionCookieName(string hostId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(hostId);
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(hostId.Trim()));
+        return $"{RecognitionCookieName}.{Convert.ToHexString(hash).ToLowerInvariant()}";
+    }
+
     public static bool ShouldShowThankYou(
         FooterOptions options,
         string? name,
+        string hostId,
         HttpRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
         return IsContributor(options, name) &&
-            !request.Cookies.ContainsKey(RecognitionCookieName);
+            !request.Cookies.ContainsKey(GetRecognitionCookieName(hostId));
     }
 
-    public static void MarkThankYouShown(HttpResponse response, bool secure)
+    public static void MarkThankYouShown(
+        HttpResponse response,
+        string hostId,
+        bool secure)
     {
         ArgumentNullException.ThrowIfNull(response);
         response.Cookies.Append(
-            RecognitionCookieName,
+            GetRecognitionCookieName(hostId),
             "1",
             new CookieOptions
             {
