@@ -146,9 +146,14 @@
         }
     };
 
-    const pauseYouTubeFrames = exceptFrame => {
+    const isWithinRoot = (node, rootNode) =>
+        rootNode instanceof Node &&
+        (node === rootNode ||
+            (rootNode instanceof Element && rootNode.contains(node)));
+
+    const pauseYouTubeFrames = (exceptFrame, exceptRoot = null) => {
         for (const frame of document.querySelectorAll(youtubeFrameSelector)) {
-            if (frame === exceptFrame) {
+            if (frame === exceptFrame || isWithinRoot(frame, exceptRoot)) {
                 continue;
             }
 
@@ -174,6 +179,10 @@
 
     const handleStateChange = (iframe, event) => {
         if (event.data === window.YT.PlayerState.PLAYING) {
+            if (iframe.dataset.youtubeAutoplayLaunch === "true") {
+                return;
+            }
+
             beginTimedPlayback(iframe);
             pauseNativeMedia(null);
             pauseYouTubeFrames(iframe);
@@ -191,6 +200,7 @@
             return;
         }
 
+        delete iframe.dataset.youtubeAutoplayLaunch;
         endTimedPlayback(iframe);
 
         if (event.data === window.YT.PlayerState.ENDED &&
@@ -300,7 +310,8 @@
         title = "YouTube",
         closeLabel = "",
         allow = "",
-        allowFullscreen = true
+        allowFullscreen = true,
+        autoplay = false
     } = {}) => {
         if (!embedUrl) {
             return null;
@@ -316,6 +327,9 @@
         placeholder.dataset.youtubeAllowFullscreen = allowFullscreen
             ? "true"
             : "false";
+        if (autoplay) {
+            placeholder.dataset.youtubeAutoplay = "true";
+        }
         if (closeLabel) {
             placeholder.dataset.youtubeCloseLabel = closeLabel;
         }
@@ -387,7 +401,7 @@
         }
     };
 
-    const launchPlaceholder = placeholder => {
+    const launchPlaceholder = (placeholder, autoplayLaunch = false) => {
         if (!placeholder.isConnected ||
             placeholder.dataset.youtubeLaunching === "true") {
             return;
@@ -405,6 +419,9 @@
         const managedFullscreen = iframe.classList.contains("youtube-auto-expand");
         iframe.dataset.youtubeLaunched = "true";
         iframe.dataset.youtubeAutoplay = "true";
+        if (autoplayLaunch) {
+            iframe.dataset.youtubeAutoplayLaunch = "true";
+        }
         iframe.dataset.youtubeEmbedUrl = embedUrl;
         iframe.src = buildLaunchUrl(embedUrl, managedFullscreen);
         iframe.title = placeholder.dataset.youtubeTitle ?? "YouTube";
@@ -423,8 +440,10 @@
         placeholder.replaceWith(iframe);
 
         if (managedFullscreen) {
-            pauseNativeMedia(null);
-            pauseYouTubeFrames(iframe);
+            if (!autoplayLaunch) {
+                pauseNativeMedia(null);
+                pauseYouTubeFrames(iframe);
+            }
             expandVideo(iframe);
         }
 
@@ -442,6 +461,7 @@
         placeholder.addEventListener("click", () => {
             launchPlaceholder(placeholder);
         });
+
     };
 
     const replaceSourceFrameWithPlaceholder = iframe => {
@@ -455,7 +475,8 @@
             title: iframe.title || "YouTube",
             closeLabel: iframe.dataset.closeLabel ?? "",
             allow: iframe.getAttribute("allow") ?? "",
-            allowFullscreen: iframe.hasAttribute("allowfullscreen")
+            allowFullscreen: iframe.hasAttribute("allowfullscreen"),
+            autoplay: iframe.dataset.youtubeAutoplay === "true"
         });
 
         if (!placeholder) {
@@ -493,6 +514,10 @@
     };
 
     const unbindMediaTree = rootNode => {
+        if (rootNode instanceof Node && rootNode.isConnected) {
+            return;
+        }
+
         forEachFrame(rootNode, iframe => {
             pendingFrames.delete(iframe);
             players.delete(iframe);
@@ -504,8 +529,47 @@
         });
     };
 
+    const autoplayMediaTree = rootNode => {
+        bindMediaTree(rootNode);
+        forEachPlaceholder(rootNode, placeholder => {
+            if (placeholder.closest(".question-clue-hidden") ||
+                placeholder.dataset.youtubeAutoplay !== "true" ||
+                placeholder.dataset.youtubeAutoplayAttempted === "true") {
+                return;
+            }
+
+            placeholder.dataset.youtubeAutoplayAttempted = "true";
+            launchPlaceholder(placeholder, true);
+        });
+    };
+
+    const stopPlaybackOutside = rootNode => {
+        pauseYouTubeFrames(null, rootNode);
+        if (expandedIframe && !isWithinRoot(expandedIframe, rootNode)) {
+            restorePlaceholder(expandedIframe);
+        }
+    };
+
+    const stopAllPlayback = () => {
+        stopPlaybackOutside(null);
+    };
+
+    const resetAutoplayTree = rootNode => {
+        forEachPlaceholder(rootNode, placeholder => {
+            delete placeholder.dataset.youtubeAutoplayAttempted;
+            delete placeholder.dataset.youtubeLaunching;
+        });
+        forEachSourceFrame(rootNode, iframe => {
+            delete iframe.dataset.youtubeAutoplayAttempted;
+        });
+    };
+
     window.BadWolfYouTubeAutoExpand = {
         scan: bindMediaTree,
+        autoplay: autoplayMediaTree,
+        stopAll: stopAllPlayback,
+        stopAllExcept: stopPlaybackOutside,
+        resetAutoplay: resetAutoplayTree,
         createPlaceholder
     };
 
@@ -545,7 +609,8 @@
 
     document.addEventListener("play", event => {
         const media = event.target;
-        if (!(media instanceof HTMLMediaElement)) {
+        if (!(media instanceof HTMLMediaElement) ||
+            media.dataset.autoplayPlayback === "true") {
             return;
         }
 

@@ -129,6 +129,39 @@ public sealed class YouTubePlaceholderRegressionTests
     }
 
     [Fact]
+    public void Autoplay_placeholder_launches_automatically_when_requested()
+    {
+        var gameplay = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "_GameContentPreview.cshtml"));
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "youtube-auto-expand.js"));
+
+        Assert.Contains("data-youtube-autoplay", gameplay, StringComparison.Ordinal);
+        Assert.Contains(
+            "const autoplayMediaTree = rootNode =>",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "launchPlaceholder(placeholder, true);",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "autoplay: autoplayMediaTree",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "url.searchParams.set(\"autoplay\", \"1\");",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains("event.target.playVideo();", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Placeholder_layout_and_styles_remain_available_after_ajax_gameplay_refresh()
     {
         var css = File.ReadAllText(FindWebFile(
@@ -182,6 +215,9 @@ public sealed class YouTubePlaceholderRegressionTests
             "const managedFullscreen = iframe.classList.contains(\"youtube-auto-expand\");",
             launch,
             StringComparison.Ordinal);
+        Assert.Contains("if (managedFullscreen)", launch, StringComparison.Ordinal);
+        Assert.Contains("if (!autoplayLaunch)", launch, StringComparison.Ordinal);
+        Assert.DoesNotContain("managedFullscreen && !autoplayLaunch", launch, StringComparison.Ordinal);
         Assert.Contains("pauseNativeMedia(null);", launch, StringComparison.Ordinal);
         Assert.Contains("pauseYouTubeFrames(iframe);", launch, StringComparison.Ordinal);
         Assert.Contains("expandVideo(iframe);", launch, StringComparison.Ordinal);

@@ -593,8 +593,15 @@
                     var contentBlocks = isShowingAnswer
                         ? Model.CurrentQuestion.AnswerBlocks
                         : Model.CurrentQuestion.QuestionBlocks;
+                    var mediaAutoplayState = isShowingAnswer
+                        ? $"answer:{Model.CurrentQuestion.SourceQuestionId}"
+                        : Model.CurrentQuestion.PresentationType ==
+                            BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues
+                            ? $"question:{Model.CurrentQuestion.SourceQuestionId}:clues:{Model.CurrentQuestion.RevealedClueCount}"
+                            : $"question:{Model.CurrentQuestion.SourceQuestionId}";
 
-                    <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation")">
+                    <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation")"
+                             data-media-autoplay-state="@mediaAutoplayState">
                         <p class="eyebrow"
                            data-question-heading
                            data-current-reward="@Model.CurrentQuestion.CorrectAnswerValue"
@@ -617,7 +624,8 @@
 
                         <div class="game-content-blocks @(Model.CurrentQuestion.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !isShowingAnswer ? "four-clue-grid" : null)"
                              data-question-clues
-                             data-source-question-id="@Model.CurrentQuestion.SourceQuestionId">
+                             data-source-question-id="@Model.CurrentQuestion.SourceQuestionId"
+                             data-revealed-clue-count="@(Model.CurrentQuestion.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !isShowingAnswer ? Model.CurrentQuestion.RevealedClueCount.ToString() : null)">
                             @{
                                 var clueIndex = 0;
                             }
@@ -661,6 +669,7 @@
                                                 <audio class="game-content-audio"
                                                        controls
                                                        preload="metadata"
+                                                       data-autoplay-media="@Model.ResolveContentBlockAutoplay(block, isShowingAnswer).ToString().ToLowerInvariant()"
                                                        src="@Url.Page(
                                                            "/Admin/Games/Lobby",
                                                            "ContentBlock",
@@ -677,12 +686,14 @@
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
                                             <video class="game-content-video"
+                                                   data-autoplay-media="@Model.ResolveContentBlockAutoplay(block, isShowingAnswer).ToString().ToLowerInvariant()"
                                                    controls
                                                    src="@block.ExternalUrl">
                                             </video>
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
                                             <iframe class="game-content-video youtube-auto-expand"
+                                                    data-youtube-autoplay="@Model.ResolveContentBlockAutoplay(block, isShowingAnswer).ToString().ToLowerInvariant()"
                                                     src="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
                                                     title="@Localizer["GameBoard_MediaContent"]"
                                                     data-close-label="@Localizer["GameBoard_CloseVideo"]"
@@ -1277,7 +1288,8 @@
 
                 @if (!showAnswer)
                 {
-                    <section class="game-content-presentation question-presentation">
+                    <section class="game-content-presentation question-presentation"
+                         data-media-autoplay-state="final-question">
                         <p class="eyebrow">
                             @Localizer["GameBoard_Question"]
                         </p>
@@ -1304,16 +1316,20 @@
                                                 <audio class="game-content-audio"
                                                        controls
                                                        preload="metadata"
+                                                       data-autoplay-media="@Model.ResolveContentBlockAutoplay(block, final: true).ToString().ToLowerInvariant()"
                                                        src="@Url.Page("/Admin/Games/Lobby", "FinalContentBlock", new { id = Model.Game.Session.Id.Value, sourceContentBlockId = block.SourceContentBlockId, answer = false })">
                                                     @Localizer["GameBoard_AudioUnsupported"]
                                                 </audio>
                                             </div>
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
-                                            <video class="game-content-video" controls src="@block.ExternalUrl"></video>
+                                            <video class="game-content-video"
+                                                   data-autoplay-media="@Model.ResolveContentBlockAutoplay(block, final: true).ToString().ToLowerInvariant()"
+                                                   controls src="@block.ExternalUrl"></video>
                                             break;
                                         case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
                                             <iframe class="game-content-video youtube-auto-expand"
+                                                    data-youtube-autoplay="@Model.ResolveContentBlockAutoplay(block, final: true).ToString().ToLowerInvariant()"
                                                     src="@LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
                                                     title="@Localizer["GameBoard_MediaContent"]"
                                                     data-close-label="@Localizer["GameBoard_CloseVideo"]"
@@ -1927,6 +1943,165 @@
             }
         };
 
+        const getMediaAutoplayState = view =>
+            view?.querySelector("[data-media-autoplay-state]")
+                ?.dataset.mediaAutoplayState ?? null;
+
+        const copyLiveTimerState = (currentView, nextView) => {
+            if (getMediaAutoplayState(currentView) !==
+                getMediaAutoplayState(nextView)) {
+                return;
+            }
+
+            const currentTimer = currentView.querySelector("#game-timer");
+            const nextTimer = nextView.querySelector("#game-timer");
+            if (!currentTimer || !nextTimer) {
+                return;
+            }
+
+            nextTimer.hidden = currentTimer.hidden;
+            nextTimer.className = currentTimer.className;
+
+            const currentValue = currentTimer.querySelector("#game-timer-value");
+            const nextValue = nextTimer.querySelector("#game-timer-value");
+            if (currentValue && nextValue) {
+                nextValue.textContent = currentValue.textContent;
+            }
+
+            for (const selector of [".game-timer-pause", ".game-timer-resume"]) {
+                const currentControl = currentTimer.querySelector(selector);
+                const nextControl = nextTimer.querySelector(selector);
+                if (currentControl && nextControl) {
+                    nextControl.hidden = currentControl.hidden;
+                }
+            }
+        };
+
+        const directChildContaining = (container, descendant) => {
+            let child = descendant;
+            while (child && child.parentNode !== container) {
+                child = child.parentNode;
+            }
+            return child?.parentNode === container ? child : null;
+        };
+
+        const replaceSiblingsPreserving = (
+            currentContainer,
+            nextContainer,
+            currentPreserved,
+            nextPreserved) => {
+            const nextChildren = Array.from(nextContainer.childNodes);
+            const preservedIndex = nextChildren.indexOf(nextPreserved);
+            if (preservedIndex < 0) {
+                return false;
+            }
+
+            Array.from(currentContainer.childNodes).forEach(node => {
+                if (node !== currentPreserved) {
+                    node.remove();
+                }
+            });
+
+            for (let index = 0; index < preservedIndex; index += 1) {
+                currentContainer.insertBefore(
+                    document.importNode(nextChildren[index], true),
+                    currentPreserved);
+            }
+            for (let index = preservedIndex + 1;
+                index < nextChildren.length;
+                index += 1) {
+                currentContainer.append(
+                    document.importNode(nextChildren[index], true));
+            }
+            return true;
+        };
+
+        const syncContainerPreservingDescendant = (
+            currentContainer,
+            nextContainer,
+            currentDescendant,
+            nextDescendant) => {
+            const currentChild = directChildContaining(
+                currentContainer,
+                currentDescendant);
+            const nextChild = directChildContaining(
+                nextContainer,
+                nextDescendant);
+            if (!currentChild || !nextChild) {
+                return false;
+            }
+
+            if (currentChild !== currentDescendant ||
+                nextChild !== nextDescendant) {
+                if (!syncContainerPreservingDescendant(
+                    currentChild,
+                    nextChild,
+                    currentDescendant,
+                    nextDescendant)) {
+                    return false;
+                }
+            }
+
+            return replaceSiblingsPreserving(
+                currentContainer,
+                nextContainer,
+                currentChild,
+                nextChild);
+        };
+
+        const syncViewPreservingMediaPresentation = (currentView, nextView) => {
+            const currentPresentation = currentView.querySelector(
+                "[data-media-autoplay-state]");
+            const nextPresentation = nextView.querySelector(
+                "[data-media-autoplay-state]");
+            if (!currentPresentation || !nextPresentation ||
+                currentPresentation.dataset.mediaAutoplayState !==
+                    nextPresentation.dataset.mediaAutoplayState) {
+                return false;
+            }
+
+            return syncContainerPreservingDescendant(
+                currentView,
+                nextView,
+                currentPresentation,
+                nextPresentation);
+        };
+
+        const activateMediaAutoplay = (request, view) => {
+            if (!request || !view) {
+                return;
+            }
+
+            if (request.kind === "clues") {
+                const clueGrid = view.querySelector(
+                    ".four-clue-grid[data-question-clues]");
+                if (clueGrid?.dataset.sourceQuestionId !==
+                    request.sourceQuestionId) {
+                    return;
+                }
+
+                const clues = Array.from(
+                    clueGrid.querySelectorAll("[data-question-clue]"));
+                clues
+                    .slice(request.startIndex, request.endIndex)
+                    .filter(clue =>
+                        !clue.classList.contains("question-clue-hidden"))
+                    .forEach(clue =>
+                        window.BadWolfMediaAutoplay?.transition(clue));
+                return;
+            }
+
+            if (request.kind !== "presentation") {
+                return;
+            }
+
+            const presentation = view.querySelector(
+                "[data-media-autoplay-state]");
+            if (presentation?.dataset.mediaAutoplayState === request.state) {
+                window.BadWolfMediaAutoplay?.activate(presentation);
+            }
+        };
+
         const applyDocument = (parsed, targetUrl, historyMode) => {
             const currentView = document.querySelector(viewSelector);
             const currentBoard = document.querySelector(boardSelector);
@@ -1939,6 +2114,7 @@
                 throw new Error("The host gameplay region is unavailable.");
             }
 
+            copyLiveTimerState(currentView, nextView);
             syncPersistentRoundBoard(currentBoard, nextBoard);
 
             const currentRoundHeading =
@@ -1965,6 +2141,47 @@
                 }
             }
 
+            const currentMediaAutoplayState = getMediaAutoplayState(currentView);
+            const nextMediaAutoplayState = getMediaAutoplayState(nextView);
+            const currentClueGrid = currentView.querySelector(
+                ".four-clue-grid[data-question-clues][data-revealed-clue-count]");
+            const nextClueGrid = nextView.querySelector(
+                ".four-clue-grid[data-question-clues][data-revealed-clue-count]");
+            const sameFourClueQuestion =
+                currentClueGrid !== null &&
+                nextClueGrid !== null &&
+                currentClueGrid.dataset.sourceQuestionId ===
+                    nextClueGrid.dataset.sourceQuestionId;
+            const currentRevealedClueCount = sameFourClueQuestion
+                ? Number.parseInt(currentClueGrid.dataset.revealedClueCount ?? "", 10)
+                : Number.NaN;
+            const nextRevealedClueCount = sameFourClueQuestion
+                ? Number.parseInt(nextClueGrid.dataset.revealedClueCount ?? "", 10)
+                : Number.NaN;
+
+            let mediaAutoplayRequest = null;
+            if (sameFourClueQuestion &&
+                Number.isFinite(currentRevealedClueCount) &&
+                Number.isFinite(nextRevealedClueCount) &&
+                nextRevealedClueCount > currentRevealedClueCount) {
+                mediaAutoplayRequest = {
+                    kind: "clues",
+                    sourceQuestionId: nextClueGrid.dataset.sourceQuestionId,
+                    startIndex: currentRevealedClueCount,
+                    endIndex: nextRevealedClueCount
+                };
+            } else if (nextMediaAutoplayState !== currentMediaAutoplayState &&
+                nextMediaAutoplayState) {
+                mediaAutoplayRequest = {
+                    kind: "presentation",
+                    state: nextMediaAutoplayState
+                };
+            }
+
+            const sameMediaAutoplayState =
+                currentMediaAutoplayState !== null &&
+                currentMediaAutoplayState === nextMediaAutoplayState;
+
             const currentLeaderboardSignature =
                 animatedLeaderboardSignature(currentView);
             const nextLeaderboardSignature =
@@ -1974,9 +2191,15 @@
                 currentLeaderboardSignature === nextLeaderboardSignature;
 
             if (!preserveAnimatedLeaderboard) {
-                currentView.replaceChildren(
-                    ...Array.from(nextView.childNodes, node =>
-                        document.importNode(node, true)));
+                const preservedLiveMedia = sameMediaAutoplayState &&
+                    syncViewPreservingMediaPresentation(currentView, nextView);
+
+                if (!preservedLiveMedia) {
+                    currentView.replaceChildren(
+                        ...Array.from(nextView.childNodes, node =>
+                            document.importNode(node, true)));
+                    activateMediaAutoplay(mediaAutoplayRequest, currentView);
+                }
             }
             currentBoard.hidden = nextBoard.hidden;
 
@@ -4700,10 +4923,28 @@
                     });
             };
 
+            const flushPendingHostChanges = () => {
+                if (hostCommandDepth > 0) {
+                    return;
+                }
+
+                if (hostReloadPending) {
+                    hostReloadPending = false;
+                    window.location.reload();
+                    return;
+                }
+
+                if (hostGameplayRefreshPending) {
+                    hostGameplayRefreshPending = false;
+                    void requestHostGameplayRefresh();
+                }
+            };
+
             const submitGameControl = async (
                 form,
                 submitter = null,
-                disableSubmitter = true) => {
+                disableSubmitter = true,
+                flushPendingHostChangesOnComplete = true) => {
                 const button = submitter ?? form.querySelector("button[type='submit']");
                 if (disableSubmitter) {
                     button?.setAttribute("disabled", "disabled");
@@ -4740,12 +4981,8 @@
                     }
                     hostCommandDepth = Math.max(0, hostCommandDepth - 1);
 
-                    if (hostCommandDepth === 0 && hostReloadPending) {
-                        hostReloadPending = false;
-                        window.location.reload();
-                    } else if (hostCommandDepth === 0 && hostGameplayRefreshPending) {
-                        hostGameplayRefreshPending = false;
-                        void requestHostGameplayRefresh();
+                    if (flushPendingHostChangesOnComplete) {
+                        flushPendingHostChanges();
                     }
                 }
             };
@@ -4814,27 +5051,49 @@
                 window.alert(error.message);
             };
 
-            const applyClueReveal = update => {
+            const applyClueReveal = (update, preserveRevealControl = false) => {
                 if (!questionClues ||
                     questionClues.dataset.sourceQuestionId !==
                         update.sourceQuestionId.toString()) {
                     return;
                 }
 
-                const clues = questionClues.querySelectorAll(
-                    "[data-question-clue]");
+                const previousRevealedClueCount = Number.parseInt(
+                    questionClues.dataset.revealedClueCount ?? "",
+                    10);
+                const nextRevealedClueCount = Number(update.revealedClueCount);
+                const clues = Array.from(questionClues.querySelectorAll(
+                    "[data-question-clue]"));
 
                 clues.forEach((clue, index) => {
                     clue.classList.toggle(
                         "question-clue-hidden",
-                        index >= update.revealedClueCount);
+                        index >= nextRevealedClueCount);
                 });
 
+                questionClues.dataset.revealedClueCount =
+                    nextRevealedClueCount.toString();
+                const presentation = questionClues.closest(
+                    "[data-media-autoplay-state]");
+                if (presentation) {
+                    presentation.dataset.mediaAutoplayState =
+                        `question:${update.sourceQuestionId}:clues:${nextRevealedClueCount}`;
+                }
+
+                if (Number.isFinite(previousRevealedClueCount) &&
+                    Number.isFinite(nextRevealedClueCount) &&
+                    nextRevealedClueCount > previousRevealedClueCount) {
+                    clues
+                        .slice(previousRevealedClueCount, nextRevealedClueCount)
+                        .forEach(clue =>
+                            window.BadWolfMediaAutoplay?.transition(clue));
+                }
+
                 if (questionHeading) {
-                    if (update.revealedClueCount >= 4) {
+                    if (nextRevealedClueCount >= 4) {
                         updateQuestionReward(
                             Number(questionHeading.dataset.rewardQuarterValue));
-                    } else if (update.revealedClueCount >= 3) {
+                    } else if (nextRevealedClueCount >= 3) {
                         updateQuestionReward(
                             Number(questionHeading.dataset.rewardHalfValue));
                     } else {
@@ -4843,12 +5102,75 @@
                     }
                 }
 
-                if (revealClueForm && !update.canRevealClue) {
+                if (revealClueForm &&
+                    !update.canRevealClue &&
+                    !preserveRevealControl) {
                     revealClueForm.remove();
                 }
             };
 
-            document.addEventListener("submit", async event => {
+            const createOptimisticClueReveal = () => {
+                if (!questionClues) {
+                    return null;
+                }
+
+                const sourceQuestionId = Number.parseInt(
+                    questionClues.dataset.sourceQuestionId ?? "",
+                    10);
+                const revealedClueCount = Number.parseInt(
+                    questionClues.dataset.revealedClueCount ?? "",
+                    10);
+                if (!Number.isFinite(sourceQuestionId) ||
+                    !Number.isFinite(revealedClueCount) ||
+                    revealedClueCount >= 4) {
+                    return null;
+                }
+
+                const nextRevealedClueCount = revealedClueCount + 1;
+                return {
+                    sourceQuestionId,
+                    revealedClueCount: nextRevealedClueCount,
+                    canRevealClue: nextRevealedClueCount < 4
+                };
+            };
+
+            const completeClueRevealRequest = async (form, submitter) => {
+                try {
+                    const result = await submitGameControl(
+                        form,
+                        submitter,
+                        true,
+                        false);
+                    applyClueReveal(result);
+                    flushPendingHostChanges();
+                } catch (error) {
+                    hostGameplayRefreshPending = false;
+                    void requestHostGameplayRefresh();
+                    handleGameControlError(error);
+                }
+            };
+
+            document.addEventListener("click", event => {
+                const button = event.target instanceof Element
+                    ? event.target.closest(
+                        "[data-reveal-clue-form] button[type='submit']")
+                    : null;
+                const form = button?.closest("[data-reveal-clue-form]");
+                if (!(button instanceof HTMLButtonElement) ||
+                    !(form instanceof HTMLFormElement) ||
+                    button.disabled) {
+                    return;
+                }
+
+                event.preventDefault();
+                const optimisticUpdate = createOptimisticClueReveal();
+                if (optimisticUpdate) {
+                    applyClueReveal(optimisticUpdate, true);
+                }
+                void completeClueRevealRequest(form, button);
+            });
+
+            document.addEventListener("submit", event => {
                 const form = event.target instanceof HTMLFormElement &&
                     event.target.matches("[data-reveal-clue-form]")
                     ? event.target
@@ -4858,11 +5180,11 @@
                 }
 
                 event.preventDefault();
-                try {
-                    await submitGameControl(form);
-                } catch (error) {
-                    handleGameControlError(error);
+                const optimisticUpdate = createOptimisticClueReveal();
+                if (optimisticUpdate) {
+                    applyClueReveal(optimisticUpdate, true);
                 }
+                void completeClueRevealRequest(form, event.submitter);
             });
 
             connection.on("QuestionClueRevealed", update => {

@@ -70,7 +70,7 @@ public sealed class QuizPackageService(QuizDbContext db)
                         block.BlockType, block.TextContent, block.TopCaption,
                         block.BottomCaption, block.MediaPath, block.ExternalUrl,
                         block.SortOrder, block.AudioOnly, mediaEntry,
-                        block.FileContentType, block.FileName);
+                        block.FileContentType, block.FileName, block.Autoplay);
                 }
 
                 var manifest = new PackageData(
@@ -183,6 +183,7 @@ public sealed class QuizPackageService(QuizDbContext db)
             target.ExternalUrl = source.ExternalUrl;
             target.SortOrder = source.SortOrder;
             target.AudioOnly = source.AudioOnly;
+            target.Autoplay = source.Autoplay;
             target.FileContentType = source.FileContentType;
             target.FileName = source.FileName;
             if (!string.IsNullOrWhiteSpace(source.MediaEntry))
@@ -375,5 +376,5 @@ public sealed class QuizPackageService(QuizDbContext db)
         ContentBlockType BlockType, string? TextContent, string? TopCaption,
         string? BottomCaption, string? MediaPath, string? ExternalUrl,
         int SortOrder, bool AudioOnly, string? MediaEntry,
-        string? FileContentType, string? FileName);
+        string? FileContentType, string? FileName, bool Autoplay = false);
 }

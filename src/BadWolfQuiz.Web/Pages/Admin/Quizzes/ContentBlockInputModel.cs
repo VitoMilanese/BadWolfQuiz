@@ -20,6 +20,8 @@ public sealed class ContentBlockInputModel
 
     public bool AudioOnly { get; set; }
 
+    public bool Autoplay { get; set; }
+
     public IFormFile? UploadedFile { get; set; }
 
     public bool RemoveFile { get; set; }

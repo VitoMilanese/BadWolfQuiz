@@ -71,6 +71,7 @@ public sealed class QuestionEditorModel(
                 BottomCaption = x.BottomCaption,
                 ExternalUrl = x.ExternalUrl,
                 AudioOnly = x.AudioOnly,
+                Autoplay = x.Autoplay,
                 FileContentType = x.FileContentType,
                 FileName = x.FileName,
                 IsAnswerBlock = false
@@ -89,6 +90,7 @@ public sealed class QuestionEditorModel(
                 BottomCaption = x.BottomCaption,
                 ExternalUrl = x.ExternalUrl,
                 AudioOnly = x.AudioOnly,
+                Autoplay = x.Autoplay,
                 FileContentType = x.FileContentType,
                 FileName = x.FileName,
                 IsAnswerBlock = true
@@ -237,6 +239,8 @@ public sealed class QuestionEditorModel(
             entity.BottomCaption = inputBlock.BottomCaption?.Trim();
             entity.ExternalUrl = inputBlock.ExternalUrl?.Trim();
             entity.AudioOnly = inputBlock.AudioOnly;
+            entity.Autoplay = inputBlock.Autoplay &&
+                inputBlock.BlockType is ContentBlockType.Audio or ContentBlockType.Video or ContentBlockType.YouTube;
         }
 
         var submittedAnswerBlockIds = Input.AnswerBlocks
@@ -308,6 +312,8 @@ public sealed class QuestionEditorModel(
             entity.BottomCaption = inputBlock.BottomCaption?.Trim();
             entity.ExternalUrl = inputBlock.ExternalUrl?.Trim();
             entity.AudioOnly = inputBlock.AudioOnly;
+            entity.Autoplay = inputBlock.Autoplay &&
+                inputBlock.BlockType is ContentBlockType.Audio or ContentBlockType.Video or ContentBlockType.YouTube;
         }
 
         await db.SaveChangesAsync(cancellationToken);

@@ -1,10 +1,19 @@
 (() => {
-    const board = document.querySelector(".host-game-board[data-game-id]");
-    if (!board) {
-        return;
-    }
+    let initialized = false;
+    let discoveryObserver = null;
 
-    const gameId = board.dataset.gameId;
+    const initialize = () => {
+        if (initialized) {
+            return true;
+        }
+
+        const board = document.querySelector(".host-game-board[data-game-id]");
+        if (!board) {
+            return false;
+        }
+
+        initialized = true;
+        const gameId = board.dataset.gameId;
     let token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
     const styleHeaderGameControl = button => {
@@ -273,11 +282,11 @@
     };
 
     const forEachMedia = (root, selector, callback) => {
-        if (!(root instanceof Element)) {
+        if (!(root instanceof Element) && !(root instanceof DocumentFragment)) {
             return;
         }
 
-        if (root.matches(selector)) {
+        if (root instanceof Element && root.matches(selector)) {
             callback(root);
         }
         root.querySelectorAll(selector).forEach(callback);
@@ -289,7 +298,19 @@
     };
 
     const unbindMediaTree = root => {
-        forEachMedia(root, nativeMediaSelector, media => deactivate(media));
+        if (root instanceof Node && root.isConnected) {
+            return;
+        }
+
+        forEachMedia(root, nativeMediaSelector, media => {
+            media.pause();
+            try {
+                media.currentTime = 0;
+            } catch {
+                // The media may not have loaded enough metadata to seek yet.
+            }
+            deactivate(media);
+        });
         forEachMedia(root, youtubeSelector, iframe => {
             const key = youtubeKeys.get(iframe);
             if (key) {
@@ -387,4 +408,26 @@
             post("DiscordMedia", { active: "false" }, true).catch(() => {});
         }
     });
+
+        return true;
+    };
+
+    const scan = () => {
+        if (!initialize()) {
+            return;
+        }
+
+        discoveryObserver?.disconnect();
+        discoveryObserver = null;
+        document.removeEventListener("badwolf:host-shell-mounted", scan);
+        document.removeEventListener("badwolf:host-gameplay-updated", scan);
+    };
+
+    scan();
+    if (!initialized) {
+        document.addEventListener("badwolf:host-shell-mounted", scan);
+        document.addEventListener("badwolf:host-gameplay-updated", scan);
+        discoveryObserver = new MutationObserver(scan);
+        discoveryObserver.observe(document.body, { childList: true, subtree: true });
+    }
 })();

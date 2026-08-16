@@ -121,6 +121,18 @@ that the current state does not permit.
 Game pages coordinate native audio, native video, and embedded YouTube playback
 so that multiple media sources do not play over one another.
 
+For four-clue questions, autoplay is reveal-scoped. Media inside an unrevealed clue
+must not receive an autoplay attempt while it is hidden. `QuestionClueRevealed` is the
+authoritative live reveal notification: the host updates the existing clue DOM in
+place, advances the stored reveal count and media state, and activates only the newly
+revealed clue range. No gameplay DOM refresh is required for the reveal itself, so clue
+3 does not retrigger clues 1-2, clue 4 does not retrigger clues 1-3, and revealing a
+clue does not flash or replace the media presentation.
+
+Follow-up gameplay refreshes with the same media state preserve the live presentation
+continuously while refreshing surrounding controls, so already-started native media or
+an expanded YouTube iframe is never temporarily detached.
+
 When native audio or video starts:
 
 - other native media is paused;
@@ -168,3 +180,5 @@ At minimum, tests and regression checks should cover:
 - starting YouTube playback pauses native media and other YouTube embeds;
 - YouTube auto-expand and auto-collapse continue to work with media coordination;
 - media coordination does not create a competing YouTube player instance.
+
+Manual reveal uses the successful AJAX response as an additional authoritative host-side update. Any gameplay refresh requested while the reveal command is in flight is held until the returned reveal state has been applied to the live clue grid. The SignalR reveal notification remains for other connected clients and is idempotent on the host. This ordering prevents a refresh from racing ahead of clue autoplay.

@@ -36,6 +36,7 @@
                             <audio class="game-content-audio"
                                    controls
                                    preload="metadata"
+                                   data-autoplay-media="@block.Autoplay.ToString().ToLowerInvariant()"
                                    src="@Url.Page(
                                        "/Admin/Games/Lobby",
                                        "ContentBlock",
@@ -53,6 +54,7 @@
                     case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
                         <video class="game-content-video"
                                controls
+                               data-autoplay-media="@block.Autoplay.ToString().ToLowerInvariant()"
                                src="@block.ExternalUrl">
                         </video>
                         break;
@@ -60,6 +62,7 @@
                         <button class="youtube-placeholder"
                                 type="button"
                                 data-youtube-placeholder
+                                data-youtube-autoplay="@block.Autoplay.ToString().ToLowerInvariant()"
                                 data-youtube-embed-url="@(LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl) + "&fs=0")"
                                 data-youtube-frame-class="game-content-video youtube-auto-expand"
                                 data-youtube-title="@Localizer["GameBoard_MediaContent"]"

@@ -94,7 +94,8 @@ public sealed class QuizSnapshotFactory
             block.FileContentType,
             block.FileName,
             block.SortOrder,
-            block.AudioOnly);
+            block.AudioOnly,
+            block.Autoplay);
     }
 
     private static ContentBlockKind ResolveContentBlockKind(

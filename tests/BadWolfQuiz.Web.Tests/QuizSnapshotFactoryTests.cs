@@ -151,6 +151,32 @@ public sealed class QuizSnapshotFactoryTests
     }
 
     [Fact]
+    public void Create_preserves_autoplay_when_video_resolves_to_youtube()
+    {
+        var quiz = CreateQuiz();
+        var question = quiz.Rounds
+            .Single()
+            .Categories
+            .SelectMany(category => category.Questions)
+            .First();
+        question.QuestionBlocks.Add(new QuestionContentBlock
+        {
+            Id = 505,
+            BlockType = ContentBlockType.Video,
+            ExternalUrl = "https://youtu.be/abc123",
+            Autoplay = true
+        });
+
+        var snapshot = _factory.Create(quiz);
+        var block = snapshot.Rounds.Single().Questions
+            .Single(item => item.SourceQuestionId == question.Id)
+            .QuestionBlocks.Single();
+
+        Assert.Equal(ContentBlockKind.YouTube, block.Kind);
+        Assert.True(block.Autoplay);
+    }
+
+    [Fact]
     public void Create_keeps_direct_video_urls_as_video()
     {
         var quiz = CreateQuiz();
