@@ -5,6 +5,9 @@
     const nativeSelector =
         'audio.game-content-audio[data-autoplay-media="true"], ' +
         'video.game-content-video[data-autoplay-media="true"]';
+    const youtubeSelector =
+        '[data-youtube-placeholder][data-youtube-autoplay="true"]';
+    const autoplaySelector = `${nativeSelector}, ${youtubeSelector}`;
 
     const isWithinRoot = (node, root) =>
         root instanceof Node &&
@@ -80,16 +83,37 @@
         }
     };
 
+    const findFirstAutoplayTarget = root => {
+        window.BadWolfYouTubeAutoExpand?.scan?.(root);
+
+        const candidates = [];
+        if (root instanceof Element && root.matches(autoplaySelector)) {
+            candidates.push(root);
+        }
+        root.querySelectorAll?.(autoplaySelector).forEach(candidate => {
+            candidates.push(candidate);
+        });
+
+        return candidates.find(candidate =>
+            !candidate.closest(".question-clue-hidden"));
+    };
+
     const activate = root => {
         if (!(root instanceof Element) && !(root instanceof Document)) {
             return;
         }
 
-        if (root instanceof Element && root.matches(nativeSelector)) {
-            tryPlayNative(root);
+        const target = findFirstAutoplayTarget(root);
+        if (!target) {
+            return;
         }
-        root.querySelectorAll(nativeSelector).forEach(tryPlayNative);
-        window.BadWolfYouTubeAutoExpand?.autoplay?.(root);
+
+        if (target.matches(nativeSelector)) {
+            tryPlayNative(target);
+            return;
+        }
+
+        window.BadWolfYouTubeAutoExpand?.autoplay?.(target);
     };
 
     const transition = root => {
