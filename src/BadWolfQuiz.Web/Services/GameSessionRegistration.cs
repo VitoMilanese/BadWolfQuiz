@@ -23,7 +23,7 @@ public sealed class GameSessionRegistration
 
     public string PublicCode { get; }
 
-    public GameSession Session { get; }
+    public GameSession Session { get; private set; }
     public string? HostId { get; }
 
     public string ClientInstanceId { get; } = Guid.NewGuid().ToString("N");
@@ -44,6 +44,59 @@ public sealed class GameSessionRegistration
         Interlocked.Increment(ref _persistenceRevision);
 
     public BuzzerRaceSnapshot? BuzzerRace { get; internal set; }
+
+    public void RestartSession(TimeProvider? timeProvider = null)
+    {
+        lock (this)
+        {
+            var current = Session;
+            var currentState = current.CaptureState();
+            var fresh = GameSession.Create(
+                current.Quiz,
+                current.Settings,
+                timeProvider ?? TimeProvider.System);
+            var freshState = fresh.CaptureState();
+            var players = currentState.Players
+                .Select(player => player with { Score = 0 })
+                .ToArray();
+            var removedPlayers = currentState.RemovedPlayers
+                .Select(player => player with { Score = 0 })
+                .ToArray();
+            var activePlayerId = currentState.ActivePlayerId is { } activeId &&
+                players.Any(player => player.Id == activeId)
+                    ? activeId
+                    : players.FirstOrDefault()?.Id;
+            var now = (timeProvider ?? TimeProvider.System).GetUtcNow();
+
+            var restartedState = freshState with
+            {
+                Id = currentState.Id,
+                Status = GameSessionStatus.Running,
+                ActivePlayerId = activePlayerId,
+                CurrentRoundIndex = 0,
+                CreatedAtUtc = currentState.CreatedAtUtc,
+                StartedAtUtc = now,
+                CurrentRoundStartScores = players
+                    .Select(player => new PlayerRoundStartScoreState(player.Id, 0))
+                    .ToArray(),
+                Players = players,
+                RemovedPlayers = removedPlayers,
+                IsForcedRoundAdvancePending = false,
+                FurthestVisitedRoundIndex = 0,
+                IsPreviousRoundReturnPending = false,
+                IsFinalQuestionAdvancePending = false,
+                IsUnfinishedRoundReturnPending = false
+            };
+
+            Session = GameSession.Restore(
+                current.Quiz,
+                current.Settings,
+                restartedState,
+                timeProvider ?? TimeProvider.System);
+            BuzzerRace = null;
+            MarkPersistenceChanged();
+        }
+    }
 }
 
 public sealed record BuzzerRaceSnapshot(
