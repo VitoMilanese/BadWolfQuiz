@@ -121,17 +121,25 @@ that the current state does not permit.
 Game pages coordinate native audio, native video, and embedded YouTube playback
 so that multiple media sources do not play over one another.
 
-For four-clue questions, autoplay is reveal-scoped. Media inside an unrevealed clue
-must not receive an autoplay attempt while it is hidden. `QuestionClueRevealed` is the
-authoritative live reveal notification: the host updates the existing clue DOM in
-place, advances the stored reveal count and media state, and activates only the newly
-revealed clue range. No gameplay DOM refresh is required for the reveal itself, so clue
-3 does not retrigger clues 1-2, clue 4 does not retrigger clues 1-3, and revealing a
-clue does not flash or replace the media presentation.
+Autoplay selection uses one shared DOM-order rule across Audio, direct Video, and
+YouTube blocks: only the first visible media block with Autoplay enabled is started.
+Later configured blocks remain available for manual playback.
 
-Follow-up gameplay refreshes with the same media state preserve the live presentation
-continuously while refreshing surrounding controls, so already-started native media or
-an expanded YouTube iframe is never temporarily detached.
+For a four-clue question opening with clues 1-2 visible, hidden clue media is ignored
+and only the first configured media among those two visible clues is started.
+`QuestionClueRevealed` is the authoritative live reveal notification: the host updates
+the existing clue DOM in place, advances the stored reveal count and media state, and
+activates only the newly revealed clue range. A `2 -> 3` reveal stops earlier game
+media and selects only the first configured media inside clue 3. A `3 -> 4` reveal does
+the same inside clue 4. Earlier clues are never rescanned or restarted.
+
+Manual **+ hint** performs the visible-clue media handoff before awaited network work
+so the target playback attempt still belongs to the host's click activation. The
+successful AJAX response and SignalR notification then reconcile the optimistic reveal
+with authoritative runtime state. Follow-up gameplay refreshes with the same media
+state preserve the live presentation continuously while refreshing surrounding
+controls, so already-started native media or an expanded YouTube iframe is never
+temporarily detached.
 
 When native audio or video starts:
 
@@ -176,6 +184,10 @@ At minimum, tests and regression checks should cover:
 - host and player timer displays use consistent ceiling semantics;
 - the Tools menu remains available during question and answer flow while invalid
   actions remain hidden;
+- opening a four-clue question starts only the first configured media among clues 1-2;
+- revealing clue 3 stops earlier game media and starts only clue 3's first configured media;
+- revealing clue 4 stops earlier game media and starts only clue 4's first configured media;
+- later Autoplay-enabled media in the same clue does not launch automatically;
 - starting native media pauses other native media and YouTube playback;
 - starting YouTube playback pauses native media and other YouTube embeds;
 - YouTube auto-expand and auto-collapse continue to work with media coordination;
