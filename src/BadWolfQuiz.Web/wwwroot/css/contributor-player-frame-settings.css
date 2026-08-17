@@ -1,0 +1,60 @@
+.player-contributor-frame-settings .contributor-frame-choice-row {
+    align-items: center;
+}
+
+.player-avatar-frame-preview {
+    --player-avatar-frame-preview-inset: 0px;
+    position: relative;
+    display: block;
+    width: 9rem;
+    height: 9rem;
+    flex: 0 0 9rem;
+}
+
+.player-avatar-frame-preview[hidden] {
+    display: none;
+}
+
+.player-avatar-frame-preview-avatar {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding: var(--player-avatar-frame-preview-inset);
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.player-avatar-frame-preview-overlay {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    z-index: 2;
+}
+
+.player-avatar-frame-preview-overlay[hidden] {
+    display: none;
+}
+
+.player-contributor-frame-settings .contributor-frame-cycle-button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    flex: 0 0 44px;
+}
+
+@media (max-width: 520px) {
+    .player-avatar-frame-preview {
+        width: 8rem;
+        height: 8rem;
+        flex-basis: 8rem;
+    }
+}

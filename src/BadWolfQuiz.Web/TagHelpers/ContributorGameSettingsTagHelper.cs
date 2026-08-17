@@ -21,7 +21,14 @@ public sealed class ContributorGameSettingsTagHelper(
         TagHelperOutput output)
     {
         var page = ViewContext.RouteData.Values["page"]?.ToString();
-        if (page is not "/Admin/Games/Lobby" and not "/Admin/Settings/Index")
+        var isHostSettingsPage = page is
+            "/Admin/Games/Lobby" or
+            "/Admin/Settings/Index";
+        var isPlayerPage = string.Equals(
+            page,
+            "/Player/Lobby",
+            StringComparison.Ordinal);
+        if (!isHostSettingsPage && !isPlayerPage)
         {
             return;
         }
@@ -31,11 +38,23 @@ public sealed class ContributorGameSettingsTagHelper(
 
         if (string.Equals(output.TagName, "head", StringComparison.OrdinalIgnoreCase))
         {
-            var stylesheetPath = fileVersionProvider.AddFileVersionToPath(
-                requestPathBase,
-                "/css/contributor-frames.css");
-            output.PostContent.AppendHtml(
-                $"<link rel=\"stylesheet\" href=\"{html.Encode(stylesheetPath)}\" />");
+            if (isHostSettingsPage)
+            {
+                var stylesheetPath = fileVersionProvider.AddFileVersionToPath(
+                    requestPathBase,
+                    "/css/contributor-frames.css");
+                output.PostContent.AppendHtml(
+                    $"<link rel=\"stylesheet\" href=\"{html.Encode(stylesheetPath)}\" />");
+            }
+
+            if (isPlayerPage)
+            {
+                var playerStylesheetPath = fileVersionProvider.AddFileVersionToPath(
+                    requestPathBase,
+                    "/css/contributor-player-frame-settings.css");
+                output.PostContent.AppendHtml(
+                    $"<link rel=\"stylesheet\" href=\"{html.Encode(playerStylesheetPath)}\" />");
+            }
             return;
         }
 
@@ -44,19 +63,31 @@ public sealed class ContributorGameSettingsTagHelper(
             return;
         }
 
-        var scriptPath = fileVersionProvider.AddFileVersionToPath(
-            requestPathBase,
-            "/js/contributor-game-settings.js");
-        output.PostContent.AppendHtml(
-            $"<script src=\"{html.Encode(scriptPath)}\"></script>");
-
-        if (string.Equals(page, "/Admin/Games/Lobby", StringComparison.Ordinal))
+        if (isHostSettingsPage)
         {
-            var dialogScriptPath = fileVersionProvider.AddFileVersionToPath(
+            var scriptPath = fileVersionProvider.AddFileVersionToPath(
                 requestPathBase,
-                "/js/contributor-game-settings-dialog.js");
+                "/js/contributor-game-settings.js");
             output.PostContent.AppendHtml(
-                $"<script src=\"{html.Encode(dialogScriptPath)}\"></script>");
+                $"<script src=\"{html.Encode(scriptPath)}\"></script>");
+
+            if (string.Equals(page, "/Admin/Games/Lobby", StringComparison.Ordinal))
+            {
+                var dialogScriptPath = fileVersionProvider.AddFileVersionToPath(
+                    requestPathBase,
+                    "/js/contributor-game-settings-dialog.js");
+                output.PostContent.AppendHtml(
+                    $"<script src=\"{html.Encode(dialogScriptPath)}\"></script>");
+            }
+        }
+
+        if (isPlayerPage)
+        {
+            var playerScriptPath = fileVersionProvider.AddFileVersionToPath(
+                requestPathBase,
+                "/js/contributor-player-frame-settings.js");
+            output.PostContent.AppendHtml(
+                $"<script src=\"{html.Encode(playerScriptPath)}\"></script>");
         }
     }
 }
