@@ -27,7 +27,7 @@ public sealed class ContentImageScalingRegressionTests
     }
 
     [Fact]
-    public void EditorPreviewImagesGrowWithinTheSharedPreviewBounds()
+    public void EditorPreviewContentUsesAvailableSharedPreviewWidth()
     {
         var root = FindRepositoryRoot();
         var overrides = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "busy-indicators.css"));
@@ -41,13 +41,53 @@ public sealed class ContentImageScalingRegressionTests
             ".question-preview-modal .question-preview-content:not(.four-clue-grid) .question-preview-image",
             "width: 100%;",
             "height: auto;");
-        Assert.Contains(".question-preview-media {", previewModal, StringComparison.Ordinal);
-        Assert.Contains("width: min(980px, 100%);", previewModal, StringComparison.Ordinal);
+        AssertCssRuleContains(
+            previewModal,
+            ".question-preview-text",
+            "width: 100%;",
+            "max-width: none;");
+        AssertCssRuleContains(
+            previewModal,
+            ".question-preview-media",
+            "width: 100%;",
+            "max-width: none;");
+        Assert.DoesNotContain("width: min(980px, 100%);", previewModal, StringComparison.Ordinal);
         Assert.Contains("max-height: min(62vh, 680px);", previewModal, StringComparison.Ordinal);
         Assert.Contains("object-fit: contain;", previewModal, StringComparison.Ordinal);
         Assert.Contains("image.className = \"question-preview-image\";", questionEditor, StringComparison.Ordinal);
         Assert.Contains("image.className = \"question-preview-image\";", finalQuestionEditor, StringComparison.Ordinal);
         Assert.Contains("image.className = \"question-preview-image\";", descriptionPreview, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ClosedQuestionAndAnswerPreviewsUseAvailableGameplayWidth()
+    {
+        var root = FindRepositoryRoot();
+        var previewStyles = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "content-preview-width.css"));
+        var gameplayPreview = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "_GameContentPreview.cshtml"));
+
+        Assert.Contains("content-preview-width.css", gameplayPreview, StringComparison.Ordinal);
+        Assert.Contains("answer-presentation", gameplayPreview, StringComparison.Ordinal);
+        Assert.Contains("question-presentation", gameplayPreview, StringComparison.Ordinal);
+        AssertCssRuleContains(
+            previewStyles,
+            ".host-game-board:has(.question-review-preview)",
+            "width: calc(100vw - 32px);",
+            "max-width: none;",
+            "margin-left: calc(50% - 50vw + 16px);",
+            "margin-right: calc(50% - 50vw + 16px);");
+        AssertCssRuleContains(
+            previewStyles,
+            ".question-review-preview .game-content-presentation",
+            "width: 100%;");
+        AssertCssRuleContains(
+            previewStyles,
+            ".question-review-preview .game-content-text",
+            "max-width: none;");
+        AssertCssRuleContains(
+            previewStyles,
+            ".question-review-preview .game-content-caption",
+            "max-width: none;");
     }
 
     [Fact]
