@@ -10,7 +10,7 @@ Round and category descriptions use ordered content blocks. These description ed
 
 Round actions are grouped under **Edit round**. From that menu the author can rename the round, edit its description, or delete it. Category renaming remains a direct action, while clicking the category header cell opens the category description editor.
 
-Both description editors provide a preview. Escape returns to the quiz board editor. Uploaded image blocks are rendered in both the editor and preview.
+Both description editors provide a preview. Escape returns to the quiz board editor. Uploaded image blocks are rendered in both the editor and preview. Description previews use the available preview-dialog width with normal responsive padding instead of the old narrow desktop content cap.
 
 ## Heading rules
 
@@ -54,6 +54,10 @@ When no players are present, the game does not show an empty inter-round leaderb
 
 Intro pages use short slide/fade/scale transitions. The first intro also animates in. `prefers-reduced-motion` disables these animations.
 
+### Presentation width
+
+Round and category intro descriptions use the available gameplay viewport width rather than fixed `1100px`/`980px` group and block caps. The standalone first-round intro also opts out of the generic centered `page-shell` maximum. Existing responsive page padding, media height constraints, centered alignment, and `object-fit` behavior remain in place.
+
 ### Host navigation behavior
 
 Later-round intros are rendered inside the persistent host gameplay shell when the surrounding game state can remain mounted. Entering an intro invalidates stale in-flight Lobby refreshes so a previous response cannot immediately overwrite the presentation.
@@ -64,4 +68,4 @@ If an asynchronous intro transition fails or returns an unsupported route, norma
 
 ## Persistence
 
-Round and category description blocks are persisted with the quiz definition and copied into the immutable quiz snapshot used by a running game. Starting or skipping an intro does not modify quiz data.
+Round and category description blocks are persisted with the quiz definition and copied into the immutable quiz snapshot used by a running game. `GameSessionLauncher` explicitly eager-loads both round and category `DescriptionBlocks` before `QuizSnapshotFactory` creates that snapshot; otherwise the no-tracking game query would leave the intro description collections empty. Starting or skipping an intro does not modify quiz data.

@@ -58,13 +58,15 @@ Later round intros and the Final Question transition can be rendered inside the 
 
 SignalR events that would normally request a gameplay refresh also avoid replacing an active intro. This keeps the transition presentation stable until it completes or the host explicitly leaves it.
 
+Round/category intro presentations use the available gameplay width instead of inheriting the old centered `1100px`/`980px` caps. The standalone first-round intro likewise opts out of the generic `page-shell` maximum, while existing responsive padding and media sizing remain intact.
+
 Duplicate refreshes of the same round-summary or final-results podium do not recreate the existing podium DOM. Keeping the same leaderboard mounted prevents entrance animations from restarting when a repeated live update reports the same visible state.
 
 ## Resolved question previews
 
 Resolved previews reuse the same server-rendered content partial as gameplay. The preview heading includes the state in the category/value line, for example `Category — 200 — Question` or `Category — 200 — Answer`, so a separate Question/Answer eyebrow does not consume presentation space.
 
-Four-clue question previews preserve the same horizontal clue layout used during gameplay. Resolved question and answer content is vertically centered within the available presentation area.
+Resolved question and answer presentations use the same available viewport width as active gameplay instead of inheriting the shared `1200px` presentation and `1100px`/`1000px` text/caption caps. Four-clue question previews preserve the same horizontal clue layout used during gameplay. Resolved question and answer content is vertically centered within the available presentation area.
 
 ## YouTube and media behavior
 
