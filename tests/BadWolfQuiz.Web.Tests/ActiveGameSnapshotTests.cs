@@ -63,6 +63,9 @@ public sealed class ActiveGameSnapshotTests
                     [new QuizQuestionSnapshot(9, 3, 0, 100, false)])
             ]);
         var session = GameSession.Create(quiz);
+        session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(9);
         var snapshot = new ActiveGameSnapshot(
             "ABC123",
             "host-1",
