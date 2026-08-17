@@ -36,8 +36,10 @@ public sealed class GameRestartRegressionTests
         var imports = Read(root,
             "src", "BadWolfQuiz.Web", "Pages", "_ViewImports.cshtml");
 
-        Assert.Contains("Contains(\"action-menu-popover\"", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("Contains(\"game-header-context\"", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("var isToolsPopover = classes.Contains(", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("\"action-menu-popover\"", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("var isHeaderContext = classes.Contains(", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("\"game-header-context\"", tagHelper, StringComparison.Ordinal);
         Assert.Contains("id=\"restart-game-dialog\"", tagHelper, StringComparison.Ordinal);
         Assert.Contains("class=\"app-dialog\"", tagHelper, StringComparison.Ordinal);
         Assert.Contains("dialog.showModal();", tagHelper, StringComparison.Ordinal);
