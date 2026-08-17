@@ -42,6 +42,7 @@ public sealed class NoveltyLocalizationTests
     [InlineData("SharedResource")]
     [InlineData("ProductVersionResource")]
     [InlineData("PlayerAdmissionResource")]
+    [InlineData("ContributorResource")]
     public void Novelty_resource_has_every_base_key_and_only_ukraine_values(string resourceName)
     {
         var basePath = FindWebFile("Resources", "Localization", $"{resourceName}.resx");

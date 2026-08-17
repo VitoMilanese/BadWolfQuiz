@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Settings;
 
@@ -19,7 +20,9 @@ public sealed class IndexModel(
     PremiumHostAccess premiumHostAccess,
     GameSessionRegistry sessionRegistry,
     IHubContext<GameHub> gameHub,
-    IStringLocalizer<SharedResource> localizer) : PageModel
+    IOptions<FooterOptions> footerOptions,
+    IStringLocalizer<SharedResource> localizer,
+    IWebHostEnvironment environment) : PageModel
 {
     [BindProperty]
     public GameSettingsInput Input { get; set; } = new();
@@ -35,6 +38,8 @@ public sealed class IndexModel(
 
     public bool HasHostImage { get; private set; }
     public bool HasBrandLogo { get; private set; }
+    public bool IsContributor { get; private set; }
+    public bool CanUseAvatarFrame { get; private set; }
     public string HostId => currentHost.RequiredId;
     public int MaximumImageUploadMegabytes =>
         mediaUploadProcessor.MaximumImageUploadMegabytes(
@@ -44,6 +49,15 @@ public sealed class IndexModel(
     {
         var settings = await settingsStore.LoadAsync(currentHost.RequiredId, cancellationToken);
         Input = GameSettingsInput.From(settings);
+        Input.HostAvatarFrameId = ContributorAvatarFrameCatalog.Normalize(
+            environment,
+            Input.HostAvatarFrameId);
+        if (Input.HostAvatarFrameEnabled &&
+            !ContributorAvatarFrameCatalog.IsValid(environment, Input.HostAvatarFrameId))
+        {
+            Input.HostAvatarFrameEnabled = false;
+        }
+
         var host = await db.Hosts.SingleAsync(
             item => item.Id == currentHost.RequiredId,
             cancellationToken);
@@ -57,6 +71,9 @@ public sealed class IndexModel(
         Input.HostName = host.DisplayName;
         HasHostImage = settings.HostImageData is not null;
         HasBrandLogo = settings.BrandLogoData is not null;
+        SetFrameAccess(ContributorRecognition.IsContributor(
+            footerOptions.Value,
+            host.DisplayName));
     }
 
     public async Task<IActionResult> OnGetBrandLogoAsync(
@@ -91,6 +108,31 @@ public sealed class IndexModel(
         var logoData = RemoveBrandLogo ? null : existing.BrandLogoData;
         var logoContentType = RemoveBrandLogo ? null : existing.BrandLogoContentType;
         HasBrandLogo = logoData is not null;
+        var host = await db.Hosts.SingleAsync(
+            item => item.Id == currentHost.RequiredId,
+            cancellationToken);
+        SetFrameAccess(ContributorRecognition.IsContributor(
+            footerOptions.Value,
+            host.DisplayName));
+
+        if (!CanUseAvatarFrame)
+        {
+            Input.HostAvatarFrameEnabled = false;
+            Input.HostAvatarFrameId = null;
+        }
+        else
+        {
+            Input.HostAvatarFrameId = ContributorAvatarFrameCatalog.Normalize(
+                environment,
+                Input.HostAvatarFrameId);
+            if (Input.HostAvatarFrameEnabled &&
+                !ContributorAvatarFrameCatalog.IsValid(environment, Input.HostAvatarFrameId))
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    localizer["HostCard_InvalidSettings"].Value);
+            }
+        }
 
         if (!ModelState.IsValid)
         {
@@ -164,14 +206,25 @@ public sealed class IndexModel(
             return Page();
         }
 
-        var host = await db.Hosts.SingleAsync(
-            item => item.Id == currentHost.RequiredId,
-            cancellationToken);
         host.DisplayName = string.IsNullOrWhiteSpace(Input.HostName)
             ? null
             : Input.HostName.Trim();
         Input.HostName = host.DisplayName;
         await db.SaveChangesAsync(cancellationToken);
+
+        // Re-check after a display-name change. A non-contributor cannot gain
+        // contributor frame access in the same POST, while premium access stays
+        // tied to the authenticated host identifier.
+        IsContributor = IsContributor &&
+            ContributorRecognition.IsContributor(footerOptions.Value, host.DisplayName);
+        CanUseAvatarFrame = IsContributor ||
+            premiumHostAccess.IsPremium(currentHost.RequiredId);
+        ViewData["ContributorHost"] = CanUseAvatarFrame;
+        if (!CanUseAvatarFrame)
+        {
+            Input.HostAvatarFrameEnabled = false;
+            Input.HostAvatarFrameId = null;
+        }
 
         var savedSettings = Input.ToRuntimeSettings(
             imageData,
@@ -192,14 +245,33 @@ public sealed class IndexModel(
                 game.Session.Status != BadWolfQuiz.Game.Runtime.GameSessionStatus.Completed)
             .ToArray();
         var themeUpdate = GameHub.CreateThemeUpdate(savedSettings);
+        var contributorFrameUpdate = new
+        {
+            enabled = CanUseAvatarFrame && savedSettings.HostAvatarFrameEnabled,
+            frameId = CanUseAvatarFrame ? savedSettings.HostAvatarFrameId : null
+        };
         foreach (var game in activeGames)
         {
             await gameHub.Clients
                 .Group(GameHub.GroupName(game.PublicCode))
                 .SendAsync("SiteThemeChanged", themeUpdate, cancellationToken);
+            await gameHub.Clients
+                .Group(GameHub.GroupName(game.PublicCode))
+                .SendAsync(
+                    "HostContributorFrameChanged",
+                    contributorFrameUpdate,
+                    cancellationToken);
         }
         TempData["SuccessMessage"] =
             localizer["GameSettings_GlobalSaved"].Value;
         return RedirectToPage();
+    }
+
+    private void SetFrameAccess(bool isContributor)
+    {
+        IsContributor = isContributor;
+        CanUseAvatarFrame = isContributor ||
+            premiumHostAccess.IsPremium(currentHost.RequiredId);
+        ViewData["ContributorHost"] = CanUseAvatarFrame;
     }
 }

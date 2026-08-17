@@ -1,14 +1,22 @@
 using BadWolfQuiz.Game.Runtime;
+using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 
 namespace BadWolfQuiz.Web.Pages.Player;
 
 public sealed class LobbyModel(
     GameSessionRegistry sessionRegistry,
     GameSettingsStore settingsStore,
-    QuizRatingService quizRatingService) : PageModel
+    QuizRatingService quizRatingService,
+    IOptions<FooterOptions> footerOptions,
+    CurrentHost currentHost,
+    PremiumHostAccess premiumHostAccess,
+    IHubContext<GameHub> gameHub,
+    IWebHostEnvironment environment) : PageModel
 {
     public GameSessionRegistration Game { get; private set; } = null!;
 
@@ -19,6 +27,8 @@ public sealed class LobbyModel(
     public string? AccessToken { get; private set; }
     public int? ExistingRating { get; private set; }
     public bool CanRateQuiz { get; private set; }
+    public bool IsContributor { get; private set; }
+    public bool CanUseAvatarFrame { get; private set; }
 
     public async Task<IActionResult> OnGetAsync(
         string code,
@@ -46,6 +56,23 @@ public sealed class LobbyModel(
         CurrentPlayer = currentPlayer;
         Players = players;
         AccessToken = accessToken;
+        IsContributor = ContributorRecognition.IsContributor(
+            footerOptions.Value,
+            currentPlayer.Name);
+        var premiumHostId = GetPremiumHostId();
+        CanUseAvatarFrame = IsContributor || premiumHostId is not null;
+        var normalizedFrameId = ContributorAvatarFrameCatalog.Normalize(
+            environment,
+            currentPlayer.AvatarFrameId);
+        ViewData["ContributorPlayer"] = CanUseAvatarFrame;
+        ViewData["ContributorPlayerFrameEnabled"] =
+            CanUseAvatarFrame &&
+            currentPlayer.AvatarFrameEnabled &&
+            normalizedFrameId is not null &&
+            ContributorAvatarFrameCatalog.IsValid(environment, normalizedFrameId);
+        ViewData["ContributorPlayerFrameId"] = CanUseAvatarFrame
+            ? normalizedFrameId
+            : null;
         CanRateQuiz = QuizRatingService.IsRatingAvailable(game.Session);
         if (CanRateQuiz)
         {
@@ -59,6 +86,77 @@ public sealed class LobbyModel(
             : game.Session.Settings;
         ViewData["GameThemeSettings"] = themeSettings;
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostAvatarFrameAsync(
+        string code,
+        Guid playerId,
+        string? accessToken,
+        bool enabled,
+        string? frameId,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(accessToken) ||
+            !ContributorAvatarFrameCatalog.IsValid(environment, frameId))
+        {
+            return new JsonResult(new { saved = false }) { StatusCode = 400 };
+        }
+
+        var validationConnectionId = $"contributor-frame:{Guid.NewGuid():N}";
+        var connection = sessionRegistry.ConnectPlayer(
+            code,
+            accessToken,
+            validationConnectionId,
+            isVisible: false);
+
+        if (connection is null)
+        {
+            return new JsonResult(new { saved = false }) { StatusCode = 403 };
+        }
+
+        try
+        {
+            var isContributor = ContributorRecognition.IsContributor(
+                footerOptions.Value,
+                connection.Player.Name);
+            var premiumHostId = GetPremiumHostId();
+            if (connection.RequiresApproval ||
+                connection.Player.Id != new GamePlayerId(playerId) ||
+                (!isContributor && premiumHostId is null))
+            {
+                return new JsonResult(new { saved = false }) { StatusCode = 403 };
+            }
+
+            var normalizedFrameId = ContributorAvatarFrameCatalog.Normalize(
+                environment,
+                frameId)!;
+            lock (connection.Game)
+            {
+                connection.Player.SetAvatarFrame(
+                    enabled,
+                    normalizedFrameId,
+                    isContributor ? null : premiumHostId);
+                connection.Game.MarkPersistenceChanged();
+            }
+
+            await gameHub.Clients
+                .Group(GameHub.GroupName(connection.Game.PublicCode))
+                .SendAsync(
+                    "PlayersChanged",
+                    GameHub.CreatePlayersUpdate(sessionRegistry, connection.Game),
+                    cancellationToken);
+
+            return new JsonResult(new
+            {
+                saved = true,
+                enabled,
+                frameId = normalizedFrameId
+            });
+        }
+        finally
+        {
+            sessionRegistry.DisconnectPlayer(validationConnectionId);
+        }
     }
 
     public async Task<IActionResult> OnPostRateQuizAsync(
@@ -113,5 +211,14 @@ public sealed class LobbyModel(
         return string.IsNullOrWhiteSpace(block.FileName)
             ? File(block.FileData, block.FileContentType)
             : File(block.FileData, block.FileContentType, block.FileName);
+    }
+
+    private string? GetPremiumHostId()
+    {
+        var hostId = currentHost.Id;
+        return !string.IsNullOrWhiteSpace(hostId) &&
+               premiumHostAccess.IsPremium(hostId)
+            ? hostId
+            : null;
     }
 }

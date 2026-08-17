@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="ContributorThanks_Title" xml:space="preserve"><value>Grazie, contributor!</value></data>
+  <data name="ContributorThanks_Message" xml:space="preserve"><value>Grazie per aver contribuito a BadWolfQuiz. Le cornici avatar per contributor sono ora disponibili nelle impostazioni visive.</value></data>
+  <data name="ContributorFrame_Title" xml:space="preserve"><value>Cornice avatar contributor</value></data>
+  <data name="ContributorFrame_Enable" xml:space="preserve"><value>Abilita cornice contributor</value></data>
+  <data name="ContributorFrame_Label" xml:space="preserve"><value>Cornice</value></data>
+  <data name="ContributorFrame_Hint" xml:space="preserve"><value>Questa cornice è disponibile perché il tuo nome visualizzato corrisponde all'elenco contributor configurato.</value></data>
+  <data name="ContributorFrame_GoldFang" xml:space="preserve"><value>Zanna d'oro</value></data>
+  <data name="ContributorFrame_Moonlight" xml:space="preserve"><value>Chiaro di luna</value></data>
+  <data name="ContributorFrame_Ember" xml:space="preserve"><value>Brace</value></data>
+  <data name="ContributorFrame_SaveFailed" xml:space="preserve"><value>Impossibile salvare la cornice contributor.</value></data>
+  <data name="ContributorThanks_Close" xml:space="preserve"><value>Chiudi</value></data>
+</root>
