@@ -1,6 +1,6 @@
 (() => {
     const body = document.body;
-    if (!body || body.dataset.contributorHost !== "true") {
+    if (!body) {
         return;
     }
 
@@ -36,11 +36,6 @@
     const normalizeState = value => ({
         enabled: value?.enabled === true,
         frameId: normalizeFrameId(value?.frameId)
-    });
-
-    const readBodyState = () => normalizeState({
-        enabled: body.dataset.contributorHostFrameEnabled === "true",
-        frameId: body.dataset.contributorHostFrameId
     });
 
     const writeBodyState = state => {
@@ -96,7 +91,7 @@
     };
 
     const savePendingState = state => {
-        if (!pendingStateKey) {
+        if (!pendingStateKey || !state) {
             return;
         }
 
@@ -110,111 +105,149 @@
         );
     };
 
-    const bridge = window.BadWolfContributorGameFrameBridge ?? {
-        handler: null,
-        pendingUpdate: null
-    };
+    const bridge = window.BadWolfContributorGameFrameBridge ?? {};
+    const handlers = bridge.handlers instanceof Set
+        ? bridge.handlers
+        : new Set();
+    if (typeof bridge.handler === "function") {
+        handlers.add(bridge.handler);
+    }
+    bridge.handlers = handlers;
+    bridge.pendingUpdate = bridge.pendingUpdate ?? null;
     window.BadWolfContributorGameFrameBridge = bridge;
 
-    bridge.publish = state => {
-        const value = writeBodyState(state);
-        if (typeof bridge.handler === "function") {
-            bridge.handler(value);
-        } else {
-            bridge.pendingUpdate = value;
-        }
-    };
-
-    const pendingState = loadPendingState();
-    if (pendingState) {
-        writeBodyState(pendingState);
-        bridge.pendingUpdate = pendingState;
-    }
-
-    const installSignalRBridge = () => {
-        const prototype = window.signalR?.HubConnectionBuilder?.prototype;
-        if (!prototype || prototype.badWolfContributorFrameBridgePatched) {
-            return false;
-        }
-
-        const originalBuild = prototype.build;
-        prototype.build = function (...args) {
-            const connection = originalBuild.apply(this, args);
-            const originalOn = connection.on.bind(connection);
-
-            connection.on = function (methodName, handler) {
-                if (methodName === "HostContributorFrameChanged" &&
-                    typeof handler === "function") {
-                    bridge.handler = handler;
-                    if (bridge.pendingUpdate) {
-                        const update = bridge.pendingUpdate;
-                        bridge.pendingUpdate = null;
-                        queueMicrotask(() => {
-                            if (bridge.handler === handler) {
-                                handler(update);
-                            }
-                        });
-                    }
-                }
-                return originalOn(methodName, handler);
-            };
-
-            return connection;
-        };
-
-        Object.defineProperty(
-            prototype,
-            "badWolfContributorFrameBridgePatched",
-            {
-                value: true,
-                configurable: false,
-                enumerable: false,
-                writable: false
-            }
-        );
-        return true;
-    };
-
-    if (!installSignalRBridge()) {
-        window.addEventListener(
-            "DOMContentLoaded",
-            installSignalRBridge,
-            { once: true }
-        );
-    }
-
-    const handlerName = (form, submitter) => {
-        try {
-            const target = submitter?.formAction || form.action || window.location.href;
-            return new URL(target, window.location.href)
-                .searchParams
-                .get("handler")
-                ?.toLowerCase() ?? "";
-        } catch {
-            return "";
-        }
-    };
-
-    document.addEventListener("submit", event => {
-        const form = event.target instanceof HTMLFormElement
-            ? event.target
-            : null;
-        if (!form || handlerName(form, event.submitter) !== "start") {
+    const flushPendingUpdate = () => {
+        if (!bridge.pendingUpdate || bridge.handlers.size === 0) {
             return;
         }
 
-        const state = readFormState(form);
+        const update = bridge.pendingUpdate;
+        bridge.pendingUpdate = null;
+        for (const handler of bridge.handlers) {
+            try {
+                handler(update);
+            } catch (error) {
+                console.error("Failed to apply host frame state.", error);
+            }
+        }
+    };
+
+    bridge.registerHandler = handler => {
+        if (typeof handler !== "function") {
+            return;
+        }
+        bridge.handlers.add(handler);
+        flushPendingUpdate();
+    };
+
+    bridge.publish = state => {
+        const value = writeBodyState(state);
+        bridge.pendingUpdate = value;
+        flushPendingUpdate();
+        return value;
+    };
+
+    const wrapConnectionOn = connection => {
+        if (!connection ||
+            typeof connection.on !== "function" ||
+            connection.badWolfContributorFrameBridgePatched) {
+            return;
+        }
+
+        const originalOn = connection.on.bind(connection);
+        connection.on = (methodName, handler) => {
+            if (methodName === "HostContributorFrameChanged") {
+                bridge.registerHandler(handler);
+            }
+            return originalOn(methodName, handler);
+        };
+        Object.defineProperty(
+            connection,
+            "badWolfContributorFrameBridgePatched",
+            { value: true }
+        );
+    };
+
+    const installSignalRBridge = () => {
+        let installed = false;
+        const connectionPrototype = window.signalR?.HubConnection?.prototype;
+        if (connectionPrototype &&
+            typeof connectionPrototype.on === "function" &&
+            !connectionPrototype.badWolfContributorFrameBridgePatched) {
+            const originalOn = connectionPrototype.on;
+            connectionPrototype.on = function (methodName, handler) {
+                if (methodName === "HostContributorFrameChanged") {
+                    bridge.registerHandler(handler);
+                }
+                return originalOn.call(this, methodName, handler);
+            };
+            Object.defineProperty(
+                connectionPrototype,
+                "badWolfContributorFrameBridgePatched",
+                { value: true }
+            );
+            installed = true;
+        }
+
+        const builderPrototype = window.signalR?.HubConnectionBuilder?.prototype;
+        if (builderPrototype &&
+            typeof builderPrototype.build === "function" &&
+            !builderPrototype.badWolfContributorFrameBridgePatched) {
+            const originalBuild = builderPrototype.build;
+            builderPrototype.build = function (...args) {
+                const connection = originalBuild.apply(this, args);
+                wrapConnectionOn(connection);
+                return connection;
+            };
+            Object.defineProperty(
+                builderPrototype,
+                "badWolfContributorFrameBridgePatched",
+                { value: true }
+            );
+            installed = true;
+        }
+
+        return installed;
+    };
+
+    installSignalRBridge();
+
+    const pendingState = loadPendingState();
+    if (pendingState) {
+        bridge.publish(pendingState);
+    }
+
+    const startGameForm = document.getElementById("start-game-form");
+    const publishStartFrameState = () => {
+        if (!(startGameForm instanceof HTMLFormElement)) {
+            return;
+        }
+
+        const state = readFormState(startGameForm);
         if (!state) {
             return;
         }
 
         savePendingState(state);
         bridge.publish(state);
-    }, true);
+    };
+
+    startGameForm?.addEventListener(
+        "submit",
+        publishStartFrameState,
+        true
+    );
+    document.querySelector(
+        '.lobby-start-button[form="start-game-form"]'
+    )?.addEventListener(
+        "click",
+        publishStartFrameState,
+        true
+    );
 
     const dialog = document.getElementById("game-settings-dialog");
-    const form = dialog?.querySelector("form");
-    if (!dialog || !(form instanceof HTMLFormElement)) {
+    const settingsForm = dialog?.querySelector("form");
+    if (!dialog || !(settingsForm instanceof HTMLFormElement)) {
         return;
     }
 
@@ -236,27 +269,27 @@
         return null;
     };
 
-    form.addEventListener("submit", async event => {
+    settingsForm.addEventListener("submit", async event => {
         event.preventDefault();
 
         const submitter = event.submitter instanceof HTMLButtonElement
             ? event.submitter
             : null;
-        const nextFrameState = readFormState(form) ?? readBodyState();
+        const nextFrameState = readFormState(settingsForm);
         submitter?.setAttribute("disabled", "disabled");
 
         try {
-            const response = await fetch(
-                submitter?.formAction || form.action || window.location.href,
-                {
-                    method: "POST",
-                    body: new FormData(form),
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest"
-                    },
-                    redirect: "follow"
-                }
-            );
+            const target = new URL(window.location.href);
+            target.searchParams.set("handler", "UpdateSettings");
+            target.hash = "";
+            const response = await fetch(target.toString(), {
+                method: "POST",
+                body: new FormData(settingsForm),
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                redirect: "follow"
+            });
             const markup = await response.text();
             if (!response.ok) {
                 throw new Error(response.statusText);
@@ -267,8 +300,10 @@
                 throw new Error(errorMessage);
             }
 
-            bridge.publish(nextFrameState);
-            savePendingState(nextFrameState);
+            if (nextFrameState) {
+                savePendingState(nextFrameState);
+                bridge.publish(nextFrameState);
+            }
             dialog.close();
 
             if (window.BadWolfHostGameplay?.refresh) {
@@ -276,7 +311,11 @@
             }
         } catch (error) {
             console.error("Failed to update game settings.", error);
-            window.alert(error?.message || body.dataset.contributorFrameSaveFailed || "");
+            window.alert(
+                error?.message ||
+                body.dataset.contributorFrameSaveFailed ||
+                ""
+            );
         } finally {
             submitter?.removeAttribute("disabled");
         }
