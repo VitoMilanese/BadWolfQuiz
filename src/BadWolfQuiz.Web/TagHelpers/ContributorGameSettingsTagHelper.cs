@@ -49,5 +49,14 @@ public sealed class ContributorGameSettingsTagHelper(
             "/js/contributor-game-settings.js");
         output.PostContent.AppendHtml(
             $"<script src=\"{html.Encode(scriptPath)}\"></script>");
+
+        if (string.Equals(page, "/Admin/Games/Lobby", StringComparison.Ordinal))
+        {
+            var dialogScriptPath = fileVersionProvider.AddFileVersionToPath(
+                requestPathBase,
+                "/js/contributor-game-settings-dialog.js");
+            output.PostContent.AppendHtml(
+                $"<script src=\"{html.Encode(dialogScriptPath)}\"></script>");
+        }
     }
 }
