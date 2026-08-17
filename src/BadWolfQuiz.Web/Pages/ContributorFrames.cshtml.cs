@@ -7,7 +7,8 @@ namespace BadWolfQuiz.Web.Pages;
 
 public sealed class ContributorFramesModel(
     GameSessionRegistry sessionRegistry,
-    IOptions<FooterOptions> footerOptions) : PageModel
+    IOptions<FooterOptions> footerOptions,
+    PremiumHostAccess premiumHostAccess) : PageModel
 {
     public IActionResult OnGet(string code)
     {
@@ -18,7 +19,12 @@ public sealed class ContributorFramesModel(
         }
 
         var players = sessionRegistry.GetPlayers(game)
-            .Where(player => ContributorRecognition.IsContributor(footerOptions.Value, player.Name))
+            .Where(player =>
+                ContributorRecognition.IsContributor(
+                    footerOptions.Value,
+                    player.Name) ||
+                (!string.IsNullOrWhiteSpace(player.AvatarFrameAuthorizedHostId) &&
+                 premiumHostAccess.IsPremium(player.AvatarFrameAuthorizedHostId)))
             .Select(player => new
             {
                 id = player.Id.Value,

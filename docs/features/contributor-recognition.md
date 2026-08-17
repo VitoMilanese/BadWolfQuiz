@@ -1,12 +1,14 @@
 # Contributor recognition and avatar frames
 
-BadWolfQuiz can recognize contributors by display name and expose optional avatar-frame customization for recognized hosts and players.
+BadWolfQuiz can recognize contributors by display name and expose optional avatar-frame customization for recognized hosts and players. Authenticated host accounts listed in `PremiumHosts:HostIds` can also use avatar frames while participating as players.
 
 ## Configuration
 
 Contributor names come from the existing `Footer:Contributors` array in `appsettings.json` or the equivalent configuration source. Matching trims the candidate name and compares it case-insensitively.
 
 The recognition cookie is not an authorization mechanism. Contributor eligibility is always recalculated from the configured contributor list and the current host or player name.
+
+Premium player frame eligibility comes from the existing `PremiumHosts:HostIds` array. Because `GamePlayerId` is a game-scoped identifier, premium access is resolved from the authenticated host account in the player's browser (`CurrentHost.Id`). A player access token by itself never grants premium frame access.
 
 `DebugMode` is a top-level `appsettings.json` switch and defaults to `false`. When enabled, the running host game page exposes temporary host-card/frame tuning controls in the header. These controls are browser-only helpers and do not change persisted host settings or frame files.
 
@@ -28,9 +30,11 @@ When `DebugMode` is enabled, the running-game header adds seven helper buttons a
 
 ## Player avatar frames
 
-Recognized players get equivalent controls inside the existing player media settings disclosure. The preference is stored in browser local storage by normalized player name and is synchronized to the current game using the player's existing access token.
+Recognized contributor players and authenticated premium host accounts get equivalent controls inside the existing player media settings disclosure. Premium access is available when the current authenticated host account identifier is present in `PremiumHosts:HostIds`; the player's game-scoped `GamePlayerId` is not compared with that list.
 
-The server revalidates the player access token, player identifier, and configured contributor name before accepting a frame update. The recognition cookie is not involved.
+The preference is stored in browser local storage by normalized player name and is synchronized to the current game using the player's existing access token. The server revalidates the player access token, player identifier, and frame eligibility before accepting a frame update. Contributor players are revalidated against the configured contributor name list. Premium players are revalidated against the authenticated host account and `PremiumHosts:HostIds`. The recognition cookie is not involved in either path.
+
+For premium players, the runtime player state records the premium host account identifier that authorized the frame. Host game pages include the frame only while that identifier still qualifies as premium, preserving the same live configuration behavior as contributor-name eligibility.
 
 The selected frame image is rendered as a square overlay over the player's current avatar, uploaded image, webcam preview, or webcam URL preview where that visual is shown. The overlay follows live card resizing. Built-in avatars use the pixel inset configured in the selected frame file name as a native-image reference value. The browser scales that inset proportionally with the rendered frame size, so the avatar-to-frame spacing remains consistent when cards are resized. Host game pages refresh contributor-frame state when the normal player roster changes.
 
