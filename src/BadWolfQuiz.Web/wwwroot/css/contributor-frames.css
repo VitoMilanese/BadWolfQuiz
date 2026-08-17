@@ -55,9 +55,9 @@
     --host-avatar-frame-preview-inset: 0px;
     position: relative;
     display: block;
-    width: 11.75rem;
-    height: 11.75rem;
-    margin-top: .75rem;
+    width: 13rem;
+    height: 13rem;
+    margin-top: 0rem;
     flex: 0 0 auto;
 }
 
