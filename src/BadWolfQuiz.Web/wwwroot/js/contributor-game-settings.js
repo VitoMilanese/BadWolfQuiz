@@ -4,13 +4,6 @@
         return;
     }
 
-    const gameRoot = document.querySelector(
-        ".host-game-board[data-game-code], .content-panel[data-game-code]"
-    );
-    const gameCode = String(gameRoot?.dataset.gameCode ?? "").trim();
-    const pendingStateKey = gameCode
-        ? `badwolfquiz:${gameCode}:pending-host-frame`
-        : null;
     const defaultFrameId = String(
         body.dataset.contributorFrameDefaultId ?? ""
     ).trim();
@@ -33,18 +26,6 @@
         return frameId;
     };
 
-    const normalizeState = value => ({
-        enabled: value?.enabled === true,
-        frameId: normalizeFrameId(value?.frameId)
-    });
-
-    const writeBodyState = state => {
-        const value = normalizeState(state);
-        body.dataset.contributorHostFrameEnabled = value.enabled.toString();
-        body.dataset.contributorHostFrameId = value.frameId;
-        return value;
-    };
-
     const readFormState = form => {
         const panel = form?.querySelector("[data-contributor-host-frame]");
         if (!panel) {
@@ -60,190 +41,98 @@
             return null;
         }
 
-        return normalizeState({
+        return {
             enabled: enabled.checked,
-            frameId: frameId.value
-        });
-    };
-
-    const loadPendingState = () => {
-        if (!pendingStateKey) {
-            return null;
-        }
-
-        const serialized = sessionStorage.getItem(pendingStateKey);
-        if (!serialized) {
-            return null;
-        }
-
-        sessionStorage.removeItem(pendingStateKey);
-        try {
-            const value = JSON.parse(serialized);
-            if (!value ||
-                !Number.isFinite(value.savedAt) ||
-                Date.now() - value.savedAt > 5 * 60 * 1000) {
-                return null;
-            }
-            return normalizeState(value);
-        } catch {
-            return null;
-        }
-    };
-
-    const savePendingState = state => {
-        if (!pendingStateKey || !state) {
-            return;
-        }
-
-        const value = normalizeState(state);
-        sessionStorage.setItem(
-            pendingStateKey,
-            JSON.stringify({
-                ...value,
-                savedAt: Date.now()
-            })
-        );
-    };
-
-    const bridge = window.BadWolfContributorGameFrameBridge ?? {};
-    const handlers = bridge.handlers instanceof Set
-        ? bridge.handlers
-        : new Set();
-    if (typeof bridge.handler === "function") {
-        handlers.add(bridge.handler);
-    }
-    bridge.handlers = handlers;
-    bridge.pendingUpdate = bridge.pendingUpdate ?? null;
-    window.BadWolfContributorGameFrameBridge = bridge;
-
-    const flushPendingUpdate = () => {
-        if (!bridge.pendingUpdate || bridge.handlers.size === 0) {
-            return;
-        }
-
-        const update = bridge.pendingUpdate;
-        bridge.pendingUpdate = null;
-        for (const handler of bridge.handlers) {
-            try {
-                handler(update);
-            } catch (error) {
-                console.error("Failed to apply host frame state.", error);
-            }
-        }
-    };
-
-    bridge.registerHandler = handler => {
-        if (typeof handler !== "function") {
-            return;
-        }
-        bridge.handlers.add(handler);
-        flushPendingUpdate();
-    };
-
-    bridge.publish = state => {
-        const value = writeBodyState(state);
-        bridge.pendingUpdate = value;
-        flushPendingUpdate();
-        return value;
-    };
-
-    const wrapConnectionOn = connection => {
-        if (!connection ||
-            typeof connection.on !== "function" ||
-            connection.badWolfContributorFrameBridgePatched) {
-            return;
-        }
-
-        const originalOn = connection.on.bind(connection);
-        connection.on = (methodName, handler) => {
-            if (methodName === "HostContributorFrameChanged") {
-                bridge.registerHandler(handler);
-            }
-            return originalOn(methodName, handler);
+            frameId: normalizeFrameId(frameId.value)
         };
-        Object.defineProperty(
-            connection,
-            "badWolfContributorFrameBridgePatched",
-            { value: true }
+    };
+
+    const resolveGameId = () => {
+        const match = window.location.pathname.match(
+            /\/Admin\/Games\/Lobby\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?$/i
         );
+        return match?.[1] ?? "";
     };
 
-    const installSignalRBridge = () => {
-        let installed = false;
-        const connectionPrototype = window.signalR?.HubConnection?.prototype;
-        if (connectionPrototype &&
-            typeof connectionPrototype.on === "function" &&
-            !connectionPrototype.badWolfContributorFrameBridgePatched) {
-            const originalOn = connectionPrototype.on;
-            connectionPrototype.on = function (methodName, handler) {
-                if (methodName === "HostContributorFrameChanged") {
-                    bridge.registerHandler(handler);
-                }
-                return originalOn.call(this, methodName, handler);
-            };
-            Object.defineProperty(
-                connectionPrototype,
-                "badWolfContributorFrameBridgePatched",
-                { value: true }
-            );
-            installed = true;
+    const syncHostFrame = async (state, sourceForm) => {
+        if (!state || body.dataset.contributorHost !== "true") {
+            return;
         }
 
-        const builderPrototype = window.signalR?.HubConnectionBuilder?.prototype;
-        if (builderPrototype &&
-            typeof builderPrototype.build === "function" &&
-            !builderPrototype.badWolfContributorFrameBridgePatched) {
-            const originalBuild = builderPrototype.build;
-            builderPrototype.build = function (...args) {
-                const connection = originalBuild.apply(this, args);
-                wrapConnectionOn(connection);
-                return connection;
-            };
-            Object.defineProperty(
-                builderPrototype,
-                "badWolfContributorFrameBridgePatched",
-                { value: true }
-            );
-            installed = true;
+        const gameId = resolveGameId();
+        if (!gameId) {
+            throw new Error("Unable to resolve the current game identifier.");
         }
 
-        return installed;
+        const token = sourceForm?.querySelector(
+            'input[name="__RequestVerificationToken"]'
+        )?.value;
+        const formData = new FormData();
+        formData.append("gameId", gameId);
+        formData.append("enabled", state.enabled.toString());
+        formData.append("frameId", state.frameId);
+        if (token) {
+            formData.append("__RequestVerificationToken", token);
+        }
+
+        const response = await fetch("/ContributorFrames?handler=HostFrame", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
     };
-
-    installSignalRBridge();
-
-    const pendingState = loadPendingState();
-    if (pendingState) {
-        bridge.publish(pendingState);
-    }
 
     const startGameForm = document.getElementById("start-game-form");
-    const publishStartFrameState = () => {
-        if (!(startGameForm instanceof HTMLFormElement)) {
-            return;
-        }
-
-        const state = readFormState(startGameForm);
-        if (!state) {
-            return;
-        }
-
-        savePendingState(state);
-        bridge.publish(state);
-    };
-
-    startGameForm?.addEventListener(
-        "submit",
-        publishStartFrameState,
-        true
-    );
-    document.querySelector(
+    const startButton = document.querySelector(
         '.lobby-start-button[form="start-game-form"]'
-    )?.addEventListener(
-        "click",
-        publishStartFrameState,
-        true
     );
+
+    const redundantSaveActions = startGameForm?.querySelector(
+        ":scope > .form-actions"
+    );
+    redundantSaveActions?.remove();
+
+    let startSubmissionReady = false;
+    startGameForm?.addEventListener("submit", async event => {
+        if (startSubmissionReady) {
+            startSubmissionReady = false;
+            return;
+        }
+
+        if (event.submitter !== startButton) {
+            event.preventDefault();
+            return;
+        }
+
+        const nextFrameState = readFormState(startGameForm);
+        if (!nextFrameState) {
+            return;
+        }
+
+        event.preventDefault();
+        startButton?.setAttribute("disabled", "disabled");
+
+        try {
+            await syncHostFrame(nextFrameState, startGameForm);
+            await new Promise(resolve => window.requestAnimationFrame(resolve));
+            startSubmissionReady = true;
+            startButton?.removeAttribute("disabled");
+            startGameForm.requestSubmit(startButton);
+        } catch (error) {
+            console.error("Failed to synchronize the host frame before starting.", error);
+            window.alert(
+                error?.message ||
+                body.dataset.contributorFrameSaveFailed ||
+                ""
+            );
+            startButton?.removeAttribute("disabled");
+        }
+    }, true);
 
     const dialog = document.getElementById("game-settings-dialog");
     const settingsForm = dialog?.querySelector("form");
@@ -300,10 +189,7 @@
                 throw new Error(errorMessage);
             }
 
-            if (nextFrameState) {
-                savePendingState(nextFrameState);
-                bridge.publish(nextFrameState);
-            }
+            await syncHostFrame(nextFrameState, settingsForm);
             dialog.close();
 
             if (window.BadWolfHostGameplay?.refresh) {
