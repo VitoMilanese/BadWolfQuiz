@@ -341,6 +341,48 @@
         image.src = url;
     };
 
+    const syncLiveHostAvatar = form => {
+        const visualSource = form?.querySelector(
+            '[name="SettingsInput.HostVisualSource"]'
+        );
+        const avatarPreview = form?.querySelector("[data-host-avatar-preview]");
+        const hostCard = document.querySelector("[data-host-card]");
+        if (!(visualSource instanceof HTMLSelectElement) ||
+            visualSource.value !== "3" ||
+            !(avatarPreview instanceof HTMLImageElement) ||
+            avatarPreview.hidden ||
+            !hostCard) {
+            return;
+        }
+
+        const avatarUrl = String(
+            avatarPreview.getAttribute("src") ?? ""
+        ).trim();
+        if (!avatarUrl) {
+            return;
+        }
+
+        for (const media of hostCard.querySelectorAll(
+            ":scope > .host-card-media"
+        )) {
+            media.remove();
+        }
+
+        const image = document.createElement("img");
+        image.className = "host-card-media";
+        image.src = avatarUrl;
+        image.alt = "";
+
+        const frameOverlay = hostCard.querySelector(
+            ":scope > .contributor-avatar-frame-overlay"
+        );
+        if (frameOverlay) {
+            hostCard.insertBefore(image, frameOverlay);
+        } else {
+            hostCard.append(image);
+        }
+    };
+
     const startGameForm = document.getElementById("start-game-form");
     const redundantSaveActions = startGameForm?.querySelector(
         ":scope > .form-actions"
@@ -411,6 +453,7 @@
             }
 
             preloadFrame(nextFrameState);
+            syncLiveHostAvatar(settingsForm);
             await syncHostFrame(nextFrameState, settingsForm);
             dialog.close();
 
