@@ -95,12 +95,41 @@
         });
     };
 
+    const findHostFrameOwner = () => document.querySelector(
+        "[data-host-card].contributor-frame-owner[data-avatar-frame]"
+    );
+
+    const getCurrentHostFrameInset = () => {
+        const owner = findHostFrameOwner();
+        if (!owner) return null;
+
+        const frameId = String(owner.dataset.avatarFrame ?? "").trim();
+        if (!frameId) return null;
+
+        return getNativeInsetPixels(owner, frameId);
+    };
+
+    const updateDebugInsetValue = () => {
+        if (body.dataset.debugMode !== "true") return;
+
+        const value = document.querySelector(
+            "[data-debug-host-frame-inset-value]"
+        );
+        if (!value) return;
+
+        const insetPixels = getCurrentHostFrameInset();
+        const text = Number.isFinite(insetPixels)
+            ? `${insetPixels}px`
+            : "—";
+        if (value.textContent !== text) {
+            value.textContent = text;
+        }
+    };
+
     const adjustHostFrameInset = delta => {
         if (!Number.isFinite(delta)) return;
 
-        const owner = document.querySelector(
-            "[data-host-card].contributor-frame-owner[data-avatar-frame]"
-        );
+        const owner = findHostFrameOwner();
         if (!owner) return;
 
         const frameId = String(owner.dataset.avatarFrame ?? "").trim();
@@ -114,6 +143,7 @@
             Math.max(0, currentInsetPixels + delta)
         );
         applyInset(owner);
+        updateDebugInsetValue();
     };
 
     const resetHostCardScale = () => {
@@ -154,6 +184,17 @@
         return button;
     };
 
+    const createDebugInsetValue = () => {
+        const value = document.createElement("span");
+        value.className = "button button-secondary";
+        value.dataset.debugHostFrameInsetValue = "true";
+        value.setAttribute("role", "status");
+        value.setAttribute("aria-live", "polite");
+        value.title = "Current avatar frame inset";
+        value.textContent = "—";
+        return value;
+    };
+
     const installDebugControls = () => {
         if (body.dataset.debugMode !== "true") return;
 
@@ -163,19 +204,25 @@
         const header = document.querySelector(".game-header-context");
         if (!board || !header ||
             header.querySelector("[data-debug-host-frame-tool]")) {
+            updateDebugInsetValue();
             return;
         }
 
         header.append(
             createDebugButton("100%", resetHostCardScale, true),
             createDebugButton("+5", () => adjustHostFrameInset(5)),
-            createDebugButton("-5", () => adjustHostFrameInset(-5))
+            createDebugButton("-5", () => adjustHostFrameInset(-5)),
+            createDebugButton("+1", () => adjustHostFrameInset(1)),
+            createDebugButton("-1", () => adjustHostFrameInset(-1)),
+            createDebugInsetValue()
         );
+        updateDebugInsetValue();
     };
 
     const mutationObserver = new MutationObserver(() => {
         queueRefresh();
         installDebugControls();
+        updateDebugInsetValue();
     });
     mutationObserver.observe(document.body, {
         attributes: true,
