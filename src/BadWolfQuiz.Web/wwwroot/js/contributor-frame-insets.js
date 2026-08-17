@@ -11,7 +11,9 @@
             .map(([id, inset]) => [id, Number.parseFloat(inset)])
             .filter(([, inset]) => Number.isFinite(inset) && inset >= 0)
     );
+    const frameIds = Array.from(frameInsets.keys());
     const debugHostFrameInsets = new Map();
+    let debugHostFrameId = null;
 
     const getBaseNativeInsetPixels = frameId =>
         frameInsets.get(frameId) ?? defaultInsetPixels;
@@ -23,6 +25,31 @@
         }
 
         return debugHostFrameInsets.get(frameId) ?? baseInsetPixels;
+    };
+
+    const findHostFrameOwner = () => document.querySelector(
+        "[data-host-card].contributor-frame-owner[data-avatar-frame]"
+    );
+
+    const applyDebugHostFrameSelection = () => {
+        if (body.dataset.debugMode !== "true" || !debugHostFrameId) return;
+
+        const owner = findHostFrameOwner();
+        if (!owner) return;
+
+        if (owner.dataset.avatarFrame !== debugHostFrameId) {
+            owner.dataset.avatarFrame = debugHostFrameId;
+        }
+
+        const overlay = owner.querySelector(
+            ":scope > .contributor-avatar-frame-overlay"
+        );
+        if (!overlay) return;
+
+        const url = `/frames/${encodeURIComponent(debugHostFrameId)}.png`;
+        if (overlay.getAttribute("src") !== url) {
+            overlay.setAttribute("src", url);
+        }
     };
 
     const applyInset = owner => {
@@ -68,6 +95,8 @@
         : null;
 
     const observeAndApply = () => {
+        applyDebugHostFrameSelection();
+
         for (const owner of document.querySelectorAll(".contributor-frame-owner")) {
             if (resizeObserver && !observedOwners.has(owner)) {
                 resizeObserver.observe(owner);
@@ -95,18 +124,17 @@
         });
     };
 
-    const findHostFrameOwner = () => document.querySelector(
-        "[data-host-card].contributor-frame-owner[data-avatar-frame]"
-    );
+    const getCurrentHostFrameId = () => {
+        if (debugHostFrameId) return debugHostFrameId;
+        return String(findHostFrameOwner()?.dataset.avatarFrame ?? "").trim();
+    };
 
     const getCurrentHostFrameInset = () => {
-        const owner = findHostFrameOwner();
-        if (!owner) return null;
-
-        const frameId = String(owner.dataset.avatarFrame ?? "").trim();
+        const frameId = getCurrentHostFrameId();
         if (!frameId) return null;
 
-        return getNativeInsetPixels(owner, frameId);
+        return debugHostFrameInsets.get(frameId) ??
+            getBaseNativeInsetPixels(frameId);
     };
 
     const updateDebugInsetValue = () => {
@@ -129,10 +157,11 @@
     const adjustHostFrameInset = delta => {
         if (!Number.isFinite(delta)) return;
 
+        applyDebugHostFrameSelection();
         const owner = findHostFrameOwner();
         if (!owner) return;
 
-        const frameId = String(owner.dataset.avatarFrame ?? "").trim();
+        const frameId = getCurrentHostFrameId();
         if (!frameId) return;
 
         const currentInsetPixels =
@@ -144,6 +173,32 @@
         );
         applyInset(owner);
         updateDebugInsetValue();
+    };
+
+    const cycleHostFrame = direction => {
+        if (body.dataset.debugMode !== "true" ||
+            !Number.isFinite(direction) ||
+            direction === 0 ||
+            frameIds.length === 0) {
+            return;
+        }
+
+        const owner = findHostFrameOwner();
+        if (!owner) return;
+
+        const currentFrameId = getCurrentHostFrameId();
+        const currentIndex = frameIds.indexOf(currentFrameId);
+        const startIndex = currentIndex >= 0
+            ? currentIndex
+            : direction > 0 ? -1 : 0;
+        const nextIndex =
+            (startIndex + Math.sign(direction) + frameIds.length) % frameIds.length;
+
+        debugHostFrameId = frameIds[nextIndex];
+        applyDebugHostFrameSelection();
+        applyInset(owner);
+        updateDebugInsetValue();
+        queueRefresh();
     };
 
     const resetHostCardScale = () => {
@@ -163,7 +218,7 @@
         window.dispatchEvent(new Event("resize"));
     };
 
-    const createDebugButton = (label, handler, icon = false) => {
+    const createDebugButton = (label, handler, icon = null) => {
         const button = document.createElement("button");
         button.className = "button button-secondary icon-button";
         button.type = "button";
@@ -174,7 +229,7 @@
         if (icon) {
             const span = document.createElement("span");
             span.setAttribute("aria-hidden", "true");
-            span.textContent = "↻";
+            span.textContent = icon;
             button.append(span);
         } else {
             button.textContent = label;
@@ -209,7 +264,13 @@
         }
 
         header.append(
-            createDebugButton("100%", resetHostCardScale, true),
+            createDebugButton(
+                "Reset host card to 100%",
+                resetHostCardScale,
+                "↻"
+            ),
+            createDebugButton("Previous frame", () => cycleHostFrame(-1), "▲"),
+            createDebugButton("Next frame", () => cycleHostFrame(1), "▼"),
             createDebugButton("+5", () => adjustHostFrameInset(5)),
             createDebugButton("-5", () => adjustHostFrameInset(-5)),
             createDebugButton("+1", () => adjustHostFrameInset(1)),
@@ -220,6 +281,7 @@
     };
 
     const mutationObserver = new MutationObserver(() => {
+        applyDebugHostFrameSelection();
         queueRefresh();
         installDebugControls();
         updateDebugInsetValue();
