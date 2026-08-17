@@ -1,0 +1,19 @@
+/* Let closed question and answer previews use the same wide viewport layout as active gameplay. */
+.host-game-board:has(.question-review-preview) {
+    width: calc(100vw - 32px);
+    max-width: none;
+    margin-left: calc(50% - 50vw + 16px);
+    margin-right: calc(50% - 50vw + 16px);
+}
+
+.question-review-preview .game-content-presentation {
+    width: 100%;
+}
+
+.question-review-preview .game-content-text {
+    max-width: none;
+}
+
+.question-review-preview .game-content-caption {
+    max-width: none;
+}

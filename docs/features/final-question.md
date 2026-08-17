@@ -61,7 +61,8 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 - Locking answers starts a sequential presentation of player submissions. The host sees one player name and answer at a time, judges it as correct or incorrect, and then advances automatically to the next submission.
 - The host **Tools** menu remains available on the inter-round leaderboard and throughout final wagering, answering, and judging. In these limited states, **Choose random player**, **Next round**, and **Advance to final question** are hidden, while applicable tools such as answer history, answer key, blocked-player management, and game settings remain available.
 - Join information is exposed as a dedicated QR button in the game header between **Tools** and the Discord microphone button rather than as an item inside **Tools**. The button opens the existing join-information panel.
-- The final-question host panel uses the same viewport-width presentation as an active regular question.
+- The final-question host panel uses the same viewport-width presentation as an active regular question. Both the outer host container and the inner question/answer presentation use the available gameplay width instead of inheriting the shared `1200px` presentation and `1100px` text caps. Normal responsive padding and media height/`object-fit` constraints remain unchanged.
+- Final-answer judging uses the same wide presentation rules so a long player answer is not artificially constrained to a narrow centered column.
 - Answer history and answer-key actions are exposed through **Tools** rather than duplicated as standalone buttons on the final-question page.
 - The game-settings dialog remains available during final wagering, answering, and judging.
 - The broadcast-facing game screen never reveals the configured correct answer. The host can open a separate live answer-key tab on another display; it follows regular, wager, and final questions automatically.

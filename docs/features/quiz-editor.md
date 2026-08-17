@@ -39,6 +39,17 @@ only when a question with a greater `RowIndex` exists in the same category.
 The system file picker may be cancelled with Escape without triggering the
 editor's own Escape navigation.
 
+## Content previews
+
+Regular-question, answer, final-question, round-description, and
+category-description previews use the available preview-dialog width instead of
+a fixed desktop text/media cap. Normal responsive padding is preserved so content
+does not touch the dialog or viewport edges.
+
+Text and media blocks stay centered, while image/video sizing keeps the existing
+height and `object-fit` constraints. Four-clue previews retain their dedicated
+clue-grid sizing rather than being stretched by the shared wide-preview rules.
+
 ## Deleting regular questions
 
 The board shows the delete control on hover or keyboard focus when either the

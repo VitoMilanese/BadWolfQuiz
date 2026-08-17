@@ -40,6 +40,49 @@
 .host-game-board.host-gameplay-presentation-mode { --game-scoreboard-space: 0px !important; padding-bottom: 0; }
 .host-game-board.host-gameplay-presentation-mode > .game-scoreboard, .host-game-board.host-gameplay-presentation-mode > .game-scoreboard-resizer, .host-game-board.host-gameplay-presentation-mode > .game-side-controls { display: none; }
 .host-game-board.final-question-host > .game-side-controls { display: none; }
+
+/* Keep intro and final-question presentation content from inheriting narrow desktop caps. */
+main.page-shell:has(> .game-intro-page) {
+    max-width: none;
+}
+
+.game-intro-page .game-intro-group {
+    width: 100%;
+    max-width: none;
+}
+
+.game-intro-page .game-intro-blocks {
+    width: 100%;
+    max-width: none;
+}
+
+.game-intro-page .game-intro-text {
+    max-width: none;
+}
+
+.game-intro-page .game-intro-image {
+    width: 100%;
+    max-width: 100%;
+}
+
+.final-question-host .final-question-panel {
+    width: 100%;
+    max-width: none;
+}
+
+.final-question-host .final-question-panel .game-content-presentation {
+    width: 100%;
+    max-width: none;
+}
+
+.final-question-host .final-question-panel .game-content-text {
+    max-width: none;
+}
+
+.final-question-host .final-question-panel .game-content-caption {
+    max-width: none;
+}
+
 .player-lobby[data-final-status="finalanswering"] #player-final-panel > .game-content-blocks { display: none; }
 body:has(.player-buzzer-panel) { overflow-x: hidden; overflow-x: clip; overscroll-behavior-x: none; touch-action: pan-y; }
 .player-lobby:has(.player-buzzer-panel), .player-lobby:has(.player-buzzer-panel) .player-buzzer-panel { max-width: 100%; overflow-x: hidden; overflow-x: clip; overscroll-behavior-x: none; }
