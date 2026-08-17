@@ -23,9 +23,8 @@
     grid-column: auto;
     min-width: 0;
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
-    justify-content: start;
     column-gap: 1rem;
     row-gap: .75rem;
 }
@@ -43,6 +42,7 @@
 .host-avatar-frame-settings-row > .host-avatar-field > .host-avatar-frame-preview {
     grid-column: 1 / -1;
     grid-row: 2;
+    justify-self: center;
 }
 
 .host-avatar-frame-settings-row > .contributor-frame-settings {
@@ -55,8 +55,8 @@
     --host-avatar-frame-preview-inset: 0px;
     position: relative;
     display: block;
-    width: 9.5rem;
-    height: 9.5rem;
+    width: 11.75rem;
+    height: 11.75rem;
     margin-top: .75rem;
     flex: 0 0 auto;
 }
