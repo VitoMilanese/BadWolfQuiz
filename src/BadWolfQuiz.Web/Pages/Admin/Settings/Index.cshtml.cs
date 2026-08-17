@@ -39,6 +39,7 @@ public sealed class IndexModel(
     public bool HasHostImage { get; private set; }
     public bool HasBrandLogo { get; private set; }
     public bool IsContributor { get; private set; }
+    public bool CanUseAvatarFrame { get; private set; }
     public string HostId => currentHost.RequiredId;
     public int MaximumImageUploadMegabytes =>
         mediaUploadProcessor.MaximumImageUploadMegabytes(
@@ -70,7 +71,9 @@ public sealed class IndexModel(
         Input.HostName = host.DisplayName;
         HasHostImage = settings.HostImageData is not null;
         HasBrandLogo = settings.BrandLogoData is not null;
-        SetContributorViewData(ContributorRecognition.IsContributor(footerOptions.Value, host.DisplayName));
+        SetFrameAccess(ContributorRecognition.IsContributor(
+            footerOptions.Value,
+            host.DisplayName));
     }
 
     public async Task<IActionResult> OnGetBrandLogoAsync(
@@ -108,9 +111,11 @@ public sealed class IndexModel(
         var host = await db.Hosts.SingleAsync(
             item => item.Id == currentHost.RequiredId,
             cancellationToken);
-        SetContributorViewData(ContributorRecognition.IsContributor(footerOptions.Value, host.DisplayName));
+        SetFrameAccess(ContributorRecognition.IsContributor(
+            footerOptions.Value,
+            host.DisplayName));
 
-        if (!IsContributor)
+        if (!CanUseAvatarFrame)
         {
             Input.HostAvatarFrameEnabled = false;
             Input.HostAvatarFrameId = null;
@@ -208,11 +213,14 @@ public sealed class IndexModel(
         await db.SaveChangesAsync(cancellationToken);
 
         // Re-check after a display-name change. A non-contributor cannot gain
-        // frame access in the same POST, while a contributor who removes their
-        // contributor name loses the frame immediately.
+        // contributor frame access in the same POST, while premium access stays
+        // tied to the authenticated host identifier.
         IsContributor = IsContributor &&
             ContributorRecognition.IsContributor(footerOptions.Value, host.DisplayName);
-        if (!IsContributor)
+        CanUseAvatarFrame = IsContributor ||
+            premiumHostAccess.IsPremium(currentHost.RequiredId);
+        ViewData["ContributorHost"] = CanUseAvatarFrame;
+        if (!CanUseAvatarFrame)
         {
             Input.HostAvatarFrameEnabled = false;
             Input.HostAvatarFrameId = null;
@@ -239,8 +247,8 @@ public sealed class IndexModel(
         var themeUpdate = GameHub.CreateThemeUpdate(savedSettings);
         var contributorFrameUpdate = new
         {
-            enabled = IsContributor && savedSettings.HostAvatarFrameEnabled,
-            frameId = IsContributor ? savedSettings.HostAvatarFrameId : null
+            enabled = CanUseAvatarFrame && savedSettings.HostAvatarFrameEnabled,
+            frameId = CanUseAvatarFrame ? savedSettings.HostAvatarFrameId : null
         };
         foreach (var game in activeGames)
         {
@@ -259,9 +267,11 @@ public sealed class IndexModel(
         return RedirectToPage();
     }
 
-    private void SetContributorViewData(bool isContributor)
+    private void SetFrameAccess(bool isContributor)
     {
         IsContributor = isContributor;
-        ViewData["ContributorHost"] = isContributor;
+        CanUseAvatarFrame = isContributor ||
+            premiumHostAccess.IsPremium(currentHost.RequiredId);
+        ViewData["ContributorHost"] = CanUseAvatarFrame;
     }
 }

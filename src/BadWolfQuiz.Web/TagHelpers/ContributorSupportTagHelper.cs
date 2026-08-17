@@ -18,6 +18,7 @@ public sealed class ContributorSupportTagHelper(
     IAntiforgery antiforgery,
     GameSettingsStore settingsStore,
     CurrentHost currentHost,
+    PremiumHostAccess premiumHostAccess,
     QuizDbContext db,
     IOptions<FooterOptions> footerOptions,
     IStringLocalizer<ContributorResource> localizer,
@@ -62,12 +63,17 @@ public sealed class ContributorSupportTagHelper(
         var frames = ContributorAvatarFrameCatalog.GetFrames(environment);
         var defaultFrameId = frames.FirstOrDefault()?.Id ?? string.Empty;
         var debugMode = configuration.GetValue<bool>("DebugMode");
-        var hostIsContributor = ViewContext.ViewData["ContributorHost"] is bool hostOverride
-            ? hostOverride
-            : isAuthenticated && ContributorRecognition.IsContributor(
+        var hostIsContributor = isAuthenticated &&
+            ContributorRecognition.IsContributor(
                 footerOptions.Value,
                 hostDisplayName);
-        var hostFrameEnabled = hostIsContributor &&
+        var hostCanUseAvatarFrame =
+            ViewContext.ViewData["ContributorHost"] is bool hostOverride
+                ? hostOverride
+                : hostIsContributor ||
+                  (authenticatedHostId is not null &&
+                   premiumHostAccess.IsPremium(authenticatedHostId));
+        var hostFrameEnabled = hostCanUseAvatarFrame &&
             settings?.HostAvatarFrameEnabled == true &&
             ContributorAvatarFrameCatalog.IsValid(
                 environment,
@@ -90,7 +96,7 @@ public sealed class ContributorSupportTagHelper(
 
         output.Attributes.SetAttribute(
             "data-contributor-host",
-            hostIsContributor ? "true" : "false");
+            hostCanUseAvatarFrame ? "true" : "false");
         output.Attributes.SetAttribute(
             "data-contributor-host-frame-enabled",
             hostFrameEnabled ? "true" : "false");
@@ -124,7 +130,7 @@ public sealed class ContributorSupportTagHelper(
         var html = HtmlEncoder.Default;
         var page = ViewContext.RouteData.Values["page"]?.ToString();
         var showHostFrameControls = frames.Count > 0 &&
-            hostIsContributor &&
+            hostCanUseAvatarFrame &&
             string.Equals(
                 page,
                 "/Admin/Settings/Index",

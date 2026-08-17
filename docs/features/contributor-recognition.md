@@ -1,6 +1,6 @@
 # Contributor recognition and avatar frames
 
-BadWolfQuiz can recognize contributors by display name and expose optional avatar-frame customization for recognized hosts and players. Authenticated host accounts listed in `PremiumHosts:HostIds` can also use avatar frames while participating as players.
+BadWolfQuiz can recognize contributors by display name and expose optional avatar-frame customization for recognized hosts and players. Authenticated host accounts listed in `PremiumHosts:HostIds` can also use avatar frames both in their host Settings and while participating as players.
 
 ## Configuration
 
@@ -8,7 +8,7 @@ Contributor names come from the existing `Footer:Contributors` array in `appsett
 
 The recognition cookie is not an authorization mechanism. Contributor eligibility is always recalculated from the configured contributor list and the current host or player name.
 
-Premium player frame eligibility comes from the existing `PremiumHosts:HostIds` array. Because `GamePlayerId` is a game-scoped identifier, premium access is resolved from the authenticated host account in the player's browser (`CurrentHost.Id`). A player access token by itself never grants premium frame access.
+Premium frame eligibility comes from the existing `PremiumHosts:HostIds` array. For host Settings, the current authenticated host identifier is compared directly with that list. While participating as a player, premium access is likewise resolved from the authenticated host account in the player's browser (`CurrentHost.Id`) because `GamePlayerId` is a game-scoped identifier. A player access token by itself never grants premium frame access.
 
 `DebugMode` is a top-level `appsettings.json` switch and defaults to `false`. When enabled, the running host game page exposes temporary host-card/frame tuning controls in the header. These controls are browser-only helpers and do not change persisted host settings or frame files.
 
@@ -20,11 +20,11 @@ A long-lived, HTTP-only cookie scoped to the authenticated host identifier recor
 
 ## Host avatar frames
 
-Recognized hosts get an Avatar frame section on the global Settings page. They can enable or disable the frame and choose from the image frames stored in `Resources/Frames`. The frame picker uses the same thumbnail-grid interaction pattern as the avatar picker.
+Recognized contributor hosts and authenticated hosts whose ID is listed in `PremiumHosts:HostIds` get an Avatar frame section on the global Settings page. They can enable or disable the frame and choose from the image frames stored in `Resources/Frames`. The frame picker uses the same thumbnail-grid interaction pattern as the avatar picker.
 
-Host frame preference is persisted with the existing per-host game settings. The server strips contributor-only frame fields from Settings posts made by hosts whose current saved display name is not recognized as a contributor.
+Host frame preference is persisted with the existing per-host game settings. The server strips frame fields from Settings posts only when the host is neither a recognized contributor nor a currently configured premium host. Changing the display name cannot grant contributor access during the same Settings POST, while premium access remains tied to the authenticated host identifier rather than the display name.
 
-When a host frame setting changes, active game pages receive the updated frame state without requiring a game restart. The selected transparent PNG is rendered over the host avatar/image/webcam visual rather than drawing a CSS border. Host cards inserted while a newly created game is initializing are observed and receive the frame immediately, without requiring a page refresh.
+When a host frame setting changes, active game pages receive the updated frame state without requiring a game restart. The selected transparent PNG is rendered over the host avatar/image/webcam visual rather than drawing a CSS border. Host cards inserted while a newly created game is initializing are observed and receive the frame immediately, without requiring a page refresh. Premium host frames use the same live rendering path as contributor host frames.
 
 When `DebugMode` is enabled, the running-game header adds seven helper buttons after the normal header actions. The reset/refresh button removes the saved host-card size and restores the CSS default 100% card dimensions without changing its saved vertical position. The previous/next frame buttons cycle through the dynamically discovered frame catalog, wrapping at either end, so frames can be previewed without returning to Settings. The `+5`, `-5`, `+1`, and `-1` buttons temporarily adjust the selected debug frame's native-size avatar inset in 5px or 1px steps. A live `Xpx` value to the right shows the current native inset being tuned. Frame selection and inset adjustments are temporary for the current page; inset overrides are kept separately per frame, remain clamped at zero, and still scale proportionally when the host card is resized. Reloading the page clears the debug selection and adjustments.
 
