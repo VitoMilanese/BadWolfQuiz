@@ -60,6 +60,17 @@ public sealed class ContributorSupportTagHelper(
                 .SingleOrDefaultAsync(httpContext.RequestAborted);
         }
 
+        var page = ViewContext.RouteData.Values["page"]?.ToString();
+        var hostFrameSettings = settings;
+        if (string.Equals(
+                page,
+                "/Admin/Games/Lobby",
+                StringComparison.Ordinal) &&
+            ViewContext.ViewData.Model is BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel lobbyModel)
+        {
+            hostFrameSettings = lobbyModel.Game.Session.Settings;
+        }
+
         var frames = ContributorAvatarFrameCatalog.GetFrames(environment);
         var defaultFrameId = frames.FirstOrDefault()?.Id ?? string.Empty;
         var debugMode = configuration.GetValue<bool>("DebugMode");
@@ -74,13 +85,13 @@ public sealed class ContributorSupportTagHelper(
                   (authenticatedHostId is not null &&
                    premiumHostAccess.IsPremium(authenticatedHostId));
         var hostFrameEnabled = hostCanUseAvatarFrame &&
-            settings?.HostAvatarFrameEnabled == true &&
+            hostFrameSettings?.HostAvatarFrameEnabled == true &&
             ContributorAvatarFrameCatalog.IsValid(
                 environment,
-                settings.HostAvatarFrameId);
+                hostFrameSettings.HostAvatarFrameId);
         var hostFrameId = ContributorAvatarFrameCatalog.Normalize(
             environment,
-            settings?.HostAvatarFrameId) ?? defaultFrameId;
+            hostFrameSettings?.HostAvatarFrameId) ?? defaultFrameId;
         var playerIsContributor =
             ViewContext.ViewData["ContributorPlayer"] is true;
         var playerFrameIdValue =
@@ -128,20 +139,28 @@ public sealed class ContributorSupportTagHelper(
             localizer["ContributorFrame_SaveFailed"].Value);
 
         var html = HtmlEncoder.Default;
-        var page = ViewContext.RouteData.Values["page"]?.ToString();
+        var isGlobalSettingsPage = string.Equals(
+            page,
+            "/Admin/Settings/Index",
+            StringComparison.Ordinal);
+        var isGameSettingsPage = string.Equals(
+            page,
+            "/Admin/Games/Lobby",
+            StringComparison.Ordinal);
         var showHostFrameControls = frames.Count > 0 &&
             hostCanUseAvatarFrame &&
-            string.Equals(
-                page,
-                "/Admin/Settings/Index",
-                StringComparison.Ordinal);
+            (isGlobalSettingsPage || isGameSettingsPage);
 
         if (showHostFrameControls)
         {
             output.PostContent.AppendHtml(BuildHostTemplate(
                 html,
                 hostFrameEnabled,
-                hostFrameId));
+                hostFrameId,
+                isGameSettingsPage ? "SettingsInput" : "Input",
+                isGameSettingsPage
+                    ? "#start-game-form .settings-grid, #game-settings-dialog .settings-grid"
+                    : null));
         }
 
         if (playerIsContributor && frames.Count > 0)
@@ -187,22 +206,24 @@ public sealed class ContributorSupportTagHelper(
     private string BuildHostTemplate(
         HtmlEncoder html,
         bool enabled,
-        string frameId)
+        string frameId,
+        string inputPrefix,
+        string? targetSelector)
     {
         var checkedAttribute = enabled ? " checked" : string.Empty;
         var frameUrl = ContributorAvatarFrameCatalog.GetUrl(
             environment,
             frameId) ?? string.Empty;
-        return $$"""
+        var template = $$"""
             <template id="contributor-host-frame-template">
                 <div class="contributor-frame-settings" data-contributor-host-frame>
                     <strong>{{html.Encode(localizer["ContributorFrame_Title"].Value)}}</strong>
                     <label class="settings-checkbox">
                         <input type="checkbox"
-                               name="Input.HostAvatarFrameEnabled"
+                               name="{{html.Encode(inputPrefix)}}.HostAvatarFrameEnabled"
                                value="true"{{checkedAttribute}} />
                         <input type="hidden"
-                               name="Input.HostAvatarFrameEnabled"
+                               name="{{html.Encode(inputPrefix)}}.HostAvatarFrameEnabled"
                                value="false" />
                         <span>{{html.Encode(localizer["ContributorFrame_Enable"].Value)}}</span>
                     </label>
@@ -220,13 +241,32 @@ public sealed class ContributorSupportTagHelper(
                             </button>
                         </div>
                         <input type="hidden"
-                               name="Input.HostAvatarFrameId"
+                               name="{{html.Encode(inputPrefix)}}.HostAvatarFrameId"
                                value="{{html.Encode(frameId)}}"
                                data-contributor-frame-id />
                     </div>
                     <small>{{html.Encode(localizer["ContributorFrame_Hint"].Value)}}</small>
                 </div>
             </template>
+            """;
+
+        if (string.IsNullOrWhiteSpace(targetSelector))
+        {
+            return template;
+        }
+
+        return template + $$"""
+            <script>
+                (() => {
+                    const template = document.getElementById("contributor-host-frame-template");
+                    if (!template) return;
+                    for (const grid of document.querySelectorAll("{{targetSelector}}")) {
+                        if (!grid.querySelector("[data-contributor-host-frame]")) {
+                            grid.append(template.content.cloneNode(true));
+                        }
+                    }
+                })();
+            </script>
             """;
     }
 
