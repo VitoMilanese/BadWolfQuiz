@@ -8,6 +8,8 @@ Contributor names come from the existing `Footer:Contributors` array in `appsett
 
 The recognition cookie is not an authorization mechanism. Contributor eligibility is always recalculated from the configured contributor list and the current host or player name.
 
+`DebugMode` is a top-level `appsettings.json` switch and defaults to `false`. When enabled, the running host game page exposes temporary host-card/frame tuning controls in the header. These controls are browser-only helpers and do not change persisted host settings or frame files.
+
 ## Thank-you dialog
 
 On the first Razor page opened by an authenticated recognized host in a browser that has not seen the contributor acknowledgement before, the application shows a localized thank-you dialog. This also covers hosts whose authentication session already existed before the feature was deployed; they do not need to sign out and sign in again.
@@ -21,6 +23,8 @@ Recognized hosts get an Avatar frame section on the global Settings page. They c
 Host frame preference is persisted with the existing per-host game settings. The server strips contributor-only frame fields from Settings posts made by hosts whose current saved display name is not recognized as a contributor.
 
 When a host frame setting changes, active game pages receive the updated frame state without requiring a game restart. The selected transparent PNG is rendered over the host avatar/image/webcam visual rather than drawing a CSS border. Host cards inserted while a newly created game is initializing are observed and receive the frame immediately, without requiring a page refresh.
+
+When `DebugMode` is enabled, the running-game header adds three helper buttons after the normal header actions. The reset/refresh button removes the saved host-card size and restores the CSS default 100% card dimensions without changing its saved vertical position. The `+5` and `-5` buttons temporarily adjust the selected host frame's native-size avatar inset in 5px steps. The adjustment starts from the value parsed from the frame file name, is clamped at zero, is kept separately per frame for the current page, and is still scaled proportionally when the host card is resized. Reloading the page clears these temporary adjustments.
 
 ## Player avatar frames
 

@@ -21,6 +21,7 @@ public sealed class ContributorSupportTagHelper(
     QuizDbContext db,
     IOptions<FooterOptions> footerOptions,
     IStringLocalizer<ContributorResource> localizer,
+    IConfiguration configuration,
     IWebHostEnvironment environment) : TagHelper
 {
     [ViewContext]
@@ -60,6 +61,7 @@ public sealed class ContributorSupportTagHelper(
 
         var frames = ContributorAvatarFrameCatalog.GetFrames(environment);
         var defaultFrameId = frames.FirstOrDefault()?.Id ?? string.Empty;
+        var debugMode = configuration.GetValue<bool>("DebugMode");
         var hostIsContributor = ViewContext.ViewData["ContributorHost"] is bool hostOverride
             ? hostOverride
             : isAuthenticated && ContributorRecognition.IsContributor(
@@ -112,6 +114,9 @@ public sealed class ContributorSupportTagHelper(
             string.Join(
                 ";",
                 frames.Select(frame => $"{frame.Id}:{frame.AvatarInsetPixels}")));
+        output.Attributes.SetAttribute(
+            "data-debug-mode",
+            debugMode ? "true" : "false");
         output.Attributes.SetAttribute(
             "data-contributor-frame-save-failed",
             localizer["ContributorFrame_SaveFailed"].Value);
