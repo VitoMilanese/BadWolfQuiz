@@ -26,6 +26,8 @@ The same frame controls are also available in the current game's settings: in th
 
 Host frame preference from the global Settings page is persisted with the existing per-host game settings. The server strips frame fields from global Settings posts only when the host is neither a recognized contributor nor a currently configured premium host. Changing the display name cannot grant contributor access during the same Settings POST, while premium access remains tied to the authenticated host identifier rather than the display name.
 
+Running-game **Tools → Game settings** submissions are handled asynchronously. After a successful server save, the current host avatar is updated directly inside the existing live host card when Avatar is the selected visual source, so changing the avatar does not require `F5`. The host-card DOM node itself is preserved, which keeps its drag/resize state and allows the active frame overlay to remain attached to the same card. The gameplay region is then refreshed from the saved session state.
+
 When a host frame setting changes, active game pages receive the updated frame state without requiring a game restart. The selected transparent PNG is rendered over the host avatar/image/webcam visual rather than drawing a CSS border. Host cards inserted while a newly created game is initializing are observed and receive the frame immediately, without requiring a page refresh. Premium host frames use the same live rendering path as contributor host frames.
 
 When `DebugMode` is enabled, the running-game header adds seven helper buttons after the normal header actions. The reset/refresh button removes the saved host-card size and restores the CSS default 100% card dimensions without changing its saved vertical position. The previous/next frame buttons cycle through the dynamically discovered frame catalog, wrapping at either end, so frames can be previewed without returning to Settings. The `+5`, `-5`, `+1`, and `-1` buttons temporarily adjust the selected debug frame's native-size avatar inset in 5px or 1px steps. A live `Xpx` value to the right shows the current native inset being tuned. Frame selection and inset adjustments are temporary for the current page; inset overrides are kept separately per frame, remain clamped at zero, and still scale proportionally when the host card is resized. Reloading the page clears the debug selection and adjustments.
@@ -51,3 +53,7 @@ Numeric frame IDs are ordered numerically first, followed by other IDs. Frames a
 ## Localization
 
 Contributor-specific UI strings live in `ContributorResource` resources for EN, UK, IT, and RU. As required by the project localization convention, every feature value in `ContributorResource.ru.resx` is exactly `Україна`.
+
+## Release
+
+Contributor recognition and avatar-frame customization are targeted for **BadWolfQuiz Web 1.15.0** with tag `web-v1.15.0`. The implementation is tracked by issue #110 and PR #229. Because 1.15.0 has not been released yet, fixes found while validating this feature remain part of 1.15.0 rather than creating a 1.15.1 patch release.
