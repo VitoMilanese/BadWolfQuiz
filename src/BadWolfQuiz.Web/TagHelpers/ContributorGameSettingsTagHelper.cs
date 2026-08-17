@@ -18,10 +18,7 @@ public sealed class ContributorGameSettingsTagHelper : TagHelper
         TagHelperOutput output)
     {
         var page = ViewContext.RouteData.Values["page"]?.ToString();
-        if (!string.Equals(
-                page,
-                "/Admin/Games/Lobby",
-                StringComparison.Ordinal))
+        if (page is not "/Admin/Games/Lobby" and not "/Admin/Settings/Index")
         {
             return;
         }
