@@ -62,12 +62,14 @@ public sealed class ContributorSupportTagHelper(
         }
 
         var page = ViewContext.RouteData.Values["page"]?.ToString();
+        var isGameHostFlowPage = page is
+            "/Admin/Games/Lobby" or
+            "/Admin/Games/RoundIntro" or
+            "/Admin/Games/RunningRoundIntro" or
+            "/Admin/Games/FinalQuestionTransition";
         var hostFrameSettings = settings;
         if (authenticatedHostId is { } gameHostId &&
-            string.Equals(
-                page,
-                "/Admin/Games/Lobby",
-                StringComparison.Ordinal) &&
+            isGameHostFlowPage &&
             Guid.TryParse(
                 ViewContext.RouteData.Values["id"]?.ToString(),
                 out var gameSessionId))
@@ -337,7 +339,7 @@ public sealed class ContributorSupportTagHelper(
             $"data-contributor-frame-option=\"{html.Encode(frame.Id)}\" " +
             $"data-contributor-frame-url=\"{html.Encode(frame.Url)}\" " +
             $"aria-label=\"{html.Encode(localizer["ContributorFrame_Label"].Value)} {html.Encode(frame.Id)}\">" +
-            $"<img src=\"{html.Encode(frame.Url)}\" alt=\"\" /></button>"));
+            $"<img data-contributor-frame-thumbnail-src=\"{html.Encode(frame.Url)}\" alt=\"\" loading=\"lazy\" decoding=\"async\" /></button>"));
 
         return $$"""
             <dialog class="avatar-picker contributor-frame-picker" data-contributor-frame-picker>
@@ -354,6 +356,26 @@ public sealed class ContributorSupportTagHelper(
                     </div>
                 </div>
             </dialog>
+            <script>
+                (() => {
+                    const picker = document.querySelector("[data-contributor-frame-picker]");
+                    if (!picker) return;
+                    let thumbnailsLoaded = false;
+                    const loadThumbnails = () => {
+                        if (thumbnailsLoaded) return;
+                        thumbnailsLoaded = true;
+                        for (const image of picker.querySelectorAll(
+                            "img[data-contributor-frame-thumbnail-src]")) {
+                            image.src = image.dataset.contributorFrameThumbnailSrc;
+                        }
+                    };
+                    document.addEventListener("click", event => {
+                        if (event.target.closest?.("[data-open-contributor-frame-picker]")) {
+                            loadThumbnails();
+                        }
+                    }, true);
+                })();
+            </script>
             """;
     }
 

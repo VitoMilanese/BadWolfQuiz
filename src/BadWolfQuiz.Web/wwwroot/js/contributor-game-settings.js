@@ -105,9 +105,6 @@
     };
 
     const startGameForm = document.getElementById("start-game-form");
-    const startButton = document.querySelector(
-        '.lobby-start-button[form="start-game-form"]'
-    );
     const redundantSaveActions = startGameForm?.querySelector(
         ":scope > .form-actions"
     );
@@ -116,37 +113,8 @@
     const lobbyFramePanel = startGameForm?.querySelector(
         "[data-contributor-host-frame]"
     );
-    let lobbyFrameSyncVersion = 0;
-
-    const syncLobbyFrameState = async () => {
-        const state = readFormState(startGameForm);
-        if (!state) {
-            return;
-        }
-
-        preloadFrame(state);
-        const version = ++lobbyFrameSyncVersion;
-        startButton?.setAttribute("disabled", "disabled");
-
-        try {
-            await syncHostFrame(state, startGameForm);
-            await new Promise(resolve => window.setTimeout(resolve, 0));
-        } catch (error) {
-            console.error("Failed to synchronize the lobby host frame.", error);
-            window.alert(
-                error?.message ||
-                body.dataset.contributorFrameSaveFailed ||
-                ""
-            );
-        } finally {
-            if (version === lobbyFrameSyncVersion) {
-                startButton?.removeAttribute("disabled");
-            }
-        }
-    };
-
     lobbyFramePanel?.addEventListener("change", () => {
-        void syncLobbyFrameState();
+        preloadFrame(readFormState(startGameForm));
     });
     preloadFrame(readFormState(startGameForm));
 
