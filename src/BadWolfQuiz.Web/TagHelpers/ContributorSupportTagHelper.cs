@@ -17,6 +17,7 @@ namespace BadWolfQuiz.Web.TagHelpers;
 public sealed class ContributorSupportTagHelper(
     IAntiforgery antiforgery,
     GameSettingsStore settingsStore,
+    GameSessionRegistry sessionRegistry,
     CurrentHost currentHost,
     PremiumHostAccess premiumHostAccess,
     QuizDbContext db,
@@ -62,13 +63,22 @@ public sealed class ContributorSupportTagHelper(
 
         var page = ViewContext.RouteData.Values["page"]?.ToString();
         var hostFrameSettings = settings;
-        if (string.Equals(
+        if (authenticatedHostId is { } gameHostId &&
+            string.Equals(
                 page,
                 "/Admin/Games/Lobby",
                 StringComparison.Ordinal) &&
-            ViewContext.ViewData.Model is BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel lobbyModel)
+            Guid.TryParse(
+                ViewContext.RouteData.Values["id"]?.ToString(),
+                out var gameSessionId))
         {
-            hostFrameSettings = lobbyModel.Game.Session.Settings;
+            var game = sessionRegistry.FindOwned(
+                new BadWolfQuiz.Game.Runtime.GameSessionId(gameSessionId),
+                gameHostId);
+            if (game is not null)
+            {
+                hostFrameSettings = game.Session.Settings;
+            }
         }
 
         var frames = ContributorAvatarFrameCatalog.GetFrames(environment);

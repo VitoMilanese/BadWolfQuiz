@@ -1,4 +1,38 @@
+@using BadWolfQuiz.Web.Data
+@using BadWolfQuiz.Web.Services
+@using Microsoft.EntityFrameworkCore
 @model BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel
+@inject CurrentHost CurrentHost
+@inject PremiumHostAccess PremiumHostAccess
+@inject QuizDbContext Db
+@inject Microsoft.Extensions.Options.IOptions<FooterOptions> FooterOptions
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment FrameEnvironment
+@inject IStringLocalizer<ContributorResource> ContributorLocalizer
+@{
+    var currentHostId = CurrentHost.RequiredId;
+    var canUseAvatarFrame = PremiumHostAccess.IsPremium(currentHostId);
+    if (!canUseAvatarFrame)
+    {
+        var currentHostDisplayName = await Db.Hosts
+            .AsNoTracking()
+            .Where(host => host.Id == currentHostId)
+            .Select(host => host.DisplayName)
+            .SingleOrDefaultAsync();
+        canUseAvatarFrame = ContributorRecognition.IsContributor(
+            FooterOptions.Value,
+            currentHostDisplayName);
+    }
+
+    var gameFrameId = ContributorAvatarFrameCatalog.Normalize(
+        FrameEnvironment,
+        Model.SettingsInput.HostAvatarFrameId);
+    var gameFrameUrl = ContributorAvatarFrameCatalog.GetUrl(
+        FrameEnvironment,
+        gameFrameId);
+    var showAvatarFrameSettings = canUseAvatarFrame &&
+        !string.IsNullOrWhiteSpace(gameFrameId) &&
+        !string.IsNullOrWhiteSpace(gameFrameUrl);
+}
 
 <p class="settings-description">
     @Localizer["GameSettings_LobbyDescription"]
@@ -107,6 +141,41 @@
                  hidden="@(Model.Game.Session.Settings.HostImageData is not null ? null : "hidden")" />
         </span>
     </label>
+    @if (showAvatarFrameSettings)
+    {
+        <div class="contributor-frame-settings" data-contributor-host-frame>
+            <strong>@ContributorLocalizer["ContributorFrame_Title"]</strong>
+            <label class="settings-checkbox">
+                <input type="checkbox"
+                       name="SettingsInput.HostAvatarFrameEnabled"
+                       value="true"
+                       checked="@(Model.SettingsInput.HostAvatarFrameEnabled ? "checked" : null)" />
+                <input type="hidden"
+                       name="SettingsInput.HostAvatarFrameEnabled"
+                       value="false" />
+                <span>@ContributorLocalizer["ContributorFrame_Enable"]</span>
+            </label>
+            <div class="contributor-frame-choice">
+                <span>@ContributorLocalizer["ContributorFrame_Label"]</span>
+                <div class="contributor-frame-choice-row">
+                    <img class="contributor-frame-choice-preview"
+                         data-contributor-frame-preview
+                         src="@gameFrameUrl"
+                         alt="" />
+                    <button class="button button-secondary"
+                            type="button"
+                            data-open-contributor-frame-picker>
+                        @ContributorLocalizer["ContributorFrame_Label"]
+                    </button>
+                </div>
+                <input type="hidden"
+                       name="SettingsInput.HostAvatarFrameId"
+                       value="@gameFrameId"
+                       data-contributor-frame-id />
+            </div>
+            <small>@ContributorLocalizer["ContributorFrame_Hint"]</small>
+        </div>
+    }
 </div>
 
 <script>
