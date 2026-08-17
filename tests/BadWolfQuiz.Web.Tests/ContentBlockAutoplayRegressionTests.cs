@@ -96,7 +96,7 @@ public sealed class ContentBlockAutoplayRegressionTests
         Assert.Contains("stopAllExcept(exceptRoot)", autoplayLifecycle, StringComparison.Ordinal);
         Assert.Contains("media.setAttribute(\"autoplay\", \"\");", autoplayLifecycle, StringComparison.Ordinal);
         Assert.Contains("media.play()", autoplayLifecycle, StringComparison.Ordinal);
-        Assert.Contains("window.BadWolfYouTubeAutoExpand?.autoplay?.(root);", autoplayLifecycle, StringComparison.Ordinal);
+        Assert.Contains("window.BadWolfYouTubeAutoExpand?.autoplay?.(target);", autoplayLifecycle, StringComparison.Ordinal);
         Assert.DoesNotContain("tryAutoplayNativeMedia", mediaLifecycle, StringComparison.Ordinal);
         Assert.Contains("media.pause();", mediaLifecycle, StringComparison.Ordinal);
         Assert.Contains("media.currentTime = 0", mediaLifecycle, StringComparison.Ordinal);
