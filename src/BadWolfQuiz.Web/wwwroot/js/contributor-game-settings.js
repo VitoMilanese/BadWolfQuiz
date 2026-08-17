@@ -88,51 +88,35 @@
     };
 
     const startGameForm = document.getElementById("start-game-form");
-    const startButton = document.querySelector(
-        '.lobby-start-button[form="start-game-form"]'
-    );
-
     const redundantSaveActions = startGameForm?.querySelector(
         ":scope > .form-actions"
     );
     redundantSaveActions?.remove();
 
-    let startSubmissionReady = false;
-    startGameForm?.addEventListener("submit", async event => {
-        if (startSubmissionReady) {
-            startSubmissionReady = false;
-            return;
-        }
+    const lobbyFramePanel = startGameForm?.querySelector(
+        "[data-contributor-host-frame]"
+    );
+    let lobbyFrameChanged = false;
+    lobbyFramePanel?.addEventListener("change", () => {
+        lobbyFrameChanged = true;
+    });
 
-        if (event.submitter !== startButton) {
-            event.preventDefault();
-            return;
-        }
+    if (lobbyFramePanel) {
+        const runningViewObserver = new MutationObserver(() => {
+            if (!lobbyFrameChanged ||
+                !document.querySelector(".host-game-board[data-game-code]")) {
+                return;
+            }
 
-        const nextFrameState = readFormState(startGameForm);
-        if (!nextFrameState) {
-            return;
-        }
-
-        event.preventDefault();
-        startButton?.setAttribute("disabled", "disabled");
-
-        try {
-            await syncHostFrame(nextFrameState, startGameForm);
-            await new Promise(resolve => window.requestAnimationFrame(resolve));
-            startSubmissionReady = true;
-            startButton?.removeAttribute("disabled");
-            startGameForm.requestSubmit(startButton);
-        } catch (error) {
-            console.error("Failed to synchronize the host frame before starting.", error);
-            window.alert(
-                error?.message ||
-                body.dataset.contributorFrameSaveFailed ||
-                ""
-            );
-            startButton?.removeAttribute("disabled");
-        }
-    }, true);
+            lobbyFrameChanged = false;
+            runningViewObserver.disconnect();
+            window.location.reload();
+        });
+        runningViewObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
 
     const dialog = document.getElementById("game-settings-dialog");
     const settingsForm = dialog?.querySelector("form");
