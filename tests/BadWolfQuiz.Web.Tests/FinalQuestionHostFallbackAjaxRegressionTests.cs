@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class FinalQuestionHostFallbackAjaxRegressionTests
 {
     [Fact]
-    public void Host_bootstrap_loads_lightweight_final_fallback_actions()
+    public void Host_bootstrap_guards_first_fallback_click_before_asset_is_ready()
     {
         var bootstrap = File.ReadAllText(Path.Combine(
             FindRepositoryRoot(),
@@ -14,9 +14,25 @@ public sealed class FinalQuestionHostFallbackAjaxRegressionTests
             "gameplay-escape-shortcuts.js"));
 
         Assert.Contains(
-            "/js/final-player-fallback-actions.js?v=2",
+            "/js/final-player-fallback-actions.js?v=3",
             bootstrap,
             StringComparison.Ordinal);
+        Assert.Contains("pendingFinalFallbackClicks", bootstrap, StringComparison.Ordinal);
+        Assert.Contains(
+            "window.badWolfFinalPlayerFallbackActionsInitialized",
+            bootstrap,
+            StringComparison.Ordinal);
+        Assert.Contains("replayPendingFinalFallbackClicks", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("event.stopImmediatePropagation()", bootstrap, StringComparison.Ordinal);
+
+        var fallbackAssetIndex = bootstrap.IndexOf(
+            "/js/final-player-fallback-actions.js?v=3",
+            StringComparison.Ordinal);
+        var hostTargetIndex = bootstrap.IndexOf(
+            "const hostGameplayTarget",
+            StringComparison.Ordinal);
+        Assert.True(fallbackAssetIndex >= 0);
+        Assert.True(hostTargetIndex > fallbackAssetIndex);
     }
 
     [Fact]

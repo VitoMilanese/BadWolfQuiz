@@ -57,6 +57,30 @@ public sealed class FinalQuestionJudgingTransitionRegressionTests
         Assert.Contains("display: none !important;", styles, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Final_judging_locks_both_decision_buttons_immediately()
+    {
+        var bootstrap = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "gameplay-escape-shortcuts.js"));
+
+        Assert.Contains(".final-judging-actions", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("finalJudgingSubmitting", bootstrap, StringComparison.Ordinal);
+        Assert.Contains(
+            "form.querySelectorAll(\"button[name='isCorrect']\")",
+            bootstrap,
+            StringComparison.Ordinal);
+        Assert.Contains("form.setAttribute(\"inert\", \"\")", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("button.disabled = true", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("const buttonObserver = new MutationObserver", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("releaseFinalJudgingLock", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("game-board-error", bootstrap, StringComparison.Ordinal);
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
