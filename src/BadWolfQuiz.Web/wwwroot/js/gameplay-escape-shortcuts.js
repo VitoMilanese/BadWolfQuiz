@@ -45,6 +45,12 @@
         loadSharedScript("/js/editor-reset-button.js");
     }
 
+    const quizCloneTarget = document.querySelector(
+        ".quiz-list .quiz-action-menu");
+    if (quizCloneTarget) {
+        loadSharedScript("/js/quiz-clone-action.js");
+    }
+
     const editorSaveOverlayTarget = document.querySelector(
         "form.quiz-board-form, form.question-editor");
     if (editorSaveOverlayTarget) {
