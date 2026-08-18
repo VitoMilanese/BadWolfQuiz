@@ -1,6 +1,136 @@
 (function () {
     "use strict";
 
+    const editorSaveOverlayDurationMs = 1000;
+    const editorSaveOverlayTransitionMs = 150;
+    const editorSaveOverlayTimers = new WeakMap();
+
+    function ensureEditorSaveOverlayStyles() {
+        if (document.getElementById("editor-save-overlay-styles")) {
+            return;
+        }
+
+        const style = document.createElement("style");
+        style.id = "editor-save-overlay-styles";
+        style.textContent = `
+.editor-save-overlay {
+    position: fixed !important;
+    z-index: 1200;
+    left: 50%;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    width: max-content;
+    max-width: min(720px, calc(100vw - 32px));
+    margin: 0 !important;
+    box-sizing: border-box;
+    transform: translateX(-50%);
+    pointer-events: none;
+    text-align: center;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.32);
+    transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.editor-save-overlay.editor-save-overlay-hiding {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+}
+
+.editor-save-overlay[hidden] {
+    display: none !important;
+}`;
+        document.head.appendChild(style);
+    }
+
+    function moveEditorSaveStatusToOverlay(status) {
+        ensureEditorSaveOverlayStyles();
+        status.classList.add("editor-save-overlay");
+        if (status.parentElement !== document.body) {
+            document.body.appendChild(status);
+        }
+    }
+
+    function scheduleEditorSaveOverlayHide(status) {
+        const previousTimer = editorSaveOverlayTimers.get(status);
+        if (previousTimer) {
+            window.clearTimeout(previousTimer);
+        }
+
+        const hideTimer = window.setTimeout(() => {
+            status.classList.add("editor-save-overlay-hiding");
+            const transitionTimer = window.setTimeout(() => {
+                status.hidden = true;
+                status.classList.remove("editor-save-overlay-hiding");
+            }, editorSaveOverlayTransitionMs);
+            editorSaveOverlayTimers.set(status, transitionTimer);
+        }, editorSaveOverlayDurationMs);
+
+        editorSaveOverlayTimers.set(status, hideTimer);
+    }
+
+    function showEditorSaveStatus(status) {
+        moveEditorSaveStatusToOverlay(status);
+        status.classList.remove("editor-save-overlay-hiding", "message-hidden");
+        scheduleEditorSaveOverlayHide(status);
+    }
+
+    function watchEditorSaveStatus(status) {
+        moveEditorSaveStatusToOverlay(status);
+
+        const sync = () => {
+            if (status.hidden || !status.textContent?.trim()) {
+                return;
+            }
+
+            showEditorSaveStatus(status);
+        };
+
+        const observer = new MutationObserver(sync);
+        observer.observe(status, {
+            attributes: true,
+            attributeFilter: ["hidden"],
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
+        sync();
+    }
+
+    function getEditorValidationMessage(editor) {
+        const candidates = editor.querySelectorAll(
+            ".validation-summary li, .field-validation-error, .text-danger");
+
+        for (const candidate of candidates) {
+            const message = candidate.textContent?.trim();
+            if (message) {
+                return message;
+            }
+        }
+
+        return "";
+    }
+
+    function initializeEditorSaveOverlay() {
+        const editor = document.querySelector("form.question-editor");
+        if (!editor) {
+            return;
+        }
+
+        document.querySelectorAll(
+            "#success-message, [data-question-save-status]")
+            .forEach(watchEditorSaveStatus);
+
+        const validationMessage = getEditorValidationMessage(editor);
+        if (!validationMessage) {
+            return;
+        }
+
+        const status = document.createElement("div");
+        status.className = "alert alert-error editor-save-overlay";
+        status.setAttribute("role", "status");
+        status.textContent = validationMessage;
+        document.body.appendChild(status);
+        showEditorSaveStatus(status);
+    }
+
     let filePickerPending = false;
     let suppressEscapeUntil = 0;
 
@@ -225,6 +355,7 @@
         selectTab("question");
     }
 
+    initializeEditorSaveOverlay();
     initializeQuestionEditorTabs();
 
     document.addEventListener("click", async event => {
