@@ -8,10 +8,10 @@ dedicated regular-question and final-question editors.
 
 ## Board settings
 
-The regular **Save** action submits board settings asynchronously. A successful
-save keeps the current page and scroll position and displays localized feedback
-that disappears after four seconds. Validation and unexpected failures remain
-visible so the host can correct them.
+The regular **Save** action submits board settings asynchronously. Save-result
+feedback is shown as a temporary localized overlay in the upper part of the
+screen, below the top bar, so it stays clear of the footer and does not disturb
+the current page position.
 
 Changes to category or question counts may still reload the page because the
 board structure must be rebuilt. The **Play** action also keeps its navigation
@@ -23,6 +23,20 @@ preserving their order, content, captions, media references, and stored file dat
 so editing the description in the new round does not modify the source round.
 Categories without description blocks remain without descriptions in the new
 round.
+
+## Save feedback
+
+The quiz editor, regular-question editor, final-question editor,
+round-description editor, and category-description editor share the same
+save-result presentation. Success and failure results appear in a prominent,
+non-interactive overlay below the top bar for approximately 1.5 seconds and then
+fade automatically. The overlay uses `pointer-events: none`, so it never blocks
+editor interaction.
+
+Existing save requests, redirects, validation, and error handling are preserved.
+Round and category description saves continue to redirect back to the description
+editor after a successful save; the `saved` query value is interpreted as a
+boolean so the shared success overlay is rendered reliably after that redirect.
 
 ## Regular questions
 
@@ -39,9 +53,10 @@ when moving between tabs. The question-type controls belong to the question side
 and are hidden while the answer tab is active.
 
 After a successful save, the editor clears consumed file inputs and remove-file
-flags. Localized success feedback disappears automatically, while validation
-feedback remains beside the editor actions. A **Next question** action is shown
-only when a question with a greater `RowIndex` exists in the same category.
+flags. Localized save-result feedback uses the shared top-screen overlay, while
+existing validation state remains available in the editor. A **Next question**
+action is shown only when a question with a greater `RowIndex` exists in the same
+category.
 
 The system file picker may be cancelled with Escape without triggering the
 editor's own Escape navigation.
