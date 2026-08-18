@@ -44,6 +44,15 @@ The in-place host flow covers the common running-game transitions, including:
 
 Responses that cannot be represented safely inside the current host shell still use normal browser navigation as a failure or unsupported-boundary fallback.
 
+## Escape gameplay shortcuts
+
+The host can use **Escape** to leave the content-only gameplay views without creating a separate navigation path. The shortcut activates the same rendered action that the host would use with the mouse or touch controls:
+
+- an active round/category intro finishes through the current **Skip**, **Start game**/**Start round**, or **Return to board** action, depending on the displayed intro state;
+- a resolved question or answer preview returns to the board through its existing **Return to board** link.
+
+If none of those views is active, Escape does not change gameplay state. Gameplay Escape handling is also suppressed while a dialog, action menu, language menu, or other visible menu is open, so the active UI layer can consume Escape without also navigating or advancing the game.
+
 ## First-round bootstrap
 
 The first round starts before the persistent running-game Lobby shell exists, so it uses `RoundIntro.cshtml` as a standalone presentation.

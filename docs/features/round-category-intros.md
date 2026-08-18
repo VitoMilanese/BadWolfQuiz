@@ -48,6 +48,8 @@ Returning to an earlier unfinished round first shows the current round leaderboa
 
 Every category receives an intro page even when its description is empty. **Next** advances through the sequence, **Skip** opens the round board immediately, and the final category replaces those actions with **Start game**.
 
+During an active intro, the host can press **Escape** to perform the same completion action as the current UI control: **Skip** where it is available, or **Start game**/**Start round** on the final intro. When a category intro is reopened from the round board, Escape uses the existing **Return to board** action and leaves game state unchanged. Open dialogs and menus take priority over this gameplay shortcut.
+
 During regular round-board play, the host can click the full category header cell to reopen only that category's intro presentation. Closing that presentation returns directly to the current round board without changing game state. The category header uses the same hover emphasis as playable question cells.
 
 When no players are present, the game does not show an empty inter-round leaderboard before the next intro.
