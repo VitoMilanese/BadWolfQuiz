@@ -10,13 +10,15 @@ The quiz editor provides a dedicated final-question editor. It uses the same ord
 
 Final content is stored separately from round questions and copied into the immutable `FinalQuestionSnapshot` when a game lobby is created. A quiz without final content produces no final snapshot and keeps the existing non-final game flow.
 
+Active-game recovery starts once normal gameplay has meaningful recoverable state. Opening the first regular question still starts persistence as before. Advancing directly to the Final Question also starts persistence when the session reaches `FinalWagering`, even if every regular question is still `Available`. `FinalWagering`, `FinalAnswering`, and `FinalJudging` snapshots are eligible for restoration after a process restart.
+
 ## Runtime flow
 
 1. After the last board round is complete, the host enters a localized **Final question** transition page.
 2. The transition has no manual controls and automatically continues after 3 seconds.
-3. Every participating player submits and confirms a private wager. While a wager is missing, the host can submit the minimum allowed wager on that player's behalf, regardless of connection or presence state.
+3. Every participating player submits and confirms a private wager. While a wager is missing for an inactive player, the host can submit the minimum allowed wager on that player's behalf.
 4. The Engine locks wagering only after every wager is present.
-5. The question is released and players submit private answers. While an answer is missing, the host can submit `-` on that player's behalf, regardless of connection or presence state.
+5. The question is released and players submit private answers. While an answer is missing for an inactive player, the host can submit `-` on that player's behalf.
 6. The Engine locks answering only after every answer is present.
 7. The host judges each answer.
 8. The wager is added for a correct answer and subtracted for an incorrect answer.
@@ -44,25 +46,26 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 
 - The last round summary offers the final phase only when the immutable quiz snapshot contains complete final question and answer content.
 - Normal and forced entry into the final phase first show the localized, automatic 3-second **Final question** transition.
-- When a final question is available, the host action menu provides a shortcut
-  to leave the current regular round and advance directly to the final phase.
-  The host must confirm the action. Unclosed regular-round questions are left
-  unchanged rather than being force-resolved by this navigation action.
+- When a final question is available, the host action menu provides a shortcut to leave the current regular round and advance directly to the final phase. The host must confirm the action. Unclosed regular-round questions are left unchanged rather than being force-resolved by this navigation action.
+- During final wagering, player submission state is displayed as an always-visible vertical panel on the right on desktop host layouts. The panel scrolls independently for long player lists so the waiting message and **Show question** action remain available in the main area.
+- During final answering, player submission state moves into a right-side drawer. On pointer-driven desktop layouts the drawer remains collapsed to a narrow player handle until hover or keyboard focus opens it. Narrow/touch layouts keep an inline responsive fallback.
+- Player names that do not fit their available width use the shared overflow-only ping-pong marquee in the final submission list, bottom player cards, and the right-side in-game scoreboard. The text moves only by the measured overflow distance, pauses at each visible edge, then reverses direction instead of scrolling into an empty interval.
 - During wagering, the host sees submission progress but not the wager amounts.
-- For every player whose wager is still missing, the host can submit the minimum allowed wager on the player's behalf. This action is available even when the player is `Active`, because an active connection can still be AFK.
+- For every inactive player whose wager is still missing, the host can submit the minimum allowed wager on the player's behalf.
 - Locking wagers releases the final question to participating player devices.
 - During answering, the host sees submission progress but not answer text.
-- For every player whose answer is still missing, the host can submit `-` on the player's behalf. This action is also independent of player presence.
-- Host-submitted wagers and answers are propagated to the affected player's
-  page in real time, so the player interface reflects the submission as if the
-  player had submitted it directly.
+- For every inactive player whose answer is still missing, the host can submit `-` on the player's behalf.
+- Host fallback wager/answer actions use a dedicated lightweight AJAX endpoint. Rapid clicks are serialized, duplicate requests are idempotent, only the affected host row is updated locally, and no full host or player-page refresh broadcast is triggered by those fallback operations.
+- The fallback helper is loaded eagerly. If the first fallback click occurs before the helper asset finishes loading, the bootstrap captures and queues that click rather than allowing the legacy form-navigation path to run.
 - The host can remove a player throughout final wagering, answering, and judging. The final-question state and host controls refresh immediately after player changes.
 - Removing the final remaining player completes the game immediately. The completed host screen keeps **Finish game** available but does not render **Final results** or an empty podium when `FinalStandings` is empty.
 - Locking answers starts a sequential presentation of player submissions. The host sees one player name and answer at a time, judges it as correct or incorrect, and then advances automatically to the next submission.
+- As soon as the host submits **Correct** or **Incorrect**, both judging buttons are disabled together and the current judging form remains locked until the refreshed view replaces it. A genuine command error releases the lock so the host can retry.
 - The host **Tools** menu remains available on the inter-round leaderboard and throughout final wagering, answering, and judging. In these limited states, **Choose random player**, **Next round**, and **Advance to final question** are hidden, while applicable tools such as answer history, answer key, blocked-player management, and game settings remain available.
 - Join information is exposed as a dedicated QR button in the game header between **Tools** and the Discord microphone button rather than as an item inside **Tools**. The button opens the existing join-information panel.
-- The final-question host panel uses the same viewport-width presentation as an active regular question. Both the outer host container and the inner question/answer presentation use the available gameplay width instead of inheriting the shared `1200px` presentation and `1100px` text caps. Normal responsive padding and media height/`object-fit` constraints remain unchanged.
+- The final-question host panel uses the same viewport-width presentation as an active regular question. During wagering/answering the panel uses compact spacing and gives the question/media area substantially more usable width and height while keeping media viewport-bounded.
 - Final-answer judging uses the same wide presentation rules so a long player answer is not artificially constrained to a narrow centered column.
+- When answering transitions to judging, any stale submission-list DOM is hidden immediately so the former drawer cannot reappear below the question while the live host view refreshes.
 - Answer history and answer-key actions are exposed through **Tools** rather than duplicated as standalone buttons on the final-question page.
 - The game-settings dialog remains available during final wagering, answering, and judging.
 - The broadcast-facing game screen never reveals the configured correct answer. The host can open a separate live answer-key tab on another display; it follows regular, wager, and final questions automatically.

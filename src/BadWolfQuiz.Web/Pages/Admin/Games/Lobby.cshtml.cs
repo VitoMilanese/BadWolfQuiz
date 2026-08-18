@@ -1863,6 +1863,9 @@ public sealed class LobbyModel(
             return NotFound();
         }
 
+        var isAjaxRequest = IsAjaxRequest();
+        string? errorMessage = null;
+
         try
         {
             command(game);
@@ -1872,8 +1875,11 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException)
         {
-            TempData["ErrorMessage"] =
-                localizer["FinalQuestion_ActionRejected"].Value;
+            errorMessage = localizer["FinalQuestion_ActionRejected"].Value;
+            if (!isAjaxRequest)
+            {
+                TempData["ErrorMessage"] = errorMessage;
+            }
         }
 
         await gameHub.Clients
@@ -1900,6 +1906,13 @@ public sealed class LobbyModel(
                 await discordMuteCoordinator.SetAutomaticAsync(
                     id, currentHost.RequiredId, discordConnection, false, cancellationToken);
             }
+        }
+
+        if (isAjaxRequest)
+        {
+            return errorMessage is null
+                ? new JsonResult(new { success = true })
+                : BadRequest(new { success = false, error = errorMessage });
         }
 
         return RedirectToPage(new { id });

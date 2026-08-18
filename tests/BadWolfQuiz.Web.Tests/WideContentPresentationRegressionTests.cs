@@ -60,6 +60,98 @@ public sealed class WideContentPresentationRegressionTests
             "max-width: none;");
     }
 
+    [Fact]
+    public void FinalQuestionLayoutPrioritizesQuestionContent()
+    {
+        var root = FindRepositoryRoot();
+        var styles = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "css",
+            "player-admission-menu.css"));
+        var lobbyMarkup = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Games",
+            "Lobby.cshtml"));
+
+        AssertCssRuleContains(
+            styles,
+            ".final-question-host:is([data-game-status=\"finalwagering\"], [data-game-status=\"finalanswering\"]) .final-question-panel",
+            "padding: clamp(10px, 1.25vw, 16px);",
+            "gap: clamp(0.5rem, 1vh, 0.8rem);",
+            "overflow: hidden;");
+        AssertCssRuleContains(
+            styles,
+            ".final-question-host[data-game-status=\"finalanswering\"] .final-question-panel .question-presentation",
+            "flex: 1 1 auto;",
+            "min-height: 0;",
+            "height: auto;");
+        AssertCssRuleContains(
+            styles,
+            ".final-question-host .final-submission-list",
+            "max-width: none;",
+            "display: grid;",
+            "grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));",
+            "overflow-x: hidden;");
+        AssertCssRuleContains(
+            styles,
+            ".final-question-host[data-game-status=\"finalwagering\"] .final-submission-list",
+            "max-height: min(44dvh, 18rem);",
+            "overflow-y: auto;");
+        AssertCssRuleContains(
+            styles,
+            ".final-question-host[data-game-status=\"finalanswering\"] .final-question-panel > .final-submission-list",
+            "position: absolute;",
+            "right: 0;",
+            "grid-template-columns: 1fr;",
+            "max-height: none;",
+            "overflow-y: auto;",
+            "transform: translateX(calc(100% - 2.75rem));");
+        AssertCssRuleContains(
+            styles,
+            ".final-question-host[data-game-status=\"finalanswering\"] .final-question-panel > .final-submission-list::before",
+            "content: \"👥\";",
+            "width: 2.75rem;",
+            "background: var(--panel-2);");
+        Assert.Contains(
+            ".final-question-host[data-game-status=\"finalanswering\"] .final-question-panel > .final-submission-list:hover",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".final-question-host[data-game-status=\"finalanswering\"] .final-question-panel > .final-submission-list:focus-within",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "@media (hover: hover) and (pointer: fine) and (min-width: 801px)",
+            styles,
+            StringComparison.Ordinal);
+        AssertCssRuleContains(
+            styles,
+            ".final-question-host .final-submission-list li",
+            "grid-template-columns: minmax(0, 1fr) auto auto;",
+            "padding: 0.42rem 0.6rem;",
+            "line-height: 1.15;");
+        AssertCssRuleContains(
+            styles,
+            ".final-question-host .final-question-panel iframe.game-content-video",
+            "width: min(100%, 1400px);");
+        AssertCssRuleContains(
+            styles,
+            ".final-question-host .final-question-panel .game-content-audio-shell",
+            "max-width: 960px;");
+
+        Assert.Contains("FinalQuestion_NotSubmitted", lobbyMarkup, StringComparison.Ordinal);
+        Assert.Contains("FinalQuestion_Submitted", lobbyMarkup, StringComparison.Ordinal);
+        Assert.Contains("asp-page-handler=\"SubmitMinimumFinalWager\"", lobbyMarkup, StringComparison.Ordinal);
+        Assert.Contains("asp-page-handler=\"SubmitEmptyFinalAnswer\"", lobbyMarkup, StringComparison.Ordinal);
+    }
+
     private static void AssertCssRuleContains(
         string css,
         string selector,

@@ -83,6 +83,127 @@ main.page-shell:has(> .game-intro-page) {
     max-width: none;
 }
 
+/* Final-question submission state should stay visible without crowding the content. */
+.final-question-host:is([data-game-status="finalwagering"], [data-game-status="finalanswering"]) .final-question-panel {
+    box-sizing: border-box;
+    padding: clamp(10px, 1.25vw, 16px);
+    gap: clamp(0.5rem, 1vh, 0.8rem);
+    overflow: hidden;
+}
+
+.final-question-host:is([data-game-status="finalwagering"], [data-game-status="finalanswering"]) .final-question-panel > .eyebrow,
+.final-question-host:is([data-game-status="finalwagering"], [data-game-status="finalanswering"]) .final-question-panel > h2 {
+    margin-block: 0;
+}
+
+.final-question-host[data-game-status="finalanswering"] .final-question-panel .question-presentation {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    padding-inline: clamp(0px, 0.6vw, 8px);
+}
+
+.final-question-host[data-game-status="finalanswering"] .final-question-panel .question-presentation .game-content-blocks,
+.final-question-host[data-game-status="finalanswering"] .final-question-panel .question-presentation .game-content-block {
+    width: 100%;
+    min-width: 0;
+}
+
+.final-question-host[data-game-status="finalanswering"] .final-question-panel .question-presentation .game-content-blocks {
+    max-height: 100%;
+}
+
+.final-question-host .final-question-panel :is(.game-content-image, .game-content-video) {
+    max-height: min(70dvh, 760px);
+}
+
+.final-question-host .final-question-panel iframe.game-content-video {
+    width: min(100%, 1400px);
+}
+
+.final-question-host .final-question-panel .game-content-audio-shell {
+    max-width: 960px;
+}
+
+.final-question-host .final-submission-list {
+    width: 100%;
+    max-width: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.final-question-host[data-game-status="finalanswering"] .final-submission-list {
+    max-height: min(16dvh, 8rem);
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.final-question-host[data-game-status="finalwagering"] .final-submission-list {
+    max-height: min(44dvh, 18rem);
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.final-question-host .final-submission-list li {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0.42rem 0.6rem;
+    line-height: 1.15;
+    text-align: left;
+}
+
+.final-question-host .final-submission-list li + li {
+    margin-top: 0;
+}
+
+.final-question-host .final-submission-list li > strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.final-question-host .final-submission-list li > span {
+    font-size: 0.85rem;
+    line-height: 1.1;
+    text-align: right;
+}
+
+.final-question-host .final-submission-list li > form {
+    margin: 0;
+}
+
+#game-board-error:empty {
+    display: none;
+}
+
+.final-question-host[data-game-status="finaljudging"] .final-submission-list,
+.final-question-panel.final-judging-mode .final-submission-list {
+    display: none !important;
+}
+
+@media (max-width: 700px) {
+    .final-question-host:is([data-game-status="finalwagering"], [data-game-status="finalanswering"]) .final-question-panel {
+        padding: 8px;
+    }
+
+    .final-question-host .final-submission-list {
+        grid-template-columns: 1fr;
+    }
+
+    .final-question-host[data-game-status="finalanswering"] .final-submission-list {
+        max-height: min(22dvh, 9rem);
+    }
+}
+
 .player-lobby[data-final-status="finalanswering"] #player-final-panel > .game-content-blocks { display: none; }
 body:has(.player-buzzer-panel) { overflow-x: hidden; overflow-x: clip; overscroll-behavior-x: none; touch-action: pan-y; }
 .player-lobby:has(.player-buzzer-panel), .player-lobby:has(.player-buzzer-panel) .player-buzzer-panel { max-width: 100%; overflow-x: hidden; overflow-x: clip; overscroll-behavior-x: none; }
@@ -156,5 +277,120 @@ body:has(.player-buzzer-panel) { overflow-x: hidden; overflow-x: clip; overscrol
     .player-lobby:has(.player-buzzer-panel) .buzzer-status,
     .player-lobby:has(.player-buzzer-panel) #player-buzzer-status {
         flex: 0 0 auto;
+    }
+}
+
+/* Keep final-answer progress in a right-side drawer on pointer-driven host displays. */
+@media (hover: hover) and (pointer: fine) and (min-width: 801px) {
+    .final-question-host[data-game-status="finalanswering"] .final-question-panel {
+        position: relative;
+    }
+
+    .final-question-host[data-game-status="finalanswering"] .final-question-panel > .final-submission-list {
+        position: absolute;
+        z-index: 40;
+        top: clamp(3.25rem, 8vh, 5rem);
+        right: 0;
+        bottom: clamp(4rem, 8vh, 5.25rem);
+        width: min(24rem, calc(100% - 1rem));
+        max-width: none;
+        max-height: none;
+        grid-template-columns: 1fr;
+        align-content: start;
+        gap: 0.4rem;
+        margin: 0;
+        padding: 0.55rem 0.6rem 0.55rem 3.25rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+        border: 1px solid var(--line);
+        border-right: 0;
+        border-radius: 0.9rem 0 0 0.9rem;
+        background: var(--panel-glass);
+        box-shadow: -18px 0 38px rgb(0 0 0 / 28%);
+        transform: translateX(calc(100% - 2.75rem));
+        transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .final-question-host[data-game-status="finalanswering"] .final-question-panel > .final-submission-list::before {
+        content: "👥";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 2.75rem;
+        display: grid;
+        place-items: center;
+        border-right: 1px solid var(--line);
+        background: var(--panel-2);
+        color: var(--text);
+        font-size: 1.15rem;
+        line-height: 1;
+        pointer-events: none;
+    }
+
+    .final-question-host[data-game-status="finalanswering"] .final-question-panel > .final-submission-list:hover,
+    .final-question-host[data-game-status="finalanswering"] .final-question-panel > .final-submission-list:focus-within {
+        transform: translateX(0);
+        box-shadow: -20px 0 44px rgb(0 0 0 / 36%);
+    }
+
+    .final-question-host[data-game-status="finalanswering"] .final-question-panel > .final-submission-list > li {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .final-question-host[data-game-status="finalanswering"] .final-question-panel > .final-submission-list {
+        transition: none;
+    }
+}
+
+/* Keep final-wager progress permanently visible on the right when there is no question content yet. */
+@media (min-width: 801px) {
+    .final-question-host[data-game-status="finalwagering"] .final-question-panel {
+        position: relative;
+        padding-right: clamp(19rem, 25vw, 25rem);
+    }
+
+    .final-question-host[data-game-status="finalwagering"] .final-question-panel > .eyebrow,
+    .final-question-host[data-game-status="finalwagering"] .final-question-panel > h2,
+    .final-question-host[data-game-status="finalwagering"] .final-question-panel > form {
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .final-question-host[data-game-status="finalwagering"] .final-question-panel > .final-submission-list {
+        position: absolute;
+        z-index: 30;
+        top: clamp(3.25rem, 8vh, 5rem);
+        right: 0.75rem;
+        bottom: 0.75rem;
+        width: clamp(18rem, 24vw, 24rem);
+        max-width: none;
+        max-height: none;
+        grid-template-columns: 1fr;
+        align-content: start;
+        gap: 0.4rem;
+        margin: 0;
+        padding: 0.55rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+        border: 1px solid var(--line);
+        border-radius: 0.9rem;
+        background: var(--panel-glass);
+        box-shadow: -12px 0 30px rgb(0 0 0 / 20%);
+        transform: none;
+    }
+
+    .final-question-host[data-game-status="finalwagering"] .final-question-panel > .final-submission-list > li {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) auto auto;
     }
 }

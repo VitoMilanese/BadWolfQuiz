@@ -25,11 +25,28 @@ regular question had an open buzzer, the question remains active but its buzzer
 is paused until the host activates it again. A buzzer already claimed by a
 player remains claimed.
 
+## Persistence threshold
+
+A lobby is not written to unfinished-game storage merely because it was created,
+players joined, or the host pressed **Start game**. Persistence begins when the
+session contains gameplay state worth recovering:
+
+- at least one regular question has left the `Available` state; or
+- the game has entered `FinalWagering`, `FinalAnswering`, or `FinalJudging`.
+
+The second rule covers games where the host advances directly to the Final
+Question before opening any regular question. Such a snapshot can be restored
+with every regular question still `Available`, preserving the final phase and its
+submissions for continuation after a restart.
+
 ## Lifecycle
 
 Only one unfinished session is retained for each host and quiz. Creating a new
-game from that quiz replaces its previous unfinished session. Completed games are
-removed from active recovery storage and remain available through game history.
+game from that quiz does not replace the previous unfinished session until the
+new session crosses the persistence threshold above. This prevents a newly
+created lobby from accidentally overwriting a recoverable game. Completed games
+are removed from active recovery storage and remain available through game
+history.
 
 The quiz list displays **Continue game** when an unfinished session exists. The
 host returns to the restored game using the original join code. Existing players

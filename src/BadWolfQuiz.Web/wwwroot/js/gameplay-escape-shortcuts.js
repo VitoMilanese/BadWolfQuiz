@@ -10,16 +10,23 @@
         : null;
     const getSharedAssetUrl = path => {
         const assetUrl = new URL(path, window.location.origin);
-        if (bootstrapUrl?.search) {
+        if (!assetUrl.search && bootstrapUrl?.search) {
             assetUrl.search = bootstrapUrl.search;
         }
         return assetUrl;
     };
-    const loadSharedScript = path => {
+    const loadSharedScript = (path, options = {}) => {
         const script = document.createElement("script");
         script.src = getSharedAssetUrl(path).href;
         script.async = false;
+        if (typeof options.onLoad === "function") {
+            script.addEventListener("load", options.onLoad, { once: true });
+        }
+        if (typeof options.onError === "function") {
+            script.addEventListener("error", options.onError, { once: true });
+        }
         document.head.appendChild(script);
+        return script;
     };
     const loadSharedStyle = path => {
         const stylesheet = document.createElement("link");
@@ -30,6 +37,209 @@
 
     loadSharedStyle("/css/content-block-containers.css");
     loadSharedScript("/js/content-block-containers.js");
+
+    const finalFallbackHandlers = new Set([
+        "SubmitMinimumFinalWager",
+        "SubmitEmptyFinalAnswer"
+    ]);
+    const pendingFinalFallbackClicks = [];
+    const getFinalFallbackForm = button => {
+        const form = button?.form;
+        if (!(form instanceof HTMLFormElement) || !form.action) {
+            return null;
+        }
+
+        const action = new URL(form.action, window.location.href);
+        return finalFallbackHandlers.has(action.searchParams.get("handler"))
+            ? form
+            : null;
+    };
+    const replayPendingFinalFallbackClicks = () => {
+        const pending = pendingFinalFallbackClicks.splice(0);
+        for (const { button } of pending) {
+            if (!(button instanceof HTMLButtonElement) || !button.isConnected) {
+                continue;
+            }
+
+            button.disabled = false;
+            button.removeAttribute("aria-busy");
+            button.click();
+        }
+    };
+    const releasePendingFinalFallbackClicks = () => {
+        for (const { button } of pendingFinalFallbackClicks.splice(0)) {
+            if (!(button instanceof HTMLButtonElement) || !button.isConnected) {
+                continue;
+            }
+
+            button.disabled = false;
+            button.removeAttribute("aria-busy");
+        }
+    };
+
+    window.addEventListener("click", event => {
+        if (window.badWolfFinalPlayerFallbackActionsInitialized) {
+            return;
+        }
+
+        const button = event.target instanceof Element
+            ? event.target.closest("button[type='submit']")
+            : null;
+        const form = getFinalFallbackForm(button);
+        if (!(button instanceof HTMLButtonElement) ||
+            !(form instanceof HTMLFormElement) ||
+            button.disabled) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        pendingFinalFallbackClicks.push({ form, button });
+    }, true);
+
+    loadSharedScript("/js/final-player-fallback-actions.js?v=3", {
+        onLoad: replayPendingFinalFallbackClicks,
+        onError: () => {
+            console.error("Final fallback actions could not be loaded.");
+            releasePendingFinalFallbackClicks();
+        }
+    });
+
+    const finalJudgingLocks = new Map();
+    const releaseFinalJudgingLock = form => {
+        const state = finalJudgingLocks.get(form);
+        if (!state) {
+            return;
+        }
+
+        window.clearTimeout(state.timeoutHandle);
+        state.buttonObserver.disconnect();
+        state.errorObserver?.disconnect();
+        finalJudgingLocks.delete(form);
+
+        if (!form.isConnected) {
+            return;
+        }
+
+        if (!state.hadInert) {
+            form.removeAttribute("inert");
+        }
+        delete form.dataset.finalJudgingSubmitting;
+
+        for (const buttonState of state.buttonStates) {
+            const { button } = buttonState;
+            if (!button.isConnected) {
+                continue;
+            }
+
+            button.disabled = buttonState.disabled;
+            if (buttonState.ariaBusy === null) {
+                button.removeAttribute("aria-busy");
+            } else {
+                button.setAttribute("aria-busy", buttonState.ariaBusy);
+            }
+        }
+    };
+
+    document.addEventListener("submit", event => {
+        const form = event.target instanceof HTMLFormElement
+            ? event.target
+            : null;
+        if (!form?.matches(".final-judging-actions")) {
+            return;
+        }
+
+        if (form.dataset.finalJudgingSubmitting === "true") {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return;
+        }
+
+        const buttons = Array.from(
+            form.querySelectorAll("button[name='isCorrect']"));
+        if (buttons.length === 0) {
+            return;
+        }
+
+        const submitter = event.submitter instanceof HTMLButtonElement
+            ? event.submitter
+            : null;
+        const buttonStates = buttons.map(button => ({
+            button,
+            disabled: button.disabled,
+            ariaBusy: button.getAttribute("aria-busy")
+        }));
+        const hadInert = form.hasAttribute("inert");
+
+        form.dataset.finalJudgingSubmitting = "true";
+        form.setAttribute("inert", "");
+        for (const button of buttons) {
+            button.disabled = true;
+        }
+        submitter?.setAttribute("aria-busy", "true");
+
+        const buttonObserver = new MutationObserver(() => {
+            if (form.dataset.finalJudgingSubmitting !== "true") {
+                return;
+            }
+
+            for (const button of buttons) {
+                if (!button.disabled) {
+                    button.disabled = true;
+                }
+            }
+        });
+        buttonObserver.observe(form, {
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["disabled"]
+        });
+
+        const errorTarget = document.getElementById("game-board-error");
+        const errorObserver = errorTarget
+            ? new MutationObserver(() => {
+                if (!errorTarget.hidden && errorTarget.textContent.trim()) {
+                    releaseFinalJudgingLock(form);
+                }
+            })
+            : null;
+        errorObserver?.observe(errorTarget, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["hidden", "class"]
+        });
+
+        const timeoutHandle = window.setTimeout(
+            () => releaseFinalJudgingLock(form),
+            15000);
+        finalJudgingLocks.set(form, {
+            hadInert,
+            buttonStates,
+            buttonObserver,
+            errorObserver,
+            timeoutHandle
+        });
+    }, true);
+
+    document.addEventListener("badwolf:host-gameplay-updated", () => {
+        for (const form of Array.from(finalJudgingLocks.keys())) {
+            if (!form.isConnected) {
+                releaseFinalJudgingLock(form);
+            }
+        }
+    });
+
+    const hostGameplayTarget = document.querySelector(".host-game-board");
+    if (hostGameplayTarget) {
+        const playerNameMarqueeVersion = "3";
+        loadSharedStyle(
+            `/css/player-name-marquee.css?v=${playerNameMarqueeVersion}`);
+        loadSharedScript(
+            `/js/player-name-marquee.js?v=${playerNameMarqueeVersion}`);
+    }
 
     const contentBlockEditorTarget = document.querySelector(
         ".content-block-section");
