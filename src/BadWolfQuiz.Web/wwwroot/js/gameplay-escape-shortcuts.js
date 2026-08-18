@@ -135,7 +135,7 @@
             }
 
             button.disabled = buttonState.disabled;
-            if (buttonState.ariaBusy is null) {
+            if (buttonState.ariaBusy === null) {
                 button.removeAttribute("aria-busy");
             } else {
                 button.setAttribute("aria-busy", buttonState.ariaBusy);
