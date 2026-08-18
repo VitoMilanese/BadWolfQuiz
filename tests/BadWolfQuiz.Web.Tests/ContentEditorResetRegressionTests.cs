@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class ContentEditorResetRegressionTests
 {
     [Fact]
-    public void Reset_control_is_shared_across_content_editors_and_only_reloads_persisted_state()
+    public void Reset_and_unsaved_change_guard_are_shared_across_content_editors()
     {
         var root = FindRepositoryRoot();
         var questionEditor = File.ReadAllText(Path.Combine(
@@ -55,6 +55,7 @@ public sealed class ContentEditorResetRegressionTests
         Assert.Contains("question-editor-back-link", questionEditor, StringComparison.Ordinal);
         Assert.Contains("final-question-editor-back-link", finalQuestionEditor, StringComparison.Ordinal);
         Assert.Contains("description-editor-back", descriptionEditor, StringComparison.Ordinal);
+        Assert.Contains("Button_NextQuestion", questionEditor, StringComparison.Ordinal);
 
         Assert.Contains("#question-editor-back-link", bootstrap, StringComparison.Ordinal);
         Assert.Contains("#final-question-editor-back-link", bootstrap, StringComparison.Ordinal);
@@ -71,10 +72,29 @@ public sealed class ContentEditorResetRegressionTests
         Assert.Contains("Date.now().toString()", script, StringComparison.Ordinal);
         Assert.Contains("window.location.replace(targetUrl.href)", script, StringComparison.Ordinal);
         Assert.Contains("window.history.replaceState(", script, StringComparison.Ordinal);
+
+        Assert.Contains("serializeEditorState", script, StringComparison.Ordinal);
+        Assert.Contains("editorForm.addEventListener(\"input\"", script, StringComparison.Ordinal);
+        Assert.Contains("editorForm.addEventListener(\"change\"", script, StringComparison.Ordinal);
+        Assert.Contains("new MutationObserver", script, StringComparison.Ordinal);
+        Assert.Contains(".editor-actions a[href]", script, StringComparison.Ordinal);
+        Assert.Contains("editorUnsavedDialog", script, StringComparison.Ordinal);
+        Assert.Contains("dialog.showModal()", script, StringComparison.Ordinal);
+        Assert.Contains("window.location.assign(targetUrl)", script, StringComparison.Ordinal);
+        Assert.Contains("beforeunload", script, StringComparison.Ordinal);
+        Assert.Contains("event.returnValue = \"\"", script, StringComparison.Ordinal);
+        Assert.Contains("data-question-save-status", script, StringComparison.Ordinal);
+        Assert.Contains("alert-success", script, StringComparison.Ordinal);
+        Assert.Contains("window.queueMicrotask(markClean)", script, StringComparison.Ordinal);
+        Assert.Contains("hasRenderedValidationErrors", script, StringComparison.Ordinal);
+        Assert.Contains("!editorForm.hasAttribute(\"data-ajax-question-editor\")", script, StringComparison.Ordinal);
+
         Assert.DoesNotContain("fetch(", script, StringComparison.Ordinal);
         Assert.DoesNotContain("requestSubmit", script, StringComparison.Ordinal);
 
         Assert.Contains(".editor-actions .editor-reset-button", stylesheet, StringComparison.Ordinal);
+        Assert.Contains(".editor-unsaved-dialog .dialog-card", stylesheet, StringComparison.Ordinal);
+        Assert.Contains(".editor-unsaved-dialog-message", stylesheet, StringComparison.Ordinal);
     }
 
     private static string FindRepositoryRoot()

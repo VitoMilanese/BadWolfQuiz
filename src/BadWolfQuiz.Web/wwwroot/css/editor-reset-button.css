@@ -14,3 +14,12 @@
     display: inline-block;
     transform: translateY(-1px);
 }
+
+.editor-unsaved-dialog .dialog-card {
+    width: min(520px, calc(100vw - 32px));
+}
+
+.editor-unsaved-dialog-message {
+    margin: 0;
+    line-height: 1.5;
+}
