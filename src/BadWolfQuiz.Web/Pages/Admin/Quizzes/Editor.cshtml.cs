@@ -254,6 +254,7 @@ public sealed class EditorModel(
                 .ThenInclude(x => x.Rows)
             .Include(x => x.Rounds)
                 .ThenInclude(x => x.Categories)
+                    .ThenInclude(x => x.DescriptionBlocks)
             .SingleOrDefaultAsync(x => x.Id == AddRound.QuizId);
 
         if (quiz is null)
@@ -316,6 +317,10 @@ public sealed class EditorModel(
                     Title = category.Title,
                     SortOrder = category.SortOrder
                 };
+
+                CategoryDescriptionBlockCloner.CopyDescriptions(
+                    category,
+                    newCategory);
 
                 foreach (var roundRow in round.Rows.OrderBy(x => x.RowIndex))
                 {
