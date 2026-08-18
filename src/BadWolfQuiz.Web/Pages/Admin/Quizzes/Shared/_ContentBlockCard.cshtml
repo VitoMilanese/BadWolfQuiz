@@ -1,4 +1,6 @@
 ﻿@using Microsoft.Extensions.Localization
+@using BadWolfQuiz.Web.Localization
+@using BadWolfQuiz.Web.Models
 @inject IStringLocalizer<SharedResource> localizer
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
 
@@ -11,6 +13,22 @@
     <input asp-for="BlockType" type="hidden" />
 
     <div class="content-block-toolbar">
+
+        <button type="button"
+                class="content-block-move-button"
+                data-content-block-move="up"
+                title="@localizer["Button_Move"] ↑"
+                aria-label="@localizer["Button_Move"] ↑">
+            ↑
+        </button>
+
+        <button type="button"
+                class="content-block-move-button"
+                data-content-block-move="down"
+                title="@localizer["Button_Move"] ↓"
+                aria-label="@localizer["Button_Move"] ↓">
+            ↓
+        </button>
 
         <button type="button"
                 class="content-block-drag-handle"
@@ -30,7 +48,14 @@
     </div>
 
     <div style="margin-bottom:12px;">
-        <strong>@localizer[$"ContentBlockType_{Model.BlockType}"]</strong>
+        @if (Model.BlockType == ContentBlockType.Container)
+        {
+            <strong>@ContentBlockContainerText.Title</strong>
+        }
+        else
+        {
+            <strong>@localizer[$"ContentBlockType_{Model.BlockType}"]</strong>
+        }
     </div>
 
     @switch (Model.BlockType)
@@ -54,6 +79,40 @@
         case ContentBlockType.YouTube:
             <partial name="Shared/_VideoBlockCard"
                      model="Model" />
+            break;
+
+        case ContentBlockType.Container:
+            <div class="content-block-container-editor"
+                 data-content-block-container>
+                <input asp-for="TextContent"
+                       type="hidden"
+                       class="content-block-container-count" />
+
+                <div class="content-block-container-toolbar">
+                    <span>@ContentBlockContainerText.HorizontalMedia</span>
+                    <div class="content-block-container-actions">
+                        <button type="button"
+                                class="button button-secondary"
+                                data-container-add-block-type="Image">
+                            @localizer["ContentBlockType_Image"]
+                        </button>
+                        <button type="button"
+                                class="button button-secondary"
+                                data-container-add-block-type="YouTube">
+                            @localizer["ContentBlockType_YouTube"]
+                        </button>
+                        <button type="button"
+                                class="button button-secondary"
+                                data-container-add-block-type="Audio">
+                            @localizer["ContentBlockType_Audio"]
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-block-container-children"
+                     data-content-block-container-children
+                     data-container-empty-label="@ContentBlockContainerText.EmptyHint"></div>
+            </div>
             break;
     }
 

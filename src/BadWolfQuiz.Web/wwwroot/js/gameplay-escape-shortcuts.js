@@ -5,23 +5,43 @@
 
     window.badWolfGameplayEscapeShortcutsInitialized = true;
 
+    const bootstrapUrl = document.currentScript?.src
+        ? new URL(document.currentScript.src)
+        : null;
+    const getSharedAssetUrl = path => {
+        const assetUrl = new URL(path, window.location.origin);
+        if (bootstrapUrl?.search) {
+            assetUrl.search = bootstrapUrl.search;
+        }
+        return assetUrl;
+    };
+    const loadSharedScript = path => {
+        const script = document.createElement("script");
+        script.src = getSharedAssetUrl(path).href;
+        script.async = false;
+        document.head.appendChild(script);
+    };
+    const loadSharedStyle = path => {
+        const stylesheet = document.createElement("link");
+        stylesheet.rel = "stylesheet";
+        stylesheet.href = getSharedAssetUrl(path).href;
+        document.head.appendChild(stylesheet);
+    };
+
+    loadSharedStyle("/css/content-block-containers.css");
+    loadSharedScript("/js/content-block-containers.js");
+
+    const contentBlockEditorTarget = document.querySelector(
+        ".content-block-section");
+    if (contentBlockEditorTarget) {
+        loadSharedStyle("/css/content-block-reorder-buttons.css");
+        loadSharedScript("/js/content-block-reorder-buttons.js");
+    }
+
     const editorSaveOverlayTarget = document.querySelector(
         "form.quiz-board-form, form.question-editor");
     if (editorSaveOverlayTarget) {
-        const bootstrapUrl = document.currentScript?.src
-            ? new URL(document.currentScript.src)
-            : null;
-        const overlayUrl = new URL(
-            "/js/editor-save-overlay.js",
-            window.location.origin);
-        if (bootstrapUrl?.search) {
-            overlayUrl.search = bootstrapUrl.search;
-        }
-
-        const overlayScript = document.createElement("script");
-        overlayScript.src = overlayUrl.href;
-        overlayScript.async = false;
-        document.head.appendChild(overlayScript);
+        loadSharedScript("/js/editor-save-overlay.js");
     }
 
     const hasBlockingUi = () =>

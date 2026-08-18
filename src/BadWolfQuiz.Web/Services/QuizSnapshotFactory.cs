@@ -82,6 +82,24 @@ public sealed class QuizSnapshotFactory
 
     private static ContentBlockSnapshot CreateContentBlock(ContentBlockBase block)
     {
+        if (block.BlockType == ContentBlockType.Container)
+        {
+            return new ContentBlockSnapshot(
+                block.Id,
+                ContentBlockKind.Text,
+                ContentBlockContainerContract.CreateRuntimeMarker(block.TextContent),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                block.SortOrder,
+                false,
+                false);
+        }
+
         return new ContentBlockSnapshot(
             block.Id,
             ResolveContentBlockKind(block),
