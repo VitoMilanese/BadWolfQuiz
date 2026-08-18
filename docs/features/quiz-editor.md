@@ -38,6 +38,36 @@ Round and category description saves continue to redirect back to the descriptio
 editor after a successful save; the `saved` query value is interpreted as a
 boolean so the shared success overlay is rendered reliably after that redirect.
 
+## Reset and unsaved changes
+
+The regular-question, final-question, round-description, and category-description
+editors provide a compact **↻ Reset** action immediately to the right of **Back**.
+Reset intentionally discards the current client-side state without saving and
+reloads the editor from the persisted server state. This restores edited fields,
+content-block order, captions, media selections, removed blocks, and other
+unsaved changes, and removes newly added unsaved blocks.
+
+Reset uses a fresh GET navigation with a one-time `_editorReset` query token so
+browser form-state restoration cannot revive stale values from the page being
+replaced. The token is removed from the visible URL after the fresh page loads.
+Description-editor reset also removes the transient `saved` query value.
+
+These editors also track whether the current form differs from its clean baseline.
+Dirty-state detection covers named text/select/checkbox/radio values, selected
+file metadata, added or removed blocks, block reordering, and structural changes
+including Container children. **Back** is intercepted when changes are unsaved and
+shows a localized confirmation dialog before leaving. The regular-question
+**Next question** action uses the same warning. Browser Back, refresh, tab close,
+and other unloads use the browser's native `beforeunload` warning as a fallback.
+
+After a successful asynchronous regular-question save, the returned block IDs and
+file-input cleanup are applied before the clean baseline is refreshed, so leaving
+immediately after Save does not produce a false warning. Failed saves and
+validation-error states remain dirty. Successful final-question and description
+saves keep their existing POST/redirect behavior and load back in a clean state.
+The explicit Reset action bypasses the unsaved-change warning because discarding
+the current changes is its intended purpose.
+
 ## Regular questions
 
 Regular questions contain independent ordered question and answer blocks. Saving
