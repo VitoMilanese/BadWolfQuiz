@@ -3,16 +3,38 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class EditorSaveOverlayRegressionTests
 {
     [Fact]
-    public void Editor_save_results_use_shared_bottom_overlay()
+    public void Editor_save_results_use_top_overlays_across_quiz_editors()
     {
         var root = FindRepositoryRoot();
-        var script = File.ReadAllText(Path.Combine(
+        var overlayScript = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "editor-save-overlay.js"));
+        var gameplayBootstrap = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "gameplay-escape-shortcuts.js"));
+        var imageClipboardScript = File.ReadAllText(Path.Combine(
             root,
             "src",
             "BadWolfQuiz.Web",
             "wwwroot",
             "js",
             "image-clipboard-upload.js"));
+        var quizEditor = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Quizzes",
+            "Editor.cshtml"));
         var questionEditor = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -38,25 +60,31 @@ public sealed class EditorSaveOverlayRegressionTests
             "Quizzes",
             "DescriptionEditor.cshtml"));
 
-        Assert.Contains("editorSaveOverlayDurationMs = 1000", script, StringComparison.Ordinal);
-        Assert.Contains(".editor-save-overlay", script, StringComparison.Ordinal);
-        Assert.Contains("bottom: max(24px, env(safe-area-inset-bottom))", script, StringComparison.Ordinal);
-        Assert.Contains("pointer-events: none", script, StringComparison.Ordinal);
-        Assert.Contains("document.body.appendChild(status)", script, StringComparison.Ordinal);
-        Assert.Contains("MutationObserver", script, StringComparison.Ordinal);
-        Assert.Contains("#success-message, [data-question-save-status]", script, StringComparison.Ordinal);
+        Assert.Contains("editor-save-overlay.js", gameplayBootstrap, StringComparison.Ordinal);
         Assert.Contains(
-            ".validation-summary li, .field-validation-error, .text-danger",
-            script,
+            "form.quiz-board-form, form.question-editor",
+            gameplayBootstrap,
             StringComparison.Ordinal);
 
+        Assert.Contains("editorSaveOverlayDurationMs = 1000", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("body .editor-save-overlay", overlayScript, StringComparison.Ordinal);
+        Assert.Contains(
+            "top: calc(var(--topbar-height, 60px) + 16px + env(safe-area-inset-top)) !important",
+            overlayScript,
+            StringComparison.Ordinal);
+        Assert.Contains("bottom: auto !important", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("pointer-events: none", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("#success-message, [data-quiz-save-status]", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("MutationObserver", overlayScript, StringComparison.Ordinal);
+
+        Assert.Contains("data-quiz-save-status", quizEditor, StringComparison.Ordinal);
         Assert.Contains("data-question-save-status", questionEditor, StringComparison.Ordinal);
-        Assert.Contains("image-clipboard-upload.js", questionEditor, StringComparison.Ordinal);
+        Assert.Contains("editorSaveOverlayDurationMs = 1000", imageClipboardScript, StringComparison.Ordinal);
+        Assert.Contains("#success-message, [data-question-save-status]", imageClipboardScript, StringComparison.Ordinal);
         Assert.Contains("id=\"success-message\"", finalQuestionEditor, StringComparison.Ordinal);
-        Assert.Contains("image-clipboard-upload.js", finalQuestionEditor, StringComparison.Ordinal);
         Assert.Contains("Request.Query[\"saved\"]", descriptionEditor, StringComparison.Ordinal);
         Assert.Contains("Message_Saved", descriptionEditor, StringComparison.Ordinal);
-        Assert.Contains("image-clipboard-upload.js", descriptionEditor, StringComparison.Ordinal);
+        Assert.Contains("Input.CategoryId", descriptionEditor, StringComparison.Ordinal);
     }
 
     private static string FindRepositoryRoot()
