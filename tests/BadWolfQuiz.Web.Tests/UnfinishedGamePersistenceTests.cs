@@ -41,6 +41,55 @@ public sealed class UnfinishedGamePersistenceTests : IDisposable
     }
 
     [Fact]
+    public async Task Game_forced_directly_to_final_is_persisted_and_restored_without_opened_regular_question()
+    {
+        var (store, registry, service) = CreateServices("ABC123");
+        var game = registry.Create(
+            CreateQuiz(includeFinalQuestion: true),
+            GameSessionSettings.Default,
+            "host-1");
+        registry.JoinPlayer(game.PublicCode, "Rose");
+        registry.StartGame(game.PublicCode);
+
+        await service.PersistIfChangedAsync();
+        Assert.Empty(store.GetAll());
+
+        registry.ForceAdvanceToFinalQuestion(game.PublicCode);
+        await service.PersistIfChangedAsync();
+
+        var snapshot = Assert.Single(store.GetAll());
+        Assert.Equal(game.Session.Id, snapshot.SessionState.Id);
+        Assert.Equal(GameSessionStatus.FinalWagering, snapshot.SessionState.Status);
+        Assert.All(
+            snapshot.SessionState.Questions,
+            question => Assert.Equal(
+                RuntimeQuestionStatus.Available,
+                question.Status));
+        Assert.NotNull(snapshot.SessionState.FinalQuestion);
+
+        var restoredRegistry = new GameSessionRegistry(
+            new SequenceGameCodeGenerator("RESTORED"));
+        var restoredService = CreatePersistenceService(restoredRegistry, store);
+        await restoredService.StartAsync(CancellationToken.None);
+        try
+        {
+            var restored = Assert.Single(restoredRegistry.GetAll());
+            Assert.Equal(game.Session.Id, restored.Session.Id);
+            Assert.Equal(GameSessionStatus.FinalWagering, restored.Session.Status);
+            Assert.All(
+                restored.Session.Board.Questions,
+                question => Assert.Equal(
+                    RuntimeQuestionStatus.Available,
+                    question.Status));
+            Assert.NotNull(restored.Session.FinalQuestion);
+        }
+        finally
+        {
+            await restoredService.StopAsync(CancellationToken.None);
+        }
+    }
+
+    [Fact]
     public async Task Replacement_lobby_preserves_old_snapshot_until_its_first_question_opens()
     {
         var (store, registry, service) = CreateServices("OLD111", "NEW222");
@@ -115,16 +164,24 @@ public sealed class UnfinishedGamePersistenceTests : IDisposable
         var environment = new TestWebHostEnvironment(_contentRoot);
         var store = new ActiveGameStore(environment);
         var registry = new GameSessionRegistry(new SequenceGameCodeGenerator(codes));
-        var service = new ActiveGamePersistenceService(
+        var service = CreatePersistenceService(registry, store);
+        return (store, registry, service);
+    }
+
+    private ActiveGamePersistenceService CreatePersistenceService(
+        GameSessionRegistry registry,
+        ActiveGameStore store)
+    {
+        var environment = new TestWebHostEnvironment(_contentRoot);
+        return new ActiveGamePersistenceService(
             registry,
             store,
             TimeProvider.System,
             NullLogger<ActiveGamePersistenceService>.Instance,
             new CrashLog(environment));
-        return (store, registry, service);
     }
 
-    private static QuizSnapshot CreateQuiz()
+    private static QuizSnapshot CreateQuiz(bool includeFinalQuestion = false)
     {
         var question = new QuizQuestionSnapshot(
             100,
@@ -136,7 +193,8 @@ public sealed class UnfinishedGamePersistenceTests : IDisposable
         return new QuizSnapshot(
             1,
             "Unfinished lifecycle",
-            [new QuizRoundSnapshot(1, "Round 1", 0, [question])]);
+            [new QuizRoundSnapshot(1, "Round 1", 0, [question])],
+            includeFinalQuestion ? new FinalQuestionSnapshot() : null);
     }
 
     private sealed class SequenceGameCodeGenerator(string[] codes)

@@ -12,7 +12,7 @@ public sealed class ActiveGamePersistenceService(
     private readonly SemaphoreSlim _persistenceGate = new(1, 1);
     private readonly Dictionary<(string HostId, int SourceQuizId), CommittedGame>
         _committedGames = store.GetAll()
-            .Where(snapshot => HasOpenedQuestion(snapshot.SessionState))
+            .Where(snapshot => HasPersistableGameplay(snapshot.SessionState))
             .GroupBy(snapshot =>
                 (snapshot.HostId, snapshot.Quiz.SourceQuizId))
             .ToDictionary(
@@ -83,7 +83,7 @@ public sealed class ActiveGamePersistenceService(
     private void RestoreSavedGames()
     {
         foreach (var snapshot in store.GetAll()
-                     .Where(snapshot => HasOpenedQuestion(snapshot.SessionState)))
+                     .Where(snapshot => HasPersistableGameplay(snapshot.SessionState)))
         {
             try
             {
@@ -198,12 +198,20 @@ public sealed class ActiveGamePersistenceService(
 
     private static bool IsPersistable(GameSession session) =>
         !IsComplete(session) &&
-        session.Board.Questions.Any(question =>
-            question.Status != RuntimeQuestionStatus.Available);
+        (session.Board.Questions.Any(question =>
+             question.Status != RuntimeQuestionStatus.Available) ||
+         IsFinalQuestionInProgress(session.Status));
 
-    private static bool HasOpenedQuestion(GameSessionState state) =>
+    private static bool HasPersistableGameplay(GameSessionState state) =>
         state.Questions.Any(question =>
-            question.Status != RuntimeQuestionStatus.Available);
+            question.Status != RuntimeQuestionStatus.Available) ||
+        IsFinalQuestionInProgress(state.Status);
+
+    private static bool IsFinalQuestionInProgress(GameSessionStatus status) =>
+        status is
+            GameSessionStatus.FinalWagering or
+            GameSessionStatus.FinalAnswering or
+            GameSessionStatus.FinalJudging;
 
     private static bool IsComplete(GameSession session) =>
         session.Status == GameSessionStatus.Completed ||
