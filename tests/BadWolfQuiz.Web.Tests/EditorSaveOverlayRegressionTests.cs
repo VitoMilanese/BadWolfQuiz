@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class EditorSaveOverlayRegressionTests
 {
     [Fact]
-    public void Editor_save_results_use_top_overlays_across_quiz_editors()
+    public void Editor_save_results_use_shared_top_overlay_across_quiz_editors()
     {
         var root = FindRepositoryRoot();
         var overlayScript = File.ReadAllText(Path.Combine(
@@ -59,6 +59,14 @@ public sealed class EditorSaveOverlayRegressionTests
             "Admin",
             "Quizzes",
             "DescriptionEditor.cshtml"));
+        var descriptionEditorModel = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Quizzes",
+            "DescriptionEditor.cshtml.cs"));
 
         Assert.Contains("editor-save-overlay.js", gameplayBootstrap, StringComparison.Ordinal);
         Assert.Contains(
@@ -66,7 +74,11 @@ public sealed class EditorSaveOverlayRegressionTests
             gameplayBootstrap,
             StringComparison.Ordinal);
 
-        Assert.Contains("editorSaveOverlayDurationMs = 1000", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("editorSaveOverlayDurationMs = 1500", overlayScript, StringComparison.Ordinal);
+        Assert.Contains(
+            "form.quiz-board-form, form.question-editor",
+            overlayScript,
+            StringComparison.Ordinal);
         Assert.Contains("body .editor-save-overlay", overlayScript, StringComparison.Ordinal);
         Assert.Contains(
             "top: calc(var(--topbar-height, 60px) + 16px + env(safe-area-inset-top)) !important",
@@ -74,17 +86,27 @@ public sealed class EditorSaveOverlayRegressionTests
             StringComparison.Ordinal);
         Assert.Contains("bottom: auto !important", overlayScript, StringComparison.Ordinal);
         Assert.Contains("pointer-events: none", overlayScript, StringComparison.Ordinal);
-        Assert.Contains("#success-message, [data-quiz-save-status]", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("font-size: 1.08rem", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("font-weight: 600", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("background: rgba(63, 185, 80, 0.34)", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("background: rgba(239, 35, 60, 0.34)", overlayScript, StringComparison.Ordinal);
+        Assert.Contains(
+            "#success-message, [data-quiz-save-status], [data-question-save-status]",
+            overlayScript,
+            StringComparison.Ordinal);
         Assert.Contains("MutationObserver", overlayScript, StringComparison.Ordinal);
+
+        Assert.DoesNotContain("editorSaveOverlayDurationMs", imageClipboardScript, StringComparison.Ordinal);
+        Assert.DoesNotContain(".editor-save-overlay", imageClipboardScript, StringComparison.Ordinal);
 
         Assert.Contains("data-quiz-save-status", quizEditor, StringComparison.Ordinal);
         Assert.Contains("data-question-save-status", questionEditor, StringComparison.Ordinal);
-        Assert.Contains("editorSaveOverlayDurationMs = 1000", imageClipboardScript, StringComparison.Ordinal);
-        Assert.Contains("#success-message, [data-question-save-status]", imageClipboardScript, StringComparison.Ordinal);
         Assert.Contains("id=\"success-message\"", finalQuestionEditor, StringComparison.Ordinal);
         Assert.Contains("Request.Query[\"saved\"]", descriptionEditor, StringComparison.Ordinal);
         Assert.Contains("Message_Saved", descriptionEditor, StringComparison.Ordinal);
         Assert.Contains("Input.CategoryId", descriptionEditor, StringComparison.Ordinal);
+        Assert.Contains("saved = true", descriptionEditorModel, StringComparison.Ordinal);
+        Assert.Contains("categoryId = Input.CategoryId", descriptionEditorModel, StringComparison.Ordinal);
     }
 
     private static string FindRepositoryRoot()
