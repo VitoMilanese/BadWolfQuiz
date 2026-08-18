@@ -17,6 +17,13 @@ Changes to category or question counts may still reload the page because the
 board structure must be rebuilt. The **Play** action also keeps its navigation
 behavior and creates or opens a game normally.
 
+Adding a round uses the previous round as the template for its category names and
+category descriptions. Description blocks are copied as separate entities while
+preserving their order, content, captions, media references, and stored file data,
+so editing the description in the new round does not modify the source round.
+Categories without description blocks remain without descriptions in the new
+round.
+
 ## Regular questions
 
 Regular questions contain independent ordered question and answer blocks. Saving
