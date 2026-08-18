@@ -10,7 +10,7 @@
         : null;
     const getSharedAssetUrl = path => {
         const assetUrl = new URL(path, window.location.origin);
-        if (bootstrapUrl?.search) {
+        if (!assetUrl.search && bootstrapUrl?.search) {
             assetUrl.search = bootstrapUrl.search;
         }
         return assetUrl;
@@ -30,6 +30,16 @@
 
     loadSharedStyle("/css/content-block-containers.css");
     loadSharedScript("/js/content-block-containers.js");
+
+    const hostGameplayTarget = document.querySelector(".host-game-board");
+    if (hostGameplayTarget) {
+        const playerNameMarqueeVersion = "3";
+        loadSharedStyle(
+            `/css/player-name-marquee.css?v=${playerNameMarqueeVersion}`);
+        loadSharedScript(
+            `/js/player-name-marquee.js?v=${playerNameMarqueeVersion}`);
+        loadSharedScript("/js/final-player-fallback-actions.js?v=2");
+    }
 
     const contentBlockEditorTarget = document.querySelector(
         ".content-block-section");

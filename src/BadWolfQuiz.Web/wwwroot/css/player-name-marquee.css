@@ -1,0 +1,46 @@
+.player-name-marquee {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: nowrap;
+}
+
+.player-name-marquee > .player-name-marquee-track {
+    display: inline-block;
+    width: max-content;
+    max-width: none;
+}
+
+.player-name-marquee.is-overflowing > .player-name-marquee-track {
+    padding-left: 0;
+    animation: player-name-marquee-bounce 8s linear infinite alternate;
+    will-change: transform;
+}
+
+@keyframes player-name-marquee-bounce {
+    0%,
+    8% {
+        transform: translateX(0);
+    }
+
+    92%,
+    100% {
+        transform: translateX(var(--player-name-marquee-end, 0px));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player-name-marquee {
+        text-overflow: ellipsis;
+    }
+
+    .player-name-marquee.is-overflowing > .player-name-marquee-track {
+        max-width: 100%;
+        padding-left: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        animation: none;
+        will-change: auto;
+    }
+}
