@@ -1,4 +1,5 @@
 ﻿@using Microsoft.Extensions.Localization
+@using BadWolfQuiz.Web.Localization
 @using BadWolfQuiz.Web.Models
 @inject IStringLocalizer<SharedResource> localizer
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockCollectionViewModel
@@ -57,6 +58,16 @@
                             class="content-block-type-option"
                             data-block-type="YouTube">
                         @localizer["ContentBlockType_YouTube"]
+                    </button>
+                }
+
+                @if (CanAdd(ContentBlockType.Container))
+                {
+                    <button type="button"
+                            class="content-block-type-option"
+                            data-block-type="Container"
+                            data-content-block-container-option>
+                        @ContentBlockContainerText.Title
                     </button>
                 }
             </div>

@@ -1,0 +1,7 @@
+.content-block-container-layout {
+    align-items: center !important;
+}
+
+.content-block-container-children:empty::before {
+    content: attr(data-container-empty-label) !important;
+}
