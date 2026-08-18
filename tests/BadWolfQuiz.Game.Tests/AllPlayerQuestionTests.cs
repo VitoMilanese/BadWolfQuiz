@@ -22,16 +22,17 @@ public sealed class AllPlayerQuestionTests
     }
 
     [Fact]
-    public void Multiple_choice_requires_two_to_four_distinct_text_options()
+    public void Multiple_choice_accepts_two_to_four_text_or_image_options()
     {
         var question = CreateQuestion(
             QuestionPresentationType.AllPlayerMultipleChoice,
-            [TextBlock(10, "Red"), TextBlock(11, "Blue")]);
+            [TextBlock(10, "Red"), ImageBlock(11)]);
 
         Assert.False(question.IsSpecial);
         Assert.True(question.ExcludeFromRandomWagerSelection);
         Assert.Equal(2, question.AnswerBlocks.Count);
         Assert.Equal("Red", question.AnswerBlocks[0].TextContent);
+        Assert.Equal(ContentBlockKind.Image, question.AnswerBlocks[1].Kind);
 
         Assert.Throws<ArgumentException>(() => CreateQuestion(
             QuestionPresentationType.AllPlayerMultipleChoice,
@@ -39,6 +40,18 @@ public sealed class AllPlayerQuestionTests
         Assert.Throws<ArgumentException>(() => CreateQuestion(
             QuestionPresentationType.AllPlayerMultipleChoice,
             [TextBlock(10, "Red"), TextBlock(11, "red")]));
+        Assert.Throws<ArgumentException>(() => CreateQuestion(
+            QuestionPresentationType.AllPlayerMultipleChoice,
+            [TextBlock(10, "Red"), AudioBlock(11)]));
+    }
+
+    [Fact]
+    public void Multiple_choice_rejects_audio_or_video_question_content()
+    {
+        Assert.Throws<ArgumentException>(() => CreateQuestion(
+            QuestionPresentationType.AllPlayerMultipleChoice,
+            [TextBlock(10, "A"), TextBlock(11, "B")],
+            [AudioBlock(1)]));
     }
 
     [Fact]
@@ -57,31 +70,33 @@ public sealed class AllPlayerQuestionTests
     }
 
     [Fact]
-    public void Wrong_answer_can_be_recorded_for_zero_points()
+    public void Text_answer_can_be_recorded_for_zero_points_and_judged_later()
     {
         var session = CreateSession(QuestionPresentationType.AllPlayerText);
         var rose = session.AddPlayer("Rose");
-        var mickey = session.AddPlayer("Mickey");
         session.Start();
         session.SelectQuestion(100);
 
-        var wrong = session.AddQuestionAnswerHistoryEntry(
+        var submitted = session.AddQuestionAnswerHistoryEntry(
             100,
             rose.Id,
             isCorrect: false,
             value: 0,
             resolveQuestionIfAvailable: false);
-        var correct = session.AddQuestionAnswerHistoryEntry(
-            100,
-            mickey.Id,
-            isCorrect: true,
-            value: 200,
-            resolveQuestionIfAvailable: false);
 
-        Assert.Equal(0, wrong.ScoreDelta);
+        Assert.Equal(0, submitted.ScoreDelta);
         Assert.Equal(0, rose.Score);
-        Assert.Equal(200, correct.ScoreDelta);
-        Assert.Equal(200, mickey.Score);
+
+        var judged = session.UpdateQuestionAnswerHistoryEntry(
+            100,
+            submitted.Id,
+            rose.Id,
+            isCorrect: true,
+            value: 200);
+
+        Assert.True(judged.IsCorrect);
+        Assert.Equal(200, judged.ScoreDelta);
+        Assert.Equal(200, rose.Score);
     }
 
     private static GameSession CreateSession(QuestionPresentationType type)
@@ -99,7 +114,8 @@ public sealed class AllPlayerQuestionTests
 
     private static QuizQuestionSnapshot CreateQuestion(
         QuestionPresentationType type,
-        IReadOnlyList<ContentBlockSnapshot> answers) => new(
+        IReadOnlyList<ContentBlockSnapshot> answers,
+        IReadOnlyList<ContentBlockSnapshot>? questionBlocks = null) => new(
             100,
             10,
             0,
@@ -107,7 +123,7 @@ public sealed class AllPlayerQuestionTests
             true,
             "Category",
             false,
-            [TextBlock(1, "Question")],
+            questionBlocks ?? [TextBlock(1, "Question")],
             answers,
             type);
 
@@ -124,4 +140,32 @@ public sealed class AllPlayerQuestionTests
         null,
         id,
         false);
+
+    private static ContentBlockSnapshot ImageBlock(int id) => new(
+        id,
+        ContentBlockKind.Image,
+        null,
+        null,
+        null,
+        null,
+        null,
+        [1, 2, 3],
+        "image/png",
+        $"option-{id}.png",
+        id,
+        false);
+
+    private static ContentBlockSnapshot AudioBlock(int id) => new(
+        id,
+        ContentBlockKind.Audio,
+        null,
+        null,
+        null,
+        null,
+        null,
+        [1, 2, 3],
+        "audio/mpeg",
+        $"audio-{id}.mp3",
+        id,
+        true);
 }

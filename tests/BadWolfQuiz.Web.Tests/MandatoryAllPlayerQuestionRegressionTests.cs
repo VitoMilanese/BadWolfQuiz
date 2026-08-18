@@ -11,24 +11,27 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
 
         Assert.Contains("All players — text answer", script);
         Assert.Contains("All players — multiple choice", script);
-        Assert.Contains("values.length === 1", script);
-        Assert.Contains("values.length >= 2", script);
-        Assert.Contains("values.length <= 4", script);
-        Assert.Contains("answerHeading.textContent", script);
+        Assert.Contains("answerCards.length === 1", script);
+        Assert.Contains("answerCards.length < 2", script);
+        Assert.Contains("answerCards.length > 4", script);
+        Assert.Contains("[\"Text\", \"Image\"]", script);
+        Assert.Contains("imageCardHasFile", script);
+        Assert.Contains("invalidChoiceMedia", script);
     }
 
     [Fact]
-    public void Player_submission_scores_only_correct_answers()
+    public void Text_answers_are_submitted_for_zero_points_and_judged_by_host()
     {
         var root = FindRepositoryRoot();
         var endpoint = Read(root,
             "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
 
-        Assert.Contains("StringComparison.OrdinalIgnoreCase", endpoint);
+        Assert.Contains("OnPostJudge", endpoint);
+        Assert.Contains("isCorrect: false", endpoint);
+        Assert.Contains("value: 0", endpoint);
+        Assert.Contains("UpdateQuestionAnswerHistoryEntry", endpoint);
+        Assert.Contains("review.JudgedPlayers.Add", endpoint);
         Assert.Contains("isCorrect ? question.Points : 0", endpoint);
-        Assert.Contains("resolveQuestionIfAvailable: false", endpoint);
-        Assert.Contains("duplicate = true", endpoint);
-        Assert.Contains("ResolveQuestionWithoutCorrectAnswer", endpoint);
     }
 
     [Fact]
@@ -44,21 +47,65 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("all-player-question-answering", script);
         Assert.Contains("all-player-host-progress", script);
         Assert.Contains("BadWolfHostGameplay.refresh", script);
-        Assert.Contains("/js/all-player-question.js?v=2", bootstrap);
+        Assert.Contains("/js/all-player-question.js?v=3", bootstrap);
         Assert.Contains("start-game-form", bootstrap);
         Assert.Contains("MutationObserver", bootstrap);
     }
 
     [Fact]
-    public void Multiple_choice_does_not_reveal_correct_option_marker_to_players()
+    public void Multiple_choice_options_are_shuffled_per_player_and_support_images()
     {
         var root = FindRepositoryRoot();
         var endpoint = Read(root,
             "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
 
-        Assert.Contains("RotateOptions", endpoint);
-        Assert.Contains("options = isMultipleChoice", endpoint);
+        Assert.Contains("ShuffleOptions", endpoint);
+        Assert.Contains("player.Id.Value.GetHashCode()", endpoint);
+        Assert.Contains("OnGetOptionImage", endpoint);
+        Assert.Contains("block.Kind == ContentBlockKind.Image", endpoint);
+        Assert.Contains("option.imageUrl", script);
         Assert.DoesNotContain("correctOption", endpoint);
+    }
+
+    [Fact]
+    public void Host_renders_choice_options_as_grid_and_marks_answer_correctness()
+    {
+        var root = FindRepositoryRoot();
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+
+        Assert.Contains("all-player-host-choice-grid", script);
+        Assert.Contains("grid-template-columns: repeat(2", script);
+        Assert.Contains("all-player-multiple-choice-answer", script);
+        Assert.Contains("border: 3px solid #c62828", script);
+        Assert.Contains("border-color: #2e7d32", script);
+    }
+
+    [Fact]
+    public void Player_client_reinitializes_after_reconnect_dom_replacement()
+    {
+        var root = FindRepositoryRoot();
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+
+        Assert.Contains("allPlayerClientInitialized", script);
+        Assert.Contains("const observer = new MutationObserver", script);
+        Assert.Contains("initializeAll", script);
+        Assert.Contains("lobby.isConnected", script);
+    }
+
+    [Fact]
+    public void Programmatic_editor_type_restore_is_marked_clean()
+    {
+        var root = FindRepositoryRoot();
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+
+        Assert.Contains("markEditorProgrammaticStateClean", script);
+        Assert.Contains("editor-state-synchronized", script);
+        Assert.Contains("data-question-save-status", script);
     }
 
     private static string Read(string root, string relativePath) =>

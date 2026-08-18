@@ -6,7 +6,7 @@
 
         window.badWolfAllPlayerQuestionLoaderStarted = true;
         const script = document.createElement("script");
-        script.src = "/js/all-player-question.js?v=2";
+        script.src = "/js/all-player-question.js?v=3";
         script.async = false;
         document.head.appendChild(script);
     };

@@ -232,18 +232,33 @@ public sealed class QuizQuestionSnapshot
 
         if (presentationType == QuestionPresentationType.AllPlayerMultipleChoice)
         {
-            var choices = orderedAnswerBlocks
-                .Select(block => block.Kind == ContentBlockKind.Text
-                    ? block.TextContent?.Trim()
-                    : null)
-                .ToArray();
-
-            if (choices.Length is < 2 or > 4 ||
-                choices.Any(string.IsNullOrWhiteSpace) ||
-                choices.Distinct(StringComparer.OrdinalIgnoreCase).Count() != choices.Length)
+            if (orderedQuestionBlocks.Any(block =>
+                    block.Kind is not ContentBlockKind.Text and
+                        not ContentBlockKind.Image))
             {
                 throw new ArgumentException(
-                    "An all-player multiple-choice question must contain two to four distinct non-empty text answer blocks.",
+                    "An all-player multiple-choice question can contain only text or image question blocks.",
+                    nameof(questionBlocks));
+            }
+
+            if (orderedAnswerBlocks.Length is < 2 or > 4 ||
+                orderedAnswerBlocks.Any(block => !IsValidAllPlayerChoiceOption(block)))
+            {
+                throw new ArgumentException(
+                    "An all-player multiple-choice question must contain two to four text or image answer blocks.",
+                    nameof(answerBlocks));
+            }
+
+            var textChoices = orderedAnswerBlocks
+                .Where(block => block.Kind == ContentBlockKind.Text)
+                .Select(block => block.TextContent!.Trim())
+                .ToArray();
+
+            if (textChoices.Distinct(StringComparer.OrdinalIgnoreCase).Count() !=
+                textChoices.Length)
+            {
+                throw new ArgumentException(
+                    "Text answer options for an all-player multiple-choice question must be distinct.",
                     nameof(answerBlocks));
             }
         }
@@ -263,6 +278,16 @@ public sealed class QuizQuestionSnapshot
         QuestionBlocks = orderedQuestionBlocks;
         AnswerBlocks = orderedAnswerBlocks;
     }
+
+    private static bool IsValidAllPlayerChoiceOption(ContentBlockSnapshot block) =>
+        block.Kind switch
+        {
+            ContentBlockKind.Text => !string.IsNullOrWhiteSpace(block.TextContent),
+            ContentBlockKind.Image =>
+                block.FileData is { Length: > 0 } &&
+                !string.IsNullOrWhiteSpace(block.FileContentType),
+            _ => false
+        };
 
     public int SourceQuestionId { get; }
 

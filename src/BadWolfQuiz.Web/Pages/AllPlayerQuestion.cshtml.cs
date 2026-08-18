@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
@@ -15,6 +16,9 @@ public sealed class AllPlayerQuestionModel(
     QuizDbContext db) : PageModel
 {
     private const int MaximumAnswerLength = 500;
+    private const string ApiPath = "/api/all-player-question";
+    private static readonly ConcurrentDictionary<TextReviewKey, TextReviewState>
+        TextReviews = new();
 
     public async Task<IActionResult> OnGetEditorAsync(
         int questionId,
@@ -90,9 +94,53 @@ public sealed class AllPlayerQuestionModel(
             }
 
             var question = FindCurrentQuestion(game);
+            if (question is null)
+            {
+                return new JsonResult(new { active = false });
+            }
+
+            EnsureQuestionLifecycle(game, question);
+            question = FindCurrentQuestion(game);
+
             return question is null
                 ? new JsonResult(new { active = false })
                 : new JsonResult(CreatePlayerState(game, question, player));
+        }
+    }
+
+    public IActionResult OnGetOptionImage(
+        string code,
+        int sourceQuestionId,
+        int sourceContentBlockId)
+    {
+        var game = sessionRegistry.Find(code);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        lock (game)
+        {
+            var question = game.Session.Board.Questions.SingleOrDefault(item =>
+                item.SourceQuestionId == sourceQuestionId &&
+                item.PresentationType == QuestionPresentationType.AllPlayerMultipleChoice &&
+                item.Status is RuntimeQuestionStatus.Selected or
+                    RuntimeQuestionStatus.Active or
+                    RuntimeQuestionStatus.ShowingAnswer);
+            var block = question?.AnswerBlocks.SingleOrDefault(item =>
+                item.SourceContentBlockId == sourceContentBlockId &&
+                item.Kind == ContentBlockKind.Image);
+
+            if (block?.FileData is null ||
+                block.FileData.Length == 0 ||
+                string.IsNullOrWhiteSpace(block.FileContentType))
+            {
+                return NotFound();
+            }
+
+            return string.IsNullOrWhiteSpace(block.FileName)
+                ? File(block.FileData, block.FileContentType)
+                : File(block.FileData, block.FileContentType, block.FileName);
         }
     }
 
@@ -142,11 +190,9 @@ public sealed class AllPlayerQuestionModel(
                     return ConflictState(game, connection.Player);
                 }
 
-                _ = game.Session.Timer.Remaining;
-                if (game.Session.Timer.Status == GameTimerStatus.Expired)
+                EnsureQuestionLifecycle(game, question);
+                if (question.Status == RuntimeQuestionStatus.ShowingAnswer)
                 {
-                    game.Session.ResolveQuestionWithoutCorrectAnswer(sourceQuestionId);
-                    game.MarkPersistenceChanged();
                     return ConflictState(game, connection.Player);
                 }
 
@@ -162,63 +208,73 @@ public sealed class AllPlayerQuestionModel(
                     });
                 }
 
-                var normalizedAnswer = answer?.Trim() ?? string.Empty;
-                if (normalizedAnswer.Length is < 1 or > MaximumAnswerLength)
+                if (question.PresentationType == QuestionPresentationType.AllPlayerText)
                 {
-                    return BadRequest(new
+                    var review = GetTextReview(game, question);
+                    if (!review.Accepting)
                     {
-                        success = false,
-                        error = "The submitted answer is invalid."
-                    });
-                }
+                        return ConflictState(game, connection.Player);
+                    }
 
-                var configuredAnswers = question.AnswerBlocks
-                    .Select(block => block.TextContent?.Trim() ?? string.Empty)
-                    .ToArray();
-
-                if (configuredAnswers.Length == 0)
-                {
-                    return BadRequest(new
+                    var normalizedAnswer = answer?.Trim() ?? string.Empty;
+                    if (normalizedAnswer.Length is < 1 or > MaximumAnswerLength)
                     {
-                        success = false,
-                        error = "The question answer configuration is invalid."
-                    });
-                }
+                        return BadRequest(new
+                        {
+                            success = false,
+                            error = "The submitted answer is invalid."
+                        });
+                    }
 
-                if (question.PresentationType ==
-                        QuestionPresentationType.AllPlayerMultipleChoice &&
-                    !configuredAnswers.Contains(
-                        normalizedAnswer,
-                        StringComparer.Ordinal))
-                {
-                    return BadRequest(new
+                    game.Session.AddQuestionAnswerHistoryEntry(
+                        sourceQuestionId,
+                        connection.Player.Id,
+                        isCorrect: false,
+                        value: 0,
+                        resolveQuestionIfAvailable: false);
+                    review.Answers[connection.Player.Id] = normalizedAnswer;
+
+                    if (AllCurrentPlayersSubmitted(game, question))
                     {
-                        success = false,
-                        error = "The selected answer is not an available option."
-                    });
+                        review.Accepting = false;
+                        game.Session.Timer.Stop();
+                    }
                 }
-
-                var comparison = question.PresentationType ==
-                    QuestionPresentationType.AllPlayerText
-                        ? StringComparison.OrdinalIgnoreCase
-                        : StringComparison.Ordinal;
-                var isCorrect = string.Equals(
-                    normalizedAnswer,
-                    configuredAnswers[0],
-                    comparison);
-
-                game.Session.AddQuestionAnswerHistoryEntry(
-                    sourceQuestionId,
-                    connection.Player.Id,
-                    isCorrect,
-                    isCorrect ? question.Points : 0,
-                    resolveQuestionIfAvailable: false);
-
-                var isComplete = question.AnswerAttempts.Count >=
-                    game.Session.Players.Count;
-                if (isComplete)
+                else
                 {
-                    game.Session.ResolveQuestionWithoutCorrectAnswer(sourceQuestionId);
+                    if (!int.TryParse(answer, out var selectedBlockId))
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            error = "The selected answer is invalid."
+                        });
+                    }
+
+                    var selectedBlock = question.AnswerBlocks.SingleOrDefault(block =>
+                        block.SourceContentBlockId == selectedBlockId);
+                    if (selectedBlock is null)
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            error = "The selected answer is not an available option."
+                        });
+                    }
+
+                    var isCorrect = selectedBlock.SourceContentBlockId ==
+                        question.AnswerBlocks[0].SourceContentBlockId;
+                    game.Session.AddQuestionAnswerHistoryEntry(
+                        sourceQuestionId,
+                        connection.Player.Id,
+                        isCorrect,
+                        isCorrect ? question.Points : 0,
+                        resolveQuestionIfAvailable: false);
+
+                    if (AllCurrentPlayersSubmitted(game, question))
+                    {
+                        game.Session.ResolveQuestionWithoutCorrectAnswer(sourceQuestionId);
+                    }
                 }
 
                 game.MarkPersistenceChanged();
@@ -234,6 +290,78 @@ public sealed class AllPlayerQuestionModel(
         finally
         {
             sessionRegistry.DisconnectPlayer(validationConnectionId);
+        }
+    }
+
+    public IActionResult OnPostJudge(
+        string code,
+        int sourceQuestionId,
+        Guid playerId,
+        bool isCorrect)
+    {
+        var game = sessionRegistry.Find(code);
+        var hostId = currentHost.Id;
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        if (string.IsNullOrWhiteSpace(hostId) ||
+            !string.Equals(game.HostId, hostId, StringComparison.Ordinal))
+        {
+            return Forbid();
+        }
+
+        lock (game)
+        {
+            var question = game.Session.Board.Questions.SingleOrDefault(item =>
+                item.SourceQuestionId == sourceQuestionId &&
+                item.PresentationType == QuestionPresentationType.AllPlayerText &&
+                item.Status is RuntimeQuestionStatus.Selected or
+                    RuntimeQuestionStatus.Active);
+            if (question is null)
+            {
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            var review = GetTextReview(game, question);
+            var runtimePlayerId = new GamePlayerId(playerId);
+            if (review.Accepting ||
+                !review.Answers.ContainsKey(runtimePlayerId))
+            {
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            var attempt = question.AnswerAttempts.SingleOrDefault(item =>
+                item.PlayerId == runtimePlayerId);
+            if (attempt is null)
+            {
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            if (!review.JudgedPlayers.Contains(runtimePlayerId))
+            {
+                game.Session.UpdateQuestionAnswerHistoryEntry(
+                    sourceQuestionId,
+                    attempt.Id,
+                    runtimePlayerId,
+                    isCorrect,
+                    isCorrect ? question.Points : 0);
+                review.JudgedPlayers.Add(runtimePlayerId);
+                game.MarkPersistenceChanged();
+            }
+
+            if (AllSubmittedCurrentPlayersJudged(game, question, review))
+            {
+                game.Session.ResolveQuestionWithoutCorrectAnswer(sourceQuestionId);
+                game.MarkPersistenceChanged();
+            }
+
+            return new JsonResult(new
+            {
+                success = true,
+                state = CreateHostState(game, question)
+            });
         }
     }
 
@@ -280,13 +408,42 @@ public sealed class AllPlayerQuestionModel(
             game.MarkPersistenceChanged();
         }
 
+        if (AllCurrentPlayersSubmitted(game, question))
+        {
+            if (question.PresentationType == QuestionPresentationType.AllPlayerText)
+            {
+                GetTextReview(game, question).Accepting = false;
+                game.Session.Timer.Stop();
+                game.MarkPersistenceChanged();
+            }
+            else
+            {
+                game.Session.ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
+                game.MarkPersistenceChanged();
+                return;
+            }
+        }
+
         _ = game.Session.Timer.Remaining;
         if (game.Session.Timer.Status != GameTimerStatus.Expired)
         {
             return;
         }
 
-        game.Session.ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
+        if (question.PresentationType == QuestionPresentationType.AllPlayerText)
+        {
+            var review = GetTextReview(game, question);
+            review.Accepting = false;
+            if (!CurrentPlayersWithSubmissions(game, question).Any())
+            {
+                game.Session.ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
+            }
+        }
+        else
+        {
+            game.Session.ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
+        }
+
         game.MarkPersistenceChanged();
     }
 
@@ -295,21 +452,52 @@ public sealed class AllPlayerQuestionModel(
         RuntimeQuestion question)
     {
         var isClosed = question.Status == RuntimeQuestionStatus.ShowingAnswer;
+        var isText = question.PresentationType == QuestionPresentationType.AllPlayerText;
+        var review = isText ? GetTextReview(game, question) : null;
         var attemptsByPlayer = question.AnswerAttempts
             .ToDictionary(attempt => attempt.PlayerId);
-        var players = game.Session.Players
+        var currentPlayers = game.Session.Players.ToArray();
+        var players = currentPlayers
             .Select(player =>
             {
                 attemptsByPlayer.TryGetValue(player.Id, out var attempt);
+                var isJudged = review?.JudgedPlayers.Contains(player.Id) == true;
                 return new
                 {
                     id = player.Id.Value,
                     player.Name,
                     submitted = attempt is not null,
-                    isCorrect = isClosed ? attempt?.IsCorrect : null
+                    isJudged,
+                    isCorrect = isClosed || isJudged ? attempt?.IsCorrect : null
                 };
             })
             .ToArray();
+
+        var judgePlayer = isText && !isClosed && review is { Accepting: false }
+            ? currentPlayers.FirstOrDefault(player =>
+                attemptsByPlayer.ContainsKey(player.Id) &&
+                !review.JudgedPlayers.Contains(player.Id))
+            : null;
+        object? judgeSubmission = null;
+        if (judgePlayer is not null)
+        {
+            review!.Answers.TryGetValue(judgePlayer.Id, out var submittedAnswer);
+            judgeSubmission = new
+            {
+                id = judgePlayer.Id.Value,
+                judgePlayer.Name,
+                answer = submittedAnswer ?? "—"
+            };
+        }
+
+        var options = question.PresentationType ==
+            QuestionPresentationType.AllPlayerMultipleChoice
+                ? ShuffleOptions(
+                    CreateChoiceOptions(game, question),
+                    HashCode.Combine(
+                        question.SourceQuestionId,
+                        game.Session.Id.Value.GetHashCode()))
+                : Array.Empty<ChoiceOption>();
 
         return new
         {
@@ -317,9 +505,14 @@ public sealed class AllPlayerQuestionModel(
             sourceQuestionId = question.SourceQuestionId,
             mode = GetMode(question),
             isClosed,
-            answeredCount = question.AnswerAttempts.Count,
-            playerCount = game.Session.Players.Count,
-            remainingMilliseconds = GetRemainingMilliseconds(game, question),
+            isAccepting = isText ? review!.Accepting : !isClosed,
+            isJudging = judgeSubmission is not null,
+            answeredCount = currentPlayers.Count(player =>
+                attemptsByPlayer.ContainsKey(player.Id)),
+            playerCount = currentPlayers.Length,
+            remainingMilliseconds = GetRemainingMilliseconds(game, question, review),
+            options,
+            judgeSubmission,
             players
         };
     }
@@ -332,40 +525,86 @@ public sealed class AllPlayerQuestionModel(
         var attempt = question.AnswerAttempts.SingleOrDefault(item =>
             item.PlayerId == player.Id);
         var isClosed = question.Status == RuntimeQuestionStatus.ShowingAnswer;
-        var isMultipleChoice = question.PresentationType ==
-            QuestionPresentationType.AllPlayerMultipleChoice;
+        var isText = question.PresentationType == QuestionPresentationType.AllPlayerText;
+        var review = isText ? GetTextReview(game, question) : null;
+        var isAccepting = !isClosed && (!isText || review!.Accepting);
 
         return new
         {
             active = true,
             sourceQuestionId = question.SourceQuestionId,
             mode = GetMode(question),
-            options = isMultipleChoice
-                ? RotateOptions(
-                    question.AnswerBlocks
-                        .Select(block => block.TextContent!.Trim())
-                        .ToArray(),
-                    question.SourceQuestionId)
-                : Array.Empty<string>(),
+            options = question.PresentationType ==
+                QuestionPresentationType.AllPlayerMultipleChoice
+                    ? ShuffleOptions(
+                        CreateChoiceOptions(game, question),
+                        HashCode.Combine(
+                            question.SourceQuestionId,
+                            player.Id.Value.GetHashCode()))
+                    : Array.Empty<ChoiceOption>(),
             hasSubmitted = attempt is not null,
+            isAccepting,
+            isJudging = isText && !isClosed && !review!.Accepting,
             isClosed,
             isCorrect = isClosed ? attempt?.IsCorrect : null,
-            remainingMilliseconds = GetRemainingMilliseconds(game, question)
+            remainingMilliseconds = GetRemainingMilliseconds(game, question, review)
         };
+    }
+
+    private static ChoiceOption[] CreateChoiceOptions(
+        GameSessionRegistration game,
+        RuntimeQuestion question) => question.AnswerBlocks
+        .Select(block => new ChoiceOption(
+            block.SourceContentBlockId,
+            block.Kind == ContentBlockKind.Image ? "image" : "text",
+            block.Kind == ContentBlockKind.Text ? block.TextContent?.Trim() : null,
+            block.Kind == ContentBlockKind.Image
+                ? BuildOptionImageUrl(game, question, block)
+                : null))
+        .ToArray();
+
+    private static string BuildOptionImageUrl(
+        GameSessionRegistration game,
+        RuntimeQuestion question,
+        ContentBlockSnapshot block) =>
+        $"{ApiPath}?handler=OptionImage" +
+        $"&code={Uri.EscapeDataString(game.PublicCode)}" +
+        $"&sourceQuestionId={question.SourceQuestionId}" +
+        $"&sourceContentBlockId={block.SourceContentBlockId}";
+
+    private static ChoiceOption[] ShuffleOptions(
+        IReadOnlyList<ChoiceOption> options,
+        int seed)
+    {
+        var shuffled = options.ToArray();
+        var random = new Random(seed);
+        for (var index = shuffled.Length - 1; index > 0; index--)
+        {
+            var swapIndex = random.Next(index + 1);
+            (shuffled[index], shuffled[swapIndex]) =
+                (shuffled[swapIndex], shuffled[index]);
+        }
+
+        return shuffled;
     }
 
     private static int GetRemainingMilliseconds(
         GameSessionRegistration game,
-        RuntimeQuestion question)
+        RuntimeQuestion question,
+        TextReviewState? review = null)
     {
-        if (question.Status == RuntimeQuestionStatus.ShowingAnswer)
+        if (question.Status == RuntimeQuestionStatus.ShowingAnswer ||
+            review is { Accepting: false })
         {
             return 0;
         }
 
-        return Math.Max(
-            0,
-            (int)Math.Ceiling(game.Session.Timer.Remaining.TotalMilliseconds));
+        _ = game.Session.Timer.Remaining;
+        return game.Session.Timer.Status == GameTimerStatus.Expired
+            ? 0
+            : Math.Max(
+                0,
+                (int)Math.Ceiling(game.Session.Timer.Remaining.TotalMilliseconds));
     }
 
     private static string GetMode(RuntimeQuestion question) =>
@@ -373,17 +612,60 @@ public sealed class AllPlayerQuestionModel(
             ? "multipleChoice"
             : "text";
 
-    private static string[] RotateOptions(string[] options, int sourceQuestionId)
+    private static bool AllCurrentPlayersSubmitted(
+        GameSessionRegistration game,
+        RuntimeQuestion question) =>
+        game.Session.Players.Count > 0 &&
+        game.Session.Players.All(player =>
+            question.AnswerAttempts.Any(attempt => attempt.PlayerId == player.Id));
+
+    private static IEnumerable<GamePlayer> CurrentPlayersWithSubmissions(
+        GameSessionRegistration game,
+        RuntimeQuestion question) => game.Session.Players.Where(player =>
+        question.AnswerAttempts.Any(attempt => attempt.PlayerId == player.Id));
+
+    private static bool AllSubmittedCurrentPlayersJudged(
+        GameSessionRegistration game,
+        RuntimeQuestion question,
+        TextReviewState review)
     {
-        if (options.Length <= 1)
+        var submittedPlayers = CurrentPlayersWithSubmissions(game, question).ToArray();
+        return submittedPlayers.Length > 0 &&
+            submittedPlayers.All(player => review.JudgedPlayers.Contains(player.Id));
+    }
+
+    private static TextReviewState GetTextReview(
+        GameSessionRegistration game,
+        RuntimeQuestion question)
+    {
+        var key = new TextReviewKey(game.Session.Id.Value, question.SourceQuestionId);
+        var review = TextReviews.GetOrAdd(key, _ => new TextReviewState());
+
+        foreach (var attempt in question.AnswerAttempts)
         {
-            return options;
+            review.Answers.TryAdd(attempt.PlayerId, "—");
         }
 
-        var offset = 1 + Math.Abs(sourceQuestionId % (options.Length - 1));
-        return options
-            .Skip(offset)
-            .Concat(options.Take(offset))
-            .ToArray();
+        if (question.Status == RuntimeQuestionStatus.ShowingAnswer)
+        {
+            review.Accepting = false;
+        }
+
+        return review;
     }
+
+    private readonly record struct TextReviewKey(Guid GameId, int SourceQuestionId);
+
+    private sealed class TextReviewState
+    {
+        public Dictionary<GamePlayerId, string> Answers { get; } = [];
+        public HashSet<GamePlayerId> JudgedPlayers { get; } = [];
+        public bool Accepting { get; set; } = true;
+    }
+
+    private sealed record ChoiceOption(
+        int Id,
+        string Kind,
+        string? Text,
+        string? ImageUrl);
 }
