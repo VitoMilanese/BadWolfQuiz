@@ -38,6 +38,13 @@
         loadSharedScript("/js/content-block-reorder-buttons.js");
     }
 
+    const editorResetTarget = document.querySelector(
+        "#question-editor-back-link, #final-question-editor-back-link, #description-editor-back");
+    if (editorResetTarget) {
+        loadSharedStyle("/css/editor-reset-button.css");
+        loadSharedScript("/js/editor-reset-button.js");
+    }
+
     const editorSaveOverlayTarget = document.querySelector(
         "form.quiz-board-form, form.question-editor");
     if (editorSaveOverlayTarget) {
