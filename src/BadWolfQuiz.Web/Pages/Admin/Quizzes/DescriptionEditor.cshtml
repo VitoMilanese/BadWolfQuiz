@@ -19,6 +19,16 @@
     </div>
 </div>
 
+@if (bool.TryParse(Request.Query["saved"].ToString(), out var saved) && saved)
+{
+    <div id="success-message"
+         class="alert alert-success"
+         role="status"
+         data-editor-save-status>
+        @Localizer["Message_Saved"]
+    </div>
+}
+
 <form method="post"
       enctype="multipart/form-data"
       class="question-editor description-editor">

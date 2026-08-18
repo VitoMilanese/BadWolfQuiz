@@ -5,6 +5,25 @@
 
     window.badWolfGameplayEscapeShortcutsInitialized = true;
 
+    const editorSaveOverlayTarget = document.querySelector(
+        "form.quiz-board-form, form.question-editor");
+    if (editorSaveOverlayTarget) {
+        const bootstrapUrl = document.currentScript?.src
+            ? new URL(document.currentScript.src)
+            : null;
+        const overlayUrl = new URL(
+            "/js/editor-save-overlay.js",
+            window.location.origin);
+        if (bootstrapUrl?.search) {
+            overlayUrl.search = bootstrapUrl.search;
+        }
+
+        const overlayScript = document.createElement("script");
+        overlayScript.src = overlayUrl.href;
+        overlayScript.async = false;
+        document.head.appendChild(overlayScript);
+    }
+
     const hasBlockingUi = () =>
         document.querySelector(
             "dialog[open], details.action-menu[open], .language-menu.open, [role='menu']:not([hidden])") !== null;
