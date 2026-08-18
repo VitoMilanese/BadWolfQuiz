@@ -68,7 +68,7 @@ public sealed class UnfinishedGamePersistenceTests : IDisposable
         Assert.NotNull(snapshot.SessionState.FinalQuestion);
 
         var restoredRegistry = new GameSessionRegistry(
-            new SequenceGameCodeGenerator("RESTORED"));
+            new SequenceGameCodeGenerator(["RESTORED"]));
         var restoredService = CreatePersistenceService(restoredRegistry, store);
         await restoredService.StartAsync(CancellationToken.None);
         try
