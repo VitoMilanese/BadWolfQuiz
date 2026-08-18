@@ -240,7 +240,6 @@ public sealed class ContributorSupportTagHelper(
                         <span>{{html.Encode(localizer["ContributorFrame_Enable"].Value)}}</span>
                     </label>
                     <div class="contributor-frame-choice">
-                        <span>{{html.Encode(localizer["ContributorFrame_Label"].Value)}}</span>
                         <div class="contributor-frame-choice-row">
                             <img class="contributor-frame-choice-preview"
                                  data-contributor-frame-preview
@@ -302,7 +301,6 @@ public sealed class ContributorSupportTagHelper(
                         <span>{{html.Encode(localizer["ContributorFrame_Enable"].Value)}}</span>
                     </label>
                     <div class="contributor-frame-choice">
-                        <span>{{html.Encode(localizer["ContributorFrame_Label"].Value)}}</span>
                         <div class="contributor-frame-choice-row">
                             <img class="contributor-frame-choice-preview"
                                  data-contributor-frame-preview
