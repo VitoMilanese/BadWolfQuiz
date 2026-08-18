@@ -6,6 +6,29 @@ The quiz editor manages the reusable quiz definition without changing any game
 snapshot that has already been created. It combines a visual board editor with
 dedicated regular-question and final-question editors.
 
+## Cloning quizzes
+
+On `/Admin/Quizzes`, an active quiz provides **Clone** immediately after **Edit**
+in its Actions menu. Selecting Clone opens a localized dialog that requires the
+name of the new quiz before anything is created. After a successful clone, the
+new quiz opens directly in the quiz editor.
+
+Cloning creates a new independent editable quiz graph. It copies the source quiz
+description, rounds, rows, categories, questions, round/category descriptions,
+final-question and final-answer content, question settings, content-block order
+and metadata, captions, URLs, and stored media bytes. Every cloned quiz, round,
+category, question, and content block receives its own database identity, so later
+editing of the clone cannot modify the source quiz.
+
+Publication and runtime history are intentionally not cloned. A cloned quiz starts
+unpublished with no publication timestamp even when the source is public. Game
+sessions/play history and rating/star data are not copied, and play/archive runtime
+state is reset. The source quiz is not modified by the cloning operation.
+
+Clone is offered only while the source quiz media state is `Active`, matching the
+existing Edit availability. This ensures the reusable stored media needed for an
+independent clone is available when the clone is created.
+
 ## Board settings
 
 The regular **Save** action submits board settings asynchronously. Save-result
