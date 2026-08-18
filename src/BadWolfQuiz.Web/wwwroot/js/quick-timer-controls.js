@@ -6,7 +6,7 @@
 
         window.badWolfAllPlayerQuestionLoaderStarted = true;
         const script = document.createElement("script");
-        script.src = "/js/all-player-question.js?v=3";
+        script.src = "/js/all-player-question.js?v=4";
         script.async = false;
         document.head.appendChild(script);
     };
@@ -23,7 +23,7 @@
             observer.disconnect();
             loadAllPlayerQuestionClient();
         });
-        observer.observe(document.body, {
+        observer.observe(document.documentElement, {
             childList: true,
             subtree: true
         });

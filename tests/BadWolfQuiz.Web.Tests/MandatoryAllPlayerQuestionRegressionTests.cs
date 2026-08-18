@@ -47,7 +47,7 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("all-player-question-answering", script);
         Assert.Contains("all-player-host-progress", script);
         Assert.Contains("BadWolfHostGameplay.refresh", script);
-        Assert.Contains("/js/all-player-question.js?v=3", bootstrap);
+        Assert.Contains("/js/all-player-question.js?v=4", bootstrap);
         Assert.Contains("start-game-form", bootstrap);
         Assert.Contains("MutationObserver", bootstrap);
     }
@@ -79,8 +79,11 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("all-player-host-choice-grid", script);
         Assert.Contains("grid-template-columns: repeat(2", script);
         Assert.Contains("all-player-multiple-choice-answer", script);
+        Assert.Contains("all-player-multiple-choice-answer-layout", script);
+        Assert.Contains("document.documentElement.classList.toggle", script);
         Assert.Contains("border: 3px solid #c62828", script);
         Assert.Contains("border-color: #2e7d32", script);
+        Assert.Contains("max-height: min(28vh, 20rem)", script);
     }
 
     [Fact]
@@ -91,9 +94,13 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
             "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
 
         Assert.Contains("allPlayerClientInitialized", script);
+        Assert.Contains("existingPanel", script);
+        Assert.Contains("panel.isConnected", script);
+        Assert.Contains("getBuzzerPanel", script);
         Assert.Contains("const observer = new MutationObserver", script);
         Assert.Contains("initializeAll", script);
         Assert.Contains("lobby.isConnected", script);
+        Assert.Contains("observer.observe(document.documentElement", script);
     }
 
     [Fact]

@@ -248,12 +248,15 @@
     display: none !important;
 }
 
+html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentation .game-content-blocks,
 .host-game-board.all-player-multiple-choice-answer .answer-presentation .game-content-blocks {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-rows: minmax(0, 1fr);
     gap: 0.8rem !important;
 }
 
+html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentation .game-content-block,
 .host-game-board.all-player-multiple-choice-answer .answer-presentation .game-content-block {
     min-width: 0;
     margin: 0 !important;
@@ -262,8 +265,17 @@
     border-radius: 0.8rem;
 }
 
+html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentation .game-content-block:first-child,
 .host-game-board.all-player-multiple-choice-answer .answer-presentation .game-content-block:first-child {
     border-color: #2e7d32;
+}
+
+html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentation .game-content-image,
+.host-game-board.all-player-multiple-choice-answer .answer-presentation .game-content-image {
+    width: 100%;
+    height: 100%;
+    max-height: min(28vh, 20rem);
+    object-fit: contain;
 }
 
 @media (max-width: 640px) {
@@ -610,10 +622,17 @@
 
     const initializePlayer = () => {
         const lobby = document.querySelector(".player-lobby");
-        if (!(lobby instanceof HTMLElement) ||
-            lobby.dataset.allPlayerClientInitialized === "true") {
+        if (!(lobby instanceof HTMLElement)) {
             return;
         }
+
+        const existingPanel = lobby.querySelector(".player-all-player-panel");
+        if (lobby.dataset.allPlayerClientInitialized === "true" &&
+            existingPanel instanceof HTMLElement &&
+            existingPanel.isConnected) {
+            return;
+        }
+        delete lobby.dataset.allPlayerClientInitialized;
 
         const code = lobby.dataset.gameCode;
         const playerId = lobby.dataset.playerId;
@@ -651,14 +670,17 @@
         let pollHandle = 0;
         let lastState = null;
 
-        const buzzerPanel = document.querySelector(".player-buzzer-panel");
+        const getBuzzerPanel = () => document.querySelector(
+            ".player-buzzer-panel");
         const hideBuzzer = () => {
+            const buzzerPanel = getBuzzerPanel();
             if (buzzerPanel && !buzzerPanel.hidden) {
                 buzzerPanel.dataset.hiddenByAllPlayer = "true";
                 buzzerPanel.hidden = true;
             }
         };
         const restoreBuzzer = () => {
+            const buzzerPanel = getBuzzerPanel();
             if (buzzerPanel?.dataset.hiddenByAllPlayer === "true") {
                 delete buzzerPanel.dataset.hiddenByAllPlayer;
                 buzzerPanel.hidden = false;
@@ -824,14 +846,14 @@
 
         const schedule = active => {
             window.clearTimeout(pollHandle);
-            if (!lobby.isConnected) {
+            if (!lobby.isConnected || !panel.isConnected) {
                 return;
             }
             pollHandle = window.setTimeout(poll, active ? 300 : 1200);
         };
 
         const poll = async () => {
-            if (!lobby.isConnected) {
+            if (!lobby.isConnected || !panel.isConnected) {
                 return;
             }
             try {
@@ -1025,6 +1047,14 @@
 
         const applyState = state => {
             lastState = state;
+            const isMultipleChoiceAnswer = Boolean(
+                state?.active &&
+                state.isClosed &&
+                state.mode === "multipleChoice");
+            document.documentElement.classList.toggle(
+                "all-player-multiple-choice-answer-layout",
+                isMultipleChoiceAnswer);
+
             const board = findBoard();
             if (!(board instanceof HTMLElement)) {
                 return;
@@ -1045,7 +1075,7 @@
                 !state.isClosed);
             board.classList.toggle(
                 "all-player-multiple-choice-answer",
-                state.isClosed && state.mode === "multipleChoice");
+                isMultipleChoiceAnswer);
             renderProgress(board, state);
             renderHostChoices(board, state);
 
@@ -1109,7 +1139,7 @@
     const observer = new MutationObserver(() => {
         initializeAll();
     });
-    observer.observe(document.body, {
+    observer.observe(document.documentElement, {
         childList: true,
         subtree: true
     });

@@ -360,7 +360,7 @@
 
         event.preventDefault();
         event.stopImmediatePropagation();
-        navigate(backLink.href);
+        backLink.click();
     }, true);
 
     window.addEventListener("keyup", event => {
