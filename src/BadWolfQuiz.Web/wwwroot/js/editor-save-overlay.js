@@ -118,7 +118,7 @@ body .editor-save-overlay[hidden] {
     };
 
     document.querySelectorAll(
-        "#success-message, [data-quiz-save-status], [data-question-save-status]")
+        "[data-editor-save-status], #success-message, [data-quiz-save-status], [data-question-save-status]")
         .forEach(watchStatus);
 
     const validationCandidates = editor.querySelectorAll(

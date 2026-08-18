@@ -90,10 +90,9 @@ public sealed class EditorSaveOverlayRegressionTests
         Assert.Contains("font-weight: 600", overlayScript, StringComparison.Ordinal);
         Assert.Contains("background: rgba(63, 185, 80, 0.34)", overlayScript, StringComparison.Ordinal);
         Assert.Contains("background: rgba(239, 35, 60, 0.34)", overlayScript, StringComparison.Ordinal);
-        Assert.Contains(
-            "#success-message, [data-quiz-save-status], [data-question-save-status]",
-            overlayScript,
-            StringComparison.Ordinal);
+        Assert.Contains("[data-editor-save-status]", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("[data-quiz-save-status]", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("[data-question-save-status]", overlayScript, StringComparison.Ordinal);
         Assert.Contains("MutationObserver", overlayScript, StringComparison.Ordinal);
 
         Assert.DoesNotContain("editorSaveOverlayDurationMs", imageClipboardScript, StringComparison.Ordinal);
@@ -102,7 +101,8 @@ public sealed class EditorSaveOverlayRegressionTests
         Assert.Contains("data-quiz-save-status", quizEditor, StringComparison.Ordinal);
         Assert.Contains("data-question-save-status", questionEditor, StringComparison.Ordinal);
         Assert.Contains("id=\"success-message\"", finalQuestionEditor, StringComparison.Ordinal);
-        Assert.Contains("Request.Query[\"saved\"]", descriptionEditor, StringComparison.Ordinal);
+        Assert.Contains("bool.TryParse(Request.Query[\"saved\"].ToString()", descriptionEditor, StringComparison.Ordinal);
+        Assert.Contains("data-editor-save-status", descriptionEditor, StringComparison.Ordinal);
         Assert.Contains("Message_Saved", descriptionEditor, StringComparison.Ordinal);
         Assert.Contains("Input.CategoryId", descriptionEditor, StringComparison.Ordinal);
         Assert.Contains("saved = true", descriptionEditorModel, StringComparison.Ordinal);

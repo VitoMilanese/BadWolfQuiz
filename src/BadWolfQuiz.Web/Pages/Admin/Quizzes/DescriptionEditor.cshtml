@@ -19,9 +19,12 @@
     </div>
 </div>
 
-@if (Request.Query["saved"].ToString() == "true")
+@if (bool.TryParse(Request.Query["saved"].ToString(), out var saved) && saved)
 {
-    <div id="success-message" class="alert alert-success" role="status">
+    <div id="success-message"
+         class="alert alert-success"
+         role="status"
+         data-editor-save-status>
         @Localizer["Message_Saved"]
     </div>
 }
