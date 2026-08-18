@@ -118,6 +118,10 @@ public sealed class RuntimeQuestion
 
     public QuestionPresentationType PresentationType { get; }
 
+    public bool IsAllPlayerQuestion => PresentationType is
+        QuestionPresentationType.AllPlayerText or
+        QuestionPresentationType.AllPlayerMultipleChoice;
+
     public int RevealedClueCount { get; private set; }
 
     public bool CanRevealClue => PresentationType == QuestionPresentationType.FourClues &&
@@ -192,6 +196,15 @@ public sealed class RuntimeQuestion
         }
 
         SelectedByPlayerId = selectedByPlayerId;
+
+        if (IsAllPlayerQuestion)
+        {
+            BuzzerStatus = QuestionBuzzerStatus.Closed;
+            AnsweringPlayerId = null;
+            Status = RuntimeQuestionStatus.Active;
+            return;
+        }
+
         Status = IsSpecial
             ? RuntimeQuestionStatus.AwaitingWager
             : RuntimeQuestionStatus.Selected;
@@ -216,6 +229,21 @@ public sealed class RuntimeQuestion
 
     internal void ActivateBuzzer()
     {
+        if (IsAllPlayerQuestion)
+        {
+            if (Status is not RuntimeQuestionStatus.Selected and
+                not RuntimeQuestionStatus.Active)
+            {
+                throw new GameRuleViolationException(
+                    "Answers can only be activated for an active all-player question.");
+            }
+
+            BuzzerStatus = QuestionBuzzerStatus.Closed;
+            AnsweringPlayerId = null;
+            Status = RuntimeQuestionStatus.Active;
+            return;
+        }
+
         if (IsSpecial || Status is not RuntimeQuestionStatus.Selected and
             not RuntimeQuestionStatus.Active)
         {

@@ -1,4 +1,34 @@
 (() => {
+    const loadAllPlayerQuestionClient = () => {
+        if (window.badWolfAllPlayerQuestionLoaderStarted) {
+            return;
+        }
+
+        window.badWolfAllPlayerQuestionLoaderStarted = true;
+        const script = document.createElement("script");
+        script.src = "/js/all-player-question.js?v=2";
+        script.async = false;
+        document.head.appendChild(script);
+    };
+
+    if (document.querySelector(
+        ".player-lobby, .host-game-board, form.question-editor")) {
+        loadAllPlayerQuestionClient();
+    } else if (document.getElementById("start-game-form")) {
+        const observer = new MutationObserver(() => {
+            if (!document.querySelector(".host-game-board")) {
+                return;
+            }
+
+            observer.disconnect();
+            loadAllPlayerQuestionClient();
+        });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
     const timerSelector = ".host-game-timer";
     const quickAdjustmentSelector = ".game-timer-adjust";
     const engagedClass = "is-quick-actions-engaged";

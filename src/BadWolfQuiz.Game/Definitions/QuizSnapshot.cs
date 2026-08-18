@@ -5,7 +5,9 @@ namespace BadWolfQuiz.Game.Definitions;
 public enum QuestionPresentationType
 {
     Standard = 0,
-    FourClues = 1
+    FourClues = 1,
+    AllPlayerText = 2,
+    AllPlayerMultipleChoice = 3
 }
 
 public sealed class QuizSnapshot
@@ -203,7 +205,13 @@ public sealed class QuizQuestionSnapshot
         SourceCategoryId = sourceCategoryId;
         RowIndex = rowIndex;
         Points = points;
-        var orderedQuestionBlocks = (questionBlocks ?? []).OrderBy(block => block.SortOrder).ToArray();
+        var orderedQuestionBlocks = (questionBlocks ?? [])
+            .OrderBy(block => block.SortOrder)
+            .ToArray();
+        var orderedAnswerBlocks = (answerBlocks ?? [])
+            .OrderBy(block => block.SortOrder)
+            .ToArray();
+
         if (presentationType == QuestionPresentationType.FourClues &&
             orderedQuestionBlocks.Length != 4)
         {
@@ -212,14 +220,48 @@ public sealed class QuizQuestionSnapshot
                 nameof(questionBlocks));
         }
 
-        IsSpecial = presentationType == QuestionPresentationType.FourClues ? false : isSpecial;
+        if (presentationType == QuestionPresentationType.AllPlayerText &&
+            (orderedAnswerBlocks.Length != 1 ||
+             orderedAnswerBlocks[0].Kind != ContentBlockKind.Text ||
+             string.IsNullOrWhiteSpace(orderedAnswerBlocks[0].TextContent)))
+        {
+            throw new ArgumentException(
+                "An all-player text question must contain exactly one non-empty text answer block.",
+                nameof(answerBlocks));
+        }
+
+        if (presentationType == QuestionPresentationType.AllPlayerMultipleChoice)
+        {
+            var choices = orderedAnswerBlocks
+                .Select(block => block.Kind == ContentBlockKind.Text
+                    ? block.TextContent?.Trim()
+                    : null)
+                .ToArray();
+
+            if (choices.Length is < 2 or > 4 ||
+                choices.Any(string.IsNullOrWhiteSpace) ||
+                choices.Distinct(StringComparer.OrdinalIgnoreCase).Count() != choices.Length)
+            {
+                throw new ArgumentException(
+                    "An all-player multiple-choice question must contain two to four distinct non-empty text answer blocks.",
+                    nameof(answerBlocks));
+            }
+        }
+
+        var isAllPlayer = presentationType is
+            QuestionPresentationType.AllPlayerText or
+            QuestionPresentationType.AllPlayerMultipleChoice;
+
+        IsSpecial = presentationType == QuestionPresentationType.FourClues || isAllPlayer
+            ? false
+            : isSpecial;
         PresentationType = presentationType;
-        ExcludeFromRandomWagerSelection = excludeFromRandomWagerSelection;
+        ExcludeFromRandomWagerSelection = isAllPlayer || excludeFromRandomWagerSelection;
         CategoryTitle = string.IsNullOrWhiteSpace(categoryTitle)
             ? sourceCategoryId.ToString()
             : categoryTitle.Trim();
         QuestionBlocks = orderedQuestionBlocks;
-        AnswerBlocks = (answerBlocks ?? []).OrderBy(block => block.SortOrder).ToArray();
+        AnswerBlocks = orderedAnswerBlocks;
     }
 
     public int SourceQuestionId { get; }
