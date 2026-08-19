@@ -294,7 +294,10 @@
                 BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
                 BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging)
             {
-                <div class="game-content-blocks">
+                @if (Model.Game.Session.Status ==
+                    BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering)
+                {
+                    <div class="game-content-blocks">
                     @foreach (var block in Model.Game.Session.FinalQuestion!.Definition.QuestionBlocks)
                     {
                         <article class="game-content-block">
@@ -336,7 +339,8 @@
                             }
                         </article>
                     }
-                </div>
+                    </div>
+                }
 
                 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering &&
                     submission.Answer is null)
