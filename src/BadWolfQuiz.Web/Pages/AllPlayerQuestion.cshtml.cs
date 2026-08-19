@@ -420,7 +420,8 @@ public sealed class AllPlayerQuestionModel(
                 }
 
                 EnsureQuestionLifecycle(game, question);
-                if (question.Status == RuntimeQuestionStatus.ShowingAnswer)
+                if (question.Status == RuntimeQuestionStatus.ShowingAnswer ||
+                    HasAnsweringTimerExpired(game, question))
                 {
                     return ConflictState(game, connection.Player);
                 }
@@ -665,21 +666,12 @@ public sealed class AllPlayerQuestionModel(
         }
 
         _ = timer.Remaining;
-        if (timer.Status != GameTimerStatus.Expired)
+        if (timer.Status == GameTimerStatus.Expired)
         {
+            // Timer expiration stops player input, but only the host advances
+            // to answer review.
             return;
         }
-
-        if (question.PresentationType == QuestionPresentationType.AllPlayerText)
-        {
-            GetTextReview(game, question).Accepting = false;
-        }
-        else
-        {
-            game.Session.ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
-        }
-
-        game.MarkPersistenceChanged();
     }
 
     private static object CreateHostState(
@@ -696,6 +688,7 @@ public sealed class AllPlayerQuestionModel(
         var wagersByPlayer = question.AllPlayerWagers
             .ToDictionary(wager => wager.PlayerId);
         var allSubmitted = AllCurrentPlayersSubmitted(game, question);
+        var timerExpired = HasAnsweringTimerExpired(game, question);
         var phase = isWagering
             ? "wagering"
             : isClosed
@@ -757,6 +750,7 @@ public sealed class AllPlayerQuestionModel(
             phase,
             isClosed,
             isAccepting = phase == "answering" &&
+                !timerExpired &&
                 (!isText || review!.Accepting),
             isJudging = phase == "judging",
             wageredCount = participants.Count(player =>
@@ -799,6 +793,7 @@ public sealed class AllPlayerQuestionModel(
         var isText = question.PresentationType == QuestionPresentationType.AllPlayerText;
         var review = isText ? GetTextReview(game, question) : null;
         var allSubmitted = AllCurrentPlayersSubmitted(game, question);
+        var timerExpired = HasAnsweringTimerExpired(game, question);
         var phase = isWagering
             ? "wagering"
             : isClosed
@@ -834,6 +829,7 @@ public sealed class AllPlayerQuestionModel(
                     : Array.Empty<ChoiceOption>(),
             hasSubmitted = attempt is not null,
             isAccepting = phase == "answering" &&
+                !timerExpired &&
                 (!isText || review!.Accepting),
             isJudging = phase is "judging" or "awaitingMissing",
             isClosed,
@@ -879,6 +875,22 @@ public sealed class AllPlayerQuestionModel(
         }
 
         return shuffled;
+    }
+
+    private static bool HasAnsweringTimerExpired(
+        GameSessionRegistration game,
+        RuntimeQuestion question)
+    {
+        if (question.Status is
+            RuntimeQuestionStatus.AwaitingWager or
+            RuntimeQuestionStatus.ShowingAnswer)
+        {
+            return false;
+        }
+
+        var timer = GetAnsweringTimer(game, question);
+        _ = timer.Remaining;
+        return timer.Status == GameTimerStatus.Expired;
     }
 
     private static int GetRemainingMilliseconds(

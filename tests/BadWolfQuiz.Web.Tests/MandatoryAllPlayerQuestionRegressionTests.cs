@@ -178,7 +178,7 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("/* All-player host hover drawers */", styles);
         Assert.Contains("@media (hover: hover)", styles);
         Assert.Contains(
-            "translateY(calc(100% - 2.75rem))",
+            "translate(-50%, calc(100% - 2.75rem))",
             styles);
         Assert.Contains(
             "translateX(calc(100% - 2.75rem))",
@@ -186,7 +186,10 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains(".all-player-host-choice-preview:hover", styles);
         Assert.Contains(".all-player-host-progress:hover", styles);
         Assert.Contains("--all-player-choice-action-width", styles);
-        Assert.Contains("right: 0.5rem", styles);
+        Assert.Contains("left: 50%", styles);
+        Assert.Contains(
+            "var(--all-player-choice-action-width) - 2rem",
+            styles);
         Assert.Contains("left: 0.5rem", styles);
         Assert.Contains("bottom: 0.15rem", styles);
         Assert.Contains("padding-bottom: 3.5rem", styles);
@@ -246,6 +249,37 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("review.isConnected", script);
         Assert.DoesNotContain("progress.appendChild(judge)", script);
         Assert.Contains("all-player-text-reviewing", styles);
+    }
+
+    [Fact]
+    public void Timer_expiration_waits_for_the_host_review_action()
+    {
+        var root = FindRepositoryRoot();
+        var endpoint = Read(root,
+            "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
+
+        Assert.Contains("HasAnsweringTimerExpired", endpoint);
+        Assert.Contains("!timerExpired", endpoint);
+        Assert.Contains(
+            "Timer expiration stops player input, but only the host advances",
+            endpoint);
+
+        var lifecycleStart = endpoint.IndexOf(
+            "private static void EnsureQuestionLifecycle",
+            StringComparison.Ordinal);
+        var hostStateStart = endpoint.IndexOf(
+            "private static object CreateHostState",
+            lifecycleStart,
+            StringComparison.Ordinal);
+        var lifecycle = endpoint[lifecycleStart..hostStateStart];
+        var expirationStart = lifecycle.IndexOf(
+            "if (timer.Status == GameTimerStatus.Expired)",
+            StringComparison.Ordinal);
+
+        Assert.True(expirationStart >= 0);
+        Assert.DoesNotContain(
+            "ResolveQuestionWithoutCorrectAnswer",
+            lifecycle[expirationStart..]);
     }
 
     [Fact]

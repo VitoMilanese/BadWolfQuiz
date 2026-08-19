@@ -3,6 +3,11 @@
 @{
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
     ViewData["HidePortalFooter"] = true;
+    var isAllPlayerWagering = Model.CurrentQuestion is
+    {
+        Status: BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager,
+        IsAllPlayerQuestion: true
+    };
 }
 
 @section HeaderContext {
@@ -332,7 +337,7 @@
 
 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
 {
-    <section class="host-game-board"
+    <section class="host-game-board @(isAllPlayerWagering ? "all-player-question-wagering" : null)"
              data-game-id="@Model.Game.Session.Id.Value"
              data-discord-auto-mute="@((Model.DiscordConnection?.AutoMuteDuringMedia ?? false).ToString().ToLowerInvariant())"
              data-game-code="@Model.Game.PublicCode"

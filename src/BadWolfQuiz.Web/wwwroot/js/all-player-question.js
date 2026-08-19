@@ -1528,6 +1528,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             if (!state?.active) {
                 board.classList.remove(
                     "all-player-question-answering",
+                    "all-player-question-wagering",
                     "all-player-multiple-choice-answer",
                     "all-player-text-reviewing");
                 removeProgress(board);
@@ -1550,6 +1551,9 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             board.classList.toggle(
                 "all-player-question-answering",
                 state.phase !== "closed");
+            board.classList.toggle(
+                "all-player-question-wagering",
+                state.phase === "wagering");
             board.classList.toggle(
                 "all-player-multiple-choice-answer",
                 isMultipleChoiceAnswer);

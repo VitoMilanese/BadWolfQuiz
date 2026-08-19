@@ -26,12 +26,30 @@ public sealed class AllPlayerHostWagerLayoutRegressionTests
             "wwwroot",
             "css",
             "site.css"));
+        var host = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Games",
+            "Lobby.cshtml"));
+        var script = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "all-player-question.js"));
+
+        Assert.Contains("all-player-question-wagering", host);
+        Assert.Contains("all-player-question-wagering", script);
         Assert.Contains(
-            ".current-question-summary.wager-mode:has(.all-player-wager-waiting)",
+            ".host-game-board.all-player-question-wagering",
             siteStyles);
-        Assert.Contains("width: 100%;", siteStyles);
-        Assert.Contains("max-width: none;", siteStyles);
-        Assert.Contains("box-sizing: border-box;", siteStyles);
+        Assert.Contains("width: calc(100vw - 32px) !important", siteStyles);
+        Assert.Contains("width: 100% !important", siteStyles);
+        Assert.Contains("justify-self: stretch !important", siteStyles);
     }
 
     private static string FindRepositoryRoot()

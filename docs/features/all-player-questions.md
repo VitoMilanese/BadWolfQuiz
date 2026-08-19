@@ -37,8 +37,9 @@ The type selector is rendered by Razor and also posts a hidden all-player mode m
 2. The normal buzzer remains closed.
 3. Every current player receives the appropriate answer controls.
 4. The host sees submitted/waiting progress without seeing correctness early.
-5. Answering closes automatically when every current player has submitted or when the timer expires.
-6. The host may close answering early with **Proceed to answer review**.
+5. Answering closes automatically when every current player has submitted.
+6. When the timer expires, player input closes but the question remains visible until the host selects **Proceed to answer review**.
+7. The host may close answering early with **Proceed to answer review**.
 
 For multiple choice, closing answering reveals the answer presentation. For text mode, closing answering starts sequential host judging when at least one answer was submitted; with no submissions the question advances directly to its answer state.
 
@@ -46,7 +47,7 @@ For multiple choice, closing answering reveals the answer presentation. For text
 
 Each player receives a stable shuffled order derived from the question and player identifiers. The host receives a separate stable shuffled order while the question is open.
 
-The host question page renders the shuffled choices on the server so the correct layout is present on the first frame, including image choices. Correctness is not highlighted during answering. On hover-capable desktop host displays, those choices stay in a collapsed bottom drawer and expand on hover or keyboard focus, while the submitted/waiting player list uses a matching right-side drawer. The host's **Proceed to answer review** button stays in a dedicated lower-left area beside the choices drawer, so the expanded drawer cannot cover it and hovering the button does not open the drawer. Drawer headers are clipped to the same rounded corners as their outer frames. Touch layouts keep the information directly visible because hover is unavailable.
+The host question page renders the shuffled choices on the server so the correct layout is present on the first frame, including image choices. Correctness is not highlighted during answering. On hover-capable desktop host displays, those choices stay in a horizontally centered collapsed bottom drawer and expand on hover or keyboard focus, while the submitted/waiting player list uses a matching right-side drawer. The host's **Proceed to answer review** button stays in a dedicated lower-left area beside the centered drawer, so the expanded drawer cannot cover it and hovering the button does not open the drawer. Drawer headers are clipped to the same rounded corners as their outer frames. Touch layouts keep the information directly visible because hover is unavailable.
 
 The editor answer preview, live answer page, and resolved-question answer preview use the configured answer order so the first option can be marked as correct. They render:
 
