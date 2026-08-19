@@ -14,6 +14,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Production OOM diagnostics](operations/oom-diagnostics.md)
 - [Reverse-proxy upload limits](operations/reverse-proxy-upload-limits.md)
 - [Quiz media archive operations](operations/media-archive.md)
+- [SEO indexing operations](operations/seo-indexing.md)
 
 ## Features
 
