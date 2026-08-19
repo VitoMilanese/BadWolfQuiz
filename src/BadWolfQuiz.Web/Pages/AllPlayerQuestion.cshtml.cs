@@ -273,7 +273,9 @@ public sealed class AllPlayerQuestionModel(
                         sourceQuestionId,
                         connection.Player.Id,
                         isCorrect,
-                        isCorrect ? question.Points : 0,
+                        isCorrect
+                            ? GetCorrectScoreValue(question)
+                            : GetIncorrectScoreValue(question),
                         resolveQuestionIfAvailable: false);
 
                     if (AllCurrentPlayersSubmitted(game, question))
@@ -351,7 +353,9 @@ public sealed class AllPlayerQuestionModel(
                     attempt.Id,
                     runtimePlayerId,
                     isCorrect,
-                    isCorrect ? question.Points : 0);
+                    isCorrect
+                        ? GetCorrectScoreValue(question)
+                        : GetIncorrectScoreValue(question));
                 review.JudgedPlayers.Add(runtimePlayerId);
                 game.MarkPersistenceChanged();
             }
@@ -407,10 +411,12 @@ public sealed class AllPlayerQuestionModel(
             return;
         }
 
-        if (game.Session.Timer.Status == GameTimerStatus.Stopped)
+        var timer = GetAnsweringTimer(game, question);
+        if (!question.IsSpecial && timer.Status == GameTimerStatus.Stopped)
         {
             game.Session.ActivateQuestionBuzzer(question.SourceQuestionId);
             game.MarkPersistenceChanged();
+            timer = GetAnsweringTimer(game, question);
         }
 
         if (AllCurrentPlayersSubmitted(game, question))
@@ -418,7 +424,7 @@ public sealed class AllPlayerQuestionModel(
             if (question.PresentationType == QuestionPresentationType.AllPlayerText)
             {
                 GetTextReview(game, question).Accepting = false;
-                game.Session.Timer.Stop();
+                timer.Stop();
                 game.MarkPersistenceChanged();
             }
             else
@@ -429,8 +435,8 @@ public sealed class AllPlayerQuestionModel(
             }
         }
 
-        _ = game.Session.Timer.Remaining;
-        if (game.Session.Timer.Status != GameTimerStatus.Expired)
+        _ = timer.Remaining;
+        if (timer.Status != GameTimerStatus.Expired)
         {
             return;
         }
@@ -604,13 +610,34 @@ public sealed class AllPlayerQuestionModel(
             return 0;
         }
 
-        _ = game.Session.Timer.Remaining;
-        return game.Session.Timer.Status == GameTimerStatus.Expired
+        var timer = GetAnsweringTimer(game, question);
+        _ = timer.Remaining;
+        return timer.Status == GameTimerStatus.Expired
             ? 0
             : Math.Max(
                 0,
-                (int)Math.Ceiling(game.Session.Timer.Remaining.TotalMilliseconds));
+                (int)Math.Ceiling(timer.Remaining.TotalMilliseconds));
     }
+
+    private static GameTimer GetAnsweringTimer(
+        GameSessionRegistration game,
+        RuntimeQuestion question) => question.IsSpecial
+            ? game.Session.AnswerTimer
+            : game.Session.Timer;
+
+    private static int GetCorrectScoreValue(RuntimeQuestion question) =>
+        question.IsSpecial
+            ? GetRequiredWagerAmount(question)
+            : question.Points;
+
+    private static int GetIncorrectScoreValue(RuntimeQuestion question) =>
+        question.IsSpecial
+            ? GetRequiredWagerAmount(question)
+            : 0;
+
+    private static int GetRequiredWagerAmount(RuntimeQuestion question) =>
+        question.Wager?.Amount ?? throw new GameRuleViolationException(
+            "An all-player wager question cannot score answers before its wager is accepted.");
 
     private static string GetMode(RuntimeQuestion question) =>
         question.PresentationType == QuestionPresentationType.AllPlayerMultipleChoice

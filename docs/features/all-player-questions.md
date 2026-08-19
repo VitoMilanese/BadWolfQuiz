@@ -17,7 +17,7 @@ These modes use the existing `QuestionPresentationType` field, so they do not re
 
 - The answer contains exactly one non-empty Text block. It is shown to the host as the reference answer but is not used for automatic judging.
 - Question content may use the normal content-block editor.
-- Wager and random-wager behavior is disabled.
+- The question may be marked as a wager question and may participate in random wager selection.
 
 ### Multiple choice
 
@@ -25,7 +25,7 @@ These modes use the existing `QuestionPresentationType` field, so they do not re
 - Every option is a Text or Image block.
 - The first configured answer block is the correct option.
 - Audio, Video, YouTube, and other content types are rejected for both the question and answer sections in this mode.
-- Wager and random-wager behavior is disabled.
+- The question may be marked as a wager question and may participate in random wager selection.
 
 Opening an existing all-player question establishes a clean editor baseline. Leaving through Back, Next, refresh, page close, or Escape uses the shared unsaved-changes guard without stacking a native browser prompt over the application dialog.
 
@@ -46,7 +46,7 @@ For multiple choice, closing answering reveals the answer presentation. For text
 
 Each player receives a stable shuffled order derived from the question and player identifiers. The host receives a separate stable shuffled order while the question is open.
 
-The host question page renders the shuffled choices on the server so the correct layout is present on the first frame, including image choices. Correctness is not highlighted during answering. On hover-capable desktop host displays, those choices stay in a collapsed bottom drawer and expand on hover or keyboard focus, while the submitted/waiting player list uses a matching right-side drawer. Touch layouts keep the information directly visible because hover is unavailable.
+The host question page renders the shuffled choices on the server so the correct layout is present on the first frame, including image choices. Correctness is not highlighted during answering. On hover-capable desktop host displays, those choices stay in a collapsed bottom drawer and expand on hover or keyboard focus, while the submitted/waiting player list uses a matching right-side drawer. The host's **Proceed to answer review** button travels with the choices drawer and remains immediately above it in both collapsed and expanded states. Touch layouts keep the information directly visible because hover is unavailable.
 
 The editor answer preview, live answer page, and resolved-question answer preview use the configured answer order so the first option can be marked as correct. They render:
 
@@ -62,13 +62,15 @@ Image endpoints return inline media responses so they can be displayed by `<img>
 
 Text submissions are never checked automatically. The host reviews one submitted answer at a time and marks it Correct or Incorrect.
 
-Scoring is the same for both modes:
+For a normal all-player question, scoring is the same for both modes:
 
 - correct answer: the full question value;
 - incorrect answer: zero points;
 - no answer: zero points.
 
-Incorrect submissions remain stored as answer attempts with a zero score delta, allowing statistics to distinguish an incorrect answer from a missing answer.
+All-player questions may also be explicit or randomly selected wager questions. The active player submits one wager before the question is shown; that wager becomes the shared value for every participant. A correct submitted answer adds the wager, an incorrect submitted answer subtracts the wager, and no submission remains worth zero. Wager all-player questions use the configured wager-answer timer start mode and duration.
+
+Incorrect submissions remain stored as answer attempts. Their score delta is zero for normal all-player questions and the negative wager amount for wager all-player questions, allowing statistics to distinguish an incorrect answer from a missing answer.
 
 ## Reconnect and page reload behavior
 

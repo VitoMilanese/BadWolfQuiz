@@ -170,11 +170,17 @@ public sealed class QuestionEditorModel(
             return NotFound();
         }
 
+        var isAllPlayer = Input.PresentationType is
+            QuestionPresentationType.AllPlayerText or
+            QuestionPresentationType.AllPlayerMultipleChoice;
+
         question.PresentationType = Input.PresentationType;
-        question.IsSpecial = Input.PresentationType == QuestionPresentationType.Standard && Input.IsSpecial;
+        question.IsSpecial =
+            Input.PresentationType != QuestionPresentationType.FourClues &&
+            Input.IsSpecial;
         question.ExcludeFromRandomWagerSelection =
             Input.ExcludeFromRandomWagerSelection;
-        question.BuzzModeOverride = question.IsSpecial
+        question.BuzzModeOverride = question.IsSpecial || isAllPlayer
             ? BuzzActivationMode.Disabled
             : Input.BuzzModeOverride;
         question.UpdatedAtUtc = DateTime.UtcNow;

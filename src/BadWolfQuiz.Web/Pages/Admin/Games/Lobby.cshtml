@@ -732,6 +732,16 @@
                                      data-all-player-server-preview
                                      tabindex="0"
                                      aria-label="@Localizer["QuestionType_AllPlayerMultipleChoice"]">
+                                <form class="all-player-host-close-form"
+                                      method="post"
+                                      asp-page-handler="CloseAllPlayerQuestion">
+                                    <input name="sourceQuestionId"
+                                           type="hidden"
+                                           value="@Model.CurrentQuestion.SourceQuestionId" />
+                                    <button class="button button-primary" type="submit">
+                                        @Localizer["AllPlayer_ReviewAnswersNow"]
+                                    </button>
+                                </form>
                                 <div class="all-player-host-choice-grid">
                                     @foreach (var optionBlock in
                                         Model.GetAllPlayerHostChoiceBlocks(
@@ -791,18 +801,41 @@
                         : Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>();
 
                 <section class="question-controls">
-                    @if (Model.CurrentQuestion.IsAllPlayerQuestion)
+                    @if (Model.CurrentQuestion.IsAllPlayerQuestion &&
+                        Model.CurrentQuestion.IsSpecial &&
+                        Model.Game.Session.Settings.WagerQuestionAnswerTimerStartMode ==
+                            BadWolfQuiz.Game.Runtime.GamePhaseStartMode.Manual &&
+                        Model.Game.Session.AnswerTimer.Status ==
+                            BadWolfQuiz.Game.Runtime.GameTimerStatus.Stopped)
                     {
-                        <form class="all-player-host-close-form"
+                        <form class="all-player-host-timer-form"
                               method="post"
-                              asp-page-handler="CloseAllPlayerQuestion">
+                              asp-page-handler="StartWagerAnswerTimer">
                             <input name="sourceQuestionId"
                                    type="hidden"
                                    value="@Model.CurrentQuestion.SourceQuestionId" />
                             <button class="button button-primary" type="submit">
-                                @Localizer["AllPlayer_ReviewAnswersNow"]
+                                @Localizer["GameBoard_StartAnswerTimer"]
                             </button>
                         </form>
+                    }
+
+                    @if (Model.CurrentQuestion.IsAllPlayerQuestion)
+                    {
+                        if (Model.CurrentQuestion.PresentationType !=
+                            BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice)
+                        {
+                            <form class="all-player-host-close-form"
+                                  method="post"
+                                  asp-page-handler="CloseAllPlayerQuestion">
+                                <input name="sourceQuestionId"
+                                       type="hidden"
+                                       value="@Model.CurrentQuestion.SourceQuestionId" />
+                                <button class="button button-primary" type="submit">
+                                    @Localizer["AllPlayer_ReviewAnswersNow"]
+                                </button>
+                            </form>
+                        }
                     }
                     else
                     {

@@ -54,8 +54,7 @@ public sealed class GameBoard
         QuizRoundSnapshot round)
     {
         var candidates = round.Questions
-            .Where(question => !question.ExcludeFromRandomWagerSelection &&
-                question.PresentationType == QuestionPresentationType.Standard)
+            .Where(question => question.IsEligibleForRandomWagerSelection)
             .ToList();
 
         for (var index = candidates.Count - 1; index > 0; index--)
@@ -197,6 +196,12 @@ public sealed class RuntimeQuestion
 
         SelectedByPlayerId = selectedByPlayerId;
 
+        if (IsSpecial)
+        {
+            Status = RuntimeQuestionStatus.AwaitingWager;
+            return;
+        }
+
         if (IsAllPlayerQuestion)
         {
             BuzzerStatus = QuestionBuzzerStatus.Closed;
@@ -205,9 +210,7 @@ public sealed class RuntimeQuestion
             return;
         }
 
-        Status = IsSpecial
-            ? RuntimeQuestionStatus.AwaitingWager
-            : RuntimeQuestionStatus.Selected;
+        Status = RuntimeQuestionStatus.Selected;
     }
 
     internal void SubmitWager(
@@ -222,7 +225,7 @@ public sealed class RuntimeQuestion
         }
 
         Wager = new Wager(playerId, amount, submittedAtUtc);
-        AnsweringPlayerId = playerId;
+        AnsweringPlayerId = IsAllPlayerQuestion ? null : playerId;
         BuzzerStatus = QuestionBuzzerStatus.Closed;
         Status = RuntimeQuestionStatus.Active;
     }
@@ -452,12 +455,12 @@ public sealed class RuntimeQuestion
 
     internal void ResolveWithoutCorrectAnswer()
     {
-        if (IsSpecial ||
+        if ((IsSpecial && !IsAllPlayerQuestion) ||
             Status is not RuntimeQuestionStatus.Selected and
                 not RuntimeQuestionStatus.Active)
         {
             throw new GameRuleViolationException(
-                "Only an active regular question can be closed without a correct answer.");
+                "Only an active regular or all-player question can be closed without a correct answer.");
         }
 
         BuzzerStatus = QuestionBuzzerStatus.Closed;

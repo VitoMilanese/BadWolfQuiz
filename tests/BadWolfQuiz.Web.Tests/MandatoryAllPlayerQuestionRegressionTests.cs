@@ -33,6 +33,36 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("ResolvePostedPresentationType", editorModel);
         Assert.Contains("LooksLikeLegacyImageMultipleChoice", compatibility);
         Assert.Contains("ResolveStoredPresentationType", snapshotFactory);
+        Assert.DoesNotContain("special.checked = false", script);
+        Assert.DoesNotContain("excludeRandom.checked = true", script);
+    }
+
+    [Fact]
+    public void All_player_questions_support_explicit_and_random_wagers()
+    {
+        var root = FindRepositoryRoot();
+        var editorModel = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Quizzes/QuestionEditor.cshtml.cs");
+        var snapshot = Read(root,
+            "src/BadWolfQuiz.Game/Definitions/QuizSnapshot.cs");
+        var board = Read(root,
+            "src/BadWolfQuiz.Game/Runtime/GameBoard.cs");
+        var session = Read(root,
+            "src/BadWolfQuiz.Game/Runtime/GameSession.cs");
+        var endpoint = Read(root,
+            "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
+
+        Assert.Contains(
+            "Input.PresentationType != QuestionPresentationType.FourClues",
+            editorModel);
+        Assert.Contains("question.IsSpecial || isAllPlayer", editorModel);
+        Assert.Contains("IsEligibleForRandomWagerSelection", snapshot);
+        Assert.Contains("question.IsEligibleForRandomWagerSelection", board);
+        Assert.Contains("IsAllPlayerQuestion ? null : playerId", board);
+        Assert.Contains("question.IsSpecial && question.IsAllPlayerQuestion", session);
+        Assert.Contains("GetCorrectScoreValue", endpoint);
+        Assert.Contains("GetIncorrectScoreValue", endpoint);
+        Assert.Contains("GetRequiredWagerAmount", endpoint);
     }
 
     [Fact]
@@ -130,6 +160,22 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
             styles);
         Assert.Contains(".all-player-host-choice-preview:hover", styles);
         Assert.Contains(".all-player-host-progress:hover", styles);
+        Assert.Contains("top: -3.65rem", styles);
+        Assert.Contains("padding-bottom: 6.75rem", styles);
+        var previewIndex = host.IndexOf(
+            "data-all-player-server-preview",
+            StringComparison.Ordinal);
+        var closeIndex = host.IndexOf(
+            "all-player-host-close-form",
+            previewIndex,
+            StringComparison.Ordinal);
+        var gridIndex = host.IndexOf(
+            "all-player-host-choice-grid",
+            previewIndex,
+            StringComparison.Ordinal);
+        Assert.True(previewIndex >= 0 &&
+            closeIndex > previewIndex &&
+            gridIndex > closeIndex);
         Assert.Contains("▦", styles);
         Assert.Contains("👥", styles);
     }

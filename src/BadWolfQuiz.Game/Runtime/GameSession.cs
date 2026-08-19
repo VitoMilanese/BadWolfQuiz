@@ -450,6 +450,12 @@ public sealed class GameSession
         var question = FindQuestion(sourceQuestionId);
         question.ActivateBuzzer();
 
+        if (question.IsSpecial && question.IsAllPlayerQuestion)
+        {
+            Timer.Stop();
+            return question;
+        }
+
         if (Timer.IsPaused)
         {
             Timer.Resume();
@@ -812,7 +818,8 @@ public sealed class GameSession
         }
 
         if (AnswerTimer.ConsumeExpiration() &&
-            question.AnsweringPlayerId is not null)
+            (question.AnsweringPlayerId is not null ||
+             question.IsSpecial && question.IsAllPlayerQuestion))
         {
             return new QuestionTimerProcessResult(
                 QuestionTimerOutcome.AnswerExpired,

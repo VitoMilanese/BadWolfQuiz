@@ -132,7 +132,7 @@ public sealed class QuizRoundSnapshot
         ArgumentOutOfRangeException.ThrowIfNegative(randomWagerQuestionCount);
 
         var eligibleQuestionCount = questionList.Count(question =>
-            !question.ExcludeFromRandomWagerSelection);
+            question.IsEligibleForRandomWagerSelection);
 
         if (useRandomWagerQuestions &&
             randomWagerQuestionCount > eligibleQuestionCount)
@@ -263,15 +263,11 @@ public sealed class QuizQuestionSnapshot
             }
         }
 
-        var isAllPlayer = presentationType is
-            QuestionPresentationType.AllPlayerText or
-            QuestionPresentationType.AllPlayerMultipleChoice;
-
-        IsSpecial = presentationType == QuestionPresentationType.FourClues || isAllPlayer
+        IsSpecial = presentationType == QuestionPresentationType.FourClues
             ? false
             : isSpecial;
         PresentationType = presentationType;
-        ExcludeFromRandomWagerSelection = isAllPlayer || excludeFromRandomWagerSelection;
+        ExcludeFromRandomWagerSelection = excludeFromRandomWagerSelection;
         CategoryTitle = string.IsNullOrWhiteSpace(categoryTitle)
             ? sourceCategoryId.ToString()
             : categoryTitle.Trim();
@@ -302,6 +298,10 @@ public sealed class QuizQuestionSnapshot
     public QuestionPresentationType PresentationType { get; }
 
     public bool ExcludeFromRandomWagerSelection { get; }
+
+    public bool IsEligibleForRandomWagerSelection =>
+        !ExcludeFromRandomWagerSelection &&
+        PresentationType != QuestionPresentationType.FourClues;
 
     public string CategoryTitle { get; }
 

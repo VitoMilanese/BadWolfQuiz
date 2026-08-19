@@ -1409,6 +1409,7 @@ public sealed class GameSessionRegistry
             }
 
             game.Session.Timer.Stop();
+            game.Session.AnswerTimer.Stop();
 
             if (question.PresentationType ==
                 QuestionPresentationType.AllPlayerText)

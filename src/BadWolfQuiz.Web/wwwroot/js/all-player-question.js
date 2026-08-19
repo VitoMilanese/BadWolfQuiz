@@ -254,7 +254,7 @@
     text-align: center;
 }
 
-.host-game-board.all-player-question-answering .question-controls > :not(.all-player-host-progress):not(.all-player-host-close-form) {
+.host-game-board.all-player-question-answering .question-controls > :not(.all-player-host-progress):not(.all-player-host-close-form):not(.all-player-host-timer-form) {
     display: none !important;
 }
 
@@ -399,17 +399,8 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             answerHeading.dataset.standardHeading = answerHeading.textContent ?? "";
         }
 
-        const special = document.getElementById("Input_IsSpecial");
-        const excludeRandom = document.getElementById(
-            "Input_ExcludeFromRandomWagerSelection");
         const buzzSetting = document.getElementById("buzz-mode-setting");
         const buzzSelect = document.getElementById("Input_BuzzModeOverride");
-        let standardSpecial = special instanceof HTMLInputElement
-            ? special.checked
-            : false;
-        let standardExclude = excludeRandom instanceof HTMLInputElement
-            ? excludeRandom.checked
-            : false;
         let standardBuzzMode = buzzSelect instanceof HTMLSelectElement
             ? buzzSelect.value
             : "0";
@@ -442,34 +433,12 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 fourClueHelp.hidden = true;
             }
 
-            if (isAllPlayer && !previousAllPlayer) {
-                if (special instanceof HTMLInputElement) {
-                    standardSpecial = special.checked;
-                }
-                if (excludeRandom instanceof HTMLInputElement) {
-                    standardExclude = excludeRandom.checked;
-                }
-                if (buzzSelect instanceof HTMLSelectElement) {
-                    standardBuzzMode = buzzSelect.value;
-                }
+            if (isAllPlayer && !previousAllPlayer &&
+                buzzSelect instanceof HTMLSelectElement) {
+                standardBuzzMode = buzzSelect.value;
             }
 
-            document.querySelectorAll(".wager-question-setting")
-                .forEach(element => {
-                    if (isAllPlayer) {
-                        element.hidden = true;
-                    } else if (select.value !== "1") {
-                        element.hidden = false;
-                    }
-                });
-
             if (isAllPlayer) {
-                if (special instanceof HTMLInputElement) {
-                    special.checked = false;
-                }
-                if (excludeRandom instanceof HTMLInputElement) {
-                    excludeRandom.checked = true;
-                }
                 if (buzzSetting) {
                     buzzSetting.hidden = true;
                 }
@@ -483,12 +452,6 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                         : text.yourAnswer;
                 }
             } else if (previousAllPlayer && select.value === "0") {
-                if (special instanceof HTMLInputElement) {
-                    special.checked = standardSpecial;
-                }
-                if (excludeRandom instanceof HTMLInputElement) {
-                    excludeRandom.checked = standardExclude;
-                }
                 if (buzzSelect instanceof HTMLSelectElement) {
                     buzzSelect.value = standardBuzzMode;
                 }
@@ -999,6 +962,11 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             preview.dataset.allPlayerClientPreview = "true";
             preview.tabIndex = 0;
             preview.setAttribute("aria-label", text.answerOptions);
+            const closeForm = board.querySelector(
+                ".all-player-host-close-form");
+            if (closeForm) {
+                preview.appendChild(closeForm);
+            }
             const grid = document.createElement("div");
             grid.className = "all-player-host-choice-grid";
             for (const option of state.options ?? []) {
