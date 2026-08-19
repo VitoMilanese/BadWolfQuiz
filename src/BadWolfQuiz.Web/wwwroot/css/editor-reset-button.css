@@ -23,3 +23,7 @@
     margin: 0;
     line-height: 1.5;
 }
+
+.all-player-editor-help[hidden] {
+    display: none;
+}
