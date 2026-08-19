@@ -79,7 +79,8 @@ public sealed class BusyIndicatorRegressionTests
         Assert.Contains("hasOpenEditorModal", script, StringComparison.Ordinal);
         Assert.Contains("runAfterPaint", script, StringComparison.Ordinal);
         Assert.Contains("window.requestAnimationFrame(() =>", script, StringComparison.Ordinal);
-        Assert.Contains("navigate(backLink.href)", script, StringComparison.Ordinal);
+        Assert.Contains("backLink.click()", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("navigate(backLink.href)", script, StringComparison.Ordinal);
         Assert.Contains("event.stopImmediatePropagation();", script, StringComparison.Ordinal);
     }
 

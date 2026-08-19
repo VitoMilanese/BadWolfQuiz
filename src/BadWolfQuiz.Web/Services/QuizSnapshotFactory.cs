@@ -67,6 +67,10 @@ public sealed class QuizSnapshotFactory
                 $"Question {question.Id} references missing row {question.RowIndex}.");
         }
 
+        var presentationType =
+            AllPlayerQuestionCompatibility.ResolveStoredPresentationType(
+                question);
+
         return new QuizQuestionSnapshot(
             question.Id,
             question.QuizCategoryId,
@@ -77,7 +81,7 @@ public sealed class QuizSnapshotFactory
             question.ExcludeFromRandomWagerSelection,
             question.QuestionBlocks.Select(CreateContentBlock),
             question.AnswerBlocks.Select(CreateContentBlock),
-            question.PresentationType);
+            presentationType);
     }
 
     private static ContentBlockSnapshot CreateContentBlock(ContentBlockBase block)

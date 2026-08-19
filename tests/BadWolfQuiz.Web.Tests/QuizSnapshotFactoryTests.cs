@@ -93,6 +93,54 @@ public sealed class QuizSnapshotFactoryTests
     }
 
     [Fact]
+    public void Create_recovers_legacy_all_image_multiple_choice_mode()
+    {
+        var quiz = CreateQuiz();
+        var question = quiz.Rounds
+            .Single()
+            .Categories
+            .SelectMany(category => category.Questions)
+            .Single(item => item.Id == 101);
+
+        question.IsSpecial = false;
+        question.PresentationType = QuestionPresentationType.Standard;
+        question.ExcludeFromRandomWagerSelection = true;
+        question.BuzzModeOverride = BuzzActivationMode.Disabled;
+        question.QuestionBlocks.Add(new QuestionContentBlock
+        {
+            Id = 700,
+            BlockType = ContentBlockType.Text,
+            TextContent = "Choose an image",
+            SortOrder = 0
+        });
+
+        for (var index = 0; index < 4; index++)
+        {
+            question.AnswerBlocks.Add(new AnswerContentBlock
+            {
+                Id = 710 + index,
+                BlockType = ContentBlockType.Image,
+                FileData = [1, 2, (byte)(3 + index)],
+                FileContentType = "image/png",
+                FileName = $"option-{index}.png",
+                SortOrder = index
+            });
+        }
+
+        var snapshot = _factory.Create(quiz);
+        var snapshotQuestion = snapshot.Rounds.Single().Questions
+            .Single(item => item.SourceQuestionId == question.Id);
+
+        Assert.Equal(
+            QuestionPresentationType.AllPlayerMultipleChoice,
+            snapshotQuestion.PresentationType);
+        Assert.Equal(4, snapshotQuestion.AnswerBlocks.Count);
+        Assert.All(
+            snapshotQuestion.AnswerBlocks,
+            block => Assert.Equal(ContentBlockKind.Image, block.Kind));
+    }
+
+    [Fact]
     public void Create_maps_final_question_and_answer_content()
     {
         var quiz = CreateQuiz();

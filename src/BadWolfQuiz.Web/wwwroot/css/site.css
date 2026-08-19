@@ -6437,3 +6437,452 @@ body.youtube-auto-expanded-open {
         animation-iteration-count: 1;
     }
 }
+
+
+/* All-player question runtime layout */
+.all-player-host-choice-preview {
+    display: grid;
+    width: min(100%, 84rem);
+    margin: 1rem auto 0;
+    align-self: stretch;
+    justify-self: stretch;
+}
+
+.question-presentation > .all-player-host-close-form {
+    display: flex;
+    justify-content: center;
+    margin: 0 0 0.65rem;
+}
+
+.all-player-host-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr);
+    width: 100%;
+    gap: clamp(0.75rem, 1.5vw, 1.25rem);
+}
+
+.all-player-host-choice-option {
+    min-width: 0;
+    min-height: clamp(5rem, 10vh, 8rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(0.8rem, 1.6vw, 1.35rem);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--panel-2);
+    font-size: clamp(1.4rem, 2.6vw, 3rem);
+    text-align: center;
+}
+
+.all-player-host-choice-option img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: min(28vh, 20rem);
+    object-fit: contain;
+}
+
+.all-player-multiple-choice-answer-presentation .game-content-blocks,
+.all-player-answer-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-rows: minmax(4.5rem, auto);
+    align-items: stretch;
+    justify-items: stretch;
+    align-content: center;
+    width: 100%;
+    overflow: hidden;
+    gap: clamp(0.5rem, 1vw, 0.85rem) !important;
+}
+
+.all-player-multiple-choice-answer-presentation .game-content-block,
+.all-player-answer-option {
+    min-width: 0;
+    width: 100%;
+    min-height: clamp(4.5rem, 13vh, 8rem);
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 !important;
+    padding: clamp(0.45rem, 0.8vw, 0.75rem);
+    overflow: hidden;
+    border: 3px solid #c62828;
+    border-radius: 0.8rem;
+    text-align: center;
+}
+
+.all-player-answer-option-correct,
+.all-player-multiple-choice-answer-presentation .game-content-block:first-child {
+    border-color: #2e7d32;
+}
+
+.all-player-answer-option-incorrect {
+    border-color: #c62828;
+}
+
+.all-player-multiple-choice-answer-presentation .game-content-text,
+.all-player-multiple-choice-answer-presentation .game-content-caption,
+.all-player-answer-option .game-content-text,
+.all-player-answer-option .game-content-caption {
+    width: 100%;
+    margin: 0;
+    text-align: center;
+}
+
+.all-player-multiple-choice-answer-presentation .game-content-text,
+.all-player-answer-option .game-content-text {
+    font-size: clamp(1.5rem, 3vw, 3.25rem);
+}
+
+.all-player-multiple-choice-answer-presentation .game-content-image,
+.all-player-answer-option .game-content-image {
+    display: block;
+    width: 100%;
+    height: min(14vh, 9rem);
+    min-height: 0;
+    max-height: min(14vh, 9rem);
+    object-fit: contain;
+}
+
+
+
+/* All-player host hover drawers */
+@media (hover: hover) and (pointer: fine) and (min-width: 801px) {
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        > .question-presentation {
+        --all-player-choice-action-width: clamp(15rem, 21vw, 20rem);
+        position: relative;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        > .question-presentation > .game-content-blocks {
+        padding-bottom: 3.5rem;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview {
+        position: absolute;
+        z-index: 35;
+        right: auto;
+        bottom: 0;
+        left: 50%;
+        width: min(
+            84rem,
+            calc(
+                100% - var(--all-player-choice-action-width) -
+                var(--all-player-choice-action-width) - 2rem));
+        max-height: min(48dvh, 25rem);
+        margin: 0;
+        padding: 3.2rem 0.75rem 0.75rem;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-bottom: 0;
+        border-radius: 0.9rem 0.9rem 0 0;
+        background: var(--panel-glass);
+        box-shadow: 0 -18px 38px rgb(0 0 0 / 28%);
+        transform: translate(-50%, calc(100% - 2.75rem));
+        transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        > .question-presentation > .all-player-host-close-form {
+        position: absolute;
+        z-index: 36;
+        right: auto;
+        bottom: 0.15rem;
+        left: 0.5rem;
+        width: var(--all-player-choice-action-width);
+        margin: 0;
+        transform: none;
+        white-space: nowrap;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        > .question-presentation > .all-player-host-close-form > .button {
+        width: 100%;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview::before {
+        content: "▦";
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 2.75rem;
+        display: grid;
+        place-items: center;
+        border-bottom: 1px solid var(--line);
+        border-radius: 0.85rem 0.85rem 0 0;
+        background: var(--panel-2);
+        color: var(--text);
+        font-size: 1.2rem;
+        line-height: 1;
+        pointer-events: none;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview:hover,
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview:focus,
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview:focus-within {
+        box-shadow: 0 -20px 44px rgb(0 0 0 / 36%);
+        transform: translate(-50%, 0);
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview:focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: -2px;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-grid {
+        max-height: calc(min(48dvh, 25rem) - 4rem);
+        gap: clamp(0.45rem, 0.8vw, 0.7rem);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-right: 2px;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-option {
+        min-height: clamp(4rem, 8vh, 6.5rem);
+        padding: clamp(0.55rem, 1vw, 0.85rem);
+        font-size: clamp(1.2rem, 2vw, 2.25rem);
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-option img {
+        height: min(16vh, 8rem);
+        max-height: min(16vh, 8rem);
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary {
+        position: relative;
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress {
+        position: absolute;
+        z-index: 40;
+        top: clamp(3.25rem, 8vh, 5rem);
+        right: 0;
+        bottom: clamp(3.5rem, 7vh, 4.75rem);
+        width: min(24rem, calc(100% - 1rem));
+        max-width: none;
+        grid-template-columns: 1fr;
+        align-content: start;
+        gap: 0.5rem;
+        margin: 0;
+        padding: 0.65rem 0.65rem 0.65rem 3.25rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+        border: 1px solid var(--line);
+        border-right: 0;
+        border-radius: 0.9rem 0 0 0.9rem;
+        background: var(--panel-glass);
+        box-shadow: -18px 0 38px rgb(0 0 0 / 28%);
+        transform: translateX(calc(100% - 2.75rem));
+        transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress::before {
+        content: "👥";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 2.75rem;
+        display: grid;
+        place-items: center;
+        border-right: 1px solid var(--line);
+        border-radius: 0.85rem 0 0 0.85rem;
+        background: var(--panel-2);
+        color: var(--text);
+        font-size: 1.15rem;
+        line-height: 1;
+        pointer-events: none;
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress:hover,
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress:focus,
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress:focus-within {
+        box-shadow: -20px 0 44px rgb(0 0 0 / 36%);
+        transform: translateX(0);
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress:focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: -2px;
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-answer-progress {
+        grid-template-columns: 1fr;
+        align-content: start;
+        overflow: visible;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .all-player-host-choice-preview,
+    .all-player-host-progress {
+        transition: none !important;
+    }
+}
+
+
+/* All-player per-player wagering and private text review */
+.all-player-wager-waiting {
+    min-height: min(58dvh, 38rem);
+    display: grid;
+    place-items: center;
+    text-align: center;
+}
+
+.all-player-answer-progress .final-player-action-icon {
+    flex: 0 0 auto;
+}
+
+.all-player-host-review {
+    width: min(100%, 72rem);
+    margin: auto;
+}
+
+.host-game-board.all-player-text-reviewing
+    .question-presentation > .game-content-blocks,
+.host-game-board.all-player-text-reviewing
+    .question-presentation > .all-player-host-choice-preview,
+.host-game-board.all-player-text-reviewing
+    .all-player-host-close-form,
+.host-game-board.all-player-text-reviewing
+    .all-player-host-timer-form {
+    display: none !important;
+}
+
+.host-game-board.all-player-text-reviewing
+    .all-player-host-review .final-player-answer-presentation {
+    min-height: clamp(12rem, 42dvh, 30rem);
+}
+
+/* Stable all-player controls and full-width wager waiting */
+.host-game-board:has(> .current-question-summary.wager-mode:has(.all-player-wager-waiting)) {
+    width: calc(100vw - 32px);
+    max-width: none;
+    margin-top: -17px;
+    margin-right: calc(50% - 50vw + 16px);
+    margin-left: calc(50% - 50vw + 16px);
+}
+
+.current-question-summary.wager-mode:has(.all-player-wager-waiting) {
+    width: 100%;
+    max-width: none;
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    box-sizing: border-box;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-content: stretch;
+    justify-items: stretch;
+    padding: 16px clamp(24px, 4vw, 56px) 8px;
+    overflow: hidden;
+}
+
+.current-question-summary.wager-mode:has(.all-player-wager-waiting)
+    .current-question-heading {
+    width: 100%;
+}
+
+.current-question-summary.wager-mode:has(.all-player-wager-waiting)
+    .all-player-wager-waiting {
+    min-height: 0;
+    height: 100%;
+    grid-row: 2;
+}
+
+.all-player-host-primary-action {
+    min-height: 42px;
+    grid-row: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0.5rem;
+}
+
+.player-lobby.all-player-runtime-active .player-buzzer-panel {
+    display: none !important;
+}
+
+.page-shell:has(.player-lobby.all-player-runtime-active) {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+@media (max-width: 900px) {
+    .host-game-board:has(> .current-question-summary.wager-mode:has(.all-player-wager-waiting)) {
+        margin-top: -10px;
+    }
+}
+
+@media (max-width: 700px) {
+    .page-shell:has(.player-lobby.all-player-runtime-active) {
+        height: auto;
+        min-height: 100dvh;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .player-lobby:has(.player-buzzer-panel).all-player-runtime-active {
+        height: auto;
+        min-height: 100%;
+        overflow: visible;
+    }
+}
+
+/* Explicit all-player wager layout state. */
+.host-game-board.all-player-question-wagering {
+    width: calc(100vw - 32px) !important;
+    max-width: none !important;
+    margin-right: calc(50% - 50vw + 16px) !important;
+    margin-left: calc(50% - 50vw + 16px) !important;
+}
+
+.host-game-board.all-player-question-wagering
+    > [data-host-gameplay-view]
+    > .current-question-summary.wager-mode {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    justify-self: stretch !important;
+    align-self: stretch !important;
+}

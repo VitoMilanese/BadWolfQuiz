@@ -294,7 +294,10 @@
                 BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering or
                 BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging)
             {
-                <div class="game-content-blocks">
+                @if (Model.Game.Session.Status ==
+                    BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering)
+                {
+                    <div class="game-content-blocks">
                     @foreach (var block in Model.Game.Session.FinalQuestion!.Definition.QuestionBlocks)
                     {
                         <article class="game-content-block">
@@ -336,7 +339,8 @@
                             }
                         </article>
                     }
-                </div>
+                    </div>
+                }
 
                 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalAnswering &&
                     submission.Answer is null)
@@ -567,7 +571,7 @@
             const clearStoredPlayerAccess = () => {
                 localStorage.removeItem(storageKey);
                 localStorage.removeItem(currentPlayerStorageKey);
-                localStorage.removeItem(transitionStorageKey);
+                sessionStorage.removeItem(transitionStorageKey);
             };
 
             if (bootstrapToken) {
@@ -889,6 +893,8 @@
                 warning.hidden = isPageActive();
             };
 
+            let rejoinApprovalRequired = false;
+
             const joinPlayerSession = async () => {
                 const transitionToken =
                     sessionStorage.getItem(transitionStorageKey);
@@ -902,6 +908,11 @@
 
                 if (transitionToken) {
                     sessionStorage.removeItem(transitionStorageKey);
+                }
+
+                if (!rejoinApprovalRequired) {
+                    document.dispatchEvent(
+                        new Event("badwolf:player-session-ready"));
                 }
             };
 
@@ -1155,12 +1166,18 @@
             });
 
             connection.on("RejoinApprovalRequired", () => {
+                rejoinApprovalRequired = true;
                 rejoinWarning.hidden = false;
+                document.dispatchEvent(
+                    new Event("badwolf:player-session-pending"));
             });
 
             connection.on("RejoinApproved", () => {
+                rejoinApprovalRequired = false;
                 rejoinWarning.hidden = true;
                 updateWarning();
+                document.dispatchEvent(
+                    new Event("badwolf:player-session-ready"));
             });
 
             connection.on("RemovedFromGame", () => {
@@ -1174,6 +1191,7 @@
             });
 
             connection.onreconnected(async () => {
+                rejoinApprovalRequired = false;
                 await joinPlayerSession();
                 await webcam.reconnect();
             });

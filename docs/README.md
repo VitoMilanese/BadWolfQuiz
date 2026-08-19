@@ -26,6 +26,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Question judging](features/question-judging.md)
 - [Answer reward decay](features/answer-reward-decay.md)
 - [Four-clue questions](features/four-clue-questions.md)
+- [Mandatory all-player questions](features/all-player-questions.md)
 - [Final question](features/final-question.md)
 - [Answer history editing](features/answer-history-editing.md)
 - [Game settings](features/game-settings.md)

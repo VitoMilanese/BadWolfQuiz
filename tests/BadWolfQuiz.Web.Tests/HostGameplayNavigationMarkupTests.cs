@@ -325,6 +325,35 @@ public sealed class HostGameplayNavigationMarkupTests
     }
 
     [Fact]
+    public void Player_final_question_content_is_hidden_during_judging()
+    {
+        var player = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Player",
+            "Lobby.cshtml"));
+
+        var finalFlowStart = player.IndexOf(
+            "else if (Model.Game.Session.Status is",
+            StringComparison.Ordinal);
+        var questionBlocks = player.IndexOf(
+            "<div class=\"game-content-blocks\">",
+            finalFlowStart,
+            StringComparison.Ordinal);
+        var answeringGate = player.LastIndexOf(
+            "GameSessionStatus.FinalAnswering",
+            questionBlocks,
+            StringComparison.Ordinal);
+        var judgingMessage = player.IndexOf(
+            "FinalQuestion_WaitingForJudging",
+            questionBlocks,
+            StringComparison.Ordinal);
+
+        Assert.True(finalFlowStart >= 0);
+        Assert.True(answeringGate > finalFlowStart && answeringGate < questionBlocks);
+        Assert.True(judgingMessage > questionBlocks);
+    }
+
+    [Fact]
     public void Partial_round_refresh_synchronizes_tools_navigation_visibility()
     {
         var markup = File.ReadAllText(FindLobbyView());

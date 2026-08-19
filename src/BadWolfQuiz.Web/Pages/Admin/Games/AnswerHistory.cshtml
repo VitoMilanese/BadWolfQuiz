@@ -12,6 +12,7 @@
             <p>@Localizer["AnswerHistory_Description"]</p>
         </div>
         <a class="button button-secondary"
+           data-answer-history-back-to-game
            asp-page="/Admin/Games/Lobby"
            asp-route-id="@Model.Game.Session.Id.Value">
             @Localizer["AnswerHistory_BackToGame"]
@@ -213,6 +214,29 @@
 @section Scripts {
     <script>
         (() => {
+            const backToGame = document.querySelector(
+                "[data-answer-history-back-to-game]");
+            let backNavigationStarted = false;
+            document.addEventListener("keydown", event => {
+                if (event.key !== "Escape" ||
+                    event.repeat ||
+                    backNavigationStarted ||
+                    event.defaultPrevented ||
+                    event.ctrlKey ||
+                    event.altKey ||
+                    event.metaKey ||
+                    document.querySelector("dialog[open]")) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                if (backToGame instanceof HTMLAnchorElement) {
+                    backNavigationStarted = true;
+                    backToGame.click();
+                }
+            });
+
             const form = document.querySelector(".answer-history-add-form");
 
             if (!form) {

@@ -5,7 +5,9 @@ namespace BadWolfQuiz.Game.Definitions;
 public enum QuestionPresentationType
 {
     Standard = 0,
-    FourClues = 1
+    FourClues = 1,
+    AllPlayerText = 2,
+    AllPlayerMultipleChoice = 3
 }
 
 public sealed class QuizSnapshot
@@ -130,7 +132,7 @@ public sealed class QuizRoundSnapshot
         ArgumentOutOfRangeException.ThrowIfNegative(randomWagerQuestionCount);
 
         var eligibleQuestionCount = questionList.Count(question =>
-            !question.ExcludeFromRandomWagerSelection);
+            question.IsEligibleForRandomWagerSelection);
 
         if (useRandomWagerQuestions &&
             randomWagerQuestionCount > eligibleQuestionCount)
@@ -203,7 +205,13 @@ public sealed class QuizQuestionSnapshot
         SourceCategoryId = sourceCategoryId;
         RowIndex = rowIndex;
         Points = points;
-        var orderedQuestionBlocks = (questionBlocks ?? []).OrderBy(block => block.SortOrder).ToArray();
+        var orderedQuestionBlocks = (questionBlocks ?? [])
+            .OrderBy(block => block.SortOrder)
+            .ToArray();
+        var orderedAnswerBlocks = (answerBlocks ?? [])
+            .OrderBy(block => block.SortOrder)
+            .ToArray();
+
         if (presentationType == QuestionPresentationType.FourClues &&
             orderedQuestionBlocks.Length != 4)
         {
@@ -212,15 +220,70 @@ public sealed class QuizQuestionSnapshot
                 nameof(questionBlocks));
         }
 
-        IsSpecial = presentationType == QuestionPresentationType.FourClues ? false : isSpecial;
+        if (presentationType == QuestionPresentationType.AllPlayerText &&
+            (orderedAnswerBlocks.Length != 1 ||
+             orderedAnswerBlocks[0].Kind != ContentBlockKind.Text ||
+             string.IsNullOrWhiteSpace(orderedAnswerBlocks[0].TextContent)))
+        {
+            throw new ArgumentException(
+                "An all-player text question must contain exactly one non-empty text answer block.",
+                nameof(answerBlocks));
+        }
+
+        if (presentationType == QuestionPresentationType.AllPlayerMultipleChoice)
+        {
+            if (orderedQuestionBlocks.Any(block =>
+                    block.Kind is not ContentBlockKind.Text and
+                        not ContentBlockKind.Image))
+            {
+                throw new ArgumentException(
+                    "An all-player multiple-choice question can contain only text or image question blocks.",
+                    nameof(questionBlocks));
+            }
+
+            if (orderedAnswerBlocks.Length is < 2 or > 4 ||
+                orderedAnswerBlocks.Any(block => !IsValidAllPlayerChoiceOption(block)))
+            {
+                throw new ArgumentException(
+                    "An all-player multiple-choice question must contain two to four text or image answer blocks.",
+                    nameof(answerBlocks));
+            }
+
+            var textChoices = orderedAnswerBlocks
+                .Where(block => block.Kind == ContentBlockKind.Text)
+                .Select(block => block.TextContent!.Trim())
+                .ToArray();
+
+            if (textChoices.Distinct(StringComparer.OrdinalIgnoreCase).Count() !=
+                textChoices.Length)
+            {
+                throw new ArgumentException(
+                    "Text answer options for an all-player multiple-choice question must be distinct.",
+                    nameof(answerBlocks));
+            }
+        }
+
+        IsSpecial = presentationType == QuestionPresentationType.FourClues
+            ? false
+            : isSpecial;
         PresentationType = presentationType;
         ExcludeFromRandomWagerSelection = excludeFromRandomWagerSelection;
         CategoryTitle = string.IsNullOrWhiteSpace(categoryTitle)
             ? sourceCategoryId.ToString()
             : categoryTitle.Trim();
         QuestionBlocks = orderedQuestionBlocks;
-        AnswerBlocks = (answerBlocks ?? []).OrderBy(block => block.SortOrder).ToArray();
+        AnswerBlocks = orderedAnswerBlocks;
     }
+
+    private static bool IsValidAllPlayerChoiceOption(ContentBlockSnapshot block) =>
+        block.Kind switch
+        {
+            ContentBlockKind.Text => !string.IsNullOrWhiteSpace(block.TextContent),
+            ContentBlockKind.Image =>
+                block.FileData is { Length: > 0 } &&
+                !string.IsNullOrWhiteSpace(block.FileContentType),
+            _ => false
+        };
 
     public int SourceQuestionId { get; }
 
@@ -235,6 +298,10 @@ public sealed class QuizQuestionSnapshot
     public QuestionPresentationType PresentationType { get; }
 
     public bool ExcludeFromRandomWagerSelection { get; }
+
+    public bool IsEligibleForRandomWagerSelection =>
+        !ExcludeFromRandomWagerSelection &&
+        PresentationType != QuestionPresentationType.FourClues;
 
     public string CategoryTitle { get; }
 

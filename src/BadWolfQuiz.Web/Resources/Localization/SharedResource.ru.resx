@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2597,5 +2597,14 @@
   </data>
   <data name="Hint_MediaAutoplay" xml:space="preserve">
     <value>Україна</value>
+  </data>
+  <data name="AllPlayer_ReviewAnswersNow" xml:space="preserve">
+    <value>Перейти к проверке ответов</value>
+  </data>
+  <data name="QuestionType_AllPlayerText" xml:space="preserve">
+    <value>Все игроки — текстовый ответ</value>
+  </data>
+  <data name="QuestionType_AllPlayerMultipleChoice" xml:space="preserve">
+    <value>Все игроки — выбор ответа</value>
   </data>
 </root>

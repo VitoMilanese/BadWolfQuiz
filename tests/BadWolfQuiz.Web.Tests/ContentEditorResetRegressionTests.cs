@@ -56,6 +56,10 @@ public sealed class ContentEditorResetRegressionTests
         Assert.Contains("final-question-editor-back-link", finalQuestionEditor, StringComparison.Ordinal);
         Assert.Contains("description-editor-back", descriptionEditor, StringComparison.Ordinal);
         Assert.Contains("Button_NextQuestion", questionEditor, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.location.assign(backLink.href)", questionEditor, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.location.assign(backLink.href)", finalQuestionEditor, StringComparison.Ordinal);
+        Assert.DoesNotContain("backLink.click()", questionEditor, StringComparison.Ordinal);
+        Assert.DoesNotContain("backLink.click()", finalQuestionEditor, StringComparison.Ordinal);
 
         Assert.Contains("#question-editor-back-link", bootstrap, StringComparison.Ordinal);
         Assert.Contains("#final-question-editor-back-link", bootstrap, StringComparison.Ordinal);
@@ -88,6 +92,12 @@ public sealed class ContentEditorResetRegressionTests
         Assert.Contains("window.queueMicrotask(markClean)", script, StringComparison.Ordinal);
         Assert.Contains("hasRenderedValidationErrors", script, StringComparison.Ordinal);
         Assert.Contains("!editorForm.hasAttribute(\"data-ajax-question-editor\")", script, StringComparison.Ordinal);
+        Assert.Contains("suppressBeforeUnload = true", script, StringComparison.Ordinal);
+        Assert.Contains("suppressBeforeUnload = false", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.location.assign(backLink.href)", questionEditor, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.location.assign(backLink.href)", finalQuestionEditor, StringComparison.Ordinal);
+        Assert.DoesNotContain("backLink.click()", questionEditor, StringComparison.Ordinal);
+        Assert.DoesNotContain("backLink.click()", finalQuestionEditor, StringComparison.Ordinal);
 
         Assert.DoesNotContain("fetch(", script, StringComparison.Ordinal);
         Assert.DoesNotContain("requestSubmit", script, StringComparison.Ordinal);

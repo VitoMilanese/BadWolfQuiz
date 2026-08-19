@@ -2598,4 +2598,13 @@
   <data name="Hint_MediaAutoplay" xml:space="preserve">
     <value>Автоматично запускати це медіа, коли блок з'являється під час гри.</value>
   </data>
+  <data name="AllPlayer_ReviewAnswersNow" xml:space="preserve">
+    <value>Перейти до перевірки відповідей</value>
+  </data>
+  <data name="QuestionType_AllPlayerText" xml:space="preserve">
+    <value>Усі гравці — текстова відповідь</value>
+  </data>
+  <data name="QuestionType_AllPlayerMultipleChoice" xml:space="preserve">
+    <value>Усі гравці — вибір відповіді</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-﻿@page "{id:int}"
+@page "{id:int}"
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.QuestionEditorModel
 @{
     ViewData["Title"] = Localizer["Title_QuestionEditor"];
@@ -35,12 +35,17 @@
     <input type="hidden" asp-for="Input.Id" />
     <input type="hidden" asp-for="Input.QuizId" />
     <input type="hidden" asp-for="Input.RoundId" />
+    <input type="hidden"
+           asp-for="Input.AllPlayerMode"
+           data-all-player-mode />
 
     <section class="content-panel question-type-setting">
         <label asp-for="Input.PresentationType">@Localizer["Label_QuestionType"]</label>
         <select asp-for="Input.PresentationType">
             <option value="0">@Localizer["QuestionType_Standard"]</option>
             <option value="1">@Localizer["QuestionType_FourClues"]</option>
+            <option value="2">@Localizer["QuestionType_AllPlayerText"]</option>
+            <option value="3">@Localizer["QuestionType_AllPlayerMultipleChoice"]</option>
         </select>
         <small id="four-clues-help" hidden>@Localizer["FourClues_EditorHint"]</small>
     </section>
@@ -563,11 +568,18 @@
             const isFourCluesPreview =
                 previewType === "question" &&
                 presentationTypeSelect?.value === "1";
+            const isAllPlayerChoiceAnswerPreview =
+                previewType === "answer" &&
+                presentationTypeSelect?.value === "3";
 
             questionPreviewContent.classList.toggle(
                 "four-clue-grid",
                 isFourCluesPreview);
+            questionPreviewContent.classList.toggle(
+                "all-player-answer-grid",
+                isAllPlayerChoiceAnswerPreview);
 
+            let answerOptionIndex = 0;
             collection
                 .querySelectorAll(".content-block-card")
                 .forEach(card => {
@@ -575,6 +587,15 @@
                         createContentBlockPreview(card);
 
                     if (blockPreview) {
+                        if (isAllPlayerChoiceAnswerPreview) {
+                            blockPreview.classList.add(
+                                "all-player-answer-option",
+                                answerOptionIndex === 0
+                                    ? "all-player-answer-option-correct"
+                                    : "all-player-answer-option-incorrect");
+                            answerOptionIndex += 1;
+                        }
+
                         questionPreviewContent.appendChild(
                             blockPreview);
                     }
@@ -637,14 +658,6 @@
             if (questionPreviewModal &&
                 !questionPreviewModal.hidden) {
                 closeQuestionPreview();
-                return;
-            }
-
-            const backLink = document.getElementById(
-                "question-editor-back-link");
-
-            if (backLink) {
-                window.location.assign(backLink.href);
             }
         }, true);
 

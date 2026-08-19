@@ -233,6 +233,7 @@
         dialog.addEventListener("cancel", event => {
             event.preventDefault();
             pendingNavigationUrl = null;
+            suppressBeforeUnload = false;
             dialog.close();
         });
 
@@ -241,6 +242,7 @@
     };
 
     const showUnsavedDialog = targetUrl => {
+        suppressBeforeUnload = true;
         pendingNavigationUrl = targetUrl;
         const dialog = createUnsavedDialog();
         if (!dialog.open) {
@@ -342,6 +344,7 @@
         if (stayButton instanceof HTMLButtonElement) {
             event.preventDefault();
             pendingNavigationUrl = null;
+            suppressBeforeUnload = false;
             unsavedDialog?.close();
             return;
         }

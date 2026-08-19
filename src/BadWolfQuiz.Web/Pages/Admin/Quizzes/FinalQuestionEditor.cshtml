@@ -462,14 +462,6 @@
             if (questionPreviewModal &&
                 !questionPreviewModal.hidden) {
                 closeQuestionPreview();
-                return;
-            }
-
-            const backLink = document.getElementById(
-                "final-question-editor-back-link");
-
-            if (backLink) {
-                window.location.assign(backLink.href);
             }
         }, true);
 

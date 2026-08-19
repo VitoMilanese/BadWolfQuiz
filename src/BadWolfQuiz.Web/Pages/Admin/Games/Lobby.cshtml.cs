@@ -1,4 +1,4 @@
-﻿using BadWolfQuiz.Game.Definitions;
+using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Hubs;
@@ -113,6 +113,24 @@ public sealed class LobbyModel(
         return values.TryGetValue(block.SourceContentBlockId, out var autoplay)
             ? autoplay
             : block.Autoplay;
+    }
+
+    public IReadOnlyList<ContentBlockSnapshot> GetAllPlayerHostChoiceBlocks(
+        RuntimeQuestion question)
+    {
+        var blocks = question.AnswerBlocks.ToArray();
+        var random = new Random(HashCode.Combine(
+            question.SourceQuestionId,
+            Game.Session.Id.Value.GetHashCode()));
+
+        for (var index = blocks.Length - 1; index > 0; index--)
+        {
+            var swapIndex = random.Next(index + 1);
+            (blocks[index], blocks[swapIndex]) =
+                (blocks[swapIndex], blocks[index]);
+        }
+
+        return blocks;
     }
 
     private static string NormalizeAnswerFeedbackSound(
@@ -1212,6 +1230,37 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostCloseAllPlayerQuestionAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.CloseAllPlayerQuestionAnswering(
+                game.PublicCode,
+                sourceQuestionId);
+            await BroadcastTimerAsync(game, cancellationToken);
+            await BroadcastBuzzerAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_JudgmentRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostResolveQuestionAsync(
         Guid id,
         int sourceQuestionId,
@@ -1992,7 +2041,8 @@ public sealed class LobbyModel(
                 .ToArray();
         }
 
-        if (CurrentQuestion?.Status == RuntimeQuestionStatus.AwaitingWager)
+        if (CurrentQuestion?.Status == RuntimeQuestionStatus.AwaitingWager &&
+            !CurrentQuestion.IsAllPlayerQuestion)
         {
             QuestionWagerLimits = game.Session.GetQuestionWagerLimits(
                 CurrentQuestion.SourceQuestionId);

@@ -1384,6 +1384,87 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public RuntimeQuestion? CloseAllPlayerQuestionAnswering(
+        string publicCode,
+        int sourceQuestionId)
+    {
+        var game = Find(publicCode);
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            var question = game.Session.Board.Questions.SingleOrDefault(item =>
+                item.SourceQuestionId == sourceQuestionId &&
+                item.IsAllPlayerQuestion &&
+                item.Status is RuntimeQuestionStatus.Selected or
+                    RuntimeQuestionStatus.Active);
+
+            if (question is null)
+            {
+                throw new GameRuleViolationException(
+                    "The all-player question is not accepting answers.");
+            }
+
+            var participantIds = question.IsSpecial
+                ? question.AllPlayerWagers
+                    .Select(wager => wager.PlayerId)
+                    .ToArray()
+                : game.Session.Players
+                    .Select(player => player.Id)
+                    .ToArray();
+            var review = question.PresentationType ==
+                QuestionPresentationType.AllPlayerText
+                    ? game.GetOrCreateAllPlayerTextReview(question)
+                    : null;
+
+            // Starting review is the host's explicit close action. Record an
+            // empty response for every participant who has not answered yet.
+            foreach (var playerId in participantIds)
+            {
+                if (question.AnswerAttempts.Any(attempt =>
+                        attempt.PlayerId == playerId))
+                {
+                    continue;
+                }
+
+                var emptyAnswerValue = question.IsSpecial
+                    ? question.AllPlayerWagers.Single(wager =>
+                        wager.PlayerId == playerId).Amount
+                    : 0;
+                game.Session.AddQuestionAnswerHistoryEntry(
+                    sourceQuestionId,
+                    playerId,
+                    isCorrect: false,
+                    value: emptyAnswerValue,
+                    resolveQuestionIfAvailable: false);
+                if (review is not null)
+                {
+                    review.Answers[playerId] = "-";
+                }
+            }
+
+            game.Session.Timer.Stop();
+            game.Session.AnswerTimer.Stop();
+
+            if (review is not null)
+            {
+                review.Accepting = false;
+            }
+            else
+            {
+                game.Session.ResolveQuestionWithoutCorrectAnswer(
+                    sourceQuestionId);
+                game.BuzzerRace = null;
+            }
+
+            game.MarkPersistenceChanged();
+            return question;
+        }
+    }
+
     public GamePlayer? AdjustPlayerScore(
         string publicCode,
         GamePlayerId playerId,
