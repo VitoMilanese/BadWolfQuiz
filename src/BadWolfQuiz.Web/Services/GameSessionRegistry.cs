@@ -1430,11 +1430,15 @@ public sealed class GameSessionRegistry
                     continue;
                 }
 
+                var emptyAnswerValue = question.IsSpecial
+                    ? question.AllPlayerWagers.Single(wager =>
+                        wager.PlayerId == playerId).Amount
+                    : 0;
                 game.Session.AddQuestionAnswerHistoryEntry(
                     sourceQuestionId,
                     playerId,
                     isCorrect: false,
-                    value: 0,
+                    value: emptyAnswerValue,
                     resolveQuestionIfAvailable: false);
                 if (review is not null)
                 {

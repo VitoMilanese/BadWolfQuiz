@@ -95,7 +95,7 @@ The host interface should provide:
 - automatic prefill of the selected question's nominal value;
 - a confirmation dialog when a new entry targets an unopened question, allowing the host to resolve it or leave it available.
 
-The tool must remain available during the game without exposing the correct answer or administrative controls to player clients.
+The tool must remain available during the game without exposing the correct answer or administrative controls to player clients. Pressing Escape returns to the live game through the same navigation target as **Back to game**; Escape is left to an open application dialog when one is active.
 
 ## Auditability
 

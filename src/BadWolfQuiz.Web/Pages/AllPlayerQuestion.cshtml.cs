@@ -354,7 +354,10 @@ public sealed class AllPlayerQuestionModel(
                     sourceQuestionId,
                     runtimePlayerId,
                     isCorrect: false,
-                    value: 0,
+                    value: GetScoreMagnitude(
+                        question,
+                        runtimePlayerId,
+                        isCorrect: false),
                     resolveQuestionIfAvailable: false);
                 if (review is not null)
                 {

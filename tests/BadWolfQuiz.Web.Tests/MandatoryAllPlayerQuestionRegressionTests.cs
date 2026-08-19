@@ -314,7 +314,12 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
             script);
         Assert.Contains("empty response for every participant", registry);
         Assert.Contains("AddQuestionAnswerHistoryEntry", registry);
+        Assert.Contains("var emptyAnswerValue = question.IsSpecial", registry);
+        Assert.Contains("wager.PlayerId == playerId).Amount", registry);
+        Assert.Contains("value: emptyAnswerValue", registry);
         Assert.Contains("review.Answers[playerId] = \"-\"", registry);
+        Assert.Contains("GetScoreMagnitude(", endpoint);
+        Assert.Contains("isCorrect: false),", endpoint);
         Assert.DoesNotContain(
             "Every all-player participant must have a recorded answer",
             registry);
@@ -322,6 +327,19 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.DoesNotContain(
             """state.mode === "text" &&""",
             script);
+    }
+
+    [Fact]
+    public void Answer_history_escape_returns_to_the_live_game()
+    {
+        var root = FindRepositoryRoot();
+        var page = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Games/AnswerHistory.cshtml");
+
+        Assert.Contains("data-answer-history-back-to-game", page);
+        Assert.Contains("event.key !== \"Escape\"", page);
+        Assert.Contains("document.querySelector(\"dialog[open]\")", page);
+        Assert.Contains("backToGame?.click()", page);
     }
 
     [Fact]
