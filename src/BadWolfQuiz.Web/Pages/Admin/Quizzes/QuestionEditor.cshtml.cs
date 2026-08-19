@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Quizzes;
 
@@ -16,7 +17,8 @@ public sealed class QuestionEditorModel(
     CurrentHost currentHost,
     MediaUploadProcessor mediaUploadProcessor,
     PremiumHostAccess premiumHostAccess,
-    IStringLocalizer<SharedResource> localizer) : PageModel
+    IStringLocalizer<SharedResource> localizer,
+    ILogger<QuestionEditorModel> logger) : PageModel
 {
     [BindProperty]
     public InputModel Input { get; set; } = new();
@@ -25,13 +27,30 @@ public sealed class QuestionEditorModel(
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
+        var totalTimer = Stopwatch.StartNew();
+        var stepTimer = Stopwatch.StartNew();
+
         var canEdit = await db.QuizQuestions.AsNoTracking().AnyAsync(x =>
             x.Id == id && x.Category.Round.Quiz.MediaState == QuizMediaState.Active);
+
+        stepTimer.Stop();
+        logger.LogInformation(
+            "QuestionEditor GET timing questionId={QuestionId} step=canEdit elapsedMs={ElapsedMs:F1}",
+            id,
+            stepTimer.Elapsed.TotalMilliseconds);
+
         if (!canEdit)
         {
+            totalTimer.Stop();
+            logger.LogInformation(
+                "QuestionEditor GET timing questionId={QuestionId} step=total elapsedMs={ElapsedMs:F1} result=notEditable",
+                id,
+                totalTimer.Elapsed.TotalMilliseconds);
             TempData["ErrorMessage"] = localizer["MediaArchive_RestoreBeforeEditing"].Value;
             return RedirectToPage("Index");
         }
+
+        stepTimer.Restart();
         var question = await db.QuizQuestions
             .Include(x => x.Category)
                 .ThenInclude(x => x.Round)
@@ -39,8 +58,19 @@ public sealed class QuestionEditorModel(
             .Include(x => x.AnswerBlocks)
             .SingleOrDefaultAsync(x => x.Id == id);
 
+        stepTimer.Stop();
+        logger.LogInformation(
+            "QuestionEditor GET timing questionId={QuestionId} step=loadQuestion elapsedMs={ElapsedMs:F1}",
+            id,
+            stepTimer.Elapsed.TotalMilliseconds);
+
         if (question is null)
         {
+            totalTimer.Stop();
+            logger.LogInformation(
+                "QuestionEditor GET timing questionId={QuestionId} step=total elapsedMs={ElapsedMs:F1} result=notFound",
+                id,
+                totalTimer.Elapsed.TotalMilliseconds);
             return NotFound();
         }
 
@@ -101,6 +131,7 @@ public sealed class QuestionEditorModel(
             })
             .ToList();
 
+        stepTimer.Restart();
         NextQuestionId = await db.QuizQuestions
             .AsNoTracking()
             .Where(x =>
@@ -109,6 +140,18 @@ public sealed class QuestionEditorModel(
             .OrderBy(x => x.RowIndex)
             .Select(x => (int?)x.Id)
             .FirstOrDefaultAsync();
+
+        stepTimer.Stop();
+        logger.LogInformation(
+            "QuestionEditor GET timing questionId={QuestionId} step=nextQuestion elapsedMs={ElapsedMs:F1}",
+            id,
+            stepTimer.Elapsed.TotalMilliseconds);
+
+        totalTimer.Stop();
+        logger.LogInformation(
+            "QuestionEditor GET timing questionId={QuestionId} step=total elapsedMs={ElapsedMs:F1} result=page",
+            id,
+            totalTimer.Elapsed.TotalMilliseconds);
 
         return Page();
     }
