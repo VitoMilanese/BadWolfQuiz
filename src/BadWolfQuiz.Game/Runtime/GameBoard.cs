@@ -75,8 +75,11 @@ public sealed class RuntimeQuestion
 {
     private readonly List<QuestionAnswerAttempt> _answerAttempts = [];
     private readonly List<Wager> _allPlayerWagers = [];
+    private readonly List<int> _remainingHostMultipleChoiceOptionIds = [];
     private readonly IReadOnlyList<QuestionAnswerAttempt> _readOnlyAnswerAttempts;
     private readonly IReadOnlyList<Wager> _readOnlyAllPlayerWagers;
+    private readonly IReadOnlyList<int> _readOnlyRemainingHostMultipleChoiceOptionIds;
+
     internal RuntimeQuestion(
         int sourceRoundId,
         int sourceQuestionId,
@@ -102,6 +105,16 @@ public sealed class RuntimeQuestion
         AnswerBlocks = answerBlocks;
         _readOnlyAnswerAttempts = _answerAttempts.AsReadOnly();
         _readOnlyAllPlayerWagers = _allPlayerWagers.AsReadOnly();
+        _readOnlyRemainingHostMultipleChoiceOptionIds =
+            _remainingHostMultipleChoiceOptionIds.AsReadOnly();
+
+        if (IsHostMultipleChoice)
+        {
+            _remainingHostMultipleChoiceOptionIds.AddRange(
+                answerBlocks
+                    .OrderBy(block => block.SortOrder)
+                    .Select(block => block.SourceContentBlockId));
+        }
     }
 
     public int SourceRoundId { get; }
@@ -124,17 +137,59 @@ public sealed class RuntimeQuestion
         QuestionPresentationType.AllPlayerText or
         QuestionPresentationType.AllPlayerMultipleChoice;
 
+    public bool IsHostMultipleChoice =>
+        PresentationType == QuestionPresentationType.HostMultipleChoice;
+
     public int RevealedClueCount { get; private set; }
 
     public bool CanRevealClue => PresentationType == QuestionPresentationType.FourClues &&
         RevealedClueCount < 4 &&
         Status is RuntimeQuestionStatus.Selected or RuntimeQuestionStatus.Active;
 
+    public int HostMultipleChoiceOriginalOptionCount =>
+        IsHostMultipleChoice ? AnswerBlocks.Count : 0;
+
+    public int HostMultipleChoiceCorrectOptionId => IsHostMultipleChoice
+        ? AnswerBlocks
+            .OrderBy(block => block.SortOrder)
+            .First()
+            .SourceContentBlockId
+        : throw new GameRuleViolationException(
+            "Only a host multiple-choice question has a correct option identifier.");
+
+    public IReadOnlyList<int> RemainingHostMultipleChoiceOptionIds =>
+        _readOnlyRemainingHostMultipleChoiceOptionIds;
+
+    public IReadOnlyList<ContentBlockSnapshot> RemainingHostMultipleChoiceOptions =>
+        IsHostMultipleChoice
+            ? AnswerBlocks
+                .Where(block => _remainingHostMultipleChoiceOptionIds.Contains(
+                    block.SourceContentBlockId))
+                .OrderBy(block => block.SortOrder)
+                .ToArray()
+            : [];
+
+    public int HostMultipleChoiceRewardPercentage => IsHostMultipleChoice
+        ? CalculateHostMultipleChoiceRewardPercentage(
+            HostMultipleChoiceOriginalOptionCount,
+            _remainingHostMultipleChoiceOptionIds.Count)
+        : 100;
+
+    public int HostMultipleChoiceRewardValue => IsHostMultipleChoice
+        ? Math.Max(
+            1,
+            (int)Math.Round(
+                Points * HostMultipleChoiceRewardPercentage / 100.0,
+                MidpointRounding.AwayFromZero))
+        : Points;
+
     public int CorrectAnswerValue => IsSpecial && !IsAllPlayerQuestion
         ? Wager?.Amount ?? Points
         : PresentationType == QuestionPresentationType.FourClues
             ? RevealedClueCount switch { 3 => Points / 2, 4 => Points / 4, _ => Points }
-            : Points;
+            : IsHostMultipleChoice
+                ? HostMultipleChoiceRewardValue
+                : Points;
 
     public IReadOnlyList<ContentBlockSnapshot> QuestionBlocks { get; }
 
@@ -165,7 +220,10 @@ public sealed class RuntimeQuestion
         AnsweringPlayerId,
         _answerAttempts.ToArray(),
         RevealedClueCount,
-        _allPlayerWagers.ToArray());
+        _allPlayerWagers.ToArray(),
+        IsHostMultipleChoice
+            ? _remainingHostMultipleChoiceOptionIds.ToArray()
+            : null);
 
     internal void RestoreState(RuntimeQuestionState state)
     {
@@ -182,6 +240,25 @@ public sealed class RuntimeQuestion
         _answerAttempts.AddRange(state.AnswerAttempts);
         _allPlayerWagers.Clear();
         _allPlayerWagers.AddRange(state.AllPlayerWagers ?? []);
+
+        if (IsHostMultipleChoice &&
+            state.RemainingHostMultipleChoiceOptionIds is { Count: > 0 })
+        {
+            var validOptionIds = AnswerBlocks
+                .Select(block => block.SourceContentBlockId)
+                .ToHashSet();
+            var restoredOptionIds = state.RemainingHostMultipleChoiceOptionIds
+                .Where(validOptionIds.Contains)
+                .Distinct()
+                .ToArray();
+
+            if (restoredOptionIds.Length >= 2 &&
+                restoredOptionIds.Contains(HostMultipleChoiceCorrectOptionId))
+            {
+                _remainingHostMultipleChoiceOptionIds.Clear();
+                _remainingHostMultipleChoiceOptionIds.AddRange(restoredOptionIds);
+            }
+        }
     }
 
     internal void SuspendOpenBuzzerForRecovery()
@@ -352,6 +429,12 @@ public sealed class RuntimeQuestion
         DateTimeOffset judgedAtUtc,
         int? correctAnswerValue = null)
     {
+        if (IsHostMultipleChoice)
+        {
+            throw new GameRuleViolationException(
+                "A host multiple-choice question must be judged by selecting an answer option.");
+        }
+
         if (Status is not RuntimeQuestionStatus.Selected and
             not RuntimeQuestionStatus.Active)
         {
@@ -405,6 +488,147 @@ public sealed class RuntimeQuestion
         }
 
         return attempt;
+    }
+
+    internal HostMultipleChoiceSelectionResult SelectHostMultipleChoiceOption(
+        GamePlayerId playerId,
+        int sourceContentBlockId,
+        DateTimeOffset judgedAtUtc)
+    {
+        if (!IsHostMultipleChoice ||
+            Status is not RuntimeQuestionStatus.Selected and
+                not RuntimeQuestionStatus.Active ||
+            BuzzerStatus != QuestionBuzzerStatus.Claimed ||
+            AnsweringPlayerId != playerId)
+        {
+            throw new GameRuleViolationException(
+                "An answer option can only be selected for the player who currently owns the buzzer.");
+        }
+
+        if (!_remainingHostMultipleChoiceOptionIds.Contains(sourceContentBlockId))
+        {
+            throw new GameRuleViolationException(
+                "The selected answer option is no longer available.");
+        }
+
+        if (_answerAttempts.Any(attempt => attempt.PlayerId == playerId))
+        {
+            throw new GameRuleViolationException(
+                "This player has already answered the current question.");
+        }
+
+        var value = HostMultipleChoiceRewardValue;
+        var percentage = HostMultipleChoiceRewardPercentage;
+        var isCorrect = sourceContentBlockId == HostMultipleChoiceCorrectOptionId;
+        var attempt = new QuestionAnswerAttempt(
+            playerId,
+            isCorrect,
+            isCorrect ? value : -value,
+            judgedAtUtc);
+        _answerAttempts.Add(attempt);
+
+        if (isCorrect)
+        {
+            BuzzerStatus = QuestionBuzzerStatus.Closed;
+            AnsweringPlayerId = null;
+            Status = RuntimeQuestionStatus.ShowingAnswer;
+        }
+        else
+        {
+            _remainingHostMultipleChoiceOptionIds.Remove(sourceContentBlockId);
+            AnsweringPlayerId = null;
+
+            if (_remainingHostMultipleChoiceOptionIds.Count <= 2)
+            {
+                BuzzerStatus = QuestionBuzzerStatus.Closed;
+                Status = RuntimeQuestionStatus.ShowingAnswer;
+            }
+            else
+            {
+                BuzzerStatus = QuestionBuzzerStatus.Open;
+                Status = RuntimeQuestionStatus.Active;
+            }
+        }
+
+        return new HostMultipleChoiceSelectionResult(
+            attempt,
+            sourceContentBlockId,
+            isCorrect,
+            Status == RuntimeQuestionStatus.ShowingAnswer,
+            _remainingHostMultipleChoiceOptionIds.Count,
+            percentage,
+            value);
+    }
+
+    internal HostMultipleChoiceEliminationResult EliminateRandomHostMultipleChoiceOption(
+        Random random)
+    {
+        ArgumentNullException.ThrowIfNull(random);
+
+        if (!IsHostMultipleChoice ||
+            Status is not RuntimeQuestionStatus.Selected and
+                not RuntimeQuestionStatus.Active ||
+            AnsweringPlayerId is not null)
+        {
+            throw new GameRuleViolationException(
+                "An answer option can only be eliminated while a host multiple-choice question is waiting for a buzzer.");
+        }
+
+        var removable = _remainingHostMultipleChoiceOptionIds
+            .Where(id => id != HostMultipleChoiceCorrectOptionId)
+            .ToArray();
+        if (removable.Length == 0)
+        {
+            throw new GameRuleViolationException(
+                "The question does not have an incorrect option to eliminate.");
+        }
+
+        var removedOptionId = removable[random.Next(removable.Length)];
+        _remainingHostMultipleChoiceOptionIds.Remove(removedOptionId);
+
+        if (_remainingHostMultipleChoiceOptionIds.Count <= 2)
+        {
+            BuzzerStatus = QuestionBuzzerStatus.Closed;
+            AnsweringPlayerId = null;
+            Status = RuntimeQuestionStatus.ShowingAnswer;
+        }
+        else
+        {
+            BuzzerStatus = QuestionBuzzerStatus.Open;
+            AnsweringPlayerId = null;
+            Status = RuntimeQuestionStatus.Active;
+        }
+
+        return new HostMultipleChoiceEliminationResult(
+            removedOptionId,
+            Status == RuntimeQuestionStatus.ShowingAnswer,
+            _remainingHostMultipleChoiceOptionIds.Count,
+            HostMultipleChoiceRewardPercentage,
+            HostMultipleChoiceRewardValue);
+    }
+
+    public static int CalculateHostMultipleChoiceRewardPercentage(
+        int originalOptionCount,
+        int remainingOptionCount)
+    {
+        if (originalOptionCount is < 4 or > 10)
+        {
+            throw new ArgumentOutOfRangeException(nameof(originalOptionCount));
+        }
+
+        if (remainingOptionCount >= originalOptionCount)
+        {
+            return 100;
+        }
+
+        if (remainingOptionCount <= 3)
+        {
+            return 50;
+        }
+
+        var progress = 50.0 * (remainingOptionCount - 3) /
+            (originalOptionCount - 3);
+        return 50 + (int)Math.Ceiling(progress);
     }
 
     internal QuestionAnswerAttempt AddHistoricalAttempt(
@@ -542,6 +766,22 @@ public sealed class RuntimeQuestion
     }
 }
 
+public sealed record HostMultipleChoiceSelectionResult(
+    QuestionAnswerAttempt Attempt,
+    int SelectedOptionId,
+    bool IsCorrect,
+    bool QuestionClosed,
+    int RemainingOptionCount,
+    int RewardPercentage,
+    int RewardValue);
+
+public sealed record HostMultipleChoiceEliminationResult(
+    int RemovedOptionId,
+    bool QuestionClosed,
+    int RemainingOptionCount,
+    int RewardPercentage,
+    int RewardValue);
+
 public enum RuntimeQuestionStatus
 {
     Available = 1,
@@ -552,7 +792,6 @@ public enum RuntimeQuestionStatus
     ShowingAnswer = 6,
     Resolved = 7
 }
-
 
 public enum QuestionBuzzerStatus
 {
