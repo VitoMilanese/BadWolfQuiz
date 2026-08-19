@@ -4,6 +4,8 @@
 
 Mandatory all-player questions replace the normal first-to-buzz flow with a phase in which every current player may submit one answer from the player page.
 
+This feature is released with `BadWolfQuiz.Web` **1.16.0**.
+
 The runtime exposes two presentation modes:
 
 - `AllPlayerText` for private free-text submissions judged by the host;
@@ -89,9 +91,9 @@ The all-player client can recover its access token from the same local-storage r
 The focused regression suite covers:
 
 - editor restrictions and dirty-state behavior;
-- automatic and host-forced answering closure;
+- host-controlled answering closure and automatic empty-response fill for missing players;
 - shuffled Text/Image choices;
 - server-rendered host and preview grids;
 - reconnect approval, local-storage token recovery, and control rebuilding;
 - versioned asset loading;
-- scoring and question lifecycle behavior.
+- normal and per-player-wager scoring behavior.
