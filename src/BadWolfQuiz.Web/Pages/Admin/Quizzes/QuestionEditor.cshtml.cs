@@ -52,6 +52,8 @@ public sealed class QuestionEditorModel(
 
         stepTimer.Restart();
         var question = await db.QuizQuestions
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(x => x.Category)
                 .ThenInclude(x => x.Round)
             .Include(x => x.QuestionBlocks)
