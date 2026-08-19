@@ -18,6 +18,8 @@ The mandatory all-player question feature is the headline backwards-compatible f
 
 Question copying and same-quiz cloning from the Quiz Editor board are the headline backwards-compatible feature for Web `1.19.0`, so this release uses a MINOR bump from `1.18.0`.
 
+Host-selected multiple-choice questions are the headline backwards-compatible feature for Web `1.20.0`, so this release uses a MINOR bump from `1.19.0`.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
