@@ -35,6 +35,11 @@
         document.head.appendChild(stylesheet);
     };
 
+    const brandLink = document.querySelector("a.brand[href]");
+    if (brandLink instanceof HTMLAnchorElement) {
+        brandLink.href = new URL("/", window.location.origin).href;
+    }
+
     loadSharedStyle("/css/content-block-containers.css");
     loadSharedScript("/js/content-block-containers.js");
 
@@ -248,11 +253,47 @@
         loadSharedScript("/js/content-block-reorder-buttons.js");
     }
 
+    const initializeEditorBrandNavigation = () => {
+        if (!(brandLink instanceof HTMLAnchorElement)) {
+            return;
+        }
+
+        const editorForm = document.querySelector("form.question-editor");
+        const editorActions = editorForm?.querySelector(".editor-actions");
+        if (!(editorForm instanceof HTMLFormElement) ||
+            !(editorActions instanceof HTMLElement)) {
+            return;
+        }
+
+        const proxyLink = document.createElement("a");
+        proxyLink.href = brandLink.href;
+        proxyLink.hidden = true;
+        proxyLink.dataset.editorBrandNavigationProxy = "true";
+        editorActions.appendChild(proxyLink);
+
+        brandLink.addEventListener("click", event => {
+            if (event.defaultPrevented ||
+                event.button !== 0 ||
+                event.altKey ||
+                event.ctrlKey ||
+                event.metaKey ||
+                event.shiftKey) {
+                return;
+            }
+
+            event.preventDefault();
+            proxyLink.href = brandLink.href;
+            proxyLink.click();
+        });
+    };
+
     const editorResetTarget = document.querySelector(
         "#question-editor-back-link, #final-question-editor-back-link, #description-editor-back");
     if (editorResetTarget) {
         loadSharedStyle("/css/editor-reset-button.css");
-        loadSharedScript("/js/editor-reset-button.js");
+        loadSharedScript("/js/editor-reset-button.js", {
+            onLoad: initializeEditorBrandNavigation
+        });
     }
 
     const quizCloneTarget = document.querySelector(
