@@ -10,10 +10,20 @@
 <link rel="stylesheet" href="~/css/content-preview-width.css" asp-append-version="true" />
 
 <section class="game-content-presentation @(Model.IsAnswer ? "answer-presentation" : "question-presentation") @(isAllPlayerMultipleChoiceAnswer ? "all-player-multiple-choice-answer-presentation" : null)">
-    <div class="game-content-blocks @(Model.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !Model.IsAnswer ? "four-clue-grid" : null)">
+    <div class="game-content-blocks @(Model.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !Model.IsAnswer ? "four-clue-grid" : null) @(isAllPlayerMultipleChoiceAnswer ? "all-player-answer-grid" : null)">
+        @{
+            var blockIndex = 0;
+        }
         @foreach (var block in Model.Blocks)
         {
-            <article class="game-content-block">
+            var allPlayerAnswerOptionClass =
+                isAllPlayerMultipleChoiceAnswer
+                    ? blockIndex == 0
+                        ? "all-player-answer-option all-player-answer-option-correct"
+                        : "all-player-answer-option all-player-answer-option-incorrect"
+                    : null;
+
+            <article class="game-content-block @allPlayerAnswerOptionClass">
                 @if (!string.IsNullOrWhiteSpace(block.TopCaption))
                 {
                     <p class="game-content-caption">@block.TopCaption</p>
@@ -90,6 +100,8 @@
                     <p class="game-content-caption">@block.BottomCaption</p>
                 }
             </article>
+
+            blockIndex++;
         }
     </div>
 </section>

@@ -72,7 +72,9 @@ Incorrect submissions remain stored as answer attempts with a zero score delta, 
 
 The player client rebuilds controls when the all-player panel or its controls are missing, even when the current question identifier and mode did not change. It polls immediately after player-session join, host reapproval, page show, focus restoration, and network restoration.
 
-The player page keeps a prepared single-use transition token in session storage. A normal reload can therefore reconnect without being treated as a new unapproved join. The token is replaced after every successful join and remains single-use.
+A normal disconnect or manual reconnect during a running game still requires host approval. A short-lived single-use transition token is created only immediately before an intentional game-phase reload, so internal page transitions do not look like an unrelated reconnect.
+
+The all-player client can recover its access token from the same local-storage record used by the player SignalR client. Controls remain hidden while rejoin approval is pending and are rebuilt after approval even when the server-rendered bootstrap token is empty.
 
 `all-player-question.js` is referenced directly by the shared layout with `asp-append-version="true"`. A rebuilt asset receives a new content hash, preventing the browser from reusing an older script after the next page request.
 
@@ -84,6 +86,6 @@ The focused regression suite covers:
 - automatic and host-forced answering closure;
 - shuffled Text/Image choices;
 - server-rendered host and preview grids;
-- reconnect control rebuilding and transition-token preparation;
+- reconnect approval, local-storage token recovery, and control rebuilding;
 - versioned asset loading;
 - scoring and question lifecycle behavior.

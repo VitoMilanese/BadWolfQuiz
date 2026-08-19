@@ -111,6 +111,7 @@
     };
     const text = stringsByCulture[culture] ?? stringsByCulture.en;
     let playerPollNow = null;
+    let playerSessionPending = true;
     let hostPollNow = null;
     let hostControllerCode = null;
 
@@ -261,17 +262,30 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
 .host-game-board.all-player-multiple-choice-answer .answer-presentation .game-content-blocks {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    grid-auto-rows: minmax(0, 1fr);
-    gap: 0.8rem !important;
+    grid-auto-rows: minmax(4.5rem, auto);
+    align-items: stretch;
+    justify-items: stretch;
+    align-content: center;
+    overflow: hidden;
+    gap: clamp(0.5rem, 1vw, 0.85rem) !important;
 }
 
 html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentation .game-content-block,
 .host-game-board.all-player-multiple-choice-answer .answer-presentation .game-content-block {
     min-width: 0;
+    width: 100%;
+    min-height: clamp(4.5rem, 13vh, 8rem);
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     margin: 0 !important;
-    padding: 0.8rem;
+    padding: clamp(0.45rem, 0.8vw, 0.75rem);
+    overflow: hidden;
     border: 3px solid #c62828;
     border-radius: 0.8rem;
+    text-align: center;
 }
 
 html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentation .game-content-block:first-child,
@@ -281,9 +295,11 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
 
 html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentation .game-content-image,
 .host-game-board.all-player-multiple-choice-answer .answer-presentation .game-content-image {
+    display: block;
     width: 100%;
-    height: 100%;
-    max-height: min(28vh, 20rem);
+    height: min(14vh, 9rem);
+    min-height: 0;
+    max-height: min(14vh, 9rem);
     object-fit: contain;
 }
 
@@ -645,7 +661,13 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
 
         const code = lobby.dataset.gameCode;
         const playerId = lobby.dataset.playerId;
-        const accessToken = lobby.dataset.accessToken;
+        const playerAccessStorageKey = code && playerId
+            ? `badwolfquiz:${code}:player:${playerId}`
+            : null;
+        const accessToken = lobby.dataset.accessToken ||
+            (playerAccessStorageKey
+                ? localStorage.getItem(playerAccessStorageKey)
+                : null);
         if (!code || !playerId || !accessToken) {
             return;
         }
@@ -808,6 +830,11 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
 
         function applyState(state) {
             lastState = state;
+            if (playerSessionPending) {
+                panel.hidden = true;
+                return;
+            }
+
             if (!state?.active) {
                 panel.hidden = true;
                 currentQuestionId = null;
@@ -882,6 +909,11 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             if (!lobby.isConnected || !panel.isConnected) {
                 return;
             }
+            if (playerSessionPending) {
+                panel.hidden = true;
+                schedule(false);
+                return;
+            }
             try {
                 const url = `${apiPath}?handler=Player` +
                     `&code=${encodeURIComponent(code)}` +
@@ -896,6 +928,10 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
 
         playerPollNow = () => {
             window.clearTimeout(pollHandle);
+            if (playerSessionPending) {
+                panel.hidden = true;
+                return;
+            }
             if (!lobby.isConnected || !panel.isConnected) {
                 delete lobby.dataset.allPlayerClientInitialized;
                 initializePlayer();
@@ -1178,7 +1214,16 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
     window.addEventListener("focus", () => playerPollNow?.());
     window.addEventListener("online", () => playerPollNow?.());
 
+    document.addEventListener("badwolf:player-session-pending", () => {
+        playerSessionPending = true;
+        const panel = document.querySelector(".player-all-player-panel");
+        if (panel instanceof HTMLElement) {
+            panel.hidden = true;
+        }
+    });
+
     document.addEventListener("badwolf:player-session-ready", () => {
+        playerSessionPending = false;
         const lobby = document.querySelector(".player-lobby");
         if (lobby instanceof HTMLElement &&
             lobby.dataset.allPlayerClientInitialized === "true" &&

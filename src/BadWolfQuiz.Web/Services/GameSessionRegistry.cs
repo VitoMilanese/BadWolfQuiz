@@ -11,7 +11,7 @@ public sealed class GameSessionRegistry
     private const int MaxCodeGenerationAttempts = 20;
     private static readonly TimeSpan BuzzerRaceWindow = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan PlayerTransitionTokenLifetime =
-        TimeSpan.FromHours(1);
+        TimeSpan.FromSeconds(30);
     private static readonly TimeSpan AnswerResultOverlayLifetime =
         TimeSpan.FromSeconds(5);
     private readonly IGameCodeGenerator _gameCodeGenerator;

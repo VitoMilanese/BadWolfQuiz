@@ -43,7 +43,7 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
     }
 
     [Fact]
-    public void Host_choices_and_answer_preview_are_server_rendered_as_grids()
+    public void Host_and_resolved_answer_use_explicit_compact_grids()
     {
         var root = FindRepositoryRoot();
         var host = Read(root,
@@ -52,21 +52,34 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
             "src/BadWolfQuiz.Web/Pages/Admin/Games/_GameContentPreview.cshtml");
         var styles = Read(root,
             "src/BadWolfQuiz.Web/wwwroot/css/site.css");
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
 
         Assert.Contains("data-all-player-server-preview", host);
         Assert.Contains("GetAllPlayerHostChoiceBlocks", host);
         Assert.Contains("answer = true", host);
-        Assert.Contains("all-player-multiple-choice-answer-presentation", host);
-        Assert.Contains("all-player-multiple-choice-answer-presentation", preview);
+        Assert.Contains("all-player-answer-grid", host);
+        Assert.Contains("all-player-answer-option-correct", host);
+        Assert.Contains("all-player-answer-option-incorrect", host);
+        Assert.Contains("all-player-answer-grid", preview);
+        Assert.Contains("all-player-answer-option-correct", preview);
+        Assert.Contains("all-player-answer-option-incorrect", preview);
+        Assert.Contains(".all-player-answer-grid", styles);
         Assert.Contains("grid-template-columns: repeat(2", styles);
-        Assert.Contains("display: flex !important", styles);
-        Assert.Contains("justify-content: center", styles);
-        Assert.Contains("border: 3px solid #c62828", styles);
+        Assert.Contains("justify-items: stretch", styles);
+        Assert.Contains("overflow: hidden", styles);
+        Assert.Contains("min-height: clamp(4.5rem, 13vh, 8rem)", styles);
+        Assert.DoesNotContain("min-height: clamp(10rem, 28vh, 22rem)", styles);
+        Assert.Contains("height: min(14vh, 9rem)", styles);
         Assert.Contains("border-color: #2e7d32", styles);
+        Assert.Contains("grid-auto-rows: minmax(4.5rem, auto)", script);
+        Assert.Contains("justify-items: stretch", script);
+        Assert.DoesNotContain("grid-auto-rows: minmax(0, 1fr)", script);
+        Assert.Contains("height: min(14vh, 9rem)", script);
     }
 
     [Fact]
-    public void Choice_images_are_inline_and_controls_rebuild_after_reconnect()
+    public void Reconnect_requires_approval_and_restores_all_player_controls()
     {
         var root = FindRepositoryRoot();
         var endpoint = Read(root,
@@ -75,6 +88,8 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
             "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
         var player = Read(root,
             "src/BadWolfQuiz.Web/Pages/Player/Lobby.cshtml");
+        var registry = Read(root,
+            "src/BadWolfQuiz.Web/Services/GameSessionRegistry.cs");
 
         Assert.Contains("return File(block.FileData, block.FileContentType);", endpoint);
         Assert.DoesNotContain(
@@ -82,12 +97,18 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
             endpoint);
         Assert.Contains("controlsMissing", script);
         Assert.Contains("currentOptionsKey", script);
+        Assert.Contains("playerAccessStorageKey", script);
+        Assert.Contains("localStorage.getItem(playerAccessStorageKey)", script);
+        Assert.Contains("let playerSessionPending = true", script);
+        Assert.Contains("badwolf:player-session-pending", script);
         Assert.Contains("badwolf:player-session-ready", script);
+        Assert.Contains("badwolf:player-session-pending", player);
+        Assert.Contains("rejoinApprovalRequired", player);
+        Assert.DoesNotContain("refreshTransitionToken", player);
+        Assert.Contains("TimeSpan.FromSeconds(30)", registry);
+        Assert.DoesNotContain("TimeSpan.FromHours(1)", registry);
         Assert.Contains("hostPollNow", script);
         Assert.Contains("badwolf:host-gameplay-updated", script);
-        Assert.Contains("refreshTransitionToken", player);
-        Assert.Contains("TimeSpan.FromHours(1)", Read(root,
-            "src/BadWolfQuiz.Web/Services/GameSessionRegistry.cs"));
     }
 
     [Fact]

@@ -889,19 +889,7 @@
                 warning.hidden = isPageActive();
             };
 
-            const refreshTransitionToken = async () => {
-                if (connection.state !==
-                    signalR.HubConnectionState.Connected) {
-                    return null;
-                }
-
-                const token = await connection.invoke(
-                    "PreparePlayerTransition");
-                if (token) {
-                    sessionStorage.setItem(transitionStorageKey, token);
-                }
-                return token;
-            };
+            let rejoinApprovalRequired = false;
 
             const joinPlayerSession = async () => {
                 const transitionToken =
@@ -918,10 +906,10 @@
                     sessionStorage.removeItem(transitionStorageKey);
                 }
 
-                await refreshTransitionToken();
-
-                document.dispatchEvent(
-                    new Event("badwolf:player-session-ready"));
+                if (!rejoinApprovalRequired) {
+                    document.dispatchEvent(
+                        new Event("badwolf:player-session-ready"));
+                }
             };
 
             let transitionReloadStarted = false;
@@ -931,9 +919,8 @@
                 }
 
                 transitionReloadStarted = true;
-                const transitionToken =
-                    sessionStorage.getItem(transitionStorageKey) ||
-                    await refreshTransitionToken();
+                const transitionToken = await connection.invoke(
+                    "PreparePlayerTransition");
 
                 if (!transitionToken) {
                     transitionReloadStarted = false;
@@ -1175,13 +1162,16 @@
             });
 
             connection.on("RejoinApprovalRequired", () => {
+                rejoinApprovalRequired = true;
                 rejoinWarning.hidden = false;
+                document.dispatchEvent(
+                    new Event("badwolf:player-session-pending"));
             });
 
             connection.on("RejoinApproved", () => {
+                rejoinApprovalRequired = false;
                 rejoinWarning.hidden = true;
                 updateWarning();
-                void refreshTransitionToken().catch(console.error);
                 document.dispatchEvent(
                     new Event("badwolf:player-session-ready"));
             });
@@ -1197,6 +1187,7 @@
             });
 
             connection.onreconnected(async () => {
+                rejoinApprovalRequired = false;
                 await joinPlayerSession();
                 await webcam.reconnect();
             });

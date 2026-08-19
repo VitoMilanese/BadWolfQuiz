@@ -6479,46 +6479,66 @@ body.youtube-auto-expanded-open {
     object-fit: contain;
 }
 
-.all-player-multiple-choice-answer-presentation .game-content-blocks {
+.all-player-multiple-choice-answer-presentation .game-content-blocks,
+.all-player-answer-grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    grid-auto-rows: minmax(0, 1fr);
+    grid-auto-rows: minmax(4.5rem, auto);
     align-items: stretch;
-    gap: clamp(0.75rem, 1.5vw, 1.25rem) !important;
+    justify-items: stretch;
+    align-content: center;
+    width: 100%;
+    overflow: hidden;
+    gap: clamp(0.5rem, 1vw, 0.85rem) !important;
 }
 
-.all-player-multiple-choice-answer-presentation .game-content-block {
+.all-player-multiple-choice-answer-presentation .game-content-block,
+.all-player-answer-option {
     min-width: 0;
-    min-height: clamp(10rem, 28vh, 22rem);
-    height: 100%;
+    width: 100%;
+    min-height: clamp(4.5rem, 13vh, 8rem);
+    height: auto !important;
     display: flex !important;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     margin: 0 !important;
-    padding: clamp(0.65rem, 1.2vw, 1rem);
+    padding: clamp(0.45rem, 0.8vw, 0.75rem);
     overflow: hidden;
     border: 3px solid #c62828;
     border-radius: 0.8rem;
     text-align: center;
 }
 
+.all-player-answer-option-correct,
 .all-player-multiple-choice-answer-presentation .game-content-block:first-child {
     border-color: #2e7d32;
 }
 
+.all-player-answer-option-incorrect {
+    border-color: #c62828;
+}
+
 .all-player-multiple-choice-answer-presentation .game-content-text,
-.all-player-multiple-choice-answer-presentation .game-content-caption {
+.all-player-multiple-choice-answer-presentation .game-content-caption,
+.all-player-answer-option .game-content-text,
+.all-player-answer-option .game-content-caption {
     width: 100%;
     margin: 0;
     text-align: center;
 }
 
-.all-player-multiple-choice-answer-presentation .game-content-image {
+.all-player-multiple-choice-answer-presentation .game-content-text,
+.all-player-answer-option .game-content-text {
+    font-size: clamp(1.5rem, 3vw, 3.25rem);
+}
+
+.all-player-multiple-choice-answer-presentation .game-content-image,
+.all-player-answer-option .game-content-image {
     display: block;
     width: 100%;
-    height: 100%;
+    height: min(14vh, 9rem);
     min-height: 0;
-    max-height: min(30vh, 22rem);
+    max-height: min(14vh, 9rem);
     object-fit: contain;
 }
