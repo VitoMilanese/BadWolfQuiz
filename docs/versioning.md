@@ -16,6 +16,8 @@ Example: `web-v1.0.0`.
 
 The mandatory all-player question feature is the headline backwards-compatible feature for Web `1.16.0`, so it uses a MINOR bump from `1.15.10`.
 
+Question copying and same-quiz cloning from the Quiz Editor board are the headline backwards-compatible feature for Web `1.19.0`, so this release uses a MINOR bump from `1.18.0`.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
