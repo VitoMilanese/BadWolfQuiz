@@ -24,6 +24,10 @@ public sealed class QuestionTypeHintVisibilityRegressionTests
         Assert.Contains("#four-clues-help,", styles);
         Assert.Contains(".all-player-editor-help {", styles);
         Assert.Contains("font-family: Inter, Segoe UI, Arial, sans-serif", styles);
+        Assert.Contains("font-size: 0.875rem", styles);
+        Assert.Contains("font-weight: 400", styles);
+        Assert.Contains("line-height: 1.5", styles);
+        Assert.Contains("#four-clues-help[hidden],", styles);
         Assert.Contains(".all-player-editor-help[hidden]", styles);
         Assert.Contains("display: none", styles);
         Assert.Contains("textHelp.hidden = !isText", script);
