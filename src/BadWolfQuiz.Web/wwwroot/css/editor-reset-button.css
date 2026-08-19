@@ -24,6 +24,11 @@
     line-height: 1.5;
 }
 
+#four-clues-help,
+.all-player-editor-help {
+    font-family: Inter, Segoe UI, Arial, sans-serif;
+}
+
 .all-player-editor-help[hidden] {
     display: none;
 }
