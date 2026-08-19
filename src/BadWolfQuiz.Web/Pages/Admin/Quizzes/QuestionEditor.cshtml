@@ -47,7 +47,7 @@
             <option value="2">@Localizer["QuestionType_AllPlayerText"]</option>
             <option value="3">@Localizer["QuestionType_AllPlayerMultipleChoice"]</option>
         </select>
-        <small id="four-clues-help" class="all-player-editor-help" hidden>@Localizer["FourClues_EditorHint"]</small>
+        <small id="four-clues-help" hidden>@Localizer["FourClues_EditorHint"]</small>
     </section>
 
     <h2>@Localizer["Label_Question"]</h2>
@@ -178,25 +178,1320 @@
                         body: new FormData(form),
                         headers: { "X-Requested-With": "XMLHttpRequest" }
                     });
-
                     const result = await response.json();
                     if (!response.ok || !result.success) {
-                        setStatus(result.message || form.dataset.saveError, false);
-                        return;
+                        throw new Error(result.error || form.dataset.saveError);
                     }
 
                     applyBlockIds("Input.QuestionBlocks", result.questionBlocks);
                     applyBlockIds("Input.AnswerBlocks", result.answerBlocks);
+                    form.querySelectorAll('input[type="file"]').forEach(input => input.value = "");
+                    form.querySelectorAll('input[name$=".RemoveFile"]').forEach(input => input.checked = false);
                     setStatus(result.message, true);
                     statusTimeout = setTimeout(() => {
                         status.hidden = true;
-                    }, 3000);
-                } catch {
-                    setStatus(form.dataset.saveError, false);
+                    }, 4000);
+                } catch (error) {
+                    setStatus(error.message || form.dataset.saveError, false);
                 } finally {
                     submitter?.removeAttribute("disabled");
                 }
             });
         })();
+
+        const wagerQuestionCheckbox =
+            document.getElementById("Input_IsSpecial");
+
+        const buzzModeSetting =
+            document.getElementById("buzz-mode-setting");
+
+        const buzzModeSelect =
+            document.getElementById("Input_BuzzModeOverride");
+
+        const presentationTypeSelect =
+            document.getElementById("Input_PresentationType");
+
+        function updateQuestionTypeUi() {
+            const isFourClues = presentationTypeSelect?.value === "1";
+            document.getElementById("four-clues-help").hidden = !isFourClues;
+            document.querySelectorAll(".wager-question-setting").forEach(
+                element => element.hidden = isFourClues);
+            if (isFourClues && wagerQuestionCheckbox) {
+                wagerQuestionCheckbox.checked = false;
+            }
+            updateBuzzModeVisibility();
+        }
+
+        function updateBuzzModeVisibility() {
+            const isWagerQuestion =
+                wagerQuestionCheckbox?.checked ?? false;
+
+            if (buzzModeSetting) {
+                buzzModeSetting.hidden = isWagerQuestion;
+            }
+
+            if (buzzModeSelect) {
+                buzzModeSelect.disabled = isWagerQuestion;
+            }
+        }
+
+        wagerQuestionCheckbox?.addEventListener(
+            "change",
+            updateBuzzModeVisibility);
+
+        presentationTypeSelect?.addEventListener("change", async () => {
+            updateQuestionTypeUi();
+            if (presentationTypeSelect.value === "1") {
+                const section = document.getElementById("question-blocks");
+                while (section.querySelectorAll(".content-block-card").length < 4) {
+                    await addContentBlock(section, "Text");
+                }
+            }
+        });
+
+        updateBuzzModeVisibility();
+        updateQuestionTypeUi();
+
+        const questionPreviewModal =
+            document.getElementById("question-preview-modal");
+
+        const questionPreviewTitle =
+            document.getElementById("question-preview-title");
+
+        const questionPreviewContent =
+            document.getElementById("question-preview-content");
+
+        function getBlockInputValue(card, propertyName) {
+            const input = card.querySelector(
+                `[name$=".${propertyName}"]`);
+
+            if (!input) {
+                return "";
+            }
+
+            return input.value?.trim() ?? "";
+        }
+
+        function appendQuestionPreviewCaption(
+            container,
+            text,
+            cssClass) {
+            if (!text) {
+                return;
+            }
+
+            const caption = document.createElement("div");
+            caption.className = cssClass;
+            caption.textContent = text;
+            container.appendChild(caption);
+        }
+
+        function createTextBlockPreview(card) {
+            const text = getBlockInputValue(
+                card,
+                "TextContent");
+
+            if (!text) {
+                return null;
+            }
+
+            const element = document.createElement("div");
+            element.className =
+                "question-preview-text game-content-block game-content-text";
+            element.textContent = text;
+
+            return element;
+        }
+
+        function createImageBlockPreview(card) {
+            const preview =
+                card.querySelector(".unified-file-preview");
+
+            const sourceImage =
+                card.querySelector(
+                    ".unified-image-preview-element");
+
+            if (!preview ||
+                preview.hidden ||
+                !sourceImage ||
+                !sourceImage.getAttribute("src")) {
+                return null;
+            }
+
+            const wrapper = document.createElement("figure");
+            wrapper.className =
+                "question-preview-media game-content-block";
+
+            appendQuestionPreviewCaption(
+                wrapper,
+                getBlockInputValue(card, "TopCaption"),
+                "question-preview-caption");
+
+            const image = document.createElement("img");
+            image.className = "question-preview-image";
+            image.src = sourceImage.src;
+            image.alt =
+                sourceImage.alt ||
+                getBlockInputValue(card, "FileName");
+
+            wrapper.appendChild(image);
+
+            appendQuestionPreviewCaption(
+                wrapper,
+                getBlockInputValue(card, "BottomCaption"),
+                "question-preview-caption");
+
+            return wrapper;
+        }
+
+        function createAudioBlockPreview(card) {
+            const preview =
+                card.querySelector(".unified-file-preview");
+
+            const sourceAudio =
+                card.querySelector(
+                    ".unified-audio-preview-element");
+
+            if (!preview ||
+                preview.hidden ||
+                !sourceAudio ||
+                !sourceAudio.getAttribute("src")) {
+                return null;
+            }
+
+            const wrapper = document.createElement("div");
+            wrapper.className =
+                "question-preview-media question-preview-audio game-content-block";
+
+            appendQuestionPreviewCaption(
+                wrapper,
+                getBlockInputValue(card, "TopCaption"),
+                "question-preview-caption");
+
+            const audio = document.createElement("audio");
+            audio.className = "question-preview-audio-player";
+            audio.controls = true;
+            audio.preload = "metadata";
+            audio.src = sourceAudio.src;
+
+            wrapper.appendChild(audio);
+
+            appendQuestionPreviewCaption(
+                wrapper,
+                getBlockInputValue(card, "BottomCaption"),
+                "question-preview-caption");
+
+            return wrapper;
+        }
+
+        function getYouTubeVideoId(value) {
+            if (!value) {
+                return null;
+            }
+
+            try {
+                const url = new URL(value);
+                const host = url.hostname
+                    .replace(/^www\./, "")
+                    .toLowerCase();
+
+                if (host === "youtu.be") {
+                    return url.pathname
+                        .split("/")
+                        .filter(Boolean)[0] ?? null;
+                }
+
+                if (host !== "youtube.com" &&
+                    host !== "m.youtube.com") {
+                    return null;
+                }
+
+                if (url.pathname === "/watch") {
+                    return url.searchParams.get("v");
+                }
+
+                const parts = url.pathname
+                    .split("/")
+                    .filter(Boolean);
+
+                if (["embed", "shorts", "live"].includes(parts[0])) {
+                    return parts[1] ?? null;
+                }
+            } catch {
+                return null;
+            }
+
+            return null;
+        }
+
+        function createVideoBlockPreview(card) {
+            const externalUrl =
+                getBlockInputValue(card, "ExternalUrl");
+
+            if (!externalUrl) {
+                return null;
+            }
+
+            const wrapper = document.createElement("figure");
+            wrapper.className =
+                "question-preview-media game-content-block";
+
+            appendQuestionPreviewCaption(
+                wrapper,
+                getBlockInputValue(card, "TopCaption"),
+                "question-preview-caption");
+
+            const youtubeVideoId =
+                getYouTubeVideoId(externalUrl);
+
+            if (youtubeVideoId) {
+                const frameWrapper =
+                    document.createElement("div");
+
+                frameWrapper.className =
+                    "question-preview-video-frame";
+
+                const iframe =
+                    document.createElement("iframe");
+
+                iframe.className = "youtube-auto-expand";
+                iframe.src =
+                    "https://www.youtube-nocookie.com/embed/" +
+                    encodeURIComponent(youtubeVideoId);
+
+                iframe.title = "YouTube";
+                iframe.allow =
+                    "accelerometer; autoplay; clipboard-write; " +
+                    "encrypted-media; gyroscope; " +
+                    "picture-in-picture; web-share";
+
+                iframe.allowFullscreen = true;
+
+                frameWrapper.appendChild(iframe);
+                wrapper.appendChild(frameWrapper);
+            } else {
+                const video =
+                    document.createElement("video");
+
+                video.className = "question-preview-video";
+                video.controls = true;
+                video.preload = "metadata";
+                video.src = externalUrl;
+
+                wrapper.appendChild(video);
+            }
+
+            appendQuestionPreviewCaption(
+                wrapper,
+                getBlockInputValue(card, "BottomCaption"),
+                "question-preview-caption");
+
+            return wrapper;
+        }
+
+        function createContentBlockPreview(card) {
+            switch (card.dataset.blockType) {
+                case "Text":
+                    return createTextBlockPreview(card);
+
+                case "Image":
+                    return createImageBlockPreview(card);
+
+                case "Audio":
+                    return createAudioBlockPreview(card);
+
+                case "Video":
+                case "YouTube":
+                    return createVideoBlockPreview(card);
+
+                default:
+                    return null;
+            }
+        }
+
+        function stopQuestionPreviewMedia() {
+            questionPreviewContent
+                ?.querySelectorAll("audio, video")
+                .forEach(media => {
+                    media.pause();
+                    media.removeAttribute("src");
+                    media.load();
+                });
+
+            questionPreviewContent
+                ?.querySelectorAll("iframe")
+                .forEach(frame => {
+                    frame.src = "about:blank";
+                });
+        }
+
+        function closeQuestionPreview() {
+            if (!questionPreviewModal ||
+                !questionPreviewContent) {
+                return;
+            }
+
+            stopQuestionPreviewMedia();
+            questionPreviewContent.replaceChildren();
+
+            questionPreviewModal.hidden = true;
+            questionPreviewModal.setAttribute(
+                "aria-hidden",
+                "true");
+
+            document.body.classList.remove(
+                "question-preview-open");
+        }
+
+        function openQuestionPreview(previewType) {
+            const collectionId =
+                previewType === "answer"
+                    ? "answer-blocks"
+                    : "question-blocks";
+
+            const collection =
+                document.getElementById(collectionId);
+
+            if (!collection ||
+                !questionPreviewModal ||
+                !questionPreviewTitle ||
+                !questionPreviewContent) {
+                return;
+            }
+
+            questionPreviewTitle.textContent =
+                previewType === "answer"
+                    ? "@JavaScriptEncoder.Default.Encode(Localizer["Label_CorrectAnswer"])"
+                    : "@JavaScriptEncoder.Default.Encode(Localizer["Label_Question"])";
+
+            questionPreviewContent.replaceChildren();
+            const isFourCluesPreview =
+                previewType === "question" &&
+                presentationTypeSelect?.value === "1";
+            const isAllPlayerChoiceAnswerPreview =
+                previewType === "answer" &&
+                presentationTypeSelect?.value === "3";
+
+            questionPreviewContent.classList.toggle(
+                "four-clue-grid",
+                isFourCluesPreview);
+            questionPreviewContent.classList.toggle(
+                "all-player-answer-grid",
+                isAllPlayerChoiceAnswerPreview);
+
+            let answerOptionIndex = 0;
+            collection
+                .querySelectorAll(".content-block-card")
+                .forEach(card => {
+                    const blockPreview =
+                        createContentBlockPreview(card);
+
+                    if (blockPreview) {
+                        if (isAllPlayerChoiceAnswerPreview) {
+                            blockPreview.classList.add(
+                                "all-player-answer-option",
+                                answerOptionIndex === 0
+                                    ? "all-player-answer-option-correct"
+                                    : "all-player-answer-option-incorrect");
+                            answerOptionIndex += 1;
+                        }
+
+                        questionPreviewContent.appendChild(
+                            blockPreview);
+                    }
+                });
+
+            if (!questionPreviewContent.children.length) {
+                const emptyState =
+                    document.createElement("div");
+
+                emptyState.className =
+                    "question-preview-empty";
+
+                emptyState.textContent = "—";
+
+                questionPreviewContent.appendChild(
+                    emptyState);
+            }
+
+            questionPreviewModal.hidden = false;
+            questionPreviewModal.setAttribute(
+                "aria-hidden",
+                "false");
+
+            document.body.classList.add(
+                "question-preview-open");
+
+            questionPreviewModal
+                .querySelector(
+                    ".question-preview-close-button")
+                ?.focus();
+        }
+
+        document.addEventListener("click", event => {
+            const openButton = event.target.closest(
+                "[data-open-question-preview]");
+
+            if (openButton) {
+                openQuestionPreview(
+                    openButton.dataset.openQuestionPreview);
+
+                return;
+            }
+
+            if (event.target.closest(
+                ".question-preview-close-button")) {
+                closeQuestionPreview();
+                return;
+            }
+
+            if (event.target === questionPreviewModal) {
+                closeQuestionPreview();
+            }
+        });
+
+        window.addEventListener("keyup", event => {
+            if (event.key !== "Escape") {
+                return;
+            }
+
+            if (questionPreviewModal &&
+                !questionPreviewModal.hidden) {
+                closeQuestionPreview();
+            }
+        }, true);
+
+        document.querySelectorAll('.type-tabs').forEach(tabGroup => {
+            tabGroup.querySelectorAll('.type-tab').forEach(button => {
+                button.addEventListener('click', () => {
+                    const target = tabGroup.dataset.target;
+
+                    tabGroup
+                        .querySelectorAll('.type-tab')
+                        .forEach(x => x.classList.remove('active'));
+
+                    button.classList.add('active');
+
+                    document
+                        .querySelectorAll(`[data-editor^="${target}-"]`)
+                        .forEach(x => x.classList.remove('active'));
+
+                    document
+                        .querySelector(`[data-editor="${target}-${button.dataset.type}"]`)
+                        ?.classList.add('active');
+                });
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const message = document.getElementById('success-message');
+
+            if (!message) {
+                return;
+            }
+
+            window.setTimeout(() => {
+                message.classList.add('success-message-hidden');
+
+                window.setTimeout(() => {
+                    message.remove();
+                }, 300);
+            }, 2500);
+        });
+
+        async function addContentBlock(section, blockType) {
+            const list = section.querySelector('.content-block-list');
+            const fieldPrefix = section.dataset.blockCollection;
+            const index = list.querySelectorAll('.content-block-card').length;
+
+            if (section.id === 'question-blocks' &&
+                presentationTypeSelect?.value === '1' &&
+                index >= 4) {
+                return;
+            }
+
+            const url =
+                `${window.location.pathname}` +
+                `?handler=ContentBlock` +
+                `&fieldPrefix=${encodeURIComponent(fieldPrefix)}` +
+                `&blockType=${encodeURIComponent(blockType)}` +
+                `&index=${index}`;
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                alert('Не вдалося додати блок.');
+                return;
+            }
+
+            const html = await response.text();
+
+            list.insertAdjacentHTML('beforeend', html);
+            updateContentBlockIndexes(section);
+
+            const newCard = list.lastElementChild;
+
+            if (newCard) {
+                updateImageBlockPreview(newCard);
+            }
+
+            clearCollectionValidationError(fieldPrefix);
+        }
+
+        function clearCollectionValidationError(fieldPrefix) {
+            const validationMessage = document.querySelector(
+                `[data-valmsg-for="${fieldPrefix}"]`
+            );
+
+            if (!validationMessage) {
+                return;
+            }
+
+            validationMessage.textContent = '';
+            validationMessage.classList.remove('field-validation-error');
+            validationMessage.classList.add('field-validation-valid');
+        }
+
+        document.querySelectorAll('.content-block-section').forEach(section => {
+            const addButton =
+                section.querySelector('.content-block-add-button');
+
+            const typeMenu =
+                section.querySelector('.content-block-type-menu');
+
+            if (!addButton || !typeMenu) {
+                return;
+            }
+
+            addButton.addEventListener('click', () => {
+                typeMenu.hidden = !typeMenu.hidden;
+            });
+
+            typeMenu
+                .querySelectorAll('.content-block-type-option')
+                .forEach(option => {
+                    option.addEventListener('click', async () => {
+                        await addContentBlock(
+                            section,
+                            option.dataset.blockType);
+
+                        typeMenu.hidden = true;
+                    });
+                });
+        });
+
+        function updateContentBlockIndexes(section) {
+            const fieldPrefix = section.dataset.blockCollection;
+            const idPrefix = fieldPrefix.replaceAll('.', '_');
+
+            const escapedFieldPrefix = fieldPrefix.replace(
+                /[.*+?^${}()|[\]\\]/g,
+                '\\$&'
+            );
+
+            const escapedIdPrefix = idPrefix.replace(
+                /[.*+?^${}()|[\]\\]/g,
+                '\\$&'
+            );
+
+            const namePattern = new RegExp(
+                `${escapedFieldPrefix}\\[\\d+\\]`,
+                'g'
+            );
+
+            const idPattern = new RegExp(
+                `${escapedIdPrefix}_\\d+__`,
+                'g'
+            );
+
+            const cards = section.querySelectorAll('.content-block-card');
+
+            cards.forEach((card, index) => {
+                card.querySelectorAll('[name]').forEach(element => {
+                    element.name = element.name.replace(
+                        namePattern,
+                        `${fieldPrefix}[${index}]`
+                    );
+                });
+
+                card.querySelectorAll('[id]').forEach(element => {
+                    element.id = element.id.replace(
+                        idPattern,
+                        `${idPrefix}_${index}__`
+                    );
+                });
+
+                card.querySelectorAll('label[for]').forEach(label => {
+                    label.htmlFor = label.htmlFor.replace(
+                        idPattern,
+                        `${idPrefix}_${index}__`
+                    );
+                });
+
+                const sortOrderInput = card.querySelector(
+                    `input[name="${fieldPrefix}[${index}].SortOrder"]`
+                );
+
+                if (sortOrderInput) {
+                    sortOrderInput.value = index;
+                }
+            });
+        }
+
+        document.addEventListener('click', event => {
+            const removeButton = event.target.closest(
+                '.content-block-remove-button'
+            );
+
+            if (!removeButton) {
+                return;
+            }
+
+            const card = removeButton.closest('.content-block-card');
+            const section = removeButton.closest('.content-block-section');
+
+            if (!card || !section) {
+                return;
+            }
+
+            const blockEditor = card.querySelector(
+                ".image-block-editor, .audio-block-editor");
+
+            if (blockEditor) {
+                revokeTemporaryFileUrl(blockEditor);
+            }
+
+            card.remove();
+            updateContentBlockIndexes(section);
+        });
+
+        let draggedContentBlock = null;
+
+        document.addEventListener('dragstart', event => {
+            const dragHandle = event.target.closest(
+                '.content-block-drag-handle'
+            );
+
+            if (!dragHandle) {
+                return;
+            }
+
+            const card = dragHandle.closest('.content-block-card');
+
+            if (!card) {
+                return;
+            }
+
+            draggedContentBlock = card;
+            card.classList.add('content-block-dragging');
+
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', '');
+        });
+
+        document.addEventListener('dragend', event => {
+            const dragHandle = event.target.closest(
+                '.content-block-drag-handle'
+            );
+
+            if (!dragHandle || !draggedContentBlock) {
+                return;
+            }
+
+            const section = draggedContentBlock.closest(
+                '.content-block-section'
+            );
+
+            draggedContentBlock.classList.remove(
+                'content-block-dragging'
+            );
+
+            clearContentBlockDropIndicators();
+
+            if (section) {
+                updateContentBlockIndexes(section);
+            }
+
+            draggedContentBlock = null;
+        });
+
+        document.addEventListener('dragover', event => {
+            if (!draggedContentBlock) {
+                return;
+            }
+
+            const targetCard = event.target.closest(
+                '.content-block-card'
+            );
+
+            if (!targetCard || targetCard === draggedContentBlock) {
+                return;
+            }
+
+            const sourceSection = draggedContentBlock.closest(
+                '.content-block-section'
+            );
+
+            const targetSection = targetCard.closest(
+                '.content-block-section'
+            );
+
+            // Не дозволяємо переносити блоки між питанням і відповіддю.
+            if (sourceSection !== targetSection) {
+                return;
+            }
+
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+
+            clearContentBlockDropIndicators();
+
+            const targetRectangle = targetCard.getBoundingClientRect();
+            const targetMiddle =
+                targetRectangle.top + targetRectangle.height / 2;
+
+            if (event.clientY < targetMiddle) {
+                targetCard.classList.add('content-block-drop-before');
+            } else {
+                targetCard.classList.add('content-block-drop-after');
+            }
+        });
+
+        document.addEventListener('drop', event => {
+            if (!draggedContentBlock) {
+                return;
+            }
+
+            const targetCard = event.target.closest(
+                '.content-block-card'
+            );
+
+            if (!targetCard || targetCard === draggedContentBlock) {
+                return;
+            }
+
+            const sourceSection = draggedContentBlock.closest(
+                '.content-block-section'
+            );
+
+            const targetSection = targetCard.closest(
+                '.content-block-section'
+            );
+
+            if (sourceSection !== targetSection) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const targetRectangle = targetCard.getBoundingClientRect();
+            const targetMiddle =
+                targetRectangle.top + targetRectangle.height / 2;
+
+            if (event.clientY < targetMiddle) {
+                targetCard.before(draggedContentBlock);
+            } else {
+                targetCard.after(draggedContentBlock);
+            }
+
+            clearContentBlockDropIndicators();
+            updateContentBlockIndexes(sourceSection);
+        });
+
+        function clearContentBlockDropIndicators() {
+            document
+                .querySelectorAll(
+                    '.content-block-drop-before, .content-block-drop-after'
+                )
+                .forEach(card => {
+                    card.classList.remove(
+                        'content-block-drop-before',
+                        'content-block-drop-after'
+                    );
+                });
+        }
+
+        document.addEventListener('dragover', event => {
+            if (!draggedContentBlock) {
+                return;
+            }
+
+            const list = event.target.closest('.content-block-list');
+
+            if (!list) {
+                return;
+            }
+
+            const sourceSection = draggedContentBlock.closest(
+                '.content-block-section'
+            );
+
+            const targetSection = list.closest(
+                '.content-block-section'
+            );
+
+            if (sourceSection !== targetSection) {
+                return;
+            }
+
+            event.preventDefault();
+        });
+
+        document.addEventListener('drop', event => {
+            if (!draggedContentBlock) {
+                return;
+            }
+
+            const list = event.target.closest('.content-block-list');
+
+            if (!list) {
+                return;
+            }
+
+            const targetCard = event.target.closest(
+                '.content-block-card'
+            );
+
+            // Перенесення відносно картки вже обробляється іншим handler.
+            if (targetCard) {
+                return;
+            }
+
+            const sourceSection = draggedContentBlock.closest(
+                '.content-block-section'
+            );
+
+            const targetSection = list.closest(
+                '.content-block-section'
+            );
+
+            if (sourceSection !== targetSection) {
+                return;
+            }
+
+            event.preventDefault();
+
+            list.appendChild(draggedContentBlock);
+            updateContentBlockIndexes(sourceSection);
+        });
+
+        function updateImageBlockPreview(card) {
+            const urlInput = card.querySelector('.image-block-url');
+            const topCaptionInput = card.querySelector(
+                '.image-block-top-caption'
+            );
+            const bottomCaptionInput = card.querySelector(
+                '.image-block-bottom-caption'
+            );
+
+            const preview = card.querySelector('.image-block-preview');
+            const previewImage = card.querySelector(
+                '.image-block-preview-image'
+            );
+            const previewTopCaption = card.querySelector(
+                '.image-block-preview-top-caption'
+            );
+            const previewBottomCaption = card.querySelector(
+                '.image-block-preview-bottom-caption'
+            );
+            const previewError = card.querySelector(
+                '.image-block-preview-error'
+            );
+
+            if (!urlInput ||
+                !preview ||
+                !previewImage ||
+                !previewTopCaption ||
+                !previewBottomCaption ||
+                !previewError) {
+                return;
+            }
+
+            const imageUrl = urlInput.value.trim();
+            const topCaption = topCaptionInput?.value.trim() ?? '';
+            const bottomCaption = bottomCaptionInput?.value.trim() ?? '';
+
+            previewTopCaption.textContent = topCaption;
+            previewBottomCaption.textContent = bottomCaption;
+
+            previewTopCaption.hidden = topCaption.length === 0;
+            previewBottomCaption.hidden = bottomCaption.length === 0;
+
+            if (imageUrl.length === 0) {
+                preview.hidden = true;
+                previewImage.removeAttribute('src');
+                previewError.hidden = true;
+                return;
+            }
+
+            preview.hidden = false;
+            previewError.hidden = true;
+            previewImage.hidden = false;
+
+            if (previewImage.src !== imageUrl) {
+                previewImage.src = imageUrl;
+            }
+        }
+
+        document.addEventListener('input', event => {
+            const card = event.target.closest('.content-block-card');
+
+            if (!card) {
+                return;
+            }
+
+            if (event.target.matches(
+                '.image-block-url, ' +
+                '.image-block-top-caption, ' +
+                '.image-block-bottom-caption'
+            )) {
+                updateImageBlockPreview(card);
+            }
+        });
+
+        document.addEventListener('load', event => {
+            if (!event.target.matches('.image-block-preview-image')) {
+                return;
+            }
+
+            const preview = event.target.closest('.image-block-preview');
+            const previewError = preview?.querySelector(
+                '.image-block-preview-error'
+            );
+
+            event.target.hidden = false;
+
+            if (previewError) {
+                previewError.hidden = true;
+            }
+        }, true);
+
+        document.addEventListener('error', event => {
+            if (!event.target.matches('.image-block-preview-image')) {
+                return;
+            }
+
+            const preview = event.target.closest('.image-block-preview');
+            const previewError = preview?.querySelector(
+                '.image-block-preview-error'
+            );
+
+            event.target.hidden = true;
+
+            if (previewError) {
+                previewError.hidden = false;
+            }
+        }, true);
+
+        document
+            .querySelectorAll('.content-block-card')
+            .forEach(card => {
+                updateImageBlockPreview(card);
+            });
+
+        function revokeTemporaryFileUrl(blockEditor) {
+            const preview = blockEditor.querySelector(
+                ".unified-file-preview");
+
+            const objectUrl = preview?.dataset.objectUrl;
+
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+                delete preview.dataset.objectUrl;
+            }
+        }
+
+        function clearPreviewMedia(blockEditor) {
+            const image = blockEditor.querySelector(
+                ".unified-image-preview-element");
+
+            const audio = blockEditor.querySelector(
+                ".unified-audio-preview-element");
+
+            if (image) {
+                image.removeAttribute("src");
+                image.alt = "";
+            }
+
+            if (audio) {
+                audio.pause();
+                audio.removeAttribute("src");
+                audio.load();
+            }
+        }
+
+        function setCancelFileChangeVisible(
+            blockEditor,
+            isVisible) {
+            const cancelButton = blockEditor.querySelector(
+                ".cancel-file-change-button");
+
+            if (!cancelButton) {
+                return;
+            }
+
+            cancelButton.style.setProperty(
+                "display",
+                isVisible ? "inline-flex" : "none",
+                "important");
+
+            cancelButton.style.width = "fit-content";
+            cancelButton.style.alignSelf = "flex-start";
+        }
+
+        function restoreOriginalFilePreview(blockEditor) {
+            revokeTemporaryFileUrl(blockEditor);
+
+            const preview = blockEditor.querySelector(
+                ".unified-file-preview");
+
+            const image = blockEditor.querySelector(
+                ".unified-image-preview-element");
+
+            const audio = blockEditor.querySelector(
+                ".unified-audio-preview-element");
+
+            const fileLabel = blockEditor.querySelector(
+                ".file-preview-label");
+
+            const fileName = blockEditor.querySelector(
+                ".file-preview-name");
+
+            const removeButton = blockEditor.querySelector(
+                ".remove-stored-file-button");
+
+            if (!preview) {
+                return;
+            }
+
+            const hasOriginal =
+                preview.dataset.hasOriginal === "true";
+
+            if (!hasOriginal) {
+                clearPreviewMedia(blockEditor);
+                preview.hidden = true;
+
+                if (removeButton) {
+                    removeButton.hidden = true;
+                }
+
+                setCancelFileChangeVisible(
+                    blockEditor,
+                    false);
+
+                return;
+            }
+
+            const originalSrc =
+                preview.dataset.originalSrc ?? "";
+
+            const originalName =
+                preview.dataset.originalName ?? "";
+
+            const originalLabel =
+                preview.dataset.originalLabel ?? "";
+
+            if (image) {
+                image.src = originalSrc;
+                image.alt = originalName;
+            }
+
+            if (audio) {
+                audio.src = originalSrc;
+                audio.load();
+            }
+
+            if (fileLabel) {
+                fileLabel.textContent = originalLabel;
+            }
+
+            if (fileName) {
+                fileName.textContent = originalName;
+            }
+
+            preview.hidden = false;
+
+            if (removeButton) {
+                removeButton.hidden = false;
+            }
+
+            setCancelFileChangeVisible(
+                blockEditor,
+                false);
+        }
+
+        function cancelFileReplacement(blockEditor) {
+            const uploadedFileInput = blockEditor.querySelector(
+                ".uploaded-file-input");
+
+            const removeFileInput = blockEditor.querySelector(
+                ".remove-file-value");
+
+            if (uploadedFileInput) {
+                uploadedFileInput.value = "";
+            }
+
+            if (removeFileInput) {
+                removeFileInput.value = "false";
+            }
+
+            restoreOriginalFilePreview(blockEditor);
+        }
+
+        document.addEventListener("click", function (event) {
+            const cancelButton = event.target.closest(
+                ".cancel-file-change-button");
+
+            if (!cancelButton) {
+                return;
+            }
+
+            const blockEditor = cancelButton.closest(
+                ".image-block-editor, .audio-block-editor");
+
+            if (!blockEditor) {
+                return;
+            }
+
+            cancelFileReplacement(blockEditor);
+        });
+
+        document.addEventListener("click", function (event) {
+            const removeButton = event.target.closest(
+                ".remove-stored-file-button");
+
+            if (!removeButton) {
+                return;
+            }
+
+            const blockEditor = removeButton.closest(
+                ".image-block-editor, .audio-block-editor");
+
+            if (!blockEditor) {
+                return;
+            }
+
+            const removeFileInput = blockEditor.querySelector(
+                ".remove-file-value");
+
+            const uploadedFileInput = blockEditor.querySelector(
+                ".uploaded-file-input");
+
+            const preview = blockEditor.querySelector(
+                ".unified-file-preview");
+
+            if (removeFileInput) {
+                removeFileInput.value = "true";
+            }
+
+            if (uploadedFileInput) {
+                uploadedFileInput.value = "";
+            }
+
+            revokeTemporaryFileUrl(blockEditor);
+            clearPreviewMedia(blockEditor);
+
+            if (preview) {
+                preview.hidden = true;
+            }
+
+            removeButton.hidden = true;
+
+            setCancelFileChangeVisible(
+                blockEditor,
+                true);
+        });
+
+        document.addEventListener("change", function (event) {
+            if (!event.target.matches(".uploaded-file-input")) {
+                return;
+            }
+
+            const blockEditor = event.target.closest(
+                ".image-block-editor, .audio-block-editor");
+
+            if (!blockEditor) {
+                return;
+            }
+
+            const selectedFile = event.target.files?.[0];
+
+            if (!selectedFile) {
+                cancelFileReplacement(blockEditor);
+                return;
+            }
+
+            const removeFileInput = blockEditor.querySelector(
+                ".remove-file-value");
+
+            const preview = blockEditor.querySelector(
+                ".unified-file-preview");
+
+            const image = blockEditor.querySelector(
+                ".unified-image-preview-element");
+
+            const audio = blockEditor.querySelector(
+                ".unified-audio-preview-element");
+
+            const fileLabel = blockEditor.querySelector(
+                ".file-preview-label");
+
+            const fileName = blockEditor.querySelector(
+                ".file-preview-name");
+
+            const removeButton = blockEditor.querySelector(
+                ".remove-stored-file-button");
+
+            if (!preview) {
+                return;
+            }
+
+            revokeTemporaryFileUrl(blockEditor);
+
+            const objectUrl = URL.createObjectURL(selectedFile);
+            preview.dataset.objectUrl = objectUrl;
+
+            if (removeFileInput) {
+                removeFileInput.value = "false";
+            }
+
+            if (image) {
+                image.src = objectUrl;
+                image.alt = selectedFile.name;
+            }
+
+            if (audio) {
+                audio.src = objectUrl;
+                audio.load();
+            }
+
+            if (fileLabel) {
+                fileLabel.textContent =
+                    preview.dataset.pendingLabel ?? "";
+            }
+
+            if (fileName) {
+                fileName.textContent = selectedFile.name;
+            }
+
+            preview.hidden = false;
+
+            if (removeButton) {
+                removeButton.hidden = true;
+            }
+
+            setCancelFileChangeVisible(
+                blockEditor,
+                true);
+        });
+
+        window.addEventListener("beforeunload", function () {
+            document
+                .querySelectorAll(
+                    ".image-block-editor, .audio-block-editor")
+                .forEach(blockEditor => {
+                    revokeTemporaryFileUrl(blockEditor);
+                });
+        });
     </script>
 }
