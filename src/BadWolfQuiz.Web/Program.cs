@@ -5,6 +5,7 @@ using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using BadWolfQuiz.Web.Models;
@@ -34,6 +35,14 @@ builder.Services
         options.Conventions.AuthorizePage("/Admin/MasterGames", "MasterHost");
         options.Conventions.AuthorizePage("/Admin/QuestionInbox", "MasterHost");
         options.Conventions.AuthorizePage("/Admin/Settings/QuestionBot", "MasterHost");
+
+        foreach (var route in SeoRouteCatalog.IndexablePages)
+        {
+            var template = string.IsNullOrWhiteSpace(route.Path)
+                ? SeoRouteCatalog.CultureRouteParameter
+                : $"{SeoRouteCatalog.CultureRouteParameter}/{route.Path}";
+            options.Conventions.AddPageRoute(route.Page, template);
+        }
     })
     .AddViewLocalization()
     .AddDataAnnotationsLocalization(options =>
@@ -155,6 +164,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 
     options.RequestCultureProviders = new IRequestCultureProvider[]
     {
+        new RouteDataRequestCultureProvider(),
         new CookieRequestCultureProvider()
     };
 });
@@ -257,6 +267,7 @@ var localizationOptions = app.Services
     .GetRequiredService<IOptions<RequestLocalizationOptions>>()
     .Value;
 
+app.UseRouting();
 app.UseRequestLocalization(localizationOptions);
 app.Use(async (context, next) =>
 {
@@ -314,7 +325,6 @@ app.UseStaticFiles(new StaticFileOptions
         context.Context.Response.Headers.Expires = "0";
     }
 });
-app.UseRouting();
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
