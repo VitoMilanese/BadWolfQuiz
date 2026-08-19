@@ -26,9 +26,16 @@
 
 #four-clues-help,
 .all-player-editor-help {
+    display: block;
+    margin-top: 0.45rem;
+    color: var(--muted);
     font-family: Inter, Segoe UI, Arial, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
+#four-clues-help[hidden],
 .all-player-editor-help[hidden] {
     display: none;
 }
