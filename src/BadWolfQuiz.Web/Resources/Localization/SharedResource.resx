@@ -2601,4 +2601,10 @@
   <data name="AllPlayer_ReviewAnswersNow" xml:space="preserve">
     <value>Proceed to answer review</value>
   </data>
+  <data name="QuestionType_AllPlayerText" xml:space="preserve">
+    <value>All players — text answer</value>
+  </data>
+  <data name="QuestionType_AllPlayerMultipleChoice" xml:space="preserve">
+    <value>All players — multiple choice</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-﻿@page "{id:int}"
+@page "{id:int}"
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.QuestionEditorModel
 @{
     ViewData["Title"] = Localizer["Title_QuestionEditor"];
@@ -35,12 +35,17 @@
     <input type="hidden" asp-for="Input.Id" />
     <input type="hidden" asp-for="Input.QuizId" />
     <input type="hidden" asp-for="Input.RoundId" />
+    <input type="hidden"
+           asp-for="Input.AllPlayerMode"
+           data-all-player-mode />
 
     <section class="content-panel question-type-setting">
         <label asp-for="Input.PresentationType">@Localizer["Label_QuestionType"]</label>
         <select asp-for="Input.PresentationType">
             <option value="0">@Localizer["QuestionType_Standard"]</option>
             <option value="1">@Localizer["QuestionType_FourClues"]</option>
+            <option value="2">@Localizer["QuestionType_AllPlayerText"]</option>
+            <option value="3">@Localizer["QuestionType_AllPlayerMultipleChoice"]</option>
         </select>
         <small id="four-clues-help" hidden>@Localizer["FourClues_EditorHint"]</small>
     </section>

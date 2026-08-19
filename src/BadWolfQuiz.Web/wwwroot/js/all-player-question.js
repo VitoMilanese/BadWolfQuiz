@@ -358,6 +358,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
     const initializeEditor = () => {
         const form = document.querySelector("form.question-editor");
         const select = document.getElementById("Input_PresentationType");
+        const modeInput = document.getElementById("Input_AllPlayerMode");
         if (!(form instanceof HTMLFormElement) ||
             !(select instanceof HTMLSelectElement) ||
             form.dataset.allPlayerEditorInitialized === "true") {
@@ -426,6 +427,14 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             const isText = select.value === "2";
             const isChoice = select.value === "3";
             const isAllPlayer = isText || isChoice;
+
+            if (modeInput instanceof HTMLInputElement) {
+                modeInput.value = isText
+                    ? "text"
+                    : isChoice
+                        ? "multipleChoice"
+                        : "";
+            }
 
             textHelp.hidden = !isText;
             choiceHelp.hidden = !isChoice;

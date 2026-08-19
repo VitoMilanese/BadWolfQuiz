@@ -29,6 +29,8 @@ These modes use the existing `QuestionPresentationType` field, so they do not re
 
 Opening an existing all-player question establishes a clean editor baseline. Leaving through Back, Next, refresh, page close, or Escape uses the shared unsaved-changes guard without stacking a native browser prompt over the application dialog.
 
+The type selector is rendered by Razor and also posts a hidden all-player mode marker, so Text/Image uploads cannot accidentally fall back to the Standard presentation value. Existing image-only questions that carry the earlier all-player editor signature (disabled buzzer, excluded from random wagers, and two to four stored Image answers) are normalized to `AllPlayerMultipleChoice` when a game snapshot is created and when the editor is reopened.
+
 ## Gameplay flow
 
 1. The host selects the question.

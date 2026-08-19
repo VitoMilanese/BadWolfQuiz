@@ -8,6 +8,14 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         var root = FindRepositoryRoot();
         var script = Read(root,
             "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+        var editor = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Quizzes/QuestionEditor.cshtml");
+        var editorModel = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Quizzes/QuestionEditor.cshtml.cs");
+        var compatibility = Read(root,
+            "src/BadWolfQuiz.Web/Services/AllPlayerQuestionCompatibility.cs");
+        var snapshotFactory = Read(root,
+            "src/BadWolfQuiz.Web/Services/QuizSnapshotFactory.cs");
 
         Assert.Contains("All players — text answer", script);
         Assert.Contains("All players — multiple choice", script);
@@ -17,6 +25,14 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("[\"Text\", \"Image\"]", script);
         Assert.Contains("imageCardHasFile", script);
         Assert.Contains("invalidChoiceMedia", script);
+        Assert.Contains("Input.AllPlayerMode", editor);
+        Assert.Contains("data-all-player-mode", editor);
+        Assert.Contains("QuestionType_AllPlayerText", editor);
+        Assert.Contains("QuestionType_AllPlayerMultipleChoice", editor);
+        Assert.Contains("modeInput.value", script);
+        Assert.Contains("ResolvePostedPresentationType", editorModel);
+        Assert.Contains("LooksLikeLegacyImageMultipleChoice", compatibility);
+        Assert.Contains("ResolveStoredPresentationType", snapshotFactory);
     }
 
     [Fact]

@@ -26,17 +26,27 @@ public sealed class AllPlayerQuestionModel(
             return Forbid();
         }
 
-        var presentationType = await db.QuizQuestions
+        var question = await db.QuizQuestions
             .AsNoTracking()
-            .Where(question =>
-                question.Id == questionId &&
-                question.Category.Round.Quiz.HostId == hostId)
-            .Select(question => (int?)question.PresentationType)
-            .SingleOrDefaultAsync(cancellationToken);
+            .Include(item => item.AnswerBlocks)
+            .SingleOrDefaultAsync(item =>
+                item.Id == questionId &&
+                item.Category.Round.Quiz.HostId == hostId,
+                cancellationToken);
 
-        return presentationType.HasValue
-            ? new JsonResult(new { presentationType = presentationType.Value })
-            : NotFound();
+        if (question is null)
+        {
+            return NotFound();
+        }
+
+        var presentationType =
+            AllPlayerQuestionCompatibility.ResolveStoredPresentationType(
+                question);
+
+        return new JsonResult(new
+        {
+            presentationType = (int)presentationType
+        });
     }
 
     public IActionResult OnGetHost(string code)

@@ -1,4 +1,4 @@
-﻿using BadWolfQuiz.Web.Data;
+using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
@@ -46,6 +46,8 @@ public sealed class QuestionEditorModel(
 
         var questionBlock = question.QuestionBlocks.OrderBy(x => x.SortOrder).FirstOrDefault();
         var answerBlock = question.AnswerBlocks.OrderBy(x => x.SortOrder).FirstOrDefault();
+        var presentationType =
+            AllPlayerQuestionCompatibility.ResolveStoredPresentationType(question);
 
         Input = new InputModel
         {
@@ -53,7 +55,9 @@ public sealed class QuestionEditorModel(
             QuizId = question.Category.Round.QuizId,
             RoundId = question.Category.Round.Id,
             IsSpecial = question.IsSpecial,
-            PresentationType = question.PresentationType,
+            PresentationType = presentationType,
+            AllPlayerMode = AllPlayerQuestionCompatibility.GetMode(
+                presentationType),
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
             BuzzModeOverride = question.BuzzModeOverride
@@ -111,6 +115,11 @@ public sealed class QuestionEditorModel(
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
+        Input.PresentationType =
+            AllPlayerQuestionCompatibility.ResolvePostedPresentationType(
+                Input.PresentationType,
+                Input.AllPlayerMode);
+
         if (!await db.Quizzes.AsNoTracking().AnyAsync(
             x => x.Id == Input.QuizId && x.MediaState == QuizMediaState.Active,
             cancellationToken))
@@ -470,6 +479,8 @@ public sealed class QuestionEditorModel(
 
         [Display(Name = "Label_QuestionType")]
         public QuestionPresentationType PresentationType { get; set; }
+
+        public string? AllPlayerMode { get; set; }
 
         [Display(Name = "Label_ExcludeFromRandomWagerSelection")]
         public bool ExcludeFromRandomWagerSelection { get; set; }
