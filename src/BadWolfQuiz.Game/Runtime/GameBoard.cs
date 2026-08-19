@@ -74,7 +74,9 @@ public sealed class GameBoard
 public sealed class RuntimeQuestion
 {
     private readonly List<QuestionAnswerAttempt> _answerAttempts = [];
+    private readonly List<Wager> _allPlayerWagers = [];
     private readonly IReadOnlyList<QuestionAnswerAttempt> _readOnlyAnswerAttempts;
+    private readonly IReadOnlyList<Wager> _readOnlyAllPlayerWagers;
     internal RuntimeQuestion(
         int sourceRoundId,
         int sourceQuestionId,
@@ -99,6 +101,7 @@ public sealed class RuntimeQuestion
         QuestionBlocks = questionBlocks;
         AnswerBlocks = answerBlocks;
         _readOnlyAnswerAttempts = _answerAttempts.AsReadOnly();
+        _readOnlyAllPlayerWagers = _allPlayerWagers.AsReadOnly();
     }
 
     public int SourceRoundId { get; }
@@ -127,7 +130,7 @@ public sealed class RuntimeQuestion
         RevealedClueCount < 4 &&
         Status is RuntimeQuestionStatus.Selected or RuntimeQuestionStatus.Active;
 
-    public int CorrectAnswerValue => IsSpecial
+    public int CorrectAnswerValue => IsSpecial && !IsAllPlayerQuestion
         ? Wager?.Amount ?? Points
         : PresentationType == QuestionPresentationType.FourClues
             ? RevealedClueCount switch { 3 => Points / 2, 4 => Points / 4, _ => Points }
@@ -142,6 +145,8 @@ public sealed class RuntimeQuestion
     public GamePlayerId? SelectedByPlayerId { get; private set; }
 
     public Wager? Wager { get; private set; }
+
+    public IReadOnlyList<Wager> AllPlayerWagers => _readOnlyAllPlayerWagers;
 
     public QuestionBuzzerStatus BuzzerStatus { get; private set; } =
         QuestionBuzzerStatus.Inactive;
@@ -159,7 +164,8 @@ public sealed class RuntimeQuestion
         BuzzerStatus,
         AnsweringPlayerId,
         _answerAttempts.ToArray(),
-        RevealedClueCount);
+        RevealedClueCount,
+        _allPlayerWagers.ToArray());
 
     internal void RestoreState(RuntimeQuestionState state)
     {
@@ -174,6 +180,8 @@ public sealed class RuntimeQuestion
             : 0;
         _answerAttempts.Clear();
         _answerAttempts.AddRange(state.AnswerAttempts);
+        _allPlayerWagers.Clear();
+        _allPlayerWagers.AddRange(state.AllPlayerWagers ?? []);
     }
 
     internal void SuspendOpenBuzzerForRecovery()
@@ -198,6 +206,12 @@ public sealed class RuntimeQuestion
 
         if (IsSpecial)
         {
+            if (IsAllPlayerQuestion)
+            {
+                BuzzerStatus = QuestionBuzzerStatus.Closed;
+                AnsweringPlayerId = null;
+            }
+
             Status = RuntimeQuestionStatus.AwaitingWager;
             return;
         }
@@ -218,15 +232,54 @@ public sealed class RuntimeQuestion
         int amount,
         DateTimeOffset submittedAtUtc)
     {
-        if (!IsSpecial || Status != RuntimeQuestionStatus.AwaitingWager)
+        if (!IsSpecial ||
+            IsAllPlayerQuestion ||
+            Status != RuntimeQuestionStatus.AwaitingWager)
         {
             throw new GameRuleViolationException(
-                "A wager can only be submitted for a wager question awaiting a wager.");
+                "A wager can only be submitted for a single-player wager question awaiting a wager.");
         }
 
         Wager = new Wager(playerId, amount, submittedAtUtc);
-        AnsweringPlayerId = IsAllPlayerQuestion ? null : playerId;
+        AnsweringPlayerId = playerId;
         BuzzerStatus = QuestionBuzzerStatus.Closed;
+        Status = RuntimeQuestionStatus.Active;
+    }
+
+    internal void SubmitAllPlayerWager(
+        GamePlayerId playerId,
+        int amount,
+        DateTimeOffset submittedAtUtc)
+    {
+        if (!IsSpecial ||
+            !IsAllPlayerQuestion ||
+            Status != RuntimeQuestionStatus.AwaitingWager)
+        {
+            throw new GameRuleViolationException(
+                "Player wagers can only be submitted while an all-player wager question is awaiting wagers.");
+        }
+
+        if (_allPlayerWagers.Any(wager => wager.PlayerId == playerId))
+        {
+            throw new GameRuleViolationException(
+                "This player has already submitted a wager for the current question.");
+        }
+
+        _allPlayerWagers.Add(new Wager(playerId, amount, submittedAtUtc));
+    }
+
+    internal void BeginAllPlayerAnswering()
+    {
+        if (!IsSpecial ||
+            !IsAllPlayerQuestion ||
+            Status != RuntimeQuestionStatus.AwaitingWager)
+        {
+            throw new GameRuleViolationException(
+                "Only an all-player wager question with locked wagers can begin answering.");
+        }
+
+        BuzzerStatus = QuestionBuzzerStatus.Closed;
+        AnsweringPlayerId = null;
         Status = RuntimeQuestionStatus.Active;
     }
 
@@ -312,7 +365,9 @@ public sealed class RuntimeQuestion
                 "This player has already answered the current question.");
         }
 
-        if (IsSpecial && Wager?.PlayerId != playerId)
+        if (IsSpecial &&
+            !IsAllPlayerQuestion &&
+            Wager?.PlayerId != playerId)
         {
             throw new GameRuleViolationException(
                 "Only the wager player can answer a wager question.");

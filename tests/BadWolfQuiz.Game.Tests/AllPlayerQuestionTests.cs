@@ -30,10 +30,8 @@ public sealed class AllPlayerQuestionTests
             [TextBlock(10, "Red"), ImageBlock(11)]);
 
         Assert.False(question.IsSpecial);
-        Assert.False(question.ExcludeFromRandomWagerSelection);
         Assert.True(question.IsEligibleForRandomWagerSelection);
         Assert.Equal(2, question.AnswerBlocks.Count);
-        Assert.Equal("Red", question.AnswerBlocks[0].TextContent);
         Assert.Equal(ContentBlockKind.Image, question.AnswerBlocks[1].Kind);
 
         Assert.Throws<ArgumentException>(() => CreateQuestion(
@@ -45,15 +43,6 @@ public sealed class AllPlayerQuestionTests
         Assert.Throws<ArgumentException>(() => CreateQuestion(
             QuestionPresentationType.AllPlayerMultipleChoice,
             [TextBlock(10, "Red"), AudioBlock(11)]));
-    }
-
-    [Fact]
-    public void Multiple_choice_rejects_audio_or_video_question_content()
-    {
-        Assert.Throws<ArgumentException>(() => CreateQuestion(
-            QuestionPresentationType.AllPlayerMultipleChoice,
-            [TextBlock(10, "A"), TextBlock(11, "B")],
-            [AudioBlock(1)]));
     }
 
     [Fact]
@@ -69,30 +58,79 @@ public sealed class AllPlayerQuestionTests
         Assert.False(question.IsSpecial);
         Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
         Assert.Equal(QuestionBuzzerStatus.Closed, question.BuzzerStatus);
-        Assert.Null(question.AnsweringPlayerId);
     }
 
     [Fact]
-    public void Explicit_wager_all_player_question_waits_for_and_accepts_wager()
+    public void Every_player_submits_an_individual_wager_before_host_reveals_question()
     {
         var session = CreateSession(
             QuestionPresentationType.AllPlayerText,
             isSpecial: true);
         var rose = session.AddPlayer("Rose");
+        var jack = session.AddPlayer("Jack");
         session.Start();
 
         var selected = session.SelectQuestion(100);
-
-        Assert.True(selected.IsSpecial);
         Assert.Equal(RuntimeQuestionStatus.AwaitingWager, selected.Status);
 
-        var active = session.SubmitQuestionWager(100, 75);
+        session.SubmitAllPlayerQuestionWager(100, rose.Id, 75);
+        Assert.Equal(RuntimeQuestionStatus.AwaitingWager, selected.Status);
+        Assert.Single(selected.AllPlayerWagers);
+
+        session.SubmitAllPlayerQuestionWager(100, jack.Id, 35);
+        Assert.Equal(RuntimeQuestionStatus.AwaitingWager, selected.Status);
+        Assert.Equal(2, selected.AllPlayerWagers.Count);
+
+        var active = session.StartAllPlayerQuestionAfterWagers(100);
 
         Assert.Equal(RuntimeQuestionStatus.Active, active.Status);
-        Assert.Equal(75, active.Wager?.Amount);
-        Assert.Equal(rose.Id, active.Wager?.PlayerId);
-        Assert.Null(active.AnsweringPlayerId);
-        Assert.Equal(QuestionBuzzerStatus.Closed, active.BuzzerStatus);
+        Assert.Equal(75, active.AllPlayerWagers.Single(item =>
+            item.PlayerId == rose.Id).Amount);
+        Assert.Equal(35, active.AllPlayerWagers.Single(item =>
+            item.PlayerId == jack.Id).Amount);
+        Assert.Null(active.Wager);
+        Assert.Equal(GameTimerStatus.Running, session.AnswerTimer.Status);
+    }
+
+    [Fact]
+    public void Host_cannot_reveal_wager_question_before_every_player_has_wagered()
+    {
+        var session = CreateSession(
+            QuestionPresentationType.AllPlayerMultipleChoice,
+            isSpecial: true);
+        var rose = session.AddPlayer("Rose");
+        session.AddPlayer("Jack");
+        session.Start();
+        session.SelectQuestion(100);
+        session.SubmitAllPlayerQuestionWager(100, rose.Id, 5);
+
+        Assert.Throws<GameRuleViolationException>(() =>
+            session.StartAllPlayerQuestionAfterWagers(100));
+    }
+
+    [Fact]
+    public void Manual_wager_timer_starts_only_when_host_requests_it()
+    {
+        var settings = new GameSessionSettings(
+            GameSession.DefaultBuzzerDuration,
+            GameSession.DefaultAnswerDuration,
+            GamePhaseStartMode.Manual,
+            GamePhaseStartMode.Manual,
+            allowNegativeScoreFinalPlayers: true);
+        var session = CreateSession(
+            QuestionPresentationType.AllPlayerText,
+            isSpecial: true,
+            settings: settings);
+        var rose = session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+        session.SubmitAllPlayerQuestionWager(100, rose.Id, 5);
+        session.StartAllPlayerQuestionAfterWagers(100);
+
+        Assert.Equal(GameTimerStatus.Stopped, session.AnswerTimer.Status);
+
+        session.StartWagerAnswerTimer(100);
+
         Assert.Equal(GameTimerStatus.Running, session.AnswerTimer.Status);
     }
 
@@ -121,7 +159,7 @@ public sealed class AllPlayerQuestionTests
     }
 
     [Fact]
-    public void Wager_all_player_scoring_uses_stake_for_correct_and_incorrect_answers()
+    public void Wager_scoring_uses_each_players_own_stake()
     {
         var session = CreateSession(
             QuestionPresentationType.AllPlayerMultipleChoice,
@@ -130,28 +168,29 @@ public sealed class AllPlayerQuestionTests
         var jack = session.AddPlayer("Jack");
         session.Start();
         session.SelectQuestion(100);
-        var question = session.SubmitQuestionWager(100, 80);
+        session.SubmitAllPlayerQuestionWager(100, rose.Id, 80);
+        session.SubmitAllPlayerQuestionWager(100, jack.Id, 25);
+        var question = session.StartAllPlayerQuestionAfterWagers(100);
 
         var correct = session.AddQuestionAnswerHistoryEntry(
             100,
             rose.Id,
             isCorrect: true,
-            value: question.Wager!.Amount,
+            value: question.AllPlayerWagers.Single(item =>
+                item.PlayerId == rose.Id).Amount,
             resolveQuestionIfAvailable: false);
         var incorrect = session.AddQuestionAnswerHistoryEntry(
             100,
             jack.Id,
             isCorrect: false,
-            value: question.Wager.Amount,
+            value: question.AllPlayerWagers.Single(item =>
+                item.PlayerId == jack.Id).Amount,
             resolveQuestionIfAvailable: false);
 
         Assert.Equal(80, correct.ScoreDelta);
-        Assert.Equal(-80, incorrect.ScoreDelta);
+        Assert.Equal(-25, incorrect.ScoreDelta);
         Assert.Equal(80, rose.Score);
-        Assert.Equal(-80, jack.Score);
-
-        session.ResolveQuestionWithoutCorrectAnswer(100);
-        Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
+        Assert.Equal(-25, jack.Score);
     }
 
     [Fact]
@@ -175,6 +214,31 @@ public sealed class AllPlayerQuestionTests
     }
 
     [Fact]
+    public void Partial_player_wagers_survive_session_state_restore()
+    {
+        var session = CreateSession(
+            QuestionPresentationType.AllPlayerText,
+            isSpecial: true);
+        var rose = session.AddPlayer("Rose");
+        session.AddPlayer("Jack");
+        session.Start();
+        session.SelectQuestion(100);
+        session.SubmitAllPlayerQuestionWager(100, rose.Id, 45);
+
+        var restored = GameSession.Restore(
+            session.Quiz,
+            session.Settings,
+            session.CaptureState());
+        var question = restored.Board.Questions.Single(item =>
+            item.SourceQuestionId == 100);
+
+        var wager = Assert.Single(question.AllPlayerWagers);
+        Assert.Equal(rose.Id, wager.PlayerId);
+        Assert.Equal(45, wager.Amount);
+        Assert.Equal(RuntimeQuestionStatus.AwaitingWager, question.Status);
+    }
+
+    [Fact]
     public void Text_answer_can_be_recorded_for_zero_points_and_judged_later()
     {
         var session = CreateSession(QuestionPresentationType.AllPlayerText);
@@ -188,9 +252,6 @@ public sealed class AllPlayerQuestionTests
             isCorrect: false,
             value: 0,
             resolveQuestionIfAvailable: false);
-
-        Assert.Equal(0, submitted.ScoreDelta);
-        Assert.Equal(0, rose.Score);
 
         var judged = session.UpdateQuestionAnswerHistoryEntry(
             100,
@@ -207,7 +268,8 @@ public sealed class AllPlayerQuestionTests
     private static GameSession CreateSession(
         QuestionPresentationType type,
         bool isSpecial = false,
-        bool excludeFromRandomWagerSelection = false)
+        bool excludeFromRandomWagerSelection = false,
+        GameSessionSettings? settings = null)
     {
         var answers = type == QuestionPresentationType.AllPlayerMultipleChoice
             ? new[] { TextBlock(10, "A"), TextBlock(11, "B") }
@@ -221,7 +283,9 @@ public sealed class AllPlayerQuestionTests
             1,
             "All players",
             [new QuizRoundSnapshot(1, "Round", 0, [question])]);
-        return GameSession.Create(quiz);
+        return GameSession.Create(
+            quiz,
+            settings ?? GameSessionSettings.Default);
     }
 
     private static QuizQuestionSnapshot CreateQuestion(

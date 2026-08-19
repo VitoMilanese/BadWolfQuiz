@@ -264,7 +264,8 @@ public sealed class GameSession
                 RuntimeQuestionStatus.AwaitingWager or
                 RuntimeQuestionStatus.Active);
 
-        if (currentQuestion?.SelectedByPlayerId == playerId ||
+        if (currentQuestion?.IsAllPlayerQuestion == true ||
+            currentQuestion?.SelectedByPlayerId == playerId ||
             currentQuestion?.AnsweringPlayerId == playerId ||
             currentQuestion?.Wager?.PlayerId == playerId)
         {
@@ -373,10 +374,37 @@ public sealed class GameSession
     public WagerLimits GetQuestionWagerLimits(int sourceQuestionId)
     {
         var question = FindQuestion(sourceQuestionId);
+        if (question.IsAllPlayerQuestion)
+        {
+            throw new GameRuleViolationException(
+                "All-player wager limits must be calculated for a specific player.");
+        }
+
         var playerId = question.SelectedByPlayerId ?? ActivePlayerId
             ?? throw new GameRuleViolationException(
                 "A wager cannot be calculated without an active player.");
-        var player = _players.Single(item => item.Id == playerId);
+        var player = FindPlayer(playerId);
+        return CreateQuestionWagerLimits(question, player);
+    }
+
+    public WagerLimits GetAllPlayerQuestionWagerLimits(
+        int sourceQuestionId,
+        GamePlayerId playerId)
+    {
+        var question = FindQuestion(sourceQuestionId);
+        if (!question.IsSpecial || !question.IsAllPlayerQuestion)
+        {
+            throw new GameRuleViolationException(
+                "Per-player wager limits are available only for an all-player wager question.");
+        }
+
+        return CreateQuestionWagerLimits(question, FindPlayer(playerId));
+    }
+
+    private WagerLimits CreateQuestionWagerLimits(
+        RuntimeQuestion question,
+        GamePlayer player)
+    {
         var highestQuestionValue = Board.Questions
             .Where(item => item.SourceRoundId == question.SourceRoundId)
             .Max(item => item.Points);
@@ -397,6 +425,12 @@ public sealed class GameSession
         }
 
         var question = FindQuestion(sourceQuestionId);
+        if (question.IsAllPlayerQuestion)
+        {
+            throw new GameRuleViolationException(
+                "All-player wagers must be submitted by individual players.");
+        }
+
         var limits = GetQuestionWagerLimits(sourceQuestionId);
 
         if (!limits.Contains(amount))
@@ -425,6 +459,69 @@ public sealed class GameSession
         return question;
     }
 
+    public RuntimeQuestion SubmitAllPlayerQuestionWager(
+        int sourceQuestionId,
+        GamePlayerId playerId,
+        int amount)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        if (!question.IsSpecial ||
+            !question.IsAllPlayerQuestion ||
+            question.Status != RuntimeQuestionStatus.AwaitingWager)
+        {
+            throw new GameRuleViolationException(
+                "The current question is not accepting player wagers.");
+        }
+
+        var limits = GetAllPlayerQuestionWagerLimits(
+            sourceQuestionId,
+            playerId);
+        if (!limits.Contains(amount))
+        {
+            throw new GameRuleViolationException(
+                $"A question wager must be between {limits.Minimum} and {limits.Maximum}.");
+        }
+
+        question.SubmitAllPlayerWager(
+            playerId,
+            amount,
+            _timeProvider.GetUtcNow());
+        return question;
+    }
+
+    public RuntimeQuestion StartAllPlayerQuestionAfterWagers(
+        int sourceQuestionId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        if (!question.IsSpecial ||
+            !question.IsAllPlayerQuestion ||
+            question.Status != RuntimeQuestionStatus.AwaitingWager ||
+            !AllCurrentPlayersWagered(question))
+        {
+            throw new GameRuleViolationException(
+                "Every current player must submit a wager before the question can begin.");
+        }
+
+        question.BeginAllPlayerAnswering();
+        Timer.Stop();
+
+        if (Settings.WagerQuestionAnswerTimerStartMode ==
+            GamePhaseStartMode.Automatic)
+        {
+            AnswerTimer.Restart();
+        }
+        else
+        {
+            AnswerTimer.Stop();
+        }
+
+        return question;
+    }
+
     public GameTimer StartWagerAnswerTimer(int sourceQuestionId)
     {
         EnsureRunning();
@@ -433,7 +530,9 @@ public sealed class GameSession
 
         if (!question.IsSpecial ||
             question.Status != RuntimeQuestionStatus.Active ||
-            question.Wager is null)
+            (question.IsAllPlayerQuestion
+                ? !AllCurrentPlayersWagered(question)
+                : question.Wager is null))
         {
             throw new GameRuleViolationException(
                 "A wager answer timer can only start for an active wager question.");
@@ -1449,6 +1548,13 @@ public sealed class GameSession
         IReadOnlyList<int> CorrectAnswersByRound,
         int TotalAttempts,
         IReadOnlyList<int> AttemptsByRound);
+
+    private bool AllCurrentPlayersWagered(RuntimeQuestion question) =>
+        question.Status == RuntimeQuestionStatus.Active
+            ? question.AllPlayerWagers.Count > 0
+            : _players.Count > 0 &&
+                _players.All(player => question.AllPlayerWagers.Any(wager =>
+                    wager.PlayerId == player.Id));
 
     private void EnsureActivePlayerChangeAllowed()
     {

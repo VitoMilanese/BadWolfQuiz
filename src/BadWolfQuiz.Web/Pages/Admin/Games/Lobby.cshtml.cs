@@ -1,4 +1,4 @@
-﻿using BadWolfQuiz.Game.Definitions;
+using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Hubs;
@@ -2041,7 +2041,8 @@ public sealed class LobbyModel(
                 .ToArray();
         }
 
-        if (CurrentQuestion?.Status == RuntimeQuestionStatus.AwaitingWager)
+        if (CurrentQuestion?.Status == RuntimeQuestionStatus.AwaitingWager &&
+            !CurrentQuestion.IsAllPlayerQuestion)
         {
             QuestionWagerLimits = game.Session.GetQuestionWagerLimits(
                 CurrentQuestion.SourceQuestionId);

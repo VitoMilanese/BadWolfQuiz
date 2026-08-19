@@ -1416,15 +1416,6 @@ public sealed class GameSessionRegistry
             {
                 var review = game.GetOrCreateAllPlayerTextReview(question);
                 review.Accepting = false;
-                var hasSubmission = game.Session.Players.Any(player =>
-                    question.AnswerAttempts.Any(attempt =>
-                        attempt.PlayerId == player.Id));
-
-                if (!hasSubmission)
-                {
-                    game.Session.ResolveQuestionWithoutCorrectAnswer(
-                        sourceQuestionId);
-                }
             }
             else
             {

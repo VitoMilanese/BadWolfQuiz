@@ -34,7 +34,19 @@
             waiting: "Waiting",
             answered: "Answered",
             judge: "Judge answer",
-            progress: (answered, total) => `Answers: ${answered}/${total}`
+            progress: (answered, total) => `Answers: ${answered}/${total}`,
+            wagersProgress: (submitted, total) => `Wagers: ${submitted}/${total}`,
+            judgingProgress: (current, total) => `Answer review: ${current}/${total}`,
+            yourWager: "Your wager",
+            confirmWager: "Confirm wager",
+            wagerConfirmed: "Wager confirmed. Waiting for the host.",
+            wagerRejected: "The wager could not be submitted.",
+            wagerOutsideLimits: (minimum, maximum) => `Enter a wager from ${minimum} to ${maximum}.`,
+            wagerSubmitted: "Wager submitted",
+            minimumWager: "Set minimum wager",
+            emptyAnswer: "Record an empty answer",
+            showQuestion: "Show question",
+            waitingForWagers: "Waiting for wagers"
         },
         uk: {
             typeText: "Усі гравці — текстова відповідь",
@@ -58,7 +70,19 @@
             waiting: "Очікує",
             answered: "Відповів",
             judge: "Перевірка відповіді",
-            progress: (answered, total) => `Відповіді: ${answered}/${total}`
+            progress: (answered, total) => `Відповіді: ${answered}/${total}`,
+            wagersProgress: (submitted, total) => `Ставки: ${submitted}/${total}`,
+            judgingProgress: (current, total) => `Перевірка відповідей: ${current}/${total}`,
+            yourWager: "Ваша ставка",
+            confirmWager: "Підтвердити ставку",
+            wagerConfirmed: "Ставку прийнято. Очікування хоста.",
+            wagerRejected: "Не вдалося прийняти ставку.",
+            wagerOutsideLimits: (minimum, maximum) => `Введіть ставку від ${minimum} до ${maximum}.`,
+            wagerSubmitted: "Ставку зроблено",
+            minimumWager: "Встановити мінімальну ставку",
+            emptyAnswer: "Зафіксувати порожню відповідь",
+            showQuestion: "Показати питання",
+            waitingForWagers: "Очікування ставок"
         },
         it: {
             typeText: "Tutti i giocatori — risposta testuale",
@@ -82,7 +106,19 @@
             waiting: "In attesa",
             answered: "Ha risposto",
             judge: "Giudica risposta",
-            progress: (answered, total) => `Risposte: ${answered}/${total}`
+            progress: (answered, total) => `Risposte: ${answered}/${total}`,
+            wagersProgress: (submitted, total) => `Puntate: ${submitted}/${total}`,
+            judgingProgress: (current, total) => `Valutazione risposte: ${current}/${total}`,
+            yourWager: "La tua puntata",
+            confirmWager: "Conferma puntata",
+            wagerConfirmed: "Puntata confermata. In attesa del conduttore.",
+            wagerRejected: "Non è stato possibile inviare la puntata.",
+            wagerOutsideLimits: (minimum, maximum) => `Inserisci una puntata da ${minimum} a ${maximum}.`,
+            wagerSubmitted: "Puntata inviata",
+            minimumWager: "Imposta la puntata minima",
+            emptyAnswer: "Registra una risposta vuota",
+            showQuestion: "Mostra domanda",
+            waitingForWagers: "In attesa delle puntate"
         },
         ru: {
             typeText: "Все игроки — текстовый ответ",
@@ -106,7 +142,19 @@
             waiting: "Ожидает",
             answered: "Ответил",
             judge: "Проверка ответа",
-            progress: (answered, total) => `Ответы: ${answered}/${total}`
+            progress: (answered, total) => `Ответы: ${answered}/${total}`,
+            wagersProgress: (submitted, total) => `Ставки: ${submitted}/${total}`,
+            judgingProgress: (current, total) => `Проверка ответов: ${current}/${total}`,
+            yourWager: "Ваша ставка",
+            confirmWager: "Подтвердить ставку",
+            wagerConfirmed: "Ставка принята. Ожидание хоста.",
+            wagerRejected: "Не удалось принять ставку.",
+            wagerOutsideLimits: (minimum, maximum) => `Введите ставку от ${minimum} до ${maximum}.`,
+            wagerSubmitted: "Ставка сделана",
+            minimumWager: "Установить минимальную ставку",
+            emptyAnswer: "Зафиксировать пустой ответ",
+            showQuestion: "Показать вопрос",
+            waitingForWagers: "Ожидание ставок"
         }
     };
     const text = stringsByCulture[culture] ?? stringsByCulture.en;
@@ -669,7 +717,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
         const timer = panel.querySelector("[data-all-player-timer]");
         let currentQuestionId = null;
         let currentMode = null;
-        let currentOptionsKey = "";
+        let currentControlsKey = "";
         let requestInFlight = false;
         let pollHandle = 0;
         let lastState = null;
@@ -692,15 +740,14 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
         };
 
         const setControlsDisabled = disabled => {
-            controls?.querySelectorAll("button, textarea")
+            controls?.querySelectorAll("button, textarea, input")
                 .forEach(element => {
                     element.disabled = disabled;
                 });
         };
 
-        const submit = async answer => {
-            const normalized = answer?.trim();
-            if (!normalized || currentQuestionId === null || requestInFlight) {
+        const postPlayerAction = async (handler, values, fallbackError) => {
+            if (currentQuestionId === null || requestInFlight) {
                 return;
             }
 
@@ -715,10 +762,12 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             data.set("playerId", playerId);
             data.set("accessToken", accessToken);
             data.set("sourceQuestionId", String(currentQuestionId));
-            data.set("answer", normalized);
+            for (const [key, value] of Object.entries(values)) {
+                data.set(key, String(value));
+            }
 
             try {
-                const response = await fetch(`${apiPath}?handler=Submit`, {
+                const response = await fetch(`${apiPath}?handler=${handler}`, {
                     method: "POST",
                     credentials: "same-origin",
                     body: data,
@@ -732,7 +781,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                     if (result?.state) {
                         applyState(result.state);
                     }
-                    throw new Error(result?.error || text.rejected);
+                    throw new Error(result?.error || fallbackError);
                 }
 
                 if (result.state) {
@@ -740,10 +789,13 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 }
             } catch (exception) {
                 if (error) {
-                    error.textContent = exception?.message || text.rejected;
+                    error.textContent = exception?.message || fallbackError;
                     error.hidden = false;
                 }
-                if (!lastState?.hasSubmitted && lastState?.isAccepting) {
+                if (lastState?.phase === "wagering" && !lastState.hasWager ||
+                    lastState?.phase === "answering" &&
+                        !lastState.hasSubmitted &&
+                        lastState.isAccepting) {
                     setControlsDisabled(false);
                 }
             } finally {
@@ -751,16 +803,119 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             }
         };
 
-        const getOptionsKey = state => JSON.stringify(
-            (state.options ?? []).map(option => [
-                option.id,
-                option.kind,
-                option.text ?? "",
-                option.imageUrl ?? ""
-            ]));
+        const submitAnswer = answer => {
+            const normalized = answer?.trim();
+            if (!normalized) {
+                return;
+            }
+            return postPlayerAction(
+                "Submit",
+                { answer: normalized },
+                text.rejected);
+        };
 
-        const buildControls = state => {
-            controls.replaceChildren();
+        const submitWager = amount => postPlayerAction(
+            "Wager",
+            { amount },
+            text.wagerRejected);
+
+        const buildWagerControls = state => {
+            const minimum = Number(state.minimumWager);
+            const maximum = Number(state.maximumWager);
+            const form = document.createElement("form");
+            form.className = "question-wager-form final-wager-form";
+            const label = document.createElement("label");
+            label.className = "wager-display-label";
+            const caption = document.createElement("span");
+            caption.textContent = text.yourWager;
+            const display = document.createElement("input");
+            display.className = "wager-display";
+            display.type = "text";
+            display.inputMode = "none";
+            display.readOnly = true;
+            display.required = true;
+            label.append(caption, display);
+
+            const keypad = document.createElement("div");
+            keypad.className = "wager-keypad";
+            const addDigit = digit => {
+                if (display.value.length >= String(maximum).length + 1) {
+                    return;
+                }
+                display.value += digit;
+                refresh();
+            };
+            for (const digit of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.textContent = String(digit);
+                button.addEventListener("click", () => addDigit(digit));
+                keypad.appendChild(button);
+            }
+            const clear = document.createElement("button");
+            clear.type = "button";
+            clear.textContent = "C";
+            clear.addEventListener("click", () => {
+                display.value = "";
+                refresh();
+            });
+            keypad.appendChild(clear);
+            const zero = document.createElement("button");
+            zero.type = "button";
+            zero.textContent = "0";
+            zero.addEventListener("click", () => addDigit(0));
+            keypad.appendChild(zero);
+            const backspace = document.createElement("button");
+            backspace.type = "button";
+            backspace.textContent = "⌫";
+            backspace.addEventListener("click", () => {
+                display.value = display.value.slice(0, -1);
+                refresh();
+            });
+            keypad.appendChild(backspace);
+            const maximumButton = document.createElement("button");
+            maximumButton.type = "button";
+            maximumButton.className = "wager-keypad-max";
+            maximumButton.textContent = "MAX";
+            maximumButton.addEventListener("click", () => {
+                display.value = String(maximum);
+                refresh();
+            });
+            keypad.appendChild(maximumButton);
+
+            const validation = document.createElement("p");
+            validation.className = "wager-validation";
+            const submit = document.createElement("button");
+            submit.type = "submit";
+            submit.className = "button button-primary";
+            submit.textContent = text.confirmWager;
+            submit.disabled = true;
+
+            function refresh() {
+                const amount = Number(display.value);
+                const isValid = display.value !== "" &&
+                    amount >= minimum &&
+                    amount <= maximum;
+                validation.textContent = isValid
+                    ? "✓"
+                    : text.wagerOutsideLimits(minimum, maximum);
+                validation.classList.toggle("is-valid", isValid);
+                submit.disabled = !isValid;
+            }
+
+            form.addEventListener("submit", event => {
+                event.preventDefault();
+                const amount = Number(display.value);
+                if (amount >= minimum && amount <= maximum) {
+                    void submitWager(amount);
+                }
+            });
+            form.append(label, keypad, validation, submit);
+            controls.appendChild(form);
+            refresh();
+        };
+
+        const buildAnswerControls = state => {
             if (state.mode === "multipleChoice") {
                 const grid = document.createElement("div");
                 grid.className = "all-player-choice-grid";
@@ -771,7 +926,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                         "button button-secondary all-player-choice-option";
                     appendOptionContent(button, option);
                     button.addEventListener("click", () => {
-                        void submit(String(option.id));
+                        void submitAnswer(String(option.id));
                     });
                     grid.appendChild(button);
                 }
@@ -795,9 +950,35 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             form.append(label, button);
             form.addEventListener("submit", event => {
                 event.preventDefault();
-                void submit(textarea.value);
+                void submitAnswer(textarea.value);
             });
             controls.appendChild(form);
+        };
+
+        const getControlsKey = state => JSON.stringify({
+            question: state.sourceQuestionId,
+            mode: state.mode,
+            phase: state.phase,
+            hasWager: state.hasWager,
+            minimumWager: state.minimumWager,
+            maximumWager: state.maximumWager,
+            options: (state.options ?? []).map(option => [
+                option.id,
+                option.kind,
+                option.text ?? "",
+                option.imageUrl ?? ""
+            ])
+        });
+
+        const buildControls = state => {
+            controls.replaceChildren();
+            if (state.phase === "wagering" && !state.hasWager) {
+                buildWagerControls(state);
+            } else if (state.phase === "answering" &&
+                !state.hasSubmitted &&
+                state.isAccepting) {
+                buildAnswerControls(state);
+            }
         };
 
         function applyState(state) {
@@ -811,7 +992,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 panel.hidden = true;
                 currentQuestionId = null;
                 currentMode = null;
-                currentOptionsKey = "";
+                currentControlsKey = "";
                 controls?.replaceChildren();
                 restoreBuzzer();
                 return;
@@ -819,27 +1000,34 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
 
             hideBuzzer();
             panel.hidden = false;
-            const questionChanged = currentQuestionId !== state.sourceQuestionId ||
-                currentMode !== state.mode;
-            const optionsKey = state.mode === "multipleChoice"
-                ? getOptionsKey(state)
-                : state.mode;
-            const controlsMissing = !controls?.firstElementChild;
             currentQuestionId = state.sourceQuestionId;
             currentMode = state.mode;
-
-            if (questionChanged ||
-                controlsMissing ||
-                currentOptionsKey !== optionsKey) {
+            const controlsKey = getControlsKey(state);
+            const controlsMissing = !controls?.firstElementChild;
+            if (controlsMissing || currentControlsKey !== controlsKey) {
                 buildControls(state);
-                currentOptionsKey = optionsKey;
+                currentControlsKey = controlsKey;
             }
 
             const seconds = Math.max(
                 0,
                 Math.ceil((state.remainingMilliseconds ?? 0) / 1000));
             if (timer) {
-                timer.textContent = state.isAccepting ? `${seconds}s` : "";
+                timer.textContent = state.phase === "answering" &&
+                    state.isAccepting
+                    ? `${seconds}s`
+                    : "";
+            }
+
+            if (state.phase === "wagering") {
+                if (state.hasWager) {
+                    controls.hidden = true;
+                    status.textContent = text.wagerConfirmed;
+                } else {
+                    controls.hidden = false;
+                    status.textContent = "";
+                }
+                return;
             }
 
             if (state.isClosed) {
@@ -930,8 +1118,8 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
 
         let pollHandle = 0;
         let lastState = null;
-        let refreshQuestionId = null;
-        let judgeRequestInFlight = false;
+        let refreshKey = null;
+        let hostRequestInFlight = false;
 
         const findBoard = () => document.querySelector(
             `.host-game-board[data-game-code="${CSS.escape(code)}"]`);
@@ -945,9 +1133,49 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 "[data-all-player-client-preview]")?.remove();
         };
 
+        const removeHostReview = board => {
+            board.querySelector(".all-player-host-review")?.remove();
+        };
+
+        const postHostAction = async (handler, values) => {
+            if (hostRequestInFlight) {
+                return;
+            }
+            hostRequestInFlight = true;
+            const data = new FormData();
+            data.set("code", code);
+            for (const [key, value] of Object.entries(values)) {
+                data.set(key, String(value));
+            }
+
+            try {
+                const response = await fetch(`${apiPath}?handler=${handler}`, {
+                    method: "POST",
+                    credentials: "same-origin",
+                    body: data,
+                    headers: {
+                        Accept: "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+                const result = await response.json().catch(() => null);
+                if (!response.ok || !result?.success) {
+                    throw new Error(result?.error || text.rejected);
+                }
+                if (result.state) {
+                    applyState(result.state);
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                hostRequestInFlight = false;
+            }
+        };
+
         const renderHostChoices = (board, state) => {
             removeHostChoices(board);
-            if (state.mode !== "multipleChoice" || state.isClosed) {
+            if (state.phase !== "answering" ||
+                state.mode !== "multipleChoice") {
                 return;
             }
 
@@ -979,50 +1207,27 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             presentation.appendChild(preview);
         };
 
-        const postJudgment = async (state, isCorrect) => {
-            if (!state.judgeSubmission || judgeRequestInFlight) {
-                return;
-            }
+        const postJudgment = (state, isCorrect) => postHostAction(
+            "Judge",
+            {
+                sourceQuestionId: state.sourceQuestionId,
+                playerId: state.judgeSubmission.id,
+                isCorrect
+            });
 
-            judgeRequestInFlight = true;
-            const board = findBoard();
-            board?.querySelectorAll(".all-player-host-judge-actions button")
-                .forEach(button => {
-                    button.disabled = true;
-                });
-
-            const data = new FormData();
-            data.set("code", code);
-            data.set("sourceQuestionId", String(state.sourceQuestionId));
-            data.set("playerId", String(state.judgeSubmission.id));
-            data.set("isCorrect", String(isCorrect));
-
-            try {
-                const response = await fetch(`${apiPath}?handler=Judge`, {
-                    method: "POST",
-                    credentials: "same-origin",
-                    body: data,
-                    headers: {
-                        Accept: "application/json",
-                        "X-Requested-With": "XMLHttpRequest"
-                    }
-                });
-                const result = await response.json().catch(() => null);
-                if (!response.ok || !result?.success || !result.state) {
-                    throw new Error(text.rejected);
-                }
-                applyState(result.state);
-            } catch (error) {
-                console.error(error);
-                const currentBoard = findBoard();
-                currentBoard?.querySelectorAll(
-                    ".all-player-host-judge-actions button")
-                    .forEach(button => {
-                        button.disabled = false;
-                    });
-            } finally {
-                judgeRequestInFlight = false;
-            }
+        const createActionButton = (symbol, label, handler) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className =
+                "button button-secondary final-player-action-icon";
+            button.title = label;
+            button.setAttribute("aria-label", label);
+            const icon = document.createElement("span");
+            icon.setAttribute("aria-hidden", "true");
+            icon.textContent = symbol;
+            button.appendChild(icon);
+            button.addEventListener("click", handler);
+            return button;
         };
 
         const renderProgress = (board, state) => {
@@ -1034,9 +1239,13 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
 
             progress.replaceChildren();
             const heading = document.createElement("strong");
-            heading.textContent = text.progress(
-                state.answeredCount ?? 0,
-                state.playerCount ?? 0);
+            heading.textContent = state.phase === "wagering"
+                ? text.wagersProgress(
+                    state.wageredCount ?? 0,
+                    state.playerCount ?? 0)
+                : text.progress(
+                    state.answeredCount ?? 0,
+                    state.playerCount ?? 0);
             progress.tabIndex = 0;
             progress.setAttribute(
                 "aria-label",
@@ -1050,56 +1259,138 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 name.textContent = player.name;
                 name.title = player.name;
                 const playerState = document.createElement("span");
-                playerState.textContent = state.isClosed || player.isJudged
-                    ? player.submitted
-                        ? player.isCorrect
-                            ? text.correct
-                            : text.incorrect
-                        : text.noAnswer
-                    : player.submitted
-                        ? text.answered
+
+                if (state.phase === "wagering") {
+                    playerState.textContent = player.wagerSubmitted
+                        ? text.wagerSubmitted
                         : text.waiting;
-                item.append(name, playerState);
+                    item.append(name, playerState);
+                    if (!player.wagerSubmitted) {
+                        item.appendChild(createActionButton(
+                            "⇩",
+                            text.minimumWager,
+                            () => void postHostAction("MinimumWager", {
+                                sourceQuestionId: state.sourceQuestionId,
+                                playerId: player.id
+                            })));
+                    }
+                } else {
+                    playerState.textContent = state.isClosed || player.isJudged
+                        ? player.submitted
+                            ? player.isCorrect
+                                ? text.correct
+                                : text.incorrect
+                            : text.noAnswer
+                        : player.submitted
+                            ? text.answered
+                            : text.waiting;
+                    item.append(name, playerState);
+                    if (state.mode === "text" &&
+                        !player.submitted &&
+                        (state.phase === "answering" ||
+                         state.phase === "awaitingMissing")) {
+                        item.appendChild(createActionButton(
+                            "∅",
+                            text.emptyAnswer,
+                            () => void postHostAction("EmptyAnswer", {
+                                sourceQuestionId: state.sourceQuestionId,
+                                playerId: player.id
+                            })));
+                    }
+                }
                 list.appendChild(item);
             }
 
             progress.append(heading, list);
-
-            if (state.judgeSubmission) {
-                const judge = document.createElement("section");
-                judge.className = "all-player-host-judge";
-                const title = document.createElement("strong");
-                title.textContent = `${text.judge}: ${state.judgeSubmission.name}`;
-                const answer = document.createElement("p");
-                answer.className = "all-player-host-judge-answer";
-                answer.textContent = state.judgeSubmission.answer ?? "—";
-                const actions = document.createElement("div");
-                actions.className = "all-player-host-judge-actions";
-                const correct = document.createElement("button");
-                correct.type = "button";
-                correct.className = "button judgment-correct-button";
-                correct.textContent = text.correct;
-                correct.addEventListener("click", () => {
-                    void postJudgment(state, true);
+            if (state.phase === "wagering" && state.canStartQuestion) {
+                const start = document.createElement("button");
+                start.type = "button";
+                start.className = "button button-primary";
+                start.textContent = text.showQuestion;
+                start.addEventListener("click", () => {
+                    void postHostAction("StartQuestion", {
+                        sourceQuestionId: state.sourceQuestionId
+                    });
                 });
-                const incorrect = document.createElement("button");
-                incorrect.type = "button";
-                incorrect.className = "button judgment-incorrect-button";
-                incorrect.textContent = text.incorrect;
-                incorrect.addEventListener("click", () => {
-                    void postJudgment(state, false);
-                });
-                actions.append(correct, incorrect);
-                judge.append(title, answer, actions);
-                progress.appendChild(judge);
+                progress.appendChild(start);
             }
 
-            const target = board.querySelector(".question-controls") ??
-                board.querySelector(".current-question-summary") ??
+            const target = board.querySelector(".current-question-summary") ??
                 board.querySelector(".question-presentation");
             if (target && progress.parentElement !== target) {
                 target.appendChild(progress);
             }
+        };
+
+        const renderTextReview = (board, state) => {
+            removeHostReview(board);
+            if (state.phase !== "judging" || !state.judgeSubmission) {
+                return;
+            }
+
+            const target = board.querySelector(".question-presentation");
+            if (!target) {
+                return;
+            }
+
+            const review = document.createElement("section");
+            review.className = "all-player-host-review final-judging-list";
+            const progress = document.createElement("p");
+            progress.className = "dialog-warning";
+            progress.textContent = text.judgingProgress(
+                (state.judgedCount ?? 0) + 1,
+                state.answeredCount ?? 0);
+            const answer = document.createElement("section");
+            answer.className =
+                "game-content-presentation final-player-answer-presentation";
+            const name = document.createElement("h2");
+            name.textContent = state.judgeSubmission.name;
+            const value = document.createElement("p");
+            value.className = "game-content-text";
+            value.textContent = state.judgeSubmission.answer ?? "-";
+            answer.append(name, value);
+            const actions = document.createElement("div");
+            actions.className =
+                "question-judge-actions final-judging-actions all-player-host-judge-actions";
+            const correct = document.createElement("button");
+            correct.type = "button";
+            correct.className = "button judgment-correct-button";
+            correct.textContent = text.correct;
+            correct.addEventListener("click", () => {
+                void postJudgment(state, true);
+            });
+            const incorrect = document.createElement("button");
+            incorrect.type = "button";
+            incorrect.className = "button judgment-incorrect-button";
+            incorrect.textContent = text.incorrect;
+            incorrect.addEventListener("click", () => {
+                void postJudgment(state, false);
+            });
+            actions.append(correct, incorrect);
+            review.append(progress, answer, actions);
+            target.appendChild(review);
+        };
+
+        const requestRefresh = (state, expectedSelector) => {
+            const board = findBoard();
+            if (!board || board.querySelector(expectedSelector)) {
+                return false;
+            }
+            const key = `${state.sourceQuestionId}:${state.phase}`;
+            if (refreshKey === key || !window.BadWolfHostGameplay?.refresh) {
+                return true;
+            }
+            refreshKey = key;
+            window.BadWolfHostGameplay.refresh()
+                .then(() => {
+                    refreshKey = null;
+                    hostPollNow?.();
+                })
+                .catch(error => {
+                    console.error(error);
+                    refreshKey = null;
+                });
+            return true;
         };
 
         const applyState = state => {
@@ -1120,40 +1411,36 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             if (!state?.active) {
                 board.classList.remove(
                     "all-player-question-answering",
-                    "all-player-multiple-choice-answer");
+                    "all-player-multiple-choice-answer",
+                    "all-player-text-reviewing");
                 removeProgress(board);
                 removeHostChoices(board);
-                refreshQuestionId = null;
+                removeHostReview(board);
+                refreshKey = null;
+                return;
+            }
+
+            if (state.phase === "answering" &&
+                requestRefresh(state, ".question-presentation")) {
+                return;
+            }
+            if (state.phase === "closed" &&
+                requestRefresh(state, ".answer-presentation")) {
                 return;
             }
 
             board.classList.toggle(
                 "all-player-question-answering",
-                !state.isClosed);
+                state.phase !== "closed");
             board.classList.toggle(
                 "all-player-multiple-choice-answer",
                 isMultipleChoiceAnswer);
+            board.classList.toggle(
+                "all-player-text-reviewing",
+                state.phase === "judging");
             renderProgress(board, state);
             renderHostChoices(board, state);
-
-            if (!state.isClosed) {
-                refreshQuestionId = null;
-                return;
-            }
-
-            const hasAnswerPresentation = Boolean(
-                board.querySelector(".answer-presentation"));
-            if (!hasAnswerPresentation &&
-                refreshQuestionId !== state.sourceQuestionId &&
-                window.BadWolfHostGameplay?.refresh) {
-                refreshQuestionId = state.sourceQuestionId;
-                window.BadWolfHostGameplay.refresh()
-                    .then(() => applyState(state))
-                    .catch(error => {
-                        console.error(error);
-                        refreshQuestionId = null;
-                    });
-            }
+            renderTextReview(board, state);
         };
 
         const schedule = active => {

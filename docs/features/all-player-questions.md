@@ -60,7 +60,7 @@ Image endpoints return inline media responses so they can be displayed by `<img>
 
 ## Text judging and scoring
 
-Text submissions are never checked automatically. The host reviews one submitted answer at a time and marks it Correct or Incorrect.
+Text submissions are never checked automatically. The right-side player drawer shows only submitted/waiting status and never displays answer text. After answering is locked and every player has a recorded submission, the host reviews one answer at a time in the main question area, matching the Final Question judging flow. For an AFK player, the host can record `-` with the empty-answer action in the drawer before judging begins.
 
 For a normal all-player question, scoring is the same for both modes:
 
@@ -68,7 +68,7 @@ For a normal all-player question, scoring is the same for both modes:
 - incorrect answer: zero points;
 - no answer: zero points.
 
-All-player questions may also be explicit or randomly selected wager questions. The active player submits one wager before the question is shown; that wager becomes the shared value for every participant. A correct submitted answer adds the wager, an incorrect submitted answer subtracts the wager, and no submission remains worth zero. Wager all-player questions use the configured wager-answer timer start mode and duration.
+All-player questions may also be explicit or randomly selected wager questions. Every participating player privately submits an individual wager from the player screen before the question is shown. The host sees only submitted/not-submitted status, may assign the minimum wager for an AFK player, and reveals the question after every wager exists. Each correct answer adds that player's own wager, each incorrect answer subtracts that player's own wager, and a player with no recorded answer has no score change. Wager all-player questions use the configured wager-answer timer start mode and duration.
 
 Incorrect submissions remain stored as answer attempts. Their score delta is zero for normal all-player questions and the negative wager amount for wager all-player questions, allowing statistics to distinguish an incorrect answer from a missing answer.
 

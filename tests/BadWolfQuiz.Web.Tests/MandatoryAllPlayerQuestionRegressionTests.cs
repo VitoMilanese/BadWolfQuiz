@@ -38,7 +38,7 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
     }
 
     [Fact]
-    public void All_player_questions_support_explicit_and_random_wagers()
+    public void All_player_questions_use_private_per_player_wagers()
     {
         var root = FindRepositoryRoot();
         var editorModel = Read(root,
@@ -47,22 +47,35 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
             "src/BadWolfQuiz.Game/Definitions/QuizSnapshot.cs");
         var board = Read(root,
             "src/BadWolfQuiz.Game/Runtime/GameBoard.cs");
+        var state = Read(root,
+            "src/BadWolfQuiz.Game/Runtime/GameSessionState.cs");
         var session = Read(root,
             "src/BadWolfQuiz.Game/Runtime/GameSession.cs");
         var endpoint = Read(root,
             "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+        var host = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml");
 
         Assert.Contains(
             "Input.PresentationType != QuestionPresentationType.FourClues",
             editorModel);
-        Assert.Contains("question.IsSpecial || isAllPlayer", editorModel);
         Assert.Contains("IsEligibleForRandomWagerSelection", snapshot);
         Assert.Contains("question.IsEligibleForRandomWagerSelection", board);
-        Assert.Contains("IsAllPlayerQuestion ? null : playerId", board);
-        Assert.Contains("question.IsSpecial && question.IsAllPlayerQuestion", session);
-        Assert.Contains("GetCorrectScoreValue", endpoint);
-        Assert.Contains("GetIncorrectScoreValue", endpoint);
-        Assert.Contains("GetRequiredWagerAmount", endpoint);
+        Assert.Contains("AllPlayerWagers", board);
+        Assert.Contains("AllPlayerWagers", state);
+        Assert.Contains("SubmitAllPlayerQuestionWager", session);
+        Assert.Contains("StartAllPlayerQuestionAfterWagers", session);
+        Assert.Contains("OnPostWager", endpoint);
+        Assert.Contains("OnPostMinimumWager", endpoint);
+        Assert.Contains("OnPostStartQuestion", endpoint);
+        Assert.Contains("GetScoreMagnitude", endpoint);
+        Assert.Contains("state.phase === \"wagering\"", script);
+        Assert.Contains("text.minimumWager", script);
+        Assert.Contains("question-wager-form", script);
+        Assert.Contains("!Model.CurrentQuestion.IsAllPlayerQuestion", host);
+        Assert.DoesNotContain("GetRequiredWagerAmount", endpoint);
     }
 
     [Fact]
@@ -86,6 +99,7 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("AllPlayerTextReviewState", registration);
         Assert.Contains("CloseAllPlayerQuestion", host);
         Assert.Contains("AllPlayer_ReviewAnswersNow", host);
+        Assert.Contains("OnPostEmptyAnswer", endpoint);
     }
 
     [Fact]
@@ -181,6 +195,27 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
     }
 
     [Fact]
+    public void Text_answers_are_reviewed_in_the_main_area_not_the_player_drawer()
+    {
+        var root = FindRepositoryRoot();
+        var endpoint = Read(root,
+            "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+        var styles = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/css/site.css");
+
+        Assert.Contains("phase == \"judging\"", endpoint);
+        Assert.Contains("AllCurrentPlayersSubmitted(game, question)", endpoint);
+        Assert.Contains("renderTextReview", script);
+        Assert.Contains("all-player-host-review", script);
+        Assert.Contains("text.emptyAnswer", script);
+        Assert.Contains("\"-\"", endpoint);
+        Assert.DoesNotContain("progress.appendChild(judge)", script);
+        Assert.Contains("all-player-text-reviewing", styles);
+    }
+
+    [Fact]
     public void Reconnect_requires_approval_and_restores_all_player_controls()
     {
         var root = FindRepositoryRoot();
@@ -198,7 +233,7 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
             "File(block.FileData, block.FileContentType, block.FileName)",
             endpoint);
         Assert.Contains("controlsMissing", script);
-        Assert.Contains("currentOptionsKey", script);
+        Assert.Contains("currentControlsKey", script);
         Assert.Contains("playerAccessStorageKey", script);
         Assert.Contains("localStorage.getItem(playerAccessStorageKey)", script);
         Assert.Contains("let playerSessionPending = true", script);

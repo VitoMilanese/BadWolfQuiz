@@ -149,6 +149,228 @@ public sealed class AllPlayerQuestionModel(
         }
     }
 
+    public IActionResult OnPostWager(
+        string code,
+        Guid playerId,
+        string accessToken,
+        int sourceQuestionId,
+        int amount)
+    {
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+            return Forbid();
+        }
+
+        var validationConnectionId = $"all-player-wager-http:{Guid.NewGuid():N}";
+        var connection = sessionRegistry.ConnectPlayer(
+            code,
+            accessToken,
+            validationConnectionId,
+            isVisible: false);
+
+        if (connection is null)
+        {
+            return Forbid();
+        }
+
+        try
+        {
+            if (connection.RequiresApproval ||
+                connection.Player.Id != new GamePlayerId(playerId))
+            {
+                return Forbid();
+            }
+
+            var game = connection.Game;
+            lock (game)
+            {
+                var question = game.Session.Board.Questions.SingleOrDefault(item =>
+                    item.SourceQuestionId == sourceQuestionId &&
+                    item.IsSpecial &&
+                    item.IsAllPlayerQuestion &&
+                    item.Status == RuntimeQuestionStatus.AwaitingWager);
+                if (question is null)
+                {
+                    return ConflictState(game, connection.Player);
+                }
+
+                if (question.AllPlayerWagers.Any(wager =>
+                        wager.PlayerId == connection.Player.Id))
+                {
+                    return new JsonResult(new
+                    {
+                        success = true,
+                        duplicate = true,
+                        state = CreatePlayerState(game, question, connection.Player)
+                    });
+                }
+
+                try
+                {
+                    game.Session.SubmitAllPlayerQuestionWager(
+                        sourceQuestionId,
+                        connection.Player.Id,
+                        amount);
+                }
+                catch (GameRuleViolationException exception)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        error = exception.Message,
+                        state = CreatePlayerState(game, question, connection.Player)
+                    });
+                }
+
+                game.MarkPersistenceChanged();
+                return new JsonResult(new
+                {
+                    success = true,
+                    duplicate = false,
+                    state = CreatePlayerState(game, question, connection.Player)
+                });
+            }
+        }
+        finally
+        {
+            sessionRegistry.DisconnectPlayer(validationConnectionId);
+        }
+    }
+
+    public IActionResult OnPostMinimumWager(
+        string code,
+        int sourceQuestionId,
+        Guid playerId)
+    {
+        var game = FindOwnedGame(code);
+        if (game is null)
+        {
+            return Forbid();
+        }
+
+        lock (game)
+        {
+            var question = game.Session.Board.Questions.SingleOrDefault(item =>
+                item.SourceQuestionId == sourceQuestionId &&
+                item.IsSpecial &&
+                item.IsAllPlayerQuestion &&
+                item.Status == RuntimeQuestionStatus.AwaitingWager);
+            var runtimePlayerId = new GamePlayerId(playerId);
+            if (question is null ||
+                game.Session.Players.All(player => player.Id != runtimePlayerId))
+            {
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            if (question.AllPlayerWagers.All(wager =>
+                    wager.PlayerId != runtimePlayerId))
+            {
+                var limits = game.Session.GetAllPlayerQuestionWagerLimits(
+                    sourceQuestionId,
+                    runtimePlayerId);
+                game.Session.SubmitAllPlayerQuestionWager(
+                    sourceQuestionId,
+                    runtimePlayerId,
+                    limits.Minimum);
+                game.MarkPersistenceChanged();
+            }
+
+            return new JsonResult(new
+            {
+                success = true,
+                state = CreateHostState(game, question)
+            });
+        }
+    }
+
+    public IActionResult OnPostStartQuestion(
+        string code,
+        int sourceQuestionId)
+    {
+        var game = FindOwnedGame(code);
+        if (game is null)
+        {
+            return Forbid();
+        }
+
+        lock (game)
+        {
+            try
+            {
+                var question = game.Session.StartAllPlayerQuestionAfterWagers(
+                    sourceQuestionId);
+                game.MarkPersistenceChanged();
+                return new JsonResult(new
+                {
+                    success = true,
+                    state = CreateHostState(game, question)
+                });
+            }
+            catch (GameRuleViolationException exception)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = exception.Message
+                });
+            }
+        }
+    }
+
+    public IActionResult OnPostEmptyAnswer(
+        string code,
+        int sourceQuestionId,
+        Guid playerId)
+    {
+        var game = FindOwnedGame(code);
+        if (game is null)
+        {
+            return Forbid();
+        }
+
+        lock (game)
+        {
+            var question = game.Session.Board.Questions.SingleOrDefault(item =>
+                item.SourceQuestionId == sourceQuestionId &&
+                item.PresentationType == QuestionPresentationType.AllPlayerText &&
+                item.Status is RuntimeQuestionStatus.Selected or
+                    RuntimeQuestionStatus.Active);
+            var runtimePlayerId = new GamePlayerId(playerId);
+            if (question is null ||
+                CurrentParticipants(game, question).All(player =>
+                    player.Id != runtimePlayerId))
+            {
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            var review = GetTextReview(game, question);
+            if (question.AnswerAttempts.All(attempt =>
+                    attempt.PlayerId != runtimePlayerId))
+            {
+                game.Session.AddQuestionAnswerHistoryEntry(
+                    sourceQuestionId,
+                    runtimePlayerId,
+                    isCorrect: false,
+                    value: 0,
+                    resolveQuestionIfAvailable: false);
+                review.Answers[runtimePlayerId] = "-";
+                game.MarkPersistenceChanged();
+            }
+
+            if (AllCurrentPlayersSubmitted(game, question))
+            {
+                review.Accepting = false;
+                GetAnsweringTimer(game, question).Stop();
+            }
+
+            return new JsonResult(new
+            {
+                success = true,
+                state = CreateHostState(game, question)
+            });
+        }
+    }
+
     public IActionResult OnPostSubmit(
         string code,
         Guid playerId,
@@ -190,7 +412,9 @@ public sealed class AllPlayerQuestionModel(
 
                 if (question is null ||
                     question.Status is not RuntimeQuestionStatus.Selected and
-                        not RuntimeQuestionStatus.Active)
+                        not RuntimeQuestionStatus.Active ||
+                    CurrentParticipants(game, question).All(player =>
+                        player.Id != connection.Player.Id))
                 {
                     return ConflictState(game, connection.Player);
                 }
@@ -242,7 +466,7 @@ public sealed class AllPlayerQuestionModel(
                     if (AllCurrentPlayersSubmitted(game, question))
                     {
                         review.Accepting = false;
-                        game.Session.Timer.Stop();
+                        GetAnsweringTimer(game, question).Stop();
                     }
                 }
                 else
@@ -273,9 +497,10 @@ public sealed class AllPlayerQuestionModel(
                         sourceQuestionId,
                         connection.Player.Id,
                         isCorrect,
-                        isCorrect
-                            ? GetCorrectScoreValue(question)
-                            : GetIncorrectScoreValue(question),
+                        GetScoreMagnitude(
+                            question,
+                            connection.Player.Id,
+                            isCorrect),
                         resolveQuestionIfAvailable: false);
 
                     if (AllCurrentPlayersSubmitted(game, question))
@@ -334,6 +559,7 @@ public sealed class AllPlayerQuestionModel(
             var review = GetTextReview(game, question);
             var runtimePlayerId = new GamePlayerId(playerId);
             if (review.Accepting ||
+                !AllCurrentPlayersSubmitted(game, question) ||
                 !review.Answers.ContainsKey(runtimePlayerId))
             {
                 return StatusCode(StatusCodes.Status409Conflict);
@@ -353,9 +579,10 @@ public sealed class AllPlayerQuestionModel(
                     attempt.Id,
                     runtimePlayerId,
                     isCorrect,
-                    isCorrect
-                        ? GetCorrectScoreValue(question)
-                        : GetIncorrectScoreValue(question));
+                    GetScoreMagnitude(
+                        question,
+                        runtimePlayerId,
+                        isCorrect));
                 review.JudgedPlayers.Add(runtimePlayerId);
                 game.MarkPersistenceChanged();
             }
@@ -397,6 +624,7 @@ public sealed class AllPlayerQuestionModel(
         .FirstOrDefault(question =>
             question.IsAllPlayerQuestion &&
             question.Status is
+                RuntimeQuestionStatus.AwaitingWager or
                 RuntimeQuestionStatus.Selected or
                 RuntimeQuestionStatus.Active or
                 RuntimeQuestionStatus.ShowingAnswer);
@@ -405,8 +633,9 @@ public sealed class AllPlayerQuestionModel(
         GameSessionRegistration game,
         RuntimeQuestion question)
     {
-        if (question.Status is not RuntimeQuestionStatus.Selected and
-            not RuntimeQuestionStatus.Active)
+        if (question.Status == RuntimeQuestionStatus.AwaitingWager ||
+            question.Status is not RuntimeQuestionStatus.Selected and
+                not RuntimeQuestionStatus.Active)
         {
             return;
         }
@@ -443,12 +672,7 @@ public sealed class AllPlayerQuestionModel(
 
         if (question.PresentationType == QuestionPresentationType.AllPlayerText)
         {
-            var review = GetTextReview(game, question);
-            review.Accepting = false;
-            if (!CurrentPlayersWithSubmissions(game, question).Any())
-            {
-                game.Session.ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
-            }
+            GetTextReview(game, question).Accepting = false;
         }
         else
         {
@@ -462,13 +686,27 @@ public sealed class AllPlayerQuestionModel(
         GameSessionRegistration game,
         RuntimeQuestion question)
     {
+        var isWagering = question.Status == RuntimeQuestionStatus.AwaitingWager;
         var isClosed = question.Status == RuntimeQuestionStatus.ShowingAnswer;
         var isText = question.PresentationType == QuestionPresentationType.AllPlayerText;
         var review = isText ? GetTextReview(game, question) : null;
+        var participants = CurrentParticipants(game, question).ToArray();
         var attemptsByPlayer = question.AnswerAttempts
             .ToDictionary(attempt => attempt.PlayerId);
-        var currentPlayers = game.Session.Players.ToArray();
-        var players = currentPlayers
+        var wagersByPlayer = question.AllPlayerWagers
+            .ToDictionary(wager => wager.PlayerId);
+        var allSubmitted = AllCurrentPlayersSubmitted(game, question);
+        var phase = isWagering
+            ? "wagering"
+            : isClosed
+                ? "closed"
+                : isText && review is { Accepting: false }
+                    ? allSubmitted
+                        ? "judging"
+                        : "awaitingMissing"
+                    : "answering";
+
+        var players = participants
             .Select(player =>
             {
                 attemptsByPlayer.TryGetValue(player.Id, out var attempt);
@@ -477,6 +715,7 @@ public sealed class AllPlayerQuestionModel(
                 {
                     id = player.Id.Value,
                     player.Name,
+                    wagerSubmitted = wagersByPlayer.ContainsKey(player.Id),
                     submitted = attempt is not null,
                     isJudged,
                     isCorrect = isClosed || isJudged ? attempt?.IsCorrect : null
@@ -484,10 +723,10 @@ public sealed class AllPlayerQuestionModel(
             })
             .ToArray();
 
-        var judgePlayer = isText && !isClosed && review is { Accepting: false }
-            ? currentPlayers.FirstOrDefault(player =>
+        var judgePlayer = phase == "judging"
+            ? participants.FirstOrDefault(player =>
                 attemptsByPlayer.ContainsKey(player.Id) &&
-                !review.JudgedPlayers.Contains(player.Id))
+                !review!.JudgedPlayers.Contains(player.Id))
             : null;
         object? judgeSubmission = null;
         if (judgePlayer is not null)
@@ -497,12 +736,12 @@ public sealed class AllPlayerQuestionModel(
             {
                 id = judgePlayer.Id.Value,
                 judgePlayer.Name,
-                answer = submittedAnswer ?? "—"
+                answer = submittedAnswer ?? "-"
             };
         }
 
-        var options = question.PresentationType ==
-            QuestionPresentationType.AllPlayerMultipleChoice
+        var options = phase == "answering" &&
+            question.PresentationType == QuestionPresentationType.AllPlayerMultipleChoice
                 ? ShuffleOptions(
                     CreateChoiceOptions(game, question),
                     HashCode.Combine(
@@ -515,13 +754,23 @@ public sealed class AllPlayerQuestionModel(
             active = true,
             sourceQuestionId = question.SourceQuestionId,
             mode = GetMode(question),
+            phase,
             isClosed,
-            isAccepting = isText ? review!.Accepting : !isClosed,
-            isJudging = judgeSubmission is not null,
-            answeredCount = currentPlayers.Count(player =>
+            isAccepting = phase == "answering" &&
+                (!isText || review!.Accepting),
+            isJudging = phase == "judging",
+            wageredCount = participants.Count(player =>
+                wagersByPlayer.ContainsKey(player.Id)),
+            answeredCount = participants.Count(player =>
                 attemptsByPlayer.ContainsKey(player.Id)),
-            playerCount = currentPlayers.Length,
-            remainingMilliseconds = GetRemainingMilliseconds(game, question, review),
+            judgedCount = review?.JudgedPlayers.Count ?? 0,
+            playerCount = participants.Length,
+            canStartQuestion = isWagering &&
+                participants.Length > 0 &&
+                participants.All(player => wagersByPlayer.ContainsKey(player.Id)),
+            remainingMilliseconds = phase == "answering"
+                ? GetRemainingMilliseconds(game, question, review)
+                : 0,
             options,
             judgeSubmission,
             players
@@ -533,20 +782,50 @@ public sealed class AllPlayerQuestionModel(
         RuntimeQuestion question,
         GamePlayer player)
     {
+        var isWagering = question.Status == RuntimeQuestionStatus.AwaitingWager;
+        var wager = question.AllPlayerWagers.SingleOrDefault(item =>
+            item.PlayerId == player.Id);
+        var participates = !question.IsSpecial ||
+            isWagering ||
+            wager is not null;
+        if (!participates)
+        {
+            return new { active = false };
+        }
+
         var attempt = question.AnswerAttempts.SingleOrDefault(item =>
             item.PlayerId == player.Id);
         var isClosed = question.Status == RuntimeQuestionStatus.ShowingAnswer;
         var isText = question.PresentationType == QuestionPresentationType.AllPlayerText;
         var review = isText ? GetTextReview(game, question) : null;
-        var isAccepting = !isClosed && (!isText || review!.Accepting);
+        var allSubmitted = AllCurrentPlayersSubmitted(game, question);
+        var phase = isWagering
+            ? "wagering"
+            : isClosed
+                ? "closed"
+                : isText && review is { Accepting: false }
+                    ? allSubmitted
+                        ? "judging"
+                        : "awaitingMissing"
+                    : "answering";
+        WagerLimits? wagerLimits = isWagering
+            ? game.Session.GetAllPlayerQuestionWagerLimits(
+                question.SourceQuestionId,
+                player.Id)
+            : null;
 
         return new
         {
             active = true,
             sourceQuestionId = question.SourceQuestionId,
             mode = GetMode(question),
-            options = question.PresentationType ==
-                QuestionPresentationType.AllPlayerMultipleChoice
+            phase,
+            hasWager = wager is not null,
+            minimumWager = wagerLimits?.Minimum,
+            maximumWager = wagerLimits?.Maximum,
+            options = phase == "answering" &&
+                question.PresentationType ==
+                    QuestionPresentationType.AllPlayerMultipleChoice
                     ? ShuffleOptions(
                         CreateChoiceOptions(game, question),
                         HashCode.Combine(
@@ -554,11 +833,14 @@ public sealed class AllPlayerQuestionModel(
                             player.Id.Value.GetHashCode()))
                     : Array.Empty<ChoiceOption>(),
             hasSubmitted = attempt is not null,
-            isAccepting,
-            isJudging = isText && !isClosed && !review!.Accepting,
+            isAccepting = phase == "answering" &&
+                (!isText || review!.Accepting),
+            isJudging = phase is "judging" or "awaitingMissing",
             isClosed,
             isCorrect = isClosed ? attempt?.IsCorrect : null,
-            remainingMilliseconds = GetRemainingMilliseconds(game, question, review)
+            remainingMilliseconds = phase == "answering"
+                ? GetRemainingMilliseconds(game, question, review)
+                : 0
         };
     }
 
@@ -604,7 +886,9 @@ public sealed class AllPlayerQuestionModel(
         RuntimeQuestion question,
         AllPlayerTextReviewState? review = null)
     {
-        if (question.Status == RuntimeQuestionStatus.ShowingAnswer ||
+        if (question.Status is
+                RuntimeQuestionStatus.AwaitingWager or
+                RuntimeQuestionStatus.ShowingAnswer ||
             review is { Accepting: false })
         {
             return 0;
@@ -625,36 +909,60 @@ public sealed class AllPlayerQuestionModel(
             ? game.Session.AnswerTimer
             : game.Session.Timer;
 
-    private static int GetCorrectScoreValue(RuntimeQuestion question) =>
-        question.IsSpecial
-            ? GetRequiredWagerAmount(question)
-            : question.Points;
+    private static int GetScoreMagnitude(
+        RuntimeQuestion question,
+        GamePlayerId playerId,
+        bool isCorrect)
+    {
+        if (!question.IsSpecial)
+        {
+            return isCorrect ? question.Points : 0;
+        }
 
-    private static int GetIncorrectScoreValue(RuntimeQuestion question) =>
-        question.IsSpecial
-            ? GetRequiredWagerAmount(question)
-            : 0;
-
-    private static int GetRequiredWagerAmount(RuntimeQuestion question) =>
-        question.Wager?.Amount ?? throw new GameRuleViolationException(
-            "An all-player wager question cannot score answers before its wager is accepted.");
+        return question.AllPlayerWagers.SingleOrDefault(wager =>
+                wager.PlayerId == playerId)?.Amount
+            ?? throw new GameRuleViolationException(
+                "An all-player wager question cannot score an answer before that player submits a wager.");
+    }
 
     private static string GetMode(RuntimeQuestion question) =>
         question.PresentationType == QuestionPresentationType.AllPlayerMultipleChoice
             ? "multipleChoice"
             : "text";
 
+    private static IReadOnlyList<GamePlayer> CurrentParticipants(
+        GameSessionRegistration game,
+        RuntimeQuestion question)
+    {
+        if (!question.IsSpecial ||
+            question.Status == RuntimeQuestionStatus.AwaitingWager)
+        {
+            return game.Session.Players.ToArray();
+        }
+
+        var wagerPlayerIds = question.AllPlayerWagers
+            .Select(wager => wager.PlayerId)
+            .ToHashSet();
+        return game.Session.Players
+            .Where(player => wagerPlayerIds.Contains(player.Id))
+            .ToArray();
+    }
+
     private static bool AllCurrentPlayersSubmitted(
         GameSessionRegistration game,
-        RuntimeQuestion question) =>
-        game.Session.Players.Count > 0 &&
-        game.Session.Players.All(player =>
-            question.AnswerAttempts.Any(attempt => attempt.PlayerId == player.Id));
+        RuntimeQuestion question)
+    {
+        var participants = CurrentParticipants(game, question);
+        return participants.Count > 0 &&
+            participants.All(player => question.AnswerAttempts.Any(attempt =>
+                attempt.PlayerId == player.Id));
+    }
 
     private static IEnumerable<GamePlayer> CurrentPlayersWithSubmissions(
         GameSessionRegistration game,
-        RuntimeQuestion question) => game.Session.Players.Where(player =>
-        question.AnswerAttempts.Any(attempt => attempt.PlayerId == player.Id));
+        RuntimeQuestion question) => CurrentParticipants(game, question)
+        .Where(player => question.AnswerAttempts.Any(attempt =>
+            attempt.PlayerId == player.Id));
 
     private static bool AllSubmittedCurrentPlayersJudged(
         GameSessionRegistration game,
@@ -664,6 +972,17 @@ public sealed class AllPlayerQuestionModel(
         var submittedPlayers = CurrentPlayersWithSubmissions(game, question).ToArray();
         return submittedPlayers.Length > 0 &&
             submittedPlayers.All(player => review.JudgedPlayers.Contains(player.Id));
+    }
+
+    private GameSessionRegistration? FindOwnedGame(string code)
+    {
+        var game = sessionRegistry.Find(code);
+        var hostId = currentHost.Id;
+        return game is not null &&
+            !string.IsNullOrWhiteSpace(hostId) &&
+            string.Equals(game.HostId, hostId, StringComparison.Ordinal)
+                ? game
+                : null;
     }
 
     private static AllPlayerTextReviewState GetTextReview(

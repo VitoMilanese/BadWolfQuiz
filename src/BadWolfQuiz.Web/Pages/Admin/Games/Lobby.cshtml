@@ -487,7 +487,8 @@
                 </div>
                 }
 
-                @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
+                @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager &&
+                    !Model.CurrentQuestion.IsAllPlayerQuestion)
                 {
                     var wagerPlayer = Model.Players.First(
                         player => player.Id == Model.CurrentQuestion.SelectedByPlayerId);
@@ -572,6 +573,14 @@
                             </button>
                         </form>
                     </div>
+                }
+                else if (Model.CurrentQuestion.Status ==
+                    BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager &&
+                    Model.CurrentQuestion.IsAllPlayerQuestion)
+                {
+                    <section class="all-player-wager-waiting">
+                        <h2>@Localizer["FinalQuestion_WaitingForWagers"]</h2>
+                    </section>
                 }
                 else if (Model.CurrentQuestion.Wager is not null)
                 {
