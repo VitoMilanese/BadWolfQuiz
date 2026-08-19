@@ -216,8 +216,11 @@
         (() => {
             const backToGame = document.querySelector(
                 "[data-answer-history-back-to-game]");
+            let backNavigationStarted = false;
             document.addEventListener("keydown", event => {
                 if (event.key !== "Escape" ||
+                    event.repeat ||
+                    backNavigationStarted ||
                     event.defaultPrevented ||
                     event.ctrlKey ||
                     event.altKey ||
@@ -228,7 +231,10 @@
 
                 event.preventDefault();
                 event.stopPropagation();
-                backToGame?.click();
+                if (backToGame instanceof HTMLAnchorElement) {
+                    backNavigationStarted = true;
+                    backToGame.click();
+                }
             });
 
             const form = document.querySelector(".answer-history-add-form");

@@ -330,6 +330,23 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
     }
 
     [Fact]
+    public void Host_progress_shows_recorded_score_delta_after_result()
+    {
+        var root = FindRepositoryRoot();
+        var endpoint = Read(root,
+            "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+
+        Assert.Contains(
+            "scoreDelta = isClosed || isJudged ? attempt?.ScoreDelta : null",
+            endpoint);
+        Assert.Contains("player.scoreDelta", script);
+        Assert.Contains("formatScoreDelta", script);
+        Assert.Contains("scoreDelta > 0 ? ` +${scoreDelta}`", script);
+    }
+
+    [Fact]
     public void Answer_history_escape_returns_to_the_live_game()
     {
         var root = FindRepositoryRoot();
@@ -338,8 +355,10 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
 
         Assert.Contains("data-answer-history-back-to-game", page);
         Assert.Contains("event.key !== \"Escape\"", page);
+        Assert.Contains("event.repeat", page);
+        Assert.Contains("backNavigationStarted", page);
         Assert.Contains("document.querySelector(\"dialog[open]\")", page);
-        Assert.Contains("backToGame?.click()", page);
+        Assert.Contains("backToGame.click()", page);
     }
 
     [Fact]

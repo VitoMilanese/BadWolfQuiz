@@ -681,7 +681,8 @@ public sealed class AllPlayerQuestionModel(
                     wagerSubmitted = wagersByPlayer.ContainsKey(player.Id),
                     submitted = attempt is not null,
                     isJudged,
-                    isCorrect = isClosed || isJudged ? attempt?.IsCorrect : null
+                    isCorrect = isClosed || isJudged ? attempt?.IsCorrect : null,
+                    scoreDelta = isClosed || isJudged ? attempt?.ScoreDelta : null
                 };
             })
             .ToArray();

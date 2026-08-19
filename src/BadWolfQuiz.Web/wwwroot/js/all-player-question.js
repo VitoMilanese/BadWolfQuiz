@@ -1269,9 +1269,19 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 player.wagerSubmitted,
                 player.submitted,
                 player.isJudged,
-                player.isCorrect
+                player.isCorrect,
+                player.scoreDelta
             ])
         });
+
+        const formatScoreDelta = value => {
+            const scoreDelta = Number(value);
+            if (!Number.isFinite(scoreDelta)) {
+                return "";
+            }
+
+            return scoreDelta > 0 ? ` +${scoreDelta}` : ` ${scoreDelta}`;
+        };
 
         const renderProgress = (board, state) => {
             let progress = board.querySelector(".all-player-host-progress");
@@ -1323,15 +1333,19 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                             })));
                     }
                 } else {
-                    playerState.textContent = state.isClosed || player.isJudged
-                        ? player.submitted
+                    if (state.isClosed || player.isJudged) {
+                        const result = player.submitted
                             ? player.isCorrect
                                 ? text.correct
                                 : text.incorrect
-                            : text.noAnswer
-                        : player.submitted
+                            : text.noAnswer;
+                        playerState.textContent =
+                            `${result}${formatScoreDelta(player.scoreDelta)}`;
+                    } else {
+                        playerState.textContent = player.submitted
                             ? text.answered
                             : text.waiting;
+                    }
                     item.append(name, playerState);
                     if (!player.submitted &&
                         state.phase === "answering") {
