@@ -66,6 +66,12 @@ public sealed class ContentEditorResetRegressionTests
         Assert.Contains("#description-editor-back", bootstrap, StringComparison.Ordinal);
         Assert.Contains("/css/editor-reset-button.css", bootstrap, StringComparison.Ordinal);
         Assert.Contains("/js/editor-reset-button.js", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("a.brand[href]", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("new URL(\"/\", window.location.origin).href", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("initializeEditorBrandNavigation", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("editorBrandNavigationProxy", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("proxyLink.click()", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("onLoad: initializeEditorBrandNavigation", bootstrap, StringComparison.Ordinal);
 
         Assert.Contains("button.type = \"button\"", script, StringComparison.Ordinal);
         Assert.Contains("data-editor-reset", script, StringComparison.Ordinal);
