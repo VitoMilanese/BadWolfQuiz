@@ -6556,13 +6556,14 @@ body.youtube-auto-expanded-open {
     .host-game-board
         .current-question-summary:has(.all-player-host-choice-preview)
         > .question-presentation {
+        --all-player-choice-action-width: clamp(15rem, 21vw, 20rem);
         position: relative;
     }
 
     .host-game-board
         .current-question-summary:has(.all-player-host-choice-preview)
         > .question-presentation > .game-content-blocks {
-        padding-bottom: 6.75rem;
+        padding-bottom: 3.5rem;
     }
 
     .host-game-board
@@ -6570,20 +6571,22 @@ body.youtube-auto-expanded-open {
         .all-player-host-choice-preview {
         position: absolute;
         z-index: 35;
-        right: auto;
+        right: 0.5rem;
         bottom: 0;
-        left: 50%;
-        width: min(84rem, calc(100% - 1rem));
+        left: auto;
+        width: min(
+            84rem,
+            calc(100% - var(--all-player-choice-action-width) - 1.5rem));
         max-height: min(48dvh, 25rem);
         margin: 0;
         padding: 3.2rem 0.75rem 0.75rem;
-        overflow: visible;
+        overflow: hidden;
         border: 1px solid var(--line);
         border-bottom: 0;
         border-radius: 0.9rem 0.9rem 0 0;
         background: var(--panel-glass);
         box-shadow: 0 -18px 38px rgb(0 0 0 / 28%);
-        transform: translate(-50%, calc(100% - 2.75rem));
+        transform: translateY(calc(100% - 2.75rem));
         transition: transform 180ms ease, box-shadow 180ms ease;
     }
 
@@ -6593,11 +6596,18 @@ body.youtube-auto-expanded-open {
         position: absolute;
         z-index: 36;
         right: auto;
-        bottom: 3.15rem;
-        left: 50%;
+        bottom: 0.15rem;
+        left: 0.5rem;
+        width: var(--all-player-choice-action-width);
         margin: 0;
-        transform: translateX(-50%);
+        transform: none;
         white-space: nowrap;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        > .question-presentation > .all-player-host-close-form > .button {
+        width: 100%;
     }
 
     .host-game-board
@@ -6612,6 +6622,7 @@ body.youtube-auto-expanded-open {
         display: grid;
         place-items: center;
         border-bottom: 1px solid var(--line);
+        border-radius: 0.85rem 0.85rem 0 0;
         background: var(--panel-2);
         color: var(--text);
         font-size: 1.2rem;
@@ -6629,7 +6640,7 @@ body.youtube-auto-expanded-open {
         .current-question-summary:has(.all-player-host-choice-preview)
         .all-player-host-choice-preview:focus-within {
         box-shadow: 0 -20px 44px rgb(0 0 0 / 36%);
-        transform: translate(-50%, 0);
+        transform: translateY(0);
     }
 
     .host-game-board
@@ -6707,6 +6718,7 @@ body.youtube-auto-expanded-open {
         display: grid;
         place-items: center;
         border-right: 1px solid var(--line);
+        border-radius: 0.85rem 0 0 0.85rem;
         background: var(--panel-2);
         color: var(--text);
         font-size: 1.15rem;
@@ -6789,10 +6801,14 @@ body.youtube-auto-expanded-open {
 }
 
 .current-question-summary.wager-mode:has(.all-player-wager-waiting) {
+    width: 100%;
+    max-width: none;
     flex: 1 1 auto;
     height: auto;
     min-height: 0;
     max-height: none;
+    margin: 0;
+    box-sizing: border-box;
     grid-template-rows: auto minmax(0, 1fr) auto;
     align-content: stretch;
     justify-items: stretch;

@@ -178,15 +178,20 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("/* All-player host hover drawers */", styles);
         Assert.Contains("@media (hover: hover)", styles);
         Assert.Contains(
-            "translate(-50%, calc(100% - 2.75rem))",
+            "translateY(calc(100% - 2.75rem))",
             styles);
         Assert.Contains(
             "translateX(calc(100% - 2.75rem))",
             styles);
         Assert.Contains(".all-player-host-choice-preview:hover", styles);
         Assert.Contains(".all-player-host-progress:hover", styles);
-        Assert.Contains("bottom: 3.15rem", styles);
-        Assert.Contains("padding-bottom: 6.75rem", styles);
+        Assert.Contains("--all-player-choice-action-width", styles);
+        Assert.Contains("right: 0.5rem", styles);
+        Assert.Contains("left: 0.5rem", styles);
+        Assert.Contains("bottom: 0.15rem", styles);
+        Assert.Contains("padding-bottom: 3.5rem", styles);
+        Assert.Contains("overflow: hidden", styles);
+        Assert.Contains("border-radius: 0.85rem 0.85rem 0 0", styles);
         Assert.Contains("getProgressRenderKey", script);
         Assert.Contains("progress.dataset.renderKey", script);
         Assert.Contains("renderPrimaryAction", script);
@@ -236,6 +241,9 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("\"-\"", endpoint);
         Assert.Contains("event.stopPropagation()", script);
         Assert.Contains("getProgressRenderKey", script);
+        Assert.Contains("getTextReviewRenderKey", script);
+        Assert.Contains("review.dataset.renderKey", script);
+        Assert.Contains("review.isConnected", script);
         Assert.DoesNotContain("progress.appendChild(judge)", script);
         Assert.Contains("all-player-text-reviewing", styles);
     }

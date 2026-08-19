@@ -1398,19 +1398,42 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             target.appendChild(button);
         };
 
+        const getTextReviewRenderKey = state => JSON.stringify({
+            sourceQuestionId: state.sourceQuestionId,
+            phase: state.phase,
+            judgedCount: state.judgedCount,
+            answeredCount: state.answeredCount,
+            judgeSubmission: state.judgeSubmission
+                ? [
+                    state.judgeSubmission.id,
+                    state.judgeSubmission.name,
+                    state.judgeSubmission.answer ?? "-"
+                ]
+                : null
+        });
+
         const renderTextReview = (board, state) => {
-            removeHostReview(board);
+            let review = board.querySelector(".all-player-host-review");
             if (state.phase !== "judging" || !state.judgeSubmission) {
+                review?.remove();
                 return;
             }
+
+            const renderKey = getTextReviewRenderKey(state);
+            if (review instanceof HTMLElement &&
+                review.dataset.renderKey === renderKey) {
+                return;
+            }
+            review?.remove();
 
             const target = board.querySelector(".question-presentation");
             if (!target) {
                 return;
             }
 
-            const review = document.createElement("section");
+            review = document.createElement("section");
             review.className = "all-player-host-review final-judging-list";
+            review.dataset.renderKey = renderKey;
             const progress = document.createElement("p");
             progress.className = "dialog-warning";
             progress.textContent = text.judgingProgress(
@@ -1432,16 +1455,34 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             correct.type = "button";
             correct.className = "button judgment-correct-button";
             correct.textContent = text.correct;
-            correct.addEventListener("click", () => {
-                void postJudgment(state, true);
-            });
             const incorrect = document.createElement("button");
             incorrect.type = "button";
             incorrect.className = "button judgment-incorrect-button";
             incorrect.textContent = text.incorrect;
-            incorrect.addEventListener("click", () => {
-                void postJudgment(state, false);
-            });
+
+            const submitJudgment = isCorrect => event => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (hostRequestInFlight) {
+                    return;
+                }
+
+                correct.disabled = true;
+                incorrect.disabled = true;
+                void postJudgment(state, isCorrect).finally(() => {
+                    if (review.isConnected) {
+                        correct.disabled = false;
+                        incorrect.disabled = false;
+                    }
+                });
+            };
+            for (const button of [correct, incorrect]) {
+                button.addEventListener("pointerdown", event => {
+                    event.stopPropagation();
+                });
+            }
+            correct.addEventListener("click", submitJudgment(true));
+            incorrect.addEventListener("click", submitJudgment(false));
             actions.append(correct, incorrect);
             review.append(progress, answer, actions);
             target.appendChild(review);

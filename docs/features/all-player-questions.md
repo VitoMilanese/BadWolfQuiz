@@ -46,7 +46,7 @@ For multiple choice, closing answering reveals the answer presentation. For text
 
 Each player receives a stable shuffled order derived from the question and player identifiers. The host receives a separate stable shuffled order while the question is open.
 
-The host question page renders the shuffled choices on the server so the correct layout is present on the first frame, including image choices. Correctness is not highlighted during answering. On hover-capable desktop host displays, those choices stay in a collapsed bottom drawer and expand on hover or keyboard focus, while the submitted/waiting player list uses a matching right-side drawer. The host's **Proceed to answer review** button is a stable sibling immediately above the choices drawer, so hovering or clicking the button does not expand or move the drawer. Touch layouts keep the information directly visible because hover is unavailable.
+The host question page renders the shuffled choices on the server so the correct layout is present on the first frame, including image choices. Correctness is not highlighted during answering. On hover-capable desktop host displays, those choices stay in a collapsed bottom drawer and expand on hover or keyboard focus, while the submitted/waiting player list uses a matching right-side drawer. The host's **Proceed to answer review** button stays in a dedicated lower-left area beside the choices drawer, so the expanded drawer cannot cover it and hovering the button does not open the drawer. Drawer headers are clipped to the same rounded corners as their outer frames. Touch layouts keep the information directly visible because hover is unavailable.
 
 The editor answer preview, live answer page, and resolved-question answer preview use the configured answer order so the first option can be marked as correct. They render:
 
@@ -60,7 +60,7 @@ Image endpoints return inline media responses so they can be displayed by `<img>
 
 ## Text judging and scoring
 
-Text submissions are never checked automatically. The right-side player drawer shows only submitted/waiting status and never displays answer text. After answering is locked and every player has a recorded submission, the host reviews one answer at a time in the main question area, matching the Final Question judging flow. For an AFK player, the host can record `-` with the empty-answer action in the drawer before judging begins.
+Text submissions are never checked automatically. The right-side player drawer shows only submitted/waiting status and never displays answer text. After answering is locked and every player has a recorded submission, the host reviews one answer at a time in the main question area, matching the Final Question judging flow. The current review card and its Correct/Incorrect controls keep a stable DOM identity between polling updates so a normal click cannot be lost. For an AFK player, the host can record `-` with the empty-answer action in the drawer before judging begins.
 
 For a normal all-player question, scoring is the same for both modes:
 
