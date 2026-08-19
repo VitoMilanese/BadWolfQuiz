@@ -997,6 +997,8 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             const preview = document.createElement("section");
             preview.className = "all-player-host-choice-preview";
             preview.dataset.allPlayerClientPreview = "true";
+            preview.tabIndex = 0;
+            preview.setAttribute("aria-label", text.answerOptions);
             const grid = document.createElement("div");
             grid.className = "all-player-host-choice-grid";
             for (const option of state.options ?? []) {
@@ -1067,6 +1069,10 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             heading.textContent = text.progress(
                 state.answeredCount ?? 0,
                 state.playerCount ?? 0);
+            progress.tabIndex = 0;
+            progress.setAttribute(
+                "aria-label",
+                heading.textContent ?? text.title);
             const list = document.createElement("ul");
             list.className = "all-player-answer-progress";
 

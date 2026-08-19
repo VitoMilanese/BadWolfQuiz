@@ -46,9 +46,9 @@ For multiple choice, closing answering reveals the answer presentation. For text
 
 Each player receives a stable shuffled order derived from the question and player identifiers. The host receives a separate stable shuffled order while the question is open.
 
-The host question page renders the shuffled choices on the server so the correct layout is present on the first frame, including image choices. Correctness is not highlighted during answering.
+The host question page renders the shuffled choices on the server so the correct layout is present on the first frame, including image choices. Correctness is not highlighted during answering. On hover-capable desktop host displays, those choices stay in a collapsed bottom drawer and expand on hover or keyboard focus, while the submitted/waiting player list uses a matching right-side drawer. Touch layouts keep the information directly visible because hover is unavailable.
 
-The live answer page and resolved-question answer preview use the configured answer order so the first option can be marked as correct. They render:
+The editor answer preview, live answer page, and resolved-question answer preview use the configured answer order so the first option can be marked as correct. They render:
 
 - two options as one row and two columns;
 - three or four options as a two-column grid;

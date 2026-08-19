@@ -70,6 +70,10 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
             "src/BadWolfQuiz.Web/wwwroot/css/site.css");
         var script = Read(root,
             "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+        var editor = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Quizzes/QuestionEditor.cshtml");
+        var editorPreview = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Shared/_QuestionPreviewModal.cshtml");
 
         Assert.Contains("data-all-player-server-preview", host);
         Assert.Contains("GetAllPlayerHostChoiceBlocks", host);
@@ -92,6 +96,42 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("justify-items: stretch", script);
         Assert.DoesNotContain("grid-auto-rows: minmax(0, 1fr)", script);
         Assert.Contains("height: min(14vh, 9rem)", script);
+        Assert.Contains("isAllPlayerChoiceAnswerPreview", editor);
+        Assert.Contains("all-player-answer-option-correct", editor);
+        Assert.Contains("all-player-answer-option-incorrect", editor);
+        Assert.Contains(
+            ".question-preview-content.all-player-answer-grid",
+            editorPreview);
+        Assert.Contains(".question-preview-image", editorPreview);
+    }
+
+    [Fact]
+    public void Host_answering_uses_hover_drawers_for_choices_and_progress()
+    {
+        var root = FindRepositoryRoot();
+        var host = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml");
+        var styles = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/css/site.css");
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+
+        Assert.Contains("data-all-player-server-preview", host);
+        Assert.Contains("tabindex=", host);
+        Assert.Contains("preview.tabIndex = 0", script);
+        Assert.Contains("progress.tabIndex = 0", script);
+        Assert.Contains("/* All-player host hover drawers */", styles);
+        Assert.Contains("@media (hover: hover)", styles);
+        Assert.Contains(
+            "translate(-50%, calc(100% - 2.75rem))",
+            styles);
+        Assert.Contains(
+            "translateX(calc(100% - 2.75rem))",
+            styles);
+        Assert.Contains(".all-player-host-choice-preview:hover", styles);
+        Assert.Contains(".all-player-host-progress:hover", styles);
+        Assert.Contains("▦", styles);
+        Assert.Contains("👥", styles);
     }
 
     [Fact]

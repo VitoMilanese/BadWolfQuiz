@@ -729,7 +729,9 @@
                         @if (isAllPlayerMultipleChoiceQuestion)
                         {
                             <section class="all-player-host-choice-preview"
-                                     data-all-player-server-preview>
+                                     data-all-player-server-preview
+                                     tabindex="0"
+                                     aria-label="@Localizer["QuestionType_AllPlayerMultipleChoice"]">
                                 <div class="all-player-host-choice-grid">
                                     @foreach (var optionBlock in
                                         Model.GetAllPlayerHostChoiceBlocks(

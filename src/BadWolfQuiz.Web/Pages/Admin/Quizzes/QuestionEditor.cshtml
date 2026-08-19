@@ -568,11 +568,18 @@
             const isFourCluesPreview =
                 previewType === "question" &&
                 presentationTypeSelect?.value === "1";
+            const isAllPlayerChoiceAnswerPreview =
+                previewType === "answer" &&
+                presentationTypeSelect?.value === "3";
 
             questionPreviewContent.classList.toggle(
                 "four-clue-grid",
                 isFourCluesPreview);
+            questionPreviewContent.classList.toggle(
+                "all-player-answer-grid",
+                isAllPlayerChoiceAnswerPreview);
 
+            let answerOptionIndex = 0;
             collection
                 .querySelectorAll(".content-block-card")
                 .forEach(card => {
@@ -580,6 +587,15 @@
                         createContentBlockPreview(card);
 
                     if (blockPreview) {
+                        if (isAllPlayerChoiceAnswerPreview) {
+                            blockPreview.classList.add(
+                                "all-player-answer-option",
+                                answerOptionIndex === 0
+                                    ? "all-player-answer-option-correct"
+                                    : "all-player-answer-option-incorrect");
+                            answerOptionIndex += 1;
+                        }
+
                         questionPreviewContent.appendChild(
                             blockPreview);
                     }

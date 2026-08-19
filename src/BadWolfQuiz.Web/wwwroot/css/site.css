@@ -6542,3 +6542,186 @@ body.youtube-auto-expanded-open {
     max-height: min(14vh, 9rem);
     object-fit: contain;
 }
+
+
+
+/* All-player host hover drawers */
+@media (hover: hover) and (pointer: fine) and (min-width: 801px) {
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        > .question-presentation {
+        position: relative;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        > .question-presentation > .game-content-blocks {
+        padding-bottom: 3rem;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview {
+        position: absolute;
+        z-index: 35;
+        right: auto;
+        bottom: 0;
+        left: 50%;
+        width: min(84rem, calc(100% - 1rem));
+        max-height: min(48dvh, 25rem);
+        margin: 0;
+        padding: 3.2rem 0.75rem 0.75rem;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-bottom: 0;
+        border-radius: 0.9rem 0.9rem 0 0;
+        background: var(--panel-glass);
+        box-shadow: 0 -18px 38px rgb(0 0 0 / 28%);
+        transform: translate(-50%, calc(100% - 2.75rem));
+        transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview::before {
+        content: "▦";
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 2.75rem;
+        display: grid;
+        place-items: center;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel-2);
+        color: var(--text);
+        font-size: 1.2rem;
+        line-height: 1;
+        pointer-events: none;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview:hover,
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview:focus,
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview:focus-within {
+        box-shadow: 0 -20px 44px rgb(0 0 0 / 36%);
+        transform: translate(-50%, 0);
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-preview:focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: -2px;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-grid {
+        max-height: calc(min(48dvh, 25rem) - 4rem);
+        gap: clamp(0.45rem, 0.8vw, 0.7rem);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-right: 2px;
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-option {
+        min-height: clamp(4rem, 8vh, 6.5rem);
+        padding: clamp(0.55rem, 1vw, 0.85rem);
+        font-size: clamp(1.2rem, 2vw, 2.25rem);
+    }
+
+    .host-game-board
+        .current-question-summary:has(.all-player-host-choice-preview)
+        .all-player-host-choice-option img {
+        height: min(16vh, 8rem);
+        max-height: min(16vh, 8rem);
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary {
+        position: relative;
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress {
+        position: absolute;
+        z-index: 40;
+        top: clamp(3.25rem, 8vh, 5rem);
+        right: 0;
+        bottom: clamp(3.5rem, 7vh, 4.75rem);
+        width: min(24rem, calc(100% - 1rem));
+        max-width: none;
+        grid-template-columns: 1fr;
+        align-content: start;
+        gap: 0.5rem;
+        margin: 0;
+        padding: 0.65rem 0.65rem 0.65rem 3.25rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+        border: 1px solid var(--line);
+        border-right: 0;
+        border-radius: 0.9rem 0 0 0.9rem;
+        background: var(--panel-glass);
+        box-shadow: -18px 0 38px rgb(0 0 0 / 28%);
+        transform: translateX(calc(100% - 2.75rem));
+        transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress::before {
+        content: "👥";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 2.75rem;
+        display: grid;
+        place-items: center;
+        border-right: 1px solid var(--line);
+        background: var(--panel-2);
+        color: var(--text);
+        font-size: 1.15rem;
+        line-height: 1;
+        pointer-events: none;
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress:hover,
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress:focus,
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress:focus-within {
+        box-shadow: -20px 0 44px rgb(0 0 0 / 36%);
+        transform: translateX(0);
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-host-progress:focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: -2px;
+    }
+
+    .host-game-board.all-player-question-answering
+        .current-question-summary .all-player-answer-progress {
+        grid-template-columns: 1fr;
+        align-content: start;
+        overflow: visible;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .all-player-host-choice-preview,
+    .all-player-host-progress {
+        transition: none !important;
+    }
+}
