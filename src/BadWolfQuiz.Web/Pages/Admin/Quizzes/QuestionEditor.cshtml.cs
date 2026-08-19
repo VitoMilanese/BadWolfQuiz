@@ -154,6 +154,11 @@ public sealed class QuestionEditorModel(
             }
         }
 
+        if (Input.PresentationType == QuestionPresentationType.HostMultipleChoice)
+        {
+            ValidateHostMultipleChoiceAnswerOptions();
+        }
+
         if (!ModelState.IsValid)
         {
             if (IsAjaxRequest())
@@ -176,13 +181,17 @@ public sealed class QuestionEditorModel(
         var isAllPlayer = Input.PresentationType is
             QuestionPresentationType.AllPlayerText or
             QuestionPresentationType.AllPlayerMultipleChoice;
+        var isHostMultipleChoice =
+            Input.PresentationType == QuestionPresentationType.HostMultipleChoice;
 
         question.PresentationType = Input.PresentationType;
         question.IsSpecial =
-            Input.PresentationType != QuestionPresentationType.FourClues &&
+            Input.PresentationType is not
+                QuestionPresentationType.FourClues and not
+                QuestionPresentationType.HostMultipleChoice &&
             Input.IsSpecial;
         question.ExcludeFromRandomWagerSelection =
-            Input.ExcludeFromRandomWagerSelection;
+            isHostMultipleChoice || Input.ExcludeFromRandomWagerSelection;
         question.BuzzModeOverride = question.IsSpecial || isAllPlayer
             ? BuzzActivationMode.Disabled
             : Input.BuzzModeOverride;
@@ -324,14 +333,29 @@ public sealed class QuestionEditorModel(
             }
 
             entity.SortOrder = inputBlock.SortOrder;
-            entity.BlockType = inputBlock.BlockType;
+            entity.BlockType = isHostMultipleChoice
+                ? ContentBlockType.Text
+                : inputBlock.BlockType;
             entity.TextContent = inputBlock.TextContent?.Trim();
-            entity.TopCaption = inputBlock.TopCaption?.Trim();
-            entity.BottomCaption = inputBlock.BottomCaption?.Trim();
-            entity.ExternalUrl = inputBlock.ExternalUrl?.Trim();
-            entity.AudioOnly = inputBlock.AudioOnly;
-            entity.Autoplay = inputBlock.Autoplay &&
+            entity.TopCaption = isHostMultipleChoice
+                ? null
+                : inputBlock.TopCaption?.Trim();
+            entity.BottomCaption = isHostMultipleChoice
+                ? null
+                : inputBlock.BottomCaption?.Trim();
+            entity.ExternalUrl = isHostMultipleChoice
+                ? null
+                : inputBlock.ExternalUrl?.Trim();
+            entity.AudioOnly = !isHostMultipleChoice && inputBlock.AudioOnly;
+            entity.Autoplay = !isHostMultipleChoice &&
+                inputBlock.Autoplay &&
                 inputBlock.BlockType is ContentBlockType.Audio or ContentBlockType.Video or ContentBlockType.YouTube;
+            if (isHostMultipleChoice)
+            {
+                entity.FileData = null;
+                entity.FileContentType = null;
+                entity.FileName = null;
+            }
         }
 
         await db.SaveChangesAsync(cancellationToken);
@@ -362,6 +386,40 @@ public sealed class QuestionEditorModel(
 
         TempData["SuccessMessage"] = localizer["Message_QuestionSaved"].Value;
         return RedirectToPage(new { id = Input.Id });
+    }
+
+    private void ValidateHostMultipleChoiceAnswerOptions()
+    {
+        var options = Input.AnswerBlocks ?? [];
+        if (options.Count is < 4 or > 10)
+        {
+            ModelState.AddModelError(
+                $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
+                "Multiple-choice questions require between 4 and 10 answer options.");
+            return;
+        }
+
+        if (options.Any(option =>
+                option.BlockType != ContentBlockType.Text ||
+                string.IsNullOrWhiteSpace(option.TextContent) ||
+                option.TextContent.Trim().Length > 20))
+        {
+            ModelState.AddModelError(
+                $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
+                "Every answer option must be non-empty text with at most 20 characters.");
+            return;
+        }
+
+        var normalizedOptions = options
+            .Select(option => option.TextContent!.Trim())
+            .ToArray();
+        if (normalizedOptions.Distinct(StringComparer.OrdinalIgnoreCase).Count() !=
+            normalizedOptions.Length)
+        {
+            ModelState.AddModelError(
+                $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
+                "Multiple-choice answer options must be unique.");
+        }
     }
 
     private bool IsAjaxRequest() => string.Equals(
