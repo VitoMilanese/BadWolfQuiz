@@ -903,6 +903,9 @@
                 if (transitionToken) {
                     sessionStorage.removeItem(transitionStorageKey);
                 }
+
+                document.dispatchEvent(
+                    new Event("badwolf:player-session-ready"));
             };
 
             let transitionReloadStarted = false;
@@ -1161,6 +1164,8 @@
             connection.on("RejoinApproved", () => {
                 rejoinWarning.hidden = true;
                 updateWarning();
+                document.dispatchEvent(
+                    new Event("badwolf:player-session-ready"));
             });
 
             connection.on("RemovedFromGame", () => {

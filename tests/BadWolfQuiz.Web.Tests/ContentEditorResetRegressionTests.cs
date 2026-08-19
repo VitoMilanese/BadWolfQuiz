@@ -56,6 +56,11 @@ public sealed class ContentEditorResetRegressionTests
         Assert.Contains("final-question-editor-back-link", finalQuestionEditor, StringComparison.Ordinal);
         Assert.Contains("description-editor-back", descriptionEditor, StringComparison.Ordinal);
         Assert.Contains("Button_NextQuestion", questionEditor, StringComparison.Ordinal);
+        Assert.Contains("[data-editor-unsaved-dialog][open]", questionEditor, StringComparison.Ordinal);
+        Assert.Contains("backLink.click()", questionEditor, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.location.assign(backLink.href)", questionEditor, StringComparison.Ordinal);
+        Assert.Contains("[data-editor-unsaved-dialog][open]", finalQuestionEditor, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.location.assign(backLink.href)", finalQuestionEditor, StringComparison.Ordinal);
 
         Assert.Contains("#question-editor-back-link", bootstrap, StringComparison.Ordinal);
         Assert.Contains("#final-question-editor-back-link", bootstrap, StringComparison.Ordinal);

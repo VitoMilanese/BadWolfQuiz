@@ -110,6 +110,7 @@
         }
     };
     const text = stringsByCulture[culture] ?? stringsByCulture.en;
+    let playerPollNow = null;
 
     const style = document.createElement("style");
     style.id = "all-player-question-styles";
@@ -230,14 +231,20 @@
 .all-player-host-choice-preview {
     display: grid;
     gap: 0.65rem;
-    margin-top: 1rem;
+    width: min(100%, 84rem);
+    margin: 1rem auto 0;
+    align-self: stretch;
+    justify-self: stretch;
 }
 
 .all-player-host-choice-option {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.8rem;
+    width: 100%;
+    min-height: clamp(5rem, 10vh, 8rem);
+    padding: clamp(0.8rem, 1.6vw, 1.35rem);
+    font-size: clamp(1.4rem, 2.6vw, 3rem);
     border: 1px solid var(--line);
     border-radius: 0.75rem;
     background: var(--panel-2);
@@ -868,6 +875,16 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             }
         };
 
+        playerPollNow = () => {
+            window.clearTimeout(pollHandle);
+            if (!lobby.isConnected || !panel.isConnected) {
+                delete lobby.dataset.allPlayerClientInitialized;
+                initializePlayer();
+                return;
+            }
+            void poll();
+        };
+
         void poll();
     };
 
@@ -1135,6 +1152,18 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
     };
 
     initializeAll();
+
+    document.addEventListener("badwolf:player-session-ready", () => {
+        const lobby = document.querySelector(".player-lobby");
+        if (lobby instanceof HTMLElement &&
+            lobby.dataset.allPlayerClientInitialized === "true" &&
+            !lobby.querySelector(".player-all-player-panel")) {
+            delete lobby.dataset.allPlayerClientInitialized;
+        }
+
+        initializePlayer();
+        playerPollNow?.();
+    });
 
     const observer = new MutationObserver(() => {
         initializeAll();

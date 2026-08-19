@@ -465,11 +465,17 @@
                 return;
             }
 
+            if (document.querySelector(
+                "[data-editor-unsaved-dialog][open]")) {
+                return;
+            }
+
             const backLink = document.getElementById(
                 "final-question-editor-back-link");
 
             if (backLink) {
-                window.location.assign(backLink.href);
+                event.preventDefault();
+                backLink.click();
             }
         }, true);
 

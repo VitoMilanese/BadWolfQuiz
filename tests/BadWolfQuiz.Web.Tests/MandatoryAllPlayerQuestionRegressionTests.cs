@@ -47,7 +47,7 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("all-player-question-answering", script);
         Assert.Contains("all-player-host-progress", script);
         Assert.Contains("BadWolfHostGameplay.refresh", script);
-        Assert.Contains("/js/all-player-question.js?v=4", bootstrap);
+        Assert.Contains("/js/all-player-question.js?v=5", bootstrap);
         Assert.Contains("start-game-form", bootstrap);
         Assert.Contains("MutationObserver", bootstrap);
     }
@@ -113,6 +113,28 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("markEditorProgrammaticStateClean", script);
         Assert.Contains("editor-state-synchronized", script);
         Assert.Contains("data-question-save-status", script);
+    }
+
+    [Fact]
+    public void Manual_feedback_uses_server_answer_layout_and_rejoin_refresh_hook()
+    {
+        var root = FindRepositoryRoot();
+        var hostView = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml");
+        var playerView = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Player/Lobby.cshtml");
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+        var styles = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/css/site.css");
+
+        Assert.Contains("all-player-multiple-choice-answer-presentation", hostView);
+        Assert.Contains(".all-player-multiple-choice-answer-presentation .game-content-blocks", styles);
+        Assert.Contains("width: min(100%, 84rem)", styles);
+        Assert.Contains("min-height: clamp(5rem, 10vh, 8rem)", script);
+        Assert.Contains("badwolf:player-session-ready", playerView);
+        Assert.Contains("badwolf:player-session-ready", script);
+        Assert.Contains("playerPollNow", script);
     }
 
     private static string Read(string root, string relativePath) =>

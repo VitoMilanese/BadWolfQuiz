@@ -590,6 +590,10 @@
                 {
                     var isShowingAnswer =
                         Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.ShowingAnswer;
+                    var isAllPlayerMultipleChoiceAnswer =
+                        isShowingAnswer &&
+                        Model.CurrentQuestion.PresentationType ==
+                            BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice;
                     var contentBlocks = isShowingAnswer
                         ? Model.CurrentQuestion.AnswerBlocks
                         : Model.CurrentQuestion.QuestionBlocks;
@@ -600,7 +604,7 @@
                             ? $"question:{Model.CurrentQuestion.SourceQuestionId}:clues:{Model.CurrentQuestion.RevealedClueCount}"
                             : $"question:{Model.CurrentQuestion.SourceQuestionId}";
 
-                    <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation")"
+                    <section class="game-content-presentation @(isShowingAnswer ? "answer-presentation" : "question-presentation") @(isAllPlayerMultipleChoiceAnswer ? "all-player-multiple-choice-answer-presentation" : null)"
                              data-media-autoplay-state="@mediaAutoplayState">
                         <p class="eyebrow"
                            data-question-heading
