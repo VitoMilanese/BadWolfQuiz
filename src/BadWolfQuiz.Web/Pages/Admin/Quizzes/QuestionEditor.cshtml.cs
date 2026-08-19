@@ -177,7 +177,6 @@ public sealed class QuestionEditorModel(
         {
             return NotFound();
         }
-
         var isAllPlayer = Input.PresentationType is
             QuestionPresentationType.AllPlayerText or
             QuestionPresentationType.AllPlayerMultipleChoice;
@@ -186,9 +185,8 @@ public sealed class QuestionEditorModel(
 
         question.PresentationType = Input.PresentationType;
         question.IsSpecial =
-            Input.PresentationType is not
-                QuestionPresentationType.FourClues and not
-                QuestionPresentationType.HostMultipleChoice &&
+            Input.PresentationType != QuestionPresentationType.FourClues &&
+            Input.PresentationType != QuestionPresentationType.HostMultipleChoice &&
             Input.IsSpecial;
         question.ExcludeFromRandomWagerSelection =
             isHostMultipleChoice || Input.ExcludeFromRandomWagerSelection;
@@ -357,7 +355,6 @@ public sealed class QuestionEditorModel(
                 entity.FileName = null;
             }
         }
-
         await db.SaveChangesAsync(cancellationToken);
 
         if (IsAjaxRequest())
