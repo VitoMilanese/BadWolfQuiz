@@ -133,6 +133,28 @@ public sealed class LobbyModel(
         return blocks;
     }
 
+    public bool CanReviewAllPlayerQuestion(RuntimeQuestion question)
+    {
+        if (!question.IsAllPlayerQuestion ||
+            question.Status is not RuntimeQuestionStatus.Selected and
+                not RuntimeQuestionStatus.Active)
+        {
+            return false;
+        }
+
+        var participantIds = question.IsSpecial
+            ? question.AllPlayerWagers
+                .Select(wager => wager.PlayerId)
+                .ToArray()
+            : Game.Session.Players
+                .Select(player => player.Id)
+                .ToArray();
+
+        return participantIds.Length > 0 &&
+            participantIds.All(playerId => question.AnswerAttempts.Any(attempt =>
+                attempt.PlayerId == playerId));
+    }
+
     private static string NormalizeAnswerFeedbackSound(
         string? configured,
         string fallback,

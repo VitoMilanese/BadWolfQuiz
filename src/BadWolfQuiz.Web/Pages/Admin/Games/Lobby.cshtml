@@ -746,6 +746,8 @@
                         @if (isAllPlayerMultipleChoiceQuestion)
                         {
                             <form class="all-player-host-close-form"
+                                  data-all-player-review-action
+                                  hidden="@(!Model.CanReviewAllPlayerQuestion(Model.CurrentQuestion) ? "hidden" : null)"
                                   method="post"
                                   asp-page-handler="CloseAllPlayerQuestion">
                                 <input name="sourceQuestionId"
@@ -845,6 +847,8 @@
                             BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice)
                         {
                             <form class="all-player-host-close-form"
+                                  data-all-player-review-action
+                                  hidden="@(!Model.CanReviewAllPlayerQuestion(Model.CurrentQuestion) ? "hidden" : null)"
                                   method="post"
                                   asp-page-handler="CloseAllPlayerQuestion">
                                 <input name="sourceQuestionId"

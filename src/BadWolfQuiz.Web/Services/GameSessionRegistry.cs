@@ -1408,6 +1408,21 @@ public sealed class GameSessionRegistry
                     "The all-player question is not accepting answers.");
             }
 
+            var participantIds = question.IsSpecial
+                ? question.AllPlayerWagers
+                    .Select(wager => wager.PlayerId)
+                    .ToArray()
+                : game.Session.Players
+                    .Select(player => player.Id)
+                    .ToArray();
+            if (participantIds.Length == 0 ||
+                participantIds.Any(playerId => question.AnswerAttempts.All(attempt =>
+                    attempt.PlayerId != playerId)))
+            {
+                throw new GameRuleViolationException(
+                    "Every all-player participant must have a recorded answer before review begins.");
+            }
+
             game.Session.Timer.Stop();
             game.Session.AnswerTimer.Stop();
 

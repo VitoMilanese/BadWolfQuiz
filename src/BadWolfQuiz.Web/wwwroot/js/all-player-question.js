@@ -1333,10 +1333,8 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                             ? text.answered
                             : text.waiting;
                     item.append(name, playerState);
-                    if (state.mode === "text" &&
-                        !player.submitted &&
-                        (state.phase === "answering" ||
-                         state.phase === "awaitingMissing")) {
+                    if (!player.submitted &&
+                        state.phase === "answering") {
                         item.appendChild(createActionButton(
                             "∅",
                             text.emptyAnswer,
@@ -1356,6 +1354,21 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             if (target && progress.parentElement !== target) {
                 target.appendChild(progress);
             }
+        };
+
+        const syncReviewActions = (board, state) => {
+            const playerCount = Number(state.playerCount ?? 0);
+            const answeredCount = Number(state.answeredCount ?? 0);
+            const canReview = state.phase === "answering" &&
+                playerCount > 0 &&
+                answeredCount >= playerCount;
+
+            board.querySelectorAll("[data-all-player-review-action]")
+                .forEach(action => {
+                    if (action instanceof HTMLElement) {
+                        action.hidden = !canReview;
+                    }
+                });
         };
 
         const renderPrimaryAction = (board, state) => {
@@ -1563,6 +1576,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             renderProgress(board, state);
             renderPrimaryAction(board, state);
             renderHostChoices(board, state);
+            syncReviewActions(board, state);
             renderTextReview(board, state);
         };
 

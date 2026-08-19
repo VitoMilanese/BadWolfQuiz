@@ -200,6 +200,10 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("renderPrimaryAction", script);
         Assert.DoesNotContain("progress.appendChild(start)", script);
         Assert.Contains("data-all-player-primary-action", host);
+        Assert.Contains("data-all-player-review-action", host);
+        Assert.Contains("CanReviewAllPlayerQuestion", host);
+        Assert.Contains("syncReviewActions", script);
+        Assert.Contains("answeredCount >= playerCount", script);
         Assert.Contains(".all-player-host-primary-action", styles);
         Assert.Contains(":has(.all-player-wager-waiting)", styles);
         var multipleChoiceIndex = host.IndexOf(
@@ -252,17 +256,27 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
     }
 
     [Fact]
-    public void Timer_expiration_waits_for_the_host_review_action()
+    public void Timer_expiration_keeps_player_submissions_open_until_host_review()
     {
         var root = FindRepositoryRoot();
         var endpoint = Read(root,
             "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
 
-        Assert.Contains("HasAnsweringTimerExpired", endpoint);
-        Assert.Contains("!timerExpired", endpoint);
+        Assert.DoesNotContain("HasAnsweringTimerExpired", endpoint);
         Assert.Contains(
-            "Timer expiration stops player input, but only the host advances",
+            "Expiration never blocks",
             endpoint);
+
+        var submitStart = endpoint.IndexOf(
+            "public IActionResult OnPostSubmit",
+            StringComparison.Ordinal);
+        var judgeStart = endpoint.IndexOf(
+            "public IActionResult OnPostJudge",
+            submitStart,
+            StringComparison.Ordinal);
+        var submit = endpoint[submitStart..judgeStart];
+        Assert.DoesNotContain("GameTimerStatus.Expired", submit);
+        Assert.DoesNotContain("AllCurrentPlayersSubmitted", submit);
 
         var lifecycleStart = endpoint.IndexOf(
             "private static void EnsureQuestionLifecycle",
@@ -272,14 +286,37 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
             lifecycleStart,
             StringComparison.Ordinal);
         var lifecycle = endpoint[lifecycleStart..hostStateStart];
-        var expirationStart = lifecycle.IndexOf(
-            "if (timer.Status == GameTimerStatus.Expired)",
-            StringComparison.Ordinal);
+        Assert.DoesNotContain("Accepting = false", lifecycle);
+        Assert.DoesNotContain("ResolveQuestionWithoutCorrectAnswer", lifecycle);
+    }
 
-        Assert.True(expirationStart >= 0);
+    [Fact]
+    public void Review_action_waits_for_every_recorded_answer()
+    {
+        var root = FindRepositoryRoot();
+        var host = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml");
+        var model = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml.cs");
+        var endpoint = Read(root,
+            "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
+        var registry = Read(root,
+            "src/BadWolfQuiz.Web/Services/GameSessionRegistry.cs");
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+
+        Assert.Contains("CanReviewAllPlayerQuestion", model);
+        Assert.Contains("data-all-player-review-action", host);
+        Assert.Contains("!Model.CanReviewAllPlayerQuestion", host);
+        Assert.Contains("syncReviewActions", script);
+        Assert.Contains("answeredCount >= playerCount", script);
+        Assert.Contains(
+            "Every all-player participant must have a recorded answer",
+            registry);
+        Assert.Contains("item.IsAllPlayerQuestion", endpoint);
         Assert.DoesNotContain(
-            "ResolveQuestionWithoutCorrectAnswer",
-            lifecycle[expirationStart..]);
+            """state.mode === "text" &&""",
+            script);
     }
 
     [Fact]

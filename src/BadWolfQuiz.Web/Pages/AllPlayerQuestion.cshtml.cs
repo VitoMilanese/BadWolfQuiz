@@ -332,7 +332,7 @@ public sealed class AllPlayerQuestionModel(
         {
             var question = game.Session.Board.Questions.SingleOrDefault(item =>
                 item.SourceQuestionId == sourceQuestionId &&
-                item.PresentationType == QuestionPresentationType.AllPlayerText &&
+                item.IsAllPlayerQuestion &&
                 item.Status is RuntimeQuestionStatus.Selected or
                     RuntimeQuestionStatus.Active);
             var runtimePlayerId = new GamePlayerId(playerId);
@@ -343,7 +343,10 @@ public sealed class AllPlayerQuestionModel(
                 return StatusCode(StatusCodes.Status409Conflict);
             }
 
-            var review = GetTextReview(game, question);
+            var review = question.PresentationType ==
+                QuestionPresentationType.AllPlayerText
+                    ? GetTextReview(game, question)
+                    : null;
             if (question.AnswerAttempts.All(attempt =>
                     attempt.PlayerId != runtimePlayerId))
             {
@@ -353,14 +356,11 @@ public sealed class AllPlayerQuestionModel(
                     isCorrect: false,
                     value: 0,
                     resolveQuestionIfAvailable: false);
-                review.Answers[runtimePlayerId] = "-";
+                if (review is not null)
+                {
+                    review.Answers[runtimePlayerId] = "-";
+                }
                 game.MarkPersistenceChanged();
-            }
-
-            if (AllCurrentPlayersSubmitted(game, question))
-            {
-                review.Accepting = false;
-                GetAnsweringTimer(game, question).Stop();
             }
 
             return new JsonResult(new
@@ -420,8 +420,7 @@ public sealed class AllPlayerQuestionModel(
                 }
 
                 EnsureQuestionLifecycle(game, question);
-                if (question.Status == RuntimeQuestionStatus.ShowingAnswer ||
-                    HasAnsweringTimerExpired(game, question))
+                if (question.Status == RuntimeQuestionStatus.ShowingAnswer)
                 {
                     return ConflictState(game, connection.Player);
                 }
@@ -463,12 +462,6 @@ public sealed class AllPlayerQuestionModel(
                         value: 0,
                         resolveQuestionIfAvailable: false);
                     review.Answers[connection.Player.Id] = normalizedAnswer;
-
-                    if (AllCurrentPlayersSubmitted(game, question))
-                    {
-                        review.Accepting = false;
-                        GetAnsweringTimer(game, question).Stop();
-                    }
                 }
                 else
                 {
@@ -503,11 +496,6 @@ public sealed class AllPlayerQuestionModel(
                             connection.Player.Id,
                             isCorrect),
                         resolveQuestionIfAvailable: false);
-
-                    if (AllCurrentPlayersSubmitted(game, question))
-                    {
-                        game.Session.ResolveQuestionWithoutCorrectAnswer(sourceQuestionId);
-                    }
                 }
 
                 game.MarkPersistenceChanged();
@@ -649,29 +637,9 @@ public sealed class AllPlayerQuestionModel(
             timer = GetAnsweringTimer(game, question);
         }
 
-        if (AllCurrentPlayersSubmitted(game, question))
-        {
-            if (question.PresentationType == QuestionPresentationType.AllPlayerText)
-            {
-                GetTextReview(game, question).Accepting = false;
-                timer.Stop();
-                game.MarkPersistenceChanged();
-            }
-            else
-            {
-                game.Session.ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
-                game.MarkPersistenceChanged();
-                return;
-            }
-        }
-
+        // The timer is informational for the host. Expiration never blocks
+        // player submissions or advances the question automatically.
         _ = timer.Remaining;
-        if (timer.Status == GameTimerStatus.Expired)
-        {
-            // Timer expiration stops player input, but only the host advances
-            // to answer review.
-            return;
-        }
     }
 
     private static object CreateHostState(
@@ -688,7 +656,6 @@ public sealed class AllPlayerQuestionModel(
         var wagersByPlayer = question.AllPlayerWagers
             .ToDictionary(wager => wager.PlayerId);
         var allSubmitted = AllCurrentPlayersSubmitted(game, question);
-        var timerExpired = HasAnsweringTimerExpired(game, question);
         var phase = isWagering
             ? "wagering"
             : isClosed
@@ -750,7 +717,6 @@ public sealed class AllPlayerQuestionModel(
             phase,
             isClosed,
             isAccepting = phase == "answering" &&
-                !timerExpired &&
                 (!isText || review!.Accepting),
             isJudging = phase == "judging",
             wageredCount = participants.Count(player =>
@@ -793,7 +759,6 @@ public sealed class AllPlayerQuestionModel(
         var isText = question.PresentationType == QuestionPresentationType.AllPlayerText;
         var review = isText ? GetTextReview(game, question) : null;
         var allSubmitted = AllCurrentPlayersSubmitted(game, question);
-        var timerExpired = HasAnsweringTimerExpired(game, question);
         var phase = isWagering
             ? "wagering"
             : isClosed
@@ -829,7 +794,6 @@ public sealed class AllPlayerQuestionModel(
                     : Array.Empty<ChoiceOption>(),
             hasSubmitted = attempt is not null,
             isAccepting = phase == "answering" &&
-                !timerExpired &&
                 (!isText || review!.Accepting),
             isJudging = phase is "judging" or "awaitingMissing",
             isClosed,
@@ -875,22 +839,6 @@ public sealed class AllPlayerQuestionModel(
         }
 
         return shuffled;
-    }
-
-    private static bool HasAnsweringTimerExpired(
-        GameSessionRegistration game,
-        RuntimeQuestion question)
-    {
-        if (question.Status is
-            RuntimeQuestionStatus.AwaitingWager or
-            RuntimeQuestionStatus.ShowingAnswer)
-        {
-            return false;
-        }
-
-        var timer = GetAnsweringTimer(game, question);
-        _ = timer.Remaining;
-        return timer.Status == GameTimerStatus.Expired;
     }
 
     private static int GetRemainingMilliseconds(

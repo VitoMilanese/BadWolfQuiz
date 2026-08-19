@@ -37,9 +37,10 @@ The type selector is rendered by Razor and also posts a hidden all-player mode m
 2. The normal buzzer remains closed.
 3. Every current player receives the appropriate answer controls.
 4. The host sees submitted/waiting progress without seeing correctness early.
-5. Answering closes automatically when every current player has submitted.
-6. When the timer expires, player input closes but the question remains visible until the host selects **Proceed to answer review**.
-7. The host may close answering early with **Proceed to answer review**.
+5. The timer is informational for the host and never blocks player submissions.
+6. Players may still answer after the timer reaches zero.
+7. **Proceed to answer review** appears only after every participant has a recorded response.
+8. The host can record an empty response for an AFK participant and then start review.
 
 For multiple choice, closing answering reveals the answer presentation. For text mode, closing answering starts sequential host judging when at least one answer was submitted; with no submissions the question advances directly to its answer state.
 
@@ -61,7 +62,7 @@ Image endpoints return inline media responses so they can be displayed by `<img>
 
 ## Text judging and scoring
 
-Text submissions are never checked automatically. The right-side player drawer shows only submitted/waiting status and never displays answer text. After answering is locked and every player has a recorded submission, the host reviews one answer at a time in the main question area, matching the Final Question judging flow. The current review card and its Correct/Incorrect controls keep a stable DOM identity between polling updates so a normal click cannot be lost. For an AFK player, the host can record `-` with the empty-answer action in the drawer before judging begins.
+Text submissions are never checked automatically. The right-side player drawer shows only submitted/waiting status and never displays answer text. The timer never closes that input; only the host starts review after every participant has a recorded response. The current review card and its Correct/Incorrect controls keep a stable DOM identity between polling updates so a normal click cannot be lost. For an AFK player, the host can record `-` with the empty-answer action in the drawer before judging begins. The same empty-response action is available for a missing multiple-choice participant so the host can complete the participant set without choosing an option on that player's behalf.
 
 For a normal all-player question, scoring is the same for both modes:
 
