@@ -1,4 +1,5 @@
 using System.Text.Encodings.Web;
+using System.Text.Json;
 using BadWolfQuiz.Web.Services;
 using BadWolfQuiz.Web.TagHelpers;
 
@@ -31,6 +32,23 @@ public sealed class SeoMetadataTests
         }
     }
 
+    [Theory]
+    [InlineData("/Faq", "en", "en", true)]
+    [InlineData("/Faq", null, "en", false)]
+    [InlineData("/Faq", "ru", "ru", false)]
+    [InlineData("/Join/Index", "en", "en", false)]
+    [InlineData("/Faq", "uk", "en", false)]
+    public void Only_explicit_search_routes_are_indexable(
+        string page,
+        string? routeCulture,
+        string uiCulture,
+        bool expected)
+    {
+        Assert.Equal(
+            expected,
+            SeoMetadataCatalog.IsIndexableRequest(page, routeCulture, uiCulture));
+    }
+
     [Fact]
     public void Head_markup_uses_self_canonical_and_only_uk_en_it_alternates()
     {
@@ -53,6 +71,34 @@ public sealed class SeoMetadataTests
         Assert.Contains("property=\"og:description\"", markup);
         Assert.Contains("property=\"og:url\"", markup);
         Assert.Contains("property=\"og:locale\"", markup);
+    }
+
+    [Fact]
+    public void Indexable_head_markup_contains_website_and_organization_structured_data()
+    {
+        Assert.True(SeoMetadataCatalog.TryGet("/About", "uk", out var metadata));
+        var helper = new SeoHeadTagHelper(HtmlEncoder.Default);
+        var markup = helper.BuildSeoMarkup("/About", "uk", metadata);
+        var scriptStart = markup.IndexOf("<script type=\"application/ld+json\">", StringComparison.Ordinal);
+        var jsonStart = scriptStart + "<script type=\"application/ld+json\">".Length;
+        var jsonEnd = markup.IndexOf("</script>", jsonStart, StringComparison.Ordinal);
+        var json = markup[jsonStart..jsonEnd];
+
+        using var document = JsonDocument.Parse(json);
+        var graph = document.RootElement.GetProperty("@graph").EnumerateArray().ToArray();
+
+        Assert.Contains(graph, item => item.GetProperty("@type").GetString() == "Organization");
+        Assert.Contains(graph, item => item.GetProperty("@type").GetString() == "WebSite");
+        Assert.Equal("https://schema.org", document.RootElement.GetProperty("@context").GetString());
+        Assert.DoesNotContain("ru", json, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Non_search_pages_get_noindex_nofollow()
+    {
+        Assert.Equal(
+            "<meta name=\"robots\" content=\"noindex, nofollow\" />",
+            SeoHeadTagHelper.BuildNoIndexMarkup());
     }
 
     [Fact]

@@ -70,6 +70,17 @@ public static class SeoMetadataCatalog
         return false;
     }
 
+    public static bool IsIndexableRequest(
+        string? page,
+        string? routeCulture,
+        string? uiCulture) =>
+        page is not null &&
+        routeCulture is not null &&
+        uiCulture is not null &&
+        string.Equals(routeCulture, uiCulture, StringComparison.Ordinal) &&
+        SeoRouteCatalog.IsSeoCulture(routeCulture) &&
+        Metadata.ContainsKey((page, routeCulture));
+
     public static string BuildAbsoluteUrl(string page, string culture)
     {
         var route = SeoRouteCatalog.IndexablePages.Single(item => item.Page == page);

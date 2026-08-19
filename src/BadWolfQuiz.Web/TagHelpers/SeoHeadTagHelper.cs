@@ -25,23 +25,29 @@ public sealed partial class SeoHeadTagHelper : TagHelper
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         var page = ViewContext.RouteData.Values["page"]?.ToString();
-        var culture = CultureInfo.CurrentUICulture.Name;
-        if (!SeoRouteCatalog.IsSeoCulture(culture) ||
-            !SeoMetadataCatalog.TryGet(page, culture, out var metadata) ||
-            page is null)
+        var routeCulture = ViewContext.RouteData.Values["culture"]?.ToString();
+        var uiCulture = CultureInfo.CurrentUICulture.Name;
+        var childContent = await output.GetChildContentAsync();
+        var headHtml = childContent.GetContent();
+
+        if (!SeoMetadataCatalog.IsIndexableRequest(page, routeCulture, uiCulture) ||
+            page is null ||
+            routeCulture is null ||
+            !SeoMetadataCatalog.TryGet(page, routeCulture, out var metadata))
         {
+            output.Content.SetHtmlContent(
+                headHtml + Environment.NewLine + BuildNoIndexMarkup() + Environment.NewLine);
             return;
         }
 
-        var childContent = await output.GetChildContentAsync();
-        var headHtml = childContent.GetContent();
         var encodedTitle = _htmlEncoder.Encode(metadata.Title);
         headHtml = TitleRegex().Replace(
             headHtml,
             $"<title>{encodedTitle}</title>",
             count: 1);
 
-        output.Content.SetHtmlContent(headHtml + BuildSeoMarkup(page, culture, metadata));
+        output.Content.SetHtmlContent(
+            headHtml + BuildSeoMarkup(page, routeCulture, metadata));
     }
 
     public string BuildSeoMarkup(string page, string culture, SeoMetadata metadata)
@@ -69,9 +75,14 @@ public sealed partial class SeoHeadTagHelper : TagHelper
         lines.Add($"<meta property=\"og:description\" content=\"{_htmlEncoder.Encode(metadata.Description)}\" />");
         lines.Add($"<meta property=\"og:url\" content=\"{_htmlEncoder.Encode(canonical)}\" />");
         lines.Add($"<meta property=\"og:locale\" content=\"{metadata.OpenGraphLocale}\" />");
+        lines.Add(
+            $"<script type=\"application/ld+json\">{SeoStructuredData.Build(page, culture)}</script>");
 
         return Environment.NewLine + string.Join(Environment.NewLine, lines) + Environment.NewLine;
     }
+
+    public static string BuildNoIndexMarkup() =>
+        "<meta name=\"robots\" content=\"noindex, nofollow\" />";
 
     [GeneratedRegex("<title>.*?</title>", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
     private static partial Regex TitleRegex();
