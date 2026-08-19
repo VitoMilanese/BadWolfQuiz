@@ -1415,21 +1415,38 @@ public sealed class GameSessionRegistry
                 : game.Session.Players
                     .Select(player => player.Id)
                     .ToArray();
-            if (participantIds.Length == 0 ||
-                participantIds.Any(playerId => question.AnswerAttempts.All(attempt =>
-                    attempt.PlayerId != playerId)))
+            var review = question.PresentationType ==
+                QuestionPresentationType.AllPlayerText
+                    ? game.GetOrCreateAllPlayerTextReview(question)
+                    : null;
+
+            // Starting review is the host's explicit close action. Record an
+            // empty response for every participant who has not answered yet.
+            foreach (var playerId in participantIds)
             {
-                throw new GameRuleViolationException(
-                    "Every all-player participant must have a recorded answer before review begins.");
+                if (question.AnswerAttempts.Any(attempt =>
+                        attempt.PlayerId == playerId))
+                {
+                    continue;
+                }
+
+                game.Session.AddQuestionAnswerHistoryEntry(
+                    sourceQuestionId,
+                    playerId,
+                    isCorrect: false,
+                    value: 0,
+                    resolveQuestionIfAvailable: false);
+                if (review is not null)
+                {
+                    review.Answers[playerId] = "-";
+                }
             }
 
             game.Session.Timer.Stop();
             game.Session.AnswerTimer.Stop();
 
-            if (question.PresentationType ==
-                QuestionPresentationType.AllPlayerText)
+            if (review is not null)
             {
-                var review = game.GetOrCreateAllPlayerTextReview(question);
                 review.Accepting = false;
             }
             else

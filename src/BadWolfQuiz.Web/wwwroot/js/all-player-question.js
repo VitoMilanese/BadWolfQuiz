@@ -1357,16 +1357,10 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
         };
 
         const syncReviewActions = (board, state) => {
-            const playerCount = Number(state.playerCount ?? 0);
-            const answeredCount = Number(state.answeredCount ?? 0);
-            const canReview = state.phase === "answering" &&
-                playerCount > 0 &&
-                answeredCount >= playerCount;
-
             board.querySelectorAll("[data-all-player-review-action]")
                 .forEach(action => {
                     if (action instanceof HTMLElement) {
-                        action.hidden = !canReview;
+                        action.hidden = state.phase !== "answering";
                     }
                 });
         };

@@ -201,9 +201,9 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.DoesNotContain("progress.appendChild(start)", script);
         Assert.Contains("data-all-player-primary-action", host);
         Assert.Contains("data-all-player-review-action", host);
-        Assert.Contains("CanReviewAllPlayerQuestion", host);
+        Assert.DoesNotContain("CanReviewAllPlayerQuestion", host);
         Assert.Contains("syncReviewActions", script);
-        Assert.Contains("answeredCount >= playerCount", script);
+        Assert.Contains("action.hidden = state.phase !== \"answering\"", script);
         Assert.Contains(".all-player-host-primary-action", styles);
         Assert.Contains(":has(.all-player-wager-waiting)", styles);
         var multipleChoiceIndex = host.IndexOf(
@@ -291,7 +291,7 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
     }
 
     [Fact]
-    public void Review_action_waits_for_every_recorded_answer()
+    public void Review_action_records_empty_answers_for_missing_participants()
     {
         var root = FindRepositoryRoot();
         var host = Read(root,
@@ -305,12 +305,17 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         var script = Read(root,
             "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
 
-        Assert.Contains("CanReviewAllPlayerQuestion", model);
+        Assert.DoesNotContain("CanReviewAllPlayerQuestion", model);
         Assert.Contains("data-all-player-review-action", host);
-        Assert.Contains("!Model.CanReviewAllPlayerQuestion", host);
+        Assert.DoesNotContain("!Model.CanReviewAllPlayerQuestion", host);
         Assert.Contains("syncReviewActions", script);
-        Assert.Contains("answeredCount >= playerCount", script);
         Assert.Contains(
+            "action.hidden = state.phase !== \"answering\"",
+            script);
+        Assert.Contains("empty response for every participant", registry);
+        Assert.Contains("AddQuestionAnswerHistoryEntry", registry);
+        Assert.Contains("review.Answers[playerId] = \"-\"", registry);
+        Assert.DoesNotContain(
             "Every all-player participant must have a recorded answer",
             registry);
         Assert.Contains("item.IsAllPlayerQuestion", endpoint);
