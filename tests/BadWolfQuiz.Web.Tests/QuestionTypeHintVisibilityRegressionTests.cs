@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class QuestionTypeHintVisibilityRegressionTests
 {
     [Fact]
-    public void Hidden_all_player_editor_hints_are_not_rendered()
+    public void Question_type_hints_share_visibility_and_font_rules()
     {
         var root = FindRepositoryRoot();
         var styles = File.ReadAllText(Path.Combine(
@@ -21,6 +21,9 @@ public sealed class QuestionTypeHintVisibilityRegressionTests
             "js",
             "all-player-question.js"));
 
+        Assert.Contains("#four-clues-help,", styles);
+        Assert.Contains(".all-player-editor-help {", styles);
+        Assert.Contains("font-family: Inter, Segoe UI, Arial, sans-serif", styles);
         Assert.Contains(".all-player-editor-help[hidden]", styles);
         Assert.Contains("display: none", styles);
         Assert.Contains("textHelp.hidden = !isText", script);
