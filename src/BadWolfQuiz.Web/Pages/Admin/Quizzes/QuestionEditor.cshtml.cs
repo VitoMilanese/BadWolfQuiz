@@ -177,6 +177,7 @@ public sealed class QuestionEditorModel(
         {
             return NotFound();
         }
+
         var isAllPlayer = Input.PresentationType is
             QuestionPresentationType.AllPlayerText or
             QuestionPresentationType.AllPlayerMultipleChoice;
@@ -355,6 +356,7 @@ public sealed class QuestionEditorModel(
                 entity.FileName = null;
             }
         }
+
         await db.SaveChangesAsync(cancellationToken);
 
         if (IsAjaxRequest())
