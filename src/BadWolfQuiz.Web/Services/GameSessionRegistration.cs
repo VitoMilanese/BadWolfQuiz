@@ -59,6 +59,32 @@ public sealed class GameSessionRegistration
 
     public BuzzerRaceSnapshot? BuzzerRace { get; internal set; }
 
+    internal Dictionary<int, AllPlayerTextReviewState> AllPlayerTextReviews { get; } = [];
+
+    internal AllPlayerTextReviewState GetOrCreateAllPlayerTextReview(
+        RuntimeQuestion question)
+    {
+        if (!AllPlayerTextReviews.TryGetValue(
+                question.SourceQuestionId,
+                out var review))
+        {
+            review = new AllPlayerTextReviewState();
+            AllPlayerTextReviews[question.SourceQuestionId] = review;
+        }
+
+        foreach (var attempt in question.AnswerAttempts)
+        {
+            review.Answers.TryAdd(attempt.PlayerId, "—");
+        }
+
+        if (question.Status == RuntimeQuestionStatus.ShowingAnswer)
+        {
+            review.Accepting = false;
+        }
+
+        return review;
+    }
+
     public void RestartSession(TimeProvider? timeProvider = null)
     {
         lock (this)
@@ -108,9 +134,17 @@ public sealed class GameSessionRegistration
                 restartedState,
                 timeProvider ?? TimeProvider.System);
             BuzzerRace = null;
+            AllPlayerTextReviews.Clear();
             MarkPersistenceChanged();
         }
     }
+}
+
+internal sealed class AllPlayerTextReviewState
+{
+    public Dictionary<GamePlayerId, string> Answers { get; } = [];
+    public HashSet<GamePlayerId> JudgedPlayers { get; } = [];
+    public bool Accepting { get; set; } = true;
 }
 
 public sealed record BuzzerRaceSnapshot(

@@ -111,6 +111,8 @@
     };
     const text = stringsByCulture[culture] ?? stringsByCulture.en;
     let playerPollNow = null;
+    let hostPollNow = null;
+    let hostControllerCode = null;
 
     const style = document.createElement("style");
     style.id = "all-player-question-styles";
@@ -251,7 +253,7 @@
     text-align: center;
 }
 
-.host-game-board.all-player-question-answering .question-controls > :not(.all-player-host-progress) {
+.host-game-board.all-player-question-answering .question-controls > :not(.all-player-host-progress):not(.all-player-host-close-form) {
     display: none !important;
 }
 
@@ -673,6 +675,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
         const timer = panel.querySelector("[data-all-player-timer]");
         let currentQuestionId = null;
         let currentMode = null;
+        let currentOptionsKey = "";
         let requestInFlight = false;
         let pollHandle = 0;
         let lastState = null;
@@ -754,6 +757,14 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             }
         };
 
+        const getOptionsKey = state => JSON.stringify(
+            (state.options ?? []).map(option => [
+                option.id,
+                option.kind,
+                option.text ?? "",
+                option.imageUrl ?? ""
+            ]));
+
         const buildControls = state => {
             controls.replaceChildren();
             if (state.mode === "multipleChoice") {
@@ -801,6 +812,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 panel.hidden = true;
                 currentQuestionId = null;
                 currentMode = null;
+                currentOptionsKey = "";
                 controls?.replaceChildren();
                 restoreBuzzer();
                 return;
@@ -810,11 +822,18 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             panel.hidden = false;
             const questionChanged = currentQuestionId !== state.sourceQuestionId ||
                 currentMode !== state.mode;
+            const optionsKey = state.mode === "multipleChoice"
+                ? getOptionsKey(state)
+                : state.mode;
+            const controlsMissing = !controls?.firstElementChild;
             currentQuestionId = state.sourceQuestionId;
             currentMode = state.mode;
 
-            if (questionChanged) {
+            if (questionChanged ||
+                controlsMissing ||
+                currentOptionsKey !== optionsKey) {
                 buildControls(state);
+                currentOptionsKey = optionsKey;
             }
 
             const seconds = Math.max(
@@ -891,16 +910,15 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
     const initializeHost = () => {
         const initialBoard = document.querySelector(
             ".host-game-board[data-game-code]");
-        if (!(initialBoard instanceof HTMLElement) ||
-            initialBoard.dataset.allPlayerHostInitialized === "true") {
+        if (!(initialBoard instanceof HTMLElement)) {
             return;
         }
 
         const code = initialBoard.dataset.gameCode;
-        if (!code) {
+        if (!code || hostControllerCode === code) {
             return;
         }
-        initialBoard.dataset.allPlayerHostInitialized = "true";
+        hostControllerCode = code;
 
         let pollHandle = 0;
         let lastState = null;
@@ -915,7 +933,8 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
         };
 
         const removeHostChoices = board => {
-            board.querySelector(".all-player-host-choice-preview")?.remove();
+            board.querySelector(
+                "[data-all-player-client-preview]")?.remove();
         };
 
         const renderHostChoices = (board, state) => {
@@ -925,12 +944,14 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             }
 
             const presentation = board.querySelector(".question-presentation");
-            if (!presentation) {
+            if (!presentation ||
+                presentation.querySelector("[data-all-player-server-preview]")) {
                 return;
             }
 
             const preview = document.createElement("section");
             preview.className = "all-player-host-choice-preview";
+            preview.dataset.allPlayerClientPreview = "true";
             const grid = document.createElement("div");
             grid.className = "all-player-host-choice-grid";
             for (const option of state.options ?? []) {
@@ -1118,9 +1139,6 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
 
         const schedule = active => {
             window.clearTimeout(pollHandle);
-            if (!initialBoard.isConnected && !findBoard()) {
-                return;
-            }
             pollHandle = window.setTimeout(poll, active ? 180 : 900);
         };
 
@@ -1136,10 +1154,13 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             }
         };
 
+        hostPollNow = () => {
+            window.clearTimeout(pollHandle);
+            void poll();
+        };
+
         document.addEventListener("badwolf:host-gameplay-updated", () => {
-            if (lastState?.active) {
-                applyState(lastState);
-            }
+            hostPollNow?.();
         });
 
         void poll();
@@ -1152,6 +1173,10 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
     };
 
     initializeAll();
+
+    window.addEventListener("pageshow", () => playerPollNow?.());
+    window.addEventListener("focus", () => playerPollNow?.());
+    window.addEventListener("online", () => playerPollNow?.());
 
     document.addEventListener("badwolf:player-session-ready", () => {
         const lobby = document.querySelector(".player-lobby");

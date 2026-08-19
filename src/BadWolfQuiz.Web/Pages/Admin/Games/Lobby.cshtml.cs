@@ -115,6 +115,24 @@ public sealed class LobbyModel(
             : block.Autoplay;
     }
 
+    public IReadOnlyList<ContentBlockSnapshot> GetAllPlayerHostChoiceBlocks(
+        RuntimeQuestion question)
+    {
+        var blocks = question.AnswerBlocks.ToArray();
+        var random = new Random(HashCode.Combine(
+            question.SourceQuestionId,
+            Game.Session.Id.Value.GetHashCode()));
+
+        for (var index = blocks.Length - 1; index > 0; index--)
+        {
+            var swapIndex = random.Next(index + 1);
+            (blocks[index], blocks[swapIndex]) =
+                (blocks[swapIndex], blocks[index]);
+        }
+
+        return blocks;
+    }
+
     private static string NormalizeAnswerFeedbackSound(
         string? configured,
         string fallback,
@@ -1207,6 +1225,37 @@ public sealed class LobbyModel(
         if (IsAjaxRequest())
         {
             return new JsonResult(new { success = true });
+        }
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostCloseAllPlayerQuestionAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.CloseAllPlayerQuestionAnswering(
+                game.PublicCode,
+                sourceQuestionId);
+            await BroadcastTimerAsync(game, cancellationToken);
+            await BroadcastBuzzerAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_JudgmentRejected"].Value;
         }
 
         return RedirectToPage(new { id });

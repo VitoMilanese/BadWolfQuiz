@@ -567,7 +567,7 @@
             const clearStoredPlayerAccess = () => {
                 localStorage.removeItem(storageKey);
                 localStorage.removeItem(currentPlayerStorageKey);
-                localStorage.removeItem(transitionStorageKey);
+                sessionStorage.removeItem(transitionStorageKey);
             };
 
             if (bootstrapToken) {
@@ -889,6 +889,20 @@
                 warning.hidden = isPageActive();
             };
 
+            const refreshTransitionToken = async () => {
+                if (connection.state !==
+                    signalR.HubConnectionState.Connected) {
+                    return null;
+                }
+
+                const token = await connection.invoke(
+                    "PreparePlayerTransition");
+                if (token) {
+                    sessionStorage.setItem(transitionStorageKey, token);
+                }
+                return token;
+            };
+
             const joinPlayerSession = async () => {
                 const transitionToken =
                     sessionStorage.getItem(transitionStorageKey);
@@ -904,6 +918,8 @@
                     sessionStorage.removeItem(transitionStorageKey);
                 }
 
+                await refreshTransitionToken();
+
                 document.dispatchEvent(
                     new Event("badwolf:player-session-ready"));
             };
@@ -915,8 +931,9 @@
                 }
 
                 transitionReloadStarted = true;
-                const transitionToken = await connection.invoke(
-                    "PreparePlayerTransition");
+                const transitionToken =
+                    sessionStorage.getItem(transitionStorageKey) ||
+                    await refreshTransitionToken();
 
                 if (!transitionToken) {
                     transitionReloadStarted = false;
@@ -1164,6 +1181,7 @@
             connection.on("RejoinApproved", () => {
                 rejoinWarning.hidden = true;
                 updateWarning();
+                void refreshTransitionToken().catch(console.error);
                 document.dispatchEvent(
                     new Event("badwolf:player-session-ready"));
             });

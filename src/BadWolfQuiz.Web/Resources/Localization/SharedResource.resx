@@ -2598,4 +2598,7 @@
   <data name="Hint_MediaAutoplay" xml:space="preserve">
     <value>Start this media automatically when the block is shown during gameplay.</value>
   </data>
+  <data name="AllPlayer_ReviewAnswersNow" xml:space="preserve">
+    <value>Proceed to answer review</value>
+  </data>
 </root>

@@ -594,6 +594,10 @@
                         isShowingAnswer &&
                         Model.CurrentQuestion.PresentationType ==
                             BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice;
+                    var isAllPlayerMultipleChoiceQuestion =
+                        !isShowingAnswer &&
+                        Model.CurrentQuestion.PresentationType ==
+                            BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice;
                     var contentBlocks = isShowingAnswer
                         ? Model.CurrentQuestion.AnswerBlocks
                         : Model.CurrentQuestion.QuestionBlocks;
@@ -716,6 +720,41 @@
                             }
                         </div>
 
+                        @if (isAllPlayerMultipleChoiceQuestion)
+                        {
+                            <section class="all-player-host-choice-preview"
+                                     data-all-player-server-preview>
+                                <div class="all-player-host-choice-grid">
+                                    @foreach (var optionBlock in
+                                        Model.GetAllPlayerHostChoiceBlocks(
+                                            Model.CurrentQuestion))
+                                    {
+                                        <article class="all-player-host-choice-option">
+                                            @if (optionBlock.Kind ==
+                                                BadWolfQuiz.Game.Definitions.ContentBlockKind.Image)
+                                            {
+                                                <img src="@Url.Page(
+                                                         "/Admin/Games/Lobby",
+                                                         "ContentBlock",
+                                                         new
+                                                         {
+                                                             id = Model.Game.Session.Id.Value,
+                                                             sourceQuestionId = Model.CurrentQuestion.SourceQuestionId,
+                                                             sourceContentBlockId = optionBlock.SourceContentBlockId,
+                                                             answer = true
+                                                         })"
+                                                     alt="@optionBlock.FileName" />
+                                            }
+                                            else
+                                            {
+                                                <span>@optionBlock.TextContent</span>
+                                            }
+                                        </article>
+                                    }
+                                </div>
+                            </section>
+                        }
+
                         @if (isShowingAnswer)
                         {
                             <form method="post" asp-page-handler="CloseAnswer">
@@ -744,6 +783,21 @@
                         : Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>();
 
                 <section class="question-controls">
+                    @if (Model.CurrentQuestion.IsAllPlayerQuestion)
+                    {
+                        <form class="all-player-host-close-form"
+                              method="post"
+                              asp-page-handler="CloseAllPlayerQuestion">
+                            <input name="sourceQuestionId"
+                                   type="hidden"
+                                   value="@Model.CurrentQuestion.SourceQuestionId" />
+                            <button class="button button-primary" type="submit">
+                                @Localizer["AllPlayer_ReviewAnswersNow"]
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
                     @if (!Model.CurrentQuestion.IsSpecial &&
                         Model.CurrentQuestion.BuzzerStatus ==
                             BadWolfQuiz.Game.Runtime.QuestionBuzzerStatus.Inactive)
@@ -833,6 +887,7 @@
                                 @Localizer["GameBoard_RevealOneClue"]
                             </button>
                         </form>
+                    }
                     }
                 </section>
             }

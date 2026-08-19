@@ -2598,4 +2598,7 @@
   <data name="Hint_MediaAutoplay" xml:space="preserve">
     <value>Avvia automaticamente questo contenuto multimediale quando il blocco viene mostrato durante il gioco.</value>
   </data>
+  <data name="AllPlayer_ReviewAnswersNow" xml:space="preserve">
+    <value>Passa alla verifica delle risposte</value>
+  </data>
 </root>

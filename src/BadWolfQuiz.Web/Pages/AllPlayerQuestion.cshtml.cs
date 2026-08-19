@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
@@ -17,9 +16,6 @@ public sealed class AllPlayerQuestionModel(
 {
     private const int MaximumAnswerLength = 500;
     private const string ApiPath = "/api/all-player-question";
-    private static readonly ConcurrentDictionary<TextReviewKey, TextReviewState>
-        TextReviews = new();
-
     public async Task<IActionResult> OnGetEditorAsync(
         int questionId,
         CancellationToken cancellationToken)
@@ -138,9 +134,8 @@ public sealed class AllPlayerQuestionModel(
                 return NotFound();
             }
 
-            return string.IsNullOrWhiteSpace(block.FileName)
-                ? File(block.FileData, block.FileContentType)
-                : File(block.FileData, block.FileContentType, block.FileName);
+            Response.Headers.CacheControl = "private, max-age=300";
+            return File(block.FileData, block.FileContentType);
         }
     }
 
@@ -591,7 +586,7 @@ public sealed class AllPlayerQuestionModel(
     private static int GetRemainingMilliseconds(
         GameSessionRegistration game,
         RuntimeQuestion question,
-        TextReviewState? review = null)
+        AllPlayerTextReviewState? review = null)
     {
         if (question.Status == RuntimeQuestionStatus.ShowingAnswer ||
             review is { Accepting: false })
@@ -627,41 +622,17 @@ public sealed class AllPlayerQuestionModel(
     private static bool AllSubmittedCurrentPlayersJudged(
         GameSessionRegistration game,
         RuntimeQuestion question,
-        TextReviewState review)
+        AllPlayerTextReviewState review)
     {
         var submittedPlayers = CurrentPlayersWithSubmissions(game, question).ToArray();
         return submittedPlayers.Length > 0 &&
             submittedPlayers.All(player => review.JudgedPlayers.Contains(player.Id));
     }
 
-    private static TextReviewState GetTextReview(
+    private static AllPlayerTextReviewState GetTextReview(
         GameSessionRegistration game,
-        RuntimeQuestion question)
-    {
-        var key = new TextReviewKey(game.Session.Id.Value, question.SourceQuestionId);
-        var review = TextReviews.GetOrAdd(key, _ => new TextReviewState());
-
-        foreach (var attempt in question.AnswerAttempts)
-        {
-            review.Answers.TryAdd(attempt.PlayerId, "—");
-        }
-
-        if (question.Status == RuntimeQuestionStatus.ShowingAnswer)
-        {
-            review.Accepting = false;
-        }
-
-        return review;
-    }
-
-    private readonly record struct TextReviewKey(Guid GameId, int SourceQuestionId);
-
-    private sealed class TextReviewState
-    {
-        public Dictionary<GamePlayerId, string> Answers { get; } = [];
-        public HashSet<GamePlayerId> JudgedPlayers { get; } = [];
-        public bool Accepting { get; set; } = true;
-    }
+        RuntimeQuestion question) =>
+        game.GetOrCreateAllPlayerTextReview(question);
 
     private sealed record ChoiceOption(
         int Id,

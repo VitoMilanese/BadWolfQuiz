@@ -20,121 +20,89 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
     }
 
     [Fact]
-    public void Text_answers_are_submitted_for_zero_points_and_judged_by_host()
+    public void Text_answers_are_manual_and_host_can_close_answering()
     {
         var root = FindRepositoryRoot();
         var endpoint = Read(root,
             "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
+        var registry = Read(root,
+            "src/BadWolfQuiz.Web/Services/GameSessionRegistry.cs");
+        var registration = Read(root,
+            "src/BadWolfQuiz.Web/Services/GameSessionRegistration.cs");
+        var host = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml");
 
         Assert.Contains("OnPostJudge", endpoint);
-        Assert.Contains("isCorrect: false", endpoint);
-        Assert.Contains("value: 0", endpoint);
-        Assert.Contains("UpdateQuestionAnswerHistoryEntry", endpoint);
-        Assert.Contains("review.JudgedPlayers.Add", endpoint);
-        Assert.Contains("isCorrect ? question.Points : 0", endpoint);
+        Assert.Contains("GetOrCreateAllPlayerTextReview", endpoint);
+        Assert.DoesNotContain("ConcurrentDictionary<TextReviewKey", endpoint);
+        Assert.Contains("CloseAllPlayerQuestionAnswering", registry);
+        Assert.Contains("review.Accepting = false", registry);
+        Assert.Contains("AllPlayerTextReviewState", registration);
+        Assert.Contains("CloseAllPlayerQuestion", host);
+        Assert.Contains("AllPlayer_ReviewAnswersNow", host);
     }
 
     [Fact]
-    public void Player_and_host_use_live_all_player_panels_without_buzzer_controls()
+    public void Host_choices_and_answer_preview_are_server_rendered_as_grids()
     {
         var root = FindRepositoryRoot();
-        var script = Read(root,
-            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
-        var bootstrap = Read(root,
-            "src/BadWolfQuiz.Web/wwwroot/js/quick-timer-controls.js");
-
-        Assert.Contains(".player-buzzer-panel", script);
-        Assert.Contains("all-player-question-answering", script);
-        Assert.Contains("all-player-host-progress", script);
-        Assert.Contains("BadWolfHostGameplay.refresh", script);
-        Assert.Contains("/js/all-player-question.js?v=5", bootstrap);
-        Assert.Contains("start-game-form", bootstrap);
-        Assert.Contains("MutationObserver", bootstrap);
-    }
-
-    [Fact]
-    public void Multiple_choice_options_are_shuffled_per_player_and_support_images()
-    {
-        var root = FindRepositoryRoot();
-        var endpoint = Read(root,
-            "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
-        var script = Read(root,
-            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
-
-        Assert.Contains("ShuffleOptions", endpoint);
-        Assert.Contains("player.Id.Value.GetHashCode()", endpoint);
-        Assert.Contains("OnGetOptionImage", endpoint);
-        Assert.Contains("block.Kind == ContentBlockKind.Image", endpoint);
-        Assert.Contains("option.imageUrl", script);
-        Assert.DoesNotContain("correctOption", endpoint);
-    }
-
-    [Fact]
-    public void Host_renders_choice_options_as_grid_and_marks_answer_correctness()
-    {
-        var root = FindRepositoryRoot();
-        var script = Read(root,
-            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
-
-        Assert.Contains("all-player-host-choice-grid", script);
-        Assert.Contains("grid-template-columns: repeat(2", script);
-        Assert.Contains("all-player-multiple-choice-answer", script);
-        Assert.Contains("all-player-multiple-choice-answer-layout", script);
-        Assert.Contains("document.documentElement.classList.toggle", script);
-        Assert.Contains("border: 3px solid #c62828", script);
-        Assert.Contains("border-color: #2e7d32", script);
-        Assert.Contains("max-height: min(28vh, 20rem)", script);
-    }
-
-    [Fact]
-    public void Player_client_reinitializes_after_reconnect_dom_replacement()
-    {
-        var root = FindRepositoryRoot();
-        var script = Read(root,
-            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
-
-        Assert.Contains("allPlayerClientInitialized", script);
-        Assert.Contains("existingPanel", script);
-        Assert.Contains("panel.isConnected", script);
-        Assert.Contains("getBuzzerPanel", script);
-        Assert.Contains("const observer = new MutationObserver", script);
-        Assert.Contains("initializeAll", script);
-        Assert.Contains("lobby.isConnected", script);
-        Assert.Contains("observer.observe(document.documentElement", script);
-    }
-
-    [Fact]
-    public void Programmatic_editor_type_restore_is_marked_clean()
-    {
-        var root = FindRepositoryRoot();
-        var script = Read(root,
-            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
-
-        Assert.Contains("markEditorProgrammaticStateClean", script);
-        Assert.Contains("editor-state-synchronized", script);
-        Assert.Contains("data-question-save-status", script);
-    }
-
-    [Fact]
-    public void Manual_feedback_uses_server_answer_layout_and_rejoin_refresh_hook()
-    {
-        var root = FindRepositoryRoot();
-        var hostView = Read(root,
+        var host = Read(root,
             "src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml");
-        var playerView = Read(root,
-            "src/BadWolfQuiz.Web/Pages/Player/Lobby.cshtml");
-        var script = Read(root,
-            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+        var preview = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Games/_GameContentPreview.cshtml");
         var styles = Read(root,
             "src/BadWolfQuiz.Web/wwwroot/css/site.css");
 
-        Assert.Contains("all-player-multiple-choice-answer-presentation", hostView);
-        Assert.Contains(".all-player-multiple-choice-answer-presentation .game-content-blocks", styles);
-        Assert.Contains("width: min(100%, 84rem)", styles);
-        Assert.Contains("min-height: clamp(5rem, 10vh, 8rem)", script);
-        Assert.Contains("badwolf:player-session-ready", playerView);
+        Assert.Contains("data-all-player-server-preview", host);
+        Assert.Contains("GetAllPlayerHostChoiceBlocks", host);
+        Assert.Contains("answer = true", host);
+        Assert.Contains("all-player-multiple-choice-answer-presentation", host);
+        Assert.Contains("all-player-multiple-choice-answer-presentation", preview);
+        Assert.Contains("grid-template-columns: repeat(2", styles);
+        Assert.Contains("display: flex !important", styles);
+        Assert.Contains("justify-content: center", styles);
+        Assert.Contains("border: 3px solid #c62828", styles);
+        Assert.Contains("border-color: #2e7d32", styles);
+    }
+
+    [Fact]
+    public void Choice_images_are_inline_and_controls_rebuild_after_reconnect()
+    {
+        var root = FindRepositoryRoot();
+        var endpoint = Read(root,
+            "src/BadWolfQuiz.Web/Pages/AllPlayerQuestion.cshtml.cs");
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+        var player = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Player/Lobby.cshtml");
+
+        Assert.Contains("return File(block.FileData, block.FileContentType);", endpoint);
+        Assert.DoesNotContain(
+            "File(block.FileData, block.FileContentType, block.FileName)",
+            endpoint);
+        Assert.Contains("controlsMissing", script);
+        Assert.Contains("currentOptionsKey", script);
         Assert.Contains("badwolf:player-session-ready", script);
-        Assert.Contains("playerPollNow", script);
+        Assert.Contains("hostPollNow", script);
+        Assert.Contains("badwolf:host-gameplay-updated", script);
+        Assert.Contains("refreshTransitionToken", player);
+        Assert.Contains("TimeSpan.FromHours(1)", Read(root,
+            "src/BadWolfQuiz.Web/Services/GameSessionRegistry.cs"));
+    }
+
+    [Fact]
+    public void All_player_asset_is_hash_versioned_in_layout()
+    {
+        var root = FindRepositoryRoot();
+        var layout = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Shared/_Layout.cshtml");
+        var bootstrap = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/quick-timer-controls.js");
+
+        Assert.Contains("~/js/all-player-question.js", layout);
+        Assert.Contains("asp-append-version=\"true\"", layout);
+        Assert.DoesNotContain("loadAllPlayerQuestionClient", bootstrap);
+        Assert.DoesNotContain("all-player-question.js?v=", bootstrap);
     }
 
     private static string Read(string root, string relativePath) =>

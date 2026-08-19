@@ -1,9 +1,15 @@
 @model BadWolfQuiz.Web.Pages.Admin.Games.GameContentPreviewModel
+@{
+    var isAllPlayerMultipleChoiceAnswer =
+        Model.IsAnswer &&
+        Model.PresentationType ==
+            BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice;
+}
 
 <link rel="stylesheet" href="~/css/youtube-placeholder.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/content-preview-width.css" asp-append-version="true" />
 
-<section class="game-content-presentation @(Model.IsAnswer ? "answer-presentation" : "question-presentation")">
+<section class="game-content-presentation @(Model.IsAnswer ? "answer-presentation" : "question-presentation") @(isAllPlayerMultipleChoiceAnswer ? "all-player-multiple-choice-answer-presentation" : null)">
     <div class="game-content-blocks @(Model.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !Model.IsAnswer ? "four-clue-grid" : null)">
         @foreach (var block in Model.Blocks)
         {

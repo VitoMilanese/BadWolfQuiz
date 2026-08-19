@@ -462,20 +462,6 @@
             if (questionPreviewModal &&
                 !questionPreviewModal.hidden) {
                 closeQuestionPreview();
-                return;
-            }
-
-            if (document.querySelector(
-                "[data-editor-unsaved-dialog][open]")) {
-                return;
-            }
-
-            const backLink = document.getElementById(
-                "final-question-editor-back-link");
-
-            if (backLink) {
-                event.preventDefault();
-                backLink.click();
             }
         }, true);
 

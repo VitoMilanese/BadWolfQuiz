@@ -6441,6 +6441,7 @@ body.youtube-auto-expanded-open {
 
 /* All-player question runtime layout */
 .all-player-host-choice-preview {
+    display: grid;
     width: min(100%, 84rem);
     margin: 1rem auto 0;
     align-self: stretch;
@@ -6450,6 +6451,7 @@ body.youtube-auto-expanded-open {
 .all-player-host-choice-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr);
     width: 100%;
     gap: clamp(0.75rem, 1.5vw, 1.25rem);
 }
@@ -6457,39 +6459,66 @@ body.youtube-auto-expanded-open {
 .all-player-host-choice-option {
     min-width: 0;
     min-height: clamp(5rem, 10vh, 8rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(0.8rem, 1.6vw, 1.35rem);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--panel-2);
     font-size: clamp(1.4rem, 2.6vw, 3rem);
+    text-align: center;
+}
+
+.all-player-host-choice-option img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: min(28vh, 20rem);
+    object-fit: contain;
 }
 
 .all-player-multiple-choice-answer-presentation .game-content-blocks {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     grid-auto-rows: minmax(0, 1fr);
+    align-items: stretch;
     gap: clamp(0.75rem, 1.5vw, 1.25rem) !important;
 }
 
 .all-player-multiple-choice-answer-presentation .game-content-block {
     min-width: 0;
+    min-height: clamp(10rem, 28vh, 22rem);
     height: 100%;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     margin: 0 !important;
     padding: clamp(0.65rem, 1.2vw, 1rem);
+    overflow: hidden;
     border: 3px solid #c62828;
     border-radius: 0.8rem;
+    text-align: center;
 }
 
 .all-player-multiple-choice-answer-presentation .game-content-block:first-child {
     border-color: #2e7d32;
 }
 
-.all-player-multiple-choice-answer-presentation .game-content-image {
+.all-player-multiple-choice-answer-presentation .game-content-text,
+.all-player-multiple-choice-answer-presentation .game-content-caption {
     width: 100%;
-    height: 100%;
-    max-height: min(30vh, 22rem);
-    object-fit: contain;
+    margin: 0;
+    text-align: center;
 }
 
-@media (max-width: 640px) {
-    .all-player-host-choice-grid,
-    .all-player-multiple-choice-answer-presentation .game-content-blocks {
-        grid-template-columns: 1fr !important;
-    }
+.all-player-multiple-choice-answer-presentation .game-content-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: min(30vh, 22rem);
+    object-fit: contain;
 }

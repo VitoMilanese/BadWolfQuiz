@@ -11,7 +11,7 @@ public sealed class GameSessionRegistry
     private const int MaxCodeGenerationAttempts = 20;
     private static readonly TimeSpan BuzzerRaceWindow = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan PlayerTransitionTokenLifetime =
-        TimeSpan.FromSeconds(30);
+        TimeSpan.FromHours(1);
     private static readonly TimeSpan AnswerResultOverlayLifetime =
         TimeSpan.FromSeconds(5);
     private readonly IGameCodeGenerator _gameCodeGenerator;
@@ -1379,6 +1379,59 @@ public sealed class GameSessionRegistry
             var question = game.Session.ResolveQuestionWithoutCorrectAnswer(
                 sourceQuestionId);
             game.BuzzerRace = null;
+            game.MarkPersistenceChanged();
+            return question;
+        }
+    }
+
+    public RuntimeQuestion? CloseAllPlayerQuestionAnswering(
+        string publicCode,
+        int sourceQuestionId)
+    {
+        var game = Find(publicCode);
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            var question = game.Session.Board.Questions.SingleOrDefault(item =>
+                item.SourceQuestionId == sourceQuestionId &&
+                item.IsAllPlayerQuestion &&
+                item.Status is RuntimeQuestionStatus.Selected or
+                    RuntimeQuestionStatus.Active);
+
+            if (question is null)
+            {
+                throw new GameRuleViolationException(
+                    "The all-player question is not accepting answers.");
+            }
+
+            game.Session.Timer.Stop();
+
+            if (question.PresentationType ==
+                QuestionPresentationType.AllPlayerText)
+            {
+                var review = game.GetOrCreateAllPlayerTextReview(question);
+                review.Accepting = false;
+                var hasSubmission = game.Session.Players.Any(player =>
+                    question.AnswerAttempts.Any(attempt =>
+                        attempt.PlayerId == player.Id));
+
+                if (!hasSubmission)
+                {
+                    game.Session.ResolveQuestionWithoutCorrectAnswer(
+                        sourceQuestionId);
+                }
+            }
+            else
+            {
+                game.Session.ResolveQuestionWithoutCorrectAnswer(
+                    sourceQuestionId);
+                game.BuzzerRace = null;
+            }
+
             game.MarkPersistenceChanged();
             return question;
         }
