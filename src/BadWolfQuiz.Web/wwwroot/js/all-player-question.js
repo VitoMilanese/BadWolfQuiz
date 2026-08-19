@@ -724,9 +724,12 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
 
         const getBuzzerPanel = () => document.querySelector(
             ".player-buzzer-panel");
+        const setRuntimeActive = active => {
+            lobby.classList.toggle("all-player-runtime-active", active);
+        };
         const hideBuzzer = () => {
             const buzzerPanel = getBuzzerPanel();
-            if (buzzerPanel && !buzzerPanel.hidden) {
+            if (buzzerPanel) {
                 buzzerPanel.dataset.hiddenByAllPlayer = "true";
                 buzzerPanel.hidden = true;
             }
@@ -984,11 +987,16 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
         function applyState(state) {
             lastState = state;
             if (playerSessionPending) {
+                setRuntimeActive(Boolean(state?.active));
+                if (state?.active) {
+                    hideBuzzer();
+                }
                 panel.hidden = true;
                 return;
             }
 
             if (!state?.active) {
+                setRuntimeActive(false);
                 panel.hidden = true;
                 currentQuestionId = null;
                 currentMode = null;
@@ -998,6 +1006,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 return;
             }
 
+            setRuntimeActive(true);
             hideBuzzer();
             panel.hidden = false;
             currentQuestionId = state.sourceQuestionId;
@@ -1131,10 +1140,21 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
         const removeHostChoices = board => {
             board.querySelector(
                 "[data-all-player-client-preview]")?.remove();
+            board.querySelector(
+                "[data-all-player-client-moved-action]")?.remove();
         };
 
         const removeHostReview = board => {
             board.querySelector(".all-player-host-review")?.remove();
+        };
+
+        const clearHostPrimaryAction = board => {
+            const target = board.querySelector(
+                "[data-all-player-primary-action]");
+            if (target instanceof HTMLElement) {
+                delete target.dataset.renderKey;
+                target.replaceChildren();
+            }
         };
 
         const postHostAction = async (handler, values) => {
@@ -1192,8 +1212,9 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             preview.setAttribute("aria-label", text.answerOptions);
             const closeForm = board.querySelector(
                 ".all-player-host-close-form");
-            if (closeForm) {
-                preview.appendChild(closeForm);
+            if (closeForm && closeForm.parentElement !== presentation) {
+                closeForm.dataset.allPlayerClientMovedAction = "true";
+                presentation.appendChild(closeForm);
             }
             const grid = document.createElement("div");
             grid.className = "all-player-host-choice-grid";
@@ -1226,9 +1247,31 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             icon.setAttribute("aria-hidden", "true");
             icon.textContent = symbol;
             button.appendChild(icon);
-            button.addEventListener("click", handler);
+            button.addEventListener("pointerdown", event => {
+                event.stopPropagation();
+            });
+            button.addEventListener("click", event => {
+                event.preventDefault();
+                event.stopPropagation();
+                void handler();
+            });
             return button;
         };
+
+        const getProgressRenderKey = state => JSON.stringify({
+            sourceQuestionId: state.sourceQuestionId,
+            phase: state.phase,
+            mode: state.mode,
+            isClosed: state.isClosed,
+            canStartQuestion: state.canStartQuestion,
+            players: (state.players ?? []).map(player => [
+                player.id,
+                player.wagerSubmitted,
+                player.submitted,
+                player.isJudged,
+                player.isCorrect
+            ])
+        });
 
         const renderProgress = (board, state) => {
             let progress = board.querySelector(".all-player-host-progress");
@@ -1237,6 +1280,11 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 progress.className = "all-player-host-progress";
             }
 
+            const renderKey = getProgressRenderKey(state);
+            if (progress.dataset.renderKey === renderKey) {
+                return;
+            }
+            progress.dataset.renderKey = renderKey;
             progress.replaceChildren();
             const heading = document.createElement("strong");
             heading.textContent = state.phase === "wagering"
@@ -1269,7 +1317,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                         item.appendChild(createActionButton(
                             "⇩",
                             text.minimumWager,
-                            () => void postHostAction("MinimumWager", {
+                            () => postHostAction("MinimumWager", {
                                 sourceQuestionId: state.sourceQuestionId,
                                 playerId: player.id
                             })));
@@ -1292,7 +1340,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                         item.appendChild(createActionButton(
                             "∅",
                             text.emptyAnswer,
-                            () => void postHostAction("EmptyAnswer", {
+                            () => postHostAction("EmptyAnswer", {
                                 sourceQuestionId: state.sourceQuestionId,
                                 playerId: player.id
                             })));
@@ -1302,24 +1350,52 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             }
 
             progress.append(heading, list);
-            if (state.phase === "wagering" && state.canStartQuestion) {
-                const start = document.createElement("button");
-                start.type = "button";
-                start.className = "button button-primary";
-                start.textContent = text.showQuestion;
-                start.addEventListener("click", () => {
-                    void postHostAction("StartQuestion", {
-                        sourceQuestionId: state.sourceQuestionId
-                    });
-                });
-                progress.appendChild(start);
-            }
 
             const target = board.querySelector(".current-question-summary") ??
                 board.querySelector(".question-presentation");
             if (target && progress.parentElement !== target) {
                 target.appendChild(progress);
             }
+        };
+
+        const renderPrimaryAction = (board, state) => {
+            const target = board.querySelector(
+                "[data-all-player-primary-action]");
+            if (!(target instanceof HTMLElement)) {
+                return;
+            }
+
+            const renderKey = [
+                state.sourceQuestionId,
+                state.phase,
+                Boolean(state.canStartQuestion)
+            ].join(":");
+            if (target.dataset.renderKey === renderKey) {
+                return;
+            }
+            target.dataset.renderKey = renderKey;
+            target.replaceChildren();
+
+            if (state.phase !== "wagering" || !state.canStartQuestion) {
+                return;
+            }
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "button button-primary";
+            button.textContent = text.showQuestion;
+            button.addEventListener("click", event => {
+                event.preventDefault();
+                button.disabled = true;
+                void postHostAction("StartQuestion", {
+                    sourceQuestionId: state.sourceQuestionId
+                }).finally(() => {
+                    if (button.isConnected) {
+                        button.disabled = false;
+                    }
+                });
+            });
+            target.appendChild(button);
         };
 
         const renderTextReview = (board, state) => {
@@ -1416,6 +1492,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 removeProgress(board);
                 removeHostChoices(board);
                 removeHostReview(board);
+                clearHostPrimaryAction(board);
                 refreshKey = null;
                 return;
             }
@@ -1439,6 +1516,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 "all-player-text-reviewing",
                 state.phase === "judging");
             renderProgress(board, state);
+            renderPrimaryAction(board, state);
             renderHostChoices(board, state);
             renderTextReview(board, state);
         };

@@ -185,22 +185,34 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
             styles);
         Assert.Contains(".all-player-host-choice-preview:hover", styles);
         Assert.Contains(".all-player-host-progress:hover", styles);
-        Assert.Contains("top: -3.65rem", styles);
+        Assert.Contains("bottom: 3.15rem", styles);
         Assert.Contains("padding-bottom: 6.75rem", styles);
-        var previewIndex = host.IndexOf(
-            "data-all-player-server-preview",
+        Assert.Contains("getProgressRenderKey", script);
+        Assert.Contains("progress.dataset.renderKey", script);
+        Assert.Contains("renderPrimaryAction", script);
+        Assert.DoesNotContain("progress.appendChild(start)", script);
+        Assert.Contains("data-all-player-primary-action", host);
+        Assert.Contains(".all-player-host-primary-action", styles);
+        Assert.Contains(":has(.all-player-wager-waiting)", styles);
+        var multipleChoiceIndex = host.IndexOf(
+            "if (isAllPlayerMultipleChoiceQuestion)",
             StringComparison.Ordinal);
         var closeIndex = host.IndexOf(
             "all-player-host-close-form",
-            previewIndex,
+            multipleChoiceIndex,
+            StringComparison.Ordinal);
+        var previewIndex = host.IndexOf(
+            "data-all-player-server-preview",
+            closeIndex,
             StringComparison.Ordinal);
         var gridIndex = host.IndexOf(
             "all-player-host-choice-grid",
             previewIndex,
             StringComparison.Ordinal);
-        Assert.True(previewIndex >= 0 &&
-            closeIndex > previewIndex &&
-            gridIndex > closeIndex);
+        Assert.True(multipleChoiceIndex >= 0 &&
+            closeIndex > multipleChoiceIndex &&
+            previewIndex > closeIndex &&
+            gridIndex > previewIndex);
         Assert.Contains("▦", styles);
         Assert.Contains("👥", styles);
     }
@@ -222,6 +234,8 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("all-player-host-review", script);
         Assert.Contains("text.emptyAnswer", script);
         Assert.Contains("\"-\"", endpoint);
+        Assert.Contains("event.stopPropagation()", script);
+        Assert.Contains("getProgressRenderKey", script);
         Assert.DoesNotContain("progress.appendChild(judge)", script);
         Assert.Contains("all-player-text-reviewing", styles);
     }
@@ -257,6 +271,26 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.DoesNotContain("TimeSpan.FromHours(1)", registry);
         Assert.Contains("hostPollNow", script);
         Assert.Contains("badwolf:host-gameplay-updated", script);
+    }
+
+    [Fact]
+    public void Player_all_player_runtime_hides_buzzer_and_restores_scrolling()
+    {
+        var root = FindRepositoryRoot();
+        var script = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
+        var styles = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/css/site.css");
+
+        Assert.Contains("all-player-runtime-active", script);
+        Assert.Contains("setRuntimeActive(true)", script);
+        Assert.Contains(
+            ".player-lobby.all-player-runtime-active .player-buzzer-panel",
+            styles);
+        Assert.Contains(
+            ".page-shell:has(.player-lobby.all-player-runtime-active)",
+            styles);
+        Assert.Contains("overflow-y: auto", styles);
     }
 
     [Fact]

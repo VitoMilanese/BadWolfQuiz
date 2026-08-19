@@ -46,7 +46,7 @@ For multiple choice, closing answering reveals the answer presentation. For text
 
 Each player receives a stable shuffled order derived from the question and player identifiers. The host receives a separate stable shuffled order while the question is open.
 
-The host question page renders the shuffled choices on the server so the correct layout is present on the first frame, including image choices. Correctness is not highlighted during answering. On hover-capable desktop host displays, those choices stay in a collapsed bottom drawer and expand on hover or keyboard focus, while the submitted/waiting player list uses a matching right-side drawer. The host's **Proceed to answer review** button travels with the choices drawer and remains immediately above it in both collapsed and expanded states. Touch layouts keep the information directly visible because hover is unavailable.
+The host question page renders the shuffled choices on the server so the correct layout is present on the first frame, including image choices. Correctness is not highlighted during answering. On hover-capable desktop host displays, those choices stay in a collapsed bottom drawer and expand on hover or keyboard focus, while the submitted/waiting player list uses a matching right-side drawer. The host's **Proceed to answer review** button is a stable sibling immediately above the choices drawer, so hovering or clicking the button does not expand or move the drawer. Touch layouts keep the information directly visible because hover is unavailable.
 
 The editor answer preview, live answer page, and resolved-question answer preview use the configured answer order so the first option can be marked as correct. They render:
 
@@ -68,7 +68,7 @@ For a normal all-player question, scoring is the same for both modes:
 - incorrect answer: zero points;
 - no answer: zero points.
 
-All-player questions may also be explicit or randomly selected wager questions. Every participating player privately submits an individual wager from the player screen before the question is shown. The host sees only submitted/not-submitted status, may assign the minimum wager for an AFK player, and reveals the question after every wager exists. Each correct answer adds that player's own wager, each incorrect answer subtracts that player's own wager, and a player with no recorded answer has no score change. Wager all-player questions use the configured wager-answer timer start mode and duration.
+All-player questions may also be explicit or randomly selected wager questions. Every participating player privately submits an individual wager from the player screen before the question is shown. The host sees only submitted/not-submitted status, may assign the minimum wager for an AFK player, and reveals the question after every wager exists. The host wager screen uses the full gameplay width, and **Show question** stays in a stable bottom action area outside the right status drawer. Each correct answer adds that player's own wager, each incorrect answer subtracts that player's own wager, and a player with no recorded answer has no score change. Wager all-player questions use the configured wager-answer timer start mode and duration.
 
 Incorrect submissions remain stored as answer attempts. Their score delta is zero for normal all-player questions and the negative wager amount for wager all-player questions, allowing statistics to distinguish an incorrect answer from a missing answer.
 
@@ -78,7 +78,7 @@ The player client rebuilds controls when the all-player panel or its controls ar
 
 A normal disconnect or manual reconnect during a running game still requires host approval. A short-lived single-use transition token is created only immediately before an intentional game-phase reload, so internal page transitions do not look like an unrelated reconnect.
 
-The all-player client can recover its access token from the same local-storage record used by the player SignalR client. Controls remain hidden while rejoin approval is pending and are rebuilt after approval even when the server-rendered bootstrap token is empty.
+The all-player client can recover its access token from the same local-storage record used by the player SignalR client. Controls remain hidden while rejoin approval is pending and are rebuilt after approval even when the server-rendered bootstrap token is empty. While the all-player wager, answer controls, or confirmation status are active, the normal buzzer is force-hidden and the player page remains vertically scrollable.
 
 `all-player-question.js` is referenced directly by the shared layout with `asp-append-version="true"`. A rebuilt asset receives a new content hash, preventing the browser from reusing an older script after the next page request.
 

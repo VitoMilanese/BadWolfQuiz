@@ -6448,7 +6448,7 @@ body.youtube-auto-expanded-open {
     justify-self: stretch;
 }
 
-.all-player-host-choice-preview > .all-player-host-close-form {
+.question-presentation > .all-player-host-close-form {
     display: flex;
     justify-content: center;
     margin: 0 0 0.65rem;
@@ -6589,10 +6589,11 @@ body.youtube-auto-expanded-open {
 
     .host-game-board
         .current-question-summary:has(.all-player-host-choice-preview)
-        .all-player-host-choice-preview > .all-player-host-close-form {
+        > .question-presentation > .all-player-host-close-form {
         position: absolute;
-        z-index: 2;
-        top: -3.65rem;
+        z-index: 36;
+        right: auto;
+        bottom: 3.15rem;
         left: 50%;
         margin: 0;
         transform: translateX(-50%);
@@ -6776,4 +6777,76 @@ body.youtube-auto-expanded-open {
 .host-game-board.all-player-text-reviewing
     .all-player-host-review .final-player-answer-presentation {
     min-height: clamp(12rem, 42dvh, 30rem);
+}
+
+/* Stable all-player controls and full-width wager waiting */
+.host-game-board:has(> .current-question-summary.wager-mode:has(.all-player-wager-waiting)) {
+    width: calc(100vw - 32px);
+    max-width: none;
+    margin-top: -17px;
+    margin-right: calc(50% - 50vw + 16px);
+    margin-left: calc(50% - 50vw + 16px);
+}
+
+.current-question-summary.wager-mode:has(.all-player-wager-waiting) {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-content: stretch;
+    justify-items: stretch;
+    padding: 16px clamp(24px, 4vw, 56px) 8px;
+    overflow: hidden;
+}
+
+.current-question-summary.wager-mode:has(.all-player-wager-waiting)
+    .current-question-heading {
+    width: 100%;
+}
+
+.current-question-summary.wager-mode:has(.all-player-wager-waiting)
+    .all-player-wager-waiting {
+    min-height: 0;
+    height: 100%;
+    grid-row: 2;
+}
+
+.all-player-host-primary-action {
+    min-height: 42px;
+    grid-row: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0.5rem;
+}
+
+.player-lobby.all-player-runtime-active .player-buzzer-panel {
+    display: none !important;
+}
+
+.page-shell:has(.player-lobby.all-player-runtime-active) {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+@media (max-width: 900px) {
+    .host-game-board:has(> .current-question-summary.wager-mode:has(.all-player-wager-waiting)) {
+        margin-top: -10px;
+    }
+}
+
+@media (max-width: 700px) {
+    .page-shell:has(.player-lobby.all-player-runtime-active) {
+        height: auto;
+        min-height: 100dvh;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .player-lobby:has(.player-buzzer-panel).all-player-runtime-active {
+        height: auto;
+        min-height: 100%;
+        overflow: visible;
+    }
 }
