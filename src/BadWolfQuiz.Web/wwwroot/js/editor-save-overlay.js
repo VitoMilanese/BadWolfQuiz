@@ -135,4 +135,14 @@ body .editor-save-overlay[hidden] {
         document.body.appendChild(status);
         showStatus(status);
     }
+
+    if (editor.matches("form.quiz-board-form")) {
+        const questionCopyScript = document.createElement("script");
+        questionCopyScript.src = new URL(
+            "/js/question-copy-action.js",
+            window.location.origin).href;
+        questionCopyScript.async = false;
+        questionCopyScript.dataset.questionCopyLoader = "true";
+        document.head.appendChild(questionCopyScript);
+    }
 })();
