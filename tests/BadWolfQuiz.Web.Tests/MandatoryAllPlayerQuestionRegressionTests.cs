@@ -74,7 +74,18 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("state.phase === \"wagering\"", script);
         Assert.Contains("text.minimumWager", script);
         Assert.Contains("question-wager-form", script);
-        Assert.Contains("!Model.CurrentQuestion.IsAllPlayerQuestion", host);
+        Assert.Contains(
+            "var eligiblePlayers = Model.CurrentQuestion.IsAllPlayerQuestion",
+            host);
+        var allPlayerGuardIndex = host.IndexOf(
+            "var eligiblePlayers = Model.CurrentQuestion.IsAllPlayerQuestion",
+            StringComparison.Ordinal);
+        var sharedWagerDereferenceIndex = host.IndexOf(
+            "Model.CurrentQuestion.Wager!.PlayerId",
+            allPlayerGuardIndex,
+            StringComparison.Ordinal);
+        Assert.True(allPlayerGuardIndex >= 0 &&
+            sharedWagerDereferenceIndex > allPlayerGuardIndex);
         Assert.DoesNotContain("GetRequiredWagerAmount", endpoint);
     }
 

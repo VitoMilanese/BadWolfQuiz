@@ -799,15 +799,17 @@
             @if (Model.CurrentQuestion.Status is BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Selected or
                 BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active)
             {
-                var eligiblePlayers = Model.CurrentQuestion.IsSpecial
-                    ? Model.Game.Session.AnswerTimer.Status ==
-                            BadWolfQuiz.Game.Runtime.GameTimerStatus.Stopped
-                        ? Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>()
-                        : Model.Players.Where(player =>
-                            player.Id == Model.CurrentQuestion.Wager!.PlayerId)
-                    : Model.CurrentQuestion.AnsweringPlayerId is { } answeringPlayerId
-                        ? Model.Players.Where(player => player.Id == answeringPlayerId)
-                        : Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>();
+                var eligiblePlayers = Model.CurrentQuestion.IsAllPlayerQuestion
+                    ? Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>()
+                    : Model.CurrentQuestion.IsSpecial
+                        ? Model.Game.Session.AnswerTimer.Status ==
+                                BadWolfQuiz.Game.Runtime.GameTimerStatus.Stopped
+                            ? Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>()
+                            : Model.Players.Where(player =>
+                                player.Id == Model.CurrentQuestion.Wager!.PlayerId)
+                        : Model.CurrentQuestion.AnsweringPlayerId is { } answeringPlayerId
+                            ? Model.Players.Where(player => player.Id == answeringPlayerId)
+                            : Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>();
 
                 <section class="question-controls">
                     @if (Model.CurrentQuestion.IsAllPlayerQuestion &&
