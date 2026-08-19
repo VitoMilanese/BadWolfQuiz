@@ -1,3 +1,4 @@
+using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -35,7 +36,8 @@ public class SetLanguageModel : PageModel
         if (!string.IsNullOrWhiteSpace(returnUrl) &&
             Url.IsLocalUrl(returnUrl))
         {
-            return LocalRedirect(returnUrl);
+            return LocalRedirect(
+                SeoRouteCatalog.RewriteLocalizedReturnUrl(returnUrl, culture));
         }
 
         return RedirectToPage("/Index");
