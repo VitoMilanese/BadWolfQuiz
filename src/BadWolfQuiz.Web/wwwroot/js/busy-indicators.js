@@ -11,6 +11,7 @@
     const overlayId = "app-busy-overlay";
     let busy = false;
     let lockedForm = null;
+    let lockedDialogButtons = [];
     let ajaxObserver = null;
     let navigationScheduled = false;
 
@@ -56,6 +57,11 @@
             delete lockedForm.dataset.busyLocked;
             lockedForm = null;
         }
+
+        lockedDialogButtons.forEach(({ button, wasDisabled }) => {
+            button.disabled = wasDisabled;
+        });
+        lockedDialogButtons = [];
     };
 
     const hide = () => {
@@ -146,6 +152,23 @@
         }
     };
 
+    const lockAddRoundDialogButtons = form => {
+        if (handlerName(form) !== "addround") {
+            return;
+        }
+
+        const dialog = form.closest("dialog");
+        if (!dialog) {
+            return;
+        }
+
+        lockedDialogButtons = [...dialog.querySelectorAll("button")]
+            .map(button => ({ button, wasDisabled: button.disabled }));
+        lockedDialogButtons.forEach(({ button }) => {
+            button.disabled = true;
+        });
+    };
+
     const isAjaxSave = (form, submitter, currentPath) => {
         if (pathMatches(currentPath, routes.editor)) {
             return submitter?.matches("[data-ajax-save-round]") ?? false;
@@ -171,7 +194,8 @@
         }
 
         if (pathMatches(currentPath, routes.editor)) {
-            return (submitter?.matches("[data-ajax-save-round]") ?? false) ||
+            return handler === "addround" ||
+                (submitter?.matches("[data-ajax-save-round]") ?? false) ||
                 (submitter?.getAttribute("name") === "play" &&
                     submitter?.getAttribute("value") === "true");
         }
@@ -296,6 +320,7 @@
 
         lockedForm = form;
         form.dataset.busyLocked = "true";
+        lockAddRoundDialogButtons(form);
         show();
 
         const currentPath = normalisePath(window.location.pathname);
