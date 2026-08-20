@@ -110,7 +110,7 @@
 }
 .host-multiple-choice-panel {
     position: fixed;
-    z-index: 70;
+    z-index: 15;
     top: 5.75rem;
     right: 1rem;
     display: grid;
@@ -332,19 +332,17 @@
     };
 
     const initializeHostGameplay = () => {
-        if (!window.location.pathname.includes("/Admin/Games/Lobby/")) {
+        const lobbyMatch = window.location.pathname.match(
+            /\/Admin\/Games\/Lobby\/([^/]+)/);
+        if (!lobbyMatch) {
             return;
         }
 
         const getBoard = () => document.querySelector(
             ".host-game-board[data-game-id]");
-        const initialBoard = getBoard();
-        const gameId = initialBoard?.dataset.gameId;
+        const gameId = getBoard()?.dataset.gameId ||
+            decodeURIComponent(lobbyMatch[1]);
         if (!gameId) {
-            document.addEventListener(
-                "badwolf:host-gameplay-updated",
-                initializeHostGameplay,
-                { once: true });
             return;
         }
 
@@ -372,11 +370,36 @@
             if (!heading || !state?.active) {
                 return;
             }
-            heading.dataset.currentReward = String(state.rewardValue);
-            const template = heading.dataset.rewardTemplate;
-            if (template) {
-                heading.textContent = template.replace("__REWARD__", state.rewardValue);
+
+            const nextValue = String(state.rewardValue);
+            heading.dataset.currentReward = nextValue;
+
+            let reward = heading.querySelector("[data-question-reward]");
+            if (!reward) {
+                const template = heading.dataset.rewardTemplate;
+                const marker = "__REWARD__";
+                const markerIndex = template?.indexOf(marker) ?? -1;
+                if (markerIndex < 0) {
+                    return;
+                }
+
+                reward = document.createElement("span");
+                reward.dataset.questionReward = "";
+                heading.replaceChildren(
+                    document.createTextNode(template.slice(0, markerIndex)),
+                    reward,
+                    document.createTextNode(
+                        template.slice(markerIndex + marker.length)));
             }
+
+            if (reward.textContent === nextValue) {
+                return;
+            }
+
+            reward.textContent = nextValue;
+            reward.classList.remove("question-reward-changed");
+            void reward.offsetWidth;
+            reward.classList.add("question-reward-changed");
         };
 
         const removePanel = () => {
