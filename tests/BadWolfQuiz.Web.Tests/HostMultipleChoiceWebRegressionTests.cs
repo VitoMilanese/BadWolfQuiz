@@ -22,6 +22,14 @@ public sealed class HostMultipleChoiceWebRegressionTests
             "Admin",
             "Games",
             "HostMultipleChoice.cshtml.cs"));
+        var gameContentPreview = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Games",
+            "_GameContentPreview.cshtml"));
         var script = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -48,6 +56,12 @@ public sealed class HostMultipleChoiceWebRegressionTests
             "BadWolfQuiz.Web",
             "TagHelpers",
             "HostMultipleChoiceAssetsTagHelper.cs"));
+        var answerBlockTagHelper = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "TagHelpers",
+            "HostMultipleChoiceAnswerBlockTagHelper.cs"));
 
         Assert.Contains(
             "QuestionPresentationType.HostMultipleChoice",
@@ -121,7 +135,26 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("block.hidden = index !== 0", bootstrap);
 
         Assert.Contains(
+            "QuestionPresentationType.HostMultipleChoice",
+            gameContentPreview);
+        Assert.Contains(
+            ".OrderBy(block => block.SortOrder)",
+            gameContentPreview);
+        Assert.Contains(".Take(1)", gameContentPreview);
+
+        Assert.Contains(
+            "RuntimeQuestionStatus.ShowingAnswer",
+            answerBlockTagHelper);
+        Assert.Contains(
+            "question.HostMultipleChoiceCorrectOptionId",
+            answerBlockTagHelper);
+        Assert.Contains("output.SuppressOutput();", answerBlockTagHelper);
+
+        Assert.Contains(
             "HostMultipleChoiceAssetsTagHelper",
+            viewImports);
+        Assert.Contains(
+            "HostMultipleChoiceAnswerBlockTagHelper",
             viewImports);
         Assert.Contains("ViewContext.ViewData.Model as LobbyModel", assetsTagHelper);
         Assert.Contains("host-multiple-choice-bootstrap.js", assetsTagHelper);
