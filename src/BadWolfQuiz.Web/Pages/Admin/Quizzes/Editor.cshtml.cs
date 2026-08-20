@@ -806,7 +806,7 @@ public sealed class EditorModel(
             RoundRows.CategoryCount < MinimumCategoryCount ||
             RoundRows.CategoryCount > MaximumCategoryCount ||
             submittedRows.Count == 0 ||
-            submittedRows.Any(x => x.RowIndex <= 0 || x.Points < 0))
+            submittedRows.Any(x => x.RowIndex <= 0 || x.Points <= 0))
         {
             if (IsAjaxRequest() && !play)
             {
