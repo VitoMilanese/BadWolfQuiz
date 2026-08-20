@@ -24,6 +24,8 @@ Follow-up fixes made before the first `1.20.0` release remain part of `1.20.0`; 
 
 Web `1.20.1` is a PATCH release that fixes Quiz Editor question drag-and-drop so successful swaps and moves update the board in place without a full page reload, while failed moves surface an error without forcing a reload.
 
+Web `1.20.2` is a PATCH release that prevents duplicate round creation from repeated **Add Round** submissions by locking the dialog actions and showing the shared busy indicator while the request is in progress.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
