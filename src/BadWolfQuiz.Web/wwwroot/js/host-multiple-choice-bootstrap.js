@@ -9,6 +9,8 @@
     const bootstrapScript = document.currentScript ??
         document.querySelector('script[src*="host-multiple-choice-bootstrap.js"]');
     const isHostLobby = bootstrapScript?.dataset.hostLobby === "true";
+    let hostChoiceQuestionActive =
+        bootstrapScript?.dataset.currentHostMultipleChoice === "true";
 
     const style = document.createElement("style");
     style.id = "host-multiple-choice-bootstrap-styles";
@@ -77,19 +79,29 @@ body.host-multiple-choice-active .question-judge-actions {
 
     const synchronizeHostChoiceUi = () => {
         const panel = document.querySelector(".host-multiple-choice-panel");
+        const questionPresentation = document.querySelector(
+            ".question-presentation");
+
+        if (panel) {
+            hostChoiceQuestionActive = true;
+        } else if (questionPresentation) {
+            hostChoiceQuestionActive = false;
+        }
+
         document.body.classList.toggle(
             "host-multiple-choice-active",
             Boolean(panel));
 
-        const correctBlock = document.querySelector(
-            ".answer-presentation .game-content-block.all-player-answer-option-correct");
-        if (!correctBlock) {
+        const answerPresentation = document.querySelector(
+            ".answer-presentation");
+        if (!hostChoiceQuestionActive || !answerPresentation) {
             return;
         }
 
-        const presentation = correctBlock.closest(".answer-presentation");
-        presentation?.querySelectorAll(".game-content-block").forEach(block => {
-            block.hidden = block !== correctBlock;
+        const answerBlocks = answerPresentation.querySelectorAll(
+            ".game-content-blocks > .game-content-block");
+        answerBlocks.forEach((block, index) => {
+            block.hidden = index !== 0;
         });
     };
 

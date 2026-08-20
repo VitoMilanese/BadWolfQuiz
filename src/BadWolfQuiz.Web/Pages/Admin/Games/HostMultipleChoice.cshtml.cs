@@ -109,6 +109,19 @@ public sealed class HostMultipleChoiceModel(
             ? game.Session.Players.SingleOrDefault(player =>
                 player.Id == answeringPlayerId)
             : null;
+        var remainingOptionsById = question.RemainingHostMultipleChoiceOptions
+            .ToDictionary(option => option.SourceContentBlockId);
+        var optionDisplayOrder = CreateOptionDisplayOrder(
+            game.Session.Id.Value,
+            question.SourceQuestionId,
+            question.AnswerBlocks
+                .OrderBy(option => option.SortOrder)
+                .Select(option => option.SourceContentBlockId)
+                .ToArray());
+        var options = optionDisplayOrder
+            .Where(remainingOptionsById.ContainsKey)
+            .Select(optionId => remainingOptionsById[optionId])
+            .ToArray();
 
         return new
         {
@@ -122,12 +135,51 @@ public sealed class HostMultipleChoiceModel(
             rewardValue = question.HostMultipleChoiceRewardValue,
             originalOptionCount = question.HostMultipleChoiceOriginalOptionCount,
             remainingOptionCount = question.RemainingHostMultipleChoiceOptionIds.Count,
-            options = question.RemainingHostMultipleChoiceOptions.Select(option => new
+            options = options.Select(option => new
             {
                 id = option.SourceContentBlockId,
                 text = option.TextContent
             }).ToArray()
         };
+    }
+
+    private static IReadOnlyList<int> CreateOptionDisplayOrder(
+        Guid gameId,
+        int sourceQuestionId,
+        IReadOnlyList<int> optionIds)
+    {
+        var originalOrder = optionIds.ToArray();
+        var shuffledOrder = optionIds.ToArray();
+        var random = new Random(CreateOptionDisplaySeed(gameId, sourceQuestionId));
+
+        for (var index = shuffledOrder.Length - 1; index > 0; index--)
+        {
+            var swapIndex = random.Next(index + 1);
+            (shuffledOrder[index], shuffledOrder[swapIndex]) =
+                (shuffledOrder[swapIndex], shuffledOrder[index]);
+        }
+
+        if (shuffledOrder.Length > 1 && shuffledOrder.SequenceEqual(originalOrder))
+        {
+            (shuffledOrder[0], shuffledOrder[1]) =
+                (shuffledOrder[1], shuffledOrder[0]);
+        }
+
+        return shuffledOrder;
+    }
+
+    private static int CreateOptionDisplaySeed(Guid gameId, int sourceQuestionId)
+    {
+        unchecked
+        {
+            var hash = 17;
+            foreach (var value in gameId.ToByteArray())
+            {
+                hash = (hash * 31) + value;
+            }
+
+            return (hash * 31) + sourceQuestionId;
+        }
     }
 
     private async Task BroadcastAsync(

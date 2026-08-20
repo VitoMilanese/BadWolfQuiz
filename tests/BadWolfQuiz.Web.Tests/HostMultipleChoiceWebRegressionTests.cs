@@ -62,6 +62,10 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("RemainingHostMultipleChoiceOptions", endpoint);
         Assert.Contains("BuzzerStateChanged", endpoint);
         Assert.Contains("TimerStateChanged", endpoint);
+        Assert.Contains("CreateOptionDisplayOrder", endpoint);
+        Assert.Contains("new Random(CreateOptionDisplaySeed", endpoint);
+        Assert.Contains("shuffledOrder.SequenceEqual(originalOrder)", endpoint);
+        Assert.Contains(".Where(remainingOptionsById.ContainsKey)", endpoint);
 
         var stateHandlerStart = endpoint.IndexOf(
             "public IActionResult OnGetState(Guid id)",
@@ -84,6 +88,14 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("handler=Select", script);
         Assert.Contains("window.setInterval(poll, 750)", script);
 
+        var optionLoopIndex = script.IndexOf(
+            "for (const option of state.options ?? [])",
+            StringComparison.Ordinal);
+        var noAnswerIndex = script.IndexOf(
+            "panel.appendChild(createNoAnswerForm(state));",
+            StringComparison.Ordinal);
+        Assert.True(optionLoopIndex >= 0 && noAnswerIndex > optionLoopIndex);
+
         Assert.Contains(
             "'[data-open-question-preview=\"answer\"]'",
             bootstrap);
@@ -93,6 +105,8 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("content.replaceChildren(answerPreview);", bootstrap);
 
         Assert.Contains("bootstrapScript?.dataset.hostLobby === \"true\"", bootstrap);
+        Assert.Contains("dataset.currentHostMultipleChoice", bootstrap);
+        Assert.Contains("let hostChoiceQuestionActive", bootstrap);
         Assert.Contains("const observer = new MutationObserver", bootstrap);
         Assert.Contains(".host-game-board[data-game-id]", bootstrap);
         Assert.Contains("window.badWolfHostMultipleChoiceInitialized = false", bootstrap);
@@ -100,18 +114,20 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("host-multiple-choice-active", bootstrap);
         Assert.Contains(".question-judge-actions", bootstrap);
         Assert.Contains("top: 13rem !important", bootstrap);
+        Assert.Contains(".answer-presentation", bootstrap);
         Assert.Contains(
-            ".answer-presentation .game-content-block.all-player-answer-option-correct",
+            ".game-content-blocks > .game-content-block",
             bootstrap);
-        Assert.Contains("block.hidden = block !== correctBlock", bootstrap);
+        Assert.Contains("block.hidden = index !== 0", bootstrap);
 
         Assert.Contains(
             "HostMultipleChoiceAssetsTagHelper",
             viewImports);
-        Assert.Contains("ViewContext.ViewData.Model is LobbyModel", assetsTagHelper);
+        Assert.Contains("ViewContext.ViewData.Model as LobbyModel", assetsTagHelper);
         Assert.Contains("host-multiple-choice-bootstrap.js", assetsTagHelper);
         Assert.Contains("data-host-lobby", assetsTagHelper);
-        Assert.Contains("v=1.20.0-259.3", assetsTagHelper);
+        Assert.Contains("data-current-host-multiple-choice", assetsTagHelper);
+        Assert.Contains("v=1.20.0-259.4", assetsTagHelper);
     }
 
     private static string FindRepositoryRoot()

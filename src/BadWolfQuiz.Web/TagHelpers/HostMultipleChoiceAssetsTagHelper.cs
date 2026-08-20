@@ -20,11 +20,16 @@ public sealed class HostMultipleChoiceAssetsTagHelper : TagHelper
             ViewContext.ViewData.Model is QuestionEditorModel editor
                 ? (int)editor.Input.PresentationType
                 : -1;
-        var isHostLobby = ViewContext.ViewData.Model is LobbyModel;
+        var lobby = ViewContext.ViewData.Model as LobbyModel;
+        var isHostLobby = lobby is not null;
+        var currentHostMultipleChoice =
+            lobby?.CurrentQuestion?.IsHostMultipleChoice == true;
         var hostLobbyValue = isHostLobby.ToString().ToLowerInvariant();
+        var currentHostMultipleChoiceValue =
+            currentHostMultipleChoice.ToString().ToLowerInvariant();
 
         output.PostContent.AppendHtml(
             $"<script src=\"/js/host-multiple-choice.js?v=1.20.0-259.3\" data-saved-question-type=\"{savedPresentationType}\"></script>" +
-            $"<script src=\"/js/host-multiple-choice-bootstrap.js?v=1.20.0-259.3\" data-host-lobby=\"{hostLobbyValue}\"></script>");
+            $"<script src=\"/js/host-multiple-choice-bootstrap.js?v=1.20.0-259.4\" data-host-lobby=\"{hostLobbyValue}\" data-current-host-multiple-choice=\"{currentHostMultipleChoiceValue}\"></script>");
     }
 }
