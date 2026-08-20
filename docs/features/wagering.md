@@ -29,7 +29,14 @@ The player who selected the wager question is the only player who answers it. Th
 
 Before revealing the question, the player states a wager verbally and the host enters it with an on-screen numeric keypad. The wager-entry summary shows the selected player's current score directly below the player name, alongside the existing allowed-wager range, so the host can see the balance used to make the wager decision. While wager entry is active, the question board is hidden and the keypad is centered so the host view focuses on the wager. A `MAX` key enters the allowed maximum immediately. If digit entry would exceed the maximum, the UI replaces the value with the maximum. The keypad is a presentation aid; the game engine remains responsible for validating the submitted amount.
 
-The minimum question wager is 5 points.
+All-player wager entry on a player's device follows the same upper-bound behavior: if appending a digit would make the wager exceed the allowed maximum, the displayed value is immediately replaced with that maximum instead of retaining an oversized value.
+
+The minimum question wager depends on the question value:
+
+- questions worth less than 10 points use a 1-point minimum;
+- questions worth 10 points or more keep the normal 5-point minimum.
+
+When the applicable minimum is 1, a player whose current score is 0 or more can still submit a 1-point wager. The host's **Set minimum wager** action uses the same calculated minimum as normal wager validation.
 
 The maximum question wager is:
 
