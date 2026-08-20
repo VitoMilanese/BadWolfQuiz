@@ -44,6 +44,14 @@ public sealed class HostMultipleChoiceWebRegressionTests
             "wwwroot",
             "js",
             "host-multiple-choice-bootstrap.js"));
+        var initialRoundIntro = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Games",
+            "RoundIntro.cshtml"));
         var viewImports = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -156,6 +164,17 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.DoesNotContain("host-multiple-choice.js?v=", bootstrap);
 
         Assert.Contains(
+            "const pageScripts = Array.from(parsed.body.querySelectorAll(\"script\"));",
+            initialRoundIntro);
+        Assert.Contains(
+            "if (loadedScriptUrls.has(sourceUrl) && !canRerun)",
+            initialRoundIntro);
+        Assert.Contains("for (const source of pageScripts)", initialRoundIntro);
+        Assert.Contains(
+            "document.dispatchEvent(new CustomEvent(hostShellMountedEventName));",
+            initialRoundIntro);
+
+        Assert.Contains(
             "QuestionPresentationType.HostMultipleChoice",
             gameContentPreview);
         Assert.Contains(
@@ -186,6 +205,8 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains(
             "HostMultipleChoiceGenericControlsTagHelper",
             viewImports);
+        Assert.Contains("model is not LobbyModel", assetsTagHelper);
+        Assert.Contains("model is not QuestionEditorModel", assetsTagHelper);
         Assert.Contains("host-multiple-choice-bootstrap.js", assetsTagHelper);
         Assert.DoesNotContain("data-host-lobby", assetsTagHelper);
         Assert.Contains("v=1.20.0-259.7", assetsTagHelper);
