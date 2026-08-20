@@ -32,6 +32,8 @@ Web `1.20.4` is a PATCH release that fixes **Copy Question** target-category cap
 
 Web `1.21.0` is a MINOR release that expands Quiz Editor question pricing: manually entered prices may be any positive integer instead of being limited to multiples of 100, while the native up/down spinner continues to change values in 100-point increments. Client-side and server-side validation reject zero and negative prices, and client-side validation also rejects empty or fractional values.
 
+Web `1.21.1` is a PATCH release that automatically advances mandatory all-player questions as soon as every participating player has submitted. Multiple-choice questions immediately reveal the answer and stop the timers; text-answer questions stop accepting submissions, stop the timers, and enter sequential host review. Wager variants wait only for players who submitted wagers, so players who join after wagering has finished do not block completion.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.

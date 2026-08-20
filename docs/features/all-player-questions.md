@@ -37,14 +37,16 @@ The type selector is rendered by Razor and also posts a hidden all-player mode m
 
 1. The host selects the question.
 2. The normal buzzer remains closed.
-3. Every current player receives the appropriate answer controls.
+3. Every current participating player receives the appropriate answer controls.
 4. The host sees submitted/waiting progress without seeing correctness early.
-5. The timer is informational for the host and never blocks player submissions.
-6. Players may still answer after the timer reaches zero.
-7. **Proceed to answer review** stays available while answering is open.
-8. When the host starts review, every participant who has not answered receives an automatic empty response before the question advances.
+5. The timer is informational for the host and never blocks player submissions while required answers are still missing.
+6. Players may still answer after the timer reaches zero if at least one required participant has not submitted yet.
+7. As soon as every required participant submits, the server advances automatically: multiple choice reveals the answer, while text mode stops accepting submissions and enters host review.
+8. **Proceed to answer review** remains available while answering is open. If the host starts review before everyone submits, every missing participant receives an automatic empty response before the question advances to reveal/review.
 
-For multiple choice, closing answering reveals the answer presentation. For text mode, closing answering starts sequential host judging when at least one answer was submitted; with no submissions the question advances directly to its answer state.
+For multiple choice, automatic completion or the host's early close action reveals the answer presentation and stops the question timers. For text mode, automatic completion stops both timers and starts sequential host judging without resolving the question first. An early host close does the same after recording empty responses for missing participants.
+
+For wager all-player questions, the participants after wagering are the players who submitted wagers. A player who joins after the wager phase has finished does not become a required respondent and therefore does not block automatic completion.
 
 ## Multiple-choice ordering and presentation
 
@@ -64,7 +66,11 @@ Image endpoints return inline media responses so they can be displayed by `<img>
 
 ## Text judging and scoring
 
-Text submissions are never checked automatically. The right-side player drawer shows only submitted/waiting status and never displays answer text. After a result is known, the host progress row also shows the recorded score delta next to Correct/Incorrect (for example `+5`, `-5`, or `0`). The timer never closes that input. When the host starts review, every participant who is still missing is recorded automatically as `-`, then the submitted answers are judged sequentially. The current review card and its Correct/Incorrect controls keep a stable DOM identity between polling updates so a normal click cannot be lost. The individual empty-response action remains available in the drawer when the host wants to mark an AFK participant before starting review. Multiple-choice review uses the same close behavior: missing participants receive incorrect empty attempts without selecting an option on their behalf. Normal questions keep a zero delta; wager questions deduct that participant's own wager.
+Text submissions are never checked automatically. The right-side player drawer shows only submitted/waiting status and never displays answer text. After a result is known, the host progress row also shows the recorded score delta next to Correct/Incorrect (for example `+5`, `-5`, or `0`). The timer never closes input by itself.
+
+When every current participant has submitted a text answer, answering closes automatically, both timers stop, and the host enters sequential review immediately. The current review card and its Correct/Incorrect controls keep a stable DOM identity between polling updates so a normal click cannot be lost. If the host starts review early, every participant who is still missing is first recorded automatically as `-`. The individual empty-response action remains available in the drawer when the host wants to mark an AFK participant before review starts.
+
+Multiple-choice early review uses the same missing-player behavior: participants without a submitted option receive incorrect empty attempts without selecting an option on their behalf. Normal questions keep a zero delta; wager questions deduct that participant's own wager.
 
 For a normal all-player question, scoring is the same for both modes:
 
@@ -91,7 +97,9 @@ The all-player client can recover its access token from the same local-storage r
 The focused regression suite covers:
 
 - editor restrictions and dirty-state behavior;
-- host-controlled answering closure and automatic empty-response fill for missing players;
+- automatic completion after every participating player submits, for both multiple-choice reveal and text-answer review;
+- host-triggered early review and automatic empty-response fill for missing players;
+- wager participation rules, including late players who did not submit wagers;
 - shuffled Text/Image choices;
 - server-rendered host and preview grids;
 - reconnect approval, local-storage token recovery, and control rebuilding;
