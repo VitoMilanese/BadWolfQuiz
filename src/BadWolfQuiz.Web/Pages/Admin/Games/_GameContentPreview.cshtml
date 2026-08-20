@@ -4,6 +4,16 @@
         Model.IsAnswer &&
         Model.PresentationType ==
             BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice;
+    var isHostMultipleChoiceAnswer =
+        Model.IsAnswer &&
+        Model.PresentationType ==
+            BadWolfQuiz.Game.Definitions.QuestionPresentationType.HostMultipleChoice;
+    var blocks = isHostMultipleChoiceAnswer
+        ? Model.Blocks
+            .OrderBy(block => block.SortOrder)
+            .Take(1)
+            .ToArray()
+        : Model.Blocks.ToArray();
 }
 
 <link rel="stylesheet" href="~/css/youtube-placeholder.css" asp-append-version="true" />
@@ -14,7 +24,7 @@
         @{
             var blockIndex = 0;
         }
-        @foreach (var block in Model.Blocks)
+        @foreach (var block in blocks)
         {
             var allPlayerAnswerOptionClass =
                 isAllPlayerMultipleChoiceAnswer
