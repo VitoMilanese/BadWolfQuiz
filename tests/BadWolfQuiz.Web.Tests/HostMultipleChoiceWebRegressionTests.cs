@@ -112,16 +112,27 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("cards.length < 4 || cards.length > 10", script);
         Assert.Contains("host-multiple-choice-correct-badge", script);
         Assert.Contains("host-multiple-choice-panel", script);
+        Assert.Contains("z-index: 15;", script);
         Assert.Contains("data-question-heading", script);
         Assert.Contains("handler=ResolveQuestion", script);
         Assert.Contains("handler=Select", script);
         Assert.Contains("window.setInterval(poll, 750)", script);
         Assert.Contains(
+            "const lobbyMatch = window.location.pathname.match",
+            script);
+        Assert.Contains("decodeURIComponent(lobbyMatch[1])", script);
+        Assert.DoesNotContain(
             "\"badwolf:host-gameplay-updated\",\n                initializeHostGameplay",
             script);
         Assert.Contains(
             "document.addEventListener(\"badwolf:host-gameplay-updated\", poll);",
             script);
+        Assert.Contains(
+            "heading.querySelector(\"[data-question-reward]\")",
+            script);
+        Assert.Contains("reward.dataset.questionReward = \"\";", script);
+        Assert.Contains("question-reward-changed", script);
+        Assert.DoesNotContain("heading.textContent = template.replace", script);
         Assert.Contains("await refreshHostGameplay();", script);
         Assert.DoesNotContain("window.location.reload()", script);
 
@@ -177,7 +188,7 @@ public sealed class HostMultipleChoiceWebRegressionTests
             viewImports);
         Assert.Contains("host-multiple-choice-bootstrap.js", assetsTagHelper);
         Assert.DoesNotContain("data-host-lobby", assetsTagHelper);
-        Assert.Contains("v=1.20.0-259.6", assetsTagHelper);
+        Assert.Contains("v=1.20.0-259.7", assetsTagHelper);
     }
 
     private static string FindRepositoryRoot()
