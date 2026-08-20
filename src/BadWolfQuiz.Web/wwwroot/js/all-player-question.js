@@ -387,8 +387,6 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             display: status.style.display
         };
 
-        // The existing editor dirty tracker already marks AJAX saves as clean
-        // by observing this status element. Reuse that path without showing UI.
         status.style.display = "none";
         status.classList.add("alert-success");
         status.classList.remove("alert-error");
@@ -842,10 +840,11 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             const keypad = document.createElement("div");
             keypad.className = "wager-keypad";
             const addDigit = digit => {
-                if (display.value.length >= String(maximum).length + 1) {
-                    return;
-                }
-                display.value += digit;
+                const nextValue = (display.value + digit)
+                    .replace(/^0+(?=\d)/, "");
+                display.value = Math.min(
+                    Number(nextValue),
+                    maximum).toString();
                 refresh();
             };
             for (const digit of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
