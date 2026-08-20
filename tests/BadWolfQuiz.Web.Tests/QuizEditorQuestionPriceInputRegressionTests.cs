@@ -38,17 +38,18 @@ public sealed class QuizEditorQuestionPriceInputRegressionTests
 
         Assert.Contains("class=\"question-points-input\"", editor, StringComparison.Ordinal);
         Assert.Contains("step=\"100\"", editor, StringComparison.Ordinal);
-        Assert.Contains("input.min = \"1\"", script, StringComparison.Ordinal);
-        Assert.Contains("input.step = \"100\"", script, StringComparison.Ordinal);
         Assert.Contains("input.required = true", script, StringComparison.Ordinal);
         Assert.Contains("form.noValidate = true", script, StringComparison.Ordinal);
-        Assert.Contains("input.step = \"1\"", script, StringComparison.Ordinal);
+        Assert.Contains("Number.isInteger(value)", script, StringComparison.Ordinal);
+        Assert.Contains("value > 0", script, StringComparison.Ordinal);
+        Assert.Contains("input.step = \"any\"", script, StringComparison.Ordinal);
         Assert.Contains("form.checkValidity()", script, StringComparison.Ordinal);
-        Assert.Contains("form.reportValidity()", script, StringComparison.Ordinal);
+        Assert.Contains("firstInvalidPoint.reportValidity()", script, StringComparison.Ordinal);
         Assert.Contains("input.step = originalSteps[index]", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("input.min = \"1\"", script, StringComparison.Ordinal);
         Assert.Contains("x.Points <= 0", pageModel, StringComparison.Ordinal);
         Assert.Contains(
-            "quiz-editor-question-price-input.js?v=273.1",
+            "quiz-editor-question-price-input.js?v=273.2",
             tagHelper,
             StringComparison.Ordinal);
     }
