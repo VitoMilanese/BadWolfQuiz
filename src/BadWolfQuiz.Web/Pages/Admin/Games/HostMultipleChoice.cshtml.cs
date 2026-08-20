@@ -60,6 +60,23 @@ public sealed class HostMultipleChoiceModel(
                     sourceContentBlockId);
                 player = game.Session.Players.Single(item =>
                     item.Id == result.Attempt.PlayerId);
+
+                if (!result.IsCorrect && !result.QuestionClosed)
+                {
+                    var question = game.Session.Board.Questions.Single(item =>
+                        item.SourceQuestionId == sourceQuestionId);
+                    var hasEligiblePlayer = game.Session.Players.Any(candidate =>
+                        question.AnswerAttempts.All(attempt =>
+                            attempt.PlayerId != candidate.Id));
+
+                    if (!hasEligiblePlayer)
+                    {
+                        game.Session.ResolveQuestionWithoutCorrectAnswer(
+                            sourceQuestionId);
+                        result = result with { QuestionClosed = true };
+                    }
+                }
+
                 game.BuzzerRace = null;
                 game.MarkPersistenceChanged();
             }

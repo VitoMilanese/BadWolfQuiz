@@ -6,10 +6,6 @@
     }
     window.badWolfHostMultipleChoiceBootstrapInitialized = true;
 
-    const bootstrapScript = document.currentScript ??
-        document.querySelector('script[src*="host-multiple-choice-bootstrap.js"]');
-    const isHostLobby = bootstrapScript?.dataset.hostLobby === "true";
-
     const style = document.createElement("style");
     style.id = "host-multiple-choice-bootstrap-styles";
     style.textContent = `
@@ -72,45 +68,5 @@
         }, true);
     };
 
-    const initializeHostGameplayLifecycle = () => {
-        if (!isHostLobby) {
-            return;
-        }
-
-        const getBoard = () => document.querySelector(
-            ".host-game-board[data-game-id]");
-        let hostGameplayInitialized = Boolean(getBoard());
-        let scriptLoadPending = false;
-
-        const ensureHostGameplay = () => {
-            if (hostGameplayInitialized || scriptLoadPending || !getBoard()) {
-                return;
-            }
-
-            scriptLoadPending = true;
-            document.getElementById("host-multiple-choice-styles")?.remove();
-            window.badWolfHostMultipleChoiceInitialized = false;
-
-            const mainScript = document.createElement("script");
-            mainScript.src = "/js/host-multiple-choice.js?v=1.20.0-259.3";
-            mainScript.dataset.savedQuestionType = "-1";
-            mainScript.addEventListener("load", () => {
-                hostGameplayInitialized = true;
-                scriptLoadPending = false;
-            }, { once: true });
-            mainScript.addEventListener("error", () => {
-                scriptLoadPending = false;
-            }, { once: true });
-            document.body.appendChild(mainScript);
-        };
-
-        document.addEventListener(
-            "badwolf:host-gameplay-updated",
-            ensureHostGameplay);
-        window.addEventListener("pageshow", ensureHostGameplay);
-        ensureHostGameplay();
-    };
-
     initializeEditorAnswerPreview();
-    initializeHostGameplayLifecycle();
 })();

@@ -86,6 +86,15 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("new Random(CreateOptionDisplaySeed", endpoint);
         Assert.Contains("shuffledOrder.SequenceEqual(originalOrder)", endpoint);
         Assert.Contains(".Where(remainingOptionsById.ContainsKey)", endpoint);
+        Assert.Contains(
+            "var hasEligiblePlayer = game.Session.Players.Any",
+            endpoint);
+        Assert.Contains(
+            "game.Session.ResolveQuestionWithoutCorrectAnswer",
+            endpoint);
+        Assert.Contains(
+            "result = result with { QuestionClosed = true };",
+            endpoint);
 
         var stateHandlerStart = endpoint.IndexOf(
             "public IActionResult OnGetState(Guid id)",
@@ -107,6 +116,14 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("handler=ResolveQuestion", script);
         Assert.Contains("handler=Select", script);
         Assert.Contains("window.setInterval(poll, 750)", script);
+        Assert.Contains(
+            "\"badwolf:host-gameplay-updated\",\n                initializeHostGameplay",
+            script);
+        Assert.Contains(
+            "document.addEventListener(\"badwolf:host-gameplay-updated\", poll);",
+            script);
+        Assert.Contains("await refreshHostGameplay();", script);
+        Assert.DoesNotContain("window.location.reload()", script);
 
         var optionLoopIndex = script.IndexOf(
             "for (const option of state.options ?? [])",
@@ -123,18 +140,9 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("const firstCard = answerSection.querySelector", bootstrap);
         Assert.Contains("event.stopImmediatePropagation();", bootstrap);
         Assert.Contains("content.replaceChildren(answerPreview);", bootstrap);
-
-        Assert.Contains("bootstrapScript?.dataset.hostLobby === \"true\"", bootstrap);
-        Assert.Contains("initializeHostGameplayLifecycle", bootstrap);
-        Assert.Contains(".host-game-board[data-game-id]", bootstrap);
-        Assert.Contains(
-            "document.addEventListener(\n            \"badwolf:host-gameplay-updated\",",
-            bootstrap);
-        Assert.Contains("window.badWolfHostMultipleChoiceInitialized = false", bootstrap);
-        Assert.Contains("scriptLoadPending", bootstrap);
-        Assert.Contains("host-multiple-choice.js?v=1.20.0-259.3", bootstrap);
-        Assert.DoesNotContain("MutationObserver", bootstrap);
         Assert.Contains("top: 13rem !important", bootstrap);
+        Assert.DoesNotContain("initializeHostGameplayLifecycle", bootstrap);
+        Assert.DoesNotContain("host-multiple-choice.js?v=", bootstrap);
 
         Assert.Contains(
             "QuestionPresentationType.HostMultipleChoice",
@@ -167,10 +175,9 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains(
             "HostMultipleChoiceGenericControlsTagHelper",
             viewImports);
-        Assert.Contains("ViewContext.ViewData.Model is LobbyModel", assetsTagHelper);
         Assert.Contains("host-multiple-choice-bootstrap.js", assetsTagHelper);
-        Assert.Contains("data-host-lobby", assetsTagHelper);
-        Assert.Contains("v=1.20.0-259.5", assetsTagHelper);
+        Assert.DoesNotContain("data-host-lobby", assetsTagHelper);
+        Assert.Contains("v=1.20.0-259.6", assetsTagHelper);
     }
 
     private static string FindRepositoryRoot()

@@ -1,5 +1,4 @@
 using BadWolfQuiz.Game.Definitions;
-using BadWolfQuiz.Web.Pages.Admin.Games;
 using BadWolfQuiz.Web.Pages.Admin.Quizzes;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -20,11 +19,9 @@ public sealed class HostMultipleChoiceAssetsTagHelper : TagHelper
             ViewContext.ViewData.Model is QuestionEditorModel editor
                 ? (int)editor.Input.PresentationType
                 : -1;
-        var isHostLobby = ViewContext.ViewData.Model is LobbyModel;
-        var hostLobbyValue = isHostLobby.ToString().ToLowerInvariant();
 
         output.PostContent.AppendHtml(
-            $"<script src=\"/js/host-multiple-choice.js?v=1.20.0-259.3\" data-saved-question-type=\"{savedPresentationType}\"></script>" +
-            $"<script src=\"/js/host-multiple-choice-bootstrap.js?v=1.20.0-259.5\" data-host-lobby=\"{hostLobbyValue}\"></script>");
+            $"<script src=\"/js/host-multiple-choice.js?v=1.20.0-259.6\" data-saved-question-type=\"{savedPresentationType}\"></script>" +
+            "<script src=\"/js/host-multiple-choice-bootstrap.js?v=1.20.0-259.6\"></script>");
     }
 }

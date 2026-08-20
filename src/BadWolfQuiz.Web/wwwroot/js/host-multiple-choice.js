@@ -341,6 +341,10 @@
         const initialBoard = getBoard();
         const gameId = initialBoard?.dataset.gameId;
         if (!gameId) {
+            document.addEventListener(
+                "badwolf:host-gameplay-updated",
+                initializeHostGameplay,
+                { once: true });
             return;
         }
 
@@ -348,6 +352,7 @@
         let panel = null;
         let pollInProgress = false;
         let selectionInProgress = false;
+        let hostRefreshInProgress = false;
         let lastState = null;
 
         const antiforgeryToken = () =>
@@ -377,6 +382,20 @@
         const removePanel = () => {
             panel?.remove();
             panel = null;
+        };
+
+        const refreshHostGameplay = async () => {
+            if (hostRefreshInProgress ||
+                typeof window.BadWolfHostGameplay?.refresh !== "function") {
+                return;
+            }
+
+            hostRefreshInProgress = true;
+            try {
+                await window.BadWolfHostGameplay.refresh();
+            } finally {
+                hostRefreshInProgress = false;
+            }
         };
 
         const createNoAnswerForm = state => {
@@ -441,7 +460,8 @@
                 }
 
                 if (result.questionClosed) {
-                    window.location.reload();
+                    removePanel();
+                    await refreshHostGameplay();
                     return;
                 }
 
@@ -469,11 +489,8 @@
                 const closeAnswerForm = document.querySelector(
                     'form[action*="handler=CloseAnswer"]');
                 if (!closeAnswerForm) {
-                    window.location.reload();
-                } else {
-                    document.querySelector(
-                        ".answer-presentation .game-content-block")
-                        ?.classList.add("all-player-answer-option-correct");
+                    refreshHostGameplay().catch(error =>
+                        console.debug("Host multiple-choice answer refresh failed.", error));
                 }
                 return;
             }
@@ -548,6 +565,7 @@
 
         poll();
         window.setInterval(poll, 750);
+        document.addEventListener("badwolf:host-gameplay-updated", poll);
 
         document.addEventListener("visibilitychange", () => {
             if (!document.hidden) {
