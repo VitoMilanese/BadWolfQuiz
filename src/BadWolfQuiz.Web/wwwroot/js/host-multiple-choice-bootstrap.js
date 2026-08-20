@@ -9,15 +9,10 @@
     const bootstrapScript = document.currentScript ??
         document.querySelector('script[src*="host-multiple-choice-bootstrap.js"]');
     const isHostLobby = bootstrapScript?.dataset.hostLobby === "true";
-    let hostChoiceQuestionActive =
-        bootstrapScript?.dataset.currentHostMultipleChoice === "true";
 
     const style = document.createElement("style");
     style.id = "host-multiple-choice-bootstrap-styles";
     style.textContent = `
-body.host-multiple-choice-active .question-judge-actions {
-    display: none !important;
-}
 .host-multiple-choice-panel {
     top: 13rem !important;
     max-height: calc(100vh - 14.5rem) !important;
@@ -77,82 +72,45 @@ body.host-multiple-choice-active .question-judge-actions {
         }, true);
     };
 
-    const synchronizeHostChoiceUi = () => {
-        const panel = document.querySelector(".host-multiple-choice-panel");
-        const questionPresentation = document.querySelector(
-            ".question-presentation");
-
-        if (panel) {
-            hostChoiceQuestionActive = true;
-        } else if (questionPresentation) {
-            hostChoiceQuestionActive = false;
-        }
-
-        document.body.classList.toggle(
-            "host-multiple-choice-active",
-            Boolean(panel));
-
-        const answerPresentation = document.querySelector(
-            ".answer-presentation");
-        if (!hostChoiceQuestionActive || !answerPresentation) {
-            return;
-        }
-
-        const answerBlocks = answerPresentation.querySelectorAll(
-            ".game-content-blocks > .game-content-block");
-        answerBlocks.forEach((block, index) => {
-            block.hidden = index !== 0;
-        });
-    };
-
-    const initializeHostUiSynchronization = () => {
-        if (!isHostLobby) {
-            return;
-        }
-
-        const observer = new MutationObserver(synchronizeHostChoiceUi);
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ["class"]
-        });
-        synchronizeHostChoiceUi();
-    };
-
-    const initializeDelayedHostGameplay = () => {
+    const initializeHostGameplayLifecycle = () => {
         if (!isHostLobby) {
             return;
         }
 
         const getBoard = () => document.querySelector(
             ".host-game-board[data-game-id]");
-        if (getBoard()) {
-            return;
-        }
+        let hostGameplayInitialized = Boolean(getBoard());
+        let scriptLoadPending = false;
 
-        const observer = new MutationObserver(() => {
-            if (!getBoard()) {
+        const ensureHostGameplay = () => {
+            if (hostGameplayInitialized || scriptLoadPending || !getBoard()) {
                 return;
             }
 
-            observer.disconnect();
+            scriptLoadPending = true;
             document.getElementById("host-multiple-choice-styles")?.remove();
             window.badWolfHostMultipleChoiceInitialized = false;
 
             const mainScript = document.createElement("script");
             mainScript.src = "/js/host-multiple-choice.js?v=1.20.0-259.3";
             mainScript.dataset.savedQuestionType = "-1";
+            mainScript.addEventListener("load", () => {
+                hostGameplayInitialized = true;
+                scriptLoadPending = false;
+            }, { once: true });
+            mainScript.addEventListener("error", () => {
+                scriptLoadPending = false;
+            }, { once: true });
             document.body.appendChild(mainScript);
-        });
+        };
 
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+        document.addEventListener(
+            "badwolf:host-gameplay-updated",
+            ensureHostGameplay);
+        window.addEventListener("pageshow", ensureHostGameplay);
+        ensureHostGameplay();
     };
 
     initializeEditorAnswerPreview();
-    initializeHostUiSynchronization();
-    initializeDelayedHostGameplay();
+    initializeHostGameplayLifecycle();
 })();

@@ -62,6 +62,12 @@ public sealed class HostMultipleChoiceWebRegressionTests
             "BadWolfQuiz.Web",
             "TagHelpers",
             "HostMultipleChoiceAnswerBlockTagHelper.cs"));
+        var genericControlsTagHelper = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "TagHelpers",
+            "HostMultipleChoiceGenericControlsTagHelper.cs"));
 
         Assert.Contains(
             "QuestionPresentationType.HostMultipleChoice",
@@ -119,20 +125,16 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("content.replaceChildren(answerPreview);", bootstrap);
 
         Assert.Contains("bootstrapScript?.dataset.hostLobby === \"true\"", bootstrap);
-        Assert.Contains("dataset.currentHostMultipleChoice", bootstrap);
-        Assert.Contains("let hostChoiceQuestionActive", bootstrap);
-        Assert.Contains("const observer = new MutationObserver", bootstrap);
+        Assert.Contains("initializeHostGameplayLifecycle", bootstrap);
         Assert.Contains(".host-game-board[data-game-id]", bootstrap);
-        Assert.Contains("window.badWolfHostMultipleChoiceInitialized = false", bootstrap);
-        Assert.Contains("host-multiple-choice.js?v=1.20.0-259.3", bootstrap);
-        Assert.Contains("host-multiple-choice-active", bootstrap);
-        Assert.Contains(".question-judge-actions", bootstrap);
-        Assert.Contains("top: 13rem !important", bootstrap);
-        Assert.Contains(".answer-presentation", bootstrap);
         Assert.Contains(
-            ".game-content-blocks > .game-content-block",
+            "document.addEventListener(\n            \"badwolf:host-gameplay-updated\",",
             bootstrap);
-        Assert.Contains("block.hidden = index !== 0", bootstrap);
+        Assert.Contains("window.badWolfHostMultipleChoiceInitialized = false", bootstrap);
+        Assert.Contains("scriptLoadPending", bootstrap);
+        Assert.Contains("host-multiple-choice.js?v=1.20.0-259.3", bootstrap);
+        Assert.DoesNotContain("MutationObserver", bootstrap);
+        Assert.Contains("top: 13rem !important", bootstrap);
 
         Assert.Contains(
             "QuestionPresentationType.HostMultipleChoice",
@@ -150,17 +152,25 @@ public sealed class HostMultipleChoiceWebRegressionTests
             answerBlockTagHelper);
         Assert.Contains("output.SuppressOutput();", answerBlockTagHelper);
 
+        Assert.Contains("asp-page-handler", genericControlsTagHelper);
+        Assert.Contains("IsHostMultipleChoice: true", genericControlsTagHelper);
+        Assert.Contains("\"JudgeQuestionAnswer\"", genericControlsTagHelper);
+        Assert.Contains("\"ResolveQuestion\"", genericControlsTagHelper);
+        Assert.Contains("output.SuppressOutput();", genericControlsTagHelper);
+
         Assert.Contains(
             "HostMultipleChoiceAssetsTagHelper",
             viewImports);
         Assert.Contains(
             "HostMultipleChoiceAnswerBlockTagHelper",
             viewImports);
-        Assert.Contains("ViewContext.ViewData.Model as LobbyModel", assetsTagHelper);
+        Assert.Contains(
+            "HostMultipleChoiceGenericControlsTagHelper",
+            viewImports);
+        Assert.Contains("ViewContext.ViewData.Model is LobbyModel", assetsTagHelper);
         Assert.Contains("host-multiple-choice-bootstrap.js", assetsTagHelper);
         Assert.Contains("data-host-lobby", assetsTagHelper);
-        Assert.Contains("data-current-host-multiple-choice", assetsTagHelper);
-        Assert.Contains("v=1.20.0-259.4", assetsTagHelper);
+        Assert.Contains("v=1.20.0-259.5", assetsTagHelper);
     }
 
     private static string FindRepositoryRoot()
