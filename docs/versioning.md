@@ -22,6 +22,8 @@ Host-selected multiple-choice questions are the headline backwards-compatible fe
 
 Follow-up fixes made before the first `1.20.0` release remain part of `1.20.0`; a PATCH bump is reserved for compatible fixes released after that version has shipped.
 
+Web `1.20.1` is a PATCH release that fixes Quiz Editor question drag-and-drop so successful swaps and moves update the board in place without a full page reload, while failed moves surface an error without forcing a reload.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
