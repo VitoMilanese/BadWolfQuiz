@@ -14,9 +14,7 @@ public sealed class HostMultipleChoiceModel(
 {
     public IActionResult OnGet() => NotFound();
 
-    public async Task<IActionResult> OnGetStateAsync(
-        Guid id,
-        CancellationToken cancellationToken)
+    public IActionResult OnGetState(Guid id)
     {
         var game = sessionRegistry.FindOwned(
             new GameSessionId(id),
@@ -31,13 +29,6 @@ public sealed class HostMultipleChoiceModel(
         {
             state = CreateState(game);
         }
-
-        await gameHub.Clients
-            .Group(GameHub.GroupName(game.PublicCode))
-            .SendAsync(
-                "BuzzerStateChanged",
-                GameHub.CreateBuzzerUpdate(game),
-                cancellationToken);
 
         return new JsonResult(state);
     }
