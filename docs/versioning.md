@@ -36,6 +36,8 @@ Web `1.21.1` is a PATCH release that automatically advances mandatory all-player
 
 Web `1.21.2` is a PATCH release that fixes low-value wager questions by using a 1-point minimum when the question value is below 10, including for players whose current score is zero, while keeping server-side validation and the host minimum-wager action aligned with the same rule. Player and host wager keypads also clamp digit entry to the maximum allowed wager instead of retaining an oversized value.
 
+Web `1.21.3` is a PATCH release that fixes the private AnswerKey screen for all-player multiple-choice questions so only the configured correct option is rendered. It also removes redundant question metadata and body-level answer chrome, places **Correct answer** in the shared application topbar, hides the portal footer on AnswerKey, and constrains the answer body to the remaining viewport so the screen no longer gains an unnecessary page scrollbar.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
