@@ -29,12 +29,25 @@ public sealed class HostMultipleChoiceWebRegressionTests
             "wwwroot",
             "js",
             "host-multiple-choice.js"));
+        var bootstrap = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "host-multiple-choice-bootstrap.js"));
         var viewImports = File.ReadAllText(Path.Combine(
             root,
             "src",
             "BadWolfQuiz.Web",
             "Pages",
             "_ViewImports.cshtml"));
+        var assetsTagHelper = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "TagHelpers",
+            "HostMultipleChoiceAssetsTagHelper.cs"));
 
         Assert.Contains(
             "QuestionPresentationType.HostMultipleChoice",
@@ -61,8 +74,26 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("window.setInterval(poll, 750)", script);
 
         Assert.Contains(
+            "'[data-open-question-preview=\"answer\"]'",
+            bootstrap);
+        Assert.Contains("presentationType.value !== \"4\"", bootstrap);
+        Assert.Contains("const firstCard = answerSection.querySelector", bootstrap);
+        Assert.Contains("event.stopImmediatePropagation();", bootstrap);
+        Assert.Contains("content.replaceChildren(answerPreview);", bootstrap);
+
+        Assert.Contains("script?.dataset.hostLobby === \"true\"", bootstrap);
+        Assert.Contains("const observer = new MutationObserver", bootstrap);
+        Assert.Contains(".host-game-board[data-game-id]", bootstrap);
+        Assert.Contains("window.badWolfHostMultipleChoiceInitialized = false", bootstrap);
+        Assert.Contains("host-multiple-choice.js?v=1.20.0-259.2", bootstrap);
+
+        Assert.Contains(
             "HostMultipleChoiceAssetsTagHelper",
             viewImports);
+        Assert.Contains("ViewContext.ViewData.Model is LobbyModel", assetsTagHelper);
+        Assert.Contains("host-multiple-choice-bootstrap.js", assetsTagHelper);
+        Assert.Contains("data-host-lobby", assetsTagHelper);
+        Assert.Contains("v=1.20.0-259.2", assetsTagHelper);
     }
 
     private static string FindRepositoryRoot()
