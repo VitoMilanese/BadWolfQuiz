@@ -62,7 +62,7 @@ The editor answer preview, live answer page, and resolved-question answer previe
 - every distractor with a red border;
 - text and images centered inside equal presentation cells.
 
-The private host `/Admin/Games/AnswerKey/` screen intentionally uses a different reveal presentation for `AllPlayerMultipleChoice`: it renders only the first configured answer block, which is the correct option, and omits every distractor. Other question types continue to render their normal answer blocks. The AnswerKey screen uses a compact centered **Correct answer** header and a full-width answer area so the answer content can use the available viewport without the previous category/question metadata or excessive horizontal margins.
+The private host `/Admin/Games/AnswerKey/` screen intentionally uses a different reveal presentation for `AllPlayerMultipleChoice`: it renders only the first configured answer block, which is the correct option, and omits every distractor. Other question types continue to render their normal answer blocks. **Correct answer** is rendered in the shared application topbar through `HeaderContext`, not in a separate body header. The AnswerKey screen hides the portal footer and constrains its body to the viewport below the topbar, preventing an otherwise unnecessary page scrollbar while allowing the answer content to use the full available width.
 
 Image endpoints return inline media responses so they can be displayed by `<img>` elements rather than downloaded as attachments.
 
@@ -104,7 +104,7 @@ The focused regression suite covers:
 - wager participation rules, including late players who did not submit wagers;
 - shuffled Text/Image choices;
 - server-rendered host and preview grids;
-- AnswerKey correct-option filtering and compact full-width presentation;
+- AnswerKey correct-option filtering, shared-topbar title placement, and viewport-bound full-width presentation;
 - reconnect approval, local-storage token recovery, and control rebuilding;
 - versioned asset loading;
 - normal and per-player-wager scoring behavior.

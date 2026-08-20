@@ -34,7 +34,7 @@ public sealed class AnswerKeyRegressionTests
     }
 
     [Fact]
-    public void Answer_key_layout_is_compact_and_uses_the_available_width()
+    public void Answer_key_uses_the_real_topbar_and_does_not_create_page_scroll_chrome()
     {
         var page = File.ReadAllText(FindWebFile(
             "Pages",
@@ -48,9 +48,15 @@ public sealed class AnswerKeyRegressionTests
 
         Assert.Contains("~/css/answer-key.css", page, StringComparison.Ordinal);
         Assert.Contains(
-            "<h1>@Localizer[\"Label_CorrectAnswer\"]</h1>",
+            "ViewData[\"HidePortalFooter\"] = true;",
             page,
             StringComparison.Ordinal);
+        Assert.Contains("@section HeaderContext", page, StringComparison.Ordinal);
+        Assert.Contains(
+            "<h2>@Localizer[\"Label_CorrectAnswer\"]</h2>",
+            page,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain("answer-key-header", page, StringComparison.Ordinal);
         Assert.DoesNotContain("Model.QuestionLabel", page, StringComparison.Ordinal);
         Assert.DoesNotContain("GameBoard_Answer", page, StringComparison.Ordinal);
 
@@ -58,8 +64,14 @@ public sealed class AnswerKeyRegressionTests
             "body:has(.answer-key-page) .page-shell",
             css,
             StringComparison.Ordinal);
-        Assert.Contains("max-width: none;", css, StringComparison.Ordinal);
-        Assert.Contains("padding-inline: 0;", css, StringComparison.Ordinal);
+        Assert.Contains(
+            "height: calc(100dvh - var(--topbar-height));",
+            css,
+            StringComparison.Ordinal);
+        Assert.Contains("padding: 0;", css, StringComparison.Ordinal);
+        Assert.Contains("overflow: hidden;", css, StringComparison.Ordinal);
+        Assert.Contains("height: 100%;", css, StringComparison.Ordinal);
+        Assert.Contains("min-height: 0;", css, StringComparison.Ordinal);
         Assert.Contains(
             ".answer-key-content.game-content-presentation",
             css,

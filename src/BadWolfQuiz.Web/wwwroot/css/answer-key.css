@@ -1,34 +1,49 @@
+body:has(.answer-key-page) {
+    overflow: hidden;
+}
+
 body:has(.answer-key-page) .page-shell {
+    width: 100%;
     max-width: none;
-    padding-inline: 0;
+    height: calc(100dvh - var(--topbar-height));
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.answer-key-header-context {
+    width: 100%;
+    justify-content: center;
+}
+
+.answer-key-header-context h2 {
+    max-width: none;
+    margin: 0;
+    text-align: center;
 }
 
 .answer-key-page {
-    gap: 0.5rem;
-}
-
-.answer-key-header {
-    padding-inline: 1rem;
-}
-
-.answer-key-header h1 {
-    margin: 0;
-    text-align: center;
-    font-size: clamp(1.15rem, 2vw, 1.65rem);
-    line-height: 1.2;
+    height: 100%;
+    min-height: 0;
+    gap: 0;
 }
 
 .answer-key-content,
 .answer-key-waiting {
     width: 100%;
     max-width: none;
-    margin-inline: 0;
-    border-inline: 0;
+    min-height: 0;
+    margin: 0;
+    border: 0;
     border-radius: 0;
 }
 
 .answer-key-content {
     padding: clamp(12px, 2vw, 24px);
+}
+
+.answer-key-waiting {
+    padding: 1rem;
 }
 
 .answer-key-content.game-content-presentation {

@@ -2,6 +2,13 @@
 @model BadWolfQuiz.Web.Pages.Admin.Games.AnswerKeyModel
 @{
     ViewData["Title"] = Localizer["AnswerKey_Title"];
+    ViewData["HidePortalFooter"] = true;
+}
+
+@section HeaderContext {
+    <div class="game-header-context answer-key-header-context">
+        <h2>@Localizer["Label_CorrectAnswer"]</h2>
+    </div>
 }
 
 <link rel="stylesheet" href="~/css/youtube-placeholder.css" asp-append-version="true" />
@@ -9,10 +16,6 @@
 
 <section class="answer-key-page"
          data-game-code="@Model.Game.PublicCode">
-    <header class="answer-key-header">
-        <h1>@Localizer["Label_CorrectAnswer"]</h1>
-    </header>
-
     @if (Model.AnswerBlocks.Count == 0)
     {
         <div class="content-panel answer-key-waiting">
