@@ -24,7 +24,7 @@ public sealed class HostMultipleChoiceAssetsTagHelper : TagHelper
         var hostLobbyValue = isHostLobby.ToString().ToLowerInvariant();
 
         output.PostContent.AppendHtml(
-            $"<script src=\"/js/host-multiple-choice.js?v=1.20.0-259.2\" data-saved-question-type=\"{savedPresentationType}\"></script>" +
-            $"<script src=\"/js/host-multiple-choice-bootstrap.js?v=1.20.0-259.2\" data-host-lobby=\"{hostLobbyValue}\"></script>");
+            $"<script src=\"/js/host-multiple-choice.js?v=1.20.0-259.3\" data-saved-question-type=\"{savedPresentationType}\"></script>" +
+            $"<script src=\"/js/host-multiple-choice-bootstrap.js?v=1.20.0-259.3\" data-host-lobby=\"{hostLobbyValue}\"></script>");
     }
 }
