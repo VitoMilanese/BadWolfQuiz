@@ -19,6 +19,12 @@ public sealed class QuizEditorQuestionDragDropRegressionTests
             "BadWolfQuiz.Web",
             "TagHelpers",
             "QuizEditorQuestionDragDropAssetsTagHelper.cs"));
+        var viewImports = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "_ViewImports.cshtml"));
 
         Assert.Contains(
             "document.addEventListener(\"drop\"",
@@ -40,6 +46,10 @@ public sealed class QuizEditorQuestionDragDropRegressionTests
             tagHelper,
             StringComparison.Ordinal);
         Assert.Contains("quiz-editor-question-drag-drop.js", tagHelper, StringComparison.Ordinal);
+        Assert.Contains(
+            "QuizEditorQuestionDragDropAssetsTagHelper",
+            viewImports,
+            StringComparison.Ordinal);
     }
 
     private static string FindRepositoryRoot()
