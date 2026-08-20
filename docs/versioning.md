@@ -30,6 +30,8 @@ Web `1.20.3` is a PATCH release that fixes cross-round question moves in the Qui
 
 Web `1.20.4` is a PATCH release that fixes **Copy Question** target-category capacity detection by treating truly blank placeholder questions as free slots and reusing those placeholders when copying. It also adds a localized **Exchange category** tooltip and local loading indicators for the Copy Question, cross-round question exchange, and category exchange dialogs while destination lists are prepared.
 
+Web `1.21.0` is a MINOR release that expands Quiz Editor question pricing: manually entered prices may be any positive integer instead of being limited to multiples of 100, while the native up/down spinner continues to change values in 100-point increments. Client-side and server-side validation reject zero and negative prices, and client-side validation also rejects empty or fractional values.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
