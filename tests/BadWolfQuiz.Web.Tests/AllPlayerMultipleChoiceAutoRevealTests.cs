@@ -39,13 +39,15 @@ public sealed class AllPlayerMultipleChoiceAutoRevealTests
     }
 
     [Fact]
-    public void Text_question_remains_host_controlled_after_every_player_submits()
+    public void Text_question_starts_review_only_after_every_current_player_submits()
     {
         var game = CreateGame(QuestionPresentationType.AllPlayerText);
         var rose = game.Session.AddPlayer("Rose");
         var jack = game.Session.AddPlayer("Jack");
         game.Session.Start();
         var question = game.Session.SelectQuestion(100);
+        game.Session.ActivateQuestionBuzzer(100);
+        var review = game.GetOrCreateAllPlayerTextReview(question);
 
         game.Session.AddQuestionAnswerHistoryEntry(
             100,
@@ -54,6 +56,11 @@ public sealed class AllPlayerMultipleChoiceAutoRevealTests
             value: 0,
             resolveQuestionIfAvailable: false);
         game.MarkPersistenceChanged();
+
+        Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
+        Assert.True(review.Accepting);
+        Assert.Equal(GameTimerStatus.Running, game.Session.Timer.Status);
+
         game.Session.AddQuestionAnswerHistoryEntry(
             100,
             jack.Id,
@@ -63,6 +70,9 @@ public sealed class AllPlayerMultipleChoiceAutoRevealTests
         game.MarkPersistenceChanged();
 
         Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
+        Assert.False(review.Accepting);
+        Assert.Equal(GameTimerStatus.Stopped, game.Session.Timer.Status);
+        Assert.Equal(GameTimerStatus.Stopped, game.Session.AnswerTimer.Status);
     }
 
     [Fact]
@@ -100,6 +110,46 @@ public sealed class AllPlayerMultipleChoiceAutoRevealTests
         game.MarkPersistenceChanged();
 
         Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
+        Assert.Equal(GameTimerStatus.Stopped, game.Session.AnswerTimer.Status);
+    }
+
+    [Fact]
+    public void Wager_text_starts_review_after_every_wager_participant_submits()
+    {
+        var game = CreateGame(
+            QuestionPresentationType.AllPlayerText,
+            isSpecial: true);
+        var rose = game.Session.AddPlayer("Rose");
+        var jack = game.Session.AddPlayer("Jack");
+        game.Session.Start();
+        game.Session.SelectQuestion(100);
+        game.Session.SubmitAllPlayerQuestionWager(100, rose.Id, 80);
+        game.Session.SubmitAllPlayerQuestionWager(100, jack.Id, 25);
+        var question = game.Session.StartAllPlayerQuestionAfterWagers(100);
+        var review = game.GetOrCreateAllPlayerTextReview(question);
+
+        _ = game.Session.AddPlayer("Late player");
+
+        game.Session.AddQuestionAnswerHistoryEntry(
+            100,
+            rose.Id,
+            isCorrect: false,
+            value: 0,
+            resolveQuestionIfAvailable: false);
+        game.MarkPersistenceChanged();
+
+        Assert.True(review.Accepting);
+
+        game.Session.AddQuestionAnswerHistoryEntry(
+            100,
+            jack.Id,
+            isCorrect: false,
+            value: 0,
+            resolveQuestionIfAvailable: false);
+        game.MarkPersistenceChanged();
+
+        Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
+        Assert.False(review.Accepting);
         Assert.Equal(GameTimerStatus.Stopped, game.Session.AnswerTimer.Status);
     }
 

@@ -43,11 +43,11 @@ public sealed class GameSessionRegistration
 
     internal void MarkPersistenceChanged()
     {
-        AutoRevealCompletedAllPlayerMultipleChoice();
+        AutoAdvanceCompletedAllPlayerQuestion();
         Interlocked.Increment(ref _persistenceRevision);
     }
 
-    private void AutoRevealCompletedAllPlayerMultipleChoice()
+    private void AutoAdvanceCompletedAllPlayerQuestion()
     {
         if (Session.Status != GameSessionStatus.Running)
         {
@@ -55,8 +55,9 @@ public sealed class GameSessionRegistration
         }
 
         var question = Session.Board.Questions.FirstOrDefault(item =>
-            item.PresentationType ==
-                QuestionPresentationType.AllPlayerMultipleChoice &&
+            item.PresentationType is
+                QuestionPresentationType.AllPlayerMultipleChoice or
+                QuestionPresentationType.AllPlayerText &&
             item.Status is RuntimeQuestionStatus.Selected or
                 RuntimeQuestionStatus.Active);
 
@@ -76,6 +77,14 @@ public sealed class GameSessionRegistration
             participants.Any(player => question.AnswerAttempts.All(attempt =>
                 attempt.PlayerId != player.Id)))
         {
+            return;
+        }
+
+        if (question.PresentationType == QuestionPresentationType.AllPlayerText)
+        {
+            Session.Timer.Stop();
+            Session.AnswerTimer.Stop();
+            GetOrCreateAllPlayerTextReview(question).Accepting = false;
             return;
         }
 
