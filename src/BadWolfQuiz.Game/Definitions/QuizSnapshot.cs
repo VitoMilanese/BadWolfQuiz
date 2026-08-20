@@ -7,7 +7,8 @@ public enum QuestionPresentationType
     Standard = 0,
     FourClues = 1,
     AllPlayerText = 2,
-    AllPlayerMultipleChoice = 3
+    AllPlayerMultipleChoice = 3,
+    HostMultipleChoice = 4
 }
 
 public sealed class QuizSnapshot
@@ -263,11 +264,39 @@ public sealed class QuizQuestionSnapshot
             }
         }
 
-        IsSpecial = presentationType == QuestionPresentationType.FourClues
-            ? false
-            : isSpecial;
+        if (presentationType == QuestionPresentationType.HostMultipleChoice)
+        {
+            if (orderedAnswerBlocks.Length is < 4 or > 10 ||
+                orderedAnswerBlocks.Any(block =>
+                    block.Kind != ContentBlockKind.Text ||
+                    string.IsNullOrWhiteSpace(block.TextContent) ||
+                    block.TextContent.Trim().Length > 20))
+            {
+                throw new ArgumentException(
+                    "A host multiple-choice question must contain four to ten non-empty text options of at most 20 characters.",
+                    nameof(answerBlocks));
+            }
+
+            var choices = orderedAnswerBlocks
+                .Select(block => block.TextContent!.Trim())
+                .ToArray();
+            if (choices.Distinct(StringComparer.OrdinalIgnoreCase).Count() != choices.Length)
+            {
+                throw new ArgumentException(
+                    "Host multiple-choice answer options must be distinct.",
+                    nameof(answerBlocks));
+            }
+        }
+
+        IsSpecial = presentationType is
+            QuestionPresentationType.FourClues or
+            QuestionPresentationType.HostMultipleChoice
+                ? false
+                : isSpecial;
         PresentationType = presentationType;
-        ExcludeFromRandomWagerSelection = excludeFromRandomWagerSelection;
+        ExcludeFromRandomWagerSelection =
+            presentationType == QuestionPresentationType.HostMultipleChoice ||
+            excludeFromRandomWagerSelection;
         CategoryTitle = string.IsNullOrWhiteSpace(categoryTitle)
             ? sourceCategoryId.ToString()
             : categoryTitle.Trim();
@@ -301,7 +330,9 @@ public sealed class QuizQuestionSnapshot
 
     public bool IsEligibleForRandomWagerSelection =>
         !ExcludeFromRandomWagerSelection &&
-        PresentationType != QuestionPresentationType.FourClues;
+        PresentationType is not
+            QuestionPresentationType.FourClues and not
+            QuestionPresentationType.HostMultipleChoice;
 
     public string CategoryTitle { get; }
 

@@ -651,6 +651,44 @@ public sealed class GameSession
         return attempt;
     }
 
+    public HostMultipleChoiceSelectionResult SelectHostMultipleChoiceOption(
+        int sourceQuestionId,
+        GamePlayerId playerId,
+        int sourceContentBlockId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        var player = FindPlayer(playerId);
+        var result = question.SelectHostMultipleChoiceOption(
+            player.Id,
+            sourceContentBlockId,
+            _timeProvider.GetUtcNow());
+
+        player.ApplyScore(result.Attempt.ScoreDelta);
+        AnswerTimer.Stop();
+
+        if (result.IsCorrect)
+        {
+            ActivePlayerId = player.Id;
+            Timer.Stop();
+        }
+        else if (result.QuestionClosed)
+        {
+            Timer.Stop();
+        }
+        else if (Timer.IsPaused)
+        {
+            Timer.Resume();
+        }
+        else
+        {
+            Timer.Restart();
+        }
+
+        return result;
+    }
+
     public QuestionAnswerAttempt AddQuestionAnswerHistoryEntry(
         int sourceQuestionId,
         GamePlayerId playerId,
@@ -928,6 +966,27 @@ public sealed class GameSession
         if (Timer.ConsumeExpiration() &&
             question.AnsweringPlayerId is null)
         {
+            if (question.IsHostMultipleChoice)
+            {
+                var elimination = question.EliminateRandomHostMultipleChoiceOption(
+                    Random.Shared);
+
+                if (elimination.QuestionClosed)
+                {
+                    Timer.Stop();
+                }
+                else
+                {
+                    Timer.Restart();
+                }
+
+                AnswerTimer.Stop();
+                return new QuestionTimerProcessResult(
+                    QuestionTimerOutcome.HostMultipleChoiceOptionEliminated,
+                    null,
+                    elimination.RemovedOptionId);
+            }
+
             return new QuestionTimerProcessResult(
                 QuestionTimerOutcome.BuzzerExpired,
                 null);
@@ -1628,7 +1687,8 @@ public sealed class GameSession
     {
         var question = FindQuestion(sourceQuestionId);
 
-        if (!Settings.AnswerRewardDecayEnabled ||
+        if (question.IsHostMultipleChoice ||
+            !Settings.AnswerRewardDecayEnabled ||
             question.IsSpecial ||
             question.AnsweringPlayerId is null ||
             AnswerTimer.Status is GameTimerStatus.Stopped)
@@ -1699,12 +1759,14 @@ public enum QuestionTimerOutcome
     None = 0,
     BuzzerExpired = 1,
     AnswerExpired = 2,
-    ClueRevealed = 3
+    ClueRevealed = 3,
+    HostMultipleChoiceOptionEliminated = 4
 }
 
 public sealed record QuestionTimerProcessResult(
     QuestionTimerOutcome Outcome,
-    QuestionAnswerAttempt? AnswerAttempt);
+    QuestionAnswerAttempt? AnswerAttempt,
+    int? RemovedHostMultipleChoiceOptionId = null);
 
 public sealed record GameResultStanding(
     int Position,
