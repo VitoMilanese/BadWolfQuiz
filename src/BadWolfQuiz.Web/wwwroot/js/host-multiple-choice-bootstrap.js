@@ -10,6 +10,25 @@
         document.querySelector('script[src*="host-multiple-choice-bootstrap.js"]');
     const isHostLobby = bootstrapScript?.dataset.hostLobby === "true";
 
+    const style = document.createElement("style");
+    style.id = "host-multiple-choice-bootstrap-styles";
+    style.textContent = `
+body.host-multiple-choice-active .question-judge-actions {
+    display: none !important;
+}
+.host-multiple-choice-panel {
+    top: 13rem !important;
+    max-height: calc(100vh - 14.5rem) !important;
+}
+@media (max-height: 760px) {
+    .host-multiple-choice-panel {
+        top: 10rem !important;
+        max-height: calc(100vh - 11rem) !important;
+    }
+}
+`;
+    document.head.appendChild(style);
+
     const initializeEditorAnswerPreview = () => {
         const presentationType = document.getElementById("Input_PresentationType");
         const answerSection = document.getElementById("answer-blocks");
@@ -56,6 +75,39 @@
         }, true);
     };
 
+    const synchronizeHostChoiceUi = () => {
+        const panel = document.querySelector(".host-multiple-choice-panel");
+        document.body.classList.toggle(
+            "host-multiple-choice-active",
+            Boolean(panel));
+
+        const correctBlock = document.querySelector(
+            ".answer-presentation .game-content-block.all-player-answer-option-correct");
+        if (!correctBlock) {
+            return;
+        }
+
+        const presentation = correctBlock.closest(".answer-presentation");
+        presentation?.querySelectorAll(".game-content-block").forEach(block => {
+            block.hidden = block !== correctBlock;
+        });
+    };
+
+    const initializeHostUiSynchronization = () => {
+        if (!isHostLobby) {
+            return;
+        }
+
+        const observer = new MutationObserver(synchronizeHostChoiceUi);
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["class"]
+        });
+        synchronizeHostChoiceUi();
+    };
+
     const initializeDelayedHostGameplay = () => {
         if (!isHostLobby) {
             return;
@@ -77,7 +129,7 @@
             window.badWolfHostMultipleChoiceInitialized = false;
 
             const mainScript = document.createElement("script");
-            mainScript.src = "/js/host-multiple-choice.js?v=1.20.0-259.2";
+            mainScript.src = "/js/host-multiple-choice.js?v=1.20.0-259.3";
             mainScript.dataset.savedQuestionType = "-1";
             document.body.appendChild(mainScript);
         });
@@ -89,5 +141,6 @@
     };
 
     initializeEditorAnswerPreview();
+    initializeHostUiSynchronization();
     initializeDelayedHostGameplay();
 })();
