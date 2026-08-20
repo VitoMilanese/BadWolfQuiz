@@ -1,3 +1,4 @@
+using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
 
 namespace BadWolfQuiz.Web.Services;
@@ -40,8 +41,46 @@ public sealed class GameSessionRegistration
 
     public long PersistenceRevision => Interlocked.Read(ref _persistenceRevision);
 
-    internal void MarkPersistenceChanged() =>
+    internal void MarkPersistenceChanged()
+    {
+        AutoRevealCompletedAllPlayerMultipleChoice();
         Interlocked.Increment(ref _persistenceRevision);
+    }
+
+    private void AutoRevealCompletedAllPlayerMultipleChoice()
+    {
+        if (Session.Status != GameSessionStatus.Running)
+        {
+            return;
+        }
+
+        var question = Session.Board.Questions.FirstOrDefault(item =>
+            item.PresentationType ==
+                QuestionPresentationType.AllPlayerMultipleChoice &&
+            item.Status is RuntimeQuestionStatus.Selected or
+                RuntimeQuestionStatus.Active);
+
+        if (question is null)
+        {
+            return;
+        }
+
+        var participants = question.IsSpecial
+            ? Session.Players
+                .Where(player => question.AllPlayerWagers.Any(wager =>
+                    wager.PlayerId == player.Id))
+                .ToArray()
+            : Session.Players.ToArray();
+
+        if (participants.Length == 0 ||
+            participants.Any(player => question.AnswerAttempts.All(attempt =>
+                attempt.PlayerId != player.Id)))
+        {
+            return;
+        }
+
+        Session.ResolveQuestionWithoutCorrectAnswer(question.SourceQuestionId);
+    }
 
     internal void AssignHost(string hostId)
     {
