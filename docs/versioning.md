@@ -18,7 +18,9 @@ The mandatory all-player question feature is the headline backwards-compatible f
 
 Question copying and same-quiz cloning from the Quiz Editor board are the headline backwards-compatible feature for Web `1.19.0`, so this release uses a MINOR bump from `1.18.0`.
 
-Host-selected multiple-choice questions are the headline backwards-compatible feature for Web `1.20.0`, so this release uses a MINOR bump from `1.19.0`.
+Host-selected multiple-choice questions are the headline backwards-compatible feature for Web `1.20.0`, so this release uses a MINOR bump from `1.19.0`. The final `1.20.0` implementation includes the host AJAX lifecycle, correct-answer-only presentation, stable randomized option order with **Nobody answered** last, dynamic reward display updates, and automatic closure when no eligible buzzer player remains.
+
+Follow-up fixes made before the first `1.20.0` release remain part of `1.20.0`; a PATCH bump is reserved for compatible fixes released after that version has shipped.
 
 ## BadWolfQuizLogDownloaderWpf
 
