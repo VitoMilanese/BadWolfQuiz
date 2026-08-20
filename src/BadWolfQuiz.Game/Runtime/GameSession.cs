@@ -408,9 +408,12 @@ public sealed class GameSession
         var highestQuestionValue = Board.Questions
             .Where(item => item.SourceRoundId == question.SourceRoundId)
             .Max(item => item.Points);
+        var minimumWager = question.Points < 10
+            ? 1
+            : MinimumQuestionWager;
 
         return new WagerLimits(
-            MinimumQuestionWager,
+            minimumWager,
             Math.Max(player.Score, highestQuestionValue));
     }
 
