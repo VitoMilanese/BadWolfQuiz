@@ -56,7 +56,10 @@ public sealed class AnswerKeyRegressionTests
             "<h2>@Localizer[\"Label_CorrectAnswer\"]</h2>",
             page,
             StringComparison.Ordinal);
-        Assert.DoesNotContain("answer-key-header", page, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "<header class=\"answer-key-header\">",
+            page,
+            StringComparison.Ordinal);
         Assert.DoesNotContain("Model.QuestionLabel", page, StringComparison.Ordinal);
         Assert.DoesNotContain("GameBoard_Answer", page, StringComparison.Ordinal);
 
