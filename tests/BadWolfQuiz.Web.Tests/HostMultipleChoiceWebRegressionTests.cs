@@ -63,6 +63,17 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("BuzzerStateChanged", endpoint);
         Assert.Contains("TimerStateChanged", endpoint);
 
+        var stateHandlerStart = endpoint.IndexOf(
+            "public IActionResult OnGetState(Guid id)",
+            StringComparison.Ordinal);
+        var selectHandlerStart = endpoint.IndexOf(
+            "public async Task<IActionResult> OnPostSelectAsync",
+            StringComparison.Ordinal);
+        Assert.True(stateHandlerStart >= 0 && selectHandlerStart > stateHandlerStart);
+        var stateHandler = endpoint[stateHandlerStart..selectHandlerStart];
+        Assert.DoesNotContain("BuzzerStateChanged", stateHandler);
+        Assert.DoesNotContain("SendAsync", stateHandler);
+
         Assert.Contains("value = \"4\"", script);
         Assert.Contains("textarea.maxLength = 20", script);
         Assert.Contains("cards.length < 4 || cards.length > 10", script);
@@ -81,11 +92,18 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("event.stopImmediatePropagation();", bootstrap);
         Assert.Contains("content.replaceChildren(answerPreview);", bootstrap);
 
-        Assert.Contains("script?.dataset.hostLobby === \"true\"", bootstrap);
+        Assert.Contains("bootstrapScript?.dataset.hostLobby === \"true\"", bootstrap);
         Assert.Contains("const observer = new MutationObserver", bootstrap);
         Assert.Contains(".host-game-board[data-game-id]", bootstrap);
         Assert.Contains("window.badWolfHostMultipleChoiceInitialized = false", bootstrap);
-        Assert.Contains("host-multiple-choice.js?v=1.20.0-259.2", bootstrap);
+        Assert.Contains("host-multiple-choice.js?v=1.20.0-259.3", bootstrap);
+        Assert.Contains("host-multiple-choice-active", bootstrap);
+        Assert.Contains(".question-judge-actions", bootstrap);
+        Assert.Contains("top: 13rem !important", bootstrap);
+        Assert.Contains(
+            ".answer-presentation .game-content-block.all-player-answer-option-correct",
+            bootstrap);
+        Assert.Contains("block.hidden = block !== correctBlock", bootstrap);
 
         Assert.Contains(
             "HostMultipleChoiceAssetsTagHelper",
@@ -93,7 +111,7 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("ViewContext.ViewData.Model is LobbyModel", assetsTagHelper);
         Assert.Contains("host-multiple-choice-bootstrap.js", assetsTagHelper);
         Assert.Contains("data-host-lobby", assetsTagHelper);
-        Assert.Contains("v=1.20.0-259.2", assetsTagHelper);
+        Assert.Contains("v=1.20.0-259.3", assetsTagHelper);
     }
 
     private static string FindRepositoryRoot()
