@@ -21,5 +21,7 @@ public sealed class QuizEditorQuestionRoundExchangeAssetsTagHelper : TagHelper
 
         output.PostContent.AppendHtml(
             "<script src=\"/js/quiz-editor-question-round-exchange.js?v=269.1\"></script>");
+        output.PostContent.AppendHtml(
+            "<script src=\"/js/quiz-editor-dialog-loading.js?v=271.1\"></script>");
     }
 }

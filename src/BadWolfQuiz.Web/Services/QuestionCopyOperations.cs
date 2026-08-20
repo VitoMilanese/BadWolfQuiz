@@ -73,6 +73,11 @@ public static class QuestionCopyOperations
             .Include(quiz => quiz.Rounds)
                 .ThenInclude(round => round.Categories)
                     .ThenInclude(category => category.Questions)
+                        .ThenInclude(question => question.QuestionBlocks)
+            .Include(quiz => quiz.Rounds)
+                .ThenInclude(round => round.Categories)
+                    .ThenInclude(category => category.Questions)
+                        .ThenInclude(question => question.AnswerBlocks)
             .OrderBy(quiz => quiz.Title)
             .ThenBy(quiz => quiz.Id)
             .ToListAsync(cancellationToken);
@@ -137,6 +142,11 @@ public static class QuestionCopyOperations
             .Include(category => category.Round)
                 .ThenInclude(round => round.Categories)
                     .ThenInclude(category => category.Questions)
+                        .ThenInclude(question => question.QuestionBlocks)
+            .Include(category => category.Round)
+                .ThenInclude(round => round.Categories)
+                    .ThenInclude(category => category.Questions)
+                        .ThenInclude(question => question.AnswerBlocks)
             .Include(category => category.Round)
                 .ThenInclude(round => round.Quiz)
             .SingleOrDefaultAsync(category =>
@@ -152,16 +162,24 @@ public static class QuestionCopyOperations
 
         var targetRound = targetCategory.Round;
         var targetQuiz = targetRound.Quiz;
+        QuizQuestion? targetPlaceholder = null;
+        var rowIndex = 0;
 
-        var rowIndex = targetRound.Rows
-            .Where(row =>
-                row.RowIndex > 0 &&
-                row.RowIndex <= maximumQuestionCount &&
-                targetCategory.Questions.All(question =>
-                    question.RowIndex != row.RowIndex))
-            .OrderBy(row => row.RowIndex)
-            .Select(row => row.RowIndex)
-            .FirstOrDefault();
+        foreach (var row in targetRound.Rows
+            .Where(row => row.RowIndex > 0 && row.RowIndex <= maximumQuestionCount)
+            .OrderBy(row => row.RowIndex))
+        {
+            var existingQuestion = targetCategory.Questions
+                .SingleOrDefault(question => question.RowIndex == row.RowIndex);
+            if (existingQuestion is not null && !IsBlankQuestion(existingQuestion))
+            {
+                continue;
+            }
+
+            rowIndex = row.RowIndex;
+            targetPlaceholder = existingQuestion;
+            break;
+        }
 
         var addedRoundRow = false;
         if (rowIndex == 0)
@@ -196,8 +214,17 @@ public static class QuestionCopyOperations
         }
 
         var now = DateTime.UtcNow;
-        var copy = CloneQuestion(source, rowIndex, now);
-        targetCategory.Questions.Add(copy);
+        QuizQuestion copy;
+        if (targetPlaceholder is null)
+        {
+            copy = CloneQuestion(source, rowIndex, now);
+            targetCategory.Questions.Add(copy);
+        }
+        else
+        {
+            copy = targetPlaceholder;
+            CopyQuestionInto(db, source, copy, now);
+        }
 
         if (addedRoundRow)
         {
@@ -231,11 +258,73 @@ public static class QuestionCopyOperations
         int maximumQuestionCount)
     {
         var hasFreeExistingRow = round.Rows.Any(row =>
-            row.RowIndex > 0 &&
-            row.RowIndex <= maximumQuestionCount &&
-            category.Questions.All(question => question.RowIndex != row.RowIndex));
+        {
+            if (row.RowIndex <= 0 || row.RowIndex > maximumQuestionCount)
+            {
+                return false;
+            }
+
+            var existingQuestion = category.Questions
+                .SingleOrDefault(question => question.RowIndex == row.RowIndex);
+            return existingQuestion is null || IsBlankQuestion(existingQuestion);
+        });
 
         return hasFreeExistingRow || round.Rows.Count < maximumQuestionCount;
+    }
+
+    private static bool IsBlankQuestion(QuizQuestion question) =>
+        question.TimeLimitSecondsOverride is null &&
+        question.BuzzModeOverride == BuzzActivationMode.UseRoundDefault &&
+        question.BuzzDelaySeconds == 0 &&
+        !question.IsSpecial &&
+        question.PresentationType == default &&
+        !question.ExcludeFromRandomWagerSelection &&
+        question.QuestionBlocks.All(IsBlankBlock) &&
+        question.AnswerBlocks.All(IsBlankBlock);
+
+    private static bool IsBlankBlock(ContentBlockBase block) =>
+        block.BlockType == ContentBlockType.Text &&
+        string.IsNullOrWhiteSpace(block.TextContent) &&
+        string.IsNullOrWhiteSpace(block.TopCaption) &&
+        string.IsNullOrWhiteSpace(block.BottomCaption) &&
+        string.IsNullOrWhiteSpace(block.MediaPath) &&
+        string.IsNullOrWhiteSpace(block.ExternalUrl) &&
+        block.FileData is not { Length: > 0 } &&
+        string.IsNullOrWhiteSpace(block.FileContentType) &&
+        string.IsNullOrWhiteSpace(block.FileName) &&
+        !block.AudioOnly &&
+        !block.Autoplay;
+
+    private static void CopyQuestionInto(
+        QuizDbContext db,
+        QuizQuestion source,
+        QuizQuestion target,
+        DateTime now)
+    {
+        target.TimeLimitSecondsOverride = source.TimeLimitSecondsOverride;
+        target.BuzzModeOverride = source.BuzzModeOverride;
+        target.BuzzDelaySeconds = source.BuzzDelaySeconds;
+        target.IsSpecial = source.IsSpecial;
+        target.PresentationType = source.PresentationType;
+        target.ExcludeFromRandomWagerSelection = source.ExcludeFromRandomWagerSelection;
+        target.UpdatedAtUtc = now;
+
+        var existingQuestionBlocks = target.QuestionBlocks.ToArray();
+        var existingAnswerBlocks = target.AnswerBlocks.ToArray();
+        db.QuestionContentBlocks.RemoveRange(existingQuestionBlocks);
+        db.AnswerContentBlocks.RemoveRange(existingAnswerBlocks);
+        target.QuestionBlocks.Clear();
+        target.AnswerBlocks.Clear();
+
+        foreach (var block in source.QuestionBlocks.OrderBy(block => block.SortOrder))
+        {
+            target.QuestionBlocks.Add(CloneQuestionBlock(block));
+        }
+
+        foreach (var block in source.AnswerBlocks.OrderBy(block => block.SortOrder))
+        {
+            target.AnswerBlocks.Add(CloneAnswerBlock(block));
+        }
     }
 
     private static QuizQuestion CloneQuestion(

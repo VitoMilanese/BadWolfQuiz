@@ -28,6 +28,8 @@ Web `1.20.2` is a PATCH release that prevents duplicate round creation from repe
 
 Web `1.20.3` is a PATCH release that fixes cross-round question moves in the Quiz Editor by closing and locking the dialog immediately, showing the shared busy indicator, and updating the source question cell in place without a full page reload.
 
+Web `1.20.4` is a PATCH release that fixes **Copy Question** target-category capacity detection by treating truly blank placeholder questions as free slots and reusing those placeholders when copying. It also adds a localized **Exchange category** tooltip and local loading indicators for the Copy Question, cross-round question exchange, and category exchange dialogs while destination lists are prepared.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.

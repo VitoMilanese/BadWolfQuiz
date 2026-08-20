@@ -18,6 +18,11 @@ public sealed class QuestionCopyOperationsTests
         db.Hosts.Add(CreateHost("host-a"));
         var source = CreateSourceQuiz("host-a");
         var target = CreateTargetQuiz("host-a", "Target", 1, 2);
+        FillQuestion(
+            target.Rounds.Single().Categories
+                .OrderBy(category => category.SortOrder)
+                .First().Questions.Single(),
+            "Occupied target slot");
         db.Quizzes.AddRange(source, target);
         await db.SaveChangesAsync();
 
@@ -102,7 +107,7 @@ public sealed class QuestionCopyOperationsTests
     }
 
     [Fact]
-    public async Task CopyAsync_uses_existing_empty_slot_allows_same_quiz_clone_and_rejects_full()
+    public async Task CopyAsync_reuses_blank_placeholder_allows_same_quiz_clone_and_rejects_content_filled()
     {
         await using var connection = new SqliteConnection("Data Source=:memory:");
         await connection.OpenAsync();
@@ -112,8 +117,11 @@ public sealed class QuestionCopyOperationsTests
         var source = CreateSourceQuiz("host-a");
         var target = CreateTargetQuiz("host-a", "Target", 2, 1);
         var targetCategory = target.Rounds.Single().Categories.Single();
-        targetCategory.Questions.Remove(targetCategory.Questions.Single(question => question.RowIndex == 2));
+        FillQuestion(
+            targetCategory.Questions.Single(question => question.RowIndex == 1),
+            "Occupied target slot");
         var full = CreateTargetQuiz("host-a", "Full", 2, 1);
+        FillAllQuestions(full);
         db.Quizzes.AddRange(source, target, full);
         await db.SaveChangesAsync();
 
@@ -123,18 +131,33 @@ public sealed class QuestionCopyOperationsTests
         var sourceQuizId = source.Id;
         var targetCategoryId = targetCategory.Id;
         var targetRoundId = target.Rounds.Single().Id;
+        var targetPlaceholderId = targetCategory.Questions
+            .Single(question => question.RowIndex == 2).Id;
         var fullCategoryId = full.Rounds.Single().Categories.Single().Id;
         db.ChangeTracker.Clear();
 
         var filledSlot = await QuestionCopyOperations.CopyAsync(
             db, "host-a", sourceQuestionId, targetCategoryId, 2, CancellationToken.None);
         Assert.Equal(QuestionCopyStatus.Success, filledSlot.Status);
+        Assert.Equal(targetPlaceholderId, filledSlot.QuestionId);
         Assert.Equal(2, await db.QuizRoundRows
             .IgnoreQueryFilters()
             .CountAsync(row => row.QuizRoundId == targetRoundId));
-        Assert.Equal(2, (await db.QuizQuestions
+        Assert.Equal(2, await db.QuizQuestions
             .IgnoreQueryFilters()
-            .SingleAsync(question => question.Id == filledSlot.QuestionId)).RowIndex);
+            .CountAsync(question => question.QuizCategoryId == targetCategoryId));
+
+        var reusedPlaceholder = await db.QuizQuestions
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Include(question => question.QuestionBlocks)
+            .Include(question => question.AnswerBlocks)
+            .SingleAsync(question => question.Id == filledSlot.QuestionId);
+        Assert.Equal(2, reusedPlaceholder.RowIndex);
+        Assert.Equal(BuzzActivationMode.AfterMedia, reusedPlaceholder.BuzzModeOverride);
+        Assert.Equal(ContentBlockType.Image, Assert.Single(reusedPlaceholder.QuestionBlocks).BlockType);
+        Assert.Equal("Question text", reusedPlaceholder.QuestionBlocks.Single().TextContent);
+        Assert.Equal("Answer", Assert.Single(reusedPlaceholder.AnswerBlocks).TextContent);
 
         db.ChangeTracker.Clear();
         var sameQuizClone = await QuestionCopyOperations.CopyAsync(
@@ -156,7 +179,7 @@ public sealed class QuestionCopyOperationsTests
     }
 
     [Fact]
-    public async Task GetDestinationsAsync_includes_source_quiz_filters_others_and_marks_full_categories()
+    public async Task GetDestinationsAsync_treats_blank_placeholders_as_capacity_and_marks_only_content_filled_categories_full()
     {
         await using var connection = new SqliteConnection("Data Source=:memory:");
         await connection.OpenAsync();
@@ -165,11 +188,17 @@ public sealed class QuestionCopyOperationsTests
         db.Hosts.AddRange(CreateHost("host-a"), CreateHost("host-b"));
         var source = CreateSourceQuiz("host-a");
         var available = CreateTargetQuiz("host-a", "Available", 1, 1);
+        var partial = CreateTargetQuiz("host-a", "Partial", 2, 1);
+        FillQuestion(
+            partial.Rounds.Single().Categories.Single().Questions
+                .Single(question => question.RowIndex == 1),
+            "Occupied partial slot");
         var full = CreateTargetQuiz("host-a", "Full", 2, 1);
+        FillAllQuestions(full);
         var archived = CreateTargetQuiz("host-a", "Archived", 1, 1);
         archived.IsArchived = true;
         var otherHost = CreateTargetQuiz("host-b", "Other", 1, 1);
-        db.Quizzes.AddRange(source, available, full, archived, otherHost);
+        db.Quizzes.AddRange(source, available, partial, full, archived, otherHost);
         await db.SaveChangesAsync();
 
         var sourceQuestionId = source.Rounds.Single().Categories.Single().Questions.Single().Id;
@@ -177,6 +206,7 @@ public sealed class QuestionCopyOperationsTests
         var archivedId = archived.Id;
         var otherHostId = otherHost.Id;
         var availableId = available.Id;
+        var partialId = partial.Id;
         var fullId = full.Id;
         db.ChangeTracker.Clear();
 
@@ -190,6 +220,8 @@ public sealed class QuestionCopyOperationsTests
         Assert.DoesNotContain(destinations, destination => destination.QuizId == otherHostId);
         Assert.True(Assert.Single(destinations.Where(destination =>
             destination.QuizId == availableId)).HasCapacity);
+        Assert.True(Assert.Single(destinations.Where(destination =>
+            destination.QuizId == partialId)).HasCapacity);
         Assert.False(Assert.Single(destinations.Where(destination =>
             destination.QuizId == fullId)).HasCapacity);
     }
@@ -337,6 +369,23 @@ public sealed class QuestionCopyOperationsTests
 
         quiz.Rounds.Add(round);
         return quiz;
+    }
+
+    private static void FillAllQuestions(Quiz quiz)
+    {
+        foreach (var question in quiz.Rounds
+            .SelectMany(round => round.Categories)
+            .SelectMany(category => category.Questions))
+        {
+            FillQuestion(question, $"Occupied {question.RowIndex}");
+        }
+    }
+
+    private static void FillQuestion(QuizQuestion question, string text)
+    {
+        var block = question.QuestionBlocks.Single();
+        block.BlockType = ContentBlockType.Text;
+        block.TextContent = text;
     }
 
     private static string FindRepositoryRoot()
