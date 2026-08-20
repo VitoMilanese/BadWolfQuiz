@@ -14,8 +14,6 @@ public sealed class AnswerKeyModel(
 
     public IReadOnlyList<ContentBlockSnapshot> AnswerBlocks { get; private set; } = [];
 
-    public string? QuestionLabel { get; private set; }
-
     public bool IsFinalQuestion { get; private set; }
 
     public IActionResult OnGet(Guid id)
@@ -39,7 +37,6 @@ public sealed class AnswerKeyModel(
             game.Session.FinalQuestion is { } finalQuestion)
         {
             IsFinalQuestion = true;
-            QuestionLabel = game.Session.Quiz.Title;
             AnswerBlocks = finalQuestion.Definition.AnswerBlocks;
             return Page();
         }
@@ -58,8 +55,7 @@ public sealed class AnswerKeyModel(
             return Page();
         }
 
-        QuestionLabel = $"{question.CategoryTitle} — {question.Points}";
-        AnswerBlocks = question.AnswerBlocks;
+        AnswerBlocks = GetVisibleAnswerBlocks(question);
         return Page();
     }
 
@@ -75,13 +71,21 @@ public sealed class AnswerKeyModel(
             return NotFound();
         }
 
-        var blocks = final
-            ? game.Session.FinalQuestion?.Definition.AnswerBlocks
-            : game.Session.Board.Questions
-                .FirstOrDefault(item =>
-                    item.Status is not RuntimeQuestionStatus.Available and
-                        not RuntimeQuestionStatus.Resolved)?
-                .AnswerBlocks;
+        IReadOnlyList<ContentBlockSnapshot>? blocks;
+        if (final)
+        {
+            blocks = game.Session.FinalQuestion?.Definition.AnswerBlocks;
+        }
+        else
+        {
+            var question = game.Session.Board.Questions.FirstOrDefault(item =>
+                item.Status is not RuntimeQuestionStatus.Available and
+                    not RuntimeQuestionStatus.Resolved);
+            blocks = question is null
+                ? null
+                : GetVisibleAnswerBlocks(question);
+        }
+
         var block = blocks?.SingleOrDefault(item =>
             item.SourceContentBlockId == sourceContentBlockId);
 
@@ -94,5 +98,18 @@ public sealed class AnswerKeyModel(
         return string.IsNullOrWhiteSpace(block.FileName)
             ? File(block.FileData, block.FileContentType)
             : File(block.FileData, block.FileContentType, block.FileName);
+    }
+
+    private static IReadOnlyList<ContentBlockSnapshot> GetVisibleAnswerBlocks(
+        RuntimeQuestion question)
+    {
+        if (question.PresentationType ==
+                QuestionPresentationType.AllPlayerMultipleChoice &&
+            question.AnswerBlocks.Count > 0)
+        {
+            return [question.AnswerBlocks[0]];
+        }
+
+        return question.AnswerBlocks;
     }
 }

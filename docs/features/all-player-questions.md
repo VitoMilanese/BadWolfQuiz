@@ -62,6 +62,8 @@ The editor answer preview, live answer page, and resolved-question answer previe
 - every distractor with a red border;
 - text and images centered inside equal presentation cells.
 
+The private host `/Admin/Games/AnswerKey/` screen intentionally uses a different reveal presentation for `AllPlayerMultipleChoice`: it renders only the first configured answer block, which is the correct option, and omits every distractor. Other question types continue to render their normal answer blocks. The AnswerKey screen uses a compact centered **Correct answer** header and a full-width answer area so the answer content can use the available viewport without the previous category/question metadata or excessive horizontal margins.
+
 Image endpoints return inline media responses so they can be displayed by `<img>` elements rather than downloaded as attachments.
 
 ## Text judging and scoring
@@ -102,6 +104,7 @@ The focused regression suite covers:
 - wager participation rules, including late players who did not submit wagers;
 - shuffled Text/Image choices;
 - server-rendered host and preview grids;
+- AnswerKey correct-option filtering and compact full-width presentation;
 - reconnect approval, local-storage token recovery, and control rebuilding;
 - versioned asset loading;
 - normal and per-player-wager scoring behavior.

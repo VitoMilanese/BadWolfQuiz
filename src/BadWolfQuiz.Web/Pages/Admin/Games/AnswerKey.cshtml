@@ -5,16 +5,12 @@
 }
 
 <link rel="stylesheet" href="~/css/youtube-placeholder.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/answer-key.css" asp-append-version="true" />
 
 <section class="answer-key-page"
          data-game-code="@Model.Game.PublicCode">
     <header class="answer-key-header">
-        <p class="eyebrow">@Localizer["AnswerKey_Eyebrow"]</p>
-        <h1>@Localizer["AnswerKey_Title"]</h1>
-        @if (!string.IsNullOrWhiteSpace(Model.QuestionLabel))
-        {
-            <p>@Model.QuestionLabel</p>
-        }
+        <h1>@Localizer["Label_CorrectAnswer"]</h1>
     </header>
 
     @if (Model.AnswerBlocks.Count == 0)
@@ -26,7 +22,6 @@
     else
     {
         <section class="content-panel game-content-presentation answer-presentation answer-key-content">
-            <p class="eyebrow">@Localizer["GameBoard_Answer"]</p>
             <div class="game-content-blocks">
                 @foreach (var block in Model.AnswerBlocks)
                 {
