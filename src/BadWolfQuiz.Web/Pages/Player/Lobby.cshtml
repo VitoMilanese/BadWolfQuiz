@@ -326,7 +326,7 @@
                                     break;
                                 case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
                                     <iframe class="game-content-video youtube-auto-expand"
-                                            src="@BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl)"
+                                            src="@YouTubeEmbedUrlBuilder.GetYouTubeEmbedUrl(block.ExternalUrl)"
                                             title="@Localizer["GameBoard_MediaContent"]"
                                             data-close-label="@Localizer["GameBoard_CloseVideo"]"
                                             allowfullscreen>

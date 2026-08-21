@@ -90,7 +90,7 @@
                                 type="button"
                                 data-youtube-placeholder
                                 data-youtube-autoplay="@block.Autoplay.ToString().ToLowerInvariant()"
-                                data-youtube-embed-url="@(LobbyModel.GetYouTubeEmbedUrl(block.ExternalUrl) + "&fs=0")"
+                                data-youtube-embed-url="@(YouTubeEmbedUrlBuilder.GetYouTubeEmbedUrl(block.ExternalUrl) + "&fs=0")"
                                 data-youtube-frame-class="game-content-video youtube-auto-expand"
                                 data-youtube-title="@Localizer["GameBoard_MediaContent"]"
                                 data-youtube-close-label="@Localizer["GameBoard_CloseVideo"]"
