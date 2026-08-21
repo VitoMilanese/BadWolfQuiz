@@ -35,7 +35,10 @@ public sealed class QuizSnapshotFactory
         var questions = categories
             .SelectMany(category => category.Questions
                 .OrderBy(question => question.RowIndex)
-                .Select(question => CreateQuestion(question, pointsByRow)))
+                .Select(question => CreateQuestion(
+            question,
+            pointsByRow,
+            round.DefaultBuzzMode)))
             .ToList();
 
         var categoryIntros = categories
@@ -59,7 +62,8 @@ public sealed class QuizSnapshotFactory
 
     private static QuizQuestionSnapshot CreateQuestion(
         QuizQuestion question,
-        IReadOnlyDictionary<int, int> pointsByRow)
+        IReadOnlyDictionary<int, int> pointsByRow,
+        BuzzActivationMode roundDefaultBuzzMode)
     {
         if (!pointsByRow.TryGetValue(question.RowIndex, out var points))
         {
@@ -70,6 +74,9 @@ public sealed class QuizSnapshotFactory
         var presentationType =
             AllPlayerQuestionCompatibility.ResolveStoredPresentationType(
                 question);
+        var buzzerMode = ResolveBuzzerMode(
+            question.BuzzModeOverride,
+            roundDefaultBuzzMode);
 
         return new QuizQuestionSnapshot(
             question.Id,
@@ -81,7 +88,29 @@ public sealed class QuizSnapshotFactory
             question.ExcludeFromRandomWagerSelection,
             question.QuestionBlocks.Select(CreateContentBlock),
             question.AnswerBlocks.Select(CreateContentBlock),
-            presentationType);
+            presentationType,
+            buzzerMode,
+            Math.Max(0, question.BuzzDelaySeconds));
+    }
+
+    private static QuestionBuzzerMode ResolveBuzzerMode(
+        BuzzActivationMode questionMode,
+        BuzzActivationMode roundMode)
+    {
+        var effectiveMode = questionMode == BuzzActivationMode.UseRoundDefault
+            ? roundMode
+            : questionMode;
+
+        return effectiveMode switch
+        {
+            BuzzActivationMode.UseRoundDefault => QuestionBuzzerMode.UseGameSetting,
+            BuzzActivationMode.Manual => QuestionBuzzerMode.Manual,
+            BuzzActivationMode.Immediately => QuestionBuzzerMode.Immediately,
+            BuzzActivationMode.AfterMedia => QuestionBuzzerMode.AfterMedia,
+            BuzzActivationMode.AfterDelay => QuestionBuzzerMode.AfterDelay,
+            BuzzActivationMode.Disabled => QuestionBuzzerMode.Disabled,
+            _ => QuestionBuzzerMode.UseGameSetting
+        };
     }
 
     private static ContentBlockSnapshot CreateContentBlock(ContentBlockBase block)

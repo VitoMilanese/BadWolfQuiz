@@ -11,6 +11,16 @@ public enum QuestionPresentationType
     HostMultipleChoice = 4
 }
 
+public enum QuestionBuzzerMode
+{
+    UseGameSetting = 0,
+    Manual = 1,
+    Immediately = 2,
+    AfterMedia = 3,
+    AfterDelay = 4,
+    Disabled = 5
+}
+
 public sealed class QuizSnapshot
 {
     private readonly ReadOnlyCollection<QuizRoundSnapshot> _rounds;
@@ -195,12 +205,15 @@ public sealed class QuizQuestionSnapshot
         bool excludeFromRandomWagerSelection = false,
         IEnumerable<ContentBlockSnapshot>? questionBlocks = null,
         IEnumerable<ContentBlockSnapshot>? answerBlocks = null,
-        QuestionPresentationType presentationType = QuestionPresentationType.Standard)
+        QuestionPresentationType presentationType = QuestionPresentationType.Standard,
+        QuestionBuzzerMode buzzerMode = QuestionBuzzerMode.UseGameSetting,
+        int buzzDelaySeconds = 0)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceQuestionId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceCategoryId);
         ArgumentOutOfRangeException.ThrowIfNegative(rowIndex);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(points);
+        ArgumentOutOfRangeException.ThrowIfNegative(buzzDelaySeconds);
 
         SourceQuestionId = sourceQuestionId;
         SourceCategoryId = sourceCategoryId;
@@ -294,6 +307,8 @@ public sealed class QuizQuestionSnapshot
                 ? false
                 : isSpecial;
         PresentationType = presentationType;
+        BuzzerMode = buzzerMode;
+        BuzzDelaySeconds = buzzDelaySeconds;
         ExcludeFromRandomWagerSelection =
             presentationType == QuestionPresentationType.HostMultipleChoice ||
             excludeFromRandomWagerSelection;
@@ -325,6 +340,10 @@ public sealed class QuizQuestionSnapshot
     public bool IsSpecial { get; }
 
     public QuestionPresentationType PresentationType { get; }
+
+    public QuestionBuzzerMode BuzzerMode { get; }
+
+    public int BuzzDelaySeconds { get; }
 
     public bool ExcludeFromRandomWagerSelection { get; }
 

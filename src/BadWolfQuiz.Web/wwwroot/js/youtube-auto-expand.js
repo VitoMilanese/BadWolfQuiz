@@ -203,6 +203,12 @@
         delete iframe.dataset.youtubeAutoplayLaunch;
         endTimedPlayback(iframe);
 
+        if (event.data === window.YT.PlayerState.ENDED) {
+            iframe.dispatchEvent(new CustomEvent(
+                "badwolf:youtube-ended",
+                { bubbles: true }));
+        }
+
         if (event.data === window.YT.PlayerState.ENDED &&
             expandedIframe === iframe) {
             restorePlaceholder(iframe);
@@ -253,9 +259,12 @@
                             // The autoplay query parameter remains as a fallback.
                         }
                     },
-                    onStateChange: event => handleStateChange(iframe, event)
-                }
-            });
+                    onStateChange: event => handleStateChange(iframe, event),
+                onError: () => iframe.dispatchEvent(new CustomEvent(
+                    "badwolf:youtube-error",
+                    { bubbles: true }))
+            }
+        });
             players.set(iframe, player);
         } catch {
             pendingFrames.add(iframe);

@@ -63,7 +63,8 @@ public sealed class QuestionEditorModel(
                 presentationType),
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
-            BuzzModeOverride = question.BuzzModeOverride
+            BuzzModeOverride = question.BuzzModeOverride,
+            BuzzDelaySeconds = question.BuzzDelaySeconds
         };
 
         Input.QuestionBlocks = question.QuestionBlocks
@@ -194,6 +195,9 @@ public sealed class QuestionEditorModel(
         question.BuzzModeOverride = question.IsSpecial || isAllPlayer
             ? BuzzActivationMode.Disabled
             : Input.BuzzModeOverride;
+        question.BuzzDelaySeconds = question.IsSpecial || isAllPlayer
+            ? 0
+            : Math.Max(0, Input.BuzzDelaySeconds);
         question.UpdatedAtUtc = DateTime.UtcNow;
 
         var submittedQuestionBlockIds = Input.QuestionBlocks
@@ -553,6 +557,10 @@ public sealed class QuestionEditorModel(
 
         [Display(Name = "Label_BuzzMode")]
         public BuzzActivationMode BuzzModeOverride { get; set; }
+
+        [Display(Name = "Label_BuzzDelay")]
+        [Range(0, int.MaxValue)]
+        public int BuzzDelaySeconds { get; set; }
 
         public List<ContentBlockInputModel> QuestionBlocks { get; set; } = [];
 
