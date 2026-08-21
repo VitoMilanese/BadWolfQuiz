@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   implement-and-test:
-    if: github.head_ref == 'agent/tmp-290-implementation'
+    if: startsWith(github.head_ref, 'agent/tmp-290-implementation')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
