@@ -48,8 +48,20 @@ body:has(.answer-key-page) .page-shell {
     height: 22px;
 }
 
-.answer-key-visibility-toggle [hidden] {
+.answer-key-show-icon {
+    display: block;
+}
+
+.answer-key-hide-icon {
     display: none;
+}
+
+.answer-key-visibility-toggle[data-answer-visible="true"] .answer-key-show-icon {
+    display: none;
+}
+
+.answer-key-visibility-toggle[data-answer-visible="true"] .answer-key-hide-icon {
+    display: block;
 }
 
 .answer-key-page {

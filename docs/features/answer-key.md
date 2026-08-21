@@ -26,22 +26,24 @@ When Window Management permission is already granted, screen details are preload
 
 Using a stable window name prevents repeated clicks from creating multiple AnswerKey windows. The existing window is navigated to the current AnswerKey URL and focused.
 
-## Answer visibility
+## Answer visibility mode
 
-When an AnswerKey page has a current answer, the answer content starts hidden instead of being exposed immediately.
+The shared topbar always shows an answer-visibility toggle beside **Correct answer**, including before any question has been opened.
 
-The shared topbar keeps the **Correct answer** heading and adds an eye toggle beside it:
+The toggle represents a presentation mode for the whole AnswerKey window rather than a one-question-only state:
 
-- the normal eye means the answer is currently hidden and can be revealed;
-- clicking the eye reveals the answer and changes the icon to a crossed-out eye;
-- clicking the crossed-out eye hides the answer again;
-- `aria-pressed` mirrors the current visible/hidden state for assistive technology.
+- the normal eye means answers are currently hidden;
+- clicking the eye enables visible-answer mode and changes the icon to a crossed-out eye;
+- the selected mode is stored in `sessionStorage` for the current game code;
+- SignalR-driven AnswerKey reloads restore the stored mode, so later answers remain visible after the host has revealed answers once;
+- clicking the crossed-out eye disables visible-answer mode again, and subsequent answers return to hidden presentation;
+- `aria-pressed` mirrors the current visible/hidden mode for assistive technology.
 
-While hidden, the answer body shows a centered placeholder with a crossed-out eye, the localized **Correct answer** label, and the existing localized **Show answer** text. This keeps the presentation intentional rather than leaving an unexplained blank screen.
+When a current answer exists and the mode is hidden, the answer body shows a centered placeholder with a crossed-out eye, the localized **Correct answer** label, and the existing localized **Show answer** text. This keeps the presentation intentional rather than leaving an unexplained blank screen.
 
-When the AnswerKey reloads for another question through its existing SignalR lifecycle, the new answer starts hidden again.
+When there is no current answer, the existing waiting-state message remains visible, but the eye/eye-slash toggle is still available so the host can choose the mode before the first question or between questions.
 
-If there is no current answer yet, the existing waiting-state message is shown and no visibility toggle is rendered.
+The eye icons are switched through the toggle's explicit `data-answer-visible="true|false"` state and CSS selectors rather than relying on the SVG `hidden` attribute.
 
 ## Compatibility and fallback
 
@@ -55,6 +57,8 @@ Modifier-clicks and non-primary mouse activations are not intercepted, so normal
 
 Browsers may prompt the host for Window Management permission before exposing multi-display details. Permission handling remains entirely browser-controlled. BadWolfQuiz does not store display identifiers or screen geometry on the server.
 
+Answer visibility is stored only in the AnswerKey window's browser `sessionStorage`, scoped by the current game code. It is not persisted to the server as a host setting.
+
 ## Validation coverage
 
 Regression coverage verifies that:
@@ -66,6 +70,7 @@ Regression coverage verifies that:
 - the helper compares against `currentScreen` and uses the target display's available bounds;
 - move/resize remains a secondary reinforcement rather than the primary placement mechanism;
 - unsupported and denied-permission environments keep native browser behavior;
-- answer content starts hidden;
-- the topbar eye control toggles answer content, placeholder visibility, icon state, and `aria-pressed`;
-- the hidden placeholder remains visible until the host reveals the answer.
+- the answer visibility control is rendered even while no question is open;
+- eye and crossed-out-eye icons follow `data-answer-visible` reliably;
+- the selected visibility mode is restored from `sessionStorage` after AnswerKey reloads;
+- hidden answer content uses the dedicated placeholder until the host enables visible-answer mode.

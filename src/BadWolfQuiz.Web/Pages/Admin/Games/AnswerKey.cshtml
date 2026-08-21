@@ -8,33 +8,27 @@
 @section HeaderContext {
     <div class="game-header-context answer-key-header-context">
         <h2>@Localizer["Label_CorrectAnswer"]</h2>
-        @if (Model.AnswerBlocks.Count > 0)
-        {
-            <button class="button button-secondary icon-button answer-key-visibility-toggle"
-                    type="button"
-                    data-answer-key-visibility-toggle
-                    aria-controls="answer-key-content"
-                    aria-pressed="false"
-                    aria-label="@Localizer["Label_CorrectAnswer"]">
-                <svg class="answer-key-visibility-icon"
-                     data-answer-key-show-icon
-                     viewBox="0 0 24 24"
-                     aria-hidden="true">
-                    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-                <svg class="answer-key-visibility-icon"
-                     data-answer-key-hide-icon
-                     viewBox="0 0 24 24"
-                     aria-hidden="true"
-                     hidden>
-                    <path d="M3 3l18 18"></path>
-                    <path d="M10.6 6.2A10.7 10.7 0 0 1 12 6c6 0 9.5 6 9.5 6a14.7 14.7 0 0 1-2.1 3"></path>
-                    <path d="M6.2 6.2C3.8 8 2.5 12 2.5 12s3.5 6 9.5 6c1.4 0 2.7-.3 3.8-.8"></path>
-                    <path d="M9.9 9.9A3 3 0 0 0 14.1 14.1"></path>
-                </svg>
-            </button>
-        }
+        <button class="button button-secondary icon-button answer-key-visibility-toggle"
+                type="button"
+                data-answer-key-visibility-toggle
+                data-answer-visible="false"
+                aria-pressed="false"
+                aria-label="@Localizer["Label_CorrectAnswer"]">
+            <svg class="answer-key-visibility-icon answer-key-show-icon"
+                 viewBox="0 0 24 24"
+                 aria-hidden="true">
+                <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <svg class="answer-key-visibility-icon answer-key-hide-icon"
+                 viewBox="0 0 24 24"
+                 aria-hidden="true">
+                <path d="M3 3l18 18"></path>
+                <path d="M10.6 6.2A10.7 10.7 0 0 1 12 6c6 0 9.5 6 9.5 6a14.7 14.7 0 0 1-2.1 3"></path>
+                <path d="M6.2 6.2C3.8 8 2.5 12 2.5 12s3.5 6 9.5 6c1.4 0 2.7-.3 3.8-.8"></path>
+                <path d="M9.9 9.9A3 3 0 0 0 14.1 14.1"></path>
+            </svg>
+        </button>
     </div>
 }
 
@@ -151,24 +145,52 @@
 @section Scripts {
     <script>
         (() => {
+            const page = document.querySelector(".answer-key-page");
             const toggle = document.querySelector("[data-answer-key-visibility-toggle]");
             const content = document.querySelector("[data-answer-key-content]");
             const placeholder = document.querySelector("[data-answer-key-hidden-placeholder]");
-            const showIcon = toggle?.querySelector("[data-answer-key-show-icon]");
-            const hideIcon = toggle?.querySelector("[data-answer-key-hide-icon]");
 
-            if (!toggle || !content || !placeholder || !showIcon || !hideIcon) {
+            if (!page || !toggle) {
                 return;
             }
 
-            toggle.addEventListener("click", () => {
-                const isVisible = content.hidden;
+            const storageKey = `badwolf-answer-key-visible:${page.dataset.gameCode ?? ""}`;
 
-                content.hidden = !isVisible;
-                placeholder.hidden = isVisible;
-                showIcon.hidden = isVisible;
-                hideIcon.hidden = !isVisible;
+            const readStoredVisibility = () => {
+                try {
+                    return window.sessionStorage.getItem(storageKey) === "true";
+                } catch {
+                    return false;
+                }
+            };
+
+            const storeVisibility = isVisible => {
+                try {
+                    window.sessionStorage.setItem(storageKey, isVisible.toString());
+                } catch {
+                    // Storage can be unavailable in restricted browser contexts.
+                }
+            };
+
+            const setAnswerVisibility = isVisible => {
+                toggle.dataset.answerVisible = isVisible ? "true" : "false";
                 toggle.setAttribute("aria-pressed", isVisible.toString());
+
+                if (content) {
+                    content.hidden = !isVisible;
+                }
+
+                if (placeholder) {
+                    placeholder.hidden = isVisible;
+                }
+            };
+
+            setAnswerVisibility(readStoredVisibility());
+
+            toggle.addEventListener("click", () => {
+                const isVisible = toggle.dataset.answerVisible !== "true";
+                storeVisibility(isVisible);
+                setAnswerVisibility(isVisible);
             });
         })();
     </script>
