@@ -222,6 +222,7 @@ Implemented:
 - Coordinated audio, video, and YouTube playback so starting one media source pauses competing playback
 - YouTube auto-expand/auto-collapse behavior preserved during coordinated playback
 - Privacy-enhanced YouTube embeds using `youtube-nocookie.com` while accepting normal supported YouTube URLs from hosts
+- YouTube `t` and `start` timestamp parameters preserved across host gameplay, player gameplay, AnswerKey, and game-content preview
 
 ---
 

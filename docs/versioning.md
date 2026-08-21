@@ -46,6 +46,8 @@ Web `1.22.2` is a PATCH release that prevents the Question Editor from persistin
 
 Web `1.22.3` is a PATCH release that makes authored buzzer activation modes effective during gameplay for Standard, Four Clues, and Host-selected multiple-choice questions. It supports Manual, Immediately, After media, After delay, and round-default inheritance; removes `Disabled` from the user-facing authoring choices while preserving it internally for wager/all-player flows; treats legacy authored `Disabled` values as Manual; and fixes After-media activation for both manually started and autoplay media.
 
+Web `1.22.4` is a PATCH release that preserves authored YouTube start times when supported YouTube links are converted to privacy-enhanced embeds. `t` and `start` parameters are accepted from the query string or fragment, numeric seconds and `h` / `m` / `s` timestamp forms are converted to the embed `start` parameter, and links without a valid positive timestamp continue to start from the beginning. The behavior is shared by host gameplay, player gameplay, AnswerKey, and game-content previews without changing the existing autoplay, placeholder, or fullscreen flow.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
