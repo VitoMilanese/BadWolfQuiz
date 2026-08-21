@@ -17,6 +17,11 @@ public sealed class MediaUploadProcessor(
             ? _premiumOptions.MaximumImageUploadMegabytes
             : _options.MaximumImageUploadMegabytes;
 
+    public int MaximumGifUploadMegabytes(bool isPremium) =>
+        isPremium
+            ? _premiumOptions.MaximumGifUploadMegabytes
+            : _options.MaximumGifUploadMegabytes;
+
     public int MaximumAudioUploadMegabytes(bool isPremium) =>
         isPremium
             ? _premiumOptions.MaximumAudioUploadMegabytes
@@ -47,6 +52,23 @@ public sealed class MediaUploadProcessor(
             using var encodedData = SKData.CreateCopy(original);
             using var codec = SKCodec.Create(encodedData) ??
                 throw new MediaUploadException("InvalidImageFile");
+
+            var isGif = codec.EncodedFormat == SKEncodedImageFormat.Gif;
+            var maximumUploadMegabytes = isGif
+                ? MaximumGifUploadMegabytes(isPremium)
+                : MaximumImageUploadMegabytes(isPremium);
+            var originalMedia = Original(file, original);
+
+            if (isGif)
+            {
+                EnsureSize(originalMedia, maximumUploadMegabytes);
+            }
+
+            if (isGif && codec.FrameCount > 1)
+            {
+                return originalMedia;
+            }
+
             using var decoded = SKBitmap.Decode(original) ??
                 throw new MediaUploadException("InvalidImageFile");
             var needsResize = decoded.Width > _options.MaximumImageWidth ||
@@ -60,9 +82,7 @@ public sealed class MediaUploadProcessor(
 
             if (!needsResize && !shouldConvertToJpeg)
             {
-                return EnsureSize(
-                    Original(file, original),
-                    MaximumImageUploadMegabytes(isPremium));
+                return EnsureSize(originalMedia, maximumUploadMegabytes);
             }
 
             SKBitmap? resized = null;
@@ -89,14 +109,14 @@ public sealed class MediaUploadProcessor(
                     throw new MediaUploadException("InvalidImageFile");
                 var converted = output.ToArray();
                 var result = !needsResize && converted.Length >= original.Length
-                    ? Original(file, original)
+                    ? originalMedia
                     : shouldConvertToJpeg
                     ? new ProcessedMedia(
                         converted,
                         "image/jpeg",
                         Path.ChangeExtension(SafeFileName(file), ".jpg"))
                     : new ProcessedMedia(converted, file.ContentType, SafeFileName(file));
-                return EnsureSize(result, MaximumImageUploadMegabytes(isPremium));
+                return EnsureSize(result, maximumUploadMegabytes);
             }
             finally
             {

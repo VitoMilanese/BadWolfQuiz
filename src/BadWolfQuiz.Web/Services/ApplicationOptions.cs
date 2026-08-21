@@ -38,6 +38,7 @@ public sealed class MediaProcessingOptions
 {
     public const string SectionName = "MediaProcessing";
     public int MaximumImageUploadMegabytes { get; set; } = 5;
+    public int MaximumGifUploadMegabytes { get; set; } = 30;
     public int MaximumAudioUploadMegabytes { get; set; } = 5;
     public int MaximumImageWidth { get; set; } = 1920;
     public int MaximumImageHeight { get; set; } = 1080;
@@ -49,6 +50,7 @@ public sealed class MediaProcessingOptions
 
     public bool IsValid =>
         MaximumImageUploadMegabytes is >= 1 and <= 1024 &&
+        MaximumGifUploadMegabytes is >= 1 and <= 1024 &&
         MaximumAudioUploadMegabytes is >= 1 and <= 1024 &&
         MaximumImageWidth is >= 1 and <= 32768 &&
         MaximumImageHeight is >= 1 and <= 32768 &&
@@ -62,10 +64,12 @@ public sealed class PremiumHostOptions
     public const string SectionName = "PremiumHosts";
     public string[] HostIds { get; set; } = [];
     public int MaximumImageUploadMegabytes { get; set; } = 10;
+    public int MaximumGifUploadMegabytes { get; set; } = 50;
     public int MaximumAudioUploadMegabytes { get; set; } = 10;
 
     public bool IsValid =>
         MaximumImageUploadMegabytes is >= 1 and <= 1024 &&
+        MaximumGifUploadMegabytes is >= 1 and <= 1024 &&
         MaximumAudioUploadMegabytes is >= 1 and <= 1024 &&
         HostIds is not null && HostIds.All(hostId =>
             !string.IsNullOrWhiteSpace(hostId) && hostId.Length <= 36);

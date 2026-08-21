@@ -8,6 +8,15 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class MediaUploadProcessorTests
 {
     [Fact]
+    public void Default_gif_limits_are_30_and_50_megabytes()
+    {
+        var processor = CreateProcessor();
+
+        Assert.Equal(30, processor.MaximumGifUploadMegabytes(isPremium: false));
+        Assert.Equal(50, processor.MaximumGifUploadMegabytes(isPremium: true));
+    }
+
+    [Fact]
     public async Task Opaque_image_is_converted_to_smaller_jpeg()
     {
         var processor = CreateProcessor();
@@ -33,6 +42,83 @@ public sealed class MediaUploadProcessorTests
 
         Assert.Equal("image/png", result.ContentType);
         Assert.Equal(transparentPng, result.Data);
+    }
+
+    [Fact]
+    public async Task Animated_gif_is_preserved_when_dimensions_exceed_resize_limits()
+    {
+        var processor = CreateProcessor(new MediaProcessingOptions
+        {
+            MaximumImageWidth = 1,
+            MaximumImageHeight = 1,
+            MaximumGifUploadMegabytes = 30
+        });
+        var animatedGif = CreateAnimatedGif();
+
+        var result = await processor.ProcessImageAsync(
+            CreateFile(animatedGif, "image/gif", "animated.gif"));
+
+        Assert.Equal("image/gif", result.ContentType);
+        Assert.Equal("animated.gif", result.FileName);
+        Assert.Equal(animatedGif, result.Data);
+
+        using var encoded = SKData.CreateCopy(result.Data);
+        using var codec = SKCodec.Create(encoded) ??
+            throw new InvalidOperationException("The preserved GIF could not be decoded.");
+        Assert.Equal(SKEncodedImageFormat.Gif, codec.EncodedFormat);
+        Assert.True(codec.FrameCount > 1);
+    }
+
+    [Fact]
+    public async Task Gif_uses_dedicated_configured_size_limit()
+    {
+        var processor = CreateProcessor(new MediaProcessingOptions
+        {
+            MaximumImageUploadMegabytes = 1,
+            MaximumGifUploadMegabytes = 2,
+            ConvertOpaqueImagesToJpeg = false
+        });
+        var gif = AddGifCommentPadding(
+            CreateAnimatedGif(),
+            1024 * 1024 + 1024);
+
+        var result = await processor.ProcessImageAsync(
+            CreateFile(gif, "image/gif", "large.gif"));
+
+        Assert.True(result.Data.Length > 1024 * 1024);
+        Assert.True(result.Data.Length <= 2 * 1024 * 1024);
+        Assert.Equal(gif, result.Data);
+    }
+
+    [Fact]
+    public async Task Premium_gif_uses_higher_configured_limit()
+    {
+        var processor = CreateProcessor(
+            new MediaProcessingOptions
+            {
+                MaximumGifUploadMegabytes = 1
+            },
+            new PremiumHostOptions
+            {
+                MaximumImageUploadMegabytes = 3,
+                MaximumGifUploadMegabytes = 2,
+                MaximumAudioUploadMegabytes = 2
+            });
+        var gif = AddGifCommentPadding(
+            CreateAnimatedGif(),
+            1024 * 1024 + 1024);
+        var regularFile = CreateFile(gif, "image/gif", "premium.gif");
+        var premiumFile = CreateFile(gif, "image/gif", "premium.gif");
+
+        var exception = await Assert.ThrowsAsync<MediaUploadException>(
+            () => processor.ProcessImageAsync(regularFile));
+        var result = await processor.ProcessImageAsync(
+            premiumFile,
+            isPremium: true);
+
+        Assert.Equal("FileSizeLimitExceeded", exception.ResourceKey);
+        Assert.Equal(1, (int)Assert.Single(exception.ResourceArguments));
+        Assert.Equal(gif, result.Data);
     }
 
     [Fact]
@@ -126,6 +212,7 @@ public sealed class MediaUploadProcessorTests
             new PremiumHostOptions
             {
                 MaximumImageUploadMegabytes = 3,
+                MaximumGifUploadMegabytes = 4,
                 MaximumAudioUploadMegabytes = 2
             });
         var file = CreateFile(
@@ -156,6 +243,33 @@ public sealed class MediaUploadProcessorTests
             Headers = new HeaderDictionary(),
             ContentType = contentType
         };
+    }
+
+    private static byte[] CreateAnimatedGif() =>
+        Convert.FromBase64String(
+            "R0lGODlhBAACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAABAACAAAIBwABCBwoMCAAIfkEAQoAAQAsAAAAAAQAAgCBAAD/AAAAAAAAAAAACAcAAQgcKDAgADs=");
+
+    private static byte[] AddGifCommentPadding(byte[] gif, int payloadBytes)
+    {
+        using var stream = new MemoryStream(
+            gif.Length + payloadBytes + payloadBytes / 255 + 8);
+        stream.Write(gif, 0, gif.Length - 1);
+        stream.WriteByte(0x21);
+        stream.WriteByte(0xFE);
+
+        var remaining = payloadBytes;
+        var buffer = new byte[255];
+        while (remaining > 0)
+        {
+            var blockSize = Math.Min(buffer.Length, remaining);
+            stream.WriteByte((byte)blockSize);
+            stream.Write(buffer, 0, blockSize);
+            remaining -= blockSize;
+        }
+
+        stream.WriteByte(0);
+        stream.WriteByte(0x3B);
+        return stream.ToArray();
     }
 
     private static byte[] CreateOpaqueBitmap(int width, int height)

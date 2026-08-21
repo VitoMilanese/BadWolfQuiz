@@ -1,4 +1,4 @@
-﻿@using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Localization
 @using BadWolfQuiz.Web.Services
 @inject IStringLocalizer<SharedResource> localizer
 @inject MediaUploadProcessor mediaUploadProcessor
@@ -10,6 +10,11 @@
     var hasStoredFile =
         Model.Id.HasValue &&
         !string.IsNullOrWhiteSpace(Model.FileName);
+    var isPremium = premiumHostAccess.IsPremium(currentHost.RequiredId);
+    var maximumImageUploadMegabytes =
+        mediaUploadProcessor.MaximumImageUploadMegabytes(isPremium);
+    var maximumGifUploadMegabytes =
+        mediaUploadProcessor.MaximumGifUploadMegabytes(isPremium);
 
     string? imageUrl = null;
 
@@ -96,8 +101,10 @@
           data-media-clipboard-error
           role="alert"
           hidden></span>
-    <small>@localizer["FileUploadLimit", mediaUploadProcessor.MaximumImageUploadMegabytes(
-        premiumHostAccess.IsPremium(currentHost.RequiredId))]</small>
+    <small>
+        @localizer["FileUploadLimit", maximumImageUploadMegabytes]
+        · GIF: @localizer["FileUploadLimit", maximumGifUploadMegabytes]
+    </small>
 
     <input asp-for="TopCaption"
            class="form-control"
