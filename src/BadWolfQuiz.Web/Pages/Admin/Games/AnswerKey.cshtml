@@ -207,25 +207,69 @@
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
                 .build();
+            const finalQuestionStatuses = new Set([
+                "finalwagering",
+                "finalanswering",
+                "finaljudging"
+            ]);
             let hasInitialStatus = false;
             let hasInitialBuzzer = false;
+            let currentStatus = null;
+            let currentQuestionId = null;
+            let reloadRequested = false;
 
-            connection.on("GameStatusChanged", () => {
+            const requestReload = () => {
+                if (reloadRequested) {
+                    return;
+                }
+
+                reloadRequested = true;
+                window.location.reload();
+            };
+
+            connection.on("GameStatusChanged", update => {
+                const nextStatus = typeof update?.status === "string"
+                    ? update.status.toLowerCase()
+                    : null;
+
+                if (!nextStatus) {
+                    return;
+                }
+
                 if (!hasInitialStatus) {
                     hasInitialStatus = true;
+                    currentStatus = nextStatus;
                     return;
                 }
 
-                window.location.reload();
+                const enteredFinalQuestion =
+                    currentStatus === "running" &&
+                    finalQuestionStatuses.has(nextStatus);
+                currentStatus = nextStatus;
+
+                if (enteredFinalQuestion) {
+                    requestReload();
+                }
             });
 
-            connection.on("BuzzerStateChanged", () => {
+            connection.on("BuzzerStateChanged", update => {
+                const nextQuestionId = Number.isInteger(update?.sourceQuestionId)
+                    ? update.sourceQuestionId
+                    : null;
+
                 if (!hasInitialBuzzer) {
                     hasInitialBuzzer = true;
+                    currentQuestionId = nextQuestionId;
                     return;
                 }
 
-                window.location.reload();
+                if (nextQuestionId === null ||
+                    nextQuestionId === currentQuestionId) {
+                    return;
+                }
+
+                currentQuestionId = nextQuestionId;
+                requestReload();
             });
 
             const joinSession = () => connection.invoke(
