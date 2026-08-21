@@ -47,16 +47,16 @@ The eye icons are switched through the toggle's explicit `data-answer-visible="t
 
 ## SignalR refresh behavior
 
-The AnswerKey page does not reload for every game-state event. Its initial `GameStatusChanged` and `BuzzerStateChanged` snapshots only seed the current session status and source-question ID.
+The AnswerKey page does not reload for every game-state event. The server-rendered page embeds the session status and current source-question ID that correspond to the answer already on screen. SignalR updates are compared against that rendered identity instead of treating every status or buzzer notification as a reason to reload.
 
-After that:
+As a result:
 
 - selecting a different regular question produces a new non-null `sourceQuestionId` and reloads AnswerKey once so the new answer is rendered;
 - buzzer activity and other updates for the same question do not reload the page;
 - changing the current question into its **showing answer** state does not reload AnswerKey again, because no new question ID has appeared;
 - returning to the board does not reload AnswerKey merely because the buzzer closes;
 - entering the final-question flow from regular play reloads once so the final answer definition is rendered;
-- reconnect snapshots that describe the same state do not create another reload.
+- initial and reconnect snapshots that describe the state already rendered on the page do not create another reload.
 
 This keeps the private answer window synchronized with the actual answer identity while avoiding the visible second refresh that previously occurred when the host revealed an answer that AnswerKey had already loaded.
 
@@ -89,6 +89,7 @@ Regression coverage verifies that:
 - eye and crossed-out-eye icons follow `data-answer-visible` reliably;
 - the selected visibility mode is restored from `sessionStorage` after AnswerKey reloads;
 - hidden answer content uses the dedicated placeholder until the host enables visible-answer mode;
+- rendered session/question identity seeds the refresh filter before SignalR callbacks run;
 - regular AnswerKey refreshes happen only when the source-question ID changes;
 - revealing the already-loaded answer does not cause a redundant second reload;
 - entering the final-question flow still refreshes AnswerKey once.
