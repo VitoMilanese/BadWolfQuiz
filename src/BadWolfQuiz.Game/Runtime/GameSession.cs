@@ -362,8 +362,12 @@ public sealed class GameSession
 
         question.Select(activePlayerId);
 
-        if (!question.IsSpecial &&
-            Settings.RegularQuestionBuzzerStartMode == GamePhaseStartMode.Automatic)
+        var buzzerPolicy = QuestionBuzzerPolicy.Get(this, sourceQuestionId);
+        if (buzzerPolicy.Mode == QuestionBuzzerMode.Immediately ||
+            buzzerPolicy.Mode == QuestionBuzzerMode.AfterMedia &&
+                !buzzerPolicy.HasInitialMedia ||
+            buzzerPolicy.Mode == QuestionBuzzerMode.AfterDelay &&
+                buzzerPolicy.DelaySeconds == 0)
         {
             ActivateQuestionBuzzer(sourceQuestionId);
         }
