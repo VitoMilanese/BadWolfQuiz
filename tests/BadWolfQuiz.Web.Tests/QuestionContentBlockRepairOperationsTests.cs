@@ -172,6 +172,14 @@ public sealed class QuestionContentBlockRepairOperationsTests
             helper,
             StringComparison.Ordinal);
         Assert.Contains("target.Clear();", helper, StringComparison.Ordinal);
+        Assert.Contains(
+            "GetChildContentAsync(useCachedResult: false)",
+            helper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "output.Content.SetHtmlContent(repairedContent);",
+            helper,
+            StringComparison.Ordinal);
     }
 
     private static async Task<QuizDbContext> CreateDbAsync(SqliteConnection connection)

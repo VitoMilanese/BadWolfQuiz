@@ -60,6 +60,12 @@ public sealed class QuestionEditorContentBlockRepairTagHelper(
             model.Input.AnswerBlocks,
             question.AnswerBlocks,
             isAnswerBlock: true);
+
+        // The form body may already have been rendered or cached by another form tag helper.
+        // Re-execute it after repairing the model so the current response cannot retain
+        // stale BlockType=0 inputs that would fail the next save.
+        var repairedContent = await output.GetChildContentAsync(useCachedResult: false);
+        output.Content.SetHtmlContent(repairedContent);
     }
 
     private static bool HasInvalidBlockType(QuestionEditorModel.InputModel input) =>
