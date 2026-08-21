@@ -169,6 +169,47 @@ public sealed class AnswerKeyRegressionTests
         Assert.Contains(".answer-key-content[hidden]", css, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Answer_key_reloads_only_when_the_answer_identity_changes()
+    {
+        var page = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "AnswerKey.cshtml"));
+
+        Assert.Contains("let currentStatus = null;", page, StringComparison.Ordinal);
+        Assert.Contains("let currentQuestionId = null;", page, StringComparison.Ordinal);
+        Assert.Contains("let reloadRequested = false;", page, StringComparison.Ordinal);
+        Assert.Contains("const requestReload = () =>", page, StringComparison.Ordinal);
+        Assert.Contains(
+            "currentStatus === \"running\" &&\n                    finalQuestionStatuses.has(nextStatus)",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const nextQuestionId = Number.isInteger(update?.sourceQuestionId)",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "if (nextQuestionId === null ||\n                    nextQuestionId === currentQuestionId)",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains("currentQuestionId = nextQuestionId;", page, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "connection.on(\"GameStatusChanged\", () =>",
+            page,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "connection.on(\"BuzzerStateChanged\", () =>",
+            page,
+            StringComparison.Ordinal);
+        Assert.Equal(
+            1,
+            page.Split(
+                "window.location.reload();",
+                StringSplitOptions.None).Length - 1);
+    }
+
     private static string FindWebFile(params string[] parts)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
