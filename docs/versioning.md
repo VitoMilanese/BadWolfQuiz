@@ -38,6 +38,8 @@ Web `1.21.2` is a PATCH release that fixes low-value wager questions by using a 
 
 Web `1.21.3` is a PATCH release that fixes the private AnswerKey screen for all-player multiple-choice questions so only the configured correct option is rendered. It also removes redundant question metadata and body-level answer chrome, places **Correct answer** in the shared application topbar, hides the portal footer on AnswerKey, and constrains the answer body to the remaining viewport so the screen no longer gains an unnecessary page scrollbar.
 
+Web `1.22.0` is a MINOR release that adds multi-display placement for the private AnswerKey window. On supporting browsers, the host AnswerKey action reuses a dedicated named window and uses the Window Management API to move and resize it to a display other than the one containing the game window. Single-monitor use, unsupported browsers, permission denial, and placement failures retain the normal separate-window fallback.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
