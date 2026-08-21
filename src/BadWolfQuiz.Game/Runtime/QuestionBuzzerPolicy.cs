@@ -27,12 +27,15 @@ public static class QuestionBuzzerPolicy
             .SelectMany(round => round.Questions)
             .Single(item => item.SourceQuestionId == sourceQuestionId);
 
-        var mode = definition.BuzzerMode == QuestionBuzzerMode.UseGameSetting
+        var authoredMode = definition.BuzzerMode == QuestionBuzzerMode.Disabled
+            ? QuestionBuzzerMode.Manual
+            : definition.BuzzerMode;
+        var mode = authoredMode == QuestionBuzzerMode.UseGameSetting
             ? session.Settings.RegularQuestionBuzzerStartMode ==
                 GamePhaseStartMode.Automatic
                 ? QuestionBuzzerMode.Immediately
                 : QuestionBuzzerMode.Manual
-            : definition.BuzzerMode;
+            : authoredMode;
 
         var initialBlocks = question.PresentationType ==
             QuestionPresentationType.FourClues

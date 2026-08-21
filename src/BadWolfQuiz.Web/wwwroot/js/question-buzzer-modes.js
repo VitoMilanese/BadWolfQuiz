@@ -16,6 +16,12 @@
             return;
         }
 
+        const disabledWasSelected = modeSelect.value === "5";
+        modeSelect.querySelector('option[value="5"]')?.remove();
+        if (disabledWasSelected) {
+            modeSelect.value = "1";
+        }
+
         let delaySetting = document.getElementById("buzz-delay-setting");
         let delayInput = document.getElementById("Input_BuzzDelaySeconds");
         if (!delaySetting) {
@@ -79,6 +85,7 @@
         const endpoint = `/Admin/Games/BuzzerActivation/${encodeURIComponent(gameId)}`;
         let policy = null;
         let policySourceQuestionId = null;
+        let completedMediaSourceQuestionId = null;
         let delayHandle = null;
         let syncHandle = null;
 
@@ -157,6 +164,26 @@
             }
         };
 
+        const gateMedia = () => {
+            const presentation = view.querySelector(".question-presentation");
+            if (!presentation) {
+                return null;
+            }
+            return [...presentation.querySelectorAll(
+                "audio.game-content-audio, " +
+                "video.game-content-video, " +
+                "iframe.youtube-auto-expand, " +
+                "[data-youtube-placeholder]")]
+                .find(element =>
+                    !element.closest(".question-clue-hidden")) ?? null;
+        };
+
+        const hasGateMediaCompleted = () => {
+            const media = gateMedia();
+            return media instanceof HTMLMediaElement &&
+                (media.ended || media.error !== null);
+        };
+
         const applyPolicy = currentPolicy => {
             clearDelay();
             policy = currentPolicy;
@@ -164,6 +191,16 @@
 
             if (!currentPolicy?.active ||
                 currentPolicy.buzzerStatus !== "inactive") {
+                return;
+            }
+
+            if (currentPolicy.mode === "aftermedia" &&
+                (completedMediaSourceQuestionId ===
+                    currentPolicy.sourceQuestionId ||
+                    hasGateMediaCompleted())) {
+                completedMediaSourceQuestionId =
+                    currentPolicy.sourceQuestionId;
+                activate("media").catch(console.error);
                 return;
             }
 
@@ -179,9 +216,16 @@
             const sourceQuestionId = currentSourceQuestionId();
             if (sourceQuestionId === null) {
                 policySourceQuestionId = null;
+                completedMediaSourceQuestionId = null;
                 policy = null;
                 clearDelay();
                 return;
+            }
+
+            if (policySourceQuestionId !== null &&
+                sourceQuestionId !== policySourceQuestionId &&
+                completedMediaSourceQuestionId !== sourceQuestionId) {
+                completedMediaSourceQuestionId = null;
             }
 
             if (sourceQuestionId === policySourceQuestionId && policy) {
@@ -191,7 +235,11 @@
 
             policySourceQuestionId = sourceQuestionId;
             try {
-                applyPolicy(await fetchPolicy(sourceQuestionId));
+                const nextPolicy = await fetchPolicy(sourceQuestionId);
+                if (currentSourceQuestionId() !== sourceQuestionId) {
+                    return;
+                }
+                applyPolicy(nextPolicy);
             } catch (error) {
                 console.error(error);
             }
@@ -204,24 +252,16 @@
             }, 40);
         };
 
-        const gateMedia = () => {
-            const presentation = view.querySelector(".question-presentation");
-            if (!presentation) {
-                return null;
-            }
-            return [...presentation.querySelectorAll(
-                "audio.game-content-audio, " +
-                "video.game-content-video, " +
-                "iframe.youtube-auto-expand, " +
-                "[data-youtube-placeholder]")]
-                .find(element =>
-                    !element.closest(".question-clue-hidden")) ?? null;
-        };
-
         const completeMedia = event => {
+            const sourceQuestionId = currentSourceQuestionId();
+            if (sourceQuestionId === null || event.target !== gateMedia()) {
+                return;
+            }
+
+            completedMediaSourceQuestionId = sourceQuestionId;
             if (policy?.mode !== "aftermedia" ||
                 policy.buzzerStatus !== "inactive" ||
-                event.target !== gateMedia()) {
+                policy.sourceQuestionId !== sourceQuestionId) {
                 return;
             }
             activate("media").catch(console.error);

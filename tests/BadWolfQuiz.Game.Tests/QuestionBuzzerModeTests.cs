@@ -35,6 +35,17 @@ public sealed class QuestionBuzzerModeTests
     }
 
     [Fact]
+    public void Legacy_disabled_mode_is_treated_as_manual_for_buzzer_questions()
+    {
+        var session = CreateSession(QuestionBuzzerMode.Disabled);
+        session.SelectQuestion(100);
+
+        var policy = QuestionBuzzerPolicy.Get(session, 100);
+
+        Assert.Equal(QuestionBuzzerMode.Manual, policy.Mode);
+    }
+
+    [Fact]
     public void After_media_waits_when_initial_media_exists()
     {
         var session = CreateSession(

@@ -20,6 +20,22 @@ public sealed class QuestionBuzzerWebRegressionTests
     }
 
     [Fact]
+    public void Authoring_ui_removes_disabled_mode_for_buzzer_questions()
+    {
+        var source = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "question-buzzer-modes.js"));
+
+        Assert.Contains("const disabledWasSelected = modeSelect.value === \"5\";", source);
+        Assert.Contains("modeSelect.querySelector('option[value=\"5\"]')?.remove();", source);
+        Assert.Contains("modeSelect.value = \"1\";", source);
+    }
+
+    [Fact]
     public void Host_helper_handles_delay_and_media_completion()
     {
         var root = FindRepositoryRoot();
@@ -40,6 +56,10 @@ public sealed class QuestionBuzzerWebRegressionTests
 
         Assert.Contains("afterdelay", source);
         Assert.Contains("aftermedia", source);
+        Assert.Contains("completedMediaSourceQuestionId", source);
+        Assert.Contains("hasGateMediaCompleted", source);
+        Assert.Contains("completedMediaSourceQuestionId = sourceQuestionId;", source);
+        Assert.Contains("currentSourceQuestionId() !== sourceQuestionId", source);
         Assert.Contains("badwolf:youtube-ended", source);
         Assert.Contains("badwolf:youtube-ended", youtube);
         Assert.Contains("badwolf:youtube-error", youtube);
