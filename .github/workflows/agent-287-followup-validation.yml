@@ -1,0 +1,21 @@
+name: Agent 287 follow-up validation
+
+on:
+  pull_request:
+    branches:
+      - agent/287-fix-buzzer-modes
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Check JavaScript syntax
+        run: node --check src/BadWolfQuiz.Web/wwwroot/js/question-buzzer-modes.js
+      - name: Run focused Game tests
+        run: dotnet test tests/BadWolfQuiz.Game.Tests/BadWolfQuiz.Game.Tests.csproj --filter "FullyQualifiedName~QuestionBuzzerModeTests"
+      - name: Run focused Web tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --filter "FullyQualifiedName~BuzzerModeSnapshotRegressionTests|FullyQualifiedName~QuestionBuzzerWebRegressionTests"
