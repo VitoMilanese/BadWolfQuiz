@@ -1,7 +1,11 @@
 (() => {
     const answerKeyWindowName = "badwolf-answer-key";
     const answerKeyPathPrefix = "/admin/games/answerkey/";
-    const popupFeatures = "popup=yes,width=960,height=720,resizable=yes,scrollbars=yes";
+    const fallbackPopupFeatures =
+        "popup=yes,width=960,height=720,resizable=yes,scrollbars=yes";
+
+    let cachedScreenDetails = null;
+    let windowManagementPermissionState = "unknown";
 
     const isPlainPrimaryActivation = event =>
         event.button === 0 &&
@@ -72,41 +76,103 @@
         return { left, top, width, height };
     };
 
-    const moveWindowToScreen = (popupWindow, screen) => {
-        const bounds = getAvailableBounds(screen);
+    const buildPopupFeatures = bounds => {
+        if (!bounds) {
+            return fallbackPopupFeatures;
+        }
+
+        return [
+            "popup=yes",
+            `left=${Math.round(bounds.left)}`,
+            `top=${Math.round(bounds.top)}`,
+            `width=${Math.round(bounds.width)}`,
+            `height=${Math.round(bounds.height)}`,
+            "resizable=yes",
+            "scrollbars=yes"
+        ].join(",");
+    };
+
+    const reinforceWindowBounds = (popupWindow, bounds) => {
         if (!bounds ||
             typeof popupWindow?.moveTo !== "function" ||
             typeof popupWindow?.resizeTo !== "function") {
-            return false;
-        }
-
-        popupWindow.moveTo(bounds.left, bounds.top);
-        popupWindow.resizeTo(bounds.width, bounds.height);
-        return true;
-    };
-
-    const placeOnOtherScreen = async popupWindow => {
-        if (window.screen?.isExtended === false ||
-            typeof window.getScreenDetails !== "function") {
             return;
         }
 
         try {
-            const details = await window.getScreenDetails();
-            const targetScreen = getOtherScreen(details);
-            if (!targetScreen) {
-                return;
-            }
-
-            if (moveWindowToScreen(popupWindow, targetScreen)) {
-                popupWindow.focus();
-            }
+            popupWindow.moveTo(bounds.left, bounds.top);
+            popupWindow.resizeTo(bounds.width, bounds.height);
         } catch {
-            // The AnswerKey window is already open; permission or placement failure uses that fallback.
+            // Coordinate window.open() placement remains the primary mechanism.
         }
     };
 
-    document.addEventListener("click", event => {
+    const openAnswerKeyWindow = (url, bounds) => {
+        const popupWindow = window.open(
+            url,
+            answerKeyWindowName,
+            buildPopupFeatures(bounds));
+
+        if (!popupWindow) {
+            return null;
+        }
+
+        reinforceWindowBounds(popupWindow, bounds);
+        popupWindow.focus();
+        return popupWindow;
+    };
+
+    const getScreenDetailsForPlacement = async () => {
+        if (cachedScreenDetails) {
+            return cachedScreenDetails;
+        }
+
+        try {
+            cachedScreenDetails = await window.getScreenDetails();
+            windowManagementPermissionState = "granted";
+            return cachedScreenDetails;
+        } catch {
+            return null;
+        }
+    };
+
+    const preloadWindowManagementState = async () => {
+        if (typeof window.getScreenDetails !== "function") {
+            windowManagementPermissionState = "unsupported";
+            return;
+        }
+
+        if (typeof navigator.permissions?.query !== "function") {
+            windowManagementPermissionState = "prompt";
+            return;
+        }
+
+        try {
+            const permission = await navigator.permissions.query({
+                name: "window-management"
+            });
+            windowManagementPermissionState = permission.state;
+
+            permission.addEventListener?.("change", () => {
+                windowManagementPermissionState = permission.state;
+                cachedScreenDetails = null;
+
+                if (permission.state === "granted") {
+                    void getScreenDetailsForPlacement();
+                }
+            });
+
+            if (permission.state === "granted") {
+                await getScreenDetailsForPlacement();
+            }
+        } catch {
+            windowManagementPermissionState = "prompt";
+        }
+    };
+
+    void preloadWindowManagementState();
+
+    document.addEventListener("click", async event => {
         if (event.defaultPrevented || !isPlainPrimaryActivation(event)) {
             return;
         }
@@ -117,17 +183,24 @@
             return;
         }
 
-        const answerKeyWindow = window.open(
-            anchor.href,
-            answerKeyWindowName,
-            popupFeatures);
+        if (typeof window.getScreenDetails !== "function" ||
+            windowManagementPermissionState === "denied") {
+            return;
+        }
 
-        if (!answerKeyWindow) {
+        if (window.screen?.isExtended === false &&
+            windowManagementPermissionState === "granted") {
             return;
         }
 
         event.preventDefault();
-        answerKeyWindow.focus();
-        void placeOnOtherScreen(answerKeyWindow);
+
+        const screenDetails = await getScreenDetailsForPlacement();
+        const targetBounds = getAvailableBounds(getOtherScreen(screenDetails));
+        const answerKeyWindow = openAnswerKeyWindow(anchor.href, targetBounds);
+
+        if (!answerKeyWindow && targetBounds) {
+            openAnswerKeyWindow(anchor.href, null);
+        }
     });
 })();

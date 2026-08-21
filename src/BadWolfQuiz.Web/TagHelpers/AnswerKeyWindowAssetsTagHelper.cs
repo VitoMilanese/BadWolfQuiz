@@ -20,6 +20,6 @@ public sealed class AnswerKeyWindowAssetsTagHelper : TagHelper
         }
 
         output.PostContent.AppendHtml(
-            "<script src=\"/js/answer-key-window.js?v=1.22.0-281.1\"></script>");
+            "<script src=\"/js/answer-key-window.js?v=1.22.0-281.2\"></script>");
     }
 }
