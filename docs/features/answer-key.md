@@ -35,7 +35,7 @@ The toggle represents a presentation mode for the whole AnswerKey window rather 
 - the normal eye means answers are currently hidden;
 - clicking the eye enables visible-answer mode and changes the icon to a crossed-out eye;
 - the selected mode is stored in `sessionStorage` for the current game code;
-- SignalR-driven AnswerKey reloads restore the stored mode, so later answers remain visible after the host has revealed answers once;
+- genuine AnswerKey reloads restore the stored mode, so later answers remain visible after the host has revealed answers once;
 - clicking the crossed-out eye disables visible-answer mode again, and subsequent answers return to hidden presentation;
 - `aria-pressed` mirrors the current visible/hidden mode for assistive technology.
 
@@ -56,7 +56,8 @@ As a result:
 - changing the current question into its **showing answer** state does not reload AnswerKey again, because no new question ID has appeared;
 - returning to the board does not reload AnswerKey merely because the buzzer closes;
 - entering the final-question flow from regular play reloads once so the final answer definition is rendered;
-- initial and reconnect snapshots that describe the state already rendered on the page do not create another reload.
+- initial and reconnect snapshots that describe the state already rendered on the page do not create another reload;
+- a reload guard prevents duplicate reloads when multiple relevant notifications arrive almost simultaneously.
 
 This keeps the private answer window synchronized with the actual answer identity while avoiding the visible second refresh that previously occurred when the host revealed an answer that AnswerKey had already loaded.
 
@@ -92,4 +93,5 @@ Regression coverage verifies that:
 - rendered session/question identity seeds the refresh filter before SignalR callbacks run;
 - regular AnswerKey refreshes happen only when the source-question ID changes;
 - revealing the already-loaded answer does not cause a redundant second reload;
-- entering the final-question flow still refreshes AnswerKey once.
+- entering the final-question flow still refreshes AnswerKey once;
+- duplicate relevant notifications cannot trigger multiple simultaneous reloads.
