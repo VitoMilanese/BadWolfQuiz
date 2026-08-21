@@ -14,6 +14,7 @@ body:has(.answer-key-page) .page-shell {
 .answer-key-header-context {
     width: 100%;
     justify-content: center;
+    gap: 0.6rem;
 }
 
 .answer-key-header-context h2 {
@@ -22,10 +23,71 @@ body:has(.answer-key-page) .page-shell {
     text-align: center;
 }
 
+.answer-key-visibility-toggle {
+    display: inline-flex;
+    flex: 0 0 40px;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    padding: 0;
+}
+
+.answer-key-visibility-icon,
+.answer-key-hidden-icon {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.answer-key-visibility-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.answer-key-visibility-toggle [hidden] {
+    display: none;
+}
+
 .answer-key-page {
     height: 100%;
     min-height: 0;
     gap: 0;
+}
+
+.answer-key-hidden-placeholder {
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 1rem;
+    text-align: center;
+    opacity: 0.72;
+}
+
+.answer-key-hidden-placeholder[hidden] {
+    display: none;
+}
+
+.answer-key-hidden-icon {
+    width: clamp(48px, 6vw, 72px);
+    height: clamp(48px, 6vw, 72px);
+}
+
+.answer-key-hidden-placeholder strong {
+    font-size: clamp(1.05rem, 2vw, 1.45rem);
+}
+
+.answer-key-hidden-placeholder span {
+    font-size: 0.95rem;
 }
 
 .answer-key-content,
@@ -39,7 +101,12 @@ body:has(.answer-key-page) .page-shell {
 }
 
 .answer-key-content {
+    height: 100%;
     padding: clamp(12px, 2vw, 24px);
+}
+
+.answer-key-content[hidden] {
+    display: none;
 }
 
 .answer-key-waiting {

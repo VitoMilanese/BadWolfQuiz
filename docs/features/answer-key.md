@@ -26,6 +26,23 @@ When Window Management permission is already granted, screen details are preload
 
 Using a stable window name prevents repeated clicks from creating multiple AnswerKey windows. The existing window is navigated to the current AnswerKey URL and focused.
 
+## Answer visibility
+
+When an AnswerKey page has a current answer, the answer content starts hidden instead of being exposed immediately.
+
+The shared topbar keeps the **Correct answer** heading and adds an eye toggle beside it:
+
+- the normal eye means the answer is currently hidden and can be revealed;
+- clicking the eye reveals the answer and changes the icon to a crossed-out eye;
+- clicking the crossed-out eye hides the answer again;
+- `aria-pressed` mirrors the current visible/hidden state for assistive technology.
+
+While hidden, the answer body shows a centered placeholder with a crossed-out eye, the localized **Correct answer** label, and the existing localized **Show answer** text. This keeps the presentation intentional rather than leaving an unexplained blank screen.
+
+When the AnswerKey reloads for another question through its existing SignalR lifecycle, the new answer starts hidden again.
+
+If there is no current answer yet, the existing waiting-state message is shown and no visibility toggle is rendered.
+
 ## Compatibility and fallback
 
 The original AnswerKey links retain `target="_blank"` and `rel="noopener"`. If JavaScript does not run, the Window Management API is unavailable, or permission is already denied, normal browser behavior remains available.
@@ -48,4 +65,7 @@ Regression coverage verifies that:
 - target display coordinates are included in the `window.open()` feature string;
 - the helper compares against `currentScreen` and uses the target display's available bounds;
 - move/resize remains a secondary reinforcement rather than the primary placement mechanism;
-- unsupported and denied-permission environments keep native browser behavior.
+- unsupported and denied-permission environments keep native browser behavior;
+- answer content starts hidden;
+- the topbar eye control toggles answer content, placeholder visibility, icon state, and `aria-pressed`;
+- the hidden placeholder remains visible until the host reveals the answer.

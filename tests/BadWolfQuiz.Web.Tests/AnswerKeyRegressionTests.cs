@@ -82,6 +82,43 @@ public sealed class AnswerKeyRegressionTests
         Assert.Contains("width: 100%;", css, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Answer_key_starts_hidden_and_header_eye_toggles_the_answer()
+    {
+        var page = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "AnswerKey.cshtml"));
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "answer-key.css"));
+
+        Assert.Contains("data-answer-key-visibility-toggle", page, StringComparison.Ordinal);
+        Assert.Contains("aria-controls=\"answer-key-content\"", page, StringComparison.Ordinal);
+        Assert.Contains("aria-pressed=\"false\"", page, StringComparison.Ordinal);
+        Assert.Contains("data-answer-key-show-icon", page, StringComparison.Ordinal);
+        Assert.Contains("data-answer-key-hide-icon", page, StringComparison.Ordinal);
+        Assert.Contains("data-answer-key-hidden-placeholder", page, StringComparison.Ordinal);
+        Assert.Contains("@Localizer[\"Button_ShowAnswer\"]", page, StringComparison.Ordinal);
+        Assert.Contains("id=\"answer-key-content\"", page, StringComparison.Ordinal);
+        Assert.Contains("data-answer-key-content", page, StringComparison.Ordinal);
+        Assert.Contains("data-answer-key-content\n                 hidden", page, StringComparison.Ordinal);
+        Assert.Contains("content.hidden = !isVisible;", page, StringComparison.Ordinal);
+        Assert.Contains("placeholder.hidden = isVisible;", page, StringComparison.Ordinal);
+        Assert.Contains("showIcon.hidden = isVisible;", page, StringComparison.Ordinal);
+        Assert.Contains("hideIcon.hidden = !isVisible;", page, StringComparison.Ordinal);
+        Assert.Contains(
+            "toggle.setAttribute(\"aria-pressed\", isVisible.toString());",
+            page,
+            StringComparison.Ordinal);
+
+        Assert.Contains(".answer-key-hidden-placeholder", css, StringComparison.Ordinal);
+        Assert.Contains(".answer-key-content[hidden]", css, StringComparison.Ordinal);
+        Assert.Contains(".answer-key-visibility-toggle [hidden]", css, StringComparison.Ordinal);
+    }
+
     private static string FindWebFile(params string[] parts)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
