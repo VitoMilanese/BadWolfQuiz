@@ -40,6 +40,12 @@ Web `1.21.3` is a PATCH release that fixes the private AnswerKey screen for all-
 
 Web `1.22.0` is a MINOR release that expands the private AnswerKey presentation for multi-screen hosting. On supporting browsers, the host AnswerKey action reuses a dedicated named window and places it on a display other than the one containing the game window through the Window Management API. The topbar always exposes an eye/eye-slash visibility mode: answers start hidden, the host can reveal them once and keep subsequent answers visible for the current game, or hide them again for later questions. Hidden answers use a clear placeholder. AnswerKey refreshes are tied to answer identity rather than every game-state notification: selecting a different question refreshes the page once, while showing the already-loaded answer, buzzer activity, same-question state changes, reconnect snapshots, and returning to the board do not cause redundant reloads. Entering the final-question flow still refreshes once, and a reload guard prevents duplicate refreshes from overlapping relevant notifications. Single-monitor use, unsupported browsers, permission denial, and placement failures retain the normal separate-window fallback.
 
+Web `1.22.1` is a PATCH release that fixes CRLF-sensitive AnswerKey regression tests without changing production AnswerKey behavior.
+
+Web `1.22.2` is a PATCH release that prevents the Question Editor from persisting phantom empty content blocks with an undefined `ContentBlockType` value, repairs already-affected empty blocks when an existing question is opened, and prevents malformed undefined block types from being saved again.
+
+Web `1.22.3` is a PATCH release that makes authored buzzer activation modes effective during gameplay for Standard, Four Clues, and Host-selected multiple-choice questions. It supports Manual, Immediately, After media, After delay, and round-default inheritance; removes `Disabled` from the user-facing authoring choices while preserving it internally for wager/all-player flows; treats legacy authored `Disabled` values as Manual; and fixes After-media activation for both manually started and autoplay media.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.

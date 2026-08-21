@@ -26,34 +26,19 @@ to edit the game-specific snapshot in the lobby or during regular play.
 
 ## Timer and buzzer start modes
 
-Regular-question buzzer activation and wager-question answer timing are controlled by separate settings:
+Wager-question answer timing is controlled by `WagerQuestionAnswerTimerStartMode`, which supports `Automatic` and `Manual`.
 
-- `RegularQuestionBuzzerStartMode`;
-- `WagerQuestionAnswerTimerStartMode`.
+Regular buzzer questions also retain the game-level `RegularQuestionBuzzerStartMode` Automatic/Manual setting, but authored question/round buzzer modes take precedence. The game-level setting is used as a compatibility fallback only when a question resolves through **Use round default** and no concrete authored mode is available.
 
-Each setting supports:
+The user-facing authored buzzer modes are documented in [Buzzer activation modes](buzzer-activation-modes.md). They apply consistently to Standard, Four Clues, and Host-selected multiple-choice questions. Wager and all-player questions remain outside the normal buzzer flow.
 
-- `Automatic`;
-- `Manual`.
-
-They are intentionally independent even though both describe how a phase starts.
+For the game-level fallback, `Automatic` opens the buzzer and starts the shared buzzer-window timer when the question is revealed. `Manual` keeps the buzzer inactive and presents the host **Activate buzzer** control. For a wager question, `Automatic` starts the answering player's timer when the question is revealed, while `Manual` presents a **Start timer** host control.
 
 Final-question eligibility has an additional boolean setting:
 
 - `AllowNegativeScoreFinalPlayers`.
 
 It defaults to `true`. When disabled, players whose score is below zero are excluded from the final question. Zero-score players remain eligible.
-
-| Regular question | Wager question | Result |
-| --- | --- | --- |
-| `Automatic` | `Automatic` | The buzzer and wager answer timer start automatically in their respective flows. |
-| `Automatic` | `Manual` | The regular-question buzzer starts on reveal; the host starts the wager answer timer. |
-| `Manual` | `Automatic` | The host activates the regular-question buzzer; the wager answer timer starts on reveal. |
-| `Manual` | `Manual` | The host explicitly starts both phases. |
-
-For a regular question, `Automatic` activates the buzzer and starts the shared buzzer window timer when the question is revealed. `Manual` presents an **Activate buzzer** host control; activating it starts the same timer.
-
-For a wager question, `Automatic` starts the answering player's timer when the question is revealed. `Manual` presents a **Start timer** host control.
 
 ## Answer reward decay
 
@@ -97,10 +82,9 @@ The administration experience provides:
 A future settings implementation may add a reset action that restores a game
 setting to the inherited global default.
 
-
 ## Implementation status
 
-The Engine-level settings snapshot is implemented. It configures buzzer and answer durations, automatically opens the regular-question buzzer when requested, supports explicit start of a wager answer timer in manual mode, controls whether negative-score players participate in the final question, and enforces configurable answer reward decay for regular buzzer questions.
+The Engine-level settings snapshot is implemented. It configures buzzer and answer durations, provides the game-level Automatic/Manual buzzer fallback, supports explicit start of a wager answer timer in manual mode, controls whether negative-score players participate in the final question, and enforces configurable answer reward decay for regular buzzer questions. Authored buzzer modes are carried in the quiz snapshot and resolved before the game-level fallback is consulted.
 
 Global defaults are persisted per host in `App_Data/game-settings.json`, keyed by
 the authenticated host identifier. One host cannot read or overwrite another

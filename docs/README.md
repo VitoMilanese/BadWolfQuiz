@@ -27,6 +27,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Quiz import and export](features/quiz-import-export.md)
 - [Wagering and active player rules](features/wagering.md)
 - [Question judging](features/question-judging.md)
+- [Buzzer activation modes](features/buzzer-activation-modes.md)
 - [Answer reward decay](features/answer-reward-decay.md)
 - [Four-clue questions](features/four-clue-questions.md)
 - [Mandatory all-player questions](features/all-player-questions.md)
