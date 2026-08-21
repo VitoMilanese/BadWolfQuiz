@@ -40,7 +40,7 @@ public sealed class AnswerKeyWindowRegressionTests
     }
 
     [Fact]
-    public void Helper_opens_the_named_window_before_requesting_screen_details()
+    public void Helper_opens_the_named_window_before_starting_display_placement()
     {
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
@@ -53,12 +53,16 @@ public sealed class AnswerKeyWindowRegressionTests
             StringComparison.Ordinal);
         Assert.Contains("window.open(", script, StringComparison.Ordinal);
         Assert.Contains("window.getScreenDetails()", script, StringComparison.Ordinal);
+        Assert.Contains(
+            "void placeOnOtherScreen(answerKeyWindow);",
+            script,
+            StringComparison.Ordinal);
 
         var openIndex = script.IndexOf("window.open(", StringComparison.Ordinal);
-        var screenDetailsIndex = script.IndexOf(
-            "window.getScreenDetails()",
+        var placementCallIndex = script.IndexOf(
+            "void placeOnOtherScreen(answerKeyWindow);",
             StringComparison.Ordinal);
-        Assert.True(openIndex >= 0 && screenDetailsIndex > openIndex);
+        Assert.True(openIndex >= 0 && placementCallIndex > openIndex);
 
         var popupFailureIndex = script.IndexOf(
             "if (!answerKeyWindow)",
