@@ -156,12 +156,16 @@ public sealed class AnswerKeyRegressionTests
             "wwwroot",
             "css",
             "answer-key.css"));
+        var normalizedPage = NormalizeWhitespace(page);
 
         Assert.Contains("data-answer-key-hidden-placeholder", page, StringComparison.Ordinal);
         Assert.Contains("@Localizer[\"Button_ShowAnswer\"]", page, StringComparison.Ordinal);
         Assert.Contains("id=\"answer-key-content\"", page, StringComparison.Ordinal);
         Assert.Contains("data-answer-key-content", page, StringComparison.Ordinal);
-        Assert.Contains("data-answer-key-content\n                 hidden", page, StringComparison.Ordinal);
+        Assert.Contains(
+            "data-answer-key-content hidden>",
+            normalizedPage,
+            StringComparison.Ordinal);
         Assert.Contains("content.hidden = !isVisible;", page, StringComparison.Ordinal);
         Assert.Contains("placeholder.hidden = isVisible;", page, StringComparison.Ordinal);
 
@@ -182,6 +186,7 @@ public sealed class AnswerKeyRegressionTests
             "Admin",
             "Games",
             "AnswerKey.cshtml.cs"));
+        var normalizedPage = NormalizeWhitespace(page);
 
         Assert.Contains(
             "public int? CurrentSourceQuestionId { get; private set; }",
@@ -214,16 +219,16 @@ public sealed class AnswerKeyRegressionTests
         Assert.Contains("let reloadRequested = false;", page, StringComparison.Ordinal);
         Assert.Contains("const requestReload = () =>", page, StringComparison.Ordinal);
         Assert.Contains(
-            "currentStatus === \"running\" &&\n                    finalQuestionStatuses.has(nextStatus)",
-            page,
+            "currentStatus === \"running\" && finalQuestionStatuses.has(nextStatus)",
+            normalizedPage,
             StringComparison.Ordinal);
         Assert.Contains(
             "const nextQuestionId = Number.isInteger(update?.sourceQuestionId)",
             page,
             StringComparison.Ordinal);
         Assert.Contains(
-            "if (nextQuestionId === null ||\n                    nextQuestionId === currentQuestionId)",
-            page,
+            "if (nextQuestionId === null || nextQuestionId === currentQuestionId)",
+            normalizedPage,
             StringComparison.Ordinal);
         Assert.Contains("currentQuestionId = nextQuestionId;", page, StringComparison.Ordinal);
         Assert.DoesNotContain("hasInitialStatus", page, StringComparison.Ordinal);
@@ -233,6 +238,14 @@ public sealed class AnswerKeyRegressionTests
             page.Split(
                 "window.location.reload();",
                 StringSplitOptions.None).Length - 1);
+    }
+
+    private static string NormalizeWhitespace(string value)
+    {
+        return System.Text.RegularExpressions.Regex.Replace(
+            value,
+            @"\s+",
+            " ").Trim();
     }
 
     private static string FindWebFile(params string[] parts)
