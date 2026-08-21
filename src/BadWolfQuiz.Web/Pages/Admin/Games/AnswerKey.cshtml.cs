@@ -16,6 +16,8 @@ public sealed class AnswerKeyModel(
 
     public bool IsFinalQuestion { get; private set; }
 
+    public int? CurrentSourceQuestionId { get; private set; }
+
     public IActionResult OnGet(Guid id)
     {
         var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
@@ -55,6 +57,7 @@ public sealed class AnswerKeyModel(
             return Page();
         }
 
+        CurrentSourceQuestionId = question.SourceQuestionId;
         AnswerBlocks = GetVisibleAnswerBlocks(question);
         return Page();
     }

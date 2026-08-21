@@ -82,6 +82,159 @@ public sealed class AnswerKeyRegressionTests
         Assert.Contains("width: 100%;", css, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Answer_key_visibility_mode_is_always_available_and_persists_between_reloads()
+    {
+        var page = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "AnswerKey.cshtml"));
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "answer-key.css"));
+
+        Assert.Contains("data-answer-key-visibility-toggle", page, StringComparison.Ordinal);
+        Assert.Contains("data-answer-visible=\"false\"", page, StringComparison.Ordinal);
+        Assert.Contains("aria-pressed=\"false\"", page, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "@if (Model.AnswerBlocks.Count > 0)",
+            page,
+            StringComparison.Ordinal);
+
+        Assert.Contains("answer-key-show-icon", page, StringComparison.Ordinal);
+        Assert.Contains("answer-key-hide-icon", page, StringComparison.Ordinal);
+        Assert.Contains(
+            ".answer-key-visibility-toggle[data-answer-visible=\"true\"] .answer-key-show-icon",
+            css,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".answer-key-visibility-toggle[data-answer-visible=\"true\"] .answer-key-hide-icon",
+            css,
+            StringComparison.Ordinal);
+
+        Assert.Contains(
+            "const storageKey = `badwolf-answer-key-visible:${page.dataset.gameCode ?? \"\"}`;",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.sessionStorage.getItem(storageKey) === \"true\"",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.sessionStorage.setItem(storageKey, isVisible.toString());",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "setAnswerVisibility(readStoredVisibility());",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "toggle.dataset.answerVisible = isVisible ? \"true\" : \"false\";",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "toggle.setAttribute(\"aria-pressed\", isVisible.toString());",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const isVisible = toggle.dataset.answerVisible !== \"true\";",
+            page,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Hidden_answer_uses_placeholder_and_visibility_mode_applies_when_answer_exists()
+    {
+        var page = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "AnswerKey.cshtml"));
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "answer-key.css"));
+
+        Assert.Contains("data-answer-key-hidden-placeholder", page, StringComparison.Ordinal);
+        Assert.Contains("@Localizer[\"Button_ShowAnswer\"]", page, StringComparison.Ordinal);
+        Assert.Contains("id=\"answer-key-content\"", page, StringComparison.Ordinal);
+        Assert.Contains("data-answer-key-content", page, StringComparison.Ordinal);
+        Assert.Contains("data-answer-key-content\n                 hidden", page, StringComparison.Ordinal);
+        Assert.Contains("content.hidden = !isVisible;", page, StringComparison.Ordinal);
+        Assert.Contains("placeholder.hidden = isVisible;", page, StringComparison.Ordinal);
+
+        Assert.Contains(".answer-key-hidden-placeholder", css, StringComparison.Ordinal);
+        Assert.Contains(".answer-key-content[hidden]", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Answer_key_reloads_only_when_the_answer_identity_changes()
+    {
+        var page = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "AnswerKey.cshtml"));
+        var model = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "AnswerKey.cshtml.cs"));
+
+        Assert.Contains(
+            "public int? CurrentSourceQuestionId { get; private set; }",
+            model,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "CurrentSourceQuestionId = question.SourceQuestionId;",
+            model,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "data-game-status=\"@Model.Game.Session.Status.ToString().ToLowerInvariant()\"",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "data-source-question-id=\"@Model.CurrentSourceQuestionId\"",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const renderedQuestionId = Number.parseInt(",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "let currentStatus = (page.dataset.gameStatus ?? \"\").toLowerCase();",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "let currentQuestionId = Number.isInteger(renderedQuestionId)",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains("let reloadRequested = false;", page, StringComparison.Ordinal);
+        Assert.Contains("const requestReload = () =>", page, StringComparison.Ordinal);
+        Assert.Contains(
+            "currentStatus === \"running\" &&\n                    finalQuestionStatuses.has(nextStatus)",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const nextQuestionId = Number.isInteger(update?.sourceQuestionId)",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "if (nextQuestionId === null ||\n                    nextQuestionId === currentQuestionId)",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains("currentQuestionId = nextQuestionId;", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("hasInitialStatus", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("hasInitialBuzzer", page, StringComparison.Ordinal);
+        Assert.Equal(
+            1,
+            page.Split(
+                "window.location.reload();",
+                StringSplitOptions.None).Length - 1);
+    }
+
     private static string FindWebFile(params string[] parts)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
