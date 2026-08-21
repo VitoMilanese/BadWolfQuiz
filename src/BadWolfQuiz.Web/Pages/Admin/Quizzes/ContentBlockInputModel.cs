@@ -1,4 +1,5 @@
-﻿using BadWolfQuiz.Web.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using BadWolfQuiz.Web.Models;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Quizzes;
 
@@ -8,6 +9,7 @@ public sealed class ContentBlockInputModel
 
     public int SortOrder { get; set; }
 
+    [EnumDataType(typeof(ContentBlockType))]
     public ContentBlockType BlockType { get; set; }
 
     public string? TextContent { get; set; }

@@ -3,6 +3,11 @@
 @using BadWolfQuiz.Web.Models
 @inject IStringLocalizer<SharedResource> localizer
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
+@{
+    var canRenderCheckboxHiddenInputsAtEndOfForm =
+        ViewContext.FormContext.CanRenderAtEndOfForm;
+    ViewContext.FormContext.CanRenderAtEndOfForm = false;
+}
 
 <div class="content-panel content-block-card"
      data-block-type="@Model.BlockType"
@@ -117,3 +122,7 @@
     }
 
 </div>
+@{
+    ViewContext.FormContext.CanRenderAtEndOfForm =
+        canRenderCheckboxHiddenInputsAtEndOfForm;
+}
