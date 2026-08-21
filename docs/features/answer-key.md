@@ -45,6 +45,21 @@ When there is no current answer, the existing waiting-state message remains visi
 
 The eye icons are switched through the toggle's explicit `data-answer-visible="true|false"` state and CSS selectors rather than relying on the SVG `hidden` attribute.
 
+## SignalR refresh behavior
+
+The AnswerKey page does not reload for every game-state event. Its initial `GameStatusChanged` and `BuzzerStateChanged` snapshots only seed the current session status and source-question ID.
+
+After that:
+
+- selecting a different regular question produces a new non-null `sourceQuestionId` and reloads AnswerKey once so the new answer is rendered;
+- buzzer activity and other updates for the same question do not reload the page;
+- changing the current question into its **showing answer** state does not reload AnswerKey again, because no new question ID has appeared;
+- returning to the board does not reload AnswerKey merely because the buzzer closes;
+- entering the final-question flow from regular play reloads once so the final answer definition is rendered;
+- reconnect snapshots that describe the same state do not create another reload.
+
+This keeps the private answer window synchronized with the actual answer identity while avoiding the visible second refresh that previously occurred when the host revealed an answer that AnswerKey had already loaded.
+
 ## Compatibility and fallback
 
 The original AnswerKey links retain `target="_blank"` and `rel="noopener"`. If JavaScript does not run, the Window Management API is unavailable, or permission is already denied, normal browser behavior remains available.
@@ -73,4 +88,7 @@ Regression coverage verifies that:
 - the answer visibility control is rendered even while no question is open;
 - eye and crossed-out-eye icons follow `data-answer-visible` reliably;
 - the selected visibility mode is restored from `sessionStorage` after AnswerKey reloads;
-- hidden answer content uses the dedicated placeholder until the host enables visible-answer mode.
+- hidden answer content uses the dedicated placeholder until the host enables visible-answer mode;
+- regular AnswerKey refreshes happen only when the source-question ID changes;
+- revealing the already-loaded answer does not cause a redundant second reload;
+- entering the final-question flow still refreshes AnswerKey once.
