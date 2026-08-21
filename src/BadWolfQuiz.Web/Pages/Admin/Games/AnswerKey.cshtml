@@ -36,7 +36,9 @@
 <link rel="stylesheet" href="~/css/answer-key.css" asp-append-version="true" />
 
 <section class="answer-key-page"
-         data-game-code="@Model.Game.PublicCode">
+         data-game-code="@Model.Game.PublicCode"
+         data-game-status="@Model.Game.Session.Status.ToString().ToLowerInvariant()"
+         data-source-question-id="@Model.CurrentSourceQuestionId">
     @if (Model.AnswerBlocks.Count == 0)
     {
         <div class="content-panel answer-key-waiting">
@@ -212,10 +214,13 @@
                 "finalanswering",
                 "finaljudging"
             ]);
-            let hasInitialStatus = false;
-            let hasInitialBuzzer = false;
-            let currentStatus = null;
-            let currentQuestionId = null;
+            const renderedQuestionId = Number.parseInt(
+                page.dataset.sourceQuestionId ?? "",
+                10);
+            let currentStatus = (page.dataset.gameStatus ?? "").toLowerCase();
+            let currentQuestionId = Number.isInteger(renderedQuestionId)
+                ? renderedQuestionId
+                : null;
             let reloadRequested = false;
 
             const requestReload = () => {
@@ -236,12 +241,6 @@
                     return;
                 }
 
-                if (!hasInitialStatus) {
-                    hasInitialStatus = true;
-                    currentStatus = nextStatus;
-                    return;
-                }
-
                 const enteredFinalQuestion =
                     currentStatus === "running" &&
                     finalQuestionStatuses.has(nextStatus);
@@ -256,12 +255,6 @@
                 const nextQuestionId = Number.isInteger(update?.sourceQuestionId)
                     ? update.sourceQuestionId
                     : null;
-
-                if (!hasInitialBuzzer) {
-                    hasInitialBuzzer = true;
-                    currentQuestionId = nextQuestionId;
-                    return;
-                }
 
                 if (nextQuestionId === null ||
                     nextQuestionId === currentQuestionId) {
