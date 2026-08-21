@@ -177,9 +177,40 @@ public sealed class AnswerKeyRegressionTests
             "Admin",
             "Games",
             "AnswerKey.cshtml"));
+        var model = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "AnswerKey.cshtml.cs"));
 
-        Assert.Contains("let currentStatus = null;", page, StringComparison.Ordinal);
-        Assert.Contains("let currentQuestionId = null;", page, StringComparison.Ordinal);
+        Assert.Contains(
+            "public int? CurrentSourceQuestionId { get; private set; }",
+            model,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "CurrentSourceQuestionId = question.SourceQuestionId;",
+            model,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "data-game-status=\"@Model.Game.Session.Status.ToString().ToLowerInvariant()\"",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "data-source-question-id=\"@Model.CurrentSourceQuestionId\"",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const renderedQuestionId = Number.parseInt(",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "let currentStatus = (page.dataset.gameStatus ?? \"\").toLowerCase();",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "let currentQuestionId = Number.isInteger(renderedQuestionId)",
+            page,
+            StringComparison.Ordinal);
         Assert.Contains("let reloadRequested = false;", page, StringComparison.Ordinal);
         Assert.Contains("const requestReload = () =>", page, StringComparison.Ordinal);
         Assert.Contains(
@@ -195,14 +226,8 @@ public sealed class AnswerKeyRegressionTests
             page,
             StringComparison.Ordinal);
         Assert.Contains("currentQuestionId = nextQuestionId;", page, StringComparison.Ordinal);
-        Assert.DoesNotContain(
-            "connection.on(\"GameStatusChanged\", () =>",
-            page,
-            StringComparison.Ordinal);
-        Assert.DoesNotContain(
-            "connection.on(\"BuzzerStateChanged\", () =>",
-            page,
-            StringComparison.Ordinal);
+        Assert.DoesNotContain("hasInitialStatus", page, StringComparison.Ordinal);
+        Assert.DoesNotContain("hasInitialBuzzer", page, StringComparison.Ordinal);
         Assert.Equal(
             1,
             page.Split(
