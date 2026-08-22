@@ -1,5 +1,5 @@
 @import url("./board-header-first-paint.css?v=1");
-@import url("./game-content-viewport-fit.css?v=4");
+@import url("./game-content-viewport-fit.css?v=5");
 
 body[aria-busy="true"] {
     overflow: hidden;

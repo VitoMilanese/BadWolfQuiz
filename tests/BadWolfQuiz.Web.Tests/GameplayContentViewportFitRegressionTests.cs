@@ -42,7 +42,7 @@ public sealed class GameplayContentViewportFitRegressionTests
         var viewportStyles = ReadAsset("css", "game-content-viewport-fit.css");
 
         Assert.Contains(
-            "@import url(\"./game-content-viewport-fit.css?v=4\");",
+            "@import url(\"./game-content-viewport-fit.css?v=5\");",
             busyStyles,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -58,6 +58,19 @@ public sealed class GameplayContentViewportFitRegressionTests
             viewportStyles,
             StringComparison.Ordinal);
         Assert.Contains("visibility: hidden;", viewportStyles, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Pending_single_image_fit_suppresses_scrollbar_until_ready()
+    {
+        var viewportStyles = ReadAsset("css", "game-content-viewport-fit.css");
+
+        Assert.Contains(":has(", viewportStyles, StringComparison.Ordinal);
+        Assert.Contains(
+            "> .game-content-block > img.game-content-image:not([data-game-content-fit-ready=\"true\"])",
+            viewportStyles,
+            StringComparison.Ordinal);
+        Assert.Contains("overflow-y: hidden;", viewportStyles, StringComparison.Ordinal);
     }
 
     [Fact]
