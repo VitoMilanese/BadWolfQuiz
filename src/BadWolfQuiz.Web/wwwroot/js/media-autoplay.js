@@ -145,6 +145,7 @@
 (() => {
     const gifPattern = /\.gif(?:$|[?#])/i;
     const maximumPosterDimension = 2048;
+    const opacitySampleSize = 32;
     const posterSources = new WeakMap();
 
     const isGifImage = image => {
@@ -178,6 +179,30 @@
         posterSources.delete(image);
     };
 
+    const isCurrentFrameOpaque = image => {
+        const sample = document.createElement("canvas");
+        sample.width = opacitySampleSize;
+        sample.height = opacitySampleSize;
+        const context = sample.getContext("2d", { willReadFrequently: true });
+        if (!context) {
+            return false;
+        }
+
+        context.drawImage(image, 0, 0, sample.width, sample.height);
+        const pixels = context.getImageData(
+            0,
+            0,
+            sample.width,
+            sample.height).data;
+        for (let index = 3; index < pixels.length; index += 4) {
+            if (pixels[index] !== 255) {
+                return false;
+            }
+        }
+
+        return true;
+    };
+
     const getBackgroundSize = objectFit => {
         switch (objectFit) {
             case "cover":
@@ -209,21 +234,27 @@
             return;
         }
 
-        const scale = Math.min(
-            1,
-            maximumPosterDimension / image.naturalWidth,
-            maximumPosterDimension / image.naturalHeight);
-        const width = Math.max(1, Math.round(image.naturalWidth * scale));
-        const height = Math.max(1, Math.round(image.naturalHeight * scale));
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const context = canvas.getContext("2d");
-        if (!context) {
-            return;
-        }
-
         try {
+            if (!isCurrentFrameOpaque(image)) {
+                clearPoster(image);
+                posterSources.set(image, sourceKey);
+                return;
+            }
+
+            const scale = Math.min(
+                1,
+                maximumPosterDimension / image.naturalWidth,
+                maximumPosterDimension / image.naturalHeight);
+            const width = Math.max(1, Math.round(image.naturalWidth * scale));
+            const height = Math.max(1, Math.round(image.naturalHeight * scale));
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const context = canvas.getContext("2d");
+            if (!context) {
+                return;
+            }
+
             context.drawImage(image, 0, 0, width, height);
             const poster = canvas.toDataURL("image/png");
             const computedStyle = window.getComputedStyle(image);
@@ -238,6 +269,8 @@
         } catch (error) {
             // Cross-origin images cannot be copied to canvas. In that case,
             // keep the original browser rendering without the poster fallback.
+            clearPoster(image);
+            posterSources.set(image, sourceKey);
             console.debug("GIF loop poster could not be created.", error);
         }
     };
