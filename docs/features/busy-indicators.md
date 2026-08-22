@@ -21,6 +21,7 @@ The shared busy state is used for:
 - creating a game from the quiz editor;
 - opening the quiz, question, final-question, round-description, and category-description editors;
 - switching rounds in the quiz editor;
+- renaming rounds and categories from the quiz editor;
 - Save actions in the quiz, question, final-question, round-description, and category-description editors;
 - Back navigation from those editor pages, including Escape-key navigation.
 
@@ -32,6 +33,8 @@ Quiz import keeps the existing native multipart form submission. Once a `.bwquiz
 
 Quiz export keeps the native browser download path rather than reading the generated package into a JavaScript `Blob`. The export link is locked immediately and a per-request `exportToken` is added to the download URL. When package preparation finishes, including server failure paths, the export handler writes a short-lived `badwolfquiz-export-complete` cookie containing that token. The current page polls for the matching token, then releases the busy overlay and export lock. A fallback timeout and `pageshow` recovery prevent stale busy state if browser download navigation behaves unexpectedly.
 
+Round and category rename dialogs use a dedicated AJAX rename endpoint instead of following the original POST/redirect path back through the full Quiz Editor GET. While the request is active, all controls in the rename dialog are disabled and the shared fullscreen overlay prevents conflicting interaction. A successful response updates the visible title and dependent client-side metadata in place, closes the dialog, shows the existing quiz save-status message, and releases the busy state. Errors release the busy state and restore the controls so the rename can be corrected or retried. The original Editor POST handlers remain available as the native/no-JavaScript fallback.
+
 Quiz Editor and Question Editor Save actions already use AJAX. Their existing save handlers continue to own the request and error handling; the shared busy layer observes the existing submitter state and closes when the operation completes and the submitter is re-enabled.
 
 Duplicate activation is blocked while the shared busy state is active. A `pageshow` handler clears stale state after browser back/forward restoration.
@@ -40,6 +43,6 @@ Escape still closes an open editor preview or dialog first. When no editor modal
 
 ## Compatibility
 
-The busy feedback does not change quiz validation, persistence, import/export package format, export filename/content type, game-launch rules, or gameplay behavior. It is presentation and duplicate-action protection around existing actions.
+The busy feedback does not change quiz validation, persistence, import/export package format, export filename/content type, game-launch rules, or gameplay behavior. Rename validation and persistence remain compatible with the original native POST handlers. The busy layer provides presentation, duplicate-action protection, and no-reload AJAX handling around existing editor operations.
 
-Regression coverage lives in `BusyIndicatorRegressionTests` and checks global asset loading, route coverage, fullscreen modal behavior, quiz import locking, export completion signaling and duplicate protection, native large-export-safe download behavior, AJAX save lifetime, Escape navigation, history restoration, and reduced-motion styling.
+Regression coverage lives in `BusyIndicatorRegressionTests` and `QuizRenameBusyRegressionTests`. It checks global asset loading, route coverage, fullscreen modal behavior, quiz import locking, export completion signaling and duplicate protection, native large-export-safe download behavior, AJAX save lifetime, rename dialog locking and duplicate protection, in-place rename synchronization, native rename fallback preservation, Escape navigation, history restoration, and reduced-motion styling.
