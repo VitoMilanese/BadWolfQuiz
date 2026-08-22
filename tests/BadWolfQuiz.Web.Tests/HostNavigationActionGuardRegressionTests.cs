@@ -131,7 +131,8 @@ public sealed class HostNavigationActionGuardRegressionTests
             "BadWolfQuiz.Web",
             "wwwroot",
             "js",
-            "host-navigation-action-guard.js"));
+            "host-navigation-action-guard.js"))
+            .ReplaceLineEndings("\n");
 
     private static string FindRepositoryRoot()
     {
