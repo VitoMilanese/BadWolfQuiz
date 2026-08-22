@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Diagnostics;
 using BadWolfQuiz.Web.Models;
 using Microsoft.Extensions.Options;
@@ -67,12 +66,13 @@ public sealed class MediaUploadProcessor(
 
             if (isGif && codec.FrameCount > 1)
             {
-                var normalized = await NormalizeAnimatedGifAsync(
-                    originalMedia,
-                    codec,
-                    maximumUploadMegabytes,
-                    cancellationToken);
-                return EnsureSize(normalized, maximumUploadMegabytes);
+                var loopSafeGif = NormalizeAnimatedGifLoop(original);
+                return EnsureSize(
+                    new ProcessedMedia(
+                        loopSafeGif,
+                        "image/gif",
+                        SafeFileName(file)),
+                    maximumUploadMegabytes);
             }
 
             using var decoded = SKBitmap.Decode(original) ??
@@ -193,7 +193,7 @@ public sealed class MediaUploadProcessor(
                 process.Start();
             }
             catch (Exception exception) when (
-                exception is InvalidOperationException or Win32Exception)
+                exception is InvalidOperationException or System.ComponentModel.Win32Exception)
             {
                 throw new MediaUploadException("AudioConversionUnavailable");
             }
@@ -232,160 +232,173 @@ public sealed class MediaUploadProcessor(
         }
     }
 
-    private async Task<ProcessedMedia> NormalizeAnimatedGifAsync(
-        ProcessedMedia originalMedia,
-        SKCodec codec,
-        int maximumUploadMegabytes,
-        CancellationToken cancellationToken)
+    internal static byte[] NormalizeAnimatedGifLoop(byte[] gif)
     {
-        var lastVisibleFrameIndex = GetLastVisibleGifFrameIndex(codec);
-        var inputPath = Path.Combine(
-            Path.GetTempPath(),
-            $"badwolf-gif-{Guid.NewGuid():N}.gif");
-        var outputPath = Path.Combine(
-            Path.GetTempPath(),
-            $"badwolf-gif-{Guid.NewGuid():N}-normalized.gif");
-
-        try
+        if (!TryFindLastGifFrameGraphicControlExtension(
+                gif,
+                out var frameCount,
+                out var packedFieldOffset) ||
+            frameCount <= 1 ||
+            packedFieldOffset < 0)
         {
-            await File.WriteAllBytesAsync(
-                inputPath,
-                originalMedia.Data,
-                cancellationToken);
-
-            using var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = _options.FfmpegExecutablePath,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = false,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            };
-
-            process.StartInfo.ArgumentList.Add("-nostdin");
-            process.StartInfo.ArgumentList.Add("-y");
-            process.StartInfo.ArgumentList.Add("-i");
-            process.StartInfo.ArgumentList.Add(inputPath);
-            process.StartInfo.ArgumentList.Add("-filter_complex");
-            process.StartInfo.ArgumentList.Add(
-                $"[0:v]select=lte(n\\,{lastVisibleFrameIndex})[selected];" +
-                "[selected]split[palette_source][video_source];" +
-                "[palette_source]palettegen=reserve_transparent=1[palette];" +
-                "[video_source][palette]paletteuse=dither=sierra2_4a");
-            process.StartInfo.ArgumentList.Add("-loop");
-            process.StartInfo.ArgumentList.Add("0");
-            process.StartInfo.ArgumentList.Add("-gifflags");
-            process.StartInfo.ArgumentList.Add("-offsetting-transdiff");
-            process.StartInfo.ArgumentList.Add("-map_metadata");
-            process.StartInfo.ArgumentList.Add("-1");
-            process.StartInfo.ArgumentList.Add(outputPath);
-
-            try
-            {
-                process.Start();
-            }
-            catch (Exception exception) when (
-                exception is InvalidOperationException or Win32Exception)
-            {
-                return originalMedia;
-            }
-
-            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
-            try
-            {
-                await process.WaitForExitAsync(cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                if (!process.HasExited)
-                {
-                    process.Kill(entireProcessTree: true);
-                }
-                throw;
-            }
-            _ = await errorTask;
-
-            if (process.ExitCode != 0 || !File.Exists(outputPath))
-            {
-                return originalMedia;
-            }
-
-            var normalized = await File.ReadAllBytesAsync(
-                outputPath,
-                cancellationToken);
-            if (normalized.Length == 0 ||
-                normalized.LongLength > maximumUploadMegabytes * 1024L * 1024L)
-            {
-                return originalMedia;
-            }
-
-            using var normalizedData = SKData.CreateCopy(normalized);
-            using var normalizedCodec = SKCodec.Create(normalizedData);
-            if (normalizedCodec is null ||
-                normalizedCodec.EncodedFormat != SKEncodedImageFormat.Gif ||
-                normalizedCodec.FrameCount <= 1)
-            {
-                return originalMedia;
-            }
-
-            return new ProcessedMedia(
-                normalized,
-                "image/gif",
-                originalMedia.FileName);
+            return gif;
         }
-        finally
+
+        const int disposalMethodMask = 0x1C;
+        const int restoreToBackground = 2;
+        const int doNotDispose = 1;
+
+        var packedField = gif[packedFieldOffset];
+        var disposalMethod =
+            (packedField & disposalMethodMask) >> 2;
+        if (disposalMethod != restoreToBackground)
         {
-            TryDelete(inputPath);
-            TryDelete(outputPath);
+            return gif;
         }
+
+        var result = (byte[])gif.Clone();
+        result[packedFieldOffset] = (byte)(
+            (packedField & ~disposalMethodMask) |
+            (doNotDispose << 2));
+        return result;
     }
 
-    internal static int GetLastVisibleGifFrameIndex(SKCodec codec)
+    private static bool TryFindLastGifFrameGraphicControlExtension(
+        byte[] data,
+        out int frameCount,
+        out int packedFieldOffset)
     {
-        var frameInfo = codec.FrameInfo;
-        var lastFrameIndex = Math.Min(codec.FrameCount, frameInfo.Length) - 1;
-        if (lastFrameIndex <= 0)
-        {
-            return Math.Max(0, lastFrameIndex);
-        }
+        frameCount = 0;
+        packedFieldOffset = -1;
 
-        while (lastFrameIndex > 0 &&
-               IsGifFrameFullyTransparent(codec, lastFrameIndex))
-        {
-            lastFrameIndex--;
-        }
-
-        return lastFrameIndex;
-    }
-
-    private static bool IsGifFrameFullyTransparent(SKCodec codec, int frameIndex)
-    {
-        var info = new SKImageInfo(
-            codec.Info.Width,
-            codec.Info.Height,
-            SKColorType.Bgra8888,
-            SKAlphaType.Premul);
-        using var bitmap = new SKBitmap(
-            info.Width,
-            info.Height,
-            info.ColorType,
-            info.AlphaType);
-        bitmap.Erase(SKColors.Transparent);
-
-        var result = codec.GetPixels(
-            info,
-            bitmap.GetPixels(),
-            bitmap.RowBytes,
-            new SKCodecOptions(frameIndex, -1));
-        if (result != SKCodecResult.Success)
+        if (data.Length < 13 ||
+            data[0] != (byte)'G' ||
+            data[1] != (byte)'I' ||
+            data[2] != (byte)'F' ||
+            data[3] != (byte)'8' ||
+            (data[4] != (byte)'7' && data[4] != (byte)'9') ||
+            data[5] != (byte)'a')
         {
             return false;
         }
 
-        return bitmap.Pixels.All(pixel => pixel.Alpha == 0);
+        var offset = 13;
+        var logicalScreenPackedField = data[10];
+        if ((logicalScreenPackedField & 0x80) != 0)
+        {
+            var colorCount = 1 << ((logicalScreenPackedField & 0x07) + 1);
+            var colorTableBytes = 3 * colorCount;
+            if (offset + colorTableBytes > data.Length)
+            {
+                return false;
+            }
+            offset += colorTableBytes;
+        }
+
+        var pendingGraphicControlPackedFieldOffset = -1;
+        while (offset < data.Length)
+        {
+            var introducer = data[offset];
+            switch (introducer)
+            {
+                case 0x3B:
+                    return true;
+
+                case 0x21:
+                    if (offset + 2 > data.Length)
+                    {
+                        return false;
+                    }
+
+                    var extensionLabel = data[offset + 1];
+                    offset += 2;
+                    if (extensionLabel == 0xF9)
+                    {
+                        if (offset + 6 > data.Length ||
+                            data[offset] != 4 ||
+                            data[offset + 5] != 0)
+                        {
+                            return false;
+                        }
+
+                        pendingGraphicControlPackedFieldOffset = offset + 1;
+                        offset += 6;
+                    }
+                    else
+                    {
+                        if (!SkipGifSubBlocks(data, ref offset))
+                        {
+                            return false;
+                        }
+
+                        if (extensionLabel == 0x01)
+                        {
+                            pendingGraphicControlPackedFieldOffset = -1;
+                        }
+                    }
+                    break;
+
+                case 0x2C:
+                    if (offset + 10 > data.Length)
+                    {
+                        return false;
+                    }
+
+                    var imagePackedField = data[offset + 9];
+                    offset += 10;
+                    if ((imagePackedField & 0x80) != 0)
+                    {
+                        var colorCount = 1 << ((imagePackedField & 0x07) + 1);
+                        var colorTableBytes = 3 * colorCount;
+                        if (offset + colorTableBytes > data.Length)
+                        {
+                            return false;
+                        }
+                        offset += colorTableBytes;
+                    }
+
+                    if (offset >= data.Length)
+                    {
+                        return false;
+                    }
+
+                    offset++;
+                    if (!SkipGifSubBlocks(data, ref offset))
+                    {
+                        return false;
+                    }
+
+                    frameCount++;
+                    packedFieldOffset = pendingGraphicControlPackedFieldOffset;
+                    pendingGraphicControlPackedFieldOffset = -1;
+                    break;
+
+                default:
+                    return false;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool SkipGifSubBlocks(byte[] data, ref int offset)
+    {
+        while (offset < data.Length)
+        {
+            var blockLength = data[offset++];
+            if (blockLength == 0)
+            {
+                return true;
+            }
+
+            if (offset + blockLength > data.Length)
+            {
+                return false;
+            }
+            offset += blockLength;
+        }
+
+        return false;
     }
 
     private static SKBitmap Resize(SKBitmap source, int width, int height)

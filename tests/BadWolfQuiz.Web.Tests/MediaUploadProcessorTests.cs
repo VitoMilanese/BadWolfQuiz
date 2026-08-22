@@ -45,7 +45,7 @@ public sealed class MediaUploadProcessorTests
     }
 
     [Fact]
-    public async Task Animated_gif_remains_animated_when_dimensions_exceed_resize_limits()
+    public async Task Animated_gif_is_preserved_when_dimensions_exceed_resize_limits()
     {
         var processor = CreateProcessor(new MediaProcessingOptions
         {
@@ -60,28 +60,46 @@ public sealed class MediaUploadProcessorTests
 
         Assert.Equal("image/gif", result.ContentType);
         Assert.Equal("animated.gif", result.FileName);
+        Assert.Equal(animatedGif, result.Data);
 
         using var encoded = SKData.CreateCopy(result.Data);
         using var codec = SKCodec.Create(encoded) ??
-            throw new InvalidOperationException("The processed GIF could not be decoded.");
+            throw new InvalidOperationException("The preserved GIF could not be decoded.");
         Assert.Equal(SKEncodedImageFormat.Gif, codec.EncodedFormat);
         Assert.True(codec.FrameCount > 1);
-        Assert.Equal(4, codec.Info.Width);
-        Assert.Equal(2, codec.Info.Height);
     }
 
     [Fact]
-    public void Gif_loop_normalization_detects_trailing_blank_frame()
+    public void Animated_gif_last_background_disposal_is_changed_to_do_not_dispose()
     {
-        using var encoded = SKData.CreateCopy(CreateGifWithTrailingBlankFrame());
+        var animatedGif = CreateGifWithBackgroundDisposal();
+        var before = GetGraphicControlDisposalMethods(animatedGif);
+
+        var normalized = MediaUploadProcessor.NormalizeAnimatedGifLoop(animatedGif);
+        var after = GetGraphicControlDisposalMethods(normalized);
+
+        Assert.Equal(new[] { 2, 2, 2, 2 }, before);
+        Assert.Equal(new[] { 2, 2, 2, 1 }, after);
+        Assert.Equal(animatedGif.Length, normalized.Length);
+        Assert.Equal(
+            1,
+            animatedGif.Zip(normalized).Count(pair => pair.First != pair.Second));
+
+        using var encoded = SKData.CreateCopy(normalized);
         using var codec = SKCodec.Create(encoded) ??
-            throw new InvalidOperationException("The test GIF could not be decoded.");
-
-        var lastVisibleFrameIndex =
-            MediaUploadProcessor.GetLastVisibleGifFrameIndex(codec);
-
+            throw new InvalidOperationException("The normalized GIF could not be decoded.");
+        Assert.Equal(SKEncodedImageFormat.Gif, codec.EncodedFormat);
         Assert.Equal(4, codec.FrameCount);
-        Assert.Equal(2, lastVisibleFrameIndex);
+    }
+
+    [Fact]
+    public void Animated_gif_without_background_disposal_is_not_modified()
+    {
+        var animatedGif = CreateAnimatedGif();
+
+        var normalized = MediaUploadProcessor.NormalizeAnimatedGifLoop(animatedGif);
+
+        Assert.Same(animatedGif, normalized);
     }
 
     [Fact]
@@ -100,11 +118,9 @@ public sealed class MediaUploadProcessorTests
         var result = await processor.ProcessImageAsync(
             CreateFile(gif, "image/gif", "large.gif"));
 
-        Assert.Equal("image/gif", result.ContentType);
-        using var encoded = SKData.CreateCopy(result.Data);
-        using var codec = SKCodec.Create(encoded);
-        Assert.NotNull(codec);
-        Assert.True(codec.FrameCount > 1);
+        Assert.True(result.Data.Length > 1024 * 1024);
+        Assert.True(result.Data.Length <= 2 * 1024 * 1024);
+        Assert.Equal(gif, result.Data);
     }
 
     [Fact]
@@ -135,7 +151,7 @@ public sealed class MediaUploadProcessorTests
 
         Assert.Equal("FileSizeLimitExceeded", exception.ResourceKey);
         Assert.Equal(1, (int)Assert.Single(exception.ResourceArguments));
-        Assert.Equal("image/gif", result.ContentType);
+        Assert.Equal(gif, result.Data);
     }
 
     [Fact]
@@ -266,9 +282,27 @@ public sealed class MediaUploadProcessorTests
         Convert.FromBase64String(
             "R0lGODlhBAACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAABAACAAAIBwABCBwoMCAAIfkEAQoAAQAsAAAAAAQAAgCBAAD/AAAAAAAAAAAACAcAAQgcKDAgADs=");
 
-    private static byte[] CreateGifWithTrailingBlankFrame() =>
+    private static byte[] CreateGifWithBackgroundDisposal() =>
         Convert.FromBase64String(
             "R0lGODlhBAACAIEAAAAAAP8AAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQJCgAAACwAAAAABAACAAAICQADABgIQCCAgAAh+QQJCgAAACwBAAAAAgACAIEAAAD/AAAAAAAAAAAIBwADAAAQICAAIfkECQoAAAAsAgAAAAIAAgCBAAAA/wAAAAAAAAAACAcAAwAAECAgAEdJRjg5YQQAAgCBAAAAAAAAAAAAAAAAAAAh/wtORVRTQ0FQRTIuMAMBAAAAIfkECQwAAAAsAAAAAAQAAgAACAcAAQgcKDAgADs=");
+
+    private static int[] GetGraphicControlDisposalMethods(byte[] gif)
+    {
+        var methods = new List<int>();
+        for (var index = 0; index <= gif.Length - 4; index++)
+        {
+            if (gif[index] != 0x21 ||
+                gif[index + 1] != 0xF9 ||
+                gif[index + 2] != 0x04)
+            {
+                continue;
+            }
+
+            methods.Add((gif[index + 3] & 0x1C) >> 2);
+            index += 3;
+        }
+        return methods.ToArray();
+    }
 
     private static byte[] AddGifCommentPadding(byte[] gif, int payloadBytes)
     {
