@@ -78,8 +78,8 @@ public sealed class MediaUploadProcessorTests
         var normalized = MediaUploadProcessor.NormalizeAnimatedGifLoop(animatedGif);
         var after = GetGraphicControlDisposalMethods(normalized);
 
-        Assert.Equal(new[] { 2, 2, 2, 2 }, before);
-        Assert.Equal(new[] { 2, 2, 2, 1 }, after);
+        Assert.Equal(new[] { 0, 2 }, before);
+        Assert.Equal(new[] { 0, 1 }, after);
         Assert.Equal(animatedGif.Length, normalized.Length);
         Assert.Equal(
             1,
@@ -89,7 +89,7 @@ public sealed class MediaUploadProcessorTests
         using var codec = SKCodec.Create(encoded) ??
             throw new InvalidOperationException("The normalized GIF could not be decoded.");
         Assert.Equal(SKEncodedImageFormat.Gif, codec.EncodedFormat);
-        Assert.Equal(4, codec.FrameCount);
+        Assert.Equal(2, codec.FrameCount);
     }
 
     [Fact]
@@ -282,9 +282,27 @@ public sealed class MediaUploadProcessorTests
         Convert.FromBase64String(
             "R0lGODlhBAACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAABAACAAAIBwABCBwoMCAAIfkEAQoAAQAsAAAAAAQAAgCBAAD/AAAAAAAAAAAACAcAAQgcKDAgADs=");
 
-    private static byte[] CreateGifWithBackgroundDisposal() =>
-        Convert.FromBase64String(
-            "R0lGODlhBAACAIEAAAAAAP8AAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQJCgAAACwAAAAABAACAAAICQADABgIQCCAgAAh+QQJCgAAACwBAAAAAgACAIEAAAD/AAAAAAAAAAAIBwADAAAQICAAIfkECQoAAAAsAgAAAAIAAgCBAAAA/wAAAAAAAAAACAcAAwAAECAgAEdJRjg5YQQAAgCBAAAAAAAAAAAAAAAAAAAh/wtORVRTQ0FQRTIuMAMBAAAAIfkECQwAAAAsAAAAAAQAAgAACAcAAQgcKDAgADs=");
+    private static byte[] CreateGifWithBackgroundDisposal()
+    {
+        var gif = CreateAnimatedGif();
+        var graphicControlPackedFieldOffsets = new List<int>();
+        for (var index = 0; index <= gif.Length - 4; index++)
+        {
+            if (gif[index] == 0x21 &&
+                gif[index + 1] == 0xF9 &&
+                gif[index + 2] == 0x04)
+            {
+                graphicControlPackedFieldOffsets.Add(index + 3);
+                index += 3;
+            }
+        }
+
+        var lastPackedFieldOffset = graphicControlPackedFieldOffsets[^1];
+        gif[lastPackedFieldOffset] = (byte)(
+            (gif[lastPackedFieldOffset] & ~0x1C) |
+            (2 << 2));
+        return gif;
+    }
 
     private static int[] GetGraphicControlDisposalMethods(byte[] gif)
     {
