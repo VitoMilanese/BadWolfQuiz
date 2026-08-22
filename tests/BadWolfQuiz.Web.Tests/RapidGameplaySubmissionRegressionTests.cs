@@ -3,60 +3,70 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class RapidGameplaySubmissionRegressionTests
 {
     [Fact]
-    public void Host_gameplay_loads_the_rapid_submit_guard()
+    public void Global_bootstrap_loads_rapid_submit_guard_before_first_soft_mounted_question()
     {
-        var layout = File.ReadAllText(FindWebFile(
+        var bootstrap = File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
-            "board-header-layout.js"));
+            "final-player-fallback-actions.js"));
 
-        Assert.Contains("/js/host-gameplay-submit-guard.js", layout);
-        Assert.Contains("data-host-gameplay-submit-guard", layout);
+        Assert.Contains("/js/host-gameplay-submit-guard.js", bootstrap);
+        Assert.Contains("data.hostGameplaySubmitGuard", bootstrap);
     }
 
     [Fact]
-    public void Busy_gameplay_submits_are_intercepted_and_replayed_once()
+    public void Busy_gameplay_submit_fallback_runs_in_bubble_phase()
     {
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
             "host-gameplay-submit-guard.js"));
 
-        Assert.Contains(
-            "document.addEventListener(\"DOMContentLoaded\", initialize, { once: true });",
-            script);
-        Assert.Contains(
-            "document.addEventListener(\"submit\", event =>",
-            script);
+        Assert.Contains("// Bubble phase is intentional.", script);
+        Assert.Contains("document.addEventListener(\"submit\", event => {", script);
+        Assert.Contains("            scheduleReplay();\n        });", script);
         Assert.Contains("if (!canNavigate(action))", script);
         Assert.Contains("event.preventDefault();", script);
         Assert.Contains("event.stopImmediatePropagation();", script);
         Assert.Contains("submitter?.hasAttribute(\"disabled\")", script);
         Assert.Contains("pendingSubmission?.key === key", script);
         Assert.Contains("if (pendingSubmission === null)", script);
-        Assert.Contains("pendingSubmission = { form, submitter, key };", script);
-        Assert.Contains("submitter?.setAttribute(\"disabled\", \"disabled\");", script);
-        Assert.Contains("submitter?.setAttribute(\"aria-busy\", \"true\");", script);
-        Assert.Contains("pendingSubmission = null;", script);
-        Assert.Contains("submitter?.removeAttribute(\"disabled\");", script);
         Assert.Contains("form.requestSubmit(submitter);", script);
-        Assert.Contains("}, true);", script);
     }
 
     [Fact]
-    public void Rapid_submit_guard_matches_host_partial_navigation_scope()
+    public void First_question_click_locks_other_questions_and_uses_delayed_busy_indicator()
     {
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
             "host-gameplay-submit-guard.js"));
 
-        Assert.Contains("const flowPaths = new Set", script);
+        Assert.Contains("const lockOtherQuestionButtons = submitter =>", script);
+        Assert.Contains(".filter(button => button !== submitter)", script);
+        Assert.Contains("button.disabled = true;", script);
+        Assert.Contains("board.setAttribute(\"aria-busy\", \"true\");", script);
+        Assert.Contains("questionBusyDelayMilliseconds = 250", script);
+        Assert.Contains("window.BadWolfBusy?.show?.() === true", script);
+        Assert.Contains("badwolf:host-gameplay-updated", script);
+        Assert.Contains("questionErrorObserver", script);
+        Assert.Contains("releaseQuestionSelectionBusy", script);
+    }
+
+    [Fact]
+    public void Rapid_submit_scope_is_resolved_from_current_soft_mounted_game()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "host-gameplay-submit-guard.js"));
+
+        Assert.Contains(".host-game-board[data-game-id]", script);
+        Assert.Contains("/Admin/Games/Lobby/", script);
         Assert.Contains("/Admin/Games/RoundIntro/", script);
         Assert.Contains("/Admin/Games/RunningRoundIntro/", script);
         Assert.Contains("/Admin/Games/FinalQuestionTransition/", script);
-        Assert.Contains("url.origin === lobbyUrl.origin", script);
-        Assert.Contains("flowPaths.has(url.pathname.toLowerCase())", script);
+        Assert.Contains("url.origin !== window.location.origin", script);
     }
 
     [Fact]

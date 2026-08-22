@@ -5,6 +5,14 @@
 
     window.badWolfFinalPlayerFallbackActionsInitialized = true;
 
+    if (!document.querySelector("script[data-host-gameplay-submit-guard]")) {
+        const submitGuard = document.createElement("script");
+        submitGuard.src = "/js/host-gameplay-submit-guard.js";
+        submitGuard.async = false;
+        submitGuard.dataset.hostGameplaySubmitGuard = "";
+        document.head.append(submitGuard);
+    }
+
     const handlers = new Map([
         ["SubmitMinimumFinalWager", "wager"],
         ["SubmitEmptyFinalAnswer", "answer"]
