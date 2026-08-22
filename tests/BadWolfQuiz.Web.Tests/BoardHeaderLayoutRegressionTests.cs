@@ -8,7 +8,8 @@ public sealed class BoardHeaderLayoutRegressionTests
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
-            "board-header-layout.js"));
+            "board-header-layout.js"))
+            .Replace("\r\n", "\n");
 
         Assert.Contains("grid.getClientRects().length === 0", script);
         Assert.Contains(
