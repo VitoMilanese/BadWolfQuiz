@@ -1,0 +1,4 @@
+/* Keep category headers on one shared visual track before gameplay JavaScript runs. */
+.host-board-column {
+    grid-template-rows: clamp(68px, 8.5dvh, 96px);
+}
