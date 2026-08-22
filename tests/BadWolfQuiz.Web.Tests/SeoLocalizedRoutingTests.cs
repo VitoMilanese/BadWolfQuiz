@@ -26,6 +26,38 @@ public sealed class SeoLocalizedRoutingTests
     }
 
     [Theory]
+    [InlineData("/Faq", "uk", "/uk/faq")]
+    [InlineData("/About", "en", "/en/about")]
+    [InlineData("/PublicQuizzes", "it", "/it/public-quizzes")]
+    [InlineData("/Faq", "ru", "/faq")]
+    [InlineData("/About", "ru", "/about")]
+    [InlineData("/PublicQuizzes", "ru", "/public-quizzes")]
+    public void Header_navigation_paths_are_explicit_and_culture_aware(
+        string page,
+        string culture,
+        string expected)
+    {
+        Assert.Equal(expected, SeoRouteCatalog.BuildNavigationPath(page, culture));
+    }
+
+    [Fact]
+    public void Header_public_navigation_links_use_the_explicit_route_tag_helper()
+    {
+        var imports = File.ReadAllText(FindWebFile("Pages", "_ViewImports.cshtml"));
+        var tagHelper = File.ReadAllText(FindWebFile(
+            "TagHelpers",
+            "HeaderSeoNavigationTagHelper.cs"));
+
+        Assert.Contains("HeaderSeoNavigationTagHelper", imports, StringComparison.Ordinal);
+        Assert.Contains("action-menu-item", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("/PublicQuizzes", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("/Faq", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("/About", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("BuildNavigationPath", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("SetAttribute(\n            \"href\"", tagHelper.ReplaceLineEndings("\n"), StringComparison.Ordinal);
+    }
+
+    [Theory]
     [InlineData("/uk", "en", "/en")]
     [InlineData("/uk/faq", "it", "/it/faq")]
     [InlineData("/it/public-quizzes?Search=test", "uk", "/uk/public-quizzes?Search=test")]

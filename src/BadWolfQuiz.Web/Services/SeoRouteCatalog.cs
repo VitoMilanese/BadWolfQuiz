@@ -19,6 +19,22 @@ public static class SeoRouteCatalog
     public static bool IsSeoCulture(string? culture) =>
         culture is not null && Cultures.Contains(culture, StringComparer.Ordinal);
 
+    public static string BuildNavigationPath(string page, string culture)
+    {
+        var route = IndexablePages.Single(item =>
+            string.Equals(item.Page, page, StringComparison.Ordinal));
+        var suffix = string.IsNullOrWhiteSpace(route.Path)
+            ? string.Empty
+            : $"/{route.Path}";
+
+        if (!IsSeoCulture(culture))
+        {
+            return string.IsNullOrEmpty(suffix) ? "/" : suffix;
+        }
+
+        return $"/{culture}{suffix}";
+    }
+
     public static string RewriteLocalizedReturnUrl(
         string returnUrl,
         string culture)
