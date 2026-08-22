@@ -94,6 +94,10 @@
             event.preventDefault();
             event.stopImmediatePropagation();
 
+            if (submitter?.hasAttribute("disabled")) {
+                return;
+            }
+
             if (pendingSubmission?.key === key) {
                 scheduleReplay();
                 return;

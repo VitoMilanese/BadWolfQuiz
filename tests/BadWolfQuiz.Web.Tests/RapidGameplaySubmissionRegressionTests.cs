@@ -30,6 +30,7 @@ public sealed class RapidGameplaySubmissionRegressionTests
             script);
         Assert.Contains("event.preventDefault();", script);
         Assert.Contains("event.stopImmediatePropagation();", script);
+        Assert.Contains("submitter?.hasAttribute(\"disabled\")", script);
         Assert.Contains("pendingSubmission?.key === key", script);
         Assert.Contains("if (pendingSubmission === null)", script);
         Assert.Contains("pendingSubmission = { form, submitter, key };", script);
