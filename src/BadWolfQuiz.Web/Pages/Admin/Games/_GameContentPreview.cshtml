@@ -14,6 +14,10 @@
             .Take(1)
             .ToArray()
         : Model.Blocks.ToArray();
+    var isSingleImageFitCandidate =
+        Model.PresentationType != BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues &&
+        !isAllPlayerMultipleChoiceAnswer &&
+        blocks.Count(block => block.Kind == BadWolfQuiz.Game.Definitions.ContentBlockKind.Image) == 1;
 }
 
 <link rel="stylesheet" href="~/css/youtube-placeholder.css" asp-append-version="true" />
@@ -32,6 +36,9 @@
                         ? "all-player-answer-option all-player-answer-option-correct"
                         : "all-player-answer-option all-player-answer-option-incorrect"
                     : null;
+            var isViewportFitCandidate =
+                isSingleImageFitCandidate &&
+                block.Kind == BadWolfQuiz.Game.Definitions.ContentBlockKind.Image;
 
             <article class="game-content-block @allPlayerAnswerOptionClass">
                 @if (!string.IsNullOrWhiteSpace(block.TopCaption))
@@ -56,6 +63,8 @@
                                      sourceContentBlockId = block.SourceContentBlockId,
                                      answer = Model.IsAnswer
                                  })"
+                             data-game-content-fit-pending="@(isViewportFitCandidate ? "true" : null)"
+                             style="@(isViewportFitCandidate ? "visibility: hidden;" : null)"
                              alt="@block.FileName" />
                         break;
                     case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
