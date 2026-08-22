@@ -47,7 +47,9 @@ Non-GIF image and audio size limits are checked after resizing, compression, or 
 
 GIF uploads use the separate `MaximumGifUploadMegabytes` limit, which is checked against the original GIF bytes. Animated GIFs are not passed through the `SKBitmap` resize or JPEG-conversion pipeline, even when their dimensions exceed `MaximumImageWidth` or `MaximumImageHeight`.
 
-To avoid a brief blank flash at the loop boundary, the GIF parser inspects the Graphic Control Extension attached to the final animation frame. When that final frame requests `Restore to Background`, the processor changes only its disposal method to `Do Not Dispose`. This prevents the browser from clearing the GIF canvas between the final frame and frame 0. The animation frames, palette, dimensions, frame delays, and compressed image data are otherwise left unchanged. GIFs whose final frame already uses another disposal method are returned byte-for-byte unchanged.
+GIF loop normalization is performed without re-encoding the remaining animation frames. If the animation starts with a full-canvas, single-color setup frame lasting no more than 50 ms and the following frame also covers the full canvas, that brief setup frame is removed. When the following frame uses transparency, the processor gives that frame a local copy of its palette, replaces only its transparent palette entry with the removed background color, and disables transparency for that one frame. This preserves the exact composed appearance of the first visible frame while later frames keep their original palettes, transparency, delays, and compressed image data.
+
+The parser also inspects the Graphic Control Extension attached to the final animation frame. When that final frame requests `Restore to Background`, the processor changes only its disposal method to `Do Not Dispose`, preventing the browser from clearing the GIF canvas immediately before the animation restarts. GIFs that need neither normalization are returned byte-for-byte unchanged.
 
 Audio conversion requires FFmpeg on the application host. On Ubuntu it can be installed with:
 
@@ -72,4 +74,4 @@ Premium hosts can be configured by copying their database ID from the Settings p
 }
 ```
 
-Premium uploads retain their original image or audio format and skip optional JPEG/MP3 conversion. Their separate, higher file-size limits still apply. Oversized static images are proportionally resized in their original format, while animated GIFs keep their original dimensions and animation data.
+Premium uploads retain their original image or audio format and skip optional JPEG/MP3 conversion. Their separate, higher file-size limits still apply. Oversized static images are proportionally resized in their original format, while animated GIFs keep their original dimensions and animation data apart from the loop-safety normalization described above.
