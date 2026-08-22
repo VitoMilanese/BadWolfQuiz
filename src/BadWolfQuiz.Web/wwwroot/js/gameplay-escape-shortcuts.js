@@ -42,6 +42,8 @@
 
     loadSharedStyle("/css/content-block-containers.css");
     loadSharedScript("/js/content-block-containers.js");
+    loadSharedStyle("/css/game-content-viewport-fit.css");
+    loadSharedScript("/js/game-content-viewport-fit.js");
 
     const finalFallbackHandlers = new Set([
         "SubmitMinimumFinalWager",
