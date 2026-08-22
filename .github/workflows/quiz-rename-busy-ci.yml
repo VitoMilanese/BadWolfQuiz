@@ -1,0 +1,304 @@
+name: Quiz rename busy CI
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Prepare final AJAX rename implementation
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          busy_path = Path("src/BadWolfQuiz.Web/wwwroot/js/busy-indicators.js")
+          text = busy_path.read_text()
+
+          if "const editorRenameEndpoint = (form, handler) =>" not in text:
+              marker = '''    const renameFallbackError = () =>\n'''
+              insert = '''    const editorRenameEndpoint = (form, handler) => {\n        let target;\n        try {\n            target = new URL(\n                form.action || window.location.href,\n                window.location.href);\n        } catch {\n            return null;\n        }\n\n        const marker = "/editor";\n        const markerIndex = target.pathname.toLowerCase().lastIndexOf(marker);\n        if (markerIndex < 0) {\n            return null;\n        }\n\n        target.pathname = `${target.pathname.slice(0, markerIndex)}/Rename`;\n        target.search = "";\n        target.hash = "";\n        target.searchParams.set(\n            "handler",\n            handler === "renameround" ? "Round" : "Category");\n        return target.href;\n    };\n\n    const showEditorRenameStatus = (message, success) => {\n        if (!message) {\n            return;\n        }\n\n        if (typeof showQuizSaveStatus === "function") {\n            showQuizSaveStatus(message, success);\n        }\n    };\n\n'''
+              if marker not in text:
+                  raise SystemExit("rename fallback marker not found")
+              text = text.replace(marker, insert + marker, 1)
+
+          start = text.index("    const submitEditorRename = async")
+          end = text.index("    const isAjaxSave =", start)
+          final_submit = '''    const submitEditorRename = async (form, handler, formData, title, input) => {\n        let errorMessage = null;\n\n        try {\n            const endpoint = editorRenameEndpoint(form, handler);\n            if (!endpoint) {\n                throw new Error(renameFallbackError());\n            }\n\n            const response = await fetch(endpoint, {\n                method: "POST",\n                body: formData,\n                headers: { "X-Requested-With": "XMLHttpRequest" }\n            });\n\n            let result = null;\n            try {\n                result = await response.json();\n            } catch {\n                // A non-JSON response is handled as a failed AJAX rename below.\n            }\n\n            if (!response.ok || !result?.success) {\n                throw new Error(result?.error || renameFallbackError());\n            }\n\n            const savedTitle = typeof result.title === "string"\n                ? result.title\n                : title;\n            applyEditorRename(handler, formData, savedTitle);\n            form.closest("dialog")?.close();\n            showEditorRenameStatus(result.message, true);\n        } catch (error) {\n            console.error("Quiz rename error:", error);\n            errorMessage = error instanceof Error && error.message\n                ? error.message\n                : renameFallbackError();\n        } finally {\n            hide();\n        }\n\n        if (errorMessage) {\n            showEditorRenameError(input, errorMessage);\n        }\n    };\n\n'''
+          text = text[:start] + final_submit + text[end:]
+          busy_path.write_text(text)
+          PY
+
+          cat > tests/BadWolfQuiz.Web.Tests/QuizRenameBusyRegressionTests.cs <<'EOF'
+          namespace BadWolfQuiz.Web.Tests;
+
+          public sealed class QuizRenameBusyRegressionTests
+          {
+              [Fact]
+              public void Rename_dialogs_save_without_following_the_expensive_editor_redirect()
+              {
+                  var script = ReadBusyIndicatorScript();
+
+                  Assert.Contains("handler === \"renameround\" || handler === \"renamecategory\"", script);
+                  Assert.Contains("const submitEditorRename = async", script);
+                  Assert.Contains("headers: { \"X-Requested-With\": \"XMLHttpRequest\" }", script);
+                  Assert.Contains("result = await response.json();", script);
+                  Assert.Contains("!response.ok || !result?.success", script);
+                  Assert.Contains("applyEditorRename(handler, formData, savedTitle);", script);
+                  Assert.Contains("form.closest(\"dialog\")?.close();", script);
+              }
+
+              [Fact]
+              public void Rename_dialogs_lock_all_controls_and_reject_duplicate_submissions()
+              {
+                  var script = ReadBusyIndicatorScript();
+
+                  Assert.Contains("const lockEditorRenameDialogControls = form =>", script);
+                  Assert.Contains("button, input, select, textarea", script);
+                  Assert.Contains("control.disabled = true;", script);
+                  Assert.Contains("control.disabled = wasDisabled;", script);
+                  Assert.Contains("busy || form.dataset.busyLocked === \"true\"", script);
+                  Assert.Contains("form.dataset.busyLocked = \"true\";", script);
+                  Assert.Contains("show();", script);
+                  Assert.Contains("finally {\n            hide();\n        }", script);
+              }
+
+              [Fact]
+              public void Successful_rename_updates_editor_state_without_a_page_reload()
+              {
+                  var script = ReadBusyIndicatorScript();
+
+                  Assert.Contains(".round-tab-link", script);
+                  Assert.Contains("#delete-round-dialog .dialog-target", script);
+                  Assert.Contains(".category-title", script);
+                  Assert.Contains("button.dataset.categoryTitle = title;", script);
+                  Assert.Contains("button.dataset.questionTitle = questionTitle;", script);
+                  Assert.Contains("categoryRound.title = title;", script);
+                  Assert.Contains("question.category = title;", script);
+
+                  var renameStart = script.IndexOf(
+                      "const submitEditorRename = async",
+                      StringComparison.Ordinal);
+                  var ajaxSaveStart = script.IndexOf(
+                      "const isAjaxSave =",
+                      renameStart,
+                      StringComparison.Ordinal);
+                  var renameScript = script[renameStart..ajaxSaveStart];
+
+                  Assert.DoesNotContain("window.location.reload()", renameScript, StringComparison.Ordinal);
+                  Assert.DoesNotContain("window.location.assign", renameScript, StringComparison.Ordinal);
+              }
+
+              [Fact]
+              public void Rename_ajax_endpoint_returns_json_while_native_editor_handlers_remain_as_fallback()
+              {
+                  var ajaxPageModel = ReadWebFile(
+                      "Pages",
+                      "Admin",
+                      "Quizzes",
+                      "Rename.cshtml.cs");
+                  var editorPageModel = ReadWebFile(
+                      "Pages",
+                      "Admin",
+                      "Quizzes",
+                      "Editor.cshtml.cs");
+
+                  Assert.Contains("OnPostRoundAsync(", ajaxPageModel);
+                  Assert.Contains("OnPostCategoryAsync(", ajaxPageModel);
+                  Assert.Contains("return BadRequest(new", ajaxPageModel);
+                  Assert.Contains("success = false", ajaxPageModel);
+                  Assert.Contains("return new JsonResult(new", ajaxPageModel);
+                  Assert.Contains("success = true", ajaxPageModel);
+                  Assert.Contains("title = round.Title", ajaxPageModel);
+                  Assert.Contains("title = category.Title", ajaxPageModel);
+
+                  Assert.Contains("OnPostRenameRoundAsync()", editorPageModel);
+                  Assert.Contains("OnPostRenameCategoryAsync()", editorPageModel);
+                  Assert.Contains("return RedirectToPage(new", editorPageModel);
+              }
+
+              private static string ReadBusyIndicatorScript() => ReadWebFile(
+                  "wwwroot",
+                  "js",
+                  "busy-indicators.js");
+
+              private static string ReadWebFile(params string[] parts)
+              {
+                  var directory = new DirectoryInfo(AppContext.BaseDirectory);
+                  while (directory is not null)
+                  {
+                      var candidate = Path.Combine(
+                          new[]
+                          {
+                              directory.FullName,
+                              "src",
+                              "BadWolfQuiz.Web"
+                          }.Concat(parts).ToArray());
+
+                      if (File.Exists(candidate))
+                      {
+                          return File.ReadAllText(candidate)
+                              .Replace("\r\n", "\n");
+                      }
+
+                      directory = directory.Parent;
+                  }
+
+                  throw new FileNotFoundException(
+                      $"Could not find BadWolfQuiz.Web file: {Path.Combine(parts)}.");
+              }
+          }
+          EOF
+
+          cat > src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Rename.cshtml <<'EOF'
+          @page
+          @model BadWolfQuiz.Web.Pages.Admin.Quizzes.RenameModel
+          EOF
+
+          cat > src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Rename.cshtml.cs <<'EOF'
+          using BadWolfQuiz.Web.Data;
+          using BadWolfQuiz.Web.Localization;
+          using Microsoft.AspNetCore.Mvc;
+          using Microsoft.AspNetCore.Mvc.RazorPages;
+          using Microsoft.EntityFrameworkCore;
+          using Microsoft.Extensions.Localization;
+
+          namespace BadWolfQuiz.Web.Pages.Admin.Quizzes;
+
+          public sealed class RenameModel(
+              QuizDbContext db,
+              IStringLocalizer<SharedResource> localizer) : PageModel
+          {
+              [BindProperty]
+              public RenameRoundInputModel RenameRound { get; set; } = new();
+
+              [BindProperty]
+              public RenameCategoryInputModel RenameCategory { get; set; } = new();
+
+              public sealed class RenameRoundInputModel
+              {
+                  public int QuizId { get; set; }
+                  public int RoundId { get; set; }
+                  public string? Title { get; set; }
+              }
+
+              public sealed class RenameCategoryInputModel
+              {
+                  public int QuizId { get; set; }
+                  public int CategoryId { get; set; }
+                  public string? Title { get; set; }
+              }
+
+              public IActionResult OnGet() => NotFound();
+
+              public async Task<IActionResult> OnPostRoundAsync(
+                  CancellationToken cancellationToken)
+              {
+                  var round = await db.QuizRounds
+                      .Include(x => x.Quiz)
+                      .SingleOrDefaultAsync(
+                          x => x.Id == RenameRound.RoundId &&
+                               x.QuizId == RenameRound.QuizId,
+                          cancellationToken);
+
+                  if (round is null)
+                  {
+                      return NotFound();
+                  }
+
+                  var title = RenameRound.Title?.Trim();
+                  if (string.IsNullOrWhiteSpace(title))
+                  {
+                      return BadRequest(new
+                      {
+                          success = false,
+                          error = localizer["QuizEditor_RoundTitleRequired"].Value
+                      });
+                  }
+
+                  round.Title = title;
+                  round.Quiz.UpdatedAtUtc = DateTime.UtcNow;
+                  await db.SaveChangesAsync(cancellationToken);
+
+                  return new JsonResult(new
+                  {
+                      success = true,
+                      title = round.Title,
+                      message = localizer["QuizEditor_RoundRenamed"].Value
+                  });
+              }
+
+              public async Task<IActionResult> OnPostCategoryAsync(
+                  CancellationToken cancellationToken)
+              {
+                  var category = await db.QuizCategories
+                      .Include(x => x.Round)
+                      .ThenInclude(x => x.Quiz)
+                      .SingleOrDefaultAsync(
+                          x => x.Id == RenameCategory.CategoryId &&
+                               x.Round.QuizId == RenameCategory.QuizId,
+                          cancellationToken);
+
+                  if (category is null)
+                  {
+                      return NotFound();
+                  }
+
+                  var title = RenameCategory.Title?.Trim();
+                  if (string.IsNullOrWhiteSpace(title))
+                  {
+                      return BadRequest(new
+                      {
+                          success = false,
+                          error = localizer["QuizEditor_CategoryTitleRequired"].Value
+                      });
+                  }
+
+                  category.Title = title;
+                  category.Round.Quiz.UpdatedAtUtc = DateTime.UtcNow;
+                  await db.SaveChangesAsync(cancellationToken);
+
+                  return new JsonResult(new
+                  {
+                      success = true,
+                      title = category.Title,
+                      message = localizer["QuizEditor_CategoryRenamed"].Value
+                  });
+              }
+          }
+          EOF
+
+          # The heredocs above are indented for YAML readability; strip that prefix.
+          sed -i 's/^          //' tests/BadWolfQuiz.Web.Tests/QuizRenameBusyRegressionTests.cs
+          sed -i 's/^          //' src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Rename.cshtml
+          sed -i 's/^          //' src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Rename.cshtml.cs
+      - name: Run rename busy regression tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~QuizRenameBusyRegressionTests"
+      - name: Run shared busy indicator regression tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~BusyIndicatorRegressionTests"
+      - name: Check busy indicator JavaScript syntax
+        run: node --check src/BadWolfQuiz.Web/wwwroot/js/busy-indicators.js
+      - name: Commit validated implementation
+        shell: bash
+        run: |
+          if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/BadWolfQuiz.Web/wwwroot/js/busy-indicators.js \
+                  src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Rename.cshtml \
+                  src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Rename.cshtml.cs \
+                  tests/BadWolfQuiz.Web.Tests/QuizRenameBusyRegressionTests.cs
+          git commit -m "Temporary validate quiz rename implementation"
+          git push origin HEAD:${{ github.head_ref }}
