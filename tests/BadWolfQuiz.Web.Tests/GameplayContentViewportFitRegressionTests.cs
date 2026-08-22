@@ -25,36 +25,44 @@ public sealed class GameplayContentViewportFitRegressionTests
     }
 
     [Fact]
-    public void Viewport_fit_styles_are_available_before_first_gameplay_paint()
+    public void Single_image_candidate_is_hidden_in_markup_until_synchronous_fit_is_ready()
     {
         var root = FindRepositoryRoot();
-        var busyStyles = File.ReadAllText(Path.Combine(
+        var previewMarkup = File.ReadAllText(Path.Combine(
             root,
             "src",
             "BadWolfQuiz.Web",
-            "wwwroot",
-            "css",
-            "busy-indicators.css"));
-        var viewportStyles = ReadAsset("css", "game-content-viewport-fit.css");
+            "Pages",
+            "Admin",
+            "Games",
+            "_GameContentPreview.cshtml"));
         var viewportScript = ReadAsset("js", "game-content-viewport-fit.js");
 
         Assert.Contains(
-            "@import url(\"./game-content-viewport-fit.css?v=2\");",
-            busyStyles,
+            "isSingleImageFitCandidate",
+            previewMarkup,
             StringComparison.Ordinal);
         Assert.Contains(
-            "img.game-content-image:not([data-game-content-fit-ready=\"true\"])",
-            viewportStyles,
+            "data-game-content-fit-pending",
+            previewMarkup,
             StringComparison.Ordinal);
-        Assert.Contains("visibility: hidden;", viewportStyles, StringComparison.Ordinal);
         Assert.Contains(
-            "image.dataset.gameContentFitReady = \"true\";",
+            "visibility: hidden;",
+            previewMarkup,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "\"max-height\"",
             viewportScript,
             StringComparison.Ordinal);
         Assert.Contains(
-            "image.removeAttribute(\"data-game-content-fit-ready\");",
+            "image.style.removeProperty(\"visibility\");",
             viewportScript,
             StringComparison.Ordinal);
+        Assert.Contains(
+            "document.addEventListener(\"badwolf:host-gameplay-updated\", fitAll);",
+            viewportScript,
+            StringComparison.Ordinal);
+        Assert.Contains("fitAll();", viewportScript, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -101,7 +109,7 @@ public sealed class GameplayContentViewportFitRegressionTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "--game-content-fit-height",
+            "max-height",
             script,
             StringComparison.Ordinal);
     }
@@ -124,12 +132,16 @@ public sealed class GameplayContentViewportFitRegressionTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "document.addEventListener(\"badwolf:host-gameplay-updated\", scheduleFit);",
+            "document.addEventListener(\"badwolf:host-gameplay-updated\", fitAll);",
             script,
             StringComparison.Ordinal);
         Assert.Contains("ResizeObserver", script, StringComparison.Ordinal);
         Assert.Contains(
             "window.addEventListener(\"resize\", scheduleFit);",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "fitContainer(container);",
             script,
             StringComparison.Ordinal);
     }

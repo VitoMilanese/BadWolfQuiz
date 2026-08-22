@@ -16,11 +16,18 @@
     const getMinimumImageHeight = () =>
         Math.max(120, Math.min(180, Math.round(window.innerHeight * 0.18)));
 
-    const clearImageFit = (image, clearExpanded = true) => {
+    const clearCompactSize = image => {
         image.style.removeProperty("--game-content-fit-height");
+        image.style.removeProperty("width");
+        image.style.removeProperty("height");
+        image.style.removeProperty("max-width");
+        image.style.removeProperty("max-height");
+    };
+
+    const clearImageFit = (image, clearExpanded = true) => {
+        clearCompactSize(image);
         image.removeAttribute("data-game-content-fit-state");
         image.removeAttribute("data-game-content-fit-eligible");
-        image.removeAttribute("data-game-content-fit-ready");
         image.removeAttribute("aria-pressed");
         image.removeAttribute("role");
         image.removeAttribute("tabindex");
@@ -37,6 +44,23 @@
 
     const markReady = image => {
         image.dataset.gameContentFitReady = "true";
+        image.removeAttribute("data-game-content-fit-pending");
+        image.style.removeProperty("visibility");
+    };
+
+    const setCompactSize = (image, height) => {
+        const roundedHeight = Math.round(height);
+        image.style.setProperty(
+            "--game-content-fit-height",
+            `${roundedHeight}px`);
+        image.style.setProperty("width", "auto", "important");
+        image.style.setProperty("height", "auto", "important");
+        image.style.setProperty("max-width", "100%", "important");
+        image.style.setProperty(
+            "max-height",
+            `${roundedHeight}px`,
+            "important");
+        image.dataset.gameContentFitState = "compact";
     };
 
     const applyCompactHeight = (container, image, height) => {
@@ -44,10 +68,7 @@
         const minimumHeight = getMinimumImageHeight();
 
         for (let attempt = 0; attempt < 2; attempt++) {
-            image.style.setProperty(
-                "--game-content-fit-height",
-                `${Math.round(nextHeight)}px`);
-            image.dataset.gameContentFitState = "compact";
+            setCompactSize(image, nextHeight);
 
             const remainingOverflow =
                 container.scrollHeight - container.clientHeight;
@@ -69,11 +90,15 @@
             .forEach(image => {
                 if (!images.includes(image)) {
                     clearImageFit(image);
+                    markReady(image);
                 }
             });
 
         if (images.length !== 1) {
-            images.forEach(image => clearImageFit(image));
+            images.forEach(image => {
+                clearImageFit(image);
+                markReady(image);
+            });
             return;
         }
 
@@ -83,9 +108,9 @@
             return;
         }
 
-        markInteractive(image);
-        image.style.removeProperty("--game-content-fit-height");
+        clearCompactSize(image);
         image.removeAttribute("data-game-content-fit-state");
+        markInteractive(image);
 
         if (image.dataset.gameContentFitExpanded === "true") {
             image.dataset.gameContentFitState = "expanded";
@@ -152,6 +177,14 @@
         });
     }
 
+    const getImageContainer = image => {
+        const container = image.closest(".game-content-blocks");
+        return container instanceof HTMLElement &&
+            container.matches(containerSelector)
+            ? container
+            : null;
+    };
+
     const toggleImage = image => {
         if (image.dataset.gameContentFitEligible !== "true") {
             return;
@@ -159,15 +192,23 @@
 
         if (image.dataset.gameContentFitState === "compact") {
             image.dataset.gameContentFitExpanded = "true";
-            image.style.removeProperty("--game-content-fit-height");
+            clearCompactSize(image);
             image.dataset.gameContentFitState = "expanded";
             image.setAttribute("aria-pressed", "true");
+            markReady(image);
             return;
         }
 
         delete image.dataset.gameContentFitExpanded;
         image.setAttribute("aria-pressed", "false");
-        scheduleFit();
+
+        const container = getImageContainer(image);
+        if (container) {
+            fitContainer(container);
+            observeContainer(container);
+        } else {
+            scheduleFit();
+        }
     };
 
     document.addEventListener("click", event => {
@@ -199,15 +240,23 @@
     });
 
     document.addEventListener("load", event => {
-        if (event.target instanceof HTMLImageElement &&
-            event.target.matches(".game-content-image")) {
-            scheduleFit();
+        if (!(event.target instanceof HTMLImageElement) ||
+            !event.target.matches(".game-content-image")) {
+            return;
         }
+
+        const container = getImageContainer(event.target);
+        if (!container) {
+            return;
+        }
+
+        fitContainer(container);
+        observeContainer(container);
     }, true);
 
-    document.addEventListener("badwolf:host-gameplay-updated", scheduleFit);
+    document.addEventListener("badwolf:host-gameplay-updated", fitAll);
     window.addEventListener("resize", scheduleFit);
     window.addEventListener("pageshow", scheduleFit);
 
-    scheduleFit();
+    fitAll();
 })();
