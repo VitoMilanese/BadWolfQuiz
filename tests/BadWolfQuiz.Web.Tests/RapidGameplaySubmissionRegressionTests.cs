@@ -11,7 +11,7 @@ public sealed class RapidGameplaySubmissionRegressionTests
             "final-player-fallback-actions.js"));
 
         Assert.Contains("/js/host-gameplay-submit-guard.js?v=3", bootstrap);
-        Assert.Contains("data.hostGameplaySubmitGuard", bootstrap);
+        Assert.Contains("submitGuard.dataset.hostGameplaySubmitGuard", bootstrap);
     }
 
     [Fact]
@@ -20,7 +20,8 @@ public sealed class RapidGameplaySubmissionRegressionTests
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
-            "host-gameplay-submit-guard.js"));
+            "host-gameplay-submit-guard.js"))
+            .Replace("\r\n", "\n");
 
         Assert.Contains("// Bubble phase is intentional.", script);
         Assert.Contains("document.addEventListener(\"submit\", event => {", script);
