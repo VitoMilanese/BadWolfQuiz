@@ -45,9 +45,11 @@ Per-file limits and conversion settings are configured in `appsettings.json`:
 
 Non-GIF image and audio size limits are checked after resizing, compression, or conversion. Images wider or taller than the configured dimensions are resized proportionally without upscaling.
 
-GIF uploads use the separate `MaximumGifUploadMegabytes` limit, which is checked against the original GIF bytes. Animated GIFs are preserved byte-for-byte and are not passed through the `SKBitmap` resize or JPEG-conversion pipeline, even when their dimensions exceed `MaximumImageWidth` or `MaximumImageHeight`. This keeps every animation frame intact.
+GIF uploads use the separate `MaximumGifUploadMegabytes` limit, which is checked against the original uploaded GIF bytes. Animated GIFs are never passed through the static `SKBitmap` resize or JPEG-conversion pipeline, even when their dimensions exceed `MaximumImageWidth` or `MaximumImageHeight`.
 
-Audio conversion requires FFmpeg on the application host. On Ubuntu it can be installed with:
+Animated GIFs are normalized with FFmpeg when it is available. The normalization re-encodes complete animation frames with GIF frame-offset and transparent-difference optimizations disabled, and removes fully transparent trailing frames before the loop restarts. This avoids the brief blank flash that some GIFs otherwise show between the last frame and the first frame. If FFmpeg is unavailable or normalization fails, the original animated GIF is retained rather than rejecting the upload.
+
+Audio conversion and animated-GIF normalization require FFmpeg on the application host. On Ubuntu it can be installed with:
 
 ```bash
 sudo apt update
@@ -55,7 +57,7 @@ sudo apt install ffmpeg
 ffmpeg -version
 ```
 
-`FfmpegExecutablePath` may be an executable name available through `PATH` or an absolute path. MP3 uploads are kept as-is; other accepted audio formats are converted to MP3. Single-frame images without fully transparent pixels are encoded as JPEG only when the JPEG is smaller than the original. Existing JPEG files, animated GIFs, and images containing fully transparent pixels are preserved.
+`FfmpegExecutablePath` may be an executable name available through `PATH` or an absolute path. MP3 uploads are kept as-is; other accepted audio formats are converted to MP3. Single-frame images without fully transparent pixels are encoded as JPEG only when the JPEG is smaller than the original. Existing JPEG files and images containing fully transparent pixels are preserved.
 
 Premium hosts can be configured by copying their database ID from the Settings page:
 
@@ -70,4 +72,4 @@ Premium hosts can be configured by copying their database ID from the Settings p
 }
 ```
 
-Premium uploads retain their original image or audio format and skip optional JPEG/MP3 conversion. Their separate, higher file-size limits still apply. Oversized static images are proportionally resized in their original format, while animated GIFs remain untouched so their animation is preserved.
+Premium uploads retain their original static-image or audio format and skip optional JPEG/MP3 conversion. Their separate, higher file-size limits still apply. Oversized static images are proportionally resized in their original format. Animated GIFs keep their original dimensions and are normalized only to preserve smooth animation looping.

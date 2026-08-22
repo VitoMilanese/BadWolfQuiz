@@ -45,7 +45,7 @@ public sealed class MediaUploadProcessorTests
     }
 
     [Fact]
-    public async Task Animated_gif_is_preserved_when_dimensions_exceed_resize_limits()
+    public async Task Animated_gif_remains_animated_when_dimensions_exceed_resize_limits()
     {
         var processor = CreateProcessor(new MediaProcessingOptions
         {
@@ -60,13 +60,28 @@ public sealed class MediaUploadProcessorTests
 
         Assert.Equal("image/gif", result.ContentType);
         Assert.Equal("animated.gif", result.FileName);
-        Assert.Equal(animatedGif, result.Data);
 
         using var encoded = SKData.CreateCopy(result.Data);
         using var codec = SKCodec.Create(encoded) ??
-            throw new InvalidOperationException("The preserved GIF could not be decoded.");
+            throw new InvalidOperationException("The processed GIF could not be decoded.");
         Assert.Equal(SKEncodedImageFormat.Gif, codec.EncodedFormat);
         Assert.True(codec.FrameCount > 1);
+        Assert.Equal(4, codec.Info.Width);
+        Assert.Equal(2, codec.Info.Height);
+    }
+
+    [Fact]
+    public void Gif_loop_normalization_detects_trailing_blank_frame()
+    {
+        using var encoded = SKData.CreateCopy(CreateGifWithTrailingBlankFrame());
+        using var codec = SKCodec.Create(encoded) ??
+            throw new InvalidOperationException("The test GIF could not be decoded.");
+
+        var lastVisibleFrameIndex =
+            MediaUploadProcessor.GetLastVisibleGifFrameIndex(codec);
+
+        Assert.Equal(4, codec.FrameCount);
+        Assert.Equal(2, lastVisibleFrameIndex);
     }
 
     [Fact]
@@ -85,9 +100,11 @@ public sealed class MediaUploadProcessorTests
         var result = await processor.ProcessImageAsync(
             CreateFile(gif, "image/gif", "large.gif"));
 
-        Assert.True(result.Data.Length > 1024 * 1024);
-        Assert.True(result.Data.Length <= 2 * 1024 * 1024);
-        Assert.Equal(gif, result.Data);
+        Assert.Equal("image/gif", result.ContentType);
+        using var encoded = SKData.CreateCopy(result.Data);
+        using var codec = SKCodec.Create(encoded);
+        Assert.NotNull(codec);
+        Assert.True(codec.FrameCount > 1);
     }
 
     [Fact]
@@ -118,7 +135,7 @@ public sealed class MediaUploadProcessorTests
 
         Assert.Equal("FileSizeLimitExceeded", exception.ResourceKey);
         Assert.Equal(1, (int)Assert.Single(exception.ResourceArguments));
-        Assert.Equal(gif, result.Data);
+        Assert.Equal("image/gif", result.ContentType);
     }
 
     [Fact]
@@ -248,6 +265,10 @@ public sealed class MediaUploadProcessorTests
     private static byte[] CreateAnimatedGif() =>
         Convert.FromBase64String(
             "R0lGODlhBAACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAABAACAAAIBwABCBwoMCAAIfkEAQoAAQAsAAAAAAQAAgCBAAD/AAAAAAAAAAAACAcAAQgcKDAgADs=");
+
+    private static byte[] CreateGifWithTrailingBlankFrame() =>
+        Convert.FromBase64String(
+            "R0lGODlhBAACAIEAAAAAAP8AAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQJCgAAACwAAAAABAACAAAICQADABgIQCCAgAAh+QQJCgAAACwBAAAAAgACAIEAAAD/AAAAAAAAAAAIBwADAAAQICAAIfkECQoAAAAsAgAAAAIAAgCBAAAA/wAAAAAAAAAACAcAAwAAECAgAEdJRjg5YQQAAgCBAAAAAAAAAAAAAAAAAAAh/wtORVRTQ0FQRTIuMAMBAAAAIfkECQwAAAAsAAAAAAQAAgAACAcAAQgcKDAgADs=");
 
     private static byte[] AddGifCommentPadding(byte[] gif, int payloadBytes)
     {

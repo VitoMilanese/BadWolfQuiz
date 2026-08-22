@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using BadWolfQuiz.Web.Models;
 using Microsoft.Extensions.Options;
@@ -66,7 +67,12 @@ public sealed class MediaUploadProcessor(
 
             if (isGif && codec.FrameCount > 1)
             {
-                return originalMedia;
+                var normalized = await NormalizeAnimatedGifAsync(
+                    originalMedia,
+                    codec,
+                    maximumUploadMegabytes,
+                    cancellationToken);
+                return EnsureSize(normalized, maximumUploadMegabytes);
             }
 
             using var decoded = SKBitmap.Decode(original) ??
@@ -187,7 +193,7 @@ public sealed class MediaUploadProcessor(
                 process.Start();
             }
             catch (Exception exception) when (
-                exception is InvalidOperationException or System.ComponentModel.Win32Exception)
+                exception is InvalidOperationException or Win32Exception)
             {
                 throw new MediaUploadException("AudioConversionUnavailable");
             }
@@ -224,6 +230,162 @@ public sealed class MediaUploadProcessor(
             TryDelete(inputPath);
             TryDelete(outputPath);
         }
+    }
+
+    private async Task<ProcessedMedia> NormalizeAnimatedGifAsync(
+        ProcessedMedia originalMedia,
+        SKCodec codec,
+        int maximumUploadMegabytes,
+        CancellationToken cancellationToken)
+    {
+        var lastVisibleFrameIndex = GetLastVisibleGifFrameIndex(codec);
+        var inputPath = Path.Combine(
+            Path.GetTempPath(),
+            $"badwolf-gif-{Guid.NewGuid():N}.gif");
+        var outputPath = Path.Combine(
+            Path.GetTempPath(),
+            $"badwolf-gif-{Guid.NewGuid():N}-normalized.gif");
+
+        try
+        {
+            await File.WriteAllBytesAsync(
+                inputPath,
+                originalMedia.Data,
+                cancellationToken);
+
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = _options.FfmpegExecutablePath,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = false,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.StartInfo.ArgumentList.Add("-nostdin");
+            process.StartInfo.ArgumentList.Add("-y");
+            process.StartInfo.ArgumentList.Add("-i");
+            process.StartInfo.ArgumentList.Add(inputPath);
+            process.StartInfo.ArgumentList.Add("-filter_complex");
+            process.StartInfo.ArgumentList.Add(
+                $"[0:v]select=lte(n\\,{lastVisibleFrameIndex})[selected];" +
+                "[selected]split[palette_source][video_source];" +
+                "[palette_source]palettegen=reserve_transparent=1[palette];" +
+                "[video_source][palette]paletteuse=dither=sierra2_4a");
+            process.StartInfo.ArgumentList.Add("-loop");
+            process.StartInfo.ArgumentList.Add("0");
+            process.StartInfo.ArgumentList.Add("-gifflags");
+            process.StartInfo.ArgumentList.Add("-offsetting-transdiff");
+            process.StartInfo.ArgumentList.Add("-map_metadata");
+            process.StartInfo.ArgumentList.Add("-1");
+            process.StartInfo.ArgumentList.Add(outputPath);
+
+            try
+            {
+                process.Start();
+            }
+            catch (Exception exception) when (
+                exception is InvalidOperationException or Win32Exception)
+            {
+                return originalMedia;
+            }
+
+            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+            try
+            {
+                await process.WaitForExitAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                if (!process.HasExited)
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                throw;
+            }
+            _ = await errorTask;
+
+            if (process.ExitCode != 0 || !File.Exists(outputPath))
+            {
+                return originalMedia;
+            }
+
+            var normalized = await File.ReadAllBytesAsync(
+                outputPath,
+                cancellationToken);
+            if (normalized.Length == 0 ||
+                normalized.LongLength > maximumUploadMegabytes * 1024L * 1024L)
+            {
+                return originalMedia;
+            }
+
+            using var normalizedData = SKData.CreateCopy(normalized);
+            using var normalizedCodec = SKCodec.Create(normalizedData);
+            if (normalizedCodec is null ||
+                normalizedCodec.EncodedFormat != SKEncodedImageFormat.Gif ||
+                normalizedCodec.FrameCount <= 1)
+            {
+                return originalMedia;
+            }
+
+            return new ProcessedMedia(
+                normalized,
+                "image/gif",
+                originalMedia.FileName);
+        }
+        finally
+        {
+            TryDelete(inputPath);
+            TryDelete(outputPath);
+        }
+    }
+
+    internal static int GetLastVisibleGifFrameIndex(SKCodec codec)
+    {
+        var frameInfo = codec.FrameInfo;
+        var lastFrameIndex = Math.Min(codec.FrameCount, frameInfo.Length) - 1;
+        if (lastFrameIndex <= 0)
+        {
+            return Math.Max(0, lastFrameIndex);
+        }
+
+        while (lastFrameIndex > 0 &&
+               IsGifFrameFullyTransparent(codec, lastFrameIndex))
+        {
+            lastFrameIndex--;
+        }
+
+        return lastFrameIndex;
+    }
+
+    private static bool IsGifFrameFullyTransparent(SKCodec codec, int frameIndex)
+    {
+        var info = new SKImageInfo(
+            codec.Info.Width,
+            codec.Info.Height,
+            SKColorType.Bgra8888,
+            SKAlphaType.Premul);
+        using var bitmap = new SKBitmap(
+            info.Width,
+            info.Height,
+            info.ColorType,
+            info.AlphaType);
+        bitmap.Erase(SKColors.Transparent);
+
+        var result = codec.GetPixels(
+            info,
+            bitmap.GetPixels(),
+            bitmap.RowBytes,
+            new SKCodecOptions(frameIndex, -1));
+        if (result != SKCodecResult.Success)
+        {
+            return false;
+        }
+
+        return bitmap.Pixels.All(pixel => pixel.Alpha == 0);
     }
 
     private static SKBitmap Resize(SKBitmap source, int width, int height)
