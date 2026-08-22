@@ -1,0 +1,19 @@
+name: Quiz rename busy CI
+
+on:
+  pull_request:
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Run rename busy regression tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~QuizRenameBusyRegressionTests"
+      - name: Run shared busy indicator regression tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~BusyIndicatorRegressionTests"
+      - name: Check busy indicator JavaScript syntax
+        run: node --check src/BadWolfQuiz.Web/wwwroot/js/busy-indicators.js
