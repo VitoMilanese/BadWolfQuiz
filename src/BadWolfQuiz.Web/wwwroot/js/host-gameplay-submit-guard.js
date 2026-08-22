@@ -5,7 +5,41 @@
 
     window.badWolfHostGameplaySubmitGuardInitialized = true;
 
+    const selectionStyleId = "host-gameplay-selection-guard";
+    const selectionBodyClass = "host-gameplay-no-select";
+
+    const ensureSelectionStyle = () => {
+        if (document.getElementById(selectionStyleId)) {
+            return;
+        }
+
+        const style = document.createElement("style");
+        style.id = selectionStyleId;
+        style.textContent = `
+body.${selectionBodyClass} {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+body.${selectionBodyClass} input:not([type="button"]):not([type="submit"]):not([type="reset"]),
+body.${selectionBodyClass} textarea,
+body.${selectionBodyClass} [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+}`;
+        document.head.append(style);
+    };
+
+    const refreshSelectionMode = () => {
+        const hasGameplayUi = document.querySelector(
+            ".host-game-board, [data-host-gameplay-view], .game-intro-page") !== null;
+        document.body?.classList.toggle(selectionBodyClass, hasGameplayUi);
+    };
+
     const initialize = () => {
+        ensureSelectionStyle();
+        refreshSelectionMode();
+
         const viewSelector = "[data-host-gameplay-view]";
         const replayDelayMilliseconds = 16;
         const questionBusyDelayMilliseconds = 250;
@@ -167,9 +201,11 @@
             lockOtherQuestionButtons(submitter);
         }, true);
 
-        document.addEventListener(
-            "badwolf:host-gameplay-updated",
-            releaseQuestionSelectionBusy);
+        document.addEventListener("badwolf:host-shell-mounted", refreshSelectionMode);
+        document.addEventListener("badwolf:host-gameplay-updated", () => {
+            refreshSelectionMode();
+            releaseQuestionSelectionBusy();
+        });
 
         const scheduleReplay = () => {
             if (replayHandle !== 0 || pendingSubmission === null) {

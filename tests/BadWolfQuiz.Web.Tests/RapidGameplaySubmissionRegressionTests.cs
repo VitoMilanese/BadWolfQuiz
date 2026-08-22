@@ -10,7 +10,7 @@ public sealed class RapidGameplaySubmissionRegressionTests
             "js",
             "final-player-fallback-actions.js"));
 
-        Assert.Contains("/js/host-gameplay-submit-guard.js", bootstrap);
+        Assert.Contains("/js/host-gameplay-submit-guard.js?v=2", bootstrap);
         Assert.Contains("data.hostGameplaySubmitGuard", bootstrap);
     }
 
@@ -51,6 +51,24 @@ public sealed class RapidGameplaySubmissionRegressionTests
         Assert.Contains("badwolf:host-gameplay-updated", script);
         Assert.Contains("questionErrorObserver", script);
         Assert.Contains("releaseQuestionSelectionBusy", script);
+    }
+
+    [Fact]
+    public void Host_gameplay_disables_mouse_text_selection_but_keeps_editable_text_selectable()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "host-gameplay-submit-guard.js"));
+
+        Assert.Contains("const selectionBodyClass = \"host-gameplay-no-select\"", script);
+        Assert.Contains("-webkit-user-select: none;", script);
+        Assert.Contains("user-select: none;", script);
+        Assert.Contains("input:not([type=\"button\"]):not([type=\"submit\"]):not([type=\"reset\"])", script);
+        Assert.Contains("[contenteditable=\"true\"]", script);
+        Assert.Contains("user-select: text;", script);
+        Assert.Contains(".host-game-board, [data-host-gameplay-view], .game-intro-page", script);
+        Assert.Contains("badwolf:host-shell-mounted", script);
     }
 
     [Fact]
