@@ -14,6 +14,7 @@
     let busy = false;
     let lockedForm = null;
     let lockedDialogButtons = [];
+    let lockedRenameDialogControls = [];
     let lockedQuizControls = [];
     let lockedExportLink = null;
     let lockedExportAriaDisabled = null;
@@ -96,6 +97,11 @@
             button.disabled = wasDisabled;
         });
         lockedDialogButtons = [];
+
+        lockedRenameDialogControls.forEach(({ control, wasDisabled }) => {
+            control.disabled = wasDisabled;
+        });
+        lockedRenameDialogControls = [];
 
         lockedQuizControls.forEach(({ button, wasDisabled }) => {
             button.disabled = wasDisabled;
@@ -192,6 +198,19 @@
         }
     };
 
+    const editorRenameHandler = form => {
+        if (!pathMatches(
+            normalisePath(window.location.pathname),
+            routes.editor)) {
+            return null;
+        }
+
+        const handler = handlerName(form);
+        return handler === "renameround" || handler === "renamecategory"
+            ? handler
+            : null;
+    };
+
     const lockAddRoundDialogButtons = form => {
         if (handlerName(form) !== "addround") {
             return;
@@ -209,6 +228,21 @@
         });
     };
 
+    const lockEditorRenameDialogControls = form => {
+        const dialog = form.closest("dialog");
+        if (!dialog) {
+            return;
+        }
+
+        lockedRenameDialogControls = [
+            ...dialog.querySelectorAll("button, input, select, textarea")
+        ].map(control => ({ control, wasDisabled: control.disabled }));
+
+        lockedRenameDialogControls.forEach(({ control }) => {
+            control.disabled = true;
+        });
+    };
+
     const lockQuizImportControl = form => {
         if (handlerName(form) !== "import") {
             return;
@@ -221,6 +255,168 @@
 
         lockedQuizControls = [{ button, wasDisabled: button.disabled }];
         button.disabled = true;
+    };
+
+    const renameTitleInput = (form, handler) => {
+        const name = handler === "renameround"
+            ? "RenameRound.Title"
+            : "RenameCategory.Title";
+        const input = form.elements.namedItem(name);
+        return input instanceof HTMLInputElement ? input : null;
+    };
+
+    const renameFallbackError = () =>
+        document.querySelector(".quiz-board-form")?.dataset.saveError ||
+        "Request failed.";
+
+    const updateRenameCaches = (handler, itemId, title, questionIds) => {
+        if (handler === "renameround") {
+            if (typeof exchangeCategoryRounds !== "undefined") {
+                const categoryRound = exchangeCategoryRounds.find(
+                    item => item.id === itemId);
+                if (categoryRound) {
+                    categoryRound.title = title;
+                }
+            }
+
+            if (typeof exchangeQuestionRounds !== "undefined") {
+                const questionRound = exchangeQuestionRounds.find(
+                    item => item.id === itemId);
+                if (questionRound) {
+                    questionRound.title = title;
+                }
+            }
+            return;
+        }
+
+        if (typeof exchangeCategoryRounds !== "undefined") {
+            for (const round of exchangeCategoryRounds) {
+                const category = round.categories.find(item => item.id === itemId);
+                if (category) {
+                    category.title = title;
+                    break;
+                }
+            }
+        }
+
+        if (typeof exchangeQuestionRounds !== "undefined" &&
+            questionIds.size > 0) {
+            for (const round of exchangeQuestionRounds) {
+                for (const question of round.questions) {
+                    if (questionIds.has(question.id)) {
+                        question.category = title;
+                    }
+                }
+            }
+        }
+    };
+
+    const applyEditorRename = (handler, formData, title) => {
+        if (handler === "renameround") {
+            const roundId = Number(formData.get("RenameRound.RoundId"));
+            const tab = document.querySelector(
+                `.round-tab-item[data-round-id="${roundId}"]`);
+            const link = tab?.querySelector(".round-tab-link");
+            if (link) {
+                link.textContent = title;
+            }
+
+            if (tab?.classList.contains("active")) {
+                const deleteTarget = document.querySelector(
+                    "#delete-round-dialog .dialog-target");
+                if (deleteTarget) {
+                    deleteTarget.textContent = title;
+                }
+            }
+
+            updateRenameCaches(handler, roundId, title, new Set());
+            return;
+        }
+
+        const categoryId = Number(formData.get("RenameCategory.CategoryId"));
+        const column = document.querySelector(
+            `.quiz-board-category-column[data-category-id="${categoryId}"]`);
+        if (!column) {
+            return;
+        }
+
+        const heading = column.querySelector(".category-title");
+        if (heading) {
+            heading.textContent = title;
+        }
+
+        column.querySelectorAll(".js-category-rename, .js-category-exchange")
+            .forEach(button => {
+                button.dataset.categoryTitle = title;
+            });
+
+        const questionIds = new Set();
+        column.querySelectorAll(".question-cell-slot[data-question-id]")
+            .forEach(slot => {
+                const questionId = Number(slot.dataset.questionId);
+                if (Number.isFinite(questionId)) {
+                    questionIds.add(questionId);
+                }
+
+                const oldTitle = slot.dataset.questionTitle || "";
+                const separatorIndex = oldTitle.indexOf(" — ");
+                const questionTitle = separatorIndex >= 0
+                    ? `${title}${oldTitle.slice(separatorIndex)}`
+                    : title;
+
+                slot.dataset.questionTitle = questionTitle;
+                slot.querySelectorAll(
+                    ".js-question-exchange, .js-question-delete")
+                    .forEach(button => {
+                        button.dataset.questionTitle = questionTitle;
+                    });
+            });
+
+        updateRenameCaches(handler, categoryId, title, questionIds);
+    };
+
+    const showEditorRenameError = (input, message) => {
+        if (!input) {
+            return;
+        }
+
+        input.setCustomValidity(message);
+        input.reportValidity();
+        input.addEventListener("input", () => {
+            input.setCustomValidity("");
+        }, { once: true });
+    };
+
+    const submitEditorRename = async (form, handler, formData, title, input) => {
+        let errorMessage = null;
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: formData,
+                redirect: "manual"
+            });
+
+            const redirected = response.type === "opaqueredirect" ||
+                (response.status >= 300 && response.status < 400);
+            if (!redirected && !response.ok) {
+                throw new Error(renameFallbackError());
+            }
+
+            applyEditorRename(handler, formData, title);
+            form.closest("dialog")?.close();
+        } catch (error) {
+            console.error("Quiz rename error:", error);
+            errorMessage = error instanceof Error && error.message
+                ? error.message
+                : renameFallbackError();
+        } finally {
+            hide();
+        }
+
+        if (errorMessage) {
+            showEditorRenameError(input, errorMessage);
+        }
     };
 
     const isAjaxSave = (form, submitter, currentPath) => {
@@ -427,6 +623,43 @@
     document.addEventListener("submit", event => {
         const form = event.target instanceof HTMLFormElement ? event.target : null;
         if (!form) {
+            return;
+        }
+
+        const renameHandler = editorRenameHandler(form);
+        if (renameHandler) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            if (busy || form.dataset.busyLocked === "true") {
+                return;
+            }
+
+            const input = renameTitleInput(form, renameHandler);
+            const title = input?.value.trim() ?? "";
+            if (!input || !title) {
+                if (input) {
+                    input.value = "";
+                    input.reportValidity();
+                }
+                return;
+            }
+
+            input.setCustomValidity("");
+            const formData = new FormData(form);
+            formData.set(input.name, title);
+
+            lockedForm = form;
+            form.dataset.busyLocked = "true";
+            lockEditorRenameDialogControls(form);
+            show();
+
+            void submitEditorRename(
+                form,
+                renameHandler,
+                formData,
+                title,
+                input);
             return;
         }
 
