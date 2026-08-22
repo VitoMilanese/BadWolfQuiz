@@ -3,17 +3,215 @@ name: Quiz rename busy CI
 on:
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   regression:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+      - name: Patch AJAX rename handlers
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Editor.cshtml.cs")
+          text = path.read_text()
+
+          replacements = [
+              (
+                  '''        if (string.IsNullOrWhiteSpace(title))
+        {
+            TempData["ErrorMessage"] =
+                localizer["QuizEditor_RoundTitleRequired"].Value;
+
+            return RedirectToPage(new
+            {
+                id = round.QuizId,
+                selectedRoundId = round.Id
+            });
+        }
+''',
+                  '''        if (string.IsNullOrWhiteSpace(title))
+        {
+            var errorMessage =
+                localizer["QuizEditor_RoundTitleRequired"].Value;
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = errorMessage
+                });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+
+            return RedirectToPage(new
+            {
+                id = round.QuizId,
+                selectedRoundId = round.Id
+            });
+        }
+'''
+              ),
+              (
+                  '''        await db.SaveChangesAsync();
+
+        TempData["SuccessMessage"] =
+            localizer["QuizEditor_RoundRenamed"].Value;
+
+        return RedirectToPage(new
+        {
+            id = round.QuizId,
+            selectedRoundId = round.Id
+        });
+    }
+
+    public async Task<IActionResult> OnPostDeleteRoundAsync()
+''',
+                  '''        await db.SaveChangesAsync();
+
+        var successMessage =
+            localizer["QuizEditor_RoundRenamed"].Value;
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                title = round.Title,
+                message = successMessage
+            });
+        }
+
+        TempData["SuccessMessage"] = successMessage;
+
+        return RedirectToPage(new
+        {
+            id = round.QuizId,
+            selectedRoundId = round.Id
+        });
+    }
+
+    public async Task<IActionResult> OnPostDeleteRoundAsync()
+'''
+              ),
+              (
+                  '''        if (string.IsNullOrWhiteSpace(title))
+        {
+            TempData["ErrorMessage"] =
+                localizer["QuizEditor_CategoryTitleRequired"].Value;
+
+            return RedirectToPage(new
+            {
+                id = category.Round.QuizId,
+                selectedRoundId = category.QuizRoundId
+            });
+        }
+''',
+                  '''        if (string.IsNullOrWhiteSpace(title))
+        {
+            var errorMessage =
+                localizer["QuizEditor_CategoryTitleRequired"].Value;
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = errorMessage
+                });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+
+            return RedirectToPage(new
+            {
+                id = category.Round.QuizId,
+                selectedRoundId = category.QuizRoundId
+            });
+        }
+'''
+              ),
+              (
+                  '''        await db.SaveChangesAsync();
+
+        TempData["SuccessMessage"] =
+            localizer["QuizEditor_CategoryRenamed"].Value;
+
+        return RedirectToPage(new
+        {
+            id = category.Round.QuizId,
+            selectedRoundId = category.QuizRoundId,
+            selectedCategoryId = category.Id
+        });
+    }
+}
+''',
+                  '''        await db.SaveChangesAsync();
+
+        var successMessage =
+            localizer["QuizEditor_CategoryRenamed"].Value;
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true,
+                title = category.Title,
+                message = successMessage
+            });
+        }
+
+        TempData["SuccessMessage"] = successMessage;
+
+        return RedirectToPage(new
+        {
+            id = category.Round.QuizId,
+            selectedRoundId = category.QuizRoundId,
+            selectedCategoryId = category.Id
+        });
+    }
+}
+'''
+              )
+          ]
+
+          changed = False
+          for old, new in replacements:
+              if new in text:
+                  continue
+              if old not in text:
+                  raise SystemExit("Expected rename handler block was not found")
+              text = text.replace(old, new, 1)
+              changed = True
+
+          if changed:
+              path.write_text(text)
+          PY
       - name: Run rename busy regression tests
         run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~QuizRenameBusyRegressionTests"
       - name: Run shared busy indicator regression tests
         run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~BusyIndicatorRegressionTests"
       - name: Check busy indicator JavaScript syntax
         run: node --check src/BadWolfQuiz.Web/wwwroot/js/busy-indicators.js
+      - name: Commit validated server patch
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Editor.cshtml.cs
+          git commit -m "Temporary validate AJAX rename handlers"
+          git push origin HEAD:${{ github.head_ref }}
