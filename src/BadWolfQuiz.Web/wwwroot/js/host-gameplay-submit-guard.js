@@ -41,6 +41,9 @@ body.${selectionBodyClass} [contenteditable="true"] {
         refreshSelectionMode();
 
         const viewSelector = "[data-host-gameplay-view]";
+        const questionButtonSelector =
+            "form.question-selection-form button[type='submit'], " +
+            "form.question-selection-form input[type='submit']";
         const replayDelayMilliseconds = 16;
         const questionBusyDelayMilliseconds = 250;
         const questionBusySafetyMilliseconds = 15000;
@@ -135,6 +138,36 @@ body.${selectionBodyClass} [contenteditable="true"] {
             }
         };
 
+        const rememberAndDisableQuestionButton = button => {
+            if (!lockedQuestionButtons.some(state => state.button === button)) {
+                lockedQuestionButtons.push({
+                    button,
+                    wasDisabled: button.disabled
+                });
+            }
+            button.disabled = true;
+        };
+
+        const keepQuestionSelectionLocked = () => {
+            if (!questionSelectionBusy) {
+                return;
+            }
+
+            const board = document.querySelector("[data-host-gameplay-board]");
+            if (!board) {
+                return;
+            }
+
+            if (board.hidden) {
+                releaseQuestionSelectionBusy();
+                return;
+            }
+
+            board.querySelectorAll(questionButtonSelector)
+                .forEach(rememberAndDisableQuestionButton);
+            board.setAttribute("aria-busy", "true");
+        };
+
         const lockOtherQuestionButtons = submitter => {
             if (questionSelectionBusy) {
                 return false;
@@ -146,14 +179,10 @@ body.${selectionBodyClass} [contenteditable="true"] {
             }
 
             questionSelectionBusy = true;
-            lockedQuestionButtons = Array.from(board.querySelectorAll(
-                "form.question-selection-form button[type='submit'], " +
-                "form.question-selection-form input[type='submit']"))
+            lockedQuestionButtons = [];
+            Array.from(board.querySelectorAll(questionButtonSelector))
                 .filter(button => button !== submitter)
-                .map(button => ({ button, wasDisabled: button.disabled }));
-            lockedQuestionButtons.forEach(({ button }) => {
-                button.disabled = true;
-            });
+                .forEach(rememberAndDisableQuestionButton);
             board.setAttribute("aria-busy", "true");
 
             const errorTarget = document.getElementById("game-board-error");
@@ -184,9 +213,7 @@ body.${selectionBodyClass} [contenteditable="true"] {
 
         document.addEventListener("click", event => {
             const submitter = event.target instanceof Element
-                ? event.target.closest(
-                    "form.question-selection-form button[type='submit'], " +
-                    "form.question-selection-form input[type='submit']")
+                ? event.target.closest(questionButtonSelector)
                 : null;
             if (!(submitter instanceof HTMLElement) || submitter.disabled) {
                 return;
@@ -204,7 +231,17 @@ body.${selectionBodyClass} [contenteditable="true"] {
         document.addEventListener("badwolf:host-shell-mounted", refreshSelectionMode);
         document.addEventListener("badwolf:host-gameplay-updated", () => {
             refreshSelectionMode();
-            releaseQuestionSelectionBusy();
+            if (!questionSelectionBusy) {
+                return;
+            }
+
+            const board = document.querySelector("[data-host-gameplay-board]");
+            if (board?.hidden === true) {
+                releaseQuestionSelectionBusy();
+                return;
+            }
+
+            keepQuestionSelectionLocked();
         });
 
         const scheduleReplay = () => {

@@ -10,7 +10,7 @@ public sealed class RapidGameplaySubmissionRegressionTests
             "js",
             "final-player-fallback-actions.js"));
 
-        Assert.Contains("/js/host-gameplay-submit-guard.js?v=2", bootstrap);
+        Assert.Contains("/js/host-gameplay-submit-guard.js?v=3", bootstrap);
         Assert.Contains("data.hostGameplaySubmitGuard", bootstrap);
     }
 
@@ -51,6 +51,22 @@ public sealed class RapidGameplaySubmissionRegressionTests
         Assert.Contains("badwolf:host-gameplay-updated", script);
         Assert.Contains("questionErrorObserver", script);
         Assert.Contains("releaseQuestionSelectionBusy", script);
+    }
+
+    [Fact]
+    public void Question_selection_stays_locked_through_unrelated_gameplay_refreshes()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "host-gameplay-submit-guard.js"));
+
+        Assert.Contains("const keepQuestionSelectionLocked = () =>", script);
+        Assert.Contains("if (board.hidden)", script);
+        Assert.Contains("board.querySelectorAll(questionButtonSelector)", script);
+        Assert.Contains(".forEach(rememberAndDisableQuestionButton);", script);
+        Assert.Contains("if (board?.hidden === true)", script);
+        Assert.Contains("keepQuestionSelectionLocked();", script);
     }
 
     [Fact]

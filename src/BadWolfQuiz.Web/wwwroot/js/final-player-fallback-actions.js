@@ -7,7 +7,7 @@
 
     if (!document.querySelector("script[data-host-gameplay-submit-guard]")) {
         const submitGuard = document.createElement("script");
-        submitGuard.src = "/js/host-gameplay-submit-guard.js?v=2";
+        submitGuard.src = "/js/host-gameplay-submit-guard.js?v=3";
         submitGuard.async = false;
         submitGuard.dataset.hostGameplaySubmitGuard = "";
         document.head.append(submitGuard);
