@@ -21,6 +21,6 @@ public sealed class HostNavigationGuardAssetsTagHelper : TagHelper
         }
 
         output.PostContent.AppendHtml(
-            "<script src=\"/js/host-navigation-action-guard.js?v=1.22.9-317.1\"></script>");
+            "<script src=\"/js/host-navigation-action-guard.js?v=1.22.10\"></script>");
     }
 }

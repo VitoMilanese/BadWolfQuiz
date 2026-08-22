@@ -23,7 +23,10 @@ The shared busy state is used for:
 - switching rounds in the quiz editor;
 - renaming rounds and categories from the quiz editor;
 - Save actions in the quiz, question, final-question, round-description, and category-description editors;
-- Back navigation from those editor pages, including Escape-key navigation.
+- Back navigation from those editor pages, including Escape-key navigation;
+- opening an already-resolved question from the host game board;
+- **Show answer**, **Show question**, and **Return to board** navigation from the closed-question review screen;
+- **Return to game** and its Escape-key equivalent from the answer-history editor.
 
 ## Lifecycle
 
@@ -37,6 +40,10 @@ Round and category rename dialogs use a dedicated AJAX rename endpoint instead o
 
 Quiz Editor and Question Editor Save actions already use AJAX. Their existing save handlers continue to own the request and error handling; the shared busy layer observes the existing submitter state and closes when the operation completes and the submitter is re-enabled.
 
+Host gameplay navigation uses a page-scoped duplicate-action guard. Opening an already-resolved board question immediately locks the complete question board, while closed-question review actions lock the review-action group. The first gameplay click continues through the existing soft-navigation path. If the transition is not immediate, the shared fullscreen busy indicator appears after a short delay. The guard releases after the expected gameplay update, a visible gameplay error, browser page restoration, or a safety timeout.
+
+Returning from Answer History to the live game is routed through the shared busy-navigation helper. The visible **Return to game** action and Escape use the same guarded navigation path, so repeated clicks or key presses cannot start duplicate requests. Failed navigation and page restoration release the lock.
+
 Duplicate activation is blocked while the shared busy state is active. A `pageshow` handler clears stale state after browser back/forward restoration.
 
 Escape still closes an open editor preview or dialog first. When no editor modal is open, Escape uses the same busy navigation path as the visible Back action.
@@ -45,4 +52,4 @@ Escape still closes an open editor preview or dialog first. When no editor modal
 
 The busy feedback does not change quiz validation, persistence, import/export package format, export filename/content type, game-launch rules, or gameplay behavior. Rename validation and persistence remain compatible with the original native POST handlers. The busy layer provides presentation, duplicate-action protection, and no-reload AJAX handling around existing editor operations.
 
-Regression coverage lives in `BusyIndicatorRegressionTests` and `QuizRenameBusyRegressionTests`. It checks global asset loading, route coverage, fullscreen modal behavior, quiz import locking, export completion signaling and duplicate protection, native large-export-safe download behavior, AJAX save lifetime, rename dialog locking and duplicate protection, in-place rename synchronization, native rename fallback preservation, Escape navigation, history restoration, and reduced-motion styling.
+Regression coverage lives in `BusyIndicatorRegressionTests`, `QuizRenameBusyRegressionTests`, and `HostNavigationActionGuardRegressionTests`. It checks global asset loading, route coverage, fullscreen modal behavior, quiz import locking, export completion signaling and duplicate protection, native large-export-safe download behavior, AJAX save lifetime, rename dialog locking and duplicate protection, in-place rename synchronization, native rename fallback preservation, closed-question board/review locks, answer-history return navigation, Escape handling, history restoration, and reduced-motion styling.

@@ -26,7 +26,7 @@ public sealed class HostNavigationActionGuardRegressionTests
         Assert.Contains("model is not LobbyModel", tagHelper, StringComparison.Ordinal);
         Assert.Contains("model is not AnswerHistoryModel", tagHelper, StringComparison.Ordinal);
         Assert.Contains(
-            "/js/host-navigation-action-guard.js?v=1.22.9-317.1",
+            "/js/host-navigation-action-guard.js?v=1.22.10",
             tagHelper,
             StringComparison.Ordinal);
     }
