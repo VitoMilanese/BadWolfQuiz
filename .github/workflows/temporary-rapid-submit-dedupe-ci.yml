@@ -1,0 +1,231 @@
+name: Temporary rapid submit dedupe CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    if: github.head_ref == 'agent/300-rapid-submit-dedupe-ci'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/300-rapid-submit-dedupe-ci
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Apply rapid submit dedupe fix
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          site = Path('src/BadWolfQuiz.Web/wwwroot/js/site.js')
+          text = site.read_text(encoding='utf-8')
+
+          old_vars = '''    let submissionInProgress = false;
+    let finalTransitionTimer = null;'''
+          new_vars = '''    let submissionInProgress = false;
+    let activeSubmissionKey = null;
+    let pendingSubmission = null;
+    let finalTransitionTimer = null;'''
+          if old_vars not in text:
+              raise SystemExit('submission variable marker not found')
+          text = text.replace(old_vars, new_vars, 1)
+
+          old_start = '''    document.addEventListener("submit", async event => {
+        const form = event.target instanceof HTMLFormElement
+            ? event.target
+            : null;
+        if (event.defaultPrevented ||
+            !form ||
+            !isGameplayForm(form) ||
+            submissionInProgress) {
+            return;
+        }
+'''
+          new_start = '''    const createGameplaySubmissionKey = (form, submitter, action) => {
+        const formData = new FormData(form);
+        if (submitter?.name) {
+            formData.append(submitter.name, submitter.value);
+        }
+
+        const fields = Array.from(formData.entries())
+            .filter(([name]) => name !== "__RequestVerificationToken")
+            .map(([name, value]) => [
+                name,
+                typeof value === "string" ? value : value.name
+            ])
+            .sort(([leftName, leftValue], [rightName, rightValue]) =>
+                leftName === rightName
+                    ? leftValue.localeCompare(rightValue)
+                    : leftName.localeCompare(rightName))
+            .map(([name, value]) =>
+                `${encodeURIComponent(name)}=${encodeURIComponent(value)}`)
+            .join("&");
+
+        return `${form.method.toUpperCase()} ${action.href} ${fields}`;
+    };
+
+    const flushPendingGameplaySubmission = () => {
+        const pending = pendingSubmission;
+        pendingSubmission = null;
+        if (!pending) {
+            return;
+        }
+
+        queueMicrotask(() => {
+            const { form, submitter } = pending;
+            if (submissionInProgress ||
+                !form.isConnected ||
+                (submitter && !submitter.isConnected)) {
+                return;
+            }
+
+            if (submitter instanceof HTMLButtonElement ||
+                submitter instanceof HTMLInputElement) {
+                form.requestSubmit(submitter);
+            } else {
+                form.requestSubmit();
+            }
+        });
+    };
+
+    document.addEventListener("submit", async event => {
+        const form = event.target instanceof HTMLFormElement
+            ? event.target
+            : null;
+        if (event.defaultPrevented ||
+            !form ||
+            !isGameplayForm(form)) {
+            return;
+        }
+'''
+          if old_start not in text:
+              raise SystemExit('submit handler start marker not found')
+          text = text.replace(old_start, new_start, 1)
+
+          old_guard = '''        event.preventDefault();
+        event.stopImmediatePropagation();
+        submissionInProgress = true;
+'''
+          new_guard = '''        const submissionKey = createGameplaySubmissionKey(
+            form,
+            submitter,
+            action);
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (submissionInProgress) {
+            if (submissionKey === activeSubmissionKey ||
+                submissionKey === pendingSubmission?.key) {
+                return;
+            }
+
+            if (pendingSubmission === null) {
+                pendingSubmission = {
+                    form,
+                    submitter,
+                    key: submissionKey
+                };
+            }
+            return;
+        }
+
+        submissionInProgress = true;
+        activeSubmissionKey = submissionKey;
+'''
+          if old_guard not in text:
+              raise SystemExit('submit guard marker not found')
+          text = text.replace(old_guard, new_guard, 1)
+
+          old_finally = '''        } finally {
+            button?.removeAttribute("disabled");
+            submissionInProgress = false;
+        }
+'''
+          new_finally = '''        } finally {
+            button?.removeAttribute("disabled");
+            activeSubmissionKey = null;
+            submissionInProgress = false;
+            flushPendingGameplaySubmission();
+        }
+'''
+          if old_finally not in text:
+              raise SystemExit('submit finally marker not found')
+          text = text.replace(old_finally, new_finally, 1)
+          site.write_text(text, encoding='utf-8')
+
+          tests = Path('tests/BadWolfQuiz.Web.Tests/HostGameplayNavigationMarkupTests.cs')
+          test_text = tests.read_text(encoding='utf-8')
+          marker = '''    [Fact]
+    public void Partial_refresh_synchronizes_resolved_question_tiles_from_server_markup()
+'''
+          test = '''    [Fact]
+    public void Rapid_gameplay_submissions_are_intercepted_queued_and_deduplicated()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+        var navigationStart = script.IndexOf(
+            "const configureHostGameplayFormNavigation = () =>",
+            StringComparison.Ordinal);
+        var submitStart = script.IndexOf(
+            "document.addEventListener(\\"submit\\", async event =>",
+            navigationStart,
+            StringComparison.Ordinal);
+        var submitEnd = script.IndexOf(
+            "}, true);",
+            submitStart,
+            StringComparison.Ordinal);
+        var submitHandler = script[submitStart..submitEnd];
+
+        var preventDefault = submitHandler.IndexOf(
+            "event.preventDefault();",
+            StringComparison.Ordinal);
+        var busyGuard = submitHandler.IndexOf(
+            "if (submissionInProgress)",
+            StringComparison.Ordinal);
+
+        Assert.True(navigationStart >= 0);
+        Assert.True(submitStart > navigationStart);
+        Assert.True(preventDefault >= 0);
+        Assert.True(busyGuard > preventDefault);
+        Assert.Contains("const createGameplaySubmissionKey =", script);
+        Assert.Contains("name !== \\\"__RequestVerificationToken\\\"", script);
+        Assert.Contains("submissionKey === activeSubmissionKey", submitHandler);
+        Assert.Contains("submissionKey === pendingSubmission?.key", submitHandler);
+        Assert.Contains("if (pendingSubmission === null)", submitHandler);
+        Assert.Contains("key: submissionKey", submitHandler);
+        Assert.Contains("activeSubmissionKey = submissionKey;", submitHandler);
+        Assert.Contains("activeSubmissionKey = null;", submitHandler);
+        Assert.Contains("flushPendingGameplaySubmission();", submitHandler);
+        Assert.Contains("form.requestSubmit(submitter);", script);
+    }
+
+'''
+          if marker not in test_text:
+              raise SystemExit('test insertion marker not found')
+          test_text = test_text.replace(marker, test + marker, 1)
+          tests.write_text(test_text, encoding='utf-8')
+          PY
+      - name: Check JavaScript syntax
+        run: node --check src/BadWolfQuiz.Web/wwwroot/js/site.js
+      - name: Run host gameplay navigation tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~HostGameplayNavigationMarkupTests"
+      - name: Commit temporary validated patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/BadWolfQuiz.Web/wwwroot/js/site.js tests/BadWolfQuiz.Web.Tests/HostGameplayNavigationMarkupTests.cs
+          git commit -m "Temporary rapid submit dedupe validation"
+          git push origin HEAD:agent/300-rapid-submit-dedupe-ci
