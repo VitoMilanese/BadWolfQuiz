@@ -17,6 +17,11 @@ public sealed class MediaUploadProcessor(
             ? _premiumOptions.MaximumImageUploadMegabytes
             : _options.MaximumImageUploadMegabytes;
 
+    public int MaximumGifUploadMegabytes(bool isPremium) =>
+        isPremium
+            ? _premiumOptions.MaximumGifUploadMegabytes
+            : _options.MaximumGifUploadMegabytes;
+
     public int MaximumAudioUploadMegabytes(bool isPremium) =>
         isPremium
             ? _premiumOptions.MaximumAudioUploadMegabytes
@@ -47,6 +52,29 @@ public sealed class MediaUploadProcessor(
             using var encodedData = SKData.CreateCopy(original);
             using var codec = SKCodec.Create(encodedData) ??
                 throw new MediaUploadException("InvalidImageFile");
+
+            var isGif = codec.EncodedFormat == SKEncodedImageFormat.Gif;
+            var maximumUploadMegabytes = isGif
+                ? MaximumGifUploadMegabytes(isPremium)
+                : MaximumImageUploadMegabytes(isPremium);
+            var originalMedia = Original(file, original);
+
+            if (isGif)
+            {
+                EnsureSize(originalMedia, maximumUploadMegabytes);
+            }
+
+            if (isGif && codec.FrameCount > 1)
+            {
+                var loopSafeGif = NormalizeAnimatedGifLoop(original);
+                return EnsureSize(
+                    new ProcessedMedia(
+                        loopSafeGif,
+                        "image/gif",
+                        SafeFileName(file)),
+                    maximumUploadMegabytes);
+            }
+
             using var decoded = SKBitmap.Decode(original) ??
                 throw new MediaUploadException("InvalidImageFile");
             var needsResize = decoded.Width > _options.MaximumImageWidth ||
@@ -60,9 +88,7 @@ public sealed class MediaUploadProcessor(
 
             if (!needsResize && !shouldConvertToJpeg)
             {
-                return EnsureSize(
-                    Original(file, original),
-                    MaximumImageUploadMegabytes(isPremium));
+                return EnsureSize(originalMedia, maximumUploadMegabytes);
             }
 
             SKBitmap? resized = null;
@@ -89,14 +115,14 @@ public sealed class MediaUploadProcessor(
                     throw new MediaUploadException("InvalidImageFile");
                 var converted = output.ToArray();
                 var result = !needsResize && converted.Length >= original.Length
-                    ? Original(file, original)
+                    ? originalMedia
                     : shouldConvertToJpeg
                     ? new ProcessedMedia(
                         converted,
                         "image/jpeg",
                         Path.ChangeExtension(SafeFileName(file), ".jpg"))
                     : new ProcessedMedia(converted, file.ContentType, SafeFileName(file));
-                return EnsureSize(result, MaximumImageUploadMegabytes(isPremium));
+                return EnsureSize(result, maximumUploadMegabytes);
             }
             finally
             {
@@ -205,6 +231,415 @@ public sealed class MediaUploadProcessor(
             TryDelete(outputPath);
         }
     }
+
+    internal static byte[] NormalizeAnimatedGifLoop(byte[] gif)
+    {
+        var normalized = TryRemoveBriefLeadingSolidGifFrame(gif, out var withoutBlankFrame)
+            ? withoutBlankFrame
+            : gif;
+
+        if (!TryReadGifFrames(
+                normalized,
+                out _,
+                out _,
+                out _,
+                out _,
+                out var frames) ||
+            frames.Count <= 1)
+        {
+            return normalized;
+        }
+
+        var packedFieldOffset = frames[^1].GraphicControlPackedFieldOffset;
+        if (packedFieldOffset < 0)
+        {
+            return normalized;
+        }
+
+        const int disposalMethodMask = 0x1C;
+        const int restoreToBackground = 2;
+        const int doNotDispose = 1;
+
+        var packedField = normalized[packedFieldOffset];
+        var disposalMethod =
+            (packedField & disposalMethodMask) >> 2;
+        if (disposalMethod != restoreToBackground)
+        {
+            return normalized;
+        }
+
+        var result = ReferenceEquals(normalized, gif)
+            ? (byte[])normalized.Clone()
+            : normalized;
+        result[packedFieldOffset] = (byte)(
+            (packedField & ~disposalMethodMask) |
+            (doNotDispose << 2));
+        return result;
+    }
+
+    private static bool TryRemoveBriefLeadingSolidGifFrame(
+        byte[] data,
+        out byte[] result)
+    {
+        result = data;
+        if (!TryReadGifFrames(
+                data,
+                out var logicalWidth,
+                out var logicalHeight,
+                out var globalColorTableOffset,
+                out var globalColorTableSizeBits,
+                out var frames) ||
+            frames.Count <= 1)
+        {
+            return false;
+        }
+
+        var first = frames[0];
+        var second = frames[1];
+        if (first.GraphicControlDelayOffset < 0 ||
+            ReadGifUInt16(data, first.GraphicControlDelayOffset) > 5 ||
+            first.Left != 0 ||
+            first.Top != 0 ||
+            first.Width != logicalWidth ||
+            first.Height != logicalHeight ||
+            second.Left != 0 ||
+            second.Top != 0 ||
+            second.Width != logicalWidth ||
+            second.Height != logicalHeight)
+        {
+            return false;
+        }
+
+        using var firstFrame = SKBitmap.Decode(data);
+        if (firstFrame is null ||
+            firstFrame.Width != logicalWidth ||
+            firstFrame.Height != logicalHeight)
+        {
+            return false;
+        }
+
+        var pixels = firstFrame.Pixels;
+        if (pixels.Length == 0 || pixels[0].Alpha != byte.MaxValue)
+        {
+            return false;
+        }
+
+        var solidColor = pixels[0];
+        for (var index = 1; index < pixels.Length; index++)
+        {
+            if (pixels[index] != solidColor)
+            {
+                return false;
+            }
+        }
+
+        if (second.GraphicControlPackedFieldOffset < 0)
+        {
+            return false;
+        }
+
+        var working = (byte[])data.Clone();
+        var secondPackedField = working[second.GraphicControlPackedFieldOffset];
+        var hasTransparency = (secondPackedField & 0x01) != 0;
+        if (!hasTransparency)
+        {
+            result = RemoveGifRange(working, first.FrameStart, first.FrameEnd);
+            return true;
+        }
+
+        if (second.GraphicControlTransparentIndexOffset < 0)
+        {
+            return false;
+        }
+
+        var transparentIndex = working[second.GraphicControlTransparentIndexOffset];
+        working[second.GraphicControlPackedFieldOffset] = (byte)(secondPackedField & 0xFE);
+
+        if (second.LocalColorTableOffset >= 0)
+        {
+            var colorCount = 1 << (second.LocalColorTableSizeBits + 1);
+            if (transparentIndex >= colorCount)
+            {
+                return false;
+            }
+
+            var colorOffset = second.LocalColorTableOffset + transparentIndex * 3;
+            working[colorOffset] = solidColor.Red;
+            working[colorOffset + 1] = solidColor.Green;
+            working[colorOffset + 2] = solidColor.Blue;
+            result = RemoveGifRange(working, first.FrameStart, first.FrameEnd);
+            return true;
+        }
+
+        if (globalColorTableOffset < 0 || globalColorTableSizeBits < 0)
+        {
+            return false;
+        }
+
+        var globalColorCount = 1 << (globalColorTableSizeBits + 1);
+        if (transparentIndex >= globalColorCount)
+        {
+            return false;
+        }
+
+        var globalColorTableLength = 3 * globalColorCount;
+        if (globalColorTableOffset + globalColorTableLength > working.Length)
+        {
+            return false;
+        }
+
+        var localColorTable = new byte[globalColorTableLength];
+        Buffer.BlockCopy(
+            working,
+            globalColorTableOffset,
+            localColorTable,
+            0,
+            localColorTable.Length);
+        var transparentColorOffset = transparentIndex * 3;
+        localColorTable[transparentColorOffset] = solidColor.Red;
+        localColorTable[transparentColorOffset + 1] = solidColor.Green;
+        localColorTable[transparentColorOffset + 2] = solidColor.Blue;
+
+        working[second.ImagePackedFieldOffset] = (byte)(
+            (working[second.ImagePackedFieldOffset] & 0x78) |
+            0x80 |
+            globalColorTableSizeBits);
+        var insertionOffset = second.ImageDescriptorOffset + 10;
+
+        using var stream = new MemoryStream(
+            working.Length - (first.FrameEnd - first.FrameStart) +
+            localColorTable.Length);
+        stream.Write(working, 0, first.FrameStart);
+        stream.Write(
+            working,
+            first.FrameEnd,
+            insertionOffset - first.FrameEnd);
+        stream.Write(localColorTable);
+        stream.Write(
+            working,
+            insertionOffset,
+            working.Length - insertionOffset);
+        result = stream.ToArray();
+        return true;
+    }
+
+    private static byte[] RemoveGifRange(byte[] data, int start, int end)
+    {
+        var result = new byte[data.Length - (end - start)];
+        Buffer.BlockCopy(data, 0, result, 0, start);
+        Buffer.BlockCopy(data, end, result, start, data.Length - end);
+        return result;
+    }
+
+    private static bool TryReadGifFrames(
+        byte[] data,
+        out int logicalWidth,
+        out int logicalHeight,
+        out int globalColorTableOffset,
+        out int globalColorTableSizeBits,
+        out List<GifFrameInfo> frames)
+    {
+        logicalWidth = 0;
+        logicalHeight = 0;
+        globalColorTableOffset = -1;
+        globalColorTableSizeBits = -1;
+        frames = [];
+
+        if (data.Length < 13 ||
+            data[0] != (byte)'G' ||
+            data[1] != (byte)'I' ||
+            data[2] != (byte)'F' ||
+            data[3] != (byte)'8' ||
+            (data[4] != (byte)'7' && data[4] != (byte)'9') ||
+            data[5] != (byte)'a')
+        {
+            return false;
+        }
+
+        logicalWidth = ReadGifUInt16(data, 6);
+        logicalHeight = ReadGifUInt16(data, 8);
+        var offset = 13;
+        var logicalScreenPackedField = data[10];
+        if ((logicalScreenPackedField & 0x80) != 0)
+        {
+            globalColorTableOffset = offset;
+            globalColorTableSizeBits = logicalScreenPackedField & 0x07;
+            var colorCount = 1 << (globalColorTableSizeBits + 1);
+            var colorTableBytes = 3 * colorCount;
+            if (offset + colorTableBytes > data.Length)
+            {
+                return false;
+            }
+            offset += colorTableBytes;
+        }
+
+        var pendingGraphicControlStart = -1;
+        var pendingGraphicControlPackedFieldOffset = -1;
+        var pendingGraphicControlDelayOffset = -1;
+        var pendingGraphicControlTransparentIndexOffset = -1;
+
+        while (offset < data.Length)
+        {
+            var introducer = data[offset];
+            switch (introducer)
+            {
+                case 0x3B:
+                    return true;
+
+                case 0x21:
+                {
+                    if (offset + 2 > data.Length)
+                    {
+                        return false;
+                    }
+
+                    var extensionStart = offset;
+                    var extensionLabel = data[offset + 1];
+                    offset += 2;
+                    if (extensionLabel == 0xF9)
+                    {
+                        if (offset + 6 > data.Length ||
+                            data[offset] != 4 ||
+                            data[offset + 5] != 0)
+                        {
+                            return false;
+                        }
+
+                        pendingGraphicControlStart = extensionStart;
+                        pendingGraphicControlPackedFieldOffset = offset + 1;
+                        pendingGraphicControlDelayOffset = offset + 2;
+                        pendingGraphicControlTransparentIndexOffset = offset + 4;
+                        offset += 6;
+                    }
+                    else
+                    {
+                        if (!SkipGifSubBlocks(data, ref offset))
+                        {
+                            return false;
+                        }
+
+                        if (extensionLabel == 0x01)
+                        {
+                            pendingGraphicControlStart = -1;
+                            pendingGraphicControlPackedFieldOffset = -1;
+                            pendingGraphicControlDelayOffset = -1;
+                            pendingGraphicControlTransparentIndexOffset = -1;
+                        }
+                    }
+                    break;
+                }
+
+                case 0x2C:
+                {
+                    if (offset + 10 > data.Length)
+                    {
+                        return false;
+                    }
+
+                    var imageDescriptorOffset = offset;
+                    var left = ReadGifUInt16(data, offset + 1);
+                    var top = ReadGifUInt16(data, offset + 3);
+                    var width = ReadGifUInt16(data, offset + 5);
+                    var height = ReadGifUInt16(data, offset + 7);
+                    var imagePackedFieldOffset = offset + 9;
+                    var imagePackedField = data[imagePackedFieldOffset];
+                    offset += 10;
+
+                    var localColorTableOffset = -1;
+                    var localColorTableSizeBits = -1;
+                    if ((imagePackedField & 0x80) != 0)
+                    {
+                        localColorTableOffset = offset;
+                        localColorTableSizeBits = imagePackedField & 0x07;
+                        var colorCount = 1 << (localColorTableSizeBits + 1);
+                        var colorTableBytes = 3 * colorCount;
+                        if (offset + colorTableBytes > data.Length)
+                        {
+                            return false;
+                        }
+                        offset += colorTableBytes;
+                    }
+
+                    if (offset >= data.Length)
+                    {
+                        return false;
+                    }
+
+                    offset++;
+                    if (!SkipGifSubBlocks(data, ref offset))
+                    {
+                        return false;
+                    }
+
+                    frames.Add(new GifFrameInfo(
+                        pendingGraphicControlStart >= 0
+                            ? pendingGraphicControlStart
+                            : imageDescriptorOffset,
+                        offset,
+                        imageDescriptorOffset,
+                        imagePackedFieldOffset,
+                        left,
+                        top,
+                        width,
+                        height,
+                        pendingGraphicControlPackedFieldOffset,
+                        pendingGraphicControlDelayOffset,
+                        pendingGraphicControlTransparentIndexOffset,
+                        localColorTableOffset,
+                        localColorTableSizeBits));
+
+                    pendingGraphicControlStart = -1;
+                    pendingGraphicControlPackedFieldOffset = -1;
+                    pendingGraphicControlDelayOffset = -1;
+                    pendingGraphicControlTransparentIndexOffset = -1;
+                    break;
+                }
+
+                default:
+                    return false;
+            }
+        }
+
+        return false;
+    }
+
+    private static int ReadGifUInt16(byte[] data, int offset) =>
+        data[offset] | (data[offset + 1] << 8);
+
+    private static bool SkipGifSubBlocks(byte[] data, ref int offset)
+    {
+        while (offset < data.Length)
+        {
+            var blockLength = data[offset++];
+            if (blockLength == 0)
+            {
+                return true;
+            }
+
+            if (offset + blockLength > data.Length)
+            {
+                return false;
+            }
+            offset += blockLength;
+        }
+
+        return false;
+    }
+
+    private readonly record struct GifFrameInfo(
+        int FrameStart,
+        int FrameEnd,
+        int ImageDescriptorOffset,
+        int ImagePackedFieldOffset,
+        int Left,
+        int Top,
+        int Width,
+        int Height,
+        int GraphicControlPackedFieldOffset,
+        int GraphicControlDelayOffset,
+        int GraphicControlTransparentIndexOffset,
+        int LocalColorTableOffset,
+        int LocalColorTableSizeBits);
 
     private static SKBitmap Resize(SKBitmap source, int width, int height)
     {
