@@ -239,6 +239,8 @@
 
     const hostGameplayTarget = document.querySelector(".host-game-board");
     if (hostGameplayTarget) {
+        loadSharedScript("/js/board-header-layout.js");
+
         const playerNameMarqueeVersion = "3";
         loadSharedStyle(
             `/css/player-name-marquee.css?v=${playerNameMarqueeVersion}`);
