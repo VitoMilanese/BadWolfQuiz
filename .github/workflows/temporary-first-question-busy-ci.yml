@@ -1,0 +1,450 @@
+name: Temporary first question navigation CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    if: github.head_ref == 'agent/300-first-question-busy-ci'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/300-first-question-busy-ci
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Apply first-question and selection-busy fixes
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          site = Path('src/BadWolfQuiz.Web/wwwroot/js/site.js')
+          text = site.read_text(encoding='utf-8')
+
+          old_state = '''    let submissionInProgress = false;
+    let finalTransitionTimer = null;
+    let gameplayErrorDismissHandle = null;
+'''
+          new_state = '''    let submissionInProgress = false;
+    let activeSubmissionKey = null;
+    let pendingSubmission = null;
+    let finalTransitionTimer = null;
+    let gameplayErrorDismissHandle = null;
+    let questionSelectionBusyTimer = null;
+    let questionSelectionBusyOverlayOwned = false;
+    let lockedQuestionButtons = [];
+'''
+          if old_state not in text:
+              raise SystemExit('site state marker not found')
+          text = text.replace(old_state, new_state, 1)
+
+          marker = '''    const showHostGameplayError = message => {
+'''
+          helpers = '''    const beginQuestionSelectionBusy = () => {
+        const currentBoard = document.querySelector(boardSelector);
+        lockedQuestionButtons = Array.from(
+            currentBoard?.querySelectorAll(
+                "form.question-selection-form button[type='submit'], " +
+                "form.question-selection-form input[type='submit']") ?? [])
+            .map(button => ({ button, wasDisabled: button.disabled }));
+        lockedQuestionButtons.forEach(({ button }) => {
+            button.disabled = true;
+        });
+        currentBoard?.setAttribute("aria-busy", "true");
+
+        window.clearTimeout(questionSelectionBusyTimer);
+        questionSelectionBusyTimer = window.setTimeout(() => {
+            questionSelectionBusyTimer = null;
+            questionSelectionBusyOverlayOwned =
+                window.BadWolfBusy?.show?.() === true;
+        }, 250);
+    };
+
+    const endQuestionSelectionBusy = () => {
+        window.clearTimeout(questionSelectionBusyTimer);
+        questionSelectionBusyTimer = null;
+
+        lockedQuestionButtons.forEach(({ button, wasDisabled }) => {
+            if (button.isConnected) {
+                button.disabled = wasDisabled;
+            }
+        });
+        lockedQuestionButtons = [];
+        document.querySelector(boardSelector)?.removeAttribute("aria-busy");
+
+        if (questionSelectionBusyOverlayOwned) {
+            questionSelectionBusyOverlayOwned = false;
+            window.BadWolfBusy?.hide?.();
+        }
+    };
+
+'''
+          if marker not in text:
+              raise SystemExit('showHostGameplayError marker not found')
+          text = text.replace(marker, helpers + marker, 1)
+
+          can_nav = '''    const canNavigate = url =>
+        url.origin === lobbyUrl.origin &&
+        (isLobbyUrl(url) || flowPaths.has(url.pathname.toLowerCase()));
+'''
+          submission_helpers = '''    const canNavigate = url =>
+        url.origin === lobbyUrl.origin &&
+        (isLobbyUrl(url) || flowPaths.has(url.pathname.toLowerCase()));
+
+    const createGameplaySubmissionKey = (form, submitter, action) => {
+        const formData = new FormData(form);
+        if (submitter?.name) {
+            formData.append(submitter.name, submitter.value);
+        }
+
+        const fields = Array.from(formData.entries())
+            .filter(([name]) => name !== "__RequestVerificationToken")
+            .map(([name, value]) => [
+                name,
+                typeof value === "string" ? value : value.name
+            ])
+            .sort(([leftName, leftValue], [rightName, rightValue]) =>
+                leftName === rightName
+                    ? leftValue.localeCompare(rightValue)
+                    : leftName.localeCompare(rightName))
+            .map(([name, value]) =>
+                `${encodeURIComponent(name)}=${encodeURIComponent(value)}`)
+            .join("&");
+
+        return `${form.method.toUpperCase()} ${action.href} ${fields}`;
+    };
+
+    const flushPendingGameplaySubmission = () => {
+        const pending = pendingSubmission;
+        pendingSubmission = null;
+        if (!pending) {
+            return;
+        }
+
+        queueMicrotask(() => {
+            const { form, submitter } = pending;
+            if (submissionInProgress ||
+                !form.isConnected ||
+                (submitter && !submitter.isConnected)) {
+                return;
+            }
+
+            if (submitter instanceof HTMLButtonElement ||
+                submitter instanceof HTMLInputElement) {
+                form.requestSubmit(submitter);
+            } else {
+                form.requestSubmit();
+            }
+        });
+    };
+'''
+          if can_nav not in text:
+              raise SystemExit('canNavigate marker not found')
+          text = text.replace(can_nav, submission_helpers, 1)
+
+          old_handler_start = '''    document.addEventListener("submit", async event => {
+        const form = event.target instanceof HTMLFormElement
+            ? event.target
+            : null;
+        if (event.defaultPrevented ||
+            !form ||
+            !isGameplayForm(form) ||
+            submissionInProgress) {
+            return;
+        }
+'''
+          new_handler_start = '''    document.addEventListener("submit", async event => {
+        const form = event.target instanceof HTMLFormElement
+            ? event.target
+            : null;
+        if (event.defaultPrevented ||
+            !form ||
+            !isGameplayForm(form)) {
+            return;
+        }
+'''
+          if old_handler_start not in text:
+              raise SystemExit('submit handler start marker not found')
+          text = text.replace(old_handler_start, new_handler_start, 1)
+
+          old_guard = '''        event.preventDefault();
+        event.stopImmediatePropagation();
+        submissionInProgress = true;
+
+        const button = submitter ?? form.querySelector("button[type='submit']");
+        button?.setAttribute("disabled", "disabled");
+
+        try {
+            const formData = new FormData(form);
+            if (submitter?.name) {
+                formData.append(submitter.name, submitter.value);
+            }
+
+            const expectsJson = form.matches(".question-selection-form");
+'''
+          new_guard = '''        const submissionKey = createGameplaySubmissionKey(
+            form,
+            submitter,
+            action);
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (submissionInProgress) {
+            if (submissionKey === activeSubmissionKey ||
+                submissionKey === pendingSubmission?.key) {
+                return;
+            }
+
+            if (pendingSubmission === null) {
+                pendingSubmission = {
+                    form,
+                    submitter,
+                    key: submissionKey
+                };
+            }
+            return;
+        }
+
+        submissionInProgress = true;
+        activeSubmissionKey = submissionKey;
+
+        const isQuestionSelection = form.matches(".question-selection-form");
+        const button = submitter ?? form.querySelector("button[type='submit']");
+        if (isQuestionSelection) {
+            beginQuestionSelectionBusy();
+        } else {
+            button?.setAttribute("disabled", "disabled");
+        }
+
+        try {
+            const formData = new FormData(form);
+            if (submitter?.name) {
+                formData.append(submitter.name, submitter.value);
+            }
+
+            const expectsJson = isQuestionSelection;
+'''
+          if old_guard not in text:
+              raise SystemExit('submit guard marker not found')
+          text = text.replace(old_guard, new_guard, 1)
+
+          old_finally = '''        } finally {
+            button?.removeAttribute("disabled");
+            submissionInProgress = false;
+        }
+'''
+          new_finally = '''        } finally {
+            if (isQuestionSelection) {
+                endQuestionSelectionBusy();
+            } else {
+                button?.removeAttribute("disabled");
+            }
+            activeSubmissionKey = null;
+            submissionInProgress = false;
+            flushPendingGameplaySubmission();
+        }
+'''
+          if old_finally not in text:
+              raise SystemExit('submit finally marker not found')
+          text = text.replace(old_finally, new_finally, 1)
+          site.write_text(text, encoding='utf-8')
+
+          escape = Path('src/BadWolfQuiz.Web/wwwroot/js/gameplay-escape-shortcuts.js')
+          escape_text = escape.read_text(encoding='utf-8')
+          old_assets = '''    const hostGameplayTarget = document.querySelector(".host-game-board");
+    if (hostGameplayTarget) {
+        loadSharedScript("/js/board-header-layout.js");
+
+        const playerNameMarqueeVersion = "3";
+        loadSharedStyle(
+            `/css/player-name-marquee.css?v=${playerNameMarqueeVersion}`);
+        loadSharedScript(
+            `/js/player-name-marquee.js?v=${playerNameMarqueeVersion}`);
+    }
+'''
+          new_assets = '''    let hostGameplayAssetsMounted = false;
+    const mountHostGameplayAssets = () => {
+        const hostGameplayTarget = document.querySelector(".host-game-board");
+        if (!hostGameplayTarget || hostGameplayAssetsMounted) {
+            return;
+        }
+
+        hostGameplayAssetsMounted = true;
+        loadSharedScript("/js/board-header-layout.js");
+
+        const playerNameMarqueeVersion = "3";
+        loadSharedStyle(
+            `/css/player-name-marquee.css?v=${playerNameMarqueeVersion}`);
+        loadSharedScript(
+            `/js/player-name-marquee.js?v=${playerNameMarqueeVersion}`);
+    };
+
+    mountHostGameplayAssets();
+    document.addEventListener(
+        "badwolf:host-shell-mounted",
+        mountHostGameplayAssets);
+'''
+          if old_assets not in escape_text:
+              raise SystemExit('host gameplay asset block not found')
+          escape_text = escape_text.replace(old_assets, new_assets, 1)
+          escape.write_text(escape_text, encoding='utf-8')
+
+          board_layout = Path('src/BadWolfQuiz.Web/wwwroot/js/board-header-layout.js')
+          board_text = board_layout.read_text(encoding='utf-8')
+          guard_loader = '''    if (!document.querySelector("script[data-host-gameplay-submit-guard]")) {
+        const submitGuard = document.createElement("script");
+        submitGuard.src = "/js/host-gameplay-submit-guard.js";
+        submitGuard.async = false;
+        submitGuard.dataset.hostGameplaySubmitGuard = "";
+        document.head.append(submitGuard);
+    }
+
+'''
+          if guard_loader not in board_text:
+              raise SystemExit('old guard loader not found')
+          board_layout.write_text(board_text.replace(guard_loader, '', 1), encoding='utf-8')
+
+          guard = Path('src/BadWolfQuiz.Web/wwwroot/js/host-gameplay-submit-guard.js')
+          if guard.exists():
+              guard.unlink()
+
+          tests = Path('tests/BadWolfQuiz.Web.Tests/RapidGameplaySubmissionRegressionTests.cs')
+          tests.write_text(r'''namespace BadWolfQuiz.Web.Tests;
+
+public sealed class RapidGameplaySubmissionRegressionTests
+{
+    [Fact]
+    public void First_round_soft_mount_initializes_host_gameplay_assets()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "gameplay-escape-shortcuts.js"));
+
+        Assert.Contains("const mountHostGameplayAssets = () =>", script);
+        Assert.Contains("hostGameplayAssetsMounted", script);
+        Assert.Contains("loadSharedScript(\"/js/board-header-layout.js\");", script);
+        Assert.Contains(
+            "document.addEventListener(\n        \"badwolf:host-shell-mounted\",\n        mountHostGameplayAssets);",
+            script);
+    }
+
+    [Fact]
+    public void Rapid_gameplay_submissions_are_serialized_and_deduplicated_in_main_handler()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+
+        Assert.Contains("let activeSubmissionKey = null;", script);
+        Assert.Contains("let pendingSubmission = null;", script);
+        Assert.Contains("const createGameplaySubmissionKey =", script);
+        Assert.Contains("const flushPendingGameplaySubmission = () =>", script);
+        Assert.Contains("submissionKey === activeSubmissionKey", script);
+        Assert.Contains("submissionKey === pendingSubmission?.key", script);
+        Assert.Contains("if (pendingSubmission === null)", script);
+        Assert.Contains("form.requestSubmit(submitter);", script);
+        Assert.Contains("flushPendingGameplaySubmission();", script);
+
+        var handlerStart = script.IndexOf(
+            "document.addEventListener(\"submit\", async event =>",
+            script.IndexOf("const configureHostGameplayFormNavigation = () =>", StringComparison.Ordinal),
+            StringComparison.Ordinal);
+        var handlerEnd = script.IndexOf("}, true);", handlerStart, StringComparison.Ordinal);
+        var handler = script[handlerStart..handlerEnd];
+        var preventDefault = handler.IndexOf("event.preventDefault();", StringComparison.Ordinal);
+        var busyGuard = handler.IndexOf("if (submissionInProgress)", StringComparison.Ordinal);
+
+        Assert.True(preventDefault >= 0);
+        Assert.True(busyGuard > preventDefault);
+    }
+
+    [Fact]
+    public void Selecting_question_immediately_locks_other_question_buttons_and_delays_busy_overlay()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+
+        Assert.Contains("const beginQuestionSelectionBusy = () =>", script);
+        Assert.Contains("form.question-selection-form button[type='submit']", script);
+        Assert.Contains("button.disabled = true;", script);
+        Assert.Contains("currentBoard?.setAttribute(\"aria-busy\", \"true\");", script);
+        Assert.Contains("window.BadWolfBusy?.show?.() === true", script);
+        Assert.Contains("}, 250);", script);
+        Assert.Contains("const endQuestionSelectionBusy = () =>", script);
+        Assert.Contains("button.disabled = wasDisabled;", script);
+        Assert.Contains("window.BadWolfBusy?.hide?.();", script);
+        Assert.Contains("if (isQuestionSelection)", script);
+        Assert.Contains("beginQuestionSelectionBusy();", script);
+        Assert.Contains("endQuestionSelectionBusy();", script);
+    }
+
+    [Fact]
+    public void Rapid_submit_key_ignores_antiforgery_token_and_includes_submitter_value()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "site.js"));
+
+        Assert.Contains(
+            ".filter(([name]) => name !== \"__RequestVerificationToken\")",
+            script);
+        Assert.Contains("formData.append(submitter.name, submitter.value);", script);
+        Assert.Contains("form.method.toUpperCase()", script);
+        Assert.Contains("action.href", script);
+    }
+
+    private static string FindWebFile(params string[] parts)
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var pathParts = new string[parts.Length + 3];
+            pathParts[0] = directory.FullName;
+            pathParts[1] = "src";
+            pathParts[2] = "BadWolfQuiz.Web";
+            Array.Copy(parts, 0, pathParts, 3, parts.Length);
+
+            var candidate = Path.Combine(pathParts);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new FileNotFoundException(
+            $"Could not find web file: {string.Join('/', parts)}.");
+    }
+}
+''', encoding='utf-8')
+          PY
+      - name: Check JavaScript syntax
+        run: |
+          node --check src/BadWolfQuiz.Web/wwwroot/js/site.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/gameplay-escape-shortcuts.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/board-header-layout.js
+      - name: Run navigation regression tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~RapidGameplaySubmissionRegressionTests|FullyQualifiedName~HostGameplayNavigationMarkupTests|FullyQualifiedName~BoardHeaderLayoutRegressionTests"
+      - name: Commit validated patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A src/BadWolfQuiz.Web/wwwroot/js tests/BadWolfQuiz.Web.Tests/RapidGameplaySubmissionRegressionTests.cs
+          git commit -m "Temporary first question navigation validation"
+          git push origin HEAD:agent/300-first-question-busy-ci
