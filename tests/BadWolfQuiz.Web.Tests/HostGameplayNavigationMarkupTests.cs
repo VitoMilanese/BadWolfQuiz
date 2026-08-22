@@ -513,6 +513,30 @@ public sealed class HostGameplayNavigationMarkupTests
     }
 
     [Fact]
+    public void Returning_to_same_round_syncs_board_before_it_becomes_visible()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+
+        Assert.Contains(
+            "const returningToVisibleBoard =\n                currentBoard.hidden && !nextBoard.hidden;",
+            markup);
+        Assert.Contains(
+            "(currentRoundId === nextRoundId && !returningToVisibleBoard)",
+            markup);
+
+        var syncCall = markup.IndexOf(
+            "syncPersistentRoundBoard(currentBoard, nextBoard);",
+            StringComparison.Ordinal);
+        var visibilityChange = markup.IndexOf(
+            "currentBoard.hidden = nextBoard.hidden;",
+            syncCall,
+            StringComparison.Ordinal);
+
+        Assert.True(syncCall >= 0);
+        Assert.True(visibilityChange > syncCall);
+    }
+
+    [Fact]
     public void YouTube_auto_expand_rebinds_dynamic_gameplay_and_editor_previews()
     {
         var script = File.ReadAllText(FindWebFile(

@@ -2032,9 +2032,11 @@
 
             const currentRoundId = currentGrid.dataset.sourceRoundId;
             const nextRoundId = nextGrid.dataset.sourceRoundId;
+            const returningToVisibleBoard =
+                currentBoard.hidden && !nextBoard.hidden;
             if (!currentRoundId ||
                 !nextRoundId ||
-                currentRoundId === nextRoundId) {
+                (currentRoundId === nextRoundId && !returningToVisibleBoard)) {
                 return;
             }
 
