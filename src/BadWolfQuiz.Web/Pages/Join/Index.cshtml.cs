@@ -13,7 +13,8 @@ public sealed class IndexModel(
     GameSessionRegistry sessionRegistry,
     AvatarCatalog avatarCatalog,
     IHubContext<GameHub> gameHub,
-    IStringLocalizer<SharedResource> localizer) : PageModel
+    IStringLocalizer<SharedResource> localizer,
+    ILogger<IndexModel> logger) : PageModel
 {
     [BindProperty]
     public JoinGameInput Input { get; set; } = new();
@@ -29,7 +30,7 @@ public sealed class IndexModel(
         }
     }
 
-    public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnPostAsync()
     {
         Input.GameCode = GameSessionRegistry.NormalizeCode(Input.GameCode ?? string.Empty);
         Input.PlayerName = Input.PlayerName?.Trim() ?? string.Empty;
@@ -53,21 +54,38 @@ public sealed class IndexModel(
         switch (result.Status)
         {
             case PlayerJoinStatus.Success:
-                await gameHub.Clients
-                    .Group(GameHub.GroupName(result.Game!.PublicCode))
-                    .SendAsync(
-                        "PlayersChanged",
-                        GameHub.CreatePlayersUpdate(sessionRegistry, result.Game),
-                        cancellationToken);
-
-                return RedirectToPage(
+            {
+                var game = result.Game!;
+                var player = result.Player!;
+                var redirect = RedirectToPage(
                     "/Player/Lobby",
                     new
                     {
-                        code = result.Game.PublicCode,
-                        playerId = result.Player!.Id.Value,
+                        code = game.PublicCode,
+                        playerId = player.Id.Value,
                         accessToken = result.AccessToken
                     });
+
+                try
+                {
+                    await gameHub.Clients
+                        .Group(GameHub.GroupName(game.PublicCode))
+                        .SendAsync(
+                            "PlayersChanged",
+                            GameHub.CreatePlayersUpdate(sessionRegistry, game),
+                            CancellationToken.None);
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(
+                        exception,
+                        "Failed to broadcast player join for game {GameCode} and player {PlayerId}; continuing with player redirect.",
+                        game.PublicCode,
+                        player.Id.Value);
+                }
+
+                return redirect;
+            }
 
             case PlayerJoinStatus.GameNotFound:
                 ModelState.AddModelError(

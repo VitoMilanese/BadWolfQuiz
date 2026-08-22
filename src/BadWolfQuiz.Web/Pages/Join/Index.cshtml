@@ -53,7 +53,8 @@
             const codeInput = document.getElementById("Input_GameCode");
             const nameInput = document.getElementById("Input_PlayerName");
             const avatarInput = document.getElementById("Input_AvatarId");
-            const gameInstanceId = form?.dataset.gameInstanceId;
+            const submitButton = form?.querySelector('button[type="submit"]');
+            let joinSubmissionInProgress = false;
 
             const restoreAvatar = () => {
                 const normalizedName = nameInput?.value.trim().toLocaleLowerCase();
@@ -62,9 +63,21 @@
                     : "";
             };
 
+            const lockJoinSubmission = () => {
+                joinSubmissionInProgress = true;
+                if (submitButton instanceof HTMLButtonElement) {
+                    submitButton.disabled = true;
+                }
+            };
+
             nameInput?.addEventListener("change", restoreAvatar);
 
             form?.addEventListener("submit", event => {
+                if (joinSubmissionInProgress) {
+                    event.preventDefault();
+                    return;
+                }
+
                 restoreAvatar();
                 const gameCode = codeInput?.value.trim().toUpperCase();
 
@@ -72,27 +85,9 @@
                     return;
                 }
 
-                const storedIdentity = localStorage.getItem(
+                localStorage.removeItem(
                     `badwolfquiz:${gameCode}:current-player`);
-
-                if (!storedIdentity) {
-                    return;
-                }
-
-                try {
-                    const identity = JSON.parse(storedIdentity);
-
-                    if (identity.accessToken &&
-                        identity.playerId &&
-                        identity.path &&
-                        identity.gameInstanceId === gameInstanceId) {
-                        event.preventDefault();
-                        window.location.assign(identity.path);
-                    }
-                } catch {
-                    localStorage.removeItem(
-                        `badwolfquiz:${gameCode}:current-player`);
-                }
+                lockJoinSubmission();
             });
         })();
     </script>
