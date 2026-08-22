@@ -23,7 +23,11 @@
     gap: clamp(9px, 1.5vw, 18px);
 }
 
-/* The server marks the one image that may need fitting before it can paint. */
+/* Never paint a normal gameplay image until the fit controller has measured the current view. */
+.host-game-board
+    :is(.current-question-summary:not(.wager-mode), .question-review-preview)
+    .game-content-blocks:not(.four-clue-grid):not(.all-player-answer-grid)
+    > .game-content-block > img.game-content-image:not([data-game-content-fit-ready="true"]),
 .host-game-board img.game-content-image[data-game-content-fit-pending="true"] {
     visibility: hidden;
 }

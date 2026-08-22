@@ -29,6 +29,38 @@ public sealed class GameplayContentViewportFitRegressionTests
     }
 
     [Fact]
+    public void Active_gameplay_images_are_hidden_until_fit_controller_marks_them_ready()
+    {
+        var root = FindRepositoryRoot();
+        var busyStyles = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "css",
+            "busy-indicators.css"));
+        var viewportStyles = ReadAsset("css", "game-content-viewport-fit.css");
+
+        Assert.Contains(
+            "@import url(\"./game-content-viewport-fit.css?v=4\");",
+            busyStyles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".current-question-summary:not(.wager-mode)",
+            viewportStyles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "img.game-content-image:not([data-game-content-fit-ready=\"true\"])",
+            viewportStyles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".game-content-blocks:not(.four-clue-grid):not(.all-player-answer-grid)",
+            viewportStyles,
+            StringComparison.Ordinal);
+        Assert.Contains("visibility: hidden;", viewportStyles, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Single_image_candidate_is_hidden_in_markup_until_synchronous_fit_is_ready()
     {
         var root = FindRepositoryRoot();
