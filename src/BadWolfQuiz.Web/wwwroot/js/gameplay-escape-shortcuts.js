@@ -35,6 +35,167 @@
         document.head.appendChild(stylesheet);
     };
 
+    const installFinalQuestionProgressGuard = () => {
+        const hubConnectionPrototype = window.signalR?.HubConnection?.prototype;
+        if (!hubConnectionPrototype ||
+            hubConnectionPrototype.badWolfFinalQuestionProgressGuardInstalled) {
+            return;
+        }
+
+        const registerHandler = hubConnectionPrototype.on;
+        if (typeof registerHandler !== "function") {
+            return;
+        }
+
+        hubConnectionPrototype.badWolfFinalQuestionProgressGuardInstalled = true;
+
+        const fallbackFormSelector =
+            "form[action*='handler=SubmitMinimumFinalWager'], " +
+            "form[action*='handler=SubmitEmptyFinalAnswer']";
+        let hostSyncInProgress = false;
+        let hostSyncPending = false;
+
+        const syncLockButton = (currentBoard, nextBoard, handler) => {
+            const selector =
+                `form[action*='handler=${handler}'] button[type='submit']`;
+            const currentButton = currentBoard.querySelector(selector);
+            const nextButton = nextBoard.querySelector(selector);
+            if (!(currentButton instanceof HTMLButtonElement) ||
+                !(nextButton instanceof HTMLButtonElement)) {
+                return;
+            }
+
+            currentButton.disabled = nextButton.disabled;
+        };
+
+        const syncFinalSubmissionRows = (currentBoard, nextBoard) => {
+            const currentLists = Array.from(
+                currentBoard.querySelectorAll(".final-submission-list"));
+            const nextLists = Array.from(
+                nextBoard.querySelectorAll(".final-submission-list"));
+            if (currentLists.length !== nextLists.length) {
+                return false;
+            }
+
+            for (let listIndex = 0; listIndex < currentLists.length; listIndex++) {
+                const currentRows = Array.from(
+                    currentLists[listIndex].querySelectorAll(":scope > li"));
+                const nextRows = Array.from(
+                    nextLists[listIndex].querySelectorAll(":scope > li"));
+                if (currentRows.length !== nextRows.length) {
+                    return false;
+                }
+
+                for (let rowIndex = 0; rowIndex < currentRows.length; rowIndex++) {
+                    const currentRow = currentRows[rowIndex];
+                    const nextRow = nextRows[rowIndex];
+                    const currentStatus = currentRow.querySelector(
+                        ":scope > strong + span");
+                    const nextStatus = nextRow.querySelector(
+                        ":scope > strong + span");
+                    if (currentStatus && nextStatus) {
+                        currentStatus.textContent = nextStatus.textContent;
+                    }
+
+                    const currentFallback = currentRow.querySelector(
+                        fallbackFormSelector);
+                    const nextFallback = nextRow.querySelector(
+                        fallbackFormSelector);
+                    if (currentFallback && !nextFallback) {
+                        currentFallback.remove();
+                    }
+                }
+            }
+
+            syncLockButton(currentBoard, nextBoard, "LockFinalWagers");
+            syncLockButton(currentBoard, nextBoard, "LockFinalAnswers");
+            return true;
+        };
+
+        const syncHostFinalProgressOnce = async () => {
+            const currentBoard = document.querySelector(
+                ".host-game-board.final-question-host");
+            if (!currentBoard) {
+                return;
+            }
+
+            const response = await fetch(window.location.href, {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    Accept: "text/html",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                cache: "no-store"
+            });
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            const parsed = new DOMParser().parseFromString(
+                await response.text(),
+                "text/html");
+            const nextBoard = parsed.querySelector(
+                ".host-game-board.final-question-host");
+            if (!nextBoard) {
+                return;
+            }
+
+            if (currentBoard.dataset.gameStatus !== nextBoard.dataset.gameStatus) {
+                return;
+            }
+
+            syncFinalSubmissionRows(currentBoard, nextBoard);
+        };
+
+        const requestHostFinalProgressSync = () => {
+            if (hostSyncInProgress) {
+                hostSyncPending = true;
+                return;
+            }
+
+            hostSyncInProgress = true;
+            void (async () => {
+                do {
+                    hostSyncPending = false;
+                    try {
+                        await syncHostFinalProgressOnce();
+                    } catch (error) {
+                        console.error(
+                            "Final question progress sync failed.",
+                            error);
+                    }
+                } while (hostSyncPending);
+            })().finally(() => {
+                hostSyncInProgress = false;
+            });
+        };
+
+        hubConnectionPrototype.on = function(methodName, handler) {
+            if (typeof methodName !== "string" ||
+                methodName.toLowerCase() !== "finalquestionprogresschanged" ||
+                typeof handler !== "function") {
+                return registerHandler.apply(this, arguments);
+            }
+
+            return registerHandler.call(this, methodName, (...args) => {
+                if (document.querySelector(".player-lobby[data-player-id]")) {
+                    return;
+                }
+
+                if (document.querySelector(
+                    ".host-game-board.final-question-host")) {
+                    requestHostFinalProgressSync();
+                    return;
+                }
+
+                return handler(...args);
+            });
+        };
+    };
+
+    installFinalQuestionProgressGuard();
+
     const brandLink = document.querySelector("a.brand[href]");
     if (brandLink instanceof HTMLAnchorElement) {
         brandLink.href = new URL("/", window.location.origin).href;
