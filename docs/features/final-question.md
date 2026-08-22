@@ -56,6 +56,7 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 - During answering, the host sees submission progress but not answer text.
 - For every inactive player whose answer is still missing, the host can submit `-` on the player's behalf.
 - Host fallback wager/answer actions use a dedicated lightweight AJAX endpoint. Rapid clicks are serialized, duplicate requests are idempotent, only the affected host row is updated locally, and no full host or player-page refresh broadcast is triggered by those fallback operations.
+- Normal player wager/answer submissions also preserve unrelated live UI state. The submitting player receives their own confirmed state, other players keep any wager or answer they are still typing, and the host updates only submission progress controls instead of rebuilding the gameplay view or player cards.
 - The fallback helper is loaded eagerly. If the first fallback click occurs before the helper asset finishes loading, the bootstrap captures and queues that click rather than allowing the legacy form-navigation path to run.
 - The host can remove a player throughout final wagering, answering, and judging. The final-question state and host controls refresh immediately after player changes.
 - Removing the final remaining player completes the game immediately. The completed host screen keeps **Finish game** available but does not render **Final results** or an empty podium when `FinalStandings` is empty.
