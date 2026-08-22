@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class GameplayContentViewportFitRegressionTests
 {
     [Fact]
-    public void Gameplay_bootstrap_loads_viewport_fit_assets_before_soft_mounted_questions()
+    public void Gameplay_bootstrap_loads_versioned_viewport_fit_assets_before_soft_mounted_questions()
     {
         var root = FindRepositoryRoot();
         var bootstrap = File.ReadAllText(Path.Combine(
@@ -15,11 +15,15 @@ public sealed class GameplayContentViewportFitRegressionTests
             "gameplay-escape-shortcuts.js"));
 
         Assert.Contains(
-            "loadSharedStyle(\"/css/game-content-viewport-fit.css\");",
+            "const gameContentViewportFitVersion = \"3\";",
             bootstrap,
             StringComparison.Ordinal);
         Assert.Contains(
-            "loadSharedScript(\"/js/game-content-viewport-fit.js\");",
+            "game-content-viewport-fit.css?v=${gameContentViewportFitVersion}",
+            bootstrap,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "game-content-viewport-fit.js?v=${gameContentViewportFitVersion}",
             bootstrap,
             StringComparison.Ordinal);
     }
