@@ -1,0 +1,96 @@
+name: Temporary board return sync CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    if: github.head_ref == 'agent/300-board-return-ci'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Apply board return synchronization fix
+        shell: python
+        run: |
+          from pathlib import Path
+
+          lobby = Path('src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml')
+          text = lobby.read_text(encoding='utf-8')
+          old = '''            if (!currentRoundId ||
+                          !nextRoundId ||
+                          currentRoundId === nextRoundId) {
+                          return;
+                      }
+          '''
+          new = '''            const returningToVisibleBoard =
+                          currentBoard.hidden && !nextBoard.hidden;
+                      if (!currentRoundId ||
+                          !nextRoundId ||
+                          (currentRoundId === nextRoundId && !returningToVisibleBoard)) {
+                          return;
+                      }
+          '''
+          if text.count(old) != 1:
+              raise SystemExit(f'Expected one board-sync guard, found {text.count(old)}')
+          lobby.write_text(text.replace(old, new), encoding='utf-8')
+
+          tests = Path('tests/BadWolfQuiz.Web.Tests/HostGameplayNavigationMarkupTests.cs')
+          text = tests.read_text(encoding='utf-8')
+          marker = '''    [Fact]
+              public void YouTube_auto_expand_rebinds_dynamic_gameplay_and_editor_previews()
+          '''
+          test = '''    [Fact]
+              public void Returning_to_same_round_syncs_board_before_it_becomes_visible()
+              {
+                  var markup = File.ReadAllText(FindLobbyView());
+
+                  Assert.Contains(
+                      "const returningToVisibleBoard =\\n                currentBoard.hidden && !nextBoard.hidden;",
+                      markup);
+                  Assert.Contains(
+                      "(currentRoundId === nextRoundId && !returningToVisibleBoard)",
+                      markup);
+
+                  var syncCall = markup.IndexOf(
+                      "syncPersistentRoundBoard(currentBoard, nextBoard);",
+                      StringComparison.Ordinal);
+                  var visibilityChange = markup.IndexOf(
+                      "currentBoard.hidden = nextBoard.hidden;",
+                      syncCall,
+                      StringComparison.Ordinal);
+
+                  Assert.True(syncCall >= 0);
+                  Assert.True(visibilityChange > syncCall);
+              }
+
+          '''
+          if text.count(marker) != 1:
+              raise SystemExit(f'Expected one test insertion marker, found {text.count(marker)}')
+          tests.write_text(text.replace(marker, test + marker), encoding='utf-8')
+
+      - name: Run host gameplay navigation tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~HostGameplayNavigationMarkupTests"
+
+      - name: Commit temporary validated patch
+        if: success()
+        run: |
+          if git diff --quiet -- src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml tests/BadWolfQuiz.Web.Tests/HostGameplayNavigationMarkupTests.cs; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml tests/BadWolfQuiz.Web.Tests/HostGameplayNavigationMarkupTests.cs
+          git commit -m "Temporary validate board return sync"
+          git push origin HEAD:agent/300-board-return-ci
