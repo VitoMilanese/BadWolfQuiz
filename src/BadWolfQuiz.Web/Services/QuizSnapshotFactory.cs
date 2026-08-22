@@ -97,8 +97,14 @@ public sealed class QuizSnapshotFactory
         BuzzActivationMode questionMode,
         BuzzActivationMode roundMode)
     {
+        // App-created rounds historically persisted Manual as a hidden default.
+        // When the question itself inherits, preserve the game-level
+        // Automatic/Manual setting instead of treating that legacy value as
+        // an explicit per-question Manual choice.
         var effectiveMode = questionMode == BuzzActivationMode.UseRoundDefault
-            ? roundMode
+            ? roundMode == BuzzActivationMode.Manual
+                ? BuzzActivationMode.UseRoundDefault
+                : roundMode
             : questionMode;
 
         return effectiveMode switch
