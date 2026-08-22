@@ -43,9 +43,25 @@
     };
 
     const markReady = image => {
+        delete image.dataset.gameContentFitSettling;
         image.dataset.gameContentFitReady = "true";
         image.removeAttribute("data-game-content-fit-pending");
         image.style.removeProperty("visibility");
+    };
+
+    const settleInitialFit = image => {
+        if (image.dataset.gameContentFitReady === "true") {
+            markReady(image);
+            return;
+        }
+
+        if (image.dataset.gameContentFitSettling === "true") {
+            markReady(image);
+            return;
+        }
+
+        image.dataset.gameContentFitSettling = "true";
+        scheduleFit();
     };
 
     const setCompactSize = (image, height) => {
@@ -115,7 +131,7 @@
         if (image.dataset.gameContentFitExpanded === "true") {
             image.dataset.gameContentFitState = "expanded";
             image.setAttribute("aria-pressed", "true");
-            markReady(image);
+            settleInitialFit(image);
             return;
         }
 
@@ -123,7 +139,7 @@
         const overflow = container.scrollHeight - container.clientHeight;
         if (fullImageHeight <= 0 || overflow <= overflowTolerance) {
             clearImageFit(image);
-            markReady(image);
+            settleInitialFit(image);
             return;
         }
 
@@ -134,14 +150,14 @@
 
         if (targetHeight >= fullImageHeight - overflowTolerance) {
             clearImageFit(image);
-            markReady(image);
+            settleInitialFit(image);
             return;
         }
 
         markInteractive(image);
         image.setAttribute("aria-pressed", "false");
         applyCompactHeight(container, image, targetHeight);
-        markReady(image);
+        settleInitialFit(image);
     };
 
     const observedContainers = new WeakSet();

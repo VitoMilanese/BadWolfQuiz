@@ -42,7 +42,7 @@
 
     loadSharedStyle("/css/content-block-containers.css");
     loadSharedScript("/js/content-block-containers.js");
-    const gameContentViewportFitVersion = "3";
+    const gameContentViewportFitVersion = "4";
     loadSharedStyle(
         `/css/game-content-viewport-fit.css?v=${gameContentViewportFitVersion}`);
     loadSharedScript(

@@ -15,7 +15,7 @@ public sealed class GameplayContentViewportFitRegressionTests
             "gameplay-escape-shortcuts.js"));
 
         Assert.Contains(
-            "const gameContentViewportFitVersion = \"3\";",
+            "const gameContentViewportFitVersion = \"4\";",
             bootstrap,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -58,6 +58,37 @@ public sealed class GameplayContentViewportFitRegressionTests
             viewportStyles,
             StringComparison.Ordinal);
         Assert.Contains("visibility: hidden;", viewportStyles, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Initial_single_image_fit_waits_for_a_follow_up_layout_measurement_before_reveal()
+    {
+        var viewportScript = ReadAsset("js", "game-content-viewport-fit.js");
+
+        Assert.Contains(
+            "image.dataset.gameContentFitSettling = \"true\";",
+            viewportScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "if (image.dataset.gameContentFitSettling === \"true\")",
+            viewportScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "frameHandle = window.requestAnimationFrame(() =>",
+            viewportScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "frameHandle = window.requestAnimationFrame(fitAll);",
+            viewportScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "delete image.dataset.gameContentFitSettling;",
+            viewportScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "settleInitialFit(image);",
+            viewportScript,
+            StringComparison.Ordinal);
     }
 
     [Fact]
