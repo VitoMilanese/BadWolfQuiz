@@ -133,6 +133,16 @@ public sealed class QuizSnapshotFactory
                 false);
         }
 
+        var fileData = block.FileData?.ToArray();
+        if (fileData is { Length: > 0 } &&
+            string.Equals(
+                block.FileContentType,
+                "image/gif",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            fileData = MediaUploadProcessor.NormalizeAnimatedGifLoop(fileData);
+        }
+
         return new ContentBlockSnapshot(
             block.Id,
             ResolveContentBlockKind(block),
@@ -141,7 +151,7 @@ public sealed class QuizSnapshotFactory
             block.BottomCaption,
             block.MediaPath,
             block.ExternalUrl,
-            block.FileData?.ToArray(),
+            fileData,
             block.FileContentType,
             block.FileName,
             block.SortOrder,
