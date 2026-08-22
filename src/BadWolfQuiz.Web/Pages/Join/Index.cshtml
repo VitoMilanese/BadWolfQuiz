@@ -38,6 +38,7 @@
                placeholder="@Localizer["Placeholder_PlayerName"]" />
         <span asp-validation-for="Input.PlayerName"></span>
         <input asp-for="Input.AvatarId" type="hidden" />
+        <input asp-for="Input.ClientDayOfMonth" type="hidden" />
 
         <button class="button button-primary" type="submit">
             @Localizer["Button_Join"]
@@ -53,14 +54,78 @@
             const codeInput = document.getElementById("Input_GameCode");
             const nameInput = document.getElementById("Input_PlayerName");
             const avatarInput = document.getElementById("Input_AvatarId");
+            const dayInput = document.getElementById("Input_ClientDayOfMonth");
             const submitButton = form?.querySelector('button[type="submit"]');
             let joinSubmissionInProgress = false;
 
+            const normalizeName = value =>
+                value?.trim().toLocaleLowerCase() || "";
+
+            const resolveDayDisplayName = (value, day) => {
+                const name = value?.trim() || "";
+                if (!name || day < 1 || day > 31) {
+                    return name;
+                }
+
+                const dayText = String(day);
+                const prefixes = day < 10
+                    ? [dayText.padStart(2, "0"), dayText]
+                    : [dayText];
+
+                for (const prefix of prefixes) {
+                    if (!name.startsWith(prefix)) {
+                        continue;
+                    }
+
+                    const nextCharacter = name.charAt(prefix.length);
+                    if (nextCharacter && /[0-9]/.test(nextCharacter)) {
+                        continue;
+                    }
+
+                    const displayName = name.slice(prefix.length).trimStart();
+                    if (displayName) {
+                        return displayName;
+                    }
+                }
+
+                return name;
+            };
+
+            const playerStorageNameKey = (gameCode, playerName) =>
+                `badwolfquiz:${gameCode}:player-storage-name:${playerName}`;
+
+            const rememberPlayerStorageName = (gameCode, day) => {
+                const originalName = normalizeName(nameInput?.value);
+                if (!gameCode || !originalName) {
+                    return;
+                }
+
+                const displayName = normalizeName(
+                    resolveDayDisplayName(nameInput?.value, day));
+                if (displayName && displayName !== originalName) {
+                    localStorage.setItem(
+                        playerStorageNameKey(gameCode, originalName),
+                        displayName);
+                }
+            };
+
             const restoreAvatar = () => {
-                const normalizedName = nameInput?.value.trim().toLocaleLowerCase();
-                avatarInput.value = normalizedName
-                    ? localStorage.getItem(`badwolfquiz:avatar:${normalizedName}`) || ""
-                    : "";
+                const originalName = normalizeName(nameInput?.value);
+                if (!originalName) {
+                    avatarInput.value = "";
+                    return;
+                }
+
+                const gameCode = codeInput?.value.trim().toUpperCase() || "";
+                const storedName = gameCode
+                    ? localStorage.getItem(
+                        playerStorageNameKey(gameCode, originalName))
+                    : null;
+                const preferenceName = storedName || originalName;
+                avatarInput.value =
+                    localStorage.getItem(`badwolfquiz:avatar:${preferenceName}`) ||
+                    localStorage.getItem(`badwolfquiz:avatar:${originalName}`) ||
+                    "";
             };
 
             const lockJoinSubmission = () => {
@@ -70,6 +135,10 @@
                 }
             };
 
+            if (dayInput) {
+                dayInput.value = String(new Date().getDate());
+            }
+
             nameInput?.addEventListener("change", restoreAvatar);
 
             form?.addEventListener("submit", event => {
@@ -78,8 +147,16 @@
                     return;
                 }
 
-                restoreAvatar();
                 const gameCode = codeInput?.value.trim().toUpperCase();
+                const currentDay = new Date().getDate();
+                if (dayInput) {
+                    dayInput.value = String(currentDay);
+                }
+
+                if (gameCode) {
+                    rememberPlayerStorageName(gameCode, currentDay);
+                }
+                restoreAvatar();
 
                 if (!gameCode) {
                     return;

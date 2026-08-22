@@ -6,12 +6,17 @@ public sealed class GamePlayer
     {
         Id = id;
         Name = name;
+        OriginalName = name;
         JoinedAtUtc = joinedAtUtc;
     }
 
     public GamePlayerId Id { get; }
 
-    public string Name { get; }
+    public string Name { get; private set; }
+
+    public string OriginalName { get; private set; }
+
+    public bool HasTemporaryContributorPrivileges { get; private set; }
 
     public int Score { get; private set; }
 
@@ -44,12 +49,18 @@ public sealed class GamePlayer
         UploadedImageDataUrl,
         UsesUploadedImage,
         JoinedAtUtc,
-        WebcamUrl);
+        WebcamUrl,
+        OriginalName,
+        HasTemporaryContributorPrivileges);
 
     internal static GamePlayer Restore(GamePlayerState state)
     {
         var player = new GamePlayer(state.Id, state.Name, state.JoinedAtUtc)
         {
+            OriginalName = string.IsNullOrWhiteSpace(state.OriginalName)
+                ? state.Name
+                : state.OriginalName.Trim(),
+            HasTemporaryContributorPrivileges = state.HasTemporaryContributorPrivileges,
             Score = state.Score,
             AvatarId = state.AvatarId,
             UploadedImageDataUrl = state.UploadedImageDataUrl,
@@ -57,6 +68,18 @@ public sealed class GamePlayer
             WebcamUrl = state.WebcamUrl
         };
         return player;
+    }
+
+    public void ApplyTemporaryContributorAlias(
+        string originalName,
+        string displayName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(originalName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
+
+        OriginalName = originalName.Trim();
+        Name = displayName.Trim();
+        HasTemporaryContributorPrivileges = true;
     }
 
     public void SetAvatar(string avatarId)
