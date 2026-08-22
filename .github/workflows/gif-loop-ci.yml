@@ -25,15 +25,37 @@ jobs:
           fi
           ffmpeg -version | head -n 1
       - name: Run media upload processor tests
-        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~MediaUploadProcessorTests"
+        id: tests
+        shell: bash
+        run: |
+          set +e
+          dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~MediaUploadProcessorTests" > test-output.txt 2>&1
+          test_exit_code=$?
+          cat test-output.txt
+          echo "exit_code=$test_exit_code" >> "$GITHUB_OUTPUT"
+          exit 0
       - name: Report result
         if: always()
         uses: actions/github-script@v7
+        env:
+          TEST_EXIT_CODE: ${{ steps.tests.outputs.exit_code }}
         with:
           script: |
+            const fs = require('fs');
+            const exitCode = process.env.TEST_EXIT_CODE || 'unknown';
+            let output = '';
+            try {
+              output = fs.readFileSync('test-output.txt', 'utf8');
+            } catch {}
+            if (output.length > 12000) {
+              output = output.slice(-12000);
+            }
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: 296,
-              body: `GIF loop CI ${{ job.status }} for ${context.sha}`
+              body: `GIF loop CI ${exitCode === '0' ? 'PASS' : 'FAIL'} for ${context.sha}\n\n\`\`\`text\n${output}\n\`\`\``
             });
+      - name: Fail job when tests fail
+        if: steps.tests.outputs.exit_code != '0'
+        run: exit 1
