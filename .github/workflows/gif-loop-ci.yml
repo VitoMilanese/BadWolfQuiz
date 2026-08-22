@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - agent/296-gif-loop-ci
-  pull_request:
-    branches:
-      - main
+
+permissions:
+  contents: read
+  issues: write
 
 jobs:
   test:
@@ -25,3 +26,14 @@ jobs:
           ffmpeg -version | head -n 1
       - name: Run media upload processor tests
         run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~MediaUploadProcessorTests"
+      - name: Report result
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: 296,
+              body: `GIF loop CI ${{ job.status }} for ${context.sha}`
+            });
