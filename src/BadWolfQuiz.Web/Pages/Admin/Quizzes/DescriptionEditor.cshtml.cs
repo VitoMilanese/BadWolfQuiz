@@ -170,10 +170,8 @@ public sealed class DescriptionEditorModel(
         var isNumericTitle = trimmedTitle.Length > 0 && trimmedTitle.All(char.IsDigit);
         if (categoryId.HasValue)
         {
+            if (!string.IsNullOrWhiteSpace(trimmedTitle)) return trimmedTitle;
             var categoryLabel = localizer["Label_Category"].Value;
-            if (isNumericTitle) return $"{categoryLabel} {trimmedTitle}";
-            if (!string.IsNullOrWhiteSpace(trimmedTitle))
-                return StartsWithLabel(trimmedTitle, categoryLabel) ? trimmedTitle : $"{categoryLabel}: {trimmedTitle}";
             var categoryIds = await db.QuizCategories.AsNoTracking().Where(x => x.QuizRoundId == roundId).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Select(x => x.Id).ToListAsync(cancellationToken);
             var position = categoryIds.IndexOf(categoryId.Value) + 1;
             return $"{categoryLabel} {Math.Max(position, 1)}";
@@ -185,14 +183,6 @@ public sealed class DescriptionEditorModel(
         var roundIds = await db.QuizRounds.AsNoTracking().Where(x => x.QuizId == quizId).OrderBy(x => x.SortOrder).ThenBy(x => x.Id).Select(x => x.Id).ToListAsync(cancellationToken);
         var roundPosition = roundIds.IndexOf(roundId) + 1;
         return $"{roundLabel} {Math.Max(roundPosition, 1)}";
-    }
-
-    private static bool StartsWithLabel(string title, string label)
-    {
-        if (!title.StartsWith(label, StringComparison.CurrentCultureIgnoreCase)) return false;
-        if (title.Length == label.Length) return true;
-        var next = title[label.Length];
-        return char.IsWhiteSpace(next) || char.IsPunctuation(next) || char.IsDigit(next);
     }
 
     private static ContentBlockInputModel ToInputModel(ContentBlockBase block, string fileHandler, string audioHandler) => new()

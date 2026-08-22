@@ -246,37 +246,13 @@ public sealed class RoundIntroModel(
         QuizCategoryIntroSnapshot category,
         int position)
     {
-        var label = localizer["Label_Category"].Value;
         var title = category.Title.Trim();
-        if (string.IsNullOrWhiteSpace(title))
+        if (!string.IsNullOrWhiteSpace(title))
         {
-            return $"{label} {position}";
+            return title;
         }
 
-        if (title.All(char.IsDigit))
-        {
-            return $"{label} {title}";
-        }
-
-        return StartsWithLabel(title, label)
-            ? title
-            : $"{label}: {title}";
-    }
-
-    private static bool StartsWithLabel(string title, string label)
-    {
-        if (!title.StartsWith(label, StringComparison.CurrentCultureIgnoreCase))
-        {
-            return false;
-        }
-
-        if (title.Length == label.Length)
-        {
-            return true;
-        }
-
-        var next = title[label.Length];
-        return char.IsWhiteSpace(next) || char.IsPunctuation(next) || char.IsDigit(next);
+        return $"{localizer["Label_Category"].Value} {position}";
     }
 
     private GameSessionRegistration? FindOwned(Guid id) =>
