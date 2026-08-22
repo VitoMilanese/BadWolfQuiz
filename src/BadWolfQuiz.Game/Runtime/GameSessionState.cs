@@ -28,7 +28,9 @@ public sealed record GamePlayerState(
     string? UploadedImageDataUrl,
     bool UsesUploadedImage,
     DateTimeOffset JoinedAtUtc,
-    string? WebcamUrl = null);
+    string? WebcamUrl = null,
+    string? OriginalName = null,
+    bool HasTemporaryContributorPrivileges = false);
 
 public sealed record RuntimeQuestionState(
     int SourceQuestionId,

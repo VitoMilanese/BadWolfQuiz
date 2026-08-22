@@ -56,9 +56,9 @@ public sealed class LobbyModel(
         CurrentPlayer = currentPlayer;
         Players = players;
         AccessToken = accessToken;
-        IsContributor = ContributorRecognition.IsContributor(
+        IsContributor = PlayerContributorAccess.IsContributor(
             footerOptions.Value,
-            currentPlayer.Name);
+            currentPlayer);
         var premiumHostId = GetPremiumHostId();
         CanUseAvatarFrame = IsContributor || premiumHostId is not null;
         var normalizedFrameId = ContributorAvatarFrameCatalog.Normalize(
@@ -116,9 +116,9 @@ public sealed class LobbyModel(
 
         try
         {
-            var isContributor = ContributorRecognition.IsContributor(
+            var isContributor = PlayerContributorAccess.IsContributor(
                 footerOptions.Value,
-                connection.Player.Name);
+                connection.Player);
             var premiumHostId = GetPremiumHostId();
             if (connection.RequiresApproval ||
                 connection.Player.Id != new GamePlayerId(playerId) ||

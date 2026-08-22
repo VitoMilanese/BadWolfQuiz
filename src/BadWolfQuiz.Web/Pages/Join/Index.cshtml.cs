@@ -34,7 +34,8 @@ public sealed class IndexModel(
     {
         Input.GameCode = GameSessionRegistry.NormalizeCode(Input.GameCode ?? string.Empty);
         Input.PlayerName = Input.PlayerName?.Trim() ?? string.Empty;
-        GameInstanceId = sessionRegistry.Find(Input.GameCode)?.ClientInstanceId;
+        var existingGame = sessionRegistry.Find(Input.GameCode);
+        GameInstanceId = existingGame?.ClientInstanceId;
         ModelState.Clear();
         TryValidateModel(Input, nameof(Input));
 
@@ -43,12 +44,19 @@ public sealed class IndexModel(
             return Page();
         }
 
+        var currentDay = Input.ClientDayOfMonth is >= 1 and <= 31
+            ? Input.ClientDayOfMonth.Value
+            : DateTimeOffset.Now.Day;
+        var playerIdentity = PlayerContributorEasterEgg.ResolveForJoin(
+            existingGame?.Session.AllPlayers ?? [],
+            Input.PlayerName,
+            currentDay);
         var avatarId = avatarCatalog.IsValid(Input.AvatarId)
             ? Input.AvatarId
             : null;
         var result = sessionRegistry.JoinPlayer(
             Input.GameCode,
-            Input.PlayerName,
+            playerIdentity.JoinName,
             avatarId);
 
         switch (result.Status)
@@ -57,6 +65,14 @@ public sealed class IndexModel(
             {
                 var game = result.Game!;
                 var player = result.Player!;
+                if (playerIdentity.ActivateTemporaryPrivileges)
+                {
+                    player.ApplyTemporaryContributorAlias(
+                        playerIdentity.OriginalName,
+                        playerIdentity.DisplayName);
+                    game.MarkPersistenceChanged();
+                }
+
                 var redirect = RedirectToPage(
                     "/Player/Lobby",
                     new
@@ -132,5 +148,7 @@ public sealed class IndexModel(
         public string PlayerName { get; set; } = string.Empty;
 
         public string? AvatarId { get; set; }
+
+        public int? ClientDayOfMonth { get; set; }
     }
 }
