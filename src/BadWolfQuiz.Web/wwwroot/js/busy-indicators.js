@@ -9,9 +9,16 @@
     };
 
     const overlayId = "app-busy-overlay";
+    const quizExportCompletionCookie = "badwolfquiz-export-complete";
+    const quizExportTimeoutMilliseconds = 30 * 60 * 1000;
     let busy = false;
     let lockedForm = null;
     let lockedDialogButtons = [];
+    let lockedQuizControls = [];
+    let lockedExportLink = null;
+    let lockedExportAriaDisabled = null;
+    let exportPollHandle = 0;
+    let exportTimeoutHandle = 0;
     let ajaxObserver = null;
     let navigationScheduled = false;
 
@@ -52,6 +59,33 @@
     const getOverlay = () =>
         document.getElementById(overlayId) ?? createOverlay();
 
+    const releaseExportLinkLock = () => {
+        if (!lockedExportLink) {
+            return;
+        }
+
+        delete lockedExportLink.dataset.busyLocked;
+        if (lockedExportAriaDisabled === null) {
+            lockedExportLink.removeAttribute("aria-disabled");
+        } else {
+            lockedExportLink.setAttribute("aria-disabled", lockedExportAriaDisabled);
+        }
+        lockedExportLink = null;
+        lockedExportAriaDisabled = null;
+    };
+
+    const clearExportTracking = () => {
+        if (exportPollHandle !== 0) {
+            window.clearInterval(exportPollHandle);
+            exportPollHandle = 0;
+        }
+        if (exportTimeoutHandle !== 0) {
+            window.clearTimeout(exportTimeoutHandle);
+            exportTimeoutHandle = 0;
+        }
+        releaseExportLinkLock();
+    };
+
     const releaseFormLock = () => {
         if (lockedForm) {
             delete lockedForm.dataset.busyLocked;
@@ -62,12 +96,18 @@
             button.disabled = wasDisabled;
         });
         lockedDialogButtons = [];
+
+        lockedQuizControls.forEach(({ button, wasDisabled }) => {
+            button.disabled = wasDisabled;
+        });
+        lockedQuizControls = [];
     };
 
     const hide = () => {
         ajaxObserver?.disconnect();
         ajaxObserver = null;
         releaseFormLock();
+        clearExportTracking();
         busy = false;
         navigationScheduled = false;
         document.body.removeAttribute("aria-busy");
@@ -169,6 +209,20 @@
         });
     };
 
+    const lockQuizImportControl = form => {
+        if (handlerName(form) !== "import") {
+            return;
+        }
+
+        const button = form.querySelector("[data-quiz-import-select]");
+        if (!(button instanceof HTMLButtonElement)) {
+            return;
+        }
+
+        lockedQuizControls = [{ button, wasDisabled: button.disabled }];
+        button.disabled = true;
+    };
+
     const isAjaxSave = (form, submitter, currentPath) => {
         if (pathMatches(currentPath, routes.editor)) {
             return submitter?.matches("[data-ajax-save-round]") ?? false;
@@ -186,7 +240,9 @@
         const handler = handlerName(form);
 
         if (isQuizzesIndex(currentPath)) {
-            return handler === "creategame" || handler === "continuegame";
+            return handler === "creategame" ||
+                handler === "continuegame" ||
+                handler === "import";
         }
 
         if (currentPath === routes.publicQuizzes) {
@@ -211,6 +267,74 @@
         }
 
         return false;
+    };
+
+    const isQuizExportLink = link => {
+        if (!link || !isQuizzesIndex(normalisePath(window.location.pathname))) {
+            return false;
+        }
+
+        let target;
+        try {
+            target = new URL(link.href, window.location.href);
+        } catch {
+            return false;
+        }
+
+        return target.origin === window.location.origin &&
+            isQuizzesIndex(normalisePath(target.pathname)) &&
+            target.searchParams.get("handler")?.toLowerCase() === "export";
+    };
+
+    const readCookie = name => {
+        const prefix = `${encodeURIComponent(name)}=`;
+        const item = document.cookie
+            .split("; ")
+            .find(value => value.startsWith(prefix));
+        return item ? decodeURIComponent(item.slice(prefix.length)) : null;
+    };
+
+    const clearQuizExportCookie = () => {
+        document.cookie = `${encodeURIComponent(quizExportCompletionCookie)}=; Max-Age=0; Path=/; SameSite=Lax`;
+    };
+
+    const createExportToken = () => {
+        if (typeof window.crypto?.randomUUID === "function") {
+            return window.crypto.randomUUID();
+        }
+
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, character => {
+            const random = Math.floor(Math.random() * 16);
+            const value = character === "x" ? random : (random & 0x3) | 0x8;
+            return value.toString(16);
+        });
+    };
+
+    const startQuizExport = link => {
+        const target = new URL(link.href, window.location.href);
+        const token = createExportToken();
+        target.searchParams.set("exportToken", token);
+
+        lockedExportLink = link;
+        lockedExportAriaDisabled = link.getAttribute("aria-disabled");
+        link.dataset.busyLocked = "true";
+        link.setAttribute("aria-disabled", "true");
+        clearQuizExportCookie();
+        show();
+
+        exportPollHandle = window.setInterval(() => {
+            if (readCookie(quizExportCompletionCookie) !== token) {
+                return;
+            }
+
+            clearQuizExportCookie();
+            hide();
+        }, 100);
+        exportTimeoutHandle = window.setTimeout(
+            hide,
+            quizExportTimeoutMilliseconds);
+
+        window.location.assign(target.href);
     };
 
     const shouldTrackLink = link => {
@@ -321,6 +445,7 @@
         lockedForm = form;
         form.dataset.busyLocked = "true";
         lockAddRoundDialogButtons(form);
+        lockQuizImportControl(form);
         show();
 
         const currentPath = normalisePath(window.location.pathname);
@@ -349,6 +474,18 @@
         const link = event.target instanceof Element
             ? event.target.closest("a[href]")
             : null;
+        if (isQuizExportLink(link)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            if (busy || link.dataset.busyLocked === "true") {
+                return;
+            }
+
+            startQuizExport(link);
+            return;
+        }
+
         if (!shouldTrackLink(link)) {
             return;
         }

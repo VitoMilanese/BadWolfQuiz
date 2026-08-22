@@ -50,6 +50,43 @@ public sealed class BusyIndicatorRegressionTests
     }
 
     [Fact]
+    public void BusyIndicatorTracksQuizImportAndDisablesImportSelector()
+    {
+        var root = FindRepositoryRoot();
+        var script = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "busy-indicators.js"));
+
+        Assert.Contains("handler === \"import\"", script, StringComparison.Ordinal);
+        Assert.Contains("const lockQuizImportControl = form =>", script, StringComparison.Ordinal);
+        Assert.Contains("[data-quiz-import-select]", script, StringComparison.Ordinal);
+        Assert.Contains("lockedQuizControls = [{ button, wasDisabled: button.disabled }]", script, StringComparison.Ordinal);
+        Assert.Contains("button.disabled = true", script, StringComparison.Ordinal);
+        Assert.Contains("lockedQuizControls.forEach(({ button, wasDisabled })", script, StringComparison.Ordinal);
+        Assert.Contains("button.disabled = wasDisabled", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BusyIndicatorTracksQuizExportUntilServerSignalsCompletion()
+    {
+        var root = FindRepositoryRoot();
+        var script = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "busy-indicators.js"));
+        var pageModel = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Quizzes", "Index.cshtml.cs"));
+
+        Assert.Contains("quizExportCompletionCookie = \"badwolfquiz-export-complete\"", script, StringComparison.Ordinal);
+        Assert.Contains("target.searchParams.set(\"exportToken\", token)", script, StringComparison.Ordinal);
+        Assert.Contains("link.setAttribute(\"aria-disabled\", \"true\")", script, StringComparison.Ordinal);
+        Assert.Contains("window.setInterval", script, StringComparison.Ordinal);
+        Assert.Contains("readCookie(quizExportCompletionCookie) !== token", script, StringComparison.Ordinal);
+        Assert.Contains("window.location.assign(target.href)", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("response.blob()", script, StringComparison.Ordinal);
+
+        Assert.Contains("ExportCompletionCookieName = \"badwolfquiz-export-complete\"", pageModel, StringComparison.Ordinal);
+        Assert.Contains("string? exportToken", pageModel, StringComparison.Ordinal);
+        Assert.Contains("Guid.TryParse(exportToken", pageModel, StringComparison.Ordinal);
+        Assert.Contains("Response.Cookies.Append(", pageModel, StringComparison.Ordinal);
+        Assert.Contains("SignalExportCompletion(exportToken)", pageModel, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void BusyIndicatorKeepsAjaxSaveVisibleUntilExistingSubmitterIsReenabled()
     {
         var root = FindRepositoryRoot();

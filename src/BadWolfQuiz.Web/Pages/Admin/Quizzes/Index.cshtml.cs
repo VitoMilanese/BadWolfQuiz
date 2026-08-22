@@ -22,6 +22,8 @@ public sealed class IndexModel(
     IStringLocalizer<SharedResource> localizer,
     IStringLocalizer<UnfinishedGameResource> unfinishedGameLocalizer) : PageModel
 {
+    public const string ExportCompletionCookieName = "badwolfquiz-export-complete";
+
     public IReadOnlyList<Quiz> Quizzes { get; private set; } = [];
     public IReadOnlySet<int> ResumableQuizIds { get; private set; } =
         new HashSet<int>();
@@ -281,19 +283,29 @@ public sealed class IndexModel(
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnGetExportAsync(int quizId, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetExportAsync(
+        int quizId,
+        string? exportToken,
+        CancellationToken cancellationToken)
     {
-        var package = await quizPackageService.ExportAsync(quizId, cancellationToken);
-        if (package is null)
+        try
         {
-            return NotFound();
-        }
+            var package = await quizPackageService.ExportAsync(quizId, cancellationToken);
+            if (package is null)
+            {
+                return NotFound();
+            }
 
-        var quiz = await db.Quizzes.AsNoTracking()
-            .SingleAsync(item => item.Id == quizId, cancellationToken);
-        var safeName = string.Concat(quiz.Title.Select(character =>
-            Path.GetInvalidFileNameChars().Contains(character) ? '_' : character));
-        return File(package, "application/vnd.badwolfquiz+zip", safeName + QuizPackageService.FileExtension);
+            var quiz = await db.Quizzes.AsNoTracking()
+                .SingleAsync(item => item.Id == quizId, cancellationToken);
+            var safeName = string.Concat(quiz.Title.Select(character =>
+                Path.GetInvalidFileNameChars().Contains(character) ? '_' : character));
+            return File(package, "application/vnd.badwolfquiz+zip", safeName + QuizPackageService.FileExtension);
+        }
+        finally
+        {
+            SignalExportCompletion(exportToken);
+        }
     }
 
     [RequestSizeLimit(1100L * 1024 * 1024)]
@@ -324,6 +336,27 @@ public sealed class IndexModel(
         }
 
         return RedirectToPage();
+    }
+
+    private void SignalExportCompletion(string? exportToken)
+    {
+        if (!Guid.TryParse(exportToken, out var token))
+        {
+            return;
+        }
+
+        Response.Cookies.Append(
+            ExportCompletionCookieName,
+            token.ToString("D"),
+            new CookieOptions
+            {
+                HttpOnly = false,
+                IsEssential = true,
+                Secure = Request.IsHttps,
+                SameSite = SameSiteMode.Lax,
+                Path = "/",
+                MaxAge = TimeSpan.FromMinutes(5)
+            });
     }
 
     private async Task LoadQuizzesAsync()
