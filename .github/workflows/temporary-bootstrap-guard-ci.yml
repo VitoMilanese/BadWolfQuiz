@@ -1,0 +1,421 @@
+name: Temporary bootstrap guard CI
+
+on:
+  push:
+    branches:
+      - agent/300-first-question-busy-ci
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/300-first-question-busy-ci
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Apply first-game bootstrap and question lock fixes
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          escape = Path('src/BadWolfQuiz.Web/wwwroot/js/gameplay-escape-shortcuts.js')
+          escape_text = escape.read_text(encoding='utf-8')
+          marker = '''    loadSharedStyle("/css/content-block-containers.css");
+    loadSharedScript("/js/content-block-containers.js");
+'''
+          replacement = marker + '''    loadSharedScript("/js/host-gameplay-submit-guard.js");
+'''
+          if 'loadSharedScript("/js/host-gameplay-submit-guard.js");' not in escape_text:
+              if marker not in escape_text:
+                  raise SystemExit('shared script bootstrap marker not found')
+              escape_text = escape_text.replace(marker, replacement, 1)
+              escape.write_text(escape_text, encoding='utf-8')
+
+          board = Path('src/BadWolfQuiz.Web/wwwroot/js/board-header-layout.js')
+          board_text = board.read_text(encoding='utf-8')
+          loader = '''    if (!document.querySelector("script[data-host-gameplay-submit-guard]")) {
+        const submitGuard = document.createElement("script");
+        submitGuard.src = "/js/host-gameplay-submit-guard.js";
+        submitGuard.async = false;
+        submitGuard.dataset.hostGameplaySubmitGuard = "";
+        document.head.append(submitGuard);
+    }
+
+'''
+          if loader in board_text:
+              board.write_text(board_text.replace(loader, '', 1), encoding='utf-8')
+
+          guard = Path('src/BadWolfQuiz.Web/wwwroot/js/host-gameplay-submit-guard.js')
+          guard.write_text(r'''(() => {
+    if (window.badWolfHostGameplaySubmitGuardInitialized) {
+        return;
+    }
+
+    window.badWolfHostGameplaySubmitGuardInitialized = true;
+
+    const initialize = () => {
+        const viewSelector = "[data-host-gameplay-view]";
+        const replayDelayMilliseconds = 16;
+        const questionBusyDelayMilliseconds = 250;
+        const questionBusySafetyMilliseconds = 15000;
+        let pendingSubmission = null;
+        let replayHandle = 0;
+        let questionSelectionBusy = false;
+        let questionBusyHandle = 0;
+        let questionSafetyHandle = 0;
+        let questionBusyOverlayOwned = false;
+        let lockedQuestionButtons = [];
+
+        const isGameplayForm = form =>
+            form instanceof HTMLFormElement &&
+            !form.matches(".game-timer-pause, .game-timer-resume, .game-timer-adjust") &&
+            !form.matches(".question-judge-actions") &&
+            (form.matches(".question-selection-form") ||
+             form.id === "remove-player-form" ||
+             form.closest("#blocked-players-dialog") !== null ||
+             form.closest(viewSelector) !== null);
+
+        const getAction = (form, submitter) => {
+            const submitterHasFormAction =
+                submitter?.hasAttribute("formaction") === true;
+            return new URL(
+                submitterHasFormAction ? submitter.formAction : form.action,
+                window.location.href);
+        };
+
+        const canNavigate = url => {
+            const board = document.querySelector(
+                ".host-game-board[data-game-id]");
+            const gameId = board?.dataset.gameId;
+            if (!gameId || url.origin !== window.location.origin) {
+                return false;
+            }
+
+            const encodedGameId = encodeURIComponent(gameId);
+            const allowedPaths = new Set([
+                `/Admin/Games/Lobby/${encodedGameId}`,
+                `/Admin/Games/RoundIntro/${encodedGameId}`,
+                `/Admin/Games/RunningRoundIntro/${encodedGameId}`,
+                `/Admin/Games/FinalQuestionTransition/${encodedGameId}`
+            ].map(path => path.toLowerCase()));
+            return allowedPaths.has(url.pathname.toLowerCase());
+        };
+
+        const submissionKey = (form, submitter, action) => {
+            const formData = new FormData(form);
+            if (submitter?.name) {
+                formData.append(submitter.name, submitter.value);
+            }
+
+            const fields = Array.from(formData.entries())
+                .filter(([name]) => name !== "__RequestVerificationToken")
+                .map(([name, value]) => [
+                    name,
+                    typeof value === "string" ? value : value.name
+                ])
+                .sort(([leftName, leftValue], [rightName, rightValue]) =>
+                    leftName === rightName
+                        ? leftValue.localeCompare(rightValue)
+                        : leftName.localeCompare(rightName))
+                .map(([name, value]) =>
+                    `${encodeURIComponent(name)}=${encodeURIComponent(value)}`)
+                .join("&");
+
+            return `${form.method.toUpperCase()} ${action.href} ${fields}`;
+        };
+
+        const releaseQuestionSelectionBusy = () => {
+            window.clearTimeout(questionBusyHandle);
+            window.clearTimeout(questionSafetyHandle);
+            questionBusyHandle = 0;
+            questionSafetyHandle = 0;
+            questionSelectionBusy = false;
+
+            lockedQuestionButtons.forEach(({ button, wasDisabled }) => {
+                if (button.isConnected) {
+                    button.disabled = wasDisabled;
+                }
+            });
+            lockedQuestionButtons = [];
+            document.querySelector("[data-host-gameplay-board]")
+                ?.removeAttribute("aria-busy");
+
+            if (questionBusyOverlayOwned) {
+                questionBusyOverlayOwned = false;
+                window.BadWolfBusy?.hide?.();
+            }
+        };
+
+        const lockOtherQuestionButtons = submitter => {
+            if (questionSelectionBusy) {
+                return false;
+            }
+
+            const board = document.querySelector("[data-host-gameplay-board]");
+            if (!board) {
+                return false;
+            }
+
+            questionSelectionBusy = true;
+            lockedQuestionButtons = Array.from(board.querySelectorAll(
+                "form.question-selection-form button[type='submit'], " +
+                "form.question-selection-form input[type='submit']"))
+                .filter(button => button !== submitter)
+                .map(button => ({ button, wasDisabled: button.disabled }));
+            lockedQuestionButtons.forEach(({ button }) => {
+                button.disabled = true;
+            });
+            board.setAttribute("aria-busy", "true");
+
+            questionBusyHandle = window.setTimeout(() => {
+                questionBusyHandle = 0;
+                questionBusyOverlayOwned =
+                    window.BadWolfBusy?.show?.() === true;
+            }, questionBusyDelayMilliseconds);
+            questionSafetyHandle = window.setTimeout(
+                releaseQuestionSelectionBusy,
+                questionBusySafetyMilliseconds);
+            return true;
+        };
+
+        document.addEventListener("click", event => {
+            const submitter = event.target instanceof Element
+                ? event.target.closest(
+                    "form.question-selection-form button[type='submit'], " +
+                    "form.question-selection-form input[type='submit']")
+                : null;
+            if (!(submitter instanceof HTMLElement) || submitter.disabled) {
+                return;
+            }
+
+            if (questionSelectionBusy) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return;
+            }
+
+            lockOtherQuestionButtons(submitter);
+        }, true);
+
+        document.addEventListener(
+            "badwolf:host-gameplay-updated",
+            releaseQuestionSelectionBusy);
+
+        const gameBoardError = document.getElementById("game-board-error");
+        if (gameBoardError) {
+            new MutationObserver(() => {
+                if (!gameBoardError.hidden &&
+                    gameBoardError.textContent?.trim()) {
+                    releaseQuestionSelectionBusy();
+                }
+            }).observe(gameBoardError, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+                attributeFilter: ["hidden"]
+            });
+        }
+
+        const scheduleReplay = () => {
+            if (replayHandle !== 0 || pendingSubmission === null) {
+                return;
+            }
+
+            replayHandle = window.setTimeout(() => {
+                replayHandle = 0;
+                const pending = pendingSubmission;
+                pendingSubmission = null;
+                if (!pending) {
+                    return;
+                }
+
+                const { form, submitter } = pending;
+                if (!form.isConnected ||
+                    (submitter && !submitter.isConnected)) {
+                    return;
+                }
+
+                if (submitter instanceof HTMLButtonElement ||
+                    submitter instanceof HTMLInputElement) {
+                    form.requestSubmit(submitter);
+                } else {
+                    form.requestSubmit();
+                }
+            }, replayDelayMilliseconds);
+        };
+
+        // Bubble phase is intentional. The normal host partial-navigation handler
+        // runs in capture phase and stops handled submits. Only a submit it leaves
+        // unhandled while another command is finishing reaches this fallback.
+        document.addEventListener("submit", event => {
+            const form = event.target instanceof HTMLFormElement
+                ? event.target
+                : null;
+            if (event.defaultPrevented || !isGameplayForm(form)) {
+                return;
+            }
+
+            const submitter = event.submitter instanceof HTMLElement
+                ? event.submitter
+                : null;
+            const action = getAction(form, submitter);
+            if (!canNavigate(action)) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            if (submitter?.hasAttribute("disabled")) {
+                return;
+            }
+
+            const key = submissionKey(form, submitter, action);
+            if (pendingSubmission?.key === key) {
+                scheduleReplay();
+                return;
+            }
+
+            if (pendingSubmission === null) {
+                pendingSubmission = { form, submitter, key };
+                submitter?.setAttribute("aria-busy", "true");
+            }
+            scheduleReplay();
+        });
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initialize, { once: true });
+    } else {
+        queueMicrotask(initialize);
+    }
+})();
+''', encoding='utf-8')
+
+          tests = Path('tests/BadWolfQuiz.Web.Tests/RapidGameplaySubmissionRegressionTests.cs')
+          tests.write_text(r'''namespace BadWolfQuiz.Web.Tests;
+
+public sealed class RapidGameplaySubmissionRegressionTests
+{
+    [Fact]
+    public void Global_bootstrap_loads_rapid_submit_guard_before_first_soft_mounted_question()
+    {
+        var bootstrap = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "gameplay-escape-shortcuts.js"));
+        var layout = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "board-header-layout.js"));
+
+        Assert.Contains(
+            "loadSharedScript(\"/js/host-gameplay-submit-guard.js\");",
+            bootstrap);
+        Assert.DoesNotContain("data-host-gameplay-submit-guard", layout);
+    }
+
+    [Fact]
+    public void Busy_gameplay_submit_fallback_runs_after_normal_capture_handler()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "host-gameplay-submit-guard.js"));
+
+        Assert.Contains("// Bubble phase is intentional.", script);
+        Assert.Contains("document.addEventListener(\"submit\", event =>", script);
+        Assert.DoesNotContain("document.addEventListener(\"submit\", event => {\n", script.Split("// Bubble phase is intentional.")[1].Split("});\n    };", StringSplitOptions.None)[0] + "true);");
+        Assert.Contains("if (!canNavigate(action))", script);
+        Assert.Contains("event.preventDefault();", script);
+        Assert.Contains("event.stopImmediatePropagation();", script);
+        Assert.Contains("submitter?.hasAttribute(\"disabled\")", script);
+        Assert.Contains("pendingSubmission?.key === key", script);
+        Assert.Contains("if (pendingSubmission === null)", script);
+        Assert.Contains("form.requestSubmit(submitter);", script);
+    }
+
+    [Fact]
+    public void First_question_click_locks_other_questions_and_uses_delayed_busy_indicator()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "host-gameplay-submit-guard.js"));
+
+        Assert.Contains("const lockOtherQuestionButtons = submitter =>", script);
+        Assert.Contains(".filter(button => button !== submitter)", script);
+        Assert.Contains("button.disabled = true;", script);
+        Assert.Contains("board.setAttribute(\"aria-busy\", \"true\");", script);
+        Assert.Contains("questionBusyDelayMilliseconds = 250", script);
+        Assert.Contains("window.BadWolfBusy?.show?.() === true", script);
+        Assert.Contains("badwolf:host-gameplay-updated", script);
+        Assert.Contains("releaseQuestionSelectionBusy", script);
+        Assert.Contains("game-board-error", script);
+    }
+
+    [Fact]
+    public void Rapid_submit_scope_is_resolved_from_the_current_soft_mounted_game()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "host-gameplay-submit-guard.js"));
+
+        Assert.Contains(".host-game-board[data-game-id]", script);
+        Assert.Contains("/Admin/Games/Lobby/", script);
+        Assert.Contains("/Admin/Games/RoundIntro/", script);
+        Assert.Contains("/Admin/Games/RunningRoundIntro/", script);
+        Assert.Contains("/Admin/Games/FinalQuestionTransition/", script);
+        Assert.Contains("url.origin !== window.location.origin", script);
+    }
+
+    private static string FindWebFile(params string[] parts)
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var pathParts = new string[parts.Length + 3];
+            pathParts[0] = directory.FullName;
+            pathParts[1] = "src";
+            pathParts[2] = "BadWolfQuiz.Web";
+            Array.Copy(parts, 0, pathParts, 3, parts.Length);
+
+            var candidate = Path.Combine(pathParts);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new FileNotFoundException(
+            $"Could not find web file: {string.Join('/', parts)}.");
+    }
+}
+''', encoding='utf-8')
+          PY
+      - name: Check JavaScript syntax
+        run: |
+          node --check src/BadWolfQuiz.Web/wwwroot/js/host-gameplay-submit-guard.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/gameplay-escape-shortcuts.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/board-header-layout.js
+      - name: Run navigation regression tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~RapidGameplaySubmissionRegressionTests|FullyQualifiedName~HostGameplayNavigationMarkupTests|FullyQualifiedName~BoardHeaderLayoutRegressionTests"
+      - name: Commit validated patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/BadWolfQuiz.Web/wwwroot/js/gameplay-escape-shortcuts.js src/BadWolfQuiz.Web/wwwroot/js/board-header-layout.js src/BadWolfQuiz.Web/wwwroot/js/host-gameplay-submit-guard.js tests/BadWolfQuiz.Web.Tests/RapidGameplaySubmissionRegressionTests.cs
+          git commit -m "Temporary first game guard validation"
+          git push origin HEAD:agent/300-first-question-busy-ci
