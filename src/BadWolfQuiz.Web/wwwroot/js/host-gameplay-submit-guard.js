@@ -6,8 +6,18 @@
     window.badWolfHostGameplaySubmitGuardInitialized = true;
 
     const initialize = () => {
+        const board = document.querySelector(".host-game-board[data-game-id]");
         const viewSelector = "[data-host-gameplay-view]";
         const replayDelayMilliseconds = 16;
+        const lobbyUrl = new URL(window.location.href);
+        const gameId = board?.dataset.gameId;
+        const flowPaths = new Set(gameId
+            ? [
+                `/Admin/Games/RoundIntro/${encodeURIComponent(gameId)}`,
+                `/Admin/Games/RunningRoundIntro/${encodeURIComponent(gameId)}`,
+                `/Admin/Games/FinalQuestionTransition/${encodeURIComponent(gameId)}`
+            ].map(path => path.toLowerCase())
+            : []);
         let pendingSubmission = null;
         let replayHandle = 0;
 
@@ -20,12 +30,20 @@
              form.closest("#blocked-players-dialog") !== null ||
              form.closest(viewSelector) !== null);
 
-        const submissionKey = (form, submitter) => {
+        const canNavigate = url =>
+            url.origin === lobbyUrl.origin &&
+            (url.pathname.toLowerCase() === lobbyUrl.pathname.toLowerCase() ||
+             flowPaths.has(url.pathname.toLowerCase()));
+
+        const getAction = (form, submitter) => {
             const submitterHasFormAction =
                 submitter?.hasAttribute("formaction") === true;
-            const action = new URL(
+            return new URL(
                 submitterHasFormAction ? submitter.formAction : form.action,
                 window.location.href);
+        };
+
+        const submissionKey = (form, submitter, action) => {
             const formData = new FormData(form);
             if (submitter?.name) {
                 formData.append(submitter.name, submitter.value);
@@ -89,7 +107,11 @@
             const submitter = event.submitter instanceof HTMLElement
                 ? event.submitter
                 : null;
-            const key = submissionKey(form, submitter);
+            const action = getAction(form, submitter);
+            if (!canNavigate(action)) {
+                return;
+            }
+            const key = submissionKey(form, submitter, action);
 
             event.preventDefault();
             event.stopImmediatePropagation();

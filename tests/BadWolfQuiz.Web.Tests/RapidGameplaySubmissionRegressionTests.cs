@@ -28,6 +28,7 @@ public sealed class RapidGameplaySubmissionRegressionTests
         Assert.Contains(
             "document.addEventListener(\"submit\", event =>",
             script);
+        Assert.Contains("if (!canNavigate(action))", script);
         Assert.Contains("event.preventDefault();", script);
         Assert.Contains("event.stopImmediatePropagation();", script);
         Assert.Contains("submitter?.hasAttribute(\"disabled\")", script);
@@ -40,6 +41,22 @@ public sealed class RapidGameplaySubmissionRegressionTests
         Assert.Contains("submitter?.removeAttribute(\"disabled\");", script);
         Assert.Contains("form.requestSubmit(submitter);", script);
         Assert.Contains("}, true);", script);
+    }
+
+    [Fact]
+    public void Rapid_submit_guard_matches_host_partial_navigation_scope()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "host-gameplay-submit-guard.js"));
+
+        Assert.Contains("const flowPaths = new Set", script);
+        Assert.Contains("/Admin/Games/RoundIntro/", script);
+        Assert.Contains("/Admin/Games/RunningRoundIntro/", script);
+        Assert.Contains("/Admin/Games/FinalQuestionTransition/", script);
+        Assert.Contains("url.origin === lobbyUrl.origin", script);
+        Assert.Contains("flowPaths.has(url.pathname.toLowerCase())", script);
     }
 
     [Fact]
