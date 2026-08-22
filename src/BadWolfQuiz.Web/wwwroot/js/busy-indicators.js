@@ -265,6 +265,41 @@
         return input instanceof HTMLInputElement ? input : null;
     };
 
+    const editorRenameEndpoint = (form, handler) => {
+        let target;
+        try {
+            target = new URL(
+                form.action || window.location.href,
+                window.location.href);
+        } catch {
+            return null;
+        }
+
+        const marker = "/editor";
+        const markerIndex = target.pathname.toLowerCase().lastIndexOf(marker);
+        if (markerIndex < 0) {
+            return null;
+        }
+
+        target.pathname = `${target.pathname.slice(0, markerIndex)}/Rename`;
+        target.search = "";
+        target.hash = "";
+        target.searchParams.set(
+            "handler",
+            handler === "renameround" ? "Round" : "Category");
+        return target.href;
+    };
+
+    const showEditorRenameStatus = (message, success) => {
+        if (!message) {
+            return;
+        }
+
+        if (typeof showQuizSaveStatus === "function") {
+            showQuizSaveStatus(message, success);
+        }
+    };
+
     const renameFallbackError = () =>
         document.querySelector(".quiz-board-form")?.dataset.saveError ||
         "Request failed.";
@@ -391,20 +426,34 @@
         let errorMessage = null;
 
         try {
-            const response = await fetch(form.action, {
-                method: "POST",
-                body: formData,
-                redirect: "manual"
-            });
-
-            const redirected = response.type === "opaqueredirect" ||
-                (response.status >= 300 && response.status < 400);
-            if (!redirected && !response.ok) {
+            const endpoint = editorRenameEndpoint(form, handler);
+            if (!endpoint) {
                 throw new Error(renameFallbackError());
             }
 
-            applyEditorRename(handler, formData, title);
+            const response = await fetch(endpoint, {
+                method: "POST",
+                body: formData,
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            let result = null;
+            try {
+                result = await response.json();
+            } catch {
+                // A non-JSON response is handled as a failed AJAX rename below.
+            }
+
+            if (!response.ok || !result?.success) {
+                throw new Error(result?.error || renameFallbackError());
+            }
+
+            const savedTitle = typeof result.title === "string"
+                ? result.title
+                : title;
+            applyEditorRename(handler, formData, savedTitle);
             form.closest("dialog")?.close();
+            showEditorRenameStatus(result.message, true);
         } catch (error) {
             console.error("Quiz rename error:", error);
             errorMessage = error instanceof Error && error.message
