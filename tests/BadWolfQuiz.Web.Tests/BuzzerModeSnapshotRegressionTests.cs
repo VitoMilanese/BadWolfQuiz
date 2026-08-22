@@ -1,6 +1,8 @@
 using BadWolfQuiz.Game.Definitions;
+using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Services;
+using RuntimeGameSession = BadWolfQuiz.Game.Runtime.GameSession;
 
 namespace BadWolfQuiz.Web.Tests;
 
@@ -34,6 +36,57 @@ public sealed class BuzzerModeSnapshotRegressionTests
         Assert.Equal(
             QuestionBuzzerMode.Immediately,
             snapshot.Rounds.Single().Questions.Single().BuzzerMode);
+    }
+
+    [Fact]
+    public void Inherited_question_uses_game_automatic_for_legacy_manual_round_default()
+    {
+        var quiz = CreateQuiz(
+            BuzzActivationMode.Manual,
+            BuzzActivationMode.UseRoundDefault,
+            0);
+
+        var snapshot = new QuizSnapshotFactory().Create(quiz);
+        var definition = snapshot.Rounds.Single().Questions.Single();
+        var session = CreateStartedSession(snapshot, GamePhaseStartMode.Automatic);
+
+        var question = session.SelectQuestion(definition.SourceQuestionId);
+
+        Assert.Equal(QuestionBuzzerMode.UseGameSetting, definition.BuzzerMode);
+        Assert.Equal(QuestionBuzzerStatus.Open, question.BuzzerStatus);
+    }
+
+    [Fact]
+    public void Explicit_question_manual_stays_manual_when_game_is_automatic()
+    {
+        var quiz = CreateQuiz(
+            BuzzActivationMode.Manual,
+            BuzzActivationMode.Manual,
+            0);
+
+        var snapshot = new QuizSnapshotFactory().Create(quiz);
+        var definition = snapshot.Rounds.Single().Questions.Single();
+        var session = CreateStartedSession(snapshot, GamePhaseStartMode.Automatic);
+
+        var question = session.SelectQuestion(definition.SourceQuestionId);
+
+        Assert.Equal(QuestionBuzzerMode.Manual, definition.BuzzerMode);
+        Assert.Equal(QuestionBuzzerStatus.Inactive, question.BuzzerStatus);
+    }
+
+    private static RuntimeGameSession CreateStartedSession(
+        QuizSnapshot snapshot,
+        GamePhaseStartMode regularBuzzerStartMode)
+    {
+        var settings = new GameSessionSettings(
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(10),
+            regularBuzzerStartMode,
+            GamePhaseStartMode.Automatic);
+        var session = RuntimeGameSession.Create(snapshot, settings);
+        session.AddPlayer("Player");
+        session.Start();
+        return session;
     }
 
     private static Quiz CreateQuiz(

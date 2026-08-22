@@ -14,7 +14,7 @@ Mandatory all-player text and all-player multiple-choice questions do not use th
 
 Question authors can choose one of the following modes:
 
-- **Use round default** — use the round's default buzzer mode. If the round also inherits the game default, the game-level `RegularQuestionBuzzerStartMode` Automatic/Manual setting remains the compatibility fallback.
+- **Use round default** — use the round's default buzzer mode. If the round also inherits the game default, the game-level `RegularQuestionBuzzerStartMode` Automatic/Manual setting remains the compatibility fallback. App-created quizzes historically persisted a hidden round-level `Manual` default even though that setting is not exposed in the current round editor; inherited questions treat that legacy value as game-level inheritance so **Automatic** continues to work. An explicit **Manual** mode selected on the question itself remains manual.
 - **Manual** — the question opens with the buzzer inactive. The host can activate it with the normal **Activate buzzer** control.
 - **Immediately** — the buzzer opens as soon as the question is selected and the existing buzzer-window timer starts.
 - **After media** — if the initial question presentation contains audio, video, or YouTube media, the buzzer stays inactive until that media ends or fails. If there is no relevant media, the buzzer opens immediately. The behavior is the same whether playback starts automatically or the host starts it manually.
