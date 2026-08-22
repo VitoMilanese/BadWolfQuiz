@@ -124,6 +124,23 @@ public sealed class PlayerContributorEasterEggTests
     }
 
     [Fact]
+    public void Shared_frame_feed_includes_temporary_contributors()
+    {
+        var source = File.ReadAllText(FindFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "ContributorFrames.cshtml.cs"));
+
+        Assert.Contains("PlayerContributorAccess.IsContributor(", source);
+        Assert.Contains("footerOptions.Value", source);
+        Assert.Contains("player) ||", source);
+        Assert.DoesNotContain(
+            "ContributorRecognition.IsContributor(\n                    footerOptions.Value,\n                    player.Name)",
+            source);
+    }
+
+    [Fact]
     public void Join_page_uses_browser_day_and_game_scoped_storage_alias()
     {
         var page = File.ReadAllText(FindFile(

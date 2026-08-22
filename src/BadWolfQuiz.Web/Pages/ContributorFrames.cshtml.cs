@@ -29,9 +29,9 @@ public sealed class ContributorFramesModel(
 
         var players = sessionRegistry.GetPlayers(game)
             .Where(player =>
-                ContributorRecognition.IsContributor(
+                PlayerContributorAccess.IsContributor(
                     footerOptions.Value,
-                    player.Name) ||
+                    player) ||
                 (!string.IsNullOrWhiteSpace(player.AvatarFrameAuthorizedHostId) &&
                  premiumHostAccess.IsPremium(player.AvatarFrameAuthorizedHostId)))
             .Select(player => new
