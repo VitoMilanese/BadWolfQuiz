@@ -23,6 +23,14 @@
     gap: clamp(9px, 1.5vw, 18px);
 }
 
+/* Hide a single candidate image until the first viewport-fit measurement is ready. */
+.host-game-board
+    :is(.current-question-summary:not(.wager-mode), .question-review-preview)
+    .game-content-blocks:not(.four-clue-grid):not(.all-player-answer-grid):has(> .game-content-block > img.game-content-image):not(:has(> .game-content-block:has(> img.game-content-image) ~ .game-content-block:has(> img.game-content-image)))
+    > .game-content-block > img.game-content-image:not([data-game-content-fit-ready="true"]) {
+    visibility: hidden;
+}
+
 .game-content-image[data-game-content-fit-eligible="true"] {
     cursor: zoom-in;
 }

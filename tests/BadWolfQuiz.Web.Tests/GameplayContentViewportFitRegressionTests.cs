@@ -25,6 +25,39 @@ public sealed class GameplayContentViewportFitRegressionTests
     }
 
     [Fact]
+    public void Viewport_fit_styles_are_available_before_first_gameplay_paint()
+    {
+        var root = FindRepositoryRoot();
+        var busyStyles = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "css",
+            "busy-indicators.css"));
+        var viewportStyles = ReadAsset("css", "game-content-viewport-fit.css");
+        var viewportScript = ReadAsset("js", "game-content-viewport-fit.js");
+
+        Assert.Contains(
+            "@import url(\"./game-content-viewport-fit.css?v=2\");",
+            busyStyles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "img.game-content-image:not([data-game-content-fit-ready=\"true\"])",
+            viewportStyles,
+            StringComparison.Ordinal);
+        Assert.Contains("visibility: hidden;", viewportStyles, StringComparison.Ordinal);
+        Assert.Contains(
+            "image.dataset.gameContentFitReady = \"true\";",
+            viewportScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "image.removeAttribute(\"data-game-content-fit-ready\");",
+            viewportScript,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Active_and_resolved_question_views_use_the_page_shell_vertical_space()
     {
         var styles = ReadAsset("css", "game-content-viewport-fit.css");

@@ -20,6 +20,7 @@
         image.style.removeProperty("--game-content-fit-height");
         image.removeAttribute("data-game-content-fit-state");
         image.removeAttribute("data-game-content-fit-eligible");
+        image.removeAttribute("data-game-content-fit-ready");
         image.removeAttribute("aria-pressed");
         image.removeAttribute("role");
         image.removeAttribute("tabindex");
@@ -32,6 +33,10 @@
         image.dataset.gameContentFitEligible = "true";
         image.setAttribute("role", "button");
         image.setAttribute("tabindex", "0");
+    };
+
+    const markReady = image => {
+        image.dataset.gameContentFitReady = "true";
     };
 
     const applyCompactHeight = (container, image, height) => {
@@ -85,6 +90,7 @@
         if (image.dataset.gameContentFitExpanded === "true") {
             image.dataset.gameContentFitState = "expanded";
             image.setAttribute("aria-pressed", "true");
+            markReady(image);
             return;
         }
 
@@ -92,6 +98,7 @@
         const overflow = container.scrollHeight - container.clientHeight;
         if (fullImageHeight <= 0 || overflow <= overflowTolerance) {
             clearImageFit(image);
+            markReady(image);
             return;
         }
 
@@ -102,12 +109,14 @@
 
         if (targetHeight >= fullImageHeight - overflowTolerance) {
             clearImageFit(image);
+            markReady(image);
             return;
         }
 
         markInteractive(image);
         image.setAttribute("aria-pressed", "false");
         applyCompactHeight(container, image, targetHeight);
+        markReady(image);
     };
 
     const observedContainers = new WeakSet();
