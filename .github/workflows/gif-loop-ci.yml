@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - agent/296-gif-loop-ci
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
