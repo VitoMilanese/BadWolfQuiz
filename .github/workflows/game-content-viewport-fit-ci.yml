@@ -1,0 +1,21 @@
+name: Gameplay content viewport fit CI
+
+on:
+  pull_request:
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Run viewport fit regression tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~GameplayContentViewportFitRegressionTests"
+      - name: Run related gameplay and media regression tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~HostGameplayNavigationMarkupTests|FullyQualifiedName~ContentImageScalingRegressionTests"
+      - name: Check viewport fit JavaScript syntax
+        run: node --check src/BadWolfQuiz.Web/wwwroot/js/game-content-viewport-fit.js
+      - name: Check gameplay bootstrap JavaScript syntax
+        run: node --check src/BadWolfQuiz.Web/wwwroot/js/gameplay-escape-shortcuts.js
