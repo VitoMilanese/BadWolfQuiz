@@ -1,3 +1,5 @@
+@import url("./board-header-first-paint.css?v=1");
+
 body[aria-busy="true"] {
     overflow: hidden;
     touch-action: none;
