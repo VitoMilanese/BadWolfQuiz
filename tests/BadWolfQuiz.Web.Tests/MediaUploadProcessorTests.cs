@@ -70,6 +70,27 @@ public sealed class MediaUploadProcessorTests
     }
 
     [Fact]
+    public void Animated_gif_brief_leading_solid_frame_is_removed()
+    {
+        var animatedGif = CreateGifWithBriefLeadingBlackFrame();
+
+        var normalized = MediaUploadProcessor.NormalizeAnimatedGifLoop(animatedGif);
+
+        Assert.NotEqual(animatedGif, normalized);
+        using var encoded = SKData.CreateCopy(normalized);
+        using var codec = SKCodec.Create(encoded) ??
+            throw new InvalidOperationException("The normalized GIF could not be decoded.");
+        Assert.Equal(SKEncodedImageFormat.Gif, codec.EncodedFormat);
+        Assert.Equal(1, codec.FrameCount);
+
+        using var firstVisibleFrame = SKBitmap.Decode(normalized) ??
+            throw new InvalidOperationException("The visible GIF frame could not be decoded.");
+        Assert.Contains(
+            firstVisibleFrame.Pixels,
+            pixel => pixel.Red > 0 || pixel.Green > 0 || pixel.Blue > 0);
+    }
+
+    [Fact]
     public void Animated_gif_last_background_disposal_is_changed_to_do_not_dispose()
     {
         var animatedGif = CreateGifWithBackgroundDisposal();
@@ -281,6 +302,17 @@ public sealed class MediaUploadProcessorTests
     private static byte[] CreateAnimatedGif() =>
         Convert.FromBase64String(
             "R0lGODlhBAACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAABAACAAAIBwABCBwoMCAAIfkEAQoAAQAsAAAAAAQAAgCBAAD/AAAAAAAAAAAACAcAAQgcKDAgADs=");
+
+    private static byte[] CreateGifWithBriefLeadingBlackFrame()
+    {
+        var gif = CreateAnimatedGif();
+        gif[13] = 0;
+        gif[14] = 0;
+        gif[15] = 0;
+        gif[48] = 4;
+        gif[49] = 0;
+        return gif;
+    }
 
     private static byte[] CreateGifWithBackgroundDisposal()
     {
