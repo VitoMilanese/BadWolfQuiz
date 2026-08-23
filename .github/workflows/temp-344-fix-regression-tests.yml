@@ -128,3 +128,5 @@ jobs:
                   tests/BadWolfQuiz.Web.Tests/GameSessionRegistryTests.cs
           git commit -m "TEMP apply regression test fixes"
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
+# trigger synchronize event
