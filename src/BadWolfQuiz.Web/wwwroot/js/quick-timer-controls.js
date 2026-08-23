@@ -88,3 +88,20 @@
     script.dataset.hostQuestionControls = "";
     document.head.appendChild(script);
 })();
+
+(() => {
+    if (window.badWolfBoardPlayerScoreActionsLoaderInstalled) {
+        return;
+    }
+
+    window.badWolfBoardPlayerScoreActionsLoaderInstalled = true;
+    if (document.querySelector("script[data-board-player-score-actions]")) {
+        return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "/js/board-player-score-actions.js?v=5";
+    script.async = false;
+    script.dataset.boardPlayerScoreActions = "";
+    document.head.appendChild(script);
+})();
