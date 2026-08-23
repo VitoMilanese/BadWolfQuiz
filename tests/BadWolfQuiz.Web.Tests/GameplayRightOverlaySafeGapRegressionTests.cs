@@ -30,7 +30,7 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
-            "/js/gameplay-right-overlay-safe-gap.js?v=4",
+            "/js/gameplay-right-overlay-safe-gap.js?v=5",
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -132,7 +132,7 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
     }
 
     [Fact]
-    public void Final_answering_uses_a_separate_drawer_shell_and_scroll_layer()
+    public void Final_answering_collapses_by_width_without_crossing_the_safe_gap()
     {
         var script = ReadHelper();
 
@@ -154,6 +154,16 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             ".final-question-panel > .final-submission-drawer > .final-submission-list",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains("width: 2.75rem;", script, StringComparison.Ordinal);
+        Assert.Contains(
+            "width: min(24rem, calc(100% - 1rem));",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains("transform: none;", script, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "transform: translateX(calc(100% - 2.75rem));",
             script,
             StringComparison.Ordinal);
         Assert.Contains("right: 0.75rem;", script, StringComparison.Ordinal);

@@ -42,8 +42,9 @@
         top: clamp(3.25rem, 8vh, 5rem);
         right: var(--gameplay-right-overlay-safe-gap, 8px);
         bottom: clamp(4rem, 8vh, 5.25rem);
-        width: min(24rem, calc(100% - 1rem));
-        max-width: none;
+        box-sizing: border-box;
+        width: 2.75rem;
+        max-width: min(24rem, calc(100% - 1rem));
         margin: 0;
         padding: 0;
         overflow: hidden;
@@ -51,9 +52,9 @@
         border-right: 0;
         border-radius: 0.9rem 0 0 0.9rem;
         background: var(--panel-glass);
-        box-shadow: -18px 0 38px rgb(0 0 0 / 28%);
-        transform: translateX(calc(100% - 2.75rem));
-        transition: transform 180ms ease, box-shadow 180ms ease;
+        box-shadow: inset 18px 0 38px -30px rgb(0 0 0 / 28%);
+        transform: none;
+        transition: width 180ms ease, box-shadow 180ms ease;
     }
 
     .final-question-host[data-game-status="finalanswering"]
@@ -79,8 +80,8 @@
         .final-question-panel > .final-submission-drawer:hover,
     .final-question-host[data-game-status="finalanswering"]
         .final-question-panel > .final-submission-drawer:focus-within {
-        transform: translateX(0);
-        box-shadow: -20px 0 44px rgb(0 0 0 / 36%);
+        width: min(24rem, calc(100% - 1rem));
+        box-shadow: inset 20px 0 44px -34px rgb(0 0 0 / 36%);
     }
 
     .final-question-host[data-game-status="finalanswering"]
