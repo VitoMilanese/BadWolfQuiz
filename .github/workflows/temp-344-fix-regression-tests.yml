@@ -1,0 +1,130 @@
+name: temp-344-fix-regression-tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Patch stale regression tests
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          autoplay_path = Path('tests/BadWolfQuiz.Web.Tests/ContentBlockAutoplayRegressionTests.cs')
+          autoplay = autoplay_path.read_text()
+          autoplay = autoplay.replace(
+              'Assert.Equal(4, Count(lobby, "data-autoplay-media"));',
+              'Assert.Equal(6, Count(lobby, "data-autoplay-media"));')
+          autoplay = autoplay.replace(
+              'Assert.Equal(2, Count(lobby, "data-youtube-autoplay"));',
+              'Assert.Equal(3, Count(lobby, "data-youtube-autoplay"));')
+          final_question_assert = '''        Assert.Equal(
+              3,
+              Count(
+                  lobby,
+                  "ResolveContentBlockAutoplay(block, final: true)"));
+'''
+          final_answer_assert = '''        Assert.Equal(
+              3,
+              Count(
+                  lobby,
+                  "ResolveContentBlockAutoplay(block, answer: true, final: true)"));
+'''
+          if final_question_assert not in autoplay:
+              raise SystemExit('Final question autoplay assertion anchor not found')
+          autoplay = autoplay.replace(
+              final_question_assert,
+              final_question_assert + final_answer_assert,
+              1)
+          autoplay_path.write_text(autoplay)
+
+          overlay_path = Path('tests/BadWolfQuiz.Web.Tests/GameplayRightOverlaySafeGapRegressionTests.cs')
+          overlay = overlay_path.read_text()
+          old_helper = '''    private static string ReadHelper()
+    {
+        var root = FindRepositoryRoot();
+        return Read(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "gameplay-right-overlay-safe-gap.js");
+    }
+'''
+          new_helper = '''    private static string ReadHelper()
+    {
+        var root = FindRepositoryRoot();
+        return Read(
+                root,
+                "src",
+                "BadWolfQuiz.Web",
+                "wwwroot",
+                "js",
+                "gameplay-right-overlay-safe-gap.js")
+            .Replace("\\r\\n", "\\n", StringComparison.Ordinal);
+    }
+'''
+          if old_helper not in overlay:
+              raise SystemExit('ReadHelper anchor not found')
+          overlay = overlay.replace(old_helper, new_helper, 1)
+          overlay_path.write_text(overlay)
+
+          registry_path = Path('tests/BadWolfQuiz.Web.Tests/GameSessionRegistryTests.cs')
+          registry = registry_path.read_text()
+          old_status = '''        Assert.Equal(
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.Completed,
+            game.Session.Status);
+        Assert.Equal(350, joined.Player.Score);
+'''
+          new_status = '''        Assert.Equal(
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging,
+            game.Session.Status);
+        Assert.Equal(350, joined.Player.Score);
+
+        registry.CompleteFinalQuestion("ABC123");
+
+        Assert.Equal(
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.Completed,
+            game.Session.Status);
+'''
+          if old_status not in registry:
+              raise SystemExit('Final status assertion anchor not found')
+          registry = registry.replace(old_status, new_status, 1)
+          registry_path.write_text(registry)
+          PY
+
+      - name: Run focused regression tests
+        run: >-
+          dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
+          --filter "FullyQualifiedName~ContentBlockAutoplayRegressionTests|FullyQualifiedName~GameplayRightOverlaySafeGapRegressionTests|FullyQualifiedName~GameSessionRegistryTests.Final_question_routes_private_player_actions_by_approved_connection"
+          --configuration Release
+          --verbosity minimal
+
+      - name: Commit patched tests for extraction
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/BadWolfQuiz.Web.Tests/ContentBlockAutoplayRegressionTests.cs \
+                  tests/BadWolfQuiz.Web.Tests/GameplayRightOverlaySafeGapRegressionTests.cs \
+                  tests/BadWolfQuiz.Web.Tests/GameSessionRegistryTests.cs
+          git commit -m "TEMP apply regression test fixes"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
