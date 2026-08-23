@@ -35,6 +35,7 @@ public sealed class GameSessionLauncher(
             .IgnoreQueryFilters()
             .AsNoTracking()
             .AsSplitQuery()
+            .Include(item => item.FinalDescriptionBlocks)
             .Include(item => item.FinalQuestionBlocks)
             .Include(item => item.FinalAnswerBlocks)
             .Include(item => item.Rounds)

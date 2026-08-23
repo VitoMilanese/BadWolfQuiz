@@ -1,4 +1,4 @@
-﻿using BadWolfQuiz.Web.Data;
+using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
@@ -23,6 +23,7 @@ public sealed class FinalQuestionEditorModel(
     public async Task<IActionResult> OnGetAsync(int id)
     {
         var quiz = await db.Quizzes
+            .Include(x => x.FinalDescriptionBlocks)
             .Include(x => x.FinalQuestionBlocks)
             .Include(x => x.FinalAnswerBlocks)
             .SingleOrDefaultAsync(x => x.Id == id);
@@ -41,6 +42,14 @@ public sealed class FinalQuestionEditorModel(
         {
             Id = quiz.Id,
             QuizId = quiz.Id,
+            DescriptionBlocks = quiz.FinalDescriptionBlocks
+                .OrderBy(x => x.SortOrder)
+                .Select(x => CreateInputBlock(
+                    x,
+                    false,
+                    "DescriptionBlockFile",
+                    "DescriptionBlockAudio"))
+                .ToList(),
             QuestionBlocks = quiz.FinalQuestionBlocks
                 .OrderBy(x => x.SortOrder)
                 .Select(x => CreateInputBlock(x, false))
@@ -56,7 +65,9 @@ public sealed class FinalQuestionEditorModel(
 
     private static ContentBlockInputModel CreateInputBlock(
         ContentBlockBase block,
-        bool isAnswerBlock)
+        bool isAnswerBlock,
+        string? storedFileHandler = null,
+        string? storedAudioHandler = null)
     {
         return new ContentBlockInputModel
         {
@@ -71,12 +82,19 @@ public sealed class FinalQuestionEditorModel(
             Autoplay = block.Autoplay,
             FileContentType = block.FileContentType,
             FileName = block.FileName,
-            IsAnswerBlock = isAnswerBlock
+            IsAnswerBlock = isAnswerBlock,
+            StoredFileHandler = storedFileHandler,
+            StoredAudioHandler = storedAudioHandler
         };
     }
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
+        Input.DescriptionBlocks ??= [];
+        Input.QuestionBlocks ??= [];
+        Input.AnswerBlocks ??= [];
+        ApplyDescriptionStoredHandlers(Input.DescriptionBlocks);
+
         if (!await db.Quizzes.AsNoTracking().AnyAsync(
             x => x.Id == Input.QuizId && x.MediaState == QuizMediaState.Active,
             cancellationToken))
@@ -84,14 +102,15 @@ public sealed class FinalQuestionEditorModel(
             TempData["ErrorMessage"] = localizer["MediaArchive_RestoreBeforeEditing"].Value;
             return RedirectToPage("Index");
         }
-        if (Input.QuestionBlocks == null || Input.QuestionBlocks.Count == 0)
+
+        if (Input.QuestionBlocks.Count == 0)
         {
             ModelState.AddModelError(
                 $"{nameof(Input)}.{nameof(Input.QuestionBlocks)}",
                 localizer["QuestionBlocksRequired"]);
         }
 
-        if (Input.AnswerBlocks == null || Input.AnswerBlocks.Count == 0)
+        if (Input.AnswerBlocks.Count == 0)
         {
             ModelState.AddModelError(
                 $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
@@ -104,6 +123,7 @@ public sealed class FinalQuestionEditorModel(
         }
 
         var quiz = await db.Quizzes
+            .Include(x => x.FinalDescriptionBlocks)
             .Include(x => x.FinalQuestionBlocks)
             .Include(x => x.FinalAnswerBlocks)
             .SingleOrDefaultAsync(x => x.Id == Input.Id);
@@ -113,150 +133,104 @@ public sealed class FinalQuestionEditorModel(
             return NotFound();
         }
 
+        if (!await SyncBlocksAsync(
+                quiz.FinalDescriptionBlocks,
+                Input.DescriptionBlocks,
+                cancellationToken) ||
+            !await SyncBlocksAsync(
+                quiz.FinalQuestionBlocks,
+                Input.QuestionBlocks,
+                cancellationToken) ||
+            !await SyncBlocksAsync(
+                quiz.FinalAnswerBlocks,
+                Input.AnswerBlocks,
+                cancellationToken))
+        {
+            return Page();
+        }
+
         quiz.UpdatedAtUtc = DateTime.UtcNow;
-
-        var submittedQuestionBlockIds = Input.QuestionBlocks
-            .Where(x => x.Id.HasValue)
-            .Select(x => x.Id!.Value)
-            .ToHashSet();
-
-        var questionBlocksToDelete = quiz.FinalQuestionBlocks
-            .Where(x => !submittedQuestionBlockIds.Contains(x.Id))
-            .ToList();
-
-        db.RemoveRange(questionBlocksToDelete);
-
-        foreach (var inputBlock in Input.QuestionBlocks.OrderBy(x => x.SortOrder))
-        {
-            FinalQuestionContentBlock entity;
-
-            if (inputBlock.Id.HasValue)
-            {
-                entity = quiz.FinalQuestionBlocks
-                    .Single(x => x.Id == inputBlock.Id.Value);
-            }
-            else
-            {
-                entity = new FinalQuestionContentBlock();
-                quiz.FinalQuestionBlocks.Add(entity);
-            }
-
-            if (inputBlock.RemoveFile &&
-                inputBlock.BlockType is ContentBlockType.Image or ContentBlockType.Audio)
-            {
-                entity.FileData = null;
-                entity.FileContentType = null;
-                entity.FileName = null;
-            }
-
-            if (inputBlock.UploadedFile is not null &&
-                inputBlock.UploadedFile.Length > 0)
-            {
-                try
-                {
-                    var media = await mediaUploadProcessor.ProcessContentBlockAsync(
-                        inputBlock.UploadedFile,
-                        inputBlock.BlockType,
-                        premiumHostAccess.IsPremium(currentHost.RequiredId),
-                        cancellationToken);
-                    entity.FileData = media.Data;
-                    entity.FileContentType = media.ContentType;
-                    entity.FileName = media.FileName;
-                }
-                catch (MediaUploadException exception)
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        localizer[exception.ResourceKey, exception.ResourceArguments]);
-
-                    return Page();
-                }
-            }
-
-            entity.SortOrder = inputBlock.SortOrder;
-            entity.BlockType = inputBlock.BlockType;
-            entity.TextContent = inputBlock.TextContent?.Trim();
-            entity.TopCaption = inputBlock.TopCaption?.Trim();
-            entity.BottomCaption = inputBlock.BottomCaption?.Trim();
-            entity.ExternalUrl = inputBlock.ExternalUrl?.Trim();
-            entity.AudioOnly = inputBlock.AudioOnly;
-            entity.Autoplay = inputBlock.Autoplay &&
-                inputBlock.BlockType is ContentBlockType.Audio or ContentBlockType.Video or ContentBlockType.YouTube;
-        }
-
-        var submittedAnswerBlockIds = Input.AnswerBlocks
-            .Where(x => x.Id.HasValue)
-            .Select(x => x.Id!.Value)
-            .ToHashSet();
-
-        var answerBlocksToDelete = quiz.FinalAnswerBlocks
-            .Where(x => !submittedAnswerBlockIds.Contains(x.Id))
-            .ToList();
-
-        db.RemoveRange(answerBlocksToDelete);
-
-        foreach (var inputBlock in Input.AnswerBlocks.OrderBy(x => x.SortOrder))
-        {
-            FinalAnswerContentBlock entity;
-
-            if (inputBlock.Id.HasValue)
-            {
-                entity = quiz.FinalAnswerBlocks
-                    .Single(x => x.Id == inputBlock.Id.Value);
-            }
-            else
-            {
-                entity = new FinalAnswerContentBlock();
-                quiz.FinalAnswerBlocks.Add(entity);
-            }
-
-            if (inputBlock.RemoveFile &&
-                inputBlock.BlockType is ContentBlockType.Image or ContentBlockType.Audio)
-            {
-                entity.FileData = null;
-                entity.FileContentType = null;
-                entity.FileName = null;
-            }
-
-            if (inputBlock.UploadedFile is not null &&
-                inputBlock.UploadedFile.Length > 0)
-            {
-                try
-                {
-                    var media = await mediaUploadProcessor.ProcessContentBlockAsync(
-                        inputBlock.UploadedFile,
-                        inputBlock.BlockType,
-                        premiumHostAccess.IsPremium(currentHost.RequiredId),
-                        cancellationToken);
-                    entity.FileData = media.Data;
-                    entity.FileContentType = media.ContentType;
-                    entity.FileName = media.FileName;
-                }
-                catch (MediaUploadException exception)
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        localizer[exception.ResourceKey, exception.ResourceArguments]);
-
-                    return Page();
-                }
-            }
-
-            entity.SortOrder = inputBlock.SortOrder;
-            entity.BlockType = inputBlock.BlockType;
-            entity.TextContent = inputBlock.TextContent?.Trim();
-            entity.TopCaption = inputBlock.TopCaption?.Trim();
-            entity.BottomCaption = inputBlock.BottomCaption?.Trim();
-            entity.ExternalUrl = inputBlock.ExternalUrl?.Trim();
-            entity.AudioOnly = inputBlock.AudioOnly;
-            entity.Autoplay = inputBlock.Autoplay &&
-                inputBlock.BlockType is ContentBlockType.Audio or ContentBlockType.Video or ContentBlockType.YouTube;
-        }
-
         await db.SaveChangesAsync(cancellationToken);
         TempData["SuccessMessage"] = localizer["Message_FinalQuestionSaved"].Value;
-        //return RedirectToPage("Editor", new { id = Input.QuizId });
         return RedirectToPage(new { id = Input.Id });
+    }
+
+    private async Task<bool> SyncBlocksAsync<TBlock>(
+        ICollection<TBlock> existingBlocks,
+        IReadOnlyList<ContentBlockInputModel> inputBlocks,
+        CancellationToken cancellationToken)
+        where TBlock : ContentBlockBase, new()
+    {
+        var submittedIds = inputBlocks
+            .Where(x => x.Id.HasValue)
+            .Select(x => x.Id!.Value)
+            .ToHashSet();
+
+        if (submittedIds.Any(id => existingBlocks.All(x => x.Id != id)))
+        {
+            ModelState.AddModelError(string.Empty, localizer["Error_Unexpected"]);
+            return false;
+        }
+
+        db.RemoveRange(existingBlocks
+            .Where(x => !submittedIds.Contains(x.Id))
+            .ToList());
+
+        foreach (var inputBlock in inputBlocks.OrderBy(x => x.SortOrder))
+        {
+            TBlock entity;
+            if (inputBlock.Id.HasValue)
+            {
+                entity = existingBlocks.Single(x => x.Id == inputBlock.Id.Value);
+            }
+            else
+            {
+                entity = new TBlock();
+                existingBlocks.Add(entity);
+            }
+
+            if (inputBlock.RemoveFile &&
+                inputBlock.BlockType is ContentBlockType.Image or ContentBlockType.Audio)
+            {
+                entity.FileData = null;
+                entity.FileContentType = null;
+                entity.FileName = null;
+            }
+
+            if (inputBlock.UploadedFile is not null && inputBlock.UploadedFile.Length > 0)
+            {
+                try
+                {
+                    var media = await mediaUploadProcessor.ProcessContentBlockAsync(
+                        inputBlock.UploadedFile,
+                        inputBlock.BlockType,
+                        premiumHostAccess.IsPremium(currentHost.RequiredId),
+                        cancellationToken);
+                    entity.FileData = media.Data;
+                    entity.FileContentType = media.ContentType;
+                    entity.FileName = media.FileName;
+                }
+                catch (MediaUploadException exception)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        localizer[exception.ResourceKey, exception.ResourceArguments]);
+                    return false;
+                }
+            }
+
+            entity.SortOrder = inputBlock.SortOrder;
+            entity.BlockType = inputBlock.BlockType;
+            entity.TextContent = inputBlock.TextContent?.Trim();
+            entity.TopCaption = inputBlock.TopCaption?.Trim();
+            entity.BottomCaption = inputBlock.BottomCaption?.Trim();
+            entity.ExternalUrl = inputBlock.ExternalUrl?.Trim();
+            entity.AudioOnly = inputBlock.AudioOnly;
+            entity.Autoplay = inputBlock.Autoplay &&
+                inputBlock.BlockType is ContentBlockType.Audio or ContentBlockType.Video or ContentBlockType.YouTube;
+        }
+
+        return true;
     }
 
     public PartialViewResult OnGetContentBlock(
@@ -284,9 +258,31 @@ public sealed class FinalQuestionEditorModel(
         };
     }
 
-    public async Task<IActionResult> OnGetQuestionBlockFileAsync(int id)
+    public Task<IActionResult> OnGetDescriptionBlockFileAsync(int id) =>
+        GetStoredBlockFileAsync(db.FinalDescriptionContentBlocks, id, false);
+
+    public Task<IActionResult> OnGetDescriptionBlockAudioAsync(int id) =>
+        GetStoredBlockFileAsync(db.FinalDescriptionContentBlocks, id, true);
+
+    public Task<IActionResult> OnGetQuestionBlockFileAsync(int id) =>
+        GetStoredBlockFileAsync(db.FinalQuestionContentBlocks, id, false);
+
+    public Task<IActionResult> OnGetAnswerBlockFileAsync(int id) =>
+        GetStoredBlockFileAsync(db.FinalAnswerContentBlocks, id, false);
+
+    public Task<IActionResult> OnGetQuestionBlockAudioAsync(int id) =>
+        GetStoredBlockFileAsync(db.FinalQuestionContentBlocks, id, true);
+
+    public Task<IActionResult> OnGetAnswerBlockAudioAsync(int id) =>
+        GetStoredBlockFileAsync(db.FinalAnswerContentBlocks, id, true);
+
+    private async Task<IActionResult> GetStoredBlockFileAsync<TBlock>(
+        DbSet<TBlock> blocks,
+        int id,
+        bool inline)
+        where TBlock : ContentBlockBase
     {
-        var block = await db.FinalQuestionContentBlocks
+        var block = await blocks
             .AsNoTracking()
             .SingleOrDefaultAsync(x => x.Id == id);
 
@@ -298,62 +294,19 @@ public sealed class FinalQuestionEditorModel(
             return NotFound();
         }
 
-        return File(block.FileData, block.FileContentType, block.FileName);
+        return inline
+            ? File(block.FileData, block.FileContentType)
+            : File(block.FileData, block.FileContentType, block.FileName);
     }
 
-    public async Task<IActionResult> OnGetAnswerBlockFileAsync(int id)
+    private static void ApplyDescriptionStoredHandlers(
+        IEnumerable<ContentBlockInputModel> blocks)
     {
-        var block = await db.FinalAnswerContentBlocks
-            .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == id);
-
-        if (block is null ||
-            block.FileData is null ||
-            block.FileData.Length == 0 ||
-            string.IsNullOrWhiteSpace(block.FileContentType))
+        foreach (var block in blocks)
         {
-            return NotFound();
+            block.StoredFileHandler = "DescriptionBlockFile";
+            block.StoredAudioHandler = "DescriptionBlockAudio";
         }
-
-        return File(block.FileData, block.FileContentType, block.FileName);
-    }
-
-    public async Task<IActionResult> OnGetQuestionBlockAudioAsync(int id)
-    {
-        var block = await db.FinalQuestionContentBlocks
-            .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == id);
-
-        if (block is null ||
-            block.FileData is null ||
-            block.FileData.Length == 0 ||
-            string.IsNullOrWhiteSpace(block.FileContentType))
-        {
-            return NotFound();
-        }
-
-        return File(
-            block.FileData,
-            block.FileContentType);
-    }
-
-    public async Task<IActionResult> OnGetAnswerBlockAudioAsync(int id)
-    {
-        var block = await db.FinalAnswerContentBlocks
-            .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == id);
-
-        if (block is null ||
-            block.FileData is null ||
-            block.FileData.Length == 0 ||
-            string.IsNullOrWhiteSpace(block.FileContentType))
-        {
-            return NotFound();
-        }
-
-        return File(
-            block.FileData,
-            block.FileContentType);
     }
 
     public sealed class InputModel
@@ -370,8 +323,8 @@ public sealed class FinalQuestionEditorModel(
         [Display(Name = "Label_BuzzMode")]
         public BuzzActivationMode BuzzModeOverride { get; set; }
 
+        public List<ContentBlockInputModel> DescriptionBlocks { get; set; } = [];
         public List<ContentBlockInputModel> QuestionBlocks { get; set; } = [];
-
         public List<ContentBlockInputModel> AnswerBlocks { get; set; } = [];
     }
 }

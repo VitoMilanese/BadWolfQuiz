@@ -22,6 +22,8 @@ public sealed class QuizDbContext : DbContext
     public DbSet<QuizRoundRow> QuizRoundRows => Set<QuizRoundRow>();
     public DbSet<QuizCategory> QuizCategories => Set<QuizCategory>();
     public DbSet<QuizQuestion> QuizQuestions => Set<QuizQuestion>();
+    public DbSet<FinalDescriptionContentBlock> FinalDescriptionContentBlocks =>
+        Set<FinalDescriptionContentBlock>();
     public DbSet<FinalQuestionContentBlock> FinalQuestionContentBlocks =>
         Set<FinalQuestionContentBlock>();
     public DbSet<FinalAnswerContentBlock> FinalAnswerContentBlocks =>
@@ -92,6 +94,8 @@ public sealed class QuizDbContext : DbContext
             .HasQueryFilter(x => x.Round.Quiz.HostId == CurrentHostId);
         modelBuilder.Entity<QuizQuestion>()
             .HasQueryFilter(x => x.Category.Round.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<FinalDescriptionContentBlock>()
+            .HasQueryFilter(x => x.Quiz.HostId == CurrentHostId);
         modelBuilder.Entity<FinalQuestionContentBlock>()
             .HasQueryFilter(x => x.Quiz.HostId == CurrentHostId);
         modelBuilder.Entity<FinalAnswerContentBlock>()

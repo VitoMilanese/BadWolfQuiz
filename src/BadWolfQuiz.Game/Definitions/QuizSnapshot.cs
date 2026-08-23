@@ -66,7 +66,8 @@ public sealed class FinalQuestionSnapshot
 {
     public FinalQuestionSnapshot(
         IEnumerable<ContentBlockSnapshot>? questionBlocks = null,
-        IEnumerable<ContentBlockSnapshot>? answerBlocks = null)
+        IEnumerable<ContentBlockSnapshot>? answerBlocks = null,
+        IEnumerable<ContentBlockSnapshot>? descriptionBlocks = null)
     {
         QuestionBlocks = (questionBlocks ?? [])
             .OrderBy(block => block.SortOrder)
@@ -74,11 +75,16 @@ public sealed class FinalQuestionSnapshot
         AnswerBlocks = (answerBlocks ?? [])
             .OrderBy(block => block.SortOrder)
             .ToArray();
+        DescriptionBlocks = (descriptionBlocks ?? [])
+            .OrderBy(block => block.SortOrder)
+            .ToArray();
     }
 
     public IReadOnlyList<ContentBlockSnapshot> QuestionBlocks { get; }
 
     public IReadOnlyList<ContentBlockSnapshot> AnswerBlocks { get; }
+
+    public IReadOnlyList<ContentBlockSnapshot> DescriptionBlocks { get; }
 }
 
 public sealed class QuizCategoryIntroSnapshot

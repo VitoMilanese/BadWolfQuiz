@@ -51,16 +51,19 @@ public sealed class QuizSnapshotJsonConverter : JsonConverter<QuizSnapshot>
 
     private sealed record FinalQuestionSnapshotData(
         ContentBlockSnapshot[] QuestionBlocks,
-        ContentBlockSnapshot[] AnswerBlocks)
+        ContentBlockSnapshot[] AnswerBlocks,
+        ContentBlockSnapshot[]? DescriptionBlocks = null)
     {
         public FinalQuestionSnapshot ToSnapshot() => new(
             QuestionBlocks,
-            AnswerBlocks);
+            AnswerBlocks,
+            DescriptionBlocks ?? []);
 
         public static FinalQuestionSnapshotData From(
             FinalQuestionSnapshot snapshot) => new(
                 snapshot.QuestionBlocks.ToArray(),
-                snapshot.AnswerBlocks.ToArray());
+                snapshot.AnswerBlocks.ToArray(),
+                snapshot.DescriptionBlocks.ToArray());
     }
 
     private sealed record QuizRoundSnapshotData(

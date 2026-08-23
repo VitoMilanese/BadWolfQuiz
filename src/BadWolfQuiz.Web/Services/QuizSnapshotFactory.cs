@@ -19,7 +19,8 @@ public sealed class QuizSnapshotFactory
                 ? null
                 : new FinalQuestionSnapshot(
                     quiz.FinalQuestionBlocks.Select(CreateContentBlock),
-                    quiz.FinalAnswerBlocks.Select(CreateContentBlock));
+                    quiz.FinalAnswerBlocks.Select(CreateContentBlock),
+                    quiz.FinalDescriptionBlocks.Select(CreateContentBlock));
 
         return new QuizSnapshot(quiz.Id, quiz.Title, rounds, finalQuestion);
     }

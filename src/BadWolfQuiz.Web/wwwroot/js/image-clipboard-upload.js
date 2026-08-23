@@ -140,6 +140,7 @@
         const form = document.querySelector(".question-editor");
         const questionSection = document.getElementById("question-blocks");
         const answerSection = document.getElementById("answer-blocks");
+        const descriptionSection = document.getElementById("description-blocks");
 
         if (!form || !questionSection || !answerSection) {
             return;
@@ -149,15 +150,18 @@
         const questionValidation = questionSection.nextElementSibling;
         const answerHeading = answerSection.previousElementSibling;
         const answerValidation = answerSection.nextElementSibling;
+        const descriptionHeading = descriptionSection?.previousElementSibling;
         const questionTypeSetting = form.querySelector(".question-type-setting");
 
         if (questionHeading?.tagName !== "H2" ||
-            answerHeading?.tagName !== "H2") {
+            answerHeading?.tagName !== "H2" ||
+            (descriptionSection && descriptionHeading?.tagName !== "H2")) {
             return;
         }
 
         const questionTitle = questionHeading.textContent.trim();
         const answerTitle = answerHeading.textContent.trim();
+        const descriptionTitle = descriptionHeading?.textContent.trim();
 
         const tabs = document.createElement("div");
         tabs.className = "editor-actions question-answer-tabs";
@@ -178,49 +182,67 @@
 
         const questionTab = createTab("question", questionTitle, true);
         const answerTab = createTab("answer", answerTitle, false);
-        tabs.append(questionTab, answerTab);
+        const descriptionTab = descriptionSection && descriptionTitle
+            ? createTab("description", descriptionTitle, false)
+            : null;
 
-        const tabsAnchor = questionTypeSetting || questionHeading;
+        tabs.append(questionTab, answerTab);
+        if (descriptionTab) {
+            tabs.appendChild(descriptionTab);
+        }
+
+        const tabsAnchor = questionTypeSetting ||
+            descriptionHeading ||
+            questionHeading;
         tabsAnchor.before(tabs);
 
         questionHeading.hidden = true;
         answerHeading.hidden = true;
+        if (descriptionHeading) {
+            descriptionHeading.hidden = true;
+        }
 
         const groups = {
             question: [questionTypeSetting, questionSection, questionValidation],
-            answer: [answerSection, answerValidation]
+            answer: [answerSection, answerValidation],
+            description: [descriptionSection]
+        };
+
+        const tabButtons = {
+            question: questionTab,
+            answer: answerTab,
+            description: descriptionTab
         };
 
         const selectTab = name => {
-            const questionActive = name === "question";
-
-            questionTab.classList.toggle("button-primary", questionActive);
-            questionTab.classList.toggle("button-secondary", !questionActive);
-            questionTab.setAttribute(
-                "aria-selected",
-                questionActive ? "true" : "false");
-
-            answerTab.classList.toggle("button-primary", !questionActive);
-            answerTab.classList.toggle("button-secondary", questionActive);
-            answerTab.setAttribute(
-                "aria-selected",
-                questionActive ? "false" : "true");
-
-            for (const element of groups.question) {
-                if (element) {
-                    element.hidden = !questionActive;
+            for (const [tabName, button] of Object.entries(tabButtons)) {
+                if (!button) {
+                    continue;
                 }
+
+                const active = tabName === name;
+                button.classList.toggle("button-primary", active);
+                button.classList.toggle("button-secondary", !active);
+                button.setAttribute(
+                    "aria-selected",
+                    active ? "true" : "false");
             }
 
-            for (const element of groups.answer) {
-                if (element) {
-                    element.hidden = questionActive;
+            for (const [groupName, elements] of Object.entries(groups)) {
+                const active = groupName === name;
+                for (const element of elements) {
+                    if (element) {
+                        element.hidden = !active;
+                    }
                 }
             }
         };
 
         questionTab.addEventListener("click", () => selectTab("question"));
         answerTab.addEventListener("click", () => selectTab("answer"));
+        descriptionTab?.addEventListener(
+            "click",
+            () => selectTab("description"));
 
         selectTab("question");
     }

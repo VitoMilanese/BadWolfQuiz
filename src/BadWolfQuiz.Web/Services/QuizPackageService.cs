@@ -26,6 +26,7 @@ public sealed class QuizPackageService(QuizDbContext db)
         var quiz = await db.Quizzes
             .AsNoTracking()
             .AsSplitQuery()
+            .Include(item => item.FinalDescriptionBlocks)
             .Include(item => item.FinalQuestionBlocks)
             .Include(item => item.FinalAnswerBlocks)
             .Include(item => item.Rounds).ThenInclude(round => round.Rows)
@@ -105,7 +106,8 @@ public sealed class QuizPackageService(QuizDbContext db)
                         .ToArray()))
                     .ToArray(),
                 quiz.FinalQuestionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
-                quiz.FinalAnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray());
+                quiz.FinalAnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
+                quiz.FinalDescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray());
 
                 var manifestEntry = archive.CreateEntry("manifest.json", CompressionLevel.Optimal);
                 await using var manifestStream = manifestEntry.Open();
@@ -248,6 +250,12 @@ public sealed class QuizPackageService(QuizDbContext db)
             quiz.Rounds.Add(round);
         }
 
+        foreach (var sourceBlock in manifest.FinalDescriptionBlocks ?? [])
+        {
+            var block = new FinalDescriptionContentBlock();
+            await ApplyBlockAsync(block, sourceBlock);
+            quiz.FinalDescriptionBlocks.Add(block);
+        }
         foreach (var sourceBlock in manifest.FinalQuestionBlocks)
         {
             var block = new FinalQuestionContentBlock();
@@ -327,7 +335,9 @@ public sealed class QuizPackageService(QuizDbContext db)
         foreach (var block in package.Rounds.SelectMany(round => round.Categories)
                      .SelectMany(category => category.Questions)
                      .SelectMany(question => question.QuestionBlocks.Concat(question.AnswerBlocks))
-                     .Concat(package.FinalQuestionBlocks).Concat(package.FinalAnswerBlocks))
+                     .Concat(package.FinalQuestionBlocks)
+                     .Concat(package.FinalAnswerBlocks)
+                     .Concat(package.FinalDescriptionBlocks ?? []))
         {
             if (block is null || !Enum.IsDefined(block.BlockType) || block.TextContent?.Length > 100_000 ||
                 block.TopCaption?.Length > 2_000 || block.BottomCaption?.Length > 2_000 ||
@@ -361,7 +371,8 @@ public sealed class QuizPackageService(QuizDbContext db)
 
     private sealed record PackageData(
         int FormatVersion, string Title, string? Description, RoundData[] Rounds,
-        BlockData[] FinalQuestionBlocks, BlockData[] FinalAnswerBlocks);
+        BlockData[] FinalQuestionBlocks, BlockData[] FinalAnswerBlocks,
+        BlockData[]? FinalDescriptionBlocks = null);
     private sealed record RoundData(
         string Title, int SortOrder, int DefaultTimeLimitSeconds,
         BuzzActivationMode DefaultBuzzMode, bool UseRandomWagerQuestions,
