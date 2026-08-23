@@ -1,0 +1,6 @@
+/* The delete-round source button is moved into the round edit context menu on DOMContentLoaded.
+ * Hide it before first paint so removing it cannot resize the right-aligned round navigation.
+ */
+.quiz-editor-toolbar .round-tabs > .round-action-button {
+    display: none;
+}
