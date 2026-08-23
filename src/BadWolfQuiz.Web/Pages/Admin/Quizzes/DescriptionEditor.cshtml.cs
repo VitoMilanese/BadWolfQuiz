@@ -101,6 +101,86 @@ public sealed class DescriptionEditorModel(
         return RedirectToPage(new { roundId = Input.CategoryId.HasValue ? (int?)null : Input.RoundId, categoryId = Input.CategoryId, saved = true });
     }
 
+    public async Task<IActionResult> OnPostRenameAsync(
+        int quizId,
+        int roundId,
+        int? categoryId,
+        string? title,
+        CancellationToken cancellationToken)
+    {
+        var trimmedTitle = title?.Trim();
+        if (string.IsNullOrWhiteSpace(trimmedTitle))
+        {
+            return BadRequest(new
+            {
+                success = false,
+                error = localizer[
+                    categoryId.HasValue
+                        ? "QuizEditor_CategoryTitleRequired"
+                        : "QuizEditor_RoundTitleRequired"].Value
+            });
+        }
+
+        string previewTitle;
+        if (categoryId.HasValue)
+        {
+            var category = await db.QuizCategories
+                .Include(x => x.Round)
+                    .ThenInclude(x => x.Quiz)
+                .SingleOrDefaultAsync(x =>
+                    x.Id == categoryId.Value &&
+                    x.QuizRoundId == roundId &&
+                    x.Round.QuizId == quizId &&
+                    x.Round.Quiz.MediaState == QuizMediaState.Active,
+                    cancellationToken);
+
+            if (category is null)
+            {
+                return NotFound();
+            }
+
+            category.Title = trimmedTitle;
+            category.Round.Quiz.UpdatedAtUtc = DateTime.UtcNow;
+            previewTitle = await BuildPreviewTitleAsync(
+                roundId,
+                category.Id,
+                trimmedTitle,
+                cancellationToken);
+        }
+        else
+        {
+            var round = await db.QuizRounds
+                .Include(x => x.Quiz)
+                .SingleOrDefaultAsync(x =>
+                    x.Id == roundId &&
+                    x.QuizId == quizId &&
+                    x.Quiz.MediaState == QuizMediaState.Active,
+                    cancellationToken);
+
+            if (round is null)
+            {
+                return NotFound();
+            }
+
+            round.Title = trimmedTitle;
+            round.Quiz.UpdatedAtUtc = DateTime.UtcNow;
+            previewTitle = await BuildPreviewTitleAsync(
+                round.Id,
+                null,
+                trimmedTitle,
+                cancellationToken);
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+
+        return new JsonResult(new
+        {
+            success = true,
+            title = trimmedTitle,
+            previewTitle
+        });
+    }
+
     public PartialViewResult OnGetContentBlock(string fieldPrefix, ContentBlockType blockType, int index)
     {
         var model = new ContentBlockInputModel { BlockType = blockType, SortOrder = index + 1 };
