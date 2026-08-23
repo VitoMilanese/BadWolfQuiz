@@ -196,3 +196,54 @@
         buzzerButton.click();
     }, { passive: false });
 })();
+
+(() => {
+    const hostBoard = document.querySelector(".host-game-board");
+    if (!hostBoard) {
+        return;
+    }
+
+    if (!document.querySelector('link[data-game-player-card-overlays]')) {
+        const stylesheet = document.createElement("link");
+        stylesheet.rel = "stylesheet";
+        stylesheet.href = "/css/game-player-card-overlays.css";
+        stylesheet.dataset.gamePlayerCardOverlays = "";
+        document.head.append(stylesheet);
+    }
+
+    const selector =
+        ".game-scoreboard .scoreboard-player:not(.host-card) .presence-badge";
+
+    const synchronizeBadge = badge => {
+        const label = badge.textContent?.trim();
+        if (!label) {
+            return;
+        }
+
+        badge.title = label;
+        badge.setAttribute("aria-label", label);
+    };
+
+    const synchronizeBadges = root => {
+        if (!(root instanceof Element || root instanceof Document)) {
+            return;
+        }
+
+        if (root instanceof Element && root.matches(selector)) {
+            synchronizeBadge(root);
+        }
+
+        root.querySelectorAll?.(selector).forEach(synchronizeBadge);
+    };
+
+    synchronizeBadges(document);
+
+    const observer = new MutationObserver(records => {
+        for (const record of records) {
+            for (const node of record.addedNodes) {
+                synchronizeBadges(node);
+            }
+        }
+    });
+    observer.observe(hostBoard, { childList: true, subtree: true });
+})();
