@@ -11,7 +11,7 @@ public sealed class HostQuestionControlsRegressionTests
         Assert.DoesNotContain("data-quick-score-category", script, StringComparison.Ordinal);
         Assert.DoesNotContain("data-quick-score-question-value", script, StringComparison.Ordinal);
         Assert.Contains("data-quick-score-question", script, StringComparison.Ordinal);
-        Assert.Contains("data-quick-score-show-unplayed", script, StringComparison.Ordinal);
+        Assert.Contains("showUnplayed.type = \"checkbox\";", script, StringComparison.Ordinal);
         Assert.Contains(
             "Показати ще не зіграні питання",
             script,
