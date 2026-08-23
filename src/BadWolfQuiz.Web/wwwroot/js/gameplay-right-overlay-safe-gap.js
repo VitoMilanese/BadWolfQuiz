@@ -30,6 +30,12 @@
         .final-question-panel > .final-submission-list {
         right: var(--gameplay-right-overlay-safe-gap, 8px);
     }
+
+    .final-question-host[data-game-status="finalanswering"]
+        .final-question-panel > .final-submission-list > li {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
 }
 
 @media (min-width: 801px) {

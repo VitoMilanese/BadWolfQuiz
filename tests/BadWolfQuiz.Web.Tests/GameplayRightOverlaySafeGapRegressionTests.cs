@@ -30,7 +30,7 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
-            "/js/gameplay-right-overlay-safe-gap.js?v=1",
+            "/js/gameplay-right-overlay-safe-gap.js?v=2",
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -125,6 +125,19 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             ".board-player-list",
             script,
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Final_answering_rows_do_not_extend_under_the_drawer_scrollbar()
+    {
+        var script = ReadHelper();
+
+        Assert.Contains(
+            ".final-question-panel > .final-submission-list > li",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains("box-sizing: border-box;", script, StringComparison.Ordinal);
+        Assert.Contains("max-width: 100%;", script, StringComparison.Ordinal);
     }
 
     private static string ReadHelper()

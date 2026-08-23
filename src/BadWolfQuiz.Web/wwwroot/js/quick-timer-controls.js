@@ -66,7 +66,7 @@
     }
 
     const script = document.createElement("script");
-    script.src = "/js/gameplay-right-overlay-safe-gap.js?v=1";
+    script.src = "/js/gameplay-right-overlay-safe-gap.js?v=2";
     script.async = false;
     script.dataset.gameplayRightOverlaySafeGap = "";
     document.head.appendChild(script);
