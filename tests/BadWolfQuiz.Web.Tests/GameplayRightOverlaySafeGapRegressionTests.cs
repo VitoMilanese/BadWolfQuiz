@@ -284,12 +284,13 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
     {
         var root = FindRepositoryRoot();
         return Read(
-            root,
-            "src",
-            "BadWolfQuiz.Web",
-            "wwwroot",
-            "js",
-            "gameplay-right-overlay-safe-gap.js");
+                root,
+                "src",
+                "BadWolfQuiz.Web",
+                "wwwroot",
+                "js",
+                "gameplay-right-overlay-safe-gap.js")
+            .Replace("\r\n", "\n", StringComparison.Ordinal);
     }
 
     private static string Read(string root, params string[] parts) =>

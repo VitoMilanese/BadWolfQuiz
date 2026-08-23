@@ -709,9 +709,15 @@ public sealed class GameSessionRegistryTests
         Assert.Equal(250, wager!.Submission.Wager!.Amount);
         Assert.Equal("Bad Wolf", answer!.Submission.Answer!.Text);
         Assert.Equal(
-            BadWolfQuiz.Game.Runtime.GameSessionStatus.Completed,
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging,
             game.Session.Status);
         Assert.Equal(350, joined.Player.Score);
+
+        registry.CompleteFinalQuestion("ABC123");
+
+        Assert.Equal(
+            BadWolfQuiz.Game.Runtime.GameSessionStatus.Completed,
+            game.Session.Status);
     }
 
     [Fact]
