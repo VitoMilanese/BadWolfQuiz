@@ -5,6 +5,7 @@ namespace BadWolfQuiz.Web.Services;
 public sealed class ActiveGamePersistenceService(
     GameSessionRegistry registry,
     ActiveGameStore store,
+    DeferredGameMediaStore deferredGameMedia,
     TimeProvider timeProvider,
     ILogger<ActiveGamePersistenceService> logger,
     CrashLog crashLog) : BackgroundService
@@ -131,7 +132,8 @@ public sealed class ActiveGamePersistenceService(
                 return;
             }
 
-            var snapshots = games.Select(CaptureSnapshot).ToArray();
+            var snapshots = await Task.WhenAll(
+                games.Select(CaptureSnapshotAsync));
             await store.ReplaceAsync(snapshots);
             _lastPersistedRevisions = revisions;
         }
@@ -220,16 +222,24 @@ public sealed class ActiveGamePersistenceService(
         !session.HasNextRound &&
         session.IsCurrentRoundComplete;
 
-    private ActiveGameSnapshot CaptureSnapshot(
+    private async Task<ActiveGameSnapshot> CaptureSnapshotAsync(
         GameSessionRegistration game)
     {
+        // New games keep only deferred media markers in the live runtime snapshot
+        // so Play -> Lobby stays lightweight. Resume snapshots remain fully
+        // self-contained: materialize the real media bytes before writing them.
+        var persistedQuiz = await deferredGameMedia.MaterializeAsync(
+            game.Session.Id.Value,
+            game.Session.Quiz,
+            CancellationToken.None);
+
         lock (game)
         {
             return new ActiveGameSnapshot(
                 game.PublicCode,
                 game.HostId!,
                 game.AllowsNewPlayers,
-                game.Session.Quiz,
+                persistedQuiz,
                 game.Session.Settings,
                 game.Session.CaptureState(),
                 timeProvider.GetUtcNow(),

@@ -5,27 +5,38 @@ namespace BadWolfQuiz.Web.Services;
 
 public sealed class QuizSnapshotFactory
 {
-    public QuizSnapshot Create(Quiz quiz)
+    public QuizSnapshot Create(Quiz quiz) =>
+        Create(quiz, copyFileData: true);
+
+    public QuizSnapshot CreateFromDetachedQuiz(Quiz quiz) =>
+        Create(quiz, copyFileData: false);
+
+    private static QuizSnapshot Create(Quiz quiz, bool copyFileData)
     {
         ArgumentNullException.ThrowIfNull(quiz);
 
         var rounds = quiz.Rounds
             .OrderBy(round => round.SortOrder)
-            .Select(CreateRound)
+            .Select(round => CreateRound(round, copyFileData))
             .ToList();
 
         var finalQuestion = quiz.FinalQuestionBlocks.Count == 0 ||
             quiz.FinalAnswerBlocks.Count == 0
                 ? null
                 : new FinalQuestionSnapshot(
-                    quiz.FinalQuestionBlocks.Select(CreateContentBlock),
-                    quiz.FinalAnswerBlocks.Select(CreateContentBlock),
-                    quiz.FinalDescriptionBlocks.Select(CreateContentBlock));
+                    quiz.FinalQuestionBlocks.Select(block =>
+                        CreateContentBlock(block, copyFileData)),
+                    quiz.FinalAnswerBlocks.Select(block =>
+                        CreateContentBlock(block, copyFileData)),
+                    quiz.FinalDescriptionBlocks.Select(block =>
+                        CreateContentBlock(block, copyFileData)));
 
         return new QuizSnapshot(quiz.Id, quiz.Title, rounds, finalQuestion);
     }
 
-    private static QuizRoundSnapshot CreateRound(QuizRound round)
+    private static QuizRoundSnapshot CreateRound(
+        QuizRound round,
+        bool copyFileData)
     {
         var pointsByRow = round.Rows.ToDictionary(row => row.RowIndex, row => row.Points);
 
@@ -37,9 +48,10 @@ public sealed class QuizSnapshotFactory
             .SelectMany(category => category.Questions
                 .OrderBy(question => question.RowIndex)
                 .Select(question => CreateQuestion(
-            question,
-            pointsByRow,
-            round.DefaultBuzzMode)))
+                    question,
+                    pointsByRow,
+                    round.DefaultBuzzMode,
+                    copyFileData)))
             .ToList();
 
         var categoryIntros = categories
@@ -47,7 +59,8 @@ public sealed class QuizSnapshotFactory
                 category.Id,
                 category.Title,
                 category.SortOrder,
-                category.DescriptionBlocks.Select(CreateContentBlock)))
+                category.DescriptionBlocks.Select(block =>
+                    CreateContentBlock(block, copyFileData))))
             .ToList();
 
         return new QuizRoundSnapshot(
@@ -57,14 +70,16 @@ public sealed class QuizSnapshotFactory
             questions,
             round.UseRandomWagerQuestions,
             round.RandomWagerQuestionCount,
-            round.DescriptionBlocks.Select(CreateContentBlock),
+            round.DescriptionBlocks.Select(block =>
+                CreateContentBlock(block, copyFileData)),
             categoryIntros);
     }
 
     private static QuizQuestionSnapshot CreateQuestion(
         QuizQuestion question,
         IReadOnlyDictionary<int, int> pointsByRow,
-        BuzzActivationMode roundDefaultBuzzMode)
+        BuzzActivationMode roundDefaultBuzzMode,
+        bool copyFileData)
     {
         if (!pointsByRow.TryGetValue(question.RowIndex, out var points))
         {
@@ -87,8 +102,10 @@ public sealed class QuizSnapshotFactory
             question.IsSpecial,
             question.Category.Title,
             question.ExcludeFromRandomWagerSelection,
-            question.QuestionBlocks.Select(CreateContentBlock),
-            question.AnswerBlocks.Select(CreateContentBlock),
+            question.QuestionBlocks.Select(block =>
+                CreateContentBlock(block, copyFileData)),
+            question.AnswerBlocks.Select(block =>
+                CreateContentBlock(block, copyFileData)),
             presentationType,
             buzzerMode,
             Math.Max(0, question.BuzzDelaySeconds));
@@ -120,7 +137,9 @@ public sealed class QuizSnapshotFactory
         };
     }
 
-    private static ContentBlockSnapshot CreateContentBlock(ContentBlockBase block)
+    private static ContentBlockSnapshot CreateContentBlock(
+        ContentBlockBase block,
+        bool copyFileData)
     {
         if (block.BlockType == ContentBlockType.Container)
         {
@@ -140,14 +159,27 @@ public sealed class QuizSnapshotFactory
                 false);
         }
 
-        var fileData = block.FileData?.ToArray();
-        if (fileData is { Length: > 0 } &&
-            string.Equals(
-                block.FileContentType,
-                "image/gif",
-                StringComparison.OrdinalIgnoreCase))
+        byte[]? fileData;
+        if (copyFileData)
         {
-            fileData = MediaUploadProcessor.NormalizeAnimatedGifLoop(fileData);
+            fileData = block.FileData?.ToArray();
+            if (fileData is { Length: > 0 } &&
+                string.Equals(
+                    block.FileContentType,
+                    "image/gif",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                fileData = MediaUploadProcessor.NormalizeAnimatedGifLoop(fileData);
+            }
+        }
+        else
+        {
+            // The detached launch graph contains only a one-byte presence marker,
+            // never the stored BLOB. Keep a distinct non-empty runtime marker so
+            // existing content validation/rendering still knows the file exists.
+            fileData = block.FileData is { Length: > 0 }
+                ? DeferredGameMediaStore.CreateMarker()
+                : null;
         }
 
         return new ContentBlockSnapshot(
