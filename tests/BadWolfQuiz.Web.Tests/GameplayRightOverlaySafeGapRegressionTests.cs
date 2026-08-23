@@ -30,7 +30,7 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
-            "/js/gameplay-right-overlay-safe-gap.js?v=7",
+            "/js/gameplay-right-overlay-safe-gap.js?v=8",
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -132,7 +132,7 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
     }
 
     [Fact]
-    public void Final_answering_collapses_by_width_without_crossing_the_safe_gap()
+    public void Final_answering_collapses_by_width_without_crossing_its_right_anchor()
     {
         var script = ReadHelper();
 
@@ -174,7 +174,7 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
     }
 
     [Fact]
-    public void Final_answering_does_not_reserve_a_scrollbar_when_the_list_fits()
+    public void Final_answering_does_not_reserve_its_own_scrollbar_when_the_list_fits()
     {
         var script = ReadHelper();
 
@@ -190,48 +190,92 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
     }
 
     [Fact]
-    public void Final_answering_drawer_stays_left_of_question_content_scrollbar()
+    public void Final_answering_only_adds_external_gap_for_a_real_scrollbar()
     {
         var script = ReadHelper();
 
         Assert.Contains(
-            "const finalAnsweringRightGapProperty = \"--final-answering-drawer-right-gap\";",
+            "const scrollbarOverflowTolerance = 1;",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "const overlayScrollbarReserve = 16;",
+            "const hasVisibleVerticalScrollbar = element =>",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "const finalAnsweringContentSelector =",
+            "styles.overflowY !== \"auto\" && styles.overflowY !== \"scroll\"",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "\".question-presentation .game-content-blocks\";",
+            "element.clientHeight + scrollbarOverflowTolerance;",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "const applyFinalAnsweringDrawerRightGap = safeGap =>",
+            "const findFinalAnsweringScrollbarOwner = (content, panel) =>",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "const panelRect = panel.getBoundingClientRect();",
+            "const pageRightGap = scrollbarWidth > 0 ? safeGap : 0;",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "const contentRect = content.getBoundingClientRect();",
+            "const scrollbarOwner = findFinalAnsweringScrollbarOwner(",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
+            "const classicScrollbarWidth = Math.max(",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const scrollbarReserve = Math.max(",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "right: var(--final-answering-drawer-right-gap, 0px);",
+            script,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
             "contentRect.right - overlayScrollbarReserve - breathingSpace",
             script,
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Final_answering_reserves_a_closed_handle_lane_inside_question_content()
+    {
+        var script = ReadHelper();
+
         Assert.Contains(
-            "drawer.style.setProperty(\n                finalAnsweringRightGapProperty",
+            "const finalAnsweringContentReserveClass =",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "document.querySelector(finalAnsweringDrawerSelector)",
+            "\"final-answering-drawer-content-reserved\";",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".game-content-blocks.${finalAnsweringContentReserveClass}",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains("padding-right: calc(", script, StringComparison.Ordinal);
+        Assert.Contains(
+            "const reserveFinalAnsweringHandleLane = (",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.getComputedStyle(drawer, \"::before\").width",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const drawerLeftBoundary =",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "totalRightReserve - basePaddingRight",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "clearFinalAnsweringContentReservations();",
             script,
             StringComparison.Ordinal);
     }

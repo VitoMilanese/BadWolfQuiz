@@ -9,8 +9,15 @@
 
     const propertyName = "--gameplay-right-overlay-safe-gap";
     const finalAnsweringRightGapProperty = "--final-answering-drawer-right-gap";
+    const finalAnsweringContentBasePaddingProperty =
+        "--final-answering-content-base-padding-right";
+    const finalAnsweringContentReserveProperty =
+        "--final-answering-content-right-reserve";
+    const finalAnsweringContentReserveClass =
+        "final-answering-drawer-content-reserved";
     const breathingSpace = 8;
     const overlayScrollbarReserve = 16;
+    const scrollbarOverflowTolerance = 1;
     const styleId = "gameplay-right-overlay-safe-gap-styles";
     const finalAnsweringListSelector =
         ".final-question-host[data-game-status=\"finalanswering\"] " +
@@ -47,9 +54,7 @@
         position: absolute;
         z-index: 40;
         top: clamp(3.25rem, 8vh, 5rem);
-        right: var(
-            --final-answering-drawer-right-gap,
-            var(--gameplay-right-overlay-safe-gap, 8px));
+        right: var(--final-answering-drawer-right-gap, 0px);
         bottom: clamp(4rem, 8vh, 5.25rem);
         box-sizing: border-box;
         width: 2.75rem;
@@ -91,6 +96,15 @@
         .final-question-panel > .final-submission-drawer:focus-within {
         width: min(24rem, calc(100% - 1rem));
         box-shadow: inset 20px 0 44px -34px rgb(0 0 0 / 36%);
+    }
+
+    .final-question-host[data-game-status="finalanswering"]
+        .question-presentation
+        .game-content-blocks.${finalAnsweringContentReserveClass} {
+        box-sizing: border-box;
+        padding-right: calc(
+            var(${finalAnsweringContentBasePaddingProperty}, 0px) +
+            var(${finalAnsweringContentReserveProperty}, 0px));
     }
 
     .final-question-host[data-game-status="finalanswering"]
@@ -148,6 +162,26 @@
         document.head.appendChild(style);
     };
 
+    const clearFinalAnsweringContentReservations = () => {
+        document.querySelectorAll(`.${finalAnsweringContentReserveClass}`)
+            .forEach(content => {
+                if (!(content instanceof HTMLElement)) {
+                    return;
+                }
+
+                const host = content.closest(
+                    ".final-question-host[data-game-status=\"finalanswering\"]");
+                if (host) {
+                    return;
+                }
+
+                content.classList.remove(finalAnsweringContentReserveClass);
+                content.style.removeProperty(
+                    finalAnsweringContentBasePaddingProperty);
+                content.style.removeProperty(finalAnsweringContentReserveProperty);
+            });
+    };
+
     const ensureFinalAnsweringDrawer = () => {
         document.querySelectorAll(finalAnsweringListSelector).forEach(list => {
             if (!(list instanceof HTMLElement)) {
@@ -165,7 +199,77 @@
         });
     };
 
-    const applyFinalAnsweringDrawerRightGap = safeGap => {
+    const hasVisibleVerticalScrollbar = element => {
+        const styles = window.getComputedStyle(element);
+        if (styles.overflowY !== "auto" && styles.overflowY !== "scroll") {
+            return false;
+        }
+
+        return styles.overflowY === "scroll" ||
+            element.scrollHeight >
+                element.clientHeight + scrollbarOverflowTolerance;
+    };
+
+    const findFinalAnsweringScrollbarOwner = (content, panel) => {
+        const host = panel.closest(".final-question-host");
+        const panelRect = panel.getBoundingClientRect();
+
+        for (let candidate = content;
+            candidate instanceof HTMLElement;
+            candidate = candidate.parentElement) {
+            if (hasVisibleVerticalScrollbar(candidate)) {
+                const candidateRect = candidate.getBoundingClientRect();
+                if (candidateRect.right >= panelRect.right - 64 &&
+                    candidateRect.left < panelRect.right) {
+                    return candidate;
+                }
+            }
+
+            if (candidate === host) {
+                break;
+            }
+        }
+
+        return null;
+    };
+
+    const reserveFinalAnsweringHandleLane = (
+        content,
+        drawer,
+        panelRect,
+        contentRect,
+        rightGap) => {
+        if (!content.classList.contains(finalAnsweringContentReserveClass)) {
+            content.style.setProperty(
+                finalAnsweringContentBasePaddingProperty,
+                window.getComputedStyle(content).paddingRight);
+            content.classList.add(finalAnsweringContentReserveClass);
+        }
+
+        const basePaddingRight = Number.parseFloat(
+            content.style.getPropertyValue(
+                finalAnsweringContentBasePaddingProperty)) || 0;
+        const handleWidth = Number.parseFloat(
+            window.getComputedStyle(drawer, "::before").width) || 44;
+        const drawerLeftBoundary =
+            panelRect.right - rightGap - handleWidth;
+        const totalRightReserve = Math.max(
+            0,
+            Math.ceil(contentRect.right - drawerLeftBoundary));
+        const additionalRightReserve = Math.max(
+            0,
+            totalRightReserve - basePaddingRight);
+
+        content.style.setProperty(
+            finalAnsweringContentReserveProperty,
+            `${additionalRightReserve}px`);
+    };
+
+    const applyFinalAnsweringDrawerRightGap = (
+        scrollbarWidth,
+        safeGap) => {
+        clearFinalAnsweringContentReservations();
+
         document.querySelectorAll(finalAnsweringDrawerSelector).forEach(drawer => {
             if (!(drawer instanceof HTMLElement)) {
                 return;
@@ -180,21 +284,40 @@
 
             const panelRect = panel.getBoundingClientRect();
             const contentRect = content.getBoundingClientRect();
-            const viewportRightBoundary =
-                document.documentElement.clientWidth - safeGap;
-            const contentScrollbarLeftBoundary =
-                contentRect.right - overlayScrollbarReserve - breathingSpace;
-            const drawerRightBoundary = Math.min(
-                panelRect.right,
-                viewportRightBoundary,
-                contentScrollbarLeftBoundary);
-            const rightGap = Math.max(
-                breathingSpace,
-                Math.ceil(panelRect.right - drawerRightBoundary));
+            const pageRightGap = scrollbarWidth > 0 ? safeGap : 0;
+            const scrollbarOwner = findFinalAnsweringScrollbarOwner(
+                content,
+                panel);
+            let rightGap = pageRightGap;
 
+            if (scrollbarOwner) {
+                const scrollbarOwnerRect =
+                    scrollbarOwner.getBoundingClientRect();
+                const classicScrollbarWidth = Math.max(
+                    0,
+                    scrollbarOwner.offsetWidth - scrollbarOwner.clientWidth);
+                const scrollbarReserve = Math.max(
+                    overlayScrollbarReserve,
+                    classicScrollbarWidth);
+                const drawerRightBoundary =
+                    scrollbarOwnerRect.right -
+                    scrollbarReserve -
+                    breathingSpace;
+                rightGap = Math.max(
+                    rightGap,
+                    Math.ceil(panelRect.right - drawerRightBoundary));
+            }
+
+            rightGap = Math.max(0, rightGap);
             drawer.style.setProperty(
                 finalAnsweringRightGapProperty,
                 `${rightGap}px`);
+            reserveFinalAnsweringHandleLane(
+                content,
+                drawer,
+                panelRect,
+                contentRect,
+                rightGap);
         });
     };
 
@@ -206,7 +329,7 @@
         document.documentElement.style.setProperty(
             propertyName,
             `${safeGap}px`);
-        applyFinalAnsweringDrawerRightGap(safeGap);
+        applyFinalAnsweringDrawerRightGap(scrollbarWidth, safeGap);
     };
 
     const refreshLayout = () => {
@@ -235,7 +358,8 @@
 
     const mutationObserver = new MutationObserver(() => {
         if (document.querySelector(finalAnsweringListSelector) ||
-            document.querySelector(finalAnsweringDrawerSelector)) {
+            document.querySelector(finalAnsweringDrawerSelector) ||
+            document.querySelector(`.${finalAnsweringContentReserveClass}`)) {
             refreshLayout();
         }
     });
