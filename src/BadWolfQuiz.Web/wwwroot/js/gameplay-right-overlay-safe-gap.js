@@ -102,7 +102,7 @@
         overflow-x: hidden;
         overflow-y: auto;
         overscroll-behavior: contain;
-        scrollbar-gutter: stable;
+        scrollbar-gutter: auto;
         border: 0;
         border-radius: 0;
         background: transparent;

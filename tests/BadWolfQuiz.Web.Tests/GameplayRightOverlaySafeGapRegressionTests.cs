@@ -30,7 +30,7 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
-            "/js/gameplay-right-overlay-safe-gap.js?v=5",
+            "/js/gameplay-right-overlay-safe-gap.js?v=6",
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -171,6 +171,22 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
         Assert.Contains("padding: 0 1rem 0 0;", script, StringComparison.Ordinal);
         Assert.Contains("overflow-y: auto;", script, StringComparison.Ordinal);
         Assert.Contains("visibility: visible;", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Final_answering_does_not_reserve_a_scrollbar_when_the_list_fits()
+    {
+        var script = ReadHelper();
+
+        Assert.Contains(
+            "overscroll-behavior: contain;\n        scrollbar-gutter: auto;",
+            script,
+            StringComparison.Ordinal);
+        Assert.Equal(
+            1,
+            script.Split(
+                "scrollbar-gutter: stable;",
+                StringSplitOptions.None).Length - 1);
     }
 
     private static string ReadHelper()
