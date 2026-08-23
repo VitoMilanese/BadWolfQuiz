@@ -27,8 +27,12 @@
         ".final-question-panel > .final-submission-drawer";
     const finalAnsweringContentSelector =
         ".question-presentation .game-content-blocks";
+    const finalAnsweringImageSelector =
+        ".question-presentation .game-content-blocks img.game-content-image";
     const finalAnsweringDrawerClass = "final-submission-drawer";
+    const observedFinalAnsweringImages = new WeakSet();
     let animationFrameHandle = 0;
+    let finalAnsweringImageResizeObserver = null;
 
     const installStyles = () => {
         if (document.getElementById(styleId)) {
@@ -199,6 +203,24 @@
         });
     };
 
+    const observeFinalAnsweringImages = () => {
+        if (!finalAnsweringImageResizeObserver) {
+            return;
+        }
+
+        document.querySelectorAll(
+            `.final-question-host[data-game-status="finalanswering"] ${finalAnsweringImageSelector}`)
+            .forEach(image => {
+                if (!(image instanceof HTMLImageElement) ||
+                    observedFinalAnsweringImages.has(image)) {
+                    return;
+                }
+
+                observedFinalAnsweringImages.add(image);
+                finalAnsweringImageResizeObserver.observe(image);
+            });
+    };
+
     const hasVisibleVerticalScrollbar = element => {
         const styles = window.getComputedStyle(element);
         if (styles.overflowY !== "auto" && styles.overflowY !== "scroll") {
@@ -334,6 +356,7 @@
 
     const refreshLayout = () => {
         ensureFinalAnsweringDrawer();
+        observeFinalAnsweringImages();
         applySafeGap();
 
         if (animationFrameHandle !== 0 &&
@@ -349,9 +372,16 @@
         animationFrameHandle = window.requestAnimationFrame(() => {
             animationFrameHandle = 0;
             ensureFinalAnsweringDrawer();
+            observeFinalAnsweringImages();
             applySafeGap();
         });
     };
+
+    if (typeof ResizeObserver === "function") {
+        finalAnsweringImageResizeObserver = new ResizeObserver(() => {
+            refreshLayout();
+        });
+    }
 
     installStyles();
     refreshLayout();
