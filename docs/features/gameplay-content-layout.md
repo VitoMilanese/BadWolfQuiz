@@ -8,6 +8,16 @@ Active question/answer presentations and resolved-question previews reclaim the 
 
 Normal stacked content blocks use a smaller vertical gap than editor cards. This reduces avoidable scrolling for combinations such as text plus an image with a top or bottom caption.
 
+## Player-card score and status overlays
+
+The fixed gameplay player cards keep essential score and presence information visible without consuming additional card layout space.
+
+When the separate right-side board scoreboard is not visible, each player card shows the current score as a bottom-anchored overlay on top of the player's avatar, uploaded image, webcam, or webcam URL media area. The score sits above the player name and does not add a normal-flow row or resize the media, name, or card controls. Contributor avatar frames remain below the score overlay so they cannot cover the score.
+
+On wide board views where the right-side player scoreboard is actually visible, the duplicate score on the fixed bottom card remains hidden. A right-side scoreboard that is present in the DOM but hidden during question or answer presentation does not suppress the player-card score.
+
+Inactive, disconnected, and rejoin-pending states are represented by compact top-right overlay icons instead of visible status text. The icons do not affect card layout. The localized status text remains available through the element's title and accessible label.
+
 ## Single-image viewport fitting
 
 A normal host question or answer is eligible for automatic image fitting when its content contains exactly one image block.
@@ -57,4 +67,7 @@ The behavior is implemented by:
 
 - `wwwroot/css/game-content-viewport-fit.css` for reclaimed viewport space, compact block spacing, first-paint image hiding, provisional-scrollbar suppression, and compact/expanded presentation styling;
 - `wwwroot/js/game-content-viewport-fit.js` for eligibility detection, overflow measurement, minimum-height enforcement, click/keyboard toggling, and resize/navigation recalculation;
-- `GameplayContentViewportFitRegressionTests` for regression coverage of asset loading, spacing, eligibility, sizing, first-paint readiness, layout settling, scrollbar suppression, and toggling.
+- `wwwroot/css/game-player-card-overlays.css` for non-flow player score and presence overlays;
+- `wwwroot/js/player-admission-menu.js` for preserving localized presence labels as accessible titles/labels when the visual status is icon-only;
+- `GameplayContentViewportFitRegressionTests` for regression coverage of asset loading, spacing, eligibility, sizing, first-paint readiness, layout settling, scrollbar suppression, and toggling;
+- `PlayerCardOverlayRegressionTests` for score visibility, contributor-frame layering, score spacing, status-icon alignment, accessibility, and unchanged media render paths.
