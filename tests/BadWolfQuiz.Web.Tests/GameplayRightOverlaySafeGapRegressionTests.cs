@@ -1,0 +1,161 @@
+namespace BadWolfQuiz.Web.Tests;
+
+public sealed class GameplayRightOverlaySafeGapRegressionTests
+{
+    [Fact]
+    public void Global_gameplay_asset_loads_scrollbar_safe_gap_helper()
+    {
+        var root = FindRepositoryRoot();
+        var layout = Read(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Shared",
+            "_Layout.cshtml");
+        var loader = Read(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "quick-timer-controls.js");
+
+        Assert.Contains(
+            "<script src=\"~/js/quick-timer-controls.js\" asp-append-version=\"true\"></script>",
+            layout,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "badWolfGameplayRightOverlaySafeGapLoaderInstalled",
+            loader,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "/js/gameplay-right-overlay-safe-gap.js?v=1",
+            loader,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "script.dataset.gameplayRightOverlaySafeGap = \"\";",
+            loader,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "document.head.appendChild(script);",
+            loader,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Safe_gap_tracks_browser_scrollbar_and_persistent_host_navigation()
+    {
+        var script = ReadHelper();
+
+        Assert.Contains(
+            "window.innerWidth - document.documentElement.clientWidth",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains("const breathingSpace = 8;", script, StringComparison.Ordinal);
+        Assert.Contains(
+            "--gameplay-right-overlay-safe-gap",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.addEventListener(\"resize\", scheduleSafeGapUpdate",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.addEventListener(\"pageshow\", scheduleSafeGapUpdate);",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.visualViewport?.addEventListener(",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "\"badwolf:host-shell-mounted\"",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "\"badwolf:host-gameplay-updated\"",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.requestAnimationFrame",
+            script,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Only_requested_right_gameplay_panels_consume_the_safe_gap()
+    {
+        var script = ReadHelper();
+
+        Assert.Contains(
+            ".host-game-board.all-player-question-answering",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".current-question-summary .all-player-host-progress",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".final-question-host[data-game-status=\"finalwagering\"]",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "right: calc(0.75rem + var(--gameplay-right-overlay-safe-gap, 8px));",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".final-question-host[data-game-status=\"finalanswering\"]",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "right: var(--gameplay-right-overlay-safe-gap, 8px);",
+            script,
+            StringComparison.Ordinal);
+
+        Assert.DoesNotContain(
+            ".all-player-host-choice-preview",
+            script,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            ".board-player-sidebar",
+            script,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            ".board-player-list",
+            script,
+            StringComparison.Ordinal);
+    }
+
+    private static string ReadHelper()
+    {
+        var root = FindRepositoryRoot();
+        return Read(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "gameplay-right-overlay-safe-gap.js");
+    }
+
+    private static string Read(string root, params string[] parts) =>
+        File.ReadAllText(Path.Combine(new[] { root }.Concat(parts).ToArray()));
+
+    private static string FindRepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            if (Directory.Exists(Path.Combine(directory.FullName, "src")) &&
+                Directory.Exists(Path.Combine(directory.FullName, "tests")))
+            {
+                return directory.FullName;
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Repository root was not found.");
+    }
+}
