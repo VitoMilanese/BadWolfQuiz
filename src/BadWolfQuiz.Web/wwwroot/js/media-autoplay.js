@@ -122,11 +122,52 @@
         activate(root);
     };
 
+    const stopOnAllPlayerReviewRequest = event => {
+        const form = event.target;
+        if (form instanceof HTMLFormElement &&
+            form.matches("[data-all-player-review-action]")) {
+            stopActivePlayback(null);
+        }
+    };
+
+    const findAllPlayerTextReview = node => {
+        if (!(node instanceof Element)) {
+            return null;
+        }
+        if (node.matches(".all-player-host-review")) {
+            return node;
+        }
+        return node.querySelector(".all-player-host-review");
+    };
+
+    const observeAllPlayerTextReview = () => {
+        const observer = new MutationObserver(records => {
+            for (const record of records) {
+                for (const node of record.addedNodes) {
+                    if (findAllPlayerTextReview(node)) {
+                        stopActivePlayback(null);
+                        return;
+                    }
+                }
+            }
+        });
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true
+        });
+    };
+
     const activateCurrentView = () => {
         const view = document.querySelector(viewSelector);
         if (view) {
             activate(view);
         }
+    };
+
+    const initialize = () => {
+        document.addEventListener("submit", stopOnAllPlayerReviewRequest, true);
+        observeAllPlayerTextReview();
+        activateCurrentView();
     };
 
     window.BadWolfMediaAutoplay = {
@@ -136,8 +177,8 @@
     };
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", activateCurrentView, { once: true });
+        document.addEventListener("DOMContentLoaded", initialize, { once: true });
     } else {
-        activateCurrentView();
+        initialize();
     }
 })();
