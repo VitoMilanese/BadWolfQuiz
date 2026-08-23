@@ -7,7 +7,8 @@
 
     const containerSelector = [
         ".host-game-board .current-question-summary:not(.wager-mode) .game-content-blocks:not(.four-clue-grid):not(.all-player-answer-grid)",
-        ".host-game-board .question-review-preview .game-content-blocks:not(.four-clue-grid):not(.all-player-answer-grid)"
+        ".host-game-board .question-review-preview .game-content-blocks:not(.four-clue-grid):not(.all-player-answer-grid)",
+        ".host-game-board .final-question-panel .game-content-presentation .game-content-blocks:not(.four-clue-grid):not(.all-player-answer-grid)"
     ].join(",");
     const imageSelector = ":scope > .game-content-block > img.game-content-image";
     const overflowTolerance = 2;
