@@ -11,7 +11,8 @@ public sealed record ActiveGameSnapshot(
     QuizSnapshot Quiz,
     GameSessionSettings Settings,
     GameSessionState SessionState,
-    DateTimeOffset? SavedAtUtc = null);
+    DateTimeOffset? SavedAtUtc = null,
+    IReadOnlyList<QuestionOpenSequenceState>? QuestionOpenSequence = null);
 
 public sealed class ActiveGameStore
 {
