@@ -47,7 +47,7 @@ public sealed class OutgoingQuestionMediaRegressionTests
     }
 
     [Fact]
-    public void Automatic_all_player_text_review_stops_question_media_when_review_is_added()
+    public void Automatic_all_player_text_review_observer_survives_gameplay_view_replacement()
     {
         var root = FindRepositoryRoot();
         var autoplay = Read(
@@ -90,6 +90,10 @@ public sealed class OutgoingQuestionMediaRegressionTests
             autoplay,
             StringComparison.Ordinal);
         Assert.Contains(
+            "observer.observe(document.documentElement, {",
+            autoplay,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
             "observer.observe(view, { childList: true, subtree: true });",
             autoplay,
             StringComparison.Ordinal);

@@ -141,11 +141,6 @@
     };
 
     const observeAllPlayerTextReview = () => {
-        const view = document.querySelector(viewSelector);
-        if (!view) {
-            return;
-        }
-
         const observer = new MutationObserver(records => {
             for (const record of records) {
                 for (const node of record.addedNodes) {
@@ -156,7 +151,10 @@
                 }
             }
         });
-        observer.observe(view, { childList: true, subtree: true });
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true
+        });
     };
 
     const activateCurrentView = () => {
