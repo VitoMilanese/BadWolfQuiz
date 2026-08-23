@@ -171,6 +171,36 @@ public sealed class EditorModel(
         public int RoundId { get; set; }
     }
 
+    private sealed class EditorContentBlockData
+    {
+        public int Id { get; set; }
+        public int ParentId { get; set; }
+        public ContentBlockType BlockType { get; set; }
+        public string? TextContent { get; set; }
+        public string? MediaPath { get; set; }
+        public string? ExternalUrl { get; set; }
+        public int SortOrder { get; set; }
+        public bool HasFileData { get; set; }
+    }
+
+    private static TBlock CreateLightweightBlock<TBlock>(
+        EditorContentBlockData source)
+        where TBlock : ContentBlockBase, new()
+    {
+        var block = new TBlock
+        {
+            Id = source.Id,
+            BlockType = source.BlockType,
+            TextContent = source.TextContent,
+            MediaPath = source.MediaPath,
+            ExternalUrl = source.ExternalUrl,
+            SortOrder = source.SortOrder,
+            FileData = source.HasFileData ? new byte[1] : null
+        };
+
+        return block;
+    }
+
     public async Task<IActionResult> OnGetAsync(
         int id,
         int? selectedRoundId = null)
@@ -184,20 +214,17 @@ public sealed class EditorModel(
             TempData["ErrorMessage"] = localizer["MediaArchive_RestoreBeforeEditing"].Value;
             return RedirectToPage("Index");
         }
+
+        // Load only the structural data needed for tabs, the visible board and
+        // move/exchange dialogs. Content blocks are loaded separately below so
+        // large FileData BLOB values are never materialized by the editor GET.
         var quiz = await db.Quizzes
             .AsNoTracking()
-            .Include(x => x.FinalQuestionBlocks)
-            .Include(x => x.FinalAnswerBlocks)
             .Include(x => x.Rounds)
                 .ThenInclude(x => x.Rows)
             .Include(x => x.Rounds)
                 .ThenInclude(x => x.Categories)
                     .ThenInclude(x => x.Questions)
-                        .ThenInclude(x => x.QuestionBlocks)
-            .Include(x => x.Rounds)
-                .ThenInclude(x => x.Categories)
-                    .ThenInclude(x => x.Questions)
-                        .ThenInclude(x => x.AnswerBlocks)
             .AsSplitQuery()
             .SingleOrDefaultAsync(x => x.Id == id);
 
@@ -215,8 +242,6 @@ public sealed class EditorModel(
             return NotFound();
         }
 
-        Quiz = quiz;
-
         SelectedRoundId =
             selectedRoundId.HasValue &&
             rounds.Any(x => x.Id == selectedRoundId.Value)
@@ -224,6 +249,123 @@ public sealed class EditorModel(
                 : rounds[0].Id;
 
         var selectedRound = rounds.Single(x => x.Id == SelectedRoundId);
+        var selectedQuestions = selectedRound.Categories
+            .SelectMany(x => x.Questions)
+            .ToDictionary(x => x.Id);
+        var selectedQuestionIds = selectedQuestions.Keys.ToArray();
+
+        if (selectedQuestionIds.Length > 0)
+        {
+            var questionBlocks = await db.QuestionContentBlocks
+                .AsNoTracking()
+                .Where(x => selectedQuestionIds.Contains(x.QuizQuestionId))
+                .OrderBy(x => x.QuizQuestionId)
+                .ThenBy(x => x.SortOrder)
+                .Select(x => new EditorContentBlockData
+                {
+                    Id = x.Id,
+                    ParentId = x.QuizQuestionId,
+                    BlockType = x.BlockType,
+                    TextContent = x.TextContent,
+                    MediaPath = x.MediaPath,
+                    ExternalUrl = x.ExternalUrl,
+                    SortOrder = x.SortOrder,
+                    HasFileData = x.FileData != null
+                })
+                .ToListAsync();
+
+            foreach (var data in questionBlocks)
+            {
+                if (!selectedQuestions.TryGetValue(data.ParentId, out var question))
+                {
+                    continue;
+                }
+
+                var block = CreateLightweightBlock<QuestionContentBlock>(data);
+                block.QuizQuestionId = data.ParentId;
+                question.QuestionBlocks.Add(block);
+            }
+
+            var answerBlocks = await db.AnswerContentBlocks
+                .AsNoTracking()
+                .Where(x => selectedQuestionIds.Contains(x.QuizQuestionId))
+                .OrderBy(x => x.QuizQuestionId)
+                .ThenBy(x => x.SortOrder)
+                .Select(x => new EditorContentBlockData
+                {
+                    Id = x.Id,
+                    ParentId = x.QuizQuestionId,
+                    BlockType = x.BlockType,
+                    TextContent = x.TextContent,
+                    MediaPath = x.MediaPath,
+                    ExternalUrl = x.ExternalUrl,
+                    SortOrder = x.SortOrder,
+                    HasFileData = x.FileData != null
+                })
+                .ToListAsync();
+
+            foreach (var data in answerBlocks)
+            {
+                if (!selectedQuestions.TryGetValue(data.ParentId, out var question))
+                {
+                    continue;
+                }
+
+                var block = CreateLightweightBlock<AnswerContentBlock>(data);
+                block.QuizQuestionId = data.ParentId;
+                question.AnswerBlocks.Add(block);
+            }
+        }
+
+        var finalQuestionBlocks = await db.FinalQuestionContentBlocks
+            .AsNoTracking()
+            .Where(x => x.QuizId == quiz.Id)
+            .OrderBy(x => x.SortOrder)
+            .Select(x => new EditorContentBlockData
+            {
+                Id = x.Id,
+                ParentId = x.QuizId,
+                BlockType = x.BlockType,
+                TextContent = x.TextContent,
+                MediaPath = x.MediaPath,
+                ExternalUrl = x.ExternalUrl,
+                SortOrder = x.SortOrder,
+                HasFileData = x.FileData != null
+            })
+            .ToListAsync();
+
+        foreach (var data in finalQuestionBlocks)
+        {
+            var block = CreateLightweightBlock<FinalQuestionContentBlock>(data);
+            block.QuizId = quiz.Id;
+            quiz.FinalQuestionBlocks.Add(block);
+        }
+
+        var finalAnswerBlocks = await db.FinalAnswerContentBlocks
+            .AsNoTracking()
+            .Where(x => x.QuizId == quiz.Id)
+            .OrderBy(x => x.SortOrder)
+            .Select(x => new EditorContentBlockData
+            {
+                Id = x.Id,
+                ParentId = x.QuizId,
+                BlockType = x.BlockType,
+                TextContent = x.TextContent,
+                MediaPath = x.MediaPath,
+                ExternalUrl = x.ExternalUrl,
+                SortOrder = x.SortOrder,
+                HasFileData = x.FileData != null
+            })
+            .ToListAsync();
+
+        foreach (var data in finalAnswerBlocks)
+        {
+            var block = CreateLightweightBlock<FinalAnswerContentBlock>(data);
+            block.QuizId = quiz.Id;
+            quiz.FinalAnswerBlocks.Add(block);
+        }
+
+        Quiz = quiz;
 
         RoundRows = new RoundRowsInputModel
         {
