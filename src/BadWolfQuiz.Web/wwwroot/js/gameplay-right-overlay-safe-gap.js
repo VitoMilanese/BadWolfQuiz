@@ -29,11 +29,13 @@
     .final-question-host[data-game-status="finalanswering"]
         .final-question-panel > .final-submission-list {
         right: var(--gameplay-right-overlay-safe-gap, 8px);
+        padding-right: calc(0.6rem + 1rem);
     }
 
     .final-question-host[data-game-status="finalanswering"]
         .final-question-panel > .final-submission-list > li {
         box-sizing: border-box;
+        width: auto;
         max-width: 100%;
     }
 }

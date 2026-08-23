@@ -30,7 +30,7 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
-            "/js/gameplay-right-overlay-safe-gap.js?v=2",
+            "/js/gameplay-right-overlay-safe-gap.js?v=3",
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -128,15 +128,20 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
     }
 
     [Fact]
-    public void Final_answering_rows_do_not_extend_under_the_drawer_scrollbar()
+    public void Final_answering_reserves_space_for_overlay_scrollbar()
     {
         var script = ReadHelper();
 
+        Assert.Contains(
+            "padding-right: calc(0.6rem + 1rem);",
+            script,
+            StringComparison.Ordinal);
         Assert.Contains(
             ".final-question-panel > .final-submission-list > li",
             script,
             StringComparison.Ordinal);
         Assert.Contains("box-sizing: border-box;", script, StringComparison.Ordinal);
+        Assert.Contains("width: auto;", script, StringComparison.Ordinal);
         Assert.Contains("max-width: 100%;", script, StringComparison.Ordinal);
     }
 
