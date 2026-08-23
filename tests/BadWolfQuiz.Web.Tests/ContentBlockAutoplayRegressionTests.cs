@@ -56,8 +56,8 @@ public sealed class ContentBlockAutoplayRegressionTests
 
         Assert.Equal(2, Count(preview, "data-autoplay-media"));
         Assert.Contains("data-youtube-autoplay", preview, StringComparison.Ordinal);
-        Assert.Equal(4, Count(lobby, "data-autoplay-media"));
-        Assert.Equal(2, Count(lobby, "data-youtube-autoplay"));
+        Assert.Equal(6, Count(lobby, "data-autoplay-media"));
+        Assert.Equal(3, Count(lobby, "data-youtube-autoplay"));
         Assert.Equal(
             3,
             Count(
@@ -68,6 +68,11 @@ public sealed class ContentBlockAutoplayRegressionTests
             Count(
                 lobby,
                 "ResolveContentBlockAutoplay(block, final: true)"));
+        Assert.Equal(
+            3,
+            Count(
+                lobby,
+                "ResolveContentBlockAutoplay(block, answer: true, final: true)"));
         Assert.DoesNotContain(
             "data-autoplay-media=\"@block.Autoplay.ToString().ToLowerInvariant()\"",
             lobby,
