@@ -1,7 +1,9 @@
 using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
+using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -173,9 +175,16 @@ public sealed class UnfinishedGamePersistenceTests : IDisposable
         ActiveGameStore store)
     {
         var environment = new TestWebHostEnvironment(_contentRoot);
+        var options = new DbContextOptionsBuilder<QuizDbContext>()
+            .UseSqlite("Data Source=:memory:")
+            .Options;
+        var deferredMedia = new DeferredGameMediaStore(
+            new QuizDbContextFactory(options),
+            NullLogger<DeferredGameMediaStore>.Instance);
         return new ActiveGamePersistenceService(
             registry,
             store,
+            deferredMedia,
             TimeProvider.System,
             NullLogger<ActiveGamePersistenceService>.Instance,
             new CrashLog(environment));

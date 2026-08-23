@@ -197,6 +197,7 @@ builder.Services.AddSingleton<IGameCodeGenerator, GameCodeGenerator>();
 builder.Services.AddSingleton<GameSessionRegistry>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ActiveGameStore>();
+builder.Services.AddSingleton<DeferredGameMediaStore>();
 builder.Services.AddSingleton<ActiveGameAvailability>();
 builder.Services.AddSingleton<CrashLog>();
 builder.Services.AddHostedService<ActiveGamePersistenceService>();
@@ -328,6 +329,7 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<DeferredGameMediaMiddleware>();
 
 app.MapRazorPages();
 app.MapHub<GameHub>("/hubs/game");

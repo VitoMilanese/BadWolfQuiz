@@ -1,7 +1,9 @@
 using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Game.Runtime;
+using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -28,6 +30,7 @@ public sealed class ActiveGamePersistenceServiceTests : IDisposable
         var service = new ActiveGamePersistenceService(
             registry,
             store,
+            CreateDeferredMediaStore(),
             TimeProvider.System,
             NullLogger<ActiveGamePersistenceService>.Instance,
             new CrashLog(environment));
@@ -66,6 +69,16 @@ public sealed class ActiveGamePersistenceServiceTests : IDisposable
         {
             Directory.Delete(_contentRoot, recursive: true);
         }
+    }
+
+    private static DeferredGameMediaStore CreateDeferredMediaStore()
+    {
+        var options = new DbContextOptionsBuilder<QuizDbContext>()
+            .UseSqlite("Data Source=:memory:")
+            .Options;
+        return new DeferredGameMediaStore(
+            new QuizDbContextFactory(options),
+            NullLogger<DeferredGameMediaStore>.Instance);
     }
 
     private static QuizSnapshot CreateMediaQuiz()
