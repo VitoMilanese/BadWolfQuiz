@@ -155,6 +155,7 @@ public sealed class QuizMediaArchiveService(
         var result = new List<ArchivedQuizMedia>();
         await AddAsync(db.QuestionContentBlocks.IgnoreQueryFilters().Where(x => x.Question.Category.Round.QuizId == quizId && x.FileData != null && x.FileData.Length > 0), ArchivedMediaRole.QuestionBlock);
         await AddAsync(db.AnswerContentBlocks.IgnoreQueryFilters().Where(x => x.Question.Category.Round.QuizId == quizId && x.FileData != null && x.FileData.Length > 0), ArchivedMediaRole.AnswerBlock);
+        await AddAsync(db.FinalDescriptionContentBlocks.IgnoreQueryFilters().Where(x => x.QuizId == quizId && x.FileData != null && x.FileData.Length > 0), ArchivedMediaRole.FinalDescriptionBlock);
         await AddAsync(db.FinalQuestionContentBlocks.IgnoreQueryFilters().Where(x => x.QuizId == quizId && x.FileData != null && x.FileData.Length > 0), ArchivedMediaRole.FinalQuestionBlock);
         await AddAsync(db.FinalAnswerContentBlocks.IgnoreQueryFilters().Where(x => x.QuizId == quizId && x.FileData != null && x.FileData.Length > 0), ArchivedMediaRole.FinalAnswerBlock);
         return result;
@@ -262,6 +263,7 @@ public sealed class QuizMediaArchiveService(
         ArchivedMediaRole.AnswerBlock => db.AnswerContentBlocks.IgnoreQueryFilters().Where(x => ids.Contains(x.Id)).ExecuteUpdateAsync(s => s.SetProperty(x => x.FileData, (byte[]?)null), token),
         ArchivedMediaRole.FinalQuestionBlock => db.FinalQuestionContentBlocks.IgnoreQueryFilters().Where(x => ids.Contains(x.Id)).ExecuteUpdateAsync(s => s.SetProperty(x => x.FileData, (byte[]?)null), token),
         ArchivedMediaRole.FinalAnswerBlock => db.FinalAnswerContentBlocks.IgnoreQueryFilters().Where(x => ids.Contains(x.Id)).ExecuteUpdateAsync(s => s.SetProperty(x => x.FileData, (byte[]?)null), token),
+        ArchivedMediaRole.FinalDescriptionBlock => db.FinalDescriptionContentBlocks.IgnoreQueryFilters().Where(x => ids.Contains(x.Id)).ExecuteUpdateAsync(s => s.SetProperty(x => x.FileData, (byte[]?)null), token),
         _ => throw new InvalidDataException("Unknown media role.")
     };
 
@@ -287,6 +289,7 @@ public sealed class QuizMediaArchiveService(
         ArchivedMediaRole.AnswerBlock => db.AnswerContentBlocks.IgnoreQueryFilters().Where(x => x.Id == item.EntityId).ExecuteUpdateAsync(s => s.SetProperty(x => x.FileData, item.Data), token),
         ArchivedMediaRole.FinalQuestionBlock => db.FinalQuestionContentBlocks.IgnoreQueryFilters().Where(x => x.Id == item.EntityId).ExecuteUpdateAsync(s => s.SetProperty(x => x.FileData, item.Data), token),
         ArchivedMediaRole.FinalAnswerBlock => db.FinalAnswerContentBlocks.IgnoreQueryFilters().Where(x => x.Id == item.EntityId).ExecuteUpdateAsync(s => s.SetProperty(x => x.FileData, item.Data), token),
+        ArchivedMediaRole.FinalDescriptionBlock => db.FinalDescriptionContentBlocks.IgnoreQueryFilters().Where(x => x.Id == item.EntityId).ExecuteUpdateAsync(s => s.SetProperty(x => x.FileData, item.Data), token),
         _ => throw new InvalidDataException("Unknown media role.")
     };
 

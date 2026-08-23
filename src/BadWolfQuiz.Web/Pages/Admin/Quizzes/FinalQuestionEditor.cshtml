@@ -3,6 +3,20 @@
 @{
     ViewData["Title"] = Localizer["Title_FinalQuestionEditor"];
 
+    var descriptionBlockCollection =
+        new BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockCollectionViewModel
+        {
+            CollectionId = "description-blocks",
+            Title = Localizer["Label_Description"].Value,
+            FieldPrefix = "Input.DescriptionBlocks",
+            Blocks = Model.Input.DescriptionBlocks,
+            AllowedBlockTypes = new[]
+            {
+                BadWolfQuiz.Web.Models.ContentBlockType.Text,
+                BadWolfQuiz.Web.Models.ContentBlockType.Image
+            }
+        };
+
     var questionBlockCollection =
         new BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockCollectionViewModel
         {
@@ -35,6 +49,11 @@
 
     <h1>@Localizer["Title_FinalQuestionEditor"]</h1>
 
+    <h2>@Localizer["Label_Description"]</h2>
+
+    <partial name="Shared/_ContentBlockCollection"
+             model="descriptionBlockCollection" />
+
     <h2>@Localizer["Label_Question"]</h2>
 
     <partial name="Shared/_ContentBlockCollection"
@@ -59,6 +78,12 @@
            class="button button-secondary"
            asp-page="Editor"
            asp-route-id="@Model.Input.QuizId">@Localizer["Button_Back"]</a>
+        <button class="button button-secondary"
+                type="button"
+                data-open-question-preview="description">
+            @Localizer["Button_Preview"] — @Localizer["Label_Description"]
+        </button>
+
         <button class="button button-secondary"
                 type="button"
                 data-open-question-preview="question">
@@ -371,13 +396,24 @@
         }
 
         function openQuestionPreview(previewType) {
-            const collectionId =
-                previewType === "answer"
-                    ? "answer-blocks"
-                    : "question-blocks";
+            const previewConfiguration =
+                previewType === "description"
+                    ? {
+                        collectionId: "description-blocks",
+                        title: "@JavaScriptEncoder.Default.Encode(Localizer["Label_Description"])"
+                    }
+                    : previewType === "answer"
+                        ? {
+                            collectionId: "answer-blocks",
+                            title: "@JavaScriptEncoder.Default.Encode(Localizer["Label_CorrectAnswer"])"
+                        }
+                        : {
+                            collectionId: "question-blocks",
+                            title: "@JavaScriptEncoder.Default.Encode(Localizer["Label_Question"])"
+                        };
 
             const collection =
-                document.getElementById(collectionId);
+                document.getElementById(previewConfiguration.collectionId);
 
             if (!collection ||
                 !questionPreviewModal ||
@@ -386,10 +422,7 @@
                 return;
             }
 
-            questionPreviewTitle.textContent =
-                previewType === "answer"
-                    ? "@JavaScriptEncoder.Default.Encode(Localizer["Label_CorrectAnswer"])"
-                    : "@JavaScriptEncoder.Default.Encode(Localizer["Label_Question"])";
+            questionPreviewTitle.textContent = previewConfiguration.title;
 
             questionPreviewContent.replaceChildren();
 

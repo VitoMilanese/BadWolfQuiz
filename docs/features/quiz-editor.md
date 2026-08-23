@@ -15,10 +15,10 @@ new quiz opens directly in the quiz editor.
 
 Cloning creates a new independent editable quiz graph. It copies the source quiz
 description, rounds, rows, categories, questions, round/category descriptions,
-final-question and final-answer content, question settings, content-block order
-and metadata, captions, URLs, and stored media bytes. Every cloned quiz, round,
-category, question, and content block receives its own database identity, so later
-editing of the clone cannot modify the source quiz.
+final-description, final-question, and final-answer content, question settings,
+content-block order and metadata, captions, URLs, and stored media bytes. Every
+cloned quiz, round, category, question, and content block receives its own database
+identity, so later editing of the clone cannot modify the source quiz.
 
 Publication and runtime history are intentionally not cloned. A cloned quiz starts
 unpublished with no publication timestamp even when the source is public. Game
@@ -116,11 +116,13 @@ editor's own Escape navigation.
 
 ## Content blocks and ordering
 
-Question and final-question editors support the existing content-block types plus
-a **Container** block for horizontal media groups. New Container children can be
-Image, YouTube, or Audio blocks; YouTube is the video source exposed for new
-Container content. Existing legacy Video blocks remain readable and renderable
-for compatibility but are not offered as a new Container add action.
+Question and final-question question/answer collections support the existing
+content-block types plus a **Container** block for horizontal media groups. New
+Container children can be Image, YouTube, or Audio blocks; YouTube is the video
+source exposed for new Container content. Existing legacy Video blocks remain
+readable and renderable for compatibility but are not offered as a new Container
+add action. The final-description collection follows round/category descriptions
+and offers Text and Image blocks only.
 
 Container children keep the normal media editing controls, captions, stored files,
 YouTube URLs, and playback behavior. In gameplay, regular editor previews, and
@@ -142,10 +144,10 @@ siblings inside that same Container.
 
 ## Content previews
 
-Regular-question, answer, final-question, round-description, and
-category-description previews use the available preview-dialog width instead of
-a fixed desktop text/media cap. Normal responsive padding is preserved so content
-does not touch the dialog or viewport edges.
+Regular-question, answer, final-question, final-description, round-description,
+and category-description previews use the available preview-dialog width instead
+of a fixed desktop text/media cap. Normal responsive padding is preserved so
+content does not touch the dialog or viewport edges.
 
 Text and media blocks stay centered, while image/video sizing keeps the existing
 height and `object-fit` constraints. Four-clue previews retain their dedicated
@@ -171,11 +173,13 @@ a question for these checks to become accurate.
 
 ## Final question
 
-Final question and answer blocks are stored directly on the quiz and edited in a
-dedicated editor. The final-question editor uses the same question/answer tab
-behavior as the regular question editor: the question tab opens by default and
-only the active block collection is shown, while both collections remain in the
-same form so switching tabs does not discard unsaved edits.
+Final description, question, and answer blocks are stored directly on the quiz
+and edited in one dedicated editor. The editor exposes three sibling tabs:
+**Question**, **Correct answer**, and **Description**. The question tab opens by
+default, and only the active block collection is shown. All three collections
+remain in the same form, so switching tabs does not discard unsaved edits. The
+Description tab uses the same Text/Image description-block scope as round and
+category descriptions.
 
 The board toolbar shows **Delete final question** only when at least one final
 question or answer block contains content.

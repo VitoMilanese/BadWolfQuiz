@@ -71,3 +71,11 @@ If an asynchronous intro transition fails or returns an unsupported route, norma
 ## Persistence
 
 Round and category description blocks are persisted with the quiz definition and copied into the immutable quiz snapshot used by a running game. `GameSessionLauncher` explicitly eager-loads both round and category `DescriptionBlocks` before `QuizSnapshotFactory` creates that snapshot; otherwise the no-tracking game query would leave the intro description collections empty. Starting or skipping an intro does not modify quiz data.
+
+## Final-question intro
+
+The final question has its own optional ordered description blocks. They are edited in the final-question editor alongside **Question** and **Correct answer**, using the same **Text** and **Image** description-block types as round and category descriptions.
+
+When the regular rounds are finished, the host first sees the localized **FINAL QUESTION** presentation. The final-question description is rendered directly below that heading. This screen does not advance on a timer: it remains visible until the host presses **Proceed to wagers**. That action uses the same normal or forced final-question transition handler that previously ran after the automatic delay, so the existing wagering, answering, and judging phases are unchanged.
+
+Final-question description blocks are stored with the quiz, included in the immutable runtime snapshot, copied by quiz cloning and package import/export, and included in media archive/restore handling for uploaded images.

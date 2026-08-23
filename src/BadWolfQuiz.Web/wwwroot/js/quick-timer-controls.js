@@ -105,3 +105,20 @@
     script.dataset.boardPlayerScoreActions = "";
     document.head.appendChild(script);
 })();
+
+(() => {
+    if (window.badWolfFinalQuestionTransitionGuardLoaderInstalled) {
+        return;
+    }
+
+    window.badWolfFinalQuestionTransitionGuardLoaderInstalled = true;
+    if (document.querySelector("script[data-final-question-transition-guard]")) {
+        return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "/js/final-question-transition-guard.js?v=1";
+    script.async = false;
+    script.dataset.finalQuestionTransitionGuard = "";
+    document.head.appendChild(script);
+})();

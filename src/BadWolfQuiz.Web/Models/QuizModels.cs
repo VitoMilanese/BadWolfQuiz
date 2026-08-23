@@ -136,6 +136,8 @@ public sealed class Quiz
     public DateTime? PublishedAtUtc { get; set; }
 
     public ICollection<QuizRound> Rounds { get; set; } = new List<QuizRound>();
+    public ICollection<FinalDescriptionContentBlock> FinalDescriptionBlocks { get; set; } =
+        new List<FinalDescriptionContentBlock>();
     public ICollection<FinalQuestionContentBlock> FinalQuestionBlocks { get; set; } =
         new List<FinalQuestionContentBlock>();
     public ICollection<FinalAnswerContentBlock> FinalAnswerBlocks { get; set; } =
@@ -240,6 +242,12 @@ public abstract class ContentBlockBase
     public byte[]? FileData { get; set; }
     public string? FileContentType { get; set; }
     public string? FileName { get; set; }
+}
+
+public sealed class FinalDescriptionContentBlock : ContentBlockBase
+{
+    public int QuizId { get; set; }
+    public Quiz Quiz { get; set; } = null!;
 }
 
 public sealed class FinalQuestionContentBlock : ContentBlockBase
