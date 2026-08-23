@@ -10,12 +10,28 @@
         FieldPrefix = "Input.Blocks",
         Blocks = Model.Input.Blocks
     };
+
+    var renameDialogTitle = Model.IsCategory
+        ? Localizer["QuizEditor_RenameCategory"].Value
+        : Localizer["QuizEditor_RenameRound"].Value;
+    var renameTitleLabel = Model.IsCategory
+        ? Localizer["QuizEditor_CategoryTitle"].Value
+        : Localizer["QuizEditor_RoundTitle"].Value;
 }
 
 <div class="page-heading">
     <div>
         <p class="eyebrow">@Localizer["Label_Description"]</p>
-        <h1>@Model.EntityTitle</h1>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button type="button"
+                    class="button button-secondary icon-button"
+                    data-open-description-rename
+                    title="@renameDialogTitle"
+                    aria-label="@renameDialogTitle">
+                ✏️
+            </button>
+            <h1 data-description-entity-title>@Model.EntityTitle</h1>
+        </div>
     </div>
 </div>
 
@@ -61,12 +77,139 @@
     </div>
 </form>
 
+<dialog id="description-rename-dialog" class="app-dialog">
+    <div class="dialog-card">
+        <div class="dialog-heading">
+            <h2>@renameDialogTitle</h2>
+            <button type="button"
+                    class="dialog-close"
+                    data-close-description-rename
+                    aria-label="@Localizer["Button_Cancel"]">
+                ×
+            </button>
+        </div>
+
+        <form method="post"
+              asp-page-handler="Rename"
+              id="description-rename-form"
+              data-error="@Localizer["Error_Unexpected"]">
+            <input type="hidden" name="quizId" value="@Model.Input.QuizId" />
+            <input type="hidden" name="roundId" value="@Model.Input.RoundId" />
+            <input type="hidden" name="categoryId" value="@Model.Input.CategoryId" />
+
+            <label for="description-rename-title">@renameTitleLabel</label>
+            <input id="description-rename-title"
+                   name="title"
+                   value="@Model.EntityTitle"
+                   maxlength="100"
+                   required />
+
+            <div class="validation-summary"
+                 data-description-rename-error
+                 hidden></div>
+
+            <div class="dialog-actions form-actions">
+                <button type="button"
+                        class="button button-secondary"
+                        data-close-description-rename>
+                    @Localizer["Button_Cancel"]
+                </button>
+                <button type="submit"
+                        class="button button-primary">
+                    @Localizer["Button_Save"]
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
 <partial name="Shared/_QuestionPreviewModal" />
 
 @section Scripts {
     <script src="~/js/image-clipboard-upload.js" asp-append-version="true"></script>
     <script>
         (() => {
+            const renameDialog = document.getElementById("description-rename-dialog");
+            const renameForm = document.getElementById("description-rename-form");
+            const renameInput = document.getElementById("description-rename-title");
+            const renameButton = document.querySelector("[data-open-description-rename]");
+            const renameError = document.querySelector("[data-description-rename-error]");
+            const entityTitle = document.querySelector("[data-description-entity-title]");
+            const previewButton = document.querySelector("[data-open-description-preview]");
+
+            const closeRenameDialog = () => {
+                if (renameDialog?.open) {
+                    renameDialog.close();
+                }
+            };
+
+            renameButton?.addEventListener("click", () => {
+                if (!renameDialog || !renameInput) return;
+                renameInput.value = entityTitle?.textContent?.trim() || renameInput.value;
+                if (renameError) {
+                    renameError.hidden = true;
+                    renameError.textContent = "";
+                }
+                renameDialog.showModal();
+                requestAnimationFrame(() => {
+                    renameInput.focus();
+                    renameInput.select();
+                });
+            });
+
+            renameDialog?.querySelectorAll("[data-close-description-rename]")
+                .forEach(button => button.addEventListener("click", closeRenameDialog));
+
+            renameForm?.addEventListener("submit", async event => {
+                event.preventDefault();
+                if (!renameForm.reportValidity()) return;
+
+                if (renameError) {
+                    renameError.hidden = true;
+                    renameError.textContent = "";
+                }
+
+                try {
+                    const response = await fetch(renameForm.action, {
+                        method: "POST",
+                        body: new FormData(renameForm),
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+
+                    let payload = null;
+                    try {
+                        payload = await response.json();
+                    } catch {
+                        payload = null;
+                    }
+
+                    if (!response.ok || !payload?.success) {
+                        if (renameError) {
+                            renameError.textContent = payload?.error || renameForm.dataset.error || "";
+                            renameError.hidden = false;
+                        }
+                        return;
+                    }
+
+                    const oldTitle = entityTitle?.textContent?.trim() || "";
+                    if (entityTitle) entityTitle.textContent = payload.title;
+                    if (renameInput) renameInput.value = payload.title;
+                    if (previewButton) {
+                        previewButton.dataset.previewTitle = payload.previewTitle || payload.title;
+                    }
+                    if (oldTitle && document.title.includes(oldTitle)) {
+                        document.title = document.title.replace(oldTitle, payload.title);
+                    }
+
+                    closeRenameDialog();
+                } catch {
+                    if (renameError) {
+                        renameError.textContent = renameForm.dataset.error || "";
+                        renameError.hidden = false;
+                    }
+                }
+            });
+
             const section = document.getElementById("description-blocks");
             const backLink = document.getElementById("description-editor-back");
             if (!section) return;
@@ -194,6 +337,7 @@
 
             document.addEventListener("keydown", event => {
                 if (event.key !== "Escape" || !backLink) return;
+                if (renameDialog?.open) return;
                 const previewModal = document.getElementById("question-preview-modal");
                 if (previewModal && !previewModal.hidden) return;
                 event.preventDefault();
