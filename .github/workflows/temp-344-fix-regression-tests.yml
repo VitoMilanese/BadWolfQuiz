@@ -21,6 +21,16 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Mark CI started
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          printf 'started\n' > .github/temp-344-ci-status.txt
+          git add .github/temp-344-ci-status.txt
+          git commit -m "TEMP mark regression CI started"
+          git push origin HEAD:${{ github.ref_name }}
+
       - name: Patch stale final lifecycle assertion
         shell: bash
         run: |
@@ -50,18 +60,31 @@ jobs:
           registry_path.write_text(registry.replace(old_status, new_status, 1))
           PY
 
-      - name: Run affected regression tests
-        run: >-
-          dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
-          --filter "FullyQualifiedName~ContentBlockAutoplayRegressionTests.Host_native_media_autoplays_and_uses_normal_media_lifecycle|FullyQualifiedName~GameplayRightOverlaySafeGapRegressionTests.Final_answering_collapses_by_width_without_crossing_its_right_anchor|FullyQualifiedName~GameplayRightOverlaySafeGapRegressionTests.Final_answering_does_not_reserve_its_own_scrollbar_when_the_list_fits|FullyQualifiedName~GameSessionRegistryTests.Final_question_routes_private_player_actions_by_approved_connection"
-          --configuration Release
-          --verbosity minimal
-
-      - name: Commit patched test for extraction
+      - name: Run affected regression tests and preserve failure log
         shell: bash
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tests/BadWolfQuiz.Web.Tests/GameSessionRegistryTests.cs
-          git commit -m "TEMP align final lifecycle regression test"
+          set +e
+          dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj \
+            --filter "FullyQualifiedName~ContentBlockAutoplayRegressionTests.Host_native_media_autoplays_and_uses_normal_media_lifecycle|FullyQualifiedName~GameplayRightOverlaySafeGapRegressionTests.Final_answering_collapses_by_width_without_crossing_its_right_anchor|FullyQualifiedName~GameplayRightOverlaySafeGapRegressionTests.Final_answering_does_not_reserve_its_own_scrollbar_when_the_list_fits|FullyQualifiedName~GameSessionRegistryTests.Final_question_routes_private_player_actions_by_approved_connection" \
+            --configuration Release \
+            --verbosity minimal 2>&1 | tee /tmp/temp-344-test.log
+          status=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$status" -ne 0 ]; then
+            cp /tmp/temp-344-test.log .github/temp-344-ci-failure.log
+            printf 'failed\n' > .github/temp-344-ci-status.txt
+            git add .github/temp-344-ci-status.txt .github/temp-344-ci-failure.log
+            git commit -m "TEMP capture regression CI failure"
+            git push origin HEAD:${{ github.ref_name }}
+            exit "$status"
+          fi
+
+      - name: Commit passing patched test for extraction
+        shell: bash
+        run: |
+          printf 'passed\n' > .github/temp-344-ci-status.txt
+          git add tests/BadWolfQuiz.Web.Tests/GameSessionRegistryTests.cs \
+                  .github/temp-344-ci-status.txt
+          git commit -m "TEMP capture passing regression test fixes"
           git push origin HEAD:${{ github.ref_name }}
