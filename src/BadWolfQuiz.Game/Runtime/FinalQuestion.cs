@@ -107,10 +107,16 @@ public sealed class FinalQuestion
 
         if (_submissions.All(item => item.IsCorrect.HasValue))
         {
-            Status = FinalQuestionStatus.Completed;
+            Status = FinalQuestionStatus.AnswerPresentation;
         }
 
         return submission;
+    }
+
+    internal void CompleteAnswerPresentation()
+    {
+        EnsureStatus(FinalQuestionStatus.AnswerPresentation);
+        Status = FinalQuestionStatus.Completed;
     }
 
     internal bool RemovePlayer(GamePlayerId playerId)
@@ -123,11 +129,14 @@ public sealed class FinalQuestion
 
         _submissions.Remove(submission);
 
-        if (_submissions.Count == 0 ||
-            (Status == FinalQuestionStatus.Judging &&
-             _submissions.All(item => item.IsCorrect.HasValue)))
+        if (_submissions.Count == 0)
         {
             Status = FinalQuestionStatus.Completed;
+        }
+        else if (Status == FinalQuestionStatus.Judging &&
+                 _submissions.All(item => item.IsCorrect.HasValue))
+        {
+            Status = FinalQuestionStatus.AnswerPresentation;
         }
 
         return true;
@@ -263,5 +272,6 @@ public enum FinalQuestionStatus
     Wagering = 1,
     Answering = 2,
     Judging = 3,
-    Completed = 4
+    Completed = 4,
+    AnswerPresentation = 5
 }

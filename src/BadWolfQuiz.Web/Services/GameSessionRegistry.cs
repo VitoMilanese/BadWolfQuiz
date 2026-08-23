@@ -946,6 +946,23 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public GameSessionRegistration? CompleteFinalQuestion(string publicCode)
+    {
+        var game = Find(publicCode);
+
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            game.Session.CompleteFinalQuestion();
+            game.MarkPersistenceChanged();
+            return game;
+        }
+    }
+
     public RuntimeQuestion? SelectQuestion(
         string publicCode,
         int sourceQuestionId)

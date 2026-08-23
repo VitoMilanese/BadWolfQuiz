@@ -1342,6 +1342,9 @@
         BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging;
     var showAnswer =
         Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.FinalJudging;
+    var showFinalAnswer =
+        showAnswer &&
+        final.Status == BadWolfQuiz.Game.Runtime.FinalQuestionStatus.AnswerPresentation;
 
     <section class="host-game-board final-question-host"
              data-game-id="@Model.Game.Session.Id.Value"
@@ -1502,6 +1505,69 @@
                             @Localizer["FinalQuestion_StartJudging"]
                         </button>
                     </form>
+                }
+                else if (showFinalAnswer)
+                {
+                    <section class="game-content-presentation answer-presentation"
+                             data-media-autoplay-state="final-answer">
+                        <p class="eyebrow">@Localizer["GameBoard_Answer"]</p>
+                        <div class="game-content-blocks">
+                            @foreach (var block in final.Definition.AnswerBlocks)
+                            {
+                                <article class="game-content-block">
+                                    @if (!string.IsNullOrWhiteSpace(block.TopCaption))
+                                    {
+                                        <p class="game-content-caption">@block.TopCaption</p>
+                                    }
+                                    @switch (block.Kind)
+                                    {
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Text:
+                                            <p class="game-content-text">@block.TextContent</p>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Image:
+                                            <img class="game-content-image"
+                                                 src="@Url.Page("/Admin/Games/Lobby", "FinalContentBlock", new { id = Model.Game.Session.Id.Value, sourceContentBlockId = block.SourceContentBlockId, answer = true })"
+                                                 alt="@block.FileName" />
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
+                                            <div class="game-content-audio-shell">
+                                                <audio class="game-content-audio"
+                                                       controls
+                                                       preload="metadata"
+                                                       data-autoplay-media="@Model.ResolveContentBlockAutoplay(block, answer: true, final: true).ToString().ToLowerInvariant()"
+                                                       src="@Url.Page("/Admin/Games/Lobby", "FinalContentBlock", new { id = Model.Game.Session.Id.Value, sourceContentBlockId = block.SourceContentBlockId, answer = true })">
+                                                    @Localizer["GameBoard_AudioUnsupported"]
+                                                </audio>
+                                            </div>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
+                                            <video class="game-content-video"
+                                                   data-autoplay-media="@Model.ResolveContentBlockAutoplay(block, answer: true, final: true).ToString().ToLowerInvariant()"
+                                                   controls src="@block.ExternalUrl"></video>
+                                            break;
+                                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
+                                            <iframe class="game-content-video youtube-auto-expand"
+                                                    data-youtube-autoplay="@Model.ResolveContentBlockAutoplay(block, answer: true, final: true).ToString().ToLowerInvariant()"
+                                                    src="@YouTubeEmbedUrlBuilder.GetYouTubeEmbedUrl(block.ExternalUrl)"
+                                                    title="@Localizer["GameBoard_MediaContent"]"
+                                                    data-close-label="@Localizer["GameBoard_CloseVideo"]"
+                                                    allowfullscreen>
+                                            </iframe>
+                                            break;
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
+                                    {
+                                        <p class="game-content-caption">@block.BottomCaption</p>
+                                    }
+                                </article>
+                            }
+                        </div>
+                        <form method="post" asp-page-handler="CompleteFinalQuestion">
+                            <button class="button button-primary" type="submit">
+                                @Localizer["FinalQuestion_Results"]
+                            </button>
+                        </form>
+                    </section>
                 }
                 else
                 {

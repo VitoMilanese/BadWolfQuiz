@@ -983,6 +983,16 @@ public sealed class LobbyModel(
             cancellationToken);
     }
 
+    public async Task<IActionResult> OnPostCompleteFinalQuestionAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return await ExecuteFinalHostCommand(
+            id,
+            game => sessionRegistry.CompleteFinalQuestion(game.PublicCode),
+            cancellationToken);
+    }
+
     public async Task<IActionResult> OnPostSelectQuestionAsync(
         Guid id,
         int sourceQuestionId,
