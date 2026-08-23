@@ -22,6 +22,7 @@ The shared busy state is used for:
 - opening the quiz, question, final-question, round-description, and category-description editors;
 - switching rounds in the quiz editor;
 - renaming rounds and categories from the quiz editor;
+- swapping quiz questions with drag-and-drop in the quiz editor;
 - Save actions in the quiz, question, final-question, round-description, and category-description editors;
 - Back navigation from those editor pages, including Escape-key navigation;
 - opening an already-resolved question from the host game board;
@@ -37,6 +38,8 @@ Quiz import keeps the existing native multipart form submission. Once a `.bwquiz
 Quiz export keeps the native browser download path rather than reading the generated package into a JavaScript `Blob`. The export link is locked immediately and a per-request `exportToken` is added to the download URL. When package preparation finishes, including server failure paths, the export handler writes a short-lived `badwolfquiz-export-complete` cookie containing that token. The current page polls for the matching token, then releases the busy overlay and export lock. A fallback timeout and `pageshow` recovery prevent stale busy state if browser download navigation behaves unexpectedly.
 
 Round and category rename dialogs use a dedicated AJAX rename endpoint instead of following the original POST/redirect path back through the full Quiz Editor GET. While the request is active, all controls in the rename dialog are disabled and the shared fullscreen overlay prevents conflicting interaction. A successful response updates the visible title and dependent client-side metadata in place, closes the dialog, shows the existing quiz save-status message, and releases the busy state. Errors release the busy state and restore the controls so the rename can be corrected or retried. The original Editor POST handlers remain available as the native/no-JavaScript fallback.
+
+Quiz question drag-and-drop exchange shows the shared fullscreen overlay immediately after a valid drop and before the `ExchangeQuestions` request is awaited. An in-progress guard prevents a second exchange from starting while the first request is active. On success, the question cells are swapped in the DOM before the overlay is released; on failure, the existing error handling runs and the busy state is still released from the exchange cleanup path.
 
 Quiz Editor and Question Editor Save actions already use AJAX. Their existing save handlers continue to own the request and error handling; the shared busy layer observes the existing submitter state and closes when the operation completes and the submitter is re-enabled.
 

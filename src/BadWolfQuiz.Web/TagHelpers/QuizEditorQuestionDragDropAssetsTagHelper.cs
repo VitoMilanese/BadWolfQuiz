@@ -20,6 +20,6 @@ public sealed class QuizEditorQuestionDragDropAssetsTagHelper : TagHelper
         }
 
         output.PostContent.AppendHtml(
-            "<script src=\"/js/quiz-editor-question-drag-drop.js?v=1.20.0-265.1\"></script>");
+            "<script src=\"/js/quiz-editor-question-drag-drop.js?v=1.22.25-357.1\"></script>");
     }
 }
