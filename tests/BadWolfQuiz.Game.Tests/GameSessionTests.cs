@@ -1270,12 +1270,17 @@ public sealed class GameSessionTests
         session.JudgeFinalAnswer(rose.Id, true);
         session.JudgeFinalAnswer(mickey.Id, false);
 
-        Assert.Equal(FinalQuestionStatus.Completed, final.Status);
-        Assert.Equal(GameSessionStatus.Completed, session.Status);
+        Assert.Equal(FinalQuestionStatus.AnswerPresentation, final.Status);
+        Assert.Equal(GameSessionStatus.FinalJudging, session.Status);
         Assert.Equal(650, rose.Score);
         Assert.Equal(50, mickey.Score);
         Assert.True(final.Submissions.Single(x => x.PlayerId == rose.Id).IsCorrect);
         Assert.False(final.Submissions.Single(x => x.PlayerId == mickey.Id).IsCorrect);
+
+        session.CompleteFinalQuestion();
+
+        Assert.Equal(FinalQuestionStatus.Completed, final.Status);
+        Assert.Equal(GameSessionStatus.Completed, session.Status);
     }
 
     [Fact]

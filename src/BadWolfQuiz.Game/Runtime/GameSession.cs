@@ -1267,12 +1267,14 @@ public sealed class GameSession
         var wager = submission.Wager!.Amount;
         player.ApplyScore(isCorrect ? wager : -wager);
 
-        if (FinalQuestion.Status == FinalQuestionStatus.Completed)
-        {
-            Status = GameSessionStatus.Completed;
-        }
-
         return submission;
+    }
+
+    public void CompleteFinalQuestion()
+    {
+        EnsureFinalStatus(GameSessionStatus.FinalJudging);
+        FinalQuestion!.CompleteAnswerPresentation();
+        Status = GameSessionStatus.Completed;
     }
 
     public IReadOnlyList<GameResultStanding> GetFinalStandings()

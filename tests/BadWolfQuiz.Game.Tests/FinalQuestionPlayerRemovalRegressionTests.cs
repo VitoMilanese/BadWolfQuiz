@@ -40,7 +40,7 @@ public sealed class FinalQuestionPlayerRemovalRegressionTests
     }
 
     [Fact]
-    public void Removing_last_unresolved_player_during_final_judging_completes_game()
+    public void Removing_last_unresolved_player_during_final_judging_shows_answer_before_completion()
     {
         var session = CreateFinalSession(out var rose, out var clara);
         foreach (var player in new[] { rose, clara })
@@ -55,9 +55,16 @@ public sealed class FinalQuestionPlayerRemovalRegressionTests
 
         session.RemovePlayer(clara.Id);
 
-        Assert.Equal(GameSessionStatus.Completed, session.Status);
-        Assert.Equal(FinalQuestionStatus.Completed, session.FinalQuestion!.Status);
+        Assert.Equal(GameSessionStatus.FinalJudging, session.Status);
+        Assert.Equal(
+            FinalQuestionStatus.AnswerPresentation,
+            session.FinalQuestion!.Status);
         Assert.Equal(100, rose.Score);
+
+        session.CompleteFinalQuestion();
+
+        Assert.Equal(GameSessionStatus.Completed, session.Status);
+        Assert.Equal(FinalQuestionStatus.Completed, session.FinalQuestion.Status);
     }
 
     [Theory]

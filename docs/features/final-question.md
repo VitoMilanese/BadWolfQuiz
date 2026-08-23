@@ -10,7 +10,7 @@ The quiz editor provides a dedicated final-question editor. It uses the same ord
 
 Final content is stored separately from round questions and copied into the immutable `FinalQuestionSnapshot` when a game lobby is created. A quiz without final content produces no final snapshot and keeps the existing non-final game flow.
 
-Active-game recovery starts once normal gameplay has meaningful recoverable state. Opening the first regular question still starts persistence as before. Advancing directly to the Final Question also starts persistence when the session reaches `FinalWagering`, even if every regular question is still `Available`. `FinalWagering`, `FinalAnswering`, and `FinalJudging` snapshots are eligible for restoration after a process restart.
+Active-game recovery starts once normal gameplay has meaningful recoverable state. Opening the first regular question still starts persistence as before. Advancing directly to the Final Question also starts persistence when the session reaches `FinalWagering`, even if every regular question is still `Available`. `FinalWagering`, `FinalAnswering`, and `FinalJudging` snapshots are eligible for restoration after a process restart. The final-answer presentation is persisted as `FinalQuestionStatus.AnswerPresentation` while the session remains in `FinalJudging`, so recovery returns to the answer presentation instead of skipping directly to final standings.
 
 ## Runtime flow
 
@@ -22,9 +22,10 @@ Active-game recovery starts once normal gameplay has meaningful recoverable stat
 6. The Engine locks answering only after every answer is present.
 7. The host judges each answer.
 8. The wager is added for a correct answer and subtracted for an incorrect answer.
-9. After every submission is judged, the game is completed and final standings are available.
+9. After every submission is judged, the canonical final answer is presented to the host while the session remains in the final-judging phase.
+10. The host explicitly opens **Final results**, which completes the game and makes final standings available.
 
-The host can remove a player during final wagering, answering, or judging. Removal also removes that player's final-question submission so the removed player cannot block phase progression. If the last remaining player is removed during any final-question phase, the final question and game complete immediately with empty final standings.
+The host can remove a player during final wagering, answering, or judging. Removal also removes that player's final-question submission so the removed player cannot block phase progression. If the final unresolved submission is removed after all remaining submissions are judged, the final answer is presented before completion. If the last remaining player is removed and no final submissions remain, the final question and game complete immediately with empty final standings.
 
 The same 3-second transition is used when the host forces advancement directly to the final question. A quiz without a final question never shows this transition.
 
@@ -59,9 +60,11 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 - Normal player wager/answer submissions also preserve unrelated live UI state. The submitting player receives their own confirmed state, other players keep any wager or answer they are still typing, and the host updates only submission progress controls instead of rebuilding the gameplay view or player cards.
 - The fallback helper is loaded eagerly. If the first fallback click occurs before the helper asset finishes loading, the bootstrap captures and queues that click rather than allowing the legacy form-navigation path to run.
 - The host can remove a player throughout final wagering, answering, and judging. The final-question state and host controls refresh immediately after player changes.
-- Removing the final remaining player completes the game immediately. The completed host screen keeps **Finish game** available but does not render **Final results** or an empty podium when `FinalStandings` is empty.
+- Removing the final remaining player completes the game immediately when no final submissions remain. The completed host screen keeps **Finish game** available but does not render **Final results** or an empty podium when `FinalStandings` is empty.
 - Locking answers starts a sequential presentation of player submissions. The host sees one player name and answer at a time, judges it as correct or incorrect, and then advances automatically to the next submission. Player devices stop rendering the final-question content as soon as the session enters `FinalJudging`; they show only the waiting-for-judging state.
 - As soon as the host submits **Correct** or **Incorrect**, both judging buttons are disabled together and the current judging form remains locked until the refreshed view replaces it. A genuine command error releases the lock so the host can retry.
+- After the last final submission has been judged, the host sees the configured canonical final answer before any leaderboard is rendered. The presentation supports the same text, image, audio, video, and YouTube answer blocks as the editor, including the existing final-answer autoplay settings and media lifecycle.
+- The final-answer presentation remains a durable runtime state across refresh and active-game recovery. The host must explicitly choose **Final results** before the session becomes `Completed` and final standings are rendered.
 - The host **Tools** menu remains available on the inter-round leaderboard and throughout final wagering, answering, and judging. In these limited states, **Choose random player**, **Next round**, and **Advance to final question** are hidden, while applicable tools such as answer history, answer key, blocked-player management, and game settings remain available.
 - Join information is exposed as a dedicated QR button in the game header between **Tools** and the Discord microphone button rather than as an item inside **Tools**. The button opens the existing join-information panel.
 - The final-question host panel uses the same viewport-width presentation as an active regular question. During wagering/answering the panel uses compact spacing and gives the question/media area substantially more usable width and height while keeping media viewport-bounded.
@@ -70,12 +73,12 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 - Answer history and answer-key actions are exposed through **Tools** rather than duplicated as standalone buttons on the final-question page.
 - The game-settings dialog remains available during final wagering, answering, and judging.
 - The broadcast-facing game screen never reveals the configured correct answer. The host can open a separate live answer-key tab on another display; it follows regular, wager, and final questions automatically.
-- The game normally finishes after every participating answer is judged, then shows the authoritative final standings. The zero-player removal case completes immediately with no standings.
+- Final judging applies all score changes before the canonical answer presentation. Opening **Final results** changes only the final workflow state; it does not apply or recalculate final wagers.
 - Players excluded by the negative-score setting remain connected as spectators.
 
 ### Persistent host navigation
 
-When the host is already inside the running-game shell, the normal and forced Final Question transition is mounted into the existing gameplay region rather than replacing the browser document. Final Wagering, Final Answering, Final Judging, and final standings continue through the same persistent host navigation path, preserving the long-lived SignalR connection, player cards, header controls, and other host state.
+When the host is already inside the running-game shell, the normal and forced Final Question transition is mounted into the existing gameplay region rather than replacing the browser document. Final Wagering, Final Answering, Final Judging, the final-answer presentation, and final standings continue through the same persistent host navigation path, preserving the long-lived SignalR connection, player cards, header controls, and other host state.
 
 The forced Final Question confirmation submits through the asynchronous host flow. The natural unfinished-round warning closes before the host advances; choosing **Return to an unfinished round** performs the actual return in one action. Unsupported or failed transitions retain normal browser navigation as a fallback.
 
@@ -90,6 +93,7 @@ Repeated live refreshes of the same final-results podium do not recreate the exi
 - `SubmitFinalAnswer()`
 - `LockFinalAnswers()`
 - `JudgeFinalAnswer()`
+- `CompleteFinalQuestion()`
 
 Each command validates the current phase and rejects duplicate or out-of-order submissions.
 
