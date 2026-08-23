@@ -87,7 +87,7 @@ public sealed class ActiveGamePersistenceService(
         {
             try
             {
-                registry.Restore(
+                var game = registry.Restore(
                     snapshot.PublicCode,
                     GameSession.Restore(
                         snapshot.Quiz,
@@ -96,6 +96,7 @@ public sealed class ActiveGamePersistenceService(
                         timeProvider),
                     snapshot.HostId,
                     snapshot.AllowsNewPlayers);
+                game.RestoreQuestionOpenSequence(snapshot.QuestionOpenSequence);
             }
             catch (Exception exception)
             {
@@ -231,7 +232,8 @@ public sealed class ActiveGamePersistenceService(
                 game.Session.Quiz,
                 game.Session.Settings,
                 game.Session.CaptureState(),
-                timeProvider.GetUtcNow());
+                timeProvider.GetUtcNow(),
+                game.CaptureQuestionOpenSequence());
         }
     }
 

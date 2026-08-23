@@ -6,6 +6,8 @@ namespace BadWolfQuiz.Web.Services;
 public sealed class GameSessionRegistration
 {
     private long _persistenceRevision;
+    private long _nextQuestionOpenSequence;
+    private readonly Dictionary<int, long> _questionOpenSequence = [];
 
     public GameSessionRegistration(
         string publicCode,
@@ -41,10 +43,116 @@ public sealed class GameSessionRegistration
 
     public long PersistenceRevision => Interlocked.Read(ref _persistenceRevision);
 
+    public long? GetQuestionOpenSequence(int sourceQuestionId) =>
+        _questionOpenSequence.TryGetValue(sourceQuestionId, out var sequence)
+            ? sequence
+            : null;
+
+    public IReadOnlyList<QuestionOpenSequenceState> CaptureQuestionOpenSequence() =>
+        _questionOpenSequence
+            .OrderBy(item => item.Value)
+            .Select(item => new QuestionOpenSequenceState(item.Key, item.Value))
+            .ToArray();
+
+    internal void RestoreQuestionOpenSequence(
+        IReadOnlyList<QuestionOpenSequenceState>? states)
+    {
+        _questionOpenSequence.Clear();
+        _nextQuestionOpenSequence = 0;
+
+        var validQuestionIds = Session.Board.Questions
+            .Select(question => question.SourceQuestionId)
+            .ToHashSet();
+
+        foreach (var state in states ?? [])
+        {
+            if (state.Sequence <= 0 ||
+                !validQuestionIds.Contains(state.SourceQuestionId) ||
+                _questionOpenSequence.ContainsKey(state.SourceQuestionId))
+            {
+                continue;
+            }
+
+            _questionOpenSequence[state.SourceQuestionId] = state.Sequence;
+            _nextQuestionOpenSequence = Math.Max(
+                _nextQuestionOpenSequence,
+                state.Sequence);
+        }
+
+        if (_questionOpenSequence.Count == 0)
+        {
+            foreach (var question in Session.Board.Questions
+                         .Select(question => new
+                         {
+                             Question = question,
+                             OpenedAtUtc = InferLegacyQuestionOpenedAt(question)
+                         })
+                         .Where(item => item.OpenedAtUtc.HasValue)
+                         .OrderBy(item => item.OpenedAtUtc)
+                         .ThenBy(item => item.Question.SourceQuestionId))
+            {
+                _questionOpenSequence[question.Question.SourceQuestionId] =
+                    ++_nextQuestionOpenSequence;
+            }
+        }
+
+        TrackQuestionOpenings();
+    }
+
     internal void MarkPersistenceChanged()
     {
+        TrackQuestionOpenings();
         AutoAdvanceCompletedAllPlayerQuestion();
         Interlocked.Increment(ref _persistenceRevision);
+    }
+
+    private void TrackQuestionOpenings()
+    {
+        foreach (var question in Session.Board.Questions.Where(question =>
+                     question.Status is
+                         RuntimeQuestionStatus.Selected or
+                         RuntimeQuestionStatus.AwaitingWager or
+                         RuntimeQuestionStatus.Active or
+                         RuntimeQuestionStatus.ShowingAnswer))
+        {
+            if (_questionOpenSequence.ContainsKey(question.SourceQuestionId))
+            {
+                continue;
+            }
+
+            _questionOpenSequence[question.SourceQuestionId] =
+                ++_nextQuestionOpenSequence;
+        }
+    }
+
+    private static DateTimeOffset? InferLegacyQuestionOpenedAt(
+        RuntimeQuestion question)
+    {
+        DateTimeOffset? latest = null;
+
+        foreach (var attempt in question.AnswerAttempts)
+        {
+            if (latest is null || attempt.JudgedAtUtc > latest.Value)
+            {
+                latest = attempt.JudgedAtUtc;
+            }
+        }
+
+        if (question.Wager is { } singleWager &&
+            (latest is null || singleWager.SubmittedAtUtc > latest.Value))
+        {
+            latest = singleWager.SubmittedAtUtc;
+        }
+
+        foreach (var wager in question.AllPlayerWagers)
+        {
+            if (latest is null || wager.SubmittedAtUtc > latest.Value)
+            {
+                latest = wager.SubmittedAtUtc;
+            }
+        }
+
+        return latest;
     }
 
     private void AutoAdvanceCompletedAllPlayerQuestion()
@@ -183,6 +291,8 @@ public sealed class GameSessionRegistration
                 timeProvider ?? TimeProvider.System);
             BuzzerRace = null;
             AllPlayerTextReviews.Clear();
+            _questionOpenSequence.Clear();
+            _nextQuestionOpenSequence = 0;
             MarkPersistenceChanged();
         }
     }
@@ -194,6 +304,10 @@ internal sealed class AllPlayerTextReviewState
     public HashSet<GamePlayerId> JudgedPlayers { get; } = [];
     public bool Accepting { get; set; } = true;
 }
+
+public sealed record QuestionOpenSequenceState(
+    int SourceQuestionId,
+    long Sequence);
 
 public sealed record BuzzerRaceSnapshot(
     int SourceQuestionId,

@@ -71,3 +71,20 @@
     script.dataset.gameplayRightOverlaySafeGap = "";
     document.head.appendChild(script);
 })();
+
+(() => {
+    if (window.badWolfHostQuestionControlsLoaderInstalled) {
+        return;
+    }
+
+    window.badWolfHostQuestionControlsLoaderInstalled = true;
+    if (document.querySelector("script[data-host-question-controls]")) {
+        return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "/js/host-question-controls.js?v=6";
+    script.async = false;
+    script.dataset.hostQuestionControls = "";
+    document.head.appendChild(script);
+})();
