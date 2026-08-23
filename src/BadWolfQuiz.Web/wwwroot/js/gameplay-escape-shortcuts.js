@@ -203,7 +203,7 @@
 
     loadSharedStyle("/css/content-block-containers.css");
     loadSharedScript("/js/content-block-containers.js");
-    const gameContentViewportFitVersion = "4";
+    const gameContentViewportFitVersion = "5";
     loadSharedStyle(
         `/css/game-content-viewport-fit.css?v=${gameContentViewportFitVersion}`);
     loadSharedScript(

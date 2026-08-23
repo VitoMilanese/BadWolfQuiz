@@ -15,7 +15,7 @@ public sealed class GameplayContentViewportFitRegressionTests
             "gameplay-escape-shortcuts.js"));
 
         Assert.Contains(
-            "const gameContentViewportFitVersion = \"4\";",
+            "const gameContentViewportFitVersion = \"5\";",
             bootstrap,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -42,7 +42,7 @@ public sealed class GameplayContentViewportFitRegressionTests
         var viewportStyles = ReadAsset("css", "game-content-viewport-fit.css");
 
         Assert.Contains(
-            "@import url(\"./game-content-viewport-fit.css?v=5\");",
+            "@import url(\"./game-content-viewport-fit.css?v=6\");",
             busyStyles,
             StringComparison.Ordinal);
         Assert.Contains(
