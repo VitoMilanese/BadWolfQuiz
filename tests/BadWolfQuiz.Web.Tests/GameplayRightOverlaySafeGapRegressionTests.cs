@@ -30,7 +30,7 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
-            "/js/gameplay-right-overlay-safe-gap.js?v=3",
+            "/js/gameplay-right-overlay-safe-gap.js?v=4",
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -58,11 +58,11 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "window.addEventListener(\"resize\", scheduleSafeGapUpdate",
+            "window.addEventListener(\"resize\", refreshLayout",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "window.addEventListener(\"pageshow\", scheduleSafeGapUpdate);",
+            "window.addEventListener(\"pageshow\", refreshLayout);",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -109,6 +109,10 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
+            ".final-question-panel > .final-submission-drawer",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
             "right: var(--gameplay-right-overlay-safe-gap, 8px);",
             script,
             StringComparison.Ordinal);
@@ -128,21 +132,35 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
     }
 
     [Fact]
-    public void Final_answering_reserves_space_for_overlay_scrollbar()
+    public void Final_answering_uses_a_separate_drawer_shell_and_scroll_layer()
     {
         var script = ReadHelper();
 
         Assert.Contains(
-            "padding-right: calc(0.6rem + 1rem);",
+            "const finalAnsweringDrawerClass = \"final-submission-drawer\";",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            ".final-question-panel > .final-submission-list > li",
+            "const ensureFinalAnsweringDrawer = () =>",
             script,
             StringComparison.Ordinal);
-        Assert.Contains("box-sizing: border-box;", script, StringComparison.Ordinal);
-        Assert.Contains("width: auto;", script, StringComparison.Ordinal);
-        Assert.Contains("max-width: 100%;", script, StringComparison.Ordinal);
+        Assert.Contains("list.before(drawer);", script, StringComparison.Ordinal);
+        Assert.Contains("drawer.appendChild(list);", script, StringComparison.Ordinal);
+        Assert.Contains("new MutationObserver", script, StringComparison.Ordinal);
+
+        Assert.Contains(
+            ".final-question-panel > .final-submission-list {\n        visibility: hidden;",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".final-question-panel > .final-submission-drawer > .final-submission-list",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains("right: 0.75rem;", script, StringComparison.Ordinal);
+        Assert.Contains("left: 3.25rem;", script, StringComparison.Ordinal);
+        Assert.Contains("padding: 0 1rem 0 0;", script, StringComparison.Ordinal);
+        Assert.Contains("overflow-y: auto;", script, StringComparison.Ordinal);
+        Assert.Contains("visibility: visible;", script, StringComparison.Ordinal);
     }
 
     private static string ReadHelper()
