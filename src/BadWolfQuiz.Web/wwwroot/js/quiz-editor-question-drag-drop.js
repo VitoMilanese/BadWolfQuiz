@@ -1,5 +1,6 @@
 (() => {
     const selector = ".question-cell-slot";
+    let exchangeInProgress = false;
 
     const getQuestionSlot = target =>
         target instanceof Element ? target.closest(selector) : null;
@@ -85,7 +86,7 @@
 
     document.addEventListener("drop", async event => {
         const targetSlot = getQuestionSlot(event.target);
-        if (!targetSlot) {
+        if (!targetSlot || exchangeInProgress) {
             return;
         }
 
@@ -105,6 +106,9 @@
         event.stopImmediatePropagation();
         targetSlot.classList.remove("question-cell-drop-target");
 
+        exchangeInProgress = true;
+        const busyShown = window.BadWolfBusy?.show?.() === true;
+
         try {
             await persistExchange(sourceQuestionId, targetQuestionId);
             swapQuestionSlots(sourceSlot, targetSlot);
@@ -114,7 +118,11 @@
             alert(error.message);
         }
         finally {
+            exchangeInProgress = false;
             clearDragClasses();
+            if (busyShown) {
+                window.BadWolfBusy.hide();
+            }
         }
     }, true);
 })();
