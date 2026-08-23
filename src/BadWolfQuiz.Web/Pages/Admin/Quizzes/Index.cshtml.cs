@@ -23,6 +23,7 @@ public sealed class IndexModel(
     IStringLocalizer<UnfinishedGameResource> unfinishedGameLocalizer) : PageModel
 {
     public const string ExportCompletionCookieName = "badwolfquiz-export-complete";
+    public const string TransferCompletionCookieName = "badwolfquiz-transfer-complete";
 
     public IReadOnlyList<Quiz> Quizzes { get; private set; } = [];
     public IReadOnlySet<int> ResumableQuizIds { get; private set; } =
@@ -300,6 +301,7 @@ public sealed class IndexModel(
         string? exportToken,
         CancellationToken cancellationToken)
     {
+        var succeeded = false;
         try
         {
             var package = await quizPackageService.ExportAsync(quizId, cancellationToken);
@@ -312,43 +314,65 @@ public sealed class IndexModel(
                 .SingleAsync(item => item.Id == quizId, cancellationToken);
             var safeName = string.Concat(quiz.Title.Select(character =>
                 Path.GetInvalidFileNameChars().Contains(character) ? '_' : character));
-            return File(package, "application/vnd.badwolfquiz+zip", safeName + QuizPackageService.FileExtension);
+            var result = File(
+                package,
+                "application/vnd.badwolfquiz+zip",
+                safeName + QuizPackageService.FileExtension);
+            succeeded = true;
+            return result;
         }
         finally
         {
             SignalExportCompletion(exportToken);
+            SignalTransferCompletion(exportToken, "export", succeeded);
         }
     }
 
     [RequestSizeLimit(1100L * 1024 * 1024)]
     [RequestFormLimits(MultipartBodyLengthLimit = 1050L * 1024 * 1024)]
-    public async Task<IActionResult> OnPostImportAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnPostImportAsync(
+        string? importToken,
+        CancellationToken cancellationToken)
     {
-        if (ImportFile is null ||
-            !string.Equals(Path.GetExtension(ImportFile.FileName), QuizPackageService.FileExtension, StringComparison.OrdinalIgnoreCase))
-        {
-            TempData["ErrorMessage"] = localizer["QuizImport_InvalidFile"].Value;
-            return RedirectToPage();
-        }
-
+        var succeeded = false;
         try
         {
-            await using var stream = ImportFile.OpenReadStream();
-            await quizPackageService.ImportAsync(
-                stream, ImportFile.Length, currentHost.RequiredId, cancellationToken);
-            TempData["SuccessMessage"] = localizer["QuizImport_Success"].Value;
-        }
-        catch (InvalidDataException)
-        {
-            TempData["ErrorMessage"] = localizer["QuizImport_InvalidFile"].Value;
-        }
-        catch (System.Text.Json.JsonException)
-        {
-            TempData["ErrorMessage"] = localizer["QuizImport_InvalidFile"].Value;
-        }
+            if (ImportFile is null ||
+                !string.Equals(Path.GetExtension(ImportFile.FileName), QuizPackageService.FileExtension, StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["ErrorMessage"] = localizer["QuizImport_InvalidFile"].Value;
+                return CompleteImport(importToken);
+            }
 
-        return RedirectToPage();
+            try
+            {
+                await using var stream = ImportFile.OpenReadStream();
+                await quizPackageService.ImportAsync(
+                    stream, ImportFile.Length, currentHost.RequiredId, cancellationToken);
+                TempData["SuccessMessage"] = localizer["QuizImport_Success"].Value;
+                succeeded = true;
+            }
+            catch (InvalidDataException)
+            {
+                TempData["ErrorMessage"] = localizer["QuizImport_InvalidFile"].Value;
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                TempData["ErrorMessage"] = localizer["QuizImport_InvalidFile"].Value;
+            }
+
+            return CompleteImport(importToken);
+        }
+        finally
+        {
+            SignalTransferCompletion(importToken, "import", succeeded);
+        }
     }
+
+    private IActionResult CompleteImport(string? importToken) =>
+        Guid.TryParse(importToken, out _)
+            ? new EmptyResult()
+            : RedirectToPage();
 
     private void SignalExportCompletion(string? exportToken)
     {
@@ -360,16 +384,34 @@ public sealed class IndexModel(
         Response.Cookies.Append(
             ExportCompletionCookieName,
             token.ToString("D"),
-            new CookieOptions
-            {
-                HttpOnly = false,
-                IsEssential = true,
-                Secure = Request.IsHttps,
-                SameSite = SameSiteMode.Lax,
-                Path = "/",
-                MaxAge = TimeSpan.FromMinutes(5)
-            });
+            CreateCompletionCookieOptions());
     }
+
+    private void SignalTransferCompletion(
+        string? transferToken,
+        string operation,
+        bool succeeded)
+    {
+        if (!Guid.TryParse(transferToken, out var token))
+        {
+            return;
+        }
+
+        Response.Cookies.Append(
+            TransferCompletionCookieName,
+            $"{operation}:{token:D}:{(succeeded ? "success" : "failure")}",
+            CreateCompletionCookieOptions());
+    }
+
+    private CookieOptions CreateCompletionCookieOptions() => new()
+    {
+        HttpOnly = false,
+        IsEssential = true,
+        Secure = Request.IsHttps,
+        SameSite = SameSiteMode.Lax,
+        Path = "/",
+        MaxAge = TimeSpan.FromMinutes(5)
+    };
 
     private async Task LoadQuizzesAsync()
     {
