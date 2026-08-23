@@ -30,6 +30,9 @@ public sealed class QuizPackageService(QuizDbContext db)
             .Include(item => item.FinalQuestionBlocks)
             .Include(item => item.FinalAnswerBlocks)
             .Include(item => item.Rounds).ThenInclude(round => round.Rows)
+            .Include(item => item.Rounds).ThenInclude(round => round.DescriptionBlocks)
+            .Include(item => item.Rounds).ThenInclude(round => round.Categories)
+                .ThenInclude(category => category.DescriptionBlocks)
             .Include(item => item.Rounds).ThenInclude(round => round.Categories)
                 .ThenInclude(category => category.Questions)
                     .ThenInclude(question => question.QuestionBlocks)
@@ -102,8 +105,10 @@ public sealed class QuizPackageService(QuizDbContext db)
                                     question.ExcludeFromRandomWagerSelection,
                                     question.QuestionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                                     question.AnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray()))
-                                .ToArray()))
-                        .ToArray()))
+                                .ToArray(),
+                            category.DescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray()))
+                        .ToArray(),
+                    round.DescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray()))
                     .ToArray(),
                 quiz.FinalQuestionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                 quiz.FinalAnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
@@ -211,6 +216,12 @@ public sealed class QuizPackageService(QuizDbContext db)
                 UseRandomWagerQuestions = sourceRound.UseRandomWagerQuestions,
                 RandomWagerQuestionCount = sourceRound.RandomWagerQuestionCount
             };
+            foreach (var sourceBlock in sourceRound.DescriptionBlocks ?? [])
+            {
+                var block = new RoundDescriptionContentBlock();
+                await ApplyBlockAsync(block, sourceBlock);
+                round.DescriptionBlocks.Add(block);
+            }
             foreach (var sourceRow in sourceRound.Rows)
             {
                 round.Rows.Add(new QuizRoundRow { RowIndex = sourceRow.RowIndex, Points = sourceRow.Points });
@@ -218,6 +229,12 @@ public sealed class QuizPackageService(QuizDbContext db)
             foreach (var sourceCategory in sourceRound.Categories.OrderBy(category => category.SortOrder))
             {
                 var category = new QuizCategory { Title = sourceCategory.Title, SortOrder = sourceCategory.SortOrder };
+                foreach (var sourceBlock in sourceCategory.DescriptionBlocks ?? [])
+                {
+                    var block = new CategoryDescriptionContentBlock();
+                    await ApplyBlockAsync(block, sourceBlock);
+                    category.DescriptionBlocks.Add(block);
+                }
                 foreach (var sourceQuestion in sourceCategory.Questions)
                 {
                     var question = new QuizQuestion
@@ -335,6 +352,9 @@ public sealed class QuizPackageService(QuizDbContext db)
         foreach (var block in package.Rounds.SelectMany(round => round.Categories)
                      .SelectMany(category => category.Questions)
                      .SelectMany(question => question.QuestionBlocks.Concat(question.AnswerBlocks))
+                     .Concat(package.Rounds.SelectMany(round => round.DescriptionBlocks ?? []))
+                     .Concat(package.Rounds.SelectMany(round => round.Categories)
+                         .SelectMany(category => category.DescriptionBlocks ?? []))
                      .Concat(package.FinalQuestionBlocks)
                      .Concat(package.FinalAnswerBlocks)
                      .Concat(package.FinalDescriptionBlocks ?? []))
@@ -376,9 +396,12 @@ public sealed class QuizPackageService(QuizDbContext db)
     private sealed record RoundData(
         string Title, int SortOrder, int DefaultTimeLimitSeconds,
         BuzzActivationMode DefaultBuzzMode, bool UseRandomWagerQuestions,
-        int RandomWagerQuestionCount, RowData[] Rows, CategoryData[] Categories);
+        int RandomWagerQuestionCount, RowData[] Rows, CategoryData[] Categories,
+        BlockData[]? DescriptionBlocks = null);
     private sealed record RowData(int RowIndex, int Points);
-    private sealed record CategoryData(string Title, int SortOrder, QuestionData[] Questions);
+    private sealed record CategoryData(
+        string Title, int SortOrder, QuestionData[] Questions,
+        BlockData[]? DescriptionBlocks = null);
     private sealed record QuestionData(
         int RowIndex, int? TimeLimitSecondsOverride, BuzzActivationMode BuzzModeOverride,
         int BuzzDelaySeconds, bool IsSpecial, QuestionPresentationType PresentationType,
