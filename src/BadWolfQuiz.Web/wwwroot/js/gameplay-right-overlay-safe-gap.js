@@ -8,11 +8,18 @@
     window.badWolfGameplayRightOverlaySafeGapInitialized = true;
 
     const propertyName = "--gameplay-right-overlay-safe-gap";
+    const finalAnsweringRightGapProperty = "--final-answering-drawer-right-gap";
     const breathingSpace = 8;
+    const overlayScrollbarReserve = 16;
     const styleId = "gameplay-right-overlay-safe-gap-styles";
     const finalAnsweringListSelector =
         ".final-question-host[data-game-status=\"finalanswering\"] " +
         ".final-question-panel > .final-submission-list";
+    const finalAnsweringDrawerSelector =
+        ".final-question-host[data-game-status=\"finalanswering\"] " +
+        ".final-question-panel > .final-submission-drawer";
+    const finalAnsweringContentSelector =
+        ".question-presentation .game-content-blocks";
     const finalAnsweringDrawerClass = "final-submission-drawer";
     let animationFrameHandle = 0;
 
@@ -40,7 +47,9 @@
         position: absolute;
         z-index: 40;
         top: clamp(3.25rem, 8vh, 5rem);
-        right: var(--gameplay-right-overlay-safe-gap, 8px);
+        right: var(
+            --final-answering-drawer-right-gap,
+            var(--gameplay-right-overlay-safe-gap, 8px));
         bottom: clamp(4rem, 8vh, 5.25rem);
         box-sizing: border-box;
         width: 2.75rem;
@@ -156,13 +165,48 @@
         });
     };
 
+    const applyFinalAnsweringDrawerRightGap = safeGap => {
+        document.querySelectorAll(finalAnsweringDrawerSelector).forEach(drawer => {
+            if (!(drawer instanceof HTMLElement)) {
+                return;
+            }
+
+            const panel = drawer.closest(".final-question-panel");
+            const content = panel?.querySelector(finalAnsweringContentSelector);
+            if (!(panel instanceof HTMLElement) || !(content instanceof HTMLElement)) {
+                drawer.style.removeProperty(finalAnsweringRightGapProperty);
+                return;
+            }
+
+            const panelRect = panel.getBoundingClientRect();
+            const contentRect = content.getBoundingClientRect();
+            const viewportRightBoundary =
+                document.documentElement.clientWidth - safeGap;
+            const contentScrollbarLeftBoundary =
+                contentRect.right - overlayScrollbarReserve - breathingSpace;
+            const drawerRightBoundary = Math.min(
+                panelRect.right,
+                viewportRightBoundary,
+                contentScrollbarLeftBoundary);
+            const rightGap = Math.max(
+                breathingSpace,
+                Math.ceil(panelRect.right - drawerRightBoundary));
+
+            drawer.style.setProperty(
+                finalAnsweringRightGapProperty,
+                `${rightGap}px`);
+        });
+    };
+
     const applySafeGap = () => {
         const scrollbarWidth = Math.max(
             0,
             window.innerWidth - document.documentElement.clientWidth);
+        const safeGap = scrollbarWidth + breathingSpace;
         document.documentElement.style.setProperty(
             propertyName,
-            `${scrollbarWidth + breathingSpace}px`);
+            `${safeGap}px`);
+        applyFinalAnsweringDrawerRightGap(safeGap);
     };
 
     const refreshLayout = () => {
@@ -190,7 +234,8 @@
     refreshLayout();
 
     const mutationObserver = new MutationObserver(() => {
-        if (document.querySelector(finalAnsweringListSelector)) {
+        if (document.querySelector(finalAnsweringListSelector) ||
+            document.querySelector(finalAnsweringDrawerSelector)) {
             refreshLayout();
         }
     });

@@ -30,7 +30,7 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
-            "/js/gameplay-right-overlay-safe-gap.js?v=6",
+            "/js/gameplay-right-overlay-safe-gap.js?v=7",
             loader,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -113,7 +113,7 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "right: var(--gameplay-right-overlay-safe-gap, 8px);",
+            "--final-answering-drawer-right-gap",
             script,
             StringComparison.Ordinal);
 
@@ -187,6 +187,53 @@ public sealed class GameplayRightOverlaySafeGapRegressionTests
             script.Split(
                 "scrollbar-gutter: stable;",
                 StringSplitOptions.None).Length - 1);
+    }
+
+    [Fact]
+    public void Final_answering_drawer_stays_left_of_question_content_scrollbar()
+    {
+        var script = ReadHelper();
+
+        Assert.Contains(
+            "const finalAnsweringRightGapProperty = \"--final-answering-drawer-right-gap\";",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const overlayScrollbarReserve = 16;",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const finalAnsweringContentSelector =",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "\".question-presentation .game-content-blocks\";",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const applyFinalAnsweringDrawerRightGap = safeGap =>",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const panelRect = panel.getBoundingClientRect();",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const contentRect = content.getBoundingClientRect();",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "contentRect.right - overlayScrollbarReserve - breathingSpace",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "drawer.style.setProperty(\n                finalAnsweringRightGapProperty",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "document.querySelector(finalAnsweringDrawerSelector)",
+            script,
+            StringComparison.Ordinal);
     }
 
     private static string ReadHelper()
