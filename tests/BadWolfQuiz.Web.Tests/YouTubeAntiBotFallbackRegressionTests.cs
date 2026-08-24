@@ -273,10 +273,9 @@ public sealed class YouTubeAntiBotFallbackRegressionTests
             "simulateThisAttempt ? \"simulated\" : \"startup-timeout\"",
             script,
             StringComparison.Ordinal);
-        Assert.Contains(
-            "simulateThisAttempt\n                ? simulatedBlockDelayMs\n                : playbackHealthTimeoutMs",
-            script,
-            StringComparison.Ordinal);
+        Assert.Matches(
+            "simulateThisAttempt\\r?\\n\\s*\\? simulatedBlockDelayMs\\r?\\n\\s*: playbackHealthTimeoutMs",
+            script);
         Assert.Contains(
             "(simulateAntiBot && !isAlternativePlayback(iframe))",
             script,
