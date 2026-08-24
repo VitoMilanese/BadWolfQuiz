@@ -178,6 +178,26 @@
         iframe.replaceWith(surface);
     };
 
+    const pauseBlockedPlayback = iframe => {
+        const player = inlinePlayers.get(iframe);
+        if (typeof player?.pauseVideo === "function") {
+            try {
+                player.pauseVideo();
+                return;
+            } catch {
+                inlinePlayers.delete(iframe);
+            }
+        }
+
+        iframe.contentWindow?.postMessage(
+            JSON.stringify({
+                event: "command",
+                func: "pauseVideo",
+                args: []
+            }),
+            "*");
+    };
+
     const markPlaybackBlocked = (iframe, reason) => {
         if (!(iframe instanceof HTMLIFrameElement) || !iframe.isConnected) {
             clearPlaybackWatchdog(iframe);
@@ -187,6 +207,7 @@
         }
 
         clearPlaybackWatchdog(iframe);
+        pauseBlockedPlayback(iframe);
         pendingInlineFrames.delete(iframe);
         inlinePlayers.delete(iframe);
 
