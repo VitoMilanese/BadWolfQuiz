@@ -45,6 +45,7 @@
     var hidePortalFooter = ViewData["HidePortalFooter"] is true;
     var isEmbeddedDiscordSettings = ViewData["EmbeddedDiscordSettings"] is true;
     var productVersion = ProductVersionInfo.Current;
+    var simulateYouTubeAntiBot = Configuration.GetValue<bool>("SimulateYouTubeAntiBot");
     var isSettingsPage = isAuthenticated &&
         string.Equals(
             Context.Request.Path.Value,
@@ -416,6 +417,9 @@
     <script src="~/js/all-player-question.js" asp-append-version="true"></script>
     <script src="~/js/quick-timer-controls.js" asp-append-version="true"></script>
     <script src="~/js/youtube-auto-expand.js" asp-append-version="true"></script>
+    <script src="~/js/youtube-antibot-fallback.js"
+            asp-append-version="true"
+            data-simulate-youtube-anti-bot="@(simulateYouTubeAntiBot ? "true" : "false")"></script>
     <script src="~/js/media-autoplay.js" asp-append-version="true"></script>
     <script src="~/js/portal-footer.js" asp-append-version="true"></script>
     <script src="~/js/discord-settings-dialog.js" asp-append-version="true"></script>
