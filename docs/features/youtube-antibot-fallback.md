@@ -40,3 +40,7 @@ Expected manual test flow:
 6. Restore `SimulateYouTubeAntiBot` to `false` after testing.
 
 The shared fallback manager is used by gameplay question/answer content, editor previews, Answer Key, closed-question/answer review, and other surfaces that use the shared YouTube renderer.
+
+## Release
+
+Introduced in Web `1.22.34` (`web-v1.22.34`).
