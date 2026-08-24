@@ -27,7 +27,7 @@ public sealed class QuizTransferCompletionRegressionTests
         var root = FindRepositoryRoot();
         var script = File.ReadAllText(Path.Combine(
             root, "src", "BadWolfQuiz.Web", "wwwroot", "js",
-            "quiz-transfer-completion.js"));
+            "quiz-transfer-completion.js")).ReplaceLineEndings("\n");
 
         Assert.Contains("window.AudioContext || window.webkitAudioContext", script, StringComparison.Ordinal);
         Assert.Contains("const armCompletionSound = () =>", script, StringComparison.Ordinal);

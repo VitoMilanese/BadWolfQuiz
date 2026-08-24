@@ -16,7 +16,7 @@ public sealed class DeferredGameMediaStoreTests : IDisposable
     public async Task MaterializeAsync_restores_real_media_bytes_from_database()
     {
         var options = new DbContextOptionsBuilder<QuizDbContext>()
-            .UseSqlite($"Data Source={databasePath};Foreign Keys=False")
+            .UseSqlite($"Data Source={databasePath};Foreign Keys=False;Pooling=False")
             .Options;
         var quiz = CreateQuiz();
 
