@@ -19,22 +19,22 @@
         en: {
             title: "YouTube blocked playback",
             message: "The embedded player could not start because YouTube requested verification.",
-            retry: "Try again"
+            retry: "Play another way"
         },
         uk: {
             title: "YouTube заблокував відтворення",
             message: "Вбудований плеєр не запустився через перевірку YouTube.",
-            retry: "Спробувати ще раз"
+            retry: "Відтворити іншим способом"
         },
         ru: {
             title: "YouTube заблокировал воспроизведение",
             message: "Встроенный плеер не запустился из-за проверки YouTube.",
-            retry: "Повторить"
+            retry: "Воспроизвести другим способом"
         },
         it: {
             title: "YouTube ha bloccato la riproduzione",
             message: "Il player incorporato non è stato avviato perché YouTube richiede una verifica.",
-            retry: "Riprova"
+            retry: "Riproduci in un altro modo"
         }
     };
 
@@ -43,6 +43,45 @@
             .toLowerCase()
             .split("-")[0];
         return fallbackCopy[language] ?? fallbackCopy.en;
+    };
+
+    const isAlternativePlayback = iframe => {
+        if (!(iframe instanceof HTMLIFrameElement)) {
+            return false;
+        }
+
+        try {
+            const url = new URL(
+                iframe.getAttribute("src") ?? iframe.src,
+                document.baseURI);
+            return url.hostname === "youtube.com" ||
+                url.hostname.endsWith(".youtube.com");
+        } catch {
+            return false;
+        }
+    };
+
+    const buildAlternativeEmbedUrl = value => {
+        try {
+            const url = new URL(value, document.baseURI);
+            if (url.hostname === "youtube-nocookie.com" ||
+                url.hostname.endsWith(".youtube-nocookie.com")) {
+                url.hostname = "www.youtube.com";
+            } else if (url.hostname !== "youtube.com" &&
+                !url.hostname.endsWith(".youtube.com")) {
+                return value;
+            }
+
+            url.protocol = "https:";
+            url.searchParams.set("enablejsapi", "1");
+            url.searchParams.set("autoplay", "1");
+            if (window.location.origin && window.location.origin !== "null") {
+                url.searchParams.set("origin", window.location.origin);
+            }
+            return url.toString();
+        } catch {
+            return value;
+        }
     };
 
     const clearPlaybackWatchdog = iframe => {
@@ -108,6 +147,10 @@
             return;
         }
 
+        const primarySource = iframe.dataset.youtubeEmbedUrl ??
+            iframe.getAttribute("src") ??
+            iframe.src;
+        const alternativeSource = buildAlternativeEmbedUrl(primarySource);
         const marker = document.createComment("youtube-antibot-retry");
         iframe.after(marker);
         clearExpandedFallback();
@@ -124,6 +167,7 @@
 
         if (restoredPlaceholder instanceof HTMLElement &&
             restoredPlaceholder.matches("[data-youtube-placeholder]")) {
+            restoredPlaceholder.dataset.youtubeEmbedUrl = alternativeSource;
             restoredPlaceholder.click();
         }
     };
@@ -159,13 +203,14 @@
             return;
         }
 
+        const alternativeSource = buildAlternativeEmbedUrl(source);
         boundFrames.delete(iframe);
         clearPlaybackWatchdog(iframe);
         pendingInlineFrames.delete(iframe);
         inlinePlayers.delete(iframe);
 
         surface.replaceWith(iframe);
-        iframe.src = source;
+        iframe.src = alternativeSource;
         startPlaybackWatchdog(iframe);
     };
 
@@ -229,7 +274,8 @@
     };
 
     const markPlaybackHealthy = iframe => {
-        if (!(iframe instanceof HTMLIFrameElement) || simulateAntiBot) {
+        if (!(iframe instanceof HTMLIFrameElement) ||
+            (simulateAntiBot && !isAlternativePlayback(iframe))) {
             return;
         }
 
@@ -306,14 +352,19 @@
 
         boundFrames.add(iframe);
 
+        const simulateThisAttempt =
+            simulateAntiBot && !isAlternativePlayback(iframe);
         const timeoutId = window.setTimeout(
             () => markPlaybackBlocked(
                 iframe,
-                simulateAntiBot ? "simulated" : "startup-timeout"),
-            simulateAntiBot ? simulatedBlockDelayMs : playbackHealthTimeoutMs);
+                simulateThisAttempt ? "simulated" : "startup-timeout"),
+            simulateThisAttempt
+                ? simulatedBlockDelayMs
+                : playbackHealthTimeoutMs);
         watchedFrames.set(iframe, timeoutId);
 
-        if (!simulateAntiBot && !iframe.classList.contains(managedFrameClass)) {
+        if (!simulateThisAttempt &&
+            !iframe.classList.contains(managedFrameClass)) {
             initializeInlineFrame(iframe);
         }
     };
@@ -412,7 +463,8 @@
     window.BadWolfYouTubeAntiBotFallback = {
         scan,
         simulate: simulateAntiBot,
-        markPlaybackBlocked
+        markPlaybackBlocked,
+        buildAlternativeEmbedUrl
     };
 
     scan(document);
