@@ -73,6 +73,42 @@ public sealed class YouTubeAntiBotFallbackRegressionTests
     }
 
     [Fact]
+    public void Blocked_playback_is_paused_before_the_iframe_is_hidden_or_replaced()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "youtube-antibot-fallback.js"));
+
+        Assert.Contains(
+            "const pauseBlockedPlayback = iframe =>",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "player.pauseVideo();",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "func: \"pauseVideo\"",
+            script,
+            StringComparison.Ordinal);
+
+        var pauseCall = script.IndexOf(
+            "pauseBlockedPlayback(iframe);",
+            StringComparison.Ordinal);
+        var managedFallback = script.IndexOf(
+            "presentManagedFallback(iframe, surface, retryButton)",
+            StringComparison.Ordinal);
+        var inlineFallback = script.IndexOf(
+            "presentInlineFallback(iframe, surface, retryButton);",
+            StringComparison.Ordinal);
+
+        Assert.True(pauseCall >= 0);
+        Assert.True(managedFallback > pauseCall);
+        Assert.True(inlineFallback > pauseCall);
+    }
+
+    [Fact]
     public void Managed_players_keep_fullscreen_open_while_the_blocked_state_is_visible()
     {
         var script = File.ReadAllText(FindWebFile(
