@@ -136,6 +136,11 @@ body:has(.answer-key-page) .page-shell {
     max-width: none;
 }
 
+.answer-key-content .game-content-text,
+.answer-key-content .game-content-caption {
+    max-width: none;
+}
+
 .answer-key-content .game-content-blocks {
     gap: clamp(12px, 2vw, 24px);
 }
