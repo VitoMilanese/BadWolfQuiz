@@ -1,6 +1,7 @@
 using System.Buffers.Binary;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Services;
 using BadWolfQuiz.Web.TagHelpers;
 using Microsoft.AspNetCore.Http;
@@ -129,16 +130,68 @@ public sealed class SeoMetadataTests
             "https://badwolf.buzz/Join/ABC123",
             SeoHeadTagHelper.BuildAbsoluteRequestUrl(context.Request));
         Assert.Equal(
-            "https://badwolf.buzz/social-preview.png?variant=join",
+            "https://badwolf.buzz/social-preview.png?variant=join&theme=classic-wolf",
             SeoHeadTagHelper.BuildAbsolutePathUrl(
                 context.Request,
-                "/social-preview.png?variant=join"));
+                SeoHeadTagHelper.BuildSocialPreviewImagePath(
+                    "join",
+                    null,
+                    null)));
+    }
+
+    [Fact]
+    public void Join_social_preview_image_path_uses_the_host_theme()
+    {
+        var path = SeoHeadTagHelper.BuildSocialPreviewImagePath(
+            "join",
+            "ukrainian-sky",
+            null);
+
+        Assert.Equal(
+            "/social-preview.png?variant=join&theme=ukrainian-sky",
+            path);
+    }
+
+    [Fact]
+    public void Custom_join_preview_image_path_carries_the_host_palette()
+    {
+        var colors = new SiteThemeColors(
+            "#010203",
+            "#111213",
+            "#212223",
+            "#f1f2f3",
+            "#a1a2a3",
+            "#313233",
+            "#414243",
+            "#515253");
+
+        var path = SeoHeadTagHelper.BuildSocialPreviewImagePath(
+            "join",
+            "custom",
+            colors);
+
+        Assert.Contains("variant=join", path, StringComparison.Ordinal);
+        Assert.Contains("theme=custom", path, StringComparison.Ordinal);
+        Assert.Contains("bg=%23010203", path, StringComparison.Ordinal);
+        Assert.Contains("accentBright=%23414243", path, StringComparison.Ordinal);
+        Assert.Contains("highlight=%23515253", path, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Built_in_join_preview_palette_matches_the_site_theme()
+    {
+        var palette = SocialPreviewThemePalette.Resolve("ukrainian-sky");
+
+        Assert.Equal("#061529", palette.Background);
+        Assert.Equal("#0057b8", palette.Accent);
+        Assert.Equal("#2f80ed", palette.AccentBright);
+        Assert.Equal("#ffd700", palette.Highlight);
     }
 
     [Fact]
     public void Social_preview_renderer_returns_a_1200_by_630_png()
     {
-        var png = SocialPreviewImageRenderer.Render("join");
+        var png = SocialPreviewImageRenderer.Render("join", "royal-violet");
         ReadOnlySpan<byte> signature =
             [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
@@ -150,6 +203,15 @@ public sealed class SeoMetadataTests
         Assert.Equal(
             SocialPreviewImageRenderer.Height,
             BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(20, 4)));
+    }
+
+    [Fact]
+    public void Different_site_themes_produce_different_join_preview_images()
+    {
+        var classic = SocialPreviewImageRenderer.Render("join", "classic-wolf");
+        var arctic = SocialPreviewImageRenderer.Render("join", "arctic-neon");
+
+        Assert.False(classic.SequenceEqual(arctic));
     }
 
     [Fact]

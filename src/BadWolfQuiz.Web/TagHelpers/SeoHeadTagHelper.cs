@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
+using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -18,6 +19,8 @@ public sealed partial class SeoHeadTagHelper : TagHelper
     public const string SocialImageVariantViewDataKey = "SocialImageVariant";
     public const string SocialUrlViewDataKey = "SocialUrl";
     public const string SocialTypeViewDataKey = "SocialType";
+    public const string SocialThemeIdViewDataKey = "SocialThemeId";
+    public const string SocialThemeColorsViewDataKey = "SocialThemeColors";
 
     private readonly HtmlEncoder _htmlEncoder;
 
@@ -74,6 +77,8 @@ public sealed partial class SeoHeadTagHelper : TagHelper
         var socialType = GetViewDataString(SocialTypeViewDataKey) ?? "website";
         var imageVariant = GetViewDataString(SocialImageVariantViewDataKey) ??
             defaultPreview.ImageVariant;
+        var socialThemeId = GetViewDataString(SocialThemeIdViewDataKey);
+        var socialThemeColors = GetViewDataThemeColors(SocialThemeColorsViewDataKey);
 
         var defaultSocialUrl = seoMetadata is not null &&
             page is not null &&
@@ -85,9 +90,11 @@ public sealed partial class SeoHeadTagHelper : TagHelper
             GetViewDataString(SocialUrlViewDataKey),
             defaultSocialUrl);
 
-        var defaultImageUrl = BuildAbsolutePathUrl(
-            request,
-            $"/social-preview.png?variant={Uri.EscapeDataString(imageVariant)}");
+        var defaultImagePath = BuildSocialPreviewImagePath(
+            imageVariant,
+            socialThemeId,
+            socialThemeColors);
+        var defaultImageUrl = BuildAbsolutePathUrl(request, defaultImagePath);
         var socialImageUrl = ResolveAbsoluteUrl(
             request,
             GetViewDataString(SocialImageViewDataKey),
@@ -182,6 +189,40 @@ public sealed partial class SeoHeadTagHelper : TagHelper
         return $"{BuildOrigin(request)}{request.PathBase}{normalizedPath}";
     }
 
+    public static string BuildSocialPreviewImagePath(
+        string imageVariant,
+        string? themeId,
+        SiteThemeColors? customThemeColors)
+    {
+        var query = new List<string>
+        {
+            $"variant={Uri.EscapeDataString(imageVariant)}"
+        };
+
+        if (!string.Equals(imageVariant, "join", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"/social-preview.png?{string.Join("&", query)}";
+        }
+
+        var normalizedThemeId = SiteThemeCatalog.Normalize(themeId);
+        query.Add($"theme={Uri.EscapeDataString(normalizedThemeId)}");
+
+        if (string.Equals(normalizedThemeId, "custom", StringComparison.Ordinal))
+        {
+            var colors = SiteThemeCatalog.Normalize(customThemeColors);
+            AddColor(query, "bg", colors.Background);
+            AddColor(query, "panel", colors.Panel);
+            AddColor(query, "panel2", colors.PanelSecondary);
+            AddColor(query, "text", colors.Text);
+            AddColor(query, "muted", colors.MutedText);
+            AddColor(query, "accent", colors.Accent);
+            AddColor(query, "accentBright", colors.AccentBright);
+            AddColor(query, "highlight", colors.Highlight);
+        }
+
+        return $"/social-preview.png?{string.Join("&", query)}";
+    }
+
     public static string ResolveAbsoluteUrl(
         HttpRequest request,
         string? value,
@@ -204,6 +245,9 @@ public sealed partial class SeoHeadTagHelper : TagHelper
             : fallback;
     }
 
+    private static void AddColor(List<string> query, string key, string value) =>
+        query.Add($"{key}={Uri.EscapeDataString(value)}");
+
     private string? GetViewDataString(string key)
     {
         if (!ViewContext.ViewData.TryGetValue(key, out var value))
@@ -213,6 +257,17 @@ public sealed partial class SeoHeadTagHelper : TagHelper
 
         var text = value?.ToString()?.Trim();
         return string.IsNullOrWhiteSpace(text) ? null : text;
+    }
+
+    private SiteThemeColors? GetViewDataThemeColors(string key)
+    {
+        if (!ViewContext.ViewData.TryGetValue(key, out var value) ||
+            value is not SiteThemeColors colors)
+        {
+            return null;
+        }
+
+        return SiteThemeCatalog.AreValid(colors) ? colors : null;
     }
 
     private static string BuildOrigin(HttpRequest request)

@@ -2,6 +2,8 @@
 @model BadWolfQuiz.Web.Pages.Join.IndexModel
 @{
     ViewData["Title"] = Localizer["Button_Join"];
+    ViewData["SocialThemeId"] = Model.SocialThemeId;
+    ViewData["SocialThemeColors"] = Model.SocialThemeColors;
 }
 
 <div class="form-card narrow">
