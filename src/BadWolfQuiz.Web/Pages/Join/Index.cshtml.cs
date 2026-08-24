@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
@@ -21,12 +22,16 @@ public sealed class IndexModel(
 
     public string? GameInstanceId { get; private set; }
 
+    public string? SocialThemeId { get; private set; }
+
+    public SiteThemeColors? SocialThemeColors { get; private set; }
+
     public void OnGet(string? code)
     {
         if (!string.IsNullOrWhiteSpace(code))
         {
             Input.GameCode = GameSessionRegistry.NormalizeCode(code);
-            GameInstanceId = sessionRegistry.Find(Input.GameCode)?.ClientInstanceId;
+            ApplyGameContext(sessionRegistry.Find(Input.GameCode));
         }
     }
 
@@ -35,7 +40,7 @@ public sealed class IndexModel(
         Input.GameCode = GameSessionRegistry.NormalizeCode(Input.GameCode ?? string.Empty);
         Input.PlayerName = Input.PlayerName?.Trim() ?? string.Empty;
         var existingGame = sessionRegistry.Find(Input.GameCode);
-        GameInstanceId = existingGame?.ClientInstanceId;
+        ApplyGameContext(existingGame);
         ModelState.Clear();
         TryValidateModel(Input, nameof(Input));
 
@@ -135,6 +140,13 @@ public sealed class IndexModel(
         }
 
         return Page();
+    }
+
+    private void ApplyGameContext(GameSessionRegistration? game)
+    {
+        GameInstanceId = game?.ClientInstanceId;
+        SocialThemeId = game?.Session.Settings.SiteThemeId;
+        SocialThemeColors = game?.Session.Settings.CustomThemeColors;
     }
 
     public sealed class JoinGameInput

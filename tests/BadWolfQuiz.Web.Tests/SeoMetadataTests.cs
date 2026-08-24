@@ -1,7 +1,10 @@
+using System.Buffers.Binary;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Services;
 using BadWolfQuiz.Web.TagHelpers;
+using Microsoft.AspNetCore.Http;
 
 namespace BadWolfQuiz.Web.Tests;
 
@@ -67,10 +70,148 @@ public sealed class SeoMetadataTests
             markup);
         Assert.DoesNotContain("hreflang=\"ru\"", markup);
         Assert.DoesNotContain("/ru/", markup);
+    }
+
+    [Fact]
+    public void Social_markup_contains_large_image_open_graph_and_twitter_metadata()
+    {
+        var helper = new SeoHeadTagHelper(HtmlEncoder.Default);
+        var metadata = SocialPreviewMetadataCatalog.GetDefault("en");
+        var markup = helper.BuildSocialMarkup(
+            metadata,
+            "https://badwolf.buzz/en",
+            "https://badwolf.buzz/social-preview.png?variant=site",
+            "website");
+
         Assert.Contains("property=\"og:title\"", markup);
         Assert.Contains("property=\"og:description\"", markup);
         Assert.Contains("property=\"og:url\"", markup);
         Assert.Contains("property=\"og:locale\"", markup);
+        Assert.Contains("property=\"og:image\"", markup);
+        Assert.Contains("property=\"og:image:width\" content=\"1200\"", markup);
+        Assert.Contains("property=\"og:image:height\" content=\"630\"", markup);
+        Assert.Contains("name=\"twitter:card\" content=\"summary_large_image\"", markup);
+        Assert.Contains("name=\"twitter:image\"", markup);
+    }
+
+    [Fact]
+    public void Join_social_preview_is_specific_to_joining_without_exposing_a_game_code()
+    {
+        var preview = SocialPreviewMetadataCatalog.Resolve("/Join/Index", "uk-UA");
+        const string gameCode = "ABC123";
+
+        Assert.Equal("join", preview.ImageVariant);
+        Assert.Contains("Приєднуйся до гри", preview.Title, StringComparison.Ordinal);
+        Assert.DoesNotContain(gameCode, preview.Title, StringComparison.Ordinal);
+        Assert.DoesNotContain(gameCode, preview.Description, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Non_join_pages_receive_the_default_site_social_preview()
+    {
+        var preview = SocialPreviewMetadataCatalog.Resolve("/Index", "it-IT");
+
+        Assert.Equal("site", preview.ImageVariant);
+        Assert.Contains("Bad Wolf Quiz", preview.Title, StringComparison.Ordinal);
+        Assert.Equal("it_IT", preview.OpenGraphLocale);
+    }
+
+    [Fact]
+    public void Social_urls_use_forwarded_https_host_for_public_requests()
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Scheme = "http";
+        context.Request.Host = new HostString("127.0.0.1:5080");
+        context.Request.Headers["X-Forwarded-Proto"] = "https";
+        context.Request.Headers["X-Forwarded-Host"] = "badwolf.buzz";
+        context.Request.Path = "/Join/ABC123";
+
+        Assert.Equal(
+            "https://badwolf.buzz/Join/ABC123",
+            SeoHeadTagHelper.BuildAbsoluteRequestUrl(context.Request));
+        Assert.Equal(
+            "https://badwolf.buzz/social-preview.png?variant=join&theme=classic-wolf",
+            SeoHeadTagHelper.BuildAbsolutePathUrl(
+                context.Request,
+                SeoHeadTagHelper.BuildSocialPreviewImagePath(
+                    "join",
+                    null,
+                    null)));
+    }
+
+    [Fact]
+    public void Join_social_preview_image_path_uses_the_host_theme()
+    {
+        var path = SeoHeadTagHelper.BuildSocialPreviewImagePath(
+            "join",
+            "ukrainian-sky",
+            null);
+
+        Assert.Equal(
+            "/social-preview.png?variant=join&theme=ukrainian-sky",
+            path);
+    }
+
+    [Fact]
+    public void Custom_join_preview_image_path_carries_the_host_palette()
+    {
+        var colors = new SiteThemeColors(
+            "#010203",
+            "#111213",
+            "#212223",
+            "#f1f2f3",
+            "#a1a2a3",
+            "#313233",
+            "#414243",
+            "#515253");
+
+        var path = SeoHeadTagHelper.BuildSocialPreviewImagePath(
+            "join",
+            "custom",
+            colors);
+
+        Assert.Contains("variant=join", path, StringComparison.Ordinal);
+        Assert.Contains("theme=custom", path, StringComparison.Ordinal);
+        Assert.Contains("bg=%23010203", path, StringComparison.Ordinal);
+        Assert.Contains("accentBright=%23414243", path, StringComparison.Ordinal);
+        Assert.Contains("highlight=%23515253", path, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Built_in_join_preview_palette_matches_the_site_theme()
+    {
+        var palette = SocialPreviewThemePalette.Resolve("ukrainian-sky");
+
+        Assert.Equal("#061529", palette.Background);
+        Assert.Equal("#0057b8", palette.Accent);
+        Assert.Equal("#2f80ed", palette.AccentBright);
+        Assert.Equal("#ffd700", palette.Highlight);
+    }
+
+    [Fact]
+    public void Social_preview_renderer_returns_a_1200_by_630_png()
+    {
+        var png = SocialPreviewImageRenderer.Render("join", "royal-violet");
+        ReadOnlySpan<byte> signature =
+            [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+
+        Assert.True(png.Length > 24);
+        Assert.True(png.AsSpan(0, 8).SequenceEqual(signature));
+        Assert.Equal(
+            SocialPreviewImageRenderer.Width,
+            BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(16, 4)));
+        Assert.Equal(
+            SocialPreviewImageRenderer.Height,
+            BinaryPrimitives.ReadInt32BigEndian(png.AsSpan(20, 4)));
+    }
+
+    [Fact]
+    public void Different_site_themes_produce_different_join_preview_images()
+    {
+        var classic = SocialPreviewImageRenderer.Render("join", "classic-wolf");
+        var arctic = SocialPreviewImageRenderer.Render("join", "arctic-neon");
+
+        Assert.False(classic.SequenceEqual(arctic));
     }
 
     [Fact]
