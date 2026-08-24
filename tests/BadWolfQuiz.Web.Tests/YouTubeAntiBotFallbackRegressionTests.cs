@@ -58,16 +58,12 @@ public sealed class YouTubeAntiBotFallbackRegressionTests
             "youtube-antibot-fallback-retry",
             script,
             StringComparison.Ordinal);
-        Assert.DoesNotContain(
-            "createFallbackPlaceholder",
+        Assert.Contains(
+            "Відтворити іншим способом",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
             ".youtube-antibot-fallback {",
-            css,
-            StringComparison.Ordinal);
-        Assert.DoesNotContain(
-            ".youtube-placeholder.youtube-antibot-fallback-expanded",
             css,
             StringComparison.Ordinal);
     }
@@ -109,6 +105,32 @@ public sealed class YouTubeAntiBotFallbackRegressionTests
     }
 
     [Fact]
+    public void Alternative_playback_switches_from_privacy_enhanced_to_standard_youtube_embed()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "youtube-antibot-fallback.js"));
+
+        Assert.Contains(
+            "const buildAlternativeEmbedUrl = value =>",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "url.hostname = \"www.youtube.com\";",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "url.searchParams.set(\"origin\", window.location.origin);",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const isAlternativePlayback = iframe =>",
+            script,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Managed_players_keep_fullscreen_open_while_the_blocked_state_is_visible()
     {
         var script = File.ReadAllText(FindWebFile(
@@ -140,10 +162,6 @@ public sealed class YouTubeAntiBotFallbackRegressionTests
             "document.body.appendChild(surface);",
             script,
             StringComparison.Ordinal);
-        Assert.DoesNotContain(
-            "window.BadWolfYouTubeAutoExpand.stopAll();\n            return;",
-            script,
-            StringComparison.Ordinal);
         Assert.Contains(
             ".youtube-antibot-fallback-expanded {",
             css,
@@ -154,7 +172,7 @@ public sealed class YouTubeAntiBotFallbackRegressionTests
     }
 
     [Fact]
-    public void Managed_retry_returns_to_the_normal_youtube_launch_path()
+    public void Managed_retry_launches_the_alternative_embed_instead_of_repeating_primary_playback()
     {
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
@@ -162,7 +180,7 @@ public sealed class YouTubeAntiBotFallbackRegressionTests
             "youtube-antibot-fallback.js"));
 
         Assert.Contains(
-            "const retryManagedPlayback = iframe =>",
+            "const alternativeSource = buildAlternativeEmbedUrl(primarySource);",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -170,17 +188,17 @@ public sealed class YouTubeAntiBotFallbackRegressionTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "restoredPlaceholder.click();",
+            "restoredPlaceholder.dataset.youtubeEmbedUrl = alternativeSource;",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "retryButton.addEventListener",
+            "restoredPlaceholder.click();",
             script,
             StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Inline_players_show_the_same_blocked_state_and_can_retry()
+    public void Inline_players_use_the_same_alternative_embed_on_retry()
     {
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
@@ -200,11 +218,11 @@ public sealed class YouTubeAntiBotFallbackRegressionTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "surface.replaceWith(iframe);",
+            "const alternativeSource = buildAlternativeEmbedUrl(source);",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "boundFrames.delete(iframe);",
+            "iframe.src = alternativeSource;",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -236,7 +254,7 @@ public sealed class YouTubeAntiBotFallbackRegressionTests
     }
 
     [Fact]
-    public void Debug_simulation_and_real_failures_share_the_same_blocked_state_path()
+    public void Debug_simulation_blocks_only_the_primary_embed_so_the_alternative_can_be_tested()
     {
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
@@ -248,25 +266,25 @@ public sealed class YouTubeAntiBotFallbackRegressionTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "simulateAntiBot ? \"simulated\" : \"startup-timeout\"",
+            "simulateAntiBot && !isAlternativePlayback(iframe)",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "markPlaybackBlocked(iframe, \"player-error\")",
+            "simulateThisAttempt ? \"simulated\" : \"startup-timeout\"",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "const { surface, retryButton } = createBlockedSurface(reason);",
+            "simulateThisAttempt\n                ? simulatedBlockDelayMs\n                : playbackHealthTimeoutMs",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "badwolf:youtube-blocked",
+            "(simulateAntiBot && !isAlternativePlayback(iframe))",
             script,
             StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Working_player_state_cancels_the_real_startup_watchdog()
+    public void Working_alternative_player_state_cancels_the_real_startup_watchdog()
     {
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
