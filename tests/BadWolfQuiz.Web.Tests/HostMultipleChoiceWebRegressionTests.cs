@@ -209,7 +209,39 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("model is not QuestionEditorModel", assetsTagHelper);
         Assert.Contains("host-multiple-choice-bootstrap.js", assetsTagHelper);
         Assert.DoesNotContain("data-host-lobby", assetsTagHelper);
-        Assert.Contains("v=1.20.0-259.7", assetsTagHelper);
+        Assert.Contains("v=1.20.0-259.8", assetsTagHelper);
+    }
+
+    [Fact]
+    public void Host_multiple_choice_panel_reserves_question_space_on_desktop()
+    {
+        var root = FindRepositoryRoot();
+        var bootstrap = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "host-multiple-choice-bootstrap.js"));
+
+        Assert.Contains("@media (min-width: 801px)", bootstrap, StringComparison.Ordinal);
+        Assert.Contains(
+            "body:has(> .host-multiple-choice-panel)",
+            bootstrap,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "> .current-question-summary:not(.wager-mode)",
+            bootstrap,
+            StringComparison.Ordinal);
+        Assert.Contains("padding-right: calc(", bootstrap, StringComparison.Ordinal);
+        Assert.Contains(
+            "min(22rem, calc(100vw - 2rem)) +",
+            bootstrap,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "clamp(24px, 4vw, 56px)",
+            bootstrap,
+            StringComparison.Ordinal);
     }
 
     private static string FindRepositoryRoot()
