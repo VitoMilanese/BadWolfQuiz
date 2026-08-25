@@ -37,7 +37,7 @@ public sealed class ContentBlockContainerRegressionTests
     }
 
     [Fact]
-    public void Snapshot_flattens_container_marker_before_media_children()
+    public void Snapshot_flattens_container_marker_before_supported_children()
     {
         var quiz = CreateQuizWithContainer();
 
@@ -46,29 +46,31 @@ public sealed class ContentBlockContainerRegressionTests
             .Questions.Single()
             .QuestionBlocks;
 
-        Assert.Equal(5, blocks.Count);
+        Assert.Equal(6, blocks.Count);
         Assert.Equal(ContentBlockKind.Text, blocks[0].Kind);
         Assert.True(
             ContentBlockContainerContract.TryParseRuntimeMarker(
                 blocks[0].TextContent,
                 out var childCount));
-        Assert.Equal(3, childCount);
+        Assert.Equal(4, childCount);
         Assert.Equal(ContentBlockKind.Image, blocks[1].Kind);
         Assert.Equal(ContentBlockKind.YouTube, blocks[2].Kind);
         Assert.Equal(ContentBlockKind.Audio, blocks[3].Kind);
-        Assert.Equal(ContentBlockKind.Image, blocks[4].Kind);
-        Assert.Equal("outside.png", blocks[4].FileName);
+        Assert.Equal(ContentBlockKind.Text, blocks[4].Kind);
+        Assert.Equal("Inside text", blocks[4].TextContent);
+        Assert.Equal(ContentBlockKind.Image, blocks[5].Kind);
+        Assert.Equal("outside.png", blocks[5].FileName);
     }
 
     [Theory]
-    [InlineData("en-US", "Container", "Horizontal media", "Add images, YouTube, or audio")]
-    [InlineData("uk-UA", "Контейнер", "Горизонтальні медіа", "Додайте зображення, YouTube або аудіо")]
-    [InlineData("it-IT", "Contenitore", "Media orizzontali", "Aggiungi immagini, YouTube o audio")]
-    [InlineData("ru-RU", "Контейнер", "Горизонтальные медиа", "Добавьте изображения, YouTube или аудио")]
+    [InlineData("en-US", "Container", "Horizontal content", "Add text, images, YouTube, or audio")]
+    [InlineData("uk-UA", "Контейнер", "Горизонтальний контент", "Додайте текст, зображення, YouTube або аудіо")]
+    [InlineData("it-IT", "Contenitore", "Contenuto orizzontale", "Aggiungi testo, immagini, YouTube o audio")]
+    [InlineData("ru-RU", "Контейнер", "Горизонтальный контент", "Добавьте текст, изображения, YouTube или аудио")]
     public void Container_editor_text_is_localized(
         string cultureName,
         string expectedTitle,
-        string expectedHorizontalMedia,
+        string expectedHorizontalContent,
         string expectedEmptyHint)
     {
         var previousCulture = CultureInfo.CurrentUICulture;
@@ -78,8 +80,8 @@ public sealed class ContentBlockContainerRegressionTests
 
             Assert.Equal(expectedTitle, ContentBlockContainerText.Title);
             Assert.Equal(
-                expectedHorizontalMedia,
-                ContentBlockContainerText.HorizontalMedia);
+                expectedHorizontalContent,
+                ContentBlockContainerText.HorizontalContent);
             Assert.Equal(expectedEmptyHint, ContentBlockContainerText.EmptyHint);
         }
         finally
@@ -135,8 +137,9 @@ public sealed class ContentBlockContainerRegressionTests
         Assert.Contains("ContentBlockType.Container", collection, StringComparison.Ordinal);
         Assert.Contains("ContentBlockContainerText.Title", collection, StringComparison.Ordinal);
         Assert.Contains("ContentBlockType.Container", card, StringComparison.Ordinal);
-        Assert.Contains("ContentBlockContainerText.HorizontalMedia", card, StringComparison.Ordinal);
+        Assert.Contains("ContentBlockContainerText.HorizontalContent", card, StringComparison.Ordinal);
         Assert.Contains("data-container-empty-label", card, StringComparison.Ordinal);
+        Assert.Contains("data-container-add-block-type=\"Text\"", card, StringComparison.Ordinal);
         Assert.Contains("data-container-add-block-type=\"Image\"", card, StringComparison.Ordinal);
         Assert.Contains("data-container-add-block-type=\"YouTube\"", card, StringComparison.Ordinal);
         Assert.Contains("data-container-add-block-type=\"Audio\"", card, StringComparison.Ordinal);
@@ -147,11 +150,13 @@ public sealed class ContentBlockContainerRegressionTests
         Assert.Contains("content-block-container-count", card, StringComparison.Ordinal);
 
         Assert.Contains("__badwolf_container:", script, StringComparison.Ordinal);
+        Assert.Contains("\"Text\",", script, StringComparison.Ordinal);
         Assert.Contains("[data-open-question-preview]", script, StringComparison.Ordinal);
         Assert.Contains(".game-content-blocks", script, StringComparison.Ordinal);
         Assert.Contains("var(--content-block-container-columns)", script, StringComparison.Ordinal);
         Assert.Contains("minmax(0, 1fr)", script, StringComparison.Ordinal);
         Assert.Contains("align-items: center", stylesheet, StringComparison.Ordinal);
+        Assert.Contains(".game-content-text", stylesheet, StringComparison.Ordinal);
         Assert.Contains(
             "attr(data-container-empty-label)",
             stylesheet,
@@ -222,7 +227,7 @@ public sealed class ContentBlockContainerRegressionTests
         {
             Id = 10,
             BlockType = ContentBlockType.Container,
-            TextContent = ContentBlockContainerContract.StoreChildCount(3),
+            TextContent = ContentBlockContainerContract.StoreChildCount(4),
             SortOrder = 0
         });
         question.QuestionBlocks.Add(new QuestionContentBlock
@@ -253,11 +258,18 @@ public sealed class ContentBlockContainerRegressionTests
         question.QuestionBlocks.Add(new QuestionContentBlock
         {
             Id = 14,
+            BlockType = ContentBlockType.Text,
+            TextContent = "Inside text",
+            SortOrder = 4
+        });
+        question.QuestionBlocks.Add(new QuestionContentBlock
+        {
+            Id = 15,
             BlockType = ContentBlockType.Image,
             FileData = [3],
             FileContentType = "image/png",
             FileName = "outside.png",
-            SortOrder = 4
+            SortOrder = 5
         });
         question.AnswerBlocks.Add(new AnswerContentBlock
         {

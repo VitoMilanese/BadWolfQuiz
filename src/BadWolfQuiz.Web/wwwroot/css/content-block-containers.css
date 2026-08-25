@@ -2,6 +2,14 @@
     align-items: center !important;
 }
 
+.content-block-container-layout .game-content-text,
+.content-block-container-layout .question-preview-text {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 .content-block-container-children:empty::before {
     content: attr(data-container-empty-label) !important;
 }
