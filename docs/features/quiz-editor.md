@@ -117,23 +117,26 @@ editor's own Escape navigation.
 ## Content blocks and ordering
 
 Question and final-question question/answer collections support the existing
-content-block types plus a **Container** block for horizontal media groups. New
-Container children can be Image, YouTube, or Audio blocks; YouTube is the video
-source exposed for new Container content. Existing legacy Video blocks remain
-readable and renderable for compatibility but are not offered as a new Container
-add action. The final-description collection follows round/category descriptions
-and offers Text and Image blocks only.
+content-block types plus a **Container** block for horizontal content groups. New
+Container children can be Text, Image, YouTube, or Audio blocks; YouTube is the
+video source exposed for new Container content. Existing legacy Video blocks
+remain readable and renderable for compatibility but are not offered as a new
+Container add action. The final-description collection follows round/category
+descriptions and offers Text and Image blocks only.
 
-Container children keep the normal media editing controls, captions, stored files,
-YouTube URLs, and playback behavior. In gameplay, regular editor previews, and
-closed-question previews, Container children share the available horizontal space
-and are vertically centered in the row. The layout uses responsive equal-width
-columns and avoids unnecessary horizontal overflow. Media outside a Container
-keeps the normal top-level layout.
+Container children keep the normal editing behavior of their underlying block
+type. Text can be edited alongside media, uses the available equal-width column,
+and wraps within that column. Image, YouTube, and Audio children keep their
+existing captions, stored files, URLs, and playback behavior. In gameplay,
+regular editor previews, and closed-question previews, all Container children
+share the available horizontal space and are vertically centered in the row. The
+layout uses responsive equal-width columns and avoids unnecessary horizontal
+overflow. Blocks outside a Container keep the normal top-level layout.
 
-Container editor labels and empty-state text follow the active supported UI
-language. Round and category description editors keep their existing Text/Image
-scope, and Container is not offered for Four Clues question content.
+Container editor labels and empty-state text describe generic horizontal content
+and follow the active supported UI language. Round and category description
+editors keep their existing Text/Image scope, and Container is not offered for
+Four Clues question content.
 
 Every content-block toolbar also provides compact **↑** and **↓** buttons before
 the existing drag handle and remove button. These controls swap the block with the

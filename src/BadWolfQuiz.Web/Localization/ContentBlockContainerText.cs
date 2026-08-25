@@ -6,7 +6,7 @@ public static class ContentBlockContainerText
 {
     public static string Title => Resolve().Title;
 
-    public static string HorizontalMedia => Resolve().HorizontalMedia;
+    public static string HorizontalContent => Resolve().HorizontalContent;
 
     public static string EmptyHint => Resolve().EmptyHint;
 
@@ -16,25 +16,25 @@ public static class ContentBlockContainerText
         {
             "uk" => new(
                 "Контейнер",
-                "Горизонтальні медіа",
-                "Додайте зображення, YouTube або аудіо"),
+                "Горизонтальний контент",
+                "Додайте текст, зображення, YouTube або аудіо"),
             "it" => new(
                 "Contenitore",
-                "Media orizzontali",
-                "Aggiungi immagini, YouTube o audio"),
+                "Contenuto orizzontale",
+                "Aggiungi testo, immagini, YouTube o audio"),
             "ru" => new(
                 "Контейнер",
-                "Горизонтальные медиа",
-                "Добавьте изображения, YouTube или аудио"),
+                "Горизонтальный контент",
+                "Добавьте текст, изображения, YouTube или аудио"),
             _ => new(
                 "Container",
-                "Horizontal media",
-                "Add images, YouTube, or audio")
+                "Horizontal content",
+                "Add text, images, YouTube, or audio")
         };
     }
 
     private sealed record ContainerText(
         string Title,
-        string HorizontalMedia,
+        string HorizontalContent,
         string EmptyHint);
 }

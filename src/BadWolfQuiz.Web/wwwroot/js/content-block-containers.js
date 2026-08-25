@@ -9,6 +9,7 @@
 
     const containerType = "Container";
     const supportedChildTypes = new Set([
+        "Text",
         "Image",
         "Audio",
         "Video",
@@ -60,7 +61,7 @@
 }
 
 .content-block-container-children:empty::before {
-    content: "Add image, video, or audio blocks";
+    content: "Add text, image, video, or audio blocks";
     color: var(--muted);
     font-size: 0.9rem;
     text-align: center;
@@ -100,6 +101,14 @@
     max-width: 100%;
     min-width: 0;
     margin: 0;
+}
+
+.content-block-container-layout .game-content-text,
+.content-block-container-layout .question-preview-text {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .content-block-container-layout .game-content-image,
@@ -349,7 +358,7 @@
 
         const card = await fetchBlockCard(section, blockType);
         if (!card) {
-            window.alert("Could not add media block.");
+            window.alert("Could not add content block.");
             return;
         }
 
