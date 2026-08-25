@@ -13,6 +13,18 @@
     top: 13rem !important;
     max-height: calc(100vh - 14.5rem) !important;
 }
+@media (min-width: 801px) {
+    body:has(> .host-multiple-choice-panel)
+        .host-game-board > [data-host-gameplay-view]
+        > .current-question-summary:not(.wager-mode) {
+        padding-right: calc(
+            min(22rem, calc(100vw - 2rem)) +
+            2rem +
+            2px +
+            clamp(24px, 4vw, 56px)
+        );
+    }
+}
 @media (max-height: 760px) {
     .host-multiple-choice-panel {
         top: 10rem !important;
