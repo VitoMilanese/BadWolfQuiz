@@ -27,9 +27,7 @@
             textHint: "Кожен гравець надсилає власну текстову відповідь. Хост перевіряє відповіді по черзі.",
             choiceHint: "Варіанти відповіді зберігаються в обов’язковому блоці «Варіанти відповіді». Перший варіант правильний. Інші блоки відповіді показуються лише після завершення питання.",
             hostChoiceHint: "У блоці «Варіанти відповіді» має бути від 4 до 10 унікальних текстових варіантів до 20 символів. Перший варіант правильний. Інші блоки відповіді показуються лише після завершення питання.",
-            yourAnswer: "Ваша відповідь",
             correct: "Правильна",
-            invalidText: "Для цього типу питання потрібен рівно один непорожній текстовий блок відповіді.",
             invalidChoiceQuestion: "Питання з вибором для всіх гравців підтримує лише текст і зображення в самому питанні.",
             invalidChoice: "У блоці «Варіанти відповіді» має бути від 2 до 4 непорожніх унікальних текстових або графічних варіантів.",
             invalidHostCount: "У блоці «Варіанти відповіді» має бути від 4 до 10 варіантів.",
@@ -45,9 +43,7 @@
                 textHint: "Ogni giocatore invia una risposta testuale privata. Il conduttore le valuta una alla volta.",
                 choiceHint: "Le opzioni sono contenute nel blocco obbligatorio «Opzioni di risposta». La prima opzione è corretta. Gli altri blocchi della risposta vengono mostrati solo dopo la chiusura della domanda.",
                 hostChoiceHint: "Il blocco «Opzioni di risposta» deve contenere da 4 a 10 opzioni testuali uniche di massimo 20 caratteri. La prima è corretta. Gli altri blocchi vengono mostrati solo dopo la chiusura della domanda.",
-                yourAnswer: "La tua risposta",
                 correct: "Corretta",
-                invalidText: "Questo tipo di domanda richiede esattamente un blocco di testo non vuoto come risposta.",
                 invalidChoiceQuestion: "La domanda a scelta per tutti i giocatori supporta solo testo e immagini nella domanda.",
                 invalidChoice: "Il blocco «Opzioni di risposta» deve contenere da 2 a 4 opzioni di testo o immagine non vuote e uniche.",
                 invalidHostCount: "Il blocco «Opzioni di risposta» deve contenere da 4 a 10 opzioni.",
@@ -63,9 +59,7 @@
                     textHint: "Каждый игрок отправляет свой текстовый ответ. Хост проверяет ответы по очереди.",
                     choiceHint: "Варианты находятся в обязательном блоке «Варианты ответа». Первый вариант правильный. Остальные блоки ответа показываются только после завершения вопроса.",
                     hostChoiceHint: "В блоке «Варианты ответа» должно быть от 4 до 10 уникальных текстовых вариантов до 20 символов. Первый вариант правильный. Остальные блоки показываются только после завершения вопроса.",
-                    yourAnswer: "Ваш ответ",
                     correct: "Правильный",
-                    invalidText: "Для этого типа вопроса нужен ровно один непустой текстовый блок ответа.",
                     invalidChoiceQuestion: "Вопрос с выбором для всех игроков поддерживает только текст и изображения в самом вопросе.",
                     invalidChoice: "В блоке «Варианты ответа» должно быть от 2 до 4 непустых уникальных текстовых или графических вариантов.",
                     invalidHostCount: "В блоке «Варианты ответа» должно быть от 4 до 10 вариантов.",
@@ -80,9 +74,7 @@
                     textHint: "Every player submits a private text answer. The host judges submissions one at a time.",
                     choiceHint: "Selectable choices live in the required Answer options block. The first option is correct. Other answer blocks are shown only after the question closes.",
                     hostChoiceHint: "The Answer options block must contain 4 to 10 unique text options of at most 20 characters. The first option is correct. Other answer blocks are shown only after the question closes.",
-                    yourAnswer: "Your answer",
                     correct: "Correct",
-                    invalidText: "This question type requires exactly one non-empty Text answer block.",
                     invalidChoiceQuestion: "All-player multiple choice supports only Text and Image blocks in the question itself.",
                     invalidChoice: "The Answer options block must contain 2 to 4 non-empty unique Text or Image options.",
                     invalidHostCount: "The Answer options block must contain between 4 and 10 options.",
@@ -558,17 +550,13 @@
             }
 
             if (answerHeading instanceof HTMLHeadingElement) {
-                answerHeading.textContent = isText
-                    ? text.yourAnswer
-                    : (answerHeading.dataset.standardHeading ?? answerHeading.textContent);
+                answerHeading.textContent =
+                    answerHeading.dataset.standardHeading ?? answerHeading.textContent;
             }
 
             if (allPlayerChoice) {
                 setAllowedTopLevelTypes(questionSection, new Set(["Text", "Image"]));
                 setAllowedTopLevelTypes(answerSection, null);
-            } else if (isText) {
-                setAllowedTopLevelTypes(questionSection, null);
-                setAllowedTopLevelTypes(answerSection, new Set(["Text"]));
             } else {
                 setAllowedTopLevelTypes(questionSection, null);
                 setAllowedTopLevelTypes(answerSection, null);
@@ -606,17 +594,6 @@
 
         const validate = () => {
             const type = select.value;
-            if (type === "2") {
-                const cards = directCards(answerSection);
-                const value = cards[0]?.querySelector('[name$=".TextContent"]')
-                    ?.value?.trim() ?? "";
-                return cards.length === 1 &&
-                    cards[0]?.dataset.blockType === "Text" &&
-                    value
-                    ? null
-                    : text.invalidText;
-            }
-
             if (!isChoiceType(type)) {
                 return null;
             }

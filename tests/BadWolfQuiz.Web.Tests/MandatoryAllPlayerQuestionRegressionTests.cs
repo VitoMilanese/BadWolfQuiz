@@ -19,7 +19,11 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
 
         Assert.Contains("All players — text answer", script);
         Assert.Contains("All players — multiple choice", script);
-        Assert.Contains("answerCards.length === 1", script);
+        Assert.DoesNotContain("answerCards.length === 1", script);
+Assert.DoesNotContain(
+    "setAllowedTypes(answerSection, new Set([\"Text\"]));",
+    script);
+Assert.DoesNotContain("text.invalidText", script);
         Assert.Contains("answerCards.length < 2", script);
         Assert.Contains("answerCards.length > 4", script);
         Assert.Contains("[\"Text\", \"Image\"]", script);
