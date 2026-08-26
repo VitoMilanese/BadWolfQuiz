@@ -6,21 +6,25 @@ namespace BadWolfQuiz.Game.Tests;
 public sealed class AllPlayerQuestionTests
 {
     [Fact]
-    public void Text_mode_requires_one_non_empty_text_answer()
-    {
-        var question = CreateQuestion(
-            QuestionPresentationType.AllPlayerText,
-            [TextBlock(10, "Kyiv")]);
+public void Text_mode_accepts_standard_answer_content()
+{
+    var question = CreateQuestion(
+        QuestionPresentationType.AllPlayerText,
+        [
+            TextBlock(10, "Kyiv"),
+            ImageBlock(11),
+            AudioBlock(12)
+        ]);
 
-        Assert.False(question.IsSpecial);
-        Assert.False(question.ExcludeFromRandomWagerSelection);
-        Assert.True(question.IsEligibleForRandomWagerSelection);
-        Assert.Single(question.AnswerBlocks);
-
-        Assert.Throws<ArgumentException>(() => CreateQuestion(
-            QuestionPresentationType.AllPlayerText,
-            [TextBlock(10, "Kyiv"), TextBlock(11, "Lviv")]));
-    }
+    Assert.False(question.IsSpecial);
+    Assert.False(question.ExcludeFromRandomWagerSelection);
+    Assert.True(question.IsEligibleForRandomWagerSelection);
+    Assert.Equal(3, question.AnswerBlocks.Count);
+    Assert.Equal(ContentBlockKind.Text, question.AnswerBlocks[0].Kind);
+    Assert.Equal(ContentBlockKind.Image, question.AnswerBlocks[1].Kind);
+    Assert.Equal(ContentBlockKind.Audio, question.AnswerBlocks[2].Kind);
+    Assert.Equal(3, question.RevealAnswerBlocks.Count);
+}
 
     [Fact]
     public void Multiple_choice_accepts_two_to_four_text_or_image_options()

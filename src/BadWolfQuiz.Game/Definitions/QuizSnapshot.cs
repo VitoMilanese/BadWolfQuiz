@@ -243,16 +243,6 @@ public sealed class QuizQuestionSnapshot
                 nameof(questionBlocks));
         }
 
-        if (presentationType == QuestionPresentationType.AllPlayerText &&
-            (orderedAnswerBlocks.Length != 1 ||
-             orderedAnswerBlocks[0].Kind != ContentBlockKind.Text ||
-             string.IsNullOrWhiteSpace(orderedAnswerBlocks[0].TextContent)))
-        {
-            throw new ArgumentException(
-                "An all-player text question must contain exactly one non-empty text answer block.",
-                nameof(answerBlocks));
-        }
-
         if (presentationType == QuestionPresentationType.AllPlayerMultipleChoice)
         {
             if (!answerLayout.IsStructurallyValid)

@@ -4,7 +4,7 @@
 
 Mandatory all-player questions replace the normal first-to-buzz flow with a phase in which every current player may submit one answer from the player page.
 
-This feature is released with `BadWolfQuiz.Web` **1.16.0**. Structured multiple-choice answer options with separate reveal-only answer content are added in **1.22.38**.
+This feature is released with `BadWolfQuiz.Web` **1.16.0**. Structured multiple-choice answer options with separate reveal-only answer content are added in **1.22.38**. Standard answer-content authoring for all-player text questions is added in **1.22.39**.
 
 The runtime exposes two presentation modes:
 
@@ -17,7 +17,8 @@ These modes use the existing `QuestionPresentationType` field, so they do not re
 
 ### Text answer
 
-- The answer contains exactly one non-empty Text block. It is shown to the host as the reference answer but is not used for automatic judging.
+- The **Correct answer** section uses the same normal content-block editor as a standard question and may contain multiple supported answer blocks, including Text, Image, Audio, YouTube, Container, and legacy Video-compatible content.
+- Configured correct-answer content is reference/reveal content only. Player text submissions are never compared against it automatically; the host judges every submission manually.
 - Question content may use the normal content-block editor.
 - The question may be marked as a wager question and may participate in random wager selection.
 
@@ -107,7 +108,7 @@ The all-player client can recover its access token from the same local-storage r
 
 The focused regression suite covers:
 
-- editor restrictions and dirty-state behavior;
+- standard answer-content authoring for all-player text questions, plus multiple-choice editor restrictions and dirty-state behavior;
 - structured **Answer options** handling, legacy flat-answer compatibility, and reveal-only answer content;
 - automatic completion after every participating player submits, for both multiple-choice reveal and text-answer review;
 - host-triggered early review and automatic empty-response fill for missing players;

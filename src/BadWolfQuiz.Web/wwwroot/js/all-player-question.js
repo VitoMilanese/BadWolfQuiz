@@ -15,10 +15,9 @@
         en: {
             typeText: "All players — text answer",
             typeChoice: "All players — multiple choice",
-            textHint: "Every player submits a text answer. The host judges submitted answers manually. Keep exactly one non-empty Text block as the reference correct answer.",
+            textHint: "Every player submits a text answer. The configured correct answer uses the normal answer editor, and the host judges each submission manually.",
             choiceHint: "Every player chooses one shuffled option. Keep 2–4 Text or Image answer blocks; the first block is the correct option. Audio and video are not supported for this question type.",
             answerOptions: "Answer options (first is correct)",
-            invalidText: "All-player text questions require exactly one non-empty Text answer block.",
             invalidChoice: "All-player multiple-choice questions require 2–4 valid Text or Image answer options; the first option is correct.",
             invalidChoiceMedia: "All-player multiple-choice questions can contain only Text or Image blocks.",
             title: "Everyone answers",
@@ -51,10 +50,9 @@
         uk: {
             typeText: "Усі гравці — текстова відповідь",
             typeChoice: "Усі гравці — вибір відповіді",
-            textHint: "Кожен гравець вводить текстову відповідь. Відповіді перевіряє хост вручну. Залиште рівно один непорожній текстовий блок як еталон правильної відповіді.",
+            textHint: "Кожен гравець вводить текстову відповідь. Правильна відповідь використовує звичайний редактор блоків, а кожну відповідь гравця хост перевіряє вручну.",
             choiceHint: "Кожен гравець обирає один перемішаний варіант. Залиште 2–4 текстові блоки або зображення; перший блок є правильним. Аудіо та відео для цього типу питання не підтримуються.",
             answerOptions: "Варіанти відповіді (перший — правильний)",
-            invalidText: "Для текстового питання для всіх потрібен рівно один непорожній текстовий блок правильної відповіді.",
             invalidChoice: "Для питання з вибором для всіх потрібно 2–4 коректні текстові варіанти або зображення; перший варіант є правильним.",
             invalidChoiceMedia: "Питання для всіх з вибором відповіді може містити лише текст або зображення.",
             title: "Відповідають усі",
@@ -87,10 +85,9 @@
         it: {
             typeText: "Tutti i giocatori — risposta testuale",
             typeChoice: "Tutti i giocatori — scelta multipla",
-            textHint: "Ogni giocatore invia una risposta testuale. Il conduttore giudica manualmente le risposte. Mantieni esattamente un blocco Testo non vuoto come risposta corretta di riferimento.",
+            textHint: "Ogni giocatore invia una risposta testuale. La risposta corretta usa il normale editor dei blocchi e il conduttore giudica manualmente ogni risposta.",
             choiceHint: "Ogni giocatore sceglie un'opzione mescolata. Mantieni 2–4 blocchi Testo o Immagine; il primo blocco è l'opzione corretta. Audio e video non sono supportati per questo tipo di domanda.",
             answerOptions: "Opzioni di risposta (la prima è corretta)",
-            invalidText: "Le domande testuali per tutti richiedono esattamente un blocco Testo non vuoto come risposta corretta.",
             invalidChoice: "Le domande a scelta multipla per tutti richiedono 2–4 opzioni Testo o Immagine valide; la prima opzione è corretta.",
             invalidChoiceMedia: "Le domande a scelta multipla per tutti possono contenere solo blocchi Testo o Immagine.",
             title: "Rispondono tutti",
@@ -123,10 +120,9 @@
         ru: {
             typeText: "Все игроки — текстовый ответ",
             typeChoice: "Все игроки — выбор ответа",
-            textHint: "Каждый игрок вводит текстовый ответ. Ответы проверяет хост вручную. Оставьте ровно один непустой текстовый блок как эталон правильного ответа.",
+            textHint: "Каждый игрок вводит текстовый ответ. Правильный ответ использует обычный редактор блоков, а каждый ответ игрока хост проверяет вручную.",
             choiceHint: "Каждый игрок выбирает один перемешанный вариант. Оставьте 2–4 текстовых блока или изображения; первый блок является правильным. Аудио и видео для этого типа вопроса не поддерживаются.",
             answerOptions: "Варианты ответа (первый — правильный)",
-            invalidText: "Для текстового вопроса для всех нужен ровно один непустой текстовый блок правильного ответа.",
             invalidChoice: "Для вопроса с выбором для всех нужны 2–4 корректных текстовых варианта или изображения; первый вариант является правильным.",
             invalidChoiceMedia: "Вопрос для всех с выбором ответа может содержать только текст или изображения.",
             title: "Отвечают все",
@@ -495,7 +491,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 if (answerHeading instanceof HTMLHeadingElement) {
                     answerHeading.textContent = isChoice
                         ? text.answerOptions
-                        : text.yourAnswer;
+                        : answerHeading.dataset.standardHeading ?? "";
                 }
             } else if (previousAllPlayer && select.value === "0") {
                 if (buzzSelect instanceof HTMLSelectElement) {
@@ -513,7 +509,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 setAllowedTypes(answerSection, allowed);
             } else if (isText) {
                 setAllowedTypes(questionSection, null);
-                setAllowedTypes(answerSection, new Set(["Text"]));
+                setAllowedTypes(answerSection, null);
             } else {
                 setAllowedTypes(questionSection, null);
                 setAllowedTypes(answerSection, null);
@@ -557,24 +553,13 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
         };
 
         const validate = () => {
-            const isText = select.value === "2";
-            const isChoice = select.value === "3";
-            if (!isText && !isChoice) {
-                return null;
-            }
+    const isChoice = select.value === "3";
+    if (!isChoice) {
+        return null;
+    }
 
-            const answerCards = directCards(answerSection);
-            if (isText) {
-                const value = answerCards[0]?.querySelector('[name$=".TextContent"]')
-                    ?.value?.trim() ?? "";
-                return answerCards.length === 1 &&
-                    answerCards[0]?.dataset.blockType === "Text" &&
-                    value
-                    ? null
-                    : text.invalidText;
-            }
-
-            const questionCards = directCards(questionSection);
+    const answerCards = directCards(answerSection);
+    const questionCards = directCards(questionSection);
             const allowedType = card => ["Text", "Image"].includes(
                 card.dataset.blockType);
             if (!questionCards.every(allowedType) ||
