@@ -126,7 +126,7 @@ public sealed class DeferredGameMediaStore(
                 question.ExcludeFromRandomWagerSelection,
                 question.QuestionBlocks.Select(block =>
                     MaterializeBlock(block, DeferredGameMediaRole.Question)),
-                question.AnswerBlocks.Select(block =>
+                question.StoredAnswerBlocks.Select(block =>
                     MaterializeBlock(block, DeferredGameMediaRole.Answer)),
                 question.PresentationType,
                 question.BuzzerMode,
@@ -351,7 +351,7 @@ public sealed class DeferredGameMediaStore(
                     yield return (DeferredGameMediaRole.Question, block);
                 }
 
-                foreach (var block in question.AnswerBlocks)
+                foreach (var block in question.StoredAnswerBlocks)
                 {
                     yield return (DeferredGameMediaRole.Answer, block);
                 }
@@ -383,7 +383,7 @@ public sealed class DeferredGameMediaStore(
     {
         public int Id { get; init; }
         public byte[]? Data { get; init; }
-        public string? ContentType { get; init; }
+        public string ContentType { get; init; } = string.Empty;
         public string? FileName { get; init; }
     }
 

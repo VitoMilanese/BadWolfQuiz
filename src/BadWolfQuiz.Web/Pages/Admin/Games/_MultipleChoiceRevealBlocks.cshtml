@@ -1,0 +1,152 @@
+@model BadWolfQuiz.Web.Pages.Admin.Games.MultipleChoiceRevealBlocksViewModel
+@{
+    var isAllPlayerMultipleChoice =
+        Model.PresentationType ==
+            BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice;
+    var blockIndex = 0;
+}
+
+<style>
+    /* Legacy AllPlayerMultipleChoice styling still turns the outer answer block list
+       into a two-column grid. Keep the shared reveal as one full-width grid item so
+       the correct option and reveal-only content always stack vertically. */
+    .game-content-blocks.multiple-choice-answer-reveal-grid
+    > .multiple-choice-answer-reveal-stack {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: clamp(9px, 1.5vw, 18px) !important;
+    }
+
+    .multiple-choice-answer-reveal-stack > .game-content-block {
+        display: block !important;
+        width: min(100%, 1100px) !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        height: auto !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        text-align: inherit !important;
+    }
+
+    .multiple-choice-answer-reveal-stack
+    > .all-player-answer-option-correct {
+        padding: clamp(.55rem, 1vw, .9rem) !important;
+        border: 3px solid #2e7d32 !important;
+        border-radius: .8rem !important;
+        text-align: center !important;
+    }
+
+    .multiple-choice-answer-reveal-stack .game-content-image {
+        width: auto !important;
+        height: auto !important;
+        max-width: 100% !important;
+        max-height: min(62vh, 720px) !important;
+        object-fit: contain !important;
+    }
+
+    /* Host gameplay disables the submitted button before replacing the gameplay
+       view. Hide the outgoing reveal during that short transition so neither the
+       correct-answer border nor stale answer content can flash before the board. */
+    .answer-presentation:has(
+        form[action*="handler=CloseAnswer"] button:disabled)
+    .multiple-choice-answer-reveal-stack {
+        visibility: hidden !important;
+    }
+</style>
+
+<div class="multiple-choice-answer-reveal-stack">
+@foreach (var block in Model.Blocks)
+{
+    var correctOptionClass = isAllPlayerMultipleChoice && blockIndex == 0
+        ? "all-player-answer-option all-player-answer-option-correct"
+        : null;
+    var additionalClass = blockIndex > 0
+        ? "multiple-choice-additional-answer-block"
+        : null;
+
+    <article class="game-content-block @correctOptionClass @additionalClass">
+        @if (!string.IsNullOrWhiteSpace(block.TopCaption))
+        {
+            <p class="game-content-caption">@block.TopCaption</p>
+        }
+
+        @switch (block.Kind)
+        {
+            case BadWolfQuiz.Game.Definitions.ContentBlockKind.Text:
+                <p class="game-content-text">@block.TextContent</p>
+                break;
+            case BadWolfQuiz.Game.Definitions.ContentBlockKind.Image:
+                <img class="game-content-image"
+                     src="@Url.Page(
+                         "/Admin/Games/MultipleChoiceAnswerMedia",
+                         "ContentBlock",
+                         new
+                         {
+                             id = Model.GameSessionId,
+                             sourceQuestionId = Model.SourceQuestionId,
+                             sourceContentBlockId = block.SourceContentBlockId
+                         })"
+                     alt="@block.FileName" />
+                break;
+            case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
+                <div class="game-content-audio-shell">
+                    <audio class="game-content-audio"
+                           controls
+                           preload="metadata"
+                           data-autoplay-media="@block.Autoplay.ToString().ToLowerInvariant()"
+                           src="@Url.Page(
+                               "/Admin/Games/MultipleChoiceAnswerMedia",
+                               "ContentBlock",
+                               new
+                               {
+                                   id = Model.GameSessionId,
+                                   sourceQuestionId = Model.SourceQuestionId,
+                                   sourceContentBlockId = block.SourceContentBlockId
+                               })">
+                        @Localizer["GameBoard_AudioUnsupported"]
+                    </audio>
+                </div>
+                break;
+            case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
+                <video class="game-content-video"
+                       controls
+                       data-autoplay-media="@block.Autoplay.ToString().ToLowerInvariant()"
+                       src="@block.ExternalUrl">
+                </video>
+                break;
+            case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
+                <button class="youtube-placeholder"
+                        type="button"
+                        data-youtube-placeholder
+                        data-youtube-autoplay="@block.Autoplay.ToString().ToLowerInvariant()"
+                        data-youtube-embed-url="@(YouTubeEmbedUrlBuilder.GetYouTubeEmbedUrl(block.ExternalUrl) + "&fs=0")"
+                        data-youtube-frame-class="game-content-video youtube-auto-expand"
+                        data-youtube-title="@Localizer["GameBoard_MediaContent"]"
+                        data-youtube-close-label="@Localizer["GameBoard_CloseVideo"]"
+                        data-youtube-allow-fullscreen="false"
+                        aria-label="@Localizer["GameBoard_MediaContent"]">
+                    <img class="youtube-placeholder-image"
+                         src="~/images/youtube-placeholder.svg"
+                         alt=""
+                         aria-hidden="true" />
+                    <span class="youtube-placeholder-play" aria-hidden="true"></span>
+                </button>
+                break;
+        }
+
+        @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
+        {
+            <p class="game-content-caption">@block.BottomCaption</p>
+        }
+    </article>
+
+    blockIndex++;
+}
+</div>

@@ -4,7 +4,7 @@
 
 Mandatory all-player questions replace the normal first-to-buzz flow with a phase in which every current player may submit one answer from the player page.
 
-This feature is released with `BadWolfQuiz.Web` **1.16.0**.
+This feature is released with `BadWolfQuiz.Web` **1.16.0**. Structured multiple-choice answer options with separate reveal-only answer content are added in **1.22.38**.
 
 The runtime exposes two presentation modes:
 
@@ -23,11 +23,16 @@ These modes use the existing `QuestionPresentationType` field, so they do not re
 
 ### Multiple choice
 
-- The answer contains two, three, or four options.
-- Every option is a Text or Image block.
-- The first configured answer block is the correct option.
-- Audio, Video, YouTube, and other content types are rejected for both the question and answer sections in this mode.
+- The Correct answer section starts with one required, non-removable **Answer options** structural block.
+- The structural block contains two, three, or four selectable options.
+- Every selectable option is a Text or Image block.
+- The first option inside **Answer options** is the correct option. Reordering options changes which option is correct.
+- Only option children participate in player choice generation, stable shuffling, submission, and scoring.
+- Normal answer blocks may be added after **Answer options** as optional reveal-only content. These blocks are not selectable and support the normal answer content types, including Text, Image, Audio, YouTube, Container, and legacy Video compatibility.
+- Question content remains limited to Text and Image blocks for this presentation type.
 - The question may be marked as a wager question and may participate in random wager selection.
+
+Legacy multiple-choice questions that store only the old flat two-to-four answer blocks are wrapped into the **Answer options** structure when opened in the editor. The database is not changed until the question is saved.
 
 Opening an existing all-player question establishes a clean editor baseline. Leaving through Back, Next, refresh, page close, or Escape uses the shared unsaved-changes guard without stacking a native browser prompt over the application dialog.
 
@@ -50,19 +55,23 @@ For wager all-player questions, the participants after wagering are the players 
 
 ## Multiple-choice ordering and presentation
 
-Each player receives a stable shuffled order derived from the question and player identifiers. The host receives a separate stable shuffled order while the question is open.
+Each player receives a stable shuffled order derived from the question and player identifiers. The host receives a separate stable shuffled order while the question is open. Only the children of **Answer options** participate in these shuffled choice lists; reveal-only answer blocks are never sent as selectable options.
 
 The host question page renders the shuffled choices on the server so the correct layout is present on the first frame, including image choices. Correctness is not highlighted during answering. On hover-capable desktop host displays, those choices stay in a horizontally centered collapsed bottom drawer and expand on hover or keyboard focus, while the submitted/waiting player list uses a matching right-side drawer. The host's **Proceed to answer review** button stays in a dedicated lower-left area beside the centered drawer, so the expanded drawer cannot cover it and hovering the button does not open the drawer. Drawer headers are clipped to the same rounded corners as their outer frames. Touch layouts keep the information directly visible because hover is unavailable.
 
-The editor answer preview, live answer page, and resolved-question answer preview use the configured answer order so the first option can be marked as correct. They render:
+When the correct answer is revealed, all supported reveal surfaces use the same composition:
 
-- two options as one row and two columns;
-- three or four options as a two-column grid;
-- the correct option with a green border;
-- every distractor with a red border;
-- text and images centered inside equal presentation cells.
+1. the correct option from **Answer options**;
+2. optional normal answer blocks that follow the structural block, in configured order.
 
-The private host `/Admin/Games/AnswerKey/` screen intentionally uses a different reveal presentation for `AllPlayerMultipleChoice`: it renders only the first configured answer block, which is the correct option, and omits every distractor. Other question types continue to render their normal answer blocks. **Correct answer** is rendered in the shared application topbar through `HeaderContext`, not in a separate body header. The AnswerKey screen hides the portal footer and constrains its body to the viewport below the topbar, preventing an otherwise unnecessary page scrollbar while allowing the answer content to use the full available width.
+Incorrect options are omitted. The reveal is a vertical content flow rather than the old two-column option grid. This same composition is used by:
+
+- live gameplay while the question is in `ShowingAnswer`;
+- Question Editor **Preview - Correct answer**;
+- the separate host **Correct answer** (`AnswerKey`) screen;
+- the resolved/closed question preview opened from the board.
+
+Reveal-only image and audio content uses the deferred-media path, including restored or recovered active games. The private host `/Admin/Games/AnswerKey/` screen renders the same correct-option-plus-additional-content composition as the other reveal surfaces. **Correct answer** is rendered in the shared application topbar through `HeaderContext`, not in a separate body header. The AnswerKey screen hides the portal footer and constrains its body to the viewport below the topbar, preventing an otherwise unnecessary page scrollbar while allowing the answer content to use the full available width.
 
 Image endpoints return inline media responses so they can be displayed by `<img>` elements rather than downloaded as attachments.
 
@@ -99,12 +108,12 @@ The all-player client can recover its access token from the same local-storage r
 The focused regression suite covers:
 
 - editor restrictions and dirty-state behavior;
+- structured **Answer options** handling, legacy flat-answer compatibility, and reveal-only answer content;
 - automatic completion after every participating player submits, for both multiple-choice reveal and text-answer review;
 - host-triggered early review and automatic empty-response fill for missing players;
 - wager participation rules, including late players who did not submit wagers;
-- shuffled Text/Image choices;
-- server-rendered host and preview grids;
-- AnswerKey correct-option filtering, shared-topbar title placement, and viewport-bound full-width presentation;
+- shuffled Text/Image choices scoped only to selectable options;
+- shared correct-option-plus-additional-content reveal behavior across live gameplay, editor preview, AnswerKey, and resolved-question preview;
 - reconnect approval, local-storage token recovery, and control rebuilding;
 - versioned asset loading;
 - normal and per-player-wager scoring behavior.

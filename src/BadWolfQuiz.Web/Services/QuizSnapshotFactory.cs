@@ -141,6 +141,24 @@ public sealed class QuizSnapshotFactory
         ContentBlockBase block,
         bool copyFileData)
     {
+        if (block.BlockType == ContentBlockType.AnswerOptions)
+        {
+            return new ContentBlockSnapshot(
+                block.Id,
+                ContentBlockKind.Text,
+                AnswerOptionsBlockContract.CreateRuntimeMarker(block.TextContent),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                block.SortOrder,
+                false,
+                false);
+        }
+
         if (block.BlockType == ContentBlockType.Container)
         {
             return new ContentBlockSnapshot(

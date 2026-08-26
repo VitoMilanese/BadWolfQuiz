@@ -49,6 +49,70 @@ public sealed class ActiveGameSnapshotTests
     }
 
     [Fact]
+    public void Structured_multiple_choice_answer_round_trips_with_reveal_content()
+    {
+        var answerBlocks = new ContentBlockSnapshot[]
+        {
+            new(
+                100,
+                ContentBlockKind.Text,
+                MultipleChoiceAnswerContract.CreateRuntimeMarker(2),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                0,
+                false),
+            TextBlock(101, "Correct", 1),
+            TextBlock(102, "Wrong", 2),
+            TextBlock(103, "Explanation", 3)
+        };
+        var question = new QuizQuestionSnapshot(
+            9,
+            3,
+            0,
+            100,
+            false,
+            questionBlocks: [TextBlock(99, "Question", 0)],
+            answerBlocks: answerBlocks,
+            presentationType: QuestionPresentationType.AllPlayerMultipleChoice);
+        var quiz = new QuizSnapshot(
+            42,
+            "Recovery quiz",
+            [new QuizRoundSnapshot(7, "Round 1", 0, [question])]);
+        var session = GameSession.Create(quiz);
+        session.AddPlayer("Rose");
+        var snapshot = new ActiveGameSnapshot(
+            "ABC123",
+            "host-1",
+            true,
+            quiz,
+            session.Settings,
+            session.CaptureState());
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new QuizSnapshotJsonConverter() }
+        };
+
+        var json = JsonSerializer.Serialize(snapshot, options);
+        var restored = JsonSerializer.Deserialize<ActiveGameSnapshot>(json, options);
+
+        Assert.NotNull(restored);
+        var restoredQuestion = restored.Quiz.Rounds.Single().Questions.Single();
+        Assert.Equal([101, 102], restoredQuestion.AnswerBlocks
+            .Select(block => block.SourceContentBlockId));
+        Assert.Equal([101, 103], restoredQuestion.RevealAnswerBlocks
+            .Select(block => block.SourceContentBlockId));
+        Assert.True(MultipleChoiceAnswerContract.TryParseRuntimeMarker(
+            restoredQuestion.StoredAnswerBlocks[0].TextContent,
+            out var optionCount));
+        Assert.Equal(2, optionCount);
+    }
+
+    [Fact]
     public void Resume_availability_expires_after_configured_days()
     {
         var now = new DateTimeOffset(2026, 8, 5, 12, 0, 0, TimeSpan.Zero);
@@ -87,6 +151,23 @@ public sealed class ActiveGameSnapshotTests
             SavedAtUtc = now.AddDays(-30).AddTicks(-1)
         }));
     }
+
+    private static ContentBlockSnapshot TextBlock(
+        int id,
+        string text,
+        int sortOrder) => new(
+            id,
+            ContentBlockKind.Text,
+            text,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            sortOrder,
+            false);
 
     private sealed class FixedTimeProvider(DateTimeOffset utcNow) : TimeProvider
     {

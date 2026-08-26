@@ -114,21 +114,21 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
     }
 
     [Fact]
-    public void Host_and_resolved_answer_use_explicit_compact_grids()
+    public void Host_answering_keeps_choice_grid_while_resolved_answer_uses_shared_reveal()
     {
         var root = FindRepositoryRoot();
         var host = Read(root,
             "src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml");
         var preview = Read(root,
             "src/BadWolfQuiz.Web/Pages/Admin/Games/_GameContentPreview.cshtml");
+        var reveal = Read(root,
+            "src/BadWolfQuiz.Web/Pages/Admin/Games/_MultipleChoiceRevealBlocks.cshtml");
         var styles = Read(root,
             "src/BadWolfQuiz.Web/wwwroot/css/site.css");
         var script = Read(root,
             "src/BadWolfQuiz.Web/wwwroot/js/all-player-question.js");
-        var editor = Read(root,
-            "src/BadWolfQuiz.Web/Pages/Admin/Quizzes/QuestionEditor.cshtml");
-        var editorPreview = Read(root,
-            "src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Shared/_QuestionPreviewModal.cshtml");
+        var answerOptionsScript = Read(root,
+            "src/BadWolfQuiz.Web/wwwroot/js/multiple-choice-answer-options.js");
 
         Assert.Contains("data-all-player-server-preview", host);
         Assert.Contains("GetAllPlayerHostChoiceBlocks", host);
@@ -136,9 +136,15 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("all-player-answer-grid", host);
         Assert.Contains("all-player-answer-option-correct", host);
         Assert.Contains("all-player-answer-option-incorrect", host);
-        Assert.Contains("all-player-answer-grid", preview);
-        Assert.Contains("all-player-answer-option-correct", preview);
-        Assert.Contains("all-player-answer-option-incorrect", preview);
+
+        Assert.Contains("MultipleChoiceAnswerContract.IsMultipleChoice", preview);
+        Assert.Contains("RevealAnswerBlocks", preview);
+        Assert.Contains("_MultipleChoiceRevealBlocks", preview);
+        Assert.Contains("multiple-choice-answer-reveal-grid", preview);
+        Assert.Contains("all-player-answer-option-correct", reveal);
+        Assert.DoesNotContain("all-player-answer-option-incorrect", reveal);
+        Assert.Contains("multiple-choice-additional-answer-block", reveal);
+
         Assert.Contains(".all-player-answer-grid", styles);
         Assert.Contains("grid-template-columns: repeat(2", styles);
         Assert.Contains("justify-items: stretch", styles);
@@ -151,13 +157,11 @@ public sealed class MandatoryAllPlayerQuestionRegressionTests
         Assert.Contains("justify-items: stretch", script);
         Assert.DoesNotContain("grid-auto-rows: minmax(0, 1fr)", script);
         Assert.Contains("height: min(14vh, 9rem)", script);
-        Assert.Contains("isAllPlayerChoiceAnswerPreview", editor);
-        Assert.Contains("all-player-answer-option-correct", editor);
-        Assert.Contains("all-player-answer-option-incorrect", editor);
-        Assert.Contains(
-            ".question-preview-content.all-player-answer-grid",
-            editorPreview);
-        Assert.Contains(".question-preview-image", editorPreview);
+
+        Assert.Contains("rebuildMultipleChoiceAnswerPreview", answerOptionsScript);
+        Assert.Contains("getAdditionalCards", answerOptionsScript);
+        Assert.Contains("previewRoot.classList.remove(\"all-player-answer-grid\")", answerOptionsScript);
+        Assert.Contains("all-player-answer-option-correct", answerOptionsScript);
     }
 
     [Fact]
