@@ -80,12 +80,6 @@
            asp-route-id="@Model.Input.QuizId">@Localizer["Button_Back"]</a>
         <button class="button button-secondary"
                 type="button"
-                data-open-question-preview="description">
-            @Localizer["Button_Preview"] — @Localizer["Label_Description"]
-        </button>
-
-        <button class="button button-secondary"
-                type="button"
                 data-open-question-preview="question">
             @Localizer["Button_Preview"] — @Localizer["Label_Question"]
         </button>
@@ -94,6 +88,12 @@
                 type="button"
                 data-open-question-preview="answer">
             @Localizer["Button_Preview"] — @Localizer["Label_CorrectAnswer"]
+        </button>
+
+        <button class="button button-secondary"
+                type="button"
+                data-open-question-preview="description">
+            @Localizer["Button_Preview"] — @Localizer["Label_Description"]
         </button>
         <button class="button button-primary" type="submit">@Localizer["Button_Save"]</button>
     </div>
