@@ -1,126 +1,134 @@
+@inject BadWolfQuiz.Web.Services.GameSessionRegistry GameSessions
+@inject BadWolfQuiz.Web.Services.CurrentHost CurrentHost
 @model BadWolfQuiz.Web.Pages.Admin.Games.GameContentPreviewModel
 @{
-    var isAllPlayerMultipleChoiceAnswer =
+    var isMultipleChoiceAnswer =
         Model.IsAnswer &&
-        Model.PresentationType ==
-            BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice;
-    var isHostMultipleChoiceAnswer =
-        Model.IsAnswer &&
-        Model.PresentationType ==
-            BadWolfQuiz.Game.Definitions.QuestionPresentationType.HostMultipleChoice;
-    var blocks = isHostMultipleChoiceAnswer
-        ? Model.Blocks
-            .OrderBy(block => block.SortOrder)
-            .Take(1)
-            .ToArray()
-        : Model.Blocks.ToArray();
+        BadWolfQuiz.Game.Definitions.MultipleChoiceAnswerContract.IsMultipleChoice(
+            Model.PresentationType);
+    var blocks = Model.Blocks.ToArray();
+
+    if (isMultipleChoiceAnswer)
+    {
+        var game = GameSessions.FindOwned(
+            new BadWolfQuiz.Game.Runtime.GameSessionId(Model.GameSessionId),
+            CurrentHost.RequiredId);
+        var definition = game?.Session.Quiz.Rounds
+            .SelectMany(round => round.Questions)
+            .SingleOrDefault(question =>
+                question.SourceQuestionId == Model.SourceQuestionId);
+        blocks = (definition?.RevealAnswerBlocks ??
+            Model.Blocks.Take(1).ToArray()).ToArray();
+    }
+
     var isSingleImageFitCandidate =
         Model.PresentationType != BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues &&
-        !isAllPlayerMultipleChoiceAnswer &&
+        !isMultipleChoiceAnswer &&
         blocks.Count(block => block.Kind == BadWolfQuiz.Game.Definitions.ContentBlockKind.Image) == 1;
 }
 
 <link rel="stylesheet" href="~/css/youtube-placeholder.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/content-preview-width.css" asp-append-version="true" />
 
-<section class="game-content-presentation @(Model.IsAnswer ? "answer-presentation" : "question-presentation") @(isAllPlayerMultipleChoiceAnswer ? "all-player-multiple-choice-answer-presentation" : null)">
-    <div class="game-content-blocks @(Model.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !Model.IsAnswer ? "four-clue-grid" : null) @(isAllPlayerMultipleChoiceAnswer ? "all-player-answer-grid" : null)">
-        @{
-            var blockIndex = 0;
-        }
-        @foreach (var block in blocks)
+<section class="game-content-presentation @(Model.IsAnswer ? "answer-presentation" : "question-presentation")">
+    <div class="game-content-blocks @(Model.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.FourClues && !Model.IsAnswer ? "four-clue-grid" : null) @(isMultipleChoiceAnswer ? "multiple-choice-answer-reveal-grid" : null)">
+        @if (isMultipleChoiceAnswer)
         {
-            var allPlayerAnswerOptionClass =
-                isAllPlayerMultipleChoiceAnswer
-                    ? blockIndex == 0
-                        ? "all-player-answer-option all-player-answer-option-correct"
-                        : "all-player-answer-option all-player-answer-option-incorrect"
-                    : null;
-            var isViewportFitCandidate =
-                isSingleImageFitCandidate &&
-                block.Kind == BadWolfQuiz.Game.Definitions.ContentBlockKind.Image;
+            <partial name="_MultipleChoiceRevealBlocks"
+                     model="@(new MultipleChoiceRevealBlocksViewModel(
+                         Model.GameSessionId,
+                         Model.SourceQuestionId,
+                         Model.PresentationType,
+                         blocks))" />
+        }
+        else
+        {
+            @foreach (var block in blocks)
+            {
+                var isViewportFitCandidate =
+                    isSingleImageFitCandidate &&
+                    block.Kind == BadWolfQuiz.Game.Definitions.ContentBlockKind.Image;
 
-            <article class="game-content-block @allPlayerAnswerOptionClass">
-                @if (!string.IsNullOrWhiteSpace(block.TopCaption))
-                {
-                    <p class="game-content-caption">@block.TopCaption</p>
-                }
+                <article class="game-content-block">
+                    @if (!string.IsNullOrWhiteSpace(block.TopCaption))
+                    {
+                        <p class="game-content-caption">@block.TopCaption</p>
+                    }
 
-                @switch (block.Kind)
-                {
-                    case BadWolfQuiz.Game.Definitions.ContentBlockKind.Text:
-                        <p class="game-content-text">@block.TextContent</p>
-                        break;
-                    case BadWolfQuiz.Game.Definitions.ContentBlockKind.Image:
-                        <img class="game-content-image"
-                             src="@Url.Page(
-                                 "/Admin/Games/Lobby",
-                                 "ContentBlock",
-                                 new
-                                 {
-                                     id = Model.GameSessionId,
-                                     sourceQuestionId = Model.SourceQuestionId,
-                                     sourceContentBlockId = block.SourceContentBlockId,
-                                     answer = Model.IsAnswer
-                                 })"
-                             data-game-content-fit-pending="@(isViewportFitCandidate ? "true" : null)"
-                             style="@(isViewportFitCandidate ? "visibility: hidden;" : null)"
-                             alt="@block.FileName" />
-                        break;
-                    case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
-                        <div class="game-content-audio-shell">
-                            <audio class="game-content-audio"
+                    @switch (block.Kind)
+                    {
+                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Text:
+                            <p class="game-content-text">@block.TextContent</p>
+                            break;
+                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Image:
+                            <img class="game-content-image"
+                                 src="@Url.Page(
+                                     "/Admin/Games/Lobby",
+                                     "ContentBlock",
+                                     new
+                                     {
+                                         id = Model.GameSessionId,
+                                         sourceQuestionId = Model.SourceQuestionId,
+                                         sourceContentBlockId = block.SourceContentBlockId,
+                                         answer = Model.IsAnswer
+                                     })"
+                                 data-game-content-fit-pending="@(isViewportFitCandidate ? "true" : null)"
+                                 style="@(isViewportFitCandidate ? "visibility: hidden;" : null)"
+                                 alt="@block.FileName" />
+                            break;
+                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Audio:
+                            <div class="game-content-audio-shell">
+                                <audio class="game-content-audio"
+                                       controls
+                                       preload="metadata"
+                                       data-autoplay-media="@block.Autoplay.ToString().ToLowerInvariant()"
+                                       src="@Url.Page(
+                                           "/Admin/Games/Lobby",
+                                           "ContentBlock",
+                                           new
+                                           {
+                                               id = Model.GameSessionId,
+                                               sourceQuestionId = Model.SourceQuestionId,
+                                               sourceContentBlockId = block.SourceContentBlockId,
+                                               answer = Model.IsAnswer
+                                           })">
+                                    @Localizer["GameBoard_AudioUnsupported"]
+                                </audio>
+                            </div>
+                            break;
+                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
+                            <video class="game-content-video"
                                    controls
-                                   preload="metadata"
                                    data-autoplay-media="@block.Autoplay.ToString().ToLowerInvariant()"
-                                   src="@Url.Page(
-                                       "/Admin/Games/Lobby",
-                                       "ContentBlock",
-                                       new
-                                       {
-                                           id = Model.GameSessionId,
-                                           sourceQuestionId = Model.SourceQuestionId,
-                                           sourceContentBlockId = block.SourceContentBlockId,
-                                           answer = Model.IsAnswer
-                                       })">
-                                @Localizer["GameBoard_AudioUnsupported"]
-                            </audio>
-                        </div>
-                        break;
-                    case BadWolfQuiz.Game.Definitions.ContentBlockKind.Video:
-                        <video class="game-content-video"
-                               controls
-                               data-autoplay-media="@block.Autoplay.ToString().ToLowerInvariant()"
-                               src="@block.ExternalUrl">
-                        </video>
-                        break;
-                    case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
-                        <button class="youtube-placeholder"
-                                type="button"
-                                data-youtube-placeholder
-                                data-youtube-autoplay="@block.Autoplay.ToString().ToLowerInvariant()"
-                                data-youtube-embed-url="@(YouTubeEmbedUrlBuilder.GetYouTubeEmbedUrl(block.ExternalUrl) + "&fs=0")"
-                                data-youtube-frame-class="game-content-video youtube-auto-expand"
-                                data-youtube-title="@Localizer["GameBoard_MediaContent"]"
-                                data-youtube-close-label="@Localizer["GameBoard_CloseVideo"]"
-                                data-youtube-allow-fullscreen="false"
-                                aria-label="@Localizer["GameBoard_MediaContent"]">
-                            <img class="youtube-placeholder-image"
-                                 src="~/images/youtube-placeholder.svg"
-                                 alt=""
-                                 aria-hidden="true" />
-                            <span class="youtube-placeholder-play" aria-hidden="true"></span>
-                        </button>
-                        break;
-                }
+                                   src="@block.ExternalUrl">
+                            </video>
+                            break;
+                        case BadWolfQuiz.Game.Definitions.ContentBlockKind.YouTube:
+                            <button class="youtube-placeholder"
+                                    type="button"
+                                    data-youtube-placeholder
+                                    data-youtube-autoplay="@block.Autoplay.ToString().ToLowerInvariant()"
+                                    data-youtube-embed-url="@(YouTubeEmbedUrlBuilder.GetYouTubeEmbedUrl(block.ExternalUrl) + "&fs=0")"
+                                    data-youtube-frame-class="game-content-video youtube-auto-expand"
+                                    data-youtube-title="@Localizer["GameBoard_MediaContent"]"
+                                    data-youtube-close-label="@Localizer["GameBoard_CloseVideo"]"
+                                    data-youtube-allow-fullscreen="false"
+                                    aria-label="@Localizer["GameBoard_MediaContent"]">
+                                <img class="youtube-placeholder-image"
+                                     src="~/images/youtube-placeholder.svg"
+                                     alt=""
+                                     aria-hidden="true" />
+                                <span class="youtube-placeholder-play" aria-hidden="true"></span>
+                            </button>
+                            break;
+                    }
 
-                @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
-                {
-                    <p class="game-content-caption">@block.BottomCaption</p>
-                }
-            </article>
-
-            blockIndex++;
+                    @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
+                    {
+                        <p class="game-content-caption">@block.BottomCaption</p>
+                    }
+                </article>
+            }
         }
     </div>
 </section>

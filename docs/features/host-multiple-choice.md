@@ -7,23 +7,39 @@ Host-selected multiple-choice questions combine the normal buzzer flow with a fi
 ## Authoring contract
 
 - A question contains the normal question content blocks.
-- The answer contains between 4 and 10 distinct text options.
-- Each option is limited to 20 characters.
-- The first option in answer-block order is the correct option and the editor presents that state explicitly.
-- Reordering answer options changes which option is correct.
+- The Correct answer section starts with one required, non-removable **Answer options** structural block.
+- **Answer options** contains between 4 and 10 distinct Text options.
+- Each selectable option is limited to 20 characters.
+- The first option inside **Answer options** is the correct option and the editor presents that state explicitly.
+- Reordering options changes which option is correct.
+- Normal answer blocks may be added after **Answer options** as optional reveal-only content. These blocks are not selectable and support the normal answer content types, including Text, Image, Audio, YouTube, Container, and legacy Video compatibility.
 - This question type cannot be a wager question and is excluded from random wager selection.
+
+Legacy host-selected multiple-choice questions that store the old flat four-to-ten Text answer blocks are treated as selectable options automatically. Opening a legacy question in the editor creates the **Answer options** structure in the view model; the database is not changed until Save.
 
 ## Answer presentation
 
-Only the correct option is presented as the answer for this question type.
+Only the correct selectable option is retained from the option list when the answer is revealed. Optional normal answer content is then rendered after it in configured order.
 
-- The Question Editor answer preview shows only the first/correct option.
-- Previewing the answer of an already closed question also shows only the correct option.
-- During live gameplay, when the question enters `ShowingAnswer`, only the correct answer block is rendered; incorrect answer-option blocks are not rendered as part of the answer.
+The same vertical reveal composition is used by all supported answer surfaces:
+
+1. the correct option from **Answer options**;
+2. optional reveal-only answer blocks that follow the structural block.
+
+Incorrect options are omitted from every reveal surface. This applies to:
+
+- live gameplay while the question is in `ShowingAnswer`;
+- Question Editor **Preview - Correct answer**;
+- the separate host **Correct answer** (`AnswerKey`) screen;
+- the resolved/closed question preview opened from the board.
+
+Reveal-only image and audio content uses the deferred-media path, including restored or recovered active games.
 
 ## Host answer-option panel
 
 During an active question, the host sees a vertical answer-option panel on the right side of the gameplay screen.
+
+Only the children of **Answer options** participate in this panel. Reveal-only answer blocks never appear as host choices and never affect elimination, judging, scoring, or dynamic value.
 
 - Available answer options are displayed in a stable randomized order for the current game/question rather than editor order.
 - Eliminating an incorrect option does not reshuffle the remaining options.
@@ -56,7 +72,7 @@ Whenever the current value changes after an incorrect answer or timer eliminatio
 
 ## Runtime behavior
 
-Selecting the correct option awards the current value, closes the question, and shows the correct answer through the normal AJAX gameplay refresh without a full-page reload.
+Selecting the correct option awards the current value, closes the question, and shows the shared correct-option-plus-additional-content reveal through the normal AJAX gameplay refresh without a full-page reload.
 
 Selecting an incorrect option subtracts the current value, removes that option, recalculates the value, and reopens the buzzer for players who have not already answered. A player keeps the normal one-attempt-per-question restriction.
 
@@ -70,8 +86,10 @@ If only two options remain after either an incorrect answer or timer elimination
 
 ## Recovery
 
-The set of remaining options is part of the active-game snapshot, so recovery does not restore eliminated choices. The current reward is derived from the recovered remaining-option state, and the stable host display order is reconstructed from the game and question identifiers.
+The set of remaining selectable options is part of the active-game snapshot, so recovery does not restore eliminated choices. Reveal-only answer blocks are stored separately from the runtime option set and are preserved in the active-game JSON snapshot. The current reward is derived from the recovered remaining-option state, and the stable host display order is reconstructed from the game and question identifiers.
+
+Legacy active-game snapshots without the structural marker continue to interpret the old flat four-to-ten Text answer blocks as selectable options and reveal only the first/correct option.
 
 ## Release
 
-Host-selected multiple-choice questions are introduced in BadWolfQuiz Web `1.20.0` (`web-v1.20.0`).
+Host-selected multiple-choice questions were introduced in BadWolfQuiz Web `1.20.0` (`web-v1.20.0`). Structured **Answer options** with separate reveal-only answer content are added in BadWolfQuiz Web `1.22.38`.

@@ -8,7 +8,8 @@ namespace BadWolfQuiz.Web.Pages.Admin.Games;
 
 public sealed class AnswerKeyModel(
     GameSessionRegistry sessionRegistry,
-    CurrentHost currentHost) : PageModel
+    CurrentHost currentHost,
+    DeferredGameMediaStore mediaStore) : PageModel
 {
     public GameSessionRegistration Game { get; private set; } = null!;
 
@@ -58,14 +59,15 @@ public sealed class AnswerKeyModel(
         }
 
         CurrentSourceQuestionId = question.SourceQuestionId;
-        AnswerBlocks = GetVisibleAnswerBlocks(question);
+        AnswerBlocks = GetVisibleAnswerBlocks(game, question);
         return Page();
     }
 
-    public IActionResult OnGetContentBlock(
+    public async Task<IActionResult> OnGetContentBlockAsync(
         Guid id,
         int sourceContentBlockId,
-        bool final)
+        bool final,
+        CancellationToken cancellationToken)
     {
         var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
 
@@ -86,33 +88,49 @@ public sealed class AnswerKeyModel(
                     not RuntimeQuestionStatus.Resolved);
             blocks = question is null
                 ? null
-                : GetVisibleAnswerBlocks(question);
+                : GetVisibleAnswerBlocks(game, question);
         }
 
         var block = blocks?.SingleOrDefault(item =>
             item.SourceContentBlockId == sourceContentBlockId);
-
-        if (block?.FileData is null ||
-            string.IsNullOrWhiteSpace(block.FileContentType))
+        if (block is null)
         {
             return NotFound();
         }
 
-        return string.IsNullOrWhiteSpace(block.FileName)
-            ? File(block.FileData, block.FileContentType)
-            : File(block.FileData, block.FileContentType, block.FileName);
+        var media = await mediaStore.ResolveAsync(
+            game.Session.Id.Value,
+            game.Session.Quiz,
+            final
+                ? DeferredGameMediaRole.FinalAnswer
+                : DeferredGameMediaRole.Answer,
+            block,
+            cancellationToken);
+        if (media is null)
+        {
+            return NotFound();
+        }
+
+        return new FileContentResult(media.Data, media.ContentType)
+        {
+            EnableRangeProcessing = true
+        };
     }
 
     private static IReadOnlyList<ContentBlockSnapshot> GetVisibleAnswerBlocks(
+        GameSessionRegistration game,
         RuntimeQuestion question)
     {
-        if (question.PresentationType ==
-                QuestionPresentationType.AllPlayerMultipleChoice &&
-            question.AnswerBlocks.Count > 0)
+        if (!MultipleChoiceAnswerContract.IsMultipleChoice(question.PresentationType))
         {
-            return [question.AnswerBlocks[0]];
+            return question.AnswerBlocks;
         }
 
-        return question.AnswerBlocks;
+        var definition = game.Session.Quiz.Rounds
+            .SelectMany(round => round.Questions)
+            .SingleOrDefault(item =>
+                item.SourceQuestionId == question.SourceQuestionId);
+        return definition?.RevealAnswerBlocks ??
+            question.AnswerBlocks.Take(1).ToArray();
     }
 }

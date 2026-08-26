@@ -47,8 +47,6 @@ public sealed class QuestionEditorModel(
             return NotFound();
         }
 
-        var questionBlock = question.QuestionBlocks.OrderBy(x => x.SortOrder).FirstOrDefault();
-        var answerBlock = question.AnswerBlocks.OrderBy(x => x.SortOrder).FirstOrDefault();
         var presentationType =
             AllPlayerQuestionCompatibility.ResolveStoredPresentationType(question);
 
@@ -105,6 +103,11 @@ public sealed class QuestionEditorModel(
             })
             .ToList();
 
+        NormalizeAnswerOptionsStructure(
+            presentationType,
+            Input.AnswerBlocks,
+            wrapLegacyBlocks: true);
+
         NextQuestionId = await db.QuizQuestions
             .AsNoTracking()
             .Where(x =>
@@ -123,6 +126,11 @@ public sealed class QuestionEditorModel(
             AllPlayerQuestionCompatibility.ResolvePostedPresentationType(
                 Input.PresentationType,
                 Input.AllPlayerMode);
+
+        NormalizeAnswerOptionsStructure(
+            Input.PresentationType,
+            Input.AnswerBlocks,
+            wrapLegacyBlocks: true);
 
         if (!await db.Quizzes.AsNoTracking().AnyAsync(
             x => x.Id == Input.QuizId && x.MediaState == QuizMediaState.Active,
@@ -155,7 +163,11 @@ public sealed class QuestionEditorModel(
             }
         }
 
-        if (Input.PresentationType == QuestionPresentationType.HostMultipleChoice)
+        if (Input.PresentationType == QuestionPresentationType.AllPlayerMultipleChoice)
+        {
+            ValidateAllPlayerMultipleChoiceAnswerOptions();
+        }
+        else if (Input.PresentationType == QuestionPresentationType.HostMultipleChoice)
         {
             ValidateHostMultipleChoiceAnswerOptions();
         }
@@ -184,6 +196,8 @@ public sealed class QuestionEditorModel(
             QuestionPresentationType.AllPlayerMultipleChoice;
         var isHostMultipleChoice =
             Input.PresentationType == QuestionPresentationType.HostMultipleChoice;
+        var answerLayout = GetAnswerOptionsLayout();
+        var answerOptionSet = answerLayout.Options.ToHashSet();
 
         question.PresentationType = Input.PresentationType;
         question.IsSpecial =
@@ -299,7 +313,13 @@ public sealed class QuestionEditorModel(
                 question.AnswerBlocks.Add(entity);
             }
 
-            if (inputBlock.RemoveFile &&
+            var isAnswerOptionsMarker =
+                inputBlock.BlockType == ContentBlockType.AnswerOptions;
+            var isHostAnswerOption =
+                isHostMultipleChoice && answerOptionSet.Contains(inputBlock);
+
+            if (!isAnswerOptionsMarker &&
+                inputBlock.RemoveFile &&
                 inputBlock.BlockType is ContentBlockType.Image or ContentBlockType.Audio)
             {
                 entity.FileData = null;
@@ -307,7 +327,8 @@ public sealed class QuestionEditorModel(
                 entity.FileName = null;
             }
 
-            if (inputBlock.UploadedFile is not null &&
+            if (!isAnswerOptionsMarker &&
+                inputBlock.UploadedFile is not null &&
                 inputBlock.UploadedFile.Length > 0)
             {
                 try
@@ -336,24 +357,28 @@ public sealed class QuestionEditorModel(
             }
 
             entity.SortOrder = inputBlock.SortOrder;
-            entity.BlockType = isHostMultipleChoice
-                ? ContentBlockType.Text
-                : inputBlock.BlockType;
-            entity.TextContent = inputBlock.TextContent?.Trim();
-            entity.TopCaption = isHostMultipleChoice
+            entity.BlockType = inputBlock.BlockType;
+            entity.TextContent = isAnswerOptionsMarker
+                ? AnswerOptionsBlockContract.StoreOptionCount(
+                    answerLayout.Options.Count)
+                : inputBlock.TextContent?.Trim();
+            entity.TopCaption = isAnswerOptionsMarker || isHostAnswerOption
                 ? null
                 : inputBlock.TopCaption?.Trim();
-            entity.BottomCaption = isHostMultipleChoice
+            entity.BottomCaption = isAnswerOptionsMarker || isHostAnswerOption
                 ? null
                 : inputBlock.BottomCaption?.Trim();
-            entity.ExternalUrl = isHostMultipleChoice
+            entity.ExternalUrl = isAnswerOptionsMarker || isHostAnswerOption
                 ? null
                 : inputBlock.ExternalUrl?.Trim();
-            entity.AudioOnly = !isHostMultipleChoice && inputBlock.AudioOnly;
-            entity.Autoplay = !isHostMultipleChoice &&
+            entity.AudioOnly = !isAnswerOptionsMarker &&
+                !isHostAnswerOption &&
+                inputBlock.AudioOnly;
+            entity.Autoplay = !isAnswerOptionsMarker &&
+                !isHostAnswerOption &&
                 inputBlock.Autoplay &&
                 inputBlock.BlockType is ContentBlockType.Audio or ContentBlockType.Video or ContentBlockType.YouTube;
-            if (isHostMultipleChoice)
+            if (isAnswerOptionsMarker || isHostAnswerOption)
             {
                 entity.FileData = null;
                 entity.FileContentType = null;
@@ -391,10 +416,57 @@ public sealed class QuestionEditorModel(
         return RedirectToPage(new { id = Input.Id });
     }
 
+    private void ValidateAllPlayerMultipleChoiceAnswerOptions()
+    {
+        var layout = GetAnswerOptionsLayout();
+        if (layout.Marker is null ||
+            layout.StoredOptionCount != layout.Options.Count ||
+            layout.Options.Count is < 2 or > 4)
+        {
+            ModelState.AddModelError(
+                $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
+                "All-player multiple-choice questions require between 2 and 4 answer options.");
+            return;
+        }
+
+        if (Input.QuestionBlocks.Any(block =>
+                block.BlockType is not ContentBlockType.Text and
+                    not ContentBlockType.Image))
+        {
+            ModelState.AddModelError(
+                $"{nameof(Input)}.{nameof(Input.QuestionBlocks)}",
+                "All-player multiple-choice questions support only text and image question blocks.");
+            return;
+        }
+
+        if (layout.Options.Any(option => !IsValidAllPlayerAnswerOption(option)))
+        {
+            ModelState.AddModelError(
+                $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
+                "Every answer option must be non-empty text or an image.");
+            return;
+        }
+
+        var textOptions = layout.Options
+            .Where(option => option.BlockType == ContentBlockType.Text)
+            .Select(option => option.TextContent!.Trim())
+            .ToArray();
+        if (textOptions.Distinct(StringComparer.OrdinalIgnoreCase).Count() !=
+            textOptions.Length)
+        {
+            ModelState.AddModelError(
+                $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
+                "Text answer options must be unique.");
+        }
+    }
+
     private void ValidateHostMultipleChoiceAnswerOptions()
     {
-        var options = Input.AnswerBlocks ?? [];
-        if (options.Count is < 4 or > 10)
+        var layout = GetAnswerOptionsLayout();
+        var options = layout.Options;
+        if (layout.Marker is null ||
+            layout.StoredOptionCount != options.Count ||
+            options.Count is < 4 or > 10)
         {
             ModelState.AddModelError(
                 $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
@@ -423,6 +495,98 @@ public sealed class QuestionEditorModel(
                 $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
                 "Multiple-choice answer options must be unique.");
         }
+    }
+
+    private static bool IsValidAllPlayerAnswerOption(ContentBlockInputModel option)
+    {
+        if (option.BlockType == ContentBlockType.Text)
+        {
+            return !string.IsNullOrWhiteSpace(option.TextContent);
+        }
+
+        if (option.BlockType != ContentBlockType.Image || option.RemoveFile)
+        {
+            return false;
+        }
+
+        return option.UploadedFile is { Length: > 0 } ||
+            (!string.IsNullOrWhiteSpace(option.FileContentType) &&
+             !string.IsNullOrWhiteSpace(option.FileName));
+    }
+
+    private AnswerOptionsInputLayout GetAnswerOptionsLayout()
+    {
+        var ordered = Input.AnswerBlocks
+            .OrderBy(block => block.SortOrder)
+            .ToArray();
+        var marker = ordered.FirstOrDefault(block =>
+            block.BlockType == ContentBlockType.AnswerOptions);
+        if (marker is null)
+        {
+            return new AnswerOptionsInputLayout(null, 0, [], ordered);
+        }
+
+        var markerIndex = Array.IndexOf(ordered, marker);
+        var storedOptionCount = AnswerOptionsBlockContract.ParseOptionCount(
+            marker.TextContent);
+        var options = ordered
+            .Skip(markerIndex + 1)
+            .Take(storedOptionCount)
+            .ToArray();
+        var additionalBlocks = ordered
+            .Skip(markerIndex + 1 + storedOptionCount)
+            .ToArray();
+        return new AnswerOptionsInputLayout(
+            marker,
+            storedOptionCount,
+            options,
+            additionalBlocks);
+    }
+
+    private static void NormalizeAnswerOptionsStructure(
+        QuestionPresentationType presentationType,
+        List<ContentBlockInputModel> blocks,
+        bool wrapLegacyBlocks)
+    {
+        blocks ??= [];
+        var ordered = blocks
+            .OrderBy(block => block.SortOrder)
+            .ToList();
+        var marker = ordered.FirstOrDefault(block =>
+            block.BlockType == ContentBlockType.AnswerOptions);
+
+        if (!MultipleChoiceAnswerContract.IsMultipleChoice(presentationType))
+        {
+            if (marker is not null)
+            {
+                ordered.Remove(marker);
+            }
+        }
+        else if (marker is null && wrapLegacyBlocks)
+        {
+            marker = new ContentBlockInputModel
+            {
+                BlockType = ContentBlockType.AnswerOptions,
+                TextContent = AnswerOptionsBlockContract.StoreOptionCount(
+                    ordered.Count),
+                IsAnswerBlock = true
+            };
+            ordered.Insert(0, marker);
+        }
+        else if (marker is not null && ordered[0] != marker)
+        {
+            ordered.Remove(marker);
+            ordered.Insert(0, marker);
+        }
+
+        for (var index = 0; index < ordered.Count; index++)
+        {
+            ordered[index].SortOrder = index;
+            ordered[index].IsAnswerBlock = true;
+        }
+
+        blocks.Clear();
+        blocks.AddRange(ordered);
     }
 
     private bool IsAjaxRequest() => string.Equals(
@@ -566,4 +730,10 @@ public sealed class QuestionEditorModel(
 
         public List<ContentBlockInputModel> AnswerBlocks { get; set; } = [];
     }
+
+    private sealed record AnswerOptionsInputLayout(
+        ContentBlockInputModel? Marker,
+        int StoredOptionCount,
+        IReadOnlyList<ContentBlockInputModel> Options,
+        IReadOnlyList<ContentBlockInputModel> AdditionalBlocks);
 }

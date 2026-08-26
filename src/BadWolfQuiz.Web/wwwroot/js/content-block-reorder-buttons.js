@@ -12,7 +12,9 @@
         element.classList.contains("content-block-card");
 
     const directCards = host =>
-        Array.from(host?.children ?? []).filter(isContentBlockCard);
+        Array.from(host?.children ?? [])
+            .filter(isContentBlockCard)
+            .filter(card => card.dataset.blockType !== "AnswerOptions");
 
     const getToolbar = card =>
         Array.from(card.children).find(element =>

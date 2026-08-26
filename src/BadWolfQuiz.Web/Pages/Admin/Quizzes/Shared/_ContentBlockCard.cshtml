@@ -17,45 +17,52 @@
     <input asp-for="SortOrder" type="hidden" />
     <input asp-for="BlockType" type="hidden" />
 
-    <div class="content-block-toolbar">
+    @if (Model.BlockType != ContentBlockType.AnswerOptions)
+    {
+        <div class="content-block-toolbar">
 
-        <button type="button"
-                class="content-block-move-button"
-                data-content-block-move="up"
-                title="@localizer["Button_Move"] ↑"
-                aria-label="@localizer["Button_Move"] ↑">
-            ↑
-        </button>
+            <button type="button"
+                    class="content-block-move-button"
+                    data-content-block-move="up"
+                    title="@localizer["Button_Move"] ↑"
+                    aria-label="@localizer["Button_Move"] ↑">
+                ↑
+            </button>
 
-        <button type="button"
-                class="content-block-move-button"
-                data-content-block-move="down"
-                title="@localizer["Button_Move"] ↓"
-                aria-label="@localizer["Button_Move"] ↓">
-            ↓
-        </button>
+            <button type="button"
+                    class="content-block-move-button"
+                    data-content-block-move="down"
+                    title="@localizer["Button_Move"] ↓"
+                    aria-label="@localizer["Button_Move"] ↓">
+                ↓
+            </button>
 
-        <button type="button"
-                class="content-block-drag-handle"
-                draggable="true"
-                title="Перемістити блок"
-                aria-label="Перемістити блок">
-            ☰
-        </button>
+            <button type="button"
+                    class="content-block-drag-handle"
+                    draggable="true"
+                    title="Перемістити блок"
+                    aria-label="Перемістити блок">
+                ☰
+            </button>
 
-        <button type="button"
-                class="content-block-remove-button"
-                title="Видалити блок"
-                aria-label="Видалити блок">
-            ×
-        </button>
+            <button type="button"
+                    class="content-block-remove-button"
+                    title="Видалити блок"
+                    aria-label="Видалити блок">
+                ×
+            </button>
 
-    </div>
+        </div>
+    }
 
     <div style="margin-bottom:12px;">
         @if (Model.BlockType == ContentBlockType.Container)
         {
             <strong>@ContentBlockContainerText.Title</strong>
+        }
+        else if (Model.BlockType == ContentBlockType.AnswerOptions)
+        {
+            <strong>@MultipleChoiceAnswerOptionsText.Title</strong>
         }
         else
         {
@@ -122,6 +129,36 @@
                 <div class="content-block-container-children"
                      data-content-block-container-children
                      data-container-empty-label="@ContentBlockContainerText.EmptyHint"></div>
+            </div>
+            break;
+
+        case ContentBlockType.AnswerOptions:
+            <div class="content-block-container-editor multiple-choice-answer-options-editor"
+                 data-answer-options-block>
+                <input asp-for="TextContent"
+                       type="hidden"
+                       class="multiple-choice-answer-options-count" />
+
+                <div class="content-block-container-toolbar">
+                    <span>@MultipleChoiceAnswerOptionsText.FirstCorrectHint</span>
+                    <div class="content-block-container-actions">
+                        <button type="button"
+                                class="button button-secondary"
+                                data-answer-option-add-block-type="Text">
+                            @localizer["ContentBlockType_Text"]
+                        </button>
+                        <button type="button"
+                                class="button button-secondary"
+                                data-answer-option-add-block-type="Image">
+                            @localizer["ContentBlockType_Image"]
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-block-container-children multiple-choice-answer-options-children"
+                     data-content-block-container-children
+                     data-answer-options-children
+                     data-container-empty-label="@MultipleChoiceAnswerOptionsText.EmptyHint"></div>
             </div>
             break;
     }

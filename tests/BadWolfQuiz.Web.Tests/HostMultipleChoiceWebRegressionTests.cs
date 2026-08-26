@@ -14,6 +14,19 @@ public sealed class HostMultipleChoiceWebRegressionTests
             "Admin",
             "Quizzes",
             "QuestionEditor.cshtml.cs"));
+        var answerOptionsScript = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "multiple-choice-answer-options.js"));
+        var answerOptionsAssets = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "TagHelpers",
+            "MultipleChoiceAnswerOptionsAssetsTagHelper.cs"));
         var endpoint = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -30,6 +43,20 @@ public sealed class HostMultipleChoiceWebRegressionTests
             "Admin",
             "Games",
             "_GameContentPreview.cshtml"));
+        var reveal = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Games",
+            "_MultipleChoiceRevealBlocks.cshtml"));
+        var revealTagHelper = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "TagHelpers",
+            "MultipleChoiceAnswerRevealTagHelper.cs"));
         var script = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -84,6 +111,19 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("option.TextContent.Trim().Length > 20", editor);
         Assert.Contains("Distinct(StringComparer.OrdinalIgnoreCase)", editor);
         Assert.Contains("isHostMultipleChoice || Input.ExcludeFromRandomWagerSelection", editor);
+        Assert.Contains("ContentBlockType.AnswerOptions", editor);
+        Assert.Contains("GetAnswerOptionsLayout", editor);
+
+        Assert.Contains("value === \"4\"", answerOptionsScript);
+        Assert.Contains("textarea.maxLength = 20", answerOptionsScript);
+        Assert.Contains("minimumOptions", answerOptionsScript);
+        Assert.Contains("maximumOptions", answerOptionsScript);
+        Assert.Contains("multiple-choice-answer-option-correct-badge", answerOptionsScript);
+        Assert.Contains("getAdditionalCards", answerOptionsScript);
+        Assert.Contains("rebuildMultipleChoiceAnswerPreview", answerOptionsScript);
+        Assert.Contains(
+            "badWolfHostMultipleChoiceBootstrapInitialized=true",
+            answerOptionsAssets);
 
         Assert.Contains("SelectHostMultipleChoiceOption", endpoint);
         Assert.Contains("HostMultipleChoiceRewardPercentage", endpoint);
@@ -115,10 +155,6 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.DoesNotContain("BuzzerStateChanged", stateHandler);
         Assert.DoesNotContain("SendAsync", stateHandler);
 
-        Assert.Contains("value = \"4\"", script);
-        Assert.Contains("textarea.maxLength = 20", script);
-        Assert.Contains("cards.length < 4 || cards.length > 10", script);
-        Assert.Contains("host-multiple-choice-correct-badge", script);
         Assert.Contains("host-multiple-choice-panel", script);
         Assert.Contains("z-index: 15;", script);
         Assert.Contains("data-question-heading", script);
@@ -152,16 +188,9 @@ public sealed class HostMultipleChoiceWebRegressionTests
             StringComparison.Ordinal);
         Assert.True(optionLoopIndex >= 0 && noAnswerIndex > optionLoopIndex);
 
-        Assert.Contains(
-            "'[data-open-question-preview=\"answer\"]'",
-            bootstrap);
-        Assert.Contains("presentationType.value !== \"4\"", bootstrap);
-        Assert.Contains("const firstCard = answerSection.querySelector", bootstrap);
-        Assert.Contains("event.stopImmediatePropagation();", bootstrap);
-        Assert.Contains("content.replaceChildren(answerPreview);", bootstrap);
+        Assert.Contains("@media (min-width: 801px)", bootstrap);
+        Assert.Contains("body:has(> .host-multiple-choice-panel)", bootstrap);
         Assert.Contains("top: 13rem !important", bootstrap);
-        Assert.DoesNotContain("initializeHostGameplayLifecycle", bootstrap);
-        Assert.DoesNotContain("host-multiple-choice.js?v=", bootstrap);
 
         Assert.Contains(
             "const pageScripts = Array.from(parsed.body.querySelectorAll(\"script\"));",
@@ -174,13 +203,13 @@ public sealed class HostMultipleChoiceWebRegressionTests
             "document.dispatchEvent(new CustomEvent(hostShellMountedEventName));",
             initialRoundIntro);
 
-        Assert.Contains(
-            "QuestionPresentationType.HostMultipleChoice",
-            gameContentPreview);
-        Assert.Contains(
-            ".OrderBy(block => block.SortOrder)",
-            gameContentPreview);
-        Assert.Contains(".Take(1)", gameContentPreview);
+        Assert.Contains("MultipleChoiceAnswerContract.IsMultipleChoice", gameContentPreview);
+        Assert.Contains("RevealAnswerBlocks", gameContentPreview);
+        Assert.Contains("_MultipleChoiceRevealBlocks", gameContentPreview);
+        Assert.Contains("RevealAnswerBlocks", revealTagHelper);
+        Assert.Contains("multiple-choice-answer-reveal-grid", revealTagHelper);
+        Assert.Contains("multiple-choice-additional-answer-block", reveal);
+        Assert.DoesNotContain("all-player-answer-option-incorrect", reveal);
 
         Assert.Contains(
             "RuntimeQuestionStatus.ShowingAnswer",
@@ -204,6 +233,12 @@ public sealed class HostMultipleChoiceWebRegressionTests
             viewImports);
         Assert.Contains(
             "HostMultipleChoiceGenericControlsTagHelper",
+            viewImports);
+        Assert.Contains(
+            "MultipleChoiceAnswerOptionsAssetsTagHelper",
+            viewImports);
+        Assert.Contains(
+            "MultipleChoiceAnswerRevealTagHelper",
             viewImports);
         Assert.Contains("model is not LobbyModel", assetsTagHelper);
         Assert.Contains("model is not QuestionEditorModel", assetsTagHelper);

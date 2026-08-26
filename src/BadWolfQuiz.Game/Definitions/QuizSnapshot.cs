@@ -231,6 +231,9 @@ public sealed class QuizQuestionSnapshot
         var orderedAnswerBlocks = (answerBlocks ?? [])
             .OrderBy(block => block.SortOrder)
             .ToArray();
+        var answerLayout = MultipleChoiceAnswerContract.Split(
+            presentationType,
+            orderedAnswerBlocks);
 
         if (presentationType == QuestionPresentationType.FourClues &&
             orderedQuestionBlocks.Length != 4)
@@ -252,6 +255,13 @@ public sealed class QuizQuestionSnapshot
 
         if (presentationType == QuestionPresentationType.AllPlayerMultipleChoice)
         {
+            if (!answerLayout.IsStructurallyValid)
+            {
+                throw new ArgumentException(
+                    "The all-player multiple-choice answer options structure is invalid.",
+                    nameof(answerBlocks));
+            }
+
             if (orderedQuestionBlocks.Any(block =>
                     block.Kind is not ContentBlockKind.Text and
                         not ContentBlockKind.Image))
@@ -261,15 +271,15 @@ public sealed class QuizQuestionSnapshot
                     nameof(questionBlocks));
             }
 
-            if (orderedAnswerBlocks.Length is < 2 or > 4 ||
-                orderedAnswerBlocks.Any(block => !IsValidAllPlayerChoiceOption(block)))
+            if (answerLayout.OptionBlocks.Count is < 2 or > 4 ||
+                answerLayout.OptionBlocks.Any(block => !IsValidAllPlayerChoiceOption(block)))
             {
                 throw new ArgumentException(
-                    "An all-player multiple-choice question must contain two to four text or image answer blocks.",
+                    "An all-player multiple-choice question must contain two to four text or image answer options.",
                     nameof(answerBlocks));
             }
 
-            var textChoices = orderedAnswerBlocks
+            var textChoices = answerLayout.OptionBlocks
                 .Where(block => block.Kind == ContentBlockKind.Text)
                 .Select(block => block.TextContent!.Trim())
                 .ToArray();
@@ -285,8 +295,15 @@ public sealed class QuizQuestionSnapshot
 
         if (presentationType == QuestionPresentationType.HostMultipleChoice)
         {
-            if (orderedAnswerBlocks.Length is < 4 or > 10 ||
-                orderedAnswerBlocks.Any(block =>
+            if (!answerLayout.IsStructurallyValid)
+            {
+                throw new ArgumentException(
+                    "The host multiple-choice answer options structure is invalid.",
+                    nameof(answerBlocks));
+            }
+
+            if (answerLayout.OptionBlocks.Count is < 4 or > 10 ||
+                answerLayout.OptionBlocks.Any(block =>
                     block.Kind != ContentBlockKind.Text ||
                     string.IsNullOrWhiteSpace(block.TextContent) ||
                     block.TextContent.Trim().Length > 20))
@@ -296,7 +313,7 @@ public sealed class QuizQuestionSnapshot
                     nameof(answerBlocks));
             }
 
-            var choices = orderedAnswerBlocks
+            var choices = answerLayout.OptionBlocks
                 .Select(block => block.TextContent!.Trim())
                 .ToArray();
             if (choices.Distinct(StringComparer.OrdinalIgnoreCase).Count() != choices.Length)
@@ -322,7 +339,9 @@ public sealed class QuizQuestionSnapshot
             ? sourceCategoryId.ToString()
             : categoryTitle.Trim();
         QuestionBlocks = orderedQuestionBlocks;
-        AnswerBlocks = orderedAnswerBlocks;
+        AnswerBlocks = answerLayout.OptionBlocks;
+        RevealAnswerBlocks = answerLayout.RevealBlocks;
+        StoredAnswerBlocks = answerLayout.StoredBlocks;
     }
 
     private static bool IsValidAllPlayerChoiceOption(ContentBlockSnapshot block) =>
@@ -363,7 +382,23 @@ public sealed class QuizQuestionSnapshot
 
     public IReadOnlyList<ContentBlockSnapshot> QuestionBlocks { get; }
 
+    /// <summary>
+    /// Runtime answer blocks. For multiple-choice questions this contains only
+    /// selectable options; for other question types it contains the normal answer.
+    /// </summary>
     public IReadOnlyList<ContentBlockSnapshot> AnswerBlocks { get; }
+
+    /// <summary>
+    /// Correct-answer presentation blocks. Multiple-choice questions expose the
+    /// correct option first followed by optional reveal-only answer content.
+    /// </summary>
+    public IReadOnlyList<ContentBlockSnapshot> RevealAnswerBlocks { get; }
+
+    /// <summary>
+    /// Persisted snapshot representation, including an answer-options marker when
+    /// the multiple-choice answer contains additional reveal-only content.
+    /// </summary>
+    public IReadOnlyList<ContentBlockSnapshot> StoredAnswerBlocks { get; }
 }
 
 public sealed record ContentBlockSnapshot(

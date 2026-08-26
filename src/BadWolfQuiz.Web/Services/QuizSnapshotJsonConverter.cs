@@ -125,7 +125,7 @@ public sealed class QuizSnapshotJsonConverter : JsonConverter<QuizSnapshot>
                 snapshot.CategoryTitle,
                 snapshot.ExcludeFromRandomWagerSelection,
                 snapshot.QuestionBlocks.ToArray(),
-                snapshot.AnswerBlocks.ToArray(),
+                snapshot.StoredAnswerBlocks.ToArray(),
                 snapshot.PresentationType);
     }
 }

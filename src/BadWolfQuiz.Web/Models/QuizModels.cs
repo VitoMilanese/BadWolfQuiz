@@ -10,7 +10,8 @@ public enum ContentBlockType
     Audio = 3,
     Video = 4,
     YouTube = 5,
-    Container = 6
+    Container = 6,
+    AnswerOptions = 7
 }
 
 public enum BuzzActivationMode

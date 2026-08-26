@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class AnswerKeyRegressionTests
 {
     [Fact]
-    public void All_player_multiple_choice_answer_key_uses_only_the_correct_option()
+    public void Multiple_choice_answer_key_uses_correct_option_and_additional_content()
     {
         var model = File.ReadAllText(FindWebFile(
             "Pages",
@@ -12,23 +12,31 @@ public sealed class AnswerKeyRegressionTests
             "AnswerKey.cshtml.cs"));
 
         Assert.Contains(
-            "QuestionPresentationType.AllPlayerMultipleChoice",
+            "MultipleChoiceAnswerContract.IsMultipleChoice",
             model,
             StringComparison.Ordinal);
         Assert.Contains(
-            "return [question.AnswerBlocks[0]];",
+            "definition?.RevealAnswerBlocks",
             model,
             StringComparison.Ordinal);
         Assert.Contains(
-            "AnswerBlocks = GetVisibleAnswerBlocks(question);",
+            "question.AnswerBlocks.Take(1).ToArray()",
             model,
             StringComparison.Ordinal);
         Assert.Contains(
-            ": GetVisibleAnswerBlocks(question);",
+            "AnswerBlocks = GetVisibleAnswerBlocks(game, question);",
+            model,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ": GetVisibleAnswerBlocks(game, question);",
             model,
             StringComparison.Ordinal);
         Assert.Contains(
             "return question.AnswerBlocks;",
+            model,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "DeferredGameMediaStore mediaStore",
             model,
             StringComparison.Ordinal);
     }
