@@ -4,6 +4,9 @@
 @{
     ViewData["Title"] = Localizer["Menu_Home"];
     var discordInviteUrl = Configuration["Discord:InviteUrl"];
+    var hasSearchContent = HomeSeoContentCatalog.TryGet(
+        CultureInfo.CurrentUICulture.Name,
+        out var searchContent);
 }
 
 <section class="hero">
@@ -27,3 +30,15 @@
         }
     </div>
 </section>
+
+@if (hasSearchContent)
+{
+    <section class="content-panel" style="margin-top: 32px; max-width: 850px;" aria-labelledby="home-search-title">
+        <h2 id="home-search-title">@searchContent.Title</h2>
+        <p>@searchContent.Introduction</p>
+        <h3>@searchContent.CreateTitle</h3>
+        <p>@searchContent.CreateText</p>
+        <h3>@searchContent.PlayTitle</h3>
+        <p>@searchContent.PlayText</p>
+    </section>
+}

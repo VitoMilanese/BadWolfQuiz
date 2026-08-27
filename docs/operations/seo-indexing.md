@@ -44,6 +44,18 @@ Indexable localized pages render SEO metadata in the initial server response:
 
 A page is indexable only when the route culture and active UI culture match a supported SEO culture.
 
+## Search semantics
+
+The localized Home page also describes the product using natural non-brand search language so search engines can associate Bad Wolf Quiz with the kind of experience it provides, not only with the `Bad Wolf Quiz` brand name.
+
+The intended semantic clusters are:
+
+- Ukrainian: online quiz, quiz game, game, trivia / `квіз`, `квіз-гра`, `гра`, `вікторина`;
+- English: `online quiz`, `quiz game`, `trivia game`, `live quiz`;
+- Italian: `quiz online`, `gioco quiz`, `gioco a quiz`.
+
+These terms must appear in readable localized titles, descriptions, and useful visible Home-page copy. Do not add `meta keywords`, hidden keyword lists, repeated search phrases, or other keyword-stuffing techniques. Search copy should explain real product capabilities such as hosting a game, joining from a device, creating multimedia rounds, and playing public quizzes.
+
 ## Regression expectations
 
 When changing public routes or localization, keep the following invariants covered by tests:
@@ -53,6 +65,7 @@ When changing public routes or localization, keep the following invariants cover
 - `ru` never becomes a search-facing culture;
 - non-SEO pages remain `noindex, nofollow`;
 - canonical and alternate URLs remain absolute `https://badwolf.buzz/...` URLs;
+- localized Home metadata and visible copy preserve the intended quiz/game/trivia search semantics without meta-keyword stuffing;
 - `NoveltyLocalizationTests` continue to pass.
 
 ## Post-deployment verification
@@ -64,5 +77,6 @@ After deploying SEO changes:
 3. Inspect one localized page per culture in the raw server response and verify title, description, canonical, `hreflang`, Open Graph, JSON-LD, and the `<html lang>` value.
 4. Confirm non-SEO routes emit `noindex, nofollow` and do not appear in the sitemap.
 5. Confirm there are no `/ru` SEO URLs, `hreflang="ru"`, or `ru` structured-data language declarations.
+6. After Google recrawls the localized Home pages, monitor Search Console query impressions for both branded searches and non-brand quiz/game/trivia terms rather than repeatedly resubmitting the sitemap.
 
-Google Search Console setup remains a deployment/operations task because it requires access to the production Google account and DNS. After deployment, add `badwolf.buzz` as a Domain Property, verify it through DNS, submit `/sitemap.xml`, inspect the canonical localized homepages, request indexing, and monitor indexing reports.
+Google Search Console setup remains a deployment/operations task because it requires access to the production Google account and DNS. After deployment, add `badwolf.buzz` as a Domain Property, verify it through DNS, submit `/sitemap.xml`, inspect the canonical localized homepages, request indexing when useful, and monitor indexing and query reports.
