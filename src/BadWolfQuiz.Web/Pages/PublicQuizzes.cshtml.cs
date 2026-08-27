@@ -28,15 +28,7 @@ public sealed class PublicQuizzesModel(
             .AsNoTracking()
             .Where(quiz => quiz.IsPublic && !quiz.IsArchived);
 
-        if (Search is { Length: > 0 })
-        {
-            var search = Search;
-            query = query.Where(quiz =>
-                quiz.Title.Contains(search) ||
-                (quiz.Description != null && quiz.Description.Contains(search)));
-        }
-
-        Quizzes = await query
+        var quizzes = await query
             .OrderByDescending(quiz => quiz.Ratings.Any())
             .ThenByDescending(quiz => quiz.Ratings.Average(rating => (double?)rating.Score))
             .ThenByDescending(quiz => quiz.PublishedAtUtc)
@@ -50,6 +42,24 @@ public sealed class PublicQuizzesModel(
                 quiz.Ratings.Count,
                 quiz.MediaState))
             .ToListAsync(cancellationToken);
+
+        if (Search is { Length: > 0 } search)
+        {
+            quizzes = quizzes
+                .Where(quiz => MatchesSearch(quiz.Title, quiz.Description, search))
+                .ToList();
+        }
+
+        Quizzes = quizzes;
+    }
+
+    internal static bool MatchesSearch(
+        string title,
+        string? description,
+        string search)
+    {
+        return title.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+            (description?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false);
     }
 
     public async Task<IActionResult> OnPostCreateGameAsync(
