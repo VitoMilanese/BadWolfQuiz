@@ -41,3 +41,19 @@ body.portal-layout {
         margin-left: auto;
     }
 }
+
+@media (max-width: 700px) {
+    body.portal-layout {
+        height: auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: visible;
+    }
+
+    .portal-layout > .page-shell {
+        flex: 1 0 auto;
+        min-height: auto;
+        overflow-y: visible;
+        overscroll-behavior-y: auto;
+    }
+}
