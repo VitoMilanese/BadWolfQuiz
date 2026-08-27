@@ -322,3 +322,11 @@ For Linux OOM investigation and cgroup commands, see
 
 For downloading and monitoring production systemd logs from Windows, see
 [BadWolfQuiz Log Downloader](src/BadWolfQuizLogDownloaderWpf/README.md).
+
+---
+
+# License / Ліцензія
+
+Bad Wolf Quiz is source-available under the [MIT License + Commons Clause License Condition v1.0 with a BadWolfQuiz-specific monetization exception](LICENSE). Monetizing BadWolfQuiz itself is restricted, while monetized streams, videos, sponsored broadcasts, productions, competitions, events, and similar activities may use BadWolfQuiz as a tool under the license terms.
+
+Bad Wolf Quiz має доступний вихідний код і поширюється за [MIT License + Commons Clause License Condition v1.0 з окремим винятком BadWolfQuiz щодо монетизації](LICENSE). Монетизація самого BadWolfQuiz обмежена, але монетизовані стріми, відео, спонсоровані трансляції, продакшени, змагання, події та подібна діяльність можуть використовувати BadWolfQuiz як інструмент відповідно до умов ліцензії.

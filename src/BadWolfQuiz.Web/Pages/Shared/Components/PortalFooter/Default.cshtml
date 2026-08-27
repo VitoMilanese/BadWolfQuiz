@@ -24,10 +24,17 @@
                 </p>
             }
 
-            <a class="portal-footer-support-link"
-               asp-page="/Privacy">
-                @Localizer["Footer_PrivacyCookies"]
-            </a>
+            <div class="portal-footer-meta-links">
+                <a class="portal-footer-support-link"
+                   asp-page="/Privacy">
+                    @Localizer["Footer_PrivacyCookies"]
+                </a>
+                <span class="portal-footer-meta-separator" aria-hidden="true">·</span>
+                <a class="portal-footer-support-link"
+                   asp-page="/License">
+                    License / Ліцензія
+                </a>
+            </div>
         </div>
 
         <div class="portal-footer-support">
@@ -77,8 +84,7 @@
                                 type="button"
                                 data-close-donation-dialog
                                 aria-label="@Localizer["Button_Close"]">
-                            ×
-                        </button>
+                            ×</button>
                     </div>
                     <p>@Localizer["Footer_DonationScanQr"]</p>
                     <img class="portal-footer-qr"
@@ -97,3 +103,20 @@
         }
     </div>
 </portal-footer>
+
+<style>
+    .portal-footer-inner {
+        padding-block: 18px;
+    }
+
+    .portal-footer-meta-links {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.25rem 0.65rem;
+    }
+
+    .portal-footer-meta-separator {
+        opacity: 0.7;
+    }
+</style>

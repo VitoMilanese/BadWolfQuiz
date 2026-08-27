@@ -4,7 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>BadWolfQuiz.Web</RootNamespace>
-    <Version>1.22.48</Version>
+    <Version>1.22.49</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -35,5 +35,13 @@
     <None Update="Resources\Avatars\**\*.png;Resources\Avatars\**\*.webp;Resources\Avatars\**\*.jpg;Resources\Avatars\**\*.jpeg;Resources\Frames\*.png"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(MSBuildProjectDirectory)/../../LICENSE">
+      <Link>LICENSE</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 </Project>
