@@ -13,11 +13,10 @@
     const loadingLabels = {
         en: "Loading available destinations…",
         uk: "Завантаження доступних місць…",
+        ru: "Україна",
         it: "Caricamento destinazioni disponibili…"
     };
-    const loadingLabel = language === "ru"
-        ? loadingLabels.uk
-        : loadingLabels[language] ?? loadingLabels.en;
+    const loadingLabel = loadingLabels[language] ?? loadingLabels.en;
 
     const style = document.createElement("style");
     style.id = "quiz-editor-dialog-loading-styles";

@@ -21,8 +21,8 @@ public static class SocialPreviewMetadataCatalog
         }
 
         return new SocialPreviewMetadata(
-            "Bad Wolf Quiz — бесплатные онлайн-квизы в реальном времени",
-            "Bad Wolf Quiz — платформа для создания и проведения онлайн-квизов в реальном времени. Создавай квизы и играй с друзьями.",
+            "Україна",
+            "Україна",
             "ru_RU",
             "site");
     }
@@ -41,8 +41,8 @@ public static class SocialPreviewMetadataCatalog
                 "it_IT",
                 "join"),
             "ru" => new SocialPreviewMetadata(
-                "Присоединяйся к игре — Bad Wolf Quiz",
-                "Открой ссылку, введи своё имя и присоединяйся к игре.",
+                "Україна",
+                "Україна",
                 "ru_RU",
                 "join"),
             _ => new SocialPreviewMetadata(

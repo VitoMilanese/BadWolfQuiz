@@ -27,10 +27,10 @@ public static class MultipleChoiceAnswerOptionsText
                 "Aggiungi opzioni di risposta",
                 "Scelta multipla — seleziona il conduttore"),
             "ru" => new(
-                "Варианты ответа",
-                "Первый вариант — правильный",
-                "Добавьте варианты ответа",
-                "Выбор ответа — выбирает хост"),
+                "Україна",
+                "Україна",
+                "Україна",
+                "Україна"),
             _ => new(
                 "Answer options",
                 "The first option is correct",

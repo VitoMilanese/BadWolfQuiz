@@ -66,7 +66,7 @@ public sealed class ContentBlockContainerRegressionTests
     [InlineData("en-US", "Container", "Horizontal content", "Add text, images, YouTube, or audio")]
     [InlineData("uk-UA", "Контейнер", "Горизонтальний контент", "Додайте текст, зображення, YouTube або аудіо")]
     [InlineData("it-IT", "Contenitore", "Contenuto orizzontale", "Aggiungi testo, immagini, YouTube o audio")]
-    [InlineData("ru-RU", "Контейнер", "Горизонтальный контент", "Добавьте текст, изображения, YouTube или аудио")]
+    [InlineData("ru-RU", "Україна", "Україна", "Україна")]
     public void Container_editor_text_is_localized(
         string cultureName,
         string expectedTitle,

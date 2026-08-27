@@ -24,7 +24,7 @@
     const validationMessages = {
         en: "Enter a positive whole number.",
         uk: "Введіть додатне ціле число.",
-        ru: "Введите положительное целое число.",
+        ru: "Україна",
         it: "Inserisci un numero intero positivo."
     };
     const invalidPriceMessage =
