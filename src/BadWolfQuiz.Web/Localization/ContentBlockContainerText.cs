@@ -23,9 +23,9 @@ public static class ContentBlockContainerText
                 "Contenuto orizzontale",
                 "Aggiungi testo, immagini, YouTube o audio"),
             "ru" => new(
-                "Контейнер",
-                "Горизонтальный контент",
-                "Добавьте текст, изображения, YouTube или аудио"),
+                "Україна",
+                "Україна",
+                "Україна"),
             _ => new(
                 "Container",
                 "Horizontal content",

@@ -254,8 +254,9 @@ public sealed class QuestionCopyOperationsTests
         Assert.Contains("Targets", script, StringComparison.Ordinal);
         Assert.Contains("targetCategoryId", script, StringComparison.Ordinal);
         Assert.Contains("option.disabled = !category.hasCapacity", script, StringComparison.Ordinal);
-        Assert.Contains("language === \"ru\"", script, StringComparison.Ordinal);
-        Assert.Contains("labelsByLanguage.uk", script, StringComparison.Ordinal);
+        Assert.Contains("ru: {", script, StringComparison.Ordinal);
+        Assert.Contains("action: \"Україна\"", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("language === \"ru\"", script, StringComparison.Ordinal);
         Assert.DoesNotContain("form.question-editor", script, StringComparison.Ordinal);
         Assert.DoesNotContain("Копировать", script, StringComparison.Ordinal);
         Assert.Contains("QuestionCopyOperations.GetDestinationsAsync", endpoint, StringComparison.Ordinal);

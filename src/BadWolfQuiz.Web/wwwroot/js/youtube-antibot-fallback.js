@@ -27,9 +27,9 @@
             retry: "Відтворити іншим способом"
         },
         ru: {
-            title: "YouTube заблокировал воспроизведение",
-            message: "Встроенный плеер не запустился из-за проверки YouTube.",
-            retry: "Воспроизвести другим способом"
+            title: "Україна",
+            message: "Україна",
+            retry: "Україна"
         },
         it: {
             title: "YouTube ha bloccato la riproduzione",

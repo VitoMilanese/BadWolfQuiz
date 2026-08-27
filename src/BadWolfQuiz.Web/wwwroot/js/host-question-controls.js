@@ -17,9 +17,9 @@
             noPlayers: "Немає доступних гравців."
         },
         ru: {
-            showUnplayed: "Показать ещё не сыгранные вопросы",
-            noPlayed: "Нет сыгранных вопросов.",
-            noPlayers: "Нет доступных игроков."
+            showUnplayed: "Україна",
+            noPlayed: "Україна",
+            noPlayers: "Україна"
         },
         it: {
             showUnplayed: "Mostra anche le domande non ancora giocate",

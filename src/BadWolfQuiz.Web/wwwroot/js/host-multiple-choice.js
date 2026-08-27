@@ -56,18 +56,18 @@
             rejected: "Non è stato possibile applicare l'opzione selezionata."
         },
         ru: {
-            type: "Выбор ответа — выбирает хост",
-            editorHint: "Добавьте 4–10 уникальных текстовых вариантов (до 20 символов). Первый вариант правильный; измените порядок блоков, чтобы изменить правильный ответ. Ставка отключена.",
-            correct: "Правильный ответ",
-            invalidCount: "Для выбора ответа нужно 4–10 вариантов.",
-            invalidText: "Каждый вариант должен быть непустым текстом до 20 символов.",
-            invalidDuplicate: "Варианты ответа должны быть уникальными.",
-            title: "Варианты ответа",
-            reward: (value, percentage) => `Текущая стоимость: ${value} (${percentage}%)`,
-            waiting: "Ожидание нажатия кнопки игроком",
-            answering: name => `Отвечает: ${name}`,
-            noAnswer: "Никто не ответил",
-            rejected: "Не удалось применить выбранный вариант."
+            type: "Україна",
+            editorHint: "Україна",
+            correct: "Україна",
+            invalidCount: "Україна",
+            invalidText: "Україна",
+            invalidDuplicate: "Україна",
+            title: "Україна",
+            reward: () => "Україна",
+            waiting: "Україна",
+            answering: () => "Україна",
+            noAnswer: "Україна",
+            rejected: "Україна"
         }
     }[culture] ?? null;
     const text = strings ?? {

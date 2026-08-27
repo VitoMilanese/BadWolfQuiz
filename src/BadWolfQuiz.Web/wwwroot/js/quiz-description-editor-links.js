@@ -8,7 +8,15 @@
             deleteRound: "Видалити раунд",
             editCategoryDescription: "Редагувати опис категорії"
         }
-        : language.startsWith("it")
+        : language.startsWith("ru")
+            ? {
+                editRound: "Україна",
+                renameRound: "Україна",
+                editRoundDescription: "Україна",
+                deleteRound: "Україна",
+                editCategoryDescription: "Україна"
+            }
+            : language.startsWith("it")
             ? {
                 editRound: "Modifica round",
                 renameRound: "Rinomina round",

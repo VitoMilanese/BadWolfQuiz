@@ -25,7 +25,7 @@ public sealed class FinalQuestionTransitionModel(
     public string ProceedToWagersLabel => CurrentLanguage switch
     {
         "uk" => "Перейти до ставок",
-        "ru" => "Перейти к ставкам",
+        "ru" => "Україна",
         "it" => "Vai alle puntate",
         _ => "Proceed to wagers"
     };

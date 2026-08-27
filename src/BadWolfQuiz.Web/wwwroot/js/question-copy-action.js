@@ -58,6 +58,26 @@
             submit: "Копіювати",
             close: "Закрити"
         },
+        ru: {
+            action: "Україна",
+            title: "Україна",
+            text: "Україна",
+            quiz: "Україна",
+            category: "Україна",
+            selectQuiz: "Україна",
+            selectCategory: "Україна",
+            full: "Україна",
+            loading: "Україна",
+            noDestination: "Україна",
+            success: "Україна",
+            sourceMissing: "Україна",
+            targetMissing: "Україна",
+            noCapacity: "Україна",
+            invalid: "Україна",
+            cancel: "Україна",
+            submit: "Україна",
+            close: "Україна"
+        },
         it: {
             action: "Copia o clona la domanda",
             title: "Copia domanda",
@@ -79,9 +99,7 @@
             close: "Chiudi"
         }
     };
-    const labels = language === "ru"
-        ? labelsByLanguage.uk
-        : labelsByLanguage[language] ?? labelsByLanguage.en;
+    const labels = labelsByLanguage[language] ?? labelsByLanguage.en;
 
     const layoutStyle = document.createElement("style");
     layoutStyle.id = "question-copy-action-layout";
