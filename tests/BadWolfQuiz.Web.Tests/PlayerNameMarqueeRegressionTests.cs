@@ -21,6 +21,25 @@ public sealed class PlayerNameMarqueeRegressionTests
     }
 
     [Fact]
+    public void Host_bootstrap_initializes_player_name_marquee_after_first_round_shell_mount()
+    {
+        var bootstrap = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "gameplay-escape-shortcuts.js"));
+
+        Assert.Contains("let playerNameMarqueeAssetsLoaded = false", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("const loadPlayerNameMarqueeAssets = () =>", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("!document.querySelector(\".host-game-board\")", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("\"badwolf:host-shell-mounted\"", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("\"badwolf:host-gameplay-updated\"", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("loadPlayerNameMarqueeAssets);", bootstrap, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Marquee_targets_final_submission_cards_and_board_sidebar_names()
     {
         var script = File.ReadAllText(Path.Combine(

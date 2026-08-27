@@ -406,12 +406,31 @@
     const hostGameplayTarget = document.querySelector(".host-game-board");
     if (hostGameplayTarget) {
         loadSharedScript("/js/board-header-layout.js");
+    }
 
-        const playerNameMarqueeVersion = "3";
+    const playerNameMarqueeVersion = "3";
+    let playerNameMarqueeAssetsLoaded = false;
+    const loadPlayerNameMarqueeAssets = () => {
+        if (playerNameMarqueeAssetsLoaded ||
+            !document.querySelector(".host-game-board")) {
+            return;
+        }
+
+        playerNameMarqueeAssetsLoaded = true;
         loadSharedStyle(
             `/css/player-name-marquee.css?v=${playerNameMarqueeVersion}`);
         loadSharedScript(
             `/js/player-name-marquee.js?v=${playerNameMarqueeVersion}`);
+    };
+
+    loadPlayerNameMarqueeAssets();
+    for (const eventName of [
+        "badwolf:host-shell-mounted",
+        "badwolf:host-gameplay-updated"
+    ]) {
+        document.addEventListener(
+            eventName,
+            loadPlayerNameMarqueeAssets);
     }
 
     const contentBlockEditorTarget = document.querySelector(
