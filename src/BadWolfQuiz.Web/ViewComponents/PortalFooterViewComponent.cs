@@ -8,6 +8,8 @@ namespace BadWolfQuiz.Web.ViewComponents;
 
 public sealed class PortalFooterViewComponent(IOptions<FooterOptions> options) : ViewComponent
 {
+    internal const string GitHubRepositoryUrl = "https://github.com/VitoMilanese/BadWolfQuiz";
+
     public IViewComponentResult Invoke()
         => View(CreateViewModel(
             options.Value,
@@ -28,6 +30,7 @@ public sealed class PortalFooterViewComponent(IOptions<FooterOptions> options) :
             initialIndex,
             donationUri?.AbsoluteUri,
             donationUri is null ? null : BuildQrCodeDataUrl(donationUri.AbsoluteUri),
+            GitHubRepositoryUrl,
             options.EffectiveContributorDisplayDurationMilliseconds);
     }
 
@@ -47,4 +50,5 @@ public sealed record PortalFooterViewModel(
     int InitialContributorIndex,
     string? DonationUrl,
     string? DonationQrCodeDataUrl,
+    string GitHubRepositoryUrl,
     int ContributorDisplayDurationMilliseconds);

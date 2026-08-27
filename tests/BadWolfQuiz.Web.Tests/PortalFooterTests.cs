@@ -91,6 +91,64 @@ public sealed class PortalFooterTests
     }
 
     [Fact]
+    public void Github_star_link_is_available_without_donation_configuration()
+    {
+        var model = PortalFooterViewComponent.CreateViewModel(
+            new FooterOptions(),
+            _ => 0);
+
+        Assert.Null(model.DonationUrl);
+        Assert.Equal(
+            PortalFooterViewComponent.GitHubRepositoryUrl,
+            model.GitHubRepositoryUrl);
+        Assert.Equal(
+            "https://github.com/VitoMilanese/BadWolfQuiz",
+            model.GitHubRepositoryUrl);
+    }
+
+    [Theory]
+    [InlineData("en", "Star Bad Wolf Quiz on", true, true)]
+    [InlineData("uk", "Поставити зірку Bad Wolf Quiz на", true, true)]
+    [InlineData("it", "Metti una stella a Bad Wolf Quiz su", true, true)]
+    [InlineData("ru", "Україна", false, false)]
+    public void Github_star_call_to_action_follows_ui_localization(
+        string cultureName,
+        string expectedPrefix,
+        bool expectedShowLeadingStar,
+        bool expectedShowGitHubBrand)
+    {
+        var label = FooterGitHubStarLabelCatalog.Resolve(
+            CultureInfo.GetCultureInfo(cultureName));
+
+        Assert.Equal(expectedPrefix, label.Prefix);
+        Assert.Equal(expectedShowLeadingStar, label.ShowLeadingStar);
+        Assert.Equal(expectedShowGitHubBrand, label.ShowGitHubBrand);
+    }
+
+    [Fact]
+    public void Github_star_is_not_part_of_the_underlined_text_run()
+    {
+        var markup = File.ReadAllText(FindFooterView());
+
+        Assert.Contains("class=\"portal-footer-github-star\"", markup, StringComparison.Ordinal);
+        Assert.Contains("display: inline-block", markup, StringComparison.Ordinal);
+        Assert.Contains("text-decoration: none", markup, StringComparison.Ordinal);
+        Assert.Contains(">⭐</span>", markup, StringComparison.Ordinal);
+        Assert.Contains("@gitHubStarLabel.Prefix@if (gitHubStarLabel.ShowGitHubBrand)", markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Github_icon_is_rendered_immediately_beside_the_github_word()
+    {
+        var markup = File.ReadAllText(FindFooterView());
+
+        Assert.Contains("class=\"portal-footer-github-brand\"", markup, StringComparison.Ordinal);
+        Assert.Contains("viewBox=\"0 0 16 16\"", markup, StringComparison.Ordinal);
+        Assert.Contains("fill=\"currentColor\"", markup, StringComparison.Ordinal);
+        Assert.Contains("</svg>GitHub", markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Valid_donation_url_is_normalized_and_has_a_generated_qr_code()
     {
         const string donationUrl = "https://example.com/support?project=badwolf";
@@ -141,5 +199,26 @@ public sealed class PortalFooterTests
                 Assert.False(string.IsNullOrWhiteSpace(resources.GetString(key, culture)));
             }
         }
+    }
+
+    private static string FindFooterView()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(
+                directory.FullName,
+                "src",
+                "BadWolfQuiz.Web",
+                "Pages",
+                "Shared",
+                "Components",
+                "PortalFooter",
+                "Default.cshtml");
+            if (File.Exists(candidate)) return candidate;
+            directory = directory.Parent;
+        }
+
+        throw new FileNotFoundException("Could not locate PortalFooter/Default.cshtml from the test output directory.");
     }
 }
