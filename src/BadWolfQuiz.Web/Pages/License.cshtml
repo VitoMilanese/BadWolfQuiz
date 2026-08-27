@@ -1,0 +1,91 @@
+@page
+@inject IWebHostEnvironment HostEnvironment
+@{
+    ViewData["Title"] = "License / Ліцензія";
+
+    var publishedLicensePath = System.IO.Path.Combine(HostEnvironment.ContentRootPath, "LICENSE");
+    var sourceLicensePath = System.IO.Path.GetFullPath(
+        System.IO.Path.Combine(HostEnvironment.ContentRootPath, "..", "..", "LICENSE"));
+    var licensePath = System.IO.File.Exists(publishedLicensePath)
+        ? publishedLicensePath
+        : sourceLicensePath;
+    var licenseText = System.IO.File.Exists(licensePath)
+        ? System.IO.File.ReadAllText(licensePath)
+        : "The license file is unavailable in this deployment. / Файл ліцензії недоступний у цьому розгортанні.";
+}
+
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">BAD WOLF QUIZ</p>
+        <h1>License / Ліцензія</h1>
+    </div>
+</div>
+
+<section class="form-card stack-form license-page-card">
+    <p class="settings-description">
+        BadWolfQuiz is source-available under the MIT License plus Commons Clause License Condition v1.0,
+        with a BadWolfQuiz-specific exception that permits external monetization when BadWolfQuiz is only used as a tool.
+    </p>
+    <p class="settings-description">
+        Вихідний код BadWolfQuiz доступний на умовах ліцензії з обмеженнями: монетизація самого BadWolfQuiz заборонена без окремого дозволу,
+        але дозволена монетизація стрімів, відео, подій та іншої діяльності, де BadWolfQuiz використовується лише як інструмент.
+    </p>
+
+    <div class="license-summary-grid">
+        <div class="field-group">
+            <label>BadWolfQuiz itself / Сам BadWolfQuiz</label>
+            <p class="settings-description">
+                Paid access, subscriptions, one-time purchases, paid tiers, paywalls, paid features, and paid BadWolfQuiz hosting/SaaS are prohibited without separate written permission.
+            </p>
+        </div>
+        <div class="field-group">
+            <label>External monetization / Зовнішня монетизація</label>
+            <p class="settings-description">
+                Monetized YouTube/Twitch streams, sponsored broadcasts, productions, competitions, and events are allowed when users are not paying for BadWolfQuiz access or functionality.
+            </p>
+        </div>
+        <div class="field-group">
+            <label>Premium features / Преміум-функції</label>
+            <p class="settings-description">
+                Premium or privileged features may be granted free of charge for contributions, achievements, recognition, testing, community participation, or similar non-monetary reasons.
+            </p>
+        </div>
+    </div>
+
+    <h2>Full license terms / Повний текст ліцензії</h2>
+    <pre class="license-text">@licenseText</pre>
+
+    <div class="form-actions">
+        <a class="button button-secondary"
+           href="https://github.com/VitoMilanese/BadWolfQuiz/blob/main/LICENSE"
+           target="_blank"
+           rel="noopener noreferrer">
+            LICENSE on GitHub
+        </a>
+    </div>
+</section>
+
+<style>
+    .license-page-card {
+        width: min(100%, 1100px);
+    }
+
+    .license-summary-grid {
+        display: grid;
+        gap: 16px;
+    }
+
+    .license-text {
+        max-width: 100%;
+        margin: 0;
+        padding: 18px;
+        overflow: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--panel-2);
+        color: var(--text);
+        font: 0.88rem/1.55 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+</style>
