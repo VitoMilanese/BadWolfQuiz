@@ -860,6 +860,8 @@
                 const avatarId = event.detail.avatarId;
                 storedAvatarId = avatarId;
                 lobby.dataset.avatarId = avatarId;
+                lobby.dataset.avatarFrameEligible =
+                    event.detail.avatarFrameEligible === true ? "true" : "false";
                 localStorage.setItem(avatarPreferenceKey, avatarId);
                 activateAvatar()
                     .then(() => currentAvatar.src = event.detail.avatarUrl)

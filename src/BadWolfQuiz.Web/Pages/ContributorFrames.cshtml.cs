@@ -12,6 +12,7 @@ namespace BadWolfQuiz.Web.Pages;
 
 public sealed class ContributorFramesModel(
     GameSessionRegistry sessionRegistry,
+    AvatarCatalog avatarCatalog,
     IOptions<FooterOptions> footerOptions,
     PremiumHostAccess premiumHostAccess,
     CurrentHost currentHost,
@@ -28,17 +29,22 @@ public sealed class ContributorFramesModel(
         }
 
         var players = sessionRegistry.GetPlayers(game)
-            .Where(player =>
-                PlayerContributorAccess.IsContributor(
-                    footerOptions.Value,
-                    player) ||
-                (!string.IsNullOrWhiteSpace(player.AvatarFrameAuthorizedHostId) &&
-                 premiumHostAccess.IsPremium(player.AvatarFrameAuthorizedHostId)))
-            .Select(player => new
+            .Select(player =>
             {
-                id = player.Id.Value,
-                enabled = player.AvatarFrameEnabled,
-                frameId = player.AvatarFrameId
+                var canUseFrame =
+                    PlayerContributorAccess.IsContributor(
+                        footerOptions.Value,
+                        player) ||
+                    avatarCatalog.CanUseFrame(player.AvatarId) ||
+                    (!string.IsNullOrWhiteSpace(player.AvatarFrameAuthorizedHostId) &&
+                     premiumHostAccess.IsPremium(player.AvatarFrameAuthorizedHostId));
+
+                return new
+                {
+                    id = player.Id.Value,
+                    enabled = canUseFrame && player.AvatarFrameEnabled,
+                    frameId = canUseFrame ? player.AvatarFrameId : null
+                };
             })
             .ToArray();
 
@@ -70,6 +76,7 @@ public sealed class ContributorFramesModel(
             .Select(host => host.DisplayName)
             .SingleOrDefaultAsync(cancellationToken);
         var canUseAvatarFrame = premiumHostAccess.IsPremium(hostId) ||
+            avatarCatalog.CanUseFrame(game.Session.Settings.HostAvatarId) ||
             ContributorRecognition.IsContributor(
                 footerOptions.Value,
                 hostDisplayName);

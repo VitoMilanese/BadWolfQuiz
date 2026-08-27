@@ -50,7 +50,8 @@
                     <button type="button"
                             class="avatar-option"
                             data-avatar-id="@avatar.Id"
-                            data-avatar-url="@avatarUrl">
+                            data-avatar-url="@avatarUrl"
+                            data-avatar-frame-eligible="@(AvatarCatalog.CanUseFrame(avatar.Id) ? "true" : "false")">
                         <img src="@avatarUrl" alt="" />
                     </button>
                 }

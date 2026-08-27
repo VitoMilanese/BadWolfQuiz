@@ -10,6 +10,8 @@ The recognition cookie is not an authorization mechanism. Contributor eligibilit
 
 Premium frame eligibility comes from the existing `PremiumHosts:HostIds` array. For host Settings, the current authenticated host identifier is compared directly with that list. While participating as a player, premium access is likewise resolved from the authenticated host account in the player's browser (`CurrentHost.Id`) because `GamePlayerId` is a game-scoped identifier. A player access token by itself never grants premium frame access.
 
+Built-in avatars can also grant frame eligibility independently of contributor or premium status. An avatar qualifies when it is stored in the `Resources/Avatars/F` category **or** when its file name, without the extension, ends in `_F` / `_f`. These conditions are OR conditions: satisfying either one is sufficient. Other built-in avatar groups do not gain frame access unless the file-name rule applies.
+
 `DebugMode` is a top-level `appsettings.json` switch and defaults to `false`. When enabled, the running host game page exposes temporary host-card/frame tuning controls in the header. These controls are browser-only helpers and do not change persisted host settings or frame files.
 
 ## Thank-you dialog
@@ -20,7 +22,7 @@ A long-lived, HTTP-only cookie scoped to the authenticated host identifier recor
 
 ## Host avatar frames
 
-Recognized contributor hosts and authenticated hosts whose ID is listed in `PremiumHosts:HostIds` get an Avatar frame section on the global Settings page. They can enable or disable the frame and choose from the image frames stored in `Resources/Frames`. The frame picker uses the same thumbnail-grid interaction pattern as the avatar picker.
+Recognized contributor hosts, authenticated hosts whose ID is listed in `PremiumHosts:HostIds`, and hosts using a built-in avatar that meets the F-category or `_F` / `_f` file-name rule get an Avatar frame section on the global Settings page. They can enable or disable the frame and choose from the image frames stored in `Resources/Frames`. The frame picker uses the same thumbnail-grid interaction pattern as the avatar picker.
 
 The same frame controls are also available in the current game's settings: in the lobby settings panel before the game starts and in **Tools → Game settings** while the game is running. Those controls bind to the current session's `SettingsInput`, so a host can override the frame for that game without first changing the global Settings page. The host game page renders the frame from the current game's settings, while other pages continue to use the saved per-host defaults.
 
@@ -34,13 +36,13 @@ When `DebugMode` is enabled, the running-game header adds seven helper buttons a
 
 ## Player avatar frames
 
-Recognized contributor players and authenticated premium host accounts get equivalent controls inside the existing player media settings disclosure. Premium access is available when the current authenticated host account identifier is present in `PremiumHosts:HostIds`; the player's game-scoped `GamePlayerId` is not compared with that list.
+Recognized contributor players, authenticated premium host accounts, and players using a built-in avatar that meets the F-category or `_F` / `_f` file-name rule get equivalent controls inside the existing player media settings disclosure. The user-facing section is named **Avatar frame**. For ordinary players the section stays hidden until an eligible built-in avatar is selected, and it hides again immediately after switching to an ineligible avatar. Premium access is available when the current authenticated host account identifier is present in `PremiumHosts:HostIds`; the player's game-scoped `GamePlayerId` is not compared with that list.
 
-The preference is stored in browser local storage by normalized player name and is synchronized to the current game using the player's existing access token. The server revalidates the player access token, player identifier, and frame eligibility before accepting a frame update. Contributor players are revalidated against the configured contributor name list. Premium players are revalidated against the authenticated host account and `PremiumHosts:HostIds`. The recognition cookie is not involved in either path.
+The preference is stored in browser local storage by normalized player name and is synchronized to the current game using the player's existing access token. The server revalidates the player access token, player identifier, and frame eligibility before accepting a frame update. Contributor players are revalidated against the configured contributor name list. Premium players are revalidated against the authenticated host account and `PremiumHosts:HostIds`. Avatar-based access is revalidated against the player's current valid built-in avatar ID using the F-category OR `_F` / `_f` file-name rule. The recognition cookie is not involved in these paths.
 
 For premium players, the runtime player state records the premium host account identifier that authorized the frame. Host game pages include the frame only while that identifier still qualifies as premium, preserving the same live configuration behavior as contributor-name eligibility.
 
-The selected frame image is rendered as a square overlay over the player's current avatar, uploaded image, webcam preview, or webcam URL preview where that visual is shown. The overlay follows live card resizing. Built-in avatars use the pixel inset configured in the selected frame file name as a native-image reference value. The browser scales that inset proportionally with the rendered frame size, so the avatar-to-frame spacing remains consistent when cards are resized. Host game pages refresh contributor-frame state when the normal player roster changes.
+The selected frame image is rendered as a square overlay over the player's current avatar, uploaded image, webcam preview, or webcam URL preview where that visual is shown. The overlay follows live card resizing. Built-in avatars use the pixel inset configured in the selected frame file name as a native-image reference value. The browser scales that inset proportionally with the rendered frame size, so the avatar-to-frame spacing remains consistent when cards are resized. Host game pages refresh avatar-frame state when the normal player roster changes. The shared frame feed returns an explicit disabled state for players that no longer qualify, and the host browser ignores out-of-order frame-feed responses so a stale request cannot restore a frame after a newer avatar change.
 
 ## Frame assets
 
@@ -52,7 +54,7 @@ Numeric frame IDs are ordered numerically first, followed by other IDs. Frames a
 
 ## Localization
 
-Contributor-specific UI strings live in `ContributorResource` resources for EN, UK, IT, and RU. As required by the project localization convention, every feature value in `ContributorResource.ru.resx` is exactly `Україна`.
+Contributor acknowledgement and avatar-frame UI strings live in `ContributorResource` resources for EN, UK, IT, and RU. As required by the project localization convention, every feature value in `ContributorResource.ru.resx` is exactly `Україна`.
 
 ## Release
 

@@ -38,7 +38,9 @@
                         dialog.dispatchEvent(new CustomEvent("avatarselected", {
                             detail: {
                                 avatarId: button.dataset.avatarId,
-                                avatarUrl: button.dataset.avatarUrl
+                                avatarUrl: button.dataset.avatarUrl,
+                                avatarFrameEligible:
+                                    button.dataset.avatarFrameEligible === "true"
                             },
                             bubbles: true
                         }));

@@ -22,6 +22,19 @@
         const id = normalizeFrameId(frameId);
         return id ? `/frames/${encodeURIComponent(id)}.png` : "";
     };
+    const isFrameEligibleAvatarId = value => {
+        const normalized = String(value ?? "").trim().replaceAll("\\", "/");
+        const parts = normalized.split("/").filter(Boolean);
+        if (parts.length !== 2) return false;
+        if (parts[0].toLocaleLowerCase() === "f") return true;
+
+        const fileName = parts[1];
+        const extensionIndex = fileName.lastIndexOf(".");
+        const stem = extensionIndex > 0
+            ? fileName.slice(0, extensionIndex)
+            : fileName;
+        return stem.toLocaleLowerCase().endsWith("_f");
+    };
 
     const defaultAvatarInsetRatio = 0.16;
     const minimumAvatarInsetRatio = 0.08;
@@ -379,11 +392,31 @@
     }
 
     const hostTemplate = document.getElementById("contributor-host-frame-template");
-    if (hostTemplate && body.dataset.contributorHost === "true") {
+    const hostAvatarInput = document.querySelector("[data-host-avatar-id]");
+    const hostHasAccountFrameAccess =
+        body.dataset.contributorHostAccountFrameAccess === "true";
+    let selectedHostAvatarFrameEligible = null;
+    const canUseHostFrame = () =>
+        hostHasAccountFrameAccess ||
+        (selectedHostAvatarFrameEligible ??
+         isFrameEligibleAvatarId(hostAvatarInput?.value));
+    const ensureHostFramePanel = () => {
         const hostSettingsGrid = document.querySelector("form.form-card .settings-grid");
-        if (hostSettingsGrid && !hostSettingsGrid.querySelector("[data-contributor-host-frame]")) {
+        if (!hostTemplate || !hostSettingsGrid) return;
+        if (!hostSettingsGrid.querySelector("[data-contributor-host-frame]")) {
             hostSettingsGrid.append(hostTemplate.content.cloneNode(true));
         }
+    };
+    const refreshHostFrameAccess = () => {
+        const canUse = canUseHostFrame();
+        body.dataset.contributorHost = canUse.toString();
+        for (const panel of document.querySelectorAll("[data-contributor-host-frame]")) {
+            panel.hidden = !canUse;
+        }
+    };
+    if (hostTemplate) {
+        ensureHostFramePanel();
+        refreshHostFrameAccess();
     }
 
     const hostFrameState = {
@@ -392,10 +425,31 @@
     };
 
     const applyHostFrame = () => {
+        const canUse = body.dataset.contributorHost === "true";
         for (const hostCard of document.querySelectorAll(".scoreboard-player.host-card")) {
-            setFrame(hostCard, hostFrameState.enabled, hostFrameState.frameId);
+            setFrame(
+                hostCard,
+                canUse && hostFrameState.enabled,
+                hostFrameState.frameId
+            );
         }
     };
+    hostAvatarInput?.addEventListener("change", () => {
+        selectedHostAvatarFrameEligible = null;
+        refreshHostFrameAccess();
+        applyHostFrame();
+    });
+    document.querySelector("[data-avatar-picker]")?.addEventListener(
+        "avatarselected",
+        event => {
+            selectedHostAvatarFrameEligible =
+                event.detail?.avatarFrameEligible === true;
+            window.queueMicrotask(() => {
+                refreshHostFrameAccess();
+                applyHostFrame();
+            });
+        }
+    );
     applyHostFrame();
 
     const playerFrameMap = new Map();
@@ -418,13 +472,19 @@
         ".host-game-board[data-game-code], .content-panel[data-game-code]"
     );
 
+    let playerFrameRefreshSequence = 0;
     const refreshPlayerFrames = async gameCode => {
+        const refreshSequence = ++playerFrameRefreshSequence;
         const response = await fetch(
             `/ContributorFrames?code=${encodeURIComponent(gameCode)}`,
-            { headers: { Accept: "application/json" } }
+            {
+                headers: { Accept: "application/json" },
+                cache: "no-store"
+            }
         );
         if (!response.ok) return;
         const update = await response.json();
+        if (refreshSequence !== playerFrameRefreshSequence) return;
         playerFrameMap.clear();
         for (const player of update?.players ?? []) {
             playerFrameMap.set(String(player.id), {
@@ -503,7 +563,7 @@
 
     const playerTemplate = document.getElementById("contributor-player-frame-template");
     const playerLobby = document.querySelector(".player-lobby");
-    if (!playerTemplate || !playerLobby || body.dataset.contributorPlayer !== "true") {
+    if (!playerTemplate || !playerLobby) {
         return;
     }
 
@@ -534,6 +594,15 @@
         body.dataset.contributorPlayerFrameId ||
         frameInput.value
     );
+    const playerHasAccountFrameAccess =
+        body.dataset.contributorPlayerAccountFrameAccess === "true";
+    const canUsePlayerFrame = () => {
+        const selectedEligibility = playerLobby.dataset.avatarFrameEligible;
+        const avatarCanUseFrame = selectedEligibility === "true" ||
+            (selectedEligibility !== "false" &&
+             isFrameEligibleAvatarId(playerLobby.dataset.avatarId));
+        return playerHasAccountFrameAccess || avatarCanUseFrame;
+    };
 
     const applyPlayerFrame = () => {
         enabledInput.checked = frameEnabled;
@@ -545,10 +614,26 @@
     const savePreference = () => {
         localStorage.setItem(enabledKey, frameEnabled.toString());
         localStorage.setItem(frameKey, frameId);
-        applyPlayerFrame();
+        if (canUsePlayerFrame()) {
+            applyPlayerFrame();
+        } else {
+            setFrame(avatarControl, false, frameId);
+        }
+    };
+    const refreshPlayerFrameAccess = () => {
+        const canUse = canUsePlayerFrame();
+        body.dataset.contributorPlayer = canUse.toString();
+        framePanel.hidden = !canUse;
+        if (canUse) {
+            applyPlayerFrame();
+        } else {
+            setFrame(avatarControl, false, frameId);
+        }
+        return canUse;
     };
 
     const syncFrame = async () => {
+        if (!canUsePlayerFrame()) return false;
         const gameCode = playerLobby.dataset.gameCode;
         const playerId = playerLobby.dataset.playerId;
         const accessToken = localStorage.getItem(`badwolfquiz:${gameCode}:player:${playerId}`) ||
@@ -586,19 +671,33 @@
         syncFrame().catch(console.error);
     });
 
-    const mediaObserver = new MutationObserver(() => applyPlayerFrame());
+    const mediaObserver = new MutationObserver(() => {
+        if (canUsePlayerFrame()) applyPlayerFrame();
+    });
     mediaObserver.observe(avatarControl, {
         attributes: true,
         subtree: true,
         attributeFilter: ["hidden"]
     });
+    new MutationObserver(() => {
+        const hadAccess = body.dataset.contributorPlayer === "true";
+        const hasAccess = refreshPlayerFrameAccess();
+        if (!hadAccess && hasAccess) {
+            syncFrame().catch(console.error);
+        }
+    }).observe(playerLobby, {
+        attributes: true,
+        attributeFilter: ["data-avatar-id", "data-avatar-frame-eligible"]
+    });
 
     savePreference();
-    window.setTimeout(() => {
-        syncFrame().then(saved => {
-            if (!saved) {
-                window.setTimeout(() => syncFrame().catch(console.error), 1500);
-            }
-        }).catch(console.error);
-    }, 750);
+    if (refreshPlayerFrameAccess()) {
+        window.setTimeout(() => {
+            syncFrame().then(saved => {
+                if (!saved) {
+                    window.setTimeout(() => syncFrame().catch(console.error), 1500);
+                }
+            }).catch(console.error);
+        }, 750);
+    }
 })();

@@ -18,6 +18,7 @@ public sealed class ContributorSupportTagHelper(
     IAntiforgery antiforgery,
     GameSettingsStore settingsStore,
     GameSessionRegistry sessionRegistry,
+    AvatarCatalog avatarCatalog,
     CurrentHost currentHost,
     PremiumHostAccess premiumHostAccess,
     QuizDbContext db,
@@ -90,12 +91,17 @@ public sealed class ContributorSupportTagHelper(
             ContributorRecognition.IsContributor(
                 footerOptions.Value,
                 hostDisplayName);
-        var hostCanUseAvatarFrame =
-            ViewContext.ViewData["ContributorHost"] is bool hostOverride
-                ? hostOverride
+        var hostHasAccountFrameAccess =
+            ViewContext.ViewData["ContributorHostAccountFrameAccess"] is bool hostAccountOverride
+                ? hostAccountOverride
                 : hostIsContributor ||
                   (authenticatedHostId is not null &&
                    premiumHostAccess.IsPremium(authenticatedHostId));
+        var hostCanUseAvatarFrame =
+            ViewContext.ViewData["ContributorHost"] is bool hostOverride
+                ? hostOverride
+                : hostHasAccountFrameAccess ||
+                  avatarCatalog.CanUseFrame(hostFrameSettings?.HostAvatarId);
         var hostFrameEnabled = hostCanUseAvatarFrame &&
             hostFrameSettings?.HostAvatarFrameEnabled == true &&
             ContributorAvatarFrameCatalog.IsValid(
@@ -104,11 +110,13 @@ public sealed class ContributorSupportTagHelper(
         var hostFrameId = ContributorAvatarFrameCatalog.Normalize(
             environment,
             hostFrameSettings?.HostAvatarFrameId) ?? defaultFrameId;
-        var playerIsContributor =
+        var playerCanUseAvatarFrame =
             ViewContext.ViewData["ContributorPlayer"] is true;
+        var playerHasAccountFrameAccess =
+            ViewContext.ViewData["ContributorPlayerAccountFrameAccess"] is true;
         var playerFrameIdValue =
             ViewContext.ViewData["ContributorPlayerFrameId"]?.ToString();
-        var playerFrameEnabled = playerIsContributor &&
+        var playerFrameEnabled = playerCanUseAvatarFrame &&
             ViewContext.ViewData["ContributorPlayerFrameEnabled"] is true &&
             ContributorAvatarFrameCatalog.IsValid(
                 environment,
@@ -121,6 +129,9 @@ public sealed class ContributorSupportTagHelper(
             "data-contributor-host",
             hostCanUseAvatarFrame ? "true" : "false");
         output.Attributes.SetAttribute(
+            "data-contributor-host-account-frame-access",
+            hostHasAccountFrameAccess ? "true" : "false");
+        output.Attributes.SetAttribute(
             "data-contributor-host-frame-enabled",
             hostFrameEnabled ? "true" : "false");
         output.Attributes.SetAttribute(
@@ -128,7 +139,10 @@ public sealed class ContributorSupportTagHelper(
             hostFrameId);
         output.Attributes.SetAttribute(
             "data-contributor-player",
-            playerIsContributor ? "true" : "false");
+            playerCanUseAvatarFrame ? "true" : "false");
+        output.Attributes.SetAttribute(
+            "data-contributor-player-account-frame-access",
+            playerHasAccountFrameAccess ? "true" : "false");
         output.Attributes.SetAttribute(
             "data-contributor-player-frame-enabled",
             playerFrameEnabled ? "true" : "false");
@@ -159,23 +173,27 @@ public sealed class ContributorSupportTagHelper(
             page,
             "/Admin/Games/Lobby",
             StringComparison.Ordinal);
-        var showHostFrameControls = frames.Count > 0 &&
-            hostCanUseAvatarFrame &&
+        var isPlayerLobbyPage = string.Equals(
+            page,
+            "/Player/Lobby",
+            StringComparison.Ordinal);
+        var provideHostFrameControls = frames.Count > 0 &&
             (isGlobalSettingsPage || isGameSettingsPage);
 
-        if (showHostFrameControls)
+        if (provideHostFrameControls)
         {
             output.PostContent.AppendHtml(BuildHostTemplate(
                 html,
                 hostFrameEnabled,
                 hostFrameId,
+                hostCanUseAvatarFrame,
                 isGameSettingsPage ? "SettingsInput" : "Input",
                 isGameSettingsPage
                     ? "#start-game-form .settings-grid, #game-settings-dialog .settings-grid"
                     : null));
         }
 
-        if (playerIsContributor && frames.Count > 0)
+        if (isPlayerLobbyPage && frames.Count > 0)
         {
             var requestToken = antiforgery
                 .GetAndStoreTokens(httpContext)
@@ -186,11 +204,12 @@ public sealed class ContributorSupportTagHelper(
                     html,
                     requestToken,
                     playerFrameEnabled,
-                    playerFrameId));
+                    playerFrameId,
+                    playerCanUseAvatarFrame));
             }
         }
 
-        if (showHostFrameControls || (playerIsContributor && frames.Count > 0))
+        if (provideHostFrameControls || (isPlayerLobbyPage && frames.Count > 0))
         {
             output.PostContent.AppendHtml(BuildFramePicker(html, frames));
         }
@@ -219,16 +238,18 @@ public sealed class ContributorSupportTagHelper(
         HtmlEncoder html,
         bool enabled,
         string frameId,
+        bool available,
         string inputPrefix,
         string? targetSelector)
     {
         var checkedAttribute = enabled ? " checked" : string.Empty;
+        var hiddenAttribute = available ? string.Empty : " hidden";
         var frameUrl = ContributorAvatarFrameCatalog.GetUrl(
             environment,
             frameId) ?? string.Empty;
         var template = $$"""
             <template id="contributor-host-frame-template">
-                <div class="contributor-frame-settings" data-contributor-host-frame>
+                <div class="contributor-frame-settings" data-contributor-host-frame{{hiddenAttribute}}>
                     <strong>{{html.Encode(localizer["ContributorFrame_Title"].Value)}}</strong>
                     <label class="settings-checkbox">
                         <input type="checkbox"
@@ -285,15 +306,17 @@ public sealed class ContributorSupportTagHelper(
         HtmlEncoder html,
         string requestToken,
         bool enabled,
-        string frameId)
+        string frameId,
+        bool available)
     {
         var checkedAttribute = enabled ? " checked" : string.Empty;
+        var hiddenAttribute = available ? string.Empty : " hidden";
         var frameUrl = ContributorAvatarFrameCatalog.GetUrl(
             environment,
             frameId) ?? string.Empty;
         return $$"""
             <template id="contributor-player-frame-template">
-                <div class="contributor-frame-settings" data-contributor-player-frame>
+                <div class="contributor-frame-settings" data-contributor-player-frame{{hiddenAttribute}}>
                     <strong>{{html.Encode(localizer["ContributorFrame_Title"].Value)}}</strong>
                     <label class="settings-checkbox">
                         <input type="checkbox"

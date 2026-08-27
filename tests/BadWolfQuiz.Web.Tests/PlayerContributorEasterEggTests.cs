@@ -119,8 +119,46 @@ public sealed class PlayerContributorEasterEggTests
             source.Split(
                 "PlayerContributorAccess.IsContributor(",
                 StringSplitOptions.None).Length - 1);
-        Assert.Contains("CanUseAvatarFrame = IsContributor", source);
-        Assert.Contains("(!isContributor && premiumHostId is null)", source);
+        Assert.Contains("avatarCatalog.CanUseFrame(currentPlayer.AvatarId)", source);
+        Assert.Contains(
+            "(!isContributor && premiumHostId is null && !avatarCanUseFrame)",
+            source);
+    }
+
+    [Fact]
+    public void Avatar_picker_uses_server_frame_eligibility_for_dynamic_selection()
+    {
+        var picker = File.ReadAllText(FindFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Shared",
+            "_AvatarPicker.cshtml"));
+        var pickerScript = File.ReadAllText(FindFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "avatar-picker.js"));
+        var frameScript = File.ReadAllText(FindFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "contributor-frames.js"));
+        var playerLobby = File.ReadAllText(FindFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Player",
+            "Lobby.cshtml"));
+
+        Assert.Contains("AvatarCatalog.CanUseFrame(avatar.Id)", picker);
+        Assert.Contains("data-avatar-frame-eligible", picker);
+        Assert.Contains("avatarFrameEligible:", pickerScript);
+        Assert.Contains("selectedHostAvatarFrameEligible", frameScript);
+        Assert.Contains("playerLobby.dataset.avatarFrameEligible", frameScript);
+        Assert.Contains("lobby.dataset.avatarFrameEligible", playerLobby);
     }
 
     [Fact]
@@ -138,6 +176,70 @@ public sealed class PlayerContributorEasterEggTests
         Assert.DoesNotContain(
             "ContributorRecognition.IsContributor(\n                    footerOptions.Value,\n                    player.Name)",
             source);
+    }
+
+    [Fact]
+    public void Avatar_frame_panel_hidden_state_is_not_overridden_by_component_css()
+    {
+        var css = File.ReadAllText(FindFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "css",
+            "contributor-frames.css")).Replace("\r\n", "\n");
+
+        Assert.Contains(
+            ".contributor-frame-settings[hidden] {\n    display: none;\n}",
+            css);
+    }
+
+    [Fact]
+    public void Shared_frame_feed_returns_explicit_disabled_state_after_eligibility_loss()
+    {
+        var source = File.ReadAllText(FindFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "ContributorFrames.cshtml.cs"));
+
+        Assert.Contains("enabled = canUseFrame && player.AvatarFrameEnabled", source);
+        Assert.Contains("frameId = canUseFrame ? player.AvatarFrameId : null", source);
+        Assert.DoesNotContain(".Where(player =>", source);
+    }
+
+    [Fact]
+    public void Host_frame_refresh_ignores_out_of_order_responses()
+    {
+        var source = File.ReadAllText(FindFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "contributor-frames.js"));
+
+        Assert.Contains("let playerFrameRefreshSequence = 0;", source);
+        Assert.Contains("const refreshSequence = ++playerFrameRefreshSequence;", source);
+        Assert.Contains("refreshSequence !== playerFrameRefreshSequence", source);
+        Assert.Contains("cache: \"no-store\"", source);
+        Assert.Contains(
+            "attributeFilter: [\"data-avatar-id\", \"data-avatar-frame-eligible\"]",
+            source);
+    }
+
+    [Fact]
+    public void Ukrainian_frame_ui_uses_avatar_frame_name()
+    {
+        var source = File.ReadAllText(FindFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "Resources",
+            "Localization",
+            "ContributorResource.uk.resx"));
+
+        Assert.Contains(">Рамка аватара</value>", source);
+        Assert.Contains(">Увімкнути рамку аватара</value>", source);
+        Assert.DoesNotContain("Рамка контриб'ютора", source);
+        Assert.DoesNotContain("рамку контриб'ютора", source);
     }
 
     [Fact]
