@@ -8,16 +8,16 @@ public static class SeoMetadataCatalog
         new Dictionary<(string, string), SeoMetadata>
         {
             [("/Index", "uk")] = new(
-                "Bad Wolf Quiz — безкоштовні онлайн-квізи в реальному часі",
-                "Bad Wolf Quiz — платформа для створення та проведення онлайн-квізів у реальному часі. Створюй квізи та грай із друзями.",
+                "Bad Wolf Quiz — безкоштовна онлайн-квіз гра та вікторина",
+                "Bad Wolf Quiz — безкоштовна онлайн-гра для створення й проведення квізів та вікторин у реальному часі. Створюй питання, збирай друзів і грай разом.",
                 "uk_UA"),
             [("/Index", "en")] = new(
-                "Bad Wolf Quiz — free real-time online quizzes",
-                "Bad Wolf Quiz is a platform for creating and hosting real-time online quizzes. Build quizzes and play with friends.",
+                "Bad Wolf Quiz — free online quiz & trivia game",
+                "Bad Wolf Quiz is a free real-time quiz and trivia game for friends and groups. Create your own quizzes, join games, and play together online.",
                 "en_US"),
             [("/Index", "it")] = new(
-                "Bad Wolf Quiz — quiz online gratuiti in tempo reale",
-                "Bad Wolf Quiz è una piattaforma per creare e organizzare quiz online in tempo reale. Crea quiz e gioca con gli amici.",
+                "Bad Wolf Quiz — gioco quiz online gratuito",
+                "Bad Wolf Quiz è un gioco quiz online gratuito in tempo reale. Crea i tuoi quiz, invita gli amici e gioca insieme.",
                 "it_IT"),
             [("/Faq", "uk")] = new(
                 "FAQ — Bad Wolf Quiz",
