@@ -7,6 +7,10 @@
     background: color-mix(in srgb, var(--panel-2) 78%, transparent);
 }
 
+.contributor-frame-settings[hidden] {
+    display: none;
+}
+
 .contributor-frame-settings > strong {
     font-size: 1rem;
 }

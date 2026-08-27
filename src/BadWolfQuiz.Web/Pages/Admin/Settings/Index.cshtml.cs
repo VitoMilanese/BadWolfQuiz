@@ -215,11 +215,8 @@ public sealed class IndexModel(
         // Re-check after a display-name change. A non-contributor cannot gain
         // contributor frame access in the same POST, while premium access stays
         // tied to the authenticated host identifier.
-        IsContributor = IsContributor &&
-            ContributorRecognition.IsContributor(footerOptions.Value, host.DisplayName);
-        CanUseAvatarFrame = IsContributor ||
-            premiumHostAccess.IsPremium(currentHost.RequiredId);
-        ViewData["ContributorHost"] = CanUseAvatarFrame;
+        SetFrameAccess(IsContributor &&
+            ContributorRecognition.IsContributor(footerOptions.Value, host.DisplayName));
         if (!CanUseAvatarFrame)
         {
             Input.HostAvatarFrameEnabled = false;
@@ -270,8 +267,11 @@ public sealed class IndexModel(
     private void SetFrameAccess(bool isContributor)
     {
         IsContributor = isContributor;
-        CanUseAvatarFrame = isContributor ||
+        var hasAccountFrameAccess = isContributor ||
             premiumHostAccess.IsPremium(currentHost.RequiredId);
+        CanUseAvatarFrame = hasAccountFrameAccess ||
+            avatarCatalog.CanUseFrame(Input.HostAvatarId);
         ViewData["ContributorHost"] = CanUseAvatarFrame;
+        ViewData["ContributorHostAccountFrameAccess"] = hasAccountFrameAccess;
     }
 }

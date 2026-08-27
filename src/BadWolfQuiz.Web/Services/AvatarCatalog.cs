@@ -43,6 +43,31 @@ public sealed class AvatarCatalog(IWebHostEnvironment environment)
         return File.Exists(Path.Combine(_root, parts[0], parts[1]));
     }
 
+    public bool CanUseFrame(string? avatarId) =>
+        IsValid(avatarId) && IsFrameEligibleId(avatarId);
+
+    public static bool IsFrameEligibleId(string? avatarId)
+    {
+        if (string.IsNullOrWhiteSpace(avatarId))
+        {
+            return false;
+        }
+
+        var parts = avatarId.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2)
+        {
+            return false;
+        }
+
+        if (string.Equals(parts[0], "F", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var avatarName = Path.GetFileNameWithoutExtension(parts[1]);
+        return avatarName.EndsWith("_F", StringComparison.OrdinalIgnoreCase);
+    }
+
     public IReadOnlyList<AvatarCategory> GetCategories()
     {
         if (!Directory.Exists(_root))

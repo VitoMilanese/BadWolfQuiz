@@ -1,6 +1,6 @@
 (() => {
     const body = document.body;
-    if (!body || body.dataset.contributorPlayer !== "true") {
+    if (!body) {
         return;
     }
 

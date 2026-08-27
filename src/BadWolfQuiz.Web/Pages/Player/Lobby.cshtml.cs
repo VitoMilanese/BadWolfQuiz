@@ -11,6 +11,7 @@ namespace BadWolfQuiz.Web.Pages.Player;
 public sealed class LobbyModel(
     GameSessionRegistry sessionRegistry,
     GameSettingsStore settingsStore,
+    AvatarCatalog avatarCatalog,
     QuizRatingService quizRatingService,
     IOptions<FooterOptions> footerOptions,
     CurrentHost currentHost,
@@ -60,7 +61,10 @@ public sealed class LobbyModel(
             footerOptions.Value,
             currentPlayer);
         var premiumHostId = GetPremiumHostId();
-        CanUseAvatarFrame = IsContributor || premiumHostId is not null;
+        var hasAccountFrameAccess = IsContributor || premiumHostId is not null;
+        CanUseAvatarFrame = hasAccountFrameAccess ||
+            avatarCatalog.CanUseFrame(currentPlayer.AvatarId);
+        ViewData["ContributorPlayerAccountFrameAccess"] = hasAccountFrameAccess;
         var normalizedFrameId = ContributorAvatarFrameCatalog.Normalize(
             environment,
             currentPlayer.AvatarFrameId);
@@ -120,9 +124,11 @@ public sealed class LobbyModel(
                 footerOptions.Value,
                 connection.Player);
             var premiumHostId = GetPremiumHostId();
+            var avatarCanUseFrame = avatarCatalog.CanUseFrame(
+                connection.Player.AvatarId);
             if (connection.RequiresApproval ||
                 connection.Player.Id != new GamePlayerId(playerId) ||
-                (!isContributor && premiumHostId is null))
+                (!isContributor && premiumHostId is null && !avatarCanUseFrame))
             {
                 return new JsonResult(new { saved = false }) { StatusCode = 403 };
             }
@@ -135,7 +141,7 @@ public sealed class LobbyModel(
                 connection.Player.SetAvatarFrame(
                     enabled,
                     normalizedFrameId,
-                    isContributor ? null : premiumHostId);
+                    isContributor || avatarCanUseFrame ? null : premiumHostId);
                 connection.Game.MarkPersistenceChanged();
             }
 

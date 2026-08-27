@@ -35,6 +35,28 @@ public sealed class ContributorRecognitionTests
         Assert.False(ContributorRecognition.IsContributor(options, name));
     }
 
+    [Theory]
+    [InlineData("F/1.png")]
+    [InlineData("F/plain.webp")]
+    [InlineData("f/plain.jpg")]
+    [InlineData("M/wolf_F.png")]
+    [InlineData("I/wolf_f.jpeg")]
+    public void Avatar_frame_eligibility_accepts_f_category_or_f_suffix(string avatarId)
+    {
+        Assert.True(AvatarCatalog.IsFrameEligibleId(avatarId));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("M/1.png")]
+    [InlineData("I/wolf.png")]
+    [InlineData("M/wolf_F_extra.png")]
+    public void Avatar_frame_eligibility_rejects_other_avatar_ids(string? avatarId)
+    {
+        Assert.False(AvatarCatalog.IsFrameEligibleId(avatarId));
+    }
+
     [Fact]
     public void Recognition_cookie_only_suppresses_the_same_host()
     {
