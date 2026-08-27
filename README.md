@@ -1,24 +1,19 @@
-# 🐺 BAD WOLF QUIZ
+# 🐺 Bad Wolf Quiz
 
-**Bad Wolf Quiz** — це сучасна real-time платформа для проведення квізів, написана на **ASP.NET Core 8**.
+**Самохостингова real-time мультимедійна платформа для проведення квізів у стилі Jeopardy.**  
+**Self-hosted real-time multimedia quiz platform for Jeopardy-style games.**
 
-Основні складові проєкту:
+### 🌐 [badwolf.buzz](https://badwolf.buzz)
 
-- редактор квізів;
-- real-time ігрова платформа для ведучого та гравців;
-- система зворотного зв'язку між користувачами та розробником.
+![Bad Wolf Quiz game board](readme-game-board.png)
 
-Детальні специфікації та архітектурні рішення зберігаються в [docs](docs/README.md).
+Bad Wolf Quiz дозволяє ведучим створювати та проводити мультимедійні квізи в реальному часі, а гравцям — приєднуватися зі своїх пристроїв. Платформу можна розгорнути самостійно або використовувати публічний сайт.
 
-**Bad Wolf Quiz** is a modern real-time quiz platform built with **ASP.NET Core 8**.
+Bad Wolf Quiz lets hosts create and run multimedia quiz games in real time while players join from their own devices. The platform can be self-hosted or used through the public site.
 
-The main components of the project are:
+**Self-hosted · Real-time · Multimedia · Jeopardy-style**
 
-- a quiz editor;
-- a real-time game platform for the host and players;
-- a feedback system between users and the developer.
-
-Detailed specifications and architectural decisions are available in [docs](docs/README.md).
+Детальні специфікації та архітектурні рішення / Detailed specifications and architecture: [docs](docs/README.md).
 
 ---
 
