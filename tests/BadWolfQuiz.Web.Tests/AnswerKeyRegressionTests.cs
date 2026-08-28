@@ -24,7 +24,11 @@ public sealed class AnswerKeyRegressionTests
             model,
             StringComparison.Ordinal);
         Assert.Contains(
-            "AnswerBlocks = GetVisibleAnswerBlocks(game, question);",
+            "IsPeerRatedQuestion = question.PresentationType ==",
+            model,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "? question.QuestionBlocks",
             model,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -37,6 +41,14 @@ public sealed class AnswerKeyRegressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             "DeferredGameMediaStore mediaStore",
+            model,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "DeferredGameMediaRole.Question",
+            model,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "DeferredGameMediaRole.Answer",
             model,
             StringComparison.Ordinal);
     }
@@ -61,9 +73,18 @@ public sealed class AnswerKeyRegressionTests
             StringComparison.Ordinal);
         Assert.Contains("@section HeaderContext", page, StringComparison.Ordinal);
         Assert.Contains(
-            "<h2>@Localizer[\"Label_CorrectAnswer\"]</h2>",
+            "var answerKeyLabel = Model.IsPeerRatedQuestion",
             page,
             StringComparison.Ordinal);
+        Assert.Contains(
+            "Localizer[\"GameBoard_Question\"]",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Localizer[\"Label_CorrectAnswer\"]",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains("<h2>@answerKeyLabel</h2>", page, StringComparison.Ordinal);
         Assert.DoesNotContain(
             "<header class=\"answer-key-header\">",
             page,
@@ -167,7 +188,19 @@ public sealed class AnswerKeyRegressionTests
         var normalizedPage = NormalizeWhitespace(page);
 
         Assert.Contains("data-answer-key-hidden-placeholder", page, StringComparison.Ordinal);
-        Assert.Contains("@Localizer[\"Button_ShowAnswer\"]", page, StringComparison.Ordinal);
+        Assert.Contains(
+            "var showAnswerKeyLabel = Model.IsPeerRatedQuestion",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Localizer[\"GameBoard_ShowQuestion\"]",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Localizer[\"Button_ShowAnswer\"]",
+            page,
+            StringComparison.Ordinal);
+        Assert.Contains("<span>@showAnswerKeyLabel</span>", page, StringComparison.Ordinal);
         Assert.Contains("id=\"answer-key-content\"", page, StringComparison.Ordinal);
         Assert.Contains("data-answer-key-content", page, StringComparison.Ordinal);
         Assert.Contains(

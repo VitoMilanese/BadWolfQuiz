@@ -8,7 +8,8 @@ public enum QuestionPresentationType
     FourClues = 1,
     AllPlayerText = 2,
     AllPlayerMultipleChoice = 3,
-    HostMultipleChoice = 4
+    HostMultipleChoice = 4,
+    AllPlayerPeerRatedText = 5
 }
 
 public enum QuestionBuzzerMode
@@ -316,12 +317,17 @@ public sealed class QuizQuestionSnapshot
 
         IsSpecial = presentationType is
             QuestionPresentationType.FourClues or
-            QuestionPresentationType.HostMultipleChoice
+            QuestionPresentationType.HostMultipleChoice or
+            QuestionPresentationType.AllPlayerPeerRatedText
                 ? false
                 : isSpecial;
         PresentationType = presentationType;
-        BuzzerMode = buzzerMode;
-        BuzzDelaySeconds = buzzDelaySeconds;
+        BuzzerMode = presentationType == QuestionPresentationType.AllPlayerPeerRatedText
+            ? QuestionBuzzerMode.Disabled
+            : buzzerMode;
+        BuzzDelaySeconds = presentationType == QuestionPresentationType.AllPlayerPeerRatedText
+            ? 0
+            : buzzDelaySeconds;
         ExcludeFromRandomWagerSelection =
             presentationType == QuestionPresentationType.HostMultipleChoice ||
             excludeFromRandomWagerSelection;
@@ -329,9 +335,23 @@ public sealed class QuizQuestionSnapshot
             ? sourceCategoryId.ToString()
             : categoryTitle.Trim();
         QuestionBlocks = orderedQuestionBlocks;
-        AnswerBlocks = answerLayout.OptionBlocks;
-        RevealAnswerBlocks = answerLayout.RevealBlocks;
-        StoredAnswerBlocks = answerLayout.StoredBlocks;
+
+        // Peer-rated questions intentionally have no separate correct answer.
+        // Runtime surfaces that are built around an "answer" phase receive the
+        // original question content instead, so second-screen/legacy answer views
+        // cannot expose a meaningless stored answer.
+        if (presentationType == QuestionPresentationType.AllPlayerPeerRatedText)
+        {
+            AnswerBlocks = orderedQuestionBlocks;
+            RevealAnswerBlocks = orderedQuestionBlocks;
+            StoredAnswerBlocks = [];
+        }
+        else
+        {
+            AnswerBlocks = answerLayout.OptionBlocks;
+            RevealAnswerBlocks = answerLayout.RevealBlocks;
+            StoredAnswerBlocks = answerLayout.StoredBlocks;
+        }
     }
 
     private static bool IsValidAllPlayerChoiceOption(ContentBlockSnapshot block) =>
@@ -356,6 +376,9 @@ public sealed class QuizQuestionSnapshot
 
     public QuestionPresentationType PresentationType { get; }
 
+    public bool HasCorrectAnswer =>
+        PresentationType != QuestionPresentationType.AllPlayerPeerRatedText;
+
     public QuestionBuzzerMode BuzzerMode { get; }
 
     public int BuzzDelaySeconds { get; }
@@ -366,27 +389,28 @@ public sealed class QuizQuestionSnapshot
         !ExcludeFromRandomWagerSelection &&
         PresentationType is not
             QuestionPresentationType.FourClues and not
-            QuestionPresentationType.HostMultipleChoice;
+            QuestionPresentationType.HostMultipleChoice and not
+            QuestionPresentationType.AllPlayerPeerRatedText;
 
     public string CategoryTitle { get; }
 
     public IReadOnlyList<ContentBlockSnapshot> QuestionBlocks { get; }
 
     /// <summary>
-    /// Runtime answer blocks. For multiple-choice questions this contains only
-    /// selectable options; for other question types it contains the normal answer.
+    /// Runtime answer blocks. Peer-rated text questions intentionally mirror their
+    /// question blocks here because they do not have a separate correct answer.
     /// </summary>
     public IReadOnlyList<ContentBlockSnapshot> AnswerBlocks { get; }
 
     /// <summary>
-    /// Correct-answer presentation blocks. Multiple-choice questions expose the
-    /// correct option first followed by optional reveal-only answer content.
+    /// Correct-answer presentation blocks. Peer-rated text questions intentionally
+    /// mirror the question content for legacy/second-screen answer surfaces.
     /// </summary>
     public IReadOnlyList<ContentBlockSnapshot> RevealAnswerBlocks { get; }
 
     /// <summary>
-    /// Persisted snapshot representation, including an answer-options marker when
-    /// the multiple-choice answer contains additional reveal-only content.
+    /// Persisted snapshot representation. Peer-rated text questions store no
+    /// correct-answer blocks because peer voting is the source of the result.
     /// </summary>
     public IReadOnlyList<ContentBlockSnapshot> StoredAnswerBlocks { get; }
 }

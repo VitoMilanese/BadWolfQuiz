@@ -12,7 +12,8 @@ public sealed record ActiveGameSnapshot(
     GameSessionSettings Settings,
     GameSessionState SessionState,
     DateTimeOffset? SavedAtUtc = null,
-    IReadOnlyList<QuestionOpenSequenceState>? QuestionOpenSequence = null);
+    IReadOnlyList<QuestionOpenSequenceState>? QuestionOpenSequence = null,
+    IReadOnlyList<PeerRatedAllPlayerReviewSnapshot>? PeerRatedAllPlayerReviews = null);
 
 public sealed class ActiveGameStore
 {
@@ -58,9 +59,6 @@ public sealed class ActiveGameStore
 
     public async Task ReplaceAsync(IReadOnlyList<ActiveGameSnapshot> snapshots)
     {
-        // Do not cancel while waiting for or performing the atomic replacement.
-        // A canceled host token used to surface as TaskCanceledException from
-        // this method and could make Visual Studio stop the application.
         await _gate.WaitAsync(CancellationToken.None);
         try
         {
@@ -179,8 +177,6 @@ public sealed class ActiveGameStore
                 catch (Exception exception) when (
                     exception is IOException or UnauthorizedAccessException)
                 {
-                    // Orphaned blobs are harmless and can be retried on the
-                    // next successful snapshot replacement.
                 }
             }
         }
@@ -202,9 +198,6 @@ public sealed class ActiveGameStore
                 attempt < maxAttempts &&
                 exception is IOException or UnauthorizedAccessException)
             {
-                // Windows, antivirus software, or an editor may briefly hold the
-                // destination without delete sharing. Preserve the atomic move
-                // and retry instead of terminating the persistence worker.
                 await Task.Delay(retryDelay, CancellationToken.None);
                 retryDelay *= 2;
             }
