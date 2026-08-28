@@ -272,6 +272,7 @@ var localizationOptions = app.Services
     .GetRequiredService<IOptions<RequestLocalizationOptions>>()
     .Value;
 
+app.UseStatusCodePagesWithReExecute(NotFoundPagePolicy.Path);
 app.UseRouting();
 app.UseRequestLocalization(localizationOptions);
 app.Use(async (context, next) =>

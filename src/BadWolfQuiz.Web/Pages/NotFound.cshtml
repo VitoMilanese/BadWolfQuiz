@@ -1,0 +1,65 @@
+@page
+@model NotFoundModel
+@inject IStringLocalizer<NotFoundResource> NotFoundLocalizer
+@{
+    ViewData["Title"] = NotFoundLocalizer["Title"];
+}
+
+<div class="not-found-page">
+    <div class="not-found-heading">
+        <p class="not-found-code">404</p>
+        <h1>@NotFoundLocalizer["Heading"]</h1>
+    </div>
+
+    <section class="form-card narrow stack-form not-found-card">
+        <p class="settings-description">@NotFoundLocalizer["Description"]</p>
+
+        <div class="form-actions not-found-actions">
+            <a class="button" href="@Url.Content("~/")">
+                @NotFoundLocalizer["BackHome"]
+            </a>
+        </div>
+    </section>
+</div>
+
+<style>
+    .not-found-page {
+        display: grid;
+        justify-items: center;
+        align-content: center;
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+        min-height: 65vh;
+        padding: clamp(2rem, 5vh, 4rem) 1rem;
+        text-align: center;
+    }
+
+    .not-found-heading {
+        display: grid;
+        justify-items: center;
+        gap: 0.75rem;
+    }
+
+    .not-found-heading h1 {
+        margin: 0;
+        text-align: center;
+    }
+
+    .not-found-code {
+        margin: 0;
+        color: var(--red-bright);
+        font-size: clamp(5.5rem, 16vw, 10rem);
+        font-weight: 900;
+        line-height: 0.82;
+        letter-spacing: -0.055em;
+    }
+
+    .not-found-card {
+        width: min(100%, 620px);
+        margin: 0;
+        text-align: center;
+    }
+
+    .not-found-actions {
+        justify-content: center;
+    }
+</style>
