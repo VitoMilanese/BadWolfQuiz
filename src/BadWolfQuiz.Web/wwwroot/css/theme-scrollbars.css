@@ -1,0 +1,37 @@
+:root {
+    --theme-scrollbar-track: color-mix(in srgb, var(--panel) 78%, var(--bg));
+    --theme-scrollbar-thumb: color-mix(in srgb, var(--red-bright) 72%, var(--text));
+    --theme-scrollbar-thumb-hover: color-mix(in srgb, var(--red-bright) 84%, var(--text));
+    --theme-scrollbar-thumb-active: var(--red-bright);
+}
+
+* {
+    scrollbar-color: var(--theme-scrollbar-thumb) var(--theme-scrollbar-track);
+}
+
+*::-webkit-scrollbar-track {
+    background-color: var(--theme-scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--theme-scrollbar-thumb);
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: var(--theme-scrollbar-thumb-hover);
+}
+
+*::-webkit-scrollbar-thumb:active {
+    background-color: var(--theme-scrollbar-thumb-active);
+}
+
+*::-webkit-scrollbar-corner {
+    background-color: var(--theme-scrollbar-track);
+}
+
+@media (forced-colors: active) {
+    * {
+        scrollbar-color: auto;
+    }
+}
