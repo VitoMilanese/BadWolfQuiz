@@ -71,7 +71,11 @@ public static class QuizCloneOperations
                 DefaultTimeLimitSeconds = sourceRound.DefaultTimeLimitSeconds,
                 DefaultBuzzMode = sourceRound.DefaultBuzzMode,
                 UseRandomWagerQuestions = sourceRound.UseRandomWagerQuestions,
-                RandomWagerQuestionCount = sourceRound.RandomWagerQuestionCount
+                RandomWagerQuestionCount = sourceRound.RandomWagerQuestionCount,
+                UseRandomAnonymousSharedWagerQuestions =
+                    sourceRound.UseRandomAnonymousSharedWagerQuestions,
+                RandomAnonymousSharedWagerQuestionCount =
+                    sourceRound.RandomAnonymousSharedWagerQuestionCount
             };
 
             foreach (var sourceRow in sourceRound.Rows.OrderBy(row => row.RowIndex))

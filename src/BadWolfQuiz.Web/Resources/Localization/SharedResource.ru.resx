@@ -2607,4 +2607,28 @@
   <data name="QuestionType_AllPlayerMultipleChoice" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="Label_WagerMode" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="WagerMode_Normal" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="WagerMode_AnonymousShared" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_UseRandomAnonymousSharedWagerQuestions" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RandomAnonymousSharedWagerDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_RandomAnonymousSharedWagerQuestionCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_InvalidRandomAnonymousSharedWagerCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_InvalidCombinedRandomWagerCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
 </root>

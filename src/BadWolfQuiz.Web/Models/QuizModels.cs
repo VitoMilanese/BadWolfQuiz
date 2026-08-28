@@ -176,6 +176,8 @@ public sealed class QuizRound
     public BuzzActivationMode DefaultBuzzMode { get; set; } = BuzzActivationMode.Manual;
     public bool UseRandomWagerQuestions { get; set; }
     public int RandomWagerQuestionCount { get; set; }
+    public bool UseRandomAnonymousSharedWagerQuestions { get; set; }
+    public int RandomAnonymousSharedWagerQuestionCount { get; set; }
 
     public Quiz Quiz { get; set; } = null!;
     public ICollection<QuizRoundRow> Rows { get; set; } = new List<QuizRoundRow>();

@@ -84,6 +84,14 @@ public sealed class DatabaseMigrationServiceTests
             "RandomWagerQuestionCount"));
         Assert.True(await ColumnExistsAsync(
             connection,
+            "QuizRounds",
+            "UseRandomAnonymousSharedWagerQuestions"));
+        Assert.True(await ColumnExistsAsync(
+            connection,
+            "QuizRounds",
+            "RandomAnonymousSharedWagerQuestionCount"));
+        Assert.True(await ColumnExistsAsync(
+            connection,
             "QuizQuestions",
             "ExcludeFromRandomWagerSelection"));
 

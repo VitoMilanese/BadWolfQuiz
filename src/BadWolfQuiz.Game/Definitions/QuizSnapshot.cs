@@ -129,7 +129,9 @@ public sealed class QuizRoundSnapshot
         bool useRandomWagerQuestions = false,
         int randomWagerQuestionCount = 0,
         IEnumerable<ContentBlockSnapshot>? descriptionBlocks = null,
-        IEnumerable<QuizCategoryIntroSnapshot>? categoryIntros = null)
+        IEnumerable<QuizCategoryIntroSnapshot>? categoryIntros = null,
+        bool useRandomAnonymousSharedWagerQuestions = false,
+        int randomAnonymousSharedWagerQuestionCount = 0)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceRoundId);
         ArgumentOutOfRangeException.ThrowIfNegative(sortOrder);
@@ -148,9 +150,13 @@ public sealed class QuizRoundSnapshot
         }
 
         ArgumentOutOfRangeException.ThrowIfNegative(randomWagerQuestionCount);
+        ArgumentOutOfRangeException.ThrowIfNegative(
+            randomAnonymousSharedWagerQuestionCount);
 
         var eligibleQuestionCount = questionList.Count(question =>
             question.IsEligibleForRandomWagerSelection);
+        var eligibleAnonymousSharedQuestionCount = questionList.Count(question =>
+            question.IsEligibleForRandomAnonymousSharedWagerSelection);
 
         if (useRandomWagerQuestions &&
             randomWagerQuestionCount > eligibleQuestionCount)
@@ -158,6 +164,27 @@ public sealed class QuizRoundSnapshot
             throw new ArgumentOutOfRangeException(
                 nameof(randomWagerQuestionCount),
                 "Random wager question count must be between zero and the number of eligible questions.");
+        }
+
+        if (useRandomAnonymousSharedWagerQuestions &&
+            randomAnonymousSharedWagerQuestionCount >
+                eligibleAnonymousSharedQuestionCount)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(randomAnonymousSharedWagerQuestionCount),
+                "Random anonymous shared wager question count must be between zero and the number of eligible standard questions.");
+        }
+
+        var requestedRandomWagerCount =
+            (useRandomWagerQuestions ? randomWagerQuestionCount : 0) +
+            (useRandomAnonymousSharedWagerQuestions
+                ? randomAnonymousSharedWagerQuestionCount
+                : 0);
+        if (requestedRandomWagerCount > eligibleQuestionCount)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(randomAnonymousSharedWagerQuestionCount),
+                "Normal and anonymous random wager questions must fit in the eligible question pool without overlap.");
         }
 
         var categoryIntroList = (categoryIntros ?? [])
@@ -176,6 +203,10 @@ public sealed class QuizRoundSnapshot
         SortOrder = sortOrder;
         UseRandomWagerQuestions = useRandomWagerQuestions;
         RandomWagerQuestionCount = randomWagerQuestionCount;
+        UseRandomAnonymousSharedWagerQuestions =
+            useRandomAnonymousSharedWagerQuestions;
+        RandomAnonymousSharedWagerQuestionCount =
+            randomAnonymousSharedWagerQuestionCount;
         DescriptionBlocks = (descriptionBlocks ?? [])
             .OrderBy(block => block.SortOrder)
             .ToArray();
@@ -192,6 +223,10 @@ public sealed class QuizRoundSnapshot
     public bool UseRandomWagerQuestions { get; }
 
     public int RandomWagerQuestionCount { get; }
+
+    public bool UseRandomAnonymousSharedWagerQuestions { get; }
+
+    public int RandomAnonymousSharedWagerQuestionCount { get; }
 
     public IReadOnlyList<ContentBlockSnapshot> DescriptionBlocks { get; }
 
@@ -391,6 +426,11 @@ public sealed class QuizQuestionSnapshot
             QuestionPresentationType.FourClues and not
             QuestionPresentationType.HostMultipleChoice and not
             QuestionPresentationType.AllPlayerPeerRatedText;
+
+    public bool IsEligibleForRandomAnonymousSharedWagerSelection =>
+        IsEligibleForRandomWagerSelection &&
+        QuestionWagerModes.GetContentPresentationType(PresentationType) ==
+            QuestionPresentationType.Standard;
 
     public string CategoryTitle { get; }
 

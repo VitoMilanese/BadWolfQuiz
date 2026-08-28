@@ -108,7 +108,9 @@ public sealed class QuizPackageService(QuizDbContext db)
                                 .ToArray(),
                             category.DescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray()))
                         .ToArray(),
-                    round.DescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray()))
+                    round.DescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
+                    round.UseRandomAnonymousSharedWagerQuestions,
+                    round.RandomAnonymousSharedWagerQuestionCount))
                     .ToArray(),
                 quiz.FinalQuestionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                 quiz.FinalAnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
@@ -214,7 +216,11 @@ public sealed class QuizPackageService(QuizDbContext db)
                 DefaultTimeLimitSeconds = sourceRound.DefaultTimeLimitSeconds,
                 DefaultBuzzMode = sourceRound.DefaultBuzzMode,
                 UseRandomWagerQuestions = sourceRound.UseRandomWagerQuestions,
-                RandomWagerQuestionCount = sourceRound.RandomWagerQuestionCount
+                RandomWagerQuestionCount = sourceRound.RandomWagerQuestionCount,
+                UseRandomAnonymousSharedWagerQuestions =
+                    sourceRound.UseRandomAnonymousSharedWagerQuestions,
+                RandomAnonymousSharedWagerQuestionCount =
+                    sourceRound.RandomAnonymousSharedWagerQuestionCount
             };
             foreach (var sourceBlock in sourceRound.DescriptionBlocks ?? [])
             {
@@ -333,6 +339,7 @@ public sealed class QuizPackageService(QuizDbContext db)
         foreach (var round in package.Rounds)
         {
             if (round.RandomWagerQuestionCount < 0 ||
+                round.RandomAnonymousSharedWagerQuestionCount < 0 ||
                 round.Rows.Select(row => row.RowIndex).Distinct().Count() != round.Rows.Length ||
                 round.Categories.Select(category => category.SortOrder).Distinct().Count() != round.Categories.Length)
             {
@@ -341,7 +348,8 @@ public sealed class QuizPackageService(QuizDbContext db)
             foreach (var question in round.Categories.SelectMany(category => category.Questions))
             {
                 if (!Enum.IsDefined(question.BuzzModeOverride) ||
-                    !Enum.IsDefined(question.PresentationType) ||
+                    (!Enum.IsDefined(question.PresentationType) &&
+                     !QuestionWagerModes.IsAnonymousShared(question.PresentationType)) ||
                     question.PresentationType == QuestionPresentationType.FourClues &&
                         (question.IsSpecial || question.QuestionBlocks.Length != 4))
                 {
@@ -397,7 +405,9 @@ public sealed class QuizPackageService(QuizDbContext db)
         string Title, int SortOrder, int DefaultTimeLimitSeconds,
         BuzzActivationMode DefaultBuzzMode, bool UseRandomWagerQuestions,
         int RandomWagerQuestionCount, RowData[] Rows, CategoryData[] Categories,
-        BlockData[]? DescriptionBlocks = null);
+        BlockData[]? DescriptionBlocks = null,
+        bool UseRandomAnonymousSharedWagerQuestions = false,
+        int RandomAnonymousSharedWagerQuestionCount = 0);
     private sealed record RowData(int RowIndex, int Points);
     private sealed record CategoryData(
         string Title, int SortOrder, QuestionData[] Questions,

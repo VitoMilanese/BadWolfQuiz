@@ -1,3 +1,4 @@
+using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Models;
@@ -108,6 +109,10 @@ public sealed class EditorModel(
         public bool UseRandomWagerQuestions { get; set; }
 
         public int RandomWagerQuestionCount { get; set; }
+
+        public bool UseRandomAnonymousSharedWagerQuestions { get; set; }
+
+        public int RandomAnonymousSharedWagerQuestionCount { get; set; }
 
         public int QuestionCount { get; set; }
 
@@ -374,6 +379,10 @@ public sealed class EditorModel(
             UseRandomWagerQuestions = selectedRound.UseRandomWagerQuestions,
             RandomWagerQuestionCount =
                 selectedRound.RandomWagerQuestionCount,
+            UseRandomAnonymousSharedWagerQuestions =
+                selectedRound.UseRandomAnonymousSharedWagerQuestions,
+            RandomAnonymousSharedWagerQuestionCount =
+                selectedRound.RandomAnonymousSharedWagerQuestionCount,
             QuestionCount = selectedRound.Rows.Count,
             CategoryCount = selectedRound.Categories.Count,
             Rows = selectedRound.Rows
@@ -1085,42 +1094,77 @@ public sealed class EditorModel(
             orderedCategories.Add(category);
         }
 
-        var eligibleQuestionCount = round.Categories
+        var eligibleQuestions = round.Categories
             .Where(category => !categoriesToRemove.Contains(category))
             .SelectMany(category => category.Questions)
-            .Count(question =>
+            .Where(question =>
                 question.RowIndex <= RoundRows.QuestionCount &&
-                !question.ExcludeFromRandomWagerSelection);
+                !question.ExcludeFromRandomWagerSelection)
+            .ToList();
+        var eligibleQuestionCount = eligibleQuestions.Count;
+        var eligibleAnonymousSharedQuestionCount = eligibleQuestions.Count(
+            question => QuestionWagerModes.GetContentPresentationType(
+                question.PresentationType) == QuestionPresentationType.Standard);
 
         if (RoundRows.UseRandomWagerQuestions &&
             (RoundRows.RandomWagerQuestionCount < 0 ||
              RoundRows.RandomWagerQuestionCount > eligibleQuestionCount))
         {
-            if (IsAjaxRequest() && !play)
-            {
-                return BadRequest(new
-                {
-                    success = false,
-                    error = localizer[
-                        "QuizEditor_InvalidRandomWagerCount",
-                        eligibleQuestionCount].Value
-                });
-            }
-            TempData["ErrorMessage"] = localizer[
+            return RandomWagerValidationError(
                 "QuizEditor_InvalidRandomWagerCount",
-                eligibleQuestionCount].Value;
+                eligibleQuestionCount);
+        }
 
-            return RedirectToPage(new
-            {
-                id = quiz.Id,
-                selectedRoundId = round.Id
-            });
+        if (RoundRows.UseRandomAnonymousSharedWagerQuestions &&
+            (RoundRows.RandomAnonymousSharedWagerQuestionCount < 0 ||
+             RoundRows.RandomAnonymousSharedWagerQuestionCount >
+                eligibleAnonymousSharedQuestionCount))
+        {
+            return RandomWagerValidationError(
+                "QuizEditor_InvalidRandomAnonymousSharedWagerCount",
+                eligibleAnonymousSharedQuestionCount);
+        }
+
+        var requestedRandomWagerCount =
+            (RoundRows.UseRandomWagerQuestions
+                ? RoundRows.RandomWagerQuestionCount
+                : 0) +
+            (RoundRows.UseRandomAnonymousSharedWagerQuestions
+                ? RoundRows.RandomAnonymousSharedWagerQuestionCount
+                : 0);
+        if (requestedRandomWagerCount > eligibleQuestionCount)
+        {
+            return RandomWagerValidationError(
+                "QuizEditor_InvalidCombinedRandomWagerCount",
+                eligibleQuestionCount);
         }
 
         round.UseRandomWagerQuestions =
             RoundRows.UseRandomWagerQuestions;
         round.RandomWagerQuestionCount =
             Math.Max(0, RoundRows.RandomWagerQuestionCount);
+        round.UseRandomAnonymousSharedWagerQuestions =
+            RoundRows.UseRandomAnonymousSharedWagerQuestions;
+        round.RandomAnonymousSharedWagerQuestionCount =
+            Math.Max(0, RoundRows.RandomAnonymousSharedWagerQuestionCount);
+
+        IActionResult RandomWagerValidationError(
+            string resourceKey,
+            int maximum)
+        {
+            var error = localizer[resourceKey, maximum].Value;
+            if (IsAjaxRequest() && !play)
+            {
+                return BadRequest(new { success = false, error });
+            }
+
+            TempData["ErrorMessage"] = error;
+            return RedirectToPage(new
+            {
+                id = quiz.Id,
+                selectedRoundId = round.Id
+            });
+        }
 
         foreach (var submittedRow in submittedRows)
         {

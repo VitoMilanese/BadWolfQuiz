@@ -8,9 +8,9 @@ Normal wager questions remain unchanged.
 
 ## Configuration
 
-The question editor exposes **Anonymous shared wager** as a schema-compatible wager mode. A question can be marked special explicitly, or the existing per-round random wager selection can turn an eligible question using this mode into a wager question at runtime.
+For a regular question marked as a wager question, Question Editor exposes **Wager mode** after the wager checkboxes and before the buzzer-mode setting. The available modes are **Normal wager** and **Anonymous shared wager**. The internal presentation-type marker used for persistence is not shown as a question type.
 
-A question configured with the shared-wager mode but not selected as a special/random wager continues to behave as a normal single-player question.
+Round settings have two independent random-wager controls: the existing normal random wager count and a separate anonymous-shared random wager count. When either random mode is enabled, runtime wager positions are selected for that game. Anonymous-shared positions are reserved first and normal random wagers are selected from the remaining eligible positions, so the two random modes can never select the same question.
 
 ## Contribution rules
 

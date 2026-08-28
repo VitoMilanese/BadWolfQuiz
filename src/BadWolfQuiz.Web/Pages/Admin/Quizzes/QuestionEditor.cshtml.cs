@@ -47,8 +47,11 @@ public sealed class QuestionEditorModel(
             return NotFound();
         }
 
-        var presentationType =
+        var storedPresentationType =
             AllPlayerQuestionCompatibility.ResolveStoredPresentationType(question);
+        var wagerMode = QuestionWagerModes.GetMode(storedPresentationType);
+        var presentationType =
+            QuestionWagerModes.GetContentPresentationType(storedPresentationType);
 
         Input = new InputModel
         {
@@ -56,6 +59,7 @@ public sealed class QuestionEditorModel(
             QuizId = question.Category.Round.QuizId,
             RoundId = question.Category.Round.Id,
             IsSpecial = question.IsSpecial,
+            WagerMode = wagerMode,
             PresentationType = presentationType,
             AllPlayerMode = AllPlayerQuestionCompatibility.GetMode(
                 presentationType),
@@ -126,6 +130,10 @@ public sealed class QuestionEditorModel(
             AllPlayerQuestionCompatibility.ResolvePostedPresentationType(
                 Input.PresentationType,
                 Input.AllPlayerMode);
+        if (Input.PresentationType != QuestionPresentationType.Standard)
+        {
+            Input.WagerMode = QuestionWagerMode.Normal;
+        }
 
         NormalizeAnswerOptionsStructure(
             Input.PresentationType,
@@ -199,7 +207,9 @@ public sealed class QuestionEditorModel(
         var answerLayout = GetAnswerOptionsLayout();
         var answerOptionSet = answerLayout.Options.ToHashSet();
 
-        question.PresentationType = Input.PresentationType;
+        question.PresentationType = QuestionWagerModes.Apply(
+            Input.PresentationType,
+            Input.IsSpecial ? Input.WagerMode : QuestionWagerMode.Normal);
         question.IsSpecial =
             Input.PresentationType != QuestionPresentationType.FourClues &&
             Input.PresentationType != QuestionPresentationType.HostMultipleChoice &&
@@ -710,6 +720,9 @@ public sealed class QuestionEditorModel(
 
         [Display(Name = "Label_SpecialQuestion")]
         public bool IsSpecial { get; set; }
+
+        [Display(Name = "Label_WagerMode")]
+        public QuestionWagerMode WagerMode { get; set; }
 
         [Display(Name = "Label_QuestionType")]
         public QuestionPresentationType PresentationType { get; set; }
