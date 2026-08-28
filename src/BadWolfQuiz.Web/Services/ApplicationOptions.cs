@@ -83,6 +83,22 @@ public sealed class ActiveGameOptions
     public bool IsValid => ResumeAvailabilityDays is >= 1 and <= 3650;
 }
 
+public sealed class ProjectOptions
+{
+    public const string SectionName = "Project";
+    public string? GitHubUrl { get; set; }
+
+    public string? GetGitHubUrl() => ConfiguredExternalUrl.Normalize(GitHubUrl);
+}
+
+public sealed class DiscordInviteOptions
+{
+    public const string SectionName = "Discord";
+    public string? InviteUrl { get; set; }
+
+    public string? GetInviteUrl() => ConfiguredExternalUrl.Normalize(InviteUrl);
+}
+
 public sealed class FooterOptions
 {
     public const string SectionName = "Footer";
@@ -136,4 +152,19 @@ public sealed class MediaArchiveOptions
         MaximumQuizzesPerRun > 0 &&
         DeleteArchiveCopyAfterRestoreDays >= 0 &&
         OrphanRetentionDays >= 0;
+}
+
+internal static class ConfiguredExternalUrl
+{
+    public static string? Normalize(string? value)
+    {
+        var normalized = value?.Trim();
+        if (!Uri.TryCreate(normalized, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp))
+        {
+            return null;
+        }
+
+        return normalized;
+    }
 }

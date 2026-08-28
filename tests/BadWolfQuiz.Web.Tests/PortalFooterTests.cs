@@ -45,9 +45,9 @@ public sealed class PortalFooterTests
     public void One_contributor_uses_the_only_index_without_selecting_randomly()
     {
         var selectorCalled = false;
-        var model = PortalFooterViewComponent.CreateViewModel(
+        var model = CreateFooterViewModel(
             new FooterOptions { Contributors = ["Alice"] },
-            _ =>
+            selector: _ =>
             {
                 selectorCalled = true;
                 return 0;
@@ -61,9 +61,9 @@ public sealed class PortalFooterTests
     public void Multiple_contributors_use_the_selected_random_initial_index()
     {
         var receivedCount = 0;
-        var model = PortalFooterViewComponent.CreateViewModel(
+        var model = CreateFooterViewModel(
             new FooterOptions { Contributors = ["Alice", "Bob", "Carol"] },
-            count =>
+            selector: count =>
             {
                 receivedCount = count;
                 return 2;
@@ -82,28 +82,39 @@ public sealed class PortalFooterTests
     [InlineData("/donate")]
     public void Invalid_donation_url_is_hidden(string? value)
     {
-        var model = PortalFooterViewComponent.CreateViewModel(
-            new FooterOptions { DonationUrl = value },
-            _ => 0);
+        var model = CreateFooterViewModel(
+            new FooterOptions { DonationUrl = value });
 
         Assert.Null(model.DonationUrl);
         Assert.Null(model.DonationQrCodeDataUrl);
     }
 
     [Fact]
-    public void Github_star_link_is_available_without_donation_configuration()
+    public void Configured_github_star_link_uses_project_url()
     {
-        var model = PortalFooterViewComponent.CreateViewModel(
+        const string gitHubUrl = "https://github.com/VitoMilanese/BadWolfQuiz";
+        var model = CreateFooterViewModel(
             new FooterOptions(),
-            _ => 0);
+            new ProjectOptions { GitHubUrl = $"  {gitHubUrl}  " });
 
         Assert.Null(model.DonationUrl);
-        Assert.Equal(
-            PortalFooterViewComponent.GitHubRepositoryUrl,
-            model.GitHubRepositoryUrl);
-        Assert.Equal(
-            "https://github.com/VitoMilanese/BadWolfQuiz",
-            model.GitHubRepositoryUrl);
+        Assert.Equal(gitHubUrl, model.GitHubRepositoryUrl);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("not a url")]
+    [InlineData("javascript:alert(1)")]
+    [InlineData("/relative")]
+    public void Missing_or_invalid_github_url_hides_star_link(string? value)
+    {
+        var model = CreateFooterViewModel(
+            new FooterOptions(),
+            new ProjectOptions { GitHubUrl = value });
+
+        Assert.Null(model.GitHubRepositoryUrl);
     }
 
     [Theory]
@@ -149,13 +160,25 @@ public sealed class PortalFooterTests
     }
 
     [Fact]
+    public void Footer_renders_github_cta_only_when_project_url_is_available()
+    {
+        var markup = File.ReadAllText(FindFooterView());
+
+        Assert.Contains("@if (Model.GitHubRepositoryUrl is not null)", markup, StringComparison.Ordinal);
+        Assert.Contains("href=\"@Model.GitHubRepositoryUrl\"", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "https://github.com/VitoMilanese/BadWolfQuiz",
+            markup,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Valid_donation_url_is_normalized_and_has_a_generated_qr_code()
     {
         const string donationUrl = "https://example.com/support?project=badwolf";
 
-        var model = PortalFooterViewComponent.CreateViewModel(
-            new FooterOptions { DonationUrl = $"  {donationUrl}  " },
-            _ => 0);
+        var model = CreateFooterViewModel(
+            new FooterOptions { DonationUrl = $"  {donationUrl}  " });
 
         Assert.Equal(donationUrl, model.DonationUrl);
         Assert.StartsWith("data:image/png;base64,", model.DonationQrCodeDataUrl);
@@ -200,6 +223,15 @@ public sealed class PortalFooterTests
             }
         }
     }
+
+    private static PortalFooterViewModel CreateFooterViewModel(
+        FooterOptions footerOptions,
+        ProjectOptions? projectOptions = null,
+        Func<int, int>? selector = null)
+        => PortalFooterViewComponent.CreateViewModel(
+            footerOptions,
+            projectOptions ?? new ProjectOptions(),
+            selector ?? (_ => 0));
 
     private static string FindFooterView()
     {

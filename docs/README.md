@@ -15,6 +15,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Reverse-proxy upload limits](operations/reverse-proxy-upload-limits.md)
 - [Quiz media archive operations](operations/media-archive.md)
 - [SEO indexing operations](operations/seo-indexing.md)
+- [External project links](operations/external-project-links.md)
 
 ## Features
 
