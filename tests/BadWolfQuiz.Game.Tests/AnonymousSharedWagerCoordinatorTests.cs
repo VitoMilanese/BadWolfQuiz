@@ -31,7 +31,7 @@ public sealed class AnonymousSharedWagerCoordinatorTests
         }
 
         session.Start();
-        session.ChangeActivePlayer(answering.Id);
+        session.SetActivePlayer(answering.Id);
         session.SelectQuestion(100);
 
         var now = DateTimeOffset.UtcNow;
@@ -71,7 +71,7 @@ public sealed class AnonymousSharedWagerCoordinatorTests
         var funder = session.AddPlayer("Funder");
         session.AdjustPlayerScore(funder.Id, 100);
         session.Start();
-        session.ChangeActivePlayer(answering.Id);
+        session.SetActivePlayer(answering.Id);
         session.SelectQuestion(100);
 
         var now = DateTimeOffset.UtcNow;
@@ -99,7 +99,7 @@ public sealed class AnonymousSharedWagerCoordinatorTests
         var session = CreateSession(200);
         var answering = session.AddPlayer("Solo");
         session.Start();
-        session.ChangeActivePlayer(answering.Id);
+        session.SetActivePlayer(answering.Id);
         session.SelectQuestion(100);
 
         var state = AnonymousSharedWagerCoordinator.Start(
