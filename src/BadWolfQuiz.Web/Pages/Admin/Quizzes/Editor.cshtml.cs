@@ -832,8 +832,6 @@ public sealed class EditorModel(
     public async Task<IActionResult> OnPostDeleteQuestionAsync()
     {
         var question = await db.QuizQuestions
-            .Include(x => x.QuestionBlocks)
-            .Include(x => x.AnswerBlocks)
             .Include(x => x.Category)
                 .ThenInclude(x => x.Round)
                     .ThenInclude(x => x.Quiz)
@@ -846,8 +844,15 @@ public sealed class EditorModel(
             return NotFound();
         }
 
-        db.QuestionContentBlocks.RemoveRange(question.QuestionBlocks);
-        db.AnswerContentBlocks.RemoveRange(question.AnswerBlocks);
+        await using var transaction = await db.Database.BeginTransactionAsync();
+
+        await db.QuestionContentBlocks
+            .Where(x => x.QuizQuestionId == question.Id)
+            .ExecuteDeleteAsync();
+        await db.AnswerContentBlocks
+            .Where(x => x.QuizQuestionId == question.Id)
+            .ExecuteDeleteAsync();
+
         db.QuestionContentBlocks.Add(new QuestionContentBlock
         {
             QuizQuestionId = question.Id,
@@ -860,10 +865,13 @@ public sealed class EditorModel(
             BlockType = ContentBlockType.Text,
             SortOrder = 1
         });
-        question.UpdatedAtUtc = DateTime.UtcNow;
-        question.Category.Round.Quiz.UpdatedAtUtc = DateTime.UtcNow;
+
+        var now = DateTime.UtcNow;
+        question.UpdatedAtUtc = now;
+        question.Category.Round.Quiz.UpdatedAtUtc = now;
 
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         if (IsAjaxRequest())
         {
@@ -887,8 +895,6 @@ public sealed class EditorModel(
     public async Task<IActionResult> OnPostDeleteFinalQuestionAsync()
     {
         var quiz = await db.Quizzes
-            .Include(x => x.FinalQuestionBlocks)
-            .Include(x => x.FinalAnswerBlocks)
             .SingleOrDefaultAsync(x => x.Id == DeleteFinalQuestion.QuizId);
 
         if (quiz is null)
@@ -896,11 +902,19 @@ public sealed class EditorModel(
             return NotFound();
         }
 
-        db.FinalQuestionContentBlocks.RemoveRange(quiz.FinalQuestionBlocks);
-        db.FinalAnswerContentBlocks.RemoveRange(quiz.FinalAnswerBlocks);
+        await using var transaction = await db.Database.BeginTransactionAsync();
+
+        await db.FinalQuestionContentBlocks
+            .Where(x => x.QuizId == quiz.Id)
+            .ExecuteDeleteAsync();
+        await db.FinalAnswerContentBlocks
+            .Where(x => x.QuizId == quiz.Id)
+            .ExecuteDeleteAsync();
+
         quiz.UpdatedAtUtc = DateTime.UtcNow;
 
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         TempData["SuccessMessage"] =
             localizer["Message_FinalQuestionDeleted"].Value;
