@@ -20,7 +20,7 @@ public sealed class AnonymousSharedWagerEditorRegressionTests
             "QuestionWagerModes.cs"));
 
         Assert.Contains("Input.PresentationType", tagHelper);
-        Assert.Contains("<option value=\"6\"", tagHelper);
+        Assert.Contains("<option value=\\\"6\\\"", tagHelper);
         Assert.Contains("QuestionWagerModes.IsAnonymousShared", tagHelper);
         Assert.Contains("(QuestionPresentationType)6", modes);
     }
