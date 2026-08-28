@@ -430,6 +430,10 @@
                     dragHandle.draggable = true;
                     dragHandle.removeAttribute("aria-hidden");
                 }
+                const remove = card.querySelector(".content-block-remove-button");
+                if (remove instanceof HTMLButtonElement) {
+                    remove.disabled = false;
+                }
                 answerList.insertBefore(card, marker);
             }
             marker.remove();
