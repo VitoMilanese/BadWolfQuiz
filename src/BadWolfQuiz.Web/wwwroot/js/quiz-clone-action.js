@@ -144,6 +144,41 @@
         actions.append(cancel, submit);
         form.appendChild(actions);
 
+        const setBusyState = busyState => {
+            if (busyState) {
+                form.dataset.busyLocked = "true";
+            } else {
+                delete form.dataset.busyLocked;
+            }
+
+            dialog.querySelectorAll("button").forEach(button => {
+                button.disabled = busyState;
+            });
+            nameInput.readOnly = busyState;
+            if (busyState) {
+                nameInput.setAttribute("aria-disabled", "true");
+            } else {
+                nameInput.removeAttribute("aria-disabled");
+            }
+        };
+
+        form.addEventListener("submit", event => {
+            if (form.dataset.busyLocked === "true") {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                return;
+            }
+
+            setBusyState(true);
+            window.BadWolfBusy?.show();
+        });
+
+        const closeDialog = () => {
+            if (form.dataset.busyLocked !== "true") {
+                dialog.close();
+            }
+        };
+
         dialog.setAttribute("aria-labelledby", title.id);
         dialog.appendChild(form);
         document.body.appendChild(dialog);
@@ -151,12 +186,18 @@
         dialog.querySelectorAll("[data-close-clone-dialog]")
             .forEach(button => button.addEventListener(
                 "click",
-                () => dialog.close()));
-        dialog.addEventListener("click", event => {
-            if (event.target === dialog) {
-                dialog.close();
+                closeDialog));
+        dialog.addEventListener("cancel", event => {
+            if (form.dataset.busyLocked === "true") {
+                event.preventDefault();
             }
         });
+        dialog.addEventListener("click", event => {
+            if (event.target === dialog) {
+                closeDialog();
+            }
+        });
+        window.addEventListener("pageshow", () => setBusyState(false));
 
         return dialog;
     };
