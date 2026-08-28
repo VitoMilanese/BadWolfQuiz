@@ -1,6 +1,9 @@
 (() => {
-    const root = document.querySelector('.host-game-board');
-    if (!root) return;
+    if (window.BadWolfAnonymousSharedWagerHostStarted) return;
+    window.BadWolfAnonymousSharedWagerHostStarted = true;
+
+    const getRoot = () => document.querySelector('.host-game-board');
+    if (!getRoot()) return;
 
     const match = location.pathname.match(/\/Admin\/Games\/Lobby\/([0-9a-f-]{36})/i);
     if (!match) return;
@@ -22,20 +25,35 @@
 
     const suppressNormalControls = suppress => {
         document.querySelectorAll('.question-judge-actions, .question-wager-form').forEach(element => {
-            if (!element.classList.contains('anonymous-shared-wager-judge-actions')) {
-                element.hidden = suppress;
+            if (element.classList.contains('anonymous-shared-wager-judge-actions')) return;
+            element.hidden = suppress;
+            if (suppress) {
+                element.style.setProperty('display', 'none', 'important');
+            } else {
+                element.style.removeProperty('display');
             }
         });
     };
 
     const ensurePanel = () => {
+        const root = getRoot();
+        if (!root) return null;
         if (panel?.isConnected) return panel;
+
+        panel = document.querySelector('.anonymous-shared-wager-host-panel');
+        if (panel?.isConnected) return panel;
+
         panel = document.createElement('section');
         panel.className = 'anonymous-shared-wager-host-panel';
         panel.setAttribute('aria-live', 'polite');
         const target = root.querySelector('.current-question-summary') || root;
         target.append(panel);
         return panel;
+    };
+
+    const removePanel = () => {
+        document.querySelectorAll('.anonymous-shared-wager-host-panel').forEach(item => item.remove());
+        panel = null;
     };
 
     const force = async playerId => {
@@ -46,8 +64,7 @@
 
     const settle = async isCorrect => {
         await api('Settle', 'POST', { isCorrect });
-        panel?.remove();
-        panel = null;
+        removePanel();
         suppressNormalControls(false);
         lastKey = '';
         lastPhase = null;
@@ -56,8 +73,7 @@
 
     const render = status => {
         if (!status.active) {
-            panel?.remove();
-            panel = null;
+            removePanel();
             suppressNormalControls(false);
             lastKey = '';
             lastPhase = null;
@@ -65,6 +81,7 @@
         }
 
         const target = ensurePanel();
+        if (!target) return;
         const key = JSON.stringify({
             phase: status.phase,
             participants: status.participants,
@@ -134,7 +151,7 @@
                 !refreshingForActivation) {
                 refreshingForActivation = true;
                 await window.BadWolfHostGameplay?.refresh?.();
-                panel = null;
+                removePanel();
                 lastKey = '';
                 refreshingForActivation = false;
             }

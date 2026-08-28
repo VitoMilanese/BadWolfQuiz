@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class AnonymousSharedWagerBuzzerRegressionTests
 {
     [Fact]
-    public void Reload_during_collection_suppresses_buzzer_on_server()
+    public void Reload_during_collection_or_answering_suppresses_buzzer_on_server()
     {
         var root = FindRepositoryRoot();
         var source = File.ReadAllText(Path.Combine(
@@ -15,6 +15,7 @@ public sealed class AnonymousSharedWagerBuzzerRegressionTests
 
         Assert.Contains("player-buzzer", source);
         Assert.Contains("RuntimeQuestionStatus.AwaitingWager", source);
+        Assert.Contains("RuntimeQuestionStatus.Active", source);
         Assert.Contains("QuestionWagerModes.IsAnonymousShared", source);
         Assert.Contains("output.SuppressOutput();", source);
     }

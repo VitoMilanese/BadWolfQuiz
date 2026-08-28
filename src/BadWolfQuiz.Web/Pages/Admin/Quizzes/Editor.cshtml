@@ -211,7 +211,8 @@
                 </span>
             </label>
 
-            <div id="random-wager-count-setting">
+            <div id="random-wager-count-setting"
+                 style="@(!Model.RoundRows.UseRandomWagerQuestions ? "display: none !important;" : null)">
                 <label asp-for="RoundRows.RandomWagerQuestionCount">
                     @Localizer["QuizEditor_RandomWagerQuestionCount"]
                 </label>
@@ -233,7 +234,8 @@
                 </span>
             </label>
 
-            <div id="random-anonymous-shared-wager-count-setting">
+            <div id="random-anonymous-shared-wager-count-setting"
+                 style="@(!Model.RoundRows.UseRandomAnonymousSharedWagerQuestions ? "display: none !important;" : null)">
                 <label asp-for="RoundRows.RandomAnonymousSharedWagerQuestionCount">
                     @Localizer["QuizEditor_RandomAnonymousSharedWagerQuestionCount"]
                 </label>
@@ -1164,15 +1166,26 @@
             document.getElementById(
                 "random-anonymous-shared-wager-count-setting");
 
+        const setRandomWagerSettingVisible = (setting, visible) => {
+            if (!setting) {
+                return;
+            }
+
+            setting.hidden = !visible;
+            if (visible) {
+                setting.style.removeProperty("display");
+            } else {
+                setting.style.setProperty("display", "none", "important");
+            }
+        };
+
         function updateRandomWagerSettings() {
-            if (randomWagerCountSetting) {
-                randomWagerCountSetting.hidden =
-                    !(randomWagerCheckbox?.checked ?? false);
-            }
-            if (randomAnonymousSharedWagerCountSetting) {
-                randomAnonymousSharedWagerCountSetting.hidden =
-                    !(randomAnonymousSharedWagerCheckbox?.checked ?? false);
-            }
+            setRandomWagerSettingVisible(
+                randomWagerCountSetting,
+                randomWagerCheckbox?.checked ?? false);
+            setRandomWagerSettingVisible(
+                randomAnonymousSharedWagerCountSetting,
+                randomAnonymousSharedWagerCheckbox?.checked ?? false);
         }
 
         randomWagerCheckbox?.addEventListener(

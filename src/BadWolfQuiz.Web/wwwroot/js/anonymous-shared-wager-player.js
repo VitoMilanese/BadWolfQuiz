@@ -1,4 +1,7 @@
 (() => {
+    if (window.BadWolfAnonymousSharedWagerPlayerStarted) return;
+    window.BadWolfAnonymousSharedWagerPlayerStarted = true;
+
     const root = document.querySelector('.player-lobby[data-game-code][data-player-id]');
     if (!root) return;
 
@@ -21,14 +24,23 @@
     const setBuzzerSuppressed = suppressed => {
         const buzzer = document.getElementById('player-buzzer');
         const buzzerPanel = buzzer?.closest('.player-buzzer-panel');
-        if (buzzerPanel) buzzerPanel.hidden = suppressed;
+        if (buzzerPanel) {
+            buzzerPanel.hidden = suppressed;
+            if (suppressed) {
+                buzzerPanel.style.setProperty('display', 'none', 'important');
+            } else {
+                buzzerPanel.style.removeProperty('display');
+            }
+        }
         if (buzzer) {
-            buzzer.disabled = suppressed || buzzer.disabled;
+            if (suppressed) buzzer.disabled = true;
             buzzer.dataset.anonymousSharedWagerSuppressed = suppressed ? 'true' : 'false';
         }
     };
 
     const ensurePanel = () => {
+        if (panel?.isConnected) return panel;
+        panel = document.querySelector('.anonymous-shared-wager-player-panel');
         if (panel?.isConnected) return panel;
         panel = document.createElement('section');
         panel.className = 'anonymous-shared-wager-player-panel';
@@ -39,7 +51,7 @@
     };
 
     const render = status => {
-        if (!status.active || status.phase !== 'collecting') {
+        if (!status.active) {
             setBuzzerSuppressed(false);
             panel?.remove();
             panel = null;
@@ -47,7 +59,18 @@
             return;
         }
 
+        // Nobody uses the buzzer during an anonymous shared wager. The answering
+        // player was already selected before collection started, and funders never
+        // get an answering attempt for this question.
         setBuzzerSuppressed(true);
+
+        if (status.phase !== 'collecting') {
+            panel?.remove();
+            panel = null;
+            lastKey = '';
+            return;
+        }
+
         const target = ensurePanel();
         const key = `${status.role}:${status.submitted}:${status.maximumShare}`;
         if (key === lastKey) return;
@@ -125,6 +148,6 @@
     };
 
     document.addEventListener('badwolf:player-gameplay-updated', refresh);
-    setInterval(refresh, 1500);
+    setInterval(refresh, 1000);
     refresh();
 })();

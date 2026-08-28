@@ -493,7 +493,9 @@
                 }
 
                 @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager &&
-                    !Model.CurrentQuestion.IsAllPlayerQuestion)
+                    !Model.CurrentQuestion.IsAllPlayerQuestion &&
+                    !BadWolfQuiz.Game.Definitions.QuestionWagerModes.IsAnonymousShared(
+                        Model.CurrentQuestion.PresentationType))
                 {
                     var wagerPlayer = Model.Players.First(
                         player => player.Id == Model.CurrentQuestion.SelectedByPlayerId);
@@ -808,7 +810,11 @@
             @if (Model.CurrentQuestion.Status is BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Selected or
                 BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active)
             {
-                var eligiblePlayers = Model.CurrentQuestion.IsAllPlayerQuestion
+                var isAnonymousSharedWager =
+                    BadWolfQuiz.Game.Definitions.QuestionWagerModes.IsAnonymousShared(
+                        Model.CurrentQuestion.PresentationType);
+                var eligiblePlayers = Model.CurrentQuestion.IsAllPlayerQuestion ||
+                    isAnonymousSharedWager
                     ? Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>()
                     : Model.CurrentQuestion.IsSpecial
                         ? Model.Game.Session.AnswerTimer.Status ==

@@ -3,13 +3,14 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class AnonymousSharedWagerWebRegressionTests
 {
     [Fact]
-    public void Player_surface_suppresses_buzzer_for_entire_collection_phase()
+    public void Player_surface_suppresses_buzzer_for_entire_shared_wager_lifetime()
     {
         var source = ReadWebFile("wwwroot", "js", "anonymous-shared-wager-player.js");
 
-        Assert.Contains("status.phase !== 'collecting'", source);
+        Assert.Contains("if (!status.active)", source);
         Assert.Contains("setBuzzerSuppressed(true);", source);
-        Assert.Contains("buzzerPanel.hidden = suppressed", source);
+        Assert.Contains("style.setProperty('display', 'none', 'important')", source);
+        Assert.Contains("status.phase !== 'collecting'", source);
         Assert.Contains("[0, 25, 50, 75, 100]", source);
         Assert.Contains("maximumShare", source);
     }
@@ -55,6 +56,30 @@ public sealed class AnonymousSharedWagerWebRegressionTests
         Assert.Contains("api('Settle', 'POST'", host);
         Assert.Contains("AnonymousSharedWagerWebStore.ForceFullStake", page);
         Assert.Contains("AnonymousSharedWagerWebStore.Settle", page);
+    }
+
+    [Fact]
+    public void Host_surface_is_singleton_and_server_does_not_render_normal_wager_or_judge_controls()
+    {
+        var host = ReadWebFile("wwwroot", "js", "anonymous-shared-wager-host.js");
+        var lobby = ReadWebFile("Pages", "Admin", "Games", "Lobby.cshtml");
+
+        Assert.Contains("BadWolfAnonymousSharedWagerHostStarted", host);
+        Assert.Contains("document.querySelectorAll('.anonymous-shared-wager-host-panel')", host);
+        Assert.Contains("!BadWolfQuiz.Game.Definitions.QuestionWagerModes.IsAnonymousShared", lobby);
+        Assert.Contains("Model.CurrentQuestion.IsAllPlayerQuestion ||", lobby);
+        Assert.Contains("isAnonymousSharedWager", lobby);
+    }
+
+    [Fact]
+    public void Round_random_wager_count_fields_follow_their_own_checkboxes()
+    {
+        var editor = ReadWebFile("Pages", "Admin", "Quizzes", "Editor.cshtml");
+
+        Assert.Contains("setRandomWagerSettingVisible", editor);
+        Assert.Contains("randomWagerCheckbox?.checked ?? false", editor);
+        Assert.Contains("randomAnonymousSharedWagerCheckbox?.checked ?? false", editor);
+        Assert.Contains("display: none !important;", editor);
     }
 
     [Fact]

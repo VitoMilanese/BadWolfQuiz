@@ -29,7 +29,7 @@ public sealed class AnonymousSharedWagerBuzzerTagHelper(
 
         var game = sessions.Find(code);
         var question = game?.Session.Board.Questions.FirstOrDefault(item =>
-            item.Status == RuntimeQuestionStatus.AwaitingWager &&
+            (item.Status is RuntimeQuestionStatus.AwaitingWager or RuntimeQuestionStatus.Active) &&
             QuestionWagerModes.IsAnonymousShared(item.PresentationType));
 
         if (question is not null)
