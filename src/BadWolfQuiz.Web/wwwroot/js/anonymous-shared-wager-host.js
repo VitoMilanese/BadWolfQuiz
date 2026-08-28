@@ -7,6 +7,8 @@
     const gameId = match[1];
     let panel = null;
     let lastKey = '';
+    let lastPhase = null;
+    let refreshingForActivation = false;
 
     const api = (handler, method = 'GET', data = null) => {
         const params = new URLSearchParams({ handler, gameId });
@@ -18,9 +20,11 @@
         }).then(response => response.ok ? response.json() : Promise.reject(response));
     };
 
-    const suppressNormalJudgment = suppress => {
-        document.querySelectorAll('.question-judge-actions').forEach(form => {
-            form.hidden = suppress;
+    const suppressNormalControls = suppress => {
+        document.querySelectorAll('.question-judge-actions, .question-wager-form').forEach(element => {
+            if (!element.classList.contains('anonymous-shared-wager-judge-actions')) {
+                element.hidden = suppress;
+            }
         });
     };
 
@@ -44,8 +48,9 @@
         await api('Settle', 'POST', { isCorrect });
         panel?.remove();
         panel = null;
-        suppressNormalJudgment(false);
+        suppressNormalControls(false);
         lastKey = '';
+        lastPhase = null;
         await window.BadWolfHostGameplay?.refresh?.();
     };
 
@@ -53,8 +58,9 @@
         if (!status.active) {
             panel?.remove();
             panel = null;
-            suppressNormalJudgment(false);
+            suppressNormalControls(false);
             lastKey = '';
+            lastPhase = null;
             return;
         }
 
@@ -68,13 +74,13 @@
         if (key === lastKey) return;
         lastKey = key;
         target.replaceChildren();
+        suppressNormalControls(true);
 
         const title = document.createElement('h3');
         title.textContent = 'Анонімна спільна ставка';
         target.append(title);
 
         if (status.phase === 'collecting') {
-            suppressNormalJudgment(true);
             const note = document.createElement('p');
             note.textContent = `Ставку для ${status.answeringPlayerName} формують інші гравці. Суми та відсотки приховані.`;
             target.append(note);
@@ -99,7 +105,6 @@
             return;
         }
 
-        suppressNormalJudgment(true);
         const summary = document.createElement('p');
         summary.textContent = `Ставка сформована: ${status.combinedWager}. Відповідає ${status.answeringPlayerName}.`;
         target.append(summary);
@@ -122,7 +127,19 @@
 
     const refresh = async () => {
         try {
-            render(await api('HostStatus'));
+            const status = await api('HostStatus');
+            if (status.active &&
+                status.phase === 'answering' &&
+                lastPhase === 'collecting' &&
+                !refreshingForActivation) {
+                refreshingForActivation = true;
+                await window.BadWolfHostGameplay?.refresh?.();
+                panel = null;
+                lastKey = '';
+                refreshingForActivation = false;
+            }
+            lastPhase = status.active ? status.phase : null;
+            render(status);
         } catch {
             // Keep the normal host surface usable if the private endpoint is unavailable.
         }
