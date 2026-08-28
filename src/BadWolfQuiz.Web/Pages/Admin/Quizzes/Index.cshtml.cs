@@ -2,6 +2,7 @@ using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Services;
+using BadWolfQuiz.Web.TagHelpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,8 @@ public sealed class IndexModel(
         new HashSet<int>();
     public IReadOnlyDictionary<int, QuizRatingSummary> Ratings { get; private set; } =
         new Dictionary<int, QuizRatingSummary>();
+    public IReadOnlyDictionary<int, string> DescriptionLinks { get; private set; } =
+        new Dictionary<int, string>();
     public bool CanDisableAutomaticArchiving => IsMasterHost();
 
     [BindProperty]
@@ -421,6 +424,20 @@ public sealed class IndexModel(
             .Where(x => !x.IsArchived)
             .OrderByDescending(x => x.UpdatedAtUtc)
             .ToListAsync();
+
+        DescriptionLinks = Quizzes.ToDictionary(
+            quiz => quiz.Id,
+            quiz =>
+            {
+                var token = QuizDescriptionLink.CreateToken(
+                    quiz.Id,
+                    quiz.HostId,
+                    quiz.CreatedAtUtc);
+                return SeoHeadTagHelper.BuildAbsolutePathUrl(
+                    Request,
+                    QuizDescriptionLink.BuildPath(quiz.Id, token));
+            });
+
         var quizIds = Quizzes.Select(quiz => quiz.Id).ToArray();
         Ratings = await db.QuizRatings
             .AsNoTracking()
