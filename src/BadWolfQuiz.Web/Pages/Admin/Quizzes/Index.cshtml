@@ -1,6 +1,7 @@
 @page
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.IndexModel
 @inject Microsoft.Extensions.Localization.IStringLocalizer<BadWolfQuiz.Web.Localization.UnfinishedGameResource> UnfinishedGameLocalizer
+@inject Microsoft.Extensions.Localization.IStringLocalizer<BadWolfQuiz.Web.Localization.QuizDescriptionResource> QuizDescriptionLocalizer
 @{
     ViewData["Title"] = Localizer["Menu_Quizzes"];
 }
@@ -194,6 +195,15 @@
                         </button>
                     </form>
 
+                    <button class="action-menu-item"
+                            type="button"
+                            data-copy-quiz-description-link
+                            data-description-url="@Model.DescriptionLinks[quiz.Id]"
+                            data-copy-success="@QuizDescriptionLocalizer["Copied"]"
+                            data-copy-failed="@QuizDescriptionLocalizer["CopyFailed"]">
+                        @QuizDescriptionLocalizer["Action"]
+                    </button>
+
                     @if (hasResumableGame)
                     {
                         <button class="action-menu-item action-menu-danger"
@@ -343,6 +353,7 @@
 </dialog>
 
 @section Scripts {
+<script src="~/js/quiz-description-link.js" asp-append-version="true"></script>
 <script>
 (() => {
     const renameDialog = document.getElementById('renameQuizDialog');

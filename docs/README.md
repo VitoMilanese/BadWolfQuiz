@@ -21,6 +21,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 
 - [Quiz and question editing](features/quiz-editor.md)
 - [Question copying and cloning](features/question-copying.md)
+- [Shareable quiz description links](features/shareable-quiz-descriptions.md)
 - [Host-selected multiple-choice questions](features/host-multiple-choice.md)
 - [Fullscreen busy feedback](features/busy-indicators.md)
 - [Round and category intros](features/round-category-intros.md)

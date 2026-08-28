@@ -37,6 +37,49 @@ public static class SocialPreviewImageRenderer
         DrawWolfMark(canvas, text, panel, panelSecondary, accentBright, background);
         DrawBranding(canvas, isJoin, text, muted, accentBright, highlight);
 
+        return Encode(bitmap);
+    }
+
+    public static byte[] RenderQuizDescription(
+        string title,
+        string? description,
+        double? averageRating,
+        int ratingCount)
+    {
+        var palette = SocialPreviewThemePalette.Resolve(null, null);
+        var background = ParseColor(palette.Background);
+        var panel = ParseColor(palette.Panel);
+        var panelSecondary = ParseColor(palette.PanelSecondary);
+        var text = ParseColor(palette.Text);
+        var muted = ParseColor(palette.MutedText);
+        var accent = ParseColor(palette.Accent);
+        var accentBright = ParseColor(palette.AccentBright);
+
+        using var bitmap = new SKBitmap(new SKImageInfo(
+            Width,
+            Height,
+            SKColorType.Bgra8888,
+            SKAlphaType.Premul));
+        using var canvas = new SKCanvas(bitmap);
+
+        DrawBackground(canvas, background, panelSecondary, accentBright);
+        DrawAccentGeometry(canvas, accent, accentBright);
+        DrawWolfMark(canvas, text, panel, panelSecondary, accentBright, background);
+        DrawQuizDescriptionBranding(
+            canvas,
+            title,
+            description,
+            averageRating,
+            ratingCount,
+            text,
+            muted,
+            accentBright);
+
+        return Encode(bitmap);
+    }
+
+    private static byte[] Encode(SKBitmap bitmap)
+    {
         using var image = SKImage.FromBitmap(bitmap);
         using var encoded = image.Encode(SKEncodedImageFormat.Png, 92);
         return encoded.ToArray();
@@ -285,6 +328,180 @@ public static class SocialPreviewImageRenderer
             Typeface = regularTypeface ?? SKTypeface.Default
         };
         canvas.DrawText("badwolf.buzz", 572, 548, domainPaint);
+    }
+
+    private static void DrawQuizDescriptionBranding(
+        SKCanvas canvas,
+        string title,
+        string? description,
+        double? averageRating,
+        int ratingCount,
+        SKColor text,
+        SKColor muted,
+        SKColor accentBright)
+    {
+        using var boldTypeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold);
+        using var regularTypeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Normal);
+
+        using var eyebrowPaint = new SKPaint
+        {
+            Color = accentBright,
+            IsAntialias = true,
+            TextSize = 28,
+            Typeface = boldTypeface ?? SKTypeface.Default
+        };
+        canvas.DrawText("BAD WOLF QUIZ", 570, 92, eyebrowPaint);
+
+        using var titlePaint = new SKPaint
+        {
+            Color = text,
+            IsAntialias = true,
+            TextSize = 52,
+            Typeface = boldTypeface ?? SKTypeface.Default
+        };
+        var titleBottom = DrawWrappedText(
+            canvas,
+            string.IsNullOrWhiteSpace(title) ? "QUIZ" : title.Trim(),
+            titlePaint,
+            570,
+            158,
+            555,
+            60,
+            3);
+
+        using var dividerPaint = new SKPaint
+        {
+            Color = accentBright,
+            StrokeWidth = 4,
+            IsAntialias = true
+        };
+        var dividerY = Math.Min(titleBottom + 16, 350);
+        canvas.DrawLine(572, dividerY, 1095, dividerY, dividerPaint);
+
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            using var descriptionPaint = new SKPaint
+            {
+                Color = muted,
+                IsAntialias = true,
+                TextSize = 27,
+                Typeface = regularTypeface ?? SKTypeface.Default
+            };
+            DrawWrappedText(
+                canvas,
+                description.Trim(),
+                descriptionPaint,
+                572,
+                dividerY + 46,
+                530,
+                36,
+                3);
+        }
+
+        if (averageRating is { } rating && ratingCount > 0)
+        {
+            using var ratingPaint = new SKPaint
+            {
+                Color = accentBright,
+                IsAntialias = true,
+                TextSize = 27,
+                Typeface = boldTypeface ?? SKTypeface.Default
+            };
+            canvas.DrawText(
+                $"RATING {rating:0.0} / 5  ·  {ratingCount}",
+                572,
+                520,
+                ratingPaint);
+        }
+
+        using var domainPaint = new SKPaint
+        {
+            Color = muted,
+            IsAntialias = true,
+            TextSize = 24,
+            Typeface = regularTypeface ?? SKTypeface.Default
+        };
+        canvas.DrawText("badwolf.buzz", 572, 566, domainPaint);
+    }
+
+    private static float DrawWrappedText(
+        SKCanvas canvas,
+        string value,
+        SKPaint paint,
+        float x,
+        float firstBaseline,
+        float maxWidth,
+        float lineHeight,
+        int maxLines)
+    {
+        var words = value
+            .Replace('\r', ' ')
+            .Replace('\n', ' ')
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (words.Length == 0)
+        {
+            return firstBaseline;
+        }
+
+        var lines = new List<string>();
+        var current = string.Empty;
+        var consumedWords = 0;
+
+        foreach (var word in words)
+        {
+            var candidate = string.IsNullOrEmpty(current) ? word : $"{current} {word}";
+            if (paint.MeasureText(candidate) <= maxWidth || string.IsNullOrEmpty(current))
+            {
+                current = candidate;
+                consumedWords++;
+                continue;
+            }
+
+            lines.Add(FitText(current, paint, maxWidth));
+            if (lines.Count == maxLines)
+            {
+                break;
+            }
+
+            current = word;
+            consumedWords++;
+        }
+
+        if (lines.Count < maxLines && !string.IsNullOrEmpty(current))
+        {
+            lines.Add(FitText(current, paint, maxWidth));
+        }
+
+        if (consumedWords < words.Length && lines.Count > 0)
+        {
+            lines[^1] = FitText(lines[^1] + "…", paint, maxWidth);
+        }
+
+        var baseline = firstBaseline;
+        foreach (var line in lines.Take(maxLines))
+        {
+            canvas.DrawText(line, x, baseline, paint);
+            baseline += lineHeight;
+        }
+
+        return baseline - lineHeight;
+    }
+
+    private static string FitText(string value, SKPaint paint, float maxWidth)
+    {
+        if (paint.MeasureText(value) <= maxWidth)
+        {
+            return value;
+        }
+
+        const string ellipsis = "…";
+        var length = value.Length;
+        while (length > 1 && paint.MeasureText(value[..length] + ellipsis) > maxWidth)
+        {
+            length--;
+        }
+
+        return value[..Math.Max(1, length)] + ellipsis;
     }
 
     private static SKColor ParseColor(string value)

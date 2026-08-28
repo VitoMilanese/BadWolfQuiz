@@ -1,0 +1,63 @@
+@page "/quiz-description/{id:int}/{token}"
+@model BadWolfQuiz.Web.Pages.QuizDescriptionModel
+@inject Microsoft.Extensions.Localization.IStringLocalizer<BadWolfQuiz.Web.Localization.QuizDescriptionResource> QuizDescriptionLocalizer
+@{
+    var socialDescription = string.IsNullOrWhiteSpace(Model.Quiz.Description)
+        ? QuizDescriptionLocalizer["SocialFallback", Model.Quiz.Title].Value
+        : Model.Quiz.Description!;
+
+    ViewData["Title"] = Model.Quiz.Title;
+    ViewData[BadWolfQuiz.Web.TagHelpers.SeoHeadTagHelper.SocialTitleViewDataKey] = Model.Quiz.Title;
+    ViewData[BadWolfQuiz.Web.TagHelpers.SeoHeadTagHelper.SocialDescriptionViewDataKey] = socialDescription;
+    ViewData[BadWolfQuiz.Web.TagHelpers.SeoHeadTagHelper.SocialImageViewDataKey] = Model.Quiz.PreviewPath;
+    ViewData[BadWolfQuiz.Web.TagHelpers.SeoHeadTagHelper.SocialUrlViewDataKey] = Model.Quiz.Path;
+}
+
+<div class="page-heading quiz-description-heading">
+    <div>
+        <p class="eyebrow">@QuizDescriptionLocalizer["Eyebrow"]</p>
+        <h1>@Model.Quiz.Title</h1>
+    </div>
+</div>
+
+<section class="form-card narrow quiz-description-card">
+    @if (!string.IsNullOrWhiteSpace(Model.Quiz.Description))
+    {
+        <p class="quiz-description-copy">@Model.Quiz.Description</p>
+    }
+    else
+    {
+        <p class="settings-description">@QuizDescriptionLocalizer["NoDescription"]</p>
+    }
+
+    @if (Model.Quiz.AverageRating is { } average)
+    {
+        <div class="quiz-rating-summary"
+             aria-label="@Localizer["QuizRating_AccessibleSummary", average, Model.Quiz.RatingCount]">
+            <span class="quiz-rating-stars" aria-hidden="true">★</span>
+            <strong>@average.ToString("0.0")</strong>
+            <span>@Localizer["QuizRating_Count", Model.Quiz.RatingCount]</span>
+        </div>
+    }
+</section>
+
+<style>
+    .quiz-description-heading {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .quiz-description-card {
+        margin-inline: auto;
+        text-align: center;
+    }
+
+    .quiz-description-copy {
+        margin: 0;
+        white-space: pre-wrap;
+    }
+
+    .quiz-description-card .quiz-rating-summary {
+        justify-content: center;
+    }
+</style>
