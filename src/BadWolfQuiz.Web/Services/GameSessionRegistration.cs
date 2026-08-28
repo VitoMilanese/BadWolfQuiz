@@ -241,6 +241,143 @@ public sealed class GameSessionRegistration
         return review;
     }
 
+    internal Dictionary<int, PeerRatedAllPlayerReviewState> PeerRatedAllPlayerReviews { get; } = [];
+
+    internal PeerRatedAllPlayerReviewState GetOrCreatePeerRatedAllPlayerReview(
+        RuntimeQuestion question,
+        IEnumerable<GamePlayerId> participantIds)
+    {
+        if (question.PresentationType != QuestionPresentationType.AllPlayerPeerRatedText)
+        {
+            throw new InvalidOperationException(
+                "Peer rating state is available only for peer-rated all-player text questions.");
+        }
+
+        if (!PeerRatedAllPlayerReviews.TryGetValue(
+                question.SourceQuestionId,
+                out var review))
+        {
+            var requestedParticipantIds = participantIds
+                .Distinct()
+                .ToHashSet();
+
+            review = new PeerRatedAllPlayerReviewState();
+            review.ParticipantIds.AddRange(Session.Players
+                .Where(player => requestedParticipantIds.Contains(player.Id))
+                .OrderBy(player => player.Score)
+                .ThenBy(player => player.JoinedAtUtc)
+                .ThenBy(player => player.Id.Value)
+                .Select(player => player.Id));
+            PeerRatedAllPlayerReviews[question.SourceQuestionId] = review;
+        }
+
+        return review;
+    }
+
+    public IReadOnlyList<PeerRatedAllPlayerReviewSnapshot>
+        CapturePeerRatedAllPlayerReviews() => PeerRatedAllPlayerReviews
+            .OrderBy(item => item.Key)
+            .Select(item => new PeerRatedAllPlayerReviewSnapshot(
+                item.Key,
+                item.Value.ParticipantIds.ToArray(),
+                item.Value.Answers
+                    .Select(answer => new PeerRatedAllPlayerAnswerSnapshot(
+                        answer.Key,
+                        answer.Value))
+                    .ToArray(),
+                item.Value.RatingsByAnswerPlayer
+                    .SelectMany(answer => answer.Value.Select(rating =>
+                        new PeerRatedAllPlayerRatingSnapshot(
+                            answer.Key,
+                            rating.Key,
+                            rating.Value)))
+                    .ToArray(),
+                item.Value.ExcludedPlayerIds.ToArray(),
+                item.Value.CompletedAnswerPlayerIds.ToArray(),
+                item.Value.ReviewIndex))
+            .ToArray();
+
+    internal void RestorePeerRatedAllPlayerReviews(
+        IReadOnlyList<PeerRatedAllPlayerReviewSnapshot>? snapshots)
+    {
+        PeerRatedAllPlayerReviews.Clear();
+        var validQuestions = Session.Board.Questions
+            .Where(question =>
+                question.PresentationType ==
+                    QuestionPresentationType.AllPlayerPeerRatedText)
+            .ToDictionary(question => question.SourceQuestionId);
+        var currentPlayerIds = Session.Players
+            .Select(player => player.Id)
+            .ToHashSet();
+
+        foreach (var snapshot in snapshots ?? [])
+        {
+            if (!validQuestions.ContainsKey(snapshot.SourceQuestionId) ||
+                PeerRatedAllPlayerReviews.ContainsKey(snapshot.SourceQuestionId))
+            {
+                continue;
+            }
+
+            var review = new PeerRatedAllPlayerReviewState
+            {
+                ReviewIndex = Math.Max(0, snapshot.ReviewIndex)
+            };
+            review.ParticipantIds.AddRange(
+                snapshot.ParticipantIds
+                    .Where(currentPlayerIds.Contains)
+                    .Distinct());
+
+            foreach (var answer in snapshot.Answers)
+            {
+                if (review.ParticipantIds.Contains(answer.PlayerId))
+                {
+                    review.Answers[answer.PlayerId] = answer.Answer;
+                }
+            }
+
+            foreach (var playerId in snapshot.ExcludedPlayerIds)
+            {
+                if (review.ParticipantIds.Contains(playerId))
+                {
+                    review.ExcludedPlayerIds.Add(playerId);
+                }
+            }
+
+            foreach (var playerId in snapshot.CompletedAnswerPlayerIds)
+            {
+                if (review.ParticipantIds.Contains(playerId))
+                {
+                    review.CompletedAnswerPlayerIds.Add(playerId);
+                }
+            }
+
+            foreach (var rating in snapshot.Ratings)
+            {
+                if (rating.Stars is < 0 or > 5 ||
+                    rating.AnswerPlayerId == rating.RaterPlayerId ||
+                    !review.ParticipantIds.Contains(rating.AnswerPlayerId) ||
+                    !review.ParticipantIds.Contains(rating.RaterPlayerId) ||
+                    review.ExcludedPlayerIds.Contains(rating.RaterPlayerId))
+                {
+                    continue;
+                }
+
+                if (!review.RatingsByAnswerPlayer.TryGetValue(
+                        rating.AnswerPlayerId,
+                        out var answerRatings))
+                {
+                    answerRatings = [];
+                    review.RatingsByAnswerPlayer[rating.AnswerPlayerId] =
+                        answerRatings;
+                }
+
+                answerRatings.TryAdd(rating.RaterPlayerId, rating.Stars);
+            }
+
+            PeerRatedAllPlayerReviews[snapshot.SourceQuestionId] = review;
+        }
+    }
+
     public void RestartSession(TimeProvider? timeProvider = null)
     {
         lock (this)
@@ -291,6 +428,7 @@ public sealed class GameSessionRegistration
                 timeProvider ?? TimeProvider.System);
             BuzzerRace = null;
             AllPlayerTextReviews.Clear();
+            PeerRatedAllPlayerReviews.Clear();
             _questionOpenSequence.Clear();
             _nextQuestionOpenSequence = 0;
             MarkPersistenceChanged();
@@ -304,6 +442,35 @@ internal sealed class AllPlayerTextReviewState
     public HashSet<GamePlayerId> JudgedPlayers { get; } = [];
     public bool Accepting { get; set; } = true;
 }
+
+internal sealed class PeerRatedAllPlayerReviewState
+{
+    public List<GamePlayerId> ParticipantIds { get; } = [];
+    public Dictionary<GamePlayerId, string> Answers { get; } = [];
+    public Dictionary<GamePlayerId, Dictionary<GamePlayerId, int>>
+        RatingsByAnswerPlayer { get; } = [];
+    public HashSet<GamePlayerId> ExcludedPlayerIds { get; } = [];
+    public HashSet<GamePlayerId> CompletedAnswerPlayerIds { get; } = [];
+    public int ReviewIndex { get; set; }
+}
+
+public sealed record PeerRatedAllPlayerReviewSnapshot(
+    int SourceQuestionId,
+    IReadOnlyList<GamePlayerId> ParticipantIds,
+    IReadOnlyList<PeerRatedAllPlayerAnswerSnapshot> Answers,
+    IReadOnlyList<PeerRatedAllPlayerRatingSnapshot> Ratings,
+    IReadOnlyList<GamePlayerId> ExcludedPlayerIds,
+    IReadOnlyList<GamePlayerId> CompletedAnswerPlayerIds,
+    int ReviewIndex);
+
+public sealed record PeerRatedAllPlayerAnswerSnapshot(
+    GamePlayerId PlayerId,
+    string Answer);
+
+public sealed record PeerRatedAllPlayerRatingSnapshot(
+    GamePlayerId AnswerPlayerId,
+    GamePlayerId RaterPlayerId,
+    int Stars);
 
 public sealed record QuestionOpenSequenceState(
     int SourceQuestionId,

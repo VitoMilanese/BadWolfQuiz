@@ -17,6 +17,8 @@ public sealed class AnswerKeyModel(
 
     public bool IsFinalQuestion { get; private set; }
 
+    public bool IsPeerRatedQuestion { get; private set; }
+
     public int? CurrentSourceQuestionId { get; private set; }
 
     public IActionResult OnGet(Guid id)
@@ -59,7 +61,11 @@ public sealed class AnswerKeyModel(
         }
 
         CurrentSourceQuestionId = question.SourceQuestionId;
-        AnswerBlocks = GetVisibleAnswerBlocks(game, question);
+        IsPeerRatedQuestion = question.PresentationType ==
+            QuestionPresentationType.AllPlayerPeerRatedText;
+        AnswerBlocks = IsPeerRatedQuestion
+            ? question.QuestionBlocks
+            : GetVisibleAnswerBlocks(game, question);
         return Page();
     }
 
@@ -77,18 +83,27 @@ public sealed class AnswerKeyModel(
         }
 
         IReadOnlyList<ContentBlockSnapshot>? blocks;
+        DeferredGameMediaRole mediaRole;
         if (final)
         {
             blocks = game.Session.FinalQuestion?.Definition.AnswerBlocks;
+            mediaRole = DeferredGameMediaRole.FinalAnswer;
         }
         else
         {
             var question = game.Session.Board.Questions.FirstOrDefault(item =>
                 item.Status is not RuntimeQuestionStatus.Available and
                     not RuntimeQuestionStatus.Resolved);
+            var isPeerRated = question?.PresentationType ==
+                QuestionPresentationType.AllPlayerPeerRatedText;
             blocks = question is null
                 ? null
-                : GetVisibleAnswerBlocks(game, question);
+                : isPeerRated
+                    ? question.QuestionBlocks
+                    : GetVisibleAnswerBlocks(game, question);
+            mediaRole = isPeerRated
+                ? DeferredGameMediaRole.Question
+                : DeferredGameMediaRole.Answer;
         }
 
         var block = blocks?.SingleOrDefault(item =>
@@ -101,9 +116,7 @@ public sealed class AnswerKeyModel(
         var media = await mediaStore.ResolveAsync(
             game.Session.Id.Value,
             game.Session.Quiz,
-            final
-                ? DeferredGameMediaRole.FinalAnswer
-                : DeferredGameMediaRole.Answer,
+            mediaRole,
             block,
             cancellationToken);
         if (media is null)

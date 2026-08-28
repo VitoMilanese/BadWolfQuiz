@@ -64,8 +64,6 @@ public sealed class ActiveGamePersistenceService(
     {
         try
         {
-            // The host-provided token may already be canceled. Allow the final
-            // atomic snapshot to finish during shutdown.
             await PersistIfChangedAsync();
         }
         catch (Exception exception)
@@ -98,6 +96,8 @@ public sealed class ActiveGamePersistenceService(
                     snapshot.HostId,
                     snapshot.AllowsNewPlayers);
                 game.RestoreQuestionOpenSequence(snapshot.QuestionOpenSequence);
+                game.RestorePeerRatedAllPlayerReviews(
+                    snapshot.PeerRatedAllPlayerReviews);
             }
             catch (Exception exception)
             {
@@ -225,9 +225,6 @@ public sealed class ActiveGamePersistenceService(
     private async Task<ActiveGameSnapshot> CaptureSnapshotAsync(
         GameSessionRegistration game)
     {
-        // New games keep only deferred media markers in the live runtime snapshot
-        // so Play -> Lobby stays lightweight. Resume snapshots remain fully
-        // self-contained: materialize the real media bytes before writing them.
         var persistedQuiz = await deferredGameMedia.MaterializeAsync(
             game.Session.Id.Value,
             game.Session.Quiz,
@@ -243,7 +240,8 @@ public sealed class ActiveGamePersistenceService(
                 game.Session.Settings,
                 game.Session.CaptureState(),
                 timeProvider.GetUtcNow(),
-                game.CaptureQuestionOpenSequence());
+                game.CaptureQuestionOpenSequence(),
+                game.CapturePeerRatedAllPlayerReviews());
         }
     }
 

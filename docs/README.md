@@ -33,6 +33,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Answer reward decay](features/answer-reward-decay.md)
 - [Four-clue questions](features/four-clue-questions.md)
 - [Mandatory all-player questions](features/all-player-questions.md)
+- [Peer-rated all-player text questions](features/peer-rated-all-player-text.md)
 - [Final question](features/final-question.md)
 - [Answer history editing](features/answer-history-editing.md)
 - [Game settings](features/game-settings.md)

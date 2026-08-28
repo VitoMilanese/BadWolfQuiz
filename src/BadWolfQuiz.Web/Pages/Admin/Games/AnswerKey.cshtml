@@ -1,19 +1,27 @@
 @page "{id:guid}"
 @model BadWolfQuiz.Web.Pages.Admin.Games.AnswerKeyModel
 @{
-    ViewData["Title"] = Localizer["AnswerKey_Title"];
+    var answerKeyLabel = Model.IsPeerRatedQuestion
+        ? Localizer["GameBoard_Question"]
+        : Localizer["Label_CorrectAnswer"];
+    var showAnswerKeyLabel = Model.IsPeerRatedQuestion
+        ? Localizer["GameBoard_ShowQuestion"]
+        : Localizer["Button_ShowAnswer"];
+    ViewData["Title"] = Model.IsPeerRatedQuestion
+        ? Localizer["GameBoard_Question"]
+        : Localizer["AnswerKey_Title"];
     ViewData["HidePortalFooter"] = true;
 }
 
 @section HeaderContext {
     <div class="game-header-context answer-key-header-context">
-        <h2>@Localizer["Label_CorrectAnswer"]</h2>
+        <h2>@answerKeyLabel</h2>
         <button class="button button-secondary icon-button answer-key-visibility-toggle"
                 type="button"
                 data-answer-key-visibility-toggle
                 data-answer-visible="false"
                 aria-pressed="false"
-                aria-label="@Localizer["Label_CorrectAnswer"]">
+                aria-label="@answerKeyLabel">
             <svg class="answer-key-visibility-icon answer-key-show-icon"
                  viewBox="0 0 24 24"
                  aria-hidden="true">
@@ -57,12 +65,12 @@
                 <path d="M6.2 6.2C3.8 8 2.5 12 2.5 12s3.5 6 9.5 6c1.4 0 2.7-.3 3.8-.8"></path>
                 <path d="M9.9 9.9A3 3 0 0 0 14.1 14.1"></path>
             </svg>
-            <strong>@Localizer["Label_CorrectAnswer"]</strong>
-            <span>@Localizer["Button_ShowAnswer"]</span>
+            <strong>@answerKeyLabel</strong>
+            <span>@showAnswerKeyLabel</span>
         </div>
 
         <section id="answer-key-content"
-                 class="content-panel game-content-presentation answer-presentation answer-key-content"
+                 class="content-panel game-content-presentation @(Model.IsPeerRatedQuestion ? "question-presentation" : "answer-presentation") answer-key-content"
                  data-answer-key-content
                  hidden>
             <div class="game-content-blocks">
