@@ -6,17 +6,19 @@ using QRCoder;
 
 namespace BadWolfQuiz.Web.ViewComponents;
 
-public sealed class PortalFooterViewComponent(IOptions<FooterOptions> options) : ViewComponent
+public sealed class PortalFooterViewComponent(
+    IOptions<FooterOptions> options,
+    IOptions<ProjectOptions> projectOptions) : ViewComponent
 {
-    internal const string GitHubRepositoryUrl = "https://github.com/VitoMilanese/BadWolfQuiz";
-
     public IViewComponentResult Invoke()
         => View(CreateViewModel(
             options.Value,
+            projectOptions.Value,
             count => RandomNumberGenerator.GetInt32(count)));
 
     internal static PortalFooterViewModel CreateViewModel(
         FooterOptions options,
+        ProjectOptions projectOptions,
         Func<int, int> selectInitialIndex)
     {
         var contributors = options.GetContributors();
@@ -30,7 +32,7 @@ public sealed class PortalFooterViewComponent(IOptions<FooterOptions> options) :
             initialIndex,
             donationUri?.AbsoluteUri,
             donationUri is null ? null : BuildQrCodeDataUrl(donationUri.AbsoluteUri),
-            GitHubRepositoryUrl,
+            projectOptions.GetGitHubUrl(),
             options.EffectiveContributorDisplayDurationMilliseconds);
     }
 
@@ -50,5 +52,5 @@ public sealed record PortalFooterViewModel(
     int InitialContributorIndex,
     string? DonationUrl,
     string? DonationQrCodeDataUrl,
-    string GitHubRepositoryUrl,
+    string? GitHubRepositoryUrl,
     int ContributorDisplayDurationMilliseconds);

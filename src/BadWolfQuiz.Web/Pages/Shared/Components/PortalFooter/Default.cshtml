@@ -46,32 +46,35 @@
                 </button>
             }
 
-            <a class="portal-footer-support-link"
-               href="@Model.GitHubRepositoryUrl"
-               target="_blank"
-               rel="noopener noreferrer">
-                @if (gitHubStarLabel.ShowLeadingStar)
-                {
-                    <span class="portal-footer-github-star"
-                          aria-hidden="true"
-                          style="display: inline-block; margin-right: 0.25rem; text-decoration: none;">⭐</span>
-                }
-                @gitHubStarLabel.Prefix@if (gitHubStarLabel.ShowGitHubBrand)
-                {
-                    <span class="portal-footer-github-brand">
-                        <svg width="16"
-                             height="16"
-                             viewBox="0 0 16 16"
-                             aria-hidden="true"
-                             focusable="false"
-                             fill="currentColor"
-                             style="margin-left: 0.35rem; margin-right: 0.2rem; vertical-align: -0.125rem;"
-                             xmlns="http://www.w3.org/2000/svg">
-                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.53-.49-.33-.86-.81-1.09-.81-1.09-.66-.45.05-.44.05-.44.73.05 1.11.75 1.11.75.65 1.11 1.69.79 2.1.6.07-.47.25-.79.44-.97-1.6-.18-3.28-.8-3.28-3.56 0-.79.28-1.43.74-1.93-.07-.18-.32-.91.07-1.9 0 0 .6-.19 1.97.74A6.8 6.8 0 0 1 8 4.77a6.8 6.8 0 0 1 1.79.24c1.36-.93 1.96-.74 1.96-.74.39.99.14 1.72.07 1.9.46.5.74 1.14.74 1.93 0 2.77-1.69 3.37-3.29 3.55.26.22.49.66.49 1.33 0 .96-.01 1.73-.01 1.97 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
-                        </svg>GitHub
-                    </span>
-                }
-            </a>
+            @if (Model.GitHubRepositoryUrl is not null)
+            {
+                <a class="portal-footer-support-link"
+                   href="@Model.GitHubRepositoryUrl"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    @if (gitHubStarLabel.ShowLeadingStar)
+                    {
+                        <span class="portal-footer-github-star"
+                              aria-hidden="true"
+                              style="display: inline-block; margin-right: 0.25rem; text-decoration: none;">⭐</span>
+                    }
+                    @gitHubStarLabel.Prefix@if (gitHubStarLabel.ShowGitHubBrand)
+                    {
+                        <span class="portal-footer-github-brand">
+                            <svg width="16"
+                                 height="16"
+                                 viewBox="0 0 16 16"
+                                 aria-hidden="true"
+                                 focusable="false"
+                                 fill="currentColor"
+                                 style="margin-left: 0.35rem; margin-right: 0.2rem; vertical-align: -0.125rem;"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.53-.49-.33-.86-.81-1.09-.81-1.09-.66-.45.05-.44.05-.44.73.05 1.11.75 1.11.75.65 1.11 1.69.79 2.1.6.07-.47.25-.79.44-.97-1.6-.18-3.28-.8-3.28-3.56 0-.79.28-1.43.74-1.93-.07-.18-.32-.91.07-1.9 0 0 .6-.19 1.97.74A6.8 6.8 0 0 1 8 4.77a6.8 6.8 0 0 1 1.79.24c1.36-.93 1.96-.74 1.96-.74.39.99.14 1.72.07 1.9.46.5.74 1.14.74 1.93 0 2.77-1.69 3.37-3.29 3.55.26.22.49.66.49 1.33 0 .96-.01 1.73-.01 1.97 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
+                            </svg>GitHub
+                        </span>
+                    }
+                </a>
+            }
         </div>
 
         @if (Model.DonationUrl is not null)

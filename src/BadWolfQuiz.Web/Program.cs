@@ -143,6 +143,10 @@ builder.Services.AddOptions<DiscordQuestionBotOptions>()
     .ValidateOnStart();
 builder.Services.Configure<FooterOptions>(
     builder.Configuration.GetSection(FooterOptions.SectionName));
+builder.Services.Configure<ProjectOptions>(
+    builder.Configuration.GetSection(ProjectOptions.SectionName));
+builder.Services.Configure<DiscordInviteOptions>(
+    builder.Configuration.GetSection(DiscordInviteOptions.SectionName));
 builder.Services.AddOptions<MediaArchiveOptions>()
     .Bind(builder.Configuration.GetSection(MediaArchiveOptions.SectionName))
     .Validate(options => options.IsValid, "Media archive settings are invalid.")
