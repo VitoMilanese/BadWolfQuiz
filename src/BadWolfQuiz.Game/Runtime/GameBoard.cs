@@ -31,27 +31,48 @@ public sealed class GameBoard
     private static IEnumerable<RuntimeQuestion> CreateRoundQuestions(
         QuizRoundSnapshot round)
     {
-        var randomWagerQuestionIds = round.UseRandomWagerQuestions
+        var usesRandomWagers =
+            round.UseRandomWagerQuestions ||
+            round.UseRandomAnonymousSharedWagerQuestions;
+        var selection = usesRandomWagers
             ? SelectRandomWagerQuestions(round)
-            : new HashSet<int>();
+            : (Normal: new HashSet<int>(), AnonymousShared: new HashSet<int>());
 
-        return round.Questions.Select(question => new RuntimeQuestion(
-            round.SourceRoundId,
-            question.SourceQuestionId,
-            question.SourceCategoryId,
-            question.CategoryTitle,
-            question.RowIndex,
-            question.Points,
-            round.UseRandomWagerQuestions
-                ? randomWagerQuestionIds.Contains(question.SourceQuestionId)
-                : question.IsSpecial,
-            question.PresentationType,
-            question.QuestionBlocks,
-            question.AnswerBlocks));
+        return round.Questions.Select(question =>
+        {
+            var isRandomNormal =
+                selection.Normal.Contains(question.SourceQuestionId);
+            var isRandomAnonymousShared =
+                selection.AnonymousShared.Contains(question.SourceQuestionId);
+            var isSpecial =
+                question.IsSpecial ||
+                isRandomNormal ||
+                isRandomAnonymousShared;
+            var presentationType = isRandomAnonymousShared
+                ? QuestionWagerModes.AnonymousShared
+                : question.IsSpecial
+                    ? question.PresentationType
+                    : usesRandomWagers
+                        ? QuestionWagerModes.GetContentPresentationType(
+                            question.PresentationType)
+                        : question.PresentationType;
+
+            return new RuntimeQuestion(
+                round.SourceRoundId,
+                question.SourceQuestionId,
+                question.SourceCategoryId,
+                question.CategoryTitle,
+                question.RowIndex,
+                question.Points,
+                isSpecial,
+                presentationType,
+                question.QuestionBlocks,
+                question.AnswerBlocks);
+        });
     }
 
-    private static HashSet<int> SelectRandomWagerQuestions(
-        QuizRoundSnapshot round)
+    private static (HashSet<int> Normal, HashSet<int> AnonymousShared)
+        SelectRandomWagerQuestions(QuizRoundSnapshot round)
     {
         var candidates = round.Questions
             .Where(question => question.IsEligibleForRandomWagerSelection)
@@ -64,11 +85,27 @@ public sealed class GameBoard
                 (candidates[swapIndex], candidates[index]);
         }
 
-        return candidates
-            .Take(round.RandomWagerQuestionCount)
-            .Select(question => question.SourceQuestionId)
-            .ToHashSet();
+        var anonymousShared = round.UseRandomAnonymousSharedWagerQuestions
+            ? candidates
+                .Where(question =>
+                    question.IsEligibleForRandomAnonymousSharedWagerSelection)
+                .Take(round.RandomAnonymousSharedWagerQuestionCount)
+                .Select(question => question.SourceQuestionId)
+                .ToHashSet()
+            : new HashSet<int>();
+
+        var normal = round.UseRandomWagerQuestions
+            ? candidates
+                .Where(question =>
+                    !anonymousShared.Contains(question.SourceQuestionId))
+                .Take(round.RandomWagerQuestionCount)
+                .Select(question => question.SourceQuestionId)
+                .ToHashSet()
+            : new HashSet<int>();
+
+        return (normal, anonymousShared);
     }
+
 }
 
 public sealed class RuntimeQuestion

@@ -98,6 +98,9 @@ public sealed class ActiveGamePersistenceService(
                 game.RestoreQuestionOpenSequence(snapshot.QuestionOpenSequence);
                 game.RestorePeerRatedAllPlayerReviews(
                     snapshot.PeerRatedAllPlayerReviews);
+                AnonymousSharedWagerWebStore.Restore(
+                    game,
+                    snapshot.AnonymousSharedWager);
             }
             catch (Exception exception)
             {
@@ -241,7 +244,8 @@ public sealed class ActiveGamePersistenceService(
                 game.Session.CaptureState(),
                 timeProvider.GetUtcNow(),
                 game.CaptureQuestionOpenSequence(),
-                game.CapturePeerRatedAllPlayerReviews());
+                game.CapturePeerRatedAllPlayerReviews(),
+                AnonymousSharedWagerWebStore.Capture(game));
         }
     }
 

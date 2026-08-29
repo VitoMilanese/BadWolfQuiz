@@ -1012,12 +1012,16 @@ public sealed class GameSessionTests
         var session = GameSession.Create(quiz);
 
         Assert.Equal(
-            2,
+            3,
             session.Board.Questions.Count(question => question.IsSpecial));
-        Assert.False(
+        Assert.True(
             session.Board.Questions
                 .Single(question => question.SourceQuestionId == 100)
                 .IsSpecial);
+        Assert.Equal(
+            2,
+            session.Board.Questions.Count(question =>
+                question.SourceQuestionId != 100 && question.IsSpecial));
     }
 
     [Fact]

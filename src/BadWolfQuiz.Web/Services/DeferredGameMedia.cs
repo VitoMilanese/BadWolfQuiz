@@ -142,7 +142,11 @@ public sealed class DeferredGameMediaStore(
                 category.DescriptionBlocks.Select(block =>
                     MaterializeBlock(
                         block,
-                        DeferredGameMediaRole.CategoryDescription))))))
+                        DeferredGameMediaRole.CategoryDescription)))),
+            useRandomAnonymousSharedWagerQuestions:
+                round.UseRandomAnonymousSharedWagerQuestions,
+            randomAnonymousSharedWagerQuestionCount:
+                round.RandomAnonymousSharedWagerQuestionCount))
             .ToArray();
 
         var finalQuestion = quiz.FinalQuestion is null

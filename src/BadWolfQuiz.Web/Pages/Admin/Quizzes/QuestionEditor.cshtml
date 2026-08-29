@@ -85,6 +85,16 @@
             </span>
         </label>
 
+        <div id="wager-mode-setting">
+            <label asp-for="Input.WagerMode">
+                @Localizer["Label_WagerMode"]
+            </label>
+            <select asp-for="Input.WagerMode">
+                <option value="0">@Localizer["WagerMode_Normal"]</option>
+                <option value="1">@Localizer["WagerMode_AnonymousShared"]</option>
+            </select>
+        </div>
+
         <div id="buzz-mode-setting">
             <label asp-for="Input.BuzzModeOverride">
                 @Localizer["Label_BuzzMode"]
@@ -211,6 +221,12 @@
         const presentationTypeSelect =
             document.getElementById("Input_PresentationType");
 
+        const wagerModeSetting =
+            document.getElementById("wager-mode-setting");
+
+        const wagerModeSelect =
+            document.getElementById("Input_WagerMode");
+
         function updateQuestionTypeUi() {
             const isFourClues = presentationTypeSelect?.value === "1";
             document.getElementById("four-clues-help").hidden = !isFourClues;
@@ -219,6 +235,16 @@
             if (isFourClues && wagerQuestionCheckbox) {
                 wagerQuestionCheckbox.checked = false;
             }
+
+            const supportsWagerMode =
+                presentationTypeSelect?.value === "0";
+            if (wagerModeSetting) {
+                wagerModeSetting.hidden = !supportsWagerMode;
+            }
+            if (!supportsWagerMode && wagerModeSelect) {
+                wagerModeSelect.value = "0";
+            }
+
             updateBuzzModeVisibility();
         }
 

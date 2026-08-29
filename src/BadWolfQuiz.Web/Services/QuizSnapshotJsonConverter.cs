@@ -72,7 +72,9 @@ public sealed class QuizSnapshotJsonConverter : JsonConverter<QuizSnapshot>
         int SortOrder,
         QuizQuestionSnapshotData[] Questions,
         bool UseRandomWagerQuestions,
-        int RandomWagerQuestionCount)
+        int RandomWagerQuestionCount,
+        bool UseRandomAnonymousSharedWagerQuestions = false,
+        int RandomAnonymousSharedWagerQuestionCount = 0)
     {
         public QuizRoundSnapshot ToSnapshot() => new(
             SourceRoundId,
@@ -80,7 +82,11 @@ public sealed class QuizSnapshotJsonConverter : JsonConverter<QuizSnapshot>
             SortOrder,
             Questions.Select(question => question.ToSnapshot()),
             UseRandomWagerQuestions,
-            RandomWagerQuestionCount);
+            RandomWagerQuestionCount,
+            useRandomAnonymousSharedWagerQuestions:
+                UseRandomAnonymousSharedWagerQuestions,
+            randomAnonymousSharedWagerQuestionCount:
+                RandomAnonymousSharedWagerQuestionCount);
 
         public static QuizRoundSnapshotData From(QuizRoundSnapshot snapshot) => new(
             snapshot.SourceRoundId,
@@ -88,7 +94,9 @@ public sealed class QuizSnapshotJsonConverter : JsonConverter<QuizSnapshot>
             snapshot.SortOrder,
             snapshot.Questions.Select(QuizQuestionSnapshotData.From).ToArray(),
             snapshot.UseRandomWagerQuestions,
-            snapshot.RandomWagerQuestionCount);
+            snapshot.RandomWagerQuestionCount,
+            snapshot.UseRandomAnonymousSharedWagerQuestions,
+            snapshot.RandomAnonymousSharedWagerQuestionCount);
     }
 
     private sealed record QuizQuestionSnapshotData(

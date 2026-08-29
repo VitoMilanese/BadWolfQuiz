@@ -1,5 +1,6 @@
 @page "{id:int}"
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.EditorModel
+@using BadWolfQuiz.Game.Definitions
 @functions {
     private static bool HasBlockContent(ContentBlockBase block) =>
         block.BlockType switch
@@ -33,9 +34,16 @@
         .OrderBy(x => x.SortOrder)
         .ToList();
 
-    var eligibleRandomWagerQuestionCount = categories
+    var eligibleRandomWagerQuestions = categories
         .SelectMany(category => category.Questions)
-        .Count(question => !question.ExcludeFromRandomWagerSelection);
+        .Where(question => !question.ExcludeFromRandomWagerSelection)
+        .ToList();
+    var eligibleRandomWagerQuestionCount =
+        eligibleRandomWagerQuestions.Count;
+    var eligibleRandomAnonymousSharedWagerQuestionCount =
+        eligibleRandomWagerQuestions.Count(question =>
+            QuestionWagerModes.GetContentPresentationType(
+                question.PresentationType) == QuestionPresentationType.Standard);
 
     var rowsWithQuestionContent = categories
         .SelectMany(category => category.Questions)
@@ -214,6 +222,28 @@
                 <small>
                     @Localizer["QuizEditor_EligibleRandomWagerQuestions",
                         eligibleRandomWagerQuestionCount]
+                </small>
+            </div>
+
+            <label class="checkbox-row">
+                <input asp-for="RoundRows.UseRandomAnonymousSharedWagerQuestions" />
+                <span>
+                    <strong>@Localizer["QuizEditor_UseRandomAnonymousSharedWagerQuestions"]</strong>
+                    <small>@Localizer["QuizEditor_RandomAnonymousSharedWagerDescription"]</small>
+                </span>
+            </label>
+
+            <div id="random-anonymous-shared-wager-count-setting">
+                <label asp-for="RoundRows.RandomAnonymousSharedWagerQuestionCount">
+                    @Localizer["QuizEditor_RandomAnonymousSharedWagerQuestionCount"]
+                </label>
+                <input asp-for="RoundRows.RandomAnonymousSharedWagerQuestionCount"
+                       type="number"
+                       min="0"
+                       max="@eligibleRandomAnonymousSharedWagerQuestionCount" />
+                <small>
+                    @Localizer["QuizEditor_EligibleRandomWagerQuestions",
+                        eligibleRandomAnonymousSharedWagerQuestionCount]
                 </small>
             </div>
         </section>
@@ -905,6 +935,10 @@
         const randomWagerCheckbox =
             document.getElementById("RoundRows_UseRandomWagerQuestions");
 
+        const randomAnonymousSharedWagerCheckbox =
+            document.getElementById(
+                "RoundRows_UseRandomAnonymousSharedWagerQuestions");
+
         const questionCountSelect =
             document.getElementById("RoundRows_QuestionCount");
 
@@ -1126,15 +1160,42 @@
 
         const randomWagerCountSetting =
             document.getElementById("random-wager-count-setting");
+        const randomAnonymousSharedWagerCountSetting =
+            document.getElementById(
+                "random-anonymous-shared-wager-count-setting");
+        const randomWagerCountInput =
+            document.getElementById("RoundRows_RandomWagerQuestionCount");
+        const randomAnonymousSharedWagerCountInput =
+            document.getElementById(
+                "RoundRows_RandomAnonymousSharedWagerQuestionCount");
+
+        const setRandomWagerSettingEnabled = (setting, input, enabled) => {
+            setting?.classList.toggle("is-disabled", !enabled);
+            if (!input) {
+                return;
+            }
+
+            // Keep the value in FormData while making the field non-editable.
+            input.readOnly = !enabled;
+            input.setAttribute("aria-disabled", (!enabled).toString());
+            input.tabIndex = enabled ? 0 : -1;
+        };
 
         function updateRandomWagerSettings() {
-            if (randomWagerCountSetting) {
-                randomWagerCountSetting.hidden =
-                    !(randomWagerCheckbox?.checked ?? false);
-            }
+            setRandomWagerSettingEnabled(
+                randomWagerCountSetting,
+                randomWagerCountInput,
+                randomWagerCheckbox?.checked ?? false);
+            setRandomWagerSettingEnabled(
+                randomAnonymousSharedWagerCountSetting,
+                randomAnonymousSharedWagerCountInput,
+                randomAnonymousSharedWagerCheckbox?.checked ?? false);
         }
 
         randomWagerCheckbox?.addEventListener(
+            "change",
+            updateRandomWagerSettings);
+        randomAnonymousSharedWagerCheckbox?.addEventListener(
             "change",
             updateRandomWagerSettings);
 

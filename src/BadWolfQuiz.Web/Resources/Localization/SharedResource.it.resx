@@ -2607,4 +2607,28 @@
   <data name="QuestionType_AllPlayerMultipleChoice" xml:space="preserve">
     <value>Tutti i giocatori — scelta multipla</value>
   </data>
+  <data name="Label_WagerMode" xml:space="preserve">
+    <value>Modalità scommessa</value>
+  </data>
+  <data name="WagerMode_Normal" xml:space="preserve">
+    <value>Scommessa normale</value>
+  </data>
+  <data name="WagerMode_AnonymousShared" xml:space="preserve">
+    <value>Scommessa condivisa anonima</value>
+  </data>
+  <data name="QuizEditor_UseRandomAnonymousSharedWagerQuestions" xml:space="preserve">
+    <value>Domande casuali con scommessa condivisa anonima</value>
+  </data>
+  <data name="QuizEditor_RandomAnonymousSharedWagerDescription" xml:space="preserve">
+    <value>Seleziona posizioni casuali separate per la scommessa condivisa anonima quando viene creata ogni partita.</value>
+  </data>
+  <data name="QuizEditor_RandomAnonymousSharedWagerQuestionCount" xml:space="preserve">
+    <value>Numero di domande con scommessa anonima</value>
+  </data>
+  <data name="QuizEditor_InvalidRandomAnonymousSharedWagerCount" xml:space="preserve">
+    <value>Il numero di domande casuali con scommessa anonima deve essere compreso tra 0 e {0}.</value>
+  </data>
+  <data name="QuizEditor_InvalidCombinedRandomWagerCount" xml:space="preserve">
+    <value>Il numero totale di domande casuali con scommessa normale e anonima non può superare {0}.</value>
+  </data>
 </root>

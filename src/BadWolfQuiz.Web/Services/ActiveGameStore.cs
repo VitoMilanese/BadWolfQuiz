@@ -13,7 +13,8 @@ public sealed record ActiveGameSnapshot(
     GameSessionState SessionState,
     DateTimeOffset? SavedAtUtc = null,
     IReadOnlyList<QuestionOpenSequenceState>? QuestionOpenSequence = null,
-    IReadOnlyList<PeerRatedAllPlayerReviewSnapshot>? PeerRatedAllPlayerReviews = null);
+    IReadOnlyList<PeerRatedAllPlayerReviewSnapshot>? PeerRatedAllPlayerReviews = null,
+    AnonymousSharedWagerState? AnonymousSharedWager = null);
 
 public sealed class ActiveGameStore
 {

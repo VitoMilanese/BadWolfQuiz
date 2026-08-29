@@ -2607,4 +2607,28 @@
   <data name="QuestionType_AllPlayerMultipleChoice" xml:space="preserve">
     <value>Усі гравці — вибір відповіді</value>
   </data>
+  <data name="Label_WagerMode" xml:space="preserve">
+    <value>Режим ставки</value>
+  </data>
+  <data name="WagerMode_Normal" xml:space="preserve">
+    <value>Звичайна ставка</value>
+  </data>
+  <data name="WagerMode_AnonymousShared" xml:space="preserve">
+    <value>Анонімна спільна ставка</value>
+  </data>
+  <data name="QuizEditor_UseRandomAnonymousSharedWagerQuestions" xml:space="preserve">
+    <value>Випадкові анонімні питання зі ставкою</value>
+  </data>
+  <data name="QuizEditor_RandomAnonymousSharedWagerDescription" xml:space="preserve">
+    <value>Вибирати окремі випадкові позиції для анонімної спільної ставки під час створення кожної гри.</value>
+  </data>
+  <data name="QuizEditor_RandomAnonymousSharedWagerQuestionCount" xml:space="preserve">
+    <value>Кількість анонімних питань зі ставкою</value>
+  </data>
+  <data name="QuizEditor_InvalidRandomAnonymousSharedWagerCount" xml:space="preserve">
+    <value>Кількість випадкових анонімних питань зі ставкою має бути від 0 до {0}.</value>
+  </data>
+  <data name="QuizEditor_InvalidCombinedRandomWagerCount" xml:space="preserve">
+    <value>Сумарна кількість звичайних та анонімних випадкових питань зі ставкою не може перевищувати {0}.</value>
+  </data>
 </root>

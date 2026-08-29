@@ -72,7 +72,11 @@ public sealed class QuizSnapshotFactory
             round.RandomWagerQuestionCount,
             round.DescriptionBlocks.Select(block =>
                 CreateContentBlock(block, copyFileData)),
-            categoryIntros);
+            categoryIntros,
+            useRandomAnonymousSharedWagerQuestions:
+                round.UseRandomAnonymousSharedWagerQuestions,
+            randomAnonymousSharedWagerQuestionCount:
+                round.RandomAnonymousSharedWagerQuestionCount);
     }
 
     private static QuizQuestionSnapshot CreateQuestion(

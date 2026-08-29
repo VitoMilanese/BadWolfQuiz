@@ -6886,3 +6886,159 @@ body.youtube-auto-expanded-open {
     justify-self: stretch !important;
     align-self: stretch !important;
 }
+
+
+/* Anonymous shared wager stable layouts */
+.round-wager-settings #random-wager-count-setting,
+.round-wager-settings #random-anonymous-shared-wager-count-setting {
+    display: grid;
+    gap: 5px;
+}
+
+.round-wager-settings #random-wager-count-setting.is-disabled,
+.round-wager-settings #random-anonymous-shared-wager-count-setting.is-disabled {
+    opacity: 0.58;
+}
+
+.round-wager-settings #random-wager-count-setting.is-disabled input,
+.round-wager-settings #random-anonymous-shared-wager-count-setting.is-disabled input {
+    cursor: not-allowed;
+}
+
+.host-game-board.anonymous-shared-wager-active {
+    width: calc(100vw - 32px);
+    max-width: none;
+    margin-top: -17px;
+    margin-right: calc(50% - 50vw + 16px);
+    margin-left: calc(50% - 50vw + 16px);
+    overflow-y: hidden;
+}
+
+.host-game-board.anonymous-shared-wager-active > [data-host-gameplay-view] {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.host-game-board.anonymous-shared-wager-active
+    > [data-host-gameplay-view]
+    > .current-question-summary {
+    width: 100%;
+    max-width: none;
+    flex: 1 1 auto;
+    margin-bottom: 0;
+}
+
+.host-game-board.anonymous-shared-wager-active
+    > [data-host-gameplay-view]
+    > .current-question-summary.wager-mode.anonymous-shared-wager-mode {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: stretch;
+    justify-items: stretch;
+    padding: 16px clamp(24px, 4vw, 56px) 8px;
+    overflow: hidden;
+}
+
+.current-question-summary.wager-mode.anonymous-shared-wager-mode
+    .current-question-heading {
+    width: 100%;
+}
+
+.current-question-summary.wager-mode.anonymous-shared-wager-mode
+    > .anonymous-shared-wager-host-panel {
+    width: min(760px, 100%);
+    min-height: 0;
+    align-self: stretch;
+    justify-self: center;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+}
+
+.anonymous-shared-wager-host-panel h3,
+.anonymous-shared-wager-host-panel p,
+.anonymous-shared-wager-player-panel h2,
+.anonymous-shared-wager-player-panel p {
+    margin: 0;
+}
+
+.anonymous-shared-wager-host-panel ul {
+    margin: 0;
+    padding-left: 1.4rem;
+    text-align: left;
+}
+
+.anonymous-shared-wager-host-panel li + li {
+    margin-top: 6px;
+}
+
+.question-controls > .anonymous-shared-wager-host-panel {
+    flex: 1 0 100%;
+    width: 100%;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.anonymous-shared-wager-player-panel {
+    width: 100%;
+    display: grid;
+    align-content: start;
+    gap: 16px;
+}
+
+.anonymous-shared-wager-choices {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.anonymous-shared-wager-choices .button {
+    width: 100%;
+    min-width: 0;
+    padding-inline: clamp(6px, 2vw, 14px);
+}
+
+.anonymous-shared-wager-choices .button.is-selected {
+    color: var(--gold);
+    border-color: var(--gold);
+    box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+.anonymous-shared-wager-selection {
+    width: 100%;
+    color: var(--gold);
+    font-weight: 800;
+    text-align: center;
+}
+
+.anonymous-shared-wager-confirm {
+    width: min(360px, 100%);
+    justify-self: center;
+}
+
+@media (max-width: 900px) {
+    .host-game-board.anonymous-shared-wager-active {
+        margin-top: -10px;
+    }
+}
+
+@media (max-width: 420px) {
+    .anonymous-shared-wager-choices {
+        gap: 4px;
+    }
+
+    .anonymous-shared-wager-choices .button {
+        padding-inline: 4px;
+        font-size: 0.9rem;
+    }
+}

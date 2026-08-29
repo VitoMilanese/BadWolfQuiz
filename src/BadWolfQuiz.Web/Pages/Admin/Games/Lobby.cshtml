@@ -8,6 +8,9 @@
         Status: BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager,
         IsAllPlayerQuestion: true
     };
+    var isAnonymousSharedWager = Model.CurrentQuestion is { } currentQuestion &&
+        BadWolfQuiz.Game.Definitions.QuestionWagerModes.IsAnonymousShared(
+            currentQuestion.PresentationType);
 }
 
 @section HeaderContext {
@@ -337,7 +340,7 @@
 
 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running)
 {
-    <section class="host-game-board @(isAllPlayerWagering ? "all-player-question-wagering" : null)"
+    <section class="host-game-board @(isAllPlayerWagering ? "all-player-question-wagering" : null) @(isAnonymousSharedWager ? "anonymous-shared-wager-active" : null)"
              data-game-id="@Model.Game.Session.Id.Value"
              data-discord-auto-mute="@((Model.DiscordConnection?.AutoMuteDuringMedia ?? false).ToString().ToLowerInvariant())"
              data-game-code="@Model.Game.PublicCode"
@@ -445,7 +448,7 @@
 
         @if (Model.CurrentQuestion is not null)
         {
-            <div class="content-panel current-question-summary @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager ? "wager-mode" : null)">
+            <div class="content-panel current-question-summary @(Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager ? "wager-mode" : null) @(isAnonymousSharedWager ? "anonymous-shared-wager-mode" : null)">
                 <div id="game-timer" class="game-timer host-game-timer" hidden>
                     <strong id="game-timer-value">0.0</strong>
                     <div class="game-timer-actions">
@@ -492,8 +495,19 @@
                 </div>
                 }
 
+                @if (isAnonymousSharedWager &&
+                    Model.CurrentQuestion.Status ==
+                        BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager)
+                {
+                    <section class="anonymous-shared-wager-host-panel anonymous-shared-wager-host-collecting"
+                             data-anonymous-shared-wager-host-panel
+                             aria-live="polite"></section>
+                }
+
                 @if (Model.CurrentQuestion.Status == BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.AwaitingWager &&
-                    !Model.CurrentQuestion.IsAllPlayerQuestion)
+                    !Model.CurrentQuestion.IsAllPlayerQuestion &&
+                    !BadWolfQuiz.Game.Definitions.QuestionWagerModes.IsAnonymousShared(
+                        Model.CurrentQuestion.PresentationType))
                 {
                     var wagerPlayer = Model.Players.First(
                         player => player.Id == Model.CurrentQuestion.SelectedByPlayerId);
@@ -808,7 +822,8 @@
             @if (Model.CurrentQuestion.Status is BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Selected or
                 BadWolfQuiz.Game.Runtime.RuntimeQuestionStatus.Active)
             {
-                var eligiblePlayers = Model.CurrentQuestion.IsAllPlayerQuestion
+                var eligiblePlayers = Model.CurrentQuestion.IsAllPlayerQuestion ||
+                    isAnonymousSharedWager
                     ? Enumerable.Empty<BadWolfQuiz.Web.Services.PlayerLobbyEntry>()
                     : Model.CurrentQuestion.IsSpecial
                         ? Model.Game.Session.AnswerTimer.Status ==
@@ -950,6 +965,13 @@
                             </button>
                         </form>
                     }
+                    }
+
+                    @if (isAnonymousSharedWager)
+                    {
+                        <div class="anonymous-shared-wager-host-panel anonymous-shared-wager-host-answering"
+                             data-anonymous-shared-wager-host-panel
+                             aria-live="polite"></div>
                     }
                 </section>
             }
@@ -2324,6 +2346,10 @@
                 currentHostBoard.classList.toggle(
                     "final-question-host",
                     nextHostBoard.classList.contains("final-question-host"));
+                currentHostBoard.classList.toggle(
+                    "anonymous-shared-wager-active",
+                    nextHostBoard.classList.contains(
+                        "anonymous-shared-wager-active"));
                 if (nextHostBoard.dataset.gameStatus) {
                     currentHostBoard.dataset.gameStatus =
                         nextHostBoard.dataset.gameStatus;

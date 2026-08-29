@@ -28,6 +28,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Host gameplay navigation](features/host-gameplay-navigation.md)
 - [Quiz import and export](features/quiz-import-export.md)
 - [Wagering and active player rules](features/wagering.md)
+- [Anonymous shared wagers](features/anonymous-shared-wager.md)
 - [Question judging](features/question-judging.md)
 - [Buzzer activation modes](features/buzzer-activation-modes.md)
 - [Answer reward decay](features/answer-reward-decay.md)
