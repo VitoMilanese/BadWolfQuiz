@@ -46,11 +46,15 @@ public sealed class MinigameHub(
 
     public async Task<MinigameRoomSnapshot> GetRoomState(
         string roomCode,
-        string playerToken)
+        string playerToken,
+        bool touchActivity = true)
     {
         try
         {
-            var state = roomStore.GetState(roomCode, playerToken);
+            var state = roomStore.GetState(
+                roomCode,
+                playerToken,
+                touchActivity);
             await JoinRoomGroup(state.RoomCode);
             return state;
         }

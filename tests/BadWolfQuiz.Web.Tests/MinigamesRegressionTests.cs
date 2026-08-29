@@ -75,6 +75,7 @@ public sealed class MinigamesRegressionTests
 
         Assert.Contains("const inactiveCards = new Set()", script);
         Assert.Contains("roomChanged", script);
+        Assert.Contains("synchronize(false)", script);
         Assert.Contains("ToggleExclusion", script);
         Assert.Contains("GetSignalRGroupName", hub);
         Assert.Contains("Clients", hub);

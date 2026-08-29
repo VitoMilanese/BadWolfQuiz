@@ -103,6 +103,23 @@ public sealed class MinigameRoomStoreTests
     }
 
     [Fact]
+    public void Passive_state_synchronization_does_not_extend_room_lifetime()
+    {
+        var time = new ManualTimeProvider();
+        var store = new MinigameRoomStore(time);
+        var owner = store.CreateRoom();
+
+        time.Advance(TimeSpan.FromMinutes(59));
+        store.GetState(
+            owner.RoomCode,
+            owner.PlayerToken,
+            touchActivity: false);
+
+        time.Advance(TimeSpan.FromMinutes(1));
+        Assert.Equal([owner.RoomCode], store.RemoveExpired());
+    }
+
+    [Fact]
     public void Expired_room_is_reported_when_accessed_before_cleanup_tick()
     {
         var time = new ManualTimeProvider();

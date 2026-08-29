@@ -481,12 +481,13 @@
         applyState(stateOf(membership));
     };
 
-    const synchronize = async () => {
+    const synchronize = async (touchActivity = true) => {
         if (!currentRoomCode || !playerToken) return false;
         const state = await connection.invoke(
             'GetRoomState',
             currentRoomCode,
-            playerToken);
+            playerToken,
+            touchActivity);
         applyState(state);
         return true;
     };
@@ -634,7 +635,7 @@
 
     connection.on('roomChanged', () => {
         if (currentRoomCode && playerToken) {
-            void synchronize().catch(error => {
+            void synchronize(false).catch(error => {
                 showError(roomError, getErrorMessage(error));
             });
         }
