@@ -219,6 +219,8 @@ builder.Services.AddSingleton(provider =>
         MinigameCardSetStore.ResolveRootPath(environment),
         options.CardCount);
 });
+builder.Services.AddSingleton<MinigameRoomStore>();
+builder.Services.AddHostedService<MinigameRoomCleanupService>();
 builder.Services.AddScoped<GameSessionLauncher>();
 builder.Services.AddScoped<GameHistoryStore>();
 builder.Services.AddScoped<PlayerStatisticsService>();
