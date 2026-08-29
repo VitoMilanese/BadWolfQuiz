@@ -211,8 +211,7 @@
                 </span>
             </label>
 
-            <div id="random-wager-count-setting"
-                 style="@(!Model.RoundRows.UseRandomWagerQuestions ? "display: none !important;" : null)">
+            <div id="random-wager-count-setting">
                 <label asp-for="RoundRows.RandomWagerQuestionCount">
                     @Localizer["QuizEditor_RandomWagerQuestionCount"]
                 </label>
@@ -234,8 +233,7 @@
                 </span>
             </label>
 
-            <div id="random-anonymous-shared-wager-count-setting"
-                 style="@(!Model.RoundRows.UseRandomAnonymousSharedWagerQuestions ? "display: none !important;" : null)">
+            <div id="random-anonymous-shared-wager-count-setting">
                 <label asp-for="RoundRows.RandomAnonymousSharedWagerQuestionCount">
                     @Localizer["QuizEditor_RandomAnonymousSharedWagerQuestionCount"]
                 </label>
@@ -1165,26 +1163,32 @@
         const randomAnonymousSharedWagerCountSetting =
             document.getElementById(
                 "random-anonymous-shared-wager-count-setting");
+        const randomWagerCountInput =
+            document.getElementById("RoundRows_RandomWagerQuestionCount");
+        const randomAnonymousSharedWagerCountInput =
+            document.getElementById(
+                "RoundRows_RandomAnonymousSharedWagerQuestionCount");
 
-        const setRandomWagerSettingVisible = (setting, visible) => {
-            if (!setting) {
+        const setRandomWagerSettingEnabled = (setting, input, enabled) => {
+            setting?.classList.toggle("is-disabled", !enabled);
+            if (!input) {
                 return;
             }
 
-            setting.hidden = !visible;
-            if (visible) {
-                setting.style.removeProperty("display");
-            } else {
-                setting.style.setProperty("display", "none", "important");
-            }
+            // Keep the value in FormData while making the field non-editable.
+            input.readOnly = !enabled;
+            input.setAttribute("aria-disabled", (!enabled).toString());
+            input.tabIndex = enabled ? 0 : -1;
         };
 
         function updateRandomWagerSettings() {
-            setRandomWagerSettingVisible(
+            setRandomWagerSettingEnabled(
                 randomWagerCountSetting,
+                randomWagerCountInput,
                 randomWagerCheckbox?.checked ?? false);
-            setRandomWagerSettingVisible(
+            setRandomWagerSettingEnabled(
                 randomAnonymousSharedWagerCountSetting,
+                randomAnonymousSharedWagerCountInput,
                 randomAnonymousSharedWagerCheckbox?.checked ?? false);
         }
 

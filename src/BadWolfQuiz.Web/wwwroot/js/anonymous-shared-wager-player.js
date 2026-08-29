@@ -72,7 +72,7 @@
         }
 
         const target = ensurePanel();
-        const key = `${status.role}:${status.submitted}:${status.maximumShare}`;
+        const key = `${status.role}:${status.submitted}:${status.maximumShare}:${status.selectedPercentage ?? ''}`;
         if (key === lastKey) return;
         lastKey = key;
         target.replaceChildren();
@@ -97,7 +97,11 @@
 
         if (status.submitted) {
             const text = document.createElement('p');
-            text.textContent = 'Ваш внесок прийнято. Очікуйте інших гравців.';
+            text.className = 'anonymous-shared-wager-selection';
+            text.textContent = status.selectedPercentage === null ||
+                status.selectedPercentage === undefined
+                ? 'Ваш внесок прийнято. Очікуйте інших гравців.'
+                : `Ваш внесок прийнято: ${status.selectedPercentage}%. Очікуйте інших гравців.`;
             target.append(text);
             return;
         }
@@ -108,25 +112,34 @@
 
         const choices = document.createElement('div');
         choices.className = 'anonymous-shared-wager-choices';
+        const selection = document.createElement('p');
+        selection.className = 'anonymous-shared-wager-selection';
+        selection.textContent = 'Оберіть відсоток внеску.';
         let selected = null;
         [0, 25, 50, 75, 100].forEach(value => {
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'button button-secondary';
             button.textContent = `${value}%`;
+            button.setAttribute('aria-pressed', 'false');
             button.addEventListener('click', () => {
                 selected = value;
-                choices.querySelectorAll('button').forEach(item => item.classList.remove('is-selected'));
+                choices.querySelectorAll('button').forEach(item => {
+                    item.classList.remove('is-selected');
+                    item.setAttribute('aria-pressed', 'false');
+                });
                 button.classList.add('is-selected');
+                button.setAttribute('aria-pressed', 'true');
+                selection.textContent = `Обрано: ${value}%`;
                 confirm.disabled = false;
             });
             choices.append(button);
         });
-        target.append(choices);
+        target.append(choices, selection);
 
         const confirm = document.createElement('button');
         confirm.type = 'button';
-        confirm.className = 'button button-primary';
+        confirm.className = 'button button-primary anonymous-shared-wager-confirm';
         confirm.textContent = 'Підтвердити внесок';
         confirm.disabled = true;
         confirm.addEventListener('click', async () => {

@@ -36,23 +36,20 @@
     };
 
     const ensurePanel = () => {
-        const root = getRoot();
-        if (!root) return null;
+        if (!getRoot()) return null;
         if (panel?.isConnected) return panel;
 
-        panel = document.querySelector('.anonymous-shared-wager-host-panel');
-        if (panel?.isConnected) return panel;
-
-        panel = document.createElement('section');
-        panel.className = 'anonymous-shared-wager-host-panel';
-        panel.setAttribute('aria-live', 'polite');
-        const target = root.querySelector('.current-question-summary') || root;
-        target.append(panel);
-        return panel;
+        panel = document.querySelector(
+            '[data-anonymous-shared-wager-host-panel]');
+        return panel?.isConnected ? panel : null;
     };
 
     const removePanel = () => {
-        document.querySelectorAll('.anonymous-shared-wager-host-panel').forEach(item => item.remove());
+        document.querySelectorAll(
+            '[data-anonymous-shared-wager-host-panel]').forEach(item => {
+                item.replaceChildren();
+                item.hidden = true;
+            });
         panel = null;
     };
 
@@ -82,6 +79,7 @@
 
         const target = ensurePanel();
         if (!target) return;
+        target.hidden = false;
         const key = JSON.stringify({
             phase: status.phase,
             participants: status.participants,

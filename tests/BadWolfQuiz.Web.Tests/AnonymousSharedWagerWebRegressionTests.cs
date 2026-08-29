@@ -31,7 +31,7 @@ public sealed class AnonymousSharedWagerWebRegressionTests
     }
 
     [Fact]
-    public void Player_payload_returns_only_own_submission_and_share_information()
+    public void Player_payload_returns_only_own_submission_share_and_selected_percentage()
     {
         var source = ReadWebFile("Pages", "AnonymousSharedWager.cshtml.cs");
         var playerStart = source.IndexOf("private JsonResult PlayerStatus", StringComparison.Ordinal);
@@ -40,9 +40,10 @@ public sealed class AnonymousSharedWagerWebRegressionTests
 
         Assert.Contains("submitted", playerStatus);
         Assert.Contains("maximumShare", playerStatus);
+        Assert.Contains("selectedPercentage = selectedChoice?.Percentage", playerStatus);
+        Assert.Contains("state.Choices.SingleOrDefault", playerStatus);
         Assert.DoesNotContain("participants =", playerStatus);
-        Assert.DoesNotContain("Choices", playerStatus);
-        Assert.DoesNotContain("Percentage", playerStatus);
+        Assert.DoesNotContain("Choices =", playerStatus);
     }
 
     [Fact]
@@ -59,27 +60,60 @@ public sealed class AnonymousSharedWagerWebRegressionTests
     }
 
     [Fact]
-    public void Host_surface_is_singleton_and_server_does_not_render_normal_wager_or_judge_controls()
+    public void Host_surface_uses_server_slots_and_syncs_full_viewport_layout_state()
     {
         var host = ReadWebFile("wwwroot", "js", "anonymous-shared-wager-host.js");
         var lobby = ReadWebFile("Pages", "Admin", "Games", "Lobby.cshtml");
+        var css = ReadWebFile("wwwroot", "css", "site.css");
 
         Assert.Contains("BadWolfAnonymousSharedWagerHostStarted", host);
-        Assert.Contains("document.querySelectorAll('.anonymous-shared-wager-host-panel')", host);
+        Assert.Contains("[data-anonymous-shared-wager-host-panel]", host);
+        Assert.DoesNotContain("document.createElement('section')", host);
+        Assert.Contains("data-anonymous-shared-wager-host-panel", lobby);
+        Assert.Contains("anonymous-shared-wager-active", lobby);
+        Assert.Contains("anonymous-shared-wager-mode", lobby);
+        Assert.Contains("currentHostBoard.classList.toggle(\n                    \"anonymous-shared-wager-active\"", lobby);
+        Assert.Contains(".host-game-board.anonymous-shared-wager-active", css);
+        Assert.Contains("> [data-host-gameplay-view]", css);
+    }
+
+    [Fact]
+    public void Server_does_not_render_normal_wager_or_judge_controls_for_shared_wager()
+    {
+        var lobby = ReadWebFile("Pages", "Admin", "Games", "Lobby.cshtml");
+
         Assert.Contains("!BadWolfQuiz.Game.Definitions.QuestionWagerModes.IsAnonymousShared", lobby);
         Assert.Contains("Model.CurrentQuestion.IsAllPlayerQuestion ||", lobby);
         Assert.Contains("isAnonymousSharedWager", lobby);
     }
 
     [Fact]
-    public void Round_random_wager_count_fields_follow_their_own_checkboxes()
+    public void Round_random_wager_count_fields_keep_stable_positions_and_become_read_only()
     {
         var editor = ReadWebFile("Pages", "Admin", "Quizzes", "Editor.cshtml");
+        var css = ReadWebFile("wwwroot", "css", "site.css");
 
-        Assert.Contains("setRandomWagerSettingVisible", editor);
+        Assert.Contains("setRandomWagerSettingEnabled", editor);
+        Assert.Contains("input.readOnly = !enabled", editor);
         Assert.Contains("randomWagerCheckbox?.checked ?? false", editor);
         Assert.Contains("randomAnonymousSharedWagerCheckbox?.checked ?? false", editor);
-        Assert.Contains("display: none !important;", editor);
+        Assert.DoesNotContain("setRandomWagerSettingVisible", editor);
+        Assert.Contains("#random-anonymous-shared-wager-count-setting", css);
+        Assert.Contains(".is-disabled", css);
+    }
+
+    [Fact]
+    public void Player_percentage_buttons_fill_width_and_show_the_selected_value()
+    {
+        var player = ReadWebFile("wwwroot", "js", "anonymous-shared-wager-player.js");
+        var css = ReadWebFile("wwwroot", "css", "site.css");
+
+        Assert.Contains("aria-pressed", player);
+        Assert.Contains("selection.textContent = `Обрано: ${value}%`", player);
+        Assert.Contains("Ваш внесок прийнято: ${status.selectedPercentage}%", player);
+        Assert.Contains("grid-template-columns: repeat(5, minmax(0, 1fr))", css);
+        Assert.Contains(".anonymous-shared-wager-choices .button.is-selected", css);
+        Assert.Contains(".anonymous-shared-wager-selection", css);
     }
 
     [Fact]

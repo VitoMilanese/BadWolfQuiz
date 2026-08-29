@@ -157,6 +157,9 @@ public sealed class AnonymousSharedWagerModel(
         var isAnswering = state.AnsweringPlayerId == player.Id;
         var isParticipant = state.ParticipantIds.Contains(player.Id);
         var submitted = isParticipant && state.HasSubmitted(player.Id);
+        var selectedChoice = isParticipant
+            ? state.Choices.SingleOrDefault(choice => choice.PlayerId == player.Id)
+            : null;
         var calculation = state.IsComplete
             ? AnonymousSharedWagerWebStore.GetCalculation(game, state)
             : null;
@@ -168,6 +171,7 @@ public sealed class AnonymousSharedWagerModel(
             sourceQuestionId = state.SourceQuestionId,
             role = isAnswering ? "answering" : isParticipant ? "funding" : "spectator",
             submitted,
+            selectedPercentage = selectedChoice?.Percentage,
             maximumShare = isParticipant
                 ? AnonymousSharedWagerCalculator.CalculateMaximumShare(
                     question.Points,
