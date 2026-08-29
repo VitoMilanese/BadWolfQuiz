@@ -36,7 +36,7 @@
     <None Update="Resources\Avatars\**\*.png;Resources\Avatars\**\*.webp;Resources\Avatars\**\*.jpg;Resources\Avatars\**\*.jpeg;Resources\Frames\*.png"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest" />
-    <None Update="Resources\Minigames\GameCards\**\*.png;Resources\Minigames\GameCards\**\*.jpg;Resources\Minigames\GameCards\**\*.jpeg;Resources\Minigames\GameCards\**\*.webp;Resources\Minigames\GameCards\**\*.gif"
+    <None Update="Resources\Minigames\GameCards\**\*.png;Resources\Minigames\GameCards\**\*.jpg;Resources\Minigames\GameCards\**\*.jpeg;Resources\Minigames\GameCards\**\*.webp;Resources\Minigames\GameCards\**\*.gif;Resources\Minigames\GameCards\**\*.txt"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

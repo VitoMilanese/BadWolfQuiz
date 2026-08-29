@@ -22,18 +22,26 @@
     const newGameDialog = root.querySelector('[data-new-game-dialog]');
     const newGameForm = root.querySelector('[data-new-game-form]');
     const newGameCount = root.querySelector('[data-new-game-count]');
+    const newGameQuestionCards = root.querySelector('[data-new-game-question-cards]');
     const newGameCancel = root.querySelector('[data-new-game-cancel]');
     const newGameSubmit = root.querySelector('[data-new-game-submit]');
     const newGameError = root.querySelector('[data-new-game-error]');
+    const gameLayout = root.querySelector('[data-game-layout]');
     const grid = root.querySelector('[data-minigames-grid]');
     const empty = root.querySelector('[data-minigames-empty]');
+    const questionPanel = root.querySelector('[data-question-panel]');
+    const questionHistory = root.querySelector('[data-question-history]');
+    const questionOptions = root.querySelector('[data-question-options]');
+    const questionStatus = root.querySelector('[data-question-status]');
 
     const hubUrl = root.dataset.hubUrl;
     const cardUrl = root.dataset.cardUrl;
     if (!entry || !roomShell || !createRoomButton || !joinForm ||
         !joinCodeInput || !answerButton || !endTurnButton || !turnPanel ||
         !turnLabel || !turnTimer || !newGameDialog || !newGameForm || !newGameCount ||
-        !newGameCancel || !newGameSubmit || !grid || !empty || !hubUrl || !cardUrl) {
+        !newGameQuestionCards || !newGameCancel || !newGameSubmit || !gameLayout ||
+        !grid || !empty || !questionPanel || !questionHistory || !questionOptions ||
+        !questionStatus || !hubUrl || !cardUrl) {
         return;
     }
 
@@ -49,6 +57,16 @@
         answerPrompt: root.dataset.answerPrompt ?? '',
         winner: root.dataset.winner ?? '',
         notYourTurn: root.dataset.notYourTurn ?? '',
+        questionHistoryEntry: root.dataset.questionHistoryEntry ?? '{player}: {question}',
+        questionHistoryEmpty: root.dataset.questionHistoryEmpty ?? '',
+        questionNotSelected: root.dataset.questionNotSelected ?? '',
+        questionChoose: root.dataset.questionChoose ?? '',
+        questionSelected: root.dataset.questionSelected ?? '',
+        questionWait: root.dataset.questionWait ?? '',
+        questionRequired: root.dataset.questionRequired ?? '',
+        questionAlreadySelected: root.dataset.questionAlreadySelected ?? '',
+        invalidQuestion: root.dataset.invalidQuestion ?? '',
+        questionsUnavailable: root.dataset.questionsUnavailable ?? '',
         roomNotFound: root.dataset.roomNotFound ?? '',
         roomExpired: root.dataset.roomExpired ?? '',
         roomFull: root.dataset.roomFull ?? '',
@@ -62,6 +80,7 @@
     const minimumCardCount = Number(root.dataset.minCardCount ?? '10');
     let maximumCardCount = Number(root.dataset.maxCardCount ?? '0');
     let defaultCardCount = Number(root.dataset.defaultCardCount ?? '0');
+    let questionsAvailable = true;
     const storagePrefix = 'badwolf-minigame-player:';
     const inactiveCards = new Set();
 
@@ -101,6 +120,18 @@
         get(value, 'turnDeadlineUtc', 'TurnDeadlineUtc') ?? '';
     const winnerOf = value =>
         Number(get(value, 'winnerPlayerNumber', 'WinnerPlayerNumber') ?? 0);
+    const questionCardsEnabledOf = value =>
+        Boolean(get(value, 'questionCardsEnabled', 'QuestionCardsEnabled') ?? false);
+    const availableQuestionsOf = value =>
+        get(value, 'myAvailableQuestions', 'MyAvailableQuestions') ?? [];
+    const questionSelectedThisTurnOf = value =>
+        Boolean(get(value, 'hasSelectedQuestionThisTurn', 'HasSelectedQuestionThisTurn') ?? false);
+    const questionHistoryOf = value =>
+        get(value, 'questionHistory', 'QuestionHistory') ?? [];
+    const historyPlayerOf = value =>
+        Number(get(value, 'playerNumber', 'PlayerNumber') ?? 0);
+    const historyQuestionOf = value =>
+        get(value, 'question', 'Question') ?? null;
 
     const phase = {
         waitingForGame: 0,
@@ -178,6 +209,12 @@
             return text.exclusionLimit;
         }
         if (message.includes('MINIGAME_ROOM_NOTYOURTURN')) return text.notYourTurn;
+        if (message.includes('MINIGAME_ROOM_INVALIDQUESTION')) return text.invalidQuestion;
+        if (message.includes('MINIGAME_ROOM_QUESTIONALREADYSELECTED')) {
+            return text.questionAlreadySelected;
+        }
+        if (message.includes('MINIGAME_ROOM_QUESTIONREQUIRED')) return text.questionRequired;
+        if (message.includes('MINIGAME_ROOM_QUESTIONSUNAVAILABLE')) return text.questionsUnavailable;
         return text.genericError;
     };
 
@@ -400,6 +437,88 @@
         if (message) showError(entryError, message);
     };
 
+    const selectQuestion = async optionIndex => {
+        if (!currentState || phaseOf(currentState) !== phase.playing ||
+            playerNumberOf(currentState) !== currentPlayerOf(currentState) ||
+            questionSelectedThisTurnOf(currentState)) {
+            return;
+        }
+
+        clearErrors();
+        try {
+            const state = await connection.invoke(
+                'SelectQuestion',
+                currentRoomCode,
+                playerToken,
+                optionIndex);
+            applyState(state);
+        } catch (error) {
+            showError(roomError, getErrorMessage(error));
+        }
+    };
+
+    const renderQuestions = state => {
+        const enabled = questionCardsEnabledOf(state);
+        gameLayout.classList.toggle('has-question-panel', enabled);
+        questionPanel.classList.toggle('is-hidden', !enabled);
+        if (!enabled) {
+            questionHistory.replaceChildren();
+            questionOptions.replaceChildren();
+            questionStatus.textContent = '';
+            return;
+        }
+
+        const entries = questionHistoryOf(state);
+        if (entries.length === 0) {
+            const emptyHistory = document.createElement('p');
+            emptyHistory.className = 'minigames-question-history-empty';
+            emptyHistory.textContent = text.questionHistoryEmpty;
+            questionHistory.replaceChildren(emptyHistory);
+        } else {
+            const list = document.createElement('ol');
+            list.className = 'minigames-question-history-list';
+            entries.forEach(entry => {
+                const item = document.createElement('li');
+                const question = historyQuestionOf(entry) ?? text.questionNotSelected;
+                item.textContent = format(text.questionHistoryEntry, {
+                    player: playerName(historyPlayerOf(entry)),
+                    question
+                });
+                list.appendChild(item);
+            });
+            questionHistory.replaceChildren(list);
+            requestAnimationFrame(() => {
+                questionHistory.scrollTop = questionHistory.scrollHeight;
+            });
+        }
+
+        const playerNumber = playerNumberOf(state);
+        const currentPhase = phaseOf(state);
+        const isMyTurn = currentPhase === phase.playing &&
+            currentPlayerOf(state) === playerNumber;
+        const selected = questionSelectedThisTurnOf(state);
+        const available = availableQuestionsOf(state);
+        questionOptions.replaceChildren(...available.map((question, index) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'button minigames-question-option';
+            button.textContent = question;
+            button.disabled = !isMyTurn || selected;
+            button.addEventListener('click', () => void selectQuestion(index));
+            return button;
+        }));
+
+        if (currentPhase !== phase.playing) {
+            questionStatus.textContent = '';
+        } else if (selected) {
+            questionStatus.textContent = text.questionSelected;
+        } else if (isMyTurn) {
+            questionStatus.textContent = text.questionChoose;
+        } else {
+            questionStatus.textContent = text.questionWait;
+        }
+    };
+
     const renderRoom = state => {
         entry.classList.add('is-hidden');
         roomShell.classList.remove('is-hidden');
@@ -429,18 +548,21 @@
 
         const currentPlayer = currentPlayerOf(state);
         const isMyTurn = currentPhase === phase.playing && currentPlayer === playerNumber;
+        const questionRequired = questionCardsEnabledOf(state) &&
+            !questionSelectedThisTurnOf(state);
         turnPanel.classList.toggle('is-hidden', currentPhase !== phase.playing);
         turnLabel.textContent = currentPhase === phase.playing
             ? format(text.turn, { player: playerName(currentPlayer) })
             : '';
-        answerButton.disabled = !isMyTurn;
-        endTurnButton.disabled = !isMyTurn;
+        answerButton.disabled = !isMyTurn || questionRequired;
+        endTurnButton.disabled = !isMyTurn || questionRequired;
         if (!isMyTurn) {
             answerMode = false;
             root.classList.remove('is-answer-mode');
             answerButton.classList.remove('is-active');
         }
         startTurnTimer(state);
+        renderQuestions(state);
 
         const cards = cardsOf(state);
         grid.replaceChildren(...cards.map(card => createCard(card, state)));
@@ -498,9 +620,13 @@
             get(catalog, 'maximumCardCount', 'MaximumCardCount') ?? maximumCardCount);
         defaultCardCount = Number(
             get(catalog, 'defaultCardCount', 'DefaultCardCount') ?? defaultCardCount);
+        questionsAvailable = Boolean(
+            get(catalog, 'questionsAvailable', 'QuestionsAvailable') ?? false);
         newGameCount.min = String(minimumCardCount);
         newGameCount.max = String(maximumCardCount);
         newGameCount.value = String(defaultCardCount || minimumCardCount);
+        newGameQuestionCards.disabled = !questionsAvailable;
+        if (!questionsAvailable) newGameQuestionCards.checked = false;
         newGameSubmit.disabled = maximumCardCount < minimumCardCount;
     };
 
@@ -513,6 +639,7 @@
             showError(roomError, getErrorMessage(error));
             return;
         }
+        newGameQuestionCards.checked = false;
         if (!newGameDialog.open) newGameDialog.showModal();
     };
 
@@ -599,7 +726,8 @@
                 'StartNewGame',
                 currentRoomCode,
                 playerToken,
-                cardCount);
+                cardCount,
+                newGameQuestionCards.checked);
             applyState(state);
             newGameDialog.close();
         } catch (error) {
@@ -651,6 +779,9 @@
         createRoomButton.disabled = true;
         answerButton.disabled = true;
         endTurnButton.disabled = true;
+        questionOptions.querySelectorAll('button').forEach(button => {
+            button.disabled = true;
+        });
         newGameButton.disabled = true;
     });
 

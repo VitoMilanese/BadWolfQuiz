@@ -27,6 +27,16 @@
      data-answer-prompt="@Localizer["Minigames_ChooseAnswer"]"
      data-winner="@Localizer["Minigames_Winner"]"
      data-not-your-turn="@Localizer["Minigames_NotYourTurn"]"
+     data-question-history-entry="@Localizer["Minigames_QuestionHistoryEntry"]"
+     data-question-history-empty="@Localizer["Minigames_QuestionHistoryEmpty"]"
+     data-question-not-selected="@Localizer["Minigames_QuestionNotSelected"]"
+     data-question-choose="@Localizer["Minigames_QuestionChoose"]"
+     data-question-selected="@Localizer["Minigames_QuestionSelected"]"
+     data-question-wait="@Localizer["Minigames_QuestionWait"]"
+     data-question-required="@Localizer["Minigames_QuestionRequired"]"
+     data-question-already-selected="@Localizer["Minigames_QuestionAlreadySelected"]"
+     data-invalid-question="@Localizer["Minigames_InvalidQuestion"]"
+     data-questions-unavailable="@Localizer["Minigames_QuestionsUnavailable"]"
      data-room-not-found="@Localizer["Minigames_RoomNotFound"]"
      data-room-expired="@Localizer["Minigames_RoomExpired"]"
      data-room-full="@Localizer["Minigames_RoomFull"]"
@@ -116,12 +126,26 @@
             <span class="minigames-opponent-status" data-opponent-status></span>
         </div>
 
-        <div class="minigames-stage">
-            <div class="minigames-grid is-hidden" data-minigames-grid></div>
-            <div class="minigames-empty" data-minigames-empty>
-                <h2>@Localizer["Minigames_WaitingTitle"]</h2>
-                <p>@Localizer["Minigames_WaitingForGame"]</p>
+        <div class="minigames-game-layout" data-game-layout>
+            <div class="minigames-stage">
+                <div class="minigames-grid is-hidden" data-minigames-grid></div>
+                <div class="minigames-empty" data-minigames-empty>
+                    <h2>@Localizer["Minigames_WaitingTitle"]</h2>
+                    <p>@Localizer["Minigames_WaitingForGame"]</p>
+                </div>
             </div>
+
+            <aside class="minigames-question-panel is-hidden" data-question-panel>
+                <section class="minigames-question-history-section">
+                    <h2>@Localizer["Minigames_QuestionHistoryTitle"]</h2>
+                    <div class="minigames-question-history" data-question-history></div>
+                </section>
+                <section class="minigames-question-options-section">
+                    <h3>@Localizer["Minigames_QuestionChoicesTitle"]</h3>
+                    <p class="minigames-question-status" data-question-status></p>
+                    <div class="minigames-question-options" data-question-options></div>
+                </section>
+            </aside>
         </div>
     </section>
 
@@ -141,6 +165,13 @@
                     BadWolfQuiz.Web.Services.MinigameRoomStore.MinimumGameCardCount,
                     Model.AvailableCardCount]
             </small>
+            <label class="minigames-checkbox-row">
+                <input type="checkbox" data-new-game-question-cards />
+                <span>
+                    <strong>@Localizer["Minigames_QuestionCards"]</strong>
+                    <small>@Localizer["Minigames_QuestionCardsDescription"]</small>
+                </span>
+            </label>
             <p class="minigames-error is-hidden"
                data-new-game-error
                role="alert"></p>

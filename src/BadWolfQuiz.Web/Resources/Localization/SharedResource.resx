@@ -2754,4 +2754,46 @@
   <data name="Minigames_NotYourTurn" xml:space="preserve">
     <value>It is not your turn.</value>
   </data>
+  <data name="Minigames_QuestionCards" xml:space="preserve">
+    <value>Question cards</value>
+  </data>
+  <data name="Minigames_QuestionCardsDescription" xml:space="preserve">
+    <value>Offer three yes/no questions to the active player on every turn.</value>
+  </data>
+  <data name="Minigames_QuestionHistoryTitle" xml:space="preserve">
+    <value>Question history</value>
+  </data>
+  <data name="Minigames_QuestionChoicesTitle" xml:space="preserve">
+    <value>Available questions</value>
+  </data>
+  <data name="Minigames_QuestionHistoryEntry" xml:space="preserve">
+    <value>{player}: {question}</value>
+  </data>
+  <data name="Minigames_QuestionHistoryEmpty" xml:space="preserve">
+    <value>No questions have been asked yet.</value>
+  </data>
+  <data name="Minigames_QuestionNotSelected" xml:space="preserve">
+    <value>no question selected</value>
+  </data>
+  <data name="Minigames_QuestionChoose" xml:space="preserve">
+    <value>Choose one question for this turn.</value>
+  </data>
+  <data name="Minigames_QuestionSelected" xml:space="preserve">
+    <value>A question has already been chosen for this turn.</value>
+  </data>
+  <data name="Minigames_QuestionWait" xml:space="preserve">
+    <value>You can choose a question when it is your turn.</value>
+  </data>
+  <data name="Minigames_QuestionRequired" xml:space="preserve">
+    <value>Choose one of the available questions before ending the turn or answering.</value>
+  </data>
+  <data name="Minigames_QuestionAlreadySelected" xml:space="preserve">
+    <value>You have already chosen a question this turn.</value>
+  </data>
+  <data name="Minigames_InvalidQuestion" xml:space="preserve">
+    <value>That question is no longer available.</value>
+  </data>
+  <data name="Minigames_QuestionsUnavailable" xml:space="preserve">
+    <value>Question cards are unavailable because questions.txt does not contain enough questions.</value>
+  </data>
 </root>

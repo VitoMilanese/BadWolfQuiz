@@ -219,6 +219,12 @@ builder.Services.AddSingleton(provider =>
         MinigameCardSetStore.ResolveRootPath(environment),
         options.CardCount);
 });
+builder.Services.AddSingleton(provider =>
+{
+    var environment = provider.GetRequiredService<IWebHostEnvironment>();
+    return new MinigameQuestionStore(
+        MinigameQuestionStore.ResolveQuestionsPath(environment));
+});
 builder.Services.AddSingleton<MinigameRoomStore>();
 builder.Services.AddHostedService<MinigameRoomCleanupService>();
 builder.Services.AddScoped<GameSessionLauncher>();

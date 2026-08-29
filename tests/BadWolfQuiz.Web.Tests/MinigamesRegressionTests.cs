@@ -14,6 +14,7 @@ public sealed class MinigamesRegressionTests
         Assert.Contains("Menu_Minigames", layout);
         Assert.Contains("AddOptions<MinigameOptions>()", program);
         Assert.Contains("MinigameCardSetStore", program);
+        Assert.Contains("MinigameQuestionStore", program);
         Assert.Contains("AddSingleton<MinigameRoomStore>()", program);
         Assert.Contains("AddHostedService<MinigameRoomCleanupService>()", program);
         Assert.Contains("MapHub<MinigameHub>(\"/hubs/minigames\")", program);
@@ -41,12 +42,15 @@ public sealed class MinigamesRegressionTests
         Assert.Contains("data-join-room-form", page);
         Assert.Contains("data-new-game-dialog", page);
         Assert.Contains("data-new-game-count", page);
+        Assert.Contains("data-new-game-question-cards", page);
+        Assert.Contains("data-question-panel", page);
         Assert.Contains("CreateRoom", script);
         Assert.Contains("JoinRoom", script);
         Assert.Contains("StartNewGame", script);
         Assert.Contains("EndTurn", script);
         Assert.Contains("ExpireTurn", script);
         Assert.Contains("SubmitGuess", script);
+        Assert.Contains("SelectQuestion", script);
         Assert.Contains("badwolf-minigame-player:", script);
         Assert.Contains("withAutomaticReconnect()", script);
     }
@@ -65,6 +69,17 @@ public sealed class MinigamesRegressionTests
         Assert.Contains("gridTemplateColumns", script);
         Assert.Contains("gridTemplateRows", script);
         Assert.Contains("ResizeObserver", script);
+    }
+
+    [Fact]
+    public void Question_file_contains_a_large_yes_no_question_pool()
+    {
+        var questions = ReadWebFile("Resources", "Minigames", "GameCards", "questions.txt")
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        Assert.True(questions.Length >= 400, $"Only {questions.Length} questions were generated.");
+        Assert.Equal(questions.Length, questions.Distinct(StringComparer.Ordinal).Count());
+        Assert.All(questions, question => Assert.EndsWith("?", question));
     }
 
     [Fact]

@@ -5,6 +5,7 @@ namespace BadWolfQuiz.Web.Hubs;
 
 public sealed class MinigameHub(
     MinigameCardSetStore cardSetStore,
+    MinigameQuestionStore questionStore,
     MinigameRoomStore roomStore) : Hub
 {
     public MinigameCardCatalogSnapshot GetCatalog()
@@ -16,10 +17,13 @@ public sealed class MinigameHub(
                 MinigameRoomStore.MinimumGameCardCount,
                 maximum)
             : 0;
+        var questionCount = questionStore.AvailableQuestionCount;
         return new MinigameCardCatalogSnapshot(
             MinigameRoomStore.MinimumGameCardCount,
             maximum,
-            defaultCount);
+            defaultCount,
+            questionCount >= MinigameQuestionStore.MinimumQuestionCount,
+            questionCount);
     }
 
     public async Task<MinigameRoomConnection> CreateRoom()
@@ -81,7 +85,8 @@ public sealed class MinigameHub(
     public async Task<MinigameRoomSnapshot> StartNewGame(
         string roomCode,
         string playerToken,
-        int cardCount)
+        int cardCount,
+        bool questionCardsEnabled = false)
     {
         try
         {
@@ -93,7 +98,21 @@ public sealed class MinigameHub(
             }
 
             var cards = cardSetStore.GenerateCards(cardCount);
-            var state = roomStore.StartNewGame(roomCode, playerToken, cards);
+            var questions = questionCardsEnabled
+                ? questionStore.GetQuestions()
+                : [];
+            if (questionCardsEnabled &&
+                questions.Count < MinigameQuestionStore.MinimumQuestionCount)
+            {
+                throw new MinigameRoomException(MinigameRoomError.QuestionsUnavailable);
+            }
+
+            var state = roomStore.StartNewGame(
+                roomCode,
+                playerToken,
+                cards,
+                questionCardsEnabled,
+                questions);
             await BroadcastRoomChanged(state);
             return state;
         }
@@ -110,6 +129,15 @@ public sealed class MinigameHub(
     {
         return await MutateRoom(() =>
             roomStore.ToggleExclusion(roomCode, playerToken, fileName));
+    }
+
+    public async Task<MinigameRoomSnapshot> SelectQuestion(
+        string roomCode,
+        string playerToken,
+        int optionIndex)
+    {
+        return await MutateRoom(() =>
+            roomStore.SelectQuestion(roomCode, playerToken, optionIndex));
     }
 
     public async Task<MinigameRoomSnapshot> EndTurn(
@@ -170,4 +198,6 @@ public sealed class MinigameHub(
 public sealed record MinigameCardCatalogSnapshot(
     int MinimumCardCount,
     int MaximumCardCount,
-    int DefaultCardCount);
+    int DefaultCardCount,
+    bool QuestionsAvailable,
+    int QuestionCount);

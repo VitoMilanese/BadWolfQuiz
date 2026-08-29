@@ -2754,4 +2754,46 @@
   <data name="Minigames_NotYourTurn" xml:space="preserve">
     <value>Зараз хід іншого гравця.</value>
   </data>
+  <data name="Minigames_QuestionCards" xml:space="preserve">
+    <value>Картки з питаннями</value>
+  </data>
+  <data name="Minigames_QuestionCardsDescription" xml:space="preserve">
+    <value>На кожному ході активний гравець обирає одне з трьох ТАК/НІ-питань.</value>
+  </data>
+  <data name="Minigames_QuestionHistoryTitle" xml:space="preserve">
+    <value>Історія питань</value>
+  </data>
+  <data name="Minigames_QuestionChoicesTitle" xml:space="preserve">
+    <value>Доступні питання</value>
+  </data>
+  <data name="Minigames_QuestionHistoryEntry" xml:space="preserve">
+    <value>{player}: {question}</value>
+  </data>
+  <data name="Minigames_QuestionHistoryEmpty" xml:space="preserve">
+    <value>Питань ще не було.</value>
+  </data>
+  <data name="Minigames_QuestionNotSelected" xml:space="preserve">
+    <value>питання не обрано</value>
+  </data>
+  <data name="Minigames_QuestionChoose" xml:space="preserve">
+    <value>Оберіть одне питання на цей хід.</value>
+  </data>
+  <data name="Minigames_QuestionSelected" xml:space="preserve">
+    <value>Питання на цей хід уже обрано.</value>
+  </data>
+  <data name="Minigames_QuestionWait" xml:space="preserve">
+    <value>Питання можна обрати, коли настане ваш хід.</value>
+  </data>
+  <data name="Minigames_QuestionRequired" xml:space="preserve">
+    <value>Спочатку оберіть одне з доступних питань.</value>
+  </data>
+  <data name="Minigames_QuestionAlreadySelected" xml:space="preserve">
+    <value>На цьому ході ви вже обрали питання.</value>
+  </data>
+  <data name="Minigames_InvalidQuestion" xml:space="preserve">
+    <value>Це питання вже недоступне.</value>
+  </data>
+  <data name="Minigames_QuestionsUnavailable" xml:space="preserve">
+    <value>Картки з питаннями недоступні: у questions.txt недостатньо питань.</value>
+  </data>
 </root>

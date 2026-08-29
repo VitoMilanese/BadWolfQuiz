@@ -116,7 +116,9 @@ public sealed class MinigameRoomStore
     public MinigameRoomSnapshot StartNewGame(
         string? roomCode,
         string? playerToken,
-        IReadOnlyList<MinigameCardDescriptor> cards)
+        IReadOnlyList<MinigameCardDescriptor> cards,
+        bool questionCardsEnabled = false,
+        IReadOnlyList<string>? questions = null)
     {
         ArgumentNullException.ThrowIfNull(cards);
         if (cards.Count < MinimumGameCardCount ||
@@ -143,6 +145,9 @@ public sealed class MinigameRoomStore
             room.Player1TurnsStarted = 0;
             room.Player2TurnsStarted = 0;
             room.WinnerPlayerNumber = null;
+            room.QuestionGame = questionCardsEnabled
+                ? MinigameQuestionGameState.Create(questions ?? [])
+                : null;
             room.Phase = MinigameRoomPhase.ChoosingExclusions;
             room.GameNumber++;
             room.LastActivityUtc = now;
@@ -215,6 +220,30 @@ public sealed class MinigameRoomStore
         }
     }
 
+    public MinigameRoomSnapshot SelectQuestion(
+        string? roomCode,
+        string? playerToken,
+        int optionIndex)
+    {
+        lock (_sync)
+        {
+            var now = _timeProvider.GetUtcNow();
+            var room = GetActiveRoom(roomCode, now);
+            var playerNumber = GetPlayerNumber(room, playerToken);
+            RequireCurrentTurn(room, playerNumber);
+
+            if (room.QuestionGame is null)
+            {
+                throw new MinigameRoomException(MinigameRoomError.InvalidPhase);
+            }
+
+            room.QuestionGame.SelectQuestion(playerNumber, optionIndex);
+            room.LastActivityUtc = now;
+            room.Version++;
+            return CreateSnapshot(room, playerNumber);
+        }
+    }
+
     public MinigameRoomSnapshot EndTurn(
         string? roomCode,
         string? playerToken)
@@ -225,6 +254,7 @@ public sealed class MinigameRoomStore
             var room = GetActiveRoom(roomCode, now);
             var playerNumber = GetPlayerNumber(room, playerToken);
             RequireCurrentTurn(room, playerNumber);
+            RequireQuestionSelected(room);
 
             room.LastActivityUtc = now;
             AdvanceTurn(room, now);
@@ -250,6 +280,12 @@ public sealed class MinigameRoomStore
                 return CreateSnapshot(room, playerNumber);
             }
 
+            if (room.QuestionGame is { HasSelectedQuestionThisTurn: false } questions &&
+                room.CurrentPlayerNumber is int currentPlayer)
+            {
+                questions.RecordNoSelection(currentPlayer);
+            }
+
             AdvanceTurn(room, now);
             room.Version++;
             return CreateSnapshot(room, playerNumber);
@@ -267,6 +303,7 @@ public sealed class MinigameRoomStore
             var room = GetActiveRoom(roomCode, now);
             var playerNumber = GetPlayerNumber(room, playerToken);
             RequireCurrentTurn(room, playerNumber);
+            RequireQuestionSelected(room);
 
             var activeCards = GetActiveCards(room);
             var guessedCard = activeCards.FirstOrDefault(card =>
@@ -369,6 +406,14 @@ public sealed class MinigameRoomStore
         }
     }
 
+    private static void RequireQuestionSelected(MinigameRoomState room)
+    {
+        if (room.QuestionGame is { HasSelectedQuestionThisTurn: false })
+        {
+            throw new MinigameRoomException(MinigameRoomError.QuestionRequired);
+        }
+    }
+
     private static void StartPlaying(
         MinigameRoomState room,
         DateTimeOffset now)
@@ -437,6 +482,7 @@ public sealed class MinigameRoomStore
             room.Player2TurnsStarted++;
         }
 
+        room.QuestionGame?.BeginTurn();
         room.CurrentPlayerNumber = playerNumber;
         room.TurnDeadlineUtc = now + duration;
     }
@@ -490,6 +536,10 @@ public sealed class MinigameRoomStore
             room.CurrentPlayerNumber,
             room.TurnDeadlineUtc,
             room.WinnerPlayerNumber,
+            room.QuestionGame is not null,
+            room.QuestionGame?.GetAvailableQuestions(playerNumber).ToArray() ?? [],
+            room.QuestionGame?.HasSelectedQuestionThisTurn ?? false,
+            room.QuestionGame?.History.ToArray() ?? [],
             room.CreatedAtUtc,
             room.LastActivityUtc,
             room.LastActivityUtc + InactivityTimeout);
@@ -565,6 +615,7 @@ public sealed class MinigameRoomStore
         public int Player1TurnsStarted { get; set; }
         public int Player2TurnsStarted { get; set; }
         public int? WinnerPlayerNumber { get; set; }
+        public MinigameQuestionGameState? QuestionGame { get; set; }
     }
 }
 
@@ -587,7 +638,11 @@ public enum MinigameRoomError
     CardNotFound,
     CardAlreadyExcluded,
     ExclusionLimitReached,
-    NotYourTurn
+    NotYourTurn,
+    InvalidQuestion,
+    QuestionAlreadySelected,
+    QuestionRequired,
+    QuestionsUnavailable
 }
 
 public sealed class MinigameRoomException(MinigameRoomError error)
@@ -617,6 +672,10 @@ public sealed record MinigameRoomSnapshot(
     int? CurrentPlayerNumber,
     DateTimeOffset? TurnDeadlineUtc,
     int? WinnerPlayerNumber,
+    bool QuestionCardsEnabled,
+    IReadOnlyList<string> MyAvailableQuestions,
+    bool HasSelectedQuestionThisTurn,
+    IReadOnlyList<MinigameQuestionHistoryEntry> QuestionHistory,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset LastActivityUtc,
     DateTimeOffset ExpiresAtUtc)
