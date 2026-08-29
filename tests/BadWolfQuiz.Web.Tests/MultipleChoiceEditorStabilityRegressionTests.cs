@@ -59,27 +59,31 @@ public sealed class MultipleChoiceEditorStabilityRegressionTests
     }
 
     [Fact]
-    public void Multiple_choice_reveal_uses_one_vertical_full_width_stack_and_hides_it_during_close()
+    public void Multiple_choice_reveal_uses_direct_vertical_full_width_blocks_and_hides_them_during_close()
     {
         var root = FindRepositoryRoot();
         var reveal = File.ReadAllText(Path.Combine(
-            root,
-            "src",
-            "BadWolfQuiz.Web",
-            "Pages",
-            "Admin",
-            "Games",
-            "_MultipleChoiceRevealBlocks.cshtml"));
+                root,
+                "src",
+                "BadWolfQuiz.Web",
+                "Pages",
+                "Admin",
+                "Games",
+                "_MultipleChoiceRevealBlocks.cshtml"))
+            .ReplaceLineEndings("\n");
 
         Assert.Contains(
-            "> .multiple-choice-answer-reveal-stack",
+            ".game-content-blocks.multiple-choice-answer-reveal-grid",
             reveal,
             StringComparison.Ordinal);
-        Assert.Contains("grid-column: 1 / -1 !important;", reveal, StringComparison.Ordinal);
         Assert.Contains("display: flex !important;", reveal, StringComparison.Ordinal);
         Assert.Contains("flex-direction: column !important;", reveal, StringComparison.Ordinal);
         Assert.Contains(
-            ".multiple-choice-answer-reveal-stack > .game-content-block",
+            "<article class=\"game-content-block @correctOptionClass @additionalClass\">",
+            reveal,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "multiple-choice-answer-reveal-stack",
             reveal,
             StringComparison.Ordinal);
         Assert.Contains("border: 0 !important;", reveal, StringComparison.Ordinal);

@@ -7,21 +7,42 @@
 }
 
 <style>
-    /* Legacy AllPlayerMultipleChoice styling still turns the outer answer block list
-       into a two-column grid. Keep the shared reveal as one full-width grid item so
-       the correct option and reveal-only content always stack vertically. */
-    .game-content-blocks.multiple-choice-answer-reveal-grid
-    > .multiple-choice-answer-reveal-stack {
-        grid-column: 1 / -1 !important;
-        width: 100% !important;
-        min-width: 0 !important;
+    /* Keep reveal blocks as direct children of the shared runtime block list.
+       content-block-containers.js relies on that structure to consume
+       __badwolf_container:N__ markers and group their following blocks. */
+    .game-content-blocks.multiple-choice-answer-reveal-grid,
+    html.all-player-multiple-choice-answer-layout
+        .host-game-board .answer-presentation
+        > .game-content-blocks.multiple-choice-answer-reveal-grid,
+    .host-game-board.all-player-multiple-choice-answer
+        .answer-presentation
+        > .game-content-blocks.multiple-choice-answer-reveal-grid {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
+        align-content: safe center !important;
+        grid-template-columns: none !important;
+        grid-auto-rows: auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
         gap: clamp(9px, 1.5vw, 18px) !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
     }
 
-    .multiple-choice-answer-reveal-stack > .game-content-block {
+    /* Legacy all-player answer styles treat every descendant block as an answer
+       option. Reset them across the whole shared reveal, including blocks moved
+       inside a runtime content container. */
+    .game-content-blocks.multiple-choice-answer-reveal-grid
+        .game-content-block,
+    html.all-player-multiple-choice-answer-layout
+        .host-game-board .answer-presentation
+        > .game-content-blocks.multiple-choice-answer-reveal-grid
+        .game-content-block,
+    .host-game-board.all-player-multiple-choice-answer
+        .answer-presentation
+        > .game-content-blocks.multiple-choice-answer-reveal-grid
+        .game-content-block {
         display: block !important;
         width: min(100%, 1100px) !important;
         min-width: 0 !important;
@@ -35,15 +56,24 @@
         text-align: inherit !important;
     }
 
-    .multiple-choice-answer-reveal-stack
-    > .all-player-answer-option-correct {
+    .game-content-blocks.multiple-choice-answer-reveal-grid
+        > .all-player-answer-option-correct {
         padding: clamp(.55rem, 1vw, .9rem) !important;
         border: 3px solid #2e7d32 !important;
         border-radius: .8rem !important;
         text-align: center !important;
     }
 
-    .multiple-choice-answer-reveal-stack .game-content-image {
+    .game-content-blocks.multiple-choice-answer-reveal-grid
+        .game-content-image,
+    html.all-player-multiple-choice-answer-layout
+        .host-game-board .answer-presentation
+        > .game-content-blocks.multiple-choice-answer-reveal-grid
+        .game-content-image,
+    .host-game-board.all-player-multiple-choice-answer
+        .answer-presentation
+        > .game-content-blocks.multiple-choice-answer-reveal-grid
+        .game-content-image {
         width: auto !important;
         height: auto !important;
         max-width: 100% !important;
@@ -56,12 +86,11 @@
        correct-answer border nor stale answer content can flash before the board. */
     .answer-presentation:has(
         form[action*="handler=CloseAnswer"] button:disabled)
-    .multiple-choice-answer-reveal-stack {
+    .multiple-choice-answer-reveal-grid {
         visibility: hidden !important;
     }
 </style>
 
-<div class="multiple-choice-answer-reveal-stack">
 @foreach (var block in Model.Blocks)
 {
     var correctOptionClass = isAllPlayerMultipleChoice && blockIndex == 0
@@ -149,4 +178,3 @@
 
     blockIndex++;
 }
-</div>
