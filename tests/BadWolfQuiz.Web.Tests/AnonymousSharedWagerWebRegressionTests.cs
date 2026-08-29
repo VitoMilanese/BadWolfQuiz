@@ -73,7 +73,8 @@ public sealed class AnonymousSharedWagerWebRegressionTests
     public void Host_surface_uses_server_slots_and_syncs_full_viewport_layout_state()
     {
         var host = ReadWebFile("wwwroot", "js", "anonymous-shared-wager-host.js");
-        var lobby = ReadWebFile("Pages", "Admin", "Games", "Lobby.cshtml");
+        var lobby = ReadWebFile("Pages", "Admin", "Games", "Lobby.cshtml")
+            .ReplaceLineEndings("\n");
         var css = ReadWebFile("wwwroot", "css", "site.css");
 
         Assert.Contains("BadWolfAnonymousSharedWagerHostStarted", host);
