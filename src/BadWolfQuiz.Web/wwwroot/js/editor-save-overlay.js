@@ -137,6 +137,15 @@ body .editor-save-overlay[hidden] {
     }
 
     if (editor.matches("form.quiz-board-form")) {
+        const questionCopyBoardRefreshScript = document.createElement("script");
+        questionCopyBoardRefreshScript.src = new URL(
+            "/js/question-copy-board-refresh.js",
+            window.location.origin).href;
+        questionCopyBoardRefreshScript.async = false;
+        questionCopyBoardRefreshScript.dataset.questionCopyBoardRefreshLoader =
+            "true";
+        document.head.appendChild(questionCopyBoardRefreshScript);
+
         const questionCopyScript = document.createElement("script");
         questionCopyScript.src = new URL(
             "/js/question-copy-action.js",
