@@ -2796,4 +2796,16 @@
   <data name="Minigames_QuestionsUnavailable" xml:space="preserve">
     <value>Question cards are unavailable because questions.txt does not contain enough questions.</value>
   </data>
+  <data name="Minigames_HistoryGuessCorrect" xml:space="preserve">
+    <value>{player} named game {game} (correct)</value>
+  </data>
+  <data name="Minigames_HistoryGuessIncorrect" xml:space="preserve">
+    <value>{player} named game {game} (incorrect)</value>
+  </data>
+  <data name="Minigames_HistoryTurnEnded" xml:space="preserve">
+    <value>{player} ended the turn</value>
+  </data>
+  <data name="Minigames_HistoryTurnTimedOut" xml:space="preserve">
+    <value>{player} ended the turn (time expired)</value>
+  </data>
 </root>

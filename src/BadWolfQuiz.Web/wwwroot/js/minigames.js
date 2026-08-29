@@ -58,6 +58,10 @@
         winner: root.dataset.winner ?? '',
         notYourTurn: root.dataset.notYourTurn ?? '',
         questionHistoryEntry: root.dataset.questionHistoryEntry ?? '{player}: {question}',
+        historyGuessCorrect: root.dataset.historyGuessCorrect ?? '{player} named game {game} (correct)',
+        historyGuessIncorrect: root.dataset.historyGuessIncorrect ?? '{player} named game {game} (incorrect)',
+        historyTurnEnded: root.dataset.historyTurnEnded ?? '{player} ended the turn',
+        historyTurnTimedOut: root.dataset.historyTurnTimedOut ?? '{player} ended the turn (time expired)',
         questionHistoryEmpty: root.dataset.questionHistoryEmpty ?? '',
         questionNotSelected: root.dataset.questionNotSelected ?? '',
         questionChoose: root.dataset.questionChoose ?? '',
@@ -130,8 +134,19 @@
         get(value, 'questionHistory', 'QuestionHistory') ?? [];
     const historyPlayerOf = value =>
         Number(get(value, 'playerNumber', 'PlayerNumber') ?? 0);
-    const historyQuestionOf = value =>
-        get(value, 'question', 'Question') ?? null;
+    const historyKindOf = value =>
+        Number(get(value, 'kind', 'Kind') ?? 0);
+    const historyValueOf = value =>
+        get(value, 'value', 'Value') ?? null;
+    const historyCorrectOf = value =>
+        Boolean(get(value, 'isCorrect', 'IsCorrect') ?? false);
+
+    const historyKind = {
+        question: 0,
+        guess: 1,
+        turnEnded: 2,
+        turnTimedOut: 3
+    };
 
     const phase = {
         waitingForGame: 0,
@@ -479,11 +494,26 @@
             list.className = 'minigames-question-history-list';
             entries.forEach(entry => {
                 const item = document.createElement('li');
-                const question = historyQuestionOf(entry) ?? text.questionNotSelected;
-                item.textContent = format(text.questionHistoryEntry, {
-                    player: playerName(historyPlayerOf(entry)),
-                    question
-                });
+                const player = playerName(historyPlayerOf(entry));
+                const kind = historyKindOf(entry);
+                const value = historyValueOf(entry) ?? '';
+
+                if (kind === historyKind.guess) {
+                    item.textContent = format(
+                        historyCorrectOf(entry)
+                            ? text.historyGuessCorrect
+                            : text.historyGuessIncorrect,
+                        { player, game: value });
+                } else if (kind === historyKind.turnEnded) {
+                    item.textContent = format(text.historyTurnEnded, { player });
+                } else if (kind === historyKind.turnTimedOut) {
+                    item.textContent = format(text.historyTurnTimedOut, { player });
+                } else {
+                    item.textContent = format(text.questionHistoryEntry, {
+                        player,
+                        question: value
+                    });
+                }
                 list.appendChild(item);
             });
             questionHistory.replaceChildren(list);
@@ -548,14 +578,12 @@
 
         const currentPlayer = currentPlayerOf(state);
         const isMyTurn = currentPhase === phase.playing && currentPlayer === playerNumber;
-        const questionRequired = questionCardsEnabledOf(state) &&
-            !questionSelectedThisTurnOf(state);
         turnPanel.classList.toggle('is-hidden', currentPhase !== phase.playing);
         turnLabel.textContent = currentPhase === phase.playing
             ? format(text.turn, { player: playerName(currentPlayer) })
             : '';
-        answerButton.disabled = !isMyTurn || questionRequired;
-        endTurnButton.disabled = !isMyTurn || questionRequired;
+        answerButton.disabled = !isMyTurn;
+        endTurnButton.disabled = !isMyTurn;
         if (!isMyTurn) {
             answerMode = false;
             root.classList.remove('is-answer-mode');

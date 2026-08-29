@@ -254,8 +254,8 @@ public sealed class MinigameRoomStore
             var room = GetActiveRoom(roomCode, now);
             var playerNumber = GetPlayerNumber(room, playerToken);
             RequireCurrentTurn(room, playerNumber);
-            RequireQuestionSelected(room);
 
+            room.QuestionGame?.RecordTurnEnded(playerNumber);
             room.LastActivityUtc = now;
             AdvanceTurn(room, now);
             room.Version++;
@@ -280,10 +280,10 @@ public sealed class MinigameRoomStore
                 return CreateSnapshot(room, playerNumber);
             }
 
-            if (room.QuestionGame is { HasSelectedQuestionThisTurn: false } questions &&
+            if (room.QuestionGame is not null &&
                 room.CurrentPlayerNumber is int currentPlayer)
             {
-                questions.RecordNoSelection(currentPlayer);
+                room.QuestionGame.RecordTurnTimedOut(currentPlayer);
             }
 
             AdvanceTurn(room, now);
@@ -303,7 +303,6 @@ public sealed class MinigameRoomStore
             var room = GetActiveRoom(roomCode, now);
             var playerNumber = GetPlayerNumber(room, playerToken);
             RequireCurrentTurn(room, playerNumber);
-            RequireQuestionSelected(room);
 
             var activeCards = GetActiveCards(room);
             var guessedCard = activeCards.FirstOrDefault(card =>
@@ -321,11 +320,16 @@ public sealed class MinigameRoomStore
                 throw new MinigameRoomException(MinigameRoomError.InvalidPhase);
             }
 
+            var isCorrect = string.Equals(
+                guessedCard.FileName,
+                opponentSecret,
+                StringComparison.Ordinal);
+            room.QuestionGame?.RecordGuess(
+                playerNumber,
+                guessedCard.DisplayName,
+                isCorrect);
             room.LastActivityUtc = now;
-            if (string.Equals(
-                    guessedCard.FileName,
-                    opponentSecret,
-                    StringComparison.Ordinal))
+            if (isCorrect)
             {
                 room.WinnerPlayerNumber = playerNumber;
                 room.Phase = MinigameRoomPhase.Finished;
@@ -403,14 +407,6 @@ public sealed class MinigameRoomStore
         if (room.CurrentPlayerNumber != playerNumber)
         {
             throw new MinigameRoomException(MinigameRoomError.NotYourTurn);
-        }
-    }
-
-    private static void RequireQuestionSelected(MinigameRoomState room)
-    {
-        if (room.QuestionGame is { HasSelectedQuestionThisTurn: false })
-        {
-            throw new MinigameRoomException(MinigameRoomError.QuestionRequired);
         }
     }
 

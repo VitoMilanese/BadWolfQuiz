@@ -52,20 +52,32 @@ internal sealed class MinigameQuestionGameState
         }
 
         var question = GetDeck(playerNumber).Select(optionIndex);
-        _history.Add(new MinigameQuestionHistoryEntry(playerNumber, question));
+        _history.Add(new MinigameQuestionHistoryEntry(
+            playerNumber,
+            MinigameQuestionHistoryKind.Question,
+            question));
         HasSelectedQuestionThisTurn = true;
     }
 
-    public void RecordNoSelection(int playerNumber)
+    public void RecordGuess(int playerNumber, string gameName, bool isCorrect)
     {
-        if (HasSelectedQuestionThisTurn)
-        {
-            return;
-        }
-
-        _history.Add(new MinigameQuestionHistoryEntry(playerNumber, null));
-        HasSelectedQuestionThisTurn = true;
+        ArgumentException.ThrowIfNullOrWhiteSpace(gameName);
+        _history.Add(new MinigameQuestionHistoryEntry(
+            playerNumber,
+            MinigameQuestionHistoryKind.Guess,
+            gameName,
+            isCorrect));
     }
+
+    public void RecordTurnEnded(int playerNumber) =>
+        _history.Add(new MinigameQuestionHistoryEntry(
+            playerNumber,
+            MinigameQuestionHistoryKind.TurnEnded));
+
+    public void RecordTurnTimedOut(int playerNumber) =>
+        _history.Add(new MinigameQuestionHistoryEntry(
+            playerNumber,
+            MinigameQuestionHistoryKind.TurnTimedOut));
 
     private PlayerQuestionDeck GetDeck(int playerNumber) =>
         playerNumber switch
@@ -136,6 +148,16 @@ internal sealed class MinigameQuestionGameState
     }
 }
 
+public enum MinigameQuestionHistoryKind
+{
+    Question = 0,
+    Guess = 1,
+    TurnEnded = 2,
+    TurnTimedOut = 3
+}
+
 public sealed record MinigameQuestionHistoryEntry(
     int PlayerNumber,
-    string? Question);
+    MinigameQuestionHistoryKind Kind,
+    string? Value = null,
+    bool? IsCorrect = null);

@@ -44,6 +44,10 @@ public sealed class MinigamesRegressionTests
         Assert.Contains("data-new-game-count", page);
         Assert.Contains("data-new-game-question-cards", page);
         Assert.Contains("data-question-panel", page);
+        Assert.Contains("data-history-guess-correct", page);
+        Assert.Contains("data-history-guess-incorrect", page);
+        Assert.Contains("data-history-turn-ended", page);
+        Assert.Contains("data-history-turn-timed-out", page);
         Assert.Contains("CreateRoom", script);
         Assert.Contains("JoinRoom", script);
         Assert.Contains("StartNewGame", script);
@@ -51,6 +55,8 @@ public sealed class MinigamesRegressionTests
         Assert.Contains("ExpireTurn", script);
         Assert.Contains("SubmitGuess", script);
         Assert.Contains("SelectQuestion", script);
+        Assert.Contains("historyKind", script);
+        Assert.Contains("historyGuessCorrect", script);
         Assert.Contains("badwolf-minigame-player:", script);
         Assert.Contains("withAutomaticReconnect()", script);
     }
