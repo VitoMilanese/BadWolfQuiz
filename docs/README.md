@@ -44,6 +44,8 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Active game recovery](features/active-game-recovery.md)
 - [Game history](features/game-history.md)
 - [Host accounts](features/host-accounts.md)
+- [Minigames and Guess what I'm playing](features/minigames.md)
+- [Social link previews](features/social-link-previews.md)
 - [Discord voice moderation](features/discord-voice-moderation.md)
 - [User feedback conversations](features/user-feedback-conversations.md)
 
