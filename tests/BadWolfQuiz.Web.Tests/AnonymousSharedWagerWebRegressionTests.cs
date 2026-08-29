@@ -60,6 +60,16 @@ public sealed class AnonymousSharedWagerWebRegressionTests
     }
 
     [Fact]
+    public void Host_answering_controls_show_only_correct_and_incorrect_actions()
+    {
+        var host = ReadWebFile("wwwroot", "js", "anonymous-shared-wager-host.js");
+
+        Assert.DoesNotContain("Ставка сформована:", host);
+        Assert.Contains("incorrect.textContent = 'Неправильно';", host);
+        Assert.DoesNotContain("Неправильно / немає відповіді", host);
+    }
+
+    [Fact]
     public void Host_surface_uses_server_slots_and_syncs_full_viewport_layout_state()
     {
         var host = ReadWebFile("wwwroot", "js", "anonymous-shared-wager-host.js");

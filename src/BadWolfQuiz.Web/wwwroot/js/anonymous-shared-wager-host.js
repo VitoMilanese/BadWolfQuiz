@@ -91,11 +91,11 @@
         target.replaceChildren();
         suppressNormalControls(true);
 
-        const title = document.createElement('h3');
-        title.textContent = 'Анонімна спільна ставка';
-        target.append(title);
-
         if (status.phase === 'collecting') {
+            const title = document.createElement('h3');
+            title.textContent = 'Анонімна спільна ставка';
+            target.append(title);
+
             const note = document.createElement('p');
             note.textContent = `Ставку для ${status.answeringPlayerName} формують інші гравці. Суми та відсотки приховані.`;
             target.append(note);
@@ -120,10 +120,6 @@
             return;
         }
 
-        const summary = document.createElement('p');
-        summary.textContent = `Ставка сформована: ${status.combinedWager}. Відповідає ${status.answeringPlayerName}.`;
-        target.append(summary);
-
         const actions = document.createElement('div');
         actions.className = 'question-judge-actions anonymous-shared-wager-judge-actions';
         const correct = document.createElement('button');
@@ -134,7 +130,7 @@
         const incorrect = document.createElement('button');
         incorrect.type = 'button';
         incorrect.className = 'button judgment-incorrect-button';
-        incorrect.textContent = 'Неправильно / немає відповіді';
+        incorrect.textContent = 'Неправильно';
         incorrect.addEventListener('click', () => settle(false));
         actions.append(correct, incorrect);
         target.append(actions);
