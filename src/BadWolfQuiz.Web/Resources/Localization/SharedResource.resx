@@ -2808,4 +2808,25 @@
   <data name="Minigames_HistoryTurnTimedOut" xml:space="preserve">
     <value>{player} ended the turn (time expired)</value>
   </data>
+  <data name="Minigames_RestartGame" xml:space="preserve">
+    <value>Restart current game</value>
+  </data>
+  <data name="Minigames_QuestionResponseTitle" xml:space="preserve">
+    <value>Answer the question</value>
+  </data>
+  <data name="Minigames_QuestionResponsePrompt" xml:space="preserve">
+    <value>{player} asks: {question}</value>
+  </data>
+  <data name="Minigames_Yes" xml:space="preserve">
+    <value>YES</value>
+  </data>
+  <data name="Minigames_No" xml:space="preserve">
+    <value>NO</value>
+  </data>
+  <data name="Minigames_HistoryQuestionAnswer" xml:space="preserve">
+    <value>{player} answered - {answer}</value>
+  </data>
+  <data name="Minigames_QuestionAwaitingResponse" xml:space="preserve">
+    <value>Waiting for {player}'s answer.</value>
+  </data>
 </root>

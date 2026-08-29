@@ -2808,4 +2808,25 @@
   <data name="Minigames_HistoryTurnTimedOut" xml:space="preserve">
     <value>{player} закінчив хід (вийшов час)</value>
   </data>
+  <data name="Minigames_RestartGame" xml:space="preserve">
+    <value>Перезапустити поточну гру</value>
+  </data>
+  <data name="Minigames_QuestionResponseTitle" xml:space="preserve">
+    <value>Відповідь на питання</value>
+  </data>
+  <data name="Minigames_QuestionResponsePrompt" xml:space="preserve">
+    <value>{player} запитує: {question}</value>
+  </data>
+  <data name="Minigames_Yes" xml:space="preserve">
+    <value>ТАК</value>
+  </data>
+  <data name="Minigames_No" xml:space="preserve">
+    <value>НІ</value>
+  </data>
+  <data name="Minigames_HistoryQuestionAnswer" xml:space="preserve">
+    <value>{player} відповів - {answer}</value>
+  </data>
+  <data name="Minigames_QuestionAwaitingResponse" xml:space="preserve">
+    <value>Очікуємо відповідь {player}.</value>
+  </data>
 </root>

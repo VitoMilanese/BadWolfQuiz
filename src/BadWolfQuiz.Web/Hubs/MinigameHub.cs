@@ -123,6 +123,14 @@ public sealed class MinigameHub(
         }
     }
 
+    public async Task<MinigameRoomSnapshot> RestartGame(
+        string roomCode,
+        string playerToken)
+    {
+        return await MutateRoom(() =>
+            roomStore.RestartGame(roomCode, playerToken));
+    }
+
     public async Task<MinigameRoomSnapshot> ToggleExclusion(
         string roomCode,
         string playerToken,
@@ -139,6 +147,15 @@ public sealed class MinigameHub(
     {
         return await MutateRoom(() =>
             roomStore.SelectQuestion(roomCode, playerToken, optionIndex));
+    }
+
+    public async Task<MinigameRoomSnapshot> SubmitQuestionResponse(
+        string roomCode,
+        string playerToken,
+        bool answerYes)
+    {
+        return await MutateRoom(() =>
+            roomStore.SubmitQuestionResponse(roomCode, playerToken, answerYes));
     }
 
     public async Task<MinigameRoomSnapshot> EndTurn(

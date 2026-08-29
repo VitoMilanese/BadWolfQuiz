@@ -45,7 +45,64 @@ public sealed class MinigameRoomQuestionTests
         Assert.Equal(MinigameQuestionHistoryKind.Question, history.Kind);
         Assert.Equal(selected, history.Value);
         Assert.Null(history.IsCorrect);
+        Assert.Equal(selected, after.PendingQuestion);
+        Assert.Equal(2, after.PendingQuestionResponsePlayerNumber);
         Assert.Equal(after.QuestionHistory, opponent.QuestionHistory);
+        Assert.Equal(selected, opponent.PendingQuestion);
+        Assert.Equal(2, opponent.PendingQuestionResponsePlayerNumber);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Asked_player_answer_is_recorded_in_shared_history(bool answerYes)
+    {
+        var (store, player1, player2, _) = CreatePlayingRoom(questionCardsEnabled: true);
+        var selected = store
+            .GetState(player1.RoomCode, player1.PlayerToken)
+            .MyAvailableQuestions[0];
+        store.SelectQuestion(player1.RoomCode, player1.PlayerToken, 0);
+
+        var answered = store.SubmitQuestionResponse(
+            player1.RoomCode,
+            player2.PlayerToken,
+            answerYes);
+        var asker = store.GetState(player1.RoomCode, player1.PlayerToken);
+
+        Assert.Null(answered.PendingQuestion);
+        Assert.Null(answered.PendingQuestionResponsePlayerNumber);
+        Assert.Collection(
+            answered.QuestionHistory,
+            entry =>
+            {
+                Assert.Equal(1, entry.PlayerNumber);
+                Assert.Equal(MinigameQuestionHistoryKind.Question, entry.Kind);
+                Assert.Equal(selected, entry.Value);
+            },
+            entry =>
+            {
+                Assert.Equal(2, entry.PlayerNumber);
+                Assert.Equal(MinigameQuestionHistoryKind.Answer, entry.Kind);
+                Assert.Equal(answerYes, entry.AnswerYes);
+                Assert.Null(entry.Value);
+                Assert.Null(entry.IsCorrect);
+            });
+        Assert.Equal(answered.QuestionHistory, asker.QuestionHistory);
+    }
+
+    [Fact]
+    public void Question_answer_can_only_be_submitted_by_the_asked_player()
+    {
+        var (store, player1, _, _) = CreatePlayingRoom(questionCardsEnabled: true);
+        store.SelectQuestion(player1.RoomCode, player1.PlayerToken, 0);
+
+        var error = Assert.Throws<MinigameRoomException>(() =>
+            store.SubmitQuestionResponse(
+                player1.RoomCode,
+                player1.PlayerToken,
+                answerYes: true));
+
+        Assert.Equal(MinigameRoomError.QuestionResponseNotPending, error.Error);
     }
 
     [Fact]
@@ -171,6 +228,10 @@ public sealed class MinigameRoomQuestionTests
             var current = store.GetState(player1.RoomCode, player1.PlayerToken);
             Assert.NotEmpty(current.MyAvailableQuestions);
             store.SelectQuestion(player1.RoomCode, player1.PlayerToken, 0);
+            store.SubmitQuestionResponse(
+                player1.RoomCode,
+                player2.PlayerToken,
+                answerYes: true);
             store.EndTurn(player1.RoomCode, player1.PlayerToken);
             store.EndTurn(player1.RoomCode, player2.PlayerToken);
         }
@@ -184,6 +245,52 @@ public sealed class MinigameRoomQuestionTests
         Assert.Equal(
             MinigameQuestionHistoryKind.TurnEnded,
             next.QuestionHistory[^1].Kind);
+    }
+
+    [Fact]
+    public void Restart_keeps_active_cards_clears_history_and_changes_only_requesters_secret()
+    {
+        var (store, player1, player2, time) = CreatePlayingRoom(questionCardsEnabled: true);
+        var before1 = store.GetState(player1.RoomCode, player1.PlayerToken);
+        var before2 = store.GetState(player1.RoomCode, player2.PlayerToken);
+        var visibleFiles = before1.Cards.Select(card => card.FileName).ToArray();
+        store.SelectQuestion(player1.RoomCode, player1.PlayerToken, 0);
+        store.SubmitQuestionResponse(player1.RoomCode, player2.PlayerToken, answerYes: true);
+
+        var restarted = store.RestartGame(player1.RoomCode, player1.PlayerToken);
+        var opponent = store.GetState(player1.RoomCode, player2.PlayerToken);
+
+        Assert.Equal(MinigameRoomPhase.Playing, restarted.Phase);
+        Assert.Equal(before1.GameNumber + 1, restarted.GameNumber);
+        Assert.Equal(visibleFiles, restarted.Cards.Select(card => card.FileName));
+        Assert.DoesNotContain("Card-1.png", restarted.Cards.Select(card => card.FileName));
+        Assert.DoesNotContain("Card-2.png", restarted.Cards.Select(card => card.FileName));
+        Assert.NotEqual(before1.MySecretCardFileName, restarted.MySecretCardFileName);
+        Assert.Equal(before2.MySecretCardFileName, opponent.MySecretCardFileName);
+        Assert.Empty(restarted.QuestionHistory);
+        Assert.Null(restarted.PendingQuestion);
+        Assert.Null(restarted.PendingQuestionResponsePlayerNumber);
+        Assert.Equal(3, restarted.MyAvailableQuestions.Count);
+        Assert.Equal(1, restarted.CurrentPlayerNumber);
+        Assert.Equal(
+            time.GetUtcNow() + MinigameRoomStore.FirstTurnDuration,
+            restarted.TurnDeadlineUtc);
+        Assert.Null(restarted.WinnerPlayerNumber);
+    }
+
+    [Fact]
+    public void Restart_by_player_two_changes_only_player_two_secret()
+    {
+        var (store, player1, player2, _) = CreatePlayingRoom(questionCardsEnabled: false);
+        var before1 = store.GetState(player1.RoomCode, player1.PlayerToken);
+        var before2 = store.GetState(player1.RoomCode, player2.PlayerToken);
+
+        var restarted = store.RestartGame(player1.RoomCode, player2.PlayerToken);
+        var player1After = store.GetState(player1.RoomCode, player1.PlayerToken);
+
+        Assert.NotEqual(before2.MySecretCardFileName, restarted.MySecretCardFileName);
+        Assert.Equal(before1.MySecretCardFileName, player1After.MySecretCardFileName);
+        Assert.Equal(1, restarted.CurrentPlayerNumber);
     }
 
     [Fact]

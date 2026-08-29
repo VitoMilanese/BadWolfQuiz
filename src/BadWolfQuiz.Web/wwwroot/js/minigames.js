@@ -18,6 +18,7 @@
     const turnPanel = root.querySelector('[data-turn-panel]');
     const turnLabel = root.querySelector('[data-turn-label]');
     const turnTimer = root.querySelector('[data-turn-timer]');
+    const restartGameButton = root.querySelector('[data-restart-game]');
     const newGameButton = root.querySelector('[data-new-game]');
     const newGameDialog = root.querySelector('[data-new-game-dialog]');
     const newGameForm = root.querySelector('[data-new-game-form]');
@@ -33,15 +34,21 @@
     const questionHistory = root.querySelector('[data-question-history]');
     const questionOptions = root.querySelector('[data-question-options]');
     const questionStatus = root.querySelector('[data-question-status]');
+    const questionResponseDialog = root.querySelector('[data-question-response-dialog]');
+    const questionResponseText = root.querySelector('[data-question-response-text]');
+    const questionResponseYes = root.querySelector('[data-question-response-yes]');
+    const questionResponseNo = root.querySelector('[data-question-response-no]');
 
     const hubUrl = root.dataset.hubUrl;
     const cardUrl = root.dataset.cardUrl;
     if (!entry || !roomShell || !createRoomButton || !joinForm ||
         !joinCodeInput || !answerButton || !endTurnButton || !turnPanel ||
-        !turnLabel || !turnTimer || !newGameDialog || !newGameForm || !newGameCount ||
-        !newGameQuestionCards || !newGameCancel || !newGameSubmit || !gameLayout ||
-        !grid || !empty || !questionPanel || !questionHistory || !questionOptions ||
-        !questionStatus || !hubUrl || !cardUrl) {
+        !turnLabel || !turnTimer || !restartGameButton || !newGameDialog || !newGameForm ||
+        !newGameCount || !newGameQuestionCards || !newGameCancel || !newGameSubmit ||
+        !gameLayout || !grid || !empty || !questionPanel || !questionHistory ||
+        !questionOptions || !questionStatus || !questionResponseDialog ||
+        !questionResponseText || !questionResponseYes || !questionResponseNo ||
+        !hubUrl || !cardUrl) {
         return;
     }
 
@@ -62,6 +69,11 @@
         historyGuessIncorrect: root.dataset.historyGuessIncorrect ?? '{player} named game {game} (incorrect)',
         historyTurnEnded: root.dataset.historyTurnEnded ?? '{player} ended the turn',
         historyTurnTimedOut: root.dataset.historyTurnTimedOut ?? '{player} ended the turn (time expired)',
+        historyQuestionAnswer: root.dataset.historyQuestionAnswer ?? '{player} answered - {answer}',
+        questionResponsePrompt: root.dataset.questionResponsePrompt ?? '{player} asks: {question}',
+        yes: root.dataset.yes ?? 'YES',
+        no: root.dataset.no ?? 'NO',
+        questionAwaitingResponse: root.dataset.questionAwaitingResponse ?? 'Waiting for {player}.',
         questionHistoryEmpty: root.dataset.questionHistoryEmpty ?? '',
         questionNotSelected: root.dataset.questionNotSelected ?? '',
         questionChoose: root.dataset.questionChoose ?? '',
@@ -179,6 +191,10 @@
         get(value, 'myAvailableQuestions', 'MyAvailableQuestions') ?? [];
     const questionSelectedThisTurnOf = value =>
         Boolean(get(value, 'hasSelectedQuestionThisTurn', 'HasSelectedQuestionThisTurn') ?? false);
+    const pendingQuestionOf = value =>
+        get(value, 'pendingQuestion', 'PendingQuestion') ?? '';
+    const pendingQuestionResponsePlayerOf = value =>
+        Number(get(value, 'pendingQuestionResponsePlayerNumber', 'PendingQuestionResponsePlayerNumber') ?? 0);
     const questionHistoryOf = value =>
         get(value, 'questionHistory', 'QuestionHistory') ?? [];
     const historyPlayerOf = value =>
@@ -189,12 +205,15 @@
         get(value, 'value', 'Value') ?? null;
     const historyCorrectOf = value =>
         Boolean(get(value, 'isCorrect', 'IsCorrect') ?? false);
+    const historyAnswerYesOf = value =>
+        get(value, 'answerYes', 'AnswerYes') === true;
 
     const historyKind = {
         question: 0,
         guess: 1,
         turnEnded: 2,
-        turnTimedOut: 3
+        turnTimedOut: 3,
+        answer: 4
     };
 
     const phase = {
@@ -505,7 +524,8 @@
     const selectQuestion = async optionIndex => {
         if (!currentState || phaseOf(currentState) !== phase.playing ||
             playerNumberOf(currentState) !== currentPlayerOf(currentState) ||
-            questionSelectedThisTurnOf(currentState)) {
+            questionSelectedThisTurnOf(currentState) ||
+            pendingQuestionResponsePlayerOf(currentState) > 0) {
             return;
         }
 
@@ -560,6 +580,11 @@
                     item.textContent = format(text.historyTurnEnded, { player });
                 } else if (kind === historyKind.turnTimedOut) {
                     item.textContent = format(text.historyTurnTimedOut, { player });
+                } else if (kind === historyKind.answer) {
+                    item.textContent = format(text.historyQuestionAnswer, {
+                        player,
+                        answer: historyAnswerYesOf(entry) ? text.yes : text.no
+                    });
                 } else {
                     item.textContent = format(text.questionHistoryEntry, {
                         player,
@@ -579,19 +604,24 @@
         const isMyTurn = currentPhase === phase.playing &&
             currentPlayerOf(state) === playerNumber;
         const selected = questionSelectedThisTurnOf(state);
+        const pendingResponsePlayer = pendingQuestionResponsePlayerOf(state);
         const available = availableQuestionsOf(state);
         questionOptions.replaceChildren(...available.map((question, index) => {
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'button minigames-question-option';
             button.textContent = question;
-            button.disabled = !isMyTurn || selected;
+            button.disabled = !isMyTurn || selected || pendingResponsePlayer > 0;
             button.addEventListener('click', () => void selectQuestion(index));
             return button;
         }));
 
         if (currentPhase !== phase.playing) {
             questionStatus.textContent = '';
+        } else if (pendingResponsePlayer > 0) {
+            questionStatus.textContent = format(text.questionAwaitingResponse, {
+                player: playerName(pendingResponsePlayer)
+            });
         } else if (selected) {
             questionStatus.textContent = text.questionSelected;
         } else if (isMyTurn) {
@@ -599,6 +629,29 @@
         } else {
             questionStatus.textContent = text.questionWait;
         }
+    };
+
+    const renderQuestionResponseDialog = state => {
+        const pendingPlayer = pendingQuestionResponsePlayerOf(state);
+        const question = pendingQuestionOf(state);
+        const playerNumber = playerNumberOf(state);
+        const shouldOpen = questionCardsEnabledOf(state) &&
+            pendingPlayer === playerNumber &&
+            Boolean(question);
+
+        if (!shouldOpen) {
+            if (questionResponseDialog.open) questionResponseDialog.close();
+            return;
+        }
+
+        const askingPlayer = pendingPlayer === 1 ? 2 : 1;
+        questionResponseText.textContent = format(text.questionResponsePrompt, {
+            player: playerName(askingPlayer),
+            question
+        });
+        questionResponseYes.disabled = false;
+        questionResponseNo.disabled = false;
+        if (!questionResponseDialog.open) questionResponseDialog.showModal();
     };
 
     const renderRoom = state => {
@@ -636,6 +689,10 @@
             : '';
         answerButton.disabled = !isMyTurn;
         endTurnButton.disabled = !isMyTurn;
+        restartGameButton.disabled = ![
+            phase.playing,
+            phase.finished
+        ].includes(currentPhase);
         if (!isMyTurn) {
             answerMode = false;
             root.classList.remove('is-answer-mode');
@@ -643,6 +700,7 @@
         }
         startTurnTimer(state);
         renderQuestions(state);
+        renderQuestionResponseDialog(state);
 
         const cards = cardsOf(state);
         grid.replaceChildren(...cards.map(card => createCard(card, state)));
@@ -770,6 +828,35 @@
         renderRoom(currentState);
     });
 
+    const submitQuestionResponse = async answerYes => {
+        if (!currentState ||
+            pendingQuestionResponsePlayerOf(currentState) !== playerNumberOf(currentState)) {
+            return;
+        }
+
+        clearErrors();
+        questionResponseYes.disabled = true;
+        questionResponseNo.disabled = true;
+        try {
+            const state = await connection.invoke(
+                'SubmitQuestionResponse',
+                currentRoomCode,
+                playerToken,
+                answerYes);
+            applyState(state);
+        } catch (error) {
+            showError(roomError, getErrorMessage(error));
+            questionResponseYes.disabled = false;
+            questionResponseNo.disabled = false;
+        }
+    };
+
+    questionResponseDialog.addEventListener('cancel', event => {
+        event.preventDefault();
+    });
+    questionResponseYes.addEventListener('click', () => void submitQuestionResponse(true));
+    questionResponseNo.addEventListener('click', () => void submitQuestionResponse(false));
+
     endTurnButton.addEventListener('click', async () => {
         if (!currentState || phaseOf(currentState) !== phase.playing ||
             playerNumberOf(currentState) !== currentPlayerOf(currentState)) return;
@@ -780,6 +867,28 @@
             applyState(state);
         } catch (error) {
             showError(roomError, getErrorMessage(error));
+        }
+    });
+
+    restartGameButton.addEventListener('click', async () => {
+        if (!currentState || ![
+            phase.playing,
+            phase.finished
+        ].includes(phaseOf(currentState))) {
+            return;
+        }
+
+        clearErrors();
+        restartGameButton.disabled = true;
+        try {
+            const state = await connection.invoke(
+                'RestartGame',
+                currentRoomCode,
+                playerToken);
+            applyState(state);
+        } catch (error) {
+            showError(roomError, getErrorMessage(error));
+            renderRoom(currentState);
         }
     });
 
@@ -860,6 +969,7 @@
         createRoomButton.disabled = true;
         answerButton.disabled = true;
         endTurnButton.disabled = true;
+        restartGameButton.disabled = true;
         questionOptions.querySelectorAll('button').forEach(button => {
             button.disabled = true;
         });
@@ -869,6 +979,10 @@
     connection.onreconnected(async () => {
         createRoomButton.disabled = false;
         newGameButton.disabled = false;
+        restartGameButton.disabled = !currentState || ![
+            phase.playing,
+            phase.finished
+        ].includes(phaseOf(currentState));
         if (currentRoomCode && playerToken) {
             try {
                 await synchronize();
@@ -885,6 +999,7 @@
             await connection.start();
             createRoomButton.disabled = false;
             newGameButton.disabled = false;
+            restartGameButton.disabled = true;
             await refreshCatalog();
 
             const roomFromUrl = readRoomFromUrl();
@@ -910,6 +1025,7 @@
         } catch {
             createRoomButton.disabled = true;
             newGameButton.disabled = true;
+            restartGameButton.disabled = true;
             window.setTimeout(connect, 2000);
         }
     };

@@ -146,6 +146,22 @@ body:has(.minigames-page) .page-shell {
     min-width: 0;
 }
 
+.minigames-refresh-button {
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    padding: 0;
+    font-size: 1.45rem;
+    line-height: 1;
+}
+
+.minigames-refresh-button span {
+    display: block;
+    transform: translateY(-1px);
+}
+
 .minigames-room-status {
     display: flex;
     align-items: center;

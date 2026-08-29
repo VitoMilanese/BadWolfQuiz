@@ -2808,4 +2808,25 @@
   <data name="Minigames_HistoryTurnTimedOut" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="Minigames_RestartGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_QuestionResponseTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_QuestionResponsePrompt" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_Yes" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_No" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_HistoryQuestionAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_QuestionAwaitingResponse" xml:space="preserve">
+    <value>Україна</value>
+  </data>
 </root>

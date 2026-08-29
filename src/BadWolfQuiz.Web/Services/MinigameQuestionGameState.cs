@@ -4,19 +4,26 @@ namespace BadWolfQuiz.Web.Services;
 
 internal sealed class MinigameQuestionGameState
 {
+    private readonly string[] _sourceQuestions;
     private readonly PlayerQuestionDeck _player1;
     private readonly PlayerQuestionDeck _player2;
     private readonly List<MinigameQuestionHistoryEntry> _history = [];
 
     private MinigameQuestionGameState(
+        string[] sourceQuestions,
         PlayerQuestionDeck player1,
         PlayerQuestionDeck player2)
     {
+        _sourceQuestions = sourceQuestions;
         _player1 = player1;
         _player2 = player2;
     }
 
     public bool HasSelectedQuestionThisTurn { get; private set; }
+
+    public string? PendingQuestion { get; private set; }
+
+    public int? PendingResponsePlayerNumber { get; private set; }
 
     public IReadOnlyList<MinigameQuestionHistoryEntry> History => _history;
 
@@ -35,9 +42,12 @@ internal sealed class MinigameQuestionGameState
         }
 
         return new MinigameQuestionGameState(
+            normalized,
             PlayerQuestionDeck.Create(normalized),
             PlayerQuestionDeck.Create(normalized));
     }
+
+    public MinigameQuestionGameState Restart() => Create(_sourceQuestions);
 
     public IReadOnlyList<string> GetAvailableQuestions(int playerNumber) =>
         GetDeck(playerNumber).AvailableQuestions;
@@ -51,12 +61,35 @@ internal sealed class MinigameQuestionGameState
             throw new MinigameRoomException(MinigameRoomError.QuestionAlreadySelected);
         }
 
+        if (PendingResponsePlayerNumber is not null)
+        {
+            throw new MinigameRoomException(MinigameRoomError.QuestionResponsePending);
+        }
+
         var question = GetDeck(playerNumber).Select(optionIndex);
         _history.Add(new MinigameQuestionHistoryEntry(
             playerNumber,
             MinigameQuestionHistoryKind.Question,
             question));
         HasSelectedQuestionThisTurn = true;
+        PendingQuestion = question;
+        PendingResponsePlayerNumber = playerNumber == 1 ? 2 : 1;
+    }
+
+    public void SubmitQuestionResponse(int playerNumber, bool answerYes)
+    {
+        if (PendingResponsePlayerNumber != playerNumber ||
+            string.IsNullOrWhiteSpace(PendingQuestion))
+        {
+            throw new MinigameRoomException(MinigameRoomError.QuestionResponseNotPending);
+        }
+
+        _history.Add(new MinigameQuestionHistoryEntry(
+            playerNumber,
+            MinigameQuestionHistoryKind.Answer,
+            AnswerYes: answerYes));
+        PendingQuestion = null;
+        PendingResponsePlayerNumber = null;
     }
 
     public void RecordGuess(int playerNumber, string gameName, bool isCorrect)
@@ -153,11 +186,13 @@ public enum MinigameQuestionHistoryKind
     Question = 0,
     Guess = 1,
     TurnEnded = 2,
-    TurnTimedOut = 3
+    TurnTimedOut = 3,
+    Answer = 4
 }
 
 public sealed record MinigameQuestionHistoryEntry(
     int PlayerNumber,
     MinigameQuestionHistoryKind Kind,
     string? Value = null,
-    bool? IsCorrect = null);
+    bool? IsCorrect = null,
+    bool? AnswerYes = null);

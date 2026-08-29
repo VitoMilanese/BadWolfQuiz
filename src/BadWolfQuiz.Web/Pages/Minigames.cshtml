@@ -32,6 +32,11 @@
      data-history-guess-incorrect="@Localizer["Minigames_HistoryGuessIncorrect"]"
      data-history-turn-ended="@Localizer["Minigames_HistoryTurnEnded"]"
      data-history-turn-timed-out="@Localizer["Minigames_HistoryTurnTimedOut"]"
+     data-history-question-answer="@Localizer["Minigames_HistoryQuestionAnswer"]"
+     data-question-response-prompt="@Localizer["Minigames_QuestionResponsePrompt"]"
+     data-yes="@Localizer["Minigames_Yes"]"
+     data-no="@Localizer["Minigames_No"]"
+     data-question-awaiting-response="@Localizer["Minigames_QuestionAwaitingResponse"]"
      data-question-history-empty="@Localizer["Minigames_QuestionHistoryEmpty"]"
      data-question-not-selected="@Localizer["Minigames_QuestionNotSelected"]"
      data-question-choose="@Localizer["Minigames_QuestionChoose"]"
@@ -112,6 +117,14 @@
                         disabled>
                     @Localizer["Minigames_EndTurn"]
                 </button>
+                <button class="button minigames-refresh-button"
+                        type="button"
+                        data-restart-game
+                        title="@Localizer["Minigames_RestartGame"]"
+                        aria-label="@Localizer["Minigames_RestartGame"]"
+                        disabled>
+                    <span aria-hidden="true">↻</span>
+                </button>
                 <button class="button button-primary"
                         type="button"
                         data-new-game>
@@ -185,6 +198,21 @@
                 </button>
                 <button class="button button-primary" type="submit" data-new-game-submit>
                     @Localizer["Minigames_StartGame"]
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog class="minigames-dialog" data-question-response-dialog>
+        <form data-question-response-form>
+            <h2>@Localizer["Minigames_QuestionResponseTitle"]</h2>
+            <p data-question-response-text></p>
+            <div class="minigames-dialog-actions">
+                <button class="button" type="button" data-question-response-no>
+                    @Localizer["Minigames_No"]
+                </button>
+                <button class="button button-primary" type="button" data-question-response-yes>
+                    @Localizer["Minigames_Yes"]
                 </button>
             </div>
         </form>
