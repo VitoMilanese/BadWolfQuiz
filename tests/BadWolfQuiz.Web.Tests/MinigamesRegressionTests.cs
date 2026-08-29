@@ -21,6 +21,26 @@ public sealed class MinigamesRegressionTests
     }
 
     [Fact]
+    public void Minigames_menu_opens_catalog_before_the_game()
+    {
+        var catalog = ReadWebFile("Pages", "Minigames.cshtml");
+        var game = ReadWebFile("Pages", "GuessWhatIPlay.cshtml");
+        var catalogStyles = ReadWebFile("wwwroot", "css", "minigames-catalog.css");
+        var illustration = ReadWebFile(
+            "wwwroot",
+            "images",
+            "minigames",
+            "guess-what-i-play.svg");
+
+        Assert.Contains("asp-page=\"/GuessWhatIPlay\"", catalog);
+        Assert.Contains("GuessWhatIPlay_Title", catalog);
+        Assert.Contains("aspect-ratio: 16 / 9", catalogStyles);
+        Assert.Contains("@page \"/minigames/guess-what-i-play\"", game);
+        Assert.Contains("data-minigames-root", game);
+        Assert.DoesNotContain("<text", illustration, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Default_new_game_count_is_ten()
     {
         using var document = JsonDocument.Parse(ReadWebFile("appsettings.json"));
@@ -35,7 +55,7 @@ public sealed class MinigamesRegressionTests
     [Fact]
     public void Page_supports_room_creation_join_and_new_game_setup()
     {
-        var page = ReadWebFile("Pages", "Minigames.cshtml");
+        var page = ReadWebFile("Pages", "GuessWhatIPlay.cshtml");
         var script = ReadWebFile("wwwroot", "js", "minigames.js");
 
         Assert.Contains("data-create-room", page);
@@ -71,7 +91,7 @@ public sealed class MinigamesRegressionTests
     [Fact]
     public void Page_keeps_room_cards_in_the_viewport_with_equal_grid_cells()
     {
-        var page = ReadWebFile("Pages", "Minigames.cshtml");
+        var page = ReadWebFile("Pages", "GuessWhatIPlay.cshtml");
         var styles = ReadWebFile("wwwroot", "css", "minigames.css");
         var script = ReadWebFile("wwwroot", "js", "minigames.js");
 
