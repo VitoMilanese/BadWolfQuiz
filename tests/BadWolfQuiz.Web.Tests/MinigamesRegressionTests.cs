@@ -84,6 +84,11 @@ public sealed class MinigamesRegressionTests
         Assert.Contains("ResizeObserver", script);
         Assert.Contains("grid-template-areas: \"stage questions\"", styles);
         Assert.Contains("grid-column: 2", styles);
+        Assert.Contains("minimumSpacing", script);
+        Assert.Contains("grid.style.gridTemplateColumns", script);
+        Assert.Contains("justify-content: space-evenly", styles);
+        Assert.Contains("align-content: space-evenly", styles);
+        Assert.Contains("aspect-ratio: 1 / 1", styles);
     }
 
     [Fact]

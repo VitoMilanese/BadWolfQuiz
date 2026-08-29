@@ -324,25 +324,46 @@
         const rect = grid.getBoundingClientRect();
         if (rect.width <= 0 || rect.height <= 0) return;
 
-        const styles = getComputedStyle(grid);
-        const gap = Number.parseFloat(styles.columnGap || styles.gap) || 0;
-        const targetAspect = 1.45;
-        let best = { columns: 1, rows: cards.length, score: -1 };
+        const firstName = cards[0].querySelector('.minigame-card-name');
+        const nameHeight = firstName?.getBoundingClientRect().height || 0;
+        const cardInternalGap = 3;
+        const minimumSpacing = Math.max(6, Math.min(18, Math.min(rect.width, rect.height) * 0.012));
+        let best = { columns: 1, rows: cards.length, size: 0 };
 
         for (let columns = 1; columns <= cards.length; columns += 1) {
             const rows = Math.ceil(cards.length / columns);
-            const cardWidth = (rect.width - gap * (columns - 1)) / columns;
-            const cardHeight = (rect.height - gap * (rows - 1)) / rows;
-            if (cardWidth <= 0 || cardHeight <= 0) continue;
-
-            const aspect = cardWidth / cardHeight;
-            const aspectPenalty = 1 + Math.abs(Math.log(aspect / targetAspect)) * 0.45;
-            const score = cardWidth * cardHeight / aspectPenalty;
-            if (score > best.score) best = { columns, rows, score };
+            const widthForCards = rect.width - minimumSpacing * (columns + 1);
+            const heightForCards = rect.height
+                - minimumSpacing * (rows + 1)
+                - rows * (nameHeight + cardInternalGap);
+            const cardSize = Math.floor(Math.min(
+                widthForCards / columns,
+                heightForCards / rows));
+            if (cardSize > best.size) {
+                best = { columns, rows, size: cardSize };
+            }
         }
 
-        grid.style.gridTemplateColumns = `repeat(${best.columns}, minmax(0, 1fr))`;
-        grid.style.gridTemplateRows = `repeat(${best.rows}, minmax(0, 1fr))`;
+        const size = Math.max(1, best.size);
+        const rowHeight = size + nameHeight + cardInternalGap;
+        grid.style.gridTemplateColumns = `repeat(${best.columns}, ${size}px)`;
+        grid.style.gridTemplateRows = `repeat(${best.rows}, ${rowHeight}px)`;
+
+        cards.forEach(card => {
+            card.style.transform = '';
+        });
+
+        const lastRowCount = cards.length % best.columns;
+        if (lastRowCount > 0 && best.rows > 1) {
+            const horizontalSpacing = Math.max(0,
+                (rect.width - best.columns * size) / (best.columns + 1));
+            const centerOffset =
+                (best.columns - lastRowCount) * (size + horizontalSpacing) / 2;
+            const firstLastRowIndex = cards.length - lastRowCount;
+            for (let index = firstLastRowIndex; index < cards.length; index += 1) {
+                cards[index].style.transform = `translateX(${centerOffset}px)`;
+            }
+        }
     };
 
     const touchRoom = async () => {
