@@ -356,6 +356,33 @@ body:has(.minigames-page) .page-shell {
     margin-top: 6px;
 }
 
+.minigames-turn-panel {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    font-weight: 700;
+}
+
+.minigames-turn-timer {
+    min-width: 4.4rem;
+    padding: 4px 9px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.minigames-toolbar-actions .button.is-active {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 35%, transparent);
+}
+
+.minigames-page.is-answer-mode .minigame-card:not(:disabled) .minigame-card-frame {
+    border-color: color-mix(in srgb, var(--gold) 72%, transparent);
+}
+
 @media (max-width: 700px) {
     .minigames-toolbar-title {
         align-items: flex-start;

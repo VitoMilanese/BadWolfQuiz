@@ -2736,4 +2736,22 @@
   <data name="Minigames_GenericError" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="Minigames_Turn" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_Answer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_EndTurn" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_ChooseAnswer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_Winner" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_NotYourTurn" xml:space="preserve">
+    <value>Україна</value>
+  </data>
 </root>

@@ -44,6 +44,9 @@ public sealed class MinigamesRegressionTests
         Assert.Contains("CreateRoom", script);
         Assert.Contains("JoinRoom", script);
         Assert.Contains("StartNewGame", script);
+        Assert.Contains("EndTurn", script);
+        Assert.Contains("ExpireTurn", script);
+        Assert.Contains("SubmitGuess", script);
         Assert.Contains("badwolf-minigame-player:", script);
         Assert.Contains("withAutomaticReconnect()", script);
     }

@@ -13,6 +13,11 @@
     const playerLabel = root.querySelector('[data-player-label]');
     const roomMessage = root.querySelector('[data-room-message]');
     const opponentStatus = root.querySelector('[data-opponent-status]');
+    const answerButton = root.querySelector('[data-answer]');
+    const endTurnButton = root.querySelector('[data-end-turn]');
+    const turnPanel = root.querySelector('[data-turn-panel]');
+    const turnLabel = root.querySelector('[data-turn-label]');
+    const turnTimer = root.querySelector('[data-turn-timer]');
     const newGameButton = root.querySelector('[data-new-game]');
     const newGameDialog = root.querySelector('[data-new-game-dialog]');
     const newGameForm = root.querySelector('[data-new-game-form]');
@@ -26,7 +31,8 @@
     const hubUrl = root.dataset.hubUrl;
     const cardUrl = root.dataset.cardUrl;
     if (!entry || !roomShell || !createRoomButton || !joinForm ||
-        !joinCodeInput || !newGameDialog || !newGameForm || !newGameCount ||
+        !joinCodeInput || !answerButton || !endTurnButton || !turnPanel ||
+        !turnLabel || !turnTimer || !newGameDialog || !newGameForm || !newGameCount ||
         !newGameCancel || !newGameSubmit || !grid || !empty || !hubUrl || !cardUrl) {
         return;
     }
@@ -39,6 +45,10 @@
         chooseExclusions: root.dataset.chooseExclusions ?? '',
         exclusionProgress: root.dataset.exclusionProgress ?? '',
         gameReady: root.dataset.gameReady ?? '',
+        turn: root.dataset.turn ?? '',
+        answerPrompt: root.dataset.answerPrompt ?? '',
+        winner: root.dataset.winner ?? '',
+        notYourTurn: root.dataset.notYourTurn ?? '',
         roomNotFound: root.dataset.roomNotFound ?? '',
         roomExpired: root.dataset.roomExpired ?? '',
         roomFull: root.dataset.roomFull ?? '',
@@ -60,6 +70,10 @@
     let playerToken = '';
     let currentState = null;
     let currentGameNumber = -1;
+    let answerMode = false;
+    let turnTimerHandle = null;
+    let expiryRequestKey = '';
+    let lastTurnKey = '';
 
     const get = (value, camelName, pascalName) =>
         value?.[camelName] ?? value?.[pascalName];
@@ -81,6 +95,12 @@
         get(value, 'opponentExcludedFiles', 'OpponentExcludedFiles') ?? [];
     const mySecretOf = value =>
         get(value, 'mySecretCardFileName', 'MySecretCardFileName') ?? '';
+    const currentPlayerOf = value =>
+        Number(get(value, 'currentPlayerNumber', 'CurrentPlayerNumber') ?? 0);
+    const deadlineOf = value =>
+        get(value, 'turnDeadlineUtc', 'TurnDeadlineUtc') ?? '';
+    const winnerOf = value =>
+        Number(get(value, 'winnerPlayerNumber', 'WinnerPlayerNumber') ?? 0);
 
     const phase = {
         waitingForGame: 0,
@@ -157,6 +177,7 @@
         if (message.includes('MINIGAME_ROOM_EXCLUSIONLIMITREACHED')) {
             return text.exclusionLimit;
         }
+        if (message.includes('MINIGAME_ROOM_NOTYOURTURN')) return text.notYourTurn;
         return text.genericError;
     };
 
@@ -231,6 +252,77 @@
         void touchRoom();
     };
 
+
+    const playerName = number => number === 1 ? text.playerOne : text.playerTwo;
+
+    const stopTurnTimer = () => {
+        if (turnTimerHandle !== null) {
+            window.clearInterval(turnTimerHandle);
+            turnTimerHandle = null;
+        }
+    };
+
+    const requestTurnExpiry = async deadline => {
+        if (!currentRoomCode || !playerToken || !deadline || expiryRequestKey === deadline) return;
+        expiryRequestKey = deadline;
+        try {
+            const state = await connection.invoke('ExpireTurn', currentRoomCode, playerToken);
+            applyState(state);
+        } catch (error) {
+            showError(roomError, getErrorMessage(error));
+        }
+    };
+
+    const updateTurnTimer = state => {
+        const deadline = deadlineOf(state);
+        if (!deadline || phaseOf(state) !== phase.playing) {
+            turnTimer.textContent = '00:00';
+            return;
+        }
+
+        const deadlineMs = Date.parse(deadline);
+        if (!Number.isFinite(deadlineMs)) {
+            turnTimer.textContent = '00:00';
+            return;
+        }
+
+        const remainingMs = Math.max(0, deadlineMs - Date.now());
+        const remainingSeconds = Math.ceil(remainingMs / 1000);
+        const minutes = Math.floor(remainingSeconds / 60);
+        const seconds = remainingSeconds % 60;
+        turnTimer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        if (remainingMs <= 0) void requestTurnExpiry(deadline);
+    };
+
+    const startTurnTimer = state => {
+        stopTurnTimer();
+        updateTurnTimer(state);
+        if (phaseOf(state) === phase.playing && deadlineOf(state)) {
+            turnTimerHandle = window.setInterval(() => updateTurnTimer(currentState), 250);
+        }
+    };
+
+    const submitGuess = async fileName => {
+        if (!answerMode || !currentState ||
+            playerNumberOf(currentState) !== currentPlayerOf(currentState)) return;
+
+        clearErrors();
+        answerMode = false;
+        root.classList.remove('is-answer-mode');
+        answerButton.classList.remove('is-active');
+        try {
+            const state = await connection.invoke(
+                'SubmitGuess',
+                currentRoomCode,
+                playerToken,
+                fileName);
+            applyState(state);
+        } catch (error) {
+            showError(roomError, getErrorMessage(error));
+        }
+    };
+
     const createCard = (card, state) => {
         const fileName = fileNameOf(card);
         const displayName = displayNameOf(card);
@@ -275,7 +367,13 @@
             button.setAttribute(
                 'aria-pressed',
                 inactiveCards.has(fileName) ? 'true' : 'false');
-            button.addEventListener('click', () => toggleLocalInactive(button));
+            button.addEventListener('click', () => {
+                if (answerMode && playerNumberOf(currentState) === currentPlayerOf(currentState)) {
+                    void submitGuess(fileName);
+                    return;
+                }
+                toggleLocalInactive(button);
+            });
         } else {
             button.disabled = true;
         }
@@ -322,10 +420,27 @@
                 text.exclusionProgress,
                 { selected: myExcluded.length, count: required })}`;
         } else if (currentPhase === phase.playing) {
-            roomMessage.textContent = text.gameReady;
+            roomMessage.textContent = answerMode ? text.answerPrompt : text.gameReady;
+        } else if (currentPhase === phase.finished) {
+            roomMessage.textContent = format(text.winner, { player: playerName(winnerOf(state)) });
         } else {
             roomMessage.textContent = '';
         }
+
+        const currentPlayer = currentPlayerOf(state);
+        const isMyTurn = currentPhase === phase.playing && currentPlayer === playerNumber;
+        turnPanel.classList.toggle('is-hidden', currentPhase !== phase.playing);
+        turnLabel.textContent = currentPhase === phase.playing
+            ? format(text.turn, { player: playerName(currentPlayer) })
+            : '';
+        answerButton.disabled = !isMyTurn;
+        endTurnButton.disabled = !isMyTurn;
+        if (!isMyTurn) {
+            answerMode = false;
+            root.classList.remove('is-answer-mode');
+            answerButton.classList.remove('is-active');
+        }
+        startTurnTimer(state);
 
         const cards = cardsOf(state);
         grid.replaceChildren(...cards.map(card => createCard(card, state)));
@@ -336,11 +451,24 @@
 
     const applyState = state => {
         if (!state) return;
+        if (currentState && versionOf(state) < versionOf(currentState)) return;
+
         const gameNumber = gameNumberOf(state);
+        const turnKey = `${gameNumber}:${currentPlayerOf(state)}:${deadlineOf(state)}`;
         if (gameNumber !== currentGameNumber) {
             inactiveCards.clear();
+            answerMode = false;
+            root.classList.remove('is-answer-mode');
+            answerButton.classList.remove('is-active');
             currentGameNumber = gameNumber;
+        } else if (lastTurnKey && turnKey !== lastTurnKey) {
+            answerMode = false;
+            root.classList.remove('is-answer-mode');
+            answerButton.classList.remove('is-active');
         }
+        if (turnKey !== lastTurnKey) expiryRequestKey = '';
+        lastTurnKey = turnKey;
+
         currentState = state;
         currentRoomCode = roomCodeOf(state).toUpperCase();
         renderRoom(state);
@@ -423,6 +551,29 @@
         }
     });
 
+    answerButton.addEventListener('click', async () => {
+        if (!currentState || phaseOf(currentState) !== phase.playing ||
+            playerNumberOf(currentState) !== currentPlayerOf(currentState)) return;
+        await touchRoom();
+        answerMode = !answerMode;
+        root.classList.toggle('is-answer-mode', answerMode);
+        answerButton.classList.toggle('is-active', answerMode);
+        renderRoom(currentState);
+    });
+
+    endTurnButton.addEventListener('click', async () => {
+        if (!currentState || phaseOf(currentState) !== phase.playing ||
+            playerNumberOf(currentState) !== currentPlayerOf(currentState)) return;
+        clearErrors();
+        endTurnButton.disabled = true;
+        try {
+            const state = await connection.invoke('EndTurn', currentRoomCode, playerToken);
+            applyState(state);
+        } catch (error) {
+            showError(roomError, getErrorMessage(error));
+        }
+    });
+
     newGameButton.addEventListener('click', () => void openNewGameDialog());
 
     newGameCancel.addEventListener('click', () => {
@@ -497,6 +648,8 @@
 
     connection.onreconnecting(() => {
         createRoomButton.disabled = true;
+        answerButton.disabled = true;
+        endTurnButton.disabled = true;
         newGameButton.disabled = true;
     });
 

@@ -2736,4 +2736,22 @@
   <data name="Minigames_GenericError" xml:space="preserve">
     <value>Не вдалося оновити мінігру. Спробуйте ще раз.</value>
   </data>
+  <data name="Minigames_Turn" xml:space="preserve">
+    <value>Хід: {player}</value>
+  </data>
+  <data name="Minigames_Answer" xml:space="preserve">
+    <value>Відповідь</value>
+  </data>
+  <data name="Minigames_EndTurn" xml:space="preserve">
+    <value>Завершити хід</value>
+  </data>
+  <data name="Minigames_ChooseAnswer" xml:space="preserve">
+    <value>Оберіть картку на столі як свою відповідь.</value>
+  </data>
+  <data name="Minigames_Winner" xml:space="preserve">
+    <value>{player} переміг!</value>
+  </data>
+  <data name="Minigames_NotYourTurn" xml:space="preserve">
+    <value>Зараз хід іншого гравця.</value>
+  </data>
 </root>

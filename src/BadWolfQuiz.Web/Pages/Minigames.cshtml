@@ -23,6 +23,10 @@
      data-choose-exclusions="@Localizer["Minigames_ChooseExclusions"]"
      data-exclusion-progress="@Localizer["Minigames_ExclusionProgress"]"
      data-game-ready="@Localizer["Minigames_GameReady"]"
+     data-turn="@Localizer["Minigames_Turn"]"
+     data-answer-prompt="@Localizer["Minigames_ChooseAnswer"]"
+     data-winner="@Localizer["Minigames_Winner"]"
+     data-not-your-turn="@Localizer["Minigames_NotYourTurn"]"
      data-room-not-found="@Localizer["Minigames_RoomNotFound"]"
      data-room-expired="@Localizer["Minigames_RoomExpired"]"
      data-room-full="@Localizer["Minigames_RoomFull"]"
@@ -82,6 +86,18 @@
                 <span class="minigames-error is-hidden"
                       data-minigames-room-error
                       role="alert"></span>
+                <button class="button"
+                        type="button"
+                        data-answer
+                        disabled>
+                    @Localizer["Minigames_Answer"]
+                </button>
+                <button class="button"
+                        type="button"
+                        data-end-turn
+                        disabled>
+                    @Localizer["Minigames_EndTurn"]
+                </button>
                 <button class="button button-primary"
                         type="button"
                         data-new-game>
@@ -93,6 +109,10 @@
         <div class="minigames-room-status">
             <strong data-player-label></strong>
             <span data-room-message></span>
+            <div class="minigames-turn-panel is-hidden" data-turn-panel>
+                <span data-turn-label></span>
+                <strong class="minigames-turn-timer" data-turn-timer>00:00</strong>
+            </div>
             <span class="minigames-opponent-status" data-opponent-status></span>
         </div>
 

@@ -104,9 +104,41 @@ public sealed class MinigameHub(
         string playerToken,
         string fileName)
     {
+        return await MutateRoom(() =>
+            roomStore.ToggleExclusion(roomCode, playerToken, fileName));
+    }
+
+    public async Task<MinigameRoomSnapshot> EndTurn(
+        string roomCode,
+        string playerToken)
+    {
+        return await MutateRoom(() =>
+            roomStore.EndTurn(roomCode, playerToken));
+    }
+
+    public async Task<MinigameRoomSnapshot> ExpireTurn(
+        string roomCode,
+        string playerToken)
+    {
+        return await MutateRoom(() =>
+            roomStore.ExpireTurn(roomCode, playerToken));
+    }
+
+    public async Task<MinigameRoomSnapshot> SubmitGuess(
+        string roomCode,
+        string playerToken,
+        string fileName)
+    {
+        return await MutateRoom(() =>
+            roomStore.SubmitGuess(roomCode, playerToken, fileName));
+    }
+
+    private async Task<MinigameRoomSnapshot> MutateRoom(
+        Func<MinigameRoomSnapshot> mutation)
+    {
         try
         {
-            var state = roomStore.ToggleExclusion(roomCode, playerToken, fileName);
+            var state = mutation();
             await BroadcastRoomChanged(state);
             return state;
         }

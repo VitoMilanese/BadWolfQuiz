@@ -5,6 +5,8 @@ namespace BadWolfQuiz.Web.Services;
 public sealed class MinigameRoomStore
 {
     public static readonly TimeSpan InactivityTimeout = TimeSpan.FromHours(1);
+    public static readonly TimeSpan FirstTurnDuration = TimeSpan.FromMinutes(3);
+    public static readonly TimeSpan StandardTurnDuration = TimeSpan.FromSeconds(90);
     public const int MinimumGameCardCount = 10;
 
     private const string CodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -136,6 +138,11 @@ public sealed class MinigameRoomStore
             room.Player2Excluded.Clear();
             room.Player1SecretFileName = null;
             room.Player2SecretFileName = null;
+            room.CurrentPlayerNumber = null;
+            room.TurnDeadlineUtc = null;
+            room.Player1TurnsStarted = 0;
+            room.Player2TurnsStarted = 0;
+            room.WinnerPlayerNumber = null;
             room.Phase = MinigameRoomPhase.ChoosingExclusions;
             room.GameNumber++;
             room.LastActivityUtc = now;
@@ -201,9 +208,98 @@ public sealed class MinigameRoomStore
                 room.Player1Excluded.Count == required &&
                 room.Player2Excluded.Count == required)
             {
-                StartPlaying(room);
+                StartPlaying(room, now);
             }
 
+            return CreateSnapshot(room, playerNumber);
+        }
+    }
+
+    public MinigameRoomSnapshot EndTurn(
+        string? roomCode,
+        string? playerToken)
+    {
+        lock (_sync)
+        {
+            var now = _timeProvider.GetUtcNow();
+            var room = GetActiveRoom(roomCode, now);
+            var playerNumber = GetPlayerNumber(room, playerToken);
+            RequireCurrentTurn(room, playerNumber);
+
+            room.LastActivityUtc = now;
+            AdvanceTurn(room, now);
+            room.Version++;
+            return CreateSnapshot(room, playerNumber);
+        }
+    }
+
+    public MinigameRoomSnapshot ExpireTurn(
+        string? roomCode,
+        string? playerToken)
+    {
+        lock (_sync)
+        {
+            var now = _timeProvider.GetUtcNow();
+            var room = GetActiveRoom(roomCode, now);
+            var playerNumber = GetPlayerNumber(room, playerToken);
+
+            if (room.Phase != MinigameRoomPhase.Playing ||
+                room.TurnDeadlineUtc is null ||
+                now < room.TurnDeadlineUtc.Value)
+            {
+                return CreateSnapshot(room, playerNumber);
+            }
+
+            AdvanceTurn(room, now);
+            room.Version++;
+            return CreateSnapshot(room, playerNumber);
+        }
+    }
+
+    public MinigameRoomSnapshot SubmitGuess(
+        string? roomCode,
+        string? playerToken,
+        string? fileName)
+    {
+        lock (_sync)
+        {
+            var now = _timeProvider.GetUtcNow();
+            var room = GetActiveRoom(roomCode, now);
+            var playerNumber = GetPlayerNumber(room, playerToken);
+            RequireCurrentTurn(room, playerNumber);
+
+            var activeCards = GetActiveCards(room);
+            var guessedCard = activeCards.FirstOrDefault(card =>
+                string.Equals(card.FileName, fileName, StringComparison.Ordinal));
+            if (guessedCard is null)
+            {
+                throw new MinigameRoomException(MinigameRoomError.CardNotFound);
+            }
+
+            var opponentSecret = playerNumber == 1
+                ? room.Player2SecretFileName
+                : room.Player1SecretFileName;
+            if (string.IsNullOrWhiteSpace(opponentSecret))
+            {
+                throw new MinigameRoomException(MinigameRoomError.InvalidPhase);
+            }
+
+            room.LastActivityUtc = now;
+            if (string.Equals(
+                    guessedCard.FileName,
+                    opponentSecret,
+                    StringComparison.Ordinal))
+            {
+                room.WinnerPlayerNumber = playerNumber;
+                room.Phase = MinigameRoomPhase.Finished;
+                room.TurnDeadlineUtc = null;
+            }
+            else
+            {
+                AdvanceTurn(room, now);
+            }
+
+            room.Version++;
             return CreateSnapshot(room, playerNumber);
         }
     }
@@ -258,15 +354,26 @@ public sealed class MinigameRoomStore
         throw new MinigameRoomException(MinigameRoomError.InvalidPlayer);
     }
 
-    private static void StartPlaying(MinigameRoomState room)
+    private static void RequireCurrentTurn(
+        MinigameRoomState room,
+        int playerNumber)
     {
-        var excluded = room.Player1Excluded
-            .Concat(room.Player2Excluded)
-            .ToHashSet(StringComparer.Ordinal);
-        var active = room.Cards
-            .Where(card => !excluded.Contains(card.FileName))
-            .ToArray();
+        if (room.Phase != MinigameRoomPhase.Playing)
+        {
+            throw new MinigameRoomException(MinigameRoomError.InvalidPhase);
+        }
 
+        if (room.CurrentPlayerNumber != playerNumber)
+        {
+            throw new MinigameRoomException(MinigameRoomError.NotYourTurn);
+        }
+    }
+
+    private static void StartPlaying(
+        MinigameRoomState room,
+        DateTimeOffset now)
+    {
+        var active = GetActiveCards(room);
         if (active.Length < 2)
         {
             throw new InvalidOperationException(
@@ -283,6 +390,55 @@ public sealed class MinigameRoomStore
         room.Player1SecretFileName = active[player1Index].FileName;
         room.Player2SecretFileName = active[player2Index].FileName;
         room.Phase = MinigameRoomPhase.Playing;
+        room.CurrentPlayerNumber = null;
+        room.TurnDeadlineUtc = null;
+        room.Player1TurnsStarted = 0;
+        room.Player2TurnsStarted = 0;
+        room.WinnerPlayerNumber = null;
+        BeginTurn(room, playerNumber: 1, now);
+    }
+
+    private static MinigameCardDescriptor[] GetActiveCards(MinigameRoomState room)
+    {
+        var excluded = room.Player1Excluded
+            .Concat(room.Player2Excluded)
+            .ToHashSet(StringComparer.Ordinal);
+        return room.Cards
+            .Where(card => !excluded.Contains(card.FileName))
+            .ToArray();
+    }
+
+    private static void AdvanceTurn(
+        MinigameRoomState room,
+        DateTimeOffset now)
+    {
+        var nextPlayer = room.CurrentPlayerNumber == 1 ? 2 : 1;
+        BeginTurn(room, nextPlayer, now);
+    }
+
+    private static void BeginTurn(
+        MinigameRoomState room,
+        int playerNumber,
+        DateTimeOffset now)
+    {
+        var turnsAlreadyStarted = playerNumber == 1
+            ? room.Player1TurnsStarted
+            : room.Player2TurnsStarted;
+        var duration = turnsAlreadyStarted == 0
+            ? FirstTurnDuration
+            : StandardTurnDuration;
+
+        if (playerNumber == 1)
+        {
+            room.Player1TurnsStarted++;
+        }
+        else
+        {
+            room.Player2TurnsStarted++;
+        }
+
+        room.CurrentPlayerNumber = playerNumber;
+        room.TurnDeadlineUtc = now + duration;
     }
 
     private static int GetRequiredExclusionCount(MinigameRoomState room) =>
@@ -308,14 +464,9 @@ public sealed class MinigameRoomStore
         var opponentExcluded = playerNumber == 1
             ? room.Player2Excluded
             : room.Player1Excluded;
-        var allExcluded = room.Player1Excluded
-            .Concat(room.Player2Excluded)
-            .ToHashSet(StringComparer.Ordinal);
         var visibleCards = room.Phase is
                 MinigameRoomPhase.Playing or MinigameRoomPhase.Finished
-            ? room.Cards
-                .Where(card => !allExcluded.Contains(card.FileName))
-                .ToArray()
+            ? GetActiveCards(room)
             : room.Cards.ToArray();
         var secret = room.Phase is
                 MinigameRoomPhase.Playing or MinigameRoomPhase.Finished
@@ -336,6 +487,9 @@ public sealed class MinigameRoomStore
             myExcluded.Order(StringComparer.Ordinal).ToArray(),
             opponentExcluded.Order(StringComparer.Ordinal).ToArray(),
             secret,
+            room.CurrentPlayerNumber,
+            room.TurnDeadlineUtc,
+            room.WinnerPlayerNumber,
             room.CreatedAtUtc,
             room.LastActivityUtc,
             room.LastActivityUtc + InactivityTimeout);
@@ -406,6 +560,11 @@ public sealed class MinigameRoomStore
         public HashSet<string> Player2Excluded { get; } = new(StringComparer.Ordinal);
         public string? Player1SecretFileName { get; set; }
         public string? Player2SecretFileName { get; set; }
+        public int? CurrentPlayerNumber { get; set; }
+        public DateTimeOffset? TurnDeadlineUtc { get; set; }
+        public int Player1TurnsStarted { get; set; }
+        public int Player2TurnsStarted { get; set; }
+        public int? WinnerPlayerNumber { get; set; }
     }
 }
 
@@ -427,7 +586,8 @@ public enum MinigameRoomError
     InvalidPhase,
     CardNotFound,
     CardAlreadyExcluded,
-    ExclusionLimitReached
+    ExclusionLimitReached,
+    NotYourTurn
 }
 
 public sealed class MinigameRoomException(MinigameRoomError error)
@@ -454,6 +614,9 @@ public sealed record MinigameRoomSnapshot(
     IReadOnlyList<string> MyExcludedFiles,
     IReadOnlyList<string> OpponentExcludedFiles,
     string? MySecretCardFileName,
+    int? CurrentPlayerNumber,
+    DateTimeOffset? TurnDeadlineUtc,
+    int? WinnerPlayerNumber,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset LastActivityUtc,
     DateTimeOffset ExpiresAtUtc)

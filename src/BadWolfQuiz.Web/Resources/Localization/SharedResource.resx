@@ -2736,4 +2736,22 @@
   <data name="Minigames_GenericError" xml:space="preserve">
     <value>Could not update the minigame. Try again.</value>
   </data>
+  <data name="Minigames_Turn" xml:space="preserve">
+    <value>Turn: {player}</value>
+  </data>
+  <data name="Minigames_Answer" xml:space="preserve">
+    <value>Answer</value>
+  </data>
+  <data name="Minigames_EndTurn" xml:space="preserve">
+    <value>End turn</value>
+  </data>
+  <data name="Minigames_ChooseAnswer" xml:space="preserve">
+    <value>Choose your answer card on the table.</value>
+  </data>
+  <data name="Minigames_Winner" xml:space="preserve">
+    <value>{player} wins!</value>
+  </data>
+  <data name="Minigames_NotYourTurn" xml:space="preserve">
+    <value>It is not your turn.</value>
+  </data>
 </root>
