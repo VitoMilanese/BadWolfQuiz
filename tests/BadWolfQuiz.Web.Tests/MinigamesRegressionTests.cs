@@ -1,4 +1,4 @@
-using System.Text.Json;
+using BadWolfQuiz.Web.Services;
 
 namespace BadWolfQuiz.Web.Tests;
 
@@ -60,15 +60,11 @@ public sealed class MinigamesRegressionTests
     }
 
     [Fact]
-    public void Default_new_game_count_is_ten()
+    public void Default_new_game_count_is_ten_when_not_configured()
     {
-        using var document = JsonDocument.Parse(ReadWebFile("appsettings.json"));
-        var cardCount = document.RootElement
-            .GetProperty("Minigames")
-            .GetProperty("CardCount")
-            .GetInt32();
+        var options = new MinigameOptions();
 
-        Assert.Equal(10, cardCount);
+        Assert.Equal(10, options.CardCount);
     }
 
     [Fact]
