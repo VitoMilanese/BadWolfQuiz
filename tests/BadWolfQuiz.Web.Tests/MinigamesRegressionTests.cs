@@ -41,6 +41,25 @@ public sealed class MinigamesRegressionTests
     }
 
     [Fact]
+    public void Game_exposes_copyable_room_links_with_social_metadata()
+    {
+        var page = ReadWebFile("Pages", "GuessWhatIPlay.cshtml");
+        var sharing = ReadWebFile("wwwroot", "js", "minigames-sharing.js");
+        var sharingStyles = ReadWebFile("wwwroot", "css", "minigames-sharing.css");
+
+        Assert.Contains("data-copy-room-link", page);
+        Assert.Contains("SocialTitle", page);
+        Assert.Contains("SocialDescription", page);
+        Assert.Contains("SocialImageVariant", page);
+        Assert.Contains("GuessWhatIPlay_RoomSocialTitle", page);
+        Assert.Contains("searchParams.set('room', roomCode)", sharing);
+        Assert.Contains("navigator.clipboard", sharing);
+        Assert.Contains("TouchRoom", sharing);
+        Assert.Contains("badwolf-minigame-player:", sharing);
+        Assert.Contains("minigames-copy-room-link", sharingStyles);
+    }
+
+    [Fact]
     public void Default_new_game_count_is_ten()
     {
         using var document = JsonDocument.Parse(ReadWebFile("appsettings.json"));

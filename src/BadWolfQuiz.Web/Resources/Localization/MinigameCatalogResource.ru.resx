@@ -7,4 +7,10 @@
   <data name="CatalogDescription" xml:space="preserve"><value>Україна</value></data>
   <data name="GuessWhatIPlay_Title" xml:space="preserve"><value>Україна</value></data>
   <data name="GuessWhatIPlay_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="GuessWhatIPlay_SocialTitle" xml:space="preserve"><value>Україна</value></data>
+  <data name="GuessWhatIPlay_RoomSocialTitle" xml:space="preserve"><value>Україна</value></data>
+  <data name="GuessWhatIPlay_SocialDescription" xml:space="preserve"><value>Україна</value></data>
+  <data name="CopyRoomLink" xml:space="preserve"><value>Україна</value></data>
+  <data name="RoomLinkCopied" xml:space="preserve"><value>Україна</value></data>
+  <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Україна</value></data>
 </root>

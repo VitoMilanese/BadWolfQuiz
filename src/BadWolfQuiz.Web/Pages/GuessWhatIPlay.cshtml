@@ -2,12 +2,23 @@
 @model BadWolfQuiz.Web.Pages.GuessWhatIPlayModel
 @inject IStringLocalizer<MinigameCatalogResource> MinigameCatalogLocalizer
 @{
+    var requestedRoomCode = Request.Query["room"].ToString().Trim().ToUpperInvariant();
+    var socialRoomCode = requestedRoomCode.Length == 6 && requestedRoomCode.All(char.IsLetterOrDigit)
+        ? requestedRoomCode
+        : null;
+
     ViewData["Title"] = MinigameCatalogLocalizer["GuessWhatIPlay_Title"];
     ViewData["HidePortalFooter"] = true;
+    ViewData["SocialTitle"] = socialRoomCode is null
+        ? MinigameCatalogLocalizer["GuessWhatIPlay_SocialTitle"].Value
+        : MinigameCatalogLocalizer["GuessWhatIPlay_RoomSocialTitle", socialRoomCode].Value;
+    ViewData["SocialDescription"] = MinigameCatalogLocalizer["GuessWhatIPlay_SocialDescription"].Value;
+    ViewData["SocialImageVariant"] = "site";
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/minigames.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/minigames-sharing.css" asp-append-version="true" />
 }
 
 <div class="minigames-page"
@@ -97,9 +108,27 @@
         <header class="minigames-toolbar">
             <div class="minigames-toolbar-title">
                 <h1>@MinigameCatalogLocalizer["GuessWhatIPlay_Title"]</h1>
-                <span class="minigames-room-code">
-                    @Localizer["Minigames_Room"]:
-                    <strong data-room-code></strong>
+                <span class="minigames-room-share">
+                    <span class="minigames-room-code">
+                        @Localizer["Minigames_Room"]:
+                        <strong data-room-code></strong>
+                    </span>
+                    <button class="button minigames-copy-room-link"
+                            type="button"
+                            data-copy-room-link
+                            data-copy-label="@MinigameCatalogLocalizer["CopyRoomLink"]"
+                            data-copied-label="@MinigameCatalogLocalizer["RoomLinkCopied"]"
+                            data-copy-failed-label="@MinigameCatalogLocalizer["RoomLinkCopyFailed"]"
+                            title="@MinigameCatalogLocalizer["CopyRoomLink"]"
+                            aria-label="@MinigameCatalogLocalizer["CopyRoomLink"]"
+                            disabled>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M10.6 13.4a1 1 0 0 1 0-1.4l3.4-3.4a4 4 0 1 1 5.7 5.7l-4.2 4.2a4 4 0 0 1-5.7 0 1 1 0 0 1 1.4-1.4 2 2 0 0 0 2.9 0l4.2-4.2a2 2 0 1 0-2.9-2.9L12 13.4a1 1 0 0 1-1.4 0Zm2.8-2.8a1 1 0 0 1 0 1.4L10 15.4a4 4 0 1 1-5.7-5.7l4.2-4.2a4 4 0 0 1 5.7 0 1 1 0 1 1-1.4 1.4 2 2 0 0 0-2.9 0L5.7 11a2 2 0 1 0 2.9 2.9l3.4-3.4a1 1 0 0 1 1.4 0Z" />
+                        </svg>
+                    </button>
+                    <span class="minigames-copy-room-status"
+                          data-copy-room-status
+                          aria-live="polite"></span>
                 </span>
             </div>
             <div class="minigames-toolbar-actions">
@@ -222,4 +251,5 @@
 
 @section Scripts {
     <script src="~/js/minigames.js" asp-append-version="true"></script>
+    <script src="~/js/minigames-sharing.js" asp-append-version="true"></script>
 }

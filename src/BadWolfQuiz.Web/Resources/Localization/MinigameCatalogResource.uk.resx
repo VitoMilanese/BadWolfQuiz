@@ -7,4 +7,10 @@
   <data name="CatalogDescription" xml:space="preserve"><value>Обери мінігру.</value></data>
   <data name="GuessWhatIPlay_Title" xml:space="preserve"><value>Вгадай, у що я граю</value></data>
   <data name="GuessWhatIPlay_Description" xml:space="preserve"><value>Гра на двох: ставте запитання «так/ні», відсіюйте картки та відгадайте гру суперника.</value></data>
+  <data name="GuessWhatIPlay_SocialTitle" xml:space="preserve"><value>Вгадай, у що я граю — Bad Wolf Quiz</value></data>
+  <data name="GuessWhatIPlay_RoomSocialTitle" xml:space="preserve"><value>Приєднуйся до кімнати {0} — Вгадай, у що я граю</value></data>
+  <data name="GuessWhatIPlay_SocialDescription" xml:space="preserve"><value>Приєднуйся до гри на двох: ставте запитання «так/ні», відсіюйте картки та відгадайте гру суперника.</value></data>
+  <data name="CopyRoomLink" xml:space="preserve"><value>Копіювати посилання на кімнату</value></data>
+  <data name="RoomLinkCopied" xml:space="preserve"><value>Посилання на кімнату скопійовано</value></data>
+  <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Не вдалося скопіювати посилання на кімнату</value></data>
 </root>
