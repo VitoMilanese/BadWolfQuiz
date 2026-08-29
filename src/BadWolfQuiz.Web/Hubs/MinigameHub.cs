@@ -26,9 +26,10 @@ public sealed class MinigameHub(
             questionCount);
     }
 
-    public async Task<MinigameRoomConnection> CreateRoom()
+    public async Task<MinigameRoomConnection> CreateRoom(
+        MinigameThemeSnapshot? theme = null)
     {
-        var membership = roomStore.CreateRoom();
+        var membership = roomStore.CreateRoom(theme);
         await JoinRoomGroup(membership.RoomCode);
         return membership;
     }

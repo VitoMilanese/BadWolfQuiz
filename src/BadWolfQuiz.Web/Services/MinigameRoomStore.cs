@@ -12,6 +12,27 @@ public sealed class MinigameRoomStore
     private const string CodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private const int CodeLength = 6;
     private const int MaximumCodeAttempts = 100;
+    private const int MaximumThemeIdLength = 64;
+    private const int MaximumThemeVariableValueLength = 1024;
+
+    private static readonly HashSet<string> AllowedThemeVariables =
+        new(StringComparer.Ordinal)
+        {
+            "--bg",
+            "--panel",
+            "--panel-2",
+            "--line",
+            "--text",
+            "--muted",
+            "--red",
+            "--red-bright",
+            "--gold",
+            "--body-background",
+            "--topbar-bg",
+            "--panel-glass",
+            "--panel-gradient-end",
+            "--accent-shadow"
+        };
 
     private readonly object _sync = new();
     private readonly Dictionary<string, MinigameRoomState> _rooms =
@@ -35,7 +56,7 @@ public sealed class MinigameRoomStore
         }
     }
 
-    public MinigameRoomConnection CreateRoom()
+    public MinigameRoomConnection CreateRoom(MinigameThemeSnapshot? theme = null)
     {
         lock (_sync)
         {
@@ -60,7 +81,11 @@ public sealed class MinigameRoomStore
             }
 
             var playerToken = CreatePlayerToken();
-            var room = new MinigameRoomState(roomCode, playerToken, now);
+            var room = new MinigameRoomState(
+                roomCode,
+                playerToken,
+                now,
+                NormalizeTheme(theme));
             _rooms.Add(roomCode, room);
 
             return CreateConnection(room, playerToken, playerNumber: 1);
@@ -538,7 +563,8 @@ public sealed class MinigameRoomStore
             room.QuestionGame?.History.ToArray() ?? [],
             room.CreatedAtUtc,
             room.LastActivityUtc,
-            room.LastActivityUtc + InactivityTimeout);
+            room.LastActivityUtc + InactivityTimeout,
+            room.Theme);
     }
 
     private IReadOnlyList<string> RemoveExpiredCore(DateTimeOffset now)
@@ -560,6 +586,47 @@ public sealed class MinigameRoomStore
         MinigameRoomState room,
         DateTimeOffset now) =>
         now - room.LastActivityUtc >= InactivityTimeout;
+
+    private static MinigameThemeSnapshot NormalizeTheme(MinigameThemeSnapshot? theme)
+    {
+        var themeId = theme?.ThemeId?.Trim().ToLowerInvariant() ?? string.Empty;
+        if (themeId.Length > MaximumThemeIdLength ||
+            themeId.Any(character =>
+                !char.IsAsciiLetterOrDigit(character) && character != '-'))
+        {
+            themeId = string.Empty;
+        }
+
+        var variables = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (theme?.Variables is not null)
+        {
+            foreach (var pair in theme.Variables)
+            {
+                if (!AllowedThemeVariables.Contains(pair.Key) ||
+                    string.IsNullOrWhiteSpace(pair.Value))
+                {
+                    continue;
+                }
+
+                var value = pair.Value.Trim();
+                if (value.Length <= MaximumThemeVariableValueLength &&
+                    IsSafeThemeCssValue(value))
+                {
+                    variables[pair.Key] = value;
+                }
+            }
+        }
+
+        return new MinigameThemeSnapshot(themeId, variables);
+    }
+
+    private static bool IsSafeThemeCssValue(string value) =>
+        !value.Contains("url(", StringComparison.OrdinalIgnoreCase) &&
+        !value.Contains(';') &&
+        !value.Contains('{') &&
+        !value.Contains('}') &&
+        !value.Contains('<') &&
+        !value.Contains('>');
 
     private static string NormalizeRoomCode(string? roomCode)
     {
@@ -591,12 +658,14 @@ public sealed class MinigameRoomStore
     private sealed class MinigameRoomState(
         string code,
         string player1Token,
-        DateTimeOffset createdAtUtc)
+        DateTimeOffset createdAtUtc,
+        MinigameThemeSnapshot theme)
     {
         public string Code { get; } = code;
         public string Player1Token { get; } = player1Token;
         public string? Player2Token { get; set; }
         public DateTimeOffset CreatedAtUtc { get; } = createdAtUtc;
+        public MinigameThemeSnapshot Theme { get; } = theme;
         public DateTimeOffset LastActivityUtc { get; set; } = createdAtUtc;
         public long Version { get; set; } = 1;
         public long GameNumber { get; set; }
@@ -647,6 +716,10 @@ public sealed class MinigameRoomException(MinigameRoomError error)
     public MinigameRoomError Error { get; } = error;
 }
 
+public sealed record MinigameThemeSnapshot(
+    string ThemeId,
+    IReadOnlyDictionary<string, string> Variables);
+
 public sealed record MinigameRoomConnection(
     string RoomCode,
     string PlayerToken,
@@ -674,7 +747,8 @@ public sealed record MinigameRoomSnapshot(
     IReadOnlyList<MinigameQuestionHistoryEntry> QuestionHistory,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset LastActivityUtc,
-    DateTimeOffset ExpiresAtUtc)
+    DateTimeOffset ExpiresAtUtc,
+    MinigameThemeSnapshot Theme)
 {
     public bool HasOpponent => PlayerCount == 2;
 }

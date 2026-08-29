@@ -75,6 +75,26 @@ public sealed class MinigamesRegressionTests
         Assert.Contains("gridTemplateColumns", script);
         Assert.Contains("gridTemplateRows", script);
         Assert.Contains("ResizeObserver", script);
+        Assert.Contains("grid-template-areas: \"stage questions\"", styles);
+        Assert.Contains("grid-column: 2", styles);
+    }
+
+    [Fact]
+    public void Question_panel_distinguishes_players_and_syncs_creator_theme()
+    {
+        var styles = ReadWebFile("wwwroot", "css", "minigames.css");
+        var script = ReadWebFile("wwwroot", "js", "minigames.js");
+        var hub = ReadWebFile("Hubs", "MinigameHub.cs");
+
+        Assert.Contains("li.is-player-1", styles);
+        Assert.Contains("li.is-player-2", styles);
+        Assert.Contains("var(--gold)", styles);
+        Assert.Contains("var(--red-bright)", styles);
+        Assert.Contains("item.classList.add(`is-player-${historyPlayer}`)", script);
+        Assert.Contains("captureTheme()", script);
+        Assert.Contains("applyTheme(roomThemeOf(state))", script);
+        Assert.Contains("CreateRoom', captureTheme()", script);
+        Assert.Contains("MinigameThemeSnapshot? theme", hub);
     }
 
     [Fact]

@@ -23,6 +23,27 @@ public sealed class MinigameRoomStoreTests
     }
 
     [Fact]
+    public void Joining_player_receives_creator_theme()
+    {
+        var store = new MinigameRoomStore(new ManualTimeProvider());
+        var theme = new MinigameThemeSnapshot(
+            "ukrainian-sky",
+            new Dictionary<string, string>
+            {
+                ["--bg"] = "#061529",
+                ["--gold"] = "#ffd700"
+            });
+
+        var owner = store.CreateRoom(theme);
+        var secondPlayer = store.JoinRoom(owner.RoomCode);
+
+        Assert.Equal("ukrainian-sky", owner.State.Theme.ThemeId);
+        Assert.Equal("ukrainian-sky", secondPlayer.State.Theme.ThemeId);
+        Assert.Equal("#061529", secondPlayer.State.Theme.Variables["--bg"]);
+        Assert.Equal("#ffd700", secondPlayer.State.Theme.Variables["--gold"]);
+    }
+
+    [Fact]
     public void Join_room_allows_exactly_one_second_player()
     {
         var store = new MinigameRoomStore(new ManualTimeProvider());

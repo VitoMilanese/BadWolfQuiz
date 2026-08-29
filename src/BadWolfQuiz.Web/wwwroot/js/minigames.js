@@ -87,6 +87,54 @@
     let questionsAvailable = true;
     const storagePrefix = 'badwolf-minigame-player:';
     const inactiveCards = new Set();
+    const themeVariableNames = Object.freeze([
+        '--bg',
+        '--panel',
+        '--panel-2',
+        '--line',
+        '--text',
+        '--muted',
+        '--red',
+        '--red-bright',
+        '--gold',
+        '--body-background',
+        '--topbar-bg',
+        '--panel-glass',
+        '--panel-gradient-end',
+        '--accent-shadow'
+    ]);
+
+    const captureTheme = () => {
+        const element = document.documentElement;
+        const variables = {};
+        themeVariableNames.forEach(name => {
+            const value = element.style.getPropertyValue(name).trim();
+            if (value) variables[name] = value;
+        });
+        return {
+            themeId: element.dataset.theme ?? '',
+            variables
+        };
+    };
+
+    const applyTheme = theme => {
+        if (!theme) return;
+        const element = document.documentElement;
+        const themeId = theme.themeId ?? theme.ThemeId ?? '';
+        const variables = theme.variables ?? theme.Variables ?? {};
+
+        themeVariableNames.forEach(name => element.style.removeProperty(name));
+        if (themeId) element.dataset.theme = themeId;
+        else element.removeAttribute('data-theme');
+
+        Object.entries(variables).forEach(([name, value]) => {
+            if (themeVariableNames.includes(name) && typeof value === 'string' && value) {
+                element.style.setProperty(name, value);
+            }
+        });
+    };
+
+    const initialTheme = captureTheme();
 
     let connection = null;
     let currentRoomCode = '';
@@ -124,6 +172,7 @@
         get(value, 'turnDeadlineUtc', 'TurnDeadlineUtc') ?? '';
     const winnerOf = value =>
         Number(get(value, 'winnerPlayerNumber', 'WinnerPlayerNumber') ?? 0);
+    const roomThemeOf = value => get(value, 'theme', 'Theme') ?? null;
     const questionCardsEnabledOf = value =>
         Boolean(get(value, 'questionCardsEnabled', 'QuestionCardsEnabled') ?? false);
     const availableQuestionsOf = value =>
@@ -195,6 +244,7 @@
         currentState = null;
         currentGameNumber = -1;
         inactiveCards.clear();
+        applyTheme(initialTheme);
         updateRoomUrl('');
     };
 
@@ -494,7 +544,9 @@
             list.className = 'minigames-question-history-list';
             entries.forEach(entry => {
                 const item = document.createElement('li');
-                const player = playerName(historyPlayerOf(entry));
+                const historyPlayer = historyPlayerOf(entry);
+                item.classList.add(`is-player-${historyPlayer}`);
+                const player = playerName(historyPlayer);
                 const kind = historyKindOf(entry);
                 const value = historyValueOf(entry) ?? '';
 
@@ -603,6 +655,7 @@
         if (!state) return;
         if (currentState && versionOf(state) < versionOf(currentState)) return;
 
+        applyTheme(roomThemeOf(state));
         const gameNumber = gameNumberOf(state);
         const turnKey = `${gameNumber}:${currentPlayerOf(state)}:${deadlineOf(state)}`;
         if (gameNumber !== currentGameNumber) {
@@ -675,7 +728,7 @@
         clearErrors();
         createRoomButton.disabled = true;
         try {
-            const membership = await connection.invoke('CreateRoom');
+            const membership = await connection.invoke('CreateRoom', captureTheme());
             applyMembership(membership);
             await openNewGameDialog();
         } catch (error) {
