@@ -44,15 +44,18 @@ public sealed class GameBoard
                 selection.Normal.Contains(question.SourceQuestionId);
             var isRandomAnonymousShared =
                 selection.AnonymousShared.Contains(question.SourceQuestionId);
-            var isSpecial = usesRandomWagers
-                ? isRandomNormal || isRandomAnonymousShared
-                : question.IsSpecial;
-            var presentationType = usesRandomWagers
-                ? isRandomAnonymousShared
-                    ? QuestionWagerModes.AnonymousShared
-                    : QuestionWagerModes.GetContentPresentationType(
-                        question.PresentationType)
-                : question.PresentationType;
+            var isSpecial =
+                question.IsSpecial ||
+                isRandomNormal ||
+                isRandomAnonymousShared;
+            var presentationType = isRandomAnonymousShared
+                ? QuestionWagerModes.AnonymousShared
+                : question.IsSpecial
+                    ? question.PresentationType
+                    : usesRandomWagers
+                        ? QuestionWagerModes.GetContentPresentationType(
+                            question.PresentationType)
+                        : question.PresentationType;
 
             return new RuntimeQuestion(
                 round.SourceRoundId,

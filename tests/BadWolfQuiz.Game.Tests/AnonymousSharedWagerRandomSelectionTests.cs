@@ -64,6 +64,84 @@ public sealed class AnonymousSharedWagerRandomSelectionTests
             randomAnonymousSharedWagerQuestionCount: 2));
     }
 
+    [Fact]
+    public void Manual_normal_wager_is_preserved_when_anonymous_random_wagers_are_enabled()
+    {
+        var manualWager = new QuizQuestionSnapshot(
+            999, 99, 4, 200, isSpecial: true,
+            categoryTitle: "Manual wager",
+            excludeFromRandomWagerSelection: true);
+        var round = new QuizRoundSnapshot(
+            1,
+            "Round",
+            0,
+            [
+                manualWager,
+                CreateStandardQuestion(1),
+                CreateStandardQuestion(2),
+                CreateStandardQuestion(3),
+                CreateStandardQuestion(4)
+            ],
+            useRandomAnonymousSharedWagerQuestions: true,
+            randomAnonymousSharedWagerQuestionCount: 4);
+
+        var session = GameSession.Create(new QuizSnapshot(1, "Quiz", [round]));
+        session.AddPlayer("Player");
+        session.Start();
+
+        var selected = session.SelectQuestion(manualWager.SourceQuestionId);
+
+        Assert.True(selected.IsSpecial);
+        Assert.Equal(QuestionPresentationType.Standard, selected.PresentationType);
+        Assert.False(QuestionWagerModes.IsAnonymousShared(selected.PresentationType));
+        Assert.Equal(RuntimeQuestionStatus.AwaitingWager, selected.Status);
+        Assert.Equal(
+            4,
+            session.Board.Questions.Count(question =>
+                question.SourceQuestionId != manualWager.SourceQuestionId &&
+                question.IsSpecial &&
+                QuestionWagerModes.IsAnonymousShared(question.PresentationType)));
+    }
+
+    [Fact]
+    public void Manual_shared_wager_is_preserved_when_normal_random_wagers_are_enabled()
+    {
+        var manualWager = new QuizQuestionSnapshot(
+            998, 98, 4, 200, isSpecial: true,
+            categoryTitle: "Manual shared wager",
+            excludeFromRandomWagerSelection: true,
+            presentationType: QuestionWagerModes.AnonymousShared);
+        var round = new QuizRoundSnapshot(
+            1,
+            "Round",
+            0,
+            [
+                manualWager,
+                CreateStandardQuestion(1),
+                CreateStandardQuestion(2),
+                CreateStandardQuestion(3),
+                CreateStandardQuestion(4)
+            ],
+            useRandomWagerQuestions: true,
+            randomWagerQuestionCount: 4);
+
+        var session = GameSession.Create(new QuizSnapshot(1, "Quiz", [round]));
+        session.AddPlayer("Player");
+        session.Start();
+
+        var selected = session.SelectQuestion(manualWager.SourceQuestionId);
+
+        Assert.True(selected.IsSpecial);
+        Assert.True(QuestionWagerModes.IsAnonymousShared(selected.PresentationType));
+        Assert.Equal(RuntimeQuestionStatus.AwaitingWager, selected.Status);
+        Assert.Equal(
+            4,
+            session.Board.Questions.Count(question =>
+                question.SourceQuestionId != manualWager.SourceQuestionId &&
+                question.IsSpecial &&
+                !QuestionWagerModes.IsAnonymousShared(question.PresentationType)));
+    }
+
     private static QuizQuestionSnapshot CreateStandardQuestion(int index) => new(
         100 + index,
         10 + index,
