@@ -48,6 +48,8 @@ Web `1.22.3` is a PATCH release that makes authored buzzer activation modes effe
 
 Web `1.22.4` is a PATCH release that preserves authored YouTube start times when supported YouTube links are converted to privacy-enhanced embeds. `t` and `start` parameters are accepted from the query string or fragment, numeric seconds and `h` / `m` / `s` timestamp forms are converted to the embed `start` parameter, and links without a valid positive timestamp continue to start from the beginning. The behavior is shared by host gameplay, player gameplay, AnswerKey, and game-content previews without changing the existing autoplay, placeholder, or fullscreen flow.
 
+Web `1.23.0` is a MINOR release that introduces the standalone **Minigames** catalog and the first two-player minigame, **Guess what I'm playing / Вгадай, у що я граю**. It adds private two-player rooms with join codes and one-hour inactivity expiry, configurable game-card tables and exclusions, private secret cards, timed alternating turns, guesses, optional YES/NO Question cards with independent shuffled decks and shared history, theme synchronization, in-place game restart, shareable room links with social previews, and a responsive square-card layout.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.

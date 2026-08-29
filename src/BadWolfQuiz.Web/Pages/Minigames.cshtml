@@ -1,0 +1,31 @@
+@page "/minigames"
+@model BadWolfQuiz.Web.Pages.MinigamesModel
+@inject IStringLocalizer<MinigameCatalogResource> MinigameCatalogLocalizer
+@{
+    ViewData["Title"] = Localizer["Minigames_Title"];
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/minigames-catalog.css" asp-append-version="true" />
+}
+
+<section class="minigames-catalog">
+    <header class="minigames-catalog-header">
+        <h1>@Localizer["Minigames_Title"]</h1>
+        <p>@MinigameCatalogLocalizer["CatalogDescription"]</p>
+    </header>
+
+    <div class="minigames-catalog-grid">
+        <a class="minigames-catalog-card" asp-page="/GuessWhatIPlay">
+            <span class="minigames-catalog-image">
+                <img src="~/images/minigames/guess-what-i-play.svg"
+                     alt=""
+                     loading="eager" />
+            </span>
+            <span class="minigames-catalog-content">
+                <strong>@MinigameCatalogLocalizer["GuessWhatIPlay_Title"]</strong>
+                <span>@MinigameCatalogLocalizer["GuessWhatIPlay_Description"]</span>
+            </span>
+        </a>
+    </div>
+</section>

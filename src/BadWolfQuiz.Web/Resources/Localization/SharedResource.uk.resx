@@ -2631,4 +2631,202 @@
   <data name="QuizEditor_InvalidCombinedRandomWagerCount" xml:space="preserve">
     <value>Сумарна кількість звичайних та анонімних випадкових питань зі ставкою не може перевищувати {0}.</value>
   </data>
+  <data name="Menu_Minigames" xml:space="preserve">
+    <value>Мініігри</value>
+  </data>
+  <data name="Minigames_Title" xml:space="preserve">
+    <value>Мініігри</value>
+  </data>
+  <data name="Minigames_Regenerate" xml:space="preserve">
+    <value>Згенерувати заново</value>
+  </data>
+  <data name="Minigames_EmptyTitle" xml:space="preserve">
+    <value>Немає карток для мініігор</value>
+  </data>
+  <data name="Minigames_EmptyDescription" xml:space="preserve">
+    <value>Додайте зображення до Resources/Minigames/GameCards.</value>
+  </data>
+  <data name="Minigames_RegenerateError" xml:space="preserve">
+    <value>Не вдалося оновити картки. Спробуйте ще раз.</value>
+  </data>
+  <data name="Minigames_CreateRoom" xml:space="preserve">
+    <value>Створити кімнату</value>
+  </data>
+  <data name="Minigames_JoinRoom" xml:space="preserve">
+    <value>Приєднатися</value>
+  </data>
+  <data name="Minigames_RoomCode" xml:space="preserve">
+    <value>Код кімнати</value>
+  </data>
+  <data name="Minigames_Room" xml:space="preserve">
+    <value>Кімната</value>
+  </data>
+  <data name="Minigames_RoomIntro" xml:space="preserve">
+    <value>Створіть приватну кімнату для двох гравців або приєднайтеся за кодом.</value>
+  </data>
+  <data name="Minigames_Or" xml:space="preserve">
+    <value>або</value>
+  </data>
+  <data name="Minigames_PlayerOne" xml:space="preserve">
+    <value>Гравець 1</value>
+  </data>
+  <data name="Minigames_PlayerTwo" xml:space="preserve">
+    <value>Гравець 2</value>
+  </data>
+  <data name="Minigames_NewGame" xml:space="preserve">
+    <value>Нова гра</value>
+  </data>
+  <data name="Minigames_NewGameTitle" xml:space="preserve">
+    <value>Нова гра</value>
+  </data>
+  <data name="Minigames_NewGameDescription" xml:space="preserve">
+    <value>Оберіть кількість випадкових карток, які будуть розміщені на столі.</value>
+  </data>
+  <data name="Minigames_CardCount" xml:space="preserve">
+    <value>Кількість карток на столі</value>
+  </data>
+  <data name="Minigames_CardCountRange" xml:space="preserve">
+    <value>Доступний діапазон: {0}–{1}.</value>
+  </data>
+  <data name="Minigames_StartGame" xml:space="preserve">
+    <value>Почати</value>
+  </data>
+  <data name="Minigames_Cancel" xml:space="preserve">
+    <value>Скасувати</value>
+  </data>
+  <data name="Minigames_WaitingTitle" xml:space="preserve">
+    <value>Очікування</value>
+  </data>
+  <data name="Minigames_WaitingForOpponent" xml:space="preserve">
+    <value>Очікуємо Гравця 2.</value>
+  </data>
+  <data name="Minigames_WaitingForGame" xml:space="preserve">
+    <value>Натисніть «Нова гра», щоб згенерувати стіл.</value>
+  </data>
+  <data name="Minigames_ChooseExclusions" xml:space="preserve">
+    <value>Оберіть {count} карток, які потрібно виключити з цієї гри.</value>
+  </data>
+  <data name="Minigames_ExclusionProgress" xml:space="preserve">
+    <value>Обрано: {selected}/{count}.</value>
+  </data>
+  <data name="Minigames_GameReady" xml:space="preserve">
+    <value>Гра готова. Ваша загадана картка виділена рамкою.</value>
+  </data>
+  <data name="Minigames_RoomNotFound" xml:space="preserve">
+    <value>Кімнату не знайдено.</value>
+  </data>
+  <data name="Minigames_RoomExpired" xml:space="preserve">
+    <value>Кімнату видалено після години неактивності.</value>
+  </data>
+  <data name="Minigames_RoomFull" xml:space="preserve">
+    <value>У цій кімнаті вже є два гравці.</value>
+  </data>
+  <data name="Minigames_InvalidPlayer" xml:space="preserve">
+    <value>Ваше підключення до кімнати більше не дійсне.</value>
+  </data>
+  <data name="Minigames_InvalidCardCount" xml:space="preserve">
+    <value>Оберіть допустиму кількість карток для столу.</value>
+  </data>
+  <data name="Minigames_CardAlreadyExcluded" xml:space="preserve">
+    <value>Інший гравець уже виключив цю картку.</value>
+  </data>
+  <data name="Minigames_ExclusionLimit" xml:space="preserve">
+    <value>Ви вже обрали всі необхідні картки.</value>
+  </data>
+  <data name="Minigames_GenericError" xml:space="preserve">
+    <value>Не вдалося оновити мінігру. Спробуйте ще раз.</value>
+  </data>
+  <data name="Minigames_Turn" xml:space="preserve">
+    <value>Хід: {player}</value>
+  </data>
+  <data name="Minigames_Answer" xml:space="preserve">
+    <value>Відповідь</value>
+  </data>
+  <data name="Minigames_EndTurn" xml:space="preserve">
+    <value>Завершити хід</value>
+  </data>
+  <data name="Minigames_ChooseAnswer" xml:space="preserve">
+    <value>Оберіть картку на столі як свою відповідь.</value>
+  </data>
+  <data name="Minigames_Winner" xml:space="preserve">
+    <value>{player} переміг!</value>
+  </data>
+  <data name="Minigames_NotYourTurn" xml:space="preserve">
+    <value>Зараз хід іншого гравця.</value>
+  </data>
+  <data name="Minigames_QuestionCards" xml:space="preserve">
+    <value>Картки з питаннями</value>
+  </data>
+  <data name="Minigames_QuestionCardsDescription" xml:space="preserve">
+    <value>На кожному ході активний гравець обирає одне з трьох ТАК/НІ-питань.</value>
+  </data>
+  <data name="Minigames_QuestionHistoryTitle" xml:space="preserve">
+    <value>Історія питань</value>
+  </data>
+  <data name="Minigames_QuestionChoicesTitle" xml:space="preserve">
+    <value>Доступні питання</value>
+  </data>
+  <data name="Minigames_QuestionHistoryEntry" xml:space="preserve">
+    <value>{player}: {question}</value>
+  </data>
+  <data name="Minigames_QuestionHistoryEmpty" xml:space="preserve">
+    <value>Питань ще не було.</value>
+  </data>
+  <data name="Minigames_QuestionNotSelected" xml:space="preserve">
+    <value>питання не обрано</value>
+  </data>
+  <data name="Minigames_QuestionChoose" xml:space="preserve">
+    <value>Оберіть одне питання на цей хід.</value>
+  </data>
+  <data name="Minigames_QuestionSelected" xml:space="preserve">
+    <value>Питання на цей хід уже обрано.</value>
+  </data>
+  <data name="Minigames_QuestionWait" xml:space="preserve">
+    <value>Питання можна обрати, коли настане ваш хід.</value>
+  </data>
+  <data name="Minigames_QuestionRequired" xml:space="preserve">
+    <value>Спочатку оберіть одне з доступних питань.</value>
+  </data>
+  <data name="Minigames_QuestionAlreadySelected" xml:space="preserve">
+    <value>На цьому ході ви вже обрали питання.</value>
+  </data>
+  <data name="Minigames_InvalidQuestion" xml:space="preserve">
+    <value>Це питання вже недоступне.</value>
+  </data>
+  <data name="Minigames_QuestionsUnavailable" xml:space="preserve">
+    <value>Картки з питаннями недоступні: у questions.txt недостатньо питань.</value>
+  </data>
+  <data name="Minigames_HistoryGuessCorrect" xml:space="preserve">
+    <value>{player} назвав гру {game} (правильно)</value>
+  </data>
+  <data name="Minigames_HistoryGuessIncorrect" xml:space="preserve">
+    <value>{player} назвав гру {game} (не правильно)</value>
+  </data>
+  <data name="Minigames_HistoryTurnEnded" xml:space="preserve">
+    <value>{player} закінчив хід</value>
+  </data>
+  <data name="Minigames_HistoryTurnTimedOut" xml:space="preserve">
+    <value>{player} закінчив хід (вийшов час)</value>
+  </data>
+  <data name="Minigames_RestartGame" xml:space="preserve">
+    <value>Перезапустити поточну гру</value>
+  </data>
+  <data name="Minigames_QuestionResponseTitle" xml:space="preserve">
+    <value>Відповідь на питання</value>
+  </data>
+  <data name="Minigames_QuestionResponsePrompt" xml:space="preserve">
+    <value>{player} запитує: {question}</value>
+  </data>
+  <data name="Minigames_Yes" xml:space="preserve">
+    <value>ТАК</value>
+  </data>
+  <data name="Minigames_No" xml:space="preserve">
+    <value>НІ</value>
+  </data>
+  <data name="Minigames_HistoryQuestionAnswer" xml:space="preserve">
+    <value>{player} відповів - {answer}</value>
+  </data>
+  <data name="Minigames_QuestionAwaitingResponse" xml:space="preserve">
+    <value>Очікуємо відповідь {player}.</value>
+  </data>
 </root>

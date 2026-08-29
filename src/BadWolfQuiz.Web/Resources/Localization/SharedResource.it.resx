@@ -2631,4 +2631,202 @@
   <data name="QuizEditor_InvalidCombinedRandomWagerCount" xml:space="preserve">
     <value>Il numero totale di domande casuali con scommessa normale e anonima non può superare {0}.</value>
   </data>
+  <data name="Menu_Minigames" xml:space="preserve">
+    <value>Minigiochi</value>
+  </data>
+  <data name="Minigames_Title" xml:space="preserve">
+    <value>Minigiochi</value>
+  </data>
+  <data name="Minigames_Regenerate" xml:space="preserve">
+    <value>Rigenera</value>
+  </data>
+  <data name="Minigames_EmptyTitle" xml:space="preserve">
+    <value>Nessuna carta di gioco</value>
+  </data>
+  <data name="Minigames_EmptyDescription" xml:space="preserve">
+    <value>Aggiungi immagini in Resources/Minigames/GameCards.</value>
+  </data>
+  <data name="Minigames_RegenerateError" xml:space="preserve">
+    <value>Impossibile rigenerare le carte. Riprova.</value>
+  </data>
+  <data name="Minigames_CreateRoom" xml:space="preserve">
+    <value>Crea stanza</value>
+  </data>
+  <data name="Minigames_JoinRoom" xml:space="preserve">
+    <value>Entra</value>
+  </data>
+  <data name="Minigames_RoomCode" xml:space="preserve">
+    <value>Codice stanza</value>
+  </data>
+  <data name="Minigames_Room" xml:space="preserve">
+    <value>Stanza</value>
+  </data>
+  <data name="Minigames_RoomIntro" xml:space="preserve">
+    <value>Crea una stanza privata per due giocatori oppure entra con un codice.</value>
+  </data>
+  <data name="Minigames_Or" xml:space="preserve">
+    <value>oppure</value>
+  </data>
+  <data name="Minigames_PlayerOne" xml:space="preserve">
+    <value>Giocatore 1</value>
+  </data>
+  <data name="Minigames_PlayerTwo" xml:space="preserve">
+    <value>Giocatore 2</value>
+  </data>
+  <data name="Minigames_NewGame" xml:space="preserve">
+    <value>Nuova partita</value>
+  </data>
+  <data name="Minigames_NewGameTitle" xml:space="preserve">
+    <value>Nuova partita</value>
+  </data>
+  <data name="Minigames_NewGameDescription" xml:space="preserve">
+    <value>Scegli quante carte casuali mettere sul tavolo.</value>
+  </data>
+  <data name="Minigames_CardCount" xml:space="preserve">
+    <value>Carte sul tavolo</value>
+  </data>
+  <data name="Minigames_CardCountRange" xml:space="preserve">
+    <value>Intervallo disponibile: {0}–{1}.</value>
+  </data>
+  <data name="Minigames_StartGame" xml:space="preserve">
+    <value>Inizia</value>
+  </data>
+  <data name="Minigames_Cancel" xml:space="preserve">
+    <value>Annulla</value>
+  </data>
+  <data name="Minigames_WaitingTitle" xml:space="preserve">
+    <value>In attesa</value>
+  </data>
+  <data name="Minigames_WaitingForOpponent" xml:space="preserve">
+    <value>In attesa del Giocatore 2.</value>
+  </data>
+  <data name="Minigames_WaitingForGame" xml:space="preserve">
+    <value>Premi Nuova partita per generare il tavolo.</value>
+  </data>
+  <data name="Minigames_ChooseExclusions" xml:space="preserve">
+    <value>Scegli {count} carte da escludere da questa partita.</value>
+  </data>
+  <data name="Minigames_ExclusionProgress" xml:space="preserve">
+    <value>Selezionate: {selected}/{count}.</value>
+  </data>
+  <data name="Minigames_GameReady" xml:space="preserve">
+    <value>La partita è pronta. La tua carta segreta è evidenziata.</value>
+  </data>
+  <data name="Minigames_RoomNotFound" xml:space="preserve">
+    <value>Stanza non trovata.</value>
+  </data>
+  <data name="Minigames_RoomExpired" xml:space="preserve">
+    <value>La stanza è scaduta dopo un'ora di inattività.</value>
+  </data>
+  <data name="Minigames_RoomFull" xml:space="preserve">
+    <value>Questa stanza ha già due giocatori.</value>
+  </data>
+  <data name="Minigames_InvalidPlayer" xml:space="preserve">
+    <value>La tua appartenenza alla stanza non è più valida.</value>
+  </data>
+  <data name="Minigames_InvalidCardCount" xml:space="preserve">
+    <value>Scegli un numero valido di carte.</value>
+  </data>
+  <data name="Minigames_CardAlreadyExcluded" xml:space="preserve">
+    <value>L'altro giocatore ha già escluso questa carta.</value>
+  </data>
+  <data name="Minigames_ExclusionLimit" xml:space="preserve">
+    <value>Hai già selezionato tutte le carte richieste.</value>
+  </data>
+  <data name="Minigames_GenericError" xml:space="preserve">
+    <value>Impossibile aggiornare il minigioco. Riprova.</value>
+  </data>
+  <data name="Minigames_Turn" xml:space="preserve">
+    <value>Turno: {player}</value>
+  </data>
+  <data name="Minigames_Answer" xml:space="preserve">
+    <value>Risposta</value>
+  </data>
+  <data name="Minigames_EndTurn" xml:space="preserve">
+    <value>Termina turno</value>
+  </data>
+  <data name="Minigames_ChooseAnswer" xml:space="preserve">
+    <value>Scegli una carta sul tavolo come risposta.</value>
+  </data>
+  <data name="Minigames_Winner" xml:space="preserve">
+    <value>{player} ha vinto!</value>
+  </data>
+  <data name="Minigames_NotYourTurn" xml:space="preserve">
+    <value>Non è il tuo turno.</value>
+  </data>
+  <data name="Minigames_QuestionCards" xml:space="preserve">
+    <value>Carte con domande</value>
+  </data>
+  <data name="Minigames_QuestionCardsDescription" xml:space="preserve">
+    <value>A ogni turno il giocatore attivo sceglie una delle tre domande sì/no.</value>
+  </data>
+  <data name="Minigames_QuestionHistoryTitle" xml:space="preserve">
+    <value>Cronologia delle domande</value>
+  </data>
+  <data name="Minigames_QuestionChoicesTitle" xml:space="preserve">
+    <value>Domande disponibili</value>
+  </data>
+  <data name="Minigames_QuestionHistoryEntry" xml:space="preserve">
+    <value>{player}: {question}</value>
+  </data>
+  <data name="Minigames_QuestionHistoryEmpty" xml:space="preserve">
+    <value>Non è stata ancora fatta nessuna domanda.</value>
+  </data>
+  <data name="Minigames_QuestionNotSelected" xml:space="preserve">
+    <value>nessuna domanda selezionata</value>
+  </data>
+  <data name="Minigames_QuestionChoose" xml:space="preserve">
+    <value>Scegli una domanda per questo turno.</value>
+  </data>
+  <data name="Minigames_QuestionSelected" xml:space="preserve">
+    <value>Hai già scelto una domanda per questo turno.</value>
+  </data>
+  <data name="Minigames_QuestionWait" xml:space="preserve">
+    <value>Potrai scegliere una domanda durante il tuo turno.</value>
+  </data>
+  <data name="Minigames_QuestionRequired" xml:space="preserve">
+    <value>Scegli prima una delle domande disponibili.</value>
+  </data>
+  <data name="Minigames_QuestionAlreadySelected" xml:space="preserve">
+    <value>Hai già scelto una domanda in questo turno.</value>
+  </data>
+  <data name="Minigames_InvalidQuestion" xml:space="preserve">
+    <value>Questa domanda non è più disponibile.</value>
+  </data>
+  <data name="Minigames_QuestionsUnavailable" xml:space="preserve">
+    <value>Le carte con domande non sono disponibili: questions.txt non contiene abbastanza domande.</value>
+  </data>
+  <data name="Minigames_HistoryGuessCorrect" xml:space="preserve">
+    <value>{player} ha indicato il gioco {game} (corretto)</value>
+  </data>
+  <data name="Minigames_HistoryGuessIncorrect" xml:space="preserve">
+    <value>{player} ha indicato il gioco {game} (non corretto)</value>
+  </data>
+  <data name="Minigames_HistoryTurnEnded" xml:space="preserve">
+    <value>{player} ha terminato il turno</value>
+  </data>
+  <data name="Minigames_HistoryTurnTimedOut" xml:space="preserve">
+    <value>{player} ha terminato il turno (tempo scaduto)</value>
+  </data>
+  <data name="Minigames_RestartGame" xml:space="preserve">
+    <value>Riavvia la partita corrente</value>
+  </data>
+  <data name="Minigames_QuestionResponseTitle" xml:space="preserve">
+    <value>Rispondi alla domanda</value>
+  </data>
+  <data name="Minigames_QuestionResponsePrompt" xml:space="preserve">
+    <value>{player} chiede: {question}</value>
+  </data>
+  <data name="Minigames_Yes" xml:space="preserve">
+    <value>SÌ</value>
+  </data>
+  <data name="Minigames_No" xml:space="preserve">
+    <value>NO</value>
+  </data>
+  <data name="Minigames_HistoryQuestionAnswer" xml:space="preserve">
+    <value>{player} ha risposto - {answer}</value>
+  </data>
+  <data name="Minigames_QuestionAwaitingResponse" xml:space="preserve">
+    <value>In attesa della risposta di {player}.</value>
+  </data>
 </root>

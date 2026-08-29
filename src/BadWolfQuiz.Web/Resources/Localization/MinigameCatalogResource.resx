@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="CatalogDescription" xml:space="preserve"><value>Choose a minigame.</value></data>
+  <data name="GuessWhatIPlay_Title" xml:space="preserve"><value>Guess what I'm playing</value></data>
+  <data name="GuessWhatIPlay_Description" xml:space="preserve"><value>A two-player deduction game: ask yes/no questions, eliminate cards, and guess the opponent's game.</value></data>
+  <data name="GuessWhatIPlay_SocialTitle" xml:space="preserve"><value>Guess what I'm playing — Bad Wolf Quiz</value></data>
+  <data name="GuessWhatIPlay_RoomSocialTitle" xml:space="preserve"><value>Join room {0} — Guess what I'm playing</value></data>
+  <data name="GuessWhatIPlay_SocialDescription" xml:space="preserve"><value>Join a two-player deduction game: ask yes/no questions, eliminate cards, and guess the opponent's game.</value></data>
+  <data name="CopyRoomLink" xml:space="preserve"><value>Copy room link</value></data>
+  <data name="RoomLinkCopied" xml:space="preserve"><value>Room link copied</value></data>
+  <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Could not copy the room link</value></data>
+</root>

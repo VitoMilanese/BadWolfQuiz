@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07172a"/>
+      <stop offset="0.55" stop-color="#12385b"/>
+      <stop offset="1" stop-color="#081a2d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="60%">
+      <stop offset="0" stop-color="#f5c542" stop-opacity=".32"/>
+      <stop offset="1" stop-color="#f5c542" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity=".34"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <circle cx="600" cy="330" r="330" fill="url(#glow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="244" y="88" width="712" height="500" rx="38" fill="#0b2947" stroke="#2f5576" stroke-width="3"/>
+    <rect x="280" y="124" width="640" height="428" rx="27" fill="#09213a"/>
+  </g>
+
+  <g>
+    <g transform="translate(330 170)">
+      <rect width="120" height="120" rx="18" fill="#f5c542"/>
+      <circle cx="60" cy="60" r="33" fill="#102e4b"/>
+      <path d="M24 94 52 55 76 77 96 42 108 94Z" fill="#e9f2f8" opacity=".8"/>
+    </g>
+    <g transform="translate(470 170)">
+      <rect width="120" height="120" rx="18" fill="#d83b43"/>
+      <path d="M60 20 101 60 60 101 19 60Z" fill="#e9f2f8"/>
+      <circle cx="60" cy="60" r="18" fill="#0d2945"/>
+    </g>
+    <g transform="translate(610 170)">
+      <rect width="120" height="120" rx="18" fill="#3c78a8"/>
+      <circle cx="48" cy="51" r="28" fill="#ecf4f9"/>
+      <circle cx="78" cy="73" r="24" fill="#091c30"/>
+    </g>
+    <g transform="translate(750 170)">
+      <rect width="120" height="120" rx="18" fill="#8395a5"/>
+      <path d="m21 92 39-68 39 68Z" fill="#0d2945"/>
+      <circle cx="60" cy="68" r="16" fill="#f5c542"/>
+    </g>
+    <g transform="translate(330 318)">
+      <rect width="120" height="120" rx="18" fill="#315b7d"/>
+      <path d="M18 80c22-46 62-57 86-35-11 1-17 7-22 15 13 1 22 8 27 21-35-8-58 7-91-1Z" fill="#e9f2f8"/>
+    </g>
+    <g transform="translate(470 318)">
+      <rect width="120" height="120" rx="18" fill="#c83e49"/>
+      <path d="M60 18 99 99H21Z" fill="#f5c542"/>
+      <rect x="49" y="48" width="22" height="42" rx="5" fill="#102e4b"/>
+    </g>
+    <g transform="translate(610 318)">
+      <rect width="120" height="120" rx="18" fill="#e5edf2"/>
+      <circle cx="60" cy="60" r="36" fill="#17466c"/>
+      <path d="M40 62h40M60 42v40" stroke="#f5c542" stroke-width="10" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(750 318)">
+      <rect width="120" height="120" rx="18" fill="#d29a37"/>
+      <path d="M26 94 60 25l34 69Z" fill="#0b2947"/>
+      <circle cx="60" cy="71" r="12" fill="#e9f2f8"/>
+    </g>
+  </g>
+
+  <rect x="462" y="162" width="136" height="136" rx="24" fill="none" stroke="#ffdf4f" stroke-width="8"/>
+
+  <g transform="translate(62 250)">
+    <circle cx="74" cy="43" r="43" fill="#eef5f9"/>
+    <rect x="13" y="91" width="122" height="114" rx="45" fill="#eef5f9"/>
+    <circle cx="60" cy="37" r="5" fill="#0b2947"/>
+    <circle cx="88" cy="37" r="5" fill="#0b2947"/>
+  </g>
+  <g transform="translate(1003 250)">
+    <circle cx="74" cy="43" r="43" fill="#eef5f9"/>
+    <rect x="13" y="91" width="122" height="114" rx="45" fill="#eef5f9"/>
+    <circle cx="60" cy="37" r="5" fill="#0b2947"/>
+    <circle cx="88" cy="37" r="5" fill="#0b2947"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <path d="M57 91h164a25 25 0 0 1 25 25v82a25 25 0 0 1-25 25h-68l-32 35 7-35H57a25 25 0 0 1-25-25v-82a25 25 0 0 1 25-25Z" fill="#0e3152" stroke="#f5c542" stroke-width="4"/>
+    <path d="m74 157 25 25 63-66" fill="none" stroke="#f5c542" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g filter="url(#shadow)">
+    <path d="M979 91h164a25 25 0 0 1 25 25v82a25 25 0 0 1-25 25h-72l7 35-32-35h-67a25 25 0 0 1-25-25v-82a25 25 0 0 1 25-25Z" fill="#0e3152" stroke="#d83b43" stroke-width="4"/>
+    <path d="m1004 123 87 67m0-67-87 67" fill="none" stroke="#d83b43" stroke-width="14" stroke-linecap="round"/>
+  </g>
+
+  <g opacity=".55">
+    <circle cx="180" cy="580" r="8" fill="#f5c542"/>
+    <circle cx="1020" cy="568" r="8" fill="#d83b43"/>
+    <circle cx="1096" cy="515" r="5" fill="#f5c542"/>
+    <circle cx="104" cy="520" r="5" fill="#d83b43"/>
+  </g>
+</svg>

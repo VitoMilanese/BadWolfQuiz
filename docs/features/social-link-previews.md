@@ -1,6 +1,6 @@
 # Social link previews
 
-Bad Wolf Quiz exposes server-rendered Open Graph and Twitter metadata so Telegram and other social clients can show rich previews for site and game join links.
+Bad Wolf Quiz exposes server-rendered Open Graph and Twitter metadata so Telegram and other social clients can show rich previews for site, quiz, game join, and Minigames room links.
 
 ## Site preview
 
@@ -22,16 +22,26 @@ Examples:
 - `/social-preview.png?variant=join&theme=arctic-neon`
 - `/social-preview.png?variant=join&theme=sunset-orange`
 
+## Minigame room preview
+
+The **Guess what I'm playing** page at `/minigames/guess-what-i-play` supports shareable room URLs with `?room=CODE`.
+
+When a room query is present, the page emits room-specific Open Graph and Twitter title/description metadata while keeping the room code out of the preview text itself. The full current request URL, including the room query, is used as `og:url` so Telegram and similar clients can associate the preview with the exact room link.
+
+A copy-link button beside the room code copies that absolute URL. Opening it in another browser pre-fills the room code for Player 2; a browser that already owns a local membership token for the room resumes that membership instead.
+
+Minigame room links use the existing large Bad Wolf Quiz social-preview image pipeline, so they remain compatible with the same reverse-proxy URL handling as site and join previews.
+
 ## Reverse proxy and URLs
 
 `og:url` and `og:image` are absolute URLs. Forwarded scheme/host values are used behind the production reverse proxy, and `badwolf.buzz` is forced to HTTPS.
 
 ## Caching
 
-Generated preview images are public and cacheable for 24 hours. The theme and, for custom themes, color values are part of the URL so previews for different game themes do not share the same cache key.
+Generated preview images are public and cacheable for 24 hours. The theme and, for custom themes, color values are part of the URL where applicable so previews for different game themes do not share the same cache key.
 
 Telegram and other clients can cache already-fetched previews. When validating after deployment, use a fresh URL if an older preview is still shown.
 
 ## Release
 
-Introduced in Web `1.22.35` (`web-v1.22.35`).
+Social previews were introduced in Web `1.22.35` (`web-v1.22.35`). Shareable Minigames room previews were added in Web `1.23.0` (`web-v1.23.0`).
