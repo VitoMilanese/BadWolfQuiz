@@ -155,6 +155,10 @@ builder.Services.AddOptions<UserQuestionOptions>()
     .Bind(builder.Configuration.GetSection(UserQuestionOptions.SectionName))
     .Validate(options => options.IsValid, "User question settings are invalid.")
     .ValidateOnStart();
+builder.Services.AddOptions<MinigameOptions>()
+    .Bind(builder.Configuration.GetSection(MinigameOptions.SectionName))
+    .Validate(options => options.IsValid, "Minigame settings are invalid.")
+    .ValidateOnStart();
 
 var defaultCulture = builder.Configuration[
     $"{SiteDefaultsOptions.SectionName}:{nameof(SiteDefaultsOptions.Culture)}"] ?? "en";
@@ -207,6 +211,14 @@ builder.Services.AddSingleton<CrashLog>();
 builder.Services.AddHostedService<ActiveGamePersistenceService>();
 builder.Services.AddSingleton<GameSettingsStore>();
 builder.Services.AddSingleton<AvatarCatalog>();
+builder.Services.AddSingleton(provider =>
+{
+    var environment = provider.GetRequiredService<IWebHostEnvironment>();
+    var options = provider.GetRequiredService<IOptions<MinigameOptions>>().Value;
+    return new MinigameCardSetStore(
+        MinigameCardSetStore.ResolveRootPath(environment),
+        options.CardCount);
+});
 builder.Services.AddScoped<GameSessionLauncher>();
 builder.Services.AddScoped<GameHistoryStore>();
 builder.Services.AddScoped<PlayerStatisticsService>();
@@ -338,6 +350,7 @@ app.UseMiddleware<DeferredGameMediaMiddleware>();
 
 app.MapRazorPages();
 app.MapHub<GameHub>("/hubs/game");
+app.MapHub<MinigameHub>("/hubs/minigames");
 
 using (var scope = app.Services.CreateScope())
 {

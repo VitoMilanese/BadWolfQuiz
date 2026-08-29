@@ -106,6 +106,7 @@
     <link rel="stylesheet" href="~/css/busy-indicators.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/buzzer-race-live.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/player-admission-menu.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
     <style>
         .host-game-board.final-question-host {
             width: calc(100vw - 32px);
@@ -289,6 +290,7 @@
                 }
 
                 <a class="action-menu-item" asp-page="/PublicQuizzes">@Localizer["Menu_PublicQuizzes"]</a>
+                <a class="action-menu-item" asp-page="/Minigames">@Localizer["Menu_Minigames"]</a>
                 @if (!string.IsNullOrWhiteSpace(discordInviteUrl))
                 {
                     <a class="action-menu-item" href="@discordInviteUrl" target="_blank" rel="noopener noreferrer">

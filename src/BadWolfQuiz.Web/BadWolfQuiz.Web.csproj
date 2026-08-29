@@ -32,7 +32,11 @@
     <Folder Include="Resources\Avatars\M\" />
     <Folder Include="Resources\Avatars\F\" />
     <Folder Include="Resources\Frames\" />
+    <Folder Include="Resources\Minigames\GameCards\" />
     <None Update="Resources\Avatars\**\*.png;Resources\Avatars\**\*.webp;Resources\Avatars\**\*.jpg;Resources\Avatars\**\*.jpeg;Resources\Frames\*.png"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest" />
+    <None Update="Resources\Minigames\GameCards\**\*.png;Resources\Minigames\GameCards\**\*.jpg;Resources\Minigames\GameCards\**\*.jpeg;Resources\Minigames\GameCards\**\*.webp;Resources\Minigames\GameCards\**\*.gif"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

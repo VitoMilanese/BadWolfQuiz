@@ -2631,4 +2631,22 @@
   <data name="QuizEditor_InvalidCombinedRandomWagerCount" xml:space="preserve">
     <value>Сумарна кількість звичайних та анонімних випадкових питань зі ставкою не може перевищувати {0}.</value>
   </data>
+  <data name="Menu_Minigames" xml:space="preserve">
+    <value>Мініігри</value>
+  </data>
+  <data name="Minigames_Title" xml:space="preserve">
+    <value>Мініігри</value>
+  </data>
+  <data name="Minigames_Regenerate" xml:space="preserve">
+    <value>Згенерувати заново</value>
+  </data>
+  <data name="Minigames_EmptyTitle" xml:space="preserve">
+    <value>Немає карток для мініігор</value>
+  </data>
+  <data name="Minigames_EmptyDescription" xml:space="preserve">
+    <value>Додайте зображення до Resources/Minigames/GameCards.</value>
+  </data>
+  <data name="Minigames_RegenerateError" xml:space="preserve">
+    <value>Не вдалося оновити картки. Спробуйте ще раз.</value>
+  </data>
 </root>

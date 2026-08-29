@@ -2631,4 +2631,22 @@
   <data name="QuizEditor_InvalidCombinedRandomWagerCount" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="Menu_Minigames" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_Regenerate" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_EmptyTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_EmptyDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_RegenerateError" xml:space="preserve">
+    <value>Україна</value>
+  </data>
 </root>

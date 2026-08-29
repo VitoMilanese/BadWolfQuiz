@@ -1,0 +1,68 @@
+@page "/minigames"
+@model BadWolfQuiz.Web.Pages.MinigamesModel
+@{
+    ViewData["Title"] = Localizer["Minigames_Title"];
+    ViewData["HidePortalFooter"] = true;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/minigames.css" asp-append-version="true" />
+}
+
+<div class="minigames-page"
+     data-minigames-root
+     data-state-version="@Model.StateVersion"
+     data-highlighted-file="@(Model.HighlightedFileName ?? string.Empty)"
+     data-hub-url="@Url.Content("~/hubs/minigames")"
+     data-card-url="@Url.Page("/Minigames", "Card")"
+     data-regenerate-error="@Localizer["Minigames_RegenerateError"]">
+    <div class="minigames-toolbar">
+        <h1>@Localizer["Minigames_Title"]</h1>
+        <div class="minigames-toolbar-actions">
+            <span class="minigames-error is-hidden"
+                  data-minigames-error
+                  role="alert"></span>
+            <button class="button button-primary"
+                    type="button"
+                    data-minigames-regenerate
+                    disabled>
+                @Localizer["Minigames_Regenerate"]
+            </button>
+        </div>
+    </div>
+
+    <div class="minigames-stage">
+        <div class="minigames-grid @(Model.Cards.Count == 0 ? "is-hidden" : null)"
+             data-minigames-grid>
+            @foreach (var card in Model.Cards)
+            {
+                var isHighlighted = string.Equals(
+                    Model.HighlightedFileName,
+                    card.FileName,
+                    StringComparison.Ordinal);
+                <button class="minigame-card @(isHighlighted ? "is-highlighted" : null)"
+                        type="button"
+                        data-card-file="@card.FileName"
+                        aria-label="@card.DisplayName"
+                        aria-pressed="false">
+                    <span class="minigame-card-frame">
+                        <img src="@Url.Page("/Minigames", "Card", new { file = card.FileName })"
+                             alt=""
+                             draggable="false" />
+                    </span>
+                    <span class="minigame-card-name">@card.DisplayName</span>
+                </button>
+            }
+        </div>
+
+        <div class="minigames-empty @(Model.Cards.Count == 0 ? null : "is-hidden")"
+             data-minigames-empty>
+            <h2>@Localizer["Minigames_EmptyTitle"]</h2>
+            <p>@Localizer["Minigames_EmptyDescription"]</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/minigames.js" asp-append-version="true"></script>
+}

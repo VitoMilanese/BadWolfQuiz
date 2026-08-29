@@ -1,0 +1,205 @@
+body:has(.minigames-page) {
+    overflow: hidden;
+}
+
+body:has(.minigames-page) .page-shell {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    height: calc(100dvh - var(--minigames-topbar-height, var(--topbar-height)));
+    min-height: 0;
+    padding: clamp(10px, 1.3vw, 18px);
+    overflow: hidden;
+}
+
+.minigames-page {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: clamp(8px, 1vw, 14px);
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+.minigames-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-width: 0;
+}
+
+.minigames-toolbar h1 {
+    margin: 0;
+    font-size: clamp(1.45rem, 2.5vw, 2.2rem);
+}
+
+.minigames-toolbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    min-width: 0;
+}
+
+.minigames-error {
+    max-width: min(40vw, 480px);
+    color: var(--red-bright);
+    font-size: 0.9rem;
+    text-align: right;
+}
+
+.minigames-stage {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.minigames-grid {
+    display: grid;
+    gap: clamp(8px, 1vw, 14px);
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+}
+
+.minigames-grid.is-hidden,
+.minigames-empty.is-hidden,
+.minigames-error.is-hidden {
+    display: none;
+}
+
+.minigame-card {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) 1.45rem;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+}
+
+.minigame-card-frame {
+    position: relative;
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    border: 3px solid transparent;
+    border-radius: 14px;
+    background: var(--panel);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
+    transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.minigame-card img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+    transition: filter 150ms ease, opacity 150ms ease;
+}
+
+.minigame-card:hover .minigame-card-frame,
+.minigame-card:focus-visible .minigame-card-frame {
+    transform: translateY(-2px);
+}
+
+.minigame-card:focus-visible {
+    outline: none;
+}
+
+.minigame-card:focus-visible .minigame-card-frame {
+    box-shadow: 0 0 0 3px var(--red-bright);
+}
+
+.minigame-card.is-highlighted .minigame-card-frame {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 34%, transparent),
+                0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+.minigame-card.is-inactive img {
+    filter: grayscale(1);
+    opacity: 0.28;
+}
+
+.minigame-card.is-inactive .minigame-card-frame::after {
+    content: "×";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--red-bright);
+    font-size: clamp(2.5rem, 7vmin, 6rem);
+    font-weight: 900;
+    line-height: 1;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.72);
+}
+
+.minigame-card-name {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: clamp(0.72rem, 1vw, 0.95rem);
+    line-height: 1.45rem;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 120ms ease;
+}
+
+.minigame-card:hover .minigame-card-name,
+.minigame-card:focus-visible .minigame-card-name {
+    visibility: visible;
+    opacity: 1;
+}
+
+.minigames-empty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 8px;
+    padding: 24px;
+    text-align: center;
+}
+
+.minigames-empty h2,
+.minigames-empty p {
+    margin: 0;
+}
+
+.minigames-empty p {
+    color: var(--muted);
+}
+
+@media (max-width: 640px) {
+    .minigames-toolbar {
+        gap: 8px;
+    }
+
+    .minigames-toolbar-actions {
+        gap: 8px;
+    }
+
+    .minigames-error {
+        display: none;
+    }
+
+    .minigames-toolbar .button {
+        padding-inline: 12px;
+        white-space: nowrap;
+    }
+}
