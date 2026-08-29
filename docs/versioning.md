@@ -54,6 +54,8 @@ Web `1.23.1` is a PATCH release that fixes same-round **Copy Question** updates 
 
 Web `1.23.2` is a PATCH release that fixes the host answer reveal for all-player multiple-choice wager questions. Player wager results stay in a bounded summary area, the answer uses the remaining viewport space, runtime content-container markers are consumed instead of appearing as text, container children are reconstructed in their intended layout, and legacy all-player option styles no longer leak onto reveal-only content. Regression coverage is also updated so configurable Minigames card counts are not mistaken for an immutable local setting.
 
+Web `1.23.3` is a PATCH release that finalizes the post-game quiz rating phase when the host explicitly finishes the game. Connected player clients are notified immediately, stale rating submissions are rejected server-side after finalization, ratings already saved before finalization remain intact, and refresh/reconnect no longer restores an editable rating screen for that finished runtime session.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
