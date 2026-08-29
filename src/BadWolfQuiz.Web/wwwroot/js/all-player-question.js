@@ -347,6 +347,53 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
     object-fit: contain;
 }
 
+.host-game-board.all-player-wager-multiple-choice-answer
+    .current-question-summary:not(.wager-mode) {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-content: stretch;
+    overflow: hidden;
+}
+
+.host-game-board.all-player-wager-multiple-choice-answer
+    .current-question-summary:not(.wager-mode)
+    > .all-player-host-progress {
+    grid-row: 1;
+    width: 100%;
+    max-width: none;
+    max-height: min(24dvh, 12rem);
+    align-self: start;
+    margin: 0;
+    padding-right: 0.25rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.host-game-board.all-player-wager-multiple-choice-answer
+    .current-question-summary:not(.wager-mode)
+    > .all-player-host-progress .all-player-answer-progress {
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    align-content: start;
+}
+
+.host-game-board.all-player-wager-multiple-choice-answer
+    .current-question-summary:not(.wager-mode)
+    > .answer-presentation {
+    grid-row: 2;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.host-game-board.all-player-wager-multiple-choice-answer
+    .answer-presentation .game-content-blocks {
+    min-height: 0;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    align-content: safe center;
+}
+
 @media (max-width: 640px) {
     .all-player-choice-grid {
         grid-template-columns: 1fr;
@@ -1521,6 +1568,10 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 state?.active &&
                 state.isClosed &&
                 state.mode === "multipleChoice");
+            const hasWagerResults = (state.players ?? [])
+                .some(player => player.wagerSubmitted);
+            const isWagerMultipleChoiceAnswer =
+                isMultipleChoiceAnswer && hasWagerResults;
             document.documentElement.classList.toggle(
                 "all-player-multiple-choice-answer-layout",
                 isMultipleChoiceAnswer);
@@ -1535,6 +1586,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                     "all-player-question-answering",
                     "all-player-question-wagering",
                     "all-player-multiple-choice-answer",
+                    "all-player-wager-multiple-choice-answer",
                     "all-player-text-reviewing");
                 removeProgress(board);
                 removeHostChoices(board);
@@ -1562,6 +1614,9 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             board.classList.toggle(
                 "all-player-multiple-choice-answer",
                 isMultipleChoiceAnswer);
+            board.classList.toggle(
+                "all-player-wager-multiple-choice-answer",
+                isWagerMultipleChoiceAnswer);
             board.classList.toggle(
                 "all-player-text-reviewing",
                 state.phase === "judging");
