@@ -61,6 +61,66 @@ public sealed class QuizRatingServiceTests
         Assert.Equal("player:Rose", rating.RaterKey);
     }
 
+    [Fact]
+    public async Task RateAsync_rejects_changes_after_rating_phase_is_finalized()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<QuizDbContext>()
+            .UseSqlite(connection)
+            .Options;
+        await using var db = new QuizDbContext(options);
+        await db.Database.EnsureCreatedAsync();
+
+        var quiz = CreateStoredQuiz();
+        db.Quizzes.Add(quiz);
+        await db.SaveChangesAsync();
+
+        var registry = new GameSessionRegistry(new FixedCodeGenerator());
+        var registration = registry.Create(CreateSnapshot(quiz));
+        var runtimePlayer = registration.Session.AddPlayer("Rose");
+        registration.Session.Start();
+        var questionId = quiz.Rounds.Single().Categories.Single().Questions.Single().Id;
+        registration.Session.SelectQuestion(questionId);
+        registration.Session.ActivateQuestionBuzzer(questionId);
+        registration.Session.JudgeQuestionAnswer(questionId, runtimePlayer.Id, true);
+        registration.Session.CloseQuestionAnswer(questionId);
+
+        var storedSession = new BadWolfQuiz.Web.Models.GameSession
+        {
+            QuizId = quiz.Id,
+            PublicCode = registration.PublicCode,
+            Status = BadWolfQuiz.Web.Models.GameSessionStatus.Finished
+        };
+        storedSession.Players.Add(new BadWolfQuiz.Web.Models.GamePlayer
+        {
+            Name = "Rose",
+            ReconnectToken = string.Empty
+        });
+        db.GameSessions.Add(storedSession);
+        await db.SaveChangesAsync();
+
+        var service = new QuizRatingService(db, registry);
+        Assert.True(QuizRatingService.IsRatingAvailable(registration.Session));
+        Assert.Equal(
+            QuizRatingResult.Saved,
+            await service.RateAsync(registration.PublicCode, runtimePlayer.Id, 5));
+
+        await service.FinalizeRatingPhaseAsync(registration.Session);
+
+        Assert.False(QuizRatingService.IsRatingAvailable(registration.Session));
+        Assert.Null(await service.GetPlayerRatingAsync(
+            registration.PublicCode,
+            runtimePlayer.Id));
+        Assert.Equal(
+            QuizRatingResult.NotAllowed,
+            await service.RateAsync(registration.PublicCode, runtimePlayer.Id, 2));
+
+        var rating = Assert.Single(await db.QuizRatings.ToListAsync());
+        Assert.Equal(5, rating.Score);
+        Assert.Equal("player:Rose", rating.RaterKey);
+    }
+
     [Theory]
     [InlineData(-1)]
     [InlineData(6)]
