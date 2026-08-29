@@ -50,6 +50,8 @@ Web `1.22.4` is a PATCH release that preserves authored YouTube start times when
 
 Web `1.23.0` is a MINOR release that introduces the standalone **Minigames** catalog and the first two-player minigame, **Guess what I'm playing / Вгадай, у що я граю**. It adds private two-player rooms with join codes and one-hour inactivity expiry, configurable game-card tables and exclusions, private secret cards, timed alternating turns, guesses, optional YES/NO Question cards with independent shuffled decks and shared history, theme synchronization, in-place game restart, shareable room links with social previews, and a responsive square-card layout.
 
+Web `1.23.1` is a PATCH release that fixes same-round **Copy Question** updates in the Quiz Editor. After a successful copy into the currently open round, the editor refreshes the affected board state from the persisted server-rendered markup without a full page reload, including newly added rows, while copies to other rounds or quizzes keep their previous behavior.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
