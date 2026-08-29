@@ -30,16 +30,19 @@
         overflow-y: auto !important;
     }
 
+    /* Legacy all-player answer styles treat every descendant block as an answer
+       option. Reset them across the whole shared reveal, including blocks moved
+       inside a runtime content container. */
     .game-content-blocks.multiple-choice-answer-reveal-grid
-        > .game-content-block,
+        .game-content-block,
     html.all-player-multiple-choice-answer-layout
         .host-game-board .answer-presentation
         > .game-content-blocks.multiple-choice-answer-reveal-grid
-        > .game-content-block,
+        .game-content-block,
     .host-game-board.all-player-multiple-choice-answer
         .answer-presentation
         > .game-content-blocks.multiple-choice-answer-reveal-grid
-        > .game-content-block {
+        .game-content-block {
         display: block !important;
         width: min(100%, 1100px) !important;
         min-width: 0 !important;
