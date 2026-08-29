@@ -2649,4 +2649,91 @@
   <data name="Minigames_RegenerateError" xml:space="preserve">
     <value>Could not regenerate the cards. Try again.</value>
   </data>
+  <data name="Minigames_CreateRoom" xml:space="preserve">
+    <value>Create room</value>
+  </data>
+  <data name="Minigames_JoinRoom" xml:space="preserve">
+    <value>Join room</value>
+  </data>
+  <data name="Minigames_RoomCode" xml:space="preserve">
+    <value>Room code</value>
+  </data>
+  <data name="Minigames_Room" xml:space="preserve">
+    <value>Room</value>
+  </data>
+  <data name="Minigames_RoomIntro" xml:space="preserve">
+    <value>Create a private two-player room or join an existing room by code.</value>
+  </data>
+  <data name="Minigames_Or" xml:space="preserve">
+    <value>or</value>
+  </data>
+  <data name="Minigames_PlayerOne" xml:space="preserve">
+    <value>Player 1</value>
+  </data>
+  <data name="Minigames_PlayerTwo" xml:space="preserve">
+    <value>Player 2</value>
+  </data>
+  <data name="Minigames_NewGame" xml:space="preserve">
+    <value>New game</value>
+  </data>
+  <data name="Minigames_NewGameTitle" xml:space="preserve">
+    <value>New game</value>
+  </data>
+  <data name="Minigames_NewGameDescription" xml:space="preserve">
+    <value>Choose how many random cards should be placed on the table.</value>
+  </data>
+  <data name="Minigames_CardCount" xml:space="preserve">
+    <value>Cards on the table</value>
+  </data>
+  <data name="Minigames_CardCountRange" xml:space="preserve">
+    <value>Allowed range: {0}–{1}.</value>
+  </data>
+  <data name="Minigames_StartGame" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="Minigames_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Minigames_WaitingTitle" xml:space="preserve">
+    <value>Waiting</value>
+  </data>
+  <data name="Minigames_WaitingForOpponent" xml:space="preserve">
+    <value>Waiting for Player 2.</value>
+  </data>
+  <data name="Minigames_WaitingForGame" xml:space="preserve">
+    <value>Press New game to generate the table.</value>
+  </data>
+  <data name="Minigames_ChooseExclusions" xml:space="preserve">
+    <value>Choose {count} cards to exclude from this game.</value>
+  </data>
+  <data name="Minigames_ExclusionProgress" xml:space="preserve">
+    <value>Selected: {selected}/{count}.</value>
+  </data>
+  <data name="Minigames_GameReady" xml:space="preserve">
+    <value>The game is ready. Your secret card is highlighted.</value>
+  </data>
+  <data name="Minigames_RoomNotFound" xml:space="preserve">
+    <value>The room was not found.</value>
+  </data>
+  <data name="Minigames_RoomExpired" xml:space="preserve">
+    <value>The room expired after one hour of inactivity.</value>
+  </data>
+  <data name="Minigames_RoomFull" xml:space="preserve">
+    <value>This room already has two players.</value>
+  </data>
+  <data name="Minigames_InvalidPlayer" xml:space="preserve">
+    <value>Your room membership is no longer valid.</value>
+  </data>
+  <data name="Minigames_InvalidCardCount" xml:space="preserve">
+    <value>Choose a valid number of cards for the table.</value>
+  </data>
+  <data name="Minigames_CardAlreadyExcluded" xml:space="preserve">
+    <value>The other player already excluded this card.</value>
+  </data>
+  <data name="Minigames_ExclusionLimit" xml:space="preserve">
+    <value>You have already selected all required cards.</value>
+  </data>
+  <data name="Minigames_GenericError" xml:space="preserve">
+    <value>Could not update the minigame. Try again.</value>
+  </data>
 </root>

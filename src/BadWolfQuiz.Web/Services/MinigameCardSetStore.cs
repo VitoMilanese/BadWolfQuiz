@@ -29,6 +29,10 @@ public sealed class MinigameCardSetStore
         _cardCount = cardCount;
     }
 
+    public int DefaultCardCount => _cardCount;
+
+    public int AvailableCardCount => DiscoverCards().Count;
+
     public static string ResolveRootPath(IHostEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(environment);
@@ -39,6 +43,25 @@ public sealed class MinigameCardSetStore
             "GameCards");
     }
 
+    public IReadOnlyList<MinigameCardDescriptor> GenerateCards(int cardCount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(cardCount);
+
+        var cards = DiscoverCards().ToList();
+        if (cardCount > cards.Count)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(cardCount),
+                cardCount,
+                "The requested card count exceeds the available image count.");
+        }
+
+        Shuffle(cards);
+        return cards.Take(cardCount).ToArray();
+    }
+
+    // Kept for compatibility with the first #445 implementation while the
+    // room-based game becomes the only UI consumer.
     public MinigameCardSetSnapshot GetCurrent()
     {
         lock (_sync)

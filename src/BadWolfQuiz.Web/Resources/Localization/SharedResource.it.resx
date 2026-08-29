@@ -2649,4 +2649,91 @@
   <data name="Minigames_RegenerateError" xml:space="preserve">
     <value>Impossibile rigenerare le carte. Riprova.</value>
   </data>
+  <data name="Minigames_CreateRoom" xml:space="preserve">
+    <value>Crea stanza</value>
+  </data>
+  <data name="Minigames_JoinRoom" xml:space="preserve">
+    <value>Entra</value>
+  </data>
+  <data name="Minigames_RoomCode" xml:space="preserve">
+    <value>Codice stanza</value>
+  </data>
+  <data name="Minigames_Room" xml:space="preserve">
+    <value>Stanza</value>
+  </data>
+  <data name="Minigames_RoomIntro" xml:space="preserve">
+    <value>Crea una stanza privata per due giocatori oppure entra con un codice.</value>
+  </data>
+  <data name="Minigames_Or" xml:space="preserve">
+    <value>oppure</value>
+  </data>
+  <data name="Minigames_PlayerOne" xml:space="preserve">
+    <value>Giocatore 1</value>
+  </data>
+  <data name="Minigames_PlayerTwo" xml:space="preserve">
+    <value>Giocatore 2</value>
+  </data>
+  <data name="Minigames_NewGame" xml:space="preserve">
+    <value>Nuova partita</value>
+  </data>
+  <data name="Minigames_NewGameTitle" xml:space="preserve">
+    <value>Nuova partita</value>
+  </data>
+  <data name="Minigames_NewGameDescription" xml:space="preserve">
+    <value>Scegli quante carte casuali mettere sul tavolo.</value>
+  </data>
+  <data name="Minigames_CardCount" xml:space="preserve">
+    <value>Carte sul tavolo</value>
+  </data>
+  <data name="Minigames_CardCountRange" xml:space="preserve">
+    <value>Intervallo disponibile: {0}–{1}.</value>
+  </data>
+  <data name="Minigames_StartGame" xml:space="preserve">
+    <value>Inizia</value>
+  </data>
+  <data name="Minigames_Cancel" xml:space="preserve">
+    <value>Annulla</value>
+  </data>
+  <data name="Minigames_WaitingTitle" xml:space="preserve">
+    <value>In attesa</value>
+  </data>
+  <data name="Minigames_WaitingForOpponent" xml:space="preserve">
+    <value>In attesa del Giocatore 2.</value>
+  </data>
+  <data name="Minigames_WaitingForGame" xml:space="preserve">
+    <value>Premi Nuova partita per generare il tavolo.</value>
+  </data>
+  <data name="Minigames_ChooseExclusions" xml:space="preserve">
+    <value>Scegli {count} carte da escludere da questa partita.</value>
+  </data>
+  <data name="Minigames_ExclusionProgress" xml:space="preserve">
+    <value>Selezionate: {selected}/{count}.</value>
+  </data>
+  <data name="Minigames_GameReady" xml:space="preserve">
+    <value>La partita è pronta. La tua carta segreta è evidenziata.</value>
+  </data>
+  <data name="Minigames_RoomNotFound" xml:space="preserve">
+    <value>Stanza non trovata.</value>
+  </data>
+  <data name="Minigames_RoomExpired" xml:space="preserve">
+    <value>La stanza è scaduta dopo un'ora di inattività.</value>
+  </data>
+  <data name="Minigames_RoomFull" xml:space="preserve">
+    <value>Questa stanza ha già due giocatori.</value>
+  </data>
+  <data name="Minigames_InvalidPlayer" xml:space="preserve">
+    <value>La tua appartenenza alla stanza non è più valida.</value>
+  </data>
+  <data name="Minigames_InvalidCardCount" xml:space="preserve">
+    <value>Scegli un numero valido di carte.</value>
+  </data>
+  <data name="Minigames_CardAlreadyExcluded" xml:space="preserve">
+    <value>L'altro giocatore ha già escluso questa carta.</value>
+  </data>
+  <data name="Minigames_ExclusionLimit" xml:space="preserve">
+    <value>Hai già selezionato tutte le carte richieste.</value>
+  </data>
+  <data name="Minigames_GenericError" xml:space="preserve">
+    <value>Impossibile aggiornare il minigioco. Riprova.</value>
+  </data>
 </root>

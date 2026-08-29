@@ -86,9 +86,9 @@ public sealed class ActiveGameOptions
 public sealed class MinigameOptions
 {
     public const string SectionName = "Minigames";
-    public int CardCount { get; set; } = 4;
+    public int CardCount { get; set; } = 10;
 
-    public bool IsValid => CardCount is >= 1 and <= 100;
+    public bool IsValid => CardCount is >= 10 and <= 100;
 }
 
 public sealed class ProjectOptions

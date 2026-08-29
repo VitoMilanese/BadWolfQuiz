@@ -2649,4 +2649,91 @@
   <data name="Minigames_RegenerateError" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="Minigames_CreateRoom" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_JoinRoom" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_RoomCode" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_Room" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_RoomIntro" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_Or" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_PlayerOne" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_PlayerTwo" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_NewGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_NewGameTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_NewGameDescription" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_CardCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_CardCountRange" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_StartGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_Cancel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_WaitingTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_WaitingForOpponent" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_WaitingForGame" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_ChooseExclusions" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_ExclusionProgress" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_GameReady" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_RoomNotFound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_RoomExpired" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_RoomFull" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_InvalidPlayer" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_InvalidCardCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_CardAlreadyExcluded" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_ExclusionLimit" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Minigames_GenericError" xml:space="preserve">
+    <value>Україна</value>
+  </data>
 </root>

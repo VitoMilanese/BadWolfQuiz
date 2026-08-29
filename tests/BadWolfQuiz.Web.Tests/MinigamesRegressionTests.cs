@@ -5,21 +5,22 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class MinigamesRegressionTests
 {
     [Fact]
-    public void Main_menu_and_runtime_expose_minigames()
+    public void Main_menu_and_runtime_expose_room_based_minigames()
     {
         var layout = ReadWebFile("Pages", "Shared", "_Layout.cshtml");
         var program = ReadWebFile("Program.cs");
 
         Assert.Contains("asp-page=\"/Minigames\"", layout);
         Assert.Contains("Menu_Minigames", layout);
-        Assert.Contains("RenderSectionAsync(\"Styles\"", layout);
         Assert.Contains("AddOptions<MinigameOptions>()", program);
         Assert.Contains("MinigameCardSetStore", program);
+        Assert.Contains("AddSingleton<MinigameRoomStore>()", program);
+        Assert.Contains("AddHostedService<MinigameRoomCleanupService>()", program);
         Assert.Contains("MapHub<MinigameHub>(\"/hubs/minigames\")", program);
     }
 
     [Fact]
-    public void Card_count_is_configurable()
+    public void Default_new_game_count_is_ten()
     {
         using var document = JsonDocument.Parse(ReadWebFile("appsettings.json"));
         var cardCount = document.RootElement
@@ -27,40 +28,54 @@ public sealed class MinigamesRegressionTests
             .GetProperty("CardCount")
             .GetInt32();
 
-        Assert.Equal(4, cardCount);
+        Assert.Equal(10, cardCount);
     }
 
     [Fact]
-    public void Page_keeps_cards_in_the_viewport_with_equal_grid_cells()
+    public void Page_supports_room_creation_join_and_new_game_setup()
+    {
+        var page = ReadWebFile("Pages", "Minigames.cshtml");
+        var script = ReadWebFile("wwwroot", "js", "minigames.js");
+
+        Assert.Contains("data-create-room", page);
+        Assert.Contains("data-join-room-form", page);
+        Assert.Contains("data-new-game-dialog", page);
+        Assert.Contains("data-new-game-count", page);
+        Assert.Contains("CreateRoom", script);
+        Assert.Contains("JoinRoom", script);
+        Assert.Contains("StartNewGame", script);
+        Assert.Contains("badwolf-minigame-player:", script);
+        Assert.Contains("withAutomaticReconnect()", script);
+    }
+
+    [Fact]
+    public void Page_keeps_room_cards_in_the_viewport_with_equal_grid_cells()
     {
         var page = ReadWebFile("Pages", "Minigames.cshtml");
         var styles = ReadWebFile("wwwroot", "css", "minigames.css");
         var script = ReadWebFile("wwwroot", "js", "minigames.js");
 
         Assert.Contains("ViewData[\"HidePortalFooter\"] = true", page);
-        Assert.Contains("data-highlighted-file", page);
-        Assert.Contains("minigame-card-name", page);
+        Assert.Contains("minigame-card", script);
         Assert.Contains("overflow: hidden", styles);
         Assert.Contains("height: calc(100dvh", styles);
-        Assert.Contains("width: 100%;", styles);
-        Assert.Contains("height: 100%;", styles);
         Assert.Contains("gridTemplateColumns", script);
         Assert.Contains("gridTemplateRows", script);
         Assert.Contains("ResizeObserver", script);
     }
 
     [Fact]
-    public void Realtime_regeneration_resets_only_local_card_state()
+    public void Room_updates_are_group_scoped_and_local_card_state_stays_local()
     {
         var script = ReadWebFile("wwwroot", "js", "minigames.js");
         var hub = ReadWebFile("Hubs", "MinigameHub.cs");
 
         Assert.Contains("const inactiveCards = new Set()", script);
-        Assert.Contains("inactiveCards.clear()", script);
-        Assert.Contains("cardsRegenerated", script);
-        Assert.Contains("withAutomaticReconnect()", script);
-        Assert.DoesNotContain("localStorage", script);
-        Assert.Contains("Clients.All.SendAsync(\"cardsRegenerated\"", hub);
+        Assert.Contains("roomChanged", script);
+        Assert.Contains("ToggleExclusion", script);
+        Assert.Contains("GetSignalRGroupName", hub);
+        Assert.Contains("Clients", hub);
+        Assert.DoesNotContain("Clients.All.SendAsync", hub);
     }
 
     private static string ReadWebFile(params string[] parts)

@@ -6,20 +6,19 @@ namespace BadWolfQuiz.Web.Pages;
 
 public sealed class MinigamesModel(MinigameCardSetStore cardSetStore) : PageModel
 {
-    public IReadOnlyList<MinigameCardDescriptor> Cards { get; private set; } = [];
+    public int AvailableCardCount { get; private set; }
 
-    public long StateVersion { get; private set; }
-
-    public string? HighlightedFileName { get; private set; }
+    public int DefaultCardCount { get; private set; }
 
     public void OnGet()
     {
-        var state = cardSetStore.GetCurrent();
-        StateVersion = state.Version;
-        Cards = state.Cards;
-        HighlightedFileName = Cards.Count == 0
-            ? null
-            : Cards[Random.Shared.Next(Cards.Count)].FileName;
+        AvailableCardCount = cardSetStore.AvailableCardCount;
+        DefaultCardCount = AvailableCardCount >= MinigameRoomStore.MinimumGameCardCount
+            ? Math.Clamp(
+                cardSetStore.DefaultCardCount,
+                MinigameRoomStore.MinimumGameCardCount,
+                AvailableCardCount)
+            : 0;
     }
 
     public IActionResult OnGetCard(string? file)

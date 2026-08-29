@@ -11,56 +11,129 @@
 
 <div class="minigames-page"
      data-minigames-root
-     data-state-version="@Model.StateVersion"
-     data-highlighted-file="@(Model.HighlightedFileName ?? string.Empty)"
      data-hub-url="@Url.Content("~/hubs/minigames")"
      data-card-url="@Url.Page("/Minigames", "Card")"
-     data-regenerate-error="@Localizer["Minigames_RegenerateError"]">
-    <div class="minigames-toolbar">
-        <h1>@Localizer["Minigames_Title"]</h1>
-        <div class="minigames-toolbar-actions">
-            <span class="minigames-error is-hidden"
-                  data-minigames-error
-                  role="alert"></span>
+     data-min-card-count="@BadWolfQuiz.Web.Services.MinigameRoomStore.MinimumGameCardCount"
+     data-max-card-count="@Model.AvailableCardCount"
+     data-default-card-count="@Model.DefaultCardCount"
+     data-player-one="@Localizer["Minigames_PlayerOne"]"
+     data-player-two="@Localizer["Minigames_PlayerTwo"]"
+     data-waiting-opponent="@Localizer["Minigames_WaitingForOpponent"]"
+     data-waiting-game="@Localizer["Minigames_WaitingForGame"]"
+     data-choose-exclusions="@Localizer["Minigames_ChooseExclusions"]"
+     data-exclusion-progress="@Localizer["Minigames_ExclusionProgress"]"
+     data-game-ready="@Localizer["Minigames_GameReady"]"
+     data-room-not-found="@Localizer["Minigames_RoomNotFound"]"
+     data-room-expired="@Localizer["Minigames_RoomExpired"]"
+     data-room-full="@Localizer["Minigames_RoomFull"]"
+     data-invalid-player="@Localizer["Minigames_InvalidPlayer"]"
+     data-invalid-card-count="@Localizer["Minigames_InvalidCardCount"]"
+     data-card-already-excluded="@Localizer["Minigames_CardAlreadyExcluded"]"
+     data-exclusion-limit="@Localizer["Minigames_ExclusionLimit"]"
+     data-generic-error="@Localizer["Minigames_GenericError"]">
+
+    <section class="minigames-entry" data-room-entry>
+        <div class="minigames-entry-card">
+            <h1>@Localizer["Minigames_Title"]</h1>
+            <p>@Localizer["Minigames_RoomIntro"]</p>
+
             <button class="button button-primary"
                     type="button"
-                    data-minigames-regenerate
-                    disabled>
-                @Localizer["Minigames_Regenerate"]
+                    data-create-room>
+                @Localizer["Minigames_CreateRoom"]
             </button>
-        </div>
-    </div>
 
-    <div class="minigames-stage">
-        <div class="minigames-grid @(Model.Cards.Count == 0 ? "is-hidden" : null)"
-             data-minigames-grid>
-            @foreach (var card in Model.Cards)
-            {
-                var isHighlighted = string.Equals(
-                    Model.HighlightedFileName,
-                    card.FileName,
-                    StringComparison.Ordinal);
-                <button class="minigame-card @(isHighlighted ? "is-highlighted" : null)"
+            <div class="minigames-entry-separator">
+                <span>@Localizer["Minigames_Or"]</span>
+            </div>
+
+            <form class="minigames-join-form" data-join-room-form>
+                <label for="minigames-room-code">@Localizer["Minigames_RoomCode"]</label>
+                <div class="minigames-join-row">
+                    <input id="minigames-room-code"
+                           type="text"
+                           maxlength="6"
+                           autocomplete="off"
+                           spellcheck="false"
+                           data-join-room-code
+                           placeholder="ABC123" />
+                    <button class="button" type="submit">
+                        @Localizer["Minigames_JoinRoom"]
+                    </button>
+                </div>
+            </form>
+
+            <p class="minigames-error is-hidden"
+               data-minigames-entry-error
+               role="alert"></p>
+        </div>
+    </section>
+
+    <section class="minigames-room is-hidden" data-room-shell>
+        <header class="minigames-toolbar">
+            <div class="minigames-toolbar-title">
+                <h1>@Localizer["Minigames_Title"]</h1>
+                <span class="minigames-room-code">
+                    @Localizer["Minigames_Room"]:
+                    <strong data-room-code></strong>
+                </span>
+            </div>
+            <div class="minigames-toolbar-actions">
+                <span class="minigames-error is-hidden"
+                      data-minigames-room-error
+                      role="alert"></span>
+                <button class="button button-primary"
                         type="button"
-                        data-card-file="@card.FileName"
-                        aria-label="@card.DisplayName"
-                        aria-pressed="false">
-                    <span class="minigame-card-frame">
-                        <img src="@Url.Page("/Minigames", "Card", new { file = card.FileName })"
-                             alt=""
-                             draggable="false" />
-                    </span>
-                    <span class="minigame-card-name">@card.DisplayName</span>
+                        data-new-game>
+                    @Localizer["Minigames_NewGame"]
                 </button>
-            }
+            </div>
+        </header>
+
+        <div class="minigames-room-status">
+            <strong data-player-label></strong>
+            <span data-room-message></span>
+            <span class="minigames-opponent-status" data-opponent-status></span>
         </div>
 
-        <div class="minigames-empty @(Model.Cards.Count == 0 ? null : "is-hidden")"
-             data-minigames-empty>
-            <h2>@Localizer["Minigames_EmptyTitle"]</h2>
-            <p>@Localizer["Minigames_EmptyDescription"]</p>
+        <div class="minigames-stage">
+            <div class="minigames-grid is-hidden" data-minigames-grid></div>
+            <div class="minigames-empty" data-minigames-empty>
+                <h2>@Localizer["Minigames_WaitingTitle"]</h2>
+                <p>@Localizer["Minigames_WaitingForGame"]</p>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <dialog class="minigames-dialog" data-new-game-dialog>
+        <form data-new-game-form>
+            <h2>@Localizer["Minigames_NewGameTitle"]</h2>
+            <p>@Localizer["Minigames_NewGameDescription"]</p>
+            <label for="minigames-card-count">@Localizer["Minigames_CardCount"]</label>
+            <input id="minigames-card-count"
+                   type="number"
+                   min="@BadWolfQuiz.Web.Services.MinigameRoomStore.MinimumGameCardCount"
+                   max="@Model.AvailableCardCount"
+                   value="@Model.DefaultCardCount"
+                   data-new-game-count />
+            <small data-card-count-range>
+                @Localizer["Minigames_CardCountRange",
+                    BadWolfQuiz.Web.Services.MinigameRoomStore.MinimumGameCardCount,
+                    Model.AvailableCardCount]
+            </small>
+            <p class="minigames-error is-hidden"
+               data-new-game-error
+               role="alert"></p>
+            <div class="minigames-dialog-actions">
+                <button class="button" type="button" data-new-game-cancel>
+                    @Localizer["Minigames_Cancel"]
+                </button>
+                <button class="button button-primary" type="submit" data-new-game-submit>
+                    @Localizer["Minigames_StartGame"]
+                </button>
+            </div>
+        </form>
+    </dialog>
 </div>
 
 @section Scripts {

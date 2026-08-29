@@ -2,31 +2,162 @@
     const root = document.querySelector('[data-minigames-root]');
     if (!root) return;
 
+    const entry = root.querySelector('[data-room-entry]');
+    const roomShell = root.querySelector('[data-room-shell]');
+    const createRoomButton = root.querySelector('[data-create-room]');
+    const joinForm = root.querySelector('[data-join-room-form]');
+    const joinCodeInput = root.querySelector('[data-join-room-code]');
+    const entryError = root.querySelector('[data-minigames-entry-error]');
+    const roomError = root.querySelector('[data-minigames-room-error]');
+    const roomCodeLabel = root.querySelector('[data-room-code]');
+    const playerLabel = root.querySelector('[data-player-label]');
+    const roomMessage = root.querySelector('[data-room-message]');
+    const opponentStatus = root.querySelector('[data-opponent-status]');
+    const newGameButton = root.querySelector('[data-new-game]');
+    const newGameDialog = root.querySelector('[data-new-game-dialog]');
+    const newGameForm = root.querySelector('[data-new-game-form]');
+    const newGameCount = root.querySelector('[data-new-game-count]');
+    const newGameCancel = root.querySelector('[data-new-game-cancel]');
+    const newGameSubmit = root.querySelector('[data-new-game-submit]');
+    const newGameError = root.querySelector('[data-new-game-error]');
     const grid = root.querySelector('[data-minigames-grid]');
     const empty = root.querySelector('[data-minigames-empty]');
-    const regenerateButton = root.querySelector('[data-minigames-regenerate]');
-    const error = root.querySelector('[data-minigames-error]');
+
     const hubUrl = root.dataset.hubUrl;
     const cardUrl = root.dataset.cardUrl;
-    const regenerateError = root.dataset.regenerateError ?? '';
+    if (!entry || !roomShell || !createRoomButton || !joinForm ||
+        !joinCodeInput || !newGameDialog || !newGameForm || !newGameCount ||
+        !newGameCancel || !newGameSubmit || !grid || !empty || !hubUrl || !cardUrl) {
+        return;
+    }
+
+    const text = {
+        playerOne: root.dataset.playerOne ?? 'Player 1',
+        playerTwo: root.dataset.playerTwo ?? 'Player 2',
+        waitingOpponent: root.dataset.waitingOpponent ?? '',
+        waitingGame: root.dataset.waitingGame ?? '',
+        chooseExclusions: root.dataset.chooseExclusions ?? '',
+        exclusionProgress: root.dataset.exclusionProgress ?? '',
+        gameReady: root.dataset.gameReady ?? '',
+        roomNotFound: root.dataset.roomNotFound ?? '',
+        roomExpired: root.dataset.roomExpired ?? '',
+        roomFull: root.dataset.roomFull ?? '',
+        invalidPlayer: root.dataset.invalidPlayer ?? '',
+        invalidCardCount: root.dataset.invalidCardCount ?? '',
+        cardAlreadyExcluded: root.dataset.cardAlreadyExcluded ?? '',
+        exclusionLimit: root.dataset.exclusionLimit ?? '',
+        genericError: root.dataset.genericError ?? ''
+    };
+
+    const minimumCardCount = Number(root.dataset.minCardCount ?? '10');
+    let maximumCardCount = Number(root.dataset.maxCardCount ?? '0');
+    let defaultCardCount = Number(root.dataset.defaultCardCount ?? '0');
+    const storagePrefix = 'badwolf-minigame-player:';
     const inactiveCards = new Set();
-    let currentVersion = Number(root.dataset.stateVersion ?? '0');
-    let highlightedFile = root.dataset.highlightedFile ?? '';
 
-    if (!grid || !empty || !regenerateButton || !hubUrl || !cardUrl) return;
+    let connection = null;
+    let currentRoomCode = '';
+    let playerToken = '';
+    let currentState = null;
+    let currentGameNumber = -1;
 
-    const getVersion = state => Number(state?.version ?? state?.Version ?? 0);
-    const getCards = state => state?.cards ?? state?.Cards ?? [];
-    const getFileName = card => card?.fileName ?? card?.FileName ?? '';
-    const getDisplayName = card => card?.displayName ?? card?.DisplayName ?? '';
+    const get = (value, camelName, pascalName) =>
+        value?.[camelName] ?? value?.[pascalName];
+    const roomCodeOf = value => get(value, 'roomCode', 'RoomCode') ?? '';
+    const playerTokenOf = value => get(value, 'playerToken', 'PlayerToken') ?? '';
+    const stateOf = value => get(value, 'state', 'State');
+    const cardsOf = value => get(value, 'cards', 'Cards') ?? [];
+    const fileNameOf = value => get(value, 'fileName', 'FileName') ?? '';
+    const displayNameOf = value => get(value, 'displayName', 'DisplayName') ?? '';
+    const phaseOf = value => Number(get(value, 'phase', 'Phase') ?? 0);
+    const versionOf = value => Number(get(value, 'version', 'Version') ?? 0);
+    const gameNumberOf = value => Number(get(value, 'gameNumber', 'GameNumber') ?? 0);
+    const playerNumberOf = value => Number(get(value, 'playerNumber', 'PlayerNumber') ?? 0);
+    const playerCountOf = value => Number(get(value, 'playerCount', 'PlayerCount') ?? 0);
+    const requiredExclusionsOf = value =>
+        Number(get(value, 'requiredExclusionsPerPlayer', 'RequiredExclusionsPerPlayer') ?? 0);
+    const myExcludedOf = value => get(value, 'myExcludedFiles', 'MyExcludedFiles') ?? [];
+    const opponentExcludedOf = value =>
+        get(value, 'opponentExcludedFiles', 'OpponentExcludedFiles') ?? [];
+    const mySecretOf = value =>
+        get(value, 'mySecretCardFileName', 'MySecretCardFileName') ?? '';
 
-    const updateTopbarHeight = () => {
-        const topbarHeight = document.querySelector('.topbar')?.getBoundingClientRect().height;
-        if (topbarHeight && topbarHeight > 0) {
-            document.documentElement.style.setProperty(
-                '--minigames-topbar-height',
-                `${topbarHeight}px`);
+    const phase = {
+        waitingForGame: 0,
+        choosingExclusions: 1,
+        playing: 2,
+        finished: 3
+    };
+
+    const format = (template, replacements) => {
+        let result = template;
+        Object.entries(replacements).forEach(([key, value]) => {
+            result = result.replaceAll(`{${key}}`, String(value));
+        });
+        return result;
+    };
+
+    const storageKey = roomCode => `${storagePrefix}${roomCode.toUpperCase()}`;
+
+    const updateRoomUrl = roomCode => {
+        const url = new URL(window.location.href);
+        if (roomCode) url.searchParams.set('room', roomCode);
+        else url.searchParams.delete('room');
+        window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    };
+
+    const readRoomFromUrl = () =>
+        (new URLSearchParams(window.location.search).get('room') ?? '')
+            .trim()
+            .toUpperCase();
+
+    const rememberMembership = membership => {
+        currentRoomCode = roomCodeOf(membership).toUpperCase();
+        playerToken = playerTokenOf(membership);
+        if (!currentRoomCode || !playerToken) return false;
+        window.localStorage.setItem(storageKey(currentRoomCode), playerToken);
+        updateRoomUrl(currentRoomCode);
+        return true;
+    };
+
+    const forgetMembership = () => {
+        if (currentRoomCode) {
+            window.localStorage.removeItem(storageKey(currentRoomCode));
         }
+        currentRoomCode = '';
+        playerToken = '';
+        currentState = null;
+        currentGameNumber = -1;
+        inactiveCards.clear();
+        updateRoomUrl('');
+    };
+
+    const showError = (element, message) => {
+        if (!element) return;
+        element.textContent = message;
+        element.classList.toggle('is-hidden', !message);
+    };
+
+    const clearErrors = () => {
+        showError(entryError, '');
+        showError(roomError, '');
+        showError(newGameError, '');
+    };
+
+    const getErrorMessage = error => {
+        const message = String(error?.message ?? error ?? '');
+        if (message.includes('MINIGAME_ROOM_ROOMNOTFOUND')) return text.roomNotFound;
+        if (message.includes('MINIGAME_ROOM_ROOMEXPIRED')) return text.roomExpired;
+        if (message.includes('MINIGAME_ROOM_ROOMFULL')) return text.roomFull;
+        if (message.includes('MINIGAME_ROOM_INVALIDPLAYER')) return text.invalidPlayer;
+        if (message.includes('MINIGAME_ROOM_INVALIDCARDCOUNT')) return text.invalidCardCount;
+        if (message.includes('MINIGAME_ROOM_CARDALREADYEXCLUDED')) {
+            return text.cardAlreadyExcluded;
+        }
+        if (message.includes('MINIGAME_ROOM_EXCLUSIONLIMITREACHED')) {
+            return text.exclusionLimit;
+        }
+        return text.genericError;
     };
 
     const imageUrl = fileName => {
@@ -35,57 +166,13 @@
         return `${url.pathname}${url.search}`;
     };
 
-    const setInactive = (button, inactive) => {
-        const fileName = button.dataset.cardFile;
-        if (!fileName) return;
-
-        if (inactive) {
-            inactiveCards.add(fileName);
-        } else {
-            inactiveCards.delete(fileName);
+    const updateTopbarHeight = () => {
+        const topbarHeight = document.querySelector('.topbar')?.getBoundingClientRect().height;
+        if (topbarHeight && topbarHeight > 0) {
+            document.documentElement.style.setProperty(
+                '--minigames-topbar-height',
+                `${topbarHeight}px`);
         }
-
-        button.classList.toggle('is-inactive', inactive);
-        button.setAttribute('aria-pressed', inactive ? 'true' : 'false');
-    };
-
-    const bindCard = button => {
-        button.addEventListener('click', () => {
-            setInactive(button, !button.classList.contains('is-inactive'));
-        });
-    };
-
-    const chooseHighlightedFile = cards => {
-        if (cards.length === 0) return '';
-        return getFileName(cards[Math.floor(Math.random() * cards.length)]);
-    };
-
-    const createCard = card => {
-        const fileName = getFileName(card);
-        const displayName = getDisplayName(card);
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'minigame-card';
-        button.dataset.cardFile = fileName;
-        button.setAttribute('aria-label', displayName);
-        button.setAttribute('aria-pressed', 'false');
-        button.classList.toggle('is-highlighted', fileName === highlightedFile);
-
-        const frame = document.createElement('span');
-        frame.className = 'minigame-card-frame';
-        const image = document.createElement('img');
-        image.src = imageUrl(fileName);
-        image.alt = '';
-        image.draggable = false;
-        frame.appendChild(image);
-
-        const name = document.createElement('span');
-        name.className = 'minigame-card-name';
-        name.textContent = displayName;
-
-        button.append(frame, name);
-        bindCard(button);
-        return button;
     };
 
     const layoutGrid = () => {
@@ -109,43 +196,272 @@
             const aspect = cardWidth / cardHeight;
             const aspectPenalty = 1 + Math.abs(Math.log(aspect / targetAspect)) * 0.45;
             const score = cardWidth * cardHeight / aspectPenalty;
-            if (score > best.score) {
-                best = { columns, rows, score };
-            }
+            if (score > best.score) best = { columns, rows, score };
         }
 
-        grid.style.gridTemplateColumns =
-            `repeat(${best.columns}, minmax(0, 1fr))`;
-        grid.style.gridTemplateRows =
-            `repeat(${best.rows}, minmax(0, 1fr))`;
+        grid.style.gridTemplateColumns = `repeat(${best.columns}, minmax(0, 1fr))`;
+        grid.style.gridTemplateRows = `repeat(${best.rows}, minmax(0, 1fr))`;
     };
 
-    const applyState = state => {
-        const version = getVersion(state);
-        const cards = getCards(state);
-        if (!Number.isFinite(version) || version <= currentVersion || !Array.isArray(cards)) {
+    const touchRoom = async () => {
+        if (!connection || !currentRoomCode || !playerToken ||
+            connection.state !== signalR.HubConnectionState.Connected) {
             return;
         }
+        try {
+            await connection.invoke('TouchRoom', currentRoomCode, playerToken);
+        } catch (error) {
+            const message = getErrorMessage(error);
+            if (message === text.roomExpired || message === text.roomNotFound ||
+                message === text.invalidPlayer) {
+                forgetMembership();
+                renderEntry(message);
+            }
+        }
+    };
 
-        inactiveCards.clear();
-        highlightedFile = chooseHighlightedFile(cards);
-        currentVersion = version;
-        root.dataset.stateVersion = String(version);
-        root.dataset.highlightedFile = highlightedFile;
+    const toggleLocalInactive = button => {
+        const fileName = button.dataset.cardFile;
+        if (!fileName) return;
+        const inactive = !button.classList.contains('is-inactive');
+        button.classList.toggle('is-inactive', inactive);
+        button.setAttribute('aria-pressed', inactive ? 'true' : 'false');
+        if (inactive) inactiveCards.add(fileName);
+        else inactiveCards.delete(fileName);
+        void touchRoom();
+    };
 
-        grid.replaceChildren(...cards.map(createCard));
-        const hasCards = cards.length > 0;
-        grid.classList.toggle('is-hidden', !hasCards);
-        empty.classList.toggle('is-hidden', hasCards);
+    const createCard = (card, state) => {
+        const fileName = fileNameOf(card);
+        const displayName = displayNameOf(card);
+        const currentPhase = phaseOf(state);
+        const myExcluded = new Set(myExcludedOf(state));
+        const opponentExcluded = new Set(opponentExcludedOf(state));
+        const required = requiredExclusionsOf(state);
+        const ownSelected = myExcluded.has(fileName);
+        const opponentSelected = opponentExcluded.has(fileName);
+        const ownLimitReached = myExcluded.size >= required;
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'minigame-card';
+        button.dataset.cardFile = fileName;
+        button.setAttribute('aria-label', displayName);
+        button.setAttribute('aria-pressed', 'false');
+
+        if (currentPhase === phase.choosingExclusions) {
+            button.classList.toggle('is-excluded-own', ownSelected);
+            button.classList.toggle('is-excluded-opponent', opponentSelected);
+            button.setAttribute('aria-pressed', ownSelected ? 'true' : 'false');
+            button.disabled = opponentSelected || (ownLimitReached && !ownSelected);
+            button.addEventListener('click', async () => {
+                clearErrors();
+                button.disabled = true;
+                try {
+                    const next = await connection.invoke(
+                        'ToggleExclusion',
+                        currentRoomCode,
+                        playerToken,
+                        fileName);
+                    applyState(next);
+                } catch (error) {
+                    showError(roomError, getErrorMessage(error));
+                    button.disabled = false;
+                }
+            });
+        } else if (currentPhase === phase.playing) {
+            button.classList.toggle('is-highlighted', fileName === mySecretOf(state));
+            button.classList.toggle('is-inactive', inactiveCards.has(fileName));
+            button.setAttribute(
+                'aria-pressed',
+                inactiveCards.has(fileName) ? 'true' : 'false');
+            button.addEventListener('click', () => toggleLocalInactive(button));
+        } else {
+            button.disabled = true;
+        }
+
+        const frame = document.createElement('span');
+        frame.className = 'minigame-card-frame';
+        const image = document.createElement('img');
+        image.src = imageUrl(fileName);
+        image.alt = '';
+        image.draggable = false;
+        frame.appendChild(image);
+
+        const name = document.createElement('span');
+        name.className = 'minigame-card-name';
+        name.textContent = displayName;
+
+        button.append(frame, name);
+        return button;
+    };
+
+    const renderEntry = message => {
+        entry.classList.remove('is-hidden');
+        roomShell.classList.add('is-hidden');
+        if (message) showError(entryError, message);
+    };
+
+    const renderRoom = state => {
+        entry.classList.add('is-hidden');
+        roomShell.classList.remove('is-hidden');
+        const playerNumber = playerNumberOf(state);
+        const playerCount = playerCountOf(state);
+        const currentPhase = phaseOf(state);
+        const required = requiredExclusionsOf(state);
+        const myExcluded = myExcludedOf(state);
+
+        roomCodeLabel.textContent = roomCodeOf(state);
+        playerLabel.textContent = playerNumber === 1 ? text.playerOne : text.playerTwo;
+        opponentStatus.textContent = playerCount < 2 ? text.waitingOpponent : '';
+
+        if (currentPhase === phase.waitingForGame) {
+            roomMessage.textContent = text.waitingGame;
+        } else if (currentPhase === phase.choosingExclusions) {
+            roomMessage.textContent = `${format(text.chooseExclusions, { count: required })} ${format(
+                text.exclusionProgress,
+                { selected: myExcluded.length, count: required })}`;
+        } else if (currentPhase === phase.playing) {
+            roomMessage.textContent = text.gameReady;
+        } else {
+            roomMessage.textContent = '';
+        }
+
+        const cards = cardsOf(state);
+        grid.replaceChildren(...cards.map(card => createCard(card, state)));
+        grid.classList.toggle('is-hidden', cards.length === 0);
+        empty.classList.toggle('is-hidden', cards.length !== 0);
         requestAnimationFrame(layoutGrid);
     };
 
-    grid.querySelectorAll('.minigame-card').forEach(bindCard);
-    updateTopbarHeight();
-    requestAnimationFrame(layoutGrid);
+    const applyState = state => {
+        if (!state) return;
+        const gameNumber = gameNumberOf(state);
+        if (gameNumber !== currentGameNumber) {
+            inactiveCards.clear();
+            currentGameNumber = gameNumber;
+        }
+        currentState = state;
+        currentRoomCode = roomCodeOf(state).toUpperCase();
+        renderRoom(state);
+    };
 
+    const applyMembership = membership => {
+        if (!rememberMembership(membership)) {
+            throw new Error('Invalid room membership response.');
+        }
+        applyState(stateOf(membership));
+    };
+
+    const synchronize = async () => {
+        if (!currentRoomCode || !playerToken) return false;
+        const state = await connection.invoke(
+            'GetRoomState',
+            currentRoomCode,
+            playerToken);
+        applyState(state);
+        return true;
+    };
+
+    const refreshCatalog = async () => {
+        const catalog = await connection.invoke('GetCatalog');
+        maximumCardCount = Number(
+            get(catalog, 'maximumCardCount', 'MaximumCardCount') ?? maximumCardCount);
+        defaultCardCount = Number(
+            get(catalog, 'defaultCardCount', 'DefaultCardCount') ?? defaultCardCount);
+        newGameCount.min = String(minimumCardCount);
+        newGameCount.max = String(maximumCardCount);
+        newGameCount.value = String(defaultCardCount || minimumCardCount);
+        newGameSubmit.disabled = maximumCardCount < minimumCardCount;
+    };
+
+    const openNewGameDialog = async () => {
+        clearErrors();
+        await touchRoom();
+        try {
+            await refreshCatalog();
+        } catch (error) {
+            showError(roomError, getErrorMessage(error));
+            return;
+        }
+        if (!newGameDialog.open) newGameDialog.showModal();
+    };
+
+    createRoomButton.addEventListener('click', async () => {
+        clearErrors();
+        createRoomButton.disabled = true;
+        try {
+            const membership = await connection.invoke('CreateRoom');
+            applyMembership(membership);
+            await openNewGameDialog();
+        } catch (error) {
+            showError(entryError, getErrorMessage(error));
+        } finally {
+            createRoomButton.disabled = false;
+        }
+    });
+
+    joinCodeInput.addEventListener('input', () => {
+        joinCodeInput.value = joinCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+
+    joinForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        clearErrors();
+        const code = joinCodeInput.value.trim().toUpperCase();
+        if (!code) return;
+
+        const submit = joinForm.querySelector('button[type="submit"]');
+        if (submit) submit.disabled = true;
+        try {
+            const membership = await connection.invoke('JoinRoom', code);
+            applyMembership(membership);
+        } catch (error) {
+            showError(entryError, getErrorMessage(error));
+        } finally {
+            if (submit) submit.disabled = false;
+        }
+    });
+
+    newGameButton.addEventListener('click', () => void openNewGameDialog());
+
+    newGameCancel.addEventListener('click', () => {
+        void touchRoom();
+        newGameDialog.close();
+    });
+
+    newGameForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        clearErrors();
+        const cardCount = Number.parseInt(newGameCount.value, 10);
+        if (!Number.isInteger(cardCount) ||
+            cardCount < minimumCardCount ||
+            cardCount > maximumCardCount) {
+            showError(newGameError, text.invalidCardCount);
+            return;
+        }
+
+        newGameSubmit.disabled = true;
+        try {
+            const state = await connection.invoke(
+                'StartNewGame',
+                currentRoomCode,
+                playerToken,
+                cardCount);
+            applyState(state);
+            newGameDialog.close();
+        } catch (error) {
+            showError(newGameError, getErrorMessage(error));
+        } finally {
+            newGameSubmit.disabled = maximumCardCount < minimumCardCount;
+        }
+    });
+
+    updateTopbarHeight();
     const gridObserver = new ResizeObserver(layoutGrid);
     gridObserver.observe(grid);
+    window.addEventListener('resize', layoutGrid);
+
     const topbar = document.querySelector('.topbar');
     if (topbar) {
         const topbarObserver = new ResizeObserver(() => {
@@ -156,63 +472,78 @@
     }
 
     if (!window.signalR) {
-        if (error) {
-            error.textContent = regenerateError;
-            error.classList.remove('is-hidden');
-        }
+        renderEntry(text.genericError);
         return;
     }
 
-    const connection = new signalR.HubConnectionBuilder()
+    connection = new signalR.HubConnectionBuilder()
         .withUrl(hubUrl)
         .withAutomaticReconnect()
         .build();
 
-    const synchronize = async () => {
-        const state = await connection.invoke('GetState');
-        applyState(state);
-    };
-
-    connection.on('cardsRegenerated', state => applyState(state));
-
-    connection.onreconnecting(() => {
-        regenerateButton.disabled = true;
-    });
-
-    connection.onreconnected(async () => {
-        regenerateButton.disabled = false;
-        try {
-            await synchronize();
-        } catch {
-            // The next broadcast or reconnect will synchronize the shared set.
+    connection.on('roomChanged', () => {
+        if (currentRoomCode && playerToken) {
+            void synchronize().catch(error => {
+                showError(roomError, getErrorMessage(error));
+            });
         }
     });
 
-    regenerateButton.addEventListener('click', async () => {
-        regenerateButton.disabled = true;
-        if (error) error.classList.add('is-hidden');
+    connection.on('roomExpired', roomCode => {
+        if (String(roomCode).toUpperCase() !== currentRoomCode) return;
+        forgetMembership();
+        renderEntry(text.roomExpired);
+    });
 
-        try {
-            const state = await connection.invoke('Regenerate');
-            applyState(state);
-        } catch {
-            if (error) {
-                error.textContent = regenerateError;
-                error.classList.remove('is-hidden');
+    connection.onreconnecting(() => {
+        createRoomButton.disabled = true;
+        newGameButton.disabled = true;
+    });
+
+    connection.onreconnected(async () => {
+        createRoomButton.disabled = false;
+        newGameButton.disabled = false;
+        if (currentRoomCode && playerToken) {
+            try {
+                await synchronize();
+            } catch (error) {
+                const message = getErrorMessage(error);
+                forgetMembership();
+                renderEntry(message);
             }
-        } finally {
-            regenerateButton.disabled =
-                connection.state !== signalR.HubConnectionState.Connected;
         }
     });
 
     const connect = async () => {
         try {
             await connection.start();
-            regenerateButton.disabled = false;
-            await synchronize();
+            createRoomButton.disabled = false;
+            newGameButton.disabled = false;
+            await refreshCatalog();
+
+            const roomFromUrl = readRoomFromUrl();
+            if (roomFromUrl) {
+                const savedToken = window.localStorage.getItem(storageKey(roomFromUrl));
+                if (savedToken) {
+                    currentRoomCode = roomFromUrl;
+                    playerToken = savedToken;
+                    try {
+                        await synchronize();
+                        return;
+                    } catch (error) {
+                        const message = getErrorMessage(error);
+                        forgetMembership();
+                        renderEntry(message);
+                        return;
+                    }
+                }
+                joinCodeInput.value = roomFromUrl;
+            }
+
+            renderEntry('');
         } catch {
-            regenerateButton.disabled = true;
+            createRoomButton.disabled = true;
+            newGameButton.disabled = true;
             window.setTimeout(connect, 2000);
         }
     };
