@@ -23,6 +23,33 @@ public sealed class AllPlayerWagerChoiceAnswerLayoutTests
     }
 
     [Fact]
+    public void Multiple_choice_reveal_keeps_container_markers_at_runtime_block_list_level()
+    {
+        var reveal = ReadWebFile(
+                "Pages", "Admin", "Games", "_MultipleChoiceRevealBlocks.cshtml")
+            .ReplaceLineEndings("\n");
+        var containerRuntime = ReadWebFile(
+                "wwwroot", "js", "content-block-containers.js")
+            .ReplaceLineEndings("\n");
+        var tagHelper = ReadWebFile(
+                "TagHelpers", "MultipleChoiceAnswerRevealTagHelper.cs")
+            .ReplaceLineEndings("\n");
+
+        Assert.Contains("multiple-choice-answer-reveal-grid", tagHelper);
+        Assert.Contains("output.Content.SetHtmlContent(rendered);", tagHelper);
+        Assert.Contains(
+            ".game-content-blocks.multiple-choice-answer-reveal-grid",
+            reveal);
+        Assert.Contains(
+            "<article class=\"game-content-block @correctOptionClass @additionalClass\">",
+            reveal);
+        Assert.DoesNotContain("multiple-choice-answer-reveal-stack", reveal);
+        Assert.Contains("Array.from(list.children)", containerRuntime);
+        Assert.Contains("parseRuntimeMarker(marker?.textContent)", containerRuntime);
+        Assert.Contains("host.nextElementSibling", containerRuntime);
+    }
+
+    [Fact]
     public void Wager_choice_layout_does_not_change_normal_choice_answers()
     {
         var script = ReadWebFile("wwwroot", "js", "all-player-question.js")
