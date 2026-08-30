@@ -56,6 +56,8 @@ Web `1.23.2` is a PATCH release that fixes the host answer reveal for all-player
 
 Web `1.23.3` is a PATCH release that finalizes the post-game quiz rating phase when the host explicitly finishes the game. Connected player clients are notified immediately, stale rating submissions are rejected server-side after finalization, ratings already saved before finalization remain intact, and refresh/reconnect no longer restores an editable rating screen for that finished runtime session.
 
+Web `1.24.0` is a MINOR release that adds filterable Question-card history to **Guess what I'm playing**. Players can switch between the full chronological history and directional `1 → 2` / `2 → 1` views that combine each completed question and response into one color-coded row, while filtering remains entirely client-side and does not modify room state.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
