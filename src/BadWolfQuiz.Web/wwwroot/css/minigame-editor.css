@@ -296,6 +296,34 @@
     font-size: 0.82rem;
 }
 
+.minigame-editor-answer-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin: 0 0 10px;
+}
+
+.minigame-editor-answer-filter-label {
+    margin-right: 2px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.minigame-editor-answer-filter .button {
+    min-height: 34px;
+    padding: 6px 10px;
+}
+
+.minigame-editor-answer-filter .button.is-active {
+    border-color: color-mix(in srgb, var(--gold) 58%, var(--border));
+    background: color-mix(in srgb, var(--gold) 14%, var(--panel));
+    color: var(--text);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 24%, transparent);
+}
+
 .minigame-editor-answer-table-wrap {
     max-height: min(68dvh, 900px);
     overflow: auto;
@@ -320,6 +348,14 @@
 }
 
 .minigame-editor-answer-table tbody tr:nth-child(even) > td {
+    background: color-mix(in srgb, var(--panel-2) 64%, var(--panel));
+}
+
+.minigame-editor-answer-form.is-answer-filtered .minigame-editor-answer-table tbody tr > td {
+    background: transparent;
+}
+
+.minigame-editor-answer-form.is-answer-filtered .minigame-editor-answer-table tbody tr.is-filter-even > td {
     background: color-mix(in srgb, var(--panel-2) 64%, var(--panel));
 }
 
@@ -432,5 +468,9 @@
 
     .minigame-editor-auto-save-status {
         min-width: 0;
+    }
+
+    .minigame-editor-answer-filter {
+        justify-content: flex-start;
     }
 }

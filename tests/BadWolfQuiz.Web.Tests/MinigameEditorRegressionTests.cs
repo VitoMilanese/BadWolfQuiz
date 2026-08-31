@@ -48,10 +48,17 @@ public sealed class MinigameEditorRegressionTests
         Assert.Contains("OnGetExportAnswersAsync", model);
         Assert.Contains("JSON.stringify(buildPayload())", script);
         Assert.Contains("fetch(answerForm.action", script);
+        Assert.Contains("activeAnswerFilter", script);
+        Assert.Contains("data.minigameAnswerFilter", script);
+        Assert.Contains("select.value === activeAnswerFilter", script);
+        Assert.Contains("row.hidden = !visible", script);
+        Assert.Contains("applyAnswerFilter()", script);
         Assert.Contains("grid-template-columns: 112px minmax(0, 1fr) auto", css);
         Assert.Contains(".minigame-editor-question-list > li:nth-child(even)", css);
         Assert.Contains(".minigame-editor-answer-table tbody tr:nth-child(even) > td", css);
         Assert.Contains(".minigame-editor-answer-table td + td", css);
+        Assert.Contains(".minigame-editor-answer-filter", css);
+        Assert.Contains(".minigame-editor-answer-form.is-answer-filtered", css);
         Assert.DoesNotContain(".minigame-editor-answer-actions", css);
         Assert.Contains("MinigameAnswerImportParser.Parse", model);
         Assert.Contains("expectedCount", store);

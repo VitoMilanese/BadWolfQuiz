@@ -50,6 +50,8 @@ The editor is split into three views:
 
 Question and answer rows use alternating backgrounds and row/grid separators so long question lists remain easy to scan and each answer selector stays visually associated with its question.
 
+The Answers view also provides client-side **YES**, **NO**, and **Unassigned** filters. Activating one filter shows only rows whose current selector value matches it; activating the same filter again clears it and restores all questions. Filtering is local to the browser, updates immediately after selector changes, and does not add server requests or change the existing autosave payload.
+
 Deleting a game also removes its stored question answers. Deleting a question removes that question's answers from every game and closes the question-order gap so subsequent TXT imports continue to map line-for-line to the visible question order.
 
 ### Bulk answer import
