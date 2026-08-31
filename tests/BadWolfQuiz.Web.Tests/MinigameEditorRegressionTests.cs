@@ -53,7 +53,7 @@ public sealed class MinigameEditorRegressionTests
         Assert.Contains("JSON.stringify(buildPayload())", script);
         Assert.Contains("fetch(answerForm.action", script);
         Assert.Contains("activeAnswerFilter", script);
-        Assert.Contains("data.minigameAnswerFilter", script);
+        Assert.Contains("dataset.minigameAnswerFilter", script);
         Assert.Contains("select.value === activeAnswerFilter", script);
         Assert.Contains("row.hidden = !visible", script);
         Assert.Contains("applyAnswerFilter()", script);
