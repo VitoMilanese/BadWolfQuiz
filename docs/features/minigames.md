@@ -48,6 +48,8 @@ The editor is split into three views:
 - **Questions** — view the deterministic question order, append questions, edit question text, and delete questions;
 - **Answers** — select one game and assign YES, NO, or unassigned for every question.
 
+Question and answer rows use alternating backgrounds and row/grid separators so long question lists remain easy to scan and each answer selector stays visually associated with its question.
+
 Deleting a game also removes its stored question answers. Deleting a question removes that question's answers from every game and closes the question-order gap so subsequent TXT imports continue to map line-for-line to the visible question order.
 
 ### Bulk answer import
@@ -162,7 +164,7 @@ When hints are enabled:
 - the normal Question-card YES/NO response dialog also shows the catalog answer for the responding player's own secret game;
 - with **Question cards disabled**, the information control opens a separate search dialog instead of the Question-card/history dialog;
 - free-form search requires at least 3 characters and matches a case-insensitive substring of the shared database question catalog;
-- search results are paged at 20 rows per page and each search/page request uses the shared `BadWolfBusy` overlay;
+- search results are paged at 10 rows per page and each search/page request uses the shared `BadWolfBusy` overlay;
 - free-form search returns only questions that have an assigned YES or NO answer for the selected candidate game; unassigned mappings are omitted completely from the result set and from paging totals;
 - the responder still chooses YES or NO manually when Question cards are enabled; hints never submit or replace a player response;
 - outside free-form search, an unassigned game/question pair is displayed as **Information unavailable**.

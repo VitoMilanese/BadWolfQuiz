@@ -203,7 +203,20 @@
     align-items: center;
     gap: 6px;
     padding: 6px;
-    border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--panel) 92%, transparent);
+    transition: background 100ms ease, border-color 100ms ease;
+}
+
+.minigame-editor-question-list > li:nth-child(even) {
+    background: color-mix(in srgb, var(--panel-2) 64%, var(--panel));
+}
+
+.minigame-editor-question-list > li:hover,
+.minigame-editor-question-list > li:focus-within {
+    border-color: color-mix(in srgb, var(--gold) 42%, var(--border));
+    background: color-mix(in srgb, var(--gold) 7%, var(--panel));
 }
 
 .minigame-editor-question-row {
@@ -299,6 +312,19 @@
     padding: 7px 9px;
     border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
     vertical-align: middle;
+}
+
+.minigame-editor-answer-table th + th,
+.minigame-editor-answer-table td + td {
+    border-left: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
+}
+
+.minigame-editor-answer-table tbody tr:nth-child(even) > td {
+    background: color-mix(in srgb, var(--panel-2) 64%, var(--panel));
+}
+
+.minigame-editor-answer-table tbody tr:hover > td {
+    background: color-mix(in srgb, var(--gold) 7%, var(--panel));
 }
 
 .minigame-editor-answer-table th {

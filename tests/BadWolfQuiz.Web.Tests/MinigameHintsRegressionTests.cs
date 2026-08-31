@@ -53,7 +53,7 @@ public sealed class MinigameHintsRegressionTests
         Assert.Contains("GetQuestionResponseHint", hub);
 
         Assert.Contains("MinimumSearchLength = 3", service);
-        Assert.Contains("SearchPageSize = 20", service);
+        Assert.Contains("SearchPageSize = 10", service);
         Assert.Contains("state.QuestionCardsEnabled", service);
         Assert.Contains("row.AnswerYes.HasValue", service);
         Assert.Contains("StringComparison.OrdinalIgnoreCase", service);

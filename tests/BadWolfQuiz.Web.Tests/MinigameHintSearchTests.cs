@@ -87,7 +87,7 @@ public sealed class MinigameHintSearchTests : IDisposable
             "ALPHA",
             page: 1);
         Assert.Equal(22, firstPage.TotalCount);
-        Assert.Equal(2, firstPage.TotalPages);
+        Assert.Equal(3, firstPage.TotalPages);
         Assert.Equal(MinigameHintService.SearchPageSize, firstPage.Items.Count);
         Assert.All(firstPage.Items, item => Assert.NotNull(item.AnswerYes));
 
@@ -97,8 +97,17 @@ public sealed class MinigameHintSearchTests : IDisposable
             candidate.FileName,
             "alpha",
             page: 2);
-        Assert.Equal(2, secondPage.Items.Count);
+        Assert.Equal(MinigameHintService.SearchPageSize, secondPage.Items.Count);
         Assert.All(secondPage.Items, item => Assert.NotNull(item.AnswerYes));
+
+        var thirdPage = await hints.SearchCardHintsAsync(
+            player1.RoomCode,
+            player1.PlayerToken,
+            candidate.FileName,
+            "alpha",
+            page: 3);
+        Assert.Equal(2, thirdPage.Items.Count);
+        Assert.All(thirdPage.Items, item => Assert.NotNull(item.AnswerYes));
 
         var unassignedOnly = await hints.SearchCardHintsAsync(
             player1.RoomCode,

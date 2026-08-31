@@ -49,6 +49,9 @@ public sealed class MinigameEditorRegressionTests
         Assert.Contains("JSON.stringify(buildPayload())", script);
         Assert.Contains("fetch(answerForm.action", script);
         Assert.Contains("grid-template-columns: 112px minmax(0, 1fr) auto", css);
+        Assert.Contains(".minigame-editor-question-list > li:nth-child(even)", css);
+        Assert.Contains(".minigame-editor-answer-table tbody tr:nth-child(even) > td", css);
+        Assert.Contains(".minigame-editor-answer-table td + td", css);
         Assert.DoesNotContain(".minigame-editor-answer-actions", css);
         Assert.Contains("MinigameAnswerImportParser.Parse", model);
         Assert.Contains("expectedCount", store);

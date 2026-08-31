@@ -8,7 +8,7 @@ namespace BadWolfQuiz.Web.Services;
 public sealed class MinigameHintService
 {
     public const int MinimumSearchLength = 3;
-    public const int SearchPageSize = 20;
+    public const int SearchPageSize = 10;
 
     private const int MaximumSearchLength = 100;
 
