@@ -18,6 +18,7 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/minigames.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/minigames-history-filter.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/minigames-sharing.css" asp-append-version="true" />
 }
 
@@ -185,6 +186,31 @@
             <aside class="minigames-question-panel is-hidden" data-question-panel>
                 <section class="minigames-question-history-section">
                     <h2>@Localizer["Minigames_QuestionHistoryTitle"]</h2>
+                    <div class="minigames-question-history-filters"
+                         data-question-history-filters
+                         role="group"
+                         aria-label="@Localizer["Minigames_QuestionHistoryTitle"]">
+                        <button class="minigames-question-history-filter"
+                                type="button"
+                                data-history-filter="1-to-2"
+                                aria-pressed="false"
+                                title="@Localizer["Minigames_PlayerOne"] → @Localizer["Minigames_PlayerTwo"]">
+                            1 → 2
+                        </button>
+                        <button class="minigames-question-history-filter"
+                                type="button"
+                                data-history-filter="2-to-1"
+                                aria-pressed="false"
+                                title="@Localizer["Minigames_PlayerTwo"] → @Localizer["Minigames_PlayerOne"]">
+                            2 → 1
+                        </button>
+                        <button class="minigames-question-history-filter is-active"
+                                type="button"
+                                data-history-filter="all"
+                                aria-pressed="true">
+                            @Localizer["Minigames_QuestionHistoryTitle"]
+                        </button>
+                    </div>
                     <div class="minigames-question-history" data-question-history></div>
                 </section>
                 <section class="minigames-question-options-section">
@@ -251,5 +277,6 @@
 
 @section Scripts {
     <script src="~/js/minigames.js" asp-append-version="true"></script>
+    <script src="~/js/minigames-history-filter.js" asp-append-version="true"></script>
     <script src="~/js/minigames-sharing.js" asp-append-version="true"></script>
 }

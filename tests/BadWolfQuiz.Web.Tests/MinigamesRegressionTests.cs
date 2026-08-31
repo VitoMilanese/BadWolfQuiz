@@ -145,6 +145,31 @@ public sealed class MinigamesRegressionTests
     }
 
     [Fact]
+    public void Question_history_can_filter_completed_question_answer_pairs()
+    {
+        var page = ReadWebFile("Pages", "GuessWhatIPlay.cshtml");
+        var script = ReadWebFile("wwwroot", "js", "minigames-history-filter.js");
+        var styles = ReadWebFile("wwwroot", "css", "minigames-history-filter.css");
+
+        Assert.Contains("data-question-history-filters", page);
+        Assert.Contains("data-history-filter=\"1-to-2\"", page);
+        Assert.Contains("data-history-filter=\"2-to-1\"", page);
+        Assert.Contains("data-history-filter=\"all\"", page);
+        Assert.Contains("minigames-history-filter.js", page);
+        Assert.Contains("minigames-history-filter.css", page);
+        Assert.Contains("buildQuestionAnswerPairs", script);
+        Assert.Contains("entry.kind === 'question'", script);
+        Assert.Contains("entry.kind === 'answer'", script);
+        Assert.Contains("entry.player !== pendingQuestion.player", script);
+        Assert.Contains("is-filtered-pairs", script);
+        Assert.Contains("minigames-history-pair-part is-player-", script);
+        Assert.DoesNotContain("connection.invoke", script);
+        Assert.Contains("white-space: nowrap", styles);
+        Assert.Contains(".minigames-history-pair-part.is-player-1", styles);
+        Assert.Contains(".minigames-history-pair-part.is-player-2", styles);
+    }
+
+    [Fact]
     public void Question_file_contains_a_large_yes_no_question_pool()
     {
         var questions = ReadWebFile("Resources", "Minigames", "GameCards", "questions.txt")
