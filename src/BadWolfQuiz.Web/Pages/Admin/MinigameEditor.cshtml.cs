@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
@@ -74,6 +76,34 @@ public sealed class MinigameEditorModel(
 
         Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
         return File(image.Data, image.ContentType);
+    }
+
+    public async Task<IActionResult> OnGetExportAnswersAsync(
+        int gameId,
+        CancellationToken cancellationToken)
+    {
+        var game = await Store.GetGameAsync(gameId, cancellationToken);
+        if (game is null)
+        {
+            Error(localizer["GameNotFound"]);
+            return RedirectToAnswers(gameId);
+        }
+
+        var answers = await Store.GetAnswerItemsAsync(gameId, cancellationToken);
+        if (answers.Count == 0 || answers.Any(answer => !answer.AnswerYes.HasValue))
+        {
+            Error(localizer["AnswersInvalid"]);
+            return RedirectToAnswers(gameId);
+        }
+
+        var content = string.Join(
+            Environment.NewLine,
+            answers.Select(answer => answer.AnswerYes == true ? "1" : "0")) +
+            Environment.NewLine;
+        return File(
+            Encoding.UTF8.GetBytes(content),
+            "text/plain; charset=utf-8",
+            BuildAnswerExportFileName(game.Name));
     }
 
     public async Task<IActionResult> OnPostCreateGameAsync(
@@ -189,16 +219,32 @@ public sealed class MinigameEditorModel(
 
     public async Task<IActionResult> OnPostSaveAnswersAsync(
         int gameId,
-        List<MinigameAnswerInput> answers,
+        string? answersJson,
         CancellationToken cancellationToken)
     {
+        List<MinigameAnswerInput>? answers;
+        try
+        {
+            answers = string.IsNullOrWhiteSpace(answersJson)
+                ? null
+                : JsonSerializer.Deserialize<List<MinigameAnswerInput>>(answersJson);
+        }
+        catch (JsonException)
+        {
+            return AnswerSaveError(localizer["AnswersInvalid"]);
+        }
+
+        if (answers is null)
+        {
+            return AnswerSaveError(localizer["AnswersInvalid"]);
+        }
+
         var values = new Dictionary<int, bool?>();
         foreach (var row in answers)
         {
             if (row.QuestionId <= 0 || values.ContainsKey(row.QuestionId))
             {
-                Error(localizer["AnswersInvalid"]);
-                return RedirectToAnswers(gameId);
+                return AnswerSaveError(localizer["AnswersInvalid"]);
             }
 
             bool? value = row.Value switch
@@ -210,20 +256,34 @@ public sealed class MinigameEditorModel(
             };
             if (row.Value is not ("1" or "0" or "" or null))
             {
-                Error(localizer["AnswersInvalid"]);
-                return RedirectToAnswers(gameId);
+                return AnswerSaveError(localizer["AnswersInvalid"]);
             }
+
             values[row.QuestionId] = value;
         }
 
+        var questions = await Store.GetQuestionItemsAsync(cancellationToken);
+        if (values.Count != questions.Count ||
+            questions.Any(question => !values.ContainsKey(question.Id)))
+        {
+            return AnswerSaveError(localizer["AnswersInvalid"]);
+        }
+
         var result = await Store.SaveAnswersAsync(gameId, values, cancellationToken);
-        SetMutationMessage(
-            result,
-            localizer["AnswersSaved"],
-            localizer["AnswersInvalid"],
-            localizer["AnswersInvalid"],
-            localizer["GameNotFound"]);
-        return RedirectToAnswers(gameId);
+        return result switch
+        {
+            MinigameCatalogMutationResult.Success => new JsonResult(new
+            {
+                success = true,
+                assignedAnswerCount = values.Values.Count(value => value.HasValue)
+            }),
+            MinigameCatalogMutationResult.NotFound => NotFound(new
+            {
+                success = false,
+                message = localizer["GameNotFound"].Value
+            }),
+            _ => AnswerSaveError(localizer["AnswersInvalid"])
+        };
     }
 
     public async Task<IActionResult> OnPostImportAnswersAsync(
@@ -307,6 +367,9 @@ public sealed class MinigameEditorModel(
         return new ImageUploadResult(true, output.ToArray(), image.ContentType, null);
     }
 
+    private IActionResult AnswerSaveError(string message) =>
+        BadRequest(new { success = false, message });
+
     private void SetMutationMessage(
         MinigameCatalogMutationResult result,
         string success,
@@ -340,6 +403,19 @@ public sealed class MinigameEditorModel(
     private void Success(string message) => TempData["StatusMessage"] = message;
 
     private void Error(string message) => TempData["ErrorMessage"] = message;
+
+    private static string BuildAnswerExportFileName(string gameName)
+    {
+        var invalid = Path.GetInvalidFileNameChars()
+            .Concat(new[] { '/', '\\' })
+            .ToHashSet();
+        var safeName = new string(
+            gameName.Select(character => invalid.Contains(character) ? '_' : character)
+                .ToArray())
+            .Trim();
+
+        return $"{(string.IsNullOrWhiteSpace(safeName) ? "answers" : safeName)}.txt";
+    }
 
     private static string NormalizeSection(string? section) =>
         section?.Trim().ToLowerInvariant() switch

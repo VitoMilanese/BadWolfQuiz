@@ -87,42 +87,46 @@
         <div class="minigame-editor-game-list">
             @foreach (var game in Model.Games)
             {
+                var editFormId = $"minigame-game-edit-{game.Id}";
                 <article class="content-panel minigame-editor-game-card">
                     <img src="@Url.Page("/Admin/MinigameEditor", "GameImage", new { id = game.Id })"
                          loading="lazy"
                          alt="@game.Name" />
-                    <div class="minigame-editor-game-body">
-                        <form method="post"
-                              enctype="multipart/form-data"
-                              asp-page-handler="UpdateGame"
-                              class="minigame-editor-game-form"
-                              data-minigame-editor-busy>
-                            <input type="hidden" name="gameId" value="@game.Id" />
-                            <label>
-                                <span>@EditorLocalizer["GameName"]</span>
-                                <input name="name" type="text" maxlength="200" value="@game.Name" required />
-                            </label>
-                            <label>
-                                <span>@EditorLocalizer["ReplaceImage"]</span>
-                                <input name="image"
-                                       type="file"
-                                       accept="image/png,image/jpeg,image/webp,image/gif" />
-                            </label>
-                            <div class="minigame-editor-meta">
-                                <span>@EditorLocalizer["ImageSize"]: @((game.ImageBytes / 1024d).ToString("N0")) KB</span>
-                                <span>@EditorLocalizer["AssignedAnswers"]: @game.AssignedAnswerCount / @Model.Counts.QuestionCount</span>
-                            </div>
-                            <div class="form-actions">
-                                <a class="button button-secondary"
-                                   asp-page="/Admin/MinigameEditor"
-                                   asp-route-section="answers"
-                                   asp-route-gameId="@game.Id"
-                                   data-minigame-editor-nav>
-                                    @EditorLocalizer["EditAnswers"]
-                                </a>
-                                <button class="button button-primary" type="submit">@Localizer["Button_Save"]</button>
-                            </div>
-                        </form>
+                    <form id="@editFormId"
+                          method="post"
+                          enctype="multipart/form-data"
+                          asp-page-handler="UpdateGame"
+                          class="minigame-editor-game-form"
+                          data-minigame-editor-busy>
+                        <input type="hidden" name="gameId" value="@game.Id" />
+                        <label>
+                            <span>@EditorLocalizer["GameName"]</span>
+                            <input name="name" type="text" maxlength="200" value="@game.Name" required />
+                        </label>
+                        <label>
+                            <span>@EditorLocalizer["ReplaceImage"]</span>
+                            <input name="image"
+                                   type="file"
+                                   accept="image/png,image/jpeg,image/webp,image/gif" />
+                        </label>
+                        <div class="minigame-editor-meta">
+                            <span>@EditorLocalizer["ImageSize"]: @((game.ImageBytes / 1024d).ToString("N0")) KB</span>
+                            <span>@EditorLocalizer["AssignedAnswers"]: @game.AssignedAnswerCount / @Model.Counts.QuestionCount</span>
+                        </div>
+                    </form>
+                    <div class="minigame-editor-game-actions">
+                        <a class="button button-secondary"
+                           asp-page="/Admin/MinigameEditor"
+                           asp-route-section="answers"
+                           asp-route-gameId="@game.Id"
+                           data-minigame-editor-nav>
+                            @EditorLocalizer["EditAnswers"]
+                        </a>
+                        <button class="button button-primary"
+                                type="submit"
+                                form="@editFormId">
+                            @Localizer["Button_Save"]
+                        </button>
                         <form method="post"
                               asp-page-handler="DeleteGame"
                               data-minigame-editor-busy
@@ -230,7 +234,8 @@ else
                 <h2>@Model.SelectedGame.Name</h2>
                 <p class="muted">
                     @EditorLocalizer["AssignedAnswers"]:
-                    @Model.SelectedGame.AssignedAnswerCount / @Model.Counts.QuestionCount
+                    <span data-minigame-assigned-count>@Model.SelectedGame.AssignedAnswerCount</span>
+                    / @Model.Counts.QuestionCount
                 </p>
             </div>
         </section>
@@ -238,21 +243,36 @@ else
         <section class="content-panel minigame-editor-import-panel">
             <h3>@EditorLocalizer["ImportAnswers"]</h3>
             <p class="muted">@EditorLocalizer["ImportHelp", Model.Counts.QuestionCount]</p>
-            <form method="post"
-                  enctype="multipart/form-data"
-                  asp-page-handler="ImportAnswers"
-                  class="minigame-editor-import-form"
-                  data-minigame-editor-busy>
-                <input type="hidden" name="gameId" value="@Model.SelectedGame.Id" />
-                <input type="file" name="answerFile" accept=".txt,text/plain" required />
-                <button class="button button-primary" type="submit">@Localizer["Button_Import"]</button>
-            </form>
+            <div class="minigame-editor-transfer-row">
+                <form method="post"
+                      enctype="multipart/form-data"
+                      asp-page-handler="ImportAnswers"
+                      class="minigame-editor-import-form"
+                      data-minigame-editor-busy>
+                    <input type="hidden" name="gameId" value="@Model.SelectedGame.Id" />
+                    <input type="file" name="answerFile" accept=".txt,text/plain" required />
+                    <button class="button button-primary" type="submit">@Localizer["Button_Import"]</button>
+                </form>
+                <a class="button button-secondary"
+                   asp-page="/Admin/MinigameEditor"
+                   asp-page-handler="ExportAnswers"
+                   asp-route-gameId="@Model.SelectedGame.Id">
+                    @Localizer["Button_Export"]
+                </a>
+                <span class="minigame-editor-auto-save-status"
+                      role="status"
+                      aria-live="polite"
+                      data-minigame-answer-status></span>
+            </div>
         </section>
 
         <form method="post"
               asp-page-handler="SaveAnswers"
               class="content-panel minigame-editor-answer-form"
-              data-minigame-editor-busy>
+              data-minigame-answer-form
+              data-saving="…"
+              data-saved="@EditorLocalizer["AnswersSaved"]"
+              data-save-failed="@EditorLocalizer["AnswersInvalid"]">
             <input type="hidden" name="gameId" value="@Model.SelectedGame.Id" />
             <div class="minigame-editor-answer-table-wrap">
                 <table class="minigame-editor-answer-table">
@@ -264,17 +284,14 @@ else
                         </tr>
                     </thead>
                     <tbody>
-                        @for (var index = 0; index < Model.AnswerItems.Count; index++)
+                        @foreach (var row in Model.AnswerItems)
                         {
-                            var row = Model.AnswerItems[index];
                             <tr>
                                 <td>@(row.SortOrder + 1)</td>
                                 <td>@row.QuestionText</td>
                                 <td>
-                                    <input type="hidden"
-                                           name="answers[@index].QuestionId"
-                                           value="@row.QuestionId" />
-                                    <select name="answers[@index].Value"
+                                    <select data-minigame-answer-select
+                                            data-question-id="@row.QuestionId"
                                             aria-label="@EditorLocalizer["Answer"] @(row.SortOrder + 1)">
                                         <option value=""
                                                 selected="@(!row.AnswerYes.HasValue ? "selected" : null)">@EditorLocalizer["Unassigned"]</option>
@@ -288,9 +305,6 @@ else
                         }
                     </tbody>
                 </table>
-            </div>
-            <div class="form-actions minigame-editor-answer-actions">
-                <button class="button button-primary" type="submit">@EditorLocalizer["SaveAnswers"]</button>
             </div>
         </form>
     }

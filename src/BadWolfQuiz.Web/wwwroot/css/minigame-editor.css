@@ -77,35 +77,39 @@
 
 .minigame-editor-game-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(620px, 1fr));
     gap: 14px;
 }
 
 .minigame-editor-game-card {
     display: grid;
-    grid-template-columns: 108px minmax(0, 1fr);
+    grid-template-columns: 112px minmax(0, 1fr) auto;
+    align-items: start;
     gap: 14px;
     min-width: 0;
 }
 
 .minigame-editor-game-card > img {
-    width: 108px;
-    height: 108px;
+    width: 112px;
+    height: 112px;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: var(--panel-2);
     object-fit: contain;
 }
 
-.minigame-editor-game-body,
 .minigame-editor-game-form {
     display: grid;
-    gap: 9px;
+    grid-template-columns: minmax(150px, 0.85fr) minmax(190px, 1.15fr);
+    align-items: end;
+    gap: 9px 12px;
     min-width: 0;
 }
 
-.minigame-editor-game-form input[type="text"] {
+.minigame-editor-game-form input[type="text"],
+.minigame-editor-game-form input[type="file"] {
     width: 100%;
+    min-width: 0;
 }
 
 .minigame-editor-game-form input[type="file"] {
@@ -115,10 +119,26 @@
 
 .minigame-editor-meta {
     display: flex;
+    grid-column: 1 / -1;
     flex-wrap: wrap;
     gap: 5px 12px;
     color: var(--muted);
     font-size: 0.76rem;
+}
+
+.minigame-editor-game-actions {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    min-width: 132px;
+}
+
+.minigame-editor-game-actions .button {
+    width: 100%;
+}
+
+.minigame-editor-game-actions form {
+    margin: 0;
 }
 
 .minigame-editor-question-create {
@@ -202,11 +222,27 @@
     margin-bottom: 0;
 }
 
+.minigame-editor-transfer-row,
 .minigame-editor-import-form {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 10px;
+}
+
+.minigame-editor-import-form {
+    flex: 1 1 520px;
+}
+
+.minigame-editor-import-form input[type="file"] {
+    flex: 1 1 300px;
+    min-width: 220px;
+}
+
+.minigame-editor-auto-save-status {
+    min-width: 9rem;
+    color: var(--muted);
+    font-size: 0.82rem;
 }
 
 .minigame-editor-answer-table-wrap {
@@ -253,15 +289,7 @@
     min-width: 7.5rem;
 }
 
-.minigame-editor-answer-actions {
-    position: sticky;
-    bottom: 0;
-    margin-top: 12px;
-    padding-top: 10px;
-    background: var(--panel);
-}
-
-@media (max-width: 760px) {
+@media (max-width: 680px) {
     .minigame-editor-heading,
     .minigame-editor-answer-header {
         align-items: stretch;
@@ -273,7 +301,8 @@
     }
 
     .minigame-editor-inline-form,
-    .minigame-editor-question-create {
+    .minigame-editor-question-create,
+    .minigame-editor-game-form {
         grid-template-columns: 1fr;
     }
 
@@ -288,6 +317,16 @@
     .minigame-editor-game-card > img {
         width: 84px;
         height: 84px;
+    }
+
+    .minigame-editor-game-actions {
+        grid-column: 2;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        min-width: 0;
+    }
+
+    .minigame-editor-meta {
+        grid-column: 1;
     }
 
     .minigame-editor-question-list > li {
@@ -306,5 +345,27 @@
     .minigame-editor-answer-header select {
         min-width: 0;
         width: 100%;
+    }
+
+    .minigame-editor-transfer-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .minigame-editor-import-form {
+        flex-basis: auto;
+    }
+
+    .minigame-editor-import-form input[type="file"] {
+        min-width: 0;
+    }
+
+    .minigame-editor-transfer-row > .button,
+    .minigame-editor-import-form .button {
+        width: 100%;
+    }
+
+    .minigame-editor-auto-save-status {
+        min-width: 0;
     }
 }

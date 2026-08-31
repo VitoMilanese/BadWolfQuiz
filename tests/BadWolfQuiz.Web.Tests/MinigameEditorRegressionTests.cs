@@ -22,10 +22,12 @@ public sealed class MinigameEditorRegressionTests
     }
 
     [Fact]
-    public void Editor_exposes_games_questions_answer_matrix_and_txt_import()
+    public void Editor_uses_horizontal_game_cards_and_non_blocking_answer_autosave()
     {
         var page = ReadWebFile("Pages", "Admin", "MinigameEditor.cshtml");
         var model = ReadWebFile("Pages", "Admin", "MinigameEditor.cshtml.cs");
+        var css = ReadWebFile("wwwroot", "css", "minigame-editor.css");
+        var script = ReadWebFile("wwwroot", "js", "minigame-editor.js");
         var store = ReadWebFile("Services", "MinigameCatalogStore.cs");
 
         Assert.Contains("asp-page-handler=\"CreateGame\"", page);
@@ -36,8 +38,18 @@ public sealed class MinigameEditorRegressionTests
         Assert.Contains("asp-page-handler=\"DeleteQuestion\"", page);
         Assert.Contains("asp-page-handler=\"SaveAnswers\"", page);
         Assert.Contains("asp-page-handler=\"ImportAnswers\"", page);
-        Assert.Contains("answers[@index].QuestionId", page);
-        Assert.Contains("answers[@index].Value", page);
+        Assert.Contains("asp-page-handler=\"ExportAnswers\"", page);
+        Assert.Contains("data-minigame-answer-form", page);
+        Assert.Contains("data-minigame-answer-select", page);
+        Assert.DoesNotContain("answers[@index].QuestionId", page);
+        Assert.DoesNotContain("minigame-editor-answer-actions", page);
+        Assert.Contains("answersJson", model);
+        Assert.Contains("JsonSerializer.Deserialize", model);
+        Assert.Contains("OnGetExportAnswersAsync", model);
+        Assert.Contains("JSON.stringify(buildPayload())", script);
+        Assert.Contains("fetch(answerForm.action", script);
+        Assert.Contains("grid-template-columns: 112px minmax(0, 1fr) auto", css);
+        Assert.DoesNotContain(".minigame-editor-answer-actions", css);
         Assert.Contains("MinigameAnswerImportParser.Parse", model);
         Assert.Contains("expectedCount", store);
         Assert.Contains("value == \"1\"", store);
