@@ -29,6 +29,7 @@ public sealed class MinigameEditorRegressionTests
         var css = ReadWebFile("wwwroot", "css", "minigame-editor.css");
         var script = ReadWebFile("wwwroot", "js", "minigame-editor.js");
         var store = ReadWebFile("Services", "MinigameCatalogStore.cs");
+        var answerFileParser = ReadWebFile("Services", "MinigameAnswerFileParser.cs");
 
         Assert.Contains("asp-page-handler=\"CreateGame\"", page);
         Assert.Contains("asp-page-handler=\"UpdateGame\"", page);
@@ -50,6 +51,12 @@ public sealed class MinigameEditorRegressionTests
         Assert.Contains("answersJson", model);
         Assert.Contains("JsonSerializer.Deserialize", model);
         Assert.Contains("OnGetExportAnswersAsync", model);
+        Assert.DoesNotContain("answers.Any(answer => !answer.AnswerYes.HasValue)", model);
+        Assert.Contains("null => string.Empty", model);
+        Assert.Contains("MinigameAnswerFileParser.Parse", model);
+        Assert.Contains("SaveAnswersAsync(gameId, values", model);
+        Assert.Contains("value.Length == 0", answerFileParser);
+        Assert.Contains("IReadOnlyList<bool?> Answers", answerFileParser);
         Assert.Contains("JSON.stringify(buildPayload())", script);
         Assert.Contains("fetch(answerForm.action", script);
         Assert.Contains("activeAnswerFilter", script);
@@ -66,7 +73,6 @@ public sealed class MinigameEditorRegressionTests
         Assert.Contains(".minigame-editor-answer-filter", css);
         Assert.Contains(".minigame-editor-answer-form.is-answer-filtered", css);
         Assert.DoesNotContain(".minigame-editor-answer-actions", css);
-        Assert.Contains("MinigameAnswerImportParser.Parse", model);
         Assert.Contains("expectedCount", store);
         Assert.Contains("value == \"1\"", store);
         Assert.Contains("value == \"0\"", store);

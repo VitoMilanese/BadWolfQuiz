@@ -96,7 +96,7 @@ public sealed class MinigameEditorModel(
         }
 
         var answers = await Store.GetAnswerItemsAsync(gameId, cancellationToken);
-        if (answers.Count == 0 || answers.Any(answer => !answer.AnswerYes.HasValue))
+        if (answers.Count == 0)
         {
             Error(localizer["AnswersInvalid"]);
             return RedirectToAnswers(gameId);
@@ -104,8 +104,12 @@ public sealed class MinigameEditorModel(
 
         var content = string.Join(
             Environment.NewLine,
-            answers.Select(answer => answer.AnswerYes == true ? "1" : "0")) +
-            Environment.NewLine;
+            answers.Select(answer => answer.AnswerYes switch
+            {
+                true => "1",
+                false => "0",
+                null => string.Empty
+            })) + Environment.NewLine;
         return File(
             Encoding.UTF8.GetBytes(content),
             "text/plain; charset=utf-8",
@@ -326,7 +330,7 @@ public sealed class MinigameEditorModel(
         }
 
         var questions = await Store.GetQuestionItemsAsync(cancellationToken);
-        var parsed = MinigameAnswerImportParser.Parse(content, questions.Count);
+        var parsed = MinigameAnswerFileParser.Parse(content, questions.Count);
         if (!parsed.Success)
         {
             if (parsed.InvalidLineNumber > 0)
@@ -343,10 +347,13 @@ public sealed class MinigameEditorModel(
             return RedirectToAnswers(gameId);
         }
 
-        var result = await Store.ReplaceAnswersAsync(
-            gameId,
-            parsed.Answers,
-            cancellationToken);
+        var values = new Dictionary<int, bool?>(questions.Count);
+        for (var index = 0; index < questions.Count; index++)
+        {
+            values[questions[index].Id] = parsed.Answers[index];
+        }
+
+        var result = await Store.SaveAnswersAsync(gameId, values, cancellationToken);
         SetMutationMessage(
             result,
             localizer["AnswersImported"],

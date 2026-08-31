@@ -30,7 +30,7 @@
   <data name="SelectGame" xml:space="preserve"><value>Gioco</value></data>
   <data name="NoGamesForAnswers" xml:space="preserve"><value>Aggiungi almeno un gioco prima di modificare le risposte.</value></data>
   <data name="ImportAnswers" xml:space="preserve"><value>Importa tutte le risposte da TXT</value></data>
-  <data name="ImportHelp" xml:space="preserve"><value>Il file deve contenere esattamente {0} righe nell'ordine delle domande: 1 = SÌ, 0 = NO.</value></data>
+  <data name="ImportHelp" xml:space="preserve"><value>Il file deve contenere esattamente {0} righe nell'ordine delle domande: 1 = SÌ, 0 = NO, riga vuota = Non assegnata.</value></data>
   <data name="Answer" xml:space="preserve"><value>Risposta</value></data>
   <data name="Unassigned" xml:space="preserve"><value>Non assegnata</value></data>
   <data name="Yes" xml:space="preserve"><value>SÌ</value></data>
@@ -55,7 +55,7 @@
   <data name="AnswersInvalid" xml:space="preserve"><value>Il set di risposte inviato non è valido.</value></data>
   <data name="AnswerFileRequired" xml:space="preserve"><value>Seleziona un file TXT da importare.</value></data>
   <data name="AnswerFileTooLarge" xml:space="preserve"><value>Il file delle risposte è troppo grande.</value></data>
-  <data name="AnswerFileInvalidLine" xml:space="preserve"><value>La riga {0} deve contenere solo 1 oppure 0.</value></data>
+  <data name="AnswerFileInvalidLine" xml:space="preserve"><value>La riga {0} deve contenere 1, 0 oppure essere vuota.</value></data>
   <data name="AnswerFileWrongCount" xml:space="preserve"><value>Il file deve contenere esattamente {0} righe; ne sono state trovate {1}.</value></data>
   <data name="ImageRequired" xml:space="preserve"><value>Seleziona un'immagine per la carta.</value></data>
   <data name="ImageTooLarge" xml:space="preserve"><value>L'immagine deve essere di massimo 5 MB.</value></data>

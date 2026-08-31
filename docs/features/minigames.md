@@ -61,10 +61,13 @@ Deleting a game also removes its stored question answers. Deleting a question re
 The Answers view accepts a per-game TXT file. The import is valid only when:
 
 - the file contains exactly one line for every current question;
-- every line contains exactly `1` or `0` after trimming;
+- after trimming, each line is `1`, `0`, or empty;
+- `1` means YES, `0` means NO, and an empty line means Unassigned;
 - line N maps to question N in the current editor order.
 
-A valid import transactionally replaces the selected game's complete answer set. An invalid file changes nothing.
+A valid import transactionally replaces the selected game's complete answer matrix. Empty rows remove the stored answer for those game/question pairs and leave them unassigned. An invalid file changes nothing.
+
+Export uses the same line-for-line format, so assigned and unassigned values round-trip without converting uncertain answers into YES or NO.
 
 ### Busy indicator
 
