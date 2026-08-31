@@ -1,11 +1,18 @@
 using System.Globalization;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.Localization;
 
 namespace BadWolfQuiz.Web.TagHelpers;
 
 [HtmlTargetElement("a", Attributes = "asp-page")]
-public sealed class HeaderSeoNavigationTagHelper : TagHelper
+public sealed class HeaderSeoNavigationTagHelper(
+    IHttpContextAccessor httpContextAccessor,
+    IConfiguration configuration,
+    IStringLocalizer<MinigameEditorResource> minigameEditorLocalizer) : TagHelper
 {
     public override int Order => 1000;
 
@@ -19,6 +26,18 @@ public sealed class HeaderSeoNavigationTagHelper : TagHelper
         }
 
         var page = pageAttribute.Value?.ToString();
+        if (page == "/Admin/MasterGames" && IsMasterHost())
+        {
+            var label = HtmlEncoder.Default.Encode(
+                minigameEditorLocalizer["MenuTitle"].Value);
+            output.PostElement.AppendHtml(
+                "<a class=\"action-menu-item\" href=\"/Admin/MinigameEditor\" " +
+                "onclick=\"if(window.BadWolfBusy){window.BadWolfBusy.navigate(this.href);return false;}\">" +
+                label +
+                "</a>");
+            return;
+        }
+
         if (page is not "/PublicQuizzes" and not "/Faq" and not "/About")
         {
             return;
@@ -29,6 +48,15 @@ public sealed class HeaderSeoNavigationTagHelper : TagHelper
             SeoRouteCatalog.BuildNavigationPath(
                 page,
                 CultureInfo.CurrentUICulture.Name));
+    }
+
+    private bool IsMasterHost()
+    {
+        var configuredId = configuration["MasterHostId"]?.Trim();
+        var currentId = httpContextAccessor.HttpContext?.User
+            .FindFirstValue(ClaimTypes.NameIdentifier);
+        return !string.IsNullOrWhiteSpace(configuredId) &&
+               string.Equals(currentId, configuredId, StringComparison.Ordinal);
     }
 
     private static bool HasCssClass(string? value, string expected) =>

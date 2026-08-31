@@ -1,0 +1,315 @@
+@page
+@model BadWolfQuiz.Web.Pages.Admin.MinigameEditorModel
+@inject IStringLocalizer<MinigameEditorResource> EditorLocalizer
+@{
+    ViewData["Title"] = EditorLocalizer["Title"];
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/minigame-editor.css" asp-append-version="true" />
+}
+
+<div class="page-heading minigame-editor-heading">
+    <div>
+        <p class="eyebrow">@EditorLocalizer["Eyebrow"]</p>
+        <h1>@EditorLocalizer["Title"]</h1>
+        <p class="muted">@EditorLocalizer["Description"]</p>
+    </div>
+    <div class="minigame-editor-counts">
+        <span><strong>@Model.Counts.GameCount</strong> @EditorLocalizer["GamesCount"]</span>
+        <span><strong>@Model.Counts.QuestionCount</strong> @EditorLocalizer["QuestionsCount"]</span>
+    </div>
+</div>
+
+@if (TempData["StatusMessage"] is string statusMessage)
+{
+    <div class="message message-success" role="status">@statusMessage</div>
+}
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="message message-error" role="alert">@errorMessage</div>
+}
+
+<nav class="minigame-editor-tabs" aria-label="@EditorLocalizer["Title"]">
+    <a class="button @(Model.Section == "games" ? "button-primary" : "button-secondary")"
+       asp-page="/Admin/MinigameEditor"
+       asp-route-section="games"
+       data-minigame-editor-nav>
+        @EditorLocalizer["GamesTab"]
+    </a>
+    <a class="button @(Model.Section == "questions" ? "button-primary" : "button-secondary")"
+       asp-page="/Admin/MinigameEditor"
+       asp-route-section="questions"
+       data-minigame-editor-nav>
+        @EditorLocalizer["QuestionsTab"]
+    </a>
+    <a class="button @(Model.Section == "answers" ? "button-primary" : "button-secondary")"
+       asp-page="/Admin/MinigameEditor"
+       asp-route-section="answers"
+       asp-route-gameId="@Model.SelectedGame?.Id"
+       data-minigame-editor-nav>
+        @EditorLocalizer["AnswersTab"]
+    </a>
+</nav>
+
+@if (Model.Section == "games")
+{
+    <section class="content-panel minigame-editor-create-panel">
+        <h2>@EditorLocalizer["AddGame"]</h2>
+        <form method="post"
+              enctype="multipart/form-data"
+              asp-page-handler="CreateGame"
+              class="minigame-editor-inline-form"
+              data-minigame-editor-busy>
+            <label>
+                <span>@EditorLocalizer["GameName"]</span>
+                <input name="name" type="text" maxlength="200" required />
+            </label>
+            <label>
+                <span>@EditorLocalizer["GameImage"]</span>
+                <input name="image"
+                       type="file"
+                       accept="image/png,image/jpeg,image/webp,image/gif"
+                       required />
+            </label>
+            <button class="button button-primary" type="submit">@Localizer["Button_Create"]</button>
+        </form>
+    </section>
+
+    @if (Model.Games.Count == 0)
+    {
+        <section class="content-panel empty-state">
+            <h2>@EditorLocalizer["NoGames"]</h2>
+        </section>
+    }
+    else
+    {
+        <div class="minigame-editor-game-list">
+            @foreach (var game in Model.Games)
+            {
+                var editFormId = $"minigame-game-edit-{game.Id}";
+                <article class="content-panel minigame-editor-game-card">
+                    <img src="@Url.Page("/Admin/MinigameEditor", "GameImage", new { id = game.Id })"
+                         loading="lazy"
+                         alt="@game.Name" />
+                    <form id="@editFormId"
+                          method="post"
+                          enctype="multipart/form-data"
+                          asp-page-handler="UpdateGame"
+                          class="minigame-editor-game-form"
+                          data-minigame-editor-busy>
+                        <input type="hidden" name="gameId" value="@game.Id" />
+                        <label>
+                            <span>@EditorLocalizer["GameName"]</span>
+                            <input name="name" type="text" maxlength="200" value="@game.Name" required />
+                        </label>
+                        <label>
+                            <span>@EditorLocalizer["ReplaceImage"]</span>
+                            <input name="image"
+                                   type="file"
+                                   accept="image/png,image/jpeg,image/webp,image/gif" />
+                        </label>
+                        <div class="minigame-editor-meta">
+                            <span>@EditorLocalizer["ImageSize"]: @((game.ImageBytes / 1024d).ToString("N0")) KB</span>
+                            <span>@EditorLocalizer["AssignedAnswers"]: @game.AssignedAnswerCount / @Model.Counts.QuestionCount</span>
+                        </div>
+                    </form>
+                    <div class="minigame-editor-game-actions">
+                        <a class="button button-secondary"
+                           asp-page="/Admin/MinigameEditor"
+                           asp-route-section="answers"
+                           asp-route-gameId="@game.Id"
+                           data-minigame-editor-nav>
+                            @EditorLocalizer["EditAnswers"]
+                        </a>
+                        <button class="button button-primary"
+                                type="submit"
+                                form="@editFormId">
+                            @Localizer["Button_Save"]
+                        </button>
+                        <form method="post"
+                              asp-page-handler="DeleteGame"
+                              data-minigame-editor-busy
+                              data-confirm="@EditorLocalizer["DeleteGameConfirm", game.Name]">
+                            <input type="hidden" name="gameId" value="@game.Id" />
+                            <button class="button button-danger" type="submit">@Localizer["Button_Delete"]</button>
+                        </form>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+}
+else if (Model.Section == "questions")
+{
+    <section class="content-panel minigame-editor-create-panel">
+        <h2>@EditorLocalizer["AddQuestion"]</h2>
+        <form method="post"
+              asp-page-handler="CreateQuestion"
+              class="minigame-editor-question-create"
+              data-minigame-editor-busy>
+            <label>
+                <span>@EditorLocalizer["QuestionText"]</span>
+                <input name="text" type="text" maxlength="500" required />
+            </label>
+            <button class="button button-primary" type="submit">@Localizer["Button_Add"]</button>
+        </form>
+    </section>
+
+    @if (Model.Questions.Count == 0)
+    {
+        <section class="content-panel empty-state">
+            <h2>@EditorLocalizer["NoQuestions"]</h2>
+        </section>
+    }
+    else
+    {
+        <section class="content-panel minigame-editor-question-panel">
+            <ol class="minigame-editor-question-list">
+                @foreach (var question in Model.Questions)
+                {
+                    <li>
+                        <form method="post"
+                              asp-page-handler="UpdateQuestion"
+                              class="minigame-editor-question-row"
+                              data-minigame-editor-busy>
+                            <input type="hidden" name="questionId" value="@question.Id" />
+                            <span class="minigame-editor-question-number">@(question.SortOrder + 1).</span>
+                            <input name="text"
+                                   type="text"
+                                   maxlength="500"
+                                   value="@question.Text"
+                                   aria-label="@EditorLocalizer["QuestionText"] @(question.SortOrder + 1)"
+                                   required />
+                            <button class="button button-secondary" type="submit">@Localizer["Button_Save"]</button>
+                        </form>
+                        <form method="post"
+                              asp-page-handler="DeleteQuestion"
+                              data-minigame-editor-busy
+                              data-confirm="@EditorLocalizer["DeleteQuestionConfirm", question.SortOrder + 1]">
+                            <input type="hidden" name="questionId" value="@question.Id" />
+                            <button class="button button-danger" type="submit">@Localizer["Button_Delete"]</button>
+                        </form>
+                    </li>
+                }
+            </ol>
+        </section>
+    }
+}
+else
+{
+    <section class="content-panel minigame-editor-answer-header">
+        <div>
+            <h2>@EditorLocalizer["AnswerEditor"]</h2>
+            <p class="muted">@EditorLocalizer["AnswerEditorDescription"]</p>
+        </div>
+        @if (Model.Games.Count > 0)
+        {
+            <label>
+                <span>@EditorLocalizer["SelectGame"]</span>
+                <select data-minigame-editor-game-picker
+                        data-base-url="@Url.Page("/Admin/MinigameEditor")">
+                    @foreach (var game in Model.Games)
+                    {
+                        <option value="@game.Id"
+                                selected="@(Model.SelectedGame?.Id == game.Id ? "selected" : null)">@game.Name</option>
+                    }
+                </select>
+            </label>
+        }
+    </section>
+
+    @if (Model.SelectedGame is null)
+    {
+        <section class="content-panel empty-state">
+            <h2>@EditorLocalizer["NoGamesForAnswers"]</h2>
+        </section>
+    }
+    else
+    {
+        <section class="content-panel minigame-editor-selected-game">
+            <img src="@Url.Page("/Admin/MinigameEditor", "GameImage", new { id = Model.SelectedGame.Id })"
+                 alt="@Model.SelectedGame.Name" />
+            <div>
+                <h2>@Model.SelectedGame.Name</h2>
+                <p class="muted">
+                    @EditorLocalizer["AssignedAnswers"]:
+                    <span data-minigame-assigned-count>@Model.SelectedGame.AssignedAnswerCount</span>
+                    / @Model.Counts.QuestionCount
+                </p>
+            </div>
+        </section>
+
+        <section class="content-panel minigame-editor-import-panel">
+            <h3>@EditorLocalizer["ImportAnswers"]</h3>
+            <p class="muted">@EditorLocalizer["ImportHelp", Model.Counts.QuestionCount]</p>
+            <div class="minigame-editor-transfer-row">
+                <form method="post"
+                      enctype="multipart/form-data"
+                      asp-page-handler="ImportAnswers"
+                      class="minigame-editor-import-form"
+                      data-minigame-editor-busy>
+                    <input type="hidden" name="gameId" value="@Model.SelectedGame.Id" />
+                    <input type="file" name="answerFile" accept=".txt,text/plain" required />
+                    <button class="button button-primary" type="submit">@Localizer["Button_Import"]</button>
+                </form>
+                <a class="button button-secondary"
+                   asp-page="/Admin/MinigameEditor"
+                   asp-page-handler="ExportAnswers"
+                   asp-route-gameId="@Model.SelectedGame.Id">
+                    @Localizer["Button_Export"]
+                </a>
+                <span class="minigame-editor-auto-save-status"
+                      role="status"
+                      aria-live="polite"
+                      data-minigame-answer-status></span>
+            </div>
+        </section>
+
+        <form method="post"
+              asp-page-handler="SaveAnswers"
+              class="content-panel minigame-editor-answer-form"
+              data-minigame-answer-form
+              data-saving="…"
+              data-saved="@EditorLocalizer["AnswersSaved"]"
+              data-save-failed="@EditorLocalizer["AnswersInvalid"]">
+            <input type="hidden" name="gameId" value="@Model.SelectedGame.Id" />
+            <div class="minigame-editor-answer-table-wrap">
+                <table class="minigame-editor-answer-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>@EditorLocalizer["QuestionText"]</th>
+                            <th>@EditorLocalizer["Answer"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.AnswerItems)
+                        {
+                            <tr>
+                                <td>@(row.SortOrder + 1)</td>
+                                <td>@row.QuestionText</td>
+                                <td>
+                                    <select data-minigame-answer-select
+                                            data-question-id="@row.QuestionId"
+                                            aria-label="@EditorLocalizer["Answer"] @(row.SortOrder + 1)">
+                                        <option value=""
+                                                selected="@(!row.AnswerYes.HasValue ? "selected" : null)">@EditorLocalizer["Unassigned"]</option>
+                                        <option value="1"
+                                                selected="@(row.AnswerYes == true ? "selected" : null)">@EditorLocalizer["Yes"]</option>
+                                        <option value="0"
+                                                selected="@(row.AnswerYes == false ? "selected" : null)">@EditorLocalizer["No"]</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    }
+}
+
+@section Scripts {
+    <script src="~/js/minigame-editor.js" asp-append-version="true"></script>
+}

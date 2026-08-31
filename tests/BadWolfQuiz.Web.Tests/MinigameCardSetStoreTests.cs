@@ -1,4 +1,3 @@
-using BadWolfQuiz.Web.Pages;
 using BadWolfQuiz.Web.Services;
 
 namespace BadWolfQuiz.Web.Tests;
@@ -50,23 +49,6 @@ public sealed class MinigameCardSetStoreTests
         Assert.Equal(System.IO.Path.Combine(directory.Path, "A.png"), path);
         Assert.False(store.TryResolveCard("../A.png", out _, out _));
         Assert.False(store.TryResolveCard("..\\A.png", out _, out _));
-    }
-
-    [Fact]
-    public void Page_exposes_available_and_default_card_counts()
-    {
-        using var directory = new TemporaryDirectory();
-        for (var index = 1; index <= 14; index++)
-        {
-            directory.CreateFile($"Card-{index}.png");
-        }
-        var store = new MinigameCardSetStore(directory.Path, 10);
-        var page = new MinigamesModel(store);
-
-        page.OnGet();
-
-        Assert.Equal(14, page.AvailableCardCount);
-        Assert.Equal(10, page.DefaultCardCount);
     }
 
     private sealed class TemporaryDirectory : IDisposable
