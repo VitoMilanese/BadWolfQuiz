@@ -211,6 +211,29 @@ public sealed class MinigameHub(
         }
     }
 
+    public async Task<MinigameCardHintSearchSnapshot> SearchCardHints(
+        string roomCode,
+        string playerToken,
+        string gameKey,
+        string query,
+        int page = 1)
+    {
+        try
+        {
+            return await Hints.SearchCardHintsAsync(
+                roomCode,
+                playerToken,
+                gameKey,
+                query,
+                page,
+                Context.ConnectionAborted);
+        }
+        catch (MinigameRoomException exception)
+        {
+            throw CreateHubException(exception);
+        }
+    }
+
     public async Task<MinigameQuestionResponseHintSnapshot> GetQuestionResponseHint(
         string roomCode,
         string playerToken)

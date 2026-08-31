@@ -178,6 +178,59 @@
     font-size: 0.86rem;
 }
 
+.minigames-hint-search-body {
+    grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.minigames-hint-search-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px;
+    gap: 8px;
+    min-width: 0;
+}
+
+.minigames-hint-search-form input[type="search"] {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+.minigames-hint-search-form .button,
+.minigames-hint-search-paging .button {
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0 10px;
+}
+
+.minigames-hint-search-section {
+    grid-template-rows: minmax(0, 1fr) auto;
+    overflow: hidden;
+}
+
+.minigames-hint-search-results {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+
+.minigames-hint-search-paging {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+}
+
+.minigames-hint-search-page {
+    min-width: 0;
+    color: var(--muted);
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-align: center;
+}
+
 .minigames-question-response-hint {
     padding: 9px 11px;
     border: 1px solid color-mix(in srgb, var(--gold) 56%, var(--border));

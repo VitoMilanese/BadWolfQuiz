@@ -23,7 +23,10 @@ public sealed class MinigameHintsRegressionTests
             script);
         Assert.Contains("newGameAllowHints.disabled = false", script);
         Assert.Contains("questionCardsEnabledOf", script);
-        Assert.Contains("cardHintCurrentSection.classList.toggle('is-hidden', !showPinned)", script);
+        Assert.Contains("if (!questionCardsEnabledOf(currentState))", script);
+        Assert.Contains("searchInput.minLength = minimumSearchLength", script);
+        Assert.Contains("'SearchCardHints'", script);
+        Assert.Contains("runBusy", script);
         Assert.Contains("'GetCardHints'", script);
         Assert.Contains("'GetQuestionResponseHint'", script);
         Assert.Contains("event.stopPropagation()", script);
@@ -35,7 +38,7 @@ public sealed class MinigameHintsRegressionTests
     }
 
     [Fact]
-    public void Hint_server_contract_preserves_legacy_start_and_resolves_only_requested_information()
+    public void Hint_server_contract_preserves_legacy_start_and_searches_only_answered_questions()
     {
         var hub = Read("src/BadWolfQuiz.Web/Hubs/MinigameHub.cs");
         var service = Read("src/BadWolfQuiz.Web/Services/MinigameHintService.cs");
@@ -44,21 +47,23 @@ public sealed class MinigameHintsRegressionTests
         Assert.Contains("public Task<MinigameRoomSnapshot> StartNewGameWithHints(", hub);
         Assert.Contains("Hints.SetEnabled(state.RoomCode, hintsEnabled)", hub);
         Assert.DoesNotContain("questionCardsEnabled && hintsEnabled", hub);
+        Assert.Contains("SearchCardHints", hub);
         Assert.Contains("GetHintsEnabled", hub);
         Assert.Contains("GetCardHints", hub);
         Assert.Contains("GetQuestionResponseHint", hub);
 
-        Assert.Contains("_roomStore.GetState", service);
-        Assert.Contains("state.Phase != MinigameRoomPhase.Playing", service);
-        Assert.Contains("state.Cards.FirstOrDefault", service);
+        Assert.Contains("MinimumSearchLength = 3", service);
+        Assert.Contains("SearchPageSize = 20", service);
+        Assert.Contains("state.QuestionCardsEnabled", service);
+        Assert.Contains("row.AnswerYes.HasValue", service);
+        Assert.Contains("StringComparison.OrdinalIgnoreCase", service);
         Assert.Contains("entry.PlayerNumber == state.PlayerNumber", service);
-        Assert.Contains(".Reverse()", service);
         Assert.Contains("state.MySecretCardFileName", service);
         Assert.DoesNotContain("OpponentSecret", service);
     }
 
     [Fact]
-    public void Hint_styles_reveal_a_compact_info_control_over_the_card_image()
+    public void Hint_styles_reveal_info_control_and_support_paged_search_dialog()
     {
         var css = Read("src/BadWolfQuiz.Web/wwwroot/css/minigames-hints.css");
 
@@ -67,6 +72,8 @@ public sealed class MinigameHintsRegressionTests
         Assert.Contains(".minigame-card:hover .minigame-card-hint-trigger", css);
         Assert.Contains(".minigame-card:focus-within .minigame-card-hint-trigger", css);
         Assert.Contains(".minigames-hint-dialog", css);
+        Assert.Contains(".minigames-hint-search-form", css);
+        Assert.Contains(".minigames-hint-search-paging", css);
         Assert.Contains(".minigames-question-response-hint", css);
     }
 

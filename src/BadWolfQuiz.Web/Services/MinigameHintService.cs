@@ -7,6 +7,11 @@ namespace BadWolfQuiz.Web.Services;
 
 public sealed class MinigameHintService
 {
+    public const int MinimumSearchLength = 3;
+    public const int SearchPageSize = 20;
+
+    private const int MaximumSearchLength = 100;
+
     private static readonly ConcurrentDictionary<string, bool> HintsByRoom =
         new(StringComparer.OrdinalIgnoreCase);
 
@@ -47,12 +52,7 @@ public sealed class MinigameHintService
         CancellationToken cancellationToken = default)
     {
         var state = GetHintState(roomCode, playerToken);
-        var card = state.Cards.FirstOrDefault(item =>
-            string.Equals(item.FileName, gameKey, StringComparison.Ordinal));
-        if (card is null || !TryParseGameId(card.FileName, out var gameId))
-        {
-            throw new MinigameRoomException(MinigameRoomError.CardNotFound);
-        }
+        var card = GetActiveCard(state, gameKey, out var gameId);
 
         var answers = await GetAnswerMapAsync(gameId, cancellationToken);
         var pinnedQuestions = state.MyAvailableQuestions
@@ -72,6 +72,73 @@ public sealed class MinigameHintService
             card.DisplayName,
             BuildRows(pinnedQuestions, answers),
             BuildRows(questionsAskedToOpponent, answers));
+    }
+
+    public async Task<MinigameCardHintSearchSnapshot> SearchCardHintsAsync(
+        string? roomCode,
+        string? playerToken,
+        string? gameKey,
+        string? query,
+        int page,
+        CancellationToken cancellationToken = default)
+    {
+        var state = GetHintState(roomCode, playerToken);
+        if (state.QuestionCardsEnabled)
+        {
+            throw new MinigameRoomException(MinigameRoomError.InvalidPhase);
+        }
+
+        var card = GetActiveCard(state, gameKey, out var gameId);
+        var normalizedQuery = (query ?? string.Empty).Trim();
+        if (normalizedQuery.Length > MaximumSearchLength)
+        {
+            normalizedQuery = normalizedQuery[..MaximumSearchLength];
+        }
+
+        if (normalizedQuery.Length < MinimumSearchLength)
+        {
+            return new MinigameCardHintSearchSnapshot(
+                card.FileName,
+                card.DisplayName,
+                normalizedQuery,
+                1,
+                SearchPageSize,
+                0,
+                0,
+                []);
+        }
+
+        var matches = (await _catalog.GetAnswerItemsAsync(gameId, cancellationToken))
+            .Where(row =>
+                row.AnswerYes.HasValue &&
+                row.QuestionText.Contains(
+                    normalizedQuery,
+                    StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        var totalCount = matches.Length;
+        var totalPages = totalCount == 0
+            ? 0
+            : (int)Math.Ceiling(totalCount / (double)SearchPageSize);
+        var effectivePage = totalPages == 0
+            ? 1
+            : Math.Clamp(page, 1, totalPages);
+        var items = matches
+            .Skip((effectivePage - 1) * SearchPageSize)
+            .Take(SearchPageSize)
+            .Select(row => new MinigameHintAnswerRow(
+                row.QuestionText,
+                row.AnswerYes!.Value))
+            .ToArray();
+
+        return new MinigameCardHintSearchSnapshot(
+            card.FileName,
+            card.DisplayName,
+            normalizedQuery,
+            effectivePage,
+            SearchPageSize,
+            totalCount,
+            totalPages,
+            items);
     }
 
     public async Task<MinigameQuestionResponseHintSnapshot> GetQuestionResponseHintAsync(
@@ -117,6 +184,21 @@ public sealed class MinigameHintService
         return state;
     }
 
+    private static MinigameCardDescriptor GetActiveCard(
+        MinigameRoomSnapshot state,
+        string? gameKey,
+        out int gameId)
+    {
+        var card = state.Cards.FirstOrDefault(item =>
+            string.Equals(item.FileName, gameKey, StringComparison.Ordinal));
+        if (card is null || !TryParseGameId(card.FileName, out gameId))
+        {
+            throw new MinigameRoomException(MinigameRoomError.CardNotFound);
+        }
+
+        return card;
+    }
+
     private bool IsEnabled(string roomCode) =>
         HintsByRoom.TryGetValue(roomCode, out var enabled) && enabled;
 
@@ -160,6 +242,16 @@ public sealed record MinigameCardHintSnapshot(
     string GameName,
     IReadOnlyList<MinigameHintAnswerRow> PinnedQuestions,
     IReadOnlyList<MinigameHintAnswerRow> AskedQuestions);
+
+public sealed record MinigameCardHintSearchSnapshot(
+    string GameKey,
+    string GameName,
+    string Query,
+    int Page,
+    int PageSize,
+    int TotalCount,
+    int TotalPages,
+    IReadOnlyList<MinigameHintAnswerRow> Items);
 
 public sealed record MinigameQuestionResponseHintSnapshot(
     string Question,

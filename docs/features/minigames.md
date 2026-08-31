@@ -158,14 +158,16 @@ Directional rows keep the asking player's and answering player's colors independ
 When hints are enabled:
 
 - hovering or focusing a game card reveals an information control over the card image;
-- when Question cards are enabled, opening that control shows the selected game's catalog answers for the current player's remaining Question cards (up to three) in a pinned section at the top;
-- when Question cards are disabled, the pinned Question-card section is omitted entirely;
-- below the pinned section, or as the only list when Question cards are disabled, the dialog lists questions this player previously asked the opponent, newest first, and shows the catalog answer for the selected candidate game;
-- when Question cards are enabled, the normal YES/NO response dialog also shows the catalog answer for the responding player's own secret game;
-- the responder still chooses YES or NO manually; hints never submit or replace a player response;
-- an unassigned game/question pair is displayed as **Information unavailable**.
+- with **Question cards enabled**, the information control opens the normal hint dialog: the current player's remaining Question cards (up to three) are pinned at the top, followed by questions that player previously asked the opponent, newest first;
+- the normal Question-card YES/NO response dialog also shows the catalog answer for the responding player's own secret game;
+- with **Question cards disabled**, the information control opens a separate search dialog instead of the Question-card/history dialog;
+- free-form search requires at least 3 characters and matches a case-insensitive substring of the shared database question catalog;
+- search results are paged at 20 rows per page and each search/page request uses the shared `BadWolfBusy` overlay;
+- free-form search returns only questions that have an assigned YES or NO answer for the selected candidate game; unassigned mappings are omitted completely from the result set and from paging totals;
+- the responder still chooses YES or NO manually when Question cards are enabled; hints never submit or replace a player response;
+- outside free-form search, an unassigned game/question pair is displayed as **Information unavailable**.
 
-Hint payloads are resolved server-side for the authenticated room membership. Card hints are limited to cards in the current active table, and response hints resolve only against the requesting player's own secret card. The client does not receive the complete answer matrix or the opponent's secret card through the hint API.
+Hint payloads are resolved server-side for the authenticated room membership. Card hints and free-form searches are limited to cards in the current active table, response hints resolve only against the requesting player's own secret card, and free-form search is available only in rooms created without Question cards. The client does not receive the complete answer matrix or the opponent's secret card through the hint API.
 
 ## In-place restart
 

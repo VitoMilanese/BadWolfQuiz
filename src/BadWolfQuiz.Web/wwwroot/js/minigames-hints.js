@@ -51,6 +51,7 @@
         finished: 3
     };
     const storagePrefix = 'badwolf-minigame-player:';
+    const minimumSearchLength = 3;
 
     let connection = null;
     let currentRoomCode = '';
@@ -59,6 +60,8 @@
     let hintsEnabled = false;
     let responseHintRequestKey = '';
     let refreshPromise = null;
+    let searchGameKey = '';
+    let searchRequestVersion = 0;
 
     const get = (value, camelName, pascalName) =>
         value?.[camelName] ?? value?.[pascalName];
@@ -121,6 +124,16 @@
         return connection;
     };
 
+    const runBusy = async action => {
+        const busy = window.BadWolfBusy;
+        const ownsBusy = Boolean(busy && !busy.isBusy && busy.show());
+        try {
+            return await action();
+        } finally {
+            if (ownsBusy) busy.hide();
+        }
+    };
+
     const setNewGameError = message => {
         if (!newGameError) return;
         newGameError.textContent = message || '';
@@ -134,15 +147,11 @@
         return text.genericError;
     };
 
-    const syncHintCheckbox = () => {
-        newGameAllowHints.disabled = false;
-    };
-
-    syncHintCheckbox();
+    newGameAllowHints.disabled = false;
     const newGameDialogObserver = new MutationObserver(() => {
         if (!newGameDialog.open) return;
         newGameAllowHints.checked = false;
-        syncHintCheckbox();
+        newGameAllowHints.disabled = false;
     });
     newGameDialogObserver.observe(newGameDialog, {
         attributes: true,
@@ -201,14 +210,7 @@
         return 'is-unavailable';
     };
 
-    const createHintList = (rows, emptyText) => {
-        if (!Array.isArray(rows) || rows.length === 0) {
-            const empty = document.createElement('p');
-            empty.className = 'minigames-hint-empty';
-            empty.textContent = emptyText;
-            return empty;
-        }
-
+    const createHintList = rows => {
         const list = document.createElement('ul');
         list.className = 'minigames-hint-list';
         rows.forEach(row => {
@@ -229,37 +231,191 @@
         return list;
     };
 
+    const replaceHintList = (container, rows, emptyText) => {
+        if (!Array.isArray(rows) || rows.length === 0) {
+            const empty = document.createElement('p');
+            empty.className = 'minigames-hint-empty';
+            empty.textContent = emptyText;
+            container.replaceChildren(empty);
+            return;
+        }
+        container.replaceChildren(createHintList(rows));
+    };
+
     const setHintLoading = () => {
-        const showPinned = Boolean(currentState && questionCardsEnabledOf(currentState));
-        cardHintCurrentSection.classList.toggle('is-hidden', !showPinned);
+        cardHintCurrentSection.classList.remove('is-hidden');
         cardHintCurrent.replaceChildren();
         cardHintHistory.replaceChildren();
-
         const loading = document.createElement('p');
         loading.className = 'minigames-hint-loading';
         loading.textContent = text.loading;
-        (showPinned ? cardHintCurrent : cardHintHistory).replaceChildren(loading);
+        cardHintCurrent.replaceChildren(loading);
     };
 
     const renderCardHint = snapshot => {
         const gameName = get(snapshot, 'gameName', 'GameName') ?? '';
         const pinned = get(snapshot, 'pinnedQuestions', 'PinnedQuestions') ?? [];
         const asked = get(snapshot, 'askedQuestions', 'AskedQuestions') ?? [];
-        const showPinned = Boolean(currentState && questionCardsEnabledOf(currentState));
-
         cardHintTitle.textContent = gameName ? `${text.title}: ${gameName}` : text.title;
-        cardHintCurrentSection.classList.toggle('is-hidden', !showPinned);
-        if (showPinned) {
-            cardHintCurrent.replaceChildren(createHintList(pinned, text.noCurrent));
-        } else {
-            cardHintCurrent.replaceChildren();
-        }
-        cardHintHistory.replaceChildren(createHintList(asked, text.noPrevious));
+        cardHintCurrentSection.classList.remove('is-hidden');
+        replaceHintList(cardHintCurrent, pinned, text.noCurrent);
+        replaceHintList(cardHintHistory, asked, text.noPrevious);
     };
 
-    const openCardHint = async gameKey => {
+    const searchDialog = document.createElement('dialog');
+    searchDialog.className = 'minigames-dialog minigames-hint-dialog minigames-hint-search-dialog';
+
+    const searchBody = document.createElement('div');
+    searchBody.className = 'minigames-hint-dialog-body minigames-hint-search-body';
+
+    const searchHeader = document.createElement('header');
+    searchHeader.className = 'minigames-hint-dialog-header';
+    const searchTitle = document.createElement('h2');
+    const searchClose = document.createElement('button');
+    searchClose.className = 'button minigames-hint-close';
+    searchClose.type = 'button';
+    searchClose.textContent = '×';
+    searchClose.title = cardHintClose.title || text.title;
+    searchClose.setAttribute('aria-label', cardHintClose.getAttribute('aria-label') || text.title);
+    searchHeader.append(searchTitle, searchClose);
+
+    const searchForm = document.createElement('form');
+    searchForm.className = 'minigames-hint-search-form';
+    const searchInput = document.createElement('input');
+    searchInput.type = 'search';
+    searchInput.required = true;
+    searchInput.minLength = minimumSearchLength;
+    searchInput.maxLength = 100;
+    searchInput.autocomplete = 'off';
+    searchInput.spellcheck = false;
+    searchInput.placeholder = `${text.title}…`;
+    searchInput.setAttribute('aria-label', text.title);
+    const searchSubmit = document.createElement('button');
+    searchSubmit.className = 'button';
+    searchSubmit.type = 'submit';
+    searchSubmit.textContent = '⌕';
+    searchSubmit.title = text.title;
+    searchSubmit.setAttribute('aria-label', text.title);
+    searchForm.append(searchInput, searchSubmit);
+
+    const searchSection = document.createElement('section');
+    searchSection.className = 'minigames-hint-section minigames-hint-search-section';
+    const searchResults = document.createElement('div');
+    searchResults.className = 'minigames-hint-search-results';
+    const searchPaging = document.createElement('div');
+    searchPaging.className = 'minigames-hint-search-paging';
+    const searchPrevious = document.createElement('button');
+    searchPrevious.className = 'button';
+    searchPrevious.type = 'button';
+    searchPrevious.textContent = '←';
+    searchPrevious.disabled = true;
+    const searchPageStatus = document.createElement('span');
+    searchPageStatus.className = 'minigames-hint-search-page';
+    const searchNext = document.createElement('button');
+    searchNext.className = 'button';
+    searchNext.type = 'button';
+    searchNext.textContent = '→';
+    searchNext.disabled = true;
+    searchPaging.append(searchPrevious, searchPageStatus, searchNext);
+    searchSection.append(searchResults, searchPaging);
+    searchBody.append(searchHeader, searchForm, searchSection);
+    searchDialog.append(searchBody);
+    root.appendChild(searchDialog);
+
+    const renderSearchSnapshot = snapshot => {
+        const items = get(snapshot, 'items', 'Items') ?? [];
+        const page = Number(get(snapshot, 'page', 'Page') ?? 1);
+        const totalPages = Number(get(snapshot, 'totalPages', 'TotalPages') ?? 0);
+        const totalCount = Number(get(snapshot, 'totalCount', 'TotalCount') ?? 0);
+        const gameName = get(snapshot, 'gameName', 'GameName') ?? '';
+        if (gameName) searchTitle.textContent = `${text.title}: ${gameName}`;
+
+        searchResults.replaceChildren();
+        if (Array.isArray(items) && items.length > 0) {
+            searchResults.appendChild(createHintList(items));
+        }
+        searchPageStatus.textContent = totalPages > 0
+            ? `${page} / ${totalPages} · ${totalCount}`
+            : '0';
+        searchPrevious.disabled = totalPages === 0 || page <= 1;
+        searchNext.disabled = totalPages === 0 || page >= totalPages;
+        searchPrevious.dataset.page = String(Math.max(1, page - 1));
+        searchNext.dataset.page = String(page + 1);
+    };
+
+    const searchCardHints = async page => {
+        const query = searchInput.value.trim();
+        if (query.length < minimumSearchLength) {
+            searchInput.setCustomValidity(' ');
+            searchInput.reportValidity();
+            searchInput.setCustomValidity('');
+            return;
+        }
+        if (!searchGameKey || !resolveMembership()) return;
+
+        const requestVersion = ++searchRequestVersion;
+        try {
+            const snapshot = await runBusy(async () => {
+                const hub = await ensureConnection();
+                return await hub.invoke(
+                    'SearchCardHints',
+                    currentRoomCode,
+                    playerToken,
+                    searchGameKey,
+                    query,
+                    page);
+            });
+            if (requestVersion !== searchRequestVersion || !searchDialog.open) return;
+            renderSearchSnapshot(snapshot);
+        } catch {
+            if (requestVersion !== searchRequestVersion || !searchDialog.open) return;
+            searchResults.replaceChildren();
+            searchPageStatus.textContent = text.genericError;
+            searchPrevious.disabled = true;
+            searchNext.disabled = true;
+        }
+    };
+
+    const openSearchHint = (gameKey, gameName) => {
+        searchGameKey = gameKey;
+        searchRequestVersion++;
+        searchTitle.textContent = gameName ? `${text.title}: ${gameName}` : text.title;
+        searchInput.value = '';
+        searchResults.replaceChildren();
+        searchPageStatus.textContent = '';
+        searchPrevious.disabled = true;
+        searchNext.disabled = true;
+        if (!searchDialog.open) searchDialog.showModal();
+        window.setTimeout(() => searchInput.focus(), 0);
+    };
+
+    searchForm.addEventListener('submit', event => {
+        event.preventDefault();
+        void searchCardHints(1);
+    });
+    searchPrevious.addEventListener('click', () => {
+        void searchCardHints(Number(searchPrevious.dataset.page || 1));
+    });
+    searchNext.addEventListener('click', () => {
+        void searchCardHints(Number(searchNext.dataset.page || 1));
+    });
+    searchClose.addEventListener('click', () => searchDialog.close());
+    searchDialog.addEventListener('close', () => {
+        searchGameKey = '';
+        searchRequestVersion++;
+        searchInput.value = '';
+        searchResults.replaceChildren();
+        searchPageStatus.textContent = '';
+    });
+
+    const openCardHint = async (gameKey, gameName) => {
         if (!hintsEnabled || !currentState || phaseOf(currentState) !== phase.playing ||
             !resolveMembership()) {
+            return;
+        }
+
+        if (!questionCardsEnabledOf(currentState)) {
+            openSearchHint(gameKey, gameName);
             return;
         }
 
@@ -278,17 +434,15 @@
             renderCardHint(snapshot);
         } catch {
             if (!cardHintDialog.open) return;
-            const showPinned = Boolean(currentState && questionCardsEnabledOf(currentState));
             const error = document.createElement('p');
             error.className = 'minigames-hint-empty';
             error.textContent = text.genericError;
-            cardHintCurrent.replaceChildren();
+            cardHintCurrent.replaceChildren(error);
             cardHintHistory.replaceChildren();
-            (showPinned ? cardHintCurrent : cardHintHistory).replaceChildren(error);
         }
     };
 
-    const createHintTrigger = gameKey => {
+    const createHintTrigger = (gameKey, gameName) => {
         const trigger = document.createElement('span');
         trigger.className = 'minigame-card-hint-trigger';
         trigger.dataset.minigameHintTrigger = gameKey;
@@ -305,13 +459,13 @@
         trigger.addEventListener('click', event => {
             event.preventDefault();
             event.stopPropagation();
-            void openCardHint(gameKey);
+            void openCardHint(gameKey, gameName);
         });
         trigger.addEventListener('keydown', event => {
             if (event.key !== 'Enter' && event.key !== ' ') return;
             event.preventDefault();
             event.stopPropagation();
-            void openCardHint(gameKey);
+            void openCardHint(gameKey, gameName);
         });
         return trigger;
     };
@@ -321,12 +475,13 @@
         grid.querySelectorAll('.minigame-card').forEach(card => {
             const frame = card.querySelector('.minigame-card-frame');
             const gameKey = card.dataset.cardFile;
+            const gameName = card.querySelector('.minigame-card-name')?.textContent?.trim() ?? '';
             const existing = frame?.querySelector('[data-minigame-hint-trigger]');
             if (!shouldShow || !frame || !gameKey) {
                 existing?.remove();
                 return;
             }
-            if (!existing) frame.appendChild(createHintTrigger(gameKey));
+            if (!existing) frame.appendChild(createHintTrigger(gameKey, gameName));
         });
     };
 
@@ -379,10 +534,15 @@
         }
     };
 
+    const closeHintDialogs = () => {
+        if (cardHintDialog.open) cardHintDialog.close();
+        if (searchDialog.open) searchDialog.close();
+    };
+
     const clearHintUi = () => {
         grid.querySelectorAll('[data-minigame-hint-trigger]').forEach(item => item.remove());
         hideQuestionResponseHint();
-        if (cardHintDialog.open) cardHintDialog.close();
+        closeHintDialogs();
     };
 
     const refreshState = async () => {
@@ -406,6 +566,9 @@
                     'GetHintsEnabled',
                     currentRoomCode,
                     playerToken));
+                if (!hintsEnabled || phaseOf(currentState) !== phase.playing) {
+                    closeHintDialogs();
+                }
                 decorateCards();
                 await updateQuestionResponseHint();
             } catch {
