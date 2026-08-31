@@ -1,37 +1,46 @@
+using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace BadWolfQuiz.Web.Pages;
 
-public sealed class GuessWhatIPlayModel(MinigameCardSetStore cardSetStore) : PageModel
+public sealed class GuessWhatIPlayModel(
+    IDbContextFactory<QuizDbContext> dbFactory,
+    IOptions<MinigameOptions> options) : PageModel
 {
     public int AvailableCardCount { get; private set; }
 
     public int DefaultCardCount { get; private set; }
 
-    public void OnGet()
+    private MinigameCatalogStore Catalog =>
+        new(dbFactory, options.Value.CardCount);
+
+    public async Task OnGetAsync(CancellationToken cancellationToken)
     {
-        AvailableCardCount = cardSetStore.AvailableCardCount;
+        var counts = await Catalog.GetCountsAsync(cancellationToken);
+        AvailableCardCount = counts.GameCount;
         DefaultCardCount = AvailableCardCount >= MinigameRoomStore.MinimumGameCardCount
             ? Math.Clamp(
-                cardSetStore.DefaultCardCount,
+                Catalog.DefaultCardCount,
                 MinigameRoomStore.MinimumGameCardCount,
                 AvailableCardCount)
             : 0;
     }
 
-    public IActionResult OnGetCard(string? file)
+    public async Task<IActionResult> OnGetCardAsync(
+        string? file,
+        CancellationToken cancellationToken)
     {
-        if (!cardSetStore.TryResolveCard(
-                file,
-                out var physicalPath,
-                out var contentType))
+        var image = await Catalog.GetGameImageAsync(file, cancellationToken);
+        if (image is null)
         {
             return NotFound();
         }
 
         Response.Headers.CacheControl = "public, max-age=300";
-        return PhysicalFile(physicalPath, contentType);
+        return File(image.Data, image.ContentType);
     }
 }

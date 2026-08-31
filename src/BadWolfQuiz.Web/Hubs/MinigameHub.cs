@@ -1,29 +1,35 @@
+using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace BadWolfQuiz.Web.Hubs;
 
 public sealed class MinigameHub(
-    MinigameCardSetStore cardSetStore,
-    MinigameQuestionStore questionStore,
+    IDbContextFactory<QuizDbContext> dbFactory,
+    IOptions<MinigameOptions> options,
     MinigameRoomStore roomStore) : Hub
 {
-    public MinigameCardCatalogSnapshot GetCatalog()
+    private MinigameCatalogStore Catalog =>
+        new(dbFactory, options.Value.CardCount);
+
+    public async Task<MinigameCardCatalogSnapshot> GetCatalog()
     {
-        var maximum = cardSetStore.AvailableCardCount;
+        var counts = await Catalog.GetCountsAsync(Context.ConnectionAborted);
+        var maximum = counts.GameCount;
         var defaultCount = maximum >= MinigameRoomStore.MinimumGameCardCount
             ? Math.Clamp(
-                cardSetStore.DefaultCardCount,
+                Catalog.DefaultCardCount,
                 MinigameRoomStore.MinimumGameCardCount,
                 maximum)
             : 0;
-        var questionCount = questionStore.AvailableQuestionCount;
         return new MinigameCardCatalogSnapshot(
             MinigameRoomStore.MinimumGameCardCount,
             maximum,
             defaultCount,
-            questionCount >= MinigameQuestionStore.MinimumQuestionCount,
-            questionCount);
+            counts.QuestionCount >= MinigameQuestionStore.MinimumQuestionCount,
+            counts.QuestionCount);
     }
 
     public async Task<MinigameRoomConnection> CreateRoom(
@@ -91,16 +97,18 @@ public sealed class MinigameHub(
     {
         try
         {
-            var available = cardSetStore.AvailableCardCount;
+            var counts = await Catalog.GetCountsAsync(Context.ConnectionAborted);
             if (cardCount < MinigameRoomStore.MinimumGameCardCount ||
-                cardCount > available)
+                cardCount > counts.GameCount)
             {
                 throw new MinigameRoomException(MinigameRoomError.InvalidCardCount);
             }
 
-            var cards = cardSetStore.GenerateCards(cardCount);
+            var cards = await Catalog.GenerateCardsAsync(
+                cardCount,
+                Context.ConnectionAborted);
             var questions = questionCardsEnabled
-                ? questionStore.GetQuestions()
+                ? await Catalog.GetQuestionsAsync(Context.ConnectionAborted)
                 : [];
             if (questionCardsEnabled &&
                 questions.Count < MinigameQuestionStore.MinimumQuestionCount)

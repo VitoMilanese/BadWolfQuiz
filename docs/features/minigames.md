@@ -12,21 +12,57 @@ The first minigame is **Guess what I'm playing** (`Вгадай, у що я гр
 
 It is a private two-player deduction game built around game-cover cards.
 
-## Card resources
+## Database-backed catalog
 
-Game-card images are loaded from:
+The runtime catalog is stored in the main BadWolfQuiz SQLite database. The catalog contains:
 
-`Resources/Minigames/GameCards`
+- games, including the display name and card-image bytes/content type;
+- the ordered shared YES/NO question pool;
+- an optional YES/NO answer for every game/question pair.
 
-Supported image formats are `.png`, `.jpg`, `.jpeg`, `.webp`, and `.gif`.
+Runtime room snapshots keep the same lightweight card contract used by the original implementation. A card's opaque key is now the database game identifier while its display name remains the game title. Exclusions, secret-card selection, guesses, reconnects, and in-memory room state therefore do not depend on physical resource paths.
 
-The default table size comes from `Minigames:CardCount`. A new game accepts from 10 cards up to the number of available supported image files.
+Card-image endpoints read the image bytes from the database and stream them with the stored content type. The game no longer resolves live card images from `Resources/Minigames/GameCards`.
 
-The optional Question cards pool is stored in:
+The default table size still comes from `Minigames:CardCount`. A new game accepts from 10 cards up to the number of games currently stored in the database catalog.
 
-`Resources/Minigames/GameCards/questions.txt`
+## Legacy catalog bootstrap
 
-One non-empty line is one YES/NO question. The bundled pool contains 938 unique questions.
+`Resources/Minigames/GameCards` remains a one-time bootstrap source for existing installations.
+
+On the first database-catalog access, when both the game and question tables are empty:
+
+1. `questions.txt` is imported in line order after trimming empty/duplicate questions;
+2. each supported top-level `.png`, `.jpg`, `.jpeg`, `.webp`, or `.gif` file becomes one game whose name is the image file name without its extension;
+3. if a matching `<GameName>.txt` exists and contains exactly one `0` or `1` line per question, its answers are imported for that game (`1` = YES, `0` = NO).
+
+Once the database contains catalog data, later runtime/editor reads use the database and do not re-import changed legacy files automatically.
+
+## MasterHost minigame editor
+
+The configured MasterHost receives a **Minigame editor** action in the header menu. The editor is available at `/Admin/MinigameEditor` and is protected by the existing `MasterHost` authorization policy.
+
+The editor is split into three views:
+
+- **Games** — list card previews and names, create games, rename games, replace card images, delete games, and open a game's answer editor;
+- **Questions** — view the deterministic question order, append questions, edit question text, and delete questions;
+- **Answers** — select one game and assign YES, NO, or unassigned for every question.
+
+Deleting a game also removes its stored question answers. Deleting a question removes that question's answers from every game and closes the question-order gap so subsequent TXT imports continue to map line-for-line to the visible question order.
+
+### Bulk answer import
+
+The Answers view accepts a per-game TXT file. The import is valid only when:
+
+- the file contains exactly one line for every current question;
+- every line contains exactly `1` or `0` after trimming;
+- line N maps to question N in the current editor order.
+
+A valid import transactionally replaces the selected game's complete answer set. An invalid file changes nothing.
+
+### Busy indicator
+
+Editor navigation and potentially slow writes use the shared `BadWolfBusy` overlay. This includes section/game navigation, image uploads/replacements, large answer saves, TXT imports, and destructive editor submissions.
 
 ## Rooms
 
@@ -107,6 +143,14 @@ After a player's question deck is exhausted, gameplay continues normally using t
 
 History distinguishes Player 1 and Player 2 with different theme-aware colors. It records selected questions, YES/NO responses, game guesses, manual turn endings, and timed-out turn endings.
 
+The history view also supports three client-side filters:
+
+- `1 → 2` combines completed Player 1 questions with Player 2 answers;
+- `2 → 1` combines completed Player 2 questions with Player 1 answers;
+- full history preserves all chronological question, answer, guess, and turn events.
+
+Directional rows keep the asking player's and answering player's colors independently and do not make extra SignalR calls.
+
 ## In-place restart
 
 The refresh-icon button beside **New game** restarts the current game without changing the already-active table.
@@ -127,4 +171,4 @@ The replacement secret differs from the requesting player's previous secret and 
 
 ## Release
 
-Introduced in Web `1.23.0` (`web-v1.23.0`) through issue #445 and PR #446.
+Introduced in Web `1.23.0` (`web-v1.23.0`) through issue #445 and PR #446. Directional history filters were added in Web `1.24.0`.

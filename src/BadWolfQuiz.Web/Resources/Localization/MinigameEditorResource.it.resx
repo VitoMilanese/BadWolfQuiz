@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="MenuTitle" xml:space="preserve"><value>Editor minigioco</value></data>
+  <data name="Title" xml:space="preserve"><value>Editor di “Indovina a cosa sto giocando”</value></data>
+  <data name="Eyebrow" xml:space="preserve"><value>MasterHost</value></data>
+  <data name="Description" xml:space="preserve"><value>Gestisci carte dei giochi, domande e matrice delle risposte SÌ/NO salvate nel database.</value></data>
+  <data name="GamesCount" xml:space="preserve"><value>giochi</value></data>
+  <data name="QuestionsCount" xml:space="preserve"><value>domande</value></data>
+  <data name="GamesTab" xml:space="preserve"><value>Giochi</value></data>
+  <data name="QuestionsTab" xml:space="preserve"><value>Domande</value></data>
+  <data name="AnswersTab" xml:space="preserve"><value>Risposte</value></data>
+  <data name="AddGame" xml:space="preserve"><value>Aggiungi gioco</value></data>
+  <data name="GameName" xml:space="preserve"><value>Nome del gioco</value></data>
+  <data name="GameImage" xml:space="preserve"><value>Immagine della carta</value></data>
+  <data name="ReplaceImage" xml:space="preserve"><value>Sostituisci immagine (facoltativo)</value></data>
+  <data name="ImageSize" xml:space="preserve"><value>Immagine</value></data>
+  <data name="AssignedAnswers" xml:space="preserve"><value>Risposte assegnate</value></data>
+  <data name="EditAnswers" xml:space="preserve"><value>Modifica risposte</value></data>
+  <data name="NoGames" xml:space="preserve"><value>Il catalogo non contiene ancora giochi.</value></data>
+  <data name="AddQuestion" xml:space="preserve"><value>Aggiungi domanda</value></data>
+  <data name="QuestionText" xml:space="preserve"><value>Domanda</value></data>
+  <data name="NoQuestions" xml:space="preserve"><value>Il catalogo non contiene ancora domande.</value></data>
+  <data name="AnswerEditor" xml:space="preserve"><value>Risposte del gioco</value></data>
+  <data name="AnswerEditorDescription" xml:space="preserve"><value>Assegna SÌ, NO oppure lascia la domanda senza risposta per il gioco selezionato.</value></data>
+  <data name="SelectGame" xml:space="preserve"><value>Gioco</value></data>
+  <data name="NoGamesForAnswers" xml:space="preserve"><value>Aggiungi almeno un gioco prima di modificare le risposte.</value></data>
+  <data name="ImportAnswers" xml:space="preserve"><value>Importa tutte le risposte da TXT</value></data>
+  <data name="ImportHelp" xml:space="preserve"><value>Il file deve contenere esattamente {0} righe nell'ordine delle domande: 1 = SÌ, 0 = NO.</value></data>
+  <data name="Answer" xml:space="preserve"><value>Risposta</value></data>
+  <data name="Unassigned" xml:space="preserve"><value>Non assegnata</value></data>
+  <data name="Yes" xml:space="preserve"><value>SÌ</value></data>
+  <data name="No" xml:space="preserve"><value>NO</value></data>
+  <data name="SaveAnswers" xml:space="preserve"><value>Salva risposte</value></data>
+  <data name="DeleteGameConfirm" xml:space="preserve"><value>Eliminare “{0}” e tutte le risposte salvate per questo gioco?</value></data>
+  <data name="DeleteQuestionConfirm" xml:space="preserve"><value>Eliminare la domanda #{0}? Le relative risposte saranno rimosse da tutti i giochi.</value></data>
+  <data name="GameCreated" xml:space="preserve"><value>Gioco creato.</value></data>
+  <data name="GameUpdated" xml:space="preserve"><value>Gioco aggiornato.</value></data>
+  <data name="GameDeleted" xml:space="preserve"><value>Gioco eliminato.</value></data>
+  <data name="GameDuplicate" xml:space="preserve"><value>Esiste già un gioco con questo nome.</value></data>
+  <data name="GameInvalid" xml:space="preserve"><value>Inserisci un nome e un'immagine validi.</value></data>
+  <data name="GameNotFound" xml:space="preserve"><value>Gioco non trovato.</value></data>
+  <data name="QuestionCreated" xml:space="preserve"><value>Domanda creata.</value></data>
+  <data name="QuestionUpdated" xml:space="preserve"><value>Domanda aggiornata.</value></data>
+  <data name="QuestionDeleted" xml:space="preserve"><value>Domanda eliminata.</value></data>
+  <data name="QuestionDuplicate" xml:space="preserve"><value>Questa domanda esiste già.</value></data>
+  <data name="QuestionInvalid" xml:space="preserve"><value>Inserisci una domanda valida.</value></data>
+  <data name="QuestionNotFound" xml:space="preserve"><value>Domanda non trovata.</value></data>
+  <data name="AnswersSaved" xml:space="preserve"><value>Risposte salvate.</value></data>
+  <data name="AnswersImported" xml:space="preserve"><value>Tutte le risposte sono state importate.</value></data>
+  <data name="AnswersInvalid" xml:space="preserve"><value>Il set di risposte inviato non è valido.</value></data>
+  <data name="AnswerFileRequired" xml:space="preserve"><value>Seleziona un file TXT da importare.</value></data>
+  <data name="AnswerFileTooLarge" xml:space="preserve"><value>Il file delle risposte è troppo grande.</value></data>
+  <data name="AnswerFileInvalidLine" xml:space="preserve"><value>La riga {0} deve contenere solo 1 oppure 0.</value></data>
+  <data name="AnswerFileWrongCount" xml:space="preserve"><value>Il file deve contenere esattamente {0} righe; ne sono state trovate {1}.</value></data>
+  <data name="ImageRequired" xml:space="preserve"><value>Seleziona un'immagine per la carta.</value></data>
+  <data name="ImageTooLarge" xml:space="preserve"><value>L'immagine deve essere di massimo 5 MB.</value></data>
+  <data name="ImageInvalidType" xml:space="preserve"><value>Usa un'immagine PNG, JPEG, WebP o GIF.</value></data>
+</root>
