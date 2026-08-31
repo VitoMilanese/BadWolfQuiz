@@ -127,14 +127,41 @@
 }
 
 .minigame-editor-game-actions {
-    display: grid;
-    align-content: start;
-    gap: 8px;
-    min-width: 132px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 6px;
+    min-width: 0;
 }
 
 .minigame-editor-game-actions .button {
-    width: 100%;
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0;
+    font-size: 0;
+    line-height: 1;
+}
+
+.minigame-editor-game-actions .button::before {
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.minigame-editor-game-actions > a.button::before {
+    content: "✎";
+}
+
+.minigame-editor-game-actions > button.button::before {
+    content: "✓";
+}
+
+.minigame-editor-game-actions > form .button::before {
+    content: "×";
+    font-size: 1.55rem;
 }
 
 .minigame-editor-game-actions form {
@@ -321,8 +348,7 @@
 
     .minigame-editor-game-actions {
         grid-column: 2;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        min-width: 0;
+        justify-content: flex-start;
     }
 
     .minigame-editor-meta {
