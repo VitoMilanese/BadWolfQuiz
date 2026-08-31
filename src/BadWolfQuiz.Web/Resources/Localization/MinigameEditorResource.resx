@@ -23,6 +23,7 @@
   <data name="NoGames" xml:space="preserve"><value>No games are stored in the catalog yet.</value></data>
   <data name="AddQuestion" xml:space="preserve"><value>Add question</value></data>
   <data name="QuestionText" xml:space="preserve"><value>Question</value></data>
+  <data name="QuestionEnabled" xml:space="preserve"><value>Enabled</value></data>
   <data name="NoQuestions" xml:space="preserve"><value>No questions are stored in the catalog yet.</value></data>
   <data name="AnswerEditor" xml:space="preserve"><value>Game answers</value></data>
   <data name="AnswerEditorDescription" xml:space="preserve"><value>Assign YES, NO or leave a question unassigned for the selected game.</value></data>

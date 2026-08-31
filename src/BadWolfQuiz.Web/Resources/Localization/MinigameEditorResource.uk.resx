@@ -23,6 +23,7 @@
   <data name="NoGames" xml:space="preserve"><value>У каталозі ще немає ігор.</value></data>
   <data name="AddQuestion" xml:space="preserve"><value>Додати питання</value></data>
   <data name="QuestionText" xml:space="preserve"><value>Питання</value></data>
+  <data name="QuestionEnabled" xml:space="preserve"><value>Увімкнено</value></data>
   <data name="NoQuestions" xml:space="preserve"><value>У каталозі ще немає питань.</value></data>
   <data name="AnswerEditor" xml:space="preserve"><value>Відповіді гри</value></data>
   <data name="AnswerEditorDescription" xml:space="preserve"><value>Для вибраної гри призначте ТАК, НІ або залиште питання без відповіді.</value></data>

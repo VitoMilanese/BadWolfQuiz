@@ -23,6 +23,7 @@
   <data name="NoGames" xml:space="preserve"><value>В каталоге пока нет игр.</value></data>
   <data name="AddQuestion" xml:space="preserve"><value>Добавить вопрос</value></data>
   <data name="QuestionText" xml:space="preserve"><value>Вопрос</value></data>
+  <data name="QuestionEnabled" xml:space="preserve"><value>Включено</value></data>
   <data name="NoQuestions" xml:space="preserve"><value>В каталоге пока нет вопросов.</value></data>
   <data name="AnswerEditor" xml:space="preserve"><value>Ответы игры</value></data>
   <data name="AnswerEditorDescription" xml:space="preserve"><value>Для выбранной игры назначьте ДА, НЕТ или оставьте вопрос без ответа.</value></data>

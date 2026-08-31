@@ -206,7 +206,7 @@
     border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
     border-radius: 8px;
     background: color-mix(in srgb, var(--panel) 92%, transparent);
-    transition: background 100ms ease, border-color 100ms ease;
+    transition: background 100ms ease, border-color 100ms ease, opacity 100ms ease;
 }
 
 .minigame-editor-question-list > li:nth-child(even) {
@@ -219,9 +219,19 @@
     background: color-mix(in srgb, var(--gold) 7%, var(--panel));
 }
 
+.minigame-editor-question-list > li.is-disabled {
+    border-style: dashed;
+    opacity: 0.72;
+}
+
+.minigame-editor-question-list > li.is-disabled:focus-within,
+.minigame-editor-question-list > li.is-disabled:hover {
+    opacity: 1;
+}
+
 .minigame-editor-question-row {
     display: grid;
-    grid-template-columns: 4rem minmax(0, 1fr) auto;
+    grid-template-columns: 4rem minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 7px;
     min-width: 0;
@@ -233,9 +243,25 @@
     text-align: right;
 }
 
-.minigame-editor-question-row input {
+.minigame-editor-question-row input[type="text"] {
     width: 100%;
     min-width: 0;
+}
+
+.minigame-editor-question-enabled {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.minigame-editor-question-enabled input[type="checkbox"] {
+    width: auto;
+    min-width: 0;
+    margin: 0;
 }
 
 .minigame-editor-answer-header {
@@ -438,6 +464,7 @@
         grid-template-columns: 3rem minmax(0, 1fr);
     }
 
+    .minigame-editor-question-enabled,
     .minigame-editor-question-row .button {
         grid-column: 2;
         justify-self: start;

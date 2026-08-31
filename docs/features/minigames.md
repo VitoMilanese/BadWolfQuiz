@@ -45,10 +45,12 @@ The configured MasterHost receives a **Minigame editor** action in the header me
 The editor is split into three views:
 
 - **Games** — list card previews and names, create games, rename games, replace card images, delete games, and open a game's answer editor;
-- **Questions** — view the deterministic question order, append questions, edit question text, and delete questions;
+- **Questions** — view the deterministic question order, append questions, edit question text, enable/disable questions for Question-card decks, and delete questions;
 - **Answers** — select one game and assign YES, NO, or unassigned for every question.
 
 Question and answer rows use alternating backgrounds and row/grid separators so long question lists remain easy to scan and each answer selector stays visually associated with its question.
+
+Each question has an **Enabled** checkbox. New questions are enabled by default. Disabled questions stay in the catalog and remain in the answer matrix, TXT import/export order, and free-form hint search, but they are excluded when a new Question-card deck is created. This preserves stored answers and lets a question be re-enabled later without rebuilding catalog data.
 
 The Answers view also provides client-side **YES**, **NO**, and **Unassigned** filters. Activating one filter shows only rows whose current selector value matches it; activating the same filter again clears it and restores all questions. Filtering is local to the browser, updates immediately after selector changes, and does not add server requests or change the existing autosave payload.
 
@@ -138,6 +140,8 @@ During their turn, a player may press **Answer** and select one active card.
 When disabled, the game uses the normal free-form conversation flow.
 
 When enabled, a vertical panel stays to the right of the table and contains shared history plus the active player's available questions.
+
+Only questions currently enabled in the MasterHost editor are loaded into newly created Question-card decks. Disabled questions remain stored but are not shuffled into either player's stack.
 
 Each player has an independent shuffled hidden question deck and sees only three current choices. Both players may therefore receive the same question independently. At most one question can be selected per turn. After selection, that slot is replenished from the player's hidden deck while questions remain.
 

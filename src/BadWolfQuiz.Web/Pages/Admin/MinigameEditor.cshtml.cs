@@ -25,11 +25,15 @@ public sealed class MinigameEditorModel(
     public MinigameCatalogCounts Counts { get; private set; } = new(0, 0);
     public IReadOnlyList<MinigameCatalogGameItem> Games { get; private set; } = [];
     public IReadOnlyList<MinigameCatalogQuestionItem> Questions { get; private set; } = [];
+    public IReadOnlySet<int> DisabledQuestionIds { get; private set; } = new HashSet<int>();
     public IReadOnlyList<MinigameCatalogAnswerItem> AnswerItems { get; private set; } = [];
     public MinigameCatalogGameItem? SelectedGame { get; private set; }
 
     private MinigameCatalogStore Store =>
         new(dbFactory, options.Value.CardCount);
+
+    private MinigameQuestionAvailabilityStore QuestionAvailability =>
+        new(dbFactory);
 
     public async Task<IActionResult> OnGetAsync(
         string? section,
@@ -46,6 +50,8 @@ public sealed class MinigameEditorModel(
         else if (Section == "questions")
         {
             Questions = await Store.GetQuestionItemsAsync(cancellationToken);
+            DisabledQuestionIds = await QuestionAvailability.GetDisabledQuestionIdsAsync(
+                cancellationToken);
         }
         else
         {
@@ -190,9 +196,19 @@ public sealed class MinigameEditorModel(
     public async Task<IActionResult> OnPostUpdateQuestionAsync(
         int questionId,
         string? text,
+        bool enabled,
         CancellationToken cancellationToken)
     {
         var result = await Store.UpdateQuestionAsync(questionId, text, cancellationToken);
+        if (result == MinigameCatalogMutationResult.Success &&
+            !await QuestionAvailability.SetEnabledAsync(
+                questionId,
+                enabled,
+                cancellationToken))
+        {
+            result = MinigameCatalogMutationResult.NotFound;
+        }
+
         SetMutationMessage(
             result,
             localizer["QuestionUpdated"],

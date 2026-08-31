@@ -14,12 +14,17 @@ public sealed class MinigameHub(
     private MinigameCatalogStore Catalog =>
         new(dbFactory, options.Value.CardCount);
 
+    private MinigameQuestionAvailabilityStore QuestionAvailability =>
+        new(dbFactory);
+
     private MinigameHintService Hints =>
         new(dbFactory, options.Value.CardCount, roomStore);
 
     public async Task<MinigameCardCatalogSnapshot> GetCatalog()
     {
         var counts = await Catalog.GetCountsAsync(Context.ConnectionAborted);
+        var enabledQuestionCount = await QuestionAvailability.GetEnabledQuestionCountAsync(
+            Context.ConnectionAborted);
         var maximum = counts.GameCount;
         var defaultCount = maximum >= MinigameRoomStore.MinimumGameCardCount
             ? Math.Clamp(
@@ -31,8 +36,8 @@ public sealed class MinigameHub(
             MinigameRoomStore.MinimumGameCardCount,
             maximum,
             defaultCount,
-            counts.QuestionCount >= MinigameQuestionStore.MinimumQuestionCount,
-            counts.QuestionCount);
+            enabledQuestionCount >= MinigameQuestionStore.MinimumQuestionCount,
+            enabledQuestionCount);
     }
 
     public async Task<MinigameRoomConnection> CreateRoom(
@@ -271,7 +276,7 @@ public sealed class MinigameHub(
                 cardCount,
                 Context.ConnectionAborted);
             var questions = questionCardsEnabled
-                ? await Catalog.GetQuestionsAsync(Context.ConnectionAborted)
+                ? await QuestionAvailability.GetEnabledQuestionsAsync(Context.ConnectionAborted)
                 : [];
             if (questionCardsEnabled &&
                 questions.Count < MinigameQuestionStore.MinimumQuestionCount)

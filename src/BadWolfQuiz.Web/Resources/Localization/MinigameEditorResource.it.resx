@@ -23,6 +23,7 @@
   <data name="NoGames" xml:space="preserve"><value>Il catalogo non contiene ancora giochi.</value></data>
   <data name="AddQuestion" xml:space="preserve"><value>Aggiungi domanda</value></data>
   <data name="QuestionText" xml:space="preserve"><value>Domanda</value></data>
+  <data name="QuestionEnabled" xml:space="preserve"><value>Abilitata</value></data>
   <data name="NoQuestions" xml:space="preserve"><value>Il catalogo non contiene ancora domande.</value></data>
   <data name="AnswerEditor" xml:space="preserve"><value>Risposte del gioco</value></data>
   <data name="AnswerEditorDescription" xml:space="preserve"><value>Assegna SÌ, NO oppure lascia la domanda senza risposta per il gioco selezionato.</value></data>
