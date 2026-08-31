@@ -13,7 +13,7 @@ public sealed class MinigameHintServiceTests : IDisposable
     public MinigameHintServiceTests() => Directory.CreateDirectory(_root);
 
     [Fact]
-    public async Task Card_hints_use_current_questions_and_opponent_questions_newest_first()
+    public async Task Card_hints_use_current_questions_and_questions_asked_to_opponent_newest_first()
     {
         var setup = await CreatePlayingRoomAsync();
         setup.Hints.SetEnabled(setup.Player1.RoomCode, enabled: true);
@@ -32,10 +32,31 @@ public sealed class MinigameHintServiceTests : IDisposable
             setup.Player1.RoomCode,
             setup.Player1.PlayerToken,
             touchActivity: false);
-        var firstQuestion = player1State.MyAvailableQuestions[0];
         setup.Rooms.SelectQuestion(
             setup.Player1.RoomCode,
             setup.Player1.PlayerToken,
+            optionIndex: 0);
+
+        var player2HintsAfterOpponentQuestion = await setup.Hints.GetCardHintsAsync(
+            setup.Player1.RoomCode,
+            setup.Player2.PlayerToken,
+            missingAnswersCard.FileName);
+        Assert.Empty(player2HintsAfterOpponentQuestion.AskedQuestions);
+
+        setup.Rooms.SubmitQuestionResponse(
+            setup.Player1.RoomCode,
+            setup.Player2.PlayerToken,
+            answerYes: true);
+        setup.Rooms.EndTurn(setup.Player1.RoomCode, setup.Player1.PlayerToken);
+
+        var player2State = setup.Rooms.GetState(
+            setup.Player1.RoomCode,
+            setup.Player2.PlayerToken,
+            touchActivity: false);
+        var firstQuestion = player2State.MyAvailableQuestions[0];
+        setup.Rooms.SelectQuestion(
+            setup.Player1.RoomCode,
+            setup.Player2.PlayerToken,
             optionIndex: 0);
 
         var afterFirst = await setup.Hints.GetCardHintsAsync(
@@ -48,28 +69,19 @@ public sealed class MinigameHintServiceTests : IDisposable
 
         setup.Rooms.SubmitQuestionResponse(
             setup.Player1.RoomCode,
-            setup.Player2.PlayerToken,
-            answerYes: true);
-        setup.Rooms.EndTurn(setup.Player1.RoomCode, setup.Player1.PlayerToken);
-
-        setup.Rooms.SelectQuestion(
-            setup.Player1.RoomCode,
-            setup.Player2.PlayerToken,
-            optionIndex: 0);
-        setup.Rooms.SubmitQuestionResponse(
-            setup.Player1.RoomCode,
             setup.Player1.PlayerToken,
             answerYes: true);
         setup.Rooms.EndTurn(setup.Player1.RoomCode, setup.Player2.PlayerToken);
+        setup.Rooms.EndTurn(setup.Player1.RoomCode, setup.Player1.PlayerToken);
 
-        player1State = setup.Rooms.GetState(
+        player2State = setup.Rooms.GetState(
             setup.Player1.RoomCode,
-            setup.Player1.PlayerToken,
+            setup.Player2.PlayerToken,
             touchActivity: false);
-        var newestQuestion = player1State.MyAvailableQuestions[0];
+        var newestQuestion = player2State.MyAvailableQuestions[0];
         setup.Rooms.SelectQuestion(
             setup.Player1.RoomCode,
-            setup.Player1.PlayerToken,
+            setup.Player2.PlayerToken,
             optionIndex: 0);
 
         var player2Hints = await setup.Hints.GetCardHintsAsync(

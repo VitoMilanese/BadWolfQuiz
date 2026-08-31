@@ -159,7 +159,7 @@ When hints are enabled:
 
 - hovering or focusing a game card reveals an information control over the card image;
 - opening that control shows the selected game's catalog answers for the current player's remaining Question cards (up to three) at the top;
-- below those pinned questions, the dialog lists questions the opponent previously asked this player, newest first, and shows the catalog answer for the selected candidate game;
+- below those pinned questions, the dialog lists questions this player previously asked the opponent, newest first, and shows the catalog answer for the selected candidate game;
 - the normal YES/NO response dialog also shows the catalog answer for the responding player's own secret game;
 - the responder still chooses YES or NO manually; hints never submit or replace a player response;
 - an unassigned game/question pair is displayed as **Information unavailable**.

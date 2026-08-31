@@ -44,7 +44,7 @@ public sealed class MinigameHintsRegressionTests
         Assert.Contains("_roomStore.GetState", service);
         Assert.Contains("state.Phase != MinigameRoomPhase.Playing", service);
         Assert.Contains("state.Cards.FirstOrDefault", service);
-        Assert.Contains("entry.PlayerNumber != state.PlayerNumber", service);
+        Assert.Contains("entry.PlayerNumber == state.PlayerNumber", service);
         Assert.Contains(".Reverse()", service);
         Assert.Contains("state.MySecretCardFileName", service);
         Assert.DoesNotContain("OpponentSecret", service);

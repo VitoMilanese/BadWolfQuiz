@@ -58,10 +58,10 @@ public sealed class MinigameHintService
         var pinnedQuestions = state.MyAvailableQuestions
             .Take(MinigameQuestionStore.MinimumQuestionCount)
             .ToArray();
-        var askedQuestions = state.QuestionHistory
+        var questionsAskedToOpponent = state.QuestionHistory
             .Where(entry =>
                 entry.Kind == MinigameQuestionHistoryKind.Question &&
-                entry.PlayerNumber != state.PlayerNumber &&
+                entry.PlayerNumber == state.PlayerNumber &&
                 !string.IsNullOrWhiteSpace(entry.Value))
             .Reverse()
             .Select(entry => entry.Value!)
@@ -71,7 +71,7 @@ public sealed class MinigameHintService
             card.FileName,
             card.DisplayName,
             BuildRows(pinnedQuestions, answers),
-            BuildRows(askedQuestions, answers));
+            BuildRows(questionsAskedToOpponent, answers));
     }
 
     public async Task<MinigameQuestionResponseHintSnapshot> GetQuestionResponseHintAsync(

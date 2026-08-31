@@ -18,9 +18,9 @@
   <data name="Hints_Title" xml:space="preserve"><value>Подсказки</value></data>
   <data name="Hints_IconLabel" xml:space="preserve"><value>Показать подсказки</value></data>
   <data name="Hints_CurrentQuestions" xml:space="preserve"><value>Текущие карточки вопросов</value></data>
-  <data name="Hints_PreviousQuestions" xml:space="preserve"><value>Вопросы, которые задавал соперник</value></data>
+  <data name="Hints_PreviousQuestions" xml:space="preserve"><value>Вопросы, заданные сопернику</value></data>
   <data name="Hints_NoCurrentQuestions" xml:space="preserve"><value>Карточек с вопросами больше не осталось.</value></data>
-  <data name="Hints_NoPreviousQuestions" xml:space="preserve"><value>Соперник ещё не задавал вам вопросов.</value></data>
+  <data name="Hints_NoPreviousQuestions" xml:space="preserve"><value>Вы ещё не задавали сопернику вопросов.</value></data>
   <data name="Hints_InformationUnavailable" xml:space="preserve"><value>Информация недоступна</value></data>
   <data name="Hints_ResponseLabel" xml:space="preserve"><value>Подсказка</value></data>
   <data name="Hints_Loading" xml:space="preserve"><value>Загрузка подсказок…</value></data>
