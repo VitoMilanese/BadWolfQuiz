@@ -88,7 +88,7 @@ See [Social link previews](social-link-previews.md) for the shared metadata impl
 
 ## Starting a new game
 
-**New game** opens a dialog where the player chooses the number of source cards and may enable **Question cards**. When Question cards are enabled, the player may also enable **Allow hints** for that game.
+**New game** opens a dialog where the player chooses the number of source cards and may independently enable **Question cards** and **Allow hints**.
 
 For a newly generated table, each player excludes:
 
@@ -153,14 +153,15 @@ Directional rows keep the asking player's and answering player's colors independ
 
 ## Optional answer hints
 
-**Allow hints** is available only together with Question cards and is scoped to the current game. Starting another game can enable or disable it independently, while an in-place restart keeps the current setting.
+**Allow hints** is independent of Question cards and is scoped to the current game. Starting another game can enable or disable it independently, while an in-place restart keeps the current setting.
 
 When hints are enabled:
 
 - hovering or focusing a game card reveals an information control over the card image;
-- opening that control shows the selected game's catalog answers for the current player's remaining Question cards (up to three) at the top;
-- below those pinned questions, the dialog lists questions this player previously asked the opponent, newest first, and shows the catalog answer for the selected candidate game;
-- the normal YES/NO response dialog also shows the catalog answer for the responding player's own secret game;
+- when Question cards are enabled, opening that control shows the selected game's catalog answers for the current player's remaining Question cards (up to three) in a pinned section at the top;
+- when Question cards are disabled, the pinned Question-card section is omitted entirely;
+- below the pinned section, or as the only list when Question cards are disabled, the dialog lists questions this player previously asked the opponent, newest first, and shows the catalog answer for the selected candidate game;
+- when Question cards are enabled, the normal YES/NO response dialog also shows the catalog answer for the responding player's own secret game;
 - the responder still chooses YES or NO manually; hints never submit or replace a player response;
 - an unassigned game/question pair is displayed as **Information unavailable**.
 

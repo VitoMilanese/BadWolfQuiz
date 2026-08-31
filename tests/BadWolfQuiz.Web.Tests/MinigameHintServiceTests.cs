@@ -28,7 +28,7 @@ public sealed class MinigameHintServiceTests : IDisposable
         Assert.All(before.PinnedQuestions, row => Assert.Null(row.AnswerYes));
         Assert.Empty(before.AskedQuestions);
 
-        var player1State = setup.Rooms.GetState(
+        setup.Rooms.GetState(
             setup.Player1.RoomCode,
             setup.Player1.PlayerToken,
             touchActivity: false);
@@ -94,6 +94,22 @@ public sealed class MinigameHintServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task Card_hints_remain_available_without_question_cards()
+    {
+        var setup = await CreatePlayingRoomAsync(questionCardsEnabled: false);
+        setup.Hints.SetEnabled(setup.Player1.RoomCode, enabled: true);
+
+        var card = setup.Cards.Single(item => item.DisplayName == "Game 10");
+        var hints = await setup.Hints.GetCardHintsAsync(
+            setup.Player1.RoomCode,
+            setup.Player1.PlayerToken,
+            card.FileName);
+
+        Assert.Empty(hints.PinnedQuestions);
+        Assert.Empty(hints.AskedQuestions);
+    }
+
+    [Fact]
     public async Task Response_hint_uses_only_responding_players_secret_game()
     {
         var setup = await CreatePlayingRoomAsync();
@@ -147,7 +163,7 @@ public sealed class MinigameHintServiceTests : IDisposable
         Assert.Equal(MinigameRoomError.CardNotFound, exception.Error);
     }
 
-    private async Task<HintSetup> CreatePlayingRoomAsync()
+    private async Task<HintSetup> CreatePlayingRoomAsync(bool questionCardsEnabled = true)
     {
         var legacy = Path.Combine(_root, Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(legacy);
@@ -196,8 +212,8 @@ public sealed class MinigameHintServiceTests : IDisposable
             player1.RoomCode,
             player1.PlayerToken,
             cards,
-            questionCardsEnabled: true,
-            questions: questions);
+            questionCardsEnabled,
+            questions);
 
         var missingAnswersKey = cards.Single(card => card.DisplayName == "Game 10").FileName;
         var exclusions = cards

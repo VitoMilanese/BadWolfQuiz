@@ -26,6 +26,9 @@
         return;
     }
 
+    const cardHintCurrentSection = cardHintCurrent.closest('.minigames-hint-section');
+    if (!cardHintCurrentSection) return;
+
     const text = {
         yes: root.dataset.yes ?? 'YES',
         no: root.dataset.no ?? 'NO',
@@ -62,6 +65,8 @@
     const phaseOf = value => Number(get(value, 'phase', 'Phase') ?? 0);
     const gameNumberOf = value => Number(get(value, 'gameNumber', 'GameNumber') ?? 0);
     const playerNumberOf = value => Number(get(value, 'playerNumber', 'PlayerNumber') ?? 0);
+    const questionCardsEnabledOf = value =>
+        Boolean(get(value, 'questionCardsEnabled', 'QuestionCardsEnabled') ?? false);
     const pendingQuestionOf = value => get(value, 'pendingQuestion', 'PendingQuestion') ?? '';
     const pendingResponsePlayerOf = value =>
         Number(get(value, 'pendingQuestionResponsePlayerNumber', 'PendingQuestionResponsePlayerNumber') ?? 0);
@@ -130,12 +135,10 @@
     };
 
     const syncHintCheckbox = () => {
-        const available = !newGameQuestionCards.disabled && newGameQuestionCards.checked;
-        newGameAllowHints.disabled = !available;
-        if (!available) newGameAllowHints.checked = false;
+        newGameAllowHints.disabled = false;
     };
 
-    newGameQuestionCards.addEventListener('change', syncHintCheckbox);
+    syncHintCheckbox();
     const newGameDialogObserver = new MutationObserver(() => {
         if (!newGameDialog.open) return;
         newGameAllowHints.checked = false;
@@ -175,7 +178,7 @@
                 playerToken,
                 cardCount,
                 newGameQuestionCards.checked,
-                newGameQuestionCards.checked && newGameAllowHints.checked);
+                newGameAllowHints.checked);
             newGameDialog.close();
             await refreshState();
         } catch (error) {
@@ -227,19 +230,30 @@
     };
 
     const setHintLoading = () => {
+        const showPinned = Boolean(currentState && questionCardsEnabledOf(currentState));
+        cardHintCurrentSection.classList.toggle('is-hidden', !showPinned);
+        cardHintCurrent.replaceChildren();
+        cardHintHistory.replaceChildren();
+
         const loading = document.createElement('p');
         loading.className = 'minigames-hint-loading';
         loading.textContent = text.loading;
-        cardHintCurrent.replaceChildren(loading);
-        cardHintHistory.replaceChildren();
+        (showPinned ? cardHintCurrent : cardHintHistory).replaceChildren(loading);
     };
 
     const renderCardHint = snapshot => {
         const gameName = get(snapshot, 'gameName', 'GameName') ?? '';
         const pinned = get(snapshot, 'pinnedQuestions', 'PinnedQuestions') ?? [];
         const asked = get(snapshot, 'askedQuestions', 'AskedQuestions') ?? [];
+        const showPinned = Boolean(currentState && questionCardsEnabledOf(currentState));
+
         cardHintTitle.textContent = gameName ? `${text.title}: ${gameName}` : text.title;
-        cardHintCurrent.replaceChildren(createHintList(pinned, text.noCurrent));
+        cardHintCurrentSection.classList.toggle('is-hidden', !showPinned);
+        if (showPinned) {
+            cardHintCurrent.replaceChildren(createHintList(pinned, text.noCurrent));
+        } else {
+            cardHintCurrent.replaceChildren();
+        }
         cardHintHistory.replaceChildren(createHintList(asked, text.noPrevious));
     };
 
@@ -264,11 +278,13 @@
             renderCardHint(snapshot);
         } catch {
             if (!cardHintDialog.open) return;
+            const showPinned = Boolean(currentState && questionCardsEnabledOf(currentState));
             const error = document.createElement('p');
             error.className = 'minigames-hint-empty';
             error.textContent = text.genericError;
-            cardHintCurrent.replaceChildren(error);
+            cardHintCurrent.replaceChildren();
             cardHintHistory.replaceChildren();
+            (showPinned ? cardHintCurrent : cardHintHistory).replaceChildren(error);
         }
     };
 

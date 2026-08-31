@@ -18,6 +18,12 @@ public sealed class MinigameHintsRegressionTests
         Assert.Contains("event.stopImmediatePropagation()", script);
         Assert.Contains("'StartNewGameWithHints'", script);
         Assert.Contains("newGameAllowHints.checked", script);
+        Assert.DoesNotContain(
+            "newGameQuestionCards.checked && newGameAllowHints.checked",
+            script);
+        Assert.Contains("newGameAllowHints.disabled = false", script);
+        Assert.Contains("questionCardsEnabledOf", script);
+        Assert.Contains("cardHintCurrentSection.classList.toggle('is-hidden', !showPinned)", script);
         Assert.Contains("'GetCardHints'", script);
         Assert.Contains("'GetQuestionResponseHint'", script);
         Assert.Contains("event.stopPropagation()", script);
@@ -36,7 +42,8 @@ public sealed class MinigameHintsRegressionTests
 
         Assert.Contains("public Task<MinigameRoomSnapshot> StartNewGame(", hub);
         Assert.Contains("public Task<MinigameRoomSnapshot> StartNewGameWithHints(", hub);
-        Assert.Contains("questionCardsEnabled && hintsEnabled", hub);
+        Assert.Contains("Hints.SetEnabled(state.RoomCode, hintsEnabled)", hub);
+        Assert.DoesNotContain("questionCardsEnabled && hintsEnabled", hub);
         Assert.Contains("GetHintsEnabled", hub);
         Assert.Contains("GetCardHints", hub);
         Assert.Contains("GetQuestionResponseHint", hub);

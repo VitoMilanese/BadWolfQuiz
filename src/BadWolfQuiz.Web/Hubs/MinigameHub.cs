@@ -262,9 +262,7 @@ public sealed class MinigameHub(
                 cards,
                 questionCardsEnabled,
                 questions);
-            Hints.SetEnabled(
-                state.RoomCode,
-                questionCardsEnabled && hintsEnabled);
+            Hints.SetEnabled(state.RoomCode, hintsEnabled);
             await BroadcastRoomChanged(state);
             return state;
         }
