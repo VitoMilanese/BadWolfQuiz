@@ -13,4 +13,16 @@
   <data name="CopyRoomLink" xml:space="preserve"><value>Копіювати посилання на кімнату</value></data>
   <data name="RoomLinkCopied" xml:space="preserve"><value>Посилання на кімнату скопійовано</value></data>
   <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Не вдалося скопіювати посилання на кімнату</value></data>
+  <data name="AllowHints" xml:space="preserve"><value>Дозволити підказки</value></data>
+  <data name="AllowHintsDescription" xml:space="preserve"><value>Показувати підказки з відповідями з бази даних для карток питань і карток ігор.</value></data>
+  <data name="Hints_Title" xml:space="preserve"><value>Підказки</value></data>
+  <data name="Hints_IconLabel" xml:space="preserve"><value>Показати підказки</value></data>
+  <data name="Hints_CurrentQuestions" xml:space="preserve"><value>Поточні картки питань</value></data>
+  <data name="Hints_PreviousQuestions" xml:space="preserve"><value>Питання, які ставив суперник</value></data>
+  <data name="Hints_NoCurrentQuestions" xml:space="preserve"><value>Карток з питаннями більше не залишилося.</value></data>
+  <data name="Hints_NoPreviousQuestions" xml:space="preserve"><value>Суперник ще не ставив вам питань.</value></data>
+  <data name="Hints_InformationUnavailable" xml:space="preserve"><value>Інформація недоступна</value></data>
+  <data name="Hints_ResponseLabel" xml:space="preserve"><value>Підказка</value></data>
+  <data name="Hints_Loading" xml:space="preserve"><value>Завантаження підказок…</value></data>
+  <data name="Hints_Close" xml:space="preserve"><value>Закрити</value></data>
 </root>

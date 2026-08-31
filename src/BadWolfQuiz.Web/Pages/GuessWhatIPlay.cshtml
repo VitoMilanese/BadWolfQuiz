@@ -18,6 +18,7 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/minigames.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/minigames-hints.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/minigames-history-filter.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/minigames-sharing.css" asp-append-version="true" />
 }
@@ -66,7 +67,17 @@
      data-invalid-card-count="@Localizer["Minigames_InvalidCardCount"]"
      data-card-already-excluded="@Localizer["Minigames_CardAlreadyExcluded"]"
      data-exclusion-limit="@Localizer["Minigames_ExclusionLimit"]"
-     data-generic-error="@Localizer["Minigames_GenericError"]">
+     data-generic-error="@Localizer["Minigames_GenericError"]"
+     data-hints-icon-label="@MinigameCatalogLocalizer["Hints_IconLabel"]"
+     data-hints-title="@MinigameCatalogLocalizer["Hints_Title"]"
+     data-hints-current-questions="@MinigameCatalogLocalizer["Hints_CurrentQuestions"]"
+     data-hints-previous-questions="@MinigameCatalogLocalizer["Hints_PreviousQuestions"]"
+     data-hints-no-current-questions="@MinigameCatalogLocalizer["Hints_NoCurrentQuestions"]"
+     data-hints-no-previous-questions="@MinigameCatalogLocalizer["Hints_NoPreviousQuestions"]"
+     data-hints-unavailable="@MinigameCatalogLocalizer["Hints_InformationUnavailable"]"
+     data-hints-response-label="@MinigameCatalogLocalizer["Hints_ResponseLabel"]"
+     data-hints-loading="@MinigameCatalogLocalizer["Hints_Loading"]"
+     data-hints-close="@MinigameCatalogLocalizer["Hints_Close"]">
 
     <section class="minigames-entry" data-room-entry>
         <div class="minigames-entry-card">
@@ -245,6 +256,13 @@
                     <small>@Localizer["Minigames_QuestionCardsDescription"]</small>
                 </span>
             </label>
+            <label class="minigames-checkbox-row">
+                <input type="checkbox" data-new-game-allow-hints disabled />
+                <span>
+                    <strong>@MinigameCatalogLocalizer["AllowHints"]</strong>
+                    <small>@MinigameCatalogLocalizer["AllowHintsDescription"]</small>
+                </span>
+            </label>
             <p class="minigames-error is-hidden"
                data-new-game-error
                role="alert"></p>
@@ -263,6 +281,9 @@
         <form data-question-response-form>
             <h2>@Localizer["Minigames_QuestionResponseTitle"]</h2>
             <p data-question-response-text></p>
+            <p class="minigames-question-response-hint is-hidden"
+               data-question-response-hint
+               aria-live="polite"></p>
             <div class="minigames-dialog-actions">
                 <button class="button" type="button" data-question-response-no>
                     @Localizer["Minigames_No"]
@@ -273,10 +294,32 @@
             </div>
         </form>
     </dialog>
+
+    <dialog class="minigames-dialog minigames-hint-dialog" data-card-hint-dialog>
+        <div class="minigames-hint-dialog-body">
+            <header class="minigames-hint-dialog-header">
+                <h2 data-card-hint-title>@MinigameCatalogLocalizer["Hints_Title"]</h2>
+                <button class="button minigames-hint-close"
+                        type="button"
+                        data-card-hint-close
+                        title="@MinigameCatalogLocalizer["Hints_Close"]"
+                        aria-label="@MinigameCatalogLocalizer["Hints_Close"]">×</button>
+            </header>
+            <section class="minigames-hint-section">
+                <h3>@MinigameCatalogLocalizer["Hints_CurrentQuestions"]</h3>
+                <div data-card-hint-current></div>
+            </section>
+            <section class="minigames-hint-section minigames-hint-history-section">
+                <h3>@MinigameCatalogLocalizer["Hints_PreviousQuestions"]</h3>
+                <div data-card-hint-history></div>
+            </section>
+        </div>
+    </dialog>
 </div>
 
 @section Scripts {
     <script src="~/js/minigames.js" asp-append-version="true"></script>
+    <script src="~/js/minigames-hints.js" asp-append-version="true"></script>
     <script src="~/js/minigames-history-filter.js" asp-append-version="true"></script>
     <script src="~/js/minigames-sharing.js" asp-append-version="true"></script>
 }

@@ -13,4 +13,16 @@
   <data name="CopyRoomLink" xml:space="preserve"><value>Copy room link</value></data>
   <data name="RoomLinkCopied" xml:space="preserve"><value>Room link copied</value></data>
   <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Could not copy the room link</value></data>
+  <data name="AllowHints" xml:space="preserve"><value>Allow hints</value></data>
+  <data name="AllowHintsDescription" xml:space="preserve"><value>Show database-backed answer hints for Question cards and game cards.</value></data>
+  <data name="Hints_Title" xml:space="preserve"><value>Hints</value></data>
+  <data name="Hints_IconLabel" xml:space="preserve"><value>Show hints</value></data>
+  <data name="Hints_CurrentQuestions" xml:space="preserve"><value>Current Question cards</value></data>
+  <data name="Hints_PreviousQuestions" xml:space="preserve"><value>Questions asked by the opponent</value></data>
+  <data name="Hints_NoCurrentQuestions" xml:space="preserve"><value>No Question cards remain.</value></data>
+  <data name="Hints_NoPreviousQuestions" xml:space="preserve"><value>The opponent has not asked you any questions yet.</value></data>
+  <data name="Hints_InformationUnavailable" xml:space="preserve"><value>Information unavailable</value></data>
+  <data name="Hints_ResponseLabel" xml:space="preserve"><value>Hint</value></data>
+  <data name="Hints_Loading" xml:space="preserve"><value>Loading hints…</value></data>
+  <data name="Hints_Close" xml:space="preserve"><value>Close</value></data>
 </root>

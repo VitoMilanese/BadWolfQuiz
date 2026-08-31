@@ -13,4 +13,16 @@
   <data name="CopyRoomLink" xml:space="preserve"><value>Copia il link della stanza</value></data>
   <data name="RoomLinkCopied" xml:space="preserve"><value>Link della stanza copiato</value></data>
   <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Impossibile copiare il link della stanza</value></data>
+  <data name="AllowHints" xml:space="preserve"><value>Consenti suggerimenti</value></data>
+  <data name="AllowHintsDescription" xml:space="preserve"><value>Mostra suggerimenti con le risposte del database per le carte domanda e le carte gioco.</value></data>
+  <data name="Hints_Title" xml:space="preserve"><value>Suggerimenti</value></data>
+  <data name="Hints_IconLabel" xml:space="preserve"><value>Mostra suggerimenti</value></data>
+  <data name="Hints_CurrentQuestions" xml:space="preserve"><value>Carte domanda attuali</value></data>
+  <data name="Hints_PreviousQuestions" xml:space="preserve"><value>Domande fatte dall'avversario</value></data>
+  <data name="Hints_NoCurrentQuestions" xml:space="preserve"><value>Non sono rimaste carte domanda.</value></data>
+  <data name="Hints_NoPreviousQuestions" xml:space="preserve"><value>L'avversario non ti ha ancora fatto domande.</value></data>
+  <data name="Hints_InformationUnavailable" xml:space="preserve"><value>Informazione non disponibile</value></data>
+  <data name="Hints_ResponseLabel" xml:space="preserve"><value>Suggerimento</value></data>
+  <data name="Hints_Loading" xml:space="preserve"><value>Caricamento suggerimenti…</value></data>
+  <data name="Hints_Close" xml:space="preserve"><value>Chiudi</value></data>
 </root>

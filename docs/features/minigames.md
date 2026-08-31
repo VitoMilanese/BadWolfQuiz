@@ -88,7 +88,7 @@ See [Social link previews](social-link-previews.md) for the shared metadata impl
 
 ## Starting a new game
 
-**New game** opens a dialog where the player chooses the number of source cards and may enable **Question cards**.
+**New game** opens a dialog where the player chooses the number of source cards and may enable **Question cards**. When Question cards are enabled, the player may also enable **Allow hints** for that game.
 
 For a newly generated table, each player excludes:
 
@@ -151,6 +151,21 @@ The history view also supports three client-side filters:
 
 Directional rows keep the asking player's and answering player's colors independently and do not make extra SignalR calls.
 
+## Optional answer hints
+
+**Allow hints** is available only together with Question cards and is scoped to the current game. Starting another game can enable or disable it independently, while an in-place restart keeps the current setting.
+
+When hints are enabled:
+
+- hovering or focusing a game card reveals an information control over the card image;
+- opening that control shows the selected game's catalog answers for the current player's remaining Question cards (up to three) at the top;
+- below those pinned questions, the dialog lists questions the opponent previously asked this player, newest first, and shows the catalog answer for the selected candidate game;
+- the normal YES/NO response dialog also shows the catalog answer for the responding player's own secret game;
+- the responder still chooses YES or NO manually; hints never submit or replace a player response;
+- an unassigned game/question pair is displayed as **Information unavailable**.
+
+Hint payloads are resolved server-side for the authenticated room membership. Card hints are limited to cards in the current active table, and response hints resolve only against the requesting player's own secret card. The client does not receive the complete answer matrix or the opponent's secret card through the hint API.
+
 ## In-place restart
 
 The refresh-icon button beside **New game** restarts the current game without changing the already-active table.
@@ -165,10 +180,11 @@ It:
 - resets winner, turn counters, and timers;
 - restarts with Player 1's first 3-minute turn;
 - gives a new random secret card only to the player who pressed refresh;
-- keeps the opponent's secret card unchanged.
+- keeps the opponent's secret card unchanged;
+- keeps the current **Allow hints** setting.
 
 The replacement secret differs from the requesting player's previous secret and from the opponent's current secret.
 
 ## Release
 
-Introduced in Web `1.23.0` (`web-v1.23.0`) through issue #445 and PR #446. Directional history filters were added in Web `1.24.0`.
+Introduced in Web `1.23.0` (`web-v1.23.0`) through issue #445 and PR #446. Directional history filters were added in Web `1.24.0`. The database-backed catalog and MasterHost editor were added in Web `1.25.0`.
