@@ -2,13 +2,6 @@ namespace BadWolfQuiz.Web.Tests;
 
 public sealed class MinigameHintsRegressionTests
 {
-    private static readonly string RepoRoot = Path.GetFullPath(Path.Combine(
-        AppContext.BaseDirectory,
-        "..",
-        "..",
-        "..",
-        ".."));
-
     [Fact]
     public void Guess_what_i_play_wires_optional_hint_ui_without_replacing_manual_answers()
     {
@@ -70,6 +63,17 @@ public sealed class MinigameHintsRegressionTests
         Assert.Contains(".minigames-question-response-hint", css);
     }
 
-    private static string Read(string relativePath) =>
-        File.ReadAllText(Path.Combine(RepoRoot, relativePath));
+    private static string Read(string relativePath)
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(directory.FullName, relativePath);
+            if (File.Exists(candidate)) return File.ReadAllText(candidate);
+            directory = directory.Parent;
+        }
+
+        throw new FileNotFoundException(
+            $"Could not locate repository file: {relativePath}");
+    }
 }
