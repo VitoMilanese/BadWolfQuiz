@@ -488,8 +488,14 @@ public sealed class AllPlayerQuestionModel(
                         });
                     }
 
-                    var isCorrect = selectedBlock.SourceContentBlockId ==
-                        question.AnswerBlocks[0].SourceContentBlockId;
+                    var definition = game.Session.Quiz.Rounds
+                        .SelectMany(round => round.Questions)
+                        .SingleOrDefault(item =>
+                            item.SourceQuestionId == sourceQuestionId);
+                    var correctOptionIds = definition?.GetCorrectAnswerOptionIds();
+                    var isCorrect = correctOptionIds?.Contains(selectedBlockId) ??
+                        selectedBlock.SourceContentBlockId ==
+                            question.AnswerBlocks[0].SourceContentBlockId;
                     game.Session.AddQuestionAnswerHistoryEntry(
                         sourceQuestionId,
                         connection.Player.Id,

@@ -7,6 +7,7 @@
         BadWolfQuiz.Game.Definitions.MultipleChoiceAnswerContract.IsMultipleChoice(
             Model.PresentationType);
     var blocks = Model.Blocks.ToArray();
+    IReadOnlyCollection<int> correctOptionIds = Array.Empty<int>();
 
     if (isMultipleChoiceAnswer)
     {
@@ -19,6 +20,13 @@
                 question.SourceQuestionId == Model.SourceQuestionId);
         blocks = (definition?.RevealAnswerBlocks ??
             Model.Blocks.Take(1).ToArray()).ToArray();
+        correctOptionIds = definition is null
+            ? Model.Blocks
+                .Take(1)
+                .Select(block => block.SourceContentBlockId)
+                .ToArray()
+            : BadWolfQuiz.Game.Definitions.MultipleChoiceQuestionExtensions
+                .GetCorrectAnswerOptionIds(definition);
     }
 
     var isSingleImageFitCandidate =
@@ -39,7 +47,8 @@
                          Model.GameSessionId,
                          Model.SourceQuestionId,
                          Model.PresentationType,
-                         blocks))" />
+                         blocks,
+                         correctOptionIds))" />
         }
         else
         {
