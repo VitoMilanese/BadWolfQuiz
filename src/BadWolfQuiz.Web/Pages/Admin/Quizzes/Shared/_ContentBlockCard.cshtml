@@ -11,6 +11,7 @@
 
 <div class="content-panel content-block-card"
      data-block-type="@Model.BlockType"
+     data-answer-options-stored-state="@(Model.BlockType == ContentBlockType.AnswerOptions ? Model.TextContent : null)"
      style="margin-bottom:16px;">
 
     <input asp-for="Id" type="hidden" />

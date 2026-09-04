@@ -3,7 +3,6 @@
     var isAllPlayerMultipleChoice =
         Model.PresentationType ==
             BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice;
-    var blockIndex = 0;
 }
 
 <style>
@@ -93,10 +92,12 @@
 
 @foreach (var block in Model.Blocks)
 {
-    var correctOptionClass = isAllPlayerMultipleChoice && blockIndex == 0
+    var isCorrectOption =
+        Model.CorrectOptionIds.Contains(block.SourceContentBlockId);
+    var correctOptionClass = isAllPlayerMultipleChoice && isCorrectOption
         ? "all-player-answer-option all-player-answer-option-correct"
         : null;
-    var additionalClass = blockIndex > 0
+    var additionalClass = !isCorrectOption
         ? "multiple-choice-additional-answer-block"
         : null;
 
@@ -175,6 +176,4 @@
             <p class="game-content-caption">@block.BottomCaption</p>
         }
     </article>
-
-    blockIndex++;
 }

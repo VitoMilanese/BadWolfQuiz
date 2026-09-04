@@ -33,6 +33,11 @@ public sealed class MultipleChoiceAnswerRevealTagHelper(
                 item.SourceQuestionId == question.SourceQuestionId);
         var blocks = definition?.RevealAnswerBlocks ??
             question.AnswerBlocks.Take(1).ToArray();
+        var correctOptionIds = definition?.GetCorrectAnswerOptionIds() ??
+            question.AnswerBlocks
+                .Take(1)
+                .Select(block => block.SourceContentBlockId)
+                .ToArray();
 
         var classValue = output.Attributes["class"]?.Value?.ToString() ?? string.Empty;
         var classes = classValue
@@ -57,7 +62,8 @@ public sealed class MultipleChoiceAnswerRevealTagHelper(
                 lobby.Game.Session.Id.Value,
                 question.SourceQuestionId,
                 question.PresentationType,
-                blocks));
+                blocks,
+                correctOptionIds));
         output.Content.SetHtmlContent(rendered);
     }
 }

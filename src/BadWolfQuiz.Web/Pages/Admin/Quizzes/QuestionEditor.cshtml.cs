@@ -369,8 +369,14 @@ public sealed class QuestionEditorModel(
             entity.SortOrder = inputBlock.SortOrder;
             entity.BlockType = inputBlock.BlockType;
             entity.TextContent = isAnswerOptionsMarker
-                ? AnswerOptionsBlockContract.StoreOptionCount(
-                    answerLayout.Options.Count)
+                ? Input.PresentationType == QuestionPresentationType.AllPlayerMultipleChoice
+                    ? AnswerOptionsBlockContract.StoreOptionState(
+                        answerLayout.Options.Count,
+                        AnswerOptionsBlockContract.ParseCorrectOptionIndexes(
+                            inputBlock.TextContent,
+                            answerLayout.Options.Count))
+                    : AnswerOptionsBlockContract.StoreOptionCount(
+                        answerLayout.Options.Count)
                 : inputBlock.TextContent?.Trim();
             entity.TopCaption = isAnswerOptionsMarker || isHostAnswerOption
                 ? null
@@ -436,6 +442,17 @@ public sealed class QuestionEditorModel(
             ModelState.AddModelError(
                 $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
                 "All-player multiple-choice questions require between 2 and 4 answer options.");
+            return;
+        }
+
+        var correctOptionIndexes = AnswerOptionsBlockContract.ParseCorrectOptionIndexes(
+            layout.Marker.TextContent,
+            layout.Options.Count);
+        if (correctOptionIndexes.Count == 0)
+        {
+            ModelState.AddModelError(
+                $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
+                "All-player multiple-choice questions require at least one correct answer option.");
             return;
         }
 
