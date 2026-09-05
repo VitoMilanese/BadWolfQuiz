@@ -1,9 +1,14 @@
 /* Host Running Game live-stage redesign. Scoped to the active host game only. */
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) {
+    /*
+     * Paint the live-stage surface on the viewport itself. This keeps the
+     * left/right space visually continuous without extending or clipping the
+     * board container (the positioned host card can safely sit on top).
+     */
     background:
-        radial-gradient(circle at 14% 10%, color-mix(in srgb, var(--red-bright) 10%, transparent), transparent 30rem),
-        radial-gradient(circle at 86% 20%, color-mix(in srgb, var(--gold) 6%, transparent), transparent 26rem),
-        linear-gradient(180deg, color-mix(in srgb, var(--panel) 90%, var(--bg)), color-mix(in srgb, var(--panel-2) 86%, var(--bg)));
+        linear-gradient(180deg,
+            color-mix(in srgb, var(--panel) 90%, var(--bg)),
+            color-mix(in srgb, var(--panel-2) 86%, var(--bg)));
 }
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) > .page-shell {
@@ -40,21 +45,14 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) #host-gam
 }
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-host-gameplay-board] {
-    position: relative;
-    z-index: 1;
-    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
-    border-radius: clamp(1rem, 1.5vw, 1.5rem);
-    background:
-        linear-gradient(180deg, color-mix(in srgb, var(--panel) 90%, transparent), color-mix(in srgb, var(--panel-2) 86%, transparent));
-    box-shadow:
-        0 20px 55px rgb(0 0 0 / 22%),
-        0 0 0 100vmax color-mix(in srgb, var(--panel) 90%, var(--bg));
-    clip-path: inset(0 -100vmax);
-}
-
-/* The full-bleed stage paint must stay behind the positioned host card. */
-body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .board-host-sidebar.is-positioned {
-    z-index: 3;
+    /*
+     * The stage fill now comes from the viewport. Keep this element purely as
+     * the layout container so it cannot cover or clip the fixed host card.
+     */
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-column {
