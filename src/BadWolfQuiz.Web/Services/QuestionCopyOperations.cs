@@ -45,58 +45,174 @@ public static class QuestionCopyOperations
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceQuestionId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumQuestionCount);
 
-        var sourceQuizId = await db.QuizQuestions
+        var sourceExists = await db.QuizQuestions
             .IgnoreQueryFilters()
             .AsNoTracking()
-            .Where(question =>
+            .AnyAsync(question =>
                 question.Id == sourceQuestionId &&
                 question.Category.Round.Quiz.HostId == hostId &&
                 !question.Category.Round.Quiz.IsArchived &&
-                question.Category.Round.Quiz.MediaState == QuizMediaState.Active)
-            .Select(question => (int?)question.Category.Round.QuizId)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (!sourceQuizId.HasValue)
+                question.Category.Round.Quiz.MediaState == QuizMediaState.Active,
+                cancellationToken);
+        if (!sourceExists)
         {
             return null;
         }
 
-        var quizzes = await db.Quizzes
+        var categories = await db.QuizCategories
             .IgnoreQueryFilters()
             .AsNoTracking()
-            .AsSplitQuery()
-            .Where(quiz =>
-                quiz.HostId == hostId &&
-                !quiz.IsArchived &&
-                quiz.MediaState == QuizMediaState.Active)
-            .Include(quiz => quiz.Rounds)
-                .ThenInclude(round => round.Rows)
-            .Include(quiz => quiz.Rounds)
-                .ThenInclude(round => round.Categories)
-                    .ThenInclude(category => category.Questions)
-                        .ThenInclude(question => question.QuestionBlocks)
-            .Include(quiz => quiz.Rounds)
-                .ThenInclude(round => round.Categories)
-                    .ThenInclude(category => category.Questions)
-                        .ThenInclude(question => question.AnswerBlocks)
-            .OrderBy(quiz => quiz.Title)
-            .ThenBy(quiz => quiz.Id)
+            .Where(category =>
+                category.Round.Quiz.HostId == hostId &&
+                !category.Round.Quiz.IsArchived &&
+                category.Round.Quiz.MediaState == QuizMediaState.Active)
+            .OrderBy(category => category.Round.Quiz.Title)
+            .ThenBy(category => category.Round.QuizId)
+            .ThenBy(category => category.Round.SortOrder)
+            .ThenBy(category => category.Round.Id)
+            .ThenBy(category => category.SortOrder)
+            .ThenBy(category => category.Id)
+            .Select(category => new
+            {
+                QuizId = category.Round.QuizId,
+                QuizTitle = category.Round.Quiz.Title,
+                RoundId = category.QuizRoundId,
+                RoundTitle = category.Round.Title,
+                CategoryId = category.Id,
+                CategoryTitle = category.Title,
+                RoundRowCount = category.Round.Rows.Count
+            })
             .ToListAsync(cancellationToken);
 
-        return quizzes
-            .SelectMany(quiz => quiz.Rounds
-                .OrderBy(round => round.SortOrder)
-                .ThenBy(round => round.Id)
-                .SelectMany(round => round.Categories
-                    .OrderBy(category => category.SortOrder)
-                    .ThenBy(category => category.Id)
-                    .Select(category => new QuestionCopyDestination(
-                        quiz.Id,
-                        quiz.Title,
-                        round.Id,
-                        round.Title,
-                        category.Id,
-                        category.Title,
-                        HasCapacity(round, category, maximumQuestionCount)))))
+        var fullRoundIds = categories
+            .Where(category => category.RoundRowCount >= maximumQuestionCount)
+            .Select(category => category.RoundId)
+            .Distinct()
+            .ToArray();
+        if (fullRoundIds.Length == 0)
+        {
+            return categories
+                .Select(category => new QuestionCopyDestination(
+                    category.QuizId,
+                    category.QuizTitle,
+                    category.RoundId,
+                    category.RoundTitle,
+                    category.CategoryId,
+                    category.CategoryTitle,
+                    HasCapacity: true))
+                .ToList();
+        }
+
+        var fullCategoryIds = categories
+            .Where(category => category.RoundRowCount >= maximumQuestionCount)
+            .Select(category => category.CategoryId)
+            .ToArray();
+
+        var rows = await db.QuizRoundRows
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(row =>
+                fullRoundIds.Contains(row.QuizRoundId) &&
+                row.RowIndex > 0 &&
+                row.RowIndex <= maximumQuestionCount)
+            .Select(row => new
+            {
+                RoundId = row.QuizRoundId,
+                row.RowIndex
+            })
+            .ToListAsync(cancellationToken);
+
+        var questions = await db.QuizQuestions
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(question =>
+                fullCategoryIds.Contains(question.QuizCategoryId) &&
+                question.RowIndex > 0 &&
+                question.RowIndex <= maximumQuestionCount)
+            .Select(question => new
+            {
+                CategoryId = question.QuizCategoryId,
+                question.RowIndex,
+                IsBlank =
+                    question.TimeLimitSecondsOverride == null &&
+                    question.BuzzModeOverride == BuzzActivationMode.UseRoundDefault &&
+                    question.BuzzDelaySeconds == 0 &&
+                    !question.IsSpecial &&
+                    question.PresentationType == default &&
+                    !question.ExcludeFromRandomWagerSelection &&
+                    !question.QuestionBlocks.Any(block =>
+                        block.BlockType != ContentBlockType.Text ||
+                        (block.TextContent != null && block.TextContent.Trim() != string.Empty) ||
+                        (block.TopCaption != null && block.TopCaption.Trim() != string.Empty) ||
+                        (block.BottomCaption != null && block.BottomCaption.Trim() != string.Empty) ||
+                        (block.MediaPath != null && block.MediaPath.Trim() != string.Empty) ||
+                        (block.ExternalUrl != null && block.ExternalUrl.Trim() != string.Empty) ||
+                        (block.FileData != null && block.FileData.Length > 0) ||
+                        (block.FileContentType != null && block.FileContentType.Trim() != string.Empty) ||
+                        (block.FileName != null && block.FileName.Trim() != string.Empty) ||
+                        block.AudioOnly ||
+                        block.Autoplay) &&
+                    !question.AnswerBlocks.Any(block =>
+                        block.BlockType != ContentBlockType.Text ||
+                        (block.TextContent != null && block.TextContent.Trim() != string.Empty) ||
+                        (block.TopCaption != null && block.TopCaption.Trim() != string.Empty) ||
+                        (block.BottomCaption != null && block.BottomCaption.Trim() != string.Empty) ||
+                        (block.MediaPath != null && block.MediaPath.Trim() != string.Empty) ||
+                        (block.ExternalUrl != null && block.ExternalUrl.Trim() != string.Empty) ||
+                        (block.FileData != null && block.FileData.Length > 0) ||
+                        (block.FileContentType != null && block.FileContentType.Trim() != string.Empty) ||
+                        (block.FileName != null && block.FileName.Trim() != string.Empty) ||
+                        block.AudioOnly ||
+                        block.Autoplay)
+            })
+            .ToListAsync(cancellationToken);
+
+        var rowsByRound = rows
+            .GroupBy(row => row.RoundId)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Select(row => row.RowIndex).ToArray());
+        var questionsByCategory = questions
+            .GroupBy(question => question.CategoryId)
+            .ToDictionary(
+                group => group.Key,
+                group => group.ToDictionary(
+                    question => question.RowIndex,
+                    question => question.IsBlank));
+
+        return categories
+            .Select(category =>
+            {
+                if (category.RoundRowCount < maximumQuestionCount)
+                {
+                    return new QuestionCopyDestination(
+                        category.QuizId,
+                        category.QuizTitle,
+                        category.RoundId,
+                        category.RoundTitle,
+                        category.CategoryId,
+                        category.CategoryTitle,
+                        HasCapacity: true);
+                }
+
+                rowsByRound.TryGetValue(category.RoundId, out var roundRows);
+                questionsByCategory.TryGetValue(
+                    category.CategoryId,
+                    out var categoryQuestions);
+                var hasFreeExistingRow = roundRows?.Any(rowIndex =>
+                    categoryQuestions is null ||
+                    !categoryQuestions.TryGetValue(rowIndex, out var isBlank) ||
+                    isBlank) == true;
+
+                return new QuestionCopyDestination(
+                    category.QuizId,
+                    category.QuizTitle,
+                    category.RoundId,
+                    category.RoundTitle,
+                    category.CategoryId,
+                    category.CategoryTitle,
+                    hasFreeExistingRow);
+            })
             .ToList();
     }
 
@@ -250,26 +366,6 @@ public static class QuestionCopyOperations
             targetQuiz.Id,
             targetRound.Id,
             targetCategory.Id);
-    }
-
-    private static bool HasCapacity(
-        QuizRound round,
-        QuizCategory category,
-        int maximumQuestionCount)
-    {
-        var hasFreeExistingRow = round.Rows.Any(row =>
-        {
-            if (row.RowIndex <= 0 || row.RowIndex > maximumQuestionCount)
-            {
-                return false;
-            }
-
-            var existingQuestion = category.Questions
-                .SingleOrDefault(question => question.RowIndex == row.RowIndex);
-            return existingQuestion is null || IsBlankQuestion(existingQuestion);
-        });
-
-        return hasFreeExistingRow || round.Rows.Count < maximumQuestionCount;
     }
 
     private static bool IsBlankQuestion(QuizQuestion question) =>

@@ -10,6 +10,8 @@ Each non-empty question card exposes a compact copy/clone action in the board ac
 
 Selecting the copy action opens a localized dialog for that question. The dialog lists active quizzes owned by the current host, including the source quiz, and their destination categories. Categories without room for another question are disabled. The copy action is intentionally not exposed inside QuestionEditor.
 
+Destination loading uses lightweight quiz/round/category metadata rather than loading full question content and media payloads. If the destination request fails or exceeds the client timeout, the dialog leaves the loading state, shows an error, and offers a Retry action. Closing or reopening the dialog cancels an obsolete in-flight destination request.
+
 After a successful copy, the dialog closes immediately and the Quiz Editor shows the localized success message through the same temporary save-status overlay used by normal quiz saving. Validation and capacity errors remain inside the dialog.
 
 ## Copy semantics
@@ -29,3 +31,5 @@ When a new row is created, blank sibling questions are added to the other catego
 ## Release
 
 Question copying and same-quiz cloning are introduced in BadWolfQuiz Web `1.19.0` (`web-v1.19.0`).
+
+Destination loading is optimized in BadWolfQuiz Web `1.26.2` (`web-v1.26.2`) so opening the dialog no longer requires materializing full question/content graphs or stored media bytes. The same release adds bounded client loading with cancellation and an explicit Retry path on failure.
