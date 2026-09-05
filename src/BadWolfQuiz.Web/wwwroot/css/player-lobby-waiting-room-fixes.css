@@ -133,6 +133,33 @@ body.gameplay-layout:has(.player-lobby[data-final-status="lobby"]) > .page-shell
         overscroll-behavior: auto;
         touch-action: auto;
     }
+
+    /* Mobile priority: keep controls, presence notice and the full Buzzer in the first viewport. */
+    .player-lobby[data-final-status="lobby"] > .eyebrow,
+    .player-lobby[data-final-status="lobby"] > h1,
+    .player-lobby[data-final-status="lobby"] > h1 + p {
+        display: none;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-media-settings {
+        margin-top: 0;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .dialog-warning {
+        margin-block: 0.25rem 0.45rem;
+        padding: 0.75rem 0.9rem;
+        font-size: 0.92rem;
+        line-height: 1.35;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-buzzer-panel {
+        flex: 1 1 auto;
+        min-height: min(46dvh, 28rem);
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-buzzer-panel > .player-buzzer {
+        min-height: min(39dvh, 24rem);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
