@@ -79,26 +79,18 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-pane
     margin-bottom: 1rem;
 }
 
-/* Deliberately use a single control-room flow with only the two stat cards sharing a row.
-   This avoids the large empty holes caused by coupling unrelated left/right grid rows. */
+/* Two independent float columns keep the original control-room composition without
+   coupling left and right item heights into shared CSS-grid rows. */
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(0.8rem, 1.5vw, 1.15rem);
-    align-items: start;
+    display: flow-root;
+    --host-lobby-gap: clamp(0.9rem, 1.6vw, 1.35rem);
+    --host-lobby-left: 37%;
+    --host-lobby-right: calc(63% - var(--host-lobby-gap));
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > * {
+    box-sizing: border-box;
     min-width: 0;
-}
-
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > p:first-child,
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-settings-panel,
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions,
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button,
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list,
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > .dialog-warning {
-    grid-column: 1 / -1;
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .avatar-picker,
@@ -112,12 +104,14 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .host-avatar-
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > p:first-child {
+    width: 100%;
+    clear: both;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
     min-height: 4.4rem;
-    margin: 0;
+    margin: 0 0 var(--host-lobby-gap);
     padding: 1rem 1.15rem;
     border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
     border-radius: 1.15rem;
@@ -156,6 +150,10 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-pane
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-settings-panel {
+    float: left;
+    clear: left;
+    width: var(--host-lobby-left);
+    margin: 0 0 var(--host-lobby-gap);
     overflow: clip;
 }
 
@@ -176,10 +174,13 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-settin
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions {
+    float: left;
+    clear: left;
+    width: var(--host-lobby-left);
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
-    margin: 0;
+    margin: 0 0 var(--host-lobby-gap);
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions > * {
@@ -195,10 +196,12 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-second
     justify-content: center;
 }
 
-/* Keep the reveal control and copy controls on one line. The QR expands below them. */
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-access {
     position: relative;
+    box-sizing: border-box;
+    width: 100%;
     padding: 0.85rem;
+    overflow: hidden;
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-details {
@@ -206,9 +209,10 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-d
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-reveal {
+    box-sizing: border-box;
     width: 100%;
     min-height: 3.1rem;
-    padding-right: 7.2rem;
+    padding-right: 7.6rem;
     justify-content: center;
     font-weight: 900;
 }
@@ -217,11 +221,17 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-c
     position: absolute;
     z-index: 2;
     top: 0.85rem;
-    right: 0.85rem;
+    right: 1rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.45rem;
+    max-width: calc(100% - 2rem);
     margin: 0;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-actions .icon-button {
+    flex: 0 0 auto;
+    box-sizing: border-box;
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-status:empty {
@@ -244,13 +254,18 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-q
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-code-value {
+    max-width: 100%;
+    overflow-wrap: anywhere;
     font-size: clamp(1.8rem, 4vw, 3rem);
     letter-spacing: 0.12em;
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button {
+    float: right;
+    clear: right;
+    width: var(--host-lobby-right);
     min-height: clamp(5.25rem, 8vw, 7rem);
-    margin: 0;
+    margin: 0 0 var(--host-lobby-gap);
     border-radius: clamp(1.25rem, 2vw, 1.8rem);
     font-size: clamp(1.45rem, 2.7vw, 2.6rem);
     font-weight: 950;
@@ -265,34 +280,50 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p,
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p + p {
+    float: right;
+    clear: right;
+    width: var(--host-lobby-right);
+    min-height: 3.8rem;
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 1rem;
-    margin: 0;
+    margin: 0 0 var(--host-lobby-gap);
     padding: 1rem 1.15rem;
     border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
     border-radius: 1rem;
     background: color-mix(in srgb, var(--panel) 91%, transparent);
+    color: var(--gold);
+    font-family: inherit;
+    font-size: 1.35rem;
+    font-weight: 950;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
 }
 
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p span,
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p + p {
-    font-variant-numeric: tabular-nums;
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p strong,
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p + p strong {
+    color: var(--text);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 850;
+    line-height: 1.2;
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-count {
-    color: var(--gold);
-    font-size: 1.35rem;
-    font-weight: 950;
+    color: inherit;
+    font: inherit;
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list {
+    float: right;
+    clear: right;
+    width: var(--host-lobby-right);
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
     gap: 0.75rem;
     max-height: min(48dvh, 34rem);
-    margin: 0;
+    margin: 0 0 var(--host-lobby-gap);
     padding: 0.25rem;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -342,16 +373,26 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list .presence-badge {
+    position: static !important;
     grid-column: 2;
     justify-self: start;
+    max-width: 100%;
+    margin: 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list .player-management {
+    position: static;
     grid-column: 3;
     grid-row: 1 / span 2;
     display: grid;
     justify-items: end;
+    align-self: center;
     gap: 0.45rem;
+    min-width: max-content;
+    margin: 0;
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list .player-card-actions {
@@ -360,8 +401,37 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > .dialog-warning {
+    float: right;
+    clear: right;
+    width: var(--host-lobby-right);
     margin: 0;
     padding: 0.9rem 1rem;
+}
+
+@media (max-width: 1000px) {
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > p:first-child,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-settings-panel,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p + p,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > .dialog-warning {
+        float: none;
+        clear: none;
+        width: 100%;
+        margin: 0;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list {
+        max-height: none;
+    }
 }
 
 @media (max-width: 700px) {
@@ -391,13 +461,10 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-pane
         justify-content: center;
     }
 
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form,
     body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions {
         grid-template-columns: 1fr;
     }
 
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p,
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p + p,
     body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions > * {
         grid-column: 1;
     }
@@ -408,17 +475,17 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-pane
     }
 
     body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-reveal {
-        padding-right: 6.6rem;
+        padding-right: 6.8rem;
         font-size: 0.92rem;
     }
 
     body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-actions {
-        gap: 0.35rem;
+        right: 0.8rem;
+        gap: 0.3rem;
     }
 
     body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list {
         grid-template-columns: 1fr;
-        max-height: none;
     }
 
     body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button {
