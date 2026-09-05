@@ -6,4 +6,5 @@ public sealed record MultipleChoiceRevealBlocksViewModel(
     Guid GameSessionId,
     int SourceQuestionId,
     QuestionPresentationType PresentationType,
-    IReadOnlyList<ContentBlockSnapshot> Blocks);
+    IReadOnlyList<ContentBlockSnapshot> Blocks,
+    IReadOnlyCollection<int> CorrectOptionIds);

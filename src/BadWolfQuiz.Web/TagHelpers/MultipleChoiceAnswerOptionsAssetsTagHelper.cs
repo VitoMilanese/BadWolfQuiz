@@ -28,6 +28,7 @@ public sealed class MultipleChoiceAnswerOptionsAssetsTagHelper : TagHelper
             "<script src=\"/js/multiple-choice-answer-options-guard.js?v=382.7\"></script>" +
             $"<script src=\"/js/multiple-choice-answer-options.js?v=382.7\" " +
             $"data-saved-question-type=\"{(int)editor.Input.PresentationType}\"></script>" +
+            "<script src=\"/js/multiple-correct-answer-options.js?v=461.1\"></script>" +
             "<script>" +
             "document.addEventListener('DOMContentLoaded',()=>{" +
             "window.badWolfMultipleChoiceAnswerOptionsRestoreMutationObserver?.();" +

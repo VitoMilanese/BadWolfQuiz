@@ -25,12 +25,12 @@ The host flow deliberately has three separate phases so ratings and score result
 3. The normal buzzer is unavailable for the entire peer-rated lifecycle, including text entry, rating, and the waiting state after a player has submitted a rating.
 4. Every participant submits one text answer from their player page.
 5. A right-side host panel shows submitted/waiting progress. A missing answer can be recorded as an empty response (`—`).
-6. When every active participant has an answer, the answer belonging to the lowest-scoring captured participant is shown first.
+6. When every active participant has an answer, the answer belonging to the lowest-scoring captured participant is shown first. The original question is displayed directly above that player's answer so the voting context stays visible throughout review.
 7. Every participant except that answer's author chooses a rating from 0 to 5 stars. The choice stays local and can be changed until the player presses **Confirm rating**; only that confirmation submits the rating to the server.
 8. The right-side host panel shows each required rater only as pending, rated, or AFK/excluded. The exact number of stars is deliberately hidden throughout the voting pass, and no average or awarded points are shown.
-9. When all required ratings are present, the host advances to the next answer. The process repeats in captured score order until every eligible answer has been voted on.
+9. When all required ratings are present, the host advances to the next answer. The process repeats in captured score order until every eligible answer has been voted on, with the original question remaining above each reviewed answer.
 10. After the final voting pass, the host selects **Show results**.
-11. Results are then shown in the same sequential order. Each result shows the player's answer, the average star rating, the awarded points, and the right-side list of who voted and how many stars they gave.
+11. Results are then shown in the same sequential order. Each result keeps the original question above the player's answer and shows the average star rating, the awarded points, and the right-side list of who voted and how many stars they gave.
 12. Scores are revealed/applied together with each result, so player totals do not expose a result before the host reaches it.
 13. The host advances with **Next result** and uses **Return to board** after the final result. Returning forces a fresh host-shell load so the resolved question cannot flash/reappear with legacy buzzer or no-correct-answer controls.
 
@@ -40,7 +40,11 @@ A player who joins after the participant set was captured does not become a requ
 
 Peer-rated host controls are overlays inside the current-question area and do not participate in normal document flow. Nothing is inserted below the question, so the feature does not create an additional page scrollbar merely because the status/rating UI exists.
 
-The participant/rater/result-status panel stays on the **right** during all three phases. The client reserves horizontal room for that panel instead of covering the question or reviewed answer.
+During the voting and results phases, the host keeps a dedicated **question context** above the currently reviewed answer. That context reuses a clone of the already server-rendered gameplay question instead of maintaining a second question renderer, so text, captions, images, audio, video, YouTube embeds, and existing media URLs stay consistent with the normal question presentation.
+
+The cloned review context disables autoplay-related attributes so entering review does not replay question media unexpectedly. The context is keyed by source question ID and lives outside the frequently rebuilt peer-rating status overlay, which prevents incoming votes or status changes from constantly recreating the question media.
+
+The participant/rater/result-status panel stays on the **right** during all three phases. The client reserves horizontal room for that panel instead of covering the question or reviewed answer. During review, the question context uses the same reserved right boundary and the answer stage is moved below it. If the question content is too tall for the available area, the question context receives its own bounded scrolling region while a minimum visible area is preserved for the reviewed answer.
 
 The layout also detects a visible vertical scrollbar owned by the question area. The right panel is shifted left of that scrollbar with a safety gap, including overlay-scrollbar environments where the browser reports a zero-width page scrollbar. The reservation is recalculated after host-shell updates, page restore, and viewport resize.
 
@@ -120,7 +124,7 @@ The persisted review index encodes both the voting pass and, after all voting is
 
 The lifecycle never advances that index while answers are still being collected. This prevents the review cursor from being moved past all participants before the first answer exists, and it also repairs the legacy stuck `0/N` state created by the initial implementation.
 
-After active-game recovery the same answer/result remains on screen with the same ratings, exclusions, progress, captured player order, and already revealed scores.
+After active-game recovery the same answer/result remains on screen with the same ratings, exclusions, progress, captured player order, and already revealed scores. Host-shell remount, reconnect, page restore, and normal gameplay refresh paths rebuild the question context above the recovered reviewed answer from the freshly rendered current question.
 
 ## Validation coverage
 
@@ -135,6 +139,7 @@ Regression coverage includes:
 - the regression where answer collection incorrectly advanced the review index past every participant;
 - separate `answering`, `rating`, and `results` client/server phases;
 - right-side absolute host layout, content reservation, scrollbar-lane protection, and single-controller reinitialization behavior;
+- question-above-answer review context, reuse of normal rendered question content, autoplay suppression for cloned media, bounded question scrolling, and refresh/recovery remount hooks;
 - player buzzer suppression throughout answering/rating/waiting states and host legacy-control suppression;
 - question-only editor, answer/correct-answer presentation, and resolved-question preview behavior;
 - local rating drafts, explicit confirmation, centered zero-star action, mobile-safe star touch targets, and hiding exact vote values until the results pass;

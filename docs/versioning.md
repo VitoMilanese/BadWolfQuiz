@@ -60,6 +60,8 @@ Web `1.24.0` is a MINOR release that adds filterable Question-card history to **
 
 Web `1.25.0` is a MINOR release that moves the **Guess what I'm playing** game-card/question catalog into the main SQLite database and adds a MasterHost-only catalog editor. The editor manages game names and card images, the ordered shared question list, and per-game YES/NO answer matrices with autosave and line-for-line TXT import/export. Clean databases are seeded once from the bundled legacy Minigames resources, while live gameplay subsequently reads card metadata, images, and questions from the database. Potentially slow editor operations use the shared busy indicator, and the Games view uses compact horizontal cards with square icon actions.
 
+Web `1.26.2` is a PATCH release that speeds up **Copy Question** destination loading in the Quiz Editor. The destination lookup now projects only the metadata needed to list quizzes, rounds, categories, and slot capacity instead of materializing full question/content graphs and stored media bytes. Full rounds use bounded lightweight capacity checks, while the dialog now cancels obsolete requests, applies a 15-second client timeout, and exposes an explicit Retry action after loading failures.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.

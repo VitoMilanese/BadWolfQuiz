@@ -3,7 +3,6 @@
     var isAllPlayerMultipleChoice =
         Model.PresentationType ==
             BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice;
-    var blockIndex = 0;
 }
 
 <style>
@@ -28,6 +27,16 @@
         gap: clamp(9px, 1.5vw, 18px) !important;
         overflow-x: hidden !important;
         overflow-y: auto !important;
+    }
+
+    /* A host-selected multiple-choice reveal with no additional answer content
+       should use the free middle row instead of sitting at its top edge. The
+       class is added only by the live host gameplay tag helper and only when
+       every rendered block is a correct option, so normal stacked reveals stay
+       top-to-bottom and all-player multiple-choice remains unchanged. */
+    .game-content-blocks.multiple-choice-answer-reveal-grid.host-multiple-choice-answer-only {
+        align-self: stretch !important;
+        justify-content: safe center !important;
     }
 
     /* Legacy all-player answer styles treat every descendant block as an answer
@@ -93,10 +102,12 @@
 
 @foreach (var block in Model.Blocks)
 {
-    var correctOptionClass = isAllPlayerMultipleChoice && blockIndex == 0
+    var isCorrectOption =
+        Model.CorrectOptionIds.Contains(block.SourceContentBlockId);
+    var correctOptionClass = isAllPlayerMultipleChoice && isCorrectOption
         ? "all-player-answer-option all-player-answer-option-correct"
         : null;
-    var additionalClass = blockIndex > 0
+    var additionalClass = !isCorrectOption
         ? "multiple-choice-additional-answer-block"
         : null;
 
@@ -175,6 +186,4 @@
             <p class="game-content-caption">@block.BottomCaption</p>
         }
     </article>
-
-    blockIndex++;
 }
