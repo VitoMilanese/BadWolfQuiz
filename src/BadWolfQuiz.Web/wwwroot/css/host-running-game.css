@@ -44,7 +44,10 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-hos
     border-radius: clamp(1rem, 1.5vw, 1.5rem);
     background:
         linear-gradient(180deg, color-mix(in srgb, var(--panel) 90%, transparent), color-mix(in srgb, var(--panel-2) 86%, transparent));
-    box-shadow: 0 20px 55px rgb(0 0 0 / 22%);
+    box-shadow:
+        0 20px 55px rgb(0 0 0 / 22%),
+        0 0 0 100vmax color-mix(in srgb, var(--panel) 90%, var(--bg));
+    clip-path: inset(0 -100vmax);
 }
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-column {
