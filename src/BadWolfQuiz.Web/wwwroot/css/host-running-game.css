@@ -156,16 +156,19 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .current-
     border-bottom-color: color-mix(in srgb, var(--line) 82%, transparent);
 }
 
-/* Continue the board-stage panel behind the translucent host/player sidebars all the way to the viewport edges. */
+/* Make the stage background itself full-bleed without changing board/sidebar geometry. */
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-host-gameplay-board] {
     position: relative;
     isolation: isolate;
+    overflow: visible !important;
+    background: transparent;
+    box-shadow: none;
 }
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-host-gameplay-board]::before {
     content: "";
     position: absolute;
-    z-index: -1;
+    z-index: 0;
     top: -1px;
     bottom: -1px;
     left: 50%;
@@ -176,6 +179,11 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-hos
         linear-gradient(180deg, color-mix(in srgb, var(--panel) 90%, transparent), color-mix(in srgb, var(--panel-2) 86%, transparent));
     box-shadow: 0 20px 55px rgb(0 0 0 / 18%);
     pointer-events: none;
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-host-gameplay-board] > * {
+    position: relative;
+    z-index: 1;
 }
 
 @media (max-width: 900px) {
