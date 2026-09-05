@@ -24,8 +24,7 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .page-heading
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
     border-radius: clamp(1.25rem, 2vw, 2rem);
-    background:
-        linear-gradient(115deg, color-mix(in srgb, var(--panel) 96%, transparent), color-mix(in srgb, var(--panel-2) 86%, transparent));
+    background: linear-gradient(115deg, color-mix(in srgb, var(--panel) 96%, transparent), color-mix(in srgb, var(--panel-2) 86%, transparent));
     box-shadow: 0 24px 72px rgb(0 0 0 / 26%);
 }
 
@@ -76,23 +75,43 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-pane
     box-shadow: none;
 }
 
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form {
-    display: grid;
-    grid-template-columns: minmax(17rem, 0.8fr) minmax(24rem, 1.35fr);
-    gap: clamp(0.9rem, 1.7vw, 1.4rem);
-    align-items: start;
-}
-
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .message {
     margin-bottom: 1rem;
+}
+
+/* Deliberately use a single control-room flow with only the two stat cards sharing a row.
+   This avoids the large empty holes caused by coupling unrelated left/right grid rows. */
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(0.8rem, 1.5vw, 1.15rem);
+    align-items: start;
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > * {
     min-width: 0;
 }
 
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > p:first-child {
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > p:first-child,
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-settings-panel,
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions,
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button,
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list,
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > .dialog-warning {
     grid-column: 1 / -1;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .avatar-picker,
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .host-avatar-picker {
+    display: none;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .avatar-picker[open],
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .host-avatar-picker[open] {
+    display: block;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > p:first-child {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -137,7 +156,6 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-pane
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-settings-panel {
-    grid-column: 1;
     overflow: clip;
 }
 
@@ -157,16 +175,10 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-settin
     padding: 1rem;
 }
 
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .avatar-picker,
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .host-avatar-picker {
-    grid-column: 1;
-}
-
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions {
-    grid-column: 1;
     display: grid;
-    gap: 0.7rem;
-    align-self: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
     margin: 0;
 }
 
@@ -174,12 +186,18 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-second
     min-width: 0;
 }
 
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions > .lobby-join-access {
+    grid-column: 1 / -1;
+}
+
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions .button:not(.icon-button) {
     width: 100%;
     justify-content: center;
 }
 
+/* Keep the reveal control and copy controls on one line. The QR expands below them. */
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-access {
+    position: relative;
     padding: 0.85rem;
 }
 
@@ -190,15 +208,31 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-d
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-reveal {
     width: 100%;
     min-height: 3.1rem;
+    padding-right: 7.2rem;
     justify-content: center;
     font-weight: 900;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-actions {
+    position: absolute;
+    z-index: 2;
+    top: 0.85rem;
+    right: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-status:empty {
+    display: none;
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-reveal-content {
     display: grid;
     justify-items: center;
     gap: 0.8rem;
-    padding: 1rem 0 0.4rem;
+    padding: 1rem 0 0.25rem;
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-qr {
@@ -214,17 +248,8 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-c
     letter-spacing: 0.12em;
 }
 
-body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: 0.65rem;
-}
-
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button {
-    grid-column: 2;
-    grid-row: 2;
-    min-height: clamp(5.25rem, 10vw, 7.4rem);
+    min-height: clamp(5.25rem, 8vw, 7rem);
     margin: 0;
     border-radius: clamp(1.25rem, 2vw, 1.8rem);
     font-size: clamp(1.45rem, 2.7vw, 2.6rem);
@@ -240,7 +265,6 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p,
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p + p {
-    grid-column: 2;
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
@@ -264,7 +288,6 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-count
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list {
-    grid-column: 2;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
     gap: 0.75rem;
@@ -337,36 +360,8 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.
 }
 
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > .dialog-warning {
-    grid-column: 2;
     margin: 0;
     padding: 0.9rem 1rem;
-}
-
-@media (max-width: 1000px) {
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form {
-        grid-template-columns: 1fr;
-    }
-
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-settings-panel,
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .avatar-picker,
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .host-avatar-picker,
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions,
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button,
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p,
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p + p,
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list,
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > .dialog-warning {
-        grid-column: 1;
-        grid-row: auto;
-    }
-
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button {
-        order: -1;
-    }
-
-    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list {
-        max-height: none;
-    }
 }
 
 @media (max-width: 700px) {
@@ -396,13 +391,34 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-pane
         justify-content: center;
     }
 
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions {
+        grid-template-columns: 1fr;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button + p + p,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-secondary-actions > * {
+        grid-column: 1;
+    }
+
     body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .content-panel[data-game-status="lobby"] > .stack-form > p:first-child {
         align-items: flex-start;
         flex-direction: column;
     }
 
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-reveal {
+        padding-right: 6.6rem;
+        font-size: 0.92rem;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-actions {
+        gap: 0.35rem;
+    }
+
     body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list {
         grid-template-columns: 1fr;
+        max-height: none;
     }
 
     body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-start-button {
