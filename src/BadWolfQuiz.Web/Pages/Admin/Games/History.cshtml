@@ -2,60 +2,109 @@
 @model BadWolfQuiz.Web.Pages.Admin.Games.HistoryModel
 @{
     ViewData["Title"] = Localizer["GameHistory_Title"];
+    var gameCount = Model.Games.Count;
 }
 
-<div class="page-heading">
-    <div>
-        <p class="eyebrow">@Localizer["Admin_Eyebrow"]</p>
-        <h1>@Localizer["GameHistory_Title"]</h1>
-        <p>@Localizer["GameHistory_Description"]</p>
-    </div>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/game-history.css" asp-append-version="true" />
+}
 
-@if (Model.Games.Count == 0)
-{
-    <section class="content-panel empty-state">
-        <p>@Localizer["GameHistory_Empty"]</p>
+<div class="game-history-page game-history-index-page">
+    <section class="game-history-hero" aria-labelledby="game-history-title">
+        <div class="game-history-hero-copy">
+            <p class="game-history-kicker">
+                <span>@Localizer["Admin_Eyebrow"]</span>
+                <span aria-hidden="true">/ MATCH ARCHIVE</span>
+            </p>
+            <h1 id="game-history-title">@Localizer["GameHistory_Title"]</h1>
+            <p class="game-history-description">@Localizer["GameHistory_Description"]</p>
+        </div>
+
+        <div class="game-history-hero-counter" aria-label="@Localizer["GameHistory_Title"]: @gameCount">
+            <span aria-hidden="true">PLAYED</span>
+            <strong>@gameCount.ToString("00")</strong>
+            <small aria-hidden="true">MATCHES</small>
+        </div>
     </section>
-}
-else
-{
-    <div class="game-history-list">
-        @foreach (var game in Model.Games)
-        {
-            <article class="content-panel game-history-card">
-                <div>
-                    <p class="eyebrow">@game.PublicCode</p>
-                    <h2>@game.QuizTitle</h2>
-                    <p>
-                        @Localizer["GameHistory_FinishedAt"]:
-                        <time datetime="@game.FinishedAtUtc.ToString("O")">
-                            @game.FinishedAtUtc.ToLocalTime().ToString("g")
-                        </time>
-                    </p>
-                    <small>@Localizer["GameHistory_PlayerCount", game.PlayerCount]</small>
-                    @if (game.Winners.Count > 0)
-                    {
-                        <p class="game-history-winner">
-                            <strong>
-                                @(game.Winners.Count == 1
-                                    ? Localizer["GameHistory_Winner"]
-                                    : Localizer["GameHistory_Winners"]):
-                            </strong>
-                            @string.Join(", ", game.Winners)
-                            <span class="@(game.WinningScore < 0 ? "score-negative" : null)">
-                                (@game.WinningScore)
-                            </span>
-                        </p>
-                    }
-                </div>
 
-                <a class="button button-secondary"
-                   asp-page="HistoryDetails"
-                   asp-route-id="@game.Id">
-                    @Localizer["GameHistory_View"]
-                </a>
-            </article>
+    <main class="game-history-content">
+        @if (gameCount == 0)
+        {
+            <section class="game-history-empty">
+                <div class="game-history-empty-mark" aria-hidden="true">00</div>
+                <div class="game-history-empty-copy">
+                    <span aria-hidden="true">BAD WOLF / NO RECORDS</span>
+                    <h2>@Localizer["GameHistory_Title"]</h2>
+                    <p>@Localizer["GameHistory_Empty"]</p>
+                </div>
+            </section>
         }
-    </div>
-}
+        else
+        {
+            <div class="game-history-archive-heading">
+                <div>
+                    <span aria-hidden="true">BAD WOLF / ARCHIVE</span>
+                    <strong>@Localizer["GameHistory_Title"]</strong>
+                </div>
+                <em aria-hidden="true">@gameCount.ToString("00") / RECORDED</em>
+            </div>
+
+            <div class="game-history-record-list">
+                @for (var index = 0; index < gameCount; index++)
+                {
+                    var game = Model.Games[index];
+                    var recordNumber = (index + 1).ToString("00");
+
+                    <article class="game-history-record">
+                        <div class="game-history-ticket" aria-hidden="true">
+                            <span class="game-history-record-number">@recordNumber</span>
+                            <span class="game-history-ticket-label">MATCH</span>
+                            <strong>@game.PublicCode</strong>
+                            <span class="game-history-ticket-slash"></span>
+                        </div>
+
+                        <div class="game-history-record-body">
+                            <div class="game-history-record-copy">
+                                <div class="game-history-record-meta">
+                                    <span>@Localizer["GameHistory_FinishedAt"]</span>
+                                    <time datetime="@game.FinishedAtUtc.ToString("O")">
+                                        @game.FinishedAtUtc.ToLocalTime().ToString("g")
+                                    </time>
+                                    <i aria-hidden="true"></i>
+                                    <span>@Localizer["GameHistory_PlayerCount", game.PlayerCount]</span>
+                                </div>
+
+                                <h2>@game.QuizTitle</h2>
+
+                                @if (game.Winners.Count > 0)
+                                {
+                                    <div class="game-history-winner-block">
+                                        <span class="game-history-winner-mark" aria-hidden="true">★</span>
+                                        <div>
+                                            <span>
+                                                @(game.Winners.Count == 1
+                                                    ? Localizer["GameHistory_Winner"]
+                                                    : Localizer["GameHistory_Winners"])
+                                            </span>
+                                            <strong>@string.Join(", ", game.Winners)</strong>
+                                        </div>
+                                        <b class="@(game.WinningScore.HasValue && game.WinningScore.Value < 0 ? "score-negative" : null)">
+                                            @game.WinningScore
+                                        </b>
+                                    </div>
+                                }
+                            </div>
+
+                            <a class="button button-secondary game-history-record-link"
+                               asp-page="HistoryDetails"
+                               asp-route-id="@game.Id">
+                                <span>@Localizer["GameHistory_View"]</span>
+                                <span aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </main>
+</div>

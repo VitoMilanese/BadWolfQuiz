@@ -1,0 +1,1152 @@
+body:has(.game-history-page) {
+    background: var(--bg);
+}
+
+body.portal-layout:has(.game-history-page) > .page-shell {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body:has(.game-history-page) .topbar {
+    border-bottom-color: color-mix(in srgb, var(--line) 72%, transparent);
+    background: color-mix(in srgb, var(--topbar-bg) 94%, transparent);
+}
+
+.game-history-page {
+    position: relative;
+    min-height: 100%;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--bg) 96%, #000) 0,
+            var(--bg) 100%);
+}
+
+.game-history-page::before,
+.game-history-page::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    pointer-events: none;
+}
+
+.game-history-page::before {
+    background:
+        radial-gradient(
+            circle at 78% 7%,
+            color-mix(in srgb, var(--red-bright) 16%, transparent) 0,
+            transparent 30rem),
+        radial-gradient(
+            circle at 8% 34%,
+            color-mix(in srgb, var(--gold) 7%, transparent) 0,
+            transparent 28rem);
+}
+
+.game-history-page::after {
+    z-index: -2;
+    background-image:
+        linear-gradient(
+            color-mix(in srgb, var(--line) 13%, transparent) 1px,
+            transparent 1px),
+        linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--line) 11%, transparent) 1px,
+            transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, #000, transparent 72%);
+    opacity: 0.18;
+}
+
+.game-history-hero,
+.game-history-details-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+    align-items: center;
+    gap: clamp(34px, 6vw, 92px);
+    width: min(100%, 1760px);
+    margin: 0 auto;
+    padding: clamp(58px, 7vw, 104px) clamp(28px, 5vw, 78px) clamp(48px, 6vw, 82px);
+}
+
+.game-history-hero {
+    min-height: clamp(430px, 54dvh, 620px);
+}
+
+.game-history-hero::after,
+.game-history-details-hero::after {
+    position: absolute;
+    left: -0.035em;
+    bottom: 0.01em;
+    z-index: -1;
+    color: color-mix(in srgb, var(--text) 3.4%, transparent);
+    font-size: clamp(8rem, 20vw, 22rem);
+    font-weight: 1000;
+    line-height: 0.68;
+    letter-spacing: -0.085em;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.game-history-hero::after {
+    content: "PLAYED";
+}
+
+.game-history-details-hero::after {
+    content: "REPORT";
+}
+
+.game-history-hero-copy,
+.game-history-details-copy {
+    position: relative;
+    z-index: 2;
+    max-width: 1050px;
+}
+
+.game-history-kicker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 0 0 20px;
+    color: var(--gold);
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+}
+
+.game-history-kicker::before {
+    content: "";
+    width: 42px;
+    height: 2px;
+    flex: 0 0 auto;
+    background: var(--red-bright);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--red-bright) 72%, transparent);
+}
+
+.game-history-hero h1,
+.game-history-details-hero h1 {
+    max-width: 1120px;
+    margin: 0;
+    font-size: clamp(4rem, 8vw, 9.2rem);
+    font-weight: 1000;
+    line-height: 0.8;
+    letter-spacing: -0.07em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    filter: drop-shadow(0 24px 32px rgba(0, 0, 0, 0.32));
+}
+
+.game-history-description {
+    max-width: 760px;
+    margin: 28px 0 0;
+    color: var(--muted);
+    font-size: clamp(1rem, 1.5vw, 1.18rem);
+    line-height: 1.65;
+}
+
+.game-history-hero-counter {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    min-height: 320px;
+    aspect-ratio: 1;
+    justify-self: center;
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    border-radius: 50%;
+    background:
+        radial-gradient(
+            circle at center,
+            color-mix(in srgb, var(--panel-2) 90%, transparent) 0 43%,
+            transparent 44%),
+        repeating-conic-gradient(
+            from -7deg,
+            color-mix(in srgb, var(--line) 20%, transparent) 0 1deg,
+            transparent 1deg 16deg);
+    box-shadow:
+        inset 0 0 80px rgba(0, 0, 0, 0.34),
+        0 0 80px color-mix(in srgb, var(--red-bright) 8%, transparent);
+}
+
+.game-history-hero-counter::before,
+.game-history-hero-counter::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 72%;
+    transform: rotate(18deg);
+}
+
+.game-history-hero-counter::before {
+    right: 17%;
+    background: var(--red-bright);
+}
+
+.game-history-hero-counter::after {
+    right: calc(17% - 13px);
+    z-index: -1;
+    background: color-mix(in srgb, var(--gold) 78%, transparent);
+}
+
+.game-history-hero-counter > span,
+.game-history-hero-counter > small {
+    position: relative;
+    z-index: 2;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+}
+
+.game-history-hero-counter > span {
+    color: var(--gold);
+}
+
+.game-history-hero-counter > strong {
+    position: relative;
+    z-index: 2;
+    margin: 12px 0 10px;
+    color: var(--text);
+    font-size: clamp(5.5rem, 10vw, 10rem);
+    font-weight: 1000;
+    line-height: 0.72;
+    letter-spacing: -0.09em;
+    text-shadow: 0 20px 36px rgba(0, 0, 0, 0.45);
+}
+
+.game-history-hero-counter > small {
+    color: var(--muted);
+}
+
+.game-history-content,
+.game-history-report {
+    position: relative;
+    width: min(100%, 1640px);
+    margin: 0 auto;
+    padding: 0 clamp(28px, 5vw, 70px) clamp(84px, 9vw, 132px);
+}
+
+.game-history-archive-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 18px;
+    padding: 0 2px 16px;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+}
+
+.game-history-archive-heading > div {
+    display: grid;
+    gap: 6px;
+}
+
+.game-history-archive-heading span,
+.game-history-archive-heading em {
+    color: var(--gold);
+    font-size: 0.72rem;
+    font-style: normal;
+    font-weight: 900;
+    letter-spacing: 0.17em;
+}
+
+.game-history-archive-heading strong {
+    color: color-mix(in srgb, var(--text) 90%, transparent);
+    font-size: clamp(1.9rem, 3.4vw, 3.4rem);
+    font-weight: 950;
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+}
+
+.game-history-archive-heading em {
+    color: var(--muted);
+}
+
+.game-history-record-list {
+    display: grid;
+    gap: 16px;
+}
+
+.game-history-record {
+    position: relative;
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr);
+    min-height: 220px;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            120deg,
+            color-mix(in srgb, var(--panel) 98%, #000) 0,
+            color-mix(in srgb, var(--panel-2) 90%, var(--bg)) 100%);
+    box-shadow: 0 22px 54px rgba(0, 0, 0, 0.2);
+    transition:
+        transform 170ms ease,
+        border-color 170ms ease,
+        box-shadow 170ms ease;
+}
+
+.game-history-record:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--red-bright) 38%, var(--line));
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
+}
+
+.game-history-ticket {
+    position: relative;
+    min-height: 100%;
+    overflow: hidden;
+    border-radius: 17px 0 0 17px;
+    border-right: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    background:
+        radial-gradient(
+            circle at 18% 20%,
+            color-mix(in srgb, var(--red-bright) 25%, transparent) 0,
+            transparent 10rem),
+        linear-gradient(
+            155deg,
+            color-mix(in srgb, var(--panel-2) 94%, #000) 0 45%,
+            color-mix(in srgb, var(--red) 24%, var(--bg)) 100%);
+}
+
+.game-history-ticket::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(
+            color-mix(in srgb, var(--line) 14%, transparent) 1px,
+            transparent 1px),
+        linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--line) 14%, transparent) 1px,
+            transparent 1px);
+    background-size: 26px 26px;
+    opacity: 0.3;
+}
+
+.game-history-record-number,
+.game-history-ticket-label,
+.game-history-ticket strong {
+    position: absolute;
+    z-index: 2;
+    left: 18px;
+}
+
+.game-history-record-number {
+    top: 18px;
+    color: var(--gold);
+    font-size: 0.8rem;
+    font-weight: 1000;
+    letter-spacing: 0.18em;
+}
+
+.game-history-ticket-label {
+    top: 54px;
+    color: var(--muted);
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+}
+
+.game-history-ticket strong {
+    bottom: 24px;
+    color: var(--text);
+    font-size: clamp(1.55rem, 3vw, 2.4rem);
+    font-weight: 1000;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    overflow-wrap: anywhere;
+}
+
+.game-history-ticket-slash {
+    position: absolute;
+    right: 28px;
+    bottom: -58px;
+    width: 10px;
+    height: 260px;
+    background: var(--red-bright);
+    box-shadow: 10px 8px 0 color-mix(in srgb, var(--gold) 75%, transparent);
+    transform: rotate(17deg);
+}
+
+.game-history-record-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 30px;
+    min-width: 0;
+    padding: 28px clamp(24px, 3.2vw, 40px);
+}
+
+.game-history-record-copy {
+    min-width: 0;
+}
+
+.game-history-record-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px 10px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 750;
+}
+
+.game-history-record-meta > span:first-child {
+    color: var(--gold);
+    font-size: 0.67rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.game-history-record-meta i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--red-bright);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--red-bright) 68%, transparent);
+}
+
+.game-history-record h2 {
+    max-width: 980px;
+    margin: 18px 0 0;
+    color: var(--text);
+    font-size: clamp(1.9rem, 3.6vw, 3.2rem);
+    font-weight: 950;
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    overflow-wrap: anywhere;
+}
+
+.game-history-winner-block {
+    display: inline-grid;
+    grid-template-columns: 34px minmax(0, auto) auto;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
+    margin-top: 24px;
+    padding: 10px 13px 10px 10px;
+    border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line));
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--gold) 5%, var(--panel-2));
+}
+
+.game-history-winner-mark {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    color: #111;
+    background: var(--gold);
+    font-size: 0.9rem;
+}
+
+.game-history-winner-block > div {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+}
+
+.game-history-winner-block > div > span {
+    color: var(--muted);
+    font-size: 0.64rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.game-history-winner-block strong {
+    overflow-wrap: anywhere;
+}
+
+.game-history-winner-block b {
+    color: var(--gold);
+    font-size: 1.25rem;
+    font-weight: 1000;
+}
+
+.game-history-winner-block b.score-negative {
+    color: var(--red-bright);
+}
+
+.game-history-record-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 22px;
+    min-width: 164px;
+    min-height: 50px;
+    border-radius: 10px;
+    font-weight: 900;
+}
+
+.game-history-record-link > span:last-child {
+    color: var(--gold);
+    font-size: 1.2rem;
+}
+
+.game-history-record-link:focus-visible,
+.game-history-back:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 3px;
+}
+
+.game-history-empty {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(160px, 0.36fr) minmax(0, 1fr);
+    min-height: 330px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 18px;
+    background:
+        radial-gradient(
+            circle at 12% 42%,
+            color-mix(in srgb, var(--red-bright) 18%, transparent),
+            transparent 18rem),
+        color-mix(in srgb, var(--panel) 97%, #000);
+}
+
+.game-history-empty::after {
+    content: "ARCHIVE";
+    position: absolute;
+    right: -0.02em;
+    bottom: -0.09em;
+    color: color-mix(in srgb, var(--text) 4%, transparent);
+    font-size: clamp(7rem, 17vw, 16rem);
+    font-weight: 1000;
+    line-height: 0.7;
+    letter-spacing: -0.08em;
+}
+
+.game-history-empty-mark {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    border-right: 1px solid color-mix(in srgb, var(--line) 68%, transparent);
+    color: var(--red-bright);
+    font-size: clamp(5rem, 10vw, 9rem);
+    font-weight: 1000;
+    letter-spacing: -0.08em;
+}
+
+.game-history-empty-copy {
+    position: relative;
+    z-index: 2;
+    align-self: center;
+    padding: 38px clamp(28px, 5vw, 64px);
+}
+
+.game-history-empty-copy > span {
+    color: var(--gold);
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.17em;
+}
+
+.game-history-empty h2 {
+    margin: 11px 0 14px;
+    font-size: clamp(2.5rem, 5vw, 4.8rem);
+    font-weight: 1000;
+    line-height: 0.88;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
+}
+
+.game-history-empty p {
+    max-width: 680px;
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.game-history-details-hero {
+    min-height: clamp(390px, 48dvh, 560px);
+}
+
+.game-history-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    font-weight: 850;
+}
+
+.game-history-details-hero h1 {
+    font-size: clamp(3.6rem, 7vw, 8.2rem);
+}
+
+.game-history-details-finished {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 26px 0 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.game-history-details-finished > span {
+    color: var(--gold);
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.game-history-details-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-self: stretch;
+    border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+    border-radius: 18px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--panel) 92%, transparent);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.26);
+}
+
+.game-history-details-stats > div {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 220px;
+    padding: 24px;
+}
+
+.game-history-details-stats > div + div {
+    border-left: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+}
+
+.game-history-details-stats > div::after {
+    content: "";
+    position: absolute;
+    right: -4px;
+    bottom: -36px;
+    width: 8px;
+    height: 130px;
+    background: color-mix(in srgb, var(--red-bright) 72%, transparent);
+    transform: rotate(19deg);
+}
+
+.game-history-details-stats span {
+    color: var(--muted);
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+}
+
+.game-history-details-stats strong {
+    color: var(--text);
+    font-size: clamp(3.8rem, 7vw, 6.8rem);
+    font-weight: 1000;
+    line-height: 0.76;
+    letter-spacing: -0.08em;
+}
+
+.game-history-report {
+    display: grid;
+    gap: 20px;
+}
+
+.game-history-report-section {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            145deg,
+            color-mix(in srgb, var(--panel) 98%, #000),
+            color-mix(in srgb, var(--panel-2) 92%, var(--bg)));
+    box-shadow: 0 22px 54px rgba(0, 0, 0, 0.2);
+}
+
+.game-history-report-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 130px;
+    height: 3px;
+    background: var(--red-bright);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--red-bright) 65%, transparent);
+}
+
+.game-history-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 22px clamp(20px, 3vw, 34px) 20px;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.game-history-section-number {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-radius: 11px;
+    color: var(--gold);
+    background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+    font-size: 0.78rem;
+    font-weight: 1000;
+    letter-spacing: 0.14em;
+}
+
+.game-history-section-heading > div {
+    display: grid;
+    gap: 4px;
+}
+
+.game-history-section-heading > div > span {
+    color: var(--muted);
+    font-size: 0.64rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+}
+
+.game-history-section-heading h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1.75rem, 3.2vw, 2.8rem);
+    font-weight: 950;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+}
+
+.game-history-final-scores {
+    display: grid;
+    gap: 1px;
+    background: color-mix(in srgb, var(--line) 55%, transparent);
+}
+
+.game-history-final-score {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    min-height: 86px;
+    padding: 13px clamp(20px, 3vw, 34px);
+    background: color-mix(in srgb, var(--panel) 98%, #000);
+}
+
+.game-history-final-score.is-winner {
+    background:
+        linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--gold) 8%, var(--panel)) 0,
+            color-mix(in srgb, var(--panel) 98%, #000) 62%);
+}
+
+.game-history-rank {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 1000;
+    letter-spacing: 0.13em;
+}
+
+.game-history-final-score.is-winner .game-history-rank {
+    color: var(--gold);
+}
+
+.game-history-final-score > div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.game-history-player-result {
+    color: var(--gold);
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+}
+
+.game-history-final-score strong {
+    min-width: 0;
+    font-size: 1.12rem;
+    overflow-wrap: anywhere;
+}
+
+.game-history-final-score > b {
+    color: var(--text);
+    font-size: clamp(1.45rem, 3vw, 2.2rem);
+    font-weight: 1000;
+    letter-spacing: -0.04em;
+}
+
+.game-history-final-score > b.score-negative {
+    color: var(--red-bright);
+}
+
+.game-history-report-empty {
+    padding: 30px clamp(20px, 3vw, 34px);
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.game-history-table-scroll {
+    max-width: 100%;
+    border: 0;
+    border-radius: 0;
+}
+
+.game-history-report-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: transparent;
+}
+
+.game-history-report-table th,
+.game-history-report-table td {
+    padding: 15px 18px;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.game-history-report-table thead th {
+    color: var(--gold);
+    background: color-mix(in srgb, var(--panel-2) 86%, transparent);
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.game-history-report-table tbody tr:last-child > * {
+    border-bottom: 0;
+}
+
+.game-history-report-table tbody tr {
+    transition: background 150ms ease;
+}
+
+.game-history-report-table tbody tr:hover {
+    background: color-mix(in srgb, var(--text) 3.5%, transparent);
+}
+
+.game-history-round-name {
+    color: var(--muted);
+    font-weight: 750;
+}
+
+.game-history-score-delta {
+    font-weight: 950;
+    white-space: nowrap;
+}
+
+.game-history-score-delta.is-positive {
+    color: var(--gold);
+}
+
+.game-history-score-delta.is-negative {
+    color: var(--red-bright);
+}
+
+.game-history-question-cell {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    min-width: 340px;
+}
+
+.game-history-question-cell > span {
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.game-history-question-cell > strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.game-history-question-cell > em {
+    min-width: 42px;
+    padding: 4px 7px;
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    border-radius: 7px;
+    color: var(--gold);
+    background: color-mix(in srgb, var(--panel-2) 84%, transparent);
+    font-size: 0.72rem;
+    font-style: normal;
+    font-weight: 900;
+    text-align: center;
+}
+
+.game-history-result {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+.game-history-result i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+}
+
+.game-history-result.is-correct {
+    color: var(--gold);
+}
+
+.game-history-result.is-incorrect {
+    color: var(--red-bright);
+}
+
+@media (max-width: 1100px) {
+    .game-history-hero,
+    .game-history-details-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 0.35fr);
+        gap: 32px;
+    }
+
+    .game-history-hero-counter {
+        min-height: 270px;
+    }
+
+    .game-history-record {
+        grid-template-columns: 165px minmax(0, 1fr);
+    }
+
+    .game-history-record-body {
+        gap: 20px;
+    }
+
+    .game-history-details-stats > div {
+        min-height: 190px;
+    }
+}
+
+@media (max-width: 820px) {
+    .game-history-hero,
+    .game-history-details-hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        padding-top: 54px;
+    }
+
+    .game-history-hero h1,
+    .game-history-details-hero h1 {
+        font-size: clamp(3.5rem, 14vw, 6.8rem);
+    }
+
+    .game-history-hero-counter {
+        width: 230px;
+        min-height: 230px;
+        justify-self: start;
+    }
+
+    .game-history-record {
+        grid-template-columns: 1fr;
+    }
+
+    .game-history-ticket {
+        min-height: 118px;
+        border-right: 0;
+        border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+        border-radius: 17px 17px 0 0;
+    }
+
+    .game-history-ticket strong {
+        left: auto;
+        right: 22px;
+        bottom: 20px;
+    }
+
+    .game-history-ticket-slash {
+        right: 40%;
+        bottom: -105px;
+        height: 240px;
+        transform: rotate(65deg);
+    }
+
+    .game-history-record-body {
+        grid-template-columns: 1fr;
+        align-items: start;
+    }
+
+    .game-history-record-link {
+        width: fit-content;
+    }
+
+    .game-history-details-stats {
+        max-width: 520px;
+        justify-self: start;
+    }
+
+    .game-history-details-stats > div {
+        min-height: 150px;
+    }
+}
+
+@media (max-width: 560px) {
+    .game-history-hero,
+    .game-history-details-hero,
+    .game-history-content,
+    .game-history-report {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .game-history-hero,
+    .game-history-details-hero {
+        padding-top: 42px;
+        padding-bottom: 38px;
+    }
+
+    .game-history-kicker {
+        font-size: 0.65rem;
+    }
+
+    .game-history-hero h1,
+    .game-history-details-hero h1 {
+        font-size: clamp(3rem, 16vw, 5rem);
+    }
+
+    .game-history-description {
+        margin-top: 20px;
+    }
+
+    .game-history-hero-counter {
+        width: 180px;
+        min-height: 180px;
+    }
+
+    .game-history-hero-counter > strong {
+        font-size: 4.4rem;
+    }
+
+    .game-history-archive-heading {
+        align-items: center;
+    }
+
+    .game-history-archive-heading em {
+        display: none;
+    }
+
+    .game-history-record-body {
+        padding: 22px 18px 24px;
+    }
+
+    .game-history-record h2 {
+        font-size: 1.85rem;
+    }
+
+    .game-history-winner-block {
+        grid-template-columns: 32px minmax(0, 1fr);
+        width: 100%;
+    }
+
+    .game-history-winner-block > b {
+        grid-column: 2;
+        justify-self: start;
+    }
+
+    .game-history-record-link {
+        width: 100%;
+    }
+
+    .game-history-empty {
+        grid-template-columns: 1fr;
+    }
+
+    .game-history-empty-mark {
+        min-height: 110px;
+        border-right: 0;
+        border-bottom: 1px solid color-mix(in srgb, var(--line) 68%, transparent);
+        font-size: 5rem;
+    }
+
+    .game-history-empty-copy {
+        padding: 28px 20px 34px;
+    }
+
+    .game-history-back {
+        margin-bottom: 24px;
+    }
+
+    .game-history-details-stats {
+        width: 100%;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .game-history-details-stats > div {
+        min-height: 120px;
+        padding: 18px 10px;
+    }
+
+    .game-history-details-stats strong {
+        font-size: 3.5rem;
+    }
+
+    .game-history-section-heading {
+        gap: 12px;
+        padding: 18px 16px 16px;
+    }
+
+    .game-history-section-number {
+        width: 44px;
+        height: 44px;
+        flex-basis: 44px;
+    }
+
+    .game-history-section-heading h2 {
+        font-size: 1.65rem;
+    }
+
+    .game-history-final-score {
+        grid-template-columns: 42px minmax(0, 1fr) auto;
+        gap: 10px;
+        min-height: 76px;
+        padding: 11px 16px;
+    }
+
+    .game-history-final-score > b {
+        font-size: 1.5rem;
+    }
+
+    .game-history-report-table {
+        min-width: 760px;
+    }
+
+    .game-history-answer-table {
+        min-width: 700px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .game-history-record,
+    .game-history-report-table tbody tr {
+        transition: none;
+    }
+
+    .game-history-record:hover {
+        transform: none;
+    }
+}

@@ -2,124 +2,201 @@
 @model BadWolfQuiz.Web.Pages.Admin.Games.HistoryDetailsModel
 @{
     ViewData["Title"] = Localizer["GameHistory_DetailsTitle"];
+    var game = Model.Game!;
+    var winningScore = game.Players.Count > 0 ? game.Players[0].Score : (int?)null;
 }
 
-<div class="page-heading">
-    <div>
-        <p class="eyebrow">@Model.Game!.PublicCode</p>
-        <h1>@Model.Game.QuizTitle</h1>
-        <p>
-            @Localizer["GameHistory_FinishedAt"]:
-            <time datetime="@Model.Game.FinishedAtUtc.ToString("O")">
-                @Model.Game.FinishedAtUtc.ToLocalTime().ToString("g")
-            </time>
-        </p>
-    </div>
-    <a class="button button-secondary" asp-page="History">
-        @Localizer["GameHistory_Back"]
-    </a>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/game-history.css" asp-append-version="true" />
+}
 
-<section class="content-panel">
-    <h2>@Localizer["GameHistory_Players"]</h2>
-    <div class="game-history-player-list">
-        @foreach (var player in Model.Game.Players)
-        {
-            <div class="game-history-player">
-                <strong>@player.Name</strong>
-                <span class="@(player.Score < 0 ? "score-negative" : null)">@player.Score</span>
+<div class="game-history-page game-history-details-page">
+    <section class="game-history-details-hero" aria-labelledby="game-history-details-title">
+        <div class="game-history-details-copy">
+            <a class="button button-secondary game-history-back" asp-page="History">
+                <span aria-hidden="true">←</span>
+                <span>@Localizer["GameHistory_Back"]</span>
+            </a>
+
+            <p class="game-history-kicker">
+                <span>@game.PublicCode</span>
+                <span aria-hidden="true">/ MATCH REPORT</span>
+            </p>
+            <h1 id="game-history-details-title">@game.QuizTitle</h1>
+            <p class="game-history-details-finished">
+                <span>@Localizer["GameHistory_FinishedAt"]</span>
+                <time datetime="@game.FinishedAtUtc.ToString("O")">
+                    @game.FinishedAtUtc.ToLocalTime().ToString("g")
+                </time>
+            </p>
+        </div>
+
+        <div class="game-history-details-stats">
+            <div>
+                <span aria-hidden="true">PLAYERS</span>
+                <strong aria-label="@Localizer["GameHistory_PlayerCount", game.Players.Count]">
+                    @game.Players.Count.ToString("00")
+                </strong>
             </div>
-        }
-    </div>
-</section>
-
-<section class="content-panel">
-    <h2>@Localizer["PlayerStatistics_PerRound"]</h2>
-
-    @if (Model.Game.RoundStatistics.Count == 0)
-    {
-        <p>@Localizer["PlayerStatistics_NoRoundAnswers"]</p>
-    }
-    else
-    {
-        <div class="table-scroll">
-            <table class="game-history-table statistics-table">
-                <thead>
-                    <tr>
-                        <th>@Localizer["PlayerStatistics_Round"]</th>
-                        <th>@Localizer["GameHistory_Player"]</th>
-                        <th>@Localizer["PlayerStatistics_Correct"]</th>
-                        <th>@Localizer["PlayerStatistics_Attempts"]</th>
-                        <th>@Localizer["PlayerStatistics_Accuracy"]</th>
-                        <th>@Localizer["GameHistory_ScoreChange"]</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.Game.RoundStatistics)
-                    {
-                        <tr>
-                            <td>@item.RoundTitle</td>
-                            <th scope="row">@item.PlayerName</th>
-                            <td>@item.CorrectAnswers</td>
-                            <td>@item.Attempts</td>
-                            <td>
-                                @if (item.Accuracy.HasValue)
-                                {
-                                    @item.Accuracy.Value.ToString("P1")
-                                }
-                                else
-                                {
-                                    @Localizer["PlayerStatistics_NotAvailable"]
-                                }
-                            </td>
-                            <td class="@(item.ScoreDelta < 0 ? "score-negative" : null)">
-                                @(item.ScoreDelta > 0 ? "+" : null)@item.ScoreDelta
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <div>
+                <span aria-hidden="true">ANSWERS</span>
+                <strong aria-label="@Localizer["GameHistory_Answers"]: @game.Answers.Count">
+                    @game.Answers.Count.ToString("00")
+                </strong>
+            </div>
         </div>
-    }
-</section>
+    </section>
 
-<section class="content-panel">
-    <h2>@Localizer["GameHistory_Answers"]</h2>
+    <main class="game-history-report">
+        <section class="game-history-report-section game-history-score-section">
+            <div class="game-history-section-heading">
+                <span class="game-history-section-number" aria-hidden="true">01</span>
+                <div>
+                    <span aria-hidden="true">FINAL / SCOREBOARD</span>
+                    <h2>@Localizer["GameHistory_Players"]</h2>
+                </div>
+            </div>
 
-    @if (Model.Game.Answers.Count == 0)
-    {
-        <p>@Localizer["GameHistory_NoAnswers"]</p>
-    }
-    else
-    {
-        <div class="table-scroll">
-            <table class="game-history-table">
-                <thead>
-                    <tr>
-                        <th>@Localizer["GameHistory_Question"]</th>
-                        <th>@Localizer["GameHistory_Player"]</th>
-                        <th>@Localizer["GameHistory_Result"]</th>
-                        <th>@Localizer["GameHistory_ScoreChange"]</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var answer in Model.Game.Answers)
+            @if (game.Players.Count == 0)
+            {
+                <div class="game-history-report-empty">@Localizer["GameHistory_PlayerCount", 0]</div>
+            }
+            else
+            {
+                <div class="game-history-final-scores">
+                    @for (var index = 0; index < game.Players.Count; index++)
                     {
-                        <tr>
-                            <td>@answer.RoundTitle — @answer.CategoryTitle — @answer.Points</td>
-                            <td>@answer.PlayerName</td>
-                            <td>
-                                @(answer.IsCorrect
-                                    ? Localizer["GameHistory_Correct"]
-                                    : Localizer["GameHistory_Incorrect"])
-                            </td>
-                            <td class="@(answer.ScoreDelta < 0 ? "score-negative" : null)">
-                                @(answer.ScoreDelta > 0 ? "+" : null)@answer.ScoreDelta
-                            </td>
-                        </tr>
+                        var player = game.Players[index];
+                        var isWinner = winningScore.HasValue && player.Score == winningScore.Value;
+
+                        <div class="game-history-final-score @(isWinner ? "is-winner" : string.Empty)">
+                            <span class="game-history-rank">@((index + 1).ToString("00"))</span>
+                            <div>
+                                @if (isWinner)
+                                {
+                                    <span class="game-history-player-result">
+                                        @(game.Players.Count(candidate => candidate.Score == winningScore) == 1
+                                            ? Localizer["GameHistory_Winner"]
+                                            : Localizer["GameHistory_Winners"])
+                                    </span>
+                                }
+                                <strong>@player.Name</strong>
+                            </div>
+                            <b class="@(player.Score < 0 ? "score-negative" : null)">@player.Score</b>
+                        </div>
                     }
-                </tbody>
-            </table>
-        </div>
-    }
-</section>
+                </div>
+            }
+        </section>
+
+        <section class="game-history-report-section">
+            <div class="game-history-section-heading">
+                <span class="game-history-section-number" aria-hidden="true">02</span>
+                <div>
+                    <span aria-hidden="true">ROUND / PERFORMANCE</span>
+                    <h2>@Localizer["PlayerStatistics_PerRound"]</h2>
+                </div>
+            </div>
+
+            @if (game.RoundStatistics.Count == 0)
+            {
+                <div class="game-history-report-empty">@Localizer["PlayerStatistics_NoRoundAnswers"]</div>
+            }
+            else
+            {
+                <div class="table-scroll game-history-table-scroll">
+                    <table class="game-history-table statistics-table game-history-report-table">
+                        <thead>
+                            <tr>
+                                <th>@Localizer["PlayerStatistics_Round"]</th>
+                                <th>@Localizer["GameHistory_Player"]</th>
+                                <th>@Localizer["PlayerStatistics_Correct"]</th>
+                                <th>@Localizer["PlayerStatistics_Attempts"]</th>
+                                <th>@Localizer["PlayerStatistics_Accuracy"]</th>
+                                <th>@Localizer["GameHistory_ScoreChange"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in game.RoundStatistics)
+                            {
+                                <tr>
+                                    <td class="game-history-round-name">@item.RoundTitle</td>
+                                    <th scope="row">@item.PlayerName</th>
+                                    <td>@item.CorrectAnswers</td>
+                                    <td>@item.Attempts</td>
+                                    <td>
+                                        @if (item.Accuracy.HasValue)
+                                        {
+                                            @item.Accuracy.Value.ToString("P1")
+                                        }
+                                        else
+                                        {
+                                            @Localizer["PlayerStatistics_NotAvailable"]
+                                        }
+                                    </td>
+                                    <td class="game-history-score-delta @(item.ScoreDelta < 0 ? "is-negative" : item.ScoreDelta > 0 ? "is-positive" : null)">
+                                        @(item.ScoreDelta > 0 ? "+" : null)@item.ScoreDelta
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+
+        <section class="game-history-report-section">
+            <div class="game-history-section-heading">
+                <span class="game-history-section-number" aria-hidden="true">03</span>
+                <div>
+                    <span aria-hidden="true">JUDGED / ANSWERS</span>
+                    <h2>@Localizer["GameHistory_Answers"]</h2>
+                </div>
+            </div>
+
+            @if (game.Answers.Count == 0)
+            {
+                <div class="game-history-report-empty">@Localizer["GameHistory_NoAnswers"]</div>
+            }
+            else
+            {
+                <div class="table-scroll game-history-table-scroll">
+                    <table class="game-history-table game-history-report-table game-history-answer-table">
+                        <thead>
+                            <tr>
+                                <th>@Localizer["GameHistory_Question"]</th>
+                                <th>@Localizer["GameHistory_Player"]</th>
+                                <th>@Localizer["GameHistory_Result"]</th>
+                                <th>@Localizer["GameHistory_ScoreChange"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var answer in game.Answers)
+                            {
+                                <tr>
+                                    <td class="game-history-question-cell">
+                                        <span>@answer.RoundTitle</span>
+                                        <strong>@answer.CategoryTitle</strong>
+                                        <em>@answer.Points</em>
+                                    </td>
+                                    <td>@answer.PlayerName</td>
+                                    <td>
+                                        <span class="game-history-result @(answer.IsCorrect ? "is-correct" : "is-incorrect")">
+                                            <i aria-hidden="true"></i>
+                                            @(answer.IsCorrect
+                                                ? Localizer["GameHistory_Correct"]
+                                                : Localizer["GameHistory_Incorrect"])
+                                        </span>
+                                    </td>
+                                    <td class="game-history-score-delta @(answer.ScoreDelta < 0 ? "is-negative" : answer.ScoreDelta > 0 ? "is-positive" : null)">
+                                        @(answer.ScoreDelta > 0 ? "+" : null)@answer.ScoreDelta
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </main>
+</div>
