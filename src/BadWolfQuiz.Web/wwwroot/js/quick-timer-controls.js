@@ -122,3 +122,88 @@
     script.dataset.finalQuestionTransitionGuard = "";
     document.head.appendChild(script);
 })();
+
+(() => {
+    if (window.badWolfJoinCodeCopyTargetsInstalled) {
+        return;
+    }
+
+    window.badWolfJoinCodeCopyTargetsInstalled = true;
+
+    const copyText = async value => {
+        if (navigator.clipboard?.writeText) {
+            try {
+                await navigator.clipboard.writeText(value);
+                return;
+            } catch {
+                // Fall back to a temporary textarea below.
+            }
+        }
+
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.setAttribute("readonly", "readonly");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+    };
+
+    const bindCopyTarget = (target, valueFactory) => {
+        if (!(target instanceof HTMLElement)) {
+            return;
+        }
+
+        target.tabIndex = 0;
+        target.setAttribute("role", "button");
+        target.style.cursor = "copy";
+        target.draggable = false;
+
+        const copy = async () => {
+            const value = valueFactory();
+            if (!value) {
+                return;
+            }
+
+            try {
+                await copyText(value);
+            } catch (error) {
+                console.error("Unable to copy join information.", error);
+            }
+        };
+
+        target.addEventListener("click", () => copy());
+        target.addEventListener("keydown", event => {
+            if (event.key !== "Enter" && event.key !== " ") {
+                return;
+            }
+
+            event.preventDefault();
+            copy();
+        });
+    };
+
+    const panel = document.querySelector("[data-join-code-panel]");
+    if (!panel) {
+        return;
+    }
+
+    const gameCode = panel.dataset.gameCode?.trim() ?? "";
+    const codeTarget = panel.querySelector(
+        ".join-code-floating-content .join-code-value");
+    const qrTarget = panel.querySelector(
+        ".join-code-floating-content .join-qr-code");
+
+    bindCopyTarget(codeTarget, () => gameCode);
+    bindCopyTarget(qrTarget, () => {
+        if (!gameCode) {
+            return "";
+        }
+
+        return new URL(
+            `/Join/${encodeURIComponent(gameCode)}/`,
+            window.location.origin).href;
+    });
+})();
