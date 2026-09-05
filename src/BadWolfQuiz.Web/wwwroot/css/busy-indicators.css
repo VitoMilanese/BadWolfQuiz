@@ -2,6 +2,7 @@
 @import url("./quiz-editor-first-paint.css?v=1");
 @import url("./game-content-viewport-fit.css?v=6");
 @import url("./theme-scrollbars.css?v=1");
+@import url("./host-lobby.css?v=1");
 
 body[aria-busy="true"] {
     overflow: hidden;
