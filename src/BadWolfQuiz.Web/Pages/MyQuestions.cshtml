@@ -4,70 +4,120 @@
     ViewData["Title"] = Localizer["MyQuestions_Title"];
 }
 
-<section class="my-questions-page">
-    <div class="page-heading">
-        <div>
-            <h1>@Localizer["MyQuestions_Title"]</h1>
+@section Styles {
+    <link rel="stylesheet" href="~/css/questions.css" asp-append-version="true" />
+}
+
+<div class="support-page support-archive-page">
+    <section class="support-hero support-hero-archive" aria-labelledby="support-archive-title">
+        <div class="support-hero-copy">
+            <p class="support-kicker">
+                <span>BAD WOLF</span>
+                <span aria-hidden="true">/ SIGNAL ARCHIVE</span>
+            </p>
+            <h1 id="support-archive-title">@Localizer["MyQuestions_Title"]</h1>
+
+            <div class="support-hero-actions">
+                <a class="button button-primary" asp-page="/AskQuestion">
+                    @Localizer["AskQuestion_Title"]
+                </a>
+            </div>
         </div>
-    </div>
 
-    @if (Model.Questions.Count == 0)
-    {
-        <div class="my-questions-empty">
-            <p>@Localizer["MyQuestions_Empty"]</p>
+        <div class="support-archive-counter" aria-hidden="true">
+            <span>ACTIVE THREADS</span>
+            <strong>@Model.Questions.Count.ToString("00")</strong>
+            <small>QUESTION LOG</small>
         </div>
-    }
-    else
-    {
-        <div class="my-questions-list">
-            @foreach (var question in Model.Questions)
-            {
-                <article class="my-question-card">
-                    <div class="my-question-card-main">
-                        <div class="my-question-preview">@question.Preview</div>
+    </section>
 
-                        <div class="my-question-meta">
-                            <span>
-                                @Localizer["MyQuestions_Updated"]:
-                                <strong>@question.UpdatedAtUtc.ToLocalTime().ToString("g")</strong>
-                            </span>
+    <main class="support-content support-archive-content">
+        <header class="support-section-heading">
+            <div>
+                <span aria-hidden="true">BAD WOLF / LOG</span>
+                <h2>@Localizer["MyQuestions_Title"]</h2>
+            </div>
+            <strong aria-hidden="true">@Model.Questions.Count.ToString("00")</strong>
+        </header>
 
-                            <span class="my-question-status @(question.AwaitingDeveloper ? "is-waiting" : "is-replyable")">
-                                @(question.AwaitingDeveloper
-                                    ? Localizer["Question_AwaitingAnswer"]
-                                    : Localizer["Question_ContinueConversation"])
-                            </span>
+        @if (Model.Questions.Count == 0)
+        {
+            <section class="support-empty-state">
+                <div class="support-empty-mark" aria-hidden="true">
+                    <strong>00</strong>
+                    <span>NO SIGNALS</span>
+                </div>
+                <div class="support-empty-copy">
+                    <h2>@Localizer["MyQuestions_Title"]</h2>
+                    <p>@Localizer["MyQuestions_Empty"]</p>
+                    <a class="button button-primary" asp-page="/AskQuestion">
+                        @Localizer["AskQuestion_Title"]
+                    </a>
+                </div>
+            </section>
+        }
+        else
+        {
+            <div class="support-thread-list">
+                @for (var index = 0; index < Model.Questions.Count; index++)
+                {
+                    var question = Model.Questions[index];
+                    var threadNumber = (index + 1).ToString("00");
+
+                    <article class="support-thread-card @(question.AwaitingDeveloper ? "is-waiting" : "is-replyable")">
+                        <div class="support-thread-index" aria-hidden="true">
+                            <span>THREAD</span>
+                            <strong>@threadNumber</strong>
+                            <i></i>
                         </div>
-                    </div>
 
-                    <div class="my-question-actions">
-                        <a class="button button-primary"
-                           asp-page="/Question"
-                           asp-route-token="@question.Token">
-                            @Localizer["MyQuestions_Open"]
-                        </a>
+                        <div class="support-thread-main">
+                            <div class="support-thread-topline">
+                                <span class="support-thread-status @(question.AwaitingDeveloper ? "is-waiting" : "is-replyable")">
+                                    @(question.AwaitingDeveloper
+                                        ? Localizer["Question_AwaitingAnswer"]
+                                        : Localizer["Question_ContinueConversation"])
+                                </span>
 
-                        <button type="button"
-                                class="button button-danger-outline"
-                                data-delete-question
-                                data-question-token="@question.Token">
-                            @Localizer["Button_Delete"]
-                        </button>
-                    </div>
-                </article>
-            }
-        </div>
-    }
-</section>
+                                <span class="support-thread-updated">
+                                    @Localizer["MyQuestions_Updated"]
+                                    <strong>@question.UpdatedAtUtc.ToLocalTime().ToString("g")</strong>
+                                </span>
+                            </div>
 
-<dialog id="delete-question-dialog" class="app-dialog">
+                            <div class="support-thread-preview">@question.Preview</div>
+                        </div>
+
+                        <div class="support-thread-actions">
+                            <a class="button button-primary"
+                               asp-page="/Question"
+                               asp-route-token="@question.Token">
+                                @Localizer["MyQuestions_Open"]
+                            </a>
+
+                            <button type="button"
+                                    class="button button-danger-outline"
+                                    data-delete-question
+                                    data-question-token="@question.Token">
+                                @Localizer["Button_Delete"]
+                            </button>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </main>
+</div>
+
+<dialog id="delete-question-dialog" class="app-dialog support-dialog">
     <form method="post"
           asp-page-handler="Delete"
-          class="dialog-card dialog-card-danger">
+          class="dialog-card dialog-card-danger support-dialog-card">
         <input type="hidden" id="delete-question-token" name="token" />
 
-        <div class="dialog-heading">
+        <div class="dialog-heading support-dialog-heading">
             <div>
+                <span class="support-dialog-kicker" aria-hidden="true">DELETE / SIGNAL</span>
                 <h2>@Localizer["QuestionInbox_DeleteConfirmTitle"]</h2>
                 <p class="dialog-warning">
                     @Localizer["QuestionInbox_DeleteConfirmText"]
