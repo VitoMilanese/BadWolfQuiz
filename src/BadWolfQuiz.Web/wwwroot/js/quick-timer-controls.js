@@ -130,6 +130,9 @@
 
     window.badWolfJoinCodeCopyTargetsInstalled = true;
 
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
+    const activeAnimations = new WeakMap();
+
     const copyText = async value => {
         if (navigator.clipboard?.writeText) {
             try {
@@ -151,6 +154,78 @@
         textarea.remove();
     };
 
+    const showCopyFeedback = target => {
+        activeAnimations.get(target)?.cancel();
+
+        const animation = target.animate(
+            reducedMotion
+                ? [
+                    { filter: "brightness(1)" },
+                    { filter: "brightness(1.35)" },
+                    { filter: "brightness(1)" }
+                ]
+                : [
+                    { transform: "scale(1)", filter: "brightness(1)" },
+                    { transform: "scale(0.96)", filter: "brightness(1.08)", offset: 0.25 },
+                    { transform: "scale(1.045)", filter: "brightness(1.35) drop-shadow(0 0 12px #3fb950)", offset: 0.62 },
+                    { transform: "scale(1)", filter: "brightness(1)" }
+                ],
+            {
+                duration: reducedMotion ? 180 : 360,
+                easing: "ease-out"
+            });
+        activeAnimations.set(target, animation);
+        animation.addEventListener("finish", () => {
+            if (activeAnimations.get(target) === animation) {
+                activeAnimations.delete(target);
+            }
+        }, { once: true });
+
+        const bounds = target.getBoundingClientRect();
+        const feedback = document.createElement("span");
+        feedback.textContent = "✓";
+        feedback.setAttribute("aria-hidden", "true");
+        Object.assign(feedback.style, {
+            position: "fixed",
+            zIndex: "1000",
+            left: `${bounds.right - Math.min(28, bounds.width * 0.14)}px`,
+            top: `${bounds.top + Math.min(28, bounds.height * 0.14)}px`,
+            display: "grid",
+            placeItems: "center",
+            width: "28px",
+            height: "28px",
+            borderRadius: "999px",
+            color: "#fff",
+            background: "#238636",
+            boxShadow: "0 6px 18px rgba(0, 0, 0, 0.35)",
+            fontSize: "17px",
+            fontWeight: "900",
+            lineHeight: "1",
+            pointerEvents: "none",
+            transform: "translate(-50%, -50%)"
+        });
+        document.body.appendChild(feedback);
+
+        const feedbackAnimation = feedback.animate(
+            reducedMotion
+                ? [
+                    { opacity: 0 },
+                    { opacity: 1, offset: 0.25 },
+                    { opacity: 0 }
+                ]
+                : [
+                    { opacity: 0, transform: "translate(-50%, -42%) scale(0.55)" },
+                    { opacity: 1, transform: "translate(-50%, -50%) scale(1.12)", offset: 0.28 },
+                    { opacity: 1, transform: "translate(-50%, -58%) scale(1)", offset: 0.68 },
+                    { opacity: 0, transform: "translate(-50%, -82%) scale(0.9)" }
+                ],
+            {
+                duration: reducedMotion ? 360 : 620,
+                easing: "ease-out"
+            });
+        feedbackAnimation.addEventListener("finish", () => feedback.remove(), { once: true });
+    };
+
     const bindCopyTarget = (target, valueFactory) => {
         if (!(target instanceof HTMLElement)) {
             return;
@@ -169,6 +244,7 @@
 
             try {
                 await copyText(value);
+                showCopyFeedback(target);
             } catch (error) {
                 console.error("Unable to copy join information.", error);
             }
