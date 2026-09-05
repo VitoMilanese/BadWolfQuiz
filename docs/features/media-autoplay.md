@@ -14,6 +14,14 @@ This first-media rule prevents multiple YouTube placeholders from launching or e
 
 Once a question or answer presentation is active, later gameplay refreshes with the same media state update only the surrounding DOM path while keeping the live media presentation continuously connected. This keeps a playing native media element or expanded YouTube iframe alive without even a temporary detach while surrounding gameplay controls refresh. Genuinely removed media still follows the normal pause/rewind and teardown lifecycle.
 
+## Audio seeking
+
+Native audio served through MVC/Razor Pages `FileResult` responses uses HTTP byte-range processing for every `audio/*` content type. This lets browser-native audio controls request the selected byte range when the user seeks forward or backward, both while audio is playing and while it is paused, instead of falling back to a sequential response whose timeline can snap back to the old position.
+
+The range-processing rule is applied globally, so stored editor previews, gameplay and answer audio, Answer Key/preview surfaces, final-question audio, downloads, and future audio `FileResult` endpoints behave consistently. Existing download filenames are preserved and non-audio file responses are not changed.
+
+Deferred game media is served by `DeferredGameMediaMiddleware` rather than an MVC `FileResult`. That path already implements `Accept-Ranges`, `206 Partial Content`, and `Content-Range` directly, so both normal and deferred audio responses remain seekable without duplicating the middleware behavior.
+
 ## Four-clue questions
 
 For four-clue questions, unrevealed clue media is excluded from the initial selection. When the question opens, only the first Autoplay-enabled media among the first two visible clues is started.
@@ -41,8 +49,9 @@ Real-host verification confirmed:
 - clue 3 and clue 4 are targeted independently without restarting earlier clues;
 - the live timer does not flash during clue reveal.
 
+Automated regression coverage for audio seeking verifies that audio `FileResult` responses enable range processing for common and case-insensitive audio MIME types, preserve download filenames, and leave non-audio file results unchanged.
+
 ## Release
 
-BadWolfQuiz Web: **1.12.0**
-
-Tag after merge: `web-v1.12.0`.
+- Media autoplay feature: **1.12.0** (`web-v1.12.0`).
+- Global audio range-processing/seeking fix: **1.26.3** (`web-v1.26.3` after merge).
