@@ -52,6 +52,21 @@ body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.
     flex: 0 0 auto;
 }
 
+/* Keep the server-rendered and settled lobby controls at the same dimensions.
+   site.css initially paints these buttons at 32px, so retaining that size here
+   prevents the refresh-time size jump once the Host Lobby overrides apply. */
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list .player-action-button {
+    box-sizing: border-box;
+    width: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    height: 32px;
+    min-height: 32px;
+    max-height: 32px;
+    flex: 0 0 32px;
+    padding: 0;
+}
+
 /* Presence state wins over the active-player badge. This prevents the initial
    inactive + active-player double-status flash during refresh. */
 body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .presence-badge) .active-player-badge {
