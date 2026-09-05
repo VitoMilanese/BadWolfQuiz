@@ -1,0 +1,179 @@
+/* Follow-up layout fixes for the redesigned pre-game Player Lobby. */
+
+/* Gameplay touch targets around the Buzzer should not drag the page. */
+.player-lobby:has(.player-buzzer-panel) :is(.player-game-timer, #player-buzzer-status, .buzzer-status),
+.player-lobby:has(.player-buzzer-panel) > .dialog-warning {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html:has(body.gameplay-layout .player-lobby[data-final-status="lobby"]),
+body.gameplay-layout:has(.player-lobby[data-final-status="lobby"]) {
+    width: 100%;
+    height: auto;
+    min-height: 100dvh;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: auto;
+}
+
+body.gameplay-layout:has(.player-lobby[data-final-status="lobby"]) > .page-shell {
+    position: static;
+    inset: auto;
+    width: 100%;
+    max-width: 1540px;
+    height: auto;
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: clamp(0.75rem, 2vw, 2rem);
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+.player-lobby[data-final-status="lobby"] {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    min-height: calc(100dvh - clamp(1.5rem, 4vw, 4rem));
+    box-sizing: border-box;
+}
+
+.player-lobby[data-final-status="lobby"] > .player-buzzer-panel {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+}
+
+.player-lobby[data-final-status="lobby"] > .player-buzzer-panel > .player-buzzer {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: auto;
+    max-height: none;
+    aspect-ratio: auto;
+    margin-inline: auto;
+}
+
+.player-lobby[data-final-status="lobby"] > .player-buzzer-panel > #player-buzzer-status {
+    flex: 0 0 auto;
+}
+
+/* On desktop/fullscreen, the Buzzer owns the remaining stage instead of collapsing into a thin pill. */
+@media (min-width: 901px) {
+    .player-lobby[data-final-status="lobby"] {
+        grid-template-rows: auto auto auto auto auto minmax(clamp(20rem, 42dvh, 34rem), 1fr);
+        align-content: stretch;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-buzzer-panel {
+        min-height: clamp(20rem, 42dvh, 34rem);
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-buzzer-panel > .player-buzzer {
+        flex: 1 1 auto;
+        min-height: 0;
+        border-radius: clamp(2.5rem, 4vw, 4.5rem);
+    }
+}
+
+@media (max-width: 900px) {
+    body.gameplay-layout:has(.player-lobby[data-final-status="lobby"]) > .page-shell {
+        max-width: none;
+        min-height: 100dvh;
+        padding: 0.7rem;
+    }
+
+    .player-lobby[data-final-status="lobby"] {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        height: auto;
+        min-height: calc(100dvh - 1.4rem);
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-media-settings {
+        flex: 0 0 auto;
+        overflow: hidden;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-buzzer-panel {
+        flex: 1 1 18rem;
+        min-height: clamp(16rem, 34dvh, 36rem);
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-buzzer-panel > .player-buzzer {
+        flex: 1 1 auto;
+        min-height: clamp(13rem, 30dvh, 32rem);
+        border-radius: clamp(2.2rem, 8vw, 4rem);
+    }
+}
+
+@media (max-width: 700px) {
+    html:has(body.gameplay-layout .player-lobby[data-final-status="lobby"]),
+    body.gameplay-layout:has(.player-lobby[data-final-status="lobby"]) {
+        height: auto;
+        min-height: 100dvh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: auto;
+    }
+
+    body.gameplay-layout:has(.player-lobby[data-final-status="lobby"]) > .page-shell {
+        position: static;
+        inset: auto;
+        height: auto;
+        min-height: 100dvh;
+        overflow: visible;
+    }
+
+    .player-lobby[data-final-status="lobby"] {
+        height: auto;
+        min-height: calc(100dvh - 1.4rem);
+        overflow: hidden;
+        overscroll-behavior: auto;
+        touch-action: auto;
+    }
+
+    /* Mobile priority: keep controls, presence notice and the full Buzzer in the first viewport. */
+    .player-lobby[data-final-status="lobby"] > .eyebrow,
+    .player-lobby[data-final-status="lobby"] > h1,
+    .player-lobby[data-final-status="lobby"] > h1 + p {
+        display: none;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-media-settings {
+        margin-top: 0;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .dialog-warning {
+        margin-block: 0.25rem 0.45rem;
+        padding: 0.75rem 0.9rem;
+        font-size: 0.92rem;
+        line-height: 1.35;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-buzzer-panel {
+        flex: 1 1 auto;
+        min-height: min(46dvh, 28rem);
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-buzzer-panel > .player-buzzer {
+        min-height: min(39dvh, 24rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player-lobby[data-final-status="lobby"] > .player-buzzer-panel > .player-buzzer {
+        transition: none;
+    }
+}
