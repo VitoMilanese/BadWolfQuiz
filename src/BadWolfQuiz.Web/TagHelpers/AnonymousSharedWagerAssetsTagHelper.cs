@@ -13,6 +13,8 @@ public sealed class AnonymousSharedWagerAssetsTagHelper : TagHelper
 
         if (classNames.Contains("player-lobby", StringComparer.Ordinal))
         {
+            output.PreElement.AppendHtml(
+                "<link rel=\"stylesheet\" href=\"/css/player-lobby-waiting-room-fixes.css?v=1\" />");
             output.PostContent.AppendHtml(
                 "<script src=\"/js/anonymous-shared-wager-player.js?v=1\"></script>");
         }
