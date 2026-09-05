@@ -4,33 +4,88 @@
     ViewData["Title"] = Localizer["AskQuestion_Title"];
 }
 
-<div class="page-heading">
-    <div>
-        <p class="eyebrow">@Localizer["AskQuestion_Eyebrow"]</p>
-        <h1>@Localizer["AskQuestion_Title"]</h1>
-        <p>@Localizer["AskQuestion_Description"]</p>
-    </div>
-</div>
-
-@if (TempData["SuccessMessage"] is string successMessage)
-{
-    <div class="message message-success" role="status" data-auto-dismiss>@successMessage</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/questions.css" asp-append-version="true" />
 }
 
-<form method="post" class="form-card narrow stack-form">
-    <div asp-validation-summary="ModelOnly" class="message message-error"></div>
-    <label>
-        <span>@Localizer["AskQuestion_Name"]</span>
-        <input asp-for="SenderName" maxlength="80" autocomplete="name" />
-        <small>@Localizer["AskQuestion_NameHint"]</small>
-    </label>
-    <label>
-        <span>@Localizer["AskQuestion_Question"]</span>
-        <textarea asp-for="Question" maxlength="1500" rows="8" required></textarea>
-    </label>
-    <div class="form-actions">
-        <button class="button button-primary" type="submit">
-            @Localizer["AskQuestion_Send"]
-        </button>
-    </div>
-</form>
+<div class="support-page support-compose-page">
+    <section class="support-hero support-hero-compose" aria-labelledby="support-compose-title">
+        <div class="support-hero-copy">
+            <p class="support-kicker">
+                <span>@Localizer["AskQuestion_Eyebrow"]</span>
+                <span aria-hidden="true">/ SIGNAL DESK</span>
+            </p>
+            <h1 id="support-compose-title">@Localizer["AskQuestion_Title"]</h1>
+            <p class="support-hero-description">@Localizer["AskQuestion_Description"]</p>
+
+            <div class="support-hero-actions">
+                <a class="button button-secondary" asp-page="/MyQuestions">
+                    @Localizer["MyQuestions_Title"]
+                </a>
+            </div>
+        </div>
+
+        <div class="support-hero-mark" aria-hidden="true">
+            <span>BAD WOLF / DIRECT LINE</span>
+            <strong>SEND</strong>
+            <i></i>
+            <b>SIGNAL</b>
+            <small>QUESTION CHANNEL</small>
+        </div>
+    </section>
+
+    <main class="support-content support-compose-content">
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="message message-success support-message" role="status" data-auto-dismiss>
+                <span aria-hidden="true">OK</span>
+                <strong>@successMessage</strong>
+            </div>
+        }
+
+        <form method="post" class="support-compose-card">
+            <div asp-validation-summary="ModelOnly" class="message message-error support-validation"></div>
+
+            <section class="support-form-block">
+                <header class="support-form-block-heading">
+                    <span aria-hidden="true">01</span>
+                    <div>
+                        <small>IDENTITY</small>
+                        <h2>@Localizer["AskQuestion_Name"]</h2>
+                    </div>
+                </header>
+
+                <label class="support-field">
+                    <span>@Localizer["AskQuestion_Name"]</span>
+                    <input asp-for="SenderName" maxlength="80" autocomplete="name" />
+                    <small>@Localizer["AskQuestion_NameHint"]</small>
+                </label>
+            </section>
+
+            <section class="support-form-block support-form-block-message">
+                <header class="support-form-block-heading">
+                    <span aria-hidden="true">02</span>
+                    <div>
+                        <small>MESSAGE</small>
+                        <h2>@Localizer["AskQuestion_Question"]</h2>
+                    </div>
+                </header>
+
+                <label class="support-field">
+                    <span>@Localizer["AskQuestion_Question"]</span>
+                    <textarea asp-for="Question" maxlength="1500" rows="8" required></textarea>
+                </label>
+            </section>
+
+            <div class="support-compose-actions">
+                <div class="support-compose-actions-copy" aria-hidden="true">
+                    <span>READY</span>
+                    <strong>TO SEND</strong>
+                </div>
+                <button class="button button-primary" type="submit">
+                    @Localizer["AskQuestion_Send"]
+                </button>
+            </div>
+        </form>
+    </main>
+</div>
