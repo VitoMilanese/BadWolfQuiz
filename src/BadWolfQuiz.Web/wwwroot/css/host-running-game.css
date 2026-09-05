@@ -40,6 +40,8 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) #host-gam
 }
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-host-gameplay-board] {
+    position: relative;
+    z-index: 1;
     border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
     border-radius: clamp(1rem, 1.5vw, 1.5rem);
     background:
@@ -48,6 +50,11 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-hos
         0 20px 55px rgb(0 0 0 / 22%),
         0 0 0 100vmax color-mix(in srgb, var(--panel) 90%, var(--bg));
     clip-path: inset(0 -100vmax);
+}
+
+/* The full-bleed stage paint must stay behind the positioned host card. */
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .board-host-sidebar.is-positioned {
+    z-index: 3;
 }
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-column {
