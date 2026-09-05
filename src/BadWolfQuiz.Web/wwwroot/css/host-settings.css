@@ -1,0 +1,761 @@
+body:has(.host-settings-page) {
+    background: var(--bg);
+}
+
+body.portal-layout:has(.host-settings-page) > .page-shell {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body:has(.host-settings-page) .topbar {
+    border-bottom-color: color-mix(in srgb, var(--line) 72%, transparent);
+    background: color-mix(in srgb, var(--topbar-bg) 94%, transparent);
+}
+
+.host-settings-page {
+    position: relative;
+    min-height: 100%;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--bg) 96%, #000) 0,
+            var(--bg) 100%);
+}
+
+.host-settings-page::before,
+.host-settings-page::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    pointer-events: none;
+}
+
+.host-settings-page::before {
+    background:
+        radial-gradient(
+            circle at 82% 6%,
+            color-mix(in srgb, var(--red-bright) 17%, transparent) 0,
+            transparent 31rem),
+        radial-gradient(
+            circle at 6% 42%,
+            color-mix(in srgb, var(--gold) 7%, transparent) 0,
+            transparent 29rem);
+}
+
+.host-settings-page::after {
+    z-index: -2;
+    background-image:
+        linear-gradient(
+            color-mix(in srgb, var(--line) 13%, transparent) 1px,
+            transparent 1px),
+        linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--line) 11%, transparent) 1px,
+            transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, #000, transparent 74%);
+    opacity: 0.2;
+}
+
+.host-settings-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.46fr);
+    align-items: center;
+    gap: clamp(36px, 6vw, 96px);
+    width: min(100%, 1760px);
+    min-height: clamp(450px, 56dvh, 650px);
+    margin: 0 auto;
+    padding: clamp(60px, 7vw, 108px) clamp(28px, 5vw, 78px) clamp(52px, 6vw, 86px);
+}
+
+.host-settings-hero::after {
+    content: "CONTROL";
+    position: absolute;
+    left: -0.04em;
+    bottom: 0.01em;
+    z-index: -1;
+    color: color-mix(in srgb, var(--text) 3.4%, transparent);
+    font-size: clamp(7.8rem, 18vw, 20rem);
+    font-weight: 1000;
+    line-height: 0.7;
+    letter-spacing: -0.08em;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.host-settings-hero-copy {
+    position: relative;
+    z-index: 2;
+    max-width: 1040px;
+}
+
+.host-settings-kicker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 0 0 20px;
+    color: var(--gold);
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+}
+
+.host-settings-kicker::before {
+    content: "";
+    width: 42px;
+    height: 2px;
+    flex: 0 0 auto;
+    background: var(--red-bright);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--red-bright) 72%, transparent);
+}
+
+.host-settings-hero h1 {
+    max-width: 1100px;
+    margin: 0;
+    font-size: clamp(4rem, 8vw, 9rem);
+    font-weight: 1000;
+    line-height: 0.82;
+    letter-spacing: -0.07em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    filter: drop-shadow(0 24px 32px rgba(0, 0, 0, 0.32));
+}
+
+.host-settings-description {
+    max-width: 760px;
+    margin: 28px 0 0;
+    color: var(--muted);
+    font-size: clamp(1rem, 1.45vw, 1.16rem);
+    line-height: 1.65;
+}
+
+.host-settings-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.host-settings-hero-actions .button {
+    min-height: 50px;
+    padding-inline: 22px;
+    border-radius: 2px;
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.host-settings-hero-mark {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 340px;
+    aspect-ratio: 1;
+    justify-self: center;
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    border-radius: 50%;
+    background:
+        radial-gradient(
+            circle at center,
+            color-mix(in srgb, var(--panel-2) 91%, transparent) 0 42%,
+            transparent 43%),
+        repeating-conic-gradient(
+            from -8deg,
+            color-mix(in srgb, var(--line) 20%, transparent) 0 1deg,
+            transparent 1deg 14deg);
+    box-shadow:
+        inset 0 0 90px rgba(0, 0, 0, 0.34),
+        0 0 90px color-mix(in srgb, var(--red-bright) 8%, transparent);
+}
+
+.host-settings-hero-mark > span,
+.host-settings-hero-mark > small {
+    position: absolute;
+    z-index: 2;
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.host-settings-hero-mark > span {
+    top: 22%;
+    color: var(--gold);
+}
+
+.host-settings-hero-mark > small {
+    bottom: 20%;
+    color: var(--muted);
+}
+
+.host-settings-hero-mark > strong,
+.host-settings-hero-mark > b {
+    position: absolute;
+    z-index: 2;
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(4.8rem, 8vw, 8.4rem);
+    font-weight: 1000;
+    line-height: 0.72;
+    letter-spacing: -0.09em;
+}
+
+.host-settings-hero-mark > strong {
+    transform: translate(-18%, -18%);
+}
+
+.host-settings-hero-mark > b {
+    transform: translate(20%, 46%);
+    color: var(--gold);
+}
+
+.host-settings-hero-mark > i {
+    position: absolute;
+    z-index: 3;
+    width: 14px;
+    height: 76%;
+    transform: rotate(18deg);
+    background: var(--red-bright);
+    box-shadow: 12px 0 0 color-mix(in srgb, var(--gold) 78%, transparent);
+}
+
+.host-settings-content {
+    position: relative;
+    width: min(100%, 1560px);
+    margin: 0 auto;
+    padding: 0 clamp(22px, 4vw, 64px) clamp(80px, 9vw, 140px);
+}
+
+.host-settings-message,
+.host-settings-validation {
+    margin-bottom: 22px;
+}
+
+.host-settings-message {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-radius: 2px;
+    padding: 16px 18px;
+}
+
+.host-settings-message > span {
+    flex: 0 0 auto;
+    color: var(--gold);
+    font-size: 0.72rem;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+}
+
+.host-settings-form {
+    display: grid;
+    gap: 22px;
+}
+
+.host-settings-meta,
+.host-settings-panel,
+.host-settings-actions {
+    position: relative;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--panel) 94%, transparent),
+            color-mix(in srgb, var(--panel-2) 86%, transparent));
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.16);
+}
+
+.host-settings-meta::before,
+.host-settings-panel::before,
+.host-settings-actions::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 70px;
+    height: 3px;
+    background: var(--red-bright);
+}
+
+.host-settings-meta {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.28fr) 1fr;
+    gap: 24px;
+    align-items: center;
+    padding: 24px clamp(22px, 3vw, 36px);
+}
+
+.host-settings-meta-label {
+    display: grid;
+    gap: 6px;
+}
+
+.host-settings-meta-label > span,
+.host-settings-panel-heading span,
+.host-settings-actions > span {
+    color: var(--gold);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.host-settings-meta-label > strong {
+    font-size: 1rem;
+}
+
+.host-settings-meta-value {
+    display: grid;
+    grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+    gap: 12px 18px;
+    align-items: center;
+}
+
+.host-settings-meta .host-id-value {
+    display: inline-flex;
+    max-width: 100%;
+    padding: 8px 11px;
+    border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--bg) 74%, transparent);
+    color: var(--text);
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+}
+
+.host-settings-meta small {
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.host-settings-panel {
+    padding: clamp(24px, 3.6vw, 46px);
+    overflow: hidden;
+}
+
+.host-settings-panel::after {
+    content: "";
+    position: absolute;
+    right: -84px;
+    top: -84px;
+    width: 190px;
+    aspect-ratio: 1;
+    border: 1px solid color-mix(in srgb, var(--line) 38%, transparent);
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 24px color-mix(in srgb, var(--line) 5%, transparent),
+        0 0 0 48px color-mix(in srgb, var(--line) 3%, transparent);
+    pointer-events: none;
+}
+
+.host-settings-panel-heading {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 28px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.host-settings-panel-heading > div {
+    display: grid;
+    gap: 7px;
+}
+
+.host-settings-panel-heading h2 {
+    margin: 0;
+    font-size: clamp(1.8rem, 3.5vw, 3.3rem);
+    font-weight: 1000;
+    line-height: 0.96;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+}
+
+.host-settings-panel-heading > strong {
+    color: var(--muted);
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.host-settings-grid,
+.host-settings-brand-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.host-settings-field,
+.host-settings-checkbox {
+    min-width: 0;
+    border: 1px solid color-mix(in srgb, var(--line) 74%, transparent);
+    background: color-mix(in srgb, var(--bg) 28%, transparent);
+    transition:
+        border-color 140ms ease,
+        background 140ms ease,
+        transform 140ms ease;
+}
+
+.host-settings-field {
+    display: grid;
+    align-content: start;
+    gap: 9px;
+    padding: 18px;
+}
+
+.host-settings-field:hover,
+.host-settings-checkbox:hover {
+    border-color: color-mix(in srgb, var(--red-bright) 42%, var(--line));
+    background: color-mix(in srgb, var(--panel-2) 74%, transparent);
+}
+
+.host-settings-field > span:first-child {
+    color: var(--text);
+    font-size: 0.77rem;
+    font-weight: 900;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+}
+
+.host-settings-field small,
+.host-settings-field .form-hint {
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.host-settings-field input:not([type="file"]):not([type="color"]),
+.host-settings-field select {
+    width: 100%;
+    min-height: 46px;
+    border-color: color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--bg) 72%, var(--panel));
+}
+
+.host-settings-field input:focus,
+.host-settings-field select:focus {
+    border-color: var(--red-bright);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--red-bright) 14%, transparent);
+}
+
+.host-settings-field-wide {
+    grid-column: 1 / -1;
+}
+
+.host-settings-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 16px 18px;
+    cursor: pointer;
+}
+
+.host-settings-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+    accent-color: var(--red-bright);
+}
+
+.host-settings-checkbox > span {
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.host-settings-theme-picker {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 14px;
+    border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--bg) 28%, transparent);
+}
+
+.host-settings-theme-picker > summary {
+    min-height: 58px;
+    padding: 18px 20px;
+    color: var(--text);
+    font-size: 0.8rem;
+    font-weight: 1000;
+    letter-spacing: 0.075em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.host-settings-theme-picker[open] > summary {
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+}
+
+.host-settings-theme-picker .theme-picker-content {
+    padding: 20px;
+}
+
+.host-settings-theme-picker .theme-picker-content > p {
+    margin: 0 0 18px;
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.host-settings-theme-picker .theme-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.host-settings-theme-picker .theme-option {
+    min-height: 112px;
+    padding: 14px;
+    border-radius: 2px;
+    border-color: color-mix(in srgb, var(--line) 74%, transparent);
+    background: color-mix(in srgb, var(--panel-2) 76%, transparent);
+}
+
+.host-settings-theme-picker .theme-option:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--red-bright) 52%, var(--line));
+}
+
+.host-settings-theme-picker .theme-option:has(input:checked) {
+    border-color: var(--red-bright);
+    box-shadow:
+        inset 0 0 0 1px var(--red-bright),
+        0 12px 28px color-mix(in srgb, var(--red-bright) 12%, transparent);
+}
+
+.host-settings-theme-picker .theme-option strong {
+    font-size: 0.74rem;
+    letter-spacing: 0.035em;
+}
+
+.host-settings-theme-picker .custom-theme-colors {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+}
+
+.host-settings-theme-picker .custom-theme-colors label {
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--panel-2) 70%, transparent);
+}
+
+.host-settings-brand-grid {
+    align-items: stretch;
+}
+
+.host-settings-field input[type="file"] {
+    width: 100%;
+    min-width: 0;
+    padding: 9px;
+    border: 1px dashed color-mix(in srgb, var(--line) 88%, transparent);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--bg) 60%, transparent);
+    color: var(--muted);
+}
+
+.host-settings-page .brand-logo-input-row,
+.host-settings-page .host-avatar-input-row,
+.host-settings-page .host-image-input-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.host-settings-page .brand-logo-preview {
+    max-width: 180px;
+    max-height: 78px;
+    object-fit: contain;
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    background: color-mix(in srgb, var(--bg) 68%, transparent);
+    padding: 8px;
+}
+
+.host-settings-page .host-avatar-preview,
+.host-settings-page .host-image-preview {
+    width: 72px;
+    height: 72px;
+    flex: 0 0 auto;
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--bg) 68%, transparent);
+    object-fit: cover;
+}
+
+.host-settings-page .host-image-preview {
+    border-radius: 3px;
+}
+
+.host-settings-page .form-hint a {
+    color: var(--gold);
+}
+
+.host-settings-actions {
+    position: sticky;
+    bottom: 18px;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 16px 18px 16px 22px;
+    backdrop-filter: blur(16px);
+    background: color-mix(in srgb, var(--panel) 88%, transparent);
+}
+
+.host-settings-actions .button-primary {
+    min-width: 180px;
+    min-height: 50px;
+    border-radius: 2px;
+    font-size: 0.78rem;
+    font-weight: 1000;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.host-settings-page :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+}
+
+@media (max-width: 1180px) {
+    .host-settings-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 0.38fr);
+        gap: 32px;
+    }
+
+    .host-settings-hero-mark {
+        min-height: 280px;
+    }
+
+    .host-settings-theme-picker .theme-options {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 860px) {
+    .host-settings-hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        padding-top: 62px;
+    }
+
+    .host-settings-hero-mark {
+        width: min(72vw, 360px);
+        min-height: 0;
+        margin-top: 6px;
+    }
+
+    .host-settings-meta {
+        grid-template-columns: 1fr;
+    }
+
+    .host-settings-meta-value {
+        grid-template-columns: 1fr;
+    }
+
+    .host-settings-grid,
+    .host-settings-brand-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .host-settings-field-wide {
+        grid-column: auto;
+    }
+
+    .host-settings-theme-picker .theme-options {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .host-settings-panel-heading > strong {
+        display: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .host-settings-hero {
+        padding: 46px 18px 42px;
+    }
+
+    .host-settings-hero h1 {
+        font-size: clamp(3.2rem, 16vw, 5.2rem);
+    }
+
+    .host-settings-description {
+        margin-top: 20px;
+    }
+
+    .host-settings-hero-mark {
+        width: min(86vw, 330px);
+    }
+
+    .host-settings-content {
+        padding-inline: 14px;
+        padding-bottom: 88px;
+    }
+
+    .host-settings-panel,
+    .host-settings-meta {
+        padding: 20px 16px;
+    }
+
+    .host-settings-panel-heading {
+        margin-bottom: 20px;
+    }
+
+    .host-settings-theme-picker .theme-picker-content {
+        padding: 14px;
+    }
+
+    .host-settings-theme-picker .theme-options {
+        grid-template-columns: 1fr;
+    }
+
+    .host-settings-theme-picker .theme-option {
+        min-height: 92px;
+    }
+
+    .host-settings-actions {
+        bottom: 8px;
+        align-items: stretch;
+        flex-direction: column;
+        padding: 14px;
+    }
+
+    .host-settings-actions > span {
+        display: none;
+    }
+
+    .host-settings-actions .button-primary {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .host-settings-field,
+    .host-settings-checkbox,
+    .host-settings-theme-picker .theme-option {
+        transition: none;
+    }
+
+    .host-settings-theme-picker .theme-option:hover {
+        transform: none;
+    }
+}
