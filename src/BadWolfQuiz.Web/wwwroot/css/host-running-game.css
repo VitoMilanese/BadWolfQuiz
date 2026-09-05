@@ -1,0 +1,178 @@
+/* Host Running Game live-stage redesign. Scoped to the active host game only. */
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) {
+    background:
+        radial-gradient(circle at 14% 10%, color-mix(in srgb, var(--red-bright) 14%, transparent), transparent 30rem),
+        radial-gradient(circle at 86% 20%, color-mix(in srgb, var(--gold) 8%, transparent), transparent 26rem),
+        linear-gradient(160deg, color-mix(in srgb, var(--panel-2) 68%, var(--bg)), var(--bg) 58%);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) > .page-shell {
+    width: min(1920px, 100%);
+    max-width: none;
+    margin-inline: auto;
+    padding: clamp(0.55rem, 1vw, 1rem);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .game-header-context {
+    gap: 0.65rem;
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .game-header-context h2 {
+    max-width: min(58vw, 56rem);
+    margin: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-size: clamp(1rem, 1.6vw, 1.35rem);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-game-board {
+    position: relative;
+    isolation: isolate;
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) #host-gameplay-view {
+    min-width: 0;
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-host-gameplay-board] {
+    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+    border-radius: clamp(1rem, 1.5vw, 1.5rem);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--panel) 90%, transparent), color-mix(in srgb, var(--panel-2) 86%, transparent));
+    box-shadow: 0 20px 55px rgb(0 0 0 / 22%);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-column {
+    gap: clamp(0.35rem, 0.7vw, 0.65rem);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-column > h3 {
+    min-height: clamp(3.2rem, 5.8vw, 5.4rem);
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: clamp(0.55rem, 1vw, 0.9rem);
+    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+    border-radius: clamp(0.75rem, 1vw, 1rem);
+    background:
+        linear-gradient(145deg, color-mix(in srgb, var(--panel-2) 96%, transparent), color-mix(in srgb, var(--panel) 84%, transparent));
+    color: var(--text);
+    font-size: clamp(0.82rem, 1.35vw, 1.15rem);
+    font-weight: 950;
+    letter-spacing: 0.035em;
+    line-height: 1.05;
+    text-align: center;
+    text-wrap: balance;
+    box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--red-bright) 30%, transparent);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question {
+    position: relative;
+    min-height: clamp(3.8rem, 7vw, 6.6rem);
+    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+    border-radius: clamp(0.7rem, 0.9vw, 0.95rem);
+    background:
+        linear-gradient(150deg, color-mix(in srgb, var(--panel) 93%, transparent), color-mix(in srgb, var(--panel-2) 90%, transparent));
+    color: var(--gold);
+    font-size: clamp(1.2rem, 2.4vw, 2.15rem);
+    font-weight: 950;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    box-shadow: 0 10px 24px rgb(0 0 0 / 14%);
+    transition:
+        transform 120ms ease,
+        border-color 120ms ease,
+        box-shadow 120ms ease,
+        filter 120ms ease;
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question.status-available:hover,
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question.status-available:focus-visible {
+    z-index: 1;
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--gold) 72%, var(--line));
+    box-shadow:
+        0 14px 30px rgb(0 0 0 / 20%),
+        0 0 0 2px color-mix(in srgb, var(--gold) 14%, transparent);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question.status-resolved {
+    border-color: color-mix(in srgb, var(--line) 52%, transparent);
+    background: color-mix(in srgb, var(--panel) 56%, transparent);
+    color: color-mix(in srgb, var(--muted) 62%, transparent);
+    box-shadow: none;
+    filter: saturate(0.45);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .game-scoreboard,
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .board-player-sidebar {
+    border-color: color-mix(in srgb, var(--line) 86%, transparent);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--panel) 94%, transparent), color-mix(in srgb, var(--panel-2) 90%, transparent));
+    box-shadow: 0 16px 42px rgb(0 0 0 / 20%);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .scoreboard-player,
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .board-player-list > li {
+    border-color: color-mix(in srgb, var(--line) 72%, transparent);
+    background: color-mix(in srgb, var(--panel-2) 78%, transparent);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .scoreboard-player.active-player,
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .board-player-list > li.active-player {
+    border-color: color-mix(in srgb, var(--gold) 68%, var(--line));
+    box-shadow: inset 3px 0 0 var(--gold);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .current-question-summary,
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .question-review-preview {
+    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+    border-radius: clamp(1rem, 1.5vw, 1.5rem);
+    background:
+        radial-gradient(circle at 50% 0, color-mix(in srgb, var(--red-bright) 8%, transparent), transparent 28rem),
+        linear-gradient(160deg, color-mix(in srgb, var(--panel) 96%, transparent), color-mix(in srgb, var(--panel-2) 90%, transparent));
+    box-shadow: 0 22px 60px rgb(0 0 0 / 24%);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-game-timer {
+    border: 1px solid color-mix(in srgb, var(--gold) 48%, var(--line));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--panel-2) 92%, transparent);
+    box-shadow: 0 8px 22px rgb(0 0 0 / 18%);
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-game-timer > strong {
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .question-review-heading,
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .current-question-heading {
+    border-bottom-color: color-mix(in srgb, var(--line) 82%, transparent);
+}
+
+@media (max-width: 900px) {
+    body.gameplay-layout:has(.host-game-board[data-game-status="running"]) > .page-shell {
+        padding: 0.45rem;
+    }
+
+    body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question {
+        min-height: clamp(3.2rem, 10vw, 4.8rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question {
+        transition: none;
+    }
+
+    body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question.status-available:hover,
+    body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question.status-available:focus-visible {
+        transform: none;
+    }
+}
