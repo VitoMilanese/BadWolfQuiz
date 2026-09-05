@@ -1,0 +1,134 @@
+/* Browser-review corrections for the Host Lobby redesign. */
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-access {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    overflow: hidden;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-details {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-reveal {
+    padding-right: 0.9rem;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-actions {
+    position: static;
+    flex: 0 0 auto;
+    align-self: flex-start;
+    max-width: none;
+    margin: 0;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-actions .icon-button {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    max-width: 2.75rem;
+    height: 2.75rem;
+    min-height: 2.75rem;
+    max-height: 2.75rem;
+    padding: 0;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li {
+    grid-template-columns: minmax(0, 1fr) max-content auto;
+    column-gap: 0.9rem;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > strong {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > .presence-badge {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    justify-self: end;
+    max-width: none;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > .player-management {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) {
+    grid-template-columns: auto minmax(0, 1fr) max-content auto;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > .player-list-avatar {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > strong {
+    grid-column: 2;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > .presence-badge {
+    grid-column: 3;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > .player-management {
+    grid-column: 4;
+}
+
+@media (max-width: 700px) {
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-access {
+        gap: 0.35rem;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-actions .icon-button {
+        width: 2.55rem;
+        min-width: 2.55rem;
+        max-width: 2.55rem;
+        height: 2.55rem;
+        min-height: 2.55rem;
+        max-height: 2.55rem;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > strong {
+        grid-column: 1 / 3;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > .presence-badge {
+        grid-column: 1 / 3;
+        grid-row: 2;
+        justify-self: start;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > .player-management {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > .player-list-avatar {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > strong {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > .presence-badge {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > .player-management {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+    }
+}
