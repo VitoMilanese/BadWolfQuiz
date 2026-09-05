@@ -58,6 +58,24 @@ body.gameplay-layout:has(.player-lobby[data-final-status="lobby"]) > .page-shell
     flex: 0 0 auto;
 }
 
+/* On desktop/fullscreen, the Buzzer owns the remaining stage instead of collapsing into a thin pill. */
+@media (min-width: 901px) {
+    .player-lobby[data-final-status="lobby"] {
+        grid-template-rows: auto auto auto auto auto minmax(clamp(20rem, 42dvh, 34rem), 1fr);
+        align-content: stretch;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-buzzer-panel {
+        min-height: clamp(20rem, 42dvh, 34rem);
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-buzzer-panel > .player-buzzer {
+        flex: 1 1 auto;
+        min-height: 0;
+        border-radius: clamp(2.5rem, 4vw, 4.5rem);
+    }
+}
+
 @media (max-width: 900px) {
     body.gameplay-layout:has(.player-lobby[data-final-status="lobby"]) > .page-shell {
         max-width: none;
