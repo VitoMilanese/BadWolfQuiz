@@ -1,9 +1,9 @@
 /* Host Running Game live-stage redesign. Scoped to the active host game only. */
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) {
     background:
-        radial-gradient(circle at 14% 10%, color-mix(in srgb, var(--red-bright) 14%, transparent), transparent 30rem),
-        radial-gradient(circle at 86% 20%, color-mix(in srgb, var(--gold) 8%, transparent), transparent 26rem),
-        linear-gradient(160deg, color-mix(in srgb, var(--panel-2) 68%, var(--bg)), var(--bg) 58%);
+        radial-gradient(circle at 14% 10%, color-mix(in srgb, var(--red-bright) 10%, transparent), transparent 30rem),
+        radial-gradient(circle at 86% 20%, color-mix(in srgb, var(--gold) 6%, transparent), transparent 26rem),
+        linear-gradient(180deg, color-mix(in srgb, var(--panel) 90%, var(--bg)), color-mix(in srgb, var(--panel-2) 86%, var(--bg)));
 }
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) > .page-shell {
@@ -45,25 +45,6 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-hos
     background:
         linear-gradient(180deg, color-mix(in srgb, var(--panel) 90%, transparent), color-mix(in srgb, var(--panel-2) 86%, transparent));
     box-shadow: 0 20px 55px rgb(0 0 0 / 22%);
-}
-
-/* Extend only the stage paint to the viewport edges. Do not change the board grid itself. */
-body.gameplay-layout:has(.host-game-board[data-game-status="running"])
-.host-game-board:has(> [data-host-gameplay-view] > .host-board-layout:not([hidden]))::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    top: 0;
-    right: auto;
-    bottom: var(--game-scoreboard-space, 0px);
-    left: 50%;
-    width: 100vw;
-    transform: translateX(-50%);
-    border-block: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
-    background:
-        linear-gradient(180deg, color-mix(in srgb, var(--panel) 90%, transparent), color-mix(in srgb, var(--panel-2) 86%, transparent));
-    box-shadow: 0 20px 55px rgb(0 0 0 / 18%);
-    pointer-events: none;
 }
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-column {
