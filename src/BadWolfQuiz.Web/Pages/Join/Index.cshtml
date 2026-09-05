@@ -6,48 +6,127 @@
     ViewData["SocialThemeColors"] = Model.SocialThemeColors;
 }
 
-<div class="form-card narrow">
-    <p class="eyebrow">@Localizer["Join_Eyebrow"]</p>
-    <h1>@Localizer["Title_JoinGame"]</h1>
+@section Styles {
+    <link rel="stylesheet" href="~/css/join.css" asp-append-version="true" />
+}
 
-    <form id="join-game-form"
-          method="post"
-          class="stack-form"
-          data-game-instance-id="@Model.GameInstanceId">
-        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+<div class="join-entry-page">
+    <main class="join-entry-stage" aria-labelledby="join-entry-title">
+        <section class="join-entry-copy">
+            <p class="join-entry-kicker">
+                <span>BAD WOLF</span>
+                <span aria-hidden="true">/ GAME ACCESS</span>
+            </p>
 
-        @if (string.IsNullOrWhiteSpace(Model.Input.GameCode))
-        {
-            <label asp-for="Input.GameCode">@Localizer["Label_GameCode"]</label>
-            <input asp-for="Input.GameCode"
-                   maxlength="6"
-                   autocomplete="off"
-                   autocapitalize="characters"
-                   placeholder="@Localizer["Placeholder_GameCode"]" />
-            <span asp-validation-for="Input.GameCode"></span>
-        }
-        else
-        {
-            <input asp-for="Input.GameCode" type="hidden" />
-            <p class="join-selected-game">@Localizer["Join_SelectedGame", Model.Input.GameCode]</p>
-            <span asp-validation-for="Input.GameCode"></span>
-        }
+            <h1 id="join-entry-title">@Localizer["Title_JoinGame"]</h1>
+            <p class="join-entry-lead">@Localizer["Join_Eyebrow"]</p>
 
-        <label asp-for="Input.PlayerName">@Localizer["Label_PlayerName"]</label>
-        <input asp-for="Input.PlayerName"
-               maxlength="60"
-               autocomplete="nickname"
-               placeholder="@Localizer["Placeholder_PlayerName"]" />
-        <span asp-validation-for="Input.PlayerName"></span>
-        <input asp-for="Input.AvatarId" type="hidden" />
-        <input asp-for="Input.ClientDayOfMonth" type="hidden" />
+            <div class="join-entry-signal" aria-hidden="true">
+                <div class="join-entry-signal-rings">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="join-entry-signal-mark">
+                    <small>LIVE</small>
+                    <strong>JOIN</strong>
+                    <i></i>
+                </div>
+            </div>
+        </section>
 
-        <button class="button button-primary" type="submit">
-            @Localizer["Button_Join"]
-        </button>
-    </form>
+        <section class="join-entry-card" aria-label="@Localizer["Title_JoinGame"]">
+            <header class="join-entry-card-header" aria-hidden="true">
+                <span>PLAYER CHECK-IN</span>
+                <strong>01</strong>
+            </header>
+
+            <form id="join-game-form"
+                  method="post"
+                  class="join-entry-form"
+                  data-game-instance-id="@Model.GameInstanceId">
+                <div asp-validation-summary="ModelOnly" class="validation-summary join-entry-summary"></div>
+
+                @if (string.IsNullOrWhiteSpace(Model.Input.GameCode))
+                {
+                    <section class="join-entry-step join-entry-step-code">
+                        <div class="join-entry-step-heading">
+                            <span aria-hidden="true">01</span>
+                            <div>
+                                <small aria-hidden="true">MATCH CODE</small>
+                                <strong>@Localizer["Label_GameCode"]</strong>
+                            </div>
+                        </div>
+
+                        <label class="join-entry-field-label" asp-for="Input.GameCode">
+                            @Localizer["Label_GameCode"]
+                        </label>
+                        <input class="join-entry-input join-entry-code-input"
+                               asp-for="Input.GameCode"
+                               maxlength="6"
+                               autocomplete="off"
+                               autocapitalize="characters"
+                               placeholder="@Localizer["Placeholder_GameCode"]" />
+                        <span class="join-entry-validation" asp-validation-for="Input.GameCode"></span>
+                    </section>
+                }
+                else
+                {
+                    <input asp-for="Input.GameCode" type="hidden" />
+                    <section class="join-entry-step join-entry-step-code is-selected">
+                        <div class="join-entry-step-heading">
+                            <span aria-hidden="true">01</span>
+                            <div>
+                                <small aria-hidden="true">MATCH LOCKED</small>
+                                <strong>@Localizer["Label_GameCode"]</strong>
+                            </div>
+                        </div>
+
+                        <div class="join-selected-game">
+                            <strong>@Model.Input.GameCode</strong>
+                            <p>@Localizer["Join_SelectedGame", Model.Input.GameCode]</p>
+                        </div>
+                        <span class="join-entry-validation" asp-validation-for="Input.GameCode"></span>
+                    </section>
+                }
+
+                <section class="join-entry-step join-entry-step-player">
+                    <div class="join-entry-step-heading">
+                        <span aria-hidden="true">02</span>
+                        <div>
+                            <small aria-hidden="true">PLAYER IDENTITY</small>
+                            <strong>@Localizer["Label_PlayerName"]</strong>
+                        </div>
+                    </div>
+
+                    <label class="join-entry-field-label" asp-for="Input.PlayerName">
+                        @Localizer["Label_PlayerName"]
+                    </label>
+                    <input class="join-entry-input"
+                           asp-for="Input.PlayerName"
+                           maxlength="60"
+                           autocomplete="nickname"
+                           placeholder="@Localizer["Placeholder_PlayerName"]" />
+                    <span class="join-entry-validation" asp-validation-for="Input.PlayerName"></span>
+                </section>
+
+                <input asp-for="Input.AvatarId" type="hidden" />
+                <input asp-for="Input.ClientDayOfMonth" type="hidden" />
+
+                <button class="button button-primary join-entry-submit" type="submit">
+                    <span>@Localizer["Button_Join"]</span>
+                    <span class="join-entry-submit-arrow" aria-hidden="true">→</span>
+                </button>
+            </form>
+
+            <footer class="join-entry-card-footer" aria-hidden="true">
+                <span>BADWOLF.BUZZ</span>
+                <i></i>
+                <span>LIVE QUIZ SYSTEM</span>
+            </footer>
+        </section>
+    </main>
 </div>
-
 
 @section Scripts {
     <script>
