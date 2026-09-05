@@ -6,227 +6,313 @@
     ViewData["Title"] = Localizer["Menu_Quizzes"];
 }
 
-<div class="page-heading">
-    <div>
-        <p class="eyebrow">@Localizer["Admin_Eyebrow"]</p>
-        <h1>@Localizer["Title_MyQuizzes"]</h1>
-    </div>
-    <div class="page-heading-actions">
-        <form id="quiz-import-form" method="post" asp-page-handler="Import" asp-antiforgery="false" enctype="multipart/form-data">
-            @Html.AntiForgeryToken()
-            <input asp-for="ImportFile" type="file" accept=".bwquiz" required hidden data-quiz-import-file />
-            <button class="button button-secondary" type="button" data-quiz-import-select>
-                @Localizer["Button_ImportQuiz"]
-            </button>
-        </form>
-        <a class="button button-primary" asp-page="Create">@Localizer["Button_CreateQuiz"]</a>
-    </div>
-</div>
-
-@if (TempData["SuccessMessage"] is string successMessage)
-{
-    <div class="message message-success" role="status" data-auto-dismiss>@successMessage</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/my-quizzes.css" asp-append-version="true" />
 }
 
-@if (TempData["ErrorMessage"] is string errorMessage)
-{
-    <div class="message message-error" role="alert">@errorMessage</div>
-}
+<div class="my-quizzes-page">
+    <section class="my-quizzes-hero" aria-labelledby="my-quizzes-title">
+        <div class="my-quizzes-heading">
+            <p class="my-quizzes-kicker">@Localizer["Admin_Eyebrow"] / LIBRARY</p>
+            <h1 id="my-quizzes-title">@Localizer["Title_MyQuizzes"]</h1>
 
-<div class="quiz-list">
-@foreach (var quiz in Model.Quizzes)
-{
-    var hasResumableGame = Model.ResumableQuizIds.Contains(quiz.Id);
-
-    <article class="quiz-card">
-        <div class="quiz-card-content">
-            <h2>@quiz.Title</h2>
-
-            @if (!string.IsNullOrWhiteSpace(quiz.Description))
-            {
-                <p>@quiz.Description</p>
-            }
-
-            <small>@Localizer["Quiz_RoundCount", quiz.Rounds.Count]</small>
-            @if (Model.Ratings.TryGetValue(quiz.Id, out var rating))
-            {
-                <div class="quiz-rating-summary"
-                     aria-label="@Localizer["QuizRating_AccessibleSummary", rating.Average, rating.Count]">
-                    <span class="quiz-rating-stars" aria-hidden="true">★</span>
-                    <strong>@rating.Average.ToString("0.0")</strong>
-                    <span>@Localizer["QuizRating_Count", rating.Count]</span>
-                </div>
-            }
-            @if (quiz.IsPublic)
-            {
-                <span class="status-pill">@Localizer["QuizPublication_Public"]</span>
-            }
-            <span class="status-pill">@Localizer[$"MediaArchive_State_{quiz.MediaState}"]</span>
-            @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived)
-            {
-                <small>@Localizer["MediaArchive_ArchivedOn"]: @quiz.MediaArchivedAtUtc?.ToLocalTime().ToString("g") · @Localizer["MediaArchive_MediaSize"]: @FormatBytes(quiz.ArchivedMediaBytes)</small>
-            }
+            <div class="my-quizzes-hero-actions">
+                <form id="quiz-import-form" method="post" asp-page-handler="Import" asp-antiforgery="false" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="ImportFile" type="file" accept=".bwquiz" required hidden data-quiz-import-file />
+                    <button class="button button-secondary my-quizzes-import-button" type="button" data-quiz-import-select>
+                        <span aria-hidden="true">↓</span>
+                        <span>@Localizer["Button_ImportQuiz"]</span>
+                    </button>
+                </form>
+                <a class="button button-primary my-quizzes-create-button" asp-page="Create">
+                    <span>@Localizer["Button_CreateQuiz"]</span>
+                    <span aria-hidden="true">＋</span>
+                </a>
+            </div>
         </div>
 
-        <div class="card-actions">
-            @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived)
-            {
-                @if (hasResumableGame)
-                {
-                    <button class="button button-primary"
-                            type="button"
-                            data-open-replace-game-dialog
-                            data-requires-media-restore="true"
-                            data-quiz-id="@quiz.Id"
-                            data-quiz-title="@quiz.Title">
-                        @Localizer["Button_CreateGame"]
-                    </button>
-                }
-                else
-                {
-                    <button class="button button-primary"
-                            type="button"
-                            data-open-owned-restore-dialog
-                            data-quiz-id="@quiz.Id"
-                            data-quiz-title="@quiz.Title">
-                        @Localizer["Button_CreateGame"]
-                    </button>
-                }
-            }
-            else if (hasResumableGame)
-            {
-                <form method="post" asp-page-handler="CreateGame" data-new-game-form>
-                    <input name="quizId" type="hidden" value="@quiz.Id" />
-                    <input name="replaceUnfinished" type="hidden" value="false" data-replace-unfinished />
-                    <button class="button button-primary"
-                            type="button"
-                            disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)"
-                            data-open-replace-game-dialog
-                            data-requires-media-restore="false"
-                            data-quiz-id="@quiz.Id"
-                            data-quiz-title="@quiz.Title">
-                        @Localizer["Button_CreateGame"]
-                    </button>
-                </form>
-            }
-            else
-            {
-                <form method="post" asp-page-handler="CreateGame">
-                    <input name="quizId" type="hidden" value="@quiz.Id" />
-                    <input name="replaceUnfinished" type="hidden" value="false" />
-                    <button class="button button-primary" type="submit" disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)">
-                        @Localizer["Button_CreateGame"]
-                    </button>
-                </form>
-            }
-
-            @if (hasResumableGame)
-            {
-                <form method="post" asp-page-handler="ContinueGame">
-                    <input name="quizId" type="hidden" value="@quiz.Id" />
-                    <button class="button button-secondary" type="submit">
-                        @Localizer["Button_ContinueGame"]
-                    </button>
-                </form>
-            }
-            <details class="action-menu quiz-action-menu">
-                <summary class="button button-secondary action-menu-trigger">
-                    @Localizer["Menu_Actions"]
-                </summary>
-                <div class="action-menu-popover">
-                    @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Active)
-                    {
-                        <a class="action-menu-item"
-                           asp-page="Editor"
-                           asp-route-id="@quiz.Id">
-                            @Localizer["Button_Edit"]
-                        </a>
-                    }
-
-                    @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Active || (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Failed && quiz.ArchivedMediaCount == 0))
-                    {
-                        <button class="action-menu-item" type="button" data-open-archive-dialog data-quiz-id="@quiz.Id" data-quiz-title="@quiz.Title">
-                            @Localizer["MediaArchive_ArchiveMedia"]
-                        </button>
-                    }
-                    @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived || (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Failed && quiz.ArchivedMediaCount > 0))
-                    {
-                        <form method="post" asp-page-handler="RestoreMedia">
-                            <input name="quizId" type="hidden" value="@quiz.Id" />
-                            <button class="action-menu-item" type="submit">@Localizer["MediaArchive_RestoreMedia"]</button>
-                        </form>
-                    }
-                    @if (Model.CanDisableAutomaticArchiving)
-                    {
-                        <form method="post" asp-page-handler="SetAutomaticArchiving">
-                            <input name="quizId" type="hidden" value="@quiz.Id" />
-                            <input name="prevent" type="hidden" value="@(!quiz.PreventAutomaticArchiving ? "true" : "false")" />
-                            <button class="action-menu-item" type="submit">
-                                @(quiz.PreventAutomaticArchiving ? Localizer["MediaArchive_AllowAutomatic"] : Localizer["MediaArchive_PreventAutomatic"])
-                            </button>
-                        </form>
-                    }
-
-                    @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Active)
-                    {
-                        <a class="action-menu-item"
-                           asp-page-handler="Export"
-                           asp-route-quizId="@quiz.Id">
-                            @Localizer["Button_ExportQuiz"]
-                        </a>
-
-                        <button class="action-menu-item"
-                                type="button"
-                                data-open-rename-dialog
-                                data-quiz-id="@quiz.Id"
-                                data-quiz-title="@quiz.Title"
-                                data-quiz-description="@(quiz.Description ?? string.Empty)">
-                            @Localizer["Button_Rename"]
-                        </button>
-                    }
-
-                    <form method="post" asp-page-handler="SetPublication">
-                        <input name="quizId" type="hidden" value="@quiz.Id" />
-                        <input name="isPublic" type="hidden" value="@(!quiz.IsPublic ? "true" : "false")" />
-                        <button class="action-menu-item" type="submit">
-                            @(quiz.IsPublic
-                                ? Localizer["QuizPublication_Unpublish"]
-                                : Localizer["QuizPublication_Publish"])
-                        </button>
-                    </form>
-
-                    <button class="action-menu-item"
-                            type="button"
-                            data-copy-quiz-description-link
-                            data-description-url="@Model.DescriptionLinks[quiz.Id]"
-                            data-copy-success="@QuizDescriptionLocalizer["Copied"]"
-                            data-copy-failed="@QuizDescriptionLocalizer["CopyFailed"]">
-                        @QuizDescriptionLocalizer["Action"]
-                    </button>
-
-                    @if (hasResumableGame)
-                    {
-                        <button class="action-menu-item action-menu-danger"
-                                type="button"
-                                data-open-delete-unfinished-dialog
-                                data-quiz-id="@quiz.Id"
-                                data-quiz-title="@quiz.Title">
-                            @UnfinishedGameLocalizer["DeleteAction"]
-                        </button>
-                    }
-
-                    <button class="action-menu-item action-menu-danger"
-                            type="button"
-                            data-open-delete-dialog
-                            data-quiz-id="@quiz.Id"
-                            data-quiz-title="@quiz.Title">
-                        @Localizer["Button_Delete"]
-                    </button>
-                </div>
-            </details>
+        <div class="my-quizzes-hero-art" aria-hidden="true">
+            <span class="my-quizzes-hero-word">HOST</span>
+            <span class="my-quizzes-hero-slash"></span>
+            <strong>
+                @Model.Quizzes.Count.ToString("00")
+                <small>QUIZZES</small>
+            </strong>
         </div>
-    </article>
-}
+    </section>
+
+    <div class="my-quizzes-content">
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="message message-success my-quizzes-alert" role="status" data-auto-dismiss>
+                <span class="my-quizzes-alert-mark" aria-hidden="true">✓</span>
+                <span>@successMessage</span>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="message message-error my-quizzes-alert" role="alert">
+                <span class="my-quizzes-alert-mark" aria-hidden="true">!</span>
+                <span>@errorMessage</span>
+            </div>
+        }
+
+        <div class="my-quizzes-library-heading">
+            <div>
+                <span>BAD WOLF / LIBRARY</span>
+                <em aria-hidden="true">OWNED GAMES</em>
+            </div>
+            <strong aria-label="@Model.Quizzes.Count">@Model.Quizzes.Count.ToString("00")</strong>
+        </div>
+
+        @if (Model.Quizzes.Count == 0)
+        {
+            <section class="my-quizzes-empty">
+                <div class="my-quizzes-empty-mark" aria-hidden="true">+</div>
+                <div>
+                    <p class="my-quizzes-empty-kicker" aria-hidden="true">BUILD / 01</p>
+                    <h2>@Localizer["Title_MyQuizzes"]</h2>
+                    <a class="button button-primary my-quizzes-empty-action" asp-page="Create">
+                        <span>@Localizer["Button_CreateQuiz"]</span>
+                        <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+            </section>
+        }
+        else
+        {
+            <div class="owned-quiz-list">
+                @for (var index = 0; index < Model.Quizzes.Count; index++)
+                {
+                    var quiz = Model.Quizzes[index];
+                    var hasResumableGame = Model.ResumableQuizIds.Contains(quiz.Id);
+                    var isArchived = quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived;
+                    var cardNumber = (index + 1).ToString("00");
+
+                    <article class="owned-quiz-card @(isArchived ? "is-archived" : string.Empty) @(hasResumableGame ? "has-resumable-game" : string.Empty)">
+                        <div class="owned-quiz-poster" aria-hidden="true">
+                            <span class="owned-quiz-number">@cardNumber</span>
+                            <span class="owned-quiz-poster-brand">BAD<br />WOLF</span>
+                            @if (hasResumableGame)
+                            {
+                                <span class="owned-quiz-resume-flag">RESUME</span>
+                            }
+                            <span class="owned-quiz-poster-word">QUIZ</span>
+                        </div>
+
+                        <div class="owned-quiz-body">
+                            <div class="owned-quiz-status-row">
+                                @if (quiz.IsPublic)
+                                {
+                                    <span class="status-pill owned-quiz-status is-public">@Localizer["QuizPublication_Public"]</span>
+                                }
+                                <span class="status-pill owned-quiz-status">@Localizer[$"MediaArchive_State_{quiz.MediaState}"]</span>
+                            </div>
+
+                            <div class="owned-quiz-copy">
+                                <h2>@quiz.Title</h2>
+                                @if (!string.IsNullOrWhiteSpace(quiz.Description))
+                                {
+                                    <p>@quiz.Description</p>
+                                }
+                            </div>
+
+                            <div class="owned-quiz-meta">
+                                <span class="owned-quiz-meta-item">
+                                    <span class="owned-quiz-meta-dot" aria-hidden="true"></span>
+                                    @Localizer["Quiz_RoundCount", quiz.Rounds.Count]
+                                </span>
+
+                                @if (Model.Ratings.TryGetValue(quiz.Id, out var rating))
+                                {
+                                    <span class="owned-quiz-rating"
+                                          aria-label="@Localizer["QuizRating_AccessibleSummary", rating.Average, rating.Count]">
+                                        <span aria-hidden="true">★</span>
+                                        <strong>@rating.Average.ToString("0.0")</strong>
+                                        <span>@Localizer["QuizRating_Count", rating.Count]</span>
+                                    </span>
+                                }
+
+                                @if (isArchived)
+                                {
+                                    <span class="owned-quiz-archive-meta">
+                                        @Localizer["MediaArchive_ArchivedOn"]: @quiz.MediaArchivedAtUtc?.ToLocalTime().ToString("g") · @Localizer["MediaArchive_MediaSize"]: @FormatBytes(quiz.ArchivedMediaBytes)
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="card-actions owned-quiz-actions">
+                                @if (isArchived)
+                                {
+                                    @if (hasResumableGame)
+                                    {
+                                        <button class="button button-primary owned-quiz-primary-action"
+                                                type="button"
+                                                data-open-replace-game-dialog
+                                                data-requires-media-restore="true"
+                                                data-quiz-id="@quiz.Id"
+                                                data-quiz-title="@quiz.Title">
+                                            <span>@Localizer["Button_CreateGame"]</span>
+                                            <span aria-hidden="true">→</span>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="button button-primary owned-quiz-primary-action"
+                                                type="button"
+                                                data-open-owned-restore-dialog
+                                                data-quiz-id="@quiz.Id"
+                                                data-quiz-title="@quiz.Title">
+                                            <span>@Localizer["Button_CreateGame"]</span>
+                                            <span aria-hidden="true">→</span>
+                                        </button>
+                                    }
+                                }
+                                else if (hasResumableGame)
+                                {
+                                    <form method="post" asp-page-handler="CreateGame" data-new-game-form>
+                                        <input name="quizId" type="hidden" value="@quiz.Id" />
+                                        <input name="replaceUnfinished" type="hidden" value="false" data-replace-unfinished />
+                                        <button class="button button-primary owned-quiz-primary-action"
+                                                type="button"
+                                                disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)"
+                                                data-open-replace-game-dialog
+                                                data-requires-media-restore="false"
+                                                data-quiz-id="@quiz.Id"
+                                                data-quiz-title="@quiz.Title">
+                                            <span>@Localizer["Button_CreateGame"]</span>
+                                            <span aria-hidden="true">→</span>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-page-handler="CreateGame">
+                                        <input name="quizId" type="hidden" value="@quiz.Id" />
+                                        <input name="replaceUnfinished" type="hidden" value="false" />
+                                        <button class="button button-primary owned-quiz-primary-action"
+                                                type="submit"
+                                                disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)">
+                                            <span>@Localizer["Button_CreateGame"]</span>
+                                            <span aria-hidden="true">→</span>
+                                        </button>
+                                    </form>
+                                }
+
+                                @if (hasResumableGame)
+                                {
+                                    <form method="post" asp-page-handler="ContinueGame">
+                                        <input name="quizId" type="hidden" value="@quiz.Id" />
+                                        <button class="button button-secondary owned-quiz-continue-action" type="submit">
+                                            @Localizer["Button_ContinueGame"]
+                                        </button>
+                                    </form>
+                                }
+
+                                <details class="action-menu quiz-action-menu owned-quiz-action-menu">
+                                    <summary class="button button-secondary action-menu-trigger owned-quiz-menu-trigger">
+                                        @Localizer["Menu_Actions"]
+                                    </summary>
+                                    <div class="action-menu-popover">
+                                        @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Active)
+                                        {
+                                            <a class="action-menu-item"
+                                               asp-page="Editor"
+                                               asp-route-id="@quiz.Id">
+                                                @Localizer["Button_Edit"]
+                                            </a>
+                                        }
+
+                                        @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Active || (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Failed && quiz.ArchivedMediaCount == 0))
+                                        {
+                                            <button class="action-menu-item" type="button" data-open-archive-dialog data-quiz-id="@quiz.Id" data-quiz-title="@quiz.Title">
+                                                @Localizer["MediaArchive_ArchiveMedia"]
+                                            </button>
+                                        }
+                                        @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived || (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Failed && quiz.ArchivedMediaCount > 0))
+                                        {
+                                            <form method="post" asp-page-handler="RestoreMedia">
+                                                <input name="quizId" type="hidden" value="@quiz.Id" />
+                                                <button class="action-menu-item" type="submit">@Localizer["MediaArchive_RestoreMedia"]</button>
+                                            </form>
+                                        }
+                                        @if (Model.CanDisableAutomaticArchiving)
+                                        {
+                                            <form method="post" asp-page-handler="SetAutomaticArchiving">
+                                                <input name="quizId" type="hidden" value="@quiz.Id" />
+                                                <input name="prevent" type="hidden" value="@(!quiz.PreventAutomaticArchiving ? "true" : "false")" />
+                                                <button class="action-menu-item" type="submit">
+                                                    @(quiz.PreventAutomaticArchiving ? Localizer["MediaArchive_AllowAutomatic"] : Localizer["MediaArchive_PreventAutomatic"])
+                                                </button>
+                                            </form>
+                                        }
+
+                                        @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Active)
+                                        {
+                                            <a class="action-menu-item"
+                                               asp-page-handler="Export"
+                                               asp-route-quizId="@quiz.Id">
+                                                @Localizer["Button_ExportQuiz"]
+                                            </a>
+
+                                            <button class="action-menu-item"
+                                                    type="button"
+                                                    data-open-rename-dialog
+                                                    data-quiz-id="@quiz.Id"
+                                                    data-quiz-title="@quiz.Title"
+                                                    data-quiz-description="@(quiz.Description ?? string.Empty)">
+                                                @Localizer["Button_Rename"]
+                                            </button>
+                                        }
+
+                                        <form method="post" asp-page-handler="SetPublication">
+                                            <input name="quizId" type="hidden" value="@quiz.Id" />
+                                            <input name="isPublic" type="hidden" value="@(!quiz.IsPublic ? "true" : "false")" />
+                                            <button class="action-menu-item" type="submit">
+                                                @(quiz.IsPublic
+                                                    ? Localizer["QuizPublication_Unpublish"]
+                                                    : Localizer["QuizPublication_Publish"])
+                                            </button>
+                                        </form>
+
+                                        <button class="action-menu-item"
+                                                type="button"
+                                                data-copy-quiz-description-link
+                                                data-description-url="@Model.DescriptionLinks[quiz.Id]"
+                                                data-copy-success="@QuizDescriptionLocalizer["Copied"]"
+                                                data-copy-failed="@QuizDescriptionLocalizer["CopyFailed"]">
+                                            @QuizDescriptionLocalizer["Action"]
+                                        </button>
+
+                                        @if (hasResumableGame)
+                                        {
+                                            <button class="action-menu-item action-menu-danger"
+                                                    type="button"
+                                                    data-open-delete-unfinished-dialog
+                                                    data-quiz-id="@quiz.Id"
+                                                    data-quiz-title="@quiz.Title">
+                                                @UnfinishedGameLocalizer["DeleteAction"]
+                                            </button>
+                                        }
+
+                                        <button class="action-menu-item action-menu-danger"
+                                                type="button"
+                                                data-open-delete-dialog
+                                                data-quiz-id="@quiz.Id"
+                                                data-quiz-title="@quiz.Title">
+                                            @Localizer["Button_Delete"]
+                                        </button>
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </div>
 </div>
 
 <dialog id="renameQuizDialog" class="app-dialog">
