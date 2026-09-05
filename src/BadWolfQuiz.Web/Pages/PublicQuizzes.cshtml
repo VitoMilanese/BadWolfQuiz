@@ -4,94 +4,169 @@
     ViewData["Title"] = Localizer["PublicQuizzes_Title"];
 }
 
-<div class="page-heading">
-    <div>
-        <p class="eyebrow">BAD WOLF QUIZ</p>
-        <h1>@Localizer["PublicQuizzes_Title"]</h1>
-        <p>@Localizer["PublicQuizzes_Description"]</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/public-quizzes.css" asp-append-version="true" />
+}
+
+<div class="public-quizzes-page">
+    <section class="public-quizzes-hero" aria-labelledby="public-quizzes-title">
+        <div class="public-quizzes-heading">
+            <p class="public-quizzes-kicker">BAD WOLF / PUBLIC</p>
+            <h1 id="public-quizzes-title">@Localizer["PublicQuizzes_Title"]</h1>
+            <p class="public-quizzes-intro">@Localizer["PublicQuizzes_Description"]</p>
+        </div>
+
+        <div class="public-quizzes-hero-art" aria-hidden="true">
+            <span class="public-quizzes-hero-word">PLAY</span>
+            <span class="public-quizzes-hero-slash"></span>
+            <strong>THE<br />DEN</strong>
+        </div>
+    </section>
+
+    <div class="public-quizzes-content">
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="message message-error public-quizzes-alert" role="alert">
+                <span class="public-quizzes-alert-mark" aria-hidden="true">!</span>
+                <span>@errorMessage</span>
+            </div>
+        }
+
+        <form method="get" class="public-quiz-search public-quizzes-search">
+            <div class="public-quizzes-search-heading">
+                <label for="public-quiz-search">@Localizer["PublicQuizzes_SearchLabel"]</label>
+                <span aria-hidden="true">SEARCH / 01</span>
+            </div>
+            <div class="public-quiz-search-row public-quizzes-search-row">
+                <div class="public-quizzes-search-field">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m21 21-4.35-4.35m2.35-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
+                    </svg>
+                    <input id="public-quiz-search"
+                           name="Search"
+                           value="@Model.Search"
+                           maxlength="160"
+                           placeholder="@Localizer["PublicQuizzes_SearchPlaceholder"]" />
+                </div>
+                <button class="button button-primary public-quizzes-search-button" type="submit">
+                    <span>@Localizer["PublicQuizzes_Search"]</span>
+                    <span aria-hidden="true">→</span>
+                </button>
+            </div>
+        </form>
+
+        <div class="public-quizzes-catalog-heading">
+            <div>
+                <span>BAD WOLF / CATALOG</span>
+                @if (!string.IsNullOrWhiteSpace(Model.Search))
+                {
+                    <em>“@Model.Search”</em>
+                }
+            </div>
+            <strong aria-label="@Model.Quizzes.Count">@Model.Quizzes.Count.ToString("00")</strong>
+        </div>
+
+        @if (Model.Quizzes.Count == 0)
+        {
+            <section class="public-quizzes-empty" aria-live="polite">
+                <div class="public-quizzes-empty-mark" aria-hidden="true">?</div>
+                <div>
+                    <p class="public-quizzes-empty-kicker">NO SIGNAL / YET</p>
+                    <h2>@Localizer["PublicQuizzes_EmptyTitle"]</h2>
+                    <p>@Localizer["PublicQuizzes_EmptyDescription"]</p>
+                </div>
+            </section>
+        }
+        else
+        {
+            <div class="public-quiz-grid">
+                @for (var index = 0; index < Model.Quizzes.Count; index++)
+                {
+                    var quiz = Model.Quizzes[index];
+                    var cardNumber = (index + 1).ToString("00");
+                    var isArchived = quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived;
+
+                    <article class="public-quiz-card @(isArchived ? "is-archived" : string.Empty)">
+                        <div class="public-quiz-poster">
+                            <span class="public-quiz-poster-number" aria-hidden="true">@cardNumber</span>
+                            <span class="public-quiz-poster-brand" aria-hidden="true">BAD<br />WOLF</span>
+                            <span class="public-quiz-state">@Localizer[$"MediaArchive_State_{quiz.MediaState}"]</span>
+                            <span class="public-quiz-poster-word" aria-hidden="true">QUIZ</span>
+                        </div>
+
+                        <div class="public-quiz-card-body">
+                            <div class="public-quiz-card-copy">
+                                <h2>@quiz.Title</h2>
+                                @if (!string.IsNullOrWhiteSpace(quiz.Description))
+                                {
+                                    <p>@quiz.Description</p>
+                                }
+                            </div>
+
+                            <div class="public-quiz-meta">
+                                @if (!string.IsNullOrWhiteSpace(quiz.AuthorName))
+                                {
+                                    <span class="public-quiz-meta-item">
+                                        <span class="public-quiz-meta-dot" aria-hidden="true"></span>
+                                        @Localizer["PublicQuizzes_Author", quiz.AuthorName]
+                                    </span>
+                                }
+                                <span class="public-quiz-meta-item">
+                                    <span class="public-quiz-meta-dot" aria-hidden="true"></span>
+                                    @Localizer["Quiz_RoundCount", quiz.RoundCount]
+                                </span>
+                            </div>
+
+                            <div class="public-quiz-card-footer">
+                                @if (quiz.AverageRating is { } average)
+                                {
+                                    <div class="public-quiz-rating"
+                                         aria-label="@Localizer["QuizRating_AccessibleSummary", average, quiz.RatingCount]">
+                                        <span class="public-quiz-rating-star" aria-hidden="true">★</span>
+                                        <strong>@average.ToString("0.0")</strong>
+                                        <span>@Localizer["QuizRating_Count", quiz.RatingCount]</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="public-quiz-rating public-quiz-rating-empty" aria-hidden="true">★ —</span>
+                                }
+
+                                <div class="public-quiz-action">
+                                    @if (isArchived)
+                                    {
+                                        <button class="button button-primary public-quiz-play-button"
+                                                type="button"
+                                                data-open-public-restore-dialog
+                                                data-quiz-id="@quiz.Id"
+                                                data-quiz-title="@quiz.Title">
+                                            <span>@Localizer["Button_CreateGame"]</span>
+                                            <span aria-hidden="true">→</span>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-page-handler="CreateGame">
+                                            <input name="quizId" type="hidden" value="@quiz.Id" />
+                                            <button class="button button-primary public-quiz-play-button"
+                                                    type="submit"
+                                                    disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)">
+                                                <span>@Localizer["Button_CreateGame"]</span>
+                                                <span aria-hidden="true">→</span>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
     </div>
 </div>
 
-@if (TempData["ErrorMessage"] is string errorMessage)
-{
-    <div class="message message-error" role="alert">@errorMessage</div>
-}
-
-<form method="get" class="public-quiz-search">
-    <label for="public-quiz-search">@Localizer["PublicQuizzes_SearchLabel"]</label>
-    <div class="public-quiz-search-row">
-        <input id="public-quiz-search"
-               name="Search"
-               value="@Model.Search"
-               maxlength="160"
-               placeholder="@Localizer["PublicQuizzes_SearchPlaceholder"]" />
-        <button class="button button-primary" type="submit">
-            @Localizer["PublicQuizzes_Search"]
-        </button>
-    </div>
-</form>
-
-@if (Model.Quizzes.Count == 0)
-{
-    <div class="empty-state content-panel">
-        <h2>@Localizer["PublicQuizzes_EmptyTitle"]</h2>
-        <p>@Localizer["PublicQuizzes_EmptyDescription"]</p>
-    </div>
-}
-else
-{
-    <div class="quiz-list public-quiz-list">
-        @foreach (var quiz in Model.Quizzes)
-        {
-            <article class="quiz-card">
-                <div class="quiz-card-content">
-                    <h2>@quiz.Title</h2>
-                    @if (!string.IsNullOrWhiteSpace(quiz.Description))
-                    {
-                        <p>@quiz.Description</p>
-                    }
-                    @if (!string.IsNullOrWhiteSpace(quiz.AuthorName))
-                    {
-                        <small>@Localizer["PublicQuizzes_Author", quiz.AuthorName]</small>
-                    }
-                    <small>@Localizer["Quiz_RoundCount", quiz.RoundCount]</small>
-                    @if (quiz.AverageRating is { } average)
-                    {
-                        <div class="quiz-rating-summary"
-                             aria-label="@Localizer["QuizRating_AccessibleSummary", average, quiz.RatingCount]">
-                            <span class="quiz-rating-stars" aria-hidden="true">★</span>
-                            <strong>@average.ToString("0.0")</strong>
-                            <span>@Localizer["QuizRating_Count", quiz.RatingCount]</span>
-                        </div>
-                    }
-                </div>
-                <div class="card-actions">
-                    @if (quiz.MediaState == BadWolfQuiz.Web.Models.QuizMediaState.Archived)
-                    {
-                        <button class="button button-primary"
-                                type="button"
-                                data-open-public-restore-dialog
-                                data-quiz-id="@quiz.Id"
-                                data-quiz-title="@quiz.Title">
-                            @Localizer["Button_CreateGame"]
-                        </button>
-                    }
-                    else
-                    {
-                        <form method="post" asp-page-handler="CreateGame">
-                            <input name="quizId" type="hidden" value="@quiz.Id" />
-                            <button class="button button-primary" type="submit" disabled="@(quiz.MediaState != BadWolfQuiz.Web.Models.QuizMediaState.Active)">
-                                @Localizer["Button_CreateGame"]
-                            </button>
-                        </form>
-                    }
-                </div>
-            </article>
-        }
-    </div>
-}
-
-<dialog id="publicRestoreDialog" class="app-dialog">
+<dialog id="publicRestoreDialog" class="app-dialog public-restore-dialog">
     <form method="post" asp-page-handler="CreateGame" class="dialog-card">
         <input id="publicRestoreQuizId" name="quizId" type="hidden" />
         <input name="Search" type="hidden" value="@Model.Search" />
