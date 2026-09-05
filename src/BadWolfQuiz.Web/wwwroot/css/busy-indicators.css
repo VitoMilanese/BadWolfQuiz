@@ -4,7 +4,7 @@
 @import url("./theme-scrollbars.css?v=1");
 @import url("./host-lobby.css?v=1");
 @import url("./host-lobby-browser-fixes.css?v=1");
-@import url("./host-running-game.css?v=5");
+@import url("./host-running-game.css?v=6");
 
 body[aria-busy="true"] {
     overflow: hidden;
