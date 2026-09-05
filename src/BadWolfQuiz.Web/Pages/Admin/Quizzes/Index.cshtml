@@ -8,6 +8,17 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/my-quizzes.css" asp-append-version="true" />
+    <style>
+        @@media (min-width: 561px) {
+            .owned-quiz-action-menu .action-menu-popover {
+                min-width: 300px;
+            }
+
+            .owned-quiz-action-menu .action-menu-item {
+                white-space: nowrap;
+            }
+        }
+    </style>
 }
 
 <div class="my-quizzes-page">
