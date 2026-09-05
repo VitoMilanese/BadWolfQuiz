@@ -4,59 +4,60 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
-  <data name="MenuTitle" xml:space="preserve"><value>Редактор мини-игры</value></data>
-  <data name="Title" xml:space="preserve"><value>Редактор «Угадай, во что я играю»</value></data>
-  <data name="Eyebrow" xml:space="preserve"><value>MasterHost</value></data>
-  <data name="Description" xml:space="preserve"><value>Управляйте карточками игр, вопросами и матрицей ответов ДА/НЕТ, сохранёнными в базе данных.</value></data>
-  <data name="GamesCount" xml:space="preserve"><value>игр</value></data>
-  <data name="QuestionsCount" xml:space="preserve"><value>вопросов</value></data>
-  <data name="GamesTab" xml:space="preserve"><value>Игры</value></data>
-  <data name="QuestionsTab" xml:space="preserve"><value>Вопросы</value></data>
-  <data name="AnswersTab" xml:space="preserve"><value>Ответы</value></data>
-  <data name="AddGame" xml:space="preserve"><value>Добавить игру</value></data>
-  <data name="GameName" xml:space="preserve"><value>Название игры</value></data>
-  <data name="GameImage" xml:space="preserve"><value>Изображение карточки</value></data>
-  <data name="ReplaceImage" xml:space="preserve"><value>Заменить изображение (необязательно)</value></data>
-  <data name="ImageSize" xml:space="preserve"><value>Изображение</value></data>
-  <data name="AssignedAnswers" xml:space="preserve"><value>Назначено ответов</value></data>
-  <data name="EditAnswers" xml:space="preserve"><value>Редактировать ответы</value></data>
-  <data name="NoGames" xml:space="preserve"><value>В каталоге пока нет игр.</value></data>
-  <data name="AddQuestion" xml:space="preserve"><value>Добавить вопрос</value></data>
-  <data name="QuestionText" xml:space="preserve"><value>Вопрос</value></data>
-  <data name="NoQuestions" xml:space="preserve"><value>В каталоге пока нет вопросов.</value></data>
-  <data name="AnswerEditor" xml:space="preserve"><value>Ответы игры</value></data>
-  <data name="AnswerEditorDescription" xml:space="preserve"><value>Для выбранной игры назначьте ДА, НЕТ или оставьте вопрос без ответа.</value></data>
-  <data name="SelectGame" xml:space="preserve"><value>Игра</value></data>
-  <data name="NoGamesForAnswers" xml:space="preserve"><value>Сначала добавьте хотя бы одну игру.</value></data>
-  <data name="ImportAnswers" xml:space="preserve"><value>Импортировать все ответы из TXT</value></data>
-  <data name="ImportHelp" xml:space="preserve"><value>Файл должен содержать ровно {0} строк в порядке вопросов: 1 = ДА, 0 = НЕТ.</value></data>
-  <data name="Answer" xml:space="preserve"><value>Ответ</value></data>
-  <data name="Unassigned" xml:space="preserve"><value>Не назначено</value></data>
-  <data name="Yes" xml:space="preserve"><value>ДА</value></data>
-  <data name="No" xml:space="preserve"><value>НЕТ</value></data>
-  <data name="SaveAnswers" xml:space="preserve"><value>Сохранить ответы</value></data>
-  <data name="DeleteGameConfirm" xml:space="preserve"><value>Удалить «{0}» и все сохранённые ответы этой игры?</value></data>
-  <data name="DeleteQuestionConfirm" xml:space="preserve"><value>Удалить вопрос №{0}? Ответы на него будут удалены для всех игр.</value></data>
-  <data name="GameCreated" xml:space="preserve"><value>Игра добавлена.</value></data>
-  <data name="GameUpdated" xml:space="preserve"><value>Игра обновлена.</value></data>
-  <data name="GameDeleted" xml:space="preserve"><value>Игра удалена.</value></data>
-  <data name="GameDuplicate" xml:space="preserve"><value>Игра с таким названием уже существует.</value></data>
-  <data name="GameInvalid" xml:space="preserve"><value>Укажите корректное название игры и изображение.</value></data>
-  <data name="GameNotFound" xml:space="preserve"><value>Игра не найдена.</value></data>
-  <data name="QuestionCreated" xml:space="preserve"><value>Вопрос добавлен.</value></data>
-  <data name="QuestionUpdated" xml:space="preserve"><value>Вопрос обновлён.</value></data>
-  <data name="QuestionDeleted" xml:space="preserve"><value>Вопрос удалён.</value></data>
-  <data name="QuestionDuplicate" xml:space="preserve"><value>Такой вопрос уже существует.</value></data>
-  <data name="QuestionInvalid" xml:space="preserve"><value>Укажите корректный вопрос.</value></data>
-  <data name="QuestionNotFound" xml:space="preserve"><value>Вопрос не найден.</value></data>
-  <data name="AnswersSaved" xml:space="preserve"><value>Ответы сохранены.</value></data>
-  <data name="AnswersImported" xml:space="preserve"><value>Все ответы импортированы.</value></data>
-  <data name="AnswersInvalid" xml:space="preserve"><value>Набор ответов некорректен.</value></data>
-  <data name="AnswerFileRequired" xml:space="preserve"><value>Выберите TXT-файл для импорта.</value></data>
-  <data name="AnswerFileTooLarge" xml:space="preserve"><value>Файл ответов слишком большой.</value></data>
-  <data name="AnswerFileInvalidLine" xml:space="preserve"><value>Строка {0} должна содержать только 1 или 0.</value></data>
-  <data name="AnswerFileWrongCount" xml:space="preserve"><value>Файл должен содержать ровно {0} строк; найдено {1}.</value></data>
-  <data name="ImageRequired" xml:space="preserve"><value>Выберите изображение карточки.</value></data>
-  <data name="ImageTooLarge" xml:space="preserve"><value>Изображение должно быть не больше 5 МБ.</value></data>
-  <data name="ImageInvalidType" xml:space="preserve"><value>Используйте PNG, JPEG, WebP или GIF.</value></data>
+  <data name="MenuTitle" xml:space="preserve"><value>Україна</value></data>
+  <data name="Title" xml:space="preserve"><value>Україна</value></data>
+  <data name="Eyebrow" xml:space="preserve"><value>Україна</value></data>
+  <data name="Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="GamesCount" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionsCount" xml:space="preserve"><value>Україна</value></data>
+  <data name="GamesTab" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionsTab" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnswersTab" xml:space="preserve"><value>Україна</value></data>
+  <data name="AddGame" xml:space="preserve"><value>Україна</value></data>
+  <data name="GameName" xml:space="preserve"><value>Україна</value></data>
+  <data name="GameImage" xml:space="preserve"><value>Україна</value></data>
+  <data name="ReplaceImage" xml:space="preserve"><value>Україна</value></data>
+  <data name="ImageSize" xml:space="preserve"><value>Україна</value></data>
+  <data name="AssignedAnswers" xml:space="preserve"><value>Україна</value></data>
+  <data name="EditAnswers" xml:space="preserve"><value>Україна</value></data>
+  <data name="NoGames" xml:space="preserve"><value>Україна</value></data>
+  <data name="AddQuestion" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionText" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionEnabled" xml:space="preserve"><value>Україна</value></data>
+  <data name="NoQuestions" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnswerEditor" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnswerEditorDescription" xml:space="preserve"><value>Україна</value></data>
+  <data name="SelectGame" xml:space="preserve"><value>Україна</value></data>
+  <data name="NoGamesForAnswers" xml:space="preserve"><value>Україна</value></data>
+  <data name="ImportAnswers" xml:space="preserve"><value>Україна</value></data>
+  <data name="ImportHelp" xml:space="preserve"><value>Україна</value></data>
+  <data name="Answer" xml:space="preserve"><value>Україна</value></data>
+  <data name="Unassigned" xml:space="preserve"><value>Україна</value></data>
+  <data name="Yes" xml:space="preserve"><value>Україна</value></data>
+  <data name="No" xml:space="preserve"><value>Україна</value></data>
+  <data name="SaveAnswers" xml:space="preserve"><value>Україна</value></data>
+  <data name="DeleteGameConfirm" xml:space="preserve"><value>Україна</value></data>
+  <data name="DeleteQuestionConfirm" xml:space="preserve"><value>Україна</value></data>
+  <data name="GameCreated" xml:space="preserve"><value>Україна</value></data>
+  <data name="GameUpdated" xml:space="preserve"><value>Україна</value></data>
+  <data name="GameDeleted" xml:space="preserve"><value>Україна</value></data>
+  <data name="GameDuplicate" xml:space="preserve"><value>Україна</value></data>
+  <data name="GameInvalid" xml:space="preserve"><value>Україна</value></data>
+  <data name="GameNotFound" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionCreated" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionUpdated" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionDeleted" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionDuplicate" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionInvalid" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionNotFound" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnswersSaved" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnswersImported" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnswersInvalid" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnswerFileRequired" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnswerFileTooLarge" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnswerFileInvalidLine" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnswerFileWrongCount" xml:space="preserve"><value>Україна</value></data>
+  <data name="ImageRequired" xml:space="preserve"><value>Україна</value></data>
+  <data name="ImageTooLarge" xml:space="preserve"><value>Україна</value></data>
+  <data name="ImageInvalidType" xml:space="preserve"><value>Україна</value></data>
 </root>

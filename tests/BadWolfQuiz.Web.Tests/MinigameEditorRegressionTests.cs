@@ -29,6 +29,7 @@ public sealed class MinigameEditorRegressionTests
         var css = ReadWebFile("wwwroot", "css", "minigame-editor.css");
         var script = ReadWebFile("wwwroot", "js", "minigame-editor.js");
         var store = ReadWebFile("Services", "MinigameCatalogStore.cs");
+        var answerFileParser = ReadWebFile("Services", "MinigameAnswerFileParser.cs");
 
         Assert.Contains("asp-page-handler=\"CreateGame\"", page);
         Assert.Contains("asp-page-handler=\"UpdateGame\"", page);
@@ -36,6 +37,10 @@ public sealed class MinigameEditorRegressionTests
         Assert.Contains("asp-page-handler=\"CreateQuestion\"", page);
         Assert.Contains("asp-page-handler=\"UpdateQuestion\"", page);
         Assert.Contains("asp-page-handler=\"DeleteQuestion\"", page);
+        Assert.Contains("name=\"enabled\"", page);
+        Assert.Contains("QuestionEnabled", page);
+        Assert.Contains("DisabledQuestionIds", model);
+        Assert.Contains("SetEnabledAsync", model);
         Assert.Contains("asp-page-handler=\"SaveAnswers\"", page);
         Assert.Contains("asp-page-handler=\"ImportAnswers\"", page);
         Assert.Contains("asp-page-handler=\"ExportAnswers\"", page);
@@ -46,11 +51,28 @@ public sealed class MinigameEditorRegressionTests
         Assert.Contains("answersJson", model);
         Assert.Contains("JsonSerializer.Deserialize", model);
         Assert.Contains("OnGetExportAnswersAsync", model);
+        Assert.DoesNotContain("answers.Any(answer => !answer.AnswerYes.HasValue)", model);
+        Assert.Contains("null => string.Empty", model);
+        Assert.Contains("MinigameAnswerFileParser.Parse", model);
+        Assert.Contains("SaveAnswersAsync(gameId, values", model);
+        Assert.Contains("value.Length == 0", answerFileParser);
+        Assert.Contains("IReadOnlyList<bool?> Answers", answerFileParser);
         Assert.Contains("JSON.stringify(buildPayload())", script);
         Assert.Contains("fetch(answerForm.action", script);
+        Assert.Contains("activeAnswerFilter", script);
+        Assert.Contains("dataset.minigameAnswerFilter", script);
+        Assert.Contains("select.value === activeAnswerFilter", script);
+        Assert.Contains("row.hidden = !visible", script);
+        Assert.Contains("applyAnswerFilter()", script);
         Assert.Contains("grid-template-columns: 112px minmax(0, 1fr) auto", css);
+        Assert.Contains(".minigame-editor-question-list > li:nth-child(even)", css);
+        Assert.Contains(".minigame-editor-question-list > li.is-disabled", css);
+        Assert.Contains(".minigame-editor-question-enabled", css);
+        Assert.Contains(".minigame-editor-answer-table tbody tr:nth-child(even) > td", css);
+        Assert.Contains(".minigame-editor-answer-table td + td", css);
+        Assert.Contains(".minigame-editor-answer-filter", css);
+        Assert.Contains(".minigame-editor-answer-form.is-answer-filtered", css);
         Assert.DoesNotContain(".minigame-editor-answer-actions", css);
-        Assert.Contains("MinigameAnswerImportParser.Parse", model);
         Assert.Contains("expectedCount", store);
         Assert.Contains("value == \"1\"", store);
         Assert.Contains("value == \"0\"", store);
@@ -58,18 +80,24 @@ public sealed class MinigameEditorRegressionTests
     }
 
     [Fact]
-    public void Runtime_reads_minigame_catalog_and_images_from_database_store()
+    public void Runtime_reads_minigame_catalog_and_only_enabled_question_cards()
     {
         var hub = ReadWebFile("Hubs", "MinigameHub.cs");
         var gamePage = ReadWebFile("Pages", "GuessWhatIPlay.cshtml.cs");
         var catalogPage = ReadWebFile("Pages", "Minigames.cshtml.cs");
         var store = ReadWebFile("Services", "MinigameCatalogStore.cs");
+        var availability = ReadWebFile("Services", "MinigameQuestionAvailabilityStore.cs");
         var migration = ReadWebFile("Migrations", "20260831090000_AddMinigameCatalogTables.cs");
+        var availabilityMigration = ReadWebFile(
+            "Migrations",
+            "20260831130000_AddMinigameDisabledQuestions.cs");
 
         Assert.Contains("MinigameCatalogStore", hub);
         Assert.Contains("GetCountsAsync", hub);
         Assert.Contains("GenerateCardsAsync", hub);
-        Assert.Contains("GetQuestionsAsync", hub);
+        Assert.Contains("MinigameQuestionAvailabilityStore", hub);
+        Assert.Contains("GetEnabledQuestionCountAsync", hub);
+        Assert.Contains("GetEnabledQuestionsAsync", hub);
         Assert.Contains("MinigameCatalogStore", gamePage);
         Assert.Contains("GetGameImageAsync", gamePage);
         Assert.DoesNotContain("PhysicalFile", gamePage);
@@ -78,6 +106,10 @@ public sealed class MinigameEditorRegressionTests
         Assert.Contains("CREATE TABLE IF NOT EXISTS MinigameCatalogGames", migration);
         Assert.Contains("CREATE TABLE IF NOT EXISTS MinigameCatalogQuestions", migration);
         Assert.Contains("CREATE TABLE IF NOT EXISTS MinigameCatalogAnswers", migration);
+        Assert.Contains("MinigameDisabledQuestions", availability);
+        Assert.Contains("WHERE d.QuestionId IS NULL", availability);
+        Assert.Contains("20260831130000_AddMinigameDisabledQuestions", availabilityMigration);
+        Assert.Contains("CREATE TABLE IF NOT EXISTS MinigameDisabledQuestions", availabilityMigration);
         Assert.Contains("questions.txt", store);
         Assert.Contains("TryParseFile", store);
     }

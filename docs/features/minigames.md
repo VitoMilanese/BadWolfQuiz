@@ -45,8 +45,14 @@ The configured MasterHost receives a **Minigame editor** action in the header me
 The editor is split into three views:
 
 - **Games** — list card previews and names, create games, rename games, replace card images, delete games, and open a game's answer editor;
-- **Questions** — view the deterministic question order, append questions, edit question text, and delete questions;
+- **Questions** — view the deterministic question order, append questions, edit question text, enable/disable questions for Question-card decks, and delete questions;
 - **Answers** — select one game and assign YES, NO, or unassigned for every question.
+
+Question and answer rows use alternating backgrounds and row/grid separators so long question lists remain easy to scan and each answer selector stays visually associated with its question.
+
+Each question has an **Enabled** checkbox. New questions are enabled by default. Disabled questions stay in the catalog and remain in the answer matrix, TXT import/export order, and free-form hint search, but they are excluded when a new Question-card deck is created. This preserves stored answers and lets a question be re-enabled later without rebuilding catalog data.
+
+The Answers view also provides client-side **YES**, **NO**, and **Unassigned** filters. Activating one filter shows only rows whose current selector value matches it; activating the same filter again clears it and restores all questions. Filtering is local to the browser, updates immediately after selector changes, and does not add server requests or change the existing autosave payload.
 
 Deleting a game also removes its stored question answers. Deleting a question removes that question's answers from every game and closes the question-order gap so subsequent TXT imports continue to map line-for-line to the visible question order.
 
@@ -55,10 +61,13 @@ Deleting a game also removes its stored question answers. Deleting a question re
 The Answers view accepts a per-game TXT file. The import is valid only when:
 
 - the file contains exactly one line for every current question;
-- every line contains exactly `1` or `0` after trimming;
+- after trimming, each line is `1`, `0`, or empty;
+- `1` means YES, `0` means NO, and an empty line means Unassigned;
 - line N maps to question N in the current editor order.
 
-A valid import transactionally replaces the selected game's complete answer set. An invalid file changes nothing.
+A valid import transactionally replaces the selected game's complete answer matrix. Empty rows remove the stored answer for those game/question pairs and leave them unassigned. An invalid file changes nothing.
+
+Export uses the same line-for-line format, so assigned and unassigned values round-trip without converting uncertain answers into YES or NO.
 
 ### Busy indicator
 
@@ -88,7 +97,7 @@ See [Social link previews](social-link-previews.md) for the shared metadata impl
 
 ## Starting a new game
 
-**New game** opens a dialog where the player chooses the number of source cards and may enable **Question cards**.
+**New game** opens a dialog where the player chooses the number of source cards and may independently enable **Question cards** and **Allow hints**.
 
 For a newly generated table, each player excludes:
 
@@ -135,6 +144,8 @@ When disabled, the game uses the normal free-form conversation flow.
 
 When enabled, a vertical panel stays to the right of the table and contains shared history plus the active player's available questions.
 
+Only questions currently enabled in the MasterHost editor are loaded into newly created Question-card decks. Disabled questions remain stored but are not shuffled into either player's stack.
+
 Each player has an independent shuffled hidden question deck and sees only three current choices. Both players may therefore receive the same question independently. At most one question can be selected per turn. After selection, that slot is replenished from the player's hidden deck while questions remain.
 
 The selected question is written to history and the opponent receives a modal requiring **YES** or **NO**. The answer is then appended to history. Pending question/recipient state survives refresh and reconnect.
@@ -151,6 +162,24 @@ The history view also supports three client-side filters:
 
 Directional rows keep the asking player's and answering player's colors independently and do not make extra SignalR calls.
 
+## Optional answer hints
+
+**Allow hints** is independent of Question cards and is scoped to the current game. Starting another game can enable or disable it independently, while an in-place restart keeps the current setting.
+
+When hints are enabled:
+
+- hovering or focusing a game card reveals an information control over the card image;
+- with **Question cards enabled**, the information control opens the normal hint dialog: the current player's remaining Question cards (up to three) are pinned at the top, followed by questions that player previously asked the opponent, newest first;
+- the normal Question-card YES/NO response dialog also shows the catalog answer for the responding player's own secret game;
+- with **Question cards disabled**, the information control opens a separate search dialog instead of the Question-card/history dialog;
+- free-form search requires at least 3 characters and matches a case-insensitive substring of the shared database question catalog;
+- search results are paged at 10 rows per page and each search/page request uses the shared `BadWolfBusy` overlay;
+- free-form search returns only questions that have an assigned YES or NO answer for the selected candidate game; unassigned mappings are omitted completely from the result set and from paging totals;
+- the responder still chooses YES or NO manually when Question cards are enabled; hints never submit or replace a player response;
+- outside free-form search, an unassigned game/question pair is displayed as **Information unavailable**.
+
+Hint payloads are resolved server-side for the authenticated room membership. Card hints and free-form searches are limited to cards in the current active table, response hints resolve only against the requesting player's own secret card, and free-form search is available only in rooms created without Question cards. The client does not receive the complete answer matrix or the opponent's secret card through the hint API.
+
 ## In-place restart
 
 The refresh-icon button beside **New game** restarts the current game without changing the already-active table.
@@ -165,10 +194,11 @@ It:
 - resets winner, turn counters, and timers;
 - restarts with Player 1's first 3-minute turn;
 - gives a new random secret card only to the player who pressed refresh;
-- keeps the opponent's secret card unchanged.
+- keeps the opponent's secret card unchanged;
+- keeps the current **Allow hints** setting.
 
 The replacement secret differs from the requesting player's previous secret and from the opponent's current secret.
 
 ## Release
 
-Introduced in Web `1.23.0` (`web-v1.23.0`) through issue #445 and PR #446. Directional history filters were added in Web `1.24.0`.
+Introduced in Web `1.23.0` (`web-v1.23.0`) through issue #445 and PR #446. Directional history filters were added in Web `1.24.0`. The database-backed catalog and MasterHost editor were added in Web `1.25.0`.

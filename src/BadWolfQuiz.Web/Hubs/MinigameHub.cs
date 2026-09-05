@@ -14,9 +14,17 @@ public sealed class MinigameHub(
     private MinigameCatalogStore Catalog =>
         new(dbFactory, options.Value.CardCount);
 
+    private MinigameQuestionAvailabilityStore QuestionAvailability =>
+        new(dbFactory);
+
+    private MinigameHintService Hints =>
+        new(dbFactory, options.Value.CardCount, roomStore);
+
     public async Task<MinigameCardCatalogSnapshot> GetCatalog()
     {
         var counts = await Catalog.GetCountsAsync(Context.ConnectionAborted);
+        var enabledQuestionCount = await QuestionAvailability.GetEnabledQuestionCountAsync(
+            Context.ConnectionAborted);
         var maximum = counts.GameCount;
         var defaultCount = maximum >= MinigameRoomStore.MinimumGameCardCount
             ? Math.Clamp(
@@ -28,14 +36,15 @@ public sealed class MinigameHub(
             MinigameRoomStore.MinimumGameCardCount,
             maximum,
             defaultCount,
-            counts.QuestionCount >= MinigameQuestionStore.MinimumQuestionCount,
-            counts.QuestionCount);
+            enabledQuestionCount >= MinigameQuestionStore.MinimumQuestionCount,
+            enabledQuestionCount);
     }
 
     public async Task<MinigameRoomConnection> CreateRoom(
         MinigameThemeSnapshot? theme = null)
     {
         var membership = roomStore.CreateRoom(theme);
+        Hints.SetEnabled(membership.RoomCode, enabled: false);
         await JoinRoomGroup(membership.RoomCode);
         return membership;
     }
@@ -89,47 +98,30 @@ public sealed class MinigameHub(
         }
     }
 
-    public async Task<MinigameRoomSnapshot> StartNewGame(
+    public Task<MinigameRoomSnapshot> StartNewGame(
         string roomCode,
         string playerToken,
         int cardCount,
-        bool questionCardsEnabled = false)
-    {
-        try
-        {
-            var counts = await Catalog.GetCountsAsync(Context.ConnectionAborted);
-            if (cardCount < MinigameRoomStore.MinimumGameCardCount ||
-                cardCount > counts.GameCount)
-            {
-                throw new MinigameRoomException(MinigameRoomError.InvalidCardCount);
-            }
+        bool questionCardsEnabled = false) =>
+        StartNewGameCore(
+            roomCode,
+            playerToken,
+            cardCount,
+            questionCardsEnabled,
+            hintsEnabled: false);
 
-            var cards = await Catalog.GenerateCardsAsync(
-                cardCount,
-                Context.ConnectionAborted);
-            var questions = questionCardsEnabled
-                ? await Catalog.GetQuestionsAsync(Context.ConnectionAborted)
-                : [];
-            if (questionCardsEnabled &&
-                questions.Count < MinigameQuestionStore.MinimumQuestionCount)
-            {
-                throw new MinigameRoomException(MinigameRoomError.QuestionsUnavailable);
-            }
-
-            var state = roomStore.StartNewGame(
-                roomCode,
-                playerToken,
-                cards,
-                questionCardsEnabled,
-                questions);
-            await BroadcastRoomChanged(state);
-            return state;
-        }
-        catch (MinigameRoomException exception)
-        {
-            throw CreateHubException(exception);
-        }
-    }
+    public Task<MinigameRoomSnapshot> StartNewGameWithHints(
+        string roomCode,
+        string playerToken,
+        int cardCount,
+        bool questionCardsEnabled,
+        bool hintsEnabled) =>
+        StartNewGameCore(
+            roomCode,
+            playerToken,
+            cardCount,
+            questionCardsEnabled,
+            hintsEnabled);
 
     public async Task<MinigameRoomSnapshot> RestartGame(
         string roomCode,
@@ -189,6 +181,123 @@ public sealed class MinigameHub(
     {
         return await MutateRoom(() =>
             roomStore.SubmitGuess(roomCode, playerToken, fileName));
+    }
+
+    public bool GetHintsEnabled(
+        string roomCode,
+        string playerToken)
+    {
+        try
+        {
+            return Hints.GetHintsEnabled(roomCode, playerToken);
+        }
+        catch (MinigameRoomException exception)
+        {
+            throw CreateHubException(exception);
+        }
+    }
+
+    public async Task<MinigameCardHintSnapshot> GetCardHints(
+        string roomCode,
+        string playerToken,
+        string gameKey)
+    {
+        try
+        {
+            return await Hints.GetCardHintsAsync(
+                roomCode,
+                playerToken,
+                gameKey,
+                Context.ConnectionAborted);
+        }
+        catch (MinigameRoomException exception)
+        {
+            throw CreateHubException(exception);
+        }
+    }
+
+    public async Task<MinigameCardHintSearchSnapshot> SearchCardHints(
+        string roomCode,
+        string playerToken,
+        string gameKey,
+        string query,
+        int page = 1)
+    {
+        try
+        {
+            return await Hints.SearchCardHintsAsync(
+                roomCode,
+                playerToken,
+                gameKey,
+                query,
+                page,
+                Context.ConnectionAborted);
+        }
+        catch (MinigameRoomException exception)
+        {
+            throw CreateHubException(exception);
+        }
+    }
+
+    public async Task<MinigameQuestionResponseHintSnapshot> GetQuestionResponseHint(
+        string roomCode,
+        string playerToken)
+    {
+        try
+        {
+            return await Hints.GetQuestionResponseHintAsync(
+                roomCode,
+                playerToken,
+                Context.ConnectionAborted);
+        }
+        catch (MinigameRoomException exception)
+        {
+            throw CreateHubException(exception);
+        }
+    }
+
+    private async Task<MinigameRoomSnapshot> StartNewGameCore(
+        string roomCode,
+        string playerToken,
+        int cardCount,
+        bool questionCardsEnabled,
+        bool hintsEnabled)
+    {
+        try
+        {
+            var counts = await Catalog.GetCountsAsync(Context.ConnectionAborted);
+            if (cardCount < MinigameRoomStore.MinimumGameCardCount ||
+                cardCount > counts.GameCount)
+            {
+                throw new MinigameRoomException(MinigameRoomError.InvalidCardCount);
+            }
+
+            var cards = await Catalog.GenerateCardsAsync(
+                cardCount,
+                Context.ConnectionAborted);
+            var questions = questionCardsEnabled
+                ? await QuestionAvailability.GetEnabledQuestionsAsync(Context.ConnectionAborted)
+                : [];
+            if (questionCardsEnabled &&
+                questions.Count < MinigameQuestionStore.MinimumQuestionCount)
+            {
+                throw new MinigameRoomException(MinigameRoomError.QuestionsUnavailable);
+            }
+
+            var state = roomStore.StartNewGame(
+                roomCode,
+                playerToken,
+                cards,
+                questionCardsEnabled,
+                questions);
+            Hints.SetEnabled(state.RoomCode, hintsEnabled);
+            await BroadcastRoomChanged(state);
+            return state;
+        }
+        catch (MinigameRoomException exception)
+        {
+            throw CreateHubException(exception);
+        }
     }
 
     private async Task<MinigameRoomSnapshot> MutateRoom(
