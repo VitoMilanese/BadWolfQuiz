@@ -13,6 +13,10 @@
     top: 13rem !important;
     max-height: calc(100vh - 14.5rem) !important;
 }
+.host-game-board .answer-presentation > .game-content-blocks.multiple-choice-answer-reveal-grid:not(:has(> .all-player-answer-option-correct)) .game-content-block {
+    width: 100% !important;
+    max-width: none !important;
+}
 @media (min-width: 801px) {
     body:has(> .host-multiple-choice-panel)
         .host-game-board > [data-host-gameplay-view]
