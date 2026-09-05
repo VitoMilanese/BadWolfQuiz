@@ -2,68 +2,159 @@
 @model BadWolfQuiz.Web.Pages.Admin.Games.StatisticsModel
 @{
     ViewData["Title"] = Localizer["PlayerStatistics_Title"];
+    var totalGameAppearances = Model.Players.Sum(player => player.GamesPlayed);
+    var totalFinalScore = Model.Players.Sum(player => player.TotalFinalScore);
+    var totalCorrectAnswers = Model.Players.Sum(player => player.CorrectAnswers);
+    var totalAttempts = Model.Players.Sum(player => player.Attempts);
+    var overallAccuracy = totalAttempts == 0
+        ? (double?)null
+        : (double)totalCorrectAnswers / totalAttempts;
 }
 
-<div class="page-heading">
-    <div>
-        <p class="eyebrow">@Localizer["Admin_Eyebrow"]</p>
-        <h1>@Localizer["PlayerStatistics_Title"]</h1>
-        <p>@Localizer["PlayerStatistics_Description"]</p>
-    </div>
-</div>
-
-@if (Model.Players.Count == 0)
-{
-    <section class="content-panel empty-state">
-        <p>@Localizer["PlayerStatistics_Empty"]</p>
-    </section>
+@section Styles {
+    <link rel="stylesheet" href="~/css/player-statistics.css" asp-append-version="true" />
 }
-else
-{
-    <section class="content-panel">
-        <div class="table-scroll">
-            <table class="game-history-table statistics-table">
-                <thead>
-                    <tr>
-                        <th>@Localizer["GameHistory_Player"]</th>
-                        <th>@Localizer["PlayerStatistics_Games"]</th>
-                        <th>@Localizer["PlayerStatistics_TotalScore"]</th>
-                        <th>@Localizer["PlayerStatistics_Correct"]</th>
-                        <th>@Localizer["PlayerStatistics_Attempts"]</th>
-                        <th>@Localizer["PlayerStatistics_Accuracy"]</th>
-                        <th>@Localizer["PlayerStatistics_LastPlayed"]</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var player in Model.Players)
-                    {
-                        <tr>
-                            <th scope="row">@player.Name</th>
-                            <td>@player.GamesPlayed</td>
-                            <td class="@(player.TotalFinalScore < 0 ? "score-negative" : null)">
-                                @player.TotalFinalScore
-                            </td>
-                            <td>@player.CorrectAnswers</td>
-                            <td>@player.Attempts</td>
-                            <td>
-                                @if (player.Accuracy.HasValue)
-                                {
-                                    @player.Accuracy.Value.ToString("P1")
-                                }
-                                else
-                                {
-                                    @Localizer["PlayerStatistics_NotAvailable"]
-                                }
-                            </td>
-                            <td>
-                                <time datetime="@player.LastPlayedAtUtc.ToString("O")">
-                                    @player.LastPlayedAtUtc.ToLocalTime().ToString("g")
-                                </time>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+
+<div class="player-statistics-page">
+    <section class="player-statistics-hero" aria-labelledby="player-statistics-title">
+        <div class="player-statistics-hero-copy">
+            <p class="player-statistics-kicker">
+                <span>@Localizer["Admin_Eyebrow"]</span>
+                <span aria-hidden="true">/ PLAYER DATA</span>
+            </p>
+            <h1 id="player-statistics-title">@Localizer["PlayerStatistics_Title"]</h1>
+            <p class="player-statistics-description">@Localizer["PlayerStatistics_Description"]</p>
+        </div>
+
+        <div class="player-statistics-hero-mark" aria-hidden="true">
+            <span class="player-statistics-hero-label">LIFETIME / ROSTER</span>
+            <strong>@Model.Players.Count.ToString("00")</strong>
+            <div class="player-statistics-signal">
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
+            </div>
+            <small>BAD WOLF / PLAYER RECORDS</small>
         </div>
     </section>
-}
+
+    <main class="player-statistics-content">
+        @if (Model.Players.Count == 0)
+        {
+            <section class="player-statistics-empty">
+                <div class="player-statistics-empty-mark" aria-hidden="true">00</div>
+                <div>
+                    <span class="player-statistics-empty-kicker" aria-hidden="true">ROSTER / EMPTY</span>
+                    <h2>@Localizer["PlayerStatistics_Title"]</h2>
+                    <p>@Localizer["PlayerStatistics_Empty"]</p>
+                </div>
+            </section>
+        }
+        else
+        {
+            <section class="player-statistics-summary" aria-label="@Localizer["PlayerStatistics_Title"]">
+                <div class="player-statistics-summary-heading">
+                    <span aria-hidden="true">LIFETIME / TOTALS</span>
+                    <strong>@Model.Players.Count.ToString("00")</strong>
+                </div>
+
+                <div class="player-statistics-summary-grid">
+                    <article class="player-statistics-metric">
+                        <span>@Localizer["PlayerStatistics_Games"]</span>
+                        <strong>@totalGameAppearances</strong>
+                        <small aria-hidden="true">MATCH APPEARANCES</small>
+                    </article>
+                    <article class="player-statistics-metric">
+                        <span>@Localizer["PlayerStatistics_TotalScore"]</span>
+                        <strong class="@(totalFinalScore < 0 ? "score-negative" : null)">@totalFinalScore</strong>
+                        <small aria-hidden="true">FINAL SCORE / TOTAL</small>
+                    </article>
+                    <article class="player-statistics-metric">
+                        <span>@Localizer["PlayerStatistics_Correct"]</span>
+                        <strong>@totalCorrectAnswers</strong>
+                        <small>@Localizer["PlayerStatistics_Attempts"]: @totalAttempts</small>
+                    </article>
+                    <article class="player-statistics-metric is-accent">
+                        <span>@Localizer["PlayerStatistics_Accuracy"]</span>
+                        <strong>
+                            @(overallAccuracy.HasValue
+                                ? overallAccuracy.Value.ToString("P1")
+                                : Localizer["PlayerStatistics_NotAvailable"])
+                        </strong>
+                        <small aria-hidden="true">ALL RECORDED ANSWERS</small>
+                    </article>
+                </div>
+            </section>
+
+            <section class="player-statistics-roster">
+                <div class="player-statistics-section-heading">
+                    <div>
+                        <span aria-hidden="true">BAD WOLF / ROSTER</span>
+                        <h2>@Localizer["PlayerStatistics_Title"]</h2>
+                    </div>
+                    <strong aria-hidden="true">PLAYER INDEX</strong>
+                </div>
+
+                <div class="player-statistics-table-frame">
+                    <div class="table-scroll player-statistics-table-scroll">
+                        <table class="player-statistics-table">
+                            <thead>
+                                <tr>
+                                    <th>@Localizer["GameHistory_Player"]</th>
+                                    <th>@Localizer["PlayerStatistics_Games"]</th>
+                                    <th>@Localizer["PlayerStatistics_TotalScore"]</th>
+                                    <th>@Localizer["PlayerStatistics_Correct"]</th>
+                                    <th>@Localizer["PlayerStatistics_Attempts"]</th>
+                                    <th>@Localizer["PlayerStatistics_Accuracy"]</th>
+                                    <th>@Localizer["PlayerStatistics_LastPlayed"]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (var index = 0; index < Model.Players.Count; index++)
+                                {
+                                    var player = Model.Players[index];
+                                    <tr>
+                                        <th scope="row" data-label="@Localizer["GameHistory_Player"]">
+                                            <span class="player-statistics-index" aria-hidden="true">@((index + 1).ToString("00"))</span>
+                                            <strong>@player.Name</strong>
+                                        </th>
+                                        <td data-label="@Localizer["PlayerStatistics_Games"]">
+                                            <strong>@player.GamesPlayed</strong>
+                                        </td>
+                                        <td data-label="@Localizer["PlayerStatistics_TotalScore"]"
+                                            class="@(player.TotalFinalScore < 0 ? "score-negative" : null)">
+                                            <strong>@player.TotalFinalScore</strong>
+                                        </td>
+                                        <td data-label="@Localizer["PlayerStatistics_Correct"]">@player.CorrectAnswers</td>
+                                        <td data-label="@Localizer["PlayerStatistics_Attempts"]">@player.Attempts</td>
+                                        <td data-label="@Localizer["PlayerStatistics_Accuracy"]" class="player-statistics-accuracy">
+                                            @if (player.Accuracy.HasValue)
+                                            {
+                                                <span class="player-statistics-accuracy-value">@player.Accuracy.Value.ToString("P1")</span>
+                                                <progress class="player-statistics-accuracy-track"
+                                                          max="1"
+                                                          value="@player.Accuracy.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                          aria-hidden="true"></progress>
+                                            }
+                                            else
+                                            {
+                                                <span>@Localizer["PlayerStatistics_NotAvailable"]</span>
+                                            }
+                                        </td>
+                                        <td data-label="@Localizer["PlayerStatistics_LastPlayed"]">
+                                            <time datetime="@player.LastPlayedAtUtc.ToString("O")">
+                                                @player.LastPlayedAtUtc.ToLocalTime().ToString("g")
+                                            </time>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        }
+    </main>
+</div>
