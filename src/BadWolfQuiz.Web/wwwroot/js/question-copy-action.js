@@ -28,6 +28,8 @@
             selectCategory: "Choose a category",
             full: "full",
             loading: "Loading available destinations…",
+            loadError: "Could not load available destinations.",
+            retry: "Retry",
             noDestination: "No active quiz category has room for an additional question.",
             success: "Question copied.",
             sourceMissing: "The source question is no longer available.",
@@ -48,6 +50,8 @@
             selectCategory: "Оберіть категорію",
             full: "заповнено",
             loading: "Завантаження доступних місць…",
+            loadError: "Не вдалося завантажити доступні місця.",
+            retry: "Повторити",
             noDestination: "В активних вікторинах немає категорії з місцем для додаткового питання.",
             success: "Питання скопійовано.",
             sourceMissing: "Початкове питання більше недоступне.",
@@ -68,6 +72,8 @@
             selectCategory: "Україна",
             full: "Україна",
             loading: "Україна",
+            loadError: "Україна",
+            retry: "Україна",
             noDestination: "Україна",
             success: "Україна",
             sourceMissing: "Україна",
@@ -88,6 +94,8 @@
             selectCategory: "Scegli una categoria",
             full: "completa",
             loading: "Caricamento destinazioni disponibili…",
+            loadError: "Impossibile caricare le destinazioni disponibili.",
+            retry: "Riprova",
             noDestination: "Nessuna categoria nei quiz attivi ha spazio per una domanda aggiuntiva.",
             success: "Domanda copiata.",
             sourceMissing: "La domanda di origine non è più disponibile.",
@@ -123,6 +131,7 @@
             /^(.*\/Admin\/Quizzes)\/Editor(?:\/.*)?$/i);
         return match ? `${match[1]}/QuestionCopy` : "/Admin/Quizzes/QuestionCopy";
     })();
+    const destinationLoadTimeoutMs = 15000;
 
     const quizSaveStatus = document.querySelector("[data-quiz-save-status]");
 
@@ -189,11 +198,17 @@
     cancelButton.type = "button";
     cancelButton.dataset.closeQuestionCopy = "true";
     cancelButton.textContent = labels.cancel;
+    const retryButton = document.createElement("button");
+    retryButton.className = "button button-secondary";
+    retryButton.type = "button";
+    retryButton.dataset.retryQuestionCopyTargets = "true";
+    retryButton.textContent = labels.retry;
+    retryButton.hidden = true;
     const submitButton = document.createElement("button");
     submitButton.className = "button button-primary";
     submitButton.type = "submit";
     submitButton.textContent = labels.submit;
-    actions.append(cancelButton, submitButton);
+    actions.append(cancelButton, retryButton, submitButton);
     form.appendChild(actions);
 
     dialog.setAttribute("aria-labelledby", title.id);
@@ -202,14 +217,16 @@
 
     let quizzes = [];
     let sourceQuestionId = "";
+    let destinationAbortController = null;
 
-    const setStatus = (message, kind = "") => {
+    const setStatus = (message, kind = "", canRetry = false) => {
         status.textContent = message;
         status.classList.remove("alert-success", "alert-error");
         if (kind === "error") {
             status.classList.add("alert-error");
         }
         status.hidden = !message;
+        retryButton.hidden = !canRetry;
     };
 
     const showQuizOverlay = message => {
@@ -310,6 +327,13 @@
     };
 
     const loadDestinations = async () => {
+        destinationAbortController?.abort();
+        const controller = new AbortController();
+        destinationAbortController = controller;
+        const timeoutId = window.setTimeout(
+            () => controller.abort(),
+            destinationLoadTimeoutMs);
+
         submitButton.disabled = true;
         quizSelect.disabled = true;
         categorySelect.disabled = true;
@@ -321,20 +345,36 @@
             url.searchParams.set("questionId", sourceQuestionId);
             const response = await fetch(url, {
                 headers: { "Accept": "application/json" },
-                credentials: "same-origin"
+                credentials: "same-origin",
+                signal: controller.signal
             });
+            if (destinationAbortController !== controller) {
+                return;
+            }
+
             const data = await response.json().catch(() => null);
             if (!response.ok || !data?.success) {
-                setStatus(errorMessage(data?.error), "error");
+                setStatus(errorMessage(data?.error), "error", true);
                 return;
             }
 
             populateDestinations(data);
         } catch {
-            setStatus(labels.invalid, "error");
+            if (destinationAbortController !== controller || !dialog.open) {
+                return;
+            }
+            setStatus(labels.loadError, "error", true);
+        } finally {
+            window.clearTimeout(timeoutId);
+            if (destinationAbortController === controller) {
+                destinationAbortController = null;
+            }
         }
     };
 
+    retryButton.addEventListener("click", () => {
+        void loadDestinations();
+    });
     quizSelect.addEventListener("change", () => {
         setStatus("");
         syncCategories();
@@ -425,6 +465,10 @@
         }
     });
 
+    dialog.addEventListener("close", () => {
+        destinationAbortController?.abort();
+        destinationAbortController = null;
+    });
     dialog.querySelectorAll("[data-close-question-copy]")
         .forEach(button => button.addEventListener("click", () => dialog.close()));
     dialog.addEventListener("click", event => {
