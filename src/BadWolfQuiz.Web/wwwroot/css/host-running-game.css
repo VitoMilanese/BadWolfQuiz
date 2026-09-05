@@ -47,6 +47,25 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-hos
     box-shadow: 0 20px 55px rgb(0 0 0 / 22%);
 }
 
+/* Extend only the stage paint to the viewport edges. Do not change the board grid itself. */
+body.gameplay-layout:has(.host-game-board[data-game-status="running"])
+.host-game-board:has(> [data-host-gameplay-view] > .host-board-layout:not([hidden]))::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    right: auto;
+    bottom: var(--game-scoreboard-space, 0px);
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
+    border-block: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--panel) 90%, transparent), color-mix(in srgb, var(--panel-2) 86%, transparent));
+    box-shadow: 0 20px 55px rgb(0 0 0 / 18%);
+    pointer-events: none;
+}
+
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-column {
     gap: clamp(0.35rem, 0.7vw, 0.65rem);
 }
@@ -154,36 +173,6 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-gam
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .question-review-heading,
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .current-question-heading {
     border-bottom-color: color-mix(in srgb, var(--line) 82%, transparent);
-}
-
-/* Make the stage background itself full-bleed without changing board/sidebar geometry. */
-body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-host-gameplay-board] {
-    position: relative;
-    isolation: isolate;
-    overflow: visible !important;
-    background: transparent;
-    box-shadow: none;
-}
-
-body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-host-gameplay-board]::before {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    top: -1px;
-    bottom: -1px;
-    left: 50%;
-    width: 100vw;
-    transform: translateX(-50%);
-    border-block: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
-    background:
-        linear-gradient(180deg, color-mix(in srgb, var(--panel) 90%, transparent), color-mix(in srgb, var(--panel-2) 86%, transparent));
-    box-shadow: 0 20px 55px rgb(0 0 0 / 18%);
-    pointer-events: none;
-}
-
-body.gameplay-layout:has(.host-game-board[data-game-status="running"]) [data-host-gameplay-board] > * {
-    position: relative;
-    z-index: 1;
 }
 
 @media (max-width: 900px) {
