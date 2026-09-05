@@ -38,6 +38,10 @@ public sealed class MultipleChoiceAnswerRevealTagHelper(
                 .Take(1)
                 .Select(block => block.SourceContentBlockId)
                 .ToArray();
+        var centerSingleHostAnswer =
+            question.PresentationType == QuestionPresentationType.HostMultipleChoice &&
+            blocks.Any() &&
+            blocks.All(block => correctOptionIds.Contains(block.SourceContentBlockId));
 
         var classValue = output.Attributes["class"]?.Value?.ToString() ?? string.Empty;
         var classes = classValue
@@ -48,7 +52,11 @@ public sealed class MultipleChoiceAnswerRevealTagHelper(
                 StringComparison.Ordinal))
             .Append("multiple-choice-answer-reveal-grid")
             .Distinct(StringComparer.Ordinal)
-            .ToArray();
+            .ToList();
+        if (centerSingleHostAnswer)
+        {
+            classes.Add("host-multiple-choice-answer-only");
+        }
         output.Attributes.SetAttribute("class", string.Join(' ', classes));
 
         if (htmlHelper is IViewContextAware contextualizedHtmlHelper)

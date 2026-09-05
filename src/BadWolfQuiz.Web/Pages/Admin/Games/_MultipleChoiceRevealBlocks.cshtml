@@ -29,6 +29,16 @@
         overflow-y: auto !important;
     }
 
+    /* A host-selected multiple-choice reveal with no additional answer content
+       should use the free middle row instead of sitting at its top edge. The
+       class is added only by the live host gameplay tag helper and only when
+       every rendered block is a correct option, so normal stacked reveals stay
+       top-to-bottom and all-player multiple-choice remains unchanged. */
+    .game-content-blocks.multiple-choice-answer-reveal-grid.host-multiple-choice-answer-only {
+        align-self: stretch !important;
+        justify-content: safe center !important;
+    }
+
     /* Legacy all-player answer styles treat every descendant block as an answer
        option. Reset them across the whole shared reveal, including blocks moved
        inside a runtime content container. */
