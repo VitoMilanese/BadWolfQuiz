@@ -44,6 +44,10 @@ builder.Services
             options.Conventions.AddPageRoute(route.Page, template);
         }
     })
+    .AddMvcOptions(options =>
+    {
+        options.Filters.Add(new AudioRangeProcessingFilter());
+    })
     .AddViewLocalization()
     .AddDataAnnotationsLocalization(options =>
     {
