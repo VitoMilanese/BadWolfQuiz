@@ -339,6 +339,11 @@ body:has(.my-quizzes-page) .topbar {
     box-shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
 }
 
+.owned-quiz-card:hover,
+.owned-quiz-card:has(.owned-quiz-action-menu[open]) {
+    z-index: 10;
+}
+
 .owned-quiz-card.has-resumable-game {
     border-color: color-mix(in srgb, var(--red-bright) 58%, var(--line));
 }
