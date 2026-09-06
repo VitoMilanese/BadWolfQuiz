@@ -11,6 +11,6 @@ public sealed class GameplayPolishAssetsTagHelper : TagHelper
     {
         output.PreContent.AppendHtml(
             "<link rel=\"stylesheet\" href=\"/css/gameplay-polish.css?v=3\" />" +
-            "<script src=\"/js/gameplay-polish.js?v=2\"></script>");
+            "<script src=\"/js/gameplay-polish.js?v=3\"></script>");
     }
 }
