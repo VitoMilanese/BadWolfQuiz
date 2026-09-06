@@ -165,22 +165,24 @@
             // A round-summary Start/Force form is navigation to the dedicated
             // Final Question transition page. Do not post it directly or the
             // server enters FinalWagering while the host is still showing the
-            // round summary. Only the button inside that transition page commits
-            // the Final Question state through the fast AJAX path.
+            // round summary.
             if (!form.matches("[data-final-question-transition-form]")) {
                 return;
             }
 
-            // The transition page intentionally requires a real host click.
-            // Leave its old programmatic three-second requestSubmit blocked by
-            // the existing navigation guard rather than treating it as consent.
+            // The transition page intentionally requires a real host click. The
+            // established transition guard blocks the old programmatic submit.
             if (submitter === null) {
                 return;
             }
 
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            void submitFastFinalCommand(form, submitter, action);
+            // Keep the proven browser navigation path for the actual transition
+            // commit. The Final Question refresh guard intentionally blocks host
+            // gameplay refreshes while this screen is mounted, so handling this
+            // POST through the generic AJAX fast path can advance players to
+            // FinalWagering while leaving the host stuck on the transition page.
+            // Busy feedback still makes the unavoidable wait visible.
+            startBusy();
             return;
         }
 
