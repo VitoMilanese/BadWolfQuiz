@@ -14,24 +14,31 @@ public sealed class HeaderSeoNavigationTagHelper(
     IConfiguration configuration,
     IStringLocalizer<MinigameEditorResource> minigameEditorLocalizer) : TagHelper
 {
+    private const string LegacyMenuItemClass = "action-menu-item";
+    private const string SideMenuItemClass = "header-side-menu-item";
+
     public override int Order => 1000;
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
         if (!context.AllAttributes.TryGetAttribute("class", out var classAttribute) ||
-            !HasCssClass(classAttribute.Value?.ToString(), "action-menu-item") ||
+            !IsHeaderNavigationItem(classAttribute.Value?.ToString()) ||
             !context.AllAttributes.TryGetAttribute("asp-page", out var pageAttribute))
         {
             return;
         }
 
+        var classes = classAttribute.Value?.ToString();
         var page = pageAttribute.Value?.ToString();
         if (page == "/Admin/MasterGames" && IsMasterHost())
         {
             var label = HtmlEncoder.Default.Encode(
                 minigameEditorLocalizer["MenuTitle"].Value);
+            var menuItemClass = HasCssClass(classes, SideMenuItemClass)
+                ? SideMenuItemClass
+                : LegacyMenuItemClass;
             output.PostElement.AppendHtml(
-                "<a class=\"action-menu-item\" href=\"/Admin/MinigameEditor\" " +
+                $"<a class=\"{menuItemClass}\" href=\"/Admin/MinigameEditor\" " +
                 "onclick=\"if(window.BadWolfBusy){window.BadWolfBusy.navigate(this.href);return false;}\">" +
                 label +
                 "</a>");
@@ -58,6 +65,10 @@ public sealed class HeaderSeoNavigationTagHelper(
         return !string.IsNullOrWhiteSpace(configuredId) &&
                string.Equals(currentId, configuredId, StringComparison.Ordinal);
     }
+
+    private static bool IsHeaderNavigationItem(string? value) =>
+        HasCssClass(value, LegacyMenuItemClass) ||
+        HasCssClass(value, SideMenuItemClass);
 
     private static bool HasCssClass(string? value, string expected) =>
         value?.Split(' ', StringSplitOptions.RemoveEmptyEntries)

@@ -50,6 +50,8 @@ public sealed class SeoLocalizedRoutingTests
 
         Assert.Contains("HeaderSeoNavigationTagHelper", imports, StringComparison.Ordinal);
         Assert.Contains("action-menu-item", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("header-side-menu-item", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("IsHeaderNavigationItem", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/PublicQuizzes", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/Faq", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/About", tagHelper, StringComparison.Ordinal);
