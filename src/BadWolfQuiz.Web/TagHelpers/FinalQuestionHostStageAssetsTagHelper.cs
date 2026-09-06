@@ -12,6 +12,6 @@ public sealed class FinalQuestionHostStageAssetsTagHelper : TagHelper
         // entering Final Question always carries the assets without an F5.
         output.PreContent.AppendHtml(
             "<link rel=\"stylesheet\" href=\"/css/final-question-host-stage.css?v=3\" />" +
-            "<link rel=\"stylesheet\" href=\"/css/final-question-host-answer-space.css?v=1\" />");
+            "<link rel=\"stylesheet\" href=\"/css/final-question-host-answer-space.css?v=2\" />");
     }
 }
