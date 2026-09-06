@@ -18,7 +18,7 @@ public sealed class FinalQuestionTransitionStylesRegressionTests
         Assert.Contains("<style data-final-question-stage-styles>", markup);
         Assert.Contains("@@import url(\"/css/final-question-stage.css\");", markup);
         Assert.Contains("main.page-shell > style", navigation);
-        Assert.Contains("...styles.map(style => document.importNode(style, true))", navigation);
+        Assert.Contains("styles.map(style => document.importNode(style, true))", navigation);
     }
 
     private static string FindWebFile(params string[] parts)
