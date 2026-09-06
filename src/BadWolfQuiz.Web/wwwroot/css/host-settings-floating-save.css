@@ -1,0 +1,112 @@
+.host-settings-actions.host-settings-floating-save-bar[hidden] {
+    display: none !important;
+}
+
+.host-settings-actions.host-settings-floating-save-bar {
+    position: fixed;
+    left: 50%;
+    right: auto;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    z-index: 120;
+    width: min(760px, calc(100vw - 36px));
+    transform: translateX(-50%);
+    gap: 18px;
+    padding: 14px 16px;
+    border-color: color-mix(in srgb, var(--red-bright) 42%, var(--line));
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--panel) 98%, transparent),
+            color-mix(in srgb, var(--panel-2) 94%, transparent));
+    box-shadow:
+        0 22px 70px rgba(0, 0, 0, 0.48),
+        0 0 0 1px color-mix(in srgb, var(--red-bright) 10%, transparent);
+    backdrop-filter: blur(14px);
+    animation: host-settings-save-bar-in 160ms ease-out;
+}
+
+.host-settings-actions.host-settings-floating-save-bar > span {
+    color: var(--text);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+}
+
+.host-settings-actions.host-settings-floating-save-bar > span::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--gold) 65%, transparent);
+    vertical-align: 0.05em;
+}
+
+.host-settings-actions.host-settings-floating-save-bar .button {
+    min-width: 150px;
+    min-height: 46px;
+}
+
+.host-settings-page.host-settings-dirty .host-settings-content {
+    padding-bottom: calc(clamp(80px, 9vw, 140px) + 92px);
+}
+
+.host-settings-unsaved-dialog .dialog-card {
+    width: min(540px, calc(100vw - 32px));
+}
+
+.host-settings-unsaved-message {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+@keyframes host-settings-save-bar-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@media (max-width: 700px) {
+    .host-settings-actions.host-settings-floating-save-bar {
+        left: 8px;
+        right: 8px;
+        bottom: max(8px, env(safe-area-inset-bottom));
+        width: auto;
+        transform: none;
+        gap: 10px;
+    }
+
+    .host-settings-actions.host-settings-floating-save-bar .button {
+        width: 100%;
+    }
+
+    .host-settings-page.host-settings-dirty .host-settings-content {
+        padding-bottom: calc(clamp(80px, 9vw, 140px) + 132px);
+    }
+
+    @keyframes host-settings-save-bar-in {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .host-settings-actions.host-settings-floating-save-bar {
+        animation: none;
+    }
+}
