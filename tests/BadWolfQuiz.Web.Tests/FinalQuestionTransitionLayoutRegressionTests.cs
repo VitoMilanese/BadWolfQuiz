@@ -16,19 +16,26 @@ public sealed class FinalQuestionTransitionLayoutRegressionTests
             "FinalQuestionTransition.cshtml"));
 
         Assert.Contains(
-            "body:has(.final-question-transition) > .page-shell",
+            "body.gameplay-layout:has(.final-question-transition) > .page-shell",
             transition,
             StringComparison.Ordinal);
         Assert.Contains(
-            "height: calc(100dvh - var(--topbar-height, 0px));",
+            "height: calc(100dvh - var(--topbar-height, 60px));",
             transition,
             StringComparison.Ordinal);
         Assert.Contains("padding: 0;", transition, StringComparison.Ordinal);
         Assert.Contains("overflow: hidden;", transition, StringComparison.Ordinal);
-        Assert.Contains("height: 100%;", transition, StringComparison.Ordinal);
+        Assert.Contains("position: fixed;", transition, StringComparison.Ordinal);
+        Assert.Contains(
+            "inset: var(--topbar-height, 60px) 0 0;",
+            transition,
+            StringComparison.Ordinal);
+        Assert.Contains("width: auto;", transition, StringComparison.Ordinal);
+        Assert.Contains("height: auto;", transition, StringComparison.Ordinal);
         Assert.Contains("box-sizing: border-box;", transition, StringComparison.Ordinal);
+        Assert.DoesNotContain("width: 100vw;", transition, StringComparison.Ordinal);
         Assert.DoesNotContain(
-            "min-height: calc(100vh - var(--topbar-height, 0px));",
+            "calc(50% - 50vw)",
             transition,
             StringComparison.Ordinal);
     }
