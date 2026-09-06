@@ -167,7 +167,7 @@ internal sealed class MinigameAiOpponent
             }
         }
 
-        return _candidates.Count - Math.Max(yesCount, noCount);
+        return Math.Min(yesCount, noCount);
     }
 
     private int ChooseQuestionIndex(

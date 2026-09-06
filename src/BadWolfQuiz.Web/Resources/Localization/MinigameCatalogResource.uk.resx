@@ -13,4 +13,10 @@
   <data name="CopyRoomLink" xml:space="preserve"><value>Копіювати посилання на кімнату</value></data>
   <data name="RoomLinkCopied" xml:space="preserve"><value>Посилання на кімнату скопійовано</value></data>
   <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Не вдалося скопіювати посилання на кімнату</value></data>
+  <data name="AiPlayer" xml:space="preserve"><value>ШІ</value></data>
+  <data name="PlayAgainstAi" xml:space="preserve"><value>Грати проти ШІ</value></data>
+  <data name="PlayAgainstAiDescription" xml:space="preserve"><value>Грайте самі проти ШІ-суперника. Картки з питаннями обов’язкові.</value></data>
+  <data name="Draw" xml:space="preserve"><value>Нічия</value></data>
+  <data name="DontKnow" xml:space="preserve"><value>Не знаю</value></data>
+  <data name="AiUnavailable" xml:space="preserve"><value>Недостатньо ігор із відповідями щонайменше на 80% питань для гри проти ШІ.</value></data>
 </root>

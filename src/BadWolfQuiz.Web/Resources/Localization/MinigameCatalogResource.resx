@@ -13,4 +13,10 @@
   <data name="CopyRoomLink" xml:space="preserve"><value>Copy room link</value></data>
   <data name="RoomLinkCopied" xml:space="preserve"><value>Room link copied</value></data>
   <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Could not copy the room link</value></data>
+  <data name="AiPlayer" xml:space="preserve"><value>AI</value></data>
+  <data name="PlayAgainstAi" xml:space="preserve"><value>Play against AI</value></data>
+  <data name="PlayAgainstAiDescription" xml:space="preserve"><value>Play solo against an AI opponent. Question cards are required.</value></data>
+  <data name="Draw" xml:space="preserve"><value>Draw</value></data>
+  <data name="DontKnow" xml:space="preserve"><value>Don't know</value></data>
+  <data name="AiUnavailable" xml:space="preserve"><value>Not enough games with at least 80% answered questions are available for AI play.</value></data>
 </root>

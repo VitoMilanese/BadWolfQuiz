@@ -13,4 +13,10 @@
   <data name="CopyRoomLink" xml:space="preserve"><value>Україна</value></data>
   <data name="RoomLinkCopied" xml:space="preserve"><value>Україна</value></data>
   <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Україна</value></data>
+  <data name="AiPlayer" xml:space="preserve"><value>Україна</value></data>
+  <data name="PlayAgainstAi" xml:space="preserve"><value>Україна</value></data>
+  <data name="PlayAgainstAiDescription" xml:space="preserve"><value>Україна</value></data>
+  <data name="Draw" xml:space="preserve"><value>Україна</value></data>
+  <data name="DontKnow" xml:space="preserve"><value>Україна</value></data>
+  <data name="AiUnavailable" xml:space="preserve"><value>Україна</value></data>
 </root>

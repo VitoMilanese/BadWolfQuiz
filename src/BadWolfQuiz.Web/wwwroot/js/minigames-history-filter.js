@@ -12,10 +12,12 @@
     const text = {
         playerOne: root.dataset.playerOne ?? 'Player 1',
         playerTwo: root.dataset.playerTwo ?? 'Player 2',
+        aiPlayer: root.dataset.aiPlayer ?? 'AI',
         questionEntry: root.dataset.questionHistoryEntry ?? '{player}: {question}',
         answerEntry: root.dataset.historyQuestionAnswer ?? '{player} answered - {answer}',
         yes: root.dataset.yes ?? 'YES',
         no: root.dataset.no ?? 'NO',
+        dontKnow: root.dataset.dontKnow ?? "Don't know",
         empty: root.dataset.questionHistoryEmpty ?? ''
     };
 
@@ -32,7 +34,9 @@
 
     const playerName = playerNumber => playerNumber === 1
         ? text.playerOne
-        : text.playerTwo;
+        : root.dataset.aiActive === 'true'
+            ? text.aiPlayer
+            : text.playerTwo;
 
     const playerNumberFromItem = item => {
         if (item.classList.contains('is-player-1')) return 1;
@@ -63,11 +67,17 @@
         const value = item.textContent?.trim() ?? '';
         const yesText = format(text.answerEntry, { player: playerLabel, answer: text.yes });
         const noText = format(text.answerEntry, { player: playerLabel, answer: text.no });
+        const dontKnowText = format(
+            text.answerEntry,
+            { player: playerLabel, answer: text.dontKnow });
         if (value === yesText) {
             return { kind: 'answer', player, value: text.yes };
         }
         if (value === noText) {
             return { kind: 'answer', player, value: text.no };
+        }
+        if (value === dontKnowText) {
+            return { kind: 'answer', player, value: text.dontKnow };
         }
 
         const question = extractTemplateValue(

@@ -11,7 +11,12 @@ public sealed class MinigameHub(
     IOptions<MinigameOptions> options,
     MinigameRoomStore roomStore) : Hub
 {
+    private static readonly MinigameAiRoomStore AiRooms = new(TimeProvider.System);
+
     private MinigameCatalogStore Catalog =>
+        new(dbFactory, options.Value.CardCount);
+
+    private MinigameAiCatalogStore AiCatalog =>
         new(dbFactory, options.Value.CardCount);
 
     public async Task<MinigameCardCatalogSnapshot> GetCatalog()
@@ -24,12 +29,15 @@ public sealed class MinigameHub(
                 MinigameRoomStore.MinimumGameCardCount,
                 maximum)
             : 0;
+        var aiMaximum = await AiCatalog.GetEligibleGameCountAsync(
+            Context.ConnectionAborted);
         return new MinigameCardCatalogSnapshot(
             MinigameRoomStore.MinimumGameCardCount,
             maximum,
             defaultCount,
             counts.QuestionCount >= MinigameQuestionStore.MinimumQuestionCount,
-            counts.QuestionCount);
+            counts.QuestionCount,
+            aiMaximum);
     }
 
     public async Task<MinigameRoomConnection> CreateRoom(
@@ -44,6 +52,10 @@ public sealed class MinigameHub(
     {
         try
         {
+            if (AiRooms.IsActive(roomCode))
+            {
+                throw new MinigameRoomException(MinigameRoomError.RoomFull);
+            }
             var membership = roomStore.JoinRoom(roomCode);
             await JoinRoomGroup(membership.RoomCode);
             await BroadcastRoomChanged(membership.State);
@@ -62,10 +74,19 @@ public sealed class MinigameHub(
     {
         try
         {
-            var state = roomStore.GetState(
-                roomCode,
-                playerToken,
-                touchActivity);
+            MinigameRoomSnapshot state;
+            if (AiRooms.IsActive(roomCode))
+            {
+                if (touchActivity)
+                {
+                    roomStore.TouchRoom(roomCode, playerToken);
+                }
+                state = AiRooms.GetState(roomCode, playerToken, touchActivity);
+            }
+            else
+            {
+                state = roomStore.GetState(roomCode, playerToken, touchActivity);
+            }
             await JoinRoomGroup(state.RoomCode);
             return state;
         }
@@ -81,7 +102,26 @@ public sealed class MinigameHub(
     {
         try
         {
+            if (AiRooms.IsActive(roomCode))
+            {
+                roomStore.TouchRoom(roomCode, playerToken);
+                return AiRooms.TouchRoom(roomCode, playerToken);
+            }
             return roomStore.TouchRoom(roomCode, playerToken);
+        }
+        catch (MinigameRoomException exception)
+        {
+            throw CreateHubException(exception);
+        }
+    }
+
+    public MinigameAiRoomStatus GetAiStatus(string roomCode, string playerToken)
+    {
+        try
+        {
+            return AiRooms.IsActive(roomCode)
+                ? AiRooms.GetStatus(roomCode, playerToken)
+                : new MinigameAiRoomStatus(false, false);
         }
         catch (MinigameRoomException exception)
         {
@@ -93,35 +133,65 @@ public sealed class MinigameHub(
         string roomCode,
         string playerToken,
         int cardCount,
-        bool questionCardsEnabled = false)
+        bool questionCardsEnabled = false,
+        bool playAgainstAi = false)
     {
         try
         {
-            var counts = await Catalog.GetCountsAsync(Context.ConnectionAborted);
-            if (cardCount < MinigameRoomStore.MinimumGameCardCount ||
-                cardCount > counts.GameCount)
+            MinigameRoomSnapshot state;
+            if (playAgainstAi)
             {
-                throw new MinigameRoomException(MinigameRoomError.InvalidCardCount);
+                if (AiRooms.IsActive(roomCode))
+                {
+                    AiRooms.Remove(roomCode, playerToken);
+                }
+                var baseState = roomStore.GetState(roomCode, playerToken);
+                if (baseState.PlayerNumber != 1)
+                {
+                    throw new MinigameRoomException(MinigameRoomError.InvalidPlayer);
+                }
+                var aiMaximum = await AiCatalog.GetEligibleGameCountAsync(
+                    Context.ConnectionAborted);
+                if (cardCount < MinigameRoomStore.MinimumGameCardCount ||
+                    cardCount > aiMaximum)
+                {
+                    throw new HubException("MINIGAME_ROOM_AIUNAVAILABLE");
+                }
+                var gameData = await AiCatalog.GenerateGameAsync(
+                    cardCount,
+                    Context.ConnectionAborted);
+                state = AiRooms.Start(roomCode, playerToken, baseState, gameData);
             }
-
-            var cards = await Catalog.GenerateCardsAsync(
-                cardCount,
-                Context.ConnectionAborted);
-            var questions = questionCardsEnabled
-                ? await Catalog.GetQuestionsAsync(Context.ConnectionAborted)
-                : [];
-            if (questionCardsEnabled &&
-                questions.Count < MinigameQuestionStore.MinimumQuestionCount)
+            else
             {
-                throw new MinigameRoomException(MinigameRoomError.QuestionsUnavailable);
+                if (AiRooms.IsActive(roomCode))
+                {
+                    AiRooms.Remove(roomCode, playerToken);
+                }
+                var counts = await Catalog.GetCountsAsync(Context.ConnectionAborted);
+                if (cardCount < MinigameRoomStore.MinimumGameCardCount ||
+                    cardCount > counts.GameCount)
+                {
+                    throw new MinigameRoomException(MinigameRoomError.InvalidCardCount);
+                }
+                var cards = await Catalog.GenerateCardsAsync(
+                    cardCount,
+                    Context.ConnectionAborted);
+                var questions = questionCardsEnabled
+                    ? await Catalog.GetQuestionsAsync(Context.ConnectionAborted)
+                    : [];
+                if (questionCardsEnabled &&
+                    questions.Count < MinigameQuestionStore.MinimumQuestionCount)
+                {
+                    throw new MinigameRoomException(MinigameRoomError.QuestionsUnavailable);
+                }
+                state = roomStore.StartNewGame(
+                    roomCode,
+                    playerToken,
+                    cards,
+                    questionCardsEnabled,
+                    questions);
             }
-
-            var state = roomStore.StartNewGame(
-                roomCode,
-                playerToken,
-                cards,
-                questionCardsEnabled,
-                questions);
             await BroadcastRoomChanged(state);
             return state;
         }
@@ -131,72 +201,93 @@ public sealed class MinigameHub(
         }
     }
 
-    public async Task<MinigameRoomSnapshot> RestartGame(
+    public Task<MinigameRoomSnapshot> RestartGame(
         string roomCode,
-        string playerToken)
-    {
-        return await MutateRoom(() =>
-            roomStore.RestartGame(roomCode, playerToken));
-    }
+        string playerToken) =>
+        MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.RestartGame(roomCode, playerToken),
+            () => AiRooms.Restart(roomCode, playerToken));
 
-    public async Task<MinigameRoomSnapshot> ToggleExclusion(
+    public Task<MinigameRoomSnapshot> ToggleExclusion(
         string roomCode,
         string playerToken,
-        string fileName)
-    {
-        return await MutateRoom(() =>
-            roomStore.ToggleExclusion(roomCode, playerToken, fileName));
-    }
+        string fileName) =>
+        MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.ToggleExclusion(roomCode, playerToken, fileName),
+            () => AiRooms.ToggleExclusion(roomCode, playerToken, fileName));
 
-    public async Task<MinigameRoomSnapshot> SelectQuestion(
+    public Task<MinigameRoomSnapshot> SelectQuestion(
         string roomCode,
         string playerToken,
-        int optionIndex)
-    {
-        return await MutateRoom(() =>
-            roomStore.SelectQuestion(roomCode, playerToken, optionIndex));
-    }
+        int optionIndex) =>
+        MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.SelectQuestion(roomCode, playerToken, optionIndex),
+            () => AiRooms.SelectQuestion(roomCode, playerToken, optionIndex));
 
-    public async Task<MinigameRoomSnapshot> SubmitQuestionResponse(
+    public Task<MinigameRoomSnapshot> SubmitQuestionResponse(
         string roomCode,
         string playerToken,
-        bool answerYes)
-    {
-        return await MutateRoom(() =>
-            roomStore.SubmitQuestionResponse(roomCode, playerToken, answerYes));
-    }
+        bool? answerYes) =>
+        MutateRoom(
+            roomCode,
+            playerToken,
+            () => answerYes is bool multiplayerAnswer
+                ? roomStore.SubmitQuestionResponse(roomCode, playerToken, multiplayerAnswer)
+                : throw new MinigameRoomException(MinigameRoomError.InvalidQuestion),
+            () => AiRooms.SubmitQuestionResponse(roomCode, playerToken, answerYes));
 
-    public async Task<MinigameRoomSnapshot> EndTurn(
+    public Task<MinigameRoomSnapshot> EndTurn(
         string roomCode,
-        string playerToken)
-    {
-        return await MutateRoom(() =>
-            roomStore.EndTurn(roomCode, playerToken));
-    }
+        string playerToken) =>
+        MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.EndTurn(roomCode, playerToken),
+            () => AiRooms.EndTurn(roomCode, playerToken));
 
-    public async Task<MinigameRoomSnapshot> ExpireTurn(
+    public Task<MinigameRoomSnapshot> ExpireTurn(
         string roomCode,
-        string playerToken)
-    {
-        return await MutateRoom(() =>
-            roomStore.ExpireTurn(roomCode, playerToken));
-    }
+        string playerToken) =>
+        MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.ExpireTurn(roomCode, playerToken),
+            () => AiRooms.ExpireTurn(roomCode, playerToken));
 
-    public async Task<MinigameRoomSnapshot> SubmitGuess(
+    public Task<MinigameRoomSnapshot> SubmitGuess(
         string roomCode,
         string playerToken,
-        string fileName)
-    {
-        return await MutateRoom(() =>
-            roomStore.SubmitGuess(roomCode, playerToken, fileName));
-    }
+        string fileName) =>
+        MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.SubmitGuess(roomCode, playerToken, fileName),
+            () => AiRooms.SubmitGuess(roomCode, playerToken, fileName));
 
     private async Task<MinigameRoomSnapshot> MutateRoom(
-        Func<MinigameRoomSnapshot> mutation)
+        string roomCode,
+        string playerToken,
+        Func<MinigameRoomSnapshot> multiplayerMutation,
+        Func<MinigameRoomSnapshot> aiMutation)
     {
         try
         {
-            var state = mutation();
+            MinigameRoomSnapshot state;
+            if (AiRooms.IsActive(roomCode))
+            {
+                roomStore.TouchRoom(roomCode, playerToken);
+                state = aiMutation();
+            }
+            else
+            {
+                state = multiplayerMutation();
+            }
             await BroadcastRoomChanged(state);
             return state;
         }
@@ -226,4 +317,5 @@ public sealed record MinigameCardCatalogSnapshot(
     int MaximumCardCount,
     int DefaultCardCount,
     bool QuestionsAvailable,
-    int QuestionCount);
+    int QuestionCount,
+    int AiMaximumCardCount);

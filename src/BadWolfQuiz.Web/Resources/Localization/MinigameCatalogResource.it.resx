@@ -13,4 +13,10 @@
   <data name="CopyRoomLink" xml:space="preserve"><value>Copia il link della stanza</value></data>
   <data name="RoomLinkCopied" xml:space="preserve"><value>Link della stanza copiato</value></data>
   <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Impossibile copiare il link della stanza</value></data>
+  <data name="AiPlayer" xml:space="preserve"><value>IA</value></data>
+  <data name="PlayAgainstAi" xml:space="preserve"><value>Gioca contro l'IA</value></data>
+  <data name="PlayAgainstAiDescription" xml:space="preserve"><value>Gioca da solo contro un avversario IA. Le carte domanda sono obbligatorie.</value></data>
+  <data name="Draw" xml:space="preserve"><value>Pareggio</value></data>
+  <data name="DontKnow" xml:space="preserve"><value>Non lo so</value></data>
+  <data name="AiUnavailable" xml:space="preserve"><value>Non ci sono abbastanza giochi con almeno l'80% delle domande risposte per giocare contro l'IA.</value></data>
 </root>

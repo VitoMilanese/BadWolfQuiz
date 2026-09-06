@@ -31,6 +31,10 @@
      data-default-card-count="@Model.DefaultCardCount"
      data-player-one="@Localizer["Minigames_PlayerOne"]"
      data-player-two="@Localizer["Minigames_PlayerTwo"]"
+     data-ai-player="@MinigameCatalogLocalizer["AiPlayer"]"
+     data-draw="@MinigameCatalogLocalizer["Draw"]"
+     data-dont-know="@MinigameCatalogLocalizer["DontKnow"]"
+     data-ai-unavailable="@MinigameCatalogLocalizer["AiUnavailable"]"
      data-waiting-opponent="@Localizer["Minigames_WaitingForOpponent"]"
      data-waiting-game="@Localizer["Minigames_WaitingForGame"]"
      data-choose-exclusions="@Localizer["Minigames_ChooseExclusions"]"
@@ -239,6 +243,13 @@
                     Model.AvailableCardCount]
             </small>
             <label class="minigames-checkbox-row">
+                <input type="checkbox" data-new-game-ai />
+                <span>
+                    <strong>@MinigameCatalogLocalizer["PlayAgainstAi"]</strong>
+                    <small>@MinigameCatalogLocalizer["PlayAgainstAiDescription"]</small>
+                </span>
+            </label>
+            <label class="minigames-checkbox-row">
                 <input type="checkbox" data-new-game-question-cards />
                 <span>
                     <strong>@Localizer["Minigames_QuestionCards"]</strong>
@@ -267,6 +278,9 @@
                 <button class="button" type="button" data-question-response-no>
                     @Localizer["Minigames_No"]
                 </button>
+                <button class="button is-hidden" type="button" data-question-response-unknown>
+                    @MinigameCatalogLocalizer["DontKnow"]
+                </button>
                 <button class="button button-primary" type="button" data-question-response-yes>
                     @Localizer["Minigames_Yes"]
                 </button>
@@ -276,6 +290,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/minigames-ai.js" asp-append-version="true"></script>
     <script src="~/js/minigames.js" asp-append-version="true"></script>
     <script src="~/js/minigames-history-filter.js" asp-append-version="true"></script>
     <script src="~/js/minigames-sharing.js" asp-append-version="true"></script>

@@ -76,7 +76,7 @@ internal sealed class MinigameQuestionGameState
         PendingResponsePlayerNumber = playerNumber == 1 ? 2 : 1;
     }
 
-    public void SubmitQuestionResponse(int playerNumber, bool answerYes)
+    public void SubmitQuestionResponse(int playerNumber, bool? answerYes)
     {
         if (PendingResponsePlayerNumber != playerNumber ||
             string.IsNullOrWhiteSpace(PendingQuestion))
@@ -88,6 +88,12 @@ internal sealed class MinigameQuestionGameState
             playerNumber,
             MinigameQuestionHistoryKind.Answer,
             AnswerYes: answerYes));
+        PendingQuestion = null;
+        PendingResponsePlayerNumber = null;
+    }
+
+    public void CancelPendingResponse()
+    {
         PendingQuestion = null;
         PendingResponsePlayerNumber = null;
     }
