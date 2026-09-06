@@ -307,6 +307,7 @@
         hintTabs.classList.toggle('is-hidden', !available);
         cardHintBody.classList.toggle('is-hint-tabs-visible', Boolean(available));
         hintCurrentSection.classList.toggle('is-hidden', Boolean(available));
+        hintCurrentSection.style.display = available ? 'none' : '';
         hintCardsTab.textContent = available ? text.hintHistoryTab : text.hintCardsTab;
         if (!available) selectHintTab('cards');
     };
@@ -509,6 +510,9 @@
 
     const captureHintCard = trigger => {
         if (!trigger) return;
+        const hideCurrentWhileOpening = !cachedState ||
+            (cachedMode === searchMode && questionsEnabledOf(cachedState));
+        hintCurrentSection.style.display = hideCurrentWhileOpening ? 'none' : '';
         hintSearchGameKey = trigger.dataset.minigameHintTrigger ?? '';
         resetHintSearch();
         selectHintTab('cards');

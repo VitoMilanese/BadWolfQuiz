@@ -62,6 +62,9 @@ public sealed class MinigameQuestionSearchRegressionTests
         Assert.Contains("hintSearchGameKey", script);
         Assert.Contains("hintHistoryTab: root.dataset.hintsPreviousQuestions", script);
         Assert.Contains("hintCurrentSection.classList.toggle('is-hidden', Boolean(available))", script);
+        Assert.Contains("hintCurrentSection.style.display = available ? 'none' : ''", script);
+        Assert.Contains("const hideCurrentWhileOpening = !cachedState ||", script);
+        Assert.Contains("hintCurrentSection.style.display = hideCurrentWhileOpening ? 'none' : ''", script);
         Assert.Contains("hintCardsTab.textContent = available ? text.hintHistoryTab : text.hintCardsTab", script);
 
         Assert.Contains("MinigameQuestionSelectionMode.Search", hints);
