@@ -20,6 +20,10 @@ public sealed class FinalQuestionHostStageRegressionTests
             "wwwroot",
             "css",
             "final-question-host-stage.css"));
+        var answerSpaceStyles = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "final-question-host-answer-space.css"));
 
         Assert.Contains(
             "FinalQuestionHostStageAssetsTagHelper",
@@ -35,6 +39,10 @@ public sealed class FinalQuestionHostStageRegressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             "final-question-host-stage.css?v=3",
+            helper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "final-question-host-answer-space.css?v=1",
             helper,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
@@ -79,6 +87,17 @@ public sealed class FinalQuestionHostStageRegressionTests
         Assert.Contains("border: 0 !important;", styles, StringComparison.Ordinal);
         Assert.Contains("background: transparent !important;", styles, StringComparison.Ordinal);
         Assert.Contains("box-shadow: none !important;", styles, StringComparison.Ordinal);
+
+        Assert.Contains(
+            ".final-question-panel:has(> .answer-presentation) > .eyebrow",
+            answerSpaceStyles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".answer-presentation > .eyebrow",
+            answerSpaceStyles,
+            StringComparison.Ordinal);
+        Assert.Contains("display: none;", answerSpaceStyles, StringComparison.Ordinal);
+        Assert.Contains("padding-top: 0;", answerSpaceStyles, StringComparison.Ordinal);
     }
 
     private static string FindWebFile(params string[] parts)

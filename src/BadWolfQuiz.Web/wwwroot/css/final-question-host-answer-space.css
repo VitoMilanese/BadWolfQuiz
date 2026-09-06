@@ -1,0 +1,19 @@
+/* Keep the canonical Final Answer focused on the answer content itself. */
+.final-question-host[data-game-status="finaljudging"]
+    .final-question-panel:has(> .answer-presentation) {
+    gap: 0;
+    padding-top: 0;
+}
+
+.final-question-host[data-game-status="finaljudging"]
+    .final-question-panel:has(> .answer-presentation) > .eyebrow,
+.final-question-host[data-game-status="finaljudging"]
+    .answer-presentation > .eyebrow {
+    display: none;
+}
+
+.final-question-host[data-game-status="finaljudging"]
+    .final-question-panel:has(> .answer-presentation)
+    .answer-presentation {
+    padding-top: 0;
+}
