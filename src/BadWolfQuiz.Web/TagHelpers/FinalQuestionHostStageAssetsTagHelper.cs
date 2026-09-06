@@ -11,6 +11,6 @@ public sealed class FinalQuestionHostStageAssetsTagHelper : TagHelper
         // Keep the stage stylesheet inside the replaceable gameplay view so
         // entering Final Question always carries the asset without an F5.
         output.PreContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/final-question-host-stage.css?v=2\" />");
+            "<link rel=\"stylesheet\" href=\"/css/final-question-host-stage.css?v=3\" />");
     }
 }
