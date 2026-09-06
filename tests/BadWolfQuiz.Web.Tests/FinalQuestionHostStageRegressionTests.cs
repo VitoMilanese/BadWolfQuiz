@@ -57,7 +57,7 @@ public sealed class FinalQuestionHostStageRegressionTests
             helper,
             StringComparison.Ordinal);
         Assert.Contains(
-            "final-question-host-responsiveness.js?v=1",
+            "final-question-host-responsiveness.js?v=2",
             helper,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
@@ -157,10 +157,6 @@ public sealed class FinalQuestionHostStageRegressionTests
             responsiveness,
             StringComparison.Ordinal);
         Assert.Contains(
-            "applyReturnedLobbyMarkup",
-            responsiveness,
-            StringComparison.Ordinal);
-        Assert.Contains(
             "window.BadWolfHostGameplay.refresh()",
             responsiveness,
             StringComparison.Ordinal);
@@ -174,6 +170,10 @@ public sealed class FinalQuestionHostStageRegressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             "submitter === null",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Keep the proven browser navigation path for the actual transition",
             responsiveness,
             StringComparison.Ordinal);
     }
