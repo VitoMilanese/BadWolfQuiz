@@ -90,13 +90,19 @@ public sealed class ContributorGameSettingsTagHelper(
                                     return;
                                 }
 
-                                const avatarField = grid.querySelector(".host-avatar-field");
+                                const avatarField = grid.querySelector(":scope > .host-avatar-field");
                                 const fragment = template.content.cloneNode(true);
-                                if (avatarField) {
-                                    avatarField.after(fragment);
-                                } else {
+                                if (!avatarField) {
                                     grid.append(fragment);
+                                    return;
                                 }
+
+                                const frameRowHost = document.createElement("div");
+                                frameRowHost.className =
+                                    "settings-grid host-avatar-frame-global-settings";
+                                frameRowHost.style.gridColumn = "1 / -1";
+                                avatarField.before(frameRowHost);
+                                frameRowHost.append(avatarField, fragment);
                             };
 
                             if (document.readyState === "loading") {
