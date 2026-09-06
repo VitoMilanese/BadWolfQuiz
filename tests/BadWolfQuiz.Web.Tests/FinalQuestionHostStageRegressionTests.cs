@@ -116,6 +116,10 @@ public sealed class FinalQuestionHostStageRegressionTests
             judgingProgressHelper,
             StringComparison.Ordinal);
         Assert.Contains(
+            "WebUtility.HtmlDecode",
+            judgingProgressHelper,
+            StringComparison.Ordinal);
+        Assert.Contains(
             " / ",
             judgingProgressHelper,
             StringComparison.Ordinal);
