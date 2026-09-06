@@ -60,6 +60,9 @@ public sealed class MinigameQuestionSearchRegressionTests
         Assert.Contains("'SearchCardHints'", script);
         Assert.Contains("hintSearchTotalPages", script);
         Assert.Contains("hintSearchGameKey", script);
+        Assert.Contains("hintHistoryTab: root.dataset.hintsPreviousQuestions", script);
+        Assert.Contains("hintCurrentSection.classList.toggle('is-hidden', Boolean(available))", script);
+        Assert.Contains("hintCardsTab.textContent = available ? text.hintHistoryTab : text.hintCardsTab", script);
 
         Assert.Contains("MinigameQuestionSelectionMode.Search", hints);
         Assert.Contains("GetRemainingSearchQuestions(roomCode, playerToken)", hints);

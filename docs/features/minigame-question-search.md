@@ -31,8 +31,8 @@ The server validates room membership, turn ownership, selection mode, and that t
 
 When **Allow hints** and **Free question selection** are both enabled, the game-card hint dialog is split into two tabs.
 
-- The Question cards tab keeps the existing current-question and previously-asked hint lists.
-- The Search questions tab uses the same minimum 3-character filter and 10-row paging model as the question picker.
+- The first tab is **Questions asked to opponent** and contains only the previously asked hint list. The **Current Question cards** section is hidden because free-selection mode has no current three-card hand.
+- The **Search questions** tab uses the same minimum 3-character filter and 10-row paging model as the question picker.
 - Hint search is read-only and does not consume a question.
 - Results are limited to that player's own remaining enabled question pool, so already-used questions disappear only for the player who used them.
 - The opponent keeps an independent pool and may still see the same question in their own hint search.

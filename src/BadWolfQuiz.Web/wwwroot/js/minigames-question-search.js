@@ -54,6 +54,7 @@
         no: root.dataset.no ?? 'NO',
         unavailable: root.dataset.hintsUnavailable ?? 'Information unavailable',
         hintCardsTab: root.dataset.hintsCurrentQuestions ?? 'Question cards',
+        hintHistoryTab: root.dataset.hintsPreviousQuestions ?? 'Questions asked to opponent',
         hintSearchTab: (searchInput.placeholder || 'Search questions').replace(/[.…]+$/, '')
     };
 
@@ -305,6 +306,8 @@
             questionsEnabledOf(cachedState);
         hintTabs.classList.toggle('is-hidden', !available);
         cardHintBody.classList.toggle('is-hint-tabs-visible', Boolean(available));
+        hintCurrentSection.classList.toggle('is-hidden', Boolean(available));
+        hintCardsTab.textContent = available ? text.hintHistoryTab : text.hintCardsTab;
         if (!available) selectHintTab('cards');
     };
 
