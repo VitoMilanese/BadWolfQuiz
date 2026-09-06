@@ -38,8 +38,12 @@ public sealed class ContributorFrameRuntimeAssetsTagHelper(
             var stylesheetPath = fileVersionProvider.AddFileVersionToPath(
                 requestPathBase,
                 "/css/contributor-frames.css");
+            var parityStylesheetPath = fileVersionProvider.AddFileVersionToPath(
+                requestPathBase,
+                "/css/contributor-frame-media-parity.css");
             output.PostContent.AppendHtml(
-                $"<link rel=\"stylesheet\" href=\"{html.Encode(stylesheetPath)}\" />");
+                $"<link rel=\"stylesheet\" href=\"{html.Encode(stylesheetPath)}\" />" +
+                $"<link rel=\"stylesheet\" href=\"{html.Encode(parityStylesheetPath)}\" />");
             return;
         }
 
@@ -51,7 +55,11 @@ public sealed class ContributorFrameRuntimeAssetsTagHelper(
         var insetScriptPath = fileVersionProvider.AddFileVersionToPath(
             requestPathBase,
             "/js/contributor-frame-insets.js");
+        var parityScriptPath = fileVersionProvider.AddFileVersionToPath(
+            requestPathBase,
+            "/js/contributor-frame-media-parity.js");
         output.PostContent.AppendHtml(
-            $"<script src=\"{html.Encode(insetScriptPath)}\" defer></script>");
+            $"<script src=\"{html.Encode(insetScriptPath)}\" defer></script>" +
+            $"<script src=\"{html.Encode(parityScriptPath)}\" defer></script>");
     }
 }

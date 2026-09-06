@@ -1,0 +1,17 @@
+/* Keep every framed runtime media surface on the same geometry contract as
+ * the contributor-frame preview: the media keeps the frame's full square box,
+ * then its visible content is reduced by the filename-derived inset inside
+ * that box. This intentionally overrides the older clip-only fallback. */
+.contributor-frame-owner[data-avatar-frame] .contributor-frame-preview-parity-media,
+.contributor-frame-owner[data-avatar-frame] .contributor-frame-preview-parity-media.contributor-frame-clipped-media {
+    box-sizing: border-box !important;
+    padding: var(--contributor-frame-preview-parity-inset, 0px) !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    clip-path: none !important;
+    overflow: hidden !important;
+    object-fit: cover !important;
+}
