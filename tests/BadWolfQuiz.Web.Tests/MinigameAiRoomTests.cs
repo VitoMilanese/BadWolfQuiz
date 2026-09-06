@@ -17,7 +17,7 @@ public sealed class MinigameAiRoomTests
 
         Assert.Equal(2, state.PlayerCount);
         Assert.True(state.QuestionCardsEnabled);
-        Assert.Equal(1, state.OpponentExcludedFiles.Count);
+        Assert.Single(state.OpponentExcludedFiles);
         Assert.True(store.GetStatus("ABC123", "token").IsAiOpponent);
     }
 
