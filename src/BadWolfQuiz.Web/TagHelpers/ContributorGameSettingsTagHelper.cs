@@ -125,6 +125,12 @@ public sealed class ContributorGameSettingsTagHelper(
                     "/js/contributor-game-settings-dialog.js");
                 output.PostContent.AppendHtml(
                     $"<script src=\"{html.Encode(dialogScriptPath)}\"></script>");
+
+                var liveFrameSyncScriptPath = fileVersionProvider.AddFileVersionToPath(
+                    requestPathBase,
+                    "/js/host-frame-live-settings-sync.js");
+                output.PostContent.AppendHtml(
+                    $"<script src=\"{html.Encode(liveFrameSyncScriptPath)}\"></script>");
             }
         }
 
