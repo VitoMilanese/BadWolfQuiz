@@ -27,10 +27,14 @@ After a successful synchronization, database games with no matching resource ima
 - the dialog displays 10 games per page;
 - checkbox selections are preserved while paging;
 - **Keep all** closes the cleanup step without deleting anything;
-- **Delete selected** requires confirmation and removes only the explicitly selected games and their stored answers.
+- **Delete selected** opens a styled BadWolfQuiz confirmation dialog and removes only the explicitly selected games and their stored answers after confirmation.
 
 The delete endpoint performs its own resource-folder check immediately before deletion. A crafted or stale request cannot delete a selected game if a matching resource image currently exists.
 
 ## Authorization
 
 Both synchronization and cleanup endpoints require the existing `MasterHost` authorization policy. POST requests retain Razor Pages antiforgery validation, and the browser uses the shared busy indicator while requests are running.
+
+## Release
+
+Added in Web `1.26.22` (`web-v1.26.22`) through issue #519 and PR #517.
