@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="HostConsole" xml:space="preserve"><value>HOST CONSOLE</value></data>
+  <data name="LoginKicker" xml:space="preserve"><value>BAD WOLF QUIZ / HOST ACCESS</value></data>
+  <data name="LoginMetaTitle" xml:space="preserve"><value>HOST ACCESS</value></data>
+  <data name="LoginMetaDescription" xml:space="preserve"><value>BAD WOLF QUIZ / AUTHENTICATION GATEWAY</value></data>
+  <data name="LoginMarkPrimary" xml:space="preserve"><value>ENTER</value></data>
+  <data name="LoginMarkAccent" xml:space="preserve"><value>READY</value></data>
+  <data name="LoginMarkFooter" xml:space="preserve"><value>AUTH / LOGIN</value></data>
+  <data name="RegisterKicker" xml:space="preserve"><value>BAD WOLF QUIZ / NEW HOST</value></data>
+  <data name="RegisterMetaTitle" xml:space="preserve"><value>NEW HOST</value></data>
+  <data name="RegisterMetaDescription" xml:space="preserve"><value>CREATE YOUR BAD WOLF QUIZ HOST PROFILE.</value></data>
+  <data name="RegisterMarkPrimary" xml:space="preserve"><value>CREATE</value></data>
+  <data name="RegisterMarkAccent" xml:space="preserve"><value>PROFILE</value></data>
+  <data name="RegisterMarkFooter" xml:space="preserve"><value>AUTH / REGISTER</value></data>
+  <data name="ForgotKicker" xml:space="preserve"><value>BAD WOLF QUIZ / ACCOUNT RECOVERY</value></data>
+  <data name="ForgotMetaTitle" xml:space="preserve"><value>RECOVERY</value></data>
+  <data name="RecoveryChannel" xml:space="preserve"><value>RECOVERY CHANNEL</value></data>
+  <data name="ForgotMarkPrimary" xml:space="preserve"><value>RESET</value></data>
+  <data name="ForgotMarkAccent" xml:space="preserve"><value>ACCESS</value></data>
+  <data name="ForgotMarkFooter" xml:space="preserve"><value>AUTH / RECOVERY</value></data>
+  <data name="ChangeKicker" xml:space="preserve"><value>BAD WOLF QUIZ / ACCOUNT SECURITY</value></data>
+  <data name="ChangeMetaTitle" xml:space="preserve"><value>SECURITY</value></data>
+  <data name="ChangeMetaDescription" xml:space="preserve"><value>UPDATE THE PASSWORD USED TO ACCESS YOUR HOST ACCOUNT.</value></data>
+  <data name="HostSecurity" xml:space="preserve"><value>HOST SECURITY</value></data>
+  <data name="ChangeMarkPrimary" xml:space="preserve"><value>CHANGE</value></data>
+  <data name="ChangeMarkAccent" xml:space="preserve"><value>KEY</value></data>
+  <data name="ChangeMarkFooter" xml:space="preserve"><value>AUTH / SECURITY</value></data>
+</root>

@@ -1,22 +1,59 @@
 @page
 @model BadWolfQuiz.Web.Pages.Account.LoginModel
+@inject IStringLocalizer<PublicAccountPagesResource> PublicAccountLocalizer
 @{
     ViewData["Title"] = Localizer["Account_HostSignIn"];
 }
-<section class="auth-card content-panel">
-    <p class="eyebrow">BAD WOLF QUIZ</p>
-    <h1>@Localizer["Account_HostSignIn"]</h1>
-    <form method="post">
-        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
-        <label asp-for="Input.Email">@Localizer["Account_Email"]</label>
-        <input asp-for="Input.Email" autocomplete="email" />
-        <span asp-validation-for="Input.Email"></span>
-        <label asp-for="Input.Password">@Localizer["Account_Password"]</label>
-        <input asp-for="Input.Password" autocomplete="current-password" />
-        <span asp-validation-for="Input.Password"></span>
-        <label class="checkbox-row"><input asp-for="Input.RememberMe" /> @Localizer["Account_RememberMe"]</label>
-        <button class="button button-primary" type="submit">@Localizer["Account_SignIn"]</button>
-    </form>
-    <p><a class="auth-link" asp-page="ForgotPassword">@Localizer["Account_ForgotPassword"]</a></p>
-    <p>@Localizer["Account_NoAccount"] <a class="auth-link" asp-page="Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Account_Register"]</a>.</p>
-</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/public-account-pages.css" asp-append-version="true" />
+}
+
+<div class="portal-page auth-page">
+    <section class="portal-hero" aria-labelledby="login-title">
+        <div class="portal-hero-copy">
+            <p class="portal-kicker">@PublicAccountLocalizer["LoginKicker"]</p>
+            <h1 id="login-title">@Localizer["Account_HostSignIn"]</h1>
+        </div>
+        <div class="portal-hero-mark" aria-hidden="true">
+            <span>@PublicAccountLocalizer["HostConsole"]</span>
+            <strong>@PublicAccountLocalizer["LoginMarkPrimary"]</strong>
+            <b>@PublicAccountLocalizer["LoginMarkAccent"]</b>
+            <small>@PublicAccountLocalizer["LoginMarkFooter"]</small>
+        </div>
+    </section>
+
+    <main class="portal-content">
+        <div class="auth-layout">
+            <section class="portal-card auth-form-card">
+                <div class="portal-section-title"><span>01</span><h2>@Localizer["Account_HostSignIn"]</h2></div>
+                <form method="post" class="auth-form">
+                    <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+                    <label class="auth-field" asp-for="Input.Email">
+                        <span>@Localizer["Account_Email"]</span>
+                        <input asp-for="Input.Email" autocomplete="email" />
+                        <span asp-validation-for="Input.Email"></span>
+                    </label>
+                    <label class="auth-field" asp-for="Input.Password">
+                        <span>@Localizer["Account_Password"]</span>
+                        <input asp-for="Input.Password" autocomplete="current-password" />
+                        <span asp-validation-for="Input.Password"></span>
+                    </label>
+                    <label class="auth-check"><input asp-for="Input.RememberMe" /> <span>@Localizer["Account_RememberMe"]</span></label>
+                    <button class="button button-primary" type="submit">@Localizer["Account_SignIn"]</button>
+                </form>
+            </section>
+
+            <aside class="portal-card auth-meta-card">
+                <div>
+                    <h2>@PublicAccountLocalizer["LoginMetaTitle"]</h2>
+                    <p>@PublicAccountLocalizer["LoginMetaDescription"]</p>
+                </div>
+                <div class="auth-meta-links">
+                    <a class="auth-link" asp-page="ForgotPassword">@Localizer["Account_ForgotPassword"]</a>
+                    <p>@Localizer["Account_NoAccount"] <a class="auth-link" asp-page="Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Account_Register"]</a>.</p>
+                </div>
+            </aside>
+        </div>
+    </main>
+</div>

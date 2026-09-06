@@ -1,0 +1,543 @@
+body:has(.portal-page) {
+    background: var(--bg);
+}
+
+body:has(.portal-page) > .page-shell {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.portal-page {
+    position: relative;
+    min-height: 100%;
+    isolation: isolate;
+    overflow: hidden;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 96%, #000), var(--bg));
+}
+
+.portal-page::before,
+.portal-page::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+}
+
+.portal-page::before {
+    background:
+        radial-gradient(circle at 84% 10%, color-mix(in srgb, var(--red-bright) 18%, transparent), transparent 31rem),
+        radial-gradient(circle at 8% 46%, color-mix(in srgb, var(--gold) 8%, transparent), transparent 27rem);
+}
+
+.portal-page::after {
+    background-image:
+        linear-gradient(color-mix(in srgb, var(--line) 14%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--line) 12%, transparent) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, #000, transparent 82%);
+    opacity: .22;
+}
+
+.portal-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, .42fr);
+    align-items: center;
+    gap: clamp(32px, 6vw, 88px);
+    width: min(100%, 1760px);
+    margin: 0 auto;
+    padding: clamp(56px, 7vw, 102px) clamp(24px, 5vw, 76px) clamp(42px, 5vw, 72px);
+}
+
+.portal-hero-copy {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    max-width: 980px;
+}
+
+.portal-kicker {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 18px;
+    color: var(--gold);
+    font-size: .74rem;
+    font-weight: 900;
+    letter-spacing: .17em;
+    text-transform: uppercase;
+}
+
+.portal-kicker::before {
+    content: "";
+    width: 42px;
+    height: 2px;
+    flex: 0 0 auto;
+    background: var(--red-bright);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--red-bright) 72%, transparent);
+}
+
+.portal-hero h1 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(3.2rem, 7vw, 7.7rem);
+    font-weight: 1000;
+    line-height: .83;
+    letter-spacing: -.06em;
+    text-transform: uppercase;
+    text-wrap: balance;
+}
+
+.portal-hero-description {
+    max-width: 760px;
+    margin: 24px 0 0;
+    color: var(--muted);
+    font-size: clamp(1rem, 1.35vw, 1.18rem);
+    line-height: 1.65;
+}
+
+.portal-hero-mark {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    min-height: 270px;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    padding: 32px;
+    border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--panel) 88%, transparent), color-mix(in srgb, var(--panel-2) 62%, transparent));
+    box-shadow: 0 30px 88px rgba(0, 0, 0, .24);
+}
+
+.portal-hero-mark::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, transparent 0 46%, color-mix(in srgb, var(--line) 18%, transparent) 46% 47%, transparent 47%),
+        linear-gradient(transparent 0 69%, color-mix(in srgb, var(--line) 17%, transparent) 69% 70%, transparent 70%);
+}
+
+.portal-hero-mark > * {
+    position: relative;
+    z-index: 1;
+}
+
+.portal-hero-mark span,
+.portal-hero-mark small {
+    color: var(--muted);
+    font-size: .68rem;
+    font-weight: 900;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.portal-hero-mark strong {
+    display: block;
+    margin-top: 14px;
+    color: var(--text);
+    font-size: clamp(3.1rem, 6vw, 6rem);
+    font-weight: 1000;
+    line-height: .84;
+    letter-spacing: -.07em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.portal-hero-mark b {
+    display: block;
+    margin-top: 4px;
+    color: var(--red-bright);
+    font-size: clamp(2.1rem, 4vw, 4rem);
+    font-weight: 1000;
+    line-height: .9;
+    letter-spacing: -.05em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.portal-hero-mark small {
+    margin-top: 18px;
+    color: var(--gold);
+}
+
+.portal-content {
+    width: min(100% - 48px, 1480px);
+    margin: 0 auto;
+    padding: 0 0 clamp(56px, 7vw, 96px);
+}
+
+.portal-card {
+    border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--panel) 94%, transparent), color-mix(in srgb, var(--panel-2) 76%, transparent));
+    box-shadow: 0 24px 74px rgba(0, 0, 0, .2);
+}
+
+.portal-section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.portal-section-title span {
+    color: var(--red-bright);
+    font-size: .75rem;
+    font-weight: 1000;
+    letter-spacing: .15em;
+}
+
+.portal-section-title h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1.25rem, 2vw, 1.8rem);
+    text-transform: uppercase;
+}
+
+.auth-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(250px, .38fr);
+    gap: 20px;
+    align-items: stretch;
+}
+
+.auth-form-card {
+    padding: clamp(24px, 4vw, 42px);
+}
+
+.auth-form {
+    display: grid;
+    gap: 16px;
+}
+
+.auth-field {
+    display: grid;
+    gap: 8px;
+}
+
+.auth-field > span,
+.auth-field > label {
+    color: var(--muted);
+    font-size: .75rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.auth-field input {
+    width: 100%;
+    min-height: 48px;
+}
+
+.auth-field small {
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.auth-form .field-validation-error {
+    color: var(--danger, #ff6b6b);
+    font-size: .86rem;
+}
+
+.auth-form .validation-summary-errors {
+    margin-bottom: 4px;
+}
+
+.auth-form .button {
+    min-height: 48px;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.auth-meta-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 28px;
+    padding: clamp(24px, 3vw, 34px);
+}
+
+.auth-meta-card h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+}
+
+.auth-meta-card p {
+    margin: 10px 0 0;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.auth-meta-links {
+    display: grid;
+    gap: 10px;
+}
+
+.auth-meta-links .auth-link {
+    font-weight: 800;
+}
+
+.auth-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+}
+
+.auth-check input {
+    width: 18px;
+    height: 18px;
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.about-panel {
+    padding: clamp(24px, 3vw, 36px);
+}
+
+.about-panel-wide {
+    grid-column: 1 / -1;
+}
+
+.about-value {
+    display: inline-flex;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    background: color-mix(in srgb, var(--bg) 55%, transparent);
+    color: var(--text);
+    font-size: .9rem;
+    word-break: break-all;
+}
+
+.about-license-copy {
+    display: grid;
+    gap: 12px;
+    color: var(--muted);
+    line-height: 1.65;
+}
+
+.about-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.about-social-link {
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.about-social-link svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+
+.portal-page.faq-page {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+.faq-page .portal-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(250px, .34fr);
+    gap: clamp(28px, 4vw, 64px);
+}
+
+.faq-page .portal-hero h1 {
+    max-width: 10ch;
+    font-size: clamp(3rem, 6vw, 6.4rem);
+}
+
+.faq-page .portal-hero-mark strong {
+    color: var(--red-bright);
+    font-size: clamp(4.8rem, 8vw, 7rem);
+}
+
+.faq-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.faq-item {
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    background: color-mix(in srgb, var(--panel) 92%, transparent);
+}
+
+.faq-item summary {
+    position: relative;
+    cursor: pointer;
+    list-style: none;
+    padding: 20px 58px 20px 22px;
+    color: var(--text);
+    font-weight: 850;
+    line-height: 1.45;
+}
+
+.faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-item summary::after {
+    content: "+";
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    translate: 0 -50%;
+    color: var(--red-bright);
+    font-size: 1.5rem;
+    font-weight: 900;
+}
+
+.faq-item[open] summary::after {
+    content: "−";
+}
+
+.faq-answer {
+    padding: 18px 22px 22px;
+    border-top: 1px solid color-mix(in srgb, var(--line) 48%, transparent);
+    color: var(--muted);
+    line-height: 1.65;
+}
+
+.faq-answer p {
+    margin: 0;
+}
+
+.faq-contact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: 20px;
+    padding: clamp(22px, 3vw, 32px);
+}
+
+.faq-contact h2 {
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.faq-contact p {
+    margin: 8px 0 0;
+    color: var(--muted);
+}
+
+.not-found-page .portal-hero {
+    min-height: clamp(520px, 68dvh, 760px);
+}
+
+.not-found-page .portal-hero h1 {
+    max-width: 10ch;
+    font-size: clamp(3.25rem, 6.5vw, 7rem);
+}
+
+.not-found-mark strong {
+    color: var(--red-bright);
+    font-size: clamp(6rem, 11vw, 10rem);
+}
+
+.not-found-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.not-found-actions .button {
+    min-height: 48px;
+    padding-inline: 24px;
+}
+
+.portal-page :is(a, button, input, summary):focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--gold) 72%, white);
+    outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+    .portal-hero,
+    .faq-page .portal-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .portal-hero-mark {
+        min-height: 210px;
+    }
+
+    .auth-layout,
+    .about-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-panel-wide {
+        grid-column: auto;
+    }
+}
+
+@media (max-width: 620px) {
+    .portal-hero {
+        padding: 42px 20px 32px;
+    }
+
+    .portal-hero h1,
+    .faq-page .portal-hero h1,
+    .not-found-page .portal-hero h1 {
+        max-width: none;
+        font-size: clamp(2.65rem, 16vw, 4.5rem);
+    }
+
+    .portal-hero-mark {
+        display: none;
+    }
+
+    .portal-content {
+        width: min(100% - 28px, 1480px);
+        padding-bottom: 54px;
+    }
+
+    .auth-form-card,
+    .auth-meta-card,
+    .about-panel {
+        padding: 20px;
+    }
+
+    .faq-contact {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .faq-contact .button,
+    .not-found-actions .button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .portal-page *,
+    .portal-page *::before,
+    .portal-page *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
