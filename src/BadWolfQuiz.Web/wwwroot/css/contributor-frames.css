@@ -192,11 +192,11 @@
     .player-avatar-current,
     .player-card-avatar,
     .player-list-avatar,
-    .host-card-media) {
+    .host-card-media):not(.contributor-frame-avatar-source) {
     border-radius: 50% !important;
-    clip-path: circle(
-        calc(50% - var(--contributor-frame-media-inset, 0px))
-        at 50% 50%);
+    clip-path: inset(
+        var(--contributor-frame-media-inset, 0px)
+        round 50%);
     overflow: hidden;
     object-fit: cover;
 }

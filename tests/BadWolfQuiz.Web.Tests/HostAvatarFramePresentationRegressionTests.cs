@@ -9,6 +9,10 @@ public sealed class HostAvatarFramePresentationRegressionTests
             "wwwroot",
             "css",
             "contributor-frames.css"));
+        var playerStyles = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "contributor-player-frame-settings.css"));
         var helper = File.ReadAllText(FindWebFile(
             "TagHelpers",
             "ContributorGameSettingsTagHelper.cs"));
@@ -16,6 +20,10 @@ public sealed class HostAvatarFramePresentationRegressionTests
             "wwwroot",
             "js",
             "host-frame-live-settings-sync.js"));
+        var frameInsetScript = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "contributor-frame-insets.js"));
 
         Assert.Contains(
             ".host-settings-page .host-avatar-frame-preview > .host-avatar-preview",
@@ -30,11 +38,44 @@ public sealed class HostAvatarFramePresentationRegressionTests
             StringComparison.Ordinal);
         Assert.Contains(".player-card-avatar", styles, StringComparison.Ordinal);
         Assert.Contains(".host-card-media", styles, StringComparison.Ordinal);
-        Assert.Contains("border-radius: 50% !important;", styles, StringComparison.Ordinal);
+        Assert.Contains(
+            "):not(.contributor-frame-avatar-source)",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains("clip-path: inset(", styles, StringComparison.Ordinal);
         Assert.Contains(
             "--contributor-frame-media-inset",
             styles,
             StringComparison.Ordinal);
+
+        Assert.Contains(
+            "body.dataset.contributorFrameNativeInsets",
+            frameInsetScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "--contributor-frame-media-inset",
+            frameInsetScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "--contributor-frame-scaled-avatar-inset",
+            frameInsetScript,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain("contributorFrameNativeInsets", syncScript);
+
+        Assert.Contains(
+            ".player-avatar-frame-preview {",
+            playerStyles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".player-avatar-frame-preview-avatar {",
+            playerStyles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".player-avatar-frame-preview-overlay {",
+            playerStyles,
+            StringComparison.Ordinal);
+        Assert.Contains("outline: 0;", playerStyles, StringComparison.Ordinal);
+        Assert.Contains("background: transparent;", playerStyles, StringComparison.Ordinal);
 
         Assert.Contains(
             "/js/host-frame-live-settings-sync.js",
@@ -51,14 +92,6 @@ public sealed class HostAvatarFramePresentationRegressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             "panel.dispatchEvent(new Event(\"change\", { bubbles: true }))",
-            syncScript,
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "data.contributorFrameNativeInsets",
-            syncScript.Replace("dataset", "data"),
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "--contributor-frame-media-inset",
             syncScript,
             StringComparison.Ordinal);
     }

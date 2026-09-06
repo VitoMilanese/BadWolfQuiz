@@ -6,14 +6,6 @@
 
     const hostCardSelector = "[data-host-card]";
     const hostFramePanelSelector = "[data-contributor-host-frame]";
-    const frameInsets = new Map(
-        String(body.dataset.contributorFrameNativeInsets ?? "")
-            .split(";")
-            .map(entry => entry.split(":"))
-            .filter(parts => parts.length === 2)
-            .map(([id, inset]) => [id, Number.parseFloat(inset)])
-            .filter(([, inset]) => Number.isFinite(inset) && inset >= 0)
-    );
 
     const synchronizeFrameControls = (allowDisabled = true) => {
         const hostCard = document.querySelector(hostCardSelector);
@@ -54,39 +46,6 @@
         }
     };
 
-    const refreshFramedMediaInsets = () => {
-        for (const owner of document.querySelectorAll(
-            ".contributor-frame-owner[data-avatar-frame]"
-        )) {
-            const frameId = String(owner.dataset.avatarFrame ?? "").trim();
-            const overlay = owner.querySelector(
-                ":scope > .contributor-avatar-frame-overlay"
-            );
-            if (!frameId || !(overlay instanceof HTMLImageElement)) {
-                continue;
-            }
-
-            const naturalFrameSize = Math.min(
-                overlay.naturalWidth || 0,
-                overlay.naturalHeight || 0
-            );
-            const layoutFrameSize = Math.min(
-                overlay.offsetWidth || 0,
-                overlay.offsetHeight || 0
-            );
-            if (naturalFrameSize <= 0 || layoutFrameSize <= 0) {
-                continue;
-            }
-
-            const nativeInset = frameInsets.get(frameId) ?? 10;
-            const scaledInset = nativeInset * layoutFrameSize / naturalFrameSize;
-            owner.style.setProperty(
-                "--contributor-frame-media-inset",
-                `${scaledInset}px`
-            );
-        }
-    };
-
     let refreshQueued = false;
     let pendingAllowDisabled = false;
     const queueSynchronization = (allowDisabled = true) => {
@@ -101,7 +60,6 @@
             pendingAllowDisabled = false;
             refreshQueued = false;
             synchronizeFrameControls(allowDisabledForRefresh);
-            refreshFramedMediaInsets();
         });
     };
 
@@ -148,14 +106,6 @@
         childList: true,
         subtree: true
     });
-
-    document.addEventListener("load", event => {
-        if (event.target instanceof Element &&
-            event.target.matches(".contributor-avatar-frame-overlay")) {
-            queueSynchronization(false);
-        }
-    }, true);
-    window.addEventListener("resize", () => queueSynchronization(false));
 
     document.addEventListener(
         "badwolf:host-shell-mounted",

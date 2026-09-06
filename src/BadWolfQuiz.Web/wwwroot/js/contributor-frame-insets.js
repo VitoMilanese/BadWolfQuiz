@@ -54,11 +54,13 @@
 
     const applyInset = owner => {
         const frameId = String(owner.dataset.avatarFrame ?? "").trim();
-        const media = owner.querySelector(".contributor-frame-avatar-source");
         const overlay = owner.querySelector(
             ":scope > .contributor-avatar-frame-overlay"
         );
-        if (!frameId || !media || !overlay) return;
+        if (!frameId || !overlay) {
+            owner.style.removeProperty("--contributor-frame-media-inset");
+            return;
+        }
 
         const naturalFrameSize = Math.min(
             overlay.naturalWidth || 0,
@@ -73,9 +75,19 @@
         const nativeInsetPixels = getNativeInsetPixels(owner, frameId);
         const scaledInsetPixels =
             nativeInsetPixels * layoutFrameSize / naturalFrameSize;
-        media.style.setProperty(
+        const scaledInsetValue = `${scaledInsetPixels}px`;
+
+        // Keep non-avatar media and built-in avatars on the exact same opening.
+        // The native inset comes from the frame filename (for example 3-96.png).
+        owner.style.setProperty(
+            "--contributor-frame-media-inset",
+            scaledInsetValue
+        );
+
+        const media = owner.querySelector(".contributor-frame-avatar-source");
+        media?.style.setProperty(
             "--contributor-frame-scaled-avatar-inset",
-            `${scaledInsetPixels}px`
+            scaledInsetValue
         );
     };
 
