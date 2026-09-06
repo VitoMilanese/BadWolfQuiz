@@ -13,6 +13,11 @@
   <data name="CopyRoomLink" xml:space="preserve"><value>Копіювати посилання на кімнату</value></data>
   <data name="RoomLinkCopied" xml:space="preserve"><value>Посилання на кімнату скопійовано</value></data>
   <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Не вдалося скопіювати посилання на кімнату</value></data>
+  <data name="SoloAi" xml:space="preserve"><value>Соло гра проти ШІ</value></data>
+  <data name="SoloAiDescription" xml:space="preserve"><value>ШІ замінює Гравця 2. Картки з питаннями обов’язкові; використовуються лише ігри із заповненими щонайменше 80% відповідей.</value></data>
+  <data name="SoloAiPlayer" xml:space="preserve"><value>ШІ</value></data>
+  <data name="SoloAiUnknownAnswer" xml:space="preserve"><value>Не знаю</value></data>
+  <data name="SoloAiCardRange" xml:space="preserve"><value>Доступний для ШІ діапазон: {0}–{1}.</value></data>
   <data name="AllowHints" xml:space="preserve"><value>Дозволити підказки</value></data>
   <data name="AllowHintsDescription" xml:space="preserve"><value>Показувати підказки з відповідями з бази даних для карток питань і карток ігор.</value></data>
   <data name="Hints_Title" xml:space="preserve"><value>Підказки</value></data>

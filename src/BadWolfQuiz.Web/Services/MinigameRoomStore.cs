@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 
 namespace BadWolfQuiz.Web.Services;
 
-public sealed class MinigameRoomStore
+public sealed partial class MinigameRoomStore
 {
     public static readonly TimeSpan InactivityTimeout = TimeSpan.FromHours(1);
     public static readonly TimeSpan FirstTurnDuration = TimeSpan.FromMinutes(3);

@@ -20,6 +20,9 @@ public sealed class MinigameHub(
     private MinigameHintService Hints =>
         new(dbFactory, options.Value.CardCount, roomStore);
 
+    private MinigameSoloAiService SoloAi =>
+        new(dbFactory, options.Value.CardCount, roomStore);
+
     public async Task<MinigameCardCatalogSnapshot> GetCatalog()
     {
         var counts = await Catalog.GetCountsAsync(Context.ConnectionAborted);
@@ -38,6 +41,23 @@ public sealed class MinigameHub(
             defaultCount,
             enabledQuestionCount >= MinigameQuestionStore.MinimumQuestionCount,
             enabledQuestionCount);
+    }
+
+    public Task<MinigameSoloAiAvailabilitySnapshot> GetSoloAiAvailability() =>
+        SoloAi.GetAvailabilityAsync(Context.ConnectionAborted);
+
+    public MinigameSoloAiStatusSnapshot GetSoloAiStatus(
+        string roomCode,
+        string playerToken)
+    {
+        try
+        {
+            return SoloAi.GetStatus(roomCode, playerToken);
+        }
+        catch (MinigameRoomException exception)
+        {
+            throw CreateHubException(exception);
+        }
     }
 
     public async Task<MinigameRoomConnection> CreateRoom(
@@ -108,7 +128,8 @@ public sealed class MinigameHub(
             playerToken,
             cardCount,
             questionCardsEnabled,
-            hintsEnabled: false);
+            hintsEnabled: false,
+            soloAi: false);
 
     public Task<MinigameRoomSnapshot> StartNewGameWithHints(
         string roomCode,
@@ -121,14 +142,30 @@ public sealed class MinigameHub(
             playerToken,
             cardCount,
             questionCardsEnabled,
-            hintsEnabled);
+            hintsEnabled,
+            soloAi: false);
+
+    public Task<MinigameRoomSnapshot> StartNewSoloGame(
+        string roomCode,
+        string playerToken,
+        int cardCount,
+        bool hintsEnabled) =>
+        StartNewGameCore(
+            roomCode,
+            playerToken,
+            cardCount,
+            questionCardsEnabled: true,
+            hintsEnabled,
+            soloAi: true);
 
     public async Task<MinigameRoomSnapshot> RestartGame(
         string roomCode,
         string playerToken)
     {
-        return await MutateRoom(() =>
-            roomStore.RestartGame(roomCode, playerToken));
+        return await MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.RestartGame(roomCode, playerToken));
     }
 
     public async Task<MinigameRoomSnapshot> ToggleExclusion(
@@ -136,8 +173,10 @@ public sealed class MinigameHub(
         string playerToken,
         string fileName)
     {
-        return await MutateRoom(() =>
-            roomStore.ToggleExclusion(roomCode, playerToken, fileName));
+        return await MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.ToggleExclusion(roomCode, playerToken, fileName));
     }
 
     public async Task<MinigameRoomSnapshot> SelectQuestion(
@@ -145,8 +184,10 @@ public sealed class MinigameHub(
         string playerToken,
         int optionIndex)
     {
-        return await MutateRoom(() =>
-            roomStore.SelectQuestion(roomCode, playerToken, optionIndex));
+        return await MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.SelectQuestion(roomCode, playerToken, optionIndex));
     }
 
     public async Task<MinigameRoomSnapshot> SubmitQuestionResponse(
@@ -154,24 +195,30 @@ public sealed class MinigameHub(
         string playerToken,
         bool answerYes)
     {
-        return await MutateRoom(() =>
-            roomStore.SubmitQuestionResponse(roomCode, playerToken, answerYes));
+        return await MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.SubmitQuestionResponse(roomCode, playerToken, answerYes));
     }
 
     public async Task<MinigameRoomSnapshot> EndTurn(
         string roomCode,
         string playerToken)
     {
-        return await MutateRoom(() =>
-            roomStore.EndTurn(roomCode, playerToken));
+        return await MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.EndTurn(roomCode, playerToken));
     }
 
     public async Task<MinigameRoomSnapshot> ExpireTurn(
         string roomCode,
         string playerToken)
     {
-        return await MutateRoom(() =>
-            roomStore.ExpireTurn(roomCode, playerToken));
+        return await MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.ExpireTurn(roomCode, playerToken));
     }
 
     public async Task<MinigameRoomSnapshot> SubmitGuess(
@@ -179,8 +226,10 @@ public sealed class MinigameHub(
         string playerToken,
         string fileName)
     {
-        return await MutateRoom(() =>
-            roomStore.SubmitGuess(roomCode, playerToken, fileName));
+        return await MutateRoom(
+            roomCode,
+            playerToken,
+            () => roomStore.SubmitGuess(roomCode, playerToken, fileName));
     }
 
     public bool GetHintsEnabled(
@@ -261,20 +310,11 @@ public sealed class MinigameHub(
         string playerToken,
         int cardCount,
         bool questionCardsEnabled,
-        bool hintsEnabled)
+        bool hintsEnabled,
+        bool soloAi)
     {
         try
         {
-            var counts = await Catalog.GetCountsAsync(Context.ConnectionAborted);
-            if (cardCount < MinigameRoomStore.MinimumGameCardCount ||
-                cardCount > counts.GameCount)
-            {
-                throw new MinigameRoomException(MinigameRoomError.InvalidCardCount);
-            }
-
-            var cards = await Catalog.GenerateCardsAsync(
-                cardCount,
-                Context.ConnectionAborted);
             var questions = questionCardsEnabled
                 ? await QuestionAvailability.GetEnabledQuestionsAsync(Context.ConnectionAborted)
                 : [];
@@ -284,12 +324,37 @@ public sealed class MinigameHub(
                 throw new MinigameRoomException(MinigameRoomError.QuestionsUnavailable);
             }
 
-            var state = roomStore.StartNewGame(
-                roomCode,
-                playerToken,
-                cards,
-                questionCardsEnabled,
-                questions);
+            MinigameRoomSnapshot state;
+            if (soloAi)
+            {
+                state = await SoloAi.StartSoloGameAsync(
+                    roomCode,
+                    playerToken,
+                    cardCount,
+                    questions,
+                    Context.ConnectionAborted);
+            }
+            else
+            {
+                var counts = await Catalog.GetCountsAsync(Context.ConnectionAborted);
+                if (cardCount < MinigameRoomStore.MinimumGameCardCount ||
+                    cardCount > counts.GameCount)
+                {
+                    throw new MinigameRoomException(MinigameRoomError.InvalidCardCount);
+                }
+
+                var cards = await Catalog.GenerateCardsAsync(
+                    cardCount,
+                    Context.ConnectionAborted);
+                SoloAi.DisableSoloGame(roomCode, playerToken);
+                state = roomStore.StartNewGame(
+                    roomCode,
+                    playerToken,
+                    cards,
+                    questionCardsEnabled,
+                    questions);
+            }
+
             Hints.SetEnabled(state.RoomCode, hintsEnabled);
             await BroadcastRoomChanged(state);
             return state;
@@ -301,11 +366,20 @@ public sealed class MinigameHub(
     }
 
     private async Task<MinigameRoomSnapshot> MutateRoom(
+        string roomCode,
+        string playerToken,
         Func<MinigameRoomSnapshot> mutation)
     {
         try
         {
             var state = mutation();
+            if (SoloAi.IsSoloGame(roomCode, playerToken))
+            {
+                state = await SoloAi.AdvanceAsync(
+                    roomCode,
+                    playerToken,
+                    Context.ConnectionAborted);
+            }
             await BroadcastRoomChanged(state);
             return state;
         }

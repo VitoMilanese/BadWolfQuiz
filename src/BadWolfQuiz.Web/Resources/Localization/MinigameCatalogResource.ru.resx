@@ -13,6 +13,11 @@
   <data name="CopyRoomLink" xml:space="preserve"><value>Україна</value></data>
   <data name="RoomLinkCopied" xml:space="preserve"><value>Україна</value></data>
   <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Україна</value></data>
+  <data name="SoloAi" xml:space="preserve"><value>Україна</value></data>
+  <data name="SoloAiDescription" xml:space="preserve"><value>Україна</value></data>
+  <data name="SoloAiPlayer" xml:space="preserve"><value>Україна</value></data>
+  <data name="SoloAiUnknownAnswer" xml:space="preserve"><value>Україна</value></data>
+  <data name="SoloAiCardRange" xml:space="preserve"><value>Україна</value></data>
   <data name="AllowHints" xml:space="preserve"><value>Україна</value></data>
   <data name="AllowHintsDescription" xml:space="preserve"><value>Україна</value></data>
   <data name="Hints_Title" xml:space="preserve"><value>Україна</value></data>

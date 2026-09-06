@@ -13,6 +13,11 @@
   <data name="CopyRoomLink" xml:space="preserve"><value>Copia il link della stanza</value></data>
   <data name="RoomLinkCopied" xml:space="preserve"><value>Link della stanza copiato</value></data>
   <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Impossibile copiare il link della stanza</value></data>
+  <data name="SoloAi" xml:space="preserve"><value>Partita in solitaria contro l'IA</value></data>
+  <data name="SoloAiDescription" xml:space="preserve"><value>L'IA sostituisce il Giocatore 2. Le carte domanda sono obbligatorie; vengono usati solo i giochi con almeno l'80% delle risposte compilate.</value></data>
+  <data name="SoloAiPlayer" xml:space="preserve"><value>IA</value></data>
+  <data name="SoloAiUnknownAnswer" xml:space="preserve"><value>Non lo so</value></data>
+  <data name="SoloAiCardRange" xml:space="preserve"><value>Intervallo disponibile per l'IA: {0}–{1}.</value></data>
   <data name="AllowHints" xml:space="preserve"><value>Consenti suggerimenti</value></data>
   <data name="AllowHintsDescription" xml:space="preserve"><value>Mostra suggerimenti con le risposte del database per le carte domanda e le carte gioco.</value></data>
   <data name="Hints_Title" xml:space="preserve"><value>Suggerimenti</value></data>

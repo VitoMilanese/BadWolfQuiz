@@ -68,6 +68,9 @@
      data-card-already-excluded="@Localizer["Minigames_CardAlreadyExcluded"]"
      data-exclusion-limit="@Localizer["Minigames_ExclusionLimit"]"
      data-generic-error="@Localizer["Minigames_GenericError"]"
+     data-solo-ai-player="@MinigameCatalogLocalizer["SoloAiPlayer"]"
+     data-solo-ai-unknown="@MinigameCatalogLocalizer["SoloAiUnknownAnswer"]"
+     data-solo-ai-card-range="@MinigameCatalogLocalizer["SoloAiCardRange"]"
      data-hints-icon-label="@MinigameCatalogLocalizer["Hints_IconLabel"]"
      data-hints-title="@MinigameCatalogLocalizer["Hints_Title"]"
      data-hints-current-questions="@MinigameCatalogLocalizer["Hints_CurrentQuestions"]"
@@ -257,6 +260,13 @@
                 </span>
             </label>
             <label class="minigames-checkbox-row">
+                <input type="checkbox" data-new-game-solo-ai />
+                <span>
+                    <strong>@MinigameCatalogLocalizer["SoloAi"]</strong>
+                    <small>@MinigameCatalogLocalizer["SoloAiDescription"]</small>
+                </span>
+            </label>
+            <label class="minigames-checkbox-row">
                 <input type="checkbox" data-new-game-allow-hints disabled />
                 <span>
                     <strong>@MinigameCatalogLocalizer["AllowHints"]</strong>
@@ -319,6 +329,7 @@
 
 @section Scripts {
     <script src="~/js/minigames.js" asp-append-version="true"></script>
+    <script src="~/js/minigames-solo-ai.js" asp-append-version="true"></script>
     <script src="~/js/minigames-hints.js" asp-append-version="true"></script>
     <script src="~/js/minigames-history-filter.js" asp-append-version="true"></script>
     <script src="~/js/minigames-sharing.js" asp-append-version="true"></script>
