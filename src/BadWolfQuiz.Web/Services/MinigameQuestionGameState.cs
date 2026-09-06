@@ -5,16 +5,19 @@ namespace BadWolfQuiz.Web.Services;
 internal sealed class MinigameQuestionGameState
 {
     private readonly string[] _sourceQuestions;
+    private readonly MinigameQuestionSelectionMode _selectionMode;
     private readonly PlayerQuestionDeck _player1;
     private readonly PlayerQuestionDeck _player2;
     private readonly List<MinigameQuestionHistoryEntry> _history = [];
 
     private MinigameQuestionGameState(
         string[] sourceQuestions,
+        MinigameQuestionSelectionMode selectionMode,
         PlayerQuestionDeck player1,
         PlayerQuestionDeck player2)
     {
         _sourceQuestions = sourceQuestions;
+        _selectionMode = selectionMode;
         _player1 = player1;
         _player2 = player2;
     }
@@ -25,11 +28,20 @@ internal sealed class MinigameQuestionGameState
 
     public int? PendingResponsePlayerNumber { get; private set; }
 
+    public MinigameQuestionSelectionMode SelectionMode => _selectionMode;
+
     public IReadOnlyList<MinigameQuestionHistoryEntry> History => _history;
 
-    public static MinigameQuestionGameState Create(IReadOnlyList<string> questions)
+    public static MinigameQuestionGameState Create(
+        IReadOnlyList<string> questions,
+        MinigameQuestionSelectionMode selectionMode = MinigameQuestionSelectionMode.Cards)
     {
         ArgumentNullException.ThrowIfNull(questions);
+        if (!Enum.IsDefined(selectionMode))
+        {
+            throw new ArgumentOutOfRangeException(nameof(selectionMode));
+        }
+
         var normalized = questions
             .Select(question => question.Trim())
             .Where(question => !string.IsNullOrWhiteSpace(question))
@@ -43,37 +55,39 @@ internal sealed class MinigameQuestionGameState
 
         return new MinigameQuestionGameState(
             normalized,
-            PlayerQuestionDeck.Create(normalized),
-            PlayerQuestionDeck.Create(normalized));
+            selectionMode,
+            PlayerQuestionDeck.Create(normalized, selectionMode),
+            PlayerQuestionDeck.Create(normalized, selectionMode));
     }
 
-    public MinigameQuestionGameState Restart() => Create(_sourceQuestions);
+    public MinigameQuestionGameState Restart() => Create(_sourceQuestions, _selectionMode);
 
     public IReadOnlyList<string> GetAvailableQuestions(int playerNumber) =>
         GetDeck(playerNumber).AvailableQuestions;
+
+    public IReadOnlyList<string> GetRemainingSearchQuestions(int playerNumber) =>
+        GetDeck(playerNumber).RemainingSearchQuestions;
 
     public void BeginTurn() => HasSelectedQuestionThisTurn = false;
 
     public void SelectQuestion(int playerNumber, int optionIndex)
     {
-        if (HasSelectedQuestionThisTurn)
+        if (_selectionMode != MinigameQuestionSelectionMode.Cards)
         {
-            throw new MinigameRoomException(MinigameRoomError.QuestionAlreadySelected);
+            throw new MinigameRoomException(MinigameRoomError.InvalidQuestion);
         }
 
-        if (PendingResponsePlayerNumber is not null)
+        RecordQuestion(playerNumber, GetDeck(playerNumber).Select(optionIndex));
+    }
+
+    public void SelectQuestion(int playerNumber, string question)
+    {
+        if (_selectionMode != MinigameQuestionSelectionMode.Search)
         {
-            throw new MinigameRoomException(MinigameRoomError.QuestionResponsePending);
+            throw new MinigameRoomException(MinigameRoomError.InvalidQuestion);
         }
 
-        var question = GetDeck(playerNumber).Select(optionIndex);
-        _history.Add(new MinigameQuestionHistoryEntry(
-            playerNumber,
-            MinigameQuestionHistoryKind.Question,
-            question));
-        HasSelectedQuestionThisTurn = true;
-        PendingQuestion = question;
-        PendingResponsePlayerNumber = playerNumber == 1 ? 2 : 1;
+        RecordQuestion(playerNumber, GetDeck(playerNumber).Select(question));
     }
 
     public void SubmitQuestionResponse(int playerNumber, bool answerYes)
@@ -112,6 +126,27 @@ internal sealed class MinigameQuestionGameState
             playerNumber,
             MinigameQuestionHistoryKind.TurnTimedOut));
 
+    private void RecordQuestion(int playerNumber, string question)
+    {
+        if (HasSelectedQuestionThisTurn)
+        {
+            throw new MinigameRoomException(MinigameRoomError.QuestionAlreadySelected);
+        }
+
+        if (PendingResponsePlayerNumber is not null)
+        {
+            throw new MinigameRoomException(MinigameRoomError.QuestionResponsePending);
+        }
+
+        _history.Add(new MinigameQuestionHistoryEntry(
+            playerNumber,
+            MinigameQuestionHistoryKind.Question,
+            question));
+        HasSelectedQuestionThisTurn = true;
+        PendingQuestion = question;
+        PendingResponsePlayerNumber = playerNumber == 1 ? 2 : 1;
+    }
+
     private PlayerQuestionDeck GetDeck(int playerNumber) =>
         playerNumber switch
         {
@@ -122,21 +157,46 @@ internal sealed class MinigameQuestionGameState
 
     private sealed class PlayerQuestionDeck
     {
+        private readonly MinigameQuestionSelectionMode _selectionMode;
         private readonly Queue<string> _remaining;
         private readonly List<string> _available;
+        private readonly List<string> _searchRemaining;
 
         private PlayerQuestionDeck(
+            MinigameQuestionSelectionMode selectionMode,
             Queue<string> remaining,
-            List<string> available)
+            List<string> available,
+            List<string> searchRemaining)
         {
+            _selectionMode = selectionMode;
             _remaining = remaining;
             _available = available;
+            _searchRemaining = searchRemaining;
         }
 
-        public IReadOnlyList<string> AvailableQuestions => _available;
+        public IReadOnlyList<string> AvailableQuestions =>
+            _selectionMode == MinigameQuestionSelectionMode.Cards
+                ? _available
+                : Array.Empty<string>();
 
-        public static PlayerQuestionDeck Create(IReadOnlyList<string> source)
+        public IReadOnlyList<string> RemainingSearchQuestions =>
+            _selectionMode == MinigameQuestionSelectionMode.Search
+                ? _searchRemaining
+                : Array.Empty<string>();
+
+        public static PlayerQuestionDeck Create(
+            IReadOnlyList<string> source,
+            MinigameQuestionSelectionMode selectionMode)
         {
+            if (selectionMode == MinigameQuestionSelectionMode.Search)
+            {
+                return new PlayerQuestionDeck(
+                    selectionMode,
+                    new Queue<string>(),
+                    [],
+                    source.ToList());
+            }
+
             var shuffled = source.ToList();
             Shuffle(shuffled);
             var remaining = new Queue<string>(shuffled);
@@ -147,12 +207,13 @@ internal sealed class MinigameQuestionGameState
                 available.Add(question);
             }
 
-            return new PlayerQuestionDeck(remaining, available);
+            return new PlayerQuestionDeck(selectionMode, remaining, available, []);
         }
 
         public string Select(int optionIndex)
         {
-            if (optionIndex < 0 || optionIndex >= _available.Count)
+            if (_selectionMode != MinigameQuestionSelectionMode.Cards ||
+                optionIndex < 0 || optionIndex >= _available.Count)
             {
                 throw new MinigameRoomException(MinigameRoomError.InvalidQuestion);
             }
@@ -170,6 +231,27 @@ internal sealed class MinigameQuestionGameState
             return selected;
         }
 
+        public string Select(string question)
+        {
+            if (_selectionMode != MinigameQuestionSelectionMode.Search ||
+                string.IsNullOrWhiteSpace(question))
+            {
+                throw new MinigameRoomException(MinigameRoomError.InvalidQuestion);
+            }
+
+            var normalized = question.Trim();
+            var index = _searchRemaining.FindIndex(item =>
+                string.Equals(item, normalized, StringComparison.Ordinal));
+            if (index < 0)
+            {
+                throw new MinigameRoomException(MinigameRoomError.InvalidQuestion);
+            }
+
+            var selected = _searchRemaining[index];
+            _searchRemaining.RemoveAt(index);
+            return selected;
+        }
+
         private static void Shuffle<T>(IList<T> values)
         {
             for (var index = values.Count - 1; index > 0; index--)
@@ -179,6 +261,12 @@ internal sealed class MinigameQuestionGameState
             }
         }
     }
+}
+
+public enum MinigameQuestionSelectionMode
+{
+    Cards = 0,
+    Search = 1
 }
 
 public enum MinigameQuestionHistoryKind

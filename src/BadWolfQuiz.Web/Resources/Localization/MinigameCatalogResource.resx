@@ -18,6 +18,17 @@
   <data name="SoloAiPlayer" xml:space="preserve"><value>AI</value></data>
   <data name="SoloAiUnknownAnswer" xml:space="preserve"><value>I don't know</value></data>
   <data name="SoloAiCardRange" xml:space="preserve"><value>Available AI range: {0}–{1}.</value></data>
+  <data name="FreeQuestionSelection" xml:space="preserve"><value>Choose any question</value></data>
+  <data name="FreeQuestionSelectionDescription" xml:space="preserve"><value>Replace the three random Question cards with a searchable list of all remaining enabled questions.</value></data>
+  <data name="QuestionSearch_Choose" xml:space="preserve"><value>Choose question</value></data>
+  <data name="QuestionSearch_Title" xml:space="preserve"><value>Choose a question</value></data>
+  <data name="QuestionSearch_Placeholder" xml:space="preserve"><value>Search questions…</value></data>
+  <data name="QuestionSearch_Help" xml:space="preserve"><value>Enter at least 3 characters to search.</value></data>
+  <data name="QuestionSearch_NoResults" xml:space="preserve"><value>No matching questions found.</value></data>
+  <data name="QuestionSearch_Loading" xml:space="preserve"><value>Searching…</value></data>
+  <data name="QuestionSearch_Page" xml:space="preserve"><value>Page {0} of {1}</value></data>
+  <data name="QuestionSearch_Previous" xml:space="preserve"><value>Previous</value></data>
+  <data name="QuestionSearch_Next" xml:space="preserve"><value>Next</value></data>
   <data name="AllowHints" xml:space="preserve"><value>Allow hints</value></data>
   <data name="AllowHintsDescription" xml:space="preserve"><value>Show database-backed answer hints for Question cards and game cards.</value></data>
   <data name="Hints_Title" xml:space="preserve"><value>Hints</value></data>

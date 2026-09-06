@@ -18,6 +18,17 @@
   <data name="SoloAiPlayer" xml:space="preserve"><value>Україна</value></data>
   <data name="SoloAiUnknownAnswer" xml:space="preserve"><value>Україна</value></data>
   <data name="SoloAiCardRange" xml:space="preserve"><value>Україна</value></data>
+  <data name="FreeQuestionSelection" xml:space="preserve"><value>Україна</value></data>
+  <data name="FreeQuestionSelectionDescription" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionSearch_Choose" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionSearch_Title" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionSearch_Placeholder" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionSearch_Help" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionSearch_NoResults" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionSearch_Loading" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionSearch_Page" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionSearch_Previous" xml:space="preserve"><value>Україна</value></data>
+  <data name="QuestionSearch_Next" xml:space="preserve"><value>Україна</value></data>
   <data name="AllowHints" xml:space="preserve"><value>Україна</value></data>
   <data name="AllowHintsDescription" xml:space="preserve"><value>Україна</value></data>
   <data name="Hints_Title" xml:space="preserve"><value>Україна</value></data>

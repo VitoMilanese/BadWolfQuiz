@@ -80,6 +80,7 @@ public sealed class MinigameSoloAiService
         string playerToken,
         int cardCount,
         IReadOnlyList<string> questions,
+        MinigameQuestionSelectionMode questionSelectionMode = MinigameQuestionSelectionMode.Cards,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(questions);
@@ -122,12 +123,18 @@ public sealed class MinigameSoloAiService
         MinigameRoomSnapshot state;
         try
         {
-            state = _rooms.StartNewGame(
-                roomCode,
-                playerToken,
-                cards,
-                questionCardsEnabled: true,
-                questions);
+            state = questionSelectionMode == MinigameQuestionSelectionMode.Search
+                ? _rooms.StartNewGameWithQuestionSearch(
+                    roomCode,
+                    playerToken,
+                    cards,
+                    questions)
+                : _rooms.StartNewGame(
+                    roomCode,
+                    playerToken,
+                    cards,
+                    questionCardsEnabled: true,
+                    questions);
         }
         catch
         {
@@ -249,30 +256,66 @@ public sealed class MinigameSoloAiService
                     touchActivity: false);
             }
 
-            if (!aiState.HasSelectedQuestionThisTurn &&
-                aiState.MyAvailableQuestions.Count > 0)
-            {
-                var optionIndex = RandomNumberGenerator.GetInt32(
-                    aiState.MyAvailableQuestions.Count);
-                _rooms.SelectQuestion(
-                    aiState.RoomCode,
-                    solo.AiPlayerToken,
-                    optionIndex);
-                return _rooms.GetState(
-                    aiState.RoomCode,
-                    playerToken,
-                    touchActivity: false);
-            }
-
             if (solo.Candidates.Count == 1)
             {
                 _rooms.SubmitGuess(
                     aiState.RoomCode,
                     solo.AiPlayerToken,
                     solo.Candidates.Single());
+                return _rooms.GetState(
+                    aiState.RoomCode,
+                    playerToken,
+                    touchActivity: false);
             }
-            else if (aiState.MyAvailableQuestions.Count == 0 &&
-                     solo.Candidates.Count > 0)
+
+            var selectionMode = _rooms.GetQuestionSelectionMode(
+                aiState.RoomCode,
+                solo.AiPlayerToken);
+            if (!aiState.HasSelectedQuestionThisTurn)
+            {
+                if (selectionMode == MinigameQuestionSelectionMode.Search)
+                {
+                    var remainingQuestions = _rooms.GetRemainingSearchQuestions(
+                        aiState.RoomCode,
+                        solo.AiPlayerToken);
+                    var bestQuestion = await ChooseBestSearchQuestionAsync(
+                        remainingQuestions,
+                        solo.Candidates,
+                        cancellationToken);
+                    if (!string.IsNullOrWhiteSpace(bestQuestion))
+                    {
+                        _rooms.SelectQuestionByText(
+                            aiState.RoomCode,
+                            solo.AiPlayerToken,
+                            bestQuestion);
+                        return _rooms.GetState(
+                            aiState.RoomCode,
+                            playerToken,
+                            touchActivity: false);
+                    }
+                }
+                else if (aiState.MyAvailableQuestions.Count > 0)
+                {
+                    var optionIndex = RandomNumberGenerator.GetInt32(
+                        aiState.MyAvailableQuestions.Count);
+                    _rooms.SelectQuestion(
+                        aiState.RoomCode,
+                        solo.AiPlayerToken,
+                        optionIndex);
+                    return _rooms.GetState(
+                        aiState.RoomCode,
+                        playerToken,
+                        touchActivity: false);
+                }
+            }
+
+            var questionsRemain = selectionMode == MinigameQuestionSelectionMode.Search
+                ? _rooms.GetRemainingSearchQuestions(
+                    aiState.RoomCode,
+                    solo.AiPlayerToken).Count > 0
+                : aiState.MyAvailableQuestions.Count > 0;
+
+            if (!questionsRemain && solo.Candidates.Count > 0)
             {
                 var guessIndex = RandomNumberGenerator.GetInt32(solo.Candidates.Count);
                 var guess = solo.Candidates.ElementAt(guessIndex);
@@ -299,6 +342,94 @@ public sealed class MinigameSoloAiService
         {
             solo.Gate.Release();
         }
+    }
+
+    internal static int GetQuestionEliminationScore(int yesCount, int noCount) =>
+        Math.Min(yesCount, noCount);
+
+    private async Task<string?> ChooseBestSearchQuestionAsync(
+        IReadOnlyList<string> questions,
+        IReadOnlySet<string> candidates,
+        CancellationToken cancellationToken)
+    {
+        if (questions.Count == 0)
+        {
+            return null;
+        }
+
+        var candidateIds = candidates
+            .Select(candidate => TryParseGameId(candidate, out var gameId) ? gameId : 0)
+            .Where(gameId => gameId > 0)
+            .Distinct()
+            .ToArray();
+        if (candidateIds.Length == 0)
+        {
+            return questions[RandomNumberGenerator.GetInt32(questions.Count)];
+        }
+
+        var questionSet = questions.ToHashSet(StringComparer.Ordinal);
+        var counts = new Dictionary<string, (int Yes, int No)>(StringComparer.Ordinal);
+
+        await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+        await db.Database.OpenConnectionAsync(cancellationToken);
+        await using var command = db.Database.GetDbConnection().CreateCommand();
+        var parameterNames = new string[candidateIds.Length];
+        for (var index = 0; index < candidateIds.Length; index++)
+        {
+            var parameterName = $"$game{index}";
+            parameterNames[index] = parameterName;
+            AddParameter(command, parameterName, candidateIds[index]);
+        }
+
+        command.CommandText =
+            $"""
+            SELECT q.Text, a.AnswerYes
+            FROM MinigameCatalogAnswers a
+            INNER JOIN MinigameCatalogQuestions q ON q.Id = a.QuestionId
+            WHERE a.GameId IN ({string.Join(", ", parameterNames)});
+            """;
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var question = reader.GetString(0);
+            if (!questionSet.Contains(question))
+            {
+                continue;
+            }
+
+            var current = counts.GetValueOrDefault(question);
+            if (reader.GetInt32(1) != 0)
+            {
+                counts[question] = (current.Yes + 1, current.No);
+            }
+            else
+            {
+                counts[question] = (current.Yes, current.No + 1);
+            }
+        }
+
+        var bestScore = -1;
+        var bestQuestions = new List<string>();
+        foreach (var question in questions)
+        {
+            var current = counts.GetValueOrDefault(question);
+            var score = GetQuestionEliminationScore(current.Yes, current.No);
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestQuestions.Clear();
+                bestQuestions.Add(question);
+            }
+            else if (score == bestScore)
+            {
+                bestQuestions.Add(question);
+            }
+        }
+
+        return bestQuestions.Count == 0
+            ? null
+            : bestQuestions[RandomNumberGenerator.GetInt32(bestQuestions.Count)];
     }
 
     private async Task ProcessHumanAnswersAsync(

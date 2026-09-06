@@ -18,6 +18,7 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/minigames.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/minigames-question-search.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/minigames-hints.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/minigames-history-filter.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/minigames-sharing.css" asp-append-version="true" />
@@ -71,6 +72,11 @@
      data-solo-ai-player="@MinigameCatalogLocalizer["SoloAiPlayer"]"
      data-solo-ai-unknown="@MinigameCatalogLocalizer["SoloAiUnknownAnswer"]"
      data-solo-ai-card-range="@MinigameCatalogLocalizer["SoloAiCardRange"]"
+     data-question-search-choose="@MinigameCatalogLocalizer["QuestionSearch_Choose"]"
+     data-question-search-help="@MinigameCatalogLocalizer["QuestionSearch_Help"]"
+     data-question-search-no-results="@MinigameCatalogLocalizer["QuestionSearch_NoResults"]"
+     data-question-search-loading="@MinigameCatalogLocalizer["QuestionSearch_Loading"]"
+     data-question-search-page="@MinigameCatalogLocalizer["QuestionSearch_Page"]"
      data-hints-icon-label="@MinigameCatalogLocalizer["Hints_IconLabel"]"
      data-hints-title="@MinigameCatalogLocalizer["Hints_Title"]"
      data-hints-current-questions="@MinigameCatalogLocalizer["Hints_CurrentQuestions"]"
@@ -260,6 +266,13 @@
                 </span>
             </label>
             <label class="minigames-checkbox-row">
+                <input type="checkbox" data-new-game-free-question-selection disabled />
+                <span>
+                    <strong>@MinigameCatalogLocalizer["FreeQuestionSelection"]</strong>
+                    <small>@MinigameCatalogLocalizer["FreeQuestionSelectionDescription"]</small>
+                </span>
+            </label>
+            <label class="minigames-checkbox-row">
                 <input type="checkbox" data-new-game-solo-ai />
                 <span>
                     <strong>@MinigameCatalogLocalizer["SoloAi"]</strong>
@@ -305,6 +318,37 @@
         </form>
     </dialog>
 
+    <dialog class="minigames-dialog minigames-question-search-dialog" data-question-search-dialog>
+        <div class="minigames-question-search-body">
+            <header class="minigames-question-search-header">
+                <h2>@MinigameCatalogLocalizer["QuestionSearch_Title"]</h2>
+                <button class="button minigames-question-search-close"
+                        type="button"
+                        data-question-search-close
+                        title="@MinigameCatalogLocalizer["Hints_Close"]"
+                        aria-label="@MinigameCatalogLocalizer["Hints_Close"]">×</button>
+            </header>
+            <input type="search"
+                   autocomplete="off"
+                   minlength="@BadWolfQuiz.Web.Services.MinigameRoomStore.MinimumQuestionSearchLength"
+                   placeholder="@MinigameCatalogLocalizer["QuestionSearch_Placeholder"]"
+                   data-question-search-input />
+            <p class="minigames-question-search-message"
+               data-question-search-message
+               aria-live="polite">@MinigameCatalogLocalizer["QuestionSearch_Help"]</p>
+            <div class="minigames-question-search-results" data-question-search-results></div>
+            <div class="minigames-question-search-pager is-hidden" data-question-search-pager>
+                <button class="button" type="button" data-question-search-prev>
+                    @MinigameCatalogLocalizer["QuestionSearch_Previous"]
+                </button>
+                <span data-question-search-page></span>
+                <button class="button" type="button" data-question-search-next>
+                    @MinigameCatalogLocalizer["QuestionSearch_Next"]
+                </button>
+            </div>
+        </div>
+    </dialog>
+
     <dialog class="minigames-dialog minigames-hint-dialog" data-card-hint-dialog>
         <div class="minigames-hint-dialog-body">
             <header class="minigames-hint-dialog-header">
@@ -329,6 +373,7 @@
 
 @section Scripts {
     <script src="~/js/minigames.js" asp-append-version="true"></script>
+    <script src="~/js/minigames-question-search.js" asp-append-version="true"></script>
     <script src="~/js/minigames-solo-ai.js" asp-append-version="true"></script>
     <script src="~/js/minigames-hints.js" asp-append-version="true"></script>
     <script src="~/js/minigames-history-filter.js" asp-append-version="true"></script>
