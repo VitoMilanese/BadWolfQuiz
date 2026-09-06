@@ -45,7 +45,7 @@ public sealed class GameplayPolishRegressionTests
             "Attributes = \"data-host-gameplay-view\"",
             helper,
             StringComparison.Ordinal);
-        Assert.Contains("gameplay-polish.css?v=2", helper, StringComparison.Ordinal);
+        Assert.Contains("gameplay-polish.css?v=3", helper, StringComparison.Ordinal);
         Assert.Contains("gameplay-polish.js?v=2", helper, StringComparison.Ordinal);
 
         Assert.Contains("data-game-intro-start", intro, StringComparison.Ordinal);
@@ -76,11 +76,23 @@ public sealed class GameplayPolishRegressionTests
             styles,
             StringComparison.Ordinal);
         Assert.Contains(
+            "padding: 14px 16px !important;",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
             ".game-scoreboard .scoreboard-player:not(.host-card) .player-card-actions",
             styles,
             StringComparison.Ordinal);
         Assert.Contains("position: absolute !important;", styles, StringComparison.Ordinal);
         Assert.Contains("right: 8px !important;", styles, StringComparison.Ordinal);
+        Assert.Contains(
+            "@media (hover: hover) and (pointer: fine)",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(".scoreboard-remove-player", styles, StringComparison.Ordinal);
+        Assert.Contains("opacity: 0;", styles, StringComparison.Ordinal);
+        Assert.Contains(":hover .scoreboard-remove-player", styles, StringComparison.Ordinal);
+        Assert.Contains(":focus-within .scoreboard-remove-player", styles, StringComparison.Ordinal);
 
         Assert.Contains(
             ".scoreboard-player.question-answering-player",
