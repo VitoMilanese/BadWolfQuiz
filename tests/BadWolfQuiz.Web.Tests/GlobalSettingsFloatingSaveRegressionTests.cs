@@ -33,6 +33,13 @@ public sealed class GlobalSettingsFloatingSaveRegressionTests
             "wwwroot",
             "js",
             "host-settings-floating-save.js"));
+        var shortcut = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "host-settings-save-shortcut.js"));
         var stylesheet = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -54,6 +61,7 @@ public sealed class GlobalSettingsFloatingSaveRegressionTests
         Assert.Contains("ViewData.Model is not IndexModel", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/css/host-settings-floating-save.css?v=2", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/js/host-settings-floating-save.js?v=2", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("/js/host-settings-save-shortcut.js?v=1", tagHelper, StringComparison.Ordinal);
 
         Assert.Contains("host-settings-floating-save-bar", script, StringComparison.Ordinal);
         Assert.Contains("actions.hidden = true", script, StringComparison.Ordinal);
@@ -85,6 +93,14 @@ public sealed class GlobalSettingsFloatingSaveRegressionTests
         Assert.Contains("ru: {", script, StringComparison.Ordinal);
         Assert.Contains("unsaved: \"Україна\"", script, StringComparison.Ordinal);
         Assert.Contains("saved: \"Україна\"", script, StringComparison.Ordinal);
+
+        Assert.Contains("event.code === \"KeyS\"", shortcut, StringComparison.Ordinal);
+        Assert.Contains("event.ctrlKey || event.metaKey", shortcut, StringComparison.Ordinal);
+        Assert.Contains("event.preventDefault();", shortcut, StringComparison.Ordinal);
+        Assert.Contains("event.stopImmediatePropagation();", shortcut, StringComparison.Ordinal);
+        Assert.Contains("window.BadWolfHostSettingsFloatingSave?.hasUnsavedChanges?.()", shortcut, StringComparison.Ordinal);
+        Assert.Contains("form.requestSubmit();", shortcut, StringComparison.Ordinal);
+        Assert.Contains("{ capture: true }", shortcut, StringComparison.Ordinal);
 
         Assert.Contains(
             ".host-settings-actions.host-settings-floating-save-bar[hidden]",
