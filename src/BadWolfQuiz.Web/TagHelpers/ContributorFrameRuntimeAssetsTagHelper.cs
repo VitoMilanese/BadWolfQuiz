@@ -25,7 +25,12 @@ public sealed class ContributorFrameRuntimeAssetsTagHelper(
         TagHelperOutput output)
     {
         var page = ViewContext.RouteData.Values["page"]?.ToString();
-        if (page is not "/Admin/Games/Lobby" and not "/Player/Lobby")
+        var isHostGameFlowPage = page is
+            "/Admin/Games/Lobby" or
+            "/Admin/Games/RoundIntro" or
+            "/Admin/Games/RunningRoundIntro" or
+            "/Admin/Games/FinalQuestionTransition";
+        if (!isHostGameFlowPage && page is not "/Player/Lobby")
         {
             return;
         }

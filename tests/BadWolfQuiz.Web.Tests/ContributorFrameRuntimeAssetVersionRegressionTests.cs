@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class ContributorFrameRuntimeAssetVersionRegressionTests
 {
     [Fact]
-    public void Player_and_host_game_pages_load_fingerprinted_frame_runtime_assets_last()
+    public void Player_and_host_game_flow_pages_load_fingerprinted_frame_runtime_assets_last()
     {
         var helper = File.ReadAllText(FindWebFile(
             "TagHelpers",
@@ -22,6 +22,9 @@ public sealed class ContributorFrameRuntimeAssetVersionRegressionTests
 
         Assert.Contains("public override int Order => 2000;", helper);
         Assert.Contains("/Admin/Games/Lobby", helper);
+        Assert.Contains("/Admin/Games/RoundIntro", helper);
+        Assert.Contains("/Admin/Games/RunningRoundIntro", helper);
+        Assert.Contains("/Admin/Games/FinalQuestionTransition", helper);
         Assert.Contains("/Player/Lobby", helper);
         Assert.Contains("AddFileVersionToPath", helper);
         Assert.Contains("/css/contributor-frames.css", helper);
