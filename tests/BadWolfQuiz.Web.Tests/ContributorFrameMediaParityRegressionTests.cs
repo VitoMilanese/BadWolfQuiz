@@ -30,6 +30,14 @@ public sealed class ContributorFrameMediaParityRegressionTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
+            "--contributor-frame-preview-parity-size",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".game-scoreboard .scoreboard-player:not(.host-card) > .player-card-avatar",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
             "badwolf:host-gameplay-updated",
             script,
             StringComparison.Ordinal);
@@ -53,6 +61,18 @@ public sealed class ContributorFrameMediaParityRegressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             "background: transparent !important;",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "width: var(--contributor-frame-preview-parity-size) !important;",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "height: var(--contributor-frame-preview-parity-size) !important;",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "justify-self: center !important;",
             styles,
             StringComparison.Ordinal);
 

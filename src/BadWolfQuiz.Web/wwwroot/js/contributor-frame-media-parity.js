@@ -23,6 +23,9 @@
         ".host-card-media iframe:not([hidden])"
     ];
 
+    const hostPlayerCardMediaSelector =
+        ".game-scoreboard .scoreboard-player:not(.host-card) > .player-card-avatar";
+
     const findMedia = owner => {
         for (const selector of mediaSelectors) {
             for (const media of owner.querySelectorAll(selector)) {
@@ -37,6 +40,7 @@
     const clearMedia = media => {
         media.classList.remove("contributor-frame-preview-parity-media");
         media.style.removeProperty("--contributor-frame-preview-parity-inset");
+        media.style.removeProperty("--contributor-frame-preview-parity-size");
     };
 
     let refreshQueued = false;
@@ -100,6 +104,17 @@
                 "--contributor-frame-preview-parity-inset",
                 `${scaledInset}px`
             );
+
+            if (media.matches(hostPlayerCardMediaSelector)) {
+                media.style.setProperty(
+                    "--contributor-frame-preview-parity-size",
+                    `${renderedSize}px`
+                );
+            } else {
+                media.style.removeProperty(
+                    "--contributor-frame-preview-parity-size"
+                );
+            }
         };
 
         if (overlay.complete && overlay.naturalWidth > 0) {
