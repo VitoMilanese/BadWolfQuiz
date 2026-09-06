@@ -1,0 +1,237 @@
+.header-menu-trigger {
+    order: 4;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-left: 0.65rem;
+    white-space: nowrap;
+}
+
+html.header-side-menu-open,
+html.header-side-menu-open body {
+    overflow: hidden;
+}
+
+.header-side-menu {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    overflow: hidden;
+}
+
+.header-side-menu::backdrop {
+    background: rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    transition: opacity 180ms ease;
+}
+
+.header-side-menu.is-open::backdrop {
+    opacity: 1;
+}
+
+.header-side-menu-panel {
+    box-sizing: border-box;
+    width: min(390px, calc(100vw - 48px));
+    height: 100%;
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid color-mix(in srgb, var(--line) 82%, var(--red-bright));
+    background:
+        radial-gradient(circle at 100% 0, color-mix(in srgb, var(--red-bright) 14%, transparent), transparent 26rem),
+        linear-gradient(180deg, color-mix(in srgb, var(--panel) 97%, var(--bg)), color-mix(in srgb, var(--panel-2) 96%, var(--bg)));
+    box-shadow: -28px 0 70px rgba(0, 0, 0, 0.38);
+    transform: translateX(100%);
+    transition: transform 220ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.header-side-menu.is-open .header-side-menu-panel {
+    transform: translateX(0);
+}
+
+.header-side-menu-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 76px;
+    padding: 18px 20px 16px 24px;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--panel) 88%, transparent);
+    backdrop-filter: blur(14px);
+}
+
+.header-side-menu-title-wrap {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+
+.header-side-menu-kicker {
+    color: var(--red-bright);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.header-side-menu-heading h2 {
+    margin: 0;
+    font-size: clamp(1.45rem, 3vw, 1.8rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+}
+
+.header-side-menu-close {
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 1.65rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+.header-side-menu-close:hover {
+    border-color: color-mix(in srgb, var(--red-bright) 62%, var(--line));
+    background: color-mix(in srgb, var(--red-bright) 12%, var(--panel-2));
+}
+
+.header-side-menu-close:active {
+    transform: scale(0.96);
+}
+
+.header-side-menu-close:focus-visible,
+.header-side-menu-item:focus-visible {
+    outline: 2px solid var(--red-bright);
+    outline-offset: 2px;
+}
+
+.header-side-menu-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 14px 16px 20px;
+    scrollbar-gutter: stable;
+}
+
+.header-side-menu-group {
+    display: grid;
+    gap: 4px;
+}
+
+.header-side-menu-group + .header-side-menu-group {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+}
+
+.header-side-menu-item {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 10px 13px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 650;
+    line-height: 1.2;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.header-side-menu-item:hover {
+    border-color: color-mix(in srgb, var(--red-bright) 24%, var(--line));
+    background: color-mix(in srgb, var(--red-bright) 10%, var(--panel-2));
+    color: var(--text);
+}
+
+.header-side-menu-item:active {
+    transform: translateX(2px);
+}
+
+.header-side-menu-item[href]::after {
+    content: "›";
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 1.35rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.header-side-menu-footer {
+    flex: 0 0 auto;
+    padding: 14px 16px max(14px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--panel) 94%, transparent);
+}
+
+.header-side-menu-footer form {
+    margin: 0;
+}
+
+.header-side-menu-footer .header-side-menu-item {
+    background: color-mix(in srgb, var(--panel-2) 86%, transparent);
+    border-color: var(--line);
+}
+
+@media (max-width: 520px) {
+    .header-side-menu-panel {
+        width: min(92vw, 420px);
+    }
+
+    .header-side-menu-heading {
+        min-height: 68px;
+        padding: 14px 14px 12px 18px;
+    }
+
+    .header-side-menu-scroll {
+        padding-inline: 12px;
+    }
+
+    .header-side-menu-footer {
+        padding-inline: 12px;
+    }
+}
+
+@media (max-width: 360px) {
+    .header-side-menu-panel {
+        width: 100vw;
+        border-left: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .header-side-menu::backdrop,
+    .header-side-menu-panel,
+    .header-side-menu-close,
+    .header-side-menu-item {
+        transition: none;
+    }
+}
