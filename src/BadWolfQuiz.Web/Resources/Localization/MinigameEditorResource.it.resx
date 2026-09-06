@@ -60,6 +60,10 @@
   <data name="ImageRequired" xml:space="preserve"><value>Seleziona un'immagine per la carta.</value></data>
   <data name="ImageTooLarge" xml:space="preserve"><value>L'immagine deve essere di massimo 5 MB.</value></data>
   <data name="ImageInvalidType" xml:space="preserve"><value>Usa un'immagine PNG, JPEG, WebP o GIF.</value></data>
+  <data name="Pagination" xml:space="preserve"><value>Pagine</value></data>
+  <data name="PreviousPage" xml:space="preserve"><value>Indietro</value></data>
+  <data name="NextPage" xml:space="preserve"><value>Avanti</value></data>
+  <data name="PageStatus" xml:space="preserve"><value>Pagina {0} di {1}</value></data>
   <data name="ResourceSyncHeading" xml:space="preserve"><value>Sincronizzazione da Resources</value></data>
   <data name="ResourceSyncDescription" xml:space="preserve"><value>Aggiunge i nuovi giochi e aggiorna immagini e risposte TXT dei giochi esistenti da Resources/Minigames/GameCards. Le domande non vengono modificate.</value></data>
   <data name="ResourceSyncButton" xml:space="preserve"><value>Sincronizza da Resources</value></data>
