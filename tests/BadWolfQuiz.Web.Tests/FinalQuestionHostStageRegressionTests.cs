@@ -34,7 +34,7 @@ public sealed class FinalQuestionHostStageRegressionTests
             helper,
             StringComparison.Ordinal);
         Assert.Contains(
-            "final-question-host-stage.css?v=2",
+            "final-question-host-stage.css?v=3",
             helper,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
@@ -60,21 +60,25 @@ public sealed class FinalQuestionHostStageRegressionTests
             styles,
             StringComparison.Ordinal);
         Assert.Contains(
-            "background: transparent;",
-            styles,
-            StringComparison.Ordinal);
-        Assert.Contains(
             "[data-game-status=\"finalwagering\"]",
             styles,
             StringComparison.Ordinal);
         Assert.Contains(
-            "[data-game-status=\"finalanswering\"]",
+            "[data-game-status=\"finalanswering\"] .question-presentation",
             styles,
             StringComparison.Ordinal);
         Assert.Contains(
-            "[data-game-status=\"finaljudging\"]",
+            "[data-game-status=\"finaljudging\"] .final-player-answer-presentation",
             styles,
             StringComparison.Ordinal);
+        Assert.Contains(
+            "[data-game-status=\"finaljudging\"] .answer-presentation",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains("max-width: none;", styles, StringComparison.Ordinal);
+        Assert.Contains("border: 0 !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("background: transparent !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("box-shadow: none !important;", styles, StringComparison.Ordinal);
     }
 
     private static string FindWebFile(params string[] parts)
