@@ -27,6 +27,10 @@ public sealed class FinalQuestionHostStageRegressionTests
             "wwwroot",
             "css",
             "final-question-host-answer-space.css"));
+        var responsiveness = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "final-question-host-responsiveness.js"));
 
         Assert.Contains(
             "FinalQuestionHostStageAssetsTagHelper",
@@ -50,6 +54,10 @@ public sealed class FinalQuestionHostStageRegressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             "final-question-host-answer-space.css?v=2",
+            helper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "final-question-host-responsiveness.js?v=1",
             helper,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
@@ -122,6 +130,51 @@ public sealed class FinalQuestionHostStageRegressionTests
         Assert.Contains(
             " / ",
             judgingProgressHelper,
+            StringComparison.Ordinal);
+
+        Assert.Contains(
+            "PrepareFinalQuestionLeaderboard",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "StartFinalQuestion",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "LockFinalWagers",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "LockFinalAnswers",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "JudgeFinalAnswer",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "\"X-Requested-With\": \"XMLHttpRequest\"",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "applyReturnedLobbyMarkup",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.BadWolfHostGameplay.refresh()",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.BadWolfBusy?.show?.()",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "form.matches(\"[data-final-question-transition-form]\")",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "submitter === null",
+            responsiveness,
             StringComparison.Ordinal);
     }
 
