@@ -12,12 +12,13 @@ public sealed class GameplayPolishAssetsTagHelper : TagHelper
     {
         if (string.Equals(output.TagName, "section", StringComparison.OrdinalIgnoreCase))
         {
-            // The host lobby's existing player fingerprint still reads the legacy
-            // uploaded-image field names while GameHub sends imageDataUrl. Load a
-            // tiny contract adapter before the host SignalR connection is created
-            // so avatar/image changes invalidate that fingerprint immediately.
+            // GameHub sends the current player image as imageDataUrl while the
+            // host lobby fingerprint still reads the legacy uploaded-image
+            // field names. Load the contract adapter before _Layout loads
+            // SignalR; the adapter hooks that later global assignment so the
+            // host connection is patched before Lobby.cshtml builds it.
             output.PreContent.AppendHtml(
-                "<script src=\"/js/host-lobby-player-visual-contract.js?v=1\"></script>");
+                "<script src=\"/js/host-lobby-player-visual-contract.js?v=2\"></script>");
             return;
         }
 

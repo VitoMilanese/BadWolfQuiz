@@ -34,7 +34,7 @@ public sealed class HostLobbyPlayerVisualSyncRegressionTests
             helper,
             StringComparison.Ordinal);
         Assert.Contains(
-            "/js/host-lobby-player-visual-contract.js?v=1",
+            "/js/host-lobby-player-visual-contract.js?v=2",
             helper,
             StringComparison.Ordinal);
 
@@ -48,6 +48,17 @@ public sealed class HostLobbyPlayerVisualSyncRegressionTests
             "player.uploadedImageDataUrl = imageDataUrl;",
             adapter,
             StringComparison.Ordinal);
+
+        Assert.Contains(
+            "Object.getOwnPropertyDescriptor(window, \"signalR\")",
+            adapter,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Object.defineProperty(window, \"signalR\"",
+            adapter,
+            StringComparison.Ordinal);
+        Assert.Contains("set: value =>", adapter, StringComparison.Ordinal);
+        Assert.Contains("install(value);", adapter, StringComparison.Ordinal);
         Assert.Contains("DOMContentLoaded", adapter, StringComparison.Ordinal);
     }
 

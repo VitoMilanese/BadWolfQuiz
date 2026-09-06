@@ -1,10 +1,10 @@
 (() => {
-    const install = () => {
+    const install = signalR => {
         if (window.badWolfHostPlayerVisualContractInstalled) {
             return true;
         }
 
-        const builderPrototype = window.signalR?.HubConnectionBuilder?.prototype;
+        const builderPrototype = signalR?.HubConnectionBuilder?.prototype;
         if (!builderPrototype || typeof builderPrototype.build !== "function") {
             return false;
         }
@@ -30,7 +30,7 @@
                             // Lobby.cshtml still fingerprints these legacy names,
                             // while GameHub's current payload exposes imageDataUrl.
                             // Keep both views of the payload aligned so switching
-                            // Avatar <-> Image triggers the existing renderPlayers path.
+                            // Avatar <-> Image triggers the existing render path.
                             player.usesUploadedImage = Boolean(imageDataUrl);
                             player.uploadedImageDataUrl = imageDataUrl;
                         }
@@ -47,8 +47,46 @@
         return true;
     };
 
-    if (!install()) {
-        document.addEventListener("DOMContentLoaded", install, { once: true });
-        window.addEventListener("load", install, { once: true });
+    if (install(window.signalR)) {
+        return;
     }
+
+    // This adapter is emitted inside the host page body, while SignalR itself
+    // is loaded later by _Layout immediately before the page Scripts section.
+    // DOMContentLoaded is therefore too late: Lobby.cshtml builds its hub
+    // connection synchronously in that Scripts section. Intercept the late
+    // window.signalR assignment so the builder is patched before that happens.
+    const signalRDescriptor = Object.getOwnPropertyDescriptor(window, "signalR");
+    if (!signalRDescriptor || signalRDescriptor.configurable) {
+        let signalRValue = signalRDescriptor?.value;
+
+        Object.defineProperty(window, "signalR", {
+            configurable: true,
+            enumerable: signalRDescriptor?.enumerable ?? true,
+            get: () => signalRValue,
+            set: value => {
+                signalRValue = value;
+
+                Object.defineProperty(window, "signalR", {
+                    configurable: true,
+                    enumerable: true,
+                    writable: true,
+                    value
+                });
+
+                install(value);
+            }
+        });
+
+        if (signalRValue) {
+            install(signalRValue);
+        }
+    }
+
+    const installLateFallback = () => install(window.signalR);
+    document.addEventListener(
+        "DOMContentLoaded",
+        installLateFallback,
+        { once: true });
+    window.addEventListener("load", installLateFallback, { once: true });
 })();
