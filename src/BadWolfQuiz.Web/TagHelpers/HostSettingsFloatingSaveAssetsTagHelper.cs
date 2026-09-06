@@ -30,7 +30,8 @@ public sealed class HostSettingsFloatingSaveAssetsTagHelper : TagHelper
         if (string.Equals(output.TagName, "body", StringComparison.OrdinalIgnoreCase))
         {
             output.PostContent.AppendHtml(
-                "<script src=\"/js/host-settings-floating-save.js?v=2\"></script>");
+                "<script src=\"/js/host-settings-floating-save.js?v=2\"></script>" +
+                "<script src=\"/js/host-settings-save-shortcut.js?v=1\"></script>");
         }
     }
 }
