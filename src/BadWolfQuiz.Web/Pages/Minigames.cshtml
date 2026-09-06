@@ -9,23 +9,55 @@
     <link rel="stylesheet" href="~/css/minigames-catalog.css" asp-append-version="true" />
 }
 
-<section class="minigames-catalog">
-    <header class="minigames-catalog-header">
-        <h1>@Localizer["Minigames_Title"]</h1>
-        <p>@MinigameCatalogLocalizer["CatalogDescription"]</p>
-    </header>
+<div class="minigames-catalog-page">
+    <section class="minigames-catalog-hero" aria-labelledby="minigames-catalog-title">
+        <div class="minigames-catalog-heading">
+            <p class="minigames-catalog-kicker" aria-hidden="true">BAD WOLF / ARCADE</p>
+            <h1 id="minigames-catalog-title">@Localizer["Minigames_Title"]</h1>
+            <p class="minigames-catalog-lead">@MinigameCatalogLocalizer["CatalogDescription"]</p>
+        </div>
 
-    <div class="minigames-catalog-grid">
-        <a class="minigames-catalog-card" asp-page="/GuessWhatIPlay">
-            <span class="minigames-catalog-image">
-                <img src="~/images/minigames/guess-what-i-play.svg"
-                     alt=""
-                     loading="eager" />
-            </span>
-            <span class="minigames-catalog-content">
-                <strong>@MinigameCatalogLocalizer["GuessWhatIPlay_Title"]</strong>
-                <span>@MinigameCatalogLocalizer["GuessWhatIPlay_Description"]</span>
-            </span>
-        </a>
-    </div>
-</section>
+        <div class="minigames-catalog-hero-art" aria-hidden="true">
+            <span class="minigames-catalog-orbit"></span>
+            <span class="minigames-catalog-hero-word">PLAY</span>
+            <span class="minigames-catalog-hero-slash"></span>
+            <strong>
+                01
+                <small>MINIGAME</small>
+            </strong>
+        </div>
+    </section>
+
+    <section class="minigames-catalog-library" aria-label="@Localizer["Minigames_Title"]">
+        <div class="minigames-catalog-library-heading" aria-hidden="true">
+            <div>
+                <span>BAD WOLF / MINIGAMES</span>
+                <em>ARCADE CATALOG</em>
+            </div>
+            <strong>01</strong>
+        </div>
+
+        <div class="minigames-catalog-grid">
+            <a class="minigames-catalog-card" asp-page="/GuessWhatIPlay">
+                <div class="minigames-catalog-image">
+                    <span class="minigames-catalog-card-index" aria-hidden="true">01</span>
+                    <img src="~/images/minigames/guess-what-i-play.svg"
+                         alt=""
+                         loading="eager" />
+                    <span class="minigames-catalog-image-label" aria-hidden="true">FEATURED</span>
+                </div>
+
+                <div class="minigames-catalog-content">
+                    <span class="minigames-catalog-card-kicker" aria-hidden="true">MINIGAME / 01</span>
+                    <h2>@MinigameCatalogLocalizer["GuessWhatIPlay_Title"]</h2>
+                    <p>@MinigameCatalogLocalizer["GuessWhatIPlay_Description"]</p>
+
+                    <span class="minigames-catalog-card-action" aria-hidden="true">
+                        <span>PLAY</span>
+                        <strong>→</strong>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </section>
+</div>
