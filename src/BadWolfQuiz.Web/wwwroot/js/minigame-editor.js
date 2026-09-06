@@ -74,6 +74,10 @@
     const selects = [...answerForm.querySelectorAll('[data-minigame-answer-select]')];
     const status = document.querySelector('[data-minigame-answer-status]');
     const assignedCount = document.querySelector('[data-minigame-assigned-count]');
+    const answerTableWrap = answerForm.querySelector('.minigame-editor-answer-table-wrap');
+    const answerHeader = answerForm.querySelector('.minigame-editor-answer-table th:last-child');
+    const filterButtons = [];
+    let activeAnswerFilter = null;
     let saveTimer = 0;
     let saving = false;
     let saveQueued = false;
@@ -81,6 +85,72 @@
     const setStatus = message => {
         if (status) {
             status.textContent = message || '';
+        }
+    };
+
+    const applyAnswerFilter = () => {
+        let visibleIndex = 0;
+        selects.forEach(select => {
+            const row = select.closest('tr');
+            if (!row) return;
+
+            const visible = activeAnswerFilter === null ||
+                select.value === activeAnswerFilter;
+            row.hidden = !visible;
+            row.classList.remove('is-filter-even');
+            if (visible) {
+                visibleIndex += 1;
+                row.classList.toggle('is-filter-even', visibleIndex % 2 === 0);
+            }
+        });
+
+        answerForm.classList.toggle(
+            'is-answer-filtered',
+            activeAnswerFilter !== null);
+        filterButtons.forEach(button => {
+            const isActive = button.dataset.minigameAnswerFilter === activeAnswerFilter;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+    };
+
+    const createAnswerFilter = () => {
+        if (!answerTableWrap || selects.length === 0) return;
+
+        const filter = document.createElement('div');
+        filter.className = 'minigame-editor-answer-filter';
+        filter.setAttribute('role', 'group');
+
+        const answerLabel = (answerHeader?.textContent ?? '').trim();
+        if (answerLabel) {
+            filter.setAttribute('aria-label', answerLabel);
+            const label = document.createElement('span');
+            label.className = 'minigame-editor-answer-filter-label';
+            label.textContent = `${answerLabel}:`;
+            filter.appendChild(label);
+        }
+
+        ['1', '0', ''].forEach(value => {
+            const option = [...selects[0].options]
+                .find(item => item.value === value);
+            if (!option) return;
+
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'button button-secondary';
+            button.dataset.minigameAnswerFilter = value;
+            button.setAttribute('aria-pressed', 'false');
+            button.textContent = option.textContent?.trim() ?? '';
+            button.addEventListener('click', () => {
+                activeAnswerFilter = activeAnswerFilter === value ? null : value;
+                applyAnswerFilter();
+            });
+            filterButtons.push(button);
+            filter.appendChild(button);
+        });
+
+        if (filterButtons.length > 0) {
+            answerTableWrap.before(filter);
         }
     };
 
@@ -152,8 +222,12 @@
         event.preventDefault();
     });
 
+    createAnswerFilter();
+    applyAnswerFilter();
+
     selects.forEach(select => {
         select.addEventListener('change', () => {
+            applyAnswerFilter();
             setStatus(answerForm.dataset.saving);
             scheduleSave();
         });

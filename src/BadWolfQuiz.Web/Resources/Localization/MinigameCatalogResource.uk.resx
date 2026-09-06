@@ -13,4 +13,32 @@
   <data name="CopyRoomLink" xml:space="preserve"><value>Копіювати посилання на кімнату</value></data>
   <data name="RoomLinkCopied" xml:space="preserve"><value>Посилання на кімнату скопійовано</value></data>
   <data name="RoomLinkCopyFailed" xml:space="preserve"><value>Не вдалося скопіювати посилання на кімнату</value></data>
+  <data name="SoloAi" xml:space="preserve"><value>Соло гра проти ШІ</value></data>
+  <data name="SoloAiDescription" xml:space="preserve"><value>ШІ замінює Гравця 2. Картки з питаннями обов’язкові; використовуються лише ігри із заповненими щонайменше 80% відповідей.</value></data>
+  <data name="SoloAiPlayer" xml:space="preserve"><value>ШІ</value></data>
+  <data name="SoloAiUnknownAnswer" xml:space="preserve"><value>Не знаю</value></data>
+  <data name="SoloAiCardRange" xml:space="preserve"><value>Доступний для ШІ діапазон: {0}–{1}.</value></data>
+  <data name="FreeQuestionSelection" xml:space="preserve"><value>Вільний вибір питань</value></data>
+  <data name="FreeQuestionSelectionDescription" xml:space="preserve"><value>Замість трьох випадкових карток обирайте будь-яке невикористане увімкнене питання через пошук.</value></data>
+  <data name="QuestionSearch_Choose" xml:space="preserve"><value>Обрати питання</value></data>
+  <data name="QuestionSearch_Title" xml:space="preserve"><value>Обрати питання</value></data>
+  <data name="QuestionSearch_Placeholder" xml:space="preserve"><value>Пошук питань…</value></data>
+  <data name="QuestionSearch_Help" xml:space="preserve"><value>Введіть щонайменше 3 символи для пошуку.</value></data>
+  <data name="QuestionSearch_NoResults" xml:space="preserve"><value>Питань за цим фільтром не знайдено.</value></data>
+  <data name="QuestionSearch_Loading" xml:space="preserve"><value>Пошук…</value></data>
+  <data name="QuestionSearch_Page" xml:space="preserve"><value>Сторінка {0} з {1}</value></data>
+  <data name="QuestionSearch_Previous" xml:space="preserve"><value>Назад</value></data>
+  <data name="QuestionSearch_Next" xml:space="preserve"><value>Далі</value></data>
+  <data name="AllowHints" xml:space="preserve"><value>Дозволити підказки</value></data>
+  <data name="AllowHintsDescription" xml:space="preserve"><value>Показувати підказки з відповідями з бази даних для карток питань і карток ігор.</value></data>
+  <data name="Hints_Title" xml:space="preserve"><value>Підказки</value></data>
+  <data name="Hints_IconLabel" xml:space="preserve"><value>Показати підказки</value></data>
+  <data name="Hints_CurrentQuestions" xml:space="preserve"><value>Поточні картки питань</value></data>
+  <data name="Hints_PreviousQuestions" xml:space="preserve"><value>Питання, поставлені супернику</value></data>
+  <data name="Hints_NoCurrentQuestions" xml:space="preserve"><value>Карток з питаннями більше не залишилося.</value></data>
+  <data name="Hints_NoPreviousQuestions" xml:space="preserve"><value>Ви ще не ставили супернику питань.</value></data>
+  <data name="Hints_InformationUnavailable" xml:space="preserve"><value>Інформація недоступна</value></data>
+  <data name="Hints_ResponseLabel" xml:space="preserve"><value>Підказка</value></data>
+  <data name="Hints_Loading" xml:space="preserve"><value>Завантаження підказок…</value></data>
+  <data name="Hints_Close" xml:space="preserve"><value>Закрити</value></data>
 </root>

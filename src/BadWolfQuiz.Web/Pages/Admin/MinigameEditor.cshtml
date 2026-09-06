@@ -168,7 +168,8 @@ else if (Model.Section == "questions")
             <ol class="minigame-editor-question-list">
                 @foreach (var question in Model.Questions)
                 {
-                    <li>
+                    var isDisabled = Model.DisabledQuestionIds.Contains(question.Id);
+                    <li class="@(isDisabled ? "is-disabled" : null)">
                         <form method="post"
                               asp-page-handler="UpdateQuestion"
                               class="minigame-editor-question-row"
@@ -181,6 +182,13 @@ else if (Model.Section == "questions")
                                    value="@question.Text"
                                    aria-label="@EditorLocalizer["QuestionText"] @(question.SortOrder + 1)"
                                    required />
+                            <label class="minigame-editor-question-enabled">
+                                <input name="enabled"
+                                       type="checkbox"
+                                       value="true"
+                                       checked="@(!isDisabled ? "checked" : null)" />
+                                <span>@EditorLocalizer["QuestionEnabled"]</span>
+                            </label>
                             <button class="button button-secondary" type="submit">@Localizer["Button_Save"]</button>
                         </form>
                         <form method="post"

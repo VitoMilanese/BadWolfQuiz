@@ -23,13 +23,14 @@
   <data name="NoGames" xml:space="preserve"><value>У каталозі ще немає ігор.</value></data>
   <data name="AddQuestion" xml:space="preserve"><value>Додати питання</value></data>
   <data name="QuestionText" xml:space="preserve"><value>Питання</value></data>
+  <data name="QuestionEnabled" xml:space="preserve"><value>Увімкнено</value></data>
   <data name="NoQuestions" xml:space="preserve"><value>У каталозі ще немає питань.</value></data>
   <data name="AnswerEditor" xml:space="preserve"><value>Відповіді гри</value></data>
   <data name="AnswerEditorDescription" xml:space="preserve"><value>Для вибраної гри призначте ТАК, НІ або залиште питання без відповіді.</value></data>
   <data name="SelectGame" xml:space="preserve"><value>Гра</value></data>
   <data name="NoGamesForAnswers" xml:space="preserve"><value>Спочатку додайте хоча б одну гру.</value></data>
   <data name="ImportAnswers" xml:space="preserve"><value>Імпортувати всі відповіді з TXT</value></data>
-  <data name="ImportHelp" xml:space="preserve"><value>Файл має містити рівно {0} рядків у порядку питань: 1 = ТАК, 0 = НІ.</value></data>
+  <data name="ImportHelp" xml:space="preserve"><value>Файл має містити рівно {0} рядків у порядку питань: 1 = ТАК, 0 = НІ, порожній рядок = Не призначено.</value></data>
   <data name="Answer" xml:space="preserve"><value>Відповідь</value></data>
   <data name="Unassigned" xml:space="preserve"><value>Не призначено</value></data>
   <data name="Yes" xml:space="preserve"><value>ТАК</value></data>
@@ -54,7 +55,7 @@
   <data name="AnswersInvalid" xml:space="preserve"><value>Набір відповідей некоректний.</value></data>
   <data name="AnswerFileRequired" xml:space="preserve"><value>Виберіть TXT-файл для імпорту.</value></data>
   <data name="AnswerFileTooLarge" xml:space="preserve"><value>Файл відповідей завеликий.</value></data>
-  <data name="AnswerFileInvalidLine" xml:space="preserve"><value>Рядок {0} повинен містити тільки 1 або 0.</value></data>
+  <data name="AnswerFileInvalidLine" xml:space="preserve"><value>Рядок {0} має містити 1, 0 або бути порожнім.</value></data>
   <data name="AnswerFileWrongCount" xml:space="preserve"><value>Файл повинен містити рівно {0} рядків; знайдено {1}.</value></data>
   <data name="ImageRequired" xml:space="preserve"><value>Виберіть картинку для картки.</value></data>
   <data name="ImageTooLarge" xml:space="preserve"><value>Картинка повинна бути не більшою за 5 МБ.</value></data>

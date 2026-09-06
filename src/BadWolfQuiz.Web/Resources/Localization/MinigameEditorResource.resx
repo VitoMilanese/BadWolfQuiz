@@ -23,13 +23,14 @@
   <data name="NoGames" xml:space="preserve"><value>No games are stored in the catalog yet.</value></data>
   <data name="AddQuestion" xml:space="preserve"><value>Add question</value></data>
   <data name="QuestionText" xml:space="preserve"><value>Question</value></data>
+  <data name="QuestionEnabled" xml:space="preserve"><value>Enabled</value></data>
   <data name="NoQuestions" xml:space="preserve"><value>No questions are stored in the catalog yet.</value></data>
   <data name="AnswerEditor" xml:space="preserve"><value>Game answers</value></data>
   <data name="AnswerEditorDescription" xml:space="preserve"><value>Assign YES, NO or leave a question unassigned for the selected game.</value></data>
   <data name="SelectGame" xml:space="preserve"><value>Game</value></data>
   <data name="NoGamesForAnswers" xml:space="preserve"><value>Add at least one game before editing answers.</value></data>
   <data name="ImportAnswers" xml:space="preserve"><value>Import all answers from TXT</value></data>
-  <data name="ImportHelp" xml:space="preserve"><value>The file must contain exactly {0} lines in question order: 1 = YES, 0 = NO.</value></data>
+  <data name="ImportHelp" xml:space="preserve"><value>The file must contain exactly {0} lines in question order: 1 = YES, 0 = NO, empty line = Unassigned.</value></data>
   <data name="Answer" xml:space="preserve"><value>Answer</value></data>
   <data name="Unassigned" xml:space="preserve"><value>Unassigned</value></data>
   <data name="Yes" xml:space="preserve"><value>YES</value></data>
@@ -54,7 +55,7 @@
   <data name="AnswersInvalid" xml:space="preserve"><value>The submitted answer set is invalid.</value></data>
   <data name="AnswerFileRequired" xml:space="preserve"><value>Select a TXT file to import.</value></data>
   <data name="AnswerFileTooLarge" xml:space="preserve"><value>The answer file is too large.</value></data>
-  <data name="AnswerFileInvalidLine" xml:space="preserve"><value>Line {0} must contain only 1 or 0.</value></data>
+  <data name="AnswerFileInvalidLine" xml:space="preserve"><value>Line {0} must contain 1, 0, or be empty.</value></data>
   <data name="AnswerFileWrongCount" xml:space="preserve"><value>The file must contain exactly {0} lines; {1} were found.</value></data>
   <data name="ImageRequired" xml:space="preserve"><value>Select a card image.</value></data>
   <data name="ImageTooLarge" xml:space="preserve"><value>The image must be 5 MB or smaller.</value></data>
