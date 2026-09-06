@@ -46,6 +46,14 @@ Quiz question drag-and-drop exchange shows the shared fullscreen overlay immedia
 
 Quiz Editor and Question Editor Save actions already use AJAX. Their existing save handlers continue to own the request and error handling; the shared busy layer observes the existing submitter state and closes when the operation completes and the submitter is re-enabled.
 
+## Editor save keyboard shortcut
+
+The quiz, question, final-question, round-description, and category-description editors support `Ctrl+S` on Windows/Linux and `Cmd+S` on macOS. The shared shortcut invokes each page's existing Save action rather than introducing another persistence path, so Quiz Editor and Question Editor keep their AJAX save behavior while Final Question and Description editors keep their existing native submit behavior.
+
+The shortcut is handled in capture phase before the browser's Save Page / Save As action and recognizes physical `KeyS`, so it works independently of the active keyboard layout, including Ukrainian and other non-Latin layouts. Repeated keydown events are ignored, disabled Save controls are respected, and an open editor dialog consumes the shortcut without silently saving the editor underneath it.
+
+This shortcut behavior ships in Web `1.26.25` via issue #531 and pull request #529.
+
 Host gameplay navigation uses a page-scoped duplicate-action guard. Opening an already-resolved board question immediately locks the complete question board, while closed-question review actions lock the review-action group. The first gameplay click continues through the existing soft-navigation path. If the transition is not immediate, the shared fullscreen busy indicator appears after a short delay. The guard releases after the expected gameplay update, a visible gameplay error, browser page restoration, or a safety timeout.
 
 Returning from Answer History to the live game is routed through the shared busy-navigation helper. The visible **Return to game** action and Escape use the same guarded navigation path, so repeated clicks or key presses cannot start duplicate requests. Failed navigation and page restoration release the lock.
@@ -56,6 +64,6 @@ Escape still closes an open editor preview or dialog first. When no editor modal
 
 ## Compatibility
 
-The busy feedback and completion tone do not change quiz validation, persistence, import/export package format, export filename/content type, game-launch rules, or gameplay behavior. Native multipart upload/download paths are preserved, and import keeps its original POST/redirect fallback when JavaScript is unavailable. Rename validation and persistence remain compatible with the original native POST handlers.
+The busy feedback, completion tone, and editor save shortcut do not change quiz validation, persistence, import/export package format, export filename/content type, game-launch rules, or gameplay behavior. Native multipart upload/download paths are preserved, and import keeps its original POST/redirect fallback when JavaScript is unavailable. Rename validation and persistence remain compatible with the original native POST handlers.
 
-Regression coverage lives in `BusyIndicatorRegressionTests`, `QuizTransferCompletionRegressionTests`, `QuizRenameBusyRegressionTests`, and `HostNavigationActionGuardRegressionTests`. It checks global asset loading, route coverage, fullscreen modal behavior, quiz import locking, native multipart import completion tracking, export completion signaling and duplicate protection, success-only transfer audio, native large-export-safe download behavior, AJAX save lifetime, rename dialog locking and duplicate protection, in-place rename synchronization, native rename fallback preservation, closed-question board/review locks, answer-history return navigation, Escape handling, history restoration, and reduced-motion styling.
+Regression coverage lives in `BusyIndicatorRegressionTests`, `QuizTransferCompletionRegressionTests`, `QuizRenameBusyRegressionTests`, `HostNavigationActionGuardRegressionTests`, and `EditorSaveShortcutRegressionTests`. It checks global asset loading, route coverage, fullscreen modal behavior, quiz import locking, native multipart import completion tracking, export completion signaling and duplicate protection, success-only transfer audio, native large-export-safe download behavior, AJAX save lifetime, rename dialog locking and duplicate protection, in-place rename synchronization, native rename fallback preservation, editor save shortcut wiring and keyboard-layout independence, closed-question board/review locks, answer-history return navigation, Escape handling, history restoration, and reduced-motion styling.
