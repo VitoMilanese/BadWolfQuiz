@@ -1,0 +1,18 @@
+.contributor-frame-owner[data-avatar-frame] > .contributor-frame-runtime-media {
+    box-sizing: border-box !important;
+    padding: var(--contributor-frame-runtime-inset, 0px) !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    clip-path: none !important;
+    overflow: hidden;
+    object-fit: cover !important;
+}
+
+.player-avatar-control.contributor-frame-owner[data-avatar-frame] > .player-avatar-current {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
