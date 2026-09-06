@@ -16,6 +16,41 @@
     opacity: 0.72;
 }
 
+/* Gameplay player-card controls are overlays, not layout columns.
+   Keep avatar/image/webcam centered in the full card width while presence and
+   host actions float above it on the right. */
+.game-scoreboard .scoreboard-player:not(.host-card) {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.game-scoreboard .scoreboard-player:not(.host-card) > .scoreboard-details {
+    display: contents !important;
+}
+
+.game-scoreboard .scoreboard-player:not(.host-card) > .player-card-avatar {
+    grid-column: 1 !important;
+    justify-self: center;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.game-scoreboard .scoreboard-player:not(.host-card) .player-card-actions {
+    position: absolute !important;
+    z-index: 26;
+    top: 50% !important;
+    right: 8px !important;
+    bottom: auto !important;
+    left: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 !important;
+    transform: translateY(-50%) !important;
+}
+
 /* The answering-player state previously forced a dark foreground intended for
    the old solid-gold card. Modern player-card surfaces stay dark, so the name
    must keep the theme foreground while the answering border/score treatment
