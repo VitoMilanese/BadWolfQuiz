@@ -9,6 +9,7 @@ public sealed class MinigameResourceSyncRegressionTests
         var endpoint = ReadWebFile("Pages", "Admin", "MinigameResourceSync.cshtml.cs");
         var script = ReadWebFile("wwwroot", "js", "minigame-resource-sync.js");
         var service = ReadWebFile("Services", "MinigameResourceSyncService.cs");
+        var css = ReadWebFile("wwwroot", "css", "minigame-resource-sync.css");
 
         Assert.Contains("data-minigame-resource-sync-start", page);
         Assert.Contains("data-minigame-resource-cleanup-dialog", page);
@@ -21,7 +22,11 @@ public sealed class MinigameResourceSyncRegressionTests
         Assert.Contains("OnPostDeleteMissingAsync", endpoint);
         Assert.Contains("const pageSize = 10", script);
         Assert.Contains("selectedIds", script);
-        Assert.Contains("window.confirm", script);
+        Assert.DoesNotContain("window.confirm", script);
+        Assert.Contains("document.createElement(\"dialog\")", script);
+        Assert.Contains("confirmDeletion", script);
+        Assert.Contains("deleteConfirmDialog.showModal()", script);
+        Assert.Contains("minigame-resource-delete-confirm-dialog", css);
         Assert.Contains("BadWolfBusy", script);
         Assert.Contains("DeleteMissingGamesAsync", service);
         Assert.Contains("!resourceNamesResult.Names.Contains(game.Name)", service);

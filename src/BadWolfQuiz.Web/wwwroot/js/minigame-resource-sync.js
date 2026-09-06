@@ -17,6 +17,62 @@
     let currentPage = 0;
     const selectedIds = new Set();
 
+    const createDeleteConfirmDialog = () => {
+        if (!deleteButton || !keepButton) return null;
+
+        const confirmDialog = document.createElement("dialog");
+        confirmDialog.className = "minigame-resource-delete-confirm-dialog";
+        confirmDialog.setAttribute("aria-labelledby", "minigame-resource-delete-confirm-title");
+
+        const form = document.createElement("form");
+        form.method = "dialog";
+        form.className = "minigame-resource-delete-confirm-content";
+
+        const heading = document.createElement("h2");
+        heading.id = "minigame-resource-delete-confirm-title";
+        heading.textContent = deleteButton.textContent.trim();
+
+        const message = document.createElement("p");
+        message.className = "muted";
+        message.textContent = root.dataset.deleteConfirm ?? "";
+
+        const actions = document.createElement("div");
+        actions.className = "minigame-resource-delete-confirm-actions";
+
+        const cancelButton = document.createElement("button");
+        cancelButton.className = "button button-secondary";
+        cancelButton.type = "submit";
+        cancelButton.value = "cancel";
+        cancelButton.textContent = keepButton.textContent.trim();
+
+        const confirmButton = document.createElement("button");
+        confirmButton.className = "button button-danger";
+        confirmButton.type = "submit";
+        confirmButton.value = "confirm";
+        confirmButton.textContent = deleteButton.textContent.trim();
+
+        actions.append(cancelButton, confirmButton);
+        form.append(heading, message, actions);
+        confirmDialog.append(form);
+        document.body.append(confirmDialog);
+        return confirmDialog;
+    };
+
+    const deleteConfirmDialog = createDeleteConfirmDialog();
+
+    const confirmDeletion = () => new Promise((resolve) => {
+        if (!deleteConfirmDialog) {
+            resolve(false);
+            return;
+        }
+
+        deleteConfirmDialog.returnValue = "";
+        deleteConfirmDialog.addEventListener("close", () => {
+            resolve(deleteConfirmDialog.returnValue === "confirm");
+        }, { once: true });
+        deleteConfirmDialog.showModal();
+    });
+
     const setStatus = (message, isError = false) => {
         if (!status) return;
         status.textContent = message ?? "";
@@ -130,7 +186,7 @@
 
     deleteButton?.addEventListener("click", async () => {
         if (selectedIds.size === 0) return;
-        if (!window.confirm(root.dataset.deleteConfirm ?? "")) return;
+        if (!await confirmDeletion()) return;
 
         setBusy(true);
         try {

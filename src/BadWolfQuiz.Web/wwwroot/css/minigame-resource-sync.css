@@ -31,19 +31,26 @@
     color: var(--danger);
 }
 
-.minigame-resource-cleanup-dialog {
-    width: min(680px, calc(100vw - 32px));
-    max-height: min(760px, calc(100vh - 32px));
+.minigame-resource-cleanup-dialog,
+.minigame-resource-delete-confirm-dialog {
     padding: 0;
     border: 1px solid var(--border);
     border-radius: 18px;
     background: var(--panel);
     color: var(--text);
     overflow: hidden;
+    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.5);
 }
 
-.minigame-resource-cleanup-dialog::backdrop {
+.minigame-resource-cleanup-dialog {
+    width: min(680px, calc(100vw - 32px));
+    max-height: min(760px, calc(100vh - 32px));
+}
+
+.minigame-resource-cleanup-dialog::backdrop,
+.minigame-resource-delete-confirm-dialog::backdrop {
     background: rgba(0, 0, 0, 0.66);
+    backdrop-filter: blur(2px);
 }
 
 .minigame-resource-cleanup-content {
@@ -105,6 +112,48 @@
     flex-wrap: wrap;
 }
 
+.minigame-resource-delete-confirm-dialog {
+    width: min(520px, calc(100vw - 32px));
+    border-color: color-mix(in srgb, var(--danger) 42%, var(--border));
+}
+
+.minigame-resource-delete-confirm-content {
+    position: relative;
+    display: grid;
+    gap: 14px;
+    padding: 26px;
+}
+
+.minigame-resource-delete-confirm-content::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: var(--danger);
+}
+
+.minigame-resource-delete-confirm-content h2,
+.minigame-resource-delete-confirm-content p {
+    margin: 0;
+}
+
+.minigame-resource-delete-confirm-content h2 {
+    padding-top: 4px;
+    font-size: 1.35rem;
+}
+
+.minigame-resource-delete-confirm-content p {
+    line-height: 1.55;
+}
+
+.minigame-resource-delete-confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
 @media (max-width: 700px) {
     .minigame-resource-sync-panel {
         align-items: stretch;
@@ -124,7 +173,13 @@
         flex-direction: column-reverse;
     }
 
-    .minigame-resource-cleanup-actions .button {
+    .minigame-resource-cleanup-actions .button,
+    .minigame-resource-delete-confirm-actions .button {
         width: 100%;
+    }
+
+    .minigame-resource-delete-confirm-actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
     }
 }
