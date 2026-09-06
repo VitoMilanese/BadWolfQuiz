@@ -22,7 +22,7 @@ public sealed class FinalQuestionTransitionStylesRegressionTests
     }
 
     [Fact]
-    public void Transition_stage_covers_the_host_viewport_without_side_rails()
+    public void Transition_stage_is_fixed_to_the_free_viewport_without_scroll_rails()
     {
         var styles = File.ReadAllText(FindWebFile(
             "wwwroot",
@@ -30,29 +30,44 @@ public sealed class FinalQuestionTransitionStylesRegressionTests
             "final-question-stage.css"));
 
         Assert.Contains(
-            "body.gameplay-layout:has(.final-question-transition) > .page-shell",
+            "body.gameplay-layout:has(.final-question-transition)",
             styles);
-        Assert.Contains("width: 100vw;", styles);
-        Assert.Contains("margin-inline: calc(50% - 50vw);", styles);
+        Assert.Contains("position: fixed;", styles);
+        Assert.Contains("inset: var(--topbar-height, 60px) 0 0;", styles);
+        Assert.Contains("width: auto;", styles);
+        Assert.Contains("margin: 0;", styles);
+        Assert.Contains("overflow: hidden;", styles);
         Assert.Contains("repeating-linear-gradient(", styles);
+        Assert.DoesNotContain("width: 100vw;", styles);
+        Assert.DoesNotContain("calc(50% - 50vw)", styles);
         Assert.DoesNotContain("transparent 0 7%", styles);
     }
 
     [Fact]
-    public void Transition_blocks_stale_host_refreshes_while_it_is_mounted()
+    public void Transition_locks_refresh_before_soft_navigation_and_blocks_legacy_auto_submit()
     {
         var guard = File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
             "final-question-transition-guard.js"));
+        var loader = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "quick-timer-controls.js"));
 
         Assert.Contains(
             "[data-host-gameplay-view] [data-final-question-transition]",
             guard);
+        Assert.Contains("finalTransitionRequested", guard);
+        Assert.Contains("guardedHandlers", guard);
+        Assert.Contains("StartFinalQuestion", guard);
+        Assert.Contains("ForceAdvanceToFinalQuestion", guard);
+        Assert.Contains("window.BadWolfHostGameplay?.cancelPending?.();", guard);
         Assert.Contains("hostGameplay.refresh = (...args) =>", guard);
-        Assert.Contains("if (isFinalTransitionActive())", guard);
-        Assert.Contains("return Promise.resolve(false);", guard);
-        Assert.Contains("finalQuestionTransitionRefreshGuardInstalled", guard);
+        Assert.Contains("if (isFinalTransitionLocked())", guard);
+        Assert.Contains("HTMLFormElement.prototype.requestSubmit", guard);
+        Assert.Contains("arguments.length === 0", guard);
+        Assert.Contains("final-question-transition-guard.js?v=3", loader);
     }
 
     private static string FindWebFile(params string[] parts)

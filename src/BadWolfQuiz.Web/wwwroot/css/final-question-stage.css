@@ -1,21 +1,29 @@
+body.gameplay-layout:has(.final-question-transition) {
+    overflow: hidden;
+}
+
 body.gameplay-layout:has(.final-question-transition) > .page-shell {
     box-sizing: border-box;
     width: 100%;
     max-width: none;
-    height: calc(100dvh - var(--topbar-height, 0px));
-    margin-inline: 0;
+    height: calc(100dvh - var(--topbar-height, 60px));
+    min-height: 0;
+    margin: 0;
     padding: 0;
     overflow: hidden;
 }
 
 .final-question-transition {
-    position: relative;
+    position: fixed;
+    inset: var(--topbar-height, 60px) 0 0;
+    z-index: 900;
     isolation: isolate;
     box-sizing: border-box;
-    width: 100vw;
+    width: auto;
     max-width: none;
-    height: 100%;
-    margin-inline: calc(50% - 50vw);
+    height: auto;
+    min-height: 0;
+    margin: 0;
     display: grid;
     grid-template-rows: minmax(0, 1fr) auto;
     gap: clamp(24px, 4vh, 48px);
