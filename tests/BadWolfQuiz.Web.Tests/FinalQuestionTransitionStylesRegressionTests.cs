@@ -21,6 +21,40 @@ public sealed class FinalQuestionTransitionStylesRegressionTests
         Assert.Contains("styles.map(style => document.importNode(style, true))", navigation);
     }
 
+    [Fact]
+    public void Transition_stage_covers_the_host_viewport_without_side_rails()
+    {
+        var styles = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "final-question-stage.css"));
+
+        Assert.Contains(
+            "body.gameplay-layout:has(.final-question-transition) > .page-shell",
+            styles);
+        Assert.Contains("width: 100vw;", styles);
+        Assert.Contains("margin-inline: calc(50% - 50vw);", styles);
+        Assert.Contains("repeating-linear-gradient(", styles);
+        Assert.DoesNotContain("transparent 0 7%", styles);
+    }
+
+    [Fact]
+    public void Transition_blocks_stale_host_refreshes_while_it_is_mounted()
+    {
+        var guard = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "final-question-transition-guard.js"));
+
+        Assert.Contains(
+            "[data-host-gameplay-view] [data-final-question-transition]",
+            guard);
+        Assert.Contains("hostGameplay.refresh = (...args) =>", guard);
+        Assert.Contains("if (isFinalTransitionActive())", guard);
+        Assert.Contains("return Promise.resolve(false);", guard);
+        Assert.Contains("finalQuestionTransitionRefreshGuardInstalled", guard);
+    }
+
     private static string FindWebFile(params string[] parts)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
