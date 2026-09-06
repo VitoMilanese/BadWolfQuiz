@@ -1,0 +1,20 @@
+name: TEMP editor save shortcut validation
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  web-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
+      - name: Test Web
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore --configuration Release
+      - name: Check shortcut JavaScript
+        run: node --check src/BadWolfQuiz.Web/wwwroot/js/editor-save-shortcut.js
