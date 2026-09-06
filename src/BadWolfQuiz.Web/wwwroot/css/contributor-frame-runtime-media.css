@@ -1,4 +1,4 @@
-.contributor-frame-owner[data-avatar-frame] > .contributor-frame-runtime-media {
+.contributor-frame-owner[data-avatar-frame] .contributor-frame-runtime-media {
     box-sizing: border-box !important;
     padding: var(--contributor-frame-runtime-inset, 0px) !important;
     border: 0 !important;
