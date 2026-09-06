@@ -1,0 +1,35 @@
+name: TEMP public account line endings validation
+
+on:
+  pull_request:
+
+jobs:
+  web-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore
+        run: dotnet restore tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
+      - name: Test Web
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore --configuration Release
+
+  windows-crlf-regression:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Force CRLF in public account stylesheet
+        shell: pwsh
+        run: |
+          $path = 'src/BadWolfQuiz.Web/wwwroot/css/public-account-pages.css'
+          $content = [System.IO.File]::ReadAllText($path).Replace("`r`n", "`n")
+          [System.IO.File]::WriteAllText($path, $content.Replace("`n", "`r`n"))
+      - name: Restore
+        run: dotnet restore tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
+      - name: Test public account regression with CRLF
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore --configuration Release --filter "FullyQualifiedName~PublicAccountPageRestyleRegressionTests"
