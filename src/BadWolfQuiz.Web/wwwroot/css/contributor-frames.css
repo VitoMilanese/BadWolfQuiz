@@ -188,17 +188,28 @@
         var(--contributor-frame-avatar-inset, 0px));
 }
 
-.contributor-frame-owner[data-avatar-frame] > :is(
-    .player-avatar-current,
-    .player-card-avatar,
-    .player-list-avatar,
-    .host-card-media):not(.contributor-frame-avatar-source) {
-    border-radius: 50% !important;
-    clip-path: inset(
-        var(--contributor-frame-media-inset, 0px)
-        round 50%);
+/* Uploaded images and webcam surfaces keep their existing rectangular layout,
+ * but the visible pixels are clipped to the exact circular opening of the
+ * square frame. The radius is calculated from the filename-native inset. */
+.contributor-frame-owner[data-avatar-frame] .contributor-frame-clipped-media {
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    clip-path: circle(var(--contributor-frame-clip-radius, 0px) at 50% 50%) !important;
     overflow: hidden;
-    object-fit: cover;
+    object-fit: cover !important;
+}
+
+/* The Player Lobby gives the media preview its own blue circular shell.
+ * Once a contributor frame is active that shell is redundant and must not
+ * show through behind the decorative frame. */
+.player-avatar-control.contributor-frame-owner[data-avatar-frame] > .player-avatar-current {
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 @media (max-width: 700px) {
