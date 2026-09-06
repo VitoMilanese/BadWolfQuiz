@@ -1,58 +1,341 @@
-.minigames-catalog {
-    width: min(1180px, calc(100vw - 32px));
-    margin: 0 auto;
-    padding: 34px 0 48px;
+body:has(.minigames-catalog-page) {
+    background: var(--bg);
 }
 
-.minigames-catalog-header {
-    margin-bottom: 24px;
-}
-
-.minigames-catalog-header h1 {
-    margin: 0 0 8px;
-    font-size: clamp(2rem, 4vw, 3.2rem);
-}
-
-.minigames-catalog-header p {
-    max-width: 720px;
+body.portal-layout:has(.minigames-catalog-page) > .page-shell {
+    max-width: none;
     margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body:has(.minigames-catalog-page) .topbar {
+    border-bottom-color: color-mix(in srgb, var(--line) 72%, transparent);
+    background: color-mix(in srgb, var(--topbar-bg) 94%, transparent);
+}
+
+.minigames-catalog-page {
+    position: relative;
+    min-height: 100%;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--bg) 95%, #000) 0,
+            var(--bg) 100%);
+}
+
+.minigames-catalog-page::before,
+.minigames-catalog-page::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.minigames-catalog-page::before {
+    z-index: -3;
+    background:
+        radial-gradient(
+            circle at 82% 10%,
+            color-mix(in srgb, var(--red-bright) 20%, transparent) 0,
+            transparent 31rem),
+        radial-gradient(
+            circle at 11% 31%,
+            color-mix(in srgb, var(--gold) 8%, transparent) 0,
+            transparent 27rem);
+}
+
+.minigames-catalog-page::after {
+    z-index: -2;
+    background-image:
+        linear-gradient(
+            color-mix(in srgb, var(--line) 14%, transparent) 1px,
+            transparent 1px),
+        linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--line) 12%, transparent) 1px,
+            transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: linear-gradient(to bottom, #000, transparent 72%);
+    mask-image: linear-gradient(to bottom, #000, transparent 72%);
+    opacity: 0.18;
+}
+
+.minigames-catalog-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.62fr);
+    align-items: center;
+    gap: clamp(34px, 6vw, 96px);
+    width: min(100%, 1760px);
+    min-height: clamp(440px, 56dvh, 650px);
+    margin: 0 auto;
+    padding: clamp(58px, 7vw, 108px) clamp(28px, 5vw, 78px) clamp(48px, 6vw, 84px);
+}
+
+.minigames-catalog-hero::after {
+    content: "ARCADE";
+    position: absolute;
+    left: -0.035em;
+    bottom: 0.015em;
+    z-index: -1;
+    color: color-mix(in srgb, var(--text) 3.8%, transparent);
+    font-size: clamp(8rem, 20vw, 23rem);
+    font-weight: 1000;
+    line-height: 0.68;
+    letter-spacing: -0.085em;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.minigames-catalog-heading {
+    position: relative;
+    z-index: 2;
+    max-width: 980px;
+}
+
+.minigames-catalog-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 20px;
+    color: var(--gold);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.minigames-catalog-kicker::before {
+    content: "";
+    width: 42px;
+    height: 2px;
+    background: var(--red-bright);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--red-bright) 75%, transparent);
+}
+
+.minigames-catalog-heading h1 {
+    max-width: 980px;
+    margin: 0;
+    font-size: clamp(4rem, 8.4vw, 9.5rem);
+    font-weight: 1000;
+    line-height: 0.8;
+    letter-spacing: -0.075em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    filter: drop-shadow(0 24px 30px rgba(0, 0, 0, 0.34));
+}
+
+.minigames-catalog-lead {
+    max-width: 760px;
+    margin: 28px 0 0;
     color: var(--muted);
-    font-size: 1.05rem;
+    font-size: clamp(1rem, 1.2vw, 1.18rem);
+    line-height: 1.65;
+    text-wrap: balance;
+}
+
+.minigames-catalog-hero-art {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 320px;
+    isolation: isolate;
+}
+
+.minigames-catalog-orbit {
+    position: absolute;
+    width: min(33vw, 520px);
+    aspect-ratio: 1;
+    border: 1px solid color-mix(in srgb, var(--line) 58%, transparent);
+    border-radius: 50%;
+    background:
+        radial-gradient(
+            circle at center,
+            color-mix(in srgb, var(--panel-2) 86%, transparent) 0 42%,
+            transparent 43%),
+        repeating-conic-gradient(
+            from -9deg,
+            color-mix(in srgb, var(--line) 18%, transparent) 0 1deg,
+            transparent 1deg 17deg);
+    box-shadow:
+        inset 0 0 80px rgba(0, 0, 0, 0.32),
+        0 0 80px color-mix(in srgb, var(--red-bright) 9%, transparent);
+}
+
+.minigames-catalog-hero-word {
+    position: absolute;
+    top: 10%;
+    right: 7%;
+    z-index: 2;
+    color: transparent;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--text) 34%, transparent);
+    font-size: clamp(3.6rem, 7vw, 7.2rem);
+    font-weight: 1000;
+    line-height: 0.8;
+    letter-spacing: -0.07em;
+    transform: rotate(90deg) translateX(28%);
+}
+
+.minigames-catalog-hero-slash {
+    position: absolute;
+    z-index: 1;
+    width: 15px;
+    height: min(34vw, 380px);
+    background: var(--red-bright);
+    box-shadow: 12px 12px 0 color-mix(in srgb, var(--gold) 72%, transparent);
+    transform: rotate(18deg);
+}
+
+.minigames-catalog-hero-art strong {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    justify-items: center;
+    color: var(--text);
+    font-size: clamp(5.5rem, 10vw, 10rem);
+    font-weight: 1000;
+    line-height: 0.72;
+    letter-spacing: -0.09em;
+    text-shadow: 0 20px 38px rgba(0, 0, 0, 0.45);
+}
+
+.minigames-catalog-hero-art strong small {
+    margin-top: 20px;
+    color: var(--gold);
+    font-size: 0.12em;
+    letter-spacing: 0.22em;
+}
+
+.minigames-catalog-library {
+    position: relative;
+    width: min(100%, 1640px);
+    margin: 0 auto;
+    padding: 0 clamp(28px, 5vw, 70px) clamp(80px, 9vw, 130px);
+}
+
+.minigames-catalog-library-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 20px;
+    padding: 0 2px 16px;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+}
+
+.minigames-catalog-library-heading > div {
+    display: grid;
+    gap: 6px;
+}
+
+.minigames-catalog-library-heading span {
+    color: var(--gold);
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+}
+
+.minigames-catalog-library-heading em {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.minigames-catalog-library-heading > strong {
+    color: color-mix(in srgb, var(--text) 88%, transparent);
+    font-size: clamp(2.8rem, 5vw, 5rem);
+    font-weight: 1000;
+    line-height: 0.7;
+    letter-spacing: -0.07em;
 }
 
 .minigames-catalog-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
-    gap: 22px;
-    align-items: start;
+    gap: 24px;
 }
 
 .minigames-catalog-card {
+    position: relative;
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
     overflow: hidden;
     color: var(--text);
     text-decoration: none;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    box-shadow: 0 14px 34px rgb(0 0 0 / 18%);
-    transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 20px;
+    background:
+        linear-gradient(
+            120deg,
+            color-mix(in srgb, var(--panel) 98%, #000) 0,
+            color-mix(in srgb, var(--panel-2) 90%, var(--bg)) 100%);
+    box-shadow: 0 22px 54px rgba(0, 0, 0, 0.22);
+    transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.minigames-catalog-card::after {
+    content: "";
+    position: absolute;
+    top: -1px;
+    right: 48px;
+    width: 120px;
+    height: 3px;
+    background: var(--red-bright);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--red-bright) 72%, transparent);
 }
 
 .minigames-catalog-card:hover,
 .minigames-catalog-card:focus-visible {
-    transform: translateY(-3px);
-    border-color: var(--gold);
-    box-shadow: 0 18px 42px rgb(0 0 0 / 24%);
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--red-bright) 48%, var(--line));
+    box-shadow: 0 30px 78px rgba(0, 0, 0, 0.31);
+}
+
+.minigames-catalog-card:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
 }
 
 .minigames-catalog-image {
-    display: block;
-    width: 100%;
+    position: relative;
+    min-width: 0;
     aspect-ratio: 16 / 9;
     overflow: hidden;
+    isolation: isolate;
     background: var(--panel-2);
+}
+
+.minigames-catalog-image::before,
+.minigames-catalog-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.minigames-catalog-image::before {
+    z-index: 2;
+    background:
+        linear-gradient(90deg, transparent 62%, color-mix(in srgb, var(--panel) 52%, transparent) 100%),
+        linear-gradient(0deg, rgba(0, 0, 0, 0.36), transparent 46%);
+}
+
+.minigames-catalog-image::after {
+    z-index: 3;
+    background-image:
+        linear-gradient(rgb(255 255 255 / 7%) 1px, transparent 1px),
+        linear-gradient(90deg, rgb(255 255 255 / 5%) 1px, transparent 1px);
+    background-size: 36px 36px;
+    opacity: 0.24;
+    mix-blend-mode: overlay;
 }
 
 .minigames-catalog-image img {
@@ -60,26 +343,321 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transform: scale(1.002);
+    transition: transform 360ms ease, filter 240ms ease;
+}
+
+.minigames-catalog-card:hover .minigames-catalog-image img,
+.minigames-catalog-card:focus-visible .minigames-catalog-image img {
+    transform: scale(1.035);
+    filter: saturate(1.08) contrast(1.03);
+}
+
+.minigames-catalog-card-index {
+    position: absolute;
+    top: 20px;
+    left: 22px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid rgb(255 255 255 / 28%);
+    border-radius: 8px;
+    color: #fff;
+    background: rgb(0 0 0 / 42%);
+    font-size: 0.72rem;
+    font-weight: 1000;
+    letter-spacing: 0.15em;
+    backdrop-filter: blur(10px);
+}
+
+.minigames-catalog-image-label {
+    position: absolute;
+    left: 22px;
+    bottom: 20px;
+    z-index: 5;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 1000;
+    letter-spacing: 0.2em;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.7);
+}
+
+.minigames-catalog-image-label::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 9px;
+    border-radius: 50%;
+    background: var(--red-bright);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--red-bright) 80%, transparent);
 }
 
 .minigames-catalog-content {
-    display: grid;
-    gap: 7px;
-    padding: 18px 20px 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    padding: clamp(34px, 4.6vw, 72px);
 }
 
-.minigames-catalog-content strong {
-    font-size: 1.3rem;
+.minigames-catalog-content::before {
+    content: "01";
+    position: absolute;
+    right: 0.08em;
+    bottom: -0.12em;
+    z-index: 0;
+    color: color-mix(in srgb, var(--text) 4.6%, transparent);
+    font-size: clamp(8rem, 14vw, 15rem);
+    font-weight: 1000;
+    line-height: 0.8;
+    letter-spacing: -0.08em;
+    pointer-events: none;
 }
 
-.minigames-catalog-content span {
+.minigames-catalog-card-kicker {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 18px;
+    color: var(--gold);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+}
+
+.minigames-catalog-content h2 {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0;
+    font-size: clamp(2rem, 3.7vw, 4.4rem);
+    font-weight: 1000;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+}
+
+.minigames-catalog-content p {
+    position: relative;
+    z-index: 1;
+    max-width: 650px;
+    margin: 20px 0 0;
     color: var(--muted);
-    line-height: 1.45;
+    font-size: 1rem;
+    line-height: 1.58;
+}
+
+.minigames-catalog-card-action {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    width: min(100%, 220px);
+    margin-top: clamp(34px, 4vw, 52px);
+    padding-top: 16px;
+    border-top: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    color: var(--text);
+    font-size: 0.72rem;
+    font-weight: 1000;
+    letter-spacing: 0.2em;
+}
+
+.minigames-catalog-card-action strong {
+    color: var(--red-bright);
+    font-size: 1.65rem;
+    line-height: 1;
+    transition: transform 180ms ease;
+}
+
+.minigames-catalog-card:hover .minigames-catalog-card-action strong,
+.minigames-catalog-card:focus-visible .minigames-catalog-card-action strong {
+    transform: translateX(6px);
+}
+
+@media (max-width: 1050px) {
+    .minigames-catalog-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 0.5fr);
+        min-height: 500px;
+    }
+
+    .minigames-catalog-orbit {
+        width: min(36vw, 390px);
+    }
+
+    .minigames-catalog-card {
+        grid-template-columns: minmax(0, 1fr) minmax(290px, 0.75fr);
+    }
+}
+
+@media (max-width: 820px) {
+    .minigames-catalog-hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        padding-top: 66px;
+    }
+
+    .minigames-catalog-heading {
+        max-width: 760px;
+    }
+
+    .minigames-catalog-heading h1 {
+        font-size: clamp(4rem, 14vw, 7rem);
+    }
+
+    .minigames-catalog-hero-art {
+        min-height: 210px;
+        margin-top: -18px;
+        opacity: 0.9;
+    }
+
+    .minigames-catalog-orbit {
+        width: min(58vw, 330px);
+    }
+
+    .minigames-catalog-hero-word {
+        right: 22%;
+        font-size: clamp(3rem, 12vw, 5.2rem);
+    }
+
+    .minigames-catalog-hero-slash {
+        height: 220px;
+    }
+
+    .minigames-catalog-hero-art strong {
+        font-size: clamp(5rem, 18vw, 8rem);
+    }
+
+    .minigames-catalog-card {
+        grid-template-columns: 1fr;
+    }
+
+    .minigames-catalog-image::before {
+        background: linear-gradient(0deg, color-mix(in srgb, var(--panel) 36%, transparent), transparent 44%);
+    }
+
+    .minigames-catalog-content {
+        padding: clamp(30px, 6vw, 50px);
+    }
 }
 
 @media (max-width: 600px) {
-    .minigames-catalog {
-        width: min(100% - 20px, 1180px);
-        padding-top: 22px;
+    .minigames-catalog-hero {
+        gap: 22px;
+        padding: 46px 18px 40px;
+    }
+
+    .minigames-catalog-hero::after {
+        font-size: 9rem;
+    }
+
+    .minigames-catalog-kicker {
+        margin-bottom: 16px;
+        font-size: 0.66rem;
+        letter-spacing: 0.16em;
+    }
+
+    .minigames-catalog-kicker::before {
+        width: 28px;
+    }
+
+    .minigames-catalog-heading h1 {
+        font-size: clamp(3.25rem, 16vw, 5.2rem);
+        line-height: 0.84;
+    }
+
+    .minigames-catalog-lead {
+        margin-top: 20px;
+        font-size: 0.96rem;
+        line-height: 1.55;
+    }
+
+    .minigames-catalog-hero-art {
+        min-height: 170px;
+        margin-top: -10px;
+    }
+
+    .minigames-catalog-orbit {
+        width: min(72vw, 270px);
+    }
+
+    .minigames-catalog-hero-word {
+        right: 16%;
+    }
+
+    .minigames-catalog-hero-slash {
+        width: 10px;
+        height: 170px;
+        box-shadow: 8px 8px 0 color-mix(in srgb, var(--gold) 72%, transparent);
+    }
+
+    .minigames-catalog-library {
+        padding: 0 10px 72px;
+    }
+
+    .minigames-catalog-library-heading {
+        margin-inline: 8px;
+    }
+
+    .minigames-catalog-library-heading > strong {
+        font-size: 2.8rem;
+    }
+
+    .minigames-catalog-card {
+        border-radius: 16px;
+    }
+
+    .minigames-catalog-card::after {
+        right: 24px;
+        width: 82px;
+    }
+
+    .minigames-catalog-card-index {
+        top: 14px;
+        left: 14px;
+    }
+
+    .minigames-catalog-image-label {
+        left: 14px;
+        bottom: 14px;
+    }
+
+    .minigames-catalog-content {
+        padding: 28px 22px 32px;
+    }
+
+    .minigames-catalog-content h2 {
+        font-size: clamp(2rem, 10vw, 3rem);
+    }
+
+    .minigames-catalog-content p {
+        margin-top: 16px;
+    }
+
+    .minigames-catalog-card-action {
+        margin-top: 30px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .minigames-catalog-card,
+    .minigames-catalog-image img,
+    .minigames-catalog-card-action strong {
+        transition: none;
+    }
+
+    .minigames-catalog-card:hover,
+    .minigames-catalog-card:focus-visible,
+    .minigames-catalog-card:hover .minigames-catalog-image img,
+    .minigames-catalog-card:focus-visible .minigames-catalog-image img,
+    .minigames-catalog-card:hover .minigames-catalog-card-action strong,
+    .minigames-catalog-card:focus-visible .minigames-catalog-card-action strong {
+        transform: none;
     }
 }
