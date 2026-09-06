@@ -60,6 +60,10 @@
   <data name="ImageRequired" xml:space="preserve"><value>Виберіть картинку для картки.</value></data>
   <data name="ImageTooLarge" xml:space="preserve"><value>Картинка повинна бути не більшою за 5 МБ.</value></data>
   <data name="ImageInvalidType" xml:space="preserve"><value>Використовуйте PNG, JPEG, WebP або GIF.</value></data>
+  <data name="Pagination" xml:space="preserve"><value>Сторінки</value></data>
+  <data name="PreviousPage" xml:space="preserve"><value>Назад</value></data>
+  <data name="NextPage" xml:space="preserve"><value>Далі</value></data>
+  <data name="PageStatus" xml:space="preserve"><value>Сторінка {0} з {1}</value></data>
   <data name="ResourceSyncHeading" xml:space="preserve"><value>Синхронізація з Resources</value></data>
   <data name="ResourceSyncDescription" xml:space="preserve"><value>Додайте нові ігри та оновіть картинки й TXT-відповіді існуючих із Resources/Minigames/GameCards. Питання не змінюються.</value></data>
   <data name="ResourceSyncButton" xml:space="preserve"><value>Синхронізувати з Resources</value></data>

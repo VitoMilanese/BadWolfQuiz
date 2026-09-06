@@ -128,6 +128,7 @@
               asp-page-handler="CreateGame"
               class="minigame-editor-inline-form"
               data-minigame-editor-busy>
+            <input type="hidden" name="pageNumber" value="@Model.Pagination.CurrentPage" />
             <label>
                 <span>@EditorLocalizer["GameName"]</span>
                 <input name="name" type="text" maxlength="200" required />
@@ -166,6 +167,7 @@
                           class="minigame-editor-game-form"
                           data-minigame-editor-busy>
                         <input type="hidden" name="gameId" value="@game.Id" />
+                        <input type="hidden" name="pageNumber" value="@Model.Pagination.CurrentPage" />
                         <label>
                             <span>@EditorLocalizer["GameName"]</span>
                             <input name="name" type="text" maxlength="200" value="@game.Name" required />
@@ -199,12 +201,50 @@
                               data-minigame-editor-busy
                               data-confirm="@EditorLocalizer["DeleteGameConfirm", game.Name]">
                             <input type="hidden" name="gameId" value="@game.Id" />
+                            <input type="hidden" name="pageNumber" value="@Model.Pagination.CurrentPage" />
                             <button class="button button-danger" type="submit">@Localizer["Button_Delete"]</button>
                         </form>
                     </div>
                 </article>
             }
         </div>
+
+        @if (Model.Pagination.TotalPages > 1)
+        {
+            <nav class="minigame-editor-pager" aria-label="@EditorLocalizer["Pagination"]">
+                @if (Model.Pagination.HasPrevious)
+                {
+                    <a class="button button-secondary"
+                       asp-page="/Admin/MinigameEditor"
+                       asp-route-section="games"
+                       asp-route-pageNumber="@(Model.Pagination.CurrentPage - 1)"
+                       data-minigame-editor-nav>
+                        @EditorLocalizer["PreviousPage"]
+                    </a>
+                }
+                else
+                {
+                    <span class="button button-secondary is-disabled" aria-disabled="true">@EditorLocalizer["PreviousPage"]</span>
+                }
+                <span class="minigame-editor-pager-status">
+                    @EditorLocalizer["PageStatus", Model.Pagination.CurrentPage, Model.Pagination.TotalPages]
+                </span>
+                @if (Model.Pagination.HasNext)
+                {
+                    <a class="button button-secondary"
+                       asp-page="/Admin/MinigameEditor"
+                       asp-route-section="games"
+                       asp-route-pageNumber="@(Model.Pagination.CurrentPage + 1)"
+                       data-minigame-editor-nav>
+                        @EditorLocalizer["NextPage"]
+                    </a>
+                }
+                else
+                {
+                    <span class="button button-secondary is-disabled" aria-disabled="true">@EditorLocalizer["NextPage"]</span>
+                }
+            </nav>
+        }
     }
 }
 else if (Model.Section == "questions")
@@ -215,6 +255,7 @@ else if (Model.Section == "questions")
               asp-page-handler="CreateQuestion"
               class="minigame-editor-question-create"
               data-minigame-editor-busy>
+            <input type="hidden" name="pageNumber" value="@Model.Pagination.CurrentPage" />
             <label>
                 <span>@EditorLocalizer["QuestionText"]</span>
                 <input name="text" type="text" maxlength="500" required />
@@ -242,6 +283,7 @@ else if (Model.Section == "questions")
                               class="minigame-editor-question-row"
                               data-minigame-editor-busy>
                             <input type="hidden" name="questionId" value="@question.Id" />
+                            <input type="hidden" name="pageNumber" value="@Model.Pagination.CurrentPage" />
                             <span class="minigame-editor-question-number">@(question.SortOrder + 1).</span>
                             <input name="text"
                                    type="text"
@@ -263,12 +305,50 @@ else if (Model.Section == "questions")
                               data-minigame-editor-busy
                               data-confirm="@EditorLocalizer["DeleteQuestionConfirm", question.SortOrder + 1]">
                             <input type="hidden" name="questionId" value="@question.Id" />
+                            <input type="hidden" name="pageNumber" value="@Model.Pagination.CurrentPage" />
                             <button class="button button-danger" type="submit">@Localizer["Button_Delete"]</button>
                         </form>
                     </li>
                 }
             </ol>
         </section>
+
+        @if (Model.Pagination.TotalPages > 1)
+        {
+            <nav class="minigame-editor-pager" aria-label="@EditorLocalizer["Pagination"]">
+                @if (Model.Pagination.HasPrevious)
+                {
+                    <a class="button button-secondary"
+                       asp-page="/Admin/MinigameEditor"
+                       asp-route-section="questions"
+                       asp-route-pageNumber="@(Model.Pagination.CurrentPage - 1)"
+                       data-minigame-editor-nav>
+                        @EditorLocalizer["PreviousPage"]
+                    </a>
+                }
+                else
+                {
+                    <span class="button button-secondary is-disabled" aria-disabled="true">@EditorLocalizer["PreviousPage"]</span>
+                }
+                <span class="minigame-editor-pager-status">
+                    @EditorLocalizer["PageStatus", Model.Pagination.CurrentPage, Model.Pagination.TotalPages]
+                </span>
+                @if (Model.Pagination.HasNext)
+                {
+                    <a class="button button-secondary"
+                       asp-page="/Admin/MinigameEditor"
+                       asp-route-section="questions"
+                       asp-route-pageNumber="@(Model.Pagination.CurrentPage + 1)"
+                       data-minigame-editor-nav>
+                        @EditorLocalizer["NextPage"]
+                    </a>
+                }
+                else
+                {
+                    <span class="button button-secondary is-disabled" aria-disabled="true">@EditorLocalizer["NextPage"]</span>
+                }
+            </nav>
+        }
     }
 }
 else
@@ -325,13 +405,15 @@ else
                       class="minigame-editor-import-form"
                       data-minigame-editor-busy>
                     <input type="hidden" name="gameId" value="@Model.SelectedGame.Id" />
+                    <input type="hidden" name="pageNumber" value="@Model.Pagination.CurrentPage" />
                     <input type="file" name="answerFile" accept=".txt,text/plain" required />
                     <button class="button button-primary" type="submit">@Localizer["Button_Import"]</button>
                 </form>
                 <a class="button button-secondary"
                    asp-page="/Admin/MinigameEditor"
                    asp-page-handler="ExportAnswers"
-                   asp-route-gameId="@Model.SelectedGame.Id">
+                   asp-route-gameId="@Model.SelectedGame.Id"
+                   asp-route-pageNumber="@Model.Pagination.CurrentPage">
                     @Localizer["Button_Export"]
                 </a>
                 <span class="minigame-editor-auto-save-status"
@@ -382,6 +464,45 @@ else
                 </table>
             </div>
         </form>
+
+        @if (Model.Pagination.TotalPages > 1)
+        {
+            <nav class="minigame-editor-pager" aria-label="@EditorLocalizer["Pagination"]">
+                @if (Model.Pagination.HasPrevious)
+                {
+                    <a class="button button-secondary"
+                       asp-page="/Admin/MinigameEditor"
+                       asp-route-section="answers"
+                       asp-route-gameId="@Model.SelectedGame.Id"
+                       asp-route-pageNumber="@(Model.Pagination.CurrentPage - 1)"
+                       data-minigame-editor-nav>
+                        @EditorLocalizer["PreviousPage"]
+                    </a>
+                }
+                else
+                {
+                    <span class="button button-secondary is-disabled" aria-disabled="true">@EditorLocalizer["PreviousPage"]</span>
+                }
+                <span class="minigame-editor-pager-status">
+                    @EditorLocalizer["PageStatus", Model.Pagination.CurrentPage, Model.Pagination.TotalPages]
+                </span>
+                @if (Model.Pagination.HasNext)
+                {
+                    <a class="button button-secondary"
+                       asp-page="/Admin/MinigameEditor"
+                       asp-route-section="answers"
+                       asp-route-gameId="@Model.SelectedGame.Id"
+                       asp-route-pageNumber="@(Model.Pagination.CurrentPage + 1)"
+                       data-minigame-editor-nav>
+                        @EditorLocalizer["NextPage"]
+                    </a>
+                }
+                else
+                {
+                    <span class="button button-secondary is-disabled" aria-disabled="true">@EditorLocalizer["NextPage"]</span>
+                }
+            </nav>
+        }
     }
 }
 

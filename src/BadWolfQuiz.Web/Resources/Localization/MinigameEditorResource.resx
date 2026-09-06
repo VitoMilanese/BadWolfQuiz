@@ -60,6 +60,10 @@
   <data name="ImageRequired" xml:space="preserve"><value>Select a card image.</value></data>
   <data name="ImageTooLarge" xml:space="preserve"><value>The image must be 5 MB or smaller.</value></data>
   <data name="ImageInvalidType" xml:space="preserve"><value>Use a PNG, JPEG, WebP or GIF image.</value></data>
+  <data name="Pagination" xml:space="preserve"><value>Pages</value></data>
+  <data name="PreviousPage" xml:space="preserve"><value>Previous</value></data>
+  <data name="NextPage" xml:space="preserve"><value>Next</value></data>
+  <data name="PageStatus" xml:space="preserve"><value>Page {0} of {1}</value></data>
   <data name="ResourceSyncHeading" xml:space="preserve"><value>Synchronize resource games</value></data>
   <data name="ResourceSyncDescription" xml:space="preserve"><value>Add new games and update images and TXT answers for existing games from Resources/Minigames/GameCards. Questions are never changed.</value></data>
   <data name="ResourceSyncButton" xml:space="preserve"><value>Synchronize from Resources</value></data>

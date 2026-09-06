@@ -114,6 +114,66 @@ public sealed class MinigameCatalogStoreTests : IDisposable
             answers.Select(answer => answer.AnswerYes).ToArray());
     }
 
+    [Fact]
+    public async Task Editor_paging_limits_rows_and_partial_answer_updates_preserve_other_pages()
+    {
+        var legacy = Path.Combine(_root, "paging-empty");
+        Directory.CreateDirectory(legacy);
+        var store = CreateStore(legacy);
+
+        for (var index = 1; index <= 30; index++)
+        {
+            Assert.Equal(
+                MinigameCatalogMutationResult.Success,
+                await store.CreateGameAsync(
+                    $"Game {index:00}",
+                    new byte[] { (byte)index },
+                    "image/png"));
+            Assert.Equal(
+                MinigameCatalogMutationResult.Success,
+                await store.CreateQuestionAsync($"Question {index:00}?"));
+        }
+
+        var firstGamePage = await store.GetGamesPageAsync(0, 25);
+        var secondGamePage = await store.GetGamesPageAsync(25, 25);
+        Assert.Equal(25, firstGamePage.Count);
+        Assert.Equal(5, secondGamePage.Count);
+        Assert.Equal("Game 01", firstGamePage[0].Name);
+        Assert.Equal("Game 26", secondGamePage[0].Name);
+
+        var firstQuestionPage = await store.GetQuestionItemsPageAsync(0, 25);
+        var secondQuestionPage = await store.GetQuestionItemsPageAsync(25, 25);
+        Assert.Equal(25, firstQuestionPage.Count);
+        Assert.Equal(5, secondQuestionPage.Count);
+        Assert.Equal(0, firstQuestionPage[0].SortOrder);
+        Assert.Equal(25, secondQuestionPage[0].SortOrder);
+
+        var game = firstGamePage[0];
+        var allQuestions = await store.GetQuestionItemsAsync();
+        var initialAnswers = allQuestions.ToDictionary(
+            question => question.Id,
+            _ => (bool?)true);
+        Assert.Equal(
+            MinigameCatalogMutationResult.Success,
+            await store.SaveAnswersAsync(game.Id, initialAnswers));
+
+        var pageUpdate = secondQuestionPage.ToDictionary(
+            question => question.Id,
+            _ => (bool?)false);
+        pageUpdate[secondQuestionPage[0].Id] = null;
+        var updateResult = await store.UpdateAnswersAsync(game.Id, pageUpdate);
+        Assert.Equal(MinigameCatalogMutationResult.Success, updateResult.Result);
+        Assert.Equal(29, updateResult.AssignedAnswerCount);
+
+        var firstAnswerPage = await store.GetAnswerItemsPageAsync(game.Id, 0, 25);
+        var secondAnswerPage = await store.GetAnswerItemsPageAsync(game.Id, 25, 25);
+        Assert.Equal(25, firstAnswerPage.Count);
+        Assert.Equal(5, secondAnswerPage.Count);
+        Assert.All(firstAnswerPage, answer => Assert.True(answer.AnswerYes));
+        Assert.Null(secondAnswerPage[0].AnswerYes);
+        Assert.All(secondAnswerPage.Skip(1), answer => Assert.False(answer.AnswerYes));
+    }
+
     private MinigameCatalogStore CreateStore(string legacyRoot)
     {
         var databasePath = Path.Combine(_root, "catalog.db");
