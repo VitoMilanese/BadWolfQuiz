@@ -14,6 +14,16 @@ The host has a global settings menu containing persistent defaults for newly cre
 
 Changing a global gameplay setting affects games created after the change. It does not retroactively modify an existing lobby or running game. The site theme is a presentation preference rather than a gameplay rule: player-facing pages use the host's current theme, and connected players receive live theme updates when the host changes it. This synchronization does not mutate the game-specific gameplay settings snapshot.
 
+#### Global settings save UX
+
+`/Admin/Settings` uses a floating save bar instead of a bottom-only Save action. The bar stays hidden while the current serialized form values match the saved baseline, appears only after an actual form value changes, and disappears again if the host restores the original values. Opening or closing `<details>` sections and other non-value UI interactions do not mark the form dirty.
+
+The floating bar remains above the visible portal footer instead of overlapping it. Saving is performed asynchronously with the existing form data so antiforgery validation and file uploads continue to use the normal settings POST contract without reloading the page. Server-side validation errors are rendered on the current page. After a successful save, the returned state becomes the new clean baseline and a short success state is shown before the bar is hidden.
+
+`Ctrl+S` / `Cmd+S` uses the same AJAX save path. The shortcut is intercepted before the browser's native Save Page behavior and recognizes physical `KeyS` independently of keyboard layout, including Ukrainian and other non-Latin layouts. Normal link navigation with unsaved changes uses a styled BadWolfQuiz confirmation dialog, while refresh and tab close retain the browser-required `beforeunload` protection.
+
+This UX ships in Web `1.26.23` via issue #527 and pull request #524.
+
 ### Game settings
 
 When a lobby is created, the application copies the current global settings into a game-specific settings snapshot.
