@@ -67,6 +67,32 @@ public sealed class HeaderSideMenuRegressionTests
         Assert.Contains("returnFocus.focus", js, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Drawer_keeps_focus_stationary_until_mobile_slide_in_finishes()
+    {
+        var root = FindRepositoryRoot();
+        var css = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "css",
+            "header-side-menu.css"));
+        var js = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "header-side-menu.js"));
+
+        Assert.Contains("header-side-menu-focus-guard", css, StringComparison.Ordinal);
+        Assert.Contains("focusGuard.setAttribute('autofocus', '');", js, StringComparison.Ordinal);
+        Assert.Contains("focusGuard.focus({ preventScroll: true });", js, StringComparison.Ordinal);
+        Assert.Contains("openFocusTimer = window.setTimeout", js, StringComparison.Ordinal);
+        Assert.Contains("focusCloseButton();", js, StringComparison.Ordinal);
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
