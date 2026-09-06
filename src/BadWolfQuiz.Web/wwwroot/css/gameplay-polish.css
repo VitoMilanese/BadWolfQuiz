@@ -1,0 +1,31 @@
+/* Browser-review polish shared by the first-round intro, player buzzer, and host scoreboard. */
+
+/* Keep the current first-round intro visible while Start/Skip waits for the server.
+   The existing inline intro animation used to finish before the POST completed,
+   leaving an empty stage for the remainder of the request. */
+.game-intro-page.is-starting-game.is-leaving .game-intro-group,
+.game-intro-page.is-starting-game.is-leaving .game-intro-actions {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+.game-intro-page.is-starting-game [data-game-intro-start] button[disabled] {
+    cursor: progress;
+    opacity: 0.72;
+}
+
+/* The answering-player state previously forced a dark foreground intended for
+   the old solid-gold card. Modern player-card surfaces stay dark, so the name
+   must keep the theme foreground while the answering border/score treatment
+   remains unchanged. */
+.game-scoreboard .scoreboard-player.question-answering-player,
+.game-scoreboard .scoreboard-player.active-player.question-answering-player {
+    color: var(--text) !important;
+}
+
+.game-scoreboard .scoreboard-player.question-answering-player strong,
+.game-scoreboard .scoreboard-player.active-player.question-answering-player strong {
+    color: inherit !important;
+}
