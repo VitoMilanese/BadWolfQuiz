@@ -7,6 +7,7 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/minigame-editor.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/minigame-resource-sync.css" asp-append-version="true" />
 }
 
 <div class="page-heading minigame-editor-heading">
@@ -54,6 +55,72 @@
 
 @if (Model.Section == "games")
 {
+    <section class="content-panel minigame-resource-sync-panel"
+             data-minigame-resource-sync
+             data-sync-url="@Url.Page("/Admin/MinigameResourceSync", "Synchronize")"
+             data-delete-url="@Url.Page("/Admin/MinigameResourceSync", "DeleteMissing")"
+             data-syncing="@EditorLocalizer["ResourceSyncWorking"]"
+             data-delete-confirm="@EditorLocalizer["ResourceSyncDeleteConfirm"]"
+             data-unexpected-error="@EditorLocalizer["ResourceSyncUnexpectedError"]">
+        <form method="post" hidden aria-hidden="true">
+            @Html.AntiForgeryToken()
+        </form>
+        <div>
+            <h2>@EditorLocalizer["ResourceSyncHeading"]</h2>
+            <p class="muted">@EditorLocalizer["ResourceSyncDescription"]</p>
+        </div>
+        <div class="minigame-resource-sync-actions">
+            <button class="button button-secondary"
+                    type="button"
+                    data-minigame-resource-sync-start>
+                @EditorLocalizer["ResourceSyncButton"]
+            </button>
+            <span class="minigame-resource-sync-status"
+                  role="status"
+                  aria-live="polite"
+                  data-minigame-resource-sync-status></span>
+        </div>
+    </section>
+
+    <dialog class="minigame-resource-cleanup-dialog"
+            data-minigame-resource-cleanup-dialog>
+        <div class="minigame-resource-cleanup-content">
+            <div>
+                <h2>@EditorLocalizer["ResourceCleanupHeading"]</h2>
+                <p class="muted">@EditorLocalizer["ResourceCleanupDescription"]</p>
+            </div>
+            <div class="minigame-resource-cleanup-list"
+                 data-minigame-resource-cleanup-list></div>
+            <div class="minigame-resource-cleanup-pager">
+                <button class="button button-secondary"
+                        type="button"
+                        data-minigame-resource-cleanup-previous>
+                    @EditorLocalizer["ResourceCleanupPrevious"]
+                </button>
+                <span class="minigame-resource-cleanup-page"
+                      data-minigame-resource-cleanup-page></span>
+                <button class="button button-secondary"
+                        type="button"
+                        data-minigame-resource-cleanup-next>
+                    @EditorLocalizer["ResourceCleanupNext"]
+                </button>
+            </div>
+            <div class="minigame-resource-cleanup-actions">
+                <button class="button button-secondary"
+                        type="button"
+                        data-minigame-resource-cleanup-keep>
+                    @EditorLocalizer["ResourceCleanupKeepAll"]
+                </button>
+                <button class="button button-danger"
+                        type="button"
+                        disabled
+                        data-minigame-resource-cleanup-delete>
+                    @EditorLocalizer["ResourceCleanupDeleteSelected"]
+                </button>
+            </div>
+        </div>
+    </dialog>
+
     <section class="content-panel minigame-editor-create-panel">
         <h2>@EditorLocalizer["AddGame"]</h2>
         <form method="post"
@@ -320,4 +387,5 @@ else
 
 @section Scripts {
     <script src="~/js/minigame-editor.js" asp-append-version="true"></script>
+    <script src="~/js/minigame-resource-sync.js" asp-append-version="true"></script>
 }

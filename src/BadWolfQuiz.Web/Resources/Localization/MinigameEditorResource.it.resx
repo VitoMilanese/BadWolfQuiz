@@ -60,4 +60,25 @@
   <data name="ImageRequired" xml:space="preserve"><value>Seleziona un'immagine per la carta.</value></data>
   <data name="ImageTooLarge" xml:space="preserve"><value>L'immagine deve essere di massimo 5 MB.</value></data>
   <data name="ImageInvalidType" xml:space="preserve"><value>Usa un'immagine PNG, JPEG, WebP o GIF.</value></data>
+  <data name="ResourceSyncHeading" xml:space="preserve"><value>Sincronizzazione da Resources</value></data>
+  <data name="ResourceSyncDescription" xml:space="preserve"><value>Aggiunge i nuovi giochi e aggiorna immagini e risposte TXT dei giochi esistenti da Resources/Minigames/GameCards. Le domande non vengono modificate.</value></data>
+  <data name="ResourceSyncButton" xml:space="preserve"><value>Sincronizza da Resources</value></data>
+  <data name="ResourceSyncWorking" xml:space="preserve"><value>Sincronizzazione…</value></data>
+  <data name="ResourceSyncCompleted" xml:space="preserve"><value>Sincronizzazione completata: {0} aggiunti, {1} aggiornati.</value></data>
+  <data name="ResourceSyncDeleted" xml:space="preserve"><value>Giochi eliminati: {0}.</value></data>
+  <data name="ResourceSyncFolderMissing" xml:space="preserve"><value>Resources/Minigames/GameCards non è stata trovata.</value></data>
+  <data name="ResourceSyncInvalidGameName" xml:space="preserve"><value>L'immagine “{0}” ha un nome di gioco non valido.</value></data>
+  <data name="ResourceSyncDuplicateGame" xml:space="preserve"><value>Più immagini in Resources corrispondono al nome del gioco “{0}”.</value></data>
+  <data name="ResourceSyncDuplicateAnswerFile" xml:space="preserve"><value>Più file TXT in Resources corrispondono al nome del gioco “{0}”.</value></data>
+  <data name="ResourceSyncInvalidAnswerLine" xml:space="preserve"><value>{0}: la riga {1} deve contenere 1, 0 oppure essere vuota.</value></data>
+  <data name="ResourceSyncWrongAnswerCount" xml:space="preserve"><value>{0} deve contenere esattamente {1} righe di risposta; ne sono state trovate {2}.</value></data>
+  <data name="ResourceSyncReadFailed" xml:space="preserve"><value>Impossibile leggere il file risorsa “{0}”.</value></data>
+  <data name="ResourceSyncUnexpectedError" xml:space="preserve"><value>Sincronizzazione da Resources non riuscita.</value></data>
+  <data name="ResourceSyncDeleteConfirm" xml:space="preserve"><value>Eliminare i giochi selezionati e tutte le risposte salvate? Questa operazione non può essere annullata.</value></data>
+  <data name="ResourceCleanupHeading" xml:space="preserve"><value>Giochi non presenti in Resources</value></data>
+  <data name="ResourceCleanupDescription" xml:space="preserve"><value>Questi giochi sono ancora nel database ma non hanno un'immagine corrispondente in Resources. Seleziona quelli da eliminare oppure mantienili tutti.</value></data>
+  <data name="ResourceCleanupPrevious" xml:space="preserve"><value>Indietro</value></data>
+  <data name="ResourceCleanupNext" xml:space="preserve"><value>Avanti</value></data>
+  <data name="ResourceCleanupKeepAll" xml:space="preserve"><value>Mantieni tutti</value></data>
+  <data name="ResourceCleanupDeleteSelected" xml:space="preserve"><value>Elimina selezionati</value></data>
 </root>
