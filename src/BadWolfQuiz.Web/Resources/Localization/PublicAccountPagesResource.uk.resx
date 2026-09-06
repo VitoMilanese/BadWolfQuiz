@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="HostConsole" xml:space="preserve"><value>КОНСОЛЬ ХОСТА</value></data>
+  <data name="LoginKicker" xml:space="preserve"><value>BAD WOLF QUIZ / ДОСТУП ХОСТА</value></data>
+  <data name="LoginMetaTitle" xml:space="preserve"><value>ДОСТУП ХОСТА</value></data>
+  <data name="LoginMetaDescription" xml:space="preserve"><value>BAD WOLF QUIZ / ШЛЮЗ АВТЕНТИФІКАЦІЇ</value></data>
+  <data name="LoginMarkPrimary" xml:space="preserve"><value>УВІЙТИ</value></data>
+  <data name="LoginMarkAccent" xml:space="preserve"><value>ГОТОВО</value></data>
+  <data name="LoginMarkFooter" xml:space="preserve"><value>АВТЕНТИФІКАЦІЯ / ВХІД</value></data>
+  <data name="RegisterKicker" xml:space="preserve"><value>BAD WOLF QUIZ / НОВИЙ ХОСТ</value></data>
+  <data name="RegisterMetaTitle" xml:space="preserve"><value>НОВИЙ ХОСТ</value></data>
+  <data name="RegisterMetaDescription" xml:space="preserve"><value>СТВОРІТЬ ПРОФІЛЬ ХОСТА BAD WOLF QUIZ.</value></data>
+  <data name="RegisterMarkPrimary" xml:space="preserve"><value>СТВОРИТИ</value></data>
+  <data name="RegisterMarkAccent" xml:space="preserve"><value>ПРОФІЛЬ</value></data>
+  <data name="RegisterMarkFooter" xml:space="preserve"><value>АВТЕНТИФІКАЦІЯ / РЕЄСТРАЦІЯ</value></data>
+  <data name="ForgotKicker" xml:space="preserve"><value>BAD WOLF QUIZ / ВІДНОВЛЕННЯ ОБЛІКОВОГО ЗАПИСУ</value></data>
+  <data name="ForgotMetaTitle" xml:space="preserve"><value>ВІДНОВЛЕННЯ</value></data>
+  <data name="RecoveryChannel" xml:space="preserve"><value>КАНАЛ ВІДНОВЛЕННЯ</value></data>
+  <data name="ForgotMarkPrimary" xml:space="preserve"><value>СКИНУТИ</value></data>
+  <data name="ForgotMarkAccent" xml:space="preserve"><value>ДОСТУП</value></data>
+  <data name="ForgotMarkFooter" xml:space="preserve"><value>АВТЕНТИФІКАЦІЯ / ВІДНОВЛЕННЯ</value></data>
+  <data name="ChangeKicker" xml:space="preserve"><value>BAD WOLF QUIZ / БЕЗПЕКА ОБЛІКОВОГО ЗАПИСУ</value></data>
+  <data name="ChangeMetaTitle" xml:space="preserve"><value>БЕЗПЕКА</value></data>
+  <data name="ChangeMetaDescription" xml:space="preserve"><value>ОНОВІТЬ ПАРОЛЬ ДЛЯ ДОСТУПУ ДО ОБЛІКОВОГО ЗАПИСУ ХОСТА.</value></data>
+  <data name="HostSecurity" xml:space="preserve"><value>БЕЗПЕКА ХОСТА</value></data>
+  <data name="ChangeMarkPrimary" xml:space="preserve"><value>ЗМІНИТИ</value></data>
+  <data name="ChangeMarkAccent" xml:space="preserve"><value>ПАРОЛЬ</value></data>
+  <data name="ChangeMarkFooter" xml:space="preserve"><value>АВТЕНТИФІКАЦІЯ / БЕЗПЕКА</value></data>
+</root>

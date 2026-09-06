@@ -3,34 +3,43 @@
     ViewData["Title"] = Localizer["Faq_Title"];
 }
 
-<section class="faq-page">
-    <header class="page-heading faq-heading">
-        <div>
-            <p class="eyebrow">@Localizer["Faq_Eyebrow"]</p>
-            <h1>@Localizer["Faq_Title"]</h1>
-            <p>@Localizer["Faq_Description"]</p>
-        </div>
-    </header>
+@section Styles {
+    <link rel="stylesheet" href="~/css/public-account-pages.css" asp-append-version="true" />
+}
 
-    <div class="faq-list">
-        @for (var index = 1; index <= 12; index++)
-        {
-            <details class="faq-item">
-                <summary>@Localizer[$"Faq_Q{index}"]</summary>
-                <div class="faq-answer">
-                    <p>@Localizer[$"Faq_A{index}"]</p>
-                </div>
-            </details>
-        }
-    </div>
-
-    <aside class="content-panel faq-contact">
-        <div>
-            <h2>@Localizer["Faq_ContactTitle"]</h2>
-            <p>@Localizer["Faq_ContactDescription"]</p>
+<div class="portal-page faq-page">
+    <section class="portal-hero" aria-labelledby="faq-title">
+        <div class="portal-hero-copy">
+            <p class="portal-kicker">@Localizer["Faq_Eyebrow"]</p>
+            <h1 id="faq-title">@Localizer["Faq_Title"]</h1>
+            <p class="portal-hero-description">@Localizer["Faq_Description"]</p>
         </div>
-        <a class="button button-primary" asp-page="/AskQuestion">
-            @Localizer["Menu_AskQuestion"]
-        </a>
-    </aside>
-</section>
+        <div class="portal-hero-mark" aria-hidden="true">
+            <span>BAD WOLF QUIZ</span>
+            <strong>12</strong>
+            <small>@Localizer["Faq_Eyebrow"]</small>
+        </div>
+    </section>
+
+    <main class="portal-content">
+        <div class="faq-grid">
+            @for (var index = 1; index <= 12; index++)
+            {
+                <details class="faq-item">
+                    <summary>@Localizer[$"Faq_Q{index}"]</summary>
+                    <div class="faq-answer">
+                        <p>@Localizer[$"Faq_A{index}"]</p>
+                    </div>
+                </details>
+            }
+        </div>
+
+        <aside class="portal-card faq-contact">
+            <div>
+                <h2>@Localizer["Faq_ContactTitle"]</h2>
+                <p>@Localizer["Faq_ContactDescription"]</p>
+            </div>
+            <a class="button button-primary" asp-page="/AskQuestion">@Localizer["Menu_AskQuestion"]</a>
+        </aside>
+    </main>
+</div>
