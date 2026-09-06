@@ -3,38 +3,78 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class FinalQuestionHostStageRegressionTests
 {
     [Fact]
-    public void Lobby_loads_scoped_final_question_host_stage_styles()
+    public void Final_question_host_stages_load_scoped_stage_styles_during_soft_navigation()
     {
-        var imports = File.ReadAllText(FindWebFile("Pages", "_ViewImports.cshtml"));
-        var tagHelper = File.ReadAllText(FindWebFile(
+        var markup = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "Lobby.cshtml"));
+        var imports = File.ReadAllText(FindWebFile(
+            "Pages",
+            "_ViewImports.cshtml"));
+        var helper = File.ReadAllText(FindWebFile(
             "TagHelpers",
             "FinalQuestionHostStageAssetsTagHelper.cs"));
         var styles = File.ReadAllText(FindWebFile(
             "wwwroot",
             "css",
             "final-question-host-stage.css"));
-        var lobby = File.ReadAllText(FindWebFile(
-            "Pages",
-            "Admin",
-            "Games",
-            "Lobby.cshtml"));
 
-        Assert.Contains("FinalQuestionHostStageAssetsTagHelper", imports);
-        Assert.Contains("/Admin/Games/Lobby", tagHelper);
-        Assert.Contains("/css/final-question-host-stage.css?v=1", tagHelper);
+        Assert.Contains(
+            "FinalQuestionHostStageAssetsTagHelper",
+            imports,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "[HtmlTargetElement(\"div\", Attributes = \"data-host-gameplay-view\")]",
+            helper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "output.PreContent.AppendHtml",
+            helper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "final-question-host-stage.css?v=2",
+            helper,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "IHttpContextAccessor",
+            helper,
+            StringComparison.Ordinal);
 
-        Assert.Contains(".host-game-board.final-question-host", styles);
-        Assert.Contains("data-game-status=\"finalwagering\"", styles);
-        Assert.Contains("data-game-status=\"finalanswering\"", styles);
-        Assert.Contains("data-game-status=\"finaljudging\"", styles);
-        Assert.Contains(".final-player-answer-presentation", styles);
-        Assert.Contains(".answer-presentation", styles);
-        Assert.Contains("prefers-reduced-motion", styles);
+        Assert.Contains("data-host-gameplay-view", markup, StringComparison.Ordinal);
+        Assert.Contains("FinalWagering", markup, StringComparison.Ordinal);
+        Assert.Contains("FinalAnswering", markup, StringComparison.Ordinal);
+        Assert.Contains("FinalJudging", markup, StringComparison.Ordinal);
 
-        Assert.Contains("class=\"host-game-board final-question-host\"", lobby);
-        Assert.Contains("FinalWagering", lobby);
-        Assert.Contains("FinalAnswering", lobby);
-        Assert.Contains("FinalJudging", lobby);
+        Assert.Contains(
+            "body.gameplay-layout:has(.host-game-board.final-question-host)",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "repeating-linear-gradient(",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".final-question-host .final-question-panel",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "background: transparent;",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "[data-game-status=\"finalwagering\"]",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "[data-game-status=\"finalanswering\"]",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "[data-game-status=\"finaljudging\"]",
+            styles,
+            StringComparison.Ordinal);
     }
 
     private static string FindWebFile(params string[] parts)

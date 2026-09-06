@@ -1,45 +1,28 @@
 /* Host-side Final Question finale presentation. Scoped to the live Final Question host shell. */
-.host-game-board.final-question-host {
+body.gameplay-layout:has(.host-game-board.final-question-host) {
+    background:
+        repeating-linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--text) 2.5%, transparent) 0 1px,
+            transparent 1px 18px),
+        radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--red-bright) 16%, transparent), transparent 38%),
+        linear-gradient(180deg, color-mix(in srgb, var(--panel-2) 76%, #050506), color-mix(in srgb, var(--bg) 90%, #000));
+}
+
+body.gameplay-layout:has(.host-game-board.final-question-host) .host-game-board.final-question-host {
     --final-stage-line: color-mix(in srgb, var(--gold) 24%, var(--line));
     --final-stage-surface: color-mix(in srgb, var(--panel) 90%, transparent);
     --final-stage-surface-strong: color-mix(in srgb, var(--panel-2) 94%, transparent);
+    background: transparent;
 }
 
 .final-question-host .final-question-panel {
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    border-color: var(--final-stage-line);
-    background:
-        radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--red-bright) 16%, transparent), transparent 34%),
-        linear-gradient(180deg, color-mix(in srgb, var(--panel-2) 76%, #050506), color-mix(in srgb, var(--bg) 90%, #000));
-    box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent),
-        0 22px 58px rgb(0 0 0 / 24%);
-}
-
-.final-question-host .final-question-panel::before,
-.final-question-host .final-question-panel::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-}
-
-.final-question-host .final-question-panel::before {
-    z-index: -2;
-    background: repeating-linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--text) 2.5%, transparent) 0 1px,
-        transparent 1px 18px);
-    opacity: .7;
-}
-
-.final-question-host .final-question-panel::after {
-    z-index: -1;
-    background:
-        radial-gradient(ellipse at 50% 110%, color-mix(in srgb, var(--red) 22%, transparent), transparent 46%),
-        linear-gradient(180deg, transparent 58%, rgb(0 0 0 / 34%));
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
 }
 
 .final-question-host .final-question-panel > * {
@@ -248,7 +231,7 @@
     .final-question-host[data-game-status="finalanswering"] .final-question-panel,
     .final-question-host[data-game-status="finaljudging"] .final-question-panel {
         padding: 14px;
-        border-radius: 16px;
+        border-radius: 0;
     }
 
     .final-question-host[data-game-status="finalanswering"] .question-presentation,
