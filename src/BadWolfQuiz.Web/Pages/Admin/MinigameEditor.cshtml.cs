@@ -18,6 +18,7 @@ public sealed class MinigameEditorModel(
     IOptions<MinigameOptions> options,
     IStringLocalizer<MinigameEditorResource> localizer) : PageModel
 {
+    private const int PageSize = 25;
     private const long MaximumImageBytes = 5L * 1024 * 1024;
     private const long MaximumAnswerImportBytes = 2L * 1024 * 1024;
 
@@ -28,6 +29,8 @@ public sealed class MinigameEditorModel(
     public IReadOnlySet<int> DisabledQuestionIds { get; private set; } = new HashSet<int>();
     public IReadOnlyList<MinigameCatalogAnswerItem> AnswerItems { get; private set; } = [];
     public MinigameCatalogGameItem? SelectedGame { get; private set; }
+    public MinigameEditorPagination Pagination { get; private set; } =
+        MinigameEditorPagination.Create(1, 0, PageSize);
 
     private MinigameCatalogStore Store =>
         new(dbFactory, options.Value.CardCount);
@@ -38,6 +41,7 @@ public sealed class MinigameEditorModel(
     public async Task<IActionResult> OnGetAsync(
         string? section,
         int? gameId,
+        int pageNumber,
         CancellationToken cancellationToken)
     {
         Section = NormalizeSection(section);
@@ -45,11 +49,25 @@ public sealed class MinigameEditorModel(
 
         if (Section == "games")
         {
-            Games = await Store.GetGamesAsync(cancellationToken);
+            Pagination = MinigameEditorPagination.Create(
+                pageNumber,
+                Counts.GameCount,
+                PageSize);
+            Games = await Store.GetGamesPageAsync(
+                Pagination.Skip,
+                PageSize,
+                cancellationToken);
         }
         else if (Section == "questions")
         {
-            Questions = await Store.GetQuestionItemsAsync(cancellationToken);
+            Pagination = MinigameEditorPagination.Create(
+                pageNumber,
+                Counts.QuestionCount,
+                PageSize);
+            Questions = await Store.GetQuestionItemsPageAsync(
+                Pagination.Skip,
+                PageSize,
+                cancellationToken);
             DisabledQuestionIds = await QuestionAvailability.GetDisabledQuestionIdsAsync(
                 cancellationToken);
         }
@@ -62,7 +80,15 @@ public sealed class MinigameEditorModel(
                 SelectedGame = Games.FirstOrDefault(game => game.Id == id);
                 if (SelectedGame is not null)
                 {
-                    AnswerItems = await Store.GetAnswerItemsAsync(id, cancellationToken);
+                    Pagination = MinigameEditorPagination.Create(
+                        pageNumber,
+                        Counts.QuestionCount,
+                        PageSize);
+                    AnswerItems = await Store.GetAnswerItemsPageAsync(
+                        id,
+                        Pagination.Skip,
+                        PageSize,
+                        cancellationToken);
                 }
             }
         }
@@ -86,20 +112,21 @@ public sealed class MinigameEditorModel(
 
     public async Task<IActionResult> OnGetExportAnswersAsync(
         int gameId,
+        int pageNumber,
         CancellationToken cancellationToken)
     {
         var game = await Store.GetGameAsync(gameId, cancellationToken);
         if (game is null)
         {
             Error(localizer["GameNotFound"]);
-            return RedirectToAnswers(gameId);
+            return RedirectToAnswers(gameId, pageNumber);
         }
 
         var answers = await Store.GetAnswerItemsAsync(gameId, cancellationToken);
         if (answers.Count == 0)
         {
             Error(localizer["AnswersInvalid"]);
-            return RedirectToAnswers(gameId);
+            return RedirectToAnswers(gameId, pageNumber);
         }
 
         var content = string.Join(
@@ -119,13 +146,14 @@ public sealed class MinigameEditorModel(
     public async Task<IActionResult> OnPostCreateGameAsync(
         string? name,
         IFormFile? image,
+        int pageNumber,
         CancellationToken cancellationToken)
     {
         var upload = await ReadImageAsync(image, required: true, cancellationToken);
         if (!upload.Success)
         {
             Error(upload.ErrorMessage!);
-            return RedirectToSection("games");
+            return RedirectToSection("games", pageNumber);
         }
 
         var result = await Store.CreateGameAsync(
@@ -138,20 +166,21 @@ public sealed class MinigameEditorModel(
             localizer["GameCreated"],
             localizer["GameDuplicate"],
             localizer["GameInvalid"]);
-        return RedirectToSection("games");
+        return RedirectToSection("games", pageNumber);
     }
 
     public async Task<IActionResult> OnPostUpdateGameAsync(
         int gameId,
         string? name,
         IFormFile? image,
+        int pageNumber,
         CancellationToken cancellationToken)
     {
         var upload = await ReadImageAsync(image, required: false, cancellationToken);
         if (!upload.Success)
         {
             Error(upload.ErrorMessage!);
-            return RedirectToSection("games");
+            return RedirectToSection("games", pageNumber);
         }
 
         var result = await Store.UpdateGameAsync(
@@ -166,11 +195,12 @@ public sealed class MinigameEditorModel(
             localizer["GameDuplicate"],
             localizer["GameInvalid"],
             localizer["GameNotFound"]);
-        return RedirectToSection("games");
+        return RedirectToSection("games", pageNumber);
     }
 
     public async Task<IActionResult> OnPostDeleteGameAsync(
         int gameId,
+        int pageNumber,
         CancellationToken cancellationToken)
     {
         if (await Store.DeleteGameAsync(gameId, cancellationToken))
@@ -181,11 +211,12 @@ public sealed class MinigameEditorModel(
         {
             Error(localizer["GameNotFound"]);
         }
-        return RedirectToSection("games");
+        return RedirectToSection("games", pageNumber);
     }
 
     public async Task<IActionResult> OnPostCreateQuestionAsync(
         string? text,
+        int pageNumber,
         CancellationToken cancellationToken)
     {
         var result = await Store.CreateQuestionAsync(text, cancellationToken);
@@ -194,13 +225,14 @@ public sealed class MinigameEditorModel(
             localizer["QuestionCreated"],
             localizer["QuestionDuplicate"],
             localizer["QuestionInvalid"]);
-        return RedirectToSection("questions");
+        return RedirectToSection("questions", pageNumber);
     }
 
     public async Task<IActionResult> OnPostUpdateQuestionAsync(
         int questionId,
         string? text,
         bool enabled,
+        int pageNumber,
         CancellationToken cancellationToken)
     {
         var result = await Store.UpdateQuestionAsync(questionId, text, cancellationToken);
@@ -219,11 +251,12 @@ public sealed class MinigameEditorModel(
             localizer["QuestionDuplicate"],
             localizer["QuestionInvalid"],
             localizer["QuestionNotFound"]);
-        return RedirectToSection("questions");
+        return RedirectToSection("questions", pageNumber);
     }
 
     public async Task<IActionResult> OnPostDeleteQuestionAsync(
         int questionId,
+        int pageNumber,
         CancellationToken cancellationToken)
     {
         if (await Store.DeleteQuestionAsync(questionId, cancellationToken))
@@ -234,7 +267,7 @@ public sealed class MinigameEditorModel(
         {
             Error(localizer["QuestionNotFound"]);
         }
-        return RedirectToSection("questions");
+        return RedirectToSection("questions", pageNumber);
     }
 
     public async Task<IActionResult> OnPostSaveAnswersAsync(
@@ -254,7 +287,7 @@ public sealed class MinigameEditorModel(
             return AnswerSaveError(localizer["AnswersInvalid"]);
         }
 
-        if (answers is null)
+        if (answers is null || answers.Count == 0 || answers.Count > PageSize)
         {
             return AnswerSaveError(localizer["AnswersInvalid"]);
         }
@@ -282,20 +315,13 @@ public sealed class MinigameEditorModel(
             values[row.QuestionId] = value;
         }
 
-        var questions = await Store.GetQuestionItemsAsync(cancellationToken);
-        if (values.Count != questions.Count ||
-            questions.Any(question => !values.ContainsKey(question.Id)))
-        {
-            return AnswerSaveError(localizer["AnswersInvalid"]);
-        }
-
-        var result = await Store.SaveAnswersAsync(gameId, values, cancellationToken);
-        return result switch
+        var result = await Store.UpdateAnswersAsync(gameId, values, cancellationToken);
+        return result.Result switch
         {
             MinigameCatalogMutationResult.Success => new JsonResult(new
             {
                 success = true,
-                assignedAnswerCount = values.Values.Count(value => value.HasValue)
+                assignedAnswerCount = result.AssignedAnswerCount
             }),
             MinigameCatalogMutationResult.NotFound => NotFound(new
             {
@@ -309,17 +335,18 @@ public sealed class MinigameEditorModel(
     public async Task<IActionResult> OnPostImportAnswersAsync(
         int gameId,
         IFormFile? answerFile,
+        int pageNumber,
         CancellationToken cancellationToken)
     {
         if (answerFile is null || answerFile.Length <= 0)
         {
             Error(localizer["AnswerFileRequired"]);
-            return RedirectToAnswers(gameId);
+            return RedirectToAnswers(gameId, pageNumber);
         }
         if (answerFile.Length > MaximumAnswerImportBytes)
         {
             Error(localizer["AnswerFileTooLarge"]);
-            return RedirectToAnswers(gameId);
+            return RedirectToAnswers(gameId, pageNumber);
         }
 
         string content;
@@ -344,7 +371,7 @@ public sealed class MinigameEditorModel(
                     parsed.ExpectedCount,
                     parsed.ActualCount]);
             }
-            return RedirectToAnswers(gameId);
+            return RedirectToAnswers(gameId, pageNumber);
         }
 
         var values = new Dictionary<int, bool?>(questions.Count);
@@ -360,7 +387,7 @@ public sealed class MinigameEditorModel(
             localizer["AnswersInvalid"],
             localizer["AnswersInvalid"],
             localizer["GameNotFound"]);
-        return RedirectToAnswers(gameId);
+        return RedirectToAnswers(gameId, pageNumber);
     }
 
     private async Task<ImageUploadResult> ReadImageAsync(
@@ -417,11 +444,16 @@ public sealed class MinigameEditorModel(
         }
     }
 
-    private IActionResult RedirectToSection(string section) =>
-        RedirectToPage(new { section });
+    private IActionResult RedirectToSection(string section, int pageNumber = 1) =>
+        RedirectToPage(new { section, pageNumber = NormalizePageNumber(pageNumber) });
 
-    private IActionResult RedirectToAnswers(int gameId) =>
-        RedirectToPage(new { section = "answers", gameId });
+    private IActionResult RedirectToAnswers(int gameId, int pageNumber = 1) =>
+        RedirectToPage(new
+        {
+            section = "answers",
+            gameId,
+            pageNumber = NormalizePageNumber(pageNumber)
+        });
 
     private void Success(string message) => TempData["StatusMessage"] = message;
 
@@ -448,6 +480,9 @@ public sealed class MinigameEditorModel(
             _ => "games"
         };
 
+    private static int NormalizePageNumber(int pageNumber) =>
+        pageNumber <= 0 ? 1 : pageNumber;
+
     private sealed record ImageUploadResult(
         bool Success,
         byte[]? Data,
@@ -464,4 +499,28 @@ public sealed class MinigameAnswerInput
 {
     public int QuestionId { get; set; }
     public string? Value { get; set; }
+}
+
+public sealed record MinigameEditorPagination(
+    int CurrentPage,
+    int TotalPages,
+    int TotalCount,
+    int PageSize)
+{
+    public int Skip => (CurrentPage - 1) * PageSize;
+    public bool HasPrevious => CurrentPage > 1;
+    public bool HasNext => CurrentPage < TotalPages;
+
+    public static MinigameEditorPagination Create(
+        int requestedPage,
+        int totalCount,
+        int pageSize)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(totalCount);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
+
+        var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
+        var currentPage = Math.Clamp(requestedPage <= 0 ? 1 : requestedPage, 1, totalPages);
+        return new(currentPage, totalPages, totalCount, pageSize);
+    }
 }

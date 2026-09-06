@@ -1,30 +1,80 @@
 .minigame-resource-sync-panel {
-    display: flex;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 16px;
+    gap: 24px;
+    margin-bottom: 18px;
+    padding: 24px 26px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--minigame-editor-line, var(--border)) 82%, transparent);
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            120deg,
+            color-mix(in srgb, var(--red-bright) 9%, var(--panel)) 0,
+            color-mix(in srgb, var(--panel-2) 88%, var(--bg)) 100%);
+    box-shadow: 0 20px 52px rgba(0, 0, 0, 0.2);
+}
+
+.minigame-resource-sync-panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    background: var(--red-bright);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--red-bright) 72%, transparent);
+}
+
+.minigame-resource-sync-panel::after {
+    content: "SYNC";
+    position: absolute;
+    right: 20px;
+    bottom: -0.17em;
+    color: color-mix(in srgb, var(--text) 4%, transparent);
+    font-size: clamp(4.8rem, 9vw, 9rem);
+    font-weight: 1000;
+    line-height: 0.8;
+    letter-spacing: -0.07em;
+    pointer-events: none;
+}
+
+.minigame-resource-sync-panel > * {
+    position: relative;
+    z-index: 1;
 }
 
 .minigame-resource-sync-panel h2 {
-    margin: 0 0 4px;
+    margin: 0 0 7px;
+    font-weight: 950;
+    letter-spacing: -0.035em;
 }
 
 .minigame-resource-sync-panel p {
+    max-width: 880px;
     margin: 0;
+    line-height: 1.55;
 }
 
 .minigame-resource-sync-actions {
     display: grid;
     justify-items: end;
-    gap: 6px;
-    flex: 0 0 auto;
+    gap: 7px;
+    min-width: 170px;
+}
+
+.minigame-resource-sync-actions .button {
+    min-width: 170px;
 }
 
 .minigame-resource-sync-status {
     min-height: 1.2em;
-    color: var(--muted);
-    font-size: 0.82rem;
+    color: var(--gold);
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-align: right;
 }
 
 .minigame-resource-sync-status.is-error {
@@ -34,29 +84,42 @@
 .minigame-resource-cleanup-dialog,
 .minigame-resource-delete-confirm-dialog {
     padding: 0;
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    background: var(--panel);
-    color: var(--text);
     overflow: hidden;
-    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.5);
+    border: 1px solid color-mix(in srgb, var(--minigame-editor-line, var(--border)) 86%, transparent);
+    border-radius: 20px;
+    background:
+        linear-gradient(
+            145deg,
+            color-mix(in srgb, var(--panel) 98%, #000),
+            color-mix(in srgb, var(--panel-2) 92%, var(--bg)));
+    color: var(--text);
+    box-shadow: 0 32px 100px rgba(0, 0, 0, 0.56);
 }
 
 .minigame-resource-cleanup-dialog {
-    width: min(680px, calc(100vw - 32px));
-    max-height: min(760px, calc(100vh - 32px));
+    width: min(720px, calc(100vw - 32px));
+    max-height: min(800px, calc(100dvh - 32px));
 }
 
 .minigame-resource-cleanup-dialog::backdrop,
 .minigame-resource-delete-confirm-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.66);
-    backdrop-filter: blur(2px);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
 }
 
 .minigame-resource-cleanup-content {
+    position: relative;
     display: grid;
-    gap: 16px;
-    padding: 22px;
+    gap: 17px;
+    padding: 28px;
+}
+
+.minigame-resource-cleanup-content::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--red-bright), var(--gold));
 }
 
 .minigame-resource-cleanup-content h2,
@@ -64,29 +127,51 @@
     margin: 0;
 }
 
+.minigame-resource-cleanup-content h2 {
+    padding-top: 3px;
+    font-size: 1.45rem;
+    font-weight: 950;
+    letter-spacing: -0.03em;
+}
+
 .minigame-resource-cleanup-list {
     display: grid;
     gap: 8px;
     min-height: 450px;
     align-content: start;
+    padding: 8px;
+    overflow: auto;
+    border: 1px solid color-mix(in srgb, var(--minigame-editor-line, var(--border)) 72%, transparent);
+    border-radius: 13px;
+    background: color-mix(in srgb, var(--bg) 52%, transparent);
+    scrollbar-gutter: stable;
 }
 
 .minigame-resource-cleanup-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    min-height: 38px;
-    padding: 8px 10px;
-    border: 1px solid var(--border);
+    gap: 11px;
+    min-height: 42px;
+    padding: 9px 11px;
+    border: 1px solid color-mix(in srgb, var(--minigame-editor-line, var(--border)) 72%, transparent);
     border-radius: 10px;
-    background: var(--panel-2);
+    background: color-mix(in srgb, var(--panel-2) 84%, var(--panel));
     cursor: pointer;
+    transition: border-color 130ms ease, background 130ms ease, transform 130ms ease;
+}
+
+.minigame-resource-cleanup-row:hover,
+.minigame-resource-cleanup-row:focus-within {
+    border-color: color-mix(in srgb, var(--gold) 42%, var(--minigame-editor-line, var(--border)));
+    background: color-mix(in srgb, var(--gold) 7%, var(--panel));
+    transform: translateX(2px);
 }
 
 .minigame-resource-cleanup-row input {
     width: 18px;
     height: 18px;
     flex: 0 0 auto;
+    accent-color: var(--red-bright);
 }
 
 .minigame-resource-cleanup-pager,
@@ -98,30 +183,35 @@
 
 .minigame-resource-cleanup-pager {
     justify-content: center;
+    padding-top: 2px;
 }
 
 .minigame-resource-cleanup-page {
-    min-width: 72px;
+    min-width: 82px;
+    color: var(--gold);
+    font-size: 0.78rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
     text-align: center;
-    color: var(--muted);
-    font-weight: 700;
 }
 
 .minigame-resource-cleanup-actions {
     justify-content: flex-end;
     flex-wrap: wrap;
+    padding-top: 4px;
+    border-top: 1px solid color-mix(in srgb, var(--minigame-editor-line, var(--border)) 58%, transparent);
 }
 
 .minigame-resource-delete-confirm-dialog {
-    width: min(520px, calc(100vw - 32px));
-    border-color: color-mix(in srgb, var(--danger) 42%, var(--border));
+    width: min(540px, calc(100vw - 32px));
+    border-color: color-mix(in srgb, var(--danger) 46%, var(--minigame-editor-line, var(--border)));
 }
 
 .minigame-resource-delete-confirm-content {
     position: relative;
     display: grid;
-    gap: 14px;
-    padding: 26px;
+    gap: 15px;
+    padding: 29px;
 }
 
 .minigame-resource-delete-confirm-content::before {
@@ -130,6 +220,7 @@
     inset: 0 0 auto;
     height: 4px;
     background: var(--danger);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--danger) 42%, transparent);
 }
 
 .minigame-resource-delete-confirm-content h2,
@@ -139,33 +230,58 @@
 
 .minigame-resource-delete-confirm-content h2 {
     padding-top: 4px;
-    font-size: 1.35rem;
+    font-size: 1.4rem;
+    font-weight: 950;
+    letter-spacing: -0.03em;
 }
 
 .minigame-resource-delete-confirm-content p {
-    line-height: 1.55;
+    line-height: 1.6;
 }
 
 .minigame-resource-delete-confirm-actions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-top: 6px;
+    margin-top: 7px;
     flex-wrap: wrap;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 760px) {
     .minigame-resource-sync-panel {
+        grid-template-columns: 1fr;
         align-items: stretch;
-        flex-direction: column;
+        gap: 18px;
+        padding: 20px;
+    }
+
+    .minigame-resource-sync-panel::after {
+        right: 10px;
+        font-size: 5rem;
     }
 
     .minigame-resource-sync-actions {
         justify-items: stretch;
+        min-width: 0;
+    }
+
+    .minigame-resource-sync-actions .button {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .minigame-resource-sync-status {
+        text-align: left;
+    }
+
+    .minigame-resource-cleanup-content,
+    .minigame-resource-delete-confirm-content {
+        padding: 22px 18px 18px;
     }
 
     .minigame-resource-cleanup-list {
         min-height: 0;
+        max-height: 52dvh;
     }
 
     .minigame-resource-cleanup-actions {
@@ -181,5 +297,16 @@
     .minigame-resource-delete-confirm-actions {
         align-items: stretch;
         flex-direction: column-reverse;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .minigame-resource-cleanup-row {
+        transition: none;
+    }
+
+    .minigame-resource-cleanup-row:hover,
+    .minigame-resource-cleanup-row:focus-within {
+        transform: none;
     }
 }

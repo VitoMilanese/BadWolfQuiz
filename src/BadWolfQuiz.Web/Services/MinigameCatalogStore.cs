@@ -153,33 +153,20 @@ public sealed class MinigameCatalogStore
         await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
         await db.Database.OpenConnectionAsync(cancellationToken);
         var connection = db.Database.GetDbConnection();
-        var games = new List<MinigameCatalogGameItem>();
+        return await ReadGamesAsync(connection, null, null, cancellationToken);
+    }
 
-        await using var command = connection.CreateCommand();
-        command.CommandText =
-            """
-            SELECT g.Id,
-                   g.Name,
-                   g.ImageContentType,
-                   length(g.ImageData),
-                   COUNT(a.QuestionId)
-            FROM MinigameCatalogGames g
-            LEFT JOIN MinigameCatalogAnswers a ON a.GameId = g.Id
-            GROUP BY g.Id, g.Name, g.ImageContentType, g.ImageData
-            ORDER BY g.Name COLLATE NOCASE, g.Id;
-            """;
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
-        {
-            games.Add(new MinigameCatalogGameItem(
-                reader.GetInt32(0),
-                reader.GetString(1),
-                reader.GetString(2),
-                reader.GetInt64(3),
-                reader.GetInt32(4)));
-        }
-
-        return games;
+    public async Task<IReadOnlyList<MinigameCatalogGameItem>> GetGamesPageAsync(
+        int skip,
+        int take,
+        CancellationToken cancellationToken = default)
+    {
+        ValidatePageArguments(skip, take);
+        await EnsureInitializedAsync(cancellationToken);
+        await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+        await db.Database.OpenConnectionAsync(cancellationToken);
+        var connection = db.Database.GetDbConnection();
+        return await ReadGamesAsync(connection, skip, take, cancellationToken);
     }
 
     public async Task<IReadOnlyList<MinigameCatalogQuestionItem>> GetQuestionItemsAsync(
@@ -189,7 +176,20 @@ public sealed class MinigameCatalogStore
         await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
         await db.Database.OpenConnectionAsync(cancellationToken);
         var connection = db.Database.GetDbConnection();
-        return await ReadQuestionItemsAsync(connection, cancellationToken);
+        return await ReadQuestionItemsAsync(connection, null, null, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<MinigameCatalogQuestionItem>> GetQuestionItemsPageAsync(
+        int skip,
+        int take,
+        CancellationToken cancellationToken = default)
+    {
+        ValidatePageArguments(skip, take);
+        await EnsureInitializedAsync(cancellationToken);
+        await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+        await db.Database.OpenConnectionAsync(cancellationToken);
+        var connection = db.Database.GetDbConnection();
+        return await ReadQuestionItemsAsync(connection, skip, take, cancellationToken);
     }
 
     public async Task<MinigameCatalogGameItem?> GetGameAsync(
@@ -208,32 +208,21 @@ public sealed class MinigameCatalogStore
         await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
         await db.Database.OpenConnectionAsync(cancellationToken);
         var connection = db.Database.GetDbConnection();
-        var rows = new List<MinigameCatalogAnswerItem>();
+        return await ReadAnswerItemsAsync(connection, gameId, null, null, cancellationToken);
+    }
 
-        await using var command = connection.CreateCommand();
-        command.CommandText =
-            """
-            SELECT q.Id,
-                   q.SortOrder,
-                   q.Text,
-                   a.AnswerYes
-            FROM MinigameCatalogQuestions q
-            LEFT JOIN MinigameCatalogAnswers a
-              ON a.QuestionId = q.Id AND a.GameId = $gameId
-            ORDER BY q.SortOrder, q.Id;
-            """;
-        AddParameter(command, "$gameId", gameId);
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
-        {
-            rows.Add(new MinigameCatalogAnswerItem(
-                reader.GetInt32(0),
-                reader.GetInt32(1),
-                reader.GetString(2),
-                reader.IsDBNull(3) ? null : reader.GetInt32(3) != 0));
-        }
-
-        return rows;
+    public async Task<IReadOnlyList<MinigameCatalogAnswerItem>> GetAnswerItemsPageAsync(
+        int gameId,
+        int skip,
+        int take,
+        CancellationToken cancellationToken = default)
+    {
+        ValidatePageArguments(skip, take);
+        await EnsureInitializedAsync(cancellationToken);
+        await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+        await db.Database.OpenConnectionAsync(cancellationToken);
+        var connection = db.Database.GetDbConnection();
+        return await ReadAnswerItemsAsync(connection, gameId, skip, take, cancellationToken);
     }
 
     public async Task<MinigameCatalogMutationResult> CreateGameAsync(
@@ -476,7 +465,7 @@ public sealed class MinigameCatalogStore
             return MinigameCatalogMutationResult.NotFound;
         }
 
-        var questions = await ReadQuestionItemsAsync(connection, cancellationToken);
+        var questions = await ReadQuestionItemsAsync(connection, null, null, cancellationToken);
         var questionIds = questions.Select(question => question.Id).ToHashSet();
         if (values.Keys.Any(id => !questionIds.Contains(id)))
         {
@@ -499,6 +488,70 @@ public sealed class MinigameCatalogStore
         return MinigameCatalogMutationResult.Success;
     }
 
+    public async Task<MinigameCatalogAnswerUpdateResult> UpdateAnswersAsync(
+        int gameId,
+        IReadOnlyDictionary<int, bool?> values,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+        if (values.Count == 0)
+        {
+            return new(MinigameCatalogMutationResult.Invalid, 0);
+        }
+
+        await EnsureInitializedAsync(cancellationToken);
+        await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
+        await db.Database.OpenConnectionAsync(cancellationToken);
+        var connection = db.Database.GetDbConnection();
+        if (!await GameExistsAsync(connection, gameId, cancellationToken))
+        {
+            return new(MinigameCatalogMutationResult.NotFound, 0);
+        }
+
+        var questions = await ReadQuestionItemsAsync(connection, null, null, cancellationToken);
+        var questionIds = questions.Select(question => question.Id).ToHashSet();
+        if (values.Keys.Any(id => !questionIds.Contains(id)))
+        {
+            return new(MinigameCatalogMutationResult.Invalid, 0);
+        }
+
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        foreach (var (questionId, answerYes) in values)
+        {
+            await using var command = connection.CreateCommand();
+            command.Transaction = transaction;
+            if (answerYes.HasValue)
+            {
+                command.CommandText =
+                    """
+                    INSERT INTO MinigameCatalogAnswers (GameId, QuestionId, AnswerYes)
+                    VALUES ($gameId, $questionId, $answerYes)
+                    ON CONFLICT(GameId, QuestionId)
+                    DO UPDATE SET AnswerYes = excluded.AnswerYes;
+                    """;
+                AddParameter(command, "$answerYes", answerYes.Value ? 1 : 0);
+            }
+            else
+            {
+                command.CommandText =
+                    "DELETE FROM MinigameCatalogAnswers WHERE GameId = $gameId AND QuestionId = $questionId;";
+            }
+            AddParameter(command, "$gameId", gameId);
+            AddParameter(command, "$questionId", questionId);
+            await command.ExecuteNonQueryAsync(cancellationToken);
+        }
+        await transaction.CommitAsync(cancellationToken);
+
+        await using var countCommand = connection.CreateCommand();
+        countCommand.CommandText =
+            "SELECT COUNT(*) FROM MinigameCatalogAnswers WHERE GameId = $gameId;";
+        AddParameter(countCommand, "$gameId", gameId);
+        var assignedAnswerCount = Convert.ToInt32(
+            await countCommand.ExecuteScalarAsync(cancellationToken),
+            CultureInfo.InvariantCulture);
+        return new(MinigameCatalogMutationResult.Success, assignedAnswerCount);
+    }
+
     public async Task<MinigameCatalogMutationResult> ReplaceAnswersAsync(
         int gameId,
         IReadOnlyList<bool> answers,
@@ -514,7 +567,7 @@ public sealed class MinigameCatalogStore
             return MinigameCatalogMutationResult.NotFound;
         }
 
-        var questions = await ReadQuestionItemsAsync(connection, cancellationToken);
+        var questions = await ReadQuestionItemsAsync(connection, null, null, cancellationToken);
         if (questions.Count != answers.Count)
         {
             return MinigameCatalogMutationResult.Invalid;
@@ -746,6 +799,72 @@ public sealed class MinigameCatalogStore
         await transaction.CommitAsync(cancellationToken);
     }
 
+    private static async Task<IReadOnlyList<MinigameCatalogGameItem>> ReadGamesAsync(
+        DbConnection connection,
+        int? skip,
+        int? take,
+        CancellationToken cancellationToken)
+    {
+        var games = new List<MinigameCatalogGameItem>();
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            SELECT g.Id,
+                   g.Name,
+                   g.ImageContentType,
+                   length(g.ImageData),
+                   COUNT(a.QuestionId)
+            FROM MinigameCatalogGames g
+            LEFT JOIN MinigameCatalogAnswers a ON a.GameId = g.Id
+            GROUP BY g.Id, g.Name, g.ImageContentType, g.ImageData
+            ORDER BY g.Name COLLATE NOCASE, g.Id
+            """ + BuildPaginationSql(command, skip, take);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            games.Add(new MinigameCatalogGameItem(
+                reader.GetInt32(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetInt64(3),
+                reader.GetInt32(4)));
+        }
+        return games;
+    }
+
+    private static async Task<IReadOnlyList<MinigameCatalogAnswerItem>> ReadAnswerItemsAsync(
+        DbConnection connection,
+        int gameId,
+        int? skip,
+        int? take,
+        CancellationToken cancellationToken)
+    {
+        var rows = new List<MinigameCatalogAnswerItem>();
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            SELECT q.Id,
+                   q.SortOrder,
+                   q.Text,
+                   a.AnswerYes
+            FROM MinigameCatalogQuestions q
+            LEFT JOIN MinigameCatalogAnswers a
+              ON a.QuestionId = q.Id AND a.GameId = $gameId
+            ORDER BY q.SortOrder, q.Id
+            """ + BuildPaginationSql(command, skip, take);
+        AddParameter(command, "$gameId", gameId);
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            rows.Add(new MinigameCatalogAnswerItem(
+                reader.GetInt32(0),
+                reader.GetInt32(1),
+                reader.GetString(2),
+                reader.IsDBNull(3) ? null : reader.GetInt32(3) != 0));
+        }
+        return rows;
+    }
+
     private static async Task InsertAnswersAsync(
         DbConnection connection,
         DbTransaction transaction,
@@ -790,12 +909,15 @@ public sealed class MinigameCatalogStore
 
     private static async Task<IReadOnlyList<MinigameCatalogQuestionItem>> ReadQuestionItemsAsync(
         DbConnection connection,
+        int? skip,
+        int? take,
         CancellationToken cancellationToken)
     {
         var questions = new List<MinigameCatalogQuestionItem>();
         await using var command = connection.CreateCommand();
         command.CommandText =
-            "SELECT Id, SortOrder, Text FROM MinigameCatalogQuestions ORDER BY SortOrder, Id;";
+            "SELECT Id, SortOrder, Text FROM MinigameCatalogQuestions ORDER BY SortOrder, Id" +
+            BuildPaginationSql(command, skip, take);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
@@ -805,6 +927,24 @@ public sealed class MinigameCatalogStore
                 reader.GetString(2)));
         }
         return questions;
+    }
+
+    private static string BuildPaginationSql(DbCommand command, int? skip, int? take)
+    {
+        if (!skip.HasValue || !take.HasValue)
+        {
+            return ";";
+        }
+
+        AddParameter(command, "$take", take.Value);
+        AddParameter(command, "$skip", skip.Value);
+        return " LIMIT $take OFFSET $skip;";
+    }
+
+    private static void ValidatePageArguments(int skip, int take)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(skip);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(take);
     }
 
     private static async Task<int> ExecuteCountAsync(
@@ -1042,6 +1182,10 @@ public sealed record MinigameCatalogAnswerItem(
     int SortOrder,
     string QuestionText,
     bool? AnswerYes);
+
+public sealed record MinigameCatalogAnswerUpdateResult(
+    MinigameCatalogMutationResult Result,
+    int AssignedAnswerCount);
 
 public sealed record MinigameAnswerImportResult(
     bool Success,

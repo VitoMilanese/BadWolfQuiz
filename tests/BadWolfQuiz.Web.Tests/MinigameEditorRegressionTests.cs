@@ -22,11 +22,12 @@ public sealed class MinigameEditorRegressionTests
     }
 
     [Fact]
-    public void Editor_uses_horizontal_game_cards_and_non_blocking_answer_autosave()
+    public void Editor_preserves_workflows_and_uses_branded_responsive_presentation()
     {
         var page = ReadWebFile("Pages", "Admin", "MinigameEditor.cshtml");
         var model = ReadWebFile("Pages", "Admin", "MinigameEditor.cshtml.cs");
         var css = ReadWebFile("wwwroot", "css", "minigame-editor.css");
+        var resourceSyncCss = ReadWebFile("wwwroot", "css", "minigame-resource-sync.css");
         var script = ReadWebFile("wwwroot", "js", "minigame-editor.js");
         var store = ReadWebFile("Services", "MinigameCatalogStore.cs");
         var answerFileParser = ReadWebFile("Services", "MinigameAnswerFileParser.cs");
@@ -59,20 +60,73 @@ public sealed class MinigameEditorRegressionTests
         Assert.Contains("IReadOnlyList<bool?> Answers", answerFileParser);
         Assert.Contains("JSON.stringify(buildPayload())", script);
         Assert.Contains("fetch(answerForm.action", script);
+        Assert.Contains("keepalive: true", script);
+        Assert.Contains("flushMinigameEditorAnswers", script);
+        Assert.Contains("await flushMinigameEditorAnswers()", script);
         Assert.Contains("activeAnswerFilter", script);
         Assert.Contains("dataset.minigameAnswerFilter", script);
         Assert.Contains("select.value === activeAnswerFilter", script);
         Assert.Contains("row.hidden = !visible", script);
         Assert.Contains("applyAnswerFilter()", script);
-        Assert.Contains("grid-template-columns: 112px minmax(0, 1fr) auto", css);
+
+        Assert.Contains("private const int PageSize = 25;", model);
+        Assert.Contains("GetGamesPageAsync", model);
+        Assert.Contains("GetQuestionItemsPageAsync", model);
+        Assert.Contains("GetAnswerItemsPageAsync", model);
+        Assert.Contains("UpdateAnswersAsync(gameId, values", model);
+        Assert.Contains("MinigameEditorPagination", model);
+        Assert.Contains("name=\"pageNumber\"", page);
+        Assert.Contains("asp-route-pageNumber", page);
+        Assert.Contains("minigame-editor-pager", page);
+        Assert.Contains("LIMIT $take OFFSET $skip", store);
+        Assert.Contains("ON CONFLICT(GameId, QuestionId)", store);
+
+        Assert.Contains("const pageSize = 25;", script);
+        Assert.Contains("buildPageNumbers", script);
+        Assert.Contains("dataset.minigameEditorPageNumbers", script);
+        Assert.Contains("data-minigame-editor-pager-position=\"top\"", script);
+        Assert.Contains("content.before(topPager)", script);
+        Assert.Contains("new DOMParser().parseFromString", script);
+        Assert.Contains("replacePagedContent", script);
+        Assert.Contains("window.history.pushState", script);
+        Assert.Contains("window.history.replaceState", script);
+        Assert.Contains("window.addEventListener('popstate'", script);
+        Assert.Contains("window.scrollTo(0, previousScrollY)", script);
+        Assert.Contains("fetch(href", script);
+        Assert.Contains("'X-Requested-With': 'XMLHttpRequest'", script);
+
+        Assert.Contains("body:has(.minigame-editor-heading) > .page-shell", css);
+        Assert.Contains("overflow-y: auto;", css);
+        Assert.Contains("overscroll-behavior-y: contain;", css);
+        Assert.Contains("@media (max-width: 700px)", css);
+        Assert.Contains("overflow-y: visible;", css);
+        Assert.Contains(".minigame-editor-heading::after", css);
+        Assert.Contains("content: \"EDITOR\"", css);
+        Assert.Contains(".minigame-editor-counts::before", css);
+        Assert.Contains(".minigame-editor-tabs > .button.button-primary", css);
+        Assert.Contains(".minigame-editor-game-card", css);
+        Assert.Contains(
+            "grid-template-columns: clamp(150px, 12vw, 190px) minmax(0, 1fr) 52px",
+            css);
         Assert.Contains(".minigame-editor-question-list > li:nth-child(even)", css);
         Assert.Contains(".minigame-editor-question-list > li.is-disabled", css);
-        Assert.Contains(".minigame-editor-question-enabled", css);
+        Assert.Contains(".minigame-editor-question-enabled input[type=\"checkbox\"]:checked", css);
         Assert.Contains(".minigame-editor-answer-table tbody tr:nth-child(even) > td", css);
         Assert.Contains(".minigame-editor-answer-table td + td", css);
         Assert.Contains(".minigame-editor-answer-filter", css);
         Assert.Contains(".minigame-editor-answer-form.is-answer-filtered", css);
+        Assert.Contains(".minigame-editor-pager", css);
         Assert.DoesNotContain(".minigame-editor-answer-actions", css);
+        Assert.Contains("@media (max-width: 760px)", css);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", css);
+
+        Assert.Contains(".minigame-resource-sync-panel::before", resourceSyncCss);
+        Assert.Contains("content: \"SYNC\"", resourceSyncCss);
+        Assert.Contains(".minigame-resource-cleanup-dialog::backdrop", resourceSyncCss);
+        Assert.Contains(".minigame-resource-delete-confirm-content::before", resourceSyncCss);
+        Assert.Contains("@media (max-width: 760px)", resourceSyncCss);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", resourceSyncCss);
+
         Assert.Contains("expectedCount", store);
         Assert.Contains("value == \"1\"", store);
         Assert.Contains("value == \"0\"", store);
