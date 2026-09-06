@@ -1,0 +1,20 @@
+name: TEMP global settings save shortcut validation
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  web-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Run Web tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release
+      - name: Check floating save JavaScript
+        run: node --check src/BadWolfQuiz.Web/wwwroot/js/host-settings-floating-save.js
+      - name: Check save shortcut JavaScript
+        run: node --check src/BadWolfQuiz.Web/wwwroot/js/host-settings-save-shortcut.js
