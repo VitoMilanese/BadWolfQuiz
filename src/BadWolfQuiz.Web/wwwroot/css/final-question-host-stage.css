@@ -20,9 +20,10 @@ body.gameplay-layout:has(.host-game-board.final-question-host) .host-game-board.
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    border-color: transparent;
-    background: transparent;
-    box-shadow: none;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 .final-question-host .final-question-panel > * {
@@ -91,23 +92,26 @@ body.gameplay-layout:has(.host-game-board.final-question-host) .host-game-board.
     background: color-mix(in srgb, var(--panel-2) 82%, transparent);
 }
 
-/* Answering: let the question read as the main finale stage, not a generic content panel. */
+/* Answering: the question uses the stage itself instead of a nested card. */
 .final-question-host[data-game-status="finalanswering"] .final-question-panel {
-    padding: clamp(18px, 2vw, 30px);
-    gap: clamp(10px, 1.6vh, 18px);
+    align-items: stretch;
+    padding: clamp(8px, 1vw, 16px);
+    gap: clamp(8px, 1.2vh, 14px);
 }
 
 .final-question-host[data-game-status="finalanswering"] .question-presentation {
-    width: min(1500px, 100%);
-    margin-inline: auto;
-    padding: clamp(12px, 1.5vw, 22px);
-    border: 1px solid color-mix(in srgb, var(--gold) 18%, var(--line));
-    border-radius: clamp(16px, 1.6vw, 24px);
-    background: color-mix(in srgb, var(--panel) 54%, transparent);
-    box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent),
-        0 20px 50px rgb(0 0 0 / 20%);
-    backdrop-filter: blur(8px);
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    height: 100%;
+    margin: 0;
+    padding: clamp(8px, 1vw, 16px);
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
 }
 
 .final-question-host[data-game-status="finalanswering"] .question-presentation .game-content-text {
@@ -137,18 +141,24 @@ body.gameplay-layout:has(.host-game-board.final-question-host) .host-game-board.
     background: color-mix(in srgb, var(--panel-2) 82%, transparent);
 }
 
-/* Judging: isolate the current answer as the dramatic focal card. */
+/* Judging: player submissions use the full finale stage without a card shell. */
 .final-question-host[data-game-status="finaljudging"] .final-question-panel {
-    padding: clamp(22px, 3vw, 46px);
-    gap: clamp(14px, 2vh, 24px);
+    align-items: stretch;
+    padding: clamp(8px, 1vw, 16px);
+    gap: clamp(10px, 1.4vh, 18px);
 }
 
 .final-question-host[data-game-status="finaljudging"] .final-judging-list {
-    width: min(980px, 100%);
-    margin-inline: auto;
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
     display: grid;
-    justify-items: center;
-    gap: clamp(16px, 2.4vh, 28px);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-items: stretch;
+    justify-items: stretch;
+    gap: clamp(12px, 1.8vh, 20px);
 }
 
 .final-question-host[data-game-status="finaljudging"] .final-judging-list > .dialog-warning {
@@ -156,25 +166,26 @@ body.gameplay-layout:has(.host-game-board.final-question-host) .host-game-board.
     color: var(--muted);
     font-size: .95rem;
     letter-spacing: .08em;
+    text-align: center;
     text-transform: uppercase;
 }
 
 .final-question-host[data-game-status="finaljudging"] .final-player-answer-presentation {
-    width: min(900px, 100%);
-    min-height: clamp(260px, 42vh, 500px);
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    height: 100%;
     display: grid;
     place-content: center;
     justify-items: center;
     gap: clamp(16px, 2.5vh, 28px);
-    padding: clamp(26px, 4vw, 56px);
-    border: 1px solid var(--final-stage-line);
-    border-radius: clamp(20px, 2vw, 30px);
-    background: linear-gradient(180deg, var(--final-stage-surface), var(--final-stage-surface-strong));
-    box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent),
-        0 28px 68px rgb(0 0 0 / 34%),
-        0 0 0 1px color-mix(in srgb, var(--red) 10%, transparent);
-    backdrop-filter: blur(12px);
+    padding: clamp(16px, 2vw, 30px);
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
 }
 
 .final-question-host[data-game-status="finaljudging"] .final-player-answer-presentation > h2 {
@@ -207,16 +218,20 @@ body.gameplay-layout:has(.host-game-board.final-question-host) .host-game-board.
     font-weight: 850;
 }
 
-/* Canonical Final Answer keeps the same finale framing. */
+/* Canonical Final Answer uses the same full-stage, transparent treatment. */
 .final-question-host[data-game-status="finaljudging"] .answer-presentation {
-    width: min(1500px, 100%);
-    margin-inline: auto;
-    padding: clamp(18px, 2.5vw, 34px);
-    border: 1px solid var(--final-stage-line);
-    border-radius: clamp(18px, 1.8vw, 28px);
-    background: linear-gradient(180deg, var(--final-stage-surface), var(--final-stage-surface-strong));
-    box-shadow: 0 24px 60px rgb(0 0 0 / 30%);
-    backdrop-filter: blur(10px);
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    height: 100%;
+    margin: 0;
+    padding: clamp(10px, 1.4vw, 22px);
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
 }
 
 .final-question-host[data-game-status="finaljudging"] .answer-presentation > .eyebrow {
@@ -230,19 +245,15 @@ body.gameplay-layout:has(.host-game-board.final-question-host) .host-game-board.
     .final-question-host[data-game-status="finalwagering"] .final-question-panel,
     .final-question-host[data-game-status="finalanswering"] .final-question-panel,
     .final-question-host[data-game-status="finaljudging"] .final-question-panel {
-        padding: 14px;
+        padding: 10px;
         border-radius: 0;
     }
 
     .final-question-host[data-game-status="finalanswering"] .question-presentation,
     .final-question-host[data-game-status="finaljudging"] .final-player-answer-presentation,
     .final-question-host[data-game-status="finaljudging"] .answer-presentation {
-        padding: 16px;
-        border-radius: 16px;
-    }
-
-    .final-question-host[data-game-status="finaljudging"] .final-player-answer-presentation {
-        min-height: 220px;
+        padding: 10px;
+        border-radius: 0;
     }
 
     .final-question-host[data-game-status="finaljudging"] .final-judging-actions {
