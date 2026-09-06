@@ -151,11 +151,14 @@
         const hostGameplay = window.BadWolfHostGameplay;
         if (!hostGameplay ||
             hostGameplay.finalQuestionTransitionRefreshGuardInstalled === true ||
-            typeof hostGameplay.refresh !== "function") {
+            typeof hostGameplay.refresh !== "function" ||
+            typeof hostGameplay.navigate !== "function") {
             return;
         }
 
         const refresh = hostGameplay.refresh.bind(hostGameplay);
+        const navigate = hostGameplay.navigate.bind(hostGameplay);
+
         hostGameplay.refresh = (...args) => {
             if (isFinalTransitionLocked()) {
                 return Promise.resolve(false);
@@ -163,6 +166,34 @@
 
             return refresh(...args);
         };
+
+        hostGameplay.navigate = async (...args) => {
+            if (!isFinalTransitionLocked()) {
+                return navigate(...args);
+            }
+
+            const targetUrl = new URL(args[0], window.location.href);
+            const response = await fetch(targetUrl.href, {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    Accept: "text/html",
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            const markup = await response.text();
+            const parsed = new DOMParser().parseFromString(markup, "text/html");
+            if (parsed.querySelector(".host-game-board.final-question-host") === null) {
+                return false;
+            }
+
+            return navigate(...args);
+        };
+
         hostGameplay.finalQuestionTransitionRefreshGuardInstalled = true;
     };
 

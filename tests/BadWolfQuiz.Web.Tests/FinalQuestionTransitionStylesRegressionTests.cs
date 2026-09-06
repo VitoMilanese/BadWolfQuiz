@@ -61,6 +61,9 @@ public sealed class FinalQuestionTransitionStylesRegressionTests
         Assert.Contains("ForceAdvanceToFinalQuestion", script);
         Assert.Contains("window.BadWolfHostGameplay?.cancelPending?.();", script);
         Assert.Contains("hostGameplay.refresh = (...args) =>", script);
+        Assert.Contains("const navigate = hostGameplay.navigate.bind(hostGameplay);", script);
+        Assert.Contains("hostGameplay.navigate = async (...args) =>", script);
+        Assert.Contains(".host-game-board.final-question-host", script);
         Assert.Contains("if (isFinalTransitionLocked())", script);
         Assert.Contains("HTMLFormElement.prototype.requestSubmit", script);
         Assert.Contains("arguments.length === 0", script);
