@@ -43,7 +43,7 @@ public sealed class HostAvatarFramePresentationRegressionTests
             styles,
             StringComparison.Ordinal);
         Assert.Contains(
-            "--contributor-frame-media-inset",
+            "--contributor-frame-clip-radius",
             styles,
             StringComparison.Ordinal);
 
