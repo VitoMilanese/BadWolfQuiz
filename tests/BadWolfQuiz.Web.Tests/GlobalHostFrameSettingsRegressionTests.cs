@@ -18,12 +18,15 @@ public sealed class GlobalHostFrameSettingsRegressionTests
             "ContributorGameSettingsTagHelper.cs"));
 
         Assert.Contains("host-settings-host-grid", settings, StringComparison.Ordinal);
+        Assert.Contains("host-avatar-input-row", settings, StringComparison.Ordinal);
         Assert.Contains("contributor-host-frame-template", supportHelper, StringComparison.Ordinal);
         Assert.Contains(
             ".host-settings-form .host-settings-host-grid",
             settingsHelper,
             StringComparison.Ordinal);
         Assert.Contains("template.content.cloneNode(true)", settingsHelper, StringComparison.Ordinal);
+        Assert.Contains("host-avatar-frame-global-settings", settingsHelper, StringComparison.Ordinal);
+        Assert.Contains("frameRowHost.append(avatarField, fragment)", settingsHelper, StringComparison.Ordinal);
     }
 
     private static string FindWebFile(params string[] parts)
