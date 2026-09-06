@@ -1,0 +1,130 @@
+.minigame-resource-sync-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.minigame-resource-sync-panel h2 {
+    margin: 0 0 4px;
+}
+
+.minigame-resource-sync-panel p {
+    margin: 0;
+}
+
+.minigame-resource-sync-actions {
+    display: grid;
+    justify-items: end;
+    gap: 6px;
+    flex: 0 0 auto;
+}
+
+.minigame-resource-sync-status {
+    min-height: 1.2em;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.minigame-resource-sync-status.is-error {
+    color: var(--danger);
+}
+
+.minigame-resource-cleanup-dialog {
+    width: min(680px, calc(100vw - 32px));
+    max-height: min(760px, calc(100vh - 32px));
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--panel);
+    color: var(--text);
+    overflow: hidden;
+}
+
+.minigame-resource-cleanup-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.66);
+}
+
+.minigame-resource-cleanup-content {
+    display: grid;
+    gap: 16px;
+    padding: 22px;
+}
+
+.minigame-resource-cleanup-content h2,
+.minigame-resource-cleanup-content p {
+    margin: 0;
+}
+
+.minigame-resource-cleanup-list {
+    display: grid;
+    gap: 8px;
+    min-height: 450px;
+    align-content: start;
+}
+
+.minigame-resource-cleanup-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel-2);
+    cursor: pointer;
+}
+
+.minigame-resource-cleanup-row input {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+}
+
+.minigame-resource-cleanup-pager,
+.minigame-resource-cleanup-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.minigame-resource-cleanup-pager {
+    justify-content: center;
+}
+
+.minigame-resource-cleanup-page {
+    min-width: 72px;
+    text-align: center;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.minigame-resource-cleanup-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 700px) {
+    .minigame-resource-sync-panel {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .minigame-resource-sync-actions {
+        justify-items: stretch;
+    }
+
+    .minigame-resource-cleanup-list {
+        min-height: 0;
+    }
+
+    .minigame-resource-cleanup-actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .minigame-resource-cleanup-actions .button {
+        width: 100%;
+    }
+}
