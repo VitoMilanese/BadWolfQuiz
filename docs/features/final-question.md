@@ -15,7 +15,7 @@ Active-game recovery starts once normal gameplay has meaningful recoverable stat
 ## Runtime flow
 
 1. After the last board round is complete, the host enters a localized **Final question** transition page.
-2. The transition has no manual controls and automatically continues after 3 seconds.
+2. The transition remains on screen until the host explicitly chooses **Proceed to wagers**.
 3. Every participating player submits and confirms a private wager. While a wager is missing for an inactive player, the host can submit the minimum allowed wager on that player's behalf.
 4. The Engine locks wagering only after every wager is present.
 5. The question is released and players submit private answers. While an answer is missing for an inactive player, the host can submit `-` on that player's behalf.
@@ -27,7 +27,7 @@ Active-game recovery starts once normal gameplay has meaningful recoverable stat
 
 The host can remove a player during final wagering, answering, or judging. Removal also removes that player's final-question submission so the removed player cannot block phase progression. If the final unresolved submission is removed after all remaining submissions are judged, the final answer is presented before completion. If the last remaining player is removed and no final submissions remain, the final question and game complete immediately with empty final standings.
 
-The same 3-second transition is used when the host forces advancement directly to the final question. A quiz without a final question never shows this transition.
+The same explicit transition is used when the host forces advancement directly to the final question. A quiz without a final question never shows this transition.
 
 ## Initial eligibility and wager rule
 
@@ -46,7 +46,8 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 ## Web presentation
 
 - The last round summary offers the final phase only when the immutable quiz snapshot contains complete final question and answer content.
-- Normal and forced entry into the final phase first show the localized, automatic 3-second **Final question** transition.
+- Normal and forced entry into the final phase first show the localized **Final question** transition, and the host explicitly chooses **Proceed to wagers** when ready.
+- The transition is presented as a full-viewport finale stage below the shared topbar, using theme variables for its background, framed final-description content, responsive sizing, and reduced-motion handling.
 - When a final question is available, the host action menu provides a shortcut to leave the current regular round and advance directly to the final phase. The host must confirm the action. Unclosed regular-round questions are left unchanged rather than being force-resolved by this navigation action.
 - During final wagering, player submission state is displayed as an always-visible vertical panel on the right on desktop host layouts. The panel scrolls independently for long player lists so the waiting message and **Show question** action remain available in the main area.
 - During final answering, player submission state moves into a right-side drawer. On pointer-driven desktop layouts the drawer remains collapsed to a narrow player handle until hover or keyboard focus opens it. Narrow/touch layouts keep an inline responsive fallback.
@@ -80,6 +81,8 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 
 When the host is already inside the running-game shell, the normal and forced Final Question transition is mounted into the existing gameplay region rather than replacing the browser document. Final Wagering, Final Answering, Final Judging, the final-answer presentation, and final standings continue through the same persistent host navigation path, preserving the long-lived SignalR connection, player cards, header controls, and other host state.
 
+Entering the Final Question transition cancels pending gameplay refreshes and guards the transition against stale host navigation. A delayed response from the previous round can no longer replace the mounted finale stage, while navigation into the real final-question host state remains allowed once the server has advanced to that phase.
+
 The forced Final Question confirmation submits through the asynchronous host flow. The natural unfinished-round warning closes before the host advances; choosing **Return to an unfinished round** performs the actual return in one action. Unsupported or failed transitions retain normal browser navigation as a fallback.
 
 Repeated live refreshes of the same final-results podium do not recreate the existing podium DOM, so its entrance animation is not restarted by duplicate state updates.
@@ -102,3 +105,7 @@ Each command validates the current phase and rejects duplicate or out-of-order s
 Before entering the Final Question through normal progression, the host is warned if any regular round still contains unclosed questions and can either continue to the Final Question or return to an unfinished round. A forced Final Question action from **Tools** always requires confirmation and, when players are present, shows the current round leaderboard before the Final Question transition. It ignores the current round when deciding whether to offer a return option. The return option considers only unfinished rounds that have already been visited: all earlier visited rounds plus later rounds reached before the host returned backward. Rounds the game has never entered are ignored. When players are present, choosing the return option shows the current round leaderboard before the selected unfinished round intro; without players, the intro opens directly. The dedicated dialog also lets the host stay in the current round.
 
 Regular-round navigation can move backward to the nearest unfinished round and skips fully completed rounds in either direction. Forced **Next round** navigation leaves unopened questions available so the host can return to them later.
+
+## Release
+
+The redesigned host Final Question transition and stale-navigation fixes ship in BadWolfQuiz Web `1.26.17` (`web-v1.26.17`).

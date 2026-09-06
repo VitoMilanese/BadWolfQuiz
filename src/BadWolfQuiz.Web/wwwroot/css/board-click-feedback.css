@@ -1,0 +1,47 @@
+/* Press feedback for interactive Host Running Game board cells. */
+body.gameplay-layout:has(.host-game-board[data-game-status="running"])
+    .host-board-question.status-available,
+body.gameplay-layout:has(.host-game-board[data-game-status="running"])
+    .host-board-column > h3[data-category-preview-url] {
+    transform-origin: center;
+    will-change: transform, filter, box-shadow;
+    transition:
+        transform 150ms cubic-bezier(0.22, 1.55, 0.36, 1),
+        filter 150ms ease-out,
+        box-shadow 150ms ease-out,
+        border-color 150ms ease-out;
+}
+
+body.gameplay-layout:has(.host-game-board[data-game-status="running"])
+    .host-board-question.status-available:active,
+body.gameplay-layout:has(.host-game-board[data-game-status="running"])
+    .host-board-column > h3[data-category-preview-url]:active {
+    z-index: 3;
+    transform: scale(0.955);
+    border-color: color-mix(in srgb, var(--gold) 82%, var(--line));
+    filter: brightness(1.24) saturate(1.08);
+    box-shadow:
+        0 7px 16px rgb(0 0 0 / 24%),
+        0 0 0 2px color-mix(in srgb, var(--gold) 26%, transparent),
+        0 0 24px color-mix(in srgb, var(--gold) 24%, transparent);
+    transition-duration: 65ms;
+    transition-timing-function: ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.gameplay-layout:has(.host-game-board[data-game-status="running"])
+        .host-board-question.status-available,
+    body.gameplay-layout:has(.host-game-board[data-game-status="running"])
+        .host-board-column > h3[data-category-preview-url] {
+        transition: none;
+        will-change: auto;
+    }
+
+    body.gameplay-layout:has(.host-game-board[data-game-status="running"])
+        .host-board-question.status-available:active,
+    body.gameplay-layout:has(.host-game-board[data-game-status="running"])
+        .host-board-column > h3[data-category-preview-url]:active {
+        transform: none;
+        filter: brightness(1.12);
+    }
+}

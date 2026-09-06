@@ -4,250 +4,321 @@
     ViewData["Title"] = Localizer["GameSettings_Title"];
 }
 
-<div class="page-heading">
-    <div>
-        <p class="eyebrow">@Localizer["GameSettings_Eyebrow"]</p>
-        <h1>@Localizer["GameSettings_Title"]</h1>
-    </div>
-    <button class="button button-secondary"
-            type="button"
-            data-open-discord-settings>
-        @Localizer["Discord_Menu"]
-    </button>
-</div>
-
-@if (TempData["SuccessMessage"] is string successMessage)
-{
-    <div class="message message-success" role="status" data-auto-dismiss>@successMessage</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/host-settings.css" asp-append-version="true" />
 }
 
-<form method="post" enctype="multipart/form-data" class="form-card narrow stack-form">
-    <p class="settings-description">@Localizer["GameSettings_GlobalDescription"]</p>
-    <div class="field-group">
-        <label>@Localizer["Settings_HostId"]</label>
-        <code class="host-id-value">@Model.HostId</code>
-        <small>@Localizer["Settings_HostIdHint"]</small>
-    </div>
-    <div asp-validation-summary="ModelOnly" class="message message-error"></div>
-    <div class="settings-grid">
-    <details class="theme-picker">
-        <summary>@Localizer["SiteTheme_Label"]</summary>
-        <div class="theme-picker-content">
-        <p>@Localizer["SiteTheme_Hint"]</p>
-        <div class="theme-options">
-            <label class="theme-option theme-option-classic">
-                <input asp-for="Input.SiteThemeId" type="radio" value="classic-wolf" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_ClassicWolf"]</strong>
-            </label>
-            <label class="theme-option theme-option-crimson">
-                <input asp-for="Input.SiteThemeId" type="radio" value="crimson-night" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_CrimsonNight"]</strong>
-            </label>
-            <label class="theme-option theme-option-arctic">
-                <input asp-for="Input.SiteThemeId" type="radio" value="arctic-neon" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_ArcticNeon"]</strong>
-            </label>
-            <label class="theme-option theme-option-emerald">
-                <input asp-for="Input.SiteThemeId" type="radio" value="emerald-stage" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_EmeraldStage"]</strong>
-            </label>
-            <label class="theme-option theme-option-violet">
-                <input asp-for="Input.SiteThemeId" type="radio" value="royal-violet" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_RoyalViolet"]</strong>
-            </label>
-            <label class="theme-option theme-option-orange">
-                <input asp-for="Input.SiteThemeId" type="radio" value="sunset-orange" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_SunsetOrange"]</strong>
-            </label>
-            <label class="theme-option theme-option-light">
-                <input asp-for="Input.SiteThemeId" type="radio" value="daylight" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_Daylight"]</strong>
-            </label>
-            <label class="theme-option theme-option-parchment">
-                <input asp-for="Input.SiteThemeId" type="radio" value="warm-parchment" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_WarmParchment"]</strong>
-            </label>
-            <label class="theme-option theme-option-mint">
-                <input asp-for="Input.SiteThemeId" type="radio" value="mint-fog" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_MintFog"]</strong>
-            </label>
-            <label class="theme-option theme-option-ukraine">
-                <input asp-for="Input.SiteThemeId" type="radio" value="ukrainian-sky" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_UkrainianSky"]</strong>
-            </label>
-            <label class="theme-option theme-option-italy">
-                <input asp-for="Input.SiteThemeId" type="radio" value="italian-spirit" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_ItalianSpirit"]</strong>
-            </label>
-            <label class="theme-option theme-option-pride">
-                <input asp-for="Input.SiteThemeId" type="radio" value="pride-spectrum" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_PrideSpectrum"]</strong>
-            </label>
-            <label class="theme-option theme-option-arcade">
-                <input asp-for="Input.SiteThemeId" type="radio" value="retro-arcade" />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_RetroArcade"]</strong>
-            </label>
-            <label class="theme-option theme-option-custom">
-                <input asp-for="Input.SiteThemeId" type="radio" value="custom" data-custom-theme-radio />
-                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
-                <strong>@Localizer["SiteTheme_Custom"]</strong>
-            </label>
+<div class="host-settings-page">
+    <section class="host-settings-hero" aria-labelledby="host-settings-title">
+        <div class="host-settings-hero-copy">
+            <p class="host-settings-kicker">
+                <span>@Localizer["GameSettings_Eyebrow"]</span>
+                <span aria-hidden="true">/ HOST CONTROL</span>
+            </p>
+            <h1 id="host-settings-title">@Localizer["GameSettings_Title"]</h1>
+            <p class="host-settings-description">@Localizer["GameSettings_GlobalDescription"]</p>
+            <div class="host-settings-hero-actions">
+                <button class="button button-secondary"
+                        type="button"
+                        data-open-discord-settings>
+                    @Localizer["Discord_Menu"]
+                </button>
+            </div>
         </div>
-        <div class="custom-theme-colors" data-custom-theme-colors>
-            <label><span>@Localizer["SiteTheme_Background"]</span><input asp-for="Input.CustomThemeColors.Background" type="color" data-theme-variable="--bg" /></label>
-            <label><span>@Localizer["SiteTheme_Panel"]</span><input asp-for="Input.CustomThemeColors.Panel" type="color" data-theme-variable="--panel" /></label>
-            <label><span>@Localizer["SiteTheme_PanelSecondary"]</span><input asp-for="Input.CustomThemeColors.PanelSecondary" type="color" data-theme-variable="--panel-2" /></label>
-            <label><span>@Localizer["SiteTheme_Text"]</span><input asp-for="Input.CustomThemeColors.Text" type="color" data-theme-variable="--text" /></label>
-            <label><span>@Localizer["SiteTheme_MutedText"]</span><input asp-for="Input.CustomThemeColors.MutedText" type="color" data-theme-variable="--muted" /></label>
-            <label><span>@Localizer["SiteTheme_Accent"]</span><input asp-for="Input.CustomThemeColors.Accent" type="color" data-theme-variable="--red" /></label>
-            <label><span>@Localizer["SiteTheme_AccentBright"]</span><input asp-for="Input.CustomThemeColors.AccentBright" type="color" data-theme-variable="--red-bright" /></label>
-            <label><span>@Localizer["SiteTheme_Highlight"]</span><input asp-for="Input.CustomThemeColors.Highlight" type="color" data-theme-variable="--gold" /></label>
+
+        <div class="host-settings-hero-mark" aria-hidden="true">
+            <span>BAD WOLF / CONTROL DECK</span>
+            <strong>SET</strong>
+            <i></i>
+            <b>UP</b>
+            <small>GLOBAL HOST PROFILE</small>
         </div>
-        </div>
-    </details>
-    <label class="brand-logo-field">
-        <span>@Localizer["BrandLogo_Label"]</span>
-        <span class="brand-logo-input-row">
-            <input asp-for="BrandLogo" type="file" accept="image/*" data-brand-logo-input />
-            <img class="brand-logo-preview"
-                 data-brand-logo-preview
-                 src="@(Model.HasBrandLogo ? Url.Page("/Admin/Settings/Index", "BrandLogo") : null)"
-                 alt="@Localizer["BrandLogo_PreviewAlt"]"
-                 hidden="@(Model.HasBrandLogo ? null : "hidden")" />
-        </span>
-        <small>@Localizer["BrandLogo_Hint", Model.MaximumImageUploadMegabytes]</small>
-    </label>
-    @if (Model.HasBrandLogo)
-    {
-        <label class="settings-checkbox">
-            <input asp-for="RemoveBrandLogo" type="checkbox" />
-            <span>@Localizer["BrandLogo_Remove"]</span>
-        </label>
-    }
-    <label>
-        <span>@Localizer["GameSettings_BuzzerDuration"]</span>
-        <input asp-for="Input.BuzzerDurationSeconds" type="number" min="1" max="3600" required />
-        <small>@Localizer["GameSettings_SecondsHint"]</small>
-    </label>
-    <label>
-        <span>@Localizer["GameSettings_AnswerDuration"]</span>
-        <input asp-for="Input.AnswerDurationSeconds" type="number" min="1" max="3600" required />
-        <small>@Localizer["GameSettings_SecondsHint"]</small>
-    </label>
+    </section>
 
-    <label>
-        <span>@Localizer["GameSettings_RegularStartMode"]</span>
-        <select asp-for="Input.RegularQuestionBuzzerStartMode">
-            <option value="1">@Localizer["GameSettings_Automatic"]</option>
-            <option value="2">@Localizer["GameSettings_Manual"]</option>
-        </select>
-    </label>
-    <label>
-        <span>@Localizer["GameSettings_WagerStartMode"]</span>
-        <select asp-for="Input.WagerQuestionAnswerTimerStartMode">
-            <option value="1">@Localizer["GameSettings_Automatic"]</option>
-            <option value="2">@Localizer["GameSettings_Manual"]</option>
-        </select>
-    </label>
+    <main class="host-settings-content">
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="message message-success host-settings-message" role="status" data-auto-dismiss>
+                <span aria-hidden="true">OK</span>
+                <strong>@successMessage</strong>
+            </div>
+        }
 
-    <label class="settings-checkbox">
-        <input asp-for="Input.AnswerRewardDecayEnabled"
-               type="checkbox"
-               data-answer-reward-decay-toggle />
-        <span>@Localizer["GameSettings_AnswerRewardDecayEnabled"]</span>
-    </label>
+        <form method="post" enctype="multipart/form-data" class="host-settings-form">
+            <section class="host-settings-meta">
+                <div class="host-settings-meta-label">
+                    <span aria-hidden="true">HOST / IDENTITY</span>
+                    <strong>@Localizer["Settings_HostId"]</strong>
+                </div>
+                <div class="host-settings-meta-value">
+                    <code class="host-id-value">@Model.HostId</code>
+                    <small>@Localizer["Settings_HostIdHint"]</small>
+                </div>
+            </section>
 
-    <label data-answer-reward-decay-setting>
-        <span>@Localizer["GameSettings_AnswerRewardDecayStartAfter"]</span>
-        <input asp-for="Input.AnswerRewardDecayStartAfterSeconds"
-               type="number"
-               min="5"
-               max="45"
-               required />
-        <small>@Localizer["GameSettings_AnswerRewardDecayStartAfterHint"]</small>
-    </label>
+            <div asp-validation-summary="ModelOnly" class="message message-error host-settings-validation"></div>
 
-    <label data-answer-reward-decay-setting>
-        <span>@Localizer["GameSettings_AnswerRewardDecayMinimum"]</span>
-        <input asp-for="Input.AnswerRewardDecayMinimumPercent"
-               type="number"
-               min="10"
-               max="90"
-               required />
-        <small>@Localizer["GameSettings_AnswerRewardDecayMinimumHint"]</small>
-    </label>
+            <section class="host-settings-panel host-settings-panel-theme">
+                <header class="host-settings-panel-heading">
+                    <div>
+                        <span aria-hidden="true">01 / LOOK &amp; FEEL</span>
+                        <h2>@Localizer["SiteTheme_Label"]</h2>
+                    </div>
+                    <strong aria-hidden="true">VISUAL SYSTEM</strong>
+                </header>
 
-    <label class="settings-checkbox">
-        <input asp-for="Input.AllowNegativeScoreFinalPlayers" type="checkbox" />
-        <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
-    </label>
-    <label>
-        <span>@Localizer["HostCard_Name"]</span>
-        <input asp-for="Input.HostName" maxlength="80" />
-    </label>
-    <label>
-        <span>@Localizer["HostCard_Source"]</span>
-        <select asp-for="Input.HostVisualSource">
-            <option value="0">@Localizer["HostCard_SourceNone"]</option>
-            <option value="3">@Localizer["HostCard_SourceAvatar"]</option>
-            <option value="1">@Localizer["HostCard_SourceImage"]</option>
-            <option value="2">@Localizer["HostCard_SourceWebcam"]</option>
-            <option value="4">@Localizer["HostCard_SourceWebcamUrl"]</option>
-        </select>
-    </label>
-    <label class="host-webcam-url-field">
-        <span>@Localizer["HostCard_WebcamUrl"]</span>
-        <input asp-for="Input.HostWebcamUrl"
-               type="url"
-               maxlength="2048"
-               placeholder="https://vdo.ninja/?view=..." />
-        <small class="form-hint">
-            @Localizer["HostCard_WebcamUrlHintPrefix"]
-            <a href="https://vdo.ninja/" target="_blank" rel="noopener noreferrer">vdo.ninja</a>.
-        </small>
-    </label>
-    <label class="host-avatar-field">
-        <span>@Localizer["HostCard_Avatar"]</span>
-        <span class="host-avatar-input-row">
-            <input asp-for="Input.HostAvatarId" type="hidden" data-host-avatar-id />
-            <button class="button button-secondary" type="button" data-open-avatar-picker>@Localizer["AvatarPicker_Choose"]</button>
-            <img class="host-avatar-preview"
-                 data-host-avatar-preview
-                 src="@(!string.IsNullOrWhiteSpace(Model.Input.HostAvatarId) ? $"/avatars/{Model.Input.HostAvatarId}" : null)"
-                 alt=""
-                 hidden="@(string.IsNullOrWhiteSpace(Model.Input.HostAvatarId) ? "hidden" : null)" />
-        </span>
-    </label>
-    <label class="host-image-field">
-        <span>@Localizer["HostCard_Image", Model.MaximumImageUploadMegabytes]</span>
-        <span class="host-image-input-row">
-            <input asp-for="HostImage" type="file" accept="image/*" data-host-image-input />
-            <img class="host-image-preview"
-                 data-host-image-preview
-                 src="@(Model.HasHostImage ? Url.Page("/Admin/Settings/Index", "HostImage") : null)"
-                 alt=""
-                 hidden="@(Model.HasHostImage ? null : "hidden")" />
-        </span>
-    </label>
+                <details class="theme-picker host-settings-theme-picker">
+                    <summary>@Localizer["SiteTheme_Label"]</summary>
+                    <div class="theme-picker-content">
+                        <p>@Localizer["SiteTheme_Hint"]</p>
+                        <div class="theme-options">
+                            <label class="theme-option theme-option-classic">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="classic-wolf" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_ClassicWolf"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-crimson">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="crimson-night" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_CrimsonNight"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-arctic">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="arctic-neon" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_ArcticNeon"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-emerald">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="emerald-stage" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_EmeraldStage"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-violet">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="royal-violet" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_RoyalViolet"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-orange">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="sunset-orange" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_SunsetOrange"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-light">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="daylight" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_Daylight"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-parchment">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="warm-parchment" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_WarmParchment"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-mint">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="mint-fog" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_MintFog"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-ukraine">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="ukrainian-sky" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_UkrainianSky"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-italy">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="italian-spirit" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_ItalianSpirit"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-pride">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="pride-spectrum" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_PrideSpectrum"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-arcade">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="retro-arcade" />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_RetroArcade"]</strong>
+                            </label>
+                            <label class="theme-option theme-option-custom">
+                                <input asp-for="Input.SiteThemeId" type="radio" value="custom" data-custom-theme-radio />
+                                <span class="theme-swatch" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <strong>@Localizer["SiteTheme_Custom"]</strong>
+                            </label>
+                        </div>
+                        <div class="custom-theme-colors" data-custom-theme-colors>
+                            <label><span>@Localizer["SiteTheme_Background"]</span><input asp-for="Input.CustomThemeColors.Background" type="color" data-theme-variable="--bg" /></label>
+                            <label><span>@Localizer["SiteTheme_Panel"]</span><input asp-for="Input.CustomThemeColors.Panel" type="color" data-theme-variable="--panel" /></label>
+                            <label><span>@Localizer["SiteTheme_PanelSecondary"]</span><input asp-for="Input.CustomThemeColors.PanelSecondary" type="color" data-theme-variable="--panel-2" /></label>
+                            <label><span>@Localizer["SiteTheme_Text"]</span><input asp-for="Input.CustomThemeColors.Text" type="color" data-theme-variable="--text" /></label>
+                            <label><span>@Localizer["SiteTheme_MutedText"]</span><input asp-for="Input.CustomThemeColors.MutedText" type="color" data-theme-variable="--muted" /></label>
+                            <label><span>@Localizer["SiteTheme_Accent"]</span><input asp-for="Input.CustomThemeColors.Accent" type="color" data-theme-variable="--red" /></label>
+                            <label><span>@Localizer["SiteTheme_AccentBright"]</span><input asp-for="Input.CustomThemeColors.AccentBright" type="color" data-theme-variable="--red-bright" /></label>
+                            <label><span>@Localizer["SiteTheme_Highlight"]</span><input asp-for="Input.CustomThemeColors.Highlight" type="color" data-theme-variable="--gold" /></label>
+                        </div>
+                    </div>
+                </details>
+
+                <div class="host-settings-brand-grid">
+                    <label class="brand-logo-field host-settings-field host-settings-field-wide">
+                        <span>@Localizer["BrandLogo_Label"]</span>
+                        <span class="brand-logo-input-row">
+                            <input asp-for="BrandLogo" type="file" accept="image/*" data-brand-logo-input />
+                            <img class="brand-logo-preview"
+                                 data-brand-logo-preview
+                                 src="@(Model.HasBrandLogo ? Url.Page("/Admin/Settings/Index", "BrandLogo") : null)"
+                                 alt="@Localizer["BrandLogo_PreviewAlt"]"
+                                 hidden="@(Model.HasBrandLogo ? null : "hidden")" />
+                        </span>
+                        <small>@Localizer["BrandLogo_Hint", Model.MaximumImageUploadMegabytes]</small>
+                    </label>
+                    @if (Model.HasBrandLogo)
+                    {
+                        <label class="settings-checkbox host-settings-checkbox">
+                            <input asp-for="RemoveBrandLogo" type="checkbox" />
+                            <span>@Localizer["BrandLogo_Remove"]</span>
+                        </label>
+                    }
+                </div>
+            </section>
+
+            <section class="host-settings-panel">
+                <header class="host-settings-panel-heading">
+                    <div>
+                        <span aria-hidden="true">02 / GAME FLOW</span>
+                        <h2>@Localizer["GameSettings_Title"]</h2>
+                    </div>
+                    <strong aria-hidden="true">TIMING / RULES</strong>
+                </header>
+
+                <div class="host-settings-grid">
+                    <label class="host-settings-field">
+                        <span>@Localizer["GameSettings_BuzzerDuration"]</span>
+                        <input asp-for="Input.BuzzerDurationSeconds" type="number" min="1" max="3600" required />
+                        <small>@Localizer["GameSettings_SecondsHint"]</small>
+                    </label>
+                    <label class="host-settings-field">
+                        <span>@Localizer["GameSettings_AnswerDuration"]</span>
+                        <input asp-for="Input.AnswerDurationSeconds" type="number" min="1" max="3600" required />
+                        <small>@Localizer["GameSettings_SecondsHint"]</small>
+                    </label>
+
+                    <label class="host-settings-field">
+                        <span>@Localizer["GameSettings_RegularStartMode"]</span>
+                        <select asp-for="Input.RegularQuestionBuzzerStartMode">
+                            <option value="1">@Localizer["GameSettings_Automatic"]</option>
+                            <option value="2">@Localizer["GameSettings_Manual"]</option>
+                        </select>
+                    </label>
+                    <label class="host-settings-field">
+                        <span>@Localizer["GameSettings_WagerStartMode"]</span>
+                        <select asp-for="Input.WagerQuestionAnswerTimerStartMode">
+                            <option value="1">@Localizer["GameSettings_Automatic"]</option>
+                            <option value="2">@Localizer["GameSettings_Manual"]</option>
+                        </select>
+                    </label>
+
+                    <label class="settings-checkbox host-settings-checkbox host-settings-field-wide">
+                        <input asp-for="Input.AnswerRewardDecayEnabled"
+                               type="checkbox"
+                               data-answer-reward-decay-toggle />
+                        <span>@Localizer["GameSettings_AnswerRewardDecayEnabled"]</span>
+                    </label>
+
+                    <label class="host-settings-field" data-answer-reward-decay-setting>
+                        <span>@Localizer["GameSettings_AnswerRewardDecayStartAfter"]</span>
+                        <input asp-for="Input.AnswerRewardDecayStartAfterSeconds"
+                               type="number"
+                               min="5"
+                               max="45"
+                               required />
+                        <small>@Localizer["GameSettings_AnswerRewardDecayStartAfterHint"]</small>
+                    </label>
+
+                    <label class="host-settings-field" data-answer-reward-decay-setting>
+                        <span>@Localizer["GameSettings_AnswerRewardDecayMinimum"]</span>
+                        <input asp-for="Input.AnswerRewardDecayMinimumPercent"
+                               type="number"
+                               min="10"
+                               max="90"
+                               required />
+                        <small>@Localizer["GameSettings_AnswerRewardDecayMinimumHint"]</small>
+                    </label>
+
+                    <label class="settings-checkbox host-settings-checkbox host-settings-field-wide">
+                        <input asp-for="Input.AllowNegativeScoreFinalPlayers" type="checkbox" />
+                        <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="host-settings-panel">
+                <header class="host-settings-panel-heading">
+                    <div>
+                        <span aria-hidden="true">03 / HOST PRESENCE</span>
+                        <h2>@Localizer["HostCard_Source"]</h2>
+                    </div>
+                    <strong aria-hidden="true">IDENTITY / CAMERA</strong>
+                </header>
+
+                <div class="host-settings-grid host-settings-host-grid">
+                    <label class="host-settings-field">
+                        <span>@Localizer["HostCard_Name"]</span>
+                        <input asp-for="Input.HostName" maxlength="80" />
+                    </label>
+                    <label class="host-settings-field">
+                        <span>@Localizer["HostCard_Source"]</span>
+                        <select asp-for="Input.HostVisualSource">
+                            <option value="0">@Localizer["HostCard_SourceNone"]</option>
+                            <option value="3">@Localizer["HostCard_SourceAvatar"]</option>
+                            <option value="1">@Localizer["HostCard_SourceImage"]</option>
+                            <option value="2">@Localizer["HostCard_SourceWebcam"]</option>
+                            <option value="4">@Localizer["HostCard_SourceWebcamUrl"]</option>
+                        </select>
+                    </label>
+                    <label class="host-webcam-url-field host-settings-field host-settings-field-wide">
+                        <span>@Localizer["HostCard_WebcamUrl"]</span>
+                        <input asp-for="Input.HostWebcamUrl"
+                               type="url"
+                               maxlength="2048"
+                               placeholder="https://vdo.ninja/?view=..." />
+                        <small class="form-hint">
+                            @Localizer["HostCard_WebcamUrlHintPrefix"]
+                            <a href="https://vdo.ninja/" target="_blank" rel="noopener noreferrer">vdo.ninja</a>.
+                        </small>
+                    </label>
+                    <label class="host-avatar-field host-settings-field">
+                        <span>@Localizer["HostCard_Avatar"]</span>
+                        <span class="host-avatar-input-row">
+                            <input asp-for="Input.HostAvatarId" type="hidden" data-host-avatar-id />
+                            <button class="button button-secondary" type="button" data-open-avatar-picker>@Localizer["AvatarPicker_Choose"]</button>
+                            <img class="host-avatar-preview"
+                                 data-host-avatar-preview
+                                 src="@(!string.IsNullOrWhiteSpace(Model.Input.HostAvatarId) ? $"/avatars/{Model.Input.HostAvatarId}" : null)"
+                                 alt=""
+                                 hidden="@(string.IsNullOrWhiteSpace(Model.Input.HostAvatarId) ? "hidden" : null)" />
+                        </span>
+                    </label>
+                    <label class="host-image-field host-settings-field">
+                        <span>@Localizer["HostCard_Image", Model.MaximumImageUploadMegabytes]</span>
+                        <span class="host-image-input-row">
+                            <input asp-for="HostImage" type="file" accept="image/*" data-host-image-input />
+                            <img class="host-image-preview"
+                                 data-host-image-preview
+                                 src="@(Model.HasHostImage ? Url.Page("/Admin/Settings/Index", "HostImage") : null)"
+                                 alt=""
+                                 hidden="@(Model.HasHostImage ? null : "hidden")" />
+                        </span>
+                    </label>
+                </div>
+            </section>
+
+            <div class="host-settings-actions">
+                <span aria-hidden="true">APPLY / GLOBAL SETTINGS</span>
+                <button class="button button-primary" type="submit">@Localizer["Button_Save"]</button>
+            </div>
+        </form>
+    </main>
+
+    <partial name="_AvatarPicker" />
 </div>
-    <div class="form-actions">
-        <button class="button button-primary" type="submit">@Localizer["Button_Save"]</button>
-    </div>
-</form>
-<partial name="_AvatarPicker" />
 
 @section Scripts {
     <script>

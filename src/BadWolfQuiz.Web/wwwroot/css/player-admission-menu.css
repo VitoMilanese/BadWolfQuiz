@@ -395,3 +395,443 @@ body:has(.player-buzzer-panel) { overflow-x: hidden; overflow-x: clip; overscrol
         grid-template-columns: minmax(0, 1fr) auto auto;
     }
 }
+
+/* Player waiting room: keep the redesign strictly scoped to the pre-game lobby state. */
+body.gameplay-layout:has(.player-lobby[data-final-status="lobby"]) {
+    min-height: 100dvh;
+    background:
+        radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--red) 18%, transparent), transparent 28rem),
+        radial-gradient(circle at 88% 82%, color-mix(in srgb, var(--gold) 12%, transparent), transparent 26rem),
+        linear-gradient(135deg, color-mix(in srgb, var(--panel) 72%, transparent), transparent 58%),
+        var(--body-background);
+}
+
+main.page-shell:has(> .player-lobby[data-final-status="lobby"]) {
+    width: min(100%, 1540px);
+    max-width: none;
+    padding: clamp(0.75rem, 2vw, 2rem);
+}
+
+.player-lobby[data-final-status="lobby"] {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    max-width: none;
+    min-height: min(78dvh, 920px);
+    margin: 0;
+    padding: clamp(1rem, 2.5vw, 2.5rem);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: clamp(0.85rem, 1.5vw, 1.35rem);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: clamp(22px, 3vw, 42px);
+    background:
+        linear-gradient(120deg, color-mix(in srgb, var(--panel-2) 74%, transparent), transparent 52%),
+        linear-gradient(315deg, color-mix(in srgb, var(--red) 9%, transparent), transparent 42%),
+        var(--panel);
+    box-shadow: 0 28px 90px rgb(0 0 0 / 24%);
+}
+
+.player-lobby[data-final-status="lobby"]::before {
+    content: "LOBBY";
+    position: absolute;
+    z-index: -1;
+    top: -0.18em;
+    right: -0.035em;
+    color: var(--text);
+    font-size: clamp(7rem, 22vw, 21rem);
+    font-weight: 950;
+    line-height: 0.8;
+    letter-spacing: -0.09em;
+    opacity: 0.035;
+    pointer-events: none;
+    user-select: none;
+}
+
+.player-lobby[data-final-status="lobby"]::after {
+    content: "GAME  " attr(data-game-code);
+    position: absolute;
+    top: clamp(1rem, 2.25vw, 2.2rem);
+    right: clamp(1rem, 2.5vw, 2.5rem);
+    z-index: 2;
+    padding: 0.42rem 0.7rem;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--panel-2) 88%, transparent);
+    color: var(--muted);
+    font-size: clamp(0.67rem, 1vw, 0.78rem);
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    line-height: 1;
+    text-transform: uppercase;
+    box-shadow: 0 10px 28px rgb(0 0 0 / 15%);
+    pointer-events: none;
+}
+
+.player-lobby[data-final-status="lobby"] > .eyebrow {
+    grid-column: 1 / -1;
+    width: fit-content;
+    max-width: calc(100% - 10rem);
+    margin: 0;
+    padding: 0.55rem 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    border: 1px solid color-mix(in srgb, var(--red) 52%, var(--line));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--red) 10%, var(--panel));
+    color: var(--text);
+    font-size: clamp(0.72rem, 1.15vw, 0.88rem);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    line-height: 1.15;
+    text-transform: uppercase;
+}
+
+.player-lobby[data-final-status="lobby"] > .eyebrow::before {
+    content: "";
+    width: 0.62rem;
+    height: 0.62rem;
+    flex: 0 0 0.62rem;
+    border-radius: 999px;
+    background: var(--red-bright);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--red-bright) 48%, transparent);
+    animation: player-lobby-signal 1.9s ease-out infinite;
+}
+
+.player-lobby[data-final-status="lobby"] > h1 {
+    grid-column: 1 / -1;
+    max-width: 18ch;
+    margin: clamp(0.65rem, 2vw, 1.7rem) 0 0;
+    color: var(--text);
+    font-size: clamp(2.7rem, 7.7vw, 7.4rem);
+    font-weight: 950;
+    line-height: 0.88;
+    letter-spacing: -0.065em;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    text-transform: uppercase;
+    text-shadow: 0 12px 40px rgb(0 0 0 / 18%);
+}
+
+.player-lobby[data-final-status="lobby"] > p:not(.eyebrow):not(.dialog-warning) {
+    grid-column: 1 / -1;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0.35rem 0 clamp(0.5rem, 1.5vw, 1.1rem);
+    padding: 0.85rem 1rem 0.85rem 1.15rem;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.7rem;
+    border-left: 4px solid var(--red-bright);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--red) 10%, transparent), transparent);
+    color: var(--text);
+    font-size: clamp(1rem, 1.65vw, 1.25rem);
+}
+
+.player-lobby[data-final-status="lobby"] > p:not(.eyebrow):not(.dialog-warning) > strong {
+    color: var(--muted);
+    font-size: 0.74em;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.player-lobby[data-final-status="lobby"] > .player-media-settings {
+    position: relative;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+    border-radius: clamp(16px, 2vw, 24px);
+    background:
+        linear-gradient(145deg, color-mix(in srgb, var(--panel-2) 88%, transparent), color-mix(in srgb, var(--panel) 92%, transparent));
+    box-shadow: 0 16px 42px rgb(0 0 0 / 14%);
+    transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.player-lobby[data-final-status="lobby"] > .player-media-settings:hover,
+.player-lobby[data-final-status="lobby"] > .player-media-settings:focus-within {
+    border-color: color-mix(in srgb, var(--red-bright) 42%, var(--line));
+    box-shadow: 0 20px 54px rgb(0 0 0 / 20%);
+    transform: translateY(-2px);
+}
+
+.player-lobby[data-final-status="lobby"] > .player-media-settings > summary {
+    min-height: 4.3rem;
+    padding: 1rem 1.05rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    color: var(--text);
+    font-weight: 900;
+    letter-spacing: 0.025em;
+    list-style: none;
+}
+
+.player-lobby[data-final-status="lobby"] > .player-media-settings > summary::-webkit-details-marker {
+    display: none;
+}
+
+.player-lobby[data-final-status="lobby"] > .player-media-settings > summary::before {
+    content: "";
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 2.25rem;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 0.7rem;
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--red) 34%, transparent), transparent 58%),
+        var(--panel);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+.player-lobby[data-final-status="lobby"] > .player-menu-settings > summary::before {
+    background:
+        linear-gradient(var(--text), var(--text)) 50% 35% / 46% 2px no-repeat,
+        linear-gradient(var(--text), var(--text)) 50% 50% / 46% 2px no-repeat,
+        linear-gradient(var(--text), var(--text)) 50% 65% / 46% 2px no-repeat,
+        linear-gradient(135deg, color-mix(in srgb, var(--red) 28%, transparent), transparent 58%),
+        var(--panel);
+}
+
+.player-lobby[data-final-status="lobby"] > .player-media-settings:not(.player-menu-settings) > summary::before {
+    background:
+        radial-gradient(circle, var(--text) 0 18%, transparent 19%),
+        radial-gradient(circle, transparent 0 34%, var(--text) 35% 41%, transparent 42%),
+        linear-gradient(135deg, color-mix(in srgb, var(--gold) 22%, transparent), transparent 58%),
+        var(--panel);
+}
+
+.player-lobby[data-final-status="lobby"] > .player-media-settings > summary::after {
+    content: "+";
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 1.4rem;
+    font-weight: 500;
+    line-height: 1;
+    transition: transform 160ms ease, color 160ms ease;
+}
+
+.player-lobby[data-final-status="lobby"] > .player-media-settings[open] > summary::after {
+    color: var(--red-bright);
+    transform: rotate(45deg);
+}
+
+.player-lobby[data-final-status="lobby"] > .player-media-settings[open] > summary {
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+}
+
+.player-lobby[data-final-status="lobby"] .player-media-settings-content {
+    gap: 0.85rem;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--panel) 58%, transparent);
+}
+
+.player-lobby[data-final-status="lobby"] .player-menu-links,
+.player-lobby[data-final-status="lobby"] .player-language-options,
+.player-lobby[data-final-status="lobby"] .player-image-source-switch,
+.player-lobby[data-final-status="lobby"] .player-image-actions {
+    gap: 0.55rem;
+}
+
+.player-lobby[data-final-status="lobby"] .player-menu-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.player-lobby[data-final-status="lobby"] .player-menu-links > *,
+.player-lobby[data-final-status="lobby"] .player-menu-links > form > *,
+.player-lobby[data-final-status="lobby"] .player-language-options > *,
+.player-lobby[data-final-status="lobby"] .player-image-source-switch > *,
+.player-lobby[data-final-status="lobby"] .player-image-actions > * {
+    min-width: 0;
+}
+
+.player-lobby[data-final-status="lobby"] .player-menu-links .button,
+.player-lobby[data-final-status="lobby"] .player-language-options .button,
+.player-lobby[data-final-status="lobby"] .player-image-source-switch .button,
+.player-lobby[data-final-status="lobby"] .player-image-actions .button,
+.player-lobby[data-final-status="lobby"] [data-toggle-player-webcam],
+.player-lobby[data-final-status="lobby"] [data-activate-player-webcam-url] {
+    min-height: 2.75rem;
+    border-radius: 0.8rem;
+    box-shadow: none;
+}
+
+.player-lobby[data-final-status="lobby"] .player-language-settings {
+    padding-top: 0.85rem;
+    border-top: 1px solid color-mix(in srgb, var(--line) 74%, transparent);
+}
+
+.player-lobby[data-final-status="lobby"] .player-language-settings > strong {
+    display: block;
+    margin-bottom: 0.6rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+.player-lobby[data-final-status="lobby"] .player-language-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.player-lobby[data-final-status="lobby"] .player-language-options .is-selected {
+    border-color: color-mix(in srgb, var(--red-bright) 56%, var(--line));
+    background: color-mix(in srgb, var(--red) 12%, var(--panel-2));
+}
+
+.player-lobby[data-final-status="lobby"] .player-avatar-control {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.player-lobby[data-final-status="lobby"] .player-avatar-current {
+    width: min(9rem, 34vw);
+    height: min(9rem, 34vw);
+    margin-inline: auto;
+    border: 2px solid color-mix(in srgb, var(--red-bright) 44%, var(--line));
+    border-radius: 50%;
+    background: var(--panel-2);
+    object-fit: cover;
+    box-shadow: 0 16px 34px rgb(0 0 0 / 20%);
+}
+
+.player-lobby[data-final-status="lobby"] iframe.player-avatar-current {
+    border-radius: 1.2rem;
+}
+
+.player-lobby[data-final-status="lobby"] .player-image-source-switch,
+.player-lobby[data-final-status="lobby"] .player-image-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
+}
+
+.player-lobby[data-final-status="lobby"] .player-webcam-url-field {
+    padding: 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+    border-radius: 0.9rem;
+    background: color-mix(in srgb, var(--panel-2) 72%, transparent);
+}
+
+.player-lobby[data-final-status="lobby"] .player-webcam-url-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.55rem;
+}
+
+.player-lobby[data-final-status="lobby"] .player-webcam-url-row input {
+    min-width: 0;
+}
+
+.player-lobby[data-final-status="lobby"] > :is(#activity-warning, #rejoin-warning, .dialog-warning) {
+    grid-column: 1 / -1;
+}
+
+.player-lobby[data-final-status="lobby"] > .dialog-warning {
+    margin: 0.15rem 0 0;
+    padding: 0.85rem 1rem;
+    border: 1px dashed color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 0.9rem;
+    background: color-mix(in srgb, var(--panel-2) 62%, transparent);
+    color: var(--muted);
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+
+.player-lobby[data-final-status="lobby"] > :is(#activity-warning, #rejoin-warning) {
+    margin: 0;
+    border-radius: 0.9rem;
+}
+
+.player-lobby[data-final-status="lobby"] > #game-timer[hidden] {
+    display: none;
+}
+
+@keyframes player-lobby-signal {
+    0% {
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--red-bright) 46%, transparent);
+    }
+
+    70%,
+    100% {
+        box-shadow: 0 0 0 0.72rem transparent;
+    }
+}
+
+@media (max-width: 900px) {
+    main.page-shell:has(> .player-lobby[data-final-status="lobby"]) {
+        padding: 0.7rem;
+    }
+
+    .player-lobby[data-final-status="lobby"] {
+        min-height: calc(100dvh - 7rem);
+        grid-template-columns: 1fr;
+        padding: clamp(0.9rem, 4vw, 1.4rem);
+        border-radius: 1.4rem;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .eyebrow,
+    .player-lobby[data-final-status="lobby"] > h1,
+    .player-lobby[data-final-status="lobby"] > p:not(.eyebrow):not(.dialog-warning),
+    .player-lobby[data-final-status="lobby"] > .player-media-settings,
+    .player-lobby[data-final-status="lobby"] > :is(#activity-warning, #rejoin-warning, .dialog-warning) {
+        grid-column: 1;
+    }
+
+    .player-lobby[data-final-status="lobby"] > h1 {
+        margin-top: clamp(1.4rem, 6vw, 3rem);
+        font-size: clamp(2.55rem, 12vw, 5.4rem);
+    }
+
+    .player-lobby[data-final-status="lobby"]::after {
+        top: 0.95rem;
+        right: 0.95rem;
+    }
+}
+
+@media (max-width: 560px) {
+    .player-lobby[data-final-status="lobby"]::after {
+        content: attr(data-game-code);
+        letter-spacing: 0.12em;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .eyebrow {
+        max-width: calc(100% - 6rem);
+        padding-inline: 0.65rem;
+        font-size: 0.68rem;
+    }
+
+    .player-lobby[data-final-status="lobby"] .player-menu-links,
+    .player-lobby[data-final-status="lobby"] .player-language-options,
+    .player-lobby[data-final-status="lobby"] .player-webcam-url-row {
+        grid-template-columns: 1fr;
+    }
+
+    .player-lobby[data-final-status="lobby"] .player-webcam-url-row .button {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player-lobby[data-final-status="lobby"] > .eyebrow::before {
+        animation: none;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-media-settings,
+    .player-lobby[data-final-status="lobby"] > .player-media-settings > summary::after {
+        transition: none;
+    }
+
+    .player-lobby[data-final-status="lobby"] > .player-media-settings:hover,
+    .player-lobby[data-final-status="lobby"] > .player-media-settings:focus-within {
+        transform: none;
+    }
+}

@@ -1,0 +1,195 @@
+/* Browser-review corrections for the Host Lobby redesign. */
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-access {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    overflow: hidden;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-details {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-reveal {
+    padding-right: 0.9rem;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-actions {
+    position: static;
+    flex: 0 0 auto;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    max-width: none;
+    margin: 0;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-actions .icon-button {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    max-width: 2.75rem;
+    height: 2.75rem;
+    min-height: 2.75rem;
+    max-height: 2.75rem;
+    padding: 0;
+}
+
+/* site.css absolutely positions player-card-actions and reserves right padding.
+   Undo both rules inside the redesigned Host Lobby. */
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(.player-card-actions) {
+    padding-right: 0.85rem !important;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list .player-card-actions {
+    position: static !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    transform: none !important;
+    translate: none !important;
+    flex-direction: row !important;
+    flex: 0 0 auto;
+}
+
+/* Keep the server-rendered and settled lobby controls at the same dimensions.
+   site.css initially paints these buttons at 32px and their glyphs at 0.72rem,
+   so retaining both values prevents refresh-time size jumps. */
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list .player-action-button {
+    box-sizing: border-box;
+    width: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    height: 32px;
+    min-height: 32px;
+    max-height: 32px;
+    flex: 0 0 32px;
+    padding: 0;
+    font-size: 0.72rem !important;
+    line-height: 1 !important;
+}
+
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list .player-action-button > span {
+    display: block;
+    font-size: inherit !important;
+    line-height: 1 !important;
+}
+
+/* Presence state wins over the active-player badge. This prevents the initial
+   inactive + active-player double-status flash during refresh. */
+body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .presence-badge) .active-player-badge {
+    display: none !important;
+}
+
+/* Desktop/tablet player cards use a simple flex row so the presence badge and
+   management buttons can never occupy the same visual space. */
+@media (min-width: 701px) {
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) {
+        display: flex !important;
+        align-items: center;
+        gap: 0.9rem;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > .player-list-avatar {
+        flex: 0 0 3rem;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > strong {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > .presence-badge {
+        position: static !important;
+        inset: auto !important;
+        flex: 0 0 auto;
+        max-width: none;
+        margin: 0 !important;
+        transform: none !important;
+        translate: none !important;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > .player-management {
+        position: static !important;
+        inset: auto !important;
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-width: max-content;
+        margin: 0 !important;
+        transform: none !important;
+        translate: none !important;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > .player-management .player-card-actions {
+        flex: 0 0 auto;
+        margin-left: 0.15rem;
+    }
+}
+
+@media (max-width: 700px) {
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-access {
+        gap: 0.35rem;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) .lobby-join-copy-actions .icon-button {
+        width: 2.55rem;
+        min-width: 2.55rem;
+        max-width: 2.55rem;
+        height: 2.55rem;
+        min-height: 2.55rem;
+        max-height: 2.55rem;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li,
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > strong {
+        grid-column: 1 / 3;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > .presence-badge {
+        position: static !important;
+        inset: auto !important;
+        grid-column: 1 / 3;
+        grid-row: 2;
+        justify-self: start;
+        margin: 0 !important;
+        transform: none !important;
+        translate: none !important;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li > .player-management {
+        position: static !important;
+        inset: auto !important;
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        margin: 0 !important;
+        transform: none !important;
+        translate: none !important;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > .player-list-avatar {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > strong {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > .presence-badge {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    body.gameplay-layout:has(.content-panel[data-game-status="lobby"]) #player-list.player-list > li:has(> .player-list-avatar) > .player-management {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+    }
+}
