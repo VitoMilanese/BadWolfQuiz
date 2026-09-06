@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class GameplayPolishRegressionTests
 {
     [Fact]
-    public void Gameplay_polish_assets_cover_intro_wait_player_runtime_and_answering_name()
+    public void Gameplay_polish_assets_cover_intro_wait_player_layout_and_answering_name()
     {
         var imports = File.ReadAllText(FindWebFile(
             "Pages",
@@ -15,6 +15,10 @@ public sealed class GameplayPolishRegressionTests
             "wwwroot",
             "css",
             "gameplay-polish.css"));
+        var playerWaitingStyles = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "player-lobby-waiting-room-fixes.css"));
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
@@ -46,7 +50,7 @@ public sealed class GameplayPolishRegressionTests
             helper,
             StringComparison.Ordinal);
         Assert.Contains("gameplay-polish.css?v=3", helper, StringComparison.Ordinal);
-        Assert.Contains("gameplay-polish.js?v=2", helper, StringComparison.Ordinal);
+        Assert.Contains("gameplay-polish.js?v=3", helper, StringComparison.Ordinal);
 
         Assert.Contains("data-game-intro-start", intro, StringComparison.Ordinal);
         Assert.Contains("is-leaving", intro, StringComparison.Ordinal);
@@ -59,13 +63,16 @@ public sealed class GameplayPolishRegressionTests
         Assert.Contains("badwolf:host-shell-mounted", script, StringComparison.Ordinal);
 
         Assert.Contains("data-final-status=", player, StringComparison.Ordinal);
-        Assert.Contains("is-page-buzzer-active", player, StringComparison.Ordinal);
-        Assert.Contains("player-buzzer-open", script, StringComparison.Ordinal);
-        Assert.Contains("new MutationObserver", script, StringComparison.Ordinal);
         Assert.Contains(
+            ".player-lobby[data-final-status=\"lobby\"] > .player-buzzer-panel > .player-buzzer",
+            playerWaitingStyles,
+            StringComparison.Ordinal);
+        Assert.Contains("aspect-ratio: auto;", playerWaitingStyles, StringComparison.Ordinal);
+        Assert.DoesNotContain(
             "playerLobby.dataset.finalStatus = \"running\";",
             script,
             StringComparison.Ordinal);
+        Assert.DoesNotContain("player-runtime-layout", script, StringComparison.Ordinal);
 
         Assert.Contains(
             ".game-scoreboard .scoreboard-player:not(.host-card)",
