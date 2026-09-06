@@ -6,7 +6,7 @@ namespace BadWolfQuiz.Web.TagHelpers;
 public sealed class FinalQuestionHostStageAssetsTagHelper(
     IHttpContextAccessor httpContextAccessor) : TagHelper
 {
-    private const string LobbyPath = "/Admin/Games/Lobby";
+    private static readonly PathString LobbyPath = new("/Admin/Games/Lobby");
 
     public override int Order => 2000;
 
@@ -14,7 +14,9 @@ public sealed class FinalQuestionHostStageAssetsTagHelper(
     {
         var requestPath = httpContextAccessor.HttpContext?.Request.Path;
         if (!requestPath.HasValue ||
-            !requestPath.Value.StartsWith(LobbyPath, StringComparison.OrdinalIgnoreCase))
+            !requestPath.Value.StartsWithSegments(
+                LobbyPath,
+                StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
