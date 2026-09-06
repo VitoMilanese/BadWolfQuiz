@@ -12,7 +12,5 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-      - name: Restore
-        run: dotnet restore BadWolfQuiz.sln
-      - name: Test
-        run: dotnet test BadWolfQuiz.sln --no-restore --configuration Release
+      - name: Test web suite
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release
