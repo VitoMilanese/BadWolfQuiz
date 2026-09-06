@@ -6,10 +6,6 @@
     ViewData["HidePortalFooter"] = true;
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/final-question-stage.css" asp-append-version="true" />
-}
-
 <div class="final-question-transition" data-final-question-transition>
     <div class="final-question-transition-ambient" aria-hidden="true"></div>
 
@@ -66,3 +62,7 @@
         </button>
     </form>
 </div>
+
+<style data-final-question-stage-styles>
+    @@import url("/css/final-question-stage.css");
+</style>
