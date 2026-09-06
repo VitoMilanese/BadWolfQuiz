@@ -16,6 +16,9 @@ public sealed class FinalQuestionHostStageRegressionTests
         var helper = File.ReadAllText(FindWebFile(
             "TagHelpers",
             "FinalQuestionHostStageAssetsTagHelper.cs"));
+        var judgingProgressHelper = File.ReadAllText(FindWebFile(
+            "TagHelpers",
+            "FinalQuestionJudgingProgressTagHelper.cs"));
         var styles = File.ReadAllText(FindWebFile(
             "wwwroot",
             "css",
@@ -27,6 +30,10 @@ public sealed class FinalQuestionHostStageRegressionTests
 
         Assert.Contains(
             "FinalQuestionHostStageAssetsTagHelper",
+            imports,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "FinalQuestionJudgingProgressTagHelper",
             imports,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -42,7 +49,7 @@ public sealed class FinalQuestionHostStageRegressionTests
             helper,
             StringComparison.Ordinal);
         Assert.Contains(
-            "final-question-host-answer-space.css?v=1",
+            "final-question-host-answer-space.css?v=2",
             helper,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
@@ -93,11 +100,25 @@ public sealed class FinalQuestionHostStageRegressionTests
             answerSpaceStyles,
             StringComparison.Ordinal);
         Assert.Contains(
-            ".answer-presentation > .eyebrow",
+            ".final-question-host .answer-presentation > .eyebrow",
             answerSpaceStyles,
             StringComparison.Ordinal);
         Assert.Contains("display: none;", answerSpaceStyles, StringComparison.Ordinal);
-        Assert.Contains("padding-top: 0;", answerSpaceStyles, StringComparison.Ordinal);
+        Assert.Contains("display: block;", answerSpaceStyles, StringComparison.Ordinal);
+        Assert.Contains("text-transform: uppercase;", answerSpaceStyles, StringComparison.Ordinal);
+
+        Assert.Contains(
+            "final-judging-list",
+            judgingProgressHelper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "localizer[\"GameBoard_Answer\"]",
+            judgingProgressHelper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            " / ",
+            judgingProgressHelper,
+            StringComparison.Ordinal);
     }
 
     private static string FindWebFile(params string[] parts)
