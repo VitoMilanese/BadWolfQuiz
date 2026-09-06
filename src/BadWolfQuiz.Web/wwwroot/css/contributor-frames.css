@@ -38,6 +38,11 @@
     grid-row: 1;
 }
 
+.host-avatar-frame-settings-row > .host-avatar-input-row {
+    grid-column: 2;
+    grid-row: 1;
+}
+
 .host-avatar-frame-settings-row > .host-avatar-field > .host-avatar-input-row {
     grid-column: 2;
     grid-row: 1;
@@ -80,6 +85,12 @@
     margin: 0;
     object-fit: cover;
     border-radius: 50%;
+}
+
+.host-settings-page .host-avatar-frame-preview > .host-avatar-preview {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .host-avatar-frame-preview-overlay {
@@ -175,6 +186,30 @@
     padding: var(
         --contributor-frame-scaled-avatar-inset,
         var(--contributor-frame-avatar-inset, 0px));
+}
+
+/* Uploaded images and webcam surfaces keep their existing rectangular layout,
+ * but the visible pixels are clipped to the exact circular opening of the
+ * square frame. The radius is calculated from the filename-native inset. */
+.contributor-frame-owner[data-avatar-frame] .contributor-frame-clipped-media {
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    clip-path: circle(var(--contributor-frame-clip-radius, 0px) at 50% 50%) !important;
+    overflow: hidden;
+    object-fit: cover !important;
+}
+
+/* The Player Lobby gives the media preview its own blue circular shell.
+ * Once a contributor frame is active that shell is redundant and must not
+ * show through behind the decorative frame. */
+.player-avatar-control.contributor-frame-owner[data-avatar-frame] > .player-avatar-current {
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 @media (max-width: 700px) {

@@ -9,6 +9,10 @@
     width: 9rem;
     height: 9rem;
     flex: 0 0 9rem;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .player-avatar-frame-preview[hidden] {
@@ -23,7 +27,11 @@
     height: 100%;
     padding: var(--player-avatar-frame-preview-inset);
     object-fit: cover;
+    border: 0;
     border-radius: 50%;
+    outline: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .player-avatar-frame-preview-overlay {
@@ -33,6 +41,10 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    box-shadow: none;
     pointer-events: none;
     user-select: none;
     z-index: 2;
