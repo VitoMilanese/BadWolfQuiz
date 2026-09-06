@@ -15,6 +15,6 @@ public sealed class FinalQuestionHostStageAssetsTagHelper : TagHelper
         output.PreContent.AppendHtml(
             "<link rel=\"stylesheet\" href=\"/css/final-question-host-stage.css?v=3\" />" +
             "<link rel=\"stylesheet\" href=\"/css/final-question-host-answer-space.css?v=2\" />" +
-            "<script src=\"/js/final-question-host-responsiveness.js?v=1\"></script>");
+            "<script src=\"/js/final-question-host-responsiveness.js?v=2\"></script>");
     }
 }
