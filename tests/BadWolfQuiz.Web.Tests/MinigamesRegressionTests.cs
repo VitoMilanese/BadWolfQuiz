@@ -34,7 +34,13 @@ public sealed class MinigamesRegressionTests
 
         Assert.Contains("asp-page=\"/GuessWhatIPlay\"", catalog);
         Assert.Contains("GuessWhatIPlay_Title", catalog);
+        Assert.Contains("minigames-catalog-page", catalog);
+        Assert.Contains("minigames-catalog-hero", catalog);
+        Assert.Contains("minigames-catalog-card-index", catalog);
+        Assert.Contains("body.portal-layout:has(.minigames-catalog-page) > .page-shell", catalogStyles);
         Assert.Contains("aspect-ratio: 16 / 9", catalogStyles);
+        Assert.Contains("@media (max-width: 600px)", catalogStyles);
+        Assert.Contains("@media (prefers-reduced-motion: reduce)", catalogStyles);
         Assert.Contains("@page \"/minigames/guess-what-i-play\"", game);
         Assert.Contains("data-minigames-root", game);
         Assert.DoesNotContain("<text", illustration, StringComparison.OrdinalIgnoreCase);
