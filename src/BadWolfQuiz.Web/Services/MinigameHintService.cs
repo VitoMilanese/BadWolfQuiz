@@ -83,7 +83,11 @@ public sealed class MinigameHintService
         CancellationToken cancellationToken = default)
     {
         var state = GetHintState(roomCode, playerToken);
-        if (state.QuestionCardsEnabled)
+        var selectionMode = state.QuestionCardsEnabled
+            ? _roomStore.GetQuestionSelectionMode(roomCode, playerToken)
+            : MinigameQuestionSelectionMode.Cards;
+        if (state.QuestionCardsEnabled &&
+            selectionMode != MinigameQuestionSelectionMode.Search)
         {
             throw new MinigameRoomException(MinigameRoomError.InvalidPhase);
         }
@@ -108,9 +112,18 @@ public sealed class MinigameHintService
                 []);
         }
 
+        IReadOnlySet<string>? remainingQuestions = null;
+        if (state.QuestionCardsEnabled)
+        {
+            remainingQuestions = _roomStore
+                .GetRemainingSearchQuestions(roomCode, playerToken)
+                .ToHashSet(StringComparer.Ordinal);
+        }
+
         var matches = (await _catalog.GetAnswerItemsAsync(gameId, cancellationToken))
             .Where(row =>
-                row.AnswerYes.HasValue &&
+                (!state.QuestionCardsEnabled || remainingQuestions!.Contains(row.QuestionText)) &&
+                (state.QuestionCardsEnabled || row.AnswerYes.HasValue) &&
                 row.QuestionText.Contains(
                     normalizedQuery,
                     StringComparison.OrdinalIgnoreCase))
@@ -127,7 +140,7 @@ public sealed class MinigameHintService
             .Take(SearchPageSize)
             .Select(row => new MinigameHintAnswerRow(
                 row.QuestionText,
-                row.AnswerYes!.Value))
+                row.AnswerYes))
             .ToArray();
 
         return new MinigameCardHintSearchSnapshot(

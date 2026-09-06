@@ -72,17 +72,93 @@
     text-align: center;
 }
 
+.minigames-hint-dialog-body.is-hint-tabs-ready {
+    grid-template-rows: auto minmax(0, 1fr);
+}
+
+.minigames-hint-dialog-body.is-hint-tabs-ready.is-hint-tabs-visible {
+    grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.minigames-hint-tabs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+}
+
+.minigames-hint-tab-button {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.minigames-hint-tab-button.is-active {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 28%, transparent);
+}
+
+.minigames-hint-tab-panel {
+    min-width: 0;
+    min-height: 0;
+}
+
+.minigames-hint-cards-panel {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 16px;
+    overflow: hidden;
+}
+
+.minigames-hint-search-panel {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.minigames-hint-search-panel input[type="search"] {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+.minigames-hint-tab-search-results {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+
+.minigames-hint-tab-search-pager {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+}
+
+.minigames-hint-tab-search-pager span {
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
 @media (max-width: 560px) {
     .minigames-question-search-body {
         padding: 16px;
     }
 
-    .minigames-question-search-pager {
+    .minigames-question-search-pager,
+    .minigames-hint-tab-search-pager {
         grid-template-columns: 1fr 1fr;
     }
 
-    .minigames-question-search-pager span {
+    .minigames-question-search-pager span,
+    .minigames-hint-tab-search-pager span {
         grid-column: 1 / -1;
         grid-row: 1;
+    }
+
+    .minigames-hint-tabs {
+        grid-template-columns: 1fr;
     }
 }

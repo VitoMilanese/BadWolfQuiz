@@ -48,6 +48,24 @@ public sealed class MinigameQuestionSearchRegressionTests
         Assert.Contains("SelectQuestionByText", ai);
     }
 
+    [Fact]
+    public void Free_selection_card_hints_have_tabs_and_search_the_remaining_question_pool()
+    {
+        var script = Read("src/BadWolfQuiz.Web/wwwroot/js/minigames-question-search.js");
+        var hints = Read("src/BadWolfQuiz.Web/Services/MinigameHintService.cs");
+
+        Assert.Contains("minigames-hint-tabs", script);
+        Assert.Contains("minigames-hint-search-panel", script);
+        Assert.Contains("hintSearchInput", script);
+        Assert.Contains("'SearchCardHints'", script);
+        Assert.Contains("hintSearchTotalPages", script);
+        Assert.Contains("hintSearchGameKey", script);
+
+        Assert.Contains("MinigameQuestionSelectionMode.Search", hints);
+        Assert.Contains("GetRemainingSearchQuestions(roomCode, playerToken)", hints);
+        Assert.Contains("state.QuestionCardsEnabled || row.AnswerYes.HasValue", hints);
+    }
+
     private static string Read(string relativePath)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
