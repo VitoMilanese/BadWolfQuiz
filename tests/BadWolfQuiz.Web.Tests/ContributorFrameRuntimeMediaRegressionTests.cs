@@ -5,56 +5,63 @@ public sealed class ContributorFrameRuntimeMediaRegressionTests
     [Fact]
     public void Runtime_media_uses_the_same_filename_inset_contract_as_frame_preview()
     {
-        var script = File.ReadAllText(FindWebFile(
+        var insetScript = File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
-            "contributor-frame-runtime-media.js"));
+            "contributor-frame-insets.js"));
         var styles = File.ReadAllText(FindWebFile(
             "wwwroot",
             "css",
-            "contributor-frame-runtime-media.css"));
-        var helper = File.ReadAllText(FindWebFile(
+            "contributor-frames.css"));
+        var supportHelper = File.ReadAllText(FindWebFile(
             "TagHelpers",
-            "ContributorFrameRuntimeMediaAssetsTagHelper.cs"));
+            "ContributorSupportTagHelper.cs"));
 
         Assert.Contains(
             "body.dataset.contributorFrameNativeInsets",
-            script,
+            insetScript,
             StringComparison.Ordinal);
         Assert.Contains(
-            "nativeInsetPixels * renderedFrameSize / naturalFrameSize",
-            script,
+            "nativeInsetPixels * layoutFrameSize / naturalFrameSize",
+            insetScript,
             StringComparison.Ordinal);
         Assert.Contains(
-            "media.classList.add(\"contributor-frame-runtime-media\")",
-            script,
+            "layoutFrameSize / 2 - scaledInsetPixels",
+            insetScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "media.classList.add(\"contributor-frame-clipped-media\")",
+            insetScript,
             StringComparison.Ordinal);
         Assert.Contains(
             "badwolf:host-gameplay-updated",
-            script,
+            insetScript,
             StringComparison.Ordinal);
 
         Assert.Contains(
-            "padding: var(--contributor-frame-runtime-inset, 0px) !important;",
+            ".contributor-frame-owner[data-avatar-frame] .contributor-frame-clipped-media",
             styles,
             StringComparison.Ordinal);
         Assert.Contains(
-            "border-radius: 50% !important;",
+            "clip-path: circle(var(--contributor-frame-clip-radius, 0px) at 50% 50%) !important;",
             styles,
             StringComparison.Ordinal);
         Assert.Contains(
             ".player-avatar-control.contributor-frame-owner[data-avatar-frame] > .player-avatar-current",
             styles,
             StringComparison.Ordinal);
-        Assert.Contains("background: transparent !important;", styles, StringComparison.Ordinal);
+        Assert.Contains(
+            "background: transparent !important;",
+            styles,
+            StringComparison.Ordinal);
 
         Assert.Contains(
-            "/css/contributor-frame-runtime-media.css?v=1",
-            helper,
+            "/js/contributor-frames.js",
+            supportHelper,
             StringComparison.Ordinal);
         Assert.Contains(
-            "/js/contributor-frame-runtime-media.js?v=1",
-            helper,
+            "/js/contributor-frame-insets.js",
+            supportHelper,
             StringComparison.Ordinal);
     }
 
