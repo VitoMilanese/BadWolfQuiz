@@ -33,16 +33,15 @@ public sealed class HostAvatarFramePresentationRegressionTests
         Assert.Contains("background: transparent;", styles, StringComparison.Ordinal);
 
         Assert.Contains(
-            ".contributor-frame-owner[data-avatar-frame] > :is(",
+            ".contributor-frame-owner[data-avatar-frame] .contributor-frame-clipped-media",
             styles,
             StringComparison.Ordinal);
-        Assert.Contains(".player-card-avatar", styles, StringComparison.Ordinal);
-        Assert.Contains(".host-card-media", styles, StringComparison.Ordinal);
+        Assert.Contains(".player-card-avatar", frameInsetScript, StringComparison.Ordinal);
+        Assert.Contains(".host-card-media", frameInsetScript, StringComparison.Ordinal);
         Assert.Contains(
-            "):not(.contributor-frame-avatar-source)",
+            "clip-path: circle(var(--contributor-frame-clip-radius, 0px) at 50% 50%) !important;",
             styles,
             StringComparison.Ordinal);
-        Assert.Contains("clip-path: inset(", styles, StringComparison.Ordinal);
         Assert.Contains(
             "--contributor-frame-media-inset",
             styles,
@@ -53,7 +52,11 @@ public sealed class HostAvatarFramePresentationRegressionTests
             frameInsetScript,
             StringComparison.Ordinal);
         Assert.Contains(
-            "--contributor-frame-media-inset",
+            "nativeInsetPixels * layoutFrameSize / naturalFrameSize",
+            frameInsetScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "layoutFrameSize / 2 - scaledInsetPixels",
             frameInsetScript,
             StringComparison.Ordinal);
         Assert.Contains(
