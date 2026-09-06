@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using BadWolfQuiz.Web.Localization;
@@ -37,7 +38,12 @@ public sealed class FinalQuestionJudgingProgressTagHelper(
             return;
         }
 
-        var numbers = NumberRegex.Matches(progressMatch.Groups["text"].Value);
+        // Razor may HTML-encode Cyrillic as numeric character entities
+        // (for example, '&#x412;' for 'В'). Decode the localized progress
+        // text before looking for the actual answer index and total.
+        var decodedProgressText = WebUtility.HtmlDecode(
+            progressMatch.Groups["text"].Value);
+        var numbers = NumberRegex.Matches(decodedProgressText);
         if (numbers.Count < 2)
         {
             return;
