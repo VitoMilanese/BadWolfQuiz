@@ -45,8 +45,8 @@ public sealed class GameplayPolishRegressionTests
             "Attributes = \"data-host-gameplay-view\"",
             helper,
             StringComparison.Ordinal);
-        Assert.Contains("gameplay-polish.css?v=1", helper, StringComparison.Ordinal);
-        Assert.Contains("gameplay-polish.js?v=1", helper, StringComparison.Ordinal);
+        Assert.Contains("gameplay-polish.css?v=2", helper, StringComparison.Ordinal);
+        Assert.Contains("gameplay-polish.js?v=2", helper, StringComparison.Ordinal);
 
         Assert.Contains("data-game-intro-start", intro, StringComparison.Ordinal);
         Assert.Contains("is-leaving", intro, StringComparison.Ordinal);
@@ -68,10 +68,42 @@ public sealed class GameplayPolishRegressionTests
             StringComparison.Ordinal);
 
         Assert.Contains(
+            ".game-scoreboard .scoreboard-player:not(.host-card)",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "grid-template-columns: minmax(0, 1fr) !important;",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".game-scoreboard .scoreboard-player:not(.host-card) .player-card-actions",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains("position: absolute !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("right: 8px !important;", styles, StringComparison.Ordinal);
+
+        Assert.Contains(
             ".scoreboard-player.question-answering-player",
             styles,
             StringComparison.Ordinal);
         Assert.Contains("color: var(--text) !important;", styles, StringComparison.Ordinal);
+
+        Assert.Contains(
+            "[data-join-code-panel] .join-code-floating-content .join-code-value",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "[data-join-code-panel] .join-code-floating-content .join-qr-code",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains("panel?.dataset.gameCode", script, StringComparison.Ordinal);
+        Assert.Contains("navigator.clipboard?.writeText", script, StringComparison.Ordinal);
+        Assert.Contains("document.execCommand(\"copy\")", script, StringComparison.Ordinal);
+        Assert.Contains(
+            "`/Join/${encodeURIComponent(gameCode)}/`",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains("event.stopImmediatePropagation();", script, StringComparison.Ordinal);
     }
 
     private static string FindWebFile(params string[] parts)
