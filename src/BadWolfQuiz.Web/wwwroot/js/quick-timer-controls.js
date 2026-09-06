@@ -117,7 +117,7 @@
     }
 
     const script = document.createElement("script");
-    script.src = "/js/final-question-transition-guard.js?v=1";
+    script.src = "/js/final-question-transition-guard.js?v=2";
     script.async = false;
     script.dataset.finalQuestionTransitionGuard = "";
     document.head.appendChild(script);
