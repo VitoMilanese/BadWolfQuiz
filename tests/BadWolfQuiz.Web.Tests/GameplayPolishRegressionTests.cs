@@ -51,6 +51,10 @@ public sealed class GameplayPolishRegressionTests
             StringComparison.Ordinal);
         Assert.Contains("gameplay-polish.css?v=3", helper, StringComparison.Ordinal);
         Assert.Contains("gameplay-polish.js?v=3", helper, StringComparison.Ordinal);
+        Assert.Contains(
+            "output.Attributes.SetAttribute(\"data-final-status\", \"lobby\")",
+            helper,
+            StringComparison.Ordinal);
 
         Assert.Contains("data-game-intro-start", intro, StringComparison.Ordinal);
         Assert.Contains("is-leaving", intro, StringComparison.Ordinal);
