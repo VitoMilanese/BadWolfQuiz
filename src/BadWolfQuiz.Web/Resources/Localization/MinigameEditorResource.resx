@@ -60,4 +60,25 @@
   <data name="ImageRequired" xml:space="preserve"><value>Select a card image.</value></data>
   <data name="ImageTooLarge" xml:space="preserve"><value>The image must be 5 MB or smaller.</value></data>
   <data name="ImageInvalidType" xml:space="preserve"><value>Use a PNG, JPEG, WebP or GIF image.</value></data>
+  <data name="ResourceSyncHeading" xml:space="preserve"><value>Synchronize resource games</value></data>
+  <data name="ResourceSyncDescription" xml:space="preserve"><value>Add new games and update images and TXT answers for existing games from Resources/Minigames/GameCards. Questions are never changed.</value></data>
+  <data name="ResourceSyncButton" xml:space="preserve"><value>Synchronize from Resources</value></data>
+  <data name="ResourceSyncWorking" xml:space="preserve"><value>Synchronizing…</value></data>
+  <data name="ResourceSyncCompleted" xml:space="preserve"><value>Synchronization complete: {0} added, {1} updated.</value></data>
+  <data name="ResourceSyncDeleted" xml:space="preserve"><value>Deleted games: {0}.</value></data>
+  <data name="ResourceSyncFolderMissing" xml:space="preserve"><value>Resources/Minigames/GameCards was not found.</value></data>
+  <data name="ResourceSyncInvalidGameName" xml:space="preserve"><value>Resource image “{0}” has an invalid game name.</value></data>
+  <data name="ResourceSyncDuplicateGame" xml:space="preserve"><value>More than one resource image resolves to the game name “{0}”.</value></data>
+  <data name="ResourceSyncDuplicateAnswerFile" xml:space="preserve"><value>More than one TXT file resolves to the game name “{0}”.</value></data>
+  <data name="ResourceSyncInvalidAnswerLine" xml:space="preserve"><value>{0}: line {1} must contain 1, 0, or be empty.</value></data>
+  <data name="ResourceSyncWrongAnswerCount" xml:space="preserve"><value>{0} must contain exactly {1} answer lines; {2} were found.</value></data>
+  <data name="ResourceSyncReadFailed" xml:space="preserve"><value>Could not read resource file “{0}”.</value></data>
+  <data name="ResourceSyncUnexpectedError" xml:space="preserve"><value>Resource synchronization failed.</value></data>
+  <data name="ResourceSyncDeleteConfirm" xml:space="preserve"><value>Delete the selected games and all of their stored answers? This cannot be undone.</value></data>
+  <data name="ResourceCleanupHeading" xml:space="preserve"><value>Games not found in Resources</value></data>
+  <data name="ResourceCleanupDescription" xml:space="preserve"><value>These games are still stored in the database but have no matching resource image. Select the games you want to delete, or keep them all.</value></data>
+  <data name="ResourceCleanupPrevious" xml:space="preserve"><value>Previous</value></data>
+  <data name="ResourceCleanupNext" xml:space="preserve"><value>Next</value></data>
+  <data name="ResourceCleanupKeepAll" xml:space="preserve"><value>Keep all</value></data>
+  <data name="ResourceCleanupDeleteSelected" xml:space="preserve"><value>Delete selected</value></data>
 </root>

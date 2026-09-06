@@ -60,4 +60,25 @@
   <data name="ImageRequired" xml:space="preserve"><value>Виберіть картинку для картки.</value></data>
   <data name="ImageTooLarge" xml:space="preserve"><value>Картинка повинна бути не більшою за 5 МБ.</value></data>
   <data name="ImageInvalidType" xml:space="preserve"><value>Використовуйте PNG, JPEG, WebP або GIF.</value></data>
+  <data name="ResourceSyncHeading" xml:space="preserve"><value>Синхронізація з Resources</value></data>
+  <data name="ResourceSyncDescription" xml:space="preserve"><value>Додайте нові ігри та оновіть картинки й TXT-відповіді існуючих із Resources/Minigames/GameCards. Питання не змінюються.</value></data>
+  <data name="ResourceSyncButton" xml:space="preserve"><value>Синхронізувати з Resources</value></data>
+  <data name="ResourceSyncWorking" xml:space="preserve"><value>Синхронізація…</value></data>
+  <data name="ResourceSyncCompleted" xml:space="preserve"><value>Синхронізацію завершено: додано {0}, оновлено {1}.</value></data>
+  <data name="ResourceSyncDeleted" xml:space="preserve"><value>Видалено ігор: {0}.</value></data>
+  <data name="ResourceSyncFolderMissing" xml:space="preserve"><value>Папку Resources/Minigames/GameCards не знайдено.</value></data>
+  <data name="ResourceSyncInvalidGameName" xml:space="preserve"><value>Файл картинки «{0}» має некоректну назву гри.</value></data>
+  <data name="ResourceSyncDuplicateGame" xml:space="preserve"><value>Кілька картинок у Resources відповідають назві гри «{0}».</value></data>
+  <data name="ResourceSyncDuplicateAnswerFile" xml:space="preserve"><value>Кілька TXT-файлів у Resources відповідають назві гри «{0}».</value></data>
+  <data name="ResourceSyncInvalidAnswerLine" xml:space="preserve"><value>{0}: рядок {1} має містити 1, 0 або бути порожнім.</value></data>
+  <data name="ResourceSyncWrongAnswerCount" xml:space="preserve"><value>{0} має містити рівно {1} рядків відповідей; знайдено {2}.</value></data>
+  <data name="ResourceSyncReadFailed" xml:space="preserve"><value>Не вдалося прочитати файл ресурсу «{0}».</value></data>
+  <data name="ResourceSyncUnexpectedError" xml:space="preserve"><value>Не вдалося виконати синхронізацію з Resources.</value></data>
+  <data name="ResourceSyncDeleteConfirm" xml:space="preserve"><value>Видалити вибрані ігри та всі їхні збережені відповіді? Цю дію не можна скасувати.</value></data>
+  <data name="ResourceCleanupHeading" xml:space="preserve"><value>Ігри, яких немає в Resources</value></data>
+  <data name="ResourceCleanupDescription" xml:space="preserve"><value>Ці ігри є в базі даних, але для них немає відповідної картинки в Resources. Виберіть ігри, які хочете видалити, або залиште всі.</value></data>
+  <data name="ResourceCleanupPrevious" xml:space="preserve"><value>Назад</value></data>
+  <data name="ResourceCleanupNext" xml:space="preserve"><value>Далі</value></data>
+  <data name="ResourceCleanupKeepAll" xml:space="preserve"><value>Залишити всі</value></data>
+  <data name="ResourceCleanupDeleteSelected" xml:space="preserve"><value>Видалити вибрані</value></data>
 </root>
