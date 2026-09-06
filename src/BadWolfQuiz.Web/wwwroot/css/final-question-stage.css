@@ -1,7 +1,9 @@
-body:has(.final-question-transition) > .page-shell {
+body.gameplay-layout:has(.final-question-transition) > .page-shell {
+    box-sizing: border-box;
     width: 100%;
     max-width: none;
     height: calc(100dvh - var(--topbar-height, 0px));
+    margin-inline: 0;
     padding: 0;
     overflow: hidden;
 }
@@ -10,8 +12,10 @@ body:has(.final-question-transition) > .page-shell {
     position: relative;
     isolation: isolate;
     box-sizing: border-box;
-    width: 100%;
+    width: 100vw;
+    max-width: none;
     height: 100%;
+    margin-inline: calc(50% - 50vw);
     display: grid;
     grid-template-rows: minmax(0, 1fr) auto;
     gap: clamp(24px, 4vh, 48px);
@@ -32,9 +36,10 @@ body:has(.final-question-transition) > .page-shell {
 }
 
 .final-question-transition::before {
-    background:
-        linear-gradient(90deg, transparent 0 7%, color-mix(in srgb, var(--gold) 14%, transparent) 7.1% 7.25%, transparent 7.35% 92.65%, color-mix(in srgb, var(--gold) 14%, transparent) 92.75% 92.9%, transparent 93%),
-        repeating-linear-gradient(135deg, color-mix(in srgb, var(--text) 2.5%, transparent) 0 1px, transparent 1px 18px);
+    background: repeating-linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--text) 2.5%, transparent) 0 1px,
+        transparent 1px 18px);
     opacity: .75;
 }
 
