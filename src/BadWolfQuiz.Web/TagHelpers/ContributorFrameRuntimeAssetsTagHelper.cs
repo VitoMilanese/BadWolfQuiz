@@ -1,0 +1,57 @@
+using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Razor.TagHelpers;
+
+namespace BadWolfQuiz.Web.TagHelpers;
+
+[HtmlTargetElement("head")]
+[HtmlTargetElement("body")]
+public sealed class ContributorFrameRuntimeAssetsTagHelper(
+    IFileVersionProvider fileVersionProvider) : TagHelper
+{
+    [ViewContext]
+    [HtmlAttributeNotBound]
+    public ViewContext ViewContext { get; set; } = default!;
+
+    // ContributorSupportTagHelper still emits the legacy unversioned assets.
+    // Run after it so the fingerprinted runtime CSS/JS is the final copy in
+    // document order and therefore wins both the stylesheet cascade and the
+    // deferred-script observer order.
+    public override int Order => 2000;
+
+    public override void Process(
+        TagHelperContext context,
+        TagHelperOutput output)
+    {
+        var page = ViewContext.RouteData.Values["page"]?.ToString();
+        if (page is not "/Admin/Games/Lobby" and not "/Player/Lobby")
+        {
+            return;
+        }
+
+        var requestPathBase = ViewContext.HttpContext.Request.PathBase;
+        var html = HtmlEncoder.Default;
+
+        if (string.Equals(output.TagName, "head", StringComparison.OrdinalIgnoreCase))
+        {
+            var stylesheetPath = fileVersionProvider.AddFileVersionToPath(
+                requestPathBase,
+                "/css/contributor-frames.css");
+            output.PostContent.AppendHtml(
+                $"<link rel=\"stylesheet\" href=\"{html.Encode(stylesheetPath)}\" />");
+            return;
+        }
+
+        if (!string.Equals(output.TagName, "body", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var insetScriptPath = fileVersionProvider.AddFileVersionToPath(
+            requestPathBase,
+            "/js/contributor-frame-insets.js");
+        output.PostContent.AppendHtml(
+            $"<script src=\"{html.Encode(insetScriptPath)}\" defer></script>");
+    }
+}
