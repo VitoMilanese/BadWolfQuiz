@@ -5,12 +5,11 @@
 
     window.badWolfFinalQuestionHostResponsivenessInitialized = true;
 
-    const viewSelector = "[data-host-gameplay-view]";
-    const boardSelector = "[data-host-gameplay-board]";
-    const transientSelector = "[data-host-gameplay-transient]";
-    const fastFinalHandlers = new Set([
+    const transitionCommitHandlers = new Set([
         "StartFinalQuestion",
-        "ForceAdvanceToFinalQuestion",
+        "ForceAdvanceToFinalQuestion"
+    ]);
+    const fastFinalHandlers = new Set([
         "SubmitMinimumFinalWager",
         "LockFinalWagers",
         "SubmitEmptyFinalAnswer",
@@ -67,132 +66,6 @@
         }
 
         window.alert(message);
-    };
-
-    const copyHostBoardState = (currentView, nextView) => {
-        const currentHostBoard = currentView.closest(
-            ".host-game-board[data-game-id]");
-        const nextHostBoard = nextView.closest(
-            ".host-game-board[data-game-id]");
-        if (!currentHostBoard || !nextHostBoard) {
-            return;
-        }
-
-        for (const className of [
-            "final-question-host",
-            "all-player-question-wagering",
-            "anonymous-shared-wager-active"
-        ]) {
-            currentHostBoard.classList.toggle(
-                className,
-                nextHostBoard.classList.contains(className));
-        }
-
-        if (nextHostBoard.dataset.gameStatus) {
-            currentHostBoard.dataset.gameStatus = nextHostBoard.dataset.gameStatus;
-        }
-    };
-
-    const applyReturnedLobbyMarkup = (markup, responseUrl) => {
-        const parsed = new DOMParser().parseFromString(markup, "text/html");
-        const nextView = parsed.querySelector(viewSelector);
-        const nextBoard = parsed.querySelector(boardSelector);
-        const currentView = document.querySelector(viewSelector);
-        const currentBoard = document.querySelector(boardSelector);
-
-        if (!nextView || !nextBoard || !currentView || !currentBoard) {
-            return false;
-        }
-
-        window.BadWolfHostGameplay?.cancelPending?.();
-        copyHostBoardState(currentView, nextView);
-
-        currentView.replaceChildren(
-            ...Array.from(nextView.childNodes, node =>
-                document.importNode(node, true)));
-        currentBoard.hidden = nextBoard.hidden;
-
-        const currentTransient = document.querySelector(transientSelector);
-        const nextTransient = parsed.querySelector(transientSelector);
-        if (currentTransient) {
-            currentTransient.replaceChildren(
-                ...Array.from(nextTransient?.childNodes ?? [], node =>
-                    document.importNode(node, true)));
-        }
-
-        const currentRoundHeading = document.querySelector(
-            ".game-header-context h2");
-        const nextRoundHeading = parsed.querySelector(
-            ".game-header-context h2");
-        if (currentRoundHeading && nextRoundHeading) {
-            currentRoundHeading.textContent = nextRoundHeading.textContent;
-            currentRoundHeading.title = nextRoundHeading.title;
-        }
-
-        const boardMenu = document.querySelector(".board-action-menu");
-        if (boardMenu) {
-            boardMenu.hidden =
-                nextView.querySelector(".round-summary") !== null ||
-                nextView.querySelector(
-                    "[data-game-intro-page], [data-final-question-transition]") !== null;
-        }
-
-        const targetUrl = new URL(responseUrl, window.location.href);
-        if (targetUrl.origin === window.location.origin &&
-            targetUrl.pathname === window.location.pathname) {
-            history.replaceState({ hostGameplay: true }, "", targetUrl.href);
-        }
-
-        document.dispatchEvent(new CustomEvent(
-            "badwolf:host-gameplay-updated"));
-        return true;
-    };
-
-    const submitPreparedFinalAdvance = async (form, submitter, action) => {
-        const button = submitter ?? form.querySelector("button[type='submit']");
-        button?.setAttribute("disabled", "disabled");
-        button?.setAttribute("aria-busy", "true");
-        form.closest("dialog")?.close();
-        startBusy();
-
-        try {
-            const formData = new FormData(form);
-            if (submitter?.name) {
-                formData.append(submitter.name, submitter.value);
-            }
-
-            const response = await fetch(action.href, {
-                method: "POST",
-                body: formData,
-                credentials: "same-origin",
-                headers: { Accept: "text/html" }
-            });
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
-
-            const markup = await response.text();
-            const responseUrl = response.url || window.location.href;
-            if (!applyReturnedLobbyMarkup(markup, responseUrl)) {
-                if (window.BadWolfHostFlowNavigation?.applyMarkup) {
-                    await window.BadWolfHostFlowNavigation.applyMarkup(
-                        markup,
-                        responseUrl);
-                } else {
-                    window.location.assign(responseUrl);
-                    return;
-                }
-            }
-        } catch (error) {
-            console.error("Final Question preparation failed.", error);
-            showError(error.message || "Final Question preparation failed.");
-        } finally {
-            if (button?.isConnected) {
-                button.removeAttribute("disabled");
-                button.removeAttribute("aria-busy");
-            }
-            stopBusy();
-        }
     };
 
     const submitFastFinalCommand = async (form, submitter, action) => {
@@ -280,21 +153,38 @@
 
         const handler = getHandler(action);
         if (handler === "PrepareFinalQuestionLeaderboard") {
+            // Keep the established round-summary navigation path. Replacing the
+            // returned leaderboard markup here made the podium animation replay
+            // and raced the host navigation handler. Busy feedback is enough for
+            // this transition until it can be optimized inside the shared router.
+            startBusy();
+            return;
+        }
+
+        if (transitionCommitHandlers.has(handler)) {
+            // A round-summary Start/Force form is navigation to the dedicated
+            // Final Question transition page. Do not post it directly or the
+            // server enters FinalWagering while the host is still showing the
+            // round summary. Only the button inside that transition page commits
+            // the Final Question state through the fast AJAX path.
+            if (!form.matches("[data-final-question-transition-form]")) {
+                return;
+            }
+
+            // The transition page intentionally requires a real host click.
+            // Leave its old programmatic three-second requestSubmit blocked by
+            // the existing navigation guard rather than treating it as consent.
+            if (submitter === null) {
+                return;
+            }
+
             event.preventDefault();
             event.stopImmediatePropagation();
-            void submitPreparedFinalAdvance(form, submitter, action);
+            void submitFastFinalCommand(form, submitter, action);
             return;
         }
 
         if (fastFinalHandlers.has(handler)) {
-            // The transition page intentionally requires a real host click.
-            // Leave its old programmatic three-second requestSubmit blocked by
-            // the existing navigation guard rather than treating it as consent.
-            if (form.matches("[data-final-question-transition-form]") &&
-                submitter === null) {
-                return;
-            }
-
             event.preventDefault();
             event.stopImmediatePropagation();
             void submitFastFinalCommand(form, submitter, action);
