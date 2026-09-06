@@ -38,6 +38,11 @@
     grid-row: 1;
 }
 
+.host-avatar-frame-settings-row > .host-avatar-input-row {
+    grid-column: 2;
+    grid-row: 1;
+}
+
 .host-avatar-frame-settings-row > .host-avatar-field > .host-avatar-input-row {
     grid-column: 2;
     grid-row: 1;
@@ -189,7 +194,9 @@
     .player-list-avatar,
     .host-card-media) {
     border-radius: 50% !important;
-    clip-path: circle(50% at 50% 50%);
+    clip-path: circle(
+        calc(50% - var(--contributor-frame-media-inset, 0px))
+        at 50% 50%);
     overflow: hidden;
     object-fit: cover;
 }
