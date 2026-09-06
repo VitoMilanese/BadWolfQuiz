@@ -1,0 +1,277 @@
+/* Host-side Final Question finale presentation. Scoped to the live Final Question host shell. */
+body.gameplay-layout:has(.host-game-board.final-question-host) {
+    background:
+        repeating-linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--text) 2.5%, transparent) 0 1px,
+            transparent 1px 18px),
+        radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--red-bright) 16%, transparent), transparent 38%),
+        linear-gradient(180deg, color-mix(in srgb, var(--panel-2) 76%, #050506), color-mix(in srgb, var(--bg) 90%, #000));
+}
+
+body.gameplay-layout:has(.host-game-board.final-question-host) .host-game-board.final-question-host {
+    --final-stage-line: color-mix(in srgb, var(--gold) 24%, var(--line));
+    --final-stage-surface: color-mix(in srgb, var(--panel) 90%, transparent);
+    --final-stage-surface-strong: color-mix(in srgb, var(--panel-2) 94%, transparent);
+    background: transparent;
+}
+
+.final-question-host .final-question-panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.final-question-host .final-question-panel > * {
+    position: relative;
+    z-index: 1;
+}
+
+.final-question-host .final-question-panel > .eyebrow {
+    margin: 0;
+    color: var(--gold);
+    font-size: clamp(.7rem, .9vw, .86rem);
+    font-weight: 850;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    text-shadow: 0 0 18px color-mix(in srgb, var(--gold) 34%, transparent);
+}
+
+.final-question-host .final-question-panel > h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1.65rem, 3vw, 3.2rem);
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing: .02em;
+    text-wrap: balance;
+    text-shadow: 0 12px 30px rgb(0 0 0 / 34%);
+}
+
+.final-question-host .final-question-panel > form {
+    margin: 0;
+}
+
+.final-question-host .final-question-panel > form > .button-primary {
+    min-height: 50px;
+    min-width: min(320px, 100%);
+    padding-inline: 24px;
+    font-weight: 850;
+    box-shadow: 0 14px 32px color-mix(in srgb, var(--red) 25%, transparent);
+}
+
+/* Wagering: a centered finale prompt with a glassy submission rail. */
+.final-question-host[data-game-status="finalwagering"] .final-question-panel {
+    justify-content: center;
+    align-content: center;
+    gap: clamp(14px, 2.2vh, 24px);
+    padding: clamp(24px, 4vw, 56px);
+}
+
+.final-question-host[data-game-status="finalwagering"] .final-question-panel > h2 {
+    font-size: clamp(2rem, 4vw, 4.2rem);
+}
+
+.final-question-host[data-game-status="finalwagering"] .final-submission-list {
+    border: 1px solid var(--final-stage-line);
+    border-radius: 20px;
+    background: linear-gradient(180deg, var(--final-stage-surface), var(--final-stage-surface-strong));
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent),
+        0 18px 44px rgb(0 0 0 / 28%);
+    backdrop-filter: blur(12px);
+}
+
+.final-question-host[data-game-status="finalwagering"] .final-submission-list li {
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+}
+
+/* Answering: the question uses the stage itself instead of a nested card. */
+.final-question-host[data-game-status="finalanswering"] .final-question-panel {
+    align-items: stretch;
+    padding: clamp(8px, 1vw, 16px);
+    gap: clamp(8px, 1.2vh, 14px);
+}
+
+.final-question-host[data-game-status="finalanswering"] .question-presentation {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    height: 100%;
+    margin: 0;
+    padding: clamp(8px, 1vw, 16px);
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+.final-question-host[data-game-status="finalanswering"] .question-presentation .game-content-text {
+    color: var(--text);
+    font-size: clamp(1.35rem, 2.3vw, 2.5rem);
+    line-height: 1.3;
+    text-shadow: 0 8px 24px rgb(0 0 0 / 28%);
+}
+
+.final-question-host[data-game-status="finalanswering"] .question-presentation :is(.game-content-image, .game-content-video) {
+    border-radius: clamp(14px, 1.4vw, 22px);
+    box-shadow:
+        0 22px 54px rgb(0 0 0 / 32%),
+        0 0 0 1px color-mix(in srgb, var(--gold) 15%, transparent);
+}
+
+.final-question-host[data-game-status="finalanswering"] .final-submission-list {
+    border-color: var(--final-stage-line) !important;
+    background: linear-gradient(180deg, var(--final-stage-surface), var(--final-stage-surface-strong)) !important;
+    box-shadow: -20px 0 46px rgb(0 0 0 / 32%) !important;
+    backdrop-filter: blur(14px);
+}
+
+.final-question-host[data-game-status="finalanswering"] .final-submission-list li {
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+}
+
+/* Judging: player submissions use the full finale stage without a card shell. */
+.final-question-host[data-game-status="finaljudging"] .final-question-panel {
+    align-items: stretch;
+    padding: clamp(8px, 1vw, 16px);
+    gap: clamp(10px, 1.4vh, 18px);
+}
+
+.final-question-host[data-game-status="finaljudging"] .final-judging-list {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-items: stretch;
+    justify-items: stretch;
+    gap: clamp(12px, 1.8vh, 20px);
+}
+
+.final-question-host[data-game-status="finaljudging"] .final-judging-list > .dialog-warning {
+    margin: 0;
+    color: var(--muted);
+    font-size: .95rem;
+    letter-spacing: .08em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.final-question-host[data-game-status="finaljudging"] .final-player-answer-presentation {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    height: 100%;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: clamp(16px, 2.5vh, 28px);
+    padding: clamp(16px, 2vw, 30px);
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+.final-question-host[data-game-status="finaljudging"] .final-player-answer-presentation > h2 {
+    margin: 0;
+    color: var(--gold);
+    font-size: clamp(1.25rem, 2vw, 2rem);
+    font-weight: 850;
+    letter-spacing: .035em;
+}
+
+.final-question-host[data-game-status="finaljudging"] .final-player-answer-presentation > .game-content-text {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(2.2rem, 5vw, 5.2rem);
+    line-height: 1.05;
+    font-weight: 900;
+    text-align: center;
+    text-wrap: balance;
+    text-shadow: 0 14px 34px rgb(0 0 0 / 36%);
+}
+
+.final-question-host[data-game-status="finaljudging"] .final-judging-actions {
+    justify-content: center;
+    gap: 12px;
+}
+
+.final-question-host[data-game-status="finaljudging"] .final-judging-actions .button {
+    min-width: 150px;
+    min-height: 48px;
+    font-weight: 850;
+}
+
+/* Canonical Final Answer uses the same full-stage, transparent treatment. */
+.final-question-host[data-game-status="finaljudging"] .answer-presentation {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    height: 100%;
+    margin: 0;
+    padding: clamp(10px, 1.4vw, 22px);
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+.final-question-host[data-game-status="finaljudging"] .answer-presentation > .eyebrow {
+    color: var(--gold);
+    letter-spacing: .2em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 800px) {
+    .final-question-host .final-question-panel,
+    .final-question-host[data-game-status="finalwagering"] .final-question-panel,
+    .final-question-host[data-game-status="finalanswering"] .final-question-panel,
+    .final-question-host[data-game-status="finaljudging"] .final-question-panel {
+        padding: 10px;
+        border-radius: 0;
+    }
+
+    .final-question-host[data-game-status="finalanswering"] .question-presentation,
+    .final-question-host[data-game-status="finaljudging"] .final-player-answer-presentation,
+    .final-question-host[data-game-status="finaljudging"] .answer-presentation {
+        padding: 10px;
+        border-radius: 0;
+    }
+
+    .final-question-host[data-game-status="finaljudging"] .final-judging-actions {
+        width: 100%;
+    }
+
+    .final-question-host[data-game-status="finaljudging"] .final-judging-actions .button {
+        min-width: 0;
+        flex: 1 1 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .final-question-host *,
+    .final-question-host *::before,
+    .final-question-host *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0s !important;
+        animation-duration: 0s !important;
+    }
+}

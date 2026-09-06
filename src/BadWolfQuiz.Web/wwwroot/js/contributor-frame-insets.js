@@ -15,6 +15,16 @@
     const debugHostFrameInsets = new Map();
     let debugHostFrameId = null;
 
+    const frameMediaSelectors = [
+        ".player-avatar-current:not([hidden])",
+        ".player-card-avatar:not([hidden])",
+        ".player-list-avatar:not([hidden])",
+        ".host-card-media video:not([hidden])",
+        ".host-card-media iframe:not([hidden])",
+        ".host-card-media img:not([hidden])",
+        ".host-card-media:not([hidden])"
+    ];
+
     const getBaseNativeInsetPixels = frameId =>
         frameInsets.get(frameId) ?? defaultInsetPixels;
 
@@ -25,6 +35,77 @@
         }
 
         return debugHostFrameInsets.get(frameId) ?? baseInsetPixels;
+    };
+
+    const findFrameMedia = owner => {
+        for (const selector of frameMediaSelectors) {
+            for (const media of owner.querySelectorAll(selector)) {
+                if (getComputedStyle(media).display !== "none") {
+                    return media;
+                }
+            }
+        }
+        return null;
+    };
+
+    const isBuiltInAvatar = media => {
+        if (!(media instanceof HTMLImageElement)) return false;
+        const source = media.currentSrc || media.getAttribute("src");
+        if (!source) return false;
+        try {
+            return new URL(source, window.location.href)
+                .pathname
+                .startsWith("/avatars/");
+        } catch {
+            return false;
+        }
+    };
+
+    const clearMediaClip = owner => {
+        for (const media of owner.querySelectorAll(
+            ".contributor-frame-clipped-media"
+        )) {
+            media.classList.remove("contributor-frame-clipped-media");
+            media.style.removeProperty("--contributor-frame-clip-radius");
+        }
+    };
+
+    const applyMediaClip = (
+        owner,
+        layoutFrameSize,
+        scaledInsetPixels
+    ) => {
+        const media = findFrameMedia(owner);
+        for (const staleMedia of owner.querySelectorAll(
+            ".contributor-frame-clipped-media"
+        )) {
+            if (staleMedia !== media) {
+                staleMedia.classList.remove("contributor-frame-clipped-media");
+                staleMedia.style.removeProperty("--contributor-frame-clip-radius");
+            }
+        }
+
+        if (!media || isBuiltInAvatar(media)) {
+            if (media) {
+                media.classList.remove("contributor-frame-clipped-media");
+                media.style.removeProperty("--contributor-frame-clip-radius");
+            }
+            return;
+        }
+
+        // This is the same geometry as the frame-settings preview:
+        // visible diameter = rendered frame size - 2 * scaled filename inset.
+        // Using an explicit circle keeps rectangular images/webcams circular
+        // instead of producing the oval created by border-radius/inset clipping.
+        const radiusPixels = Math.max(
+            0,
+            layoutFrameSize / 2 - scaledInsetPixels
+        );
+        media.classList.add("contributor-frame-clipped-media");
+        media.style.setProperty(
+            "--contributor-frame-clip-radius",
+            `${radiusPixels}px`
+        );
     };
 
     const findHostFrameOwner = () => document.querySelector(
@@ -54,11 +135,14 @@
 
     const applyInset = owner => {
         const frameId = String(owner.dataset.avatarFrame ?? "").trim();
-        const media = owner.querySelector(".contributor-frame-avatar-source");
         const overlay = owner.querySelector(
             ":scope > .contributor-avatar-frame-overlay"
         );
-        if (!frameId || !media || !overlay) return;
+        if (!frameId || !overlay) {
+            owner.style.removeProperty("--contributor-frame-media-inset");
+            clearMediaClip(owner);
+            return;
+        }
 
         const naturalFrameSize = Math.min(
             overlay.naturalWidth || 0,
@@ -73,10 +157,22 @@
         const nativeInsetPixels = getNativeInsetPixels(owner, frameId);
         const scaledInsetPixels =
             nativeInsetPixels * layoutFrameSize / naturalFrameSize;
-        media.style.setProperty(
-            "--contributor-frame-scaled-avatar-inset",
-            `${scaledInsetPixels}px`
+        const scaledInsetValue = `${scaledInsetPixels}px`;
+
+        owner.style.setProperty(
+            "--contributor-frame-media-inset",
+            scaledInsetValue
         );
+
+        const avatarMedia = owner.querySelector(
+            ".contributor-frame-avatar-source"
+        );
+        avatarMedia?.style.setProperty(
+            "--contributor-frame-scaled-avatar-inset",
+            scaledInsetValue
+        );
+
+        applyMediaClip(owner, layoutFrameSize, scaledInsetPixels);
     };
 
     const observedOwners = new WeakSet();
@@ -288,17 +384,25 @@
     });
     mutationObserver.observe(document.body, {
         attributes: true,
-        attributeFilter: ["class", "data-avatar-frame", "hidden"],
+        attributeFilter: [
+            "class",
+            "data-avatar-frame",
+            "hidden",
+            "src"
+        ],
         childList: true,
         subtree: true
     });
 
     document.addEventListener("load", event => {
-        if (event.target instanceof Element &&
-            event.target.matches(".contributor-avatar-frame-overlay")) {
+        if (!(event.target instanceof Element)) return;
+        if (event.target.matches(".contributor-avatar-frame-overlay") ||
+            frameMediaSelectors.some(selector => event.target.matches(selector))) {
             queueRefresh();
         }
     }, true);
+    document.addEventListener("badwolf:host-shell-mounted", queueRefresh);
+    document.addEventListener("badwolf:host-gameplay-updated", queueRefresh);
     window.addEventListener("resize", queueRefresh);
 
     observeAndApply();
