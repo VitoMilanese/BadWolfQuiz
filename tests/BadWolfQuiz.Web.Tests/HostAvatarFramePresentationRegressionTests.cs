@@ -31,7 +31,10 @@ public sealed class HostAvatarFramePresentationRegressionTests
         Assert.Contains(".player-card-avatar", styles, StringComparison.Ordinal);
         Assert.Contains(".host-card-media", styles, StringComparison.Ordinal);
         Assert.Contains("border-radius: 50% !important;", styles, StringComparison.Ordinal);
-        Assert.Contains("clip-path: circle(50% at 50% 50%);", styles, StringComparison.Ordinal);
+        Assert.Contains(
+            "--contributor-frame-media-inset",
+            styles,
+            StringComparison.Ordinal);
 
         Assert.Contains(
             "/js/host-frame-live-settings-sync.js",
@@ -48,6 +51,14 @@ public sealed class HostAvatarFramePresentationRegressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             "panel.dispatchEvent(new Event(\"change\", { bubbles: true }))",
+            syncScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "data.contributorFrameNativeInsets",
+            syncScript.Replace("dataset", "data"),
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "--contributor-frame-media-inset",
             syncScript,
             StringComparison.Ordinal);
     }
