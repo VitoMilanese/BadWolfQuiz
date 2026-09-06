@@ -199,6 +199,17 @@ It:
 
 The replacement secret differs from the requesting player's previous secret and from the opponent's current secret.
 
+## Presentation
+
+The public Minigames experience uses the current BadWolfQuiz portal visual language while keeping the existing gameplay contracts intact.
+
+- `/minigames` uses a full-width branded hero, theme-aware grid/glow background, and a featured game card with the existing 16:9 artwork contract.
+- `/minigames/guess-what-i-play` carries the same visual language into the create/join entry stage and active room.
+- The active room keeps its viewport-fitted square-card grid and right-side Question Cards layout while applying the branded toolbar, status strip, stage, card, sidebar, waiting-state, and dialog treatments.
+- Responsive layouts cover desktop, tablet, and narrow mobile screens.
+- Keyboard focus remains visible and motion-heavy presentation is reduced when `prefers-reduced-motion` is enabled.
+- Room rules, SignalR contracts, solo AI, hints, question search, history, restart behavior, and sharing remain unchanged by the presentation layer.
+
 ## Release
 
-Introduced in Web `1.23.0` (`web-v1.23.0`) through issue #445 and PR #446. Directional history filters were added in Web `1.24.0`. The database-backed catalog and MasterHost editor were added in Web `1.25.0`.
+Introduced in Web `1.23.0` (`web-v1.23.0`) through issue #445 and PR #446. Directional history filters were added in Web `1.24.0`. The database-backed catalog and MasterHost editor were added in Web `1.25.0`. The Minigames catalog and **Guess what I'm playing** presentation were redesigned in Web `1.26.21` (`web-v1.26.21`) through issue #513 and PR #514.
