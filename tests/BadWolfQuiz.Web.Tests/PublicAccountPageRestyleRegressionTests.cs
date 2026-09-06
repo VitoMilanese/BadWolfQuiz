@@ -194,7 +194,8 @@ public sealed class PublicAccountPageRestyleRegressionTests
     [Fact]
     public void Shared_styles_widen_faq_balance_answers_and_cover_404_responsive_accessibility_contracts()
     {
-        var styles = File.ReadAllText(FindWebFile("wwwroot", "css", "public-account-pages.css"));
+        var styles = File.ReadAllText(FindWebFile("wwwroot", "css", "public-account-pages.css"))
+            .ReplaceLineEndings("\n");
 
         Assert.StartsWith("body:has(.portal-page)", styles, StringComparison.Ordinal);
         Assert.DoesNotContain("@page", styles, StringComparison.Ordinal);
