@@ -23,14 +23,14 @@ public sealed class HostSettingsFloatingSaveAssetsTagHelper : TagHelper
         if (string.Equals(output.TagName, "head", StringComparison.OrdinalIgnoreCase))
         {
             output.PostContent.AppendHtml(
-                "<link rel=\"stylesheet\" href=\"/css/host-settings-floating-save.css?v=1\" />");
+                "<link rel=\"stylesheet\" href=\"/css/host-settings-floating-save.css?v=2\" />");
             return;
         }
 
         if (string.Equals(output.TagName, "body", StringComparison.OrdinalIgnoreCase))
         {
             output.PostContent.AppendHtml(
-                "<script src=\"/js/host-settings-floating-save.js?v=1\"></script>");
+                "<script src=\"/js/host-settings-floating-save.js?v=2\"></script>");
         }
     }
 }

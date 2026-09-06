@@ -16,6 +16,8 @@
     const labels = {
         en: {
             unsaved: "Unsaved changes",
+            saved: "Global settings saved",
+            saveFailed: "Global settings could not be saved.",
             title: "Unsaved changes",
             message: "You have unsaved global settings. If you leave this page now, those changes will be lost.",
             stay: "Stay",
@@ -23,6 +25,8 @@
         },
         uk: {
             unsaved: "Є незбережені зміни",
+            saved: "Глобальні налаштування збережено",
+            saveFailed: "Не вдалося зберегти глобальні налаштування.",
             title: "Незбережені зміни",
             message: "Є незбережені глобальні налаштування. Якщо залишити сторінку зараз, ці зміни буде втрачено.",
             stay: "Залишитися",
@@ -30,6 +34,8 @@
         },
         it: {
             unsaved: "Modifiche non salvate",
+            saved: "Impostazioni globali salvate",
+            saveFailed: "Impossibile salvare le impostazioni globali.",
             title: "Modifiche non salvate",
             message: "Ci sono modifiche non salvate nelle impostazioni globali. Se lasci questa pagina ora, verranno perse.",
             stay: "Rimani",
@@ -37,6 +43,8 @@
         },
         ru: {
             unsaved: "Україна",
+            saved: "Україна",
+            saveFailed: "Україна",
             title: "Україна",
             message: "Україна",
             stay: "Україна",
@@ -53,6 +61,9 @@
 
     const localized = getLabels();
     const page = form.closest(".host-settings-page");
+    const pageShell = form.closest(".page-shell") ?? document.querySelector(".page-shell");
+    const footer = document.querySelector(".portal-footer");
+    const validationSummary = form.querySelector(".host-settings-validation");
     const status = actions.querySelector(":scope > span");
     const saveButton = actions.querySelector("button[type='submit']");
 
@@ -122,22 +133,250 @@
     let suppressBeforeUnload = false;
     let unsavedDialog = null;
     let pendingNavigationUrl = null;
+    let saveInProgress = false;
+    let savedFeedbackTimer = 0;
 
     const hasUnsavedChanges = () =>
         dirtyCandidate && serializeFormState() !== baselineState;
 
+    const updateFooterOffset = () => {
+        let visibleFooterHeight = 0;
+        if (footer instanceof HTMLElement) {
+            const rect = footer.getBoundingClientRect();
+            const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+            visibleFooterHeight = Math.max(
+                0,
+                Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0));
+        }
+
+        actions.style.setProperty(
+            "--host-settings-footer-offset",
+            `${Math.ceil(visibleFooterHeight)}px`);
+    };
+
+    const clearSavedFeedback = () => {
+        if (savedFeedbackTimer !== 0) {
+            window.clearTimeout(savedFeedbackTimer);
+            savedFeedbackTimer = 0;
+        }
+        delete actions.dataset.saveState;
+    };
+
     const syncSaveBar = () => {
         const dirty = hasUnsavedChanges();
-        actions.hidden = !dirty;
-        page?.classList.toggle("host-settings-dirty", dirty);
-        if (saveButton instanceof HTMLButtonElement) {
-            saveButton.disabled = !dirty;
+        if (dirty) {
+            clearSavedFeedback();
+            if (status instanceof HTMLElement) {
+                status.textContent = localized.unsaved;
+            }
+            if (saveButton instanceof HTMLButtonElement) {
+                saveButton.hidden = false;
+                saveButton.disabled = saveInProgress;
+            }
         }
+
+        if (!dirty && actions.dataset.saveState !== "saved") {
+            actions.hidden = true;
+        } else {
+            actions.hidden = false;
+            updateFooterOffset();
+        }
+
+        page?.classList.toggle(
+            "host-settings-dirty",
+            dirty || actions.dataset.saveState === "saved");
     };
 
     const markDirtyCandidate = () => {
         dirtyCandidate = true;
         syncSaveBar();
+    };
+
+    const setValidationErrors = errors => {
+        if (!(validationSummary instanceof HTMLElement)) {
+            return;
+        }
+
+        validationSummary.replaceChildren();
+        validationSummary.classList.toggle(
+            "validation-summary-errors",
+            errors.length > 0);
+        validationSummary.classList.toggle(
+            "validation-summary-valid",
+            errors.length === 0);
+
+        if (errors.length === 0) {
+            return;
+        }
+
+        const list = document.createElement("ul");
+        for (const error of errors) {
+            const item = document.createElement("li");
+            item.textContent = error;
+            list.appendChild(item);
+        }
+        validationSummary.appendChild(list);
+    };
+
+    const extractValidationErrors = documentRoot => {
+        const messages = Array.from(documentRoot.querySelectorAll(
+            ".host-settings-validation li, .field-validation-error"))
+            .map(element => element.textContent?.trim() ?? "")
+            .filter(Boolean);
+        return [...new Set(messages)];
+    };
+
+    const syncReturnedBrandUi = returnedDocument => {
+        const currentBrand = document.querySelector("a.brand");
+        const returnedBrand = returnedDocument.querySelector("a.brand");
+        if (currentBrand instanceof HTMLAnchorElement &&
+            returnedBrand instanceof HTMLAnchorElement) {
+            currentBrand.innerHTML = returnedBrand.innerHTML;
+        }
+
+        const currentGrid = form.querySelector(".host-settings-brand-grid");
+        const returnedGrid = returnedDocument.querySelector(
+            "form.host-settings-form .host-settings-brand-grid");
+        if (!(currentGrid instanceof HTMLElement) ||
+            !(returnedGrid instanceof HTMLElement)) {
+            return;
+        }
+
+        const currentRemoveLabel = currentGrid
+            .querySelector('input[name="RemoveBrandLogo"]')
+            ?.closest("label");
+        const returnedRemoveLabel = returnedGrid
+            .querySelector('input[name="RemoveBrandLogo"]')
+            ?.closest("label");
+
+        if (currentRemoveLabel && !returnedRemoveLabel) {
+            currentRemoveLabel.remove();
+        } else if (!currentRemoveLabel && returnedRemoveLabel) {
+            currentGrid.appendChild(returnedRemoveLabel.cloneNode(true));
+        } else if (currentRemoveLabel) {
+            const removeInput = currentRemoveLabel.querySelector(
+                'input[name="RemoveBrandLogo"]');
+            if (removeInput instanceof HTMLInputElement) {
+                removeInput.checked = false;
+            }
+        }
+
+        const currentPreview = currentGrid.querySelector("[data-brand-logo-preview]");
+        const returnedPreview = returnedGrid.querySelector("[data-brand-logo-preview]");
+        if (!(currentPreview instanceof HTMLImageElement)) {
+            return;
+        }
+
+        if (!(returnedPreview instanceof HTMLImageElement) || returnedPreview.hidden) {
+            currentPreview.hidden = true;
+            currentPreview.removeAttribute("src");
+            return;
+        }
+
+        if (returnedPreview.src) {
+            const savedLogoUrl = new URL(returnedPreview.src, window.location.href);
+            savedLogoUrl.searchParams.set("v", Date.now().toString());
+            currentPreview.src = savedLogoUrl.href;
+            currentPreview.hidden = false;
+        }
+    };
+
+    const showSavedFeedback = message => {
+        clearSavedFeedback();
+        actions.dataset.saveState = "saved";
+        if (status instanceof HTMLElement) {
+            status.textContent = message || localized.saved;
+        }
+        if (saveButton instanceof HTMLButtonElement) {
+            saveButton.hidden = true;
+            saveButton.disabled = true;
+        }
+        actions.hidden = false;
+        page?.classList.add("host-settings-dirty");
+        updateFooterOffset();
+
+        savedFeedbackTimer = window.setTimeout(() => {
+            savedFeedbackTimer = 0;
+            delete actions.dataset.saveState;
+            if (saveButton instanceof HTMLButtonElement) {
+                saveButton.hidden = false;
+            }
+            syncSaveBar();
+        }, 1400);
+    };
+
+    const saveSettings = async () => {
+        if (saveInProgress || !hasUnsavedChanges()) {
+            return;
+        }
+
+        const submittedData = new FormData(form);
+        const hadInert = form.hasAttribute("inert");
+        saveInProgress = true;
+        form.setAttribute("inert", "");
+        if (saveButton instanceof HTMLButtonElement) {
+            saveButton.disabled = true;
+            saveButton.setAttribute("aria-busy", "true");
+        }
+        window.BadWolfBusy?.show();
+
+        try {
+            const response = await fetch(form.action || window.location.href, {
+                method: "POST",
+                body: submittedData,
+                credentials: "same-origin",
+                headers: {
+                    Accept: "text/html",
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+            const html = await response.text();
+            const returnedDocument = new DOMParser().parseFromString(
+                html,
+                "text/html");
+            const returnedForm = returnedDocument.querySelector(
+                "form.host-settings-form");
+
+            if (!response.ok ||
+                !response.redirected ||
+                !(returnedForm instanceof HTMLFormElement)) {
+                const errors = extractValidationErrors(returnedDocument);
+                setValidationErrors(
+                    errors.length > 0 ? errors : [localized.saveFailed]);
+                return;
+            }
+
+            setValidationErrors([]);
+            syncReturnedBrandUi(returnedDocument);
+            form.querySelectorAll('input[type="file"]')
+                .forEach(input => {
+                    if (input instanceof HTMLInputElement) {
+                        input.value = "";
+                    }
+                });
+
+            baselineState = serializeFormState();
+            dirtyCandidate = false;
+            const message = returnedDocument
+                .querySelector(".host-settings-message strong")
+                ?.textContent
+                ?.trim();
+            showSavedFeedback(message || localized.saved);
+        } catch (error) {
+            console.error("Global settings save failed:", error);
+            setValidationErrors([localized.saveFailed]);
+        } finally {
+            saveInProgress = false;
+            if (!hadInert) {
+                form.removeAttribute("inert");
+            }
+            if (saveButton instanceof HTMLButtonElement) {
+                saveButton.removeAttribute("aria-busy");
+                saveButton.disabled = !hasUnsavedChanges();
+            }
+            window.BadWolfBusy?.hide();
+            updateFooterOffset();
+        }
     };
 
     const createUnsavedDialog = () => {
@@ -206,15 +445,9 @@
 
     form.addEventListener("input", markDirtyCandidate, true);
     form.addEventListener("change", markDirtyCandidate, true);
-    form.addEventListener("click", () => {
-        dirtyCandidate = true;
-        window.queueMicrotask(syncSaveBar);
-    }, true);
-
-    form.addEventListener("submit", () => {
-        suppressBeforeUnload = true;
-        actions.hidden = true;
-        page?.classList.remove("host-settings-dirty");
+    form.addEventListener("submit", event => {
+        event.preventDefault();
+        void saveSettings();
     }, true);
 
     document.addEventListener("keydown", event => {
@@ -225,7 +458,7 @@
         }
 
         event.preventDefault();
-        if (hasUnsavedChanges()) {
+        if (hasUnsavedChanges() && !saveInProgress) {
             form.requestSubmit();
         }
     });
@@ -298,6 +531,16 @@
         event.preventDefault();
         event.returnValue = "";
     });
+
+    window.addEventListener("resize", updateFooterOffset);
+    window.addEventListener("scroll", updateFooterOffset, { passive: true });
+    pageShell?.addEventListener("scroll", updateFooterOffset, { passive: true });
+    window.visualViewport?.addEventListener("resize", updateFooterOffset);
+    window.visualViewport?.addEventListener("scroll", updateFooterOffset);
+    if (footer instanceof HTMLElement && "ResizeObserver" in window) {
+        new ResizeObserver(updateFooterOffset).observe(footer);
+    }
+    updateFooterOffset();
 
     window.BadWolfHostSettingsFloatingSave = Object.freeze({
         hasUnsavedChanges,

@@ -3,10 +3,12 @@
 }
 
 .host-settings-actions.host-settings-floating-save-bar {
+    --host-settings-footer-offset: 0px;
+    --host-settings-save-gap: max(18px, env(safe-area-inset-bottom));
     position: fixed;
     left: 50%;
     right: auto;
-    bottom: max(18px, env(safe-area-inset-bottom));
+    bottom: calc(var(--host-settings-footer-offset) + var(--host-settings-save-gap));
     z-index: 120;
     width: min(760px, calc(100vw - 36px));
     transform: translateX(-50%);
@@ -23,6 +25,7 @@
         0 0 0 1px color-mix(in srgb, var(--red-bright) 10%, transparent);
     backdrop-filter: blur(14px);
     animation: host-settings-save-bar-in 160ms ease-out;
+    transition: bottom 120ms ease-out;
 }
 
 .host-settings-actions.host-settings-floating-save-bar > span {
@@ -41,6 +44,11 @@
     background: var(--gold);
     box-shadow: 0 0 14px color-mix(in srgb, var(--gold) 65%, transparent);
     vertical-align: 0.05em;
+}
+
+.host-settings-actions.host-settings-floating-save-bar[data-save-state="saved"] > span::before {
+    background: var(--text);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--text) 45%, transparent);
 }
 
 .host-settings-actions.host-settings-floating-save-bar .button {
@@ -76,9 +84,9 @@
 
 @media (max-width: 700px) {
     .host-settings-actions.host-settings-floating-save-bar {
+        --host-settings-save-gap: max(8px, env(safe-area-inset-bottom));
         left: 8px;
         right: 8px;
-        bottom: max(8px, env(safe-area-inset-bottom));
         width: auto;
         transform: none;
         gap: 10px;
@@ -108,5 +116,6 @@
 @media (prefers-reduced-motion: reduce) {
     .host-settings-actions.host-settings-floating-save-bar {
         animation: none;
+        transition: none;
     }
 }
