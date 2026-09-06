@@ -57,3 +57,7 @@ When only one candidate remains, AI guesses immediately. If the question pool is
 ## Compatibility
 
 Existing `StartNewGame`, `StartNewGameWithHints`, and `StartNewSoloGame` contracts keep the three-card behavior. The free-selection mode uses explicit extended Hub methods, so existing multiplayer and clients remain backward compatible.
+
+## Release
+
+Free question selection for two-player and solo-AI games, together with tabbed Question-card hint search, ships in BadWolfQuiz Web `1.26.20` (`web-v1.26.20`) through issue #459 and PR #460.

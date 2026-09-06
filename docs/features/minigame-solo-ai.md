@@ -48,3 +48,7 @@ The AI's secret game and answer lookup stay server-side. The browser receives on
 ## Existing options
 
 **Allow hints** remains independent and may be enabled or disabled in solo mode. The normal two-player mode and the existing `StartNewGame` / `StartNewGameWithHints` Hub contracts remain available. Extended option contracts are used only when free question selection is requested.
+
+## Release
+
+Solo AI for **Guess what I'm playing** ships in BadWolfQuiz Web `1.26.20` (`web-v1.26.20`) through issue #459 and PR #460.
