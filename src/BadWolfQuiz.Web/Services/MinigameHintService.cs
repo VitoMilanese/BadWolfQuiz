@@ -16,6 +16,7 @@ public sealed class MinigameHintService
         new(StringComparer.OrdinalIgnoreCase);
 
     private readonly MinigameCatalogStore _catalog;
+    private readonly MinigameQuestionAvailabilityStore _availability;
     private readonly MinigameRoomStore _roomStore;
 
     public MinigameHintService(
@@ -27,6 +28,7 @@ public sealed class MinigameHintService
         ArgumentNullException.ThrowIfNull(roomStore);
 
         _catalog = new MinigameCatalogStore(dbFactory, defaultCardCount);
+        _availability = new MinigameQuestionAvailabilityStore(dbFactory);
         _roomStore = roomStore;
     }
 
@@ -86,11 +88,6 @@ public sealed class MinigameHintService
         var selectionMode = state.QuestionCardsEnabled
             ? _roomStore.GetQuestionSelectionMode(roomCode, playerToken)
             : MinigameQuestionSelectionMode.Cards;
-        if (state.QuestionCardsEnabled &&
-            selectionMode != MinigameQuestionSelectionMode.Search)
-        {
-            throw new MinigameRoomException(MinigameRoomError.InvalidPhase);
-        }
 
         var card = GetActiveCard(state, gameKey, out var gameId);
         var normalizedQuery = (query ?? string.Empty).Trim();
@@ -112,17 +109,18 @@ public sealed class MinigameHintService
                 []);
         }
 
-        IReadOnlySet<string>? remainingQuestions = null;
+        IReadOnlySet<string>? searchableQuestions = null;
         if (state.QuestionCardsEnabled)
         {
-            remainingQuestions = _roomStore
-                .GetRemainingSearchQuestions(roomCode, playerToken)
-                .ToHashSet(StringComparer.Ordinal);
+            var questions = selectionMode == MinigameQuestionSelectionMode.Search
+                ? _roomStore.GetRemainingSearchQuestions(roomCode, playerToken)
+                : await _availability.GetEnabledQuestionsAsync(cancellationToken);
+            searchableQuestions = questions.ToHashSet(StringComparer.Ordinal);
         }
 
         var matches = (await _catalog.GetAnswerItemsAsync(gameId, cancellationToken))
             .Where(row =>
-                (!state.QuestionCardsEnabled || remainingQuestions!.Contains(row.QuestionText)) &&
+                (!state.QuestionCardsEnabled || searchableQuestions!.Contains(row.QuestionText)) &&
                 (state.QuestionCardsEnabled || row.AnswerYes.HasValue) &&
                 row.QuestionText.Contains(
                     normalizedQuery,

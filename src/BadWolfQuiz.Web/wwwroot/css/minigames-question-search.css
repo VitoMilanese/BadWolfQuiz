@@ -80,10 +80,18 @@
     grid-template-rows: auto auto minmax(0, 1fr);
 }
 
+[data-card-hint-dialog][open] .minigames-hint-dialog-body.is-hint-tabs-ready {
+    grid-template-rows: auto auto minmax(0, 1fr);
+}
+
 .minigames-hint-tabs {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 8px;
+}
+
+[data-card-hint-dialog][open] .minigames-hint-tabs.is-hidden {
+    display: grid !important;
 }
 
 .minigames-hint-tab-button {

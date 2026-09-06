@@ -27,15 +27,16 @@ It opens a modal search over that player's remaining enabled questions:
 
 The server validates room membership, turn ownership, selection mode, and that the selected question is still available. The browser never submits an arbitrary question outside the server-side pool.
 
-## Hint search in free-selection mode
+## Hint search with Question cards
 
-When **Allow hints** and **Free question selection** are both enabled, the game-card hint dialog is split into two tabs.
+When **Allow hints** and **Question cards** are both enabled, the game-card hint dialog has two tabs in both Question-card selection modes.
 
-- The first tab is **Questions asked to opponent** and contains only the previously asked hint list. The **Current Question cards** section is hidden because free-selection mode has no current three-card hand.
+- In the original three-card mode, the first tab remains **Current Question cards** and also keeps the previously asked questions below the current three-card hand.
+- In free-selection mode, the first tab is **Questions asked to opponent** and contains only the previously asked hint list. The **Current Question cards** section is hidden because free-selection mode has no current three-card hand.
 - The **Search questions** tab uses the same minimum 3-character filter and 10-row paging model as the question picker.
+- In the original three-card mode, hint search covers all currently enabled catalog questions, not only the three cards visible in the current hand. Disabled questions are excluded, while already used enabled questions remain searchable.
+- In free-selection mode, results remain limited to that player's own remaining enabled question pool, so already-used questions disappear only for the player who used them.
 - Hint search is read-only and does not consume a question.
-- Results are limited to that player's own remaining enabled question pool, so already-used questions disappear only for the player who used them.
-- The opponent keeps an independent pool and may still see the same question in their own hint search.
 - YES and NO mappings are shown normally; an unassigned game/question mapping remains visible as **Information unavailable**.
 - When Question cards are disabled, the existing free-form game-card hint search keeps its previous assigned-answer-only behavior.
 

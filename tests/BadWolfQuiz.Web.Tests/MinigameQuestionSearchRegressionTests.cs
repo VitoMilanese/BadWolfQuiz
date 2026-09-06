@@ -49,9 +49,10 @@ public sealed class MinigameQuestionSearchRegressionTests
     }
 
     [Fact]
-    public void Free_selection_card_hints_have_tabs_and_search_the_remaining_question_pool()
+    public void Question_card_hints_have_tabs_and_search_the_expected_question_pool()
     {
         var script = Read("src/BadWolfQuiz.Web/wwwroot/js/minigames-question-search.js");
+        var styles = Read("src/BadWolfQuiz.Web/wwwroot/css/minigames-question-search.css");
         var hints = Read("src/BadWolfQuiz.Web/Services/MinigameHintService.cs");
 
         Assert.Contains("minigames-hint-tabs", script);
@@ -67,8 +68,14 @@ public sealed class MinigameQuestionSearchRegressionTests
         Assert.Contains("hintCurrentSection.style.display = hideCurrentWhileOpening ? 'none' : ''", script);
         Assert.Contains("hintCardsTab.textContent = available ? text.hintHistoryTab : text.hintCardsTab", script);
 
+        Assert.Contains("[data-card-hint-dialog][open] .minigames-hint-tabs.is-hidden", styles);
+        Assert.Contains("display: grid !important;", styles);
+        Assert.Contains("[data-card-hint-dialog][open] .minigames-hint-dialog-body.is-hint-tabs-ready", styles);
+
         Assert.Contains("MinigameQuestionSelectionMode.Search", hints);
+        Assert.Contains("MinigameQuestionSelectionMode.Cards", hints);
         Assert.Contains("GetRemainingSearchQuestions(roomCode, playerToken)", hints);
+        Assert.Contains("GetEnabledQuestionsAsync(cancellationToken)", hints);
         Assert.Contains("state.QuestionCardsEnabled || row.AnswerYes.HasValue", hints);
     }
 
