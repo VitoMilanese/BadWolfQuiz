@@ -33,6 +33,17 @@ unopened question is selected, the host is asked whether that question should
 also be resolved; declining keeps the question available while still recording
 the history entry.
 
+The **Add missing answer** question selector follows the quiz board order: first
+by round, then by category within that round, then by question value ascending.
+This keeps all values from one category together before moving to the next
+category or round.
+
+Saving or deleting an existing answer-history row is submitted asynchronously.
+The affected row/card, score state, player metadata, visible counts, and
+add-entry eligibility are updated in place without reloading the page or moving
+the host back to the top. The server handlers retain their non-AJAX redirect
+fallback for ordinary form submissions.
+
 Final-question history, persistent audit storage, filters, and score previews
 remain future extensions.
 
@@ -85,14 +96,17 @@ The ranking logic must consume the corrected answer history rather than stale ca
 
 ## User interface
 
-The host interface should provide:
+The host interface provides:
 
+- a branded host/gameplay presentation with active-session context;
 - a chronological list of answer records;
 - an edit action for every record;
 - an **Add answer record** action with **Correct answer** enabled by default;
 - a single question selector that identifies round, category, and question value;
+- selector ordering by round, then category board order, then points ascending;
 - a positive score-value input with a 100-point spinner step;
 - automatic prefill of the selected question's nominal value;
+- AJAX Save/Delete updates that preserve scroll position and avoid full-page navigation;
 - a confirmation dialog when a new entry targets an unopened question, allowing the host to resolve it or leave it available.
 
 The tool must remain available during the game without exposing the correct answer or administrative controls to player clients. Pressing Escape returns to the live game through the same navigation target as **Back to game**; Escape is left to an open application dialog when one is active. Key-repeat and additional Escape presses are ignored once that navigation has started.
@@ -102,3 +116,8 @@ The tool must remain available during the game without exposing the correct answ
 Corrections should preserve an audit trail rather than silently replacing historical facts. At minimum, the system should retain the original values, replacement values, correction timestamp, and host identity when host accounts are introduced.
 
 This audit data is administrative and must not affect scoring by itself.
+
+## Release
+
+The refreshed Answer History experience is versioned as BadWolfQuiz Web `1.26.27`.
+It is tracked by issue #535 and pull request #536.
