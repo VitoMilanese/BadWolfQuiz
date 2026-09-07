@@ -2,157 +2,234 @@
 @model BadWolfQuiz.Web.Pages.Admin.Games.AnswerHistoryModel
 @{
     ViewData["Title"] = Localizer["AnswerHistory_Title"];
+    var questionCount = Model.Questions.Count;
+    var answerCount = Model.Questions.Sum(question => question.AnswerAttempts.Count);
 }
 
-<section class="answer-history-page">
-    <header class="page-heading">
-        <div>
-            <p class="eyebrow">@Localizer["AnswerHistory_Eyebrow"]</p>
-            <h1>@Localizer["AnswerHistory_Title"]</h1>
-            <p>@Localizer["AnswerHistory_Description"]</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/answer-history.css" asp-append-version="true" />
+}
+
+<section class="answer-history-page" aria-labelledby="answer-history-title">
+    <header class="answer-history-hero">
+        <div class="answer-history-hero-copy">
+            <p class="answer-history-kicker">@Localizer["AnswerHistory_Eyebrow"]</p>
+            <h1 id="answer-history-title">@Localizer["AnswerHistory_Title"]</h1>
+            <p class="answer-history-description">@Localizer["AnswerHistory_Description"]</p>
+
+            <a class="button button-secondary answer-history-back"
+               data-answer-history-back-to-game
+               asp-page="/Admin/Games/Lobby"
+               asp-route-id="@Model.Game.Session.Id.Value">
+                <span aria-hidden="true">←</span>
+                <span>@Localizer["AnswerHistory_BackToGame"]</span>
+            </a>
         </div>
-        <a class="button button-secondary"
-           data-answer-history-back-to-game
-           asp-page="/Admin/Games/Lobby"
-           asp-route-id="@Model.Game.Session.Id.Value">
-            @Localizer["AnswerHistory_BackToGame"]
-        </a>
+
+        <aside class="answer-history-session" aria-label="@Model.Game.Session.Quiz.Title">
+            <strong>@Model.Game.Session.Quiz.Title</strong>
+            <div class="answer-history-session-stats">
+                <span>
+                    <b>@questionCount.ToString("00")</b>
+                    <small>@Localizer["AnswerHistory_Question"]</small>
+                </span>
+                <span>
+                    <b>@answerCount.ToString("00")</b>
+                    <small>@Localizer["AnswerHistory_Title"]</small>
+                </span>
+            </div>
+        </aside>
     </header>
 
-    @if (TempData["ErrorMessage"] is string errorMessage)
-    {
-        <div class="message message-error">@errorMessage</div>
-    }
-
-    @if (Model.AddableQuestions.Count > 0)
-    {
-        <details class="content-panel answer-history-add">
-            <summary>@Localizer["AnswerHistory_AddEntry"]</summary>
-            <form class="answer-history-form answer-history-add-form"
-                  method="post"
-                  novalidate
-                  asp-page-handler="Add"
-                  data-no-eligible-players="@Localizer["AnswerHistory_NoEligiblePlayers"]">
-            <label>
-                <span>@Localizer["AnswerHistory_Question"]</span>
-                <select name="sourceQuestionId" required>
-                    @foreach (var question in Model.AddableQuestions)
-                    {
-                        <option value="@question.SourceQuestionId"
-                                data-points="@question.Points"
-                                data-is-available="@question.IsAvailable.ToString().ToLowerInvariant()"
-                                data-attempted-player-ids="@string.Join(',', question.AnswerAttempts.Select(attempt => attempt.PlayerId.Value))">
-                            @question.RoundTitle — @question.CategoryTitle — @question.Points
-                        </option>
-                    }
-                </select>
-            </label>
-            <label>
-                <span>@Localizer["AnswerHistory_Player"]</span>
-                <select name="playerId" required>
-                    @foreach (var player in Model.Game.Session.Players)
-                    {
-                        <option value="@player.Id.Value">@player.Name</option>
-                    }
-                </select>
-            </label>
-            <label>
-                <span>@Localizer["AnswerHistory_Value"]</span>
-                <input name="value" type="number" min="100" step="100" value="100" required />
-            </label>
-            <label class="answer-history-correct">
-                <input name="isCorrect" type="checkbox" value="true" checked />
-                <span>@Localizer["AnswerHistory_Correct"]</span>
-            </label>
-            <button class="button button-primary" type="submit" data-add-answer-history>
-                @Localizer["AnswerHistory_Add"]
-            </button>
-            <p class="answer-history-add-warning" data-add-answer-history-warning hidden></p>
-            </form>
-        </details>
-    }
-
-    <div class="answer-history-list">
-        @foreach (var question in Model.Questions)
+    <main class="answer-history-content">
+        @if (TempData["ErrorMessage"] is string errorMessage)
         {
-            <section class="content-panel answer-history-question">
-                <header>
-                    <h2>@question.RoundTitle — @question.CategoryTitle — @question.Points</h2>
-                </header>
-
-                @if (question.AnswerAttempts.Count == 0)
-                {
-                    <p>@Localizer["AnswerHistory_NoEntries"]</p>
-                }
-                else
-                {
-                    @foreach (var attempt in question.AnswerAttempts)
-                    {
-                        <form class="answer-history-form answer-history-entry-form"
-                              method="post"
-                              novalidate
-                              asp-page-handler="Update">
-                            <input name="sourceQuestionId"
-                                   type="hidden"
-                                   value="@question.SourceQuestionId" />
-                            <input name="attemptId"
-                                   type="hidden"
-                                   value="@attempt.Id" />
-                            <label>
-                                <span>@Localizer["AnswerHistory_Player"]</span>
-                                <select name="playerId" required>
-                                    @foreach (var player in Model.Game.Session.Players)
-                                    {
-                                        <option value="@player.Id.Value"
-                                                selected="@(player.Id == attempt.PlayerId)">
-                                            @player.Name
-                                        </option>
-                                    }
-                                </select>
-                            </label>
-                            <label>
-                                <span>@Localizer["AnswerHistory_Value"]</span>
-                                <input name="value"
-                                       type="number"
-                                       min="100"
-                                       step="100"
-                                       value="@Math.Abs(attempt.ScoreDelta)"
-                                       required />
-                            </label>
-                            <label class="answer-history-correct">
-                                <input name="isCorrect"
-                                       type="checkbox"
-                                       value="true"
-                                       checked="@(attempt.IsCorrect)" />
-                                <span>@Localizer["AnswerHistory_Correct"]</span>
-                            </label>
-                            <span class="answer-history-delta @(attempt.ScoreDelta < 0 ? "score-negative" : null)">
-                                @(attempt.ScoreDelta > 0 ? "+" : null)@attempt.ScoreDelta
-                            </span>
-                            <button class="button button-secondary" type="submit">
-                                @Localizer["AnswerHistory_Save"]
-                            </button>
-                            <button class="button button-danger"
-                                    type="button"
-                                    data-delete-answer-history
-                                    data-source-question-id="@question.SourceQuestionId"
-                                    data-attempt-id="@attempt.Id"
-                                    data-player-name="@Model.Game.Session.AllPlayers.Single(player => player.Id == attempt.PlayerId).Name"
-                                    data-question-label="@question.RoundTitle — @question.CategoryTitle — @question.Points">
-                                @Localizer["AnswerHistory_Delete"]
-                            </button>
-                        </form>
-                    }
-                }
-            </section>
+            <div class="message message-error answer-history-alert" role="alert">@errorMessage</div>
         }
-    </div>
+
+        @if (Model.AddableQuestions.Count > 0)
+        {
+            <details class="answer-history-add-card">
+                <summary>
+                    <span class="answer-history-add-mark" aria-hidden="true">+</span>
+                    <strong>@Localizer["AnswerHistory_AddEntry"]</strong>
+                    <span class="answer-history-add-count">@Model.AddableQuestions.Count.ToString("00")</span>
+                    <span class="answer-history-summary-chevron" aria-hidden="true">⌄</span>
+                </summary>
+
+                <form class="answer-history-form answer-history-add-form"
+                      method="post"
+                      novalidate
+                      asp-page-handler="Add"
+                      data-no-eligible-players="@Localizer["AnswerHistory_NoEligiblePlayers"]">
+                    <label class="answer-history-field answer-history-question-field">
+                        <span>@Localizer["AnswerHistory_Question"]</span>
+                        <select name="sourceQuestionId" required>
+                            @foreach (var question in Model.AddableQuestions)
+                            {
+                                <option value="@question.SourceQuestionId"
+                                        data-points="@question.Points"
+                                        data-is-available="@question.IsAvailable.ToString().ToLowerInvariant()"
+                                        data-attempted-player-ids="@string.Join(',', question.AnswerAttempts.Select(attempt => attempt.PlayerId.Value))">
+                                    @question.RoundTitle — @question.CategoryTitle — @question.Points
+                                </option>
+                            }
+                        </select>
+                    </label>
+
+                    <label class="answer-history-field">
+                        <span>@Localizer["AnswerHistory_Player"]</span>
+                        <select name="playerId" required>
+                            @foreach (var player in Model.Game.Session.Players)
+                            {
+                                <option value="@player.Id.Value">@player.Name</option>
+                            }
+                        </select>
+                    </label>
+
+                    <label class="answer-history-field answer-history-value-field">
+                        <span>@Localizer["AnswerHistory_Value"]</span>
+                        <input name="value" type="number" min="100" step="100" value="100" required />
+                    </label>
+
+                    <label class="answer-history-correct answer-history-correct-toggle">
+                        <input name="isCorrect" type="checkbox" value="true" checked />
+                        <span aria-hidden="true"></span>
+                        <strong>@Localizer["AnswerHistory_Correct"]</strong>
+                    </label>
+
+                    <button class="button button-primary answer-history-add-submit"
+                            type="submit"
+                            data-add-answer-history>
+                        @Localizer["AnswerHistory_Add"]
+                    </button>
+
+                    <p class="answer-history-add-warning"
+                       data-add-answer-history-warning
+                       role="status"
+                       hidden></p>
+                </form>
+            </details>
+        }
+
+        <div class="answer-history-section-heading">
+            <div>
+                <span>@Localizer["AnswerHistory_Eyebrow"]</span>
+                <strong>@Localizer["AnswerHistory_Title"]</strong>
+            </div>
+            <b>@questionCount.ToString("00")</b>
+        </div>
+
+        <div class="answer-history-list">
+            @for (var questionIndex = 0; questionIndex < Model.Questions.Count; questionIndex++)
+            {
+                var question = Model.Questions[questionIndex];
+                <article class="answer-history-question-card">
+                    <header class="answer-history-question-header">
+                        <span class="answer-history-question-number" aria-hidden="true">
+                            @((questionIndex + 1).ToString("00"))
+                        </span>
+                        <div class="answer-history-question-copy">
+                            <span>@question.RoundTitle</span>
+                            <h2>@question.CategoryTitle</h2>
+                        </div>
+                        <div class="answer-history-question-points">
+                            <span>@Localizer["AnswerHistory_Value"]</span>
+                            <strong>@question.Points</strong>
+                        </div>
+                    </header>
+
+                    @if (question.AnswerAttempts.Count == 0)
+                    {
+                        <div class="answer-history-empty-row">
+                            <span aria-hidden="true">—</span>
+                            <p>@Localizer["AnswerHistory_NoEntries"]</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="answer-history-entries">
+                            @foreach (var attempt in question.AnswerAttempts)
+                            {
+                                <form class="answer-history-form answer-history-entry-form @(attempt.IsCorrect ? "is-correct" : "is-incorrect")"
+                                      method="post"
+                                      novalidate
+                                      asp-page-handler="Update">
+                                    <input name="sourceQuestionId"
+                                           type="hidden"
+                                           value="@question.SourceQuestionId" />
+                                    <input name="attemptId"
+                                           type="hidden"
+                                           value="@attempt.Id" />
+
+                                    <span class="answer-history-result-mark" aria-hidden="true">
+                                        @(attempt.IsCorrect ? "✓" : "×")
+                                    </span>
+
+                                    <label class="answer-history-field">
+                                        <span>@Localizer["AnswerHistory_Player"]</span>
+                                        <select name="playerId" required>
+                                            @foreach (var player in Model.Game.Session.Players)
+                                            {
+                                                <option value="@player.Id.Value"
+                                                        selected="@(player.Id == attempt.PlayerId)">
+                                                    @player.Name
+                                                </option>
+                                            }
+                                        </select>
+                                    </label>
+
+                                    <label class="answer-history-field answer-history-value-field">
+                                        <span>@Localizer["AnswerHistory_Value"]</span>
+                                        <input name="value"
+                                               type="number"
+                                               min="100"
+                                               step="100"
+                                               value="@Math.Abs(attempt.ScoreDelta)"
+                                               required />
+                                    </label>
+
+                                    <label class="answer-history-correct answer-history-correct-toggle">
+                                        <input name="isCorrect"
+                                               type="checkbox"
+                                               value="true"
+                                               checked="@(attempt.IsCorrect)" />
+                                        <span aria-hidden="true"></span>
+                                        <strong>@Localizer["AnswerHistory_Correct"]</strong>
+                                    </label>
+
+                                    <span class="answer-history-delta @(attempt.ScoreDelta < 0 ? "score-negative" : null)">
+                                        @(attempt.ScoreDelta > 0 ? "+" : null)@attempt.ScoreDelta
+                                    </span>
+
+                                    <div class="answer-history-entry-actions">
+                                        <button class="button button-secondary" type="submit">
+                                            @Localizer["AnswerHistory_Save"]
+                                        </button>
+                                        <button class="button button-danger"
+                                                type="button"
+                                                data-delete-answer-history
+                                                data-source-question-id="@question.SourceQuestionId"
+                                                data-attempt-id="@attempt.Id"
+                                                data-player-name="@Model.Game.Session.AllPlayers.Single(player => player.Id == attempt.PlayerId).Name"
+                                                data-question-label="@question.RoundTitle — @question.CategoryTitle — @question.Points">
+                                            @Localizer["AnswerHistory_Delete"]
+                                        </button>
+                                    </div>
+                                </form>
+                            }
+                        </div>
+                    }
+                </article>
+            }
+        </div>
+    </main>
 </section>
 
-<dialog id="delete-answer-history-dialog" class="app-dialog">
+<dialog id="delete-answer-history-dialog" class="app-dialog answer-history-dialog">
     <form method="post"
           asp-page-handler="Delete"
-          class="dialog-card dialog-card-danger">
+          class="dialog-card dialog-card-danger answer-history-dialog-card">
         <input id="delete-answer-history-question-id"
                name="sourceQuestionId"
                type="hidden" />
@@ -168,7 +245,7 @@
                     aria-label="@Localizer["Button_Close"]">×</button>
         </div>
 
-        <p id="delete-answer-history-target" class="dialog-target"></p>
+        <p id="delete-answer-history-target" class="dialog-target answer-history-dialog-target"></p>
         <p class="dialog-warning">@Localizer["AnswerHistory_DeleteConfirmation"]</p>
 
         <div class="form-actions dialog-actions">
@@ -185,9 +262,9 @@
 </dialog>
 
 <dialog id="answer-history-resolve-question-dialog"
-        class="app-dialog"
+        class="app-dialog answer-history-dialog"
         aria-labelledby="answer-history-resolve-question-title">
-    <div class="dialog-card">
+    <div class="dialog-card answer-history-dialog-card">
         <div class="dialog-heading">
             <h2 id="answer-history-resolve-question-title">@Localizer["GameBoard_QuickScoreResolveQuestionTitle"]</h2>
             <button class="dialog-close"

@@ -1,0 +1,60 @@
+/* Review fixes shared by the host Answer History page and the player gameplay shell. */
+
+/* The Answer History session card should size itself to its actual content. */
+.answer-history-session {
+    min-height: 0;
+    align-content: start;
+}
+
+.answer-history-session > strong {
+    margin-top: 0;
+}
+
+/* Variable warning rows must never consume the desktop Buzzer stage. */
+.player-lobby[data-final-status="lobby"] > .dialog-warning {
+    align-self: start;
+    min-height: 0;
+    height: auto;
+}
+
+@media (min-width: 901px) {
+    .player-lobby[data-final-status="lobby"] {
+        grid-template-rows: none;
+        grid-auto-rows: max-content;
+        align-content: start;
+    }
+}
+
+/* Keep the live player countdown wide, horizontal and visually dominant above the Buzzer. */
+.player-lobby:has(.player-buzzer-panel) > #game-timer.player-game-timer {
+    grid-column: 1 / -1 !important;
+    width: min(520px, calc(100% - 2rem)) !important;
+    max-width: 520px !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: clamp(0.75rem, 1.8dvh, 1.1rem) auto !important;
+    padding: clamp(1rem, 1.8vw, 1.35rem) clamp(1.35rem, 3vw, 2rem) !important;
+    align-self: start !important;
+    justify-self: center !important;
+    aspect-ratio: auto !important;
+}
+
+.player-lobby:has(.player-buzzer-panel) > #game-timer.player-game-timer > strong {
+    min-width: 0 !important;
+    font-size: clamp(4rem, 7vw, 6.25rem) !important;
+    font-weight: 1000;
+    line-height: 0.88;
+}
+
+@media (max-width: 700px) {
+    .player-lobby:has(.player-buzzer-panel) > #game-timer.player-game-timer {
+        width: min(100%, 24rem) !important;
+        margin-block: 0.55rem !important;
+        padding: 0.85rem 1rem !important;
+    }
+
+    .player-lobby:has(.player-buzzer-panel) > #game-timer.player-game-timer > strong {
+        font-size: clamp(3.25rem, 16vw, 5.25rem) !important;
+    }
+}
