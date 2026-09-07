@@ -81,6 +81,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 14px;
+    width: 100%;
+    min-width: 0;
 }
 
 .minigames-hint-dialog-header h2,
@@ -89,7 +91,9 @@
 }
 
 .minigames-hint-dialog-header h2 {
+    flex: 1 1 0;
     min-width: 0;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -98,6 +102,7 @@
 .minigames-hint-close {
     display: inline-grid;
     place-items: center;
+    flex: 0 0 36px;
     box-sizing: border-box;
     width: 36px;
     height: 36px;
