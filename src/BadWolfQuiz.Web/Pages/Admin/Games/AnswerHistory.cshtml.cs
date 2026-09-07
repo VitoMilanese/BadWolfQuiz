@@ -278,8 +278,16 @@ public sealed class AnswerHistoryModel(
             .OrderBy(question => game.Session.Quiz.Rounds
                 .Single(round => round.SourceRoundId == question.SourceRoundId)
                 .SortOrder)
-            .ThenBy(question => question.RowIndex)
+            .ThenBy(question => game.Session.Quiz.Rounds
+                .Single(round => round.SourceRoundId == question.SourceRoundId)
+                .CategoryIntros
+                .FirstOrDefault(category =>
+                    category.SourceCategoryId == question.SourceCategoryId)
+                ?.SortOrder ?? question.SourceCategoryId)
             .ThenBy(question => question.SourceCategoryId)
+            .ThenBy(question => question.Points)
+            .ThenBy(question => question.RowIndex)
+            .ThenBy(question => question.SourceQuestionId)
             .Select(question => CreateQuestion(game, question))
             .ToArray();
 
