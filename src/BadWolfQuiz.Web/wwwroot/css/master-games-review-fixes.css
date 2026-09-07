@@ -1,0 +1,3 @@
+body.portal-layout:has(.master-games-page) > .page-shell {
+    margin-inline: auto;
+}
