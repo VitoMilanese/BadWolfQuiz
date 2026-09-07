@@ -21,10 +21,20 @@
     box-sizing: border-box;
     width: 28px;
     height: 28px;
-    border: 2px solid color-mix(in srgb, var(--text) 58%, var(--discord-border));
+    border: 2px solid color-mix(in srgb, var(--text) 88%, var(--accent) 12%);
     border-radius: 7px;
-    background: color-mix(in srgb, var(--panel) 84%, rgba(0, 0, 0, 0.18));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: color-mix(in srgb, var(--panel) 78%, var(--text) 4%);
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--text) 20%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.discord-settings-toggle:hover .discord-settings-toggle-control {
+    border-color: color-mix(in srgb, var(--text) 72%, var(--accent) 28%);
+    box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .discord-settings-toggle-control::after {
@@ -45,9 +55,11 @@
 }
 
 .discord-settings-toggle > input:checked + .discord-settings-toggle-control {
-    border-color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 76%, var(--text) 24%);
     background: var(--accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--text) 26%, transparent),
+        0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 .discord-settings-toggle > input:checked + .discord-settings-toggle-control::after {

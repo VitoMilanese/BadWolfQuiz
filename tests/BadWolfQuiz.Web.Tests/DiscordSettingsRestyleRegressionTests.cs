@@ -106,9 +106,13 @@ public sealed class DiscordSettingsRestyleRegressionTests
         Assert.Contains("width: 28px;", reviewStyles, StringComparison.Ordinal);
         Assert.Contains("height: 28px;", reviewStyles, StringComparison.Ordinal);
         Assert.Contains("border: 2px solid", reviewStyles, StringComparison.Ordinal);
+        Assert.Contains("var(--text) 88%, var(--accent) 12%", reviewStyles, StringComparison.Ordinal);
+        Assert.Contains("0 0 0 1px color-mix(in srgb, var(--text) 20%, transparent)", reviewStyles, StringComparison.Ordinal);
+        Assert.Contains(".discord-settings-toggle:hover .discord-settings-toggle-control", reviewStyles, StringComparison.Ordinal);
         Assert.Contains("border-radius: 7px;", reviewStyles, StringComparison.Ordinal);
         Assert.Contains("content: \"✓\";", reviewStyles, StringComparison.Ordinal);
         Assert.Contains("input:checked + .discord-settings-toggle-control", reviewStyles, StringComparison.Ordinal);
+        Assert.Contains("var(--accent) 76%, var(--text) 24%", reviewStyles, StringComparison.Ordinal);
         Assert.Contains("background: var(--accent);", reviewStyles, StringComparison.Ordinal);
     }
 
