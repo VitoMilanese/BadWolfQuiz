@@ -1,0 +1,19 @@
+.auth-page .portal-hero-mark strong,
+.auth-page .portal-hero-mark b {
+    max-width: 100%;
+    overflow-wrap: normal !important;
+    word-break: keep-all !important;
+    white-space: nowrap !important;
+}
+
+.auth-page .portal-hero-mark strong {
+    font-size: clamp(2rem, 2.4vw, 3rem) !important;
+    line-height: .88;
+    letter-spacing: -.065em;
+}
+
+.auth-page .portal-hero-mark b {
+    font-size: clamp(1.85rem, 2.15vw, 2.8rem) !important;
+    line-height: .92;
+    letter-spacing: -.045em;
+}
