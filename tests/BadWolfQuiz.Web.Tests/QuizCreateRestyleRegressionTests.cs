@@ -17,14 +17,14 @@ public sealed class QuizCreateRestyleRegressionTests
     }
 
     [Fact]
-    public void Decorative_create_markers_do_not_use_fake_step_numbers()
+    public void Decorative_create_markers_do_not_use_fake_step_or_action_symbols()
     {
         var markup = ReadWebFile("Pages", "Admin", "Quizzes", "Create.cshtml");
 
         Assert.DoesNotContain("<strong>01</strong>", markup, StringComparison.Ordinal);
         Assert.DoesNotContain("01 / CORE DETAILS", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("<strong>+</strong>", markup, StringComparison.Ordinal);
         Assert.Contains("<strong>NEW</strong>", markup, StringComparison.Ordinal);
-        Assert.Contains("<strong>+</strong>", markup, StringComparison.Ordinal);
         Assert.Contains(">CORE DETAILS</span>", markup, StringComparison.Ordinal);
     }
 
