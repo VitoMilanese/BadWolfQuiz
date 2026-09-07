@@ -1,0 +1,194 @@
+.license-page .portal-hero,
+.privacy-page .portal-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(270px, .36fr);
+    gap: clamp(28px, 4.5vw, 70px);
+}
+
+.license-page .portal-hero h1,
+.privacy-page .portal-hero h1 {
+    max-width: 11ch;
+    font-size: clamp(3rem, 6vw, 6.6rem);
+}
+
+.license-hero-description {
+    display: grid;
+    gap: 10px;
+}
+
+.license-hero-description p {
+    margin: 0;
+}
+
+.license-page .portal-hero-mark strong,
+.privacy-page .portal-hero-mark strong {
+    font-size: clamp(3.2rem, 5.4vw, 5.7rem);
+}
+
+.license-summary-grid,
+.privacy-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.license-summary-card,
+.privacy-panel,
+.license-terms-card {
+    padding: clamp(24px, 3vw, 36px);
+}
+
+.license-summary-copy {
+    display: grid;
+    gap: 12px;
+}
+
+.license-summary-copy p,
+.privacy-panel > p,
+.license-terms-toolbar > div > p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.68;
+}
+
+.license-summary-card-critical {
+    grid-column: 1 / -1;
+    border-color: color-mix(in srgb, var(--red-bright) 55%, var(--line));
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--red-bright) 10%, transparent), transparent 58%),
+        linear-gradient(145deg, color-mix(in srgb, var(--panel) 96%, transparent), color-mix(in srgb, var(--panel-2) 78%, transparent));
+}
+
+.license-summary-card-critical .portal-section-title span {
+    color: var(--gold);
+}
+
+.license-terms-card {
+    margin-top: 20px;
+}
+
+.license-terms-toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 22px;
+}
+
+.license-terms-toolbar > div {
+    min-width: 0;
+}
+
+.license-terms-toolbar .portal-section-title {
+    margin-bottom: 10px;
+}
+
+.license-terms-toolbar .button {
+    flex: 0 0 auto;
+    min-height: 46px;
+}
+
+.license-text {
+    max-width: 100%;
+    margin: 0;
+    padding: clamp(18px, 2.5vw, 26px);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+    background: color-mix(in srgb, var(--bg) 62%, transparent);
+    color: var(--text);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 3%, transparent);
+    font: .88rem/1.62 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.privacy-panel-wide {
+    grid-column: 1 / -1;
+}
+
+.privacy-panel .portal-section-title {
+    margin-bottom: 14px;
+}
+
+.privacy-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+}
+
+.privacy-detail {
+    min-width: 0;
+    padding: 18px;
+    border-left: 3px solid color-mix(in srgb, var(--red-bright) 72%, var(--line));
+    background: color-mix(in srgb, var(--bg) 48%, transparent);
+}
+
+.privacy-detail h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: .92rem;
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+.privacy-detail p {
+    margin: 10px 0 0;
+    color: var(--muted);
+    line-height: 1.62;
+}
+
+.privacy-page .portal-hero-mark b {
+    color: var(--gold);
+}
+
+@media (max-width: 900px) {
+    .license-page .portal-hero,
+    .privacy-page .portal-hero,
+    .license-summary-grid,
+    .privacy-grid,
+    .privacy-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .license-summary-card-critical,
+    .privacy-panel-wide {
+        grid-column: auto;
+    }
+
+    .license-terms-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .license-terms-toolbar .button {
+        width: fit-content;
+    }
+}
+
+@media (max-width: 620px) {
+    .license-page .portal-hero h1,
+    .privacy-page .portal-hero h1 {
+        max-width: none;
+        font-size: clamp(2.65rem, 16vw, 4.5rem);
+    }
+
+    .license-summary-card,
+    .privacy-panel,
+    .license-terms-card {
+        padding: 20px;
+    }
+
+    .license-terms-toolbar .button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .license-text {
+        padding: 16px;
+        font-size: .8rem;
+    }
+
+    .privacy-detail {
+        padding: 16px;
+    }
+}
