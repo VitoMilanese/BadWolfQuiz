@@ -1,0 +1,92 @@
+@page "{id:guid}"
+@model BadWolfQuiz.Web.Pages.Admin.Games.RoundTransitionSummaryModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<BadWolfQuiz.Web.Localization.SharedResource> Localizer
+@{
+    Layout = null;
+}
+
+<section class="round-summary"
+         data-round-transition-summary
+         aria-labelledby="round-transition-summary-title">
+    <p class="eyebrow">@Localizer["GameBoard_RoundComplete"]</p>
+    <h2 id="round-transition-summary-title">@Model.Game.Session.CurrentRound.Title</h2>
+    <ol class="round-podium">
+        @foreach (var leader in Model.RoundLeaders)
+        {
+            <li class="round-podium-player @(leader.Position == 1 ? "round-winner" : null)">
+                <span class="round-podium-position">@leader.Position</span>
+                <strong>@leader.PlayerName</strong>
+                <span class="round-podium-score">@leader.Score</span>
+            </li>
+        }
+    </ol>
+
+    @if (Model.Game.Session.IsPreviousRoundReturnPending)
+    {
+        <form method="post"
+              asp-page="/Admin/Games/RunningRoundIntro"
+              asp-page-handler="Previous"
+              asp-route-id="@Model.Game.Session.Id.Value">
+            <button class="button button-primary" type="submit">
+                @Localizer["GameBoard_PreviousRound"]
+            </button>
+        </form>
+    }
+    else if (Model.Game.Session.IsFinalQuestionAdvancePending)
+    {
+        <form method="post"
+              asp-page="/Admin/Games/Lobby"
+              asp-page-handler="ForceAdvanceToFinalQuestion"
+              asp-route-id="@Model.Game.Session.Id.Value">
+            <button class="button button-primary" type="submit">
+                @Localizer["FinalQuestion_Start"]
+            </button>
+        </form>
+    }
+    else if (Model.Game.Session.IsUnfinishedRoundReturnPending)
+    {
+        <form method="post"
+              asp-page="/Admin/Games/RunningRoundIntro"
+              asp-page-handler="ReturnToUnfinished"
+              asp-route-id="@Model.Game.Session.Id.Value">
+            <button class="button button-primary" type="submit">
+                @Localizer["GameBoard_ReturnToUnfinishedRound"]
+            </button>
+        </form>
+    }
+    else if (Model.Game.Session.HasNextUnfinishedRound)
+    {
+        <form method="post"
+              asp-page="/Admin/Games/RunningRoundIntro"
+              asp-page-handler="Advance"
+              asp-route-id="@Model.Game.Session.Id.Value">
+            <input type="hidden"
+                   name="filterCompletedCategories"
+                   value="@Model.Game.Session.IsForcedRoundAdvancePending.ToString().ToLowerInvariant()" />
+            <button class="button button-primary" type="submit">
+                @Localizer["GameBoard_StartNextRound"]
+            </button>
+        </form>
+    }
+    else if (Model.Game.Session.Quiz.FinalQuestion is not null)
+    {
+        @if (Model.Game.Session.HasAnyUnfinishedRegularRound)
+        {
+            <button class="button button-primary" type="button" data-open-natural-final-warning>
+                @Localizer["FinalQuestion_Start"]
+            </button>
+        }
+        else
+        {
+            <form method="post"
+                  asp-page="/Admin/Games/Lobby"
+                  asp-page-handler="StartNaturalFinalTransition"
+                  asp-route-id="@Model.Game.Session.Id.Value">
+                <button class="button button-primary" type="submit">
+                    @Localizer["FinalQuestion_Start"]
+                </button>
+            </form>
+        }
+    }
+</section>

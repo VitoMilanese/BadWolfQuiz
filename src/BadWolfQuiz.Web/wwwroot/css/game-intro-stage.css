@@ -1,5 +1,6 @@
 /* Shared host presentation for first-round and running-round category intro stages. */
-body.gameplay-layout:has(.game-intro-page) {
+body.gameplay-layout:has(.game-intro-page),
+body.gameplay-layout:has(.host-game-board.host-gameplay-presentation-mode [data-game-intro-page]) {
     background:
         repeating-linear-gradient(
             135deg,
@@ -18,7 +19,15 @@ body.gameplay-layout:has(.game-intro-page) > main.page-shell {
     overflow: hidden;
 }
 
-body.gameplay-layout main.page-shell > .game-intro-page {
+body.gameplay-layout .host-game-board.host-gameplay-presentation-mode:has(> [data-host-gameplay-view] > .game-intro-page) {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+}
+
+body.gameplay-layout :is(main.page-shell, [data-host-gameplay-view]) > .game-intro-page {
     position: relative;
     isolation: isolate;
     width: 100%;
@@ -30,7 +39,7 @@ body.gameplay-layout main.page-shell > .game-intro-page {
     overflow: hidden;
 }
 
-body.gameplay-layout main.page-shell > .game-intro-page::after {
+body.gameplay-layout :is(main.page-shell, [data-host-gameplay-view]) > .game-intro-page::after {
     content: "";
     position: absolute;
     z-index: -1;
@@ -183,19 +192,13 @@ body.gameplay-layout .game-intro-page > .game-intro-actions {
     margin: 0;
     padding: 2px clamp(12px, 2vw, 20px);
     gap: 10px;
-    border-top: 1px solid color-mix(in srgb, var(--line) 74%, transparent);
-    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg) 54%, transparent));
+    border: 0;
+    background: transparent;
 }
 
 body.gameplay-layout .game-intro-page > .game-intro-actions::before {
-    content: "";
-    position: absolute;
-    top: -1px;
-    left: 50%;
-    width: min(220px, 32vw);
-    height: 2px;
-    translate: -50% 0;
-    background: linear-gradient(90deg, transparent, var(--red-bright), transparent);
+    content: none;
+    display: none;
 }
 
 body.gameplay-layout .game-intro-page .game-intro-actions form {
@@ -219,7 +222,7 @@ body.gameplay-layout .game-intro-page :is(a, button):focus-visible {
 }
 
 @media (max-width: 820px) {
-    body.gameplay-layout main.page-shell > .game-intro-page {
+    body.gameplay-layout :is(main.page-shell, [data-host-gameplay-view]) > .game-intro-page {
         gap: 5px;
         padding: 8px 14px 6px;
     }
@@ -269,7 +272,7 @@ body.gameplay-layout .game-intro-page :is(a, button):focus-visible {
 }
 
 @media (max-height: 760px) {
-    body.gameplay-layout main.page-shell > .game-intro-page {
+    body.gameplay-layout :is(main.page-shell, [data-host-gameplay-view]) > .game-intro-page {
         gap: 3px;
         padding-block: 5px 4px;
     }
@@ -311,7 +314,7 @@ body.gameplay-layout .game-intro-page :is(a, button):focus-visible {
 }
 
 @media (max-height: 620px) {
-    body.gameplay-layout main.page-shell > .game-intro-page {
+    body.gameplay-layout :is(main.page-shell, [data-host-gameplay-view]) > .game-intro-page {
         gap: 2px;
         padding-block: 2px;
         overflow: hidden;

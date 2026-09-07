@@ -140,3 +140,21 @@
         trigger.setAttribute('aria-expanded', 'false');
     });
 })();
+
+(() => {
+    if (window.badWolfRoundIntroRefreshGuardLoaderInstalled) {
+        return;
+    }
+
+    window.badWolfRoundIntroRefreshGuardLoaderInstalled = true;
+
+    if (!window.location.pathname.toLowerCase().startsWith('/admin/games/')) {
+        return;
+    }
+
+    const script = document.createElement('script');
+    script.src = '/js/round-intro-refresh-guard.js?v=6';
+    script.async = false;
+    script.dataset.roundIntroRefreshGuard = '';
+    document.head.appendChild(script);
+})();
