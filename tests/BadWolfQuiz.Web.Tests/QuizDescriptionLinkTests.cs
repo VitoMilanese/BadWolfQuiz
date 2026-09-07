@@ -180,7 +180,7 @@ public sealed class QuizDescriptionLinkTests
         Assert.Contains("SocialUrlViewDataKey", markup);
         Assert.Contains("Model.Quiz.PreviewPath", markup);
         Assert.Contains("Model.Quiz.AverageRating", markup);
-        Assert.Contains("quiz-rating-summary", markup);
+        Assert.Contains("quiz-announcement-rating", markup);
         Assert.Contains("X-Robots-Tag", model);
         Assert.Contains("noindex, nofollow", model);
         Assert.Contains(".IgnoreQueryFilters()", linkService);

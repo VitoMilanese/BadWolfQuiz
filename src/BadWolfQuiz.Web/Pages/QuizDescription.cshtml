@@ -13,51 +13,57 @@
     ViewData[BadWolfQuiz.Web.TagHelpers.SeoHeadTagHelper.SocialUrlViewDataKey] = Model.Quiz.Path;
 }
 
-<div class="page-heading quiz-description-heading">
-    <div>
-        <p class="eyebrow">@QuizDescriptionLocalizer["Eyebrow"]</p>
-        <h1>@Model.Quiz.Title</h1>
-    </div>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/quiz-description.css" asp-append-version="true" />
+}
 
-<section class="form-card narrow quiz-description-card">
-    @if (!string.IsNullOrWhiteSpace(Model.Quiz.Description))
-    {
-        <p class="quiz-description-copy">@Model.Quiz.Description</p>
-    }
-    else
-    {
-        <p class="settings-description">@QuizDescriptionLocalizer["NoDescription"]</p>
-    }
+<div class="quiz-announcement-page">
+    <section class="quiz-announcement-hero" aria-labelledby="quiz-announcement-title">
+        <div class="quiz-announcement-heading">
+            <p class="quiz-announcement-kicker">@QuizDescriptionLocalizer["Eyebrow"]</p>
+            <h1 id="quiz-announcement-title">@Model.Quiz.Title</h1>
 
-    @if (Model.Quiz.AverageRating is { } average)
-    {
-        <div class="quiz-rating-summary"
-             aria-label="@Localizer["QuizRating_AccessibleSummary", average, Model.Quiz.RatingCount]">
-            <span class="quiz-rating-stars" aria-hidden="true">★</span>
-            <strong>@average.ToString("0.0")</strong>
-            <span>@Localizer["QuizRating_Count", Model.Quiz.RatingCount]</span>
+            @if (Model.Quiz.AverageRating is { } average)
+            {
+                <div class="quiz-announcement-rating"
+                     aria-label="@Localizer["QuizRating_AccessibleSummary", average, Model.Quiz.RatingCount]">
+                    <span aria-hidden="true">★</span>
+                    <strong>@average.ToString("0.0")</strong>
+                    <span>@Localizer["QuizRating_Count", Model.Quiz.RatingCount]</span>
+                </div>
+            }
         </div>
-    }
-</section>
 
-<style>
-    .quiz-description-heading {
-        justify-content: center;
-        text-align: center;
-    }
+        <div class="quiz-announcement-hero-art" aria-hidden="true">
+            <span class="quiz-announcement-orbit"></span>
+            <span class="quiz-announcement-slash"></span>
+            <strong>QUIZ</strong>
+            <small>BAD WOLF</small>
+        </div>
+    </section>
 
-    .quiz-description-card {
-        margin-inline: auto;
-        text-align: center;
-    }
+    <main class="quiz-announcement-content">
+        <article class="quiz-announcement-card">
+            <aside class="quiz-announcement-rail" aria-hidden="true">
+                <span>BAD WOLF / QUIZ</span>
+                <div>
+                    <strong>SHARE</strong>
+                    <small>ANNOUNCEMENT</small>
+                </div>
+            </aside>
 
-    .quiz-description-copy {
-        margin: 0;
-        white-space: pre-wrap;
-    }
+            <div class="quiz-announcement-copy">
+                <span class="quiz-announcement-copy-label" aria-hidden="true">@QuizDescriptionLocalizer["Eyebrow"]</span>
 
-    .quiz-description-card .quiz-rating-summary {
-        justify-content: center;
-    }
-</style>
+                @if (!string.IsNullOrWhiteSpace(Model.Quiz.Description))
+                {
+                    <p class="quiz-description-copy">@Model.Quiz.Description</p>
+                }
+                else
+                {
+                    <p class="quiz-description-empty">@QuizDescriptionLocalizer["NoDescription"]</p>
+                }
+            </div>
+        </article>
+    </main>
+</div>
