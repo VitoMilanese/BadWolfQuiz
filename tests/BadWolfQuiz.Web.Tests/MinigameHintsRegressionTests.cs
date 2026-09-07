@@ -77,6 +77,18 @@ public sealed class MinigameHintsRegressionTests
         Assert.Contains(".minigames-question-response-hint", css);
     }
 
+    [Fact]
+    public void Hint_dialog_keeps_close_button_visible_for_long_game_titles()
+    {
+        var css = Read("src/BadWolfQuiz.Web/wwwroot/css/minigames-hints.css");
+
+        Assert.Contains(".minigames-hint-dialog-header", css);
+        Assert.Contains("width: 100%", css);
+        Assert.Contains("flex: 1 1 0", css);
+        Assert.Contains("text-overflow: ellipsis", css);
+        Assert.Contains("flex: 0 0 36px", css);
+    }
+
     private static string Read(string relativePath)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
