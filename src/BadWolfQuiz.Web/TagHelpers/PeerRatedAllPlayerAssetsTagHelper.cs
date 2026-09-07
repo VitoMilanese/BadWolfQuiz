@@ -19,5 +19,7 @@ public sealed class PeerRatedAllPlayerAssetsTagHelper : TagHelper
             "<script src=\"/js/peer-rated-all-player-polish.js?v=3\"></script>");
         output.PostContent.AppendHtml(
             "<script src=\"/js/peer-rated-question-context.js?v=1\"></script>");
+        output.PostContent.AppendHtml(
+            "<script src=\"/js/peer-rated-all-player-layout.js?v=1\"></script>");
     }
 }
