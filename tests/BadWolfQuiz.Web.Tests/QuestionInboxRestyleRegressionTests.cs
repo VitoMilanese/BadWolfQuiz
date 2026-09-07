@@ -108,8 +108,11 @@ public sealed class QuestionInboxRestyleRegressionTests
 
         Assert.Contains(".question-inbox-card:only-child.is-awaiting-reply", script, StringComparison.Ordinal);
         Assert.Contains("panel.classList.add(\"is-floating-reply\")", script, StringComparison.Ordinal);
-        Assert.Contains("document.querySelector(\".portal-footer\")", script, StringComparison.Ordinal);
+        Assert.Contains("document.readyState === \"loading\"", script, StringComparison.Ordinal);
+        Assert.Contains("DOMContentLoaded", script, StringComparison.Ordinal);
+        Assert.Contains("const footer = document.querySelector(\".portal-footer\")", script, StringComparison.Ordinal);
         Assert.Contains("getBoundingClientRect()", script, StringComparison.Ordinal);
+        Assert.Contains("viewportBottom - footerTop", script, StringComparison.Ordinal);
         Assert.Contains("--question-inbox-footer-offset", script, StringComparison.Ordinal);
         Assert.Contains("--question-inbox-floating-left", script, StringComparison.Ordinal);
         Assert.Contains("--question-inbox-floating-width", script, StringComparison.Ordinal);
