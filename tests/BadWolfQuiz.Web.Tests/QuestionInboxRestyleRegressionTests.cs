@@ -9,6 +9,7 @@ public sealed class QuestionInboxRestyleRegressionTests
 
         Assert.Contains("@model BadWolfQuiz.Web.Pages.Admin.QuestionInboxModel", markup, StringComparison.Ordinal);
         Assert.Contains("~/css/question-inbox.css", markup, StringComparison.Ordinal);
+        Assert.Contains("~/css/question-inbox-review-fixes.css", markup, StringComparison.Ordinal);
         Assert.Contains("class=\"question-inbox-page\"", markup, StringComparison.Ordinal);
         Assert.Contains("class=\"question-inbox-hero\"", markup, StringComparison.Ordinal);
         Assert.Contains("class=\"question-inbox-count\"", markup, StringComparison.Ordinal);
@@ -73,6 +74,31 @@ public sealed class QuestionInboxRestyleRegressionTests
         Assert.Contains("@media (max-width: 420px)", styles, StringComparison.Ordinal);
         Assert.Contains(":focus-visible", styles, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", styles, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Review_layout_keeps_scrollbar_at_viewport_edge_and_widens_single_conversation()
+    {
+        var styles = ReadWebFile("wwwroot", "css", "question-inbox-review-fixes.css")
+            .ReplaceLineEndings("\n");
+
+        Assert.Contains("body.portal-layout:has(.question-inbox-page) > .page-shell", styles, StringComparison.Ordinal);
+        Assert.Contains("width: 100%;", styles, StringComparison.Ordinal);
+        Assert.Contains("padding-inline: 0;", styles, StringComparison.Ordinal);
+        Assert.Contains(".question-inbox-page {", styles, StringComparison.Ordinal);
+        Assert.Contains("margin-inline: auto;", styles, StringComparison.Ordinal);
+        Assert.Contains("grid-template-areas:\n        \"header\"\n        \"messages\"\n        \"actions\";", styles, StringComparison.Ordinal);
+        Assert.Contains(".question-messages {", styles, StringComparison.Ordinal);
+        Assert.Contains("max-height: none;", styles, StringComparison.Ordinal);
+        Assert.Contains("overflow: visible;", styles, StringComparison.Ordinal);
+        Assert.Contains("width: min(88%, 74rem);", styles, StringComparison.Ordinal);
+        Assert.Contains(".question-inbox-card:only-child.is-awaiting-reply .question-inbox-actions-panel", styles, StringComparison.Ordinal);
+        Assert.Contains("position: sticky;", styles, StringComparison.Ordinal);
+        Assert.Contains("bottom: 0;", styles, StringComparison.Ordinal);
+        Assert.Contains(".question-inbox-card:only-child.is-awaiting-reply .question-reply-form", styles, StringComparison.Ordinal);
+        Assert.Contains("grid-template-columns: minmax(0, 1fr) auto;", styles, StringComparison.Ordinal);
+        Assert.Contains("@media (max-width: 700px)", styles, StringComparison.Ordinal);
+        Assert.Contains("position: static;", styles, StringComparison.Ordinal);
     }
 
     [Fact]
