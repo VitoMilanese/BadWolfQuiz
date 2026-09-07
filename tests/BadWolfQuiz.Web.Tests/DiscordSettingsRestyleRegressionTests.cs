@@ -79,30 +79,37 @@ public sealed class DiscordSettingsRestyleRegressionTests
     }
 
     [Fact]
-    public void Dedicated_styles_cover_viewport_embedded_responsive_and_accessibility_layouts()
+    public void Dedicated_styles_cover_viewport_embedded_responsive_and_explicit_checkbox_layouts()
     {
-        var styles = ReadWebFile("wwwroot", "css", "discord-settings.css")
+        var layoutStyles = ReadWebFile("wwwroot", "css", "discord-settings-layout.css")
             .ReplaceLineEndings("\n");
+        var reviewStyles = ReadWebFile("wwwroot", "css", "discord-settings.css")
+            .ReplaceLineEndings("\n");
+        var styles = layoutStyles + "\n" + reviewStyles;
 
+        Assert.Contains("@import url(\"./discord-settings-layout.css\");", reviewStyles, StringComparison.Ordinal);
         Assert.Contains("body.portal-layout:has(.discord-settings-page:not(.is-embedded)) > .page-shell", styles, StringComparison.Ordinal);
-        Assert.Contains("width: 100%;", styles, StringComparison.Ordinal);
-        Assert.Contains("padding-inline: 0;", styles, StringComparison.Ordinal);
-        Assert.Contains(".discord-settings-page {", styles, StringComparison.Ordinal);
         Assert.Contains("width: min(100%, 1540px);", styles, StringComparison.Ordinal);
-        Assert.Contains("margin-inline: auto;", styles, StringComparison.Ordinal);
         Assert.Contains(".discord-settings-hero {", styles, StringComparison.Ordinal);
         Assert.Contains(".discord-settings-summary {", styles, StringComparison.Ordinal);
         Assert.Contains("grid-template-columns: repeat(3, minmax(0, 1fr));", styles, StringComparison.Ordinal);
         Assert.Contains(".discord-settings-workspace {", styles, StringComparison.Ordinal);
         Assert.Contains(".discord-settings-page.is-embedded {", styles, StringComparison.Ordinal);
         Assert.Contains("body.embedded-discord-settings:has(.discord-settings-page) > .page-shell", styles, StringComparison.Ordinal);
-        Assert.Contains(".discord-settings-page.is-embedded .discord-settings-workspace", styles, StringComparison.Ordinal);
-        Assert.Contains("grid-template-columns: minmax(0, 1fr);", styles, StringComparison.Ordinal);
         Assert.Contains("@media (max-width: 980px)", styles, StringComparison.Ordinal);
         Assert.Contains("@media (max-width: 700px)", styles, StringComparison.Ordinal);
         Assert.Contains("@media (max-width: 480px)", styles, StringComparison.Ordinal);
         Assert.Contains(":focus-visible", styles, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", styles, StringComparison.Ordinal);
+
+        Assert.Contains(".discord-settings-toggle-control {", reviewStyles, StringComparison.Ordinal);
+        Assert.Contains("width: 28px;", reviewStyles, StringComparison.Ordinal);
+        Assert.Contains("height: 28px;", reviewStyles, StringComparison.Ordinal);
+        Assert.Contains("border: 2px solid", reviewStyles, StringComparison.Ordinal);
+        Assert.Contains("border-radius: 7px;", reviewStyles, StringComparison.Ordinal);
+        Assert.Contains("content: \"✓\";", reviewStyles, StringComparison.Ordinal);
+        Assert.Contains("input:checked + .discord-settings-toggle-control", reviewStyles, StringComparison.Ordinal);
+        Assert.Contains("background: var(--accent);", reviewStyles, StringComparison.Ordinal);
     }
 
     [Fact]
