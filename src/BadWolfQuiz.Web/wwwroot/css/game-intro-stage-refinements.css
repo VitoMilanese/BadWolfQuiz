@@ -1,0 +1,89 @@
+/* Final viewport and content refinements shared by standalone and embedded round intros. */
+body.gameplay-layout:has([data-host-gameplay-view] > .game-intro-page) {
+    background:
+        repeating-linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--text) 2.6%, transparent) 0 1px,
+            transparent 1px 20px),
+        radial-gradient(circle at 16% 18%, color-mix(in srgb, var(--red-bright) 18%, transparent), transparent 31rem),
+        radial-gradient(circle at 82% 76%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 34rem),
+        linear-gradient(160deg, color-mix(in srgb, var(--panel-2) 78%, #050506), color-mix(in srgb, var(--bg) 94%, #000) 62%) !important;
+    overflow-x: hidden;
+}
+
+html:has(body.gameplay-layout [data-host-gameplay-view] > .game-intro-page) {
+    overflow-x: hidden;
+}
+
+body.gameplay-layout:has([data-host-gameplay-view] > .game-intro-page) > main.page-shell {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body.gameplay-layout .host-game-board.host-gameplay-presentation-mode:has(> [data-host-gameplay-view] > .game-intro-page) {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+body.gameplay-layout :is(main.page-shell, [data-host-gameplay-view]) > .game-intro-page {
+    left: auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    box-sizing: border-box;
+    background: transparent;
+}
+
+/* RunningRoundIntro is injected into the live Lobby shell. Pull the actual intro
+ * stage out of that shell's 16px desktop gutters so its geometry is identical
+ * to the standalone first-round intro. */
+body.gameplay-layout:has([data-host-gameplay-view] > .game-intro-page)
+    [data-host-gameplay-view] > .game-intro-page {
+    position: fixed;
+    inset: var(--topbar-height, 60px) 0 0;
+    z-index: 40;
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: none;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* The category frame is replaced on every Next click. Keep the corner ornament
+ * outside that replaceable subtree so it cannot restart from the frame's old
+ * geometry for a paint before the new intro settles. The measurements mirror
+ * the standalone .game-intro-page::after ornament exactly. */
+body.gameplay-layout:has([data-host-gameplay-view] > .game-intro-page)::after {
+    content: "";
+    position: fixed;
+    z-index: 1;
+    pointer-events: none;
+    width: clamp(220px, 26vw, 520px);
+    aspect-ratio: 1;
+    right: clamp(-180px, -9vw, -80px);
+    top: calc(var(--topbar-height, 60px) + clamp(-180px, -10vw, -90px));
+    border: 1px solid color-mix(in srgb, var(--red-bright) 24%, transparent);
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 42px color-mix(in srgb, var(--red-bright) 2.5%, transparent),
+        0 0 0 86px color-mix(in srgb, var(--text) 1.8%, transparent);
+}
+
+body.gameplay-layout:has([data-host-gameplay-view] > .game-intro-page)
+    [data-host-gameplay-view] > .game-intro-page::after {
+    content: none;
+    display: none;
+}
+
+body.gameplay-layout .game-intro-page .game-intro-text {
+    padding: clamp(2px, .5vh, 6px) 0;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}

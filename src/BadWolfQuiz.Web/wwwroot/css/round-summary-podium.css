@@ -1,0 +1,312 @@
+/* Shared host presentation for between-round summaries and completed-game standings. */
+body.gameplay-layout:has(.host-game-board .round-summary),
+body.gameplay-layout:has(.final-question-host[data-game-status="completed"]) {
+    background:
+        repeating-linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--text) 2.4%, transparent) 0 1px,
+            transparent 1px 19px),
+        radial-gradient(circle at 50% 26%, color-mix(in srgb, var(--red-bright) 15%, transparent), transparent 34rem),
+        radial-gradient(circle at 50% 88%, color-mix(in srgb, var(--gold) 9%, transparent), transparent 30rem),
+        linear-gradient(180deg, color-mix(in srgb, var(--panel-2) 78%, #050506), color-mix(in srgb, var(--bg) 92%, #000));
+}
+
+body.gameplay-layout:has(.host-game-board .round-summary) > .page-shell,
+body.gameplay-layout:has(.final-question-host[data-game-status="completed"]) > .page-shell {
+    width: min(1920px, 100%);
+    max-width: none;
+    margin-inline: auto;
+    padding: clamp(.55rem, 1vw, 1rem);
+}
+
+.host-game-board:has(.round-summary) #host-gameplay-view {
+    min-height: min(76dvh, 820px);
+    display: grid;
+    place-items: center;
+}
+
+.host-game-board .round-summary,
+.final-question-host[data-game-status="completed"] .final-question-panel {
+    position: relative;
+    isolation: isolate;
+    width: min(1220px, 100%);
+    max-width: none;
+    min-height: min(68dvh, 720px);
+    margin: auto;
+    padding: clamp(18px, 3vw, 46px);
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: clamp(16px, 2.3vh, 28px);
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible;
+}
+
+.host-game-board .round-summary::before,
+.final-question-host[data-game-status="completed"] .final-question-panel::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: min(34rem, 54vw);
+    aspect-ratio: 1;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--red-bright) 9%, transparent), transparent 68%);
+    pointer-events: none;
+}
+
+.host-game-board .round-summary > .eyebrow,
+.final-question-host[data-game-status="completed"] .final-question-panel > .eyebrow {
+    margin: 0;
+    color: var(--gold);
+    font-size: clamp(.78rem, 1vw, .98rem);
+    font-weight: 900;
+    letter-spacing: .25em;
+    text-align: center;
+    text-transform: uppercase;
+    text-shadow: 0 0 18px color-mix(in srgb, var(--gold) 32%, transparent);
+}
+
+.host-game-board .round-summary > h2,
+.final-question-host[data-game-status="completed"] .final-question-panel > h2 {
+    max-width: 22ch;
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(2.5rem, 5.6vw, 5.8rem);
+    line-height: .96;
+    font-weight: 950;
+    letter-spacing: -.035em;
+    text-align: center;
+    text-wrap: balance;
+    text-shadow:
+        0 16px 36px rgb(0 0 0 / 38%),
+        0 0 28px color-mix(in srgb, var(--red-bright) 12%, transparent);
+}
+
+.host-game-board .round-summary > .round-podium,
+.final-question-host[data-game-status="completed"] .final-question-panel > .round-podium {
+    width: min(1080px, 100%);
+    margin: clamp(4px, 1vh, 10px) auto 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    gap: clamp(12px, 1.8vw, 24px);
+    list-style: none;
+}
+
+.host-game-board .round-summary .round-podium-player,
+.final-question-host[data-game-status="completed"] .round-podium-player {
+    position: relative;
+    flex: 0 1 340px;
+    width: min(340px, 100%);
+    min-width: 0;
+    min-height: clamp(150px, 20vh, 220px);
+    margin: 0;
+    padding: clamp(18px, 2vw, 26px);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    place-items: center;
+    gap: clamp(8px, 1.1vh, 14px);
+    border: 1px solid color-mix(in srgb, var(--line) 84%, transparent);
+    border-radius: clamp(16px, 1.5vw, 24px);
+    background:
+        linear-gradient(165deg,
+            color-mix(in srgb, var(--panel-2) 94%, transparent),
+            color-mix(in srgb, var(--panel) 82%, transparent));
+    color: var(--text);
+    text-align: center;
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent),
+        0 18px 42px rgb(0 0 0 / 22%);
+    overflow: hidden;
+}
+
+.host-game-board .round-summary .round-podium-player::after,
+.final-question-host[data-game-status="completed"] .round-podium-player::after {
+    content: "";
+    position: absolute;
+    inset: auto 12% 0;
+    height: 3px;
+    border-radius: 999px 999px 0 0;
+    background: color-mix(in srgb, var(--muted) 42%, transparent);
+}
+
+.host-game-board .round-summary .round-podium-player.round-winner,
+.final-question-host[data-game-status="completed"] .round-podium-player.round-winner {
+    min-height: clamp(180px, 24vh, 270px);
+    border-color: color-mix(in srgb, var(--gold) 68%, var(--line));
+    background:
+        radial-gradient(circle at 50% 0, color-mix(in srgb, var(--gold) 15%, transparent), transparent 58%),
+        linear-gradient(165deg,
+            color-mix(in srgb, var(--panel-2) 96%, transparent),
+            color-mix(in srgb, var(--panel) 84%, transparent));
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--gold) 16%, transparent),
+        0 22px 54px rgb(0 0 0 / 28%),
+        0 0 34px color-mix(in srgb, var(--gold) 10%, transparent);
+}
+
+.host-game-board .round-summary .round-podium-player.round-winner::after,
+.final-question-host[data-game-status="completed"] .round-podium-player.round-winner::after {
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.host-game-board .round-summary .round-podium-position,
+.final-question-host[data-game-status="completed"] .round-podium-position {
+    width: clamp(42px, 4vw, 58px);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--line) 86%, transparent);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    color: var(--muted);
+    font-size: clamp(1.1rem, 1.8vw, 1.55rem);
+    font-weight: 950;
+    font-variant-numeric: tabular-nums;
+    box-shadow: none;
+}
+
+.host-game-board .round-summary .round-winner .round-podium-position,
+.final-question-host[data-game-status="completed"] .round-winner .round-podium-position {
+    border-color: color-mix(in srgb, var(--gold) 72%, transparent);
+    background: color-mix(in srgb, var(--gold) 12%, var(--bg));
+    color: var(--gold);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--gold) 18%, transparent);
+}
+
+.host-game-board .round-summary .round-podium-player > strong,
+.final-question-host[data-game-status="completed"] .round-podium-player > strong {
+    min-width: 0;
+    max-width: 100%;
+    align-self: center;
+    color: var(--text);
+    font-size: clamp(1.25rem, 2.1vw, 2rem);
+    line-height: 1.05;
+    font-weight: 900;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+}
+
+.host-game-board .round-summary .round-podium-score,
+.final-question-host[data-game-status="completed"] .round-podium-score {
+    color: var(--gold);
+    font-size: clamp(1.65rem, 3vw, 2.75rem);
+    line-height: 1;
+    font-weight: 950;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.035em;
+}
+
+.host-game-board .round-summary .round-summary-finished {
+    margin: 0;
+    color: var(--gold);
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
+    font-weight: 850;
+    text-align: center;
+}
+
+.host-game-board .round-summary .final-finish-actions,
+.final-question-host[data-game-status="completed"] .final-finish-actions,
+.final-question-host[data-game-status="completed"] .final-question-panel > form {
+    width: 100%;
+    margin: 0;
+    justify-content: center;
+}
+
+.host-game-board .round-summary .final-finish-actions .button,
+.final-question-host[data-game-status="completed"] .final-finish-actions .button,
+.final-question-host[data-game-status="completed"] .final-question-panel > form .button {
+    min-width: min(260px, 100%);
+    min-height: 48px;
+    font-weight: 850;
+}
+
+@media (max-width: 760px) {
+    .host-game-board:has(.round-summary) #host-gameplay-view {
+        min-height: auto;
+    }
+
+    .host-game-board .round-summary,
+    .final-question-host[data-game-status="completed"] .final-question-panel {
+        min-height: auto;
+        padding: 16px 8px;
+        gap: 14px;
+    }
+
+    .host-game-board .round-summary > .round-podium,
+    .final-question-host[data-game-status="completed"] .final-question-panel > .round-podium {
+        width: min(640px, 100%);
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .host-game-board .round-summary .round-podium-player,
+    .host-game-board .round-summary .round-podium-player.round-winner,
+    .final-question-host[data-game-status="completed"] .round-podium-player,
+    .final-question-host[data-game-status="completed"] .round-podium-player.round-winner {
+        flex: none;
+        width: 100%;
+        min-height: 0;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-rows: auto;
+        justify-items: start;
+        padding: 14px 16px;
+        text-align: left;
+    }
+
+    .host-game-board .round-summary .round-podium-player > strong,
+    .final-question-host[data-game-status="completed"] .round-podium-player > strong {
+        justify-self: start;
+        text-align: left;
+    }
+
+    .host-game-board .round-summary .round-podium-score,
+    .final-question-host[data-game-status="completed"] .round-podium-score {
+        justify-self: end;
+    }
+}
+
+@media (max-height: 700px) and (min-width: 761px) {
+    .host-game-board:has(.round-summary) #host-gameplay-view {
+        min-height: calc(100dvh - var(--topbar-height, 60px) - 2rem);
+    }
+
+    .host-game-board .round-summary,
+    .final-question-host[data-game-status="completed"] .final-question-panel {
+        min-height: 0;
+        padding-block: 10px;
+        gap: 10px;
+    }
+
+    .host-game-board .round-summary > h2,
+    .final-question-host[data-game-status="completed"] .final-question-panel > h2 {
+        font-size: clamp(2.2rem, 7vh, 4.2rem);
+    }
+
+    .host-game-board .round-summary .round-podium-player,
+    .final-question-host[data-game-status="completed"] .round-podium-player {
+        min-height: 124px;
+        padding: 12px 16px;
+    }
+
+    .host-game-board .round-summary .round-podium-player.round-winner,
+    .final-question-host[data-game-status="completed"] .round-podium-player.round-winner {
+        min-height: 150px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .host-game-board .round-summary .round-podium-player,
+    .final-question-host[data-game-status="completed"] .round-podium-player {
+        animation: none !important;
+        transition: none !important;
+    }
+}

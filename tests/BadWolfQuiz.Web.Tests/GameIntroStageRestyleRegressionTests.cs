@@ -24,25 +24,33 @@ public sealed class GameIntroStageRestyleRegressionTests
     }
 
     [Fact]
-    public void Intro_stage_asset_is_registered_and_attached_to_the_replaceable_frame()
+    public void Intro_stage_assets_are_registered_and_attached_to_the_replaceable_frame()
     {
         var imports = ReadWebFile("Pages", "_ViewImports.cshtml");
         var helper = ReadWebFile("TagHelpers", "GameIntroStageAssetsTagHelper.cs");
+        var sharedStyles = ReadWebFile("wwwroot", "css", "busy-indicators.css");
 
         Assert.Contains("GameIntroStageAssetsTagHelper", imports, StringComparison.Ordinal);
         Assert.Contains("[HtmlTargetElement(\"div\", Attributes = \"data-game-intro-page\")]", helper, StringComparison.Ordinal);
-        Assert.Contains("/css/game-intro-stage.css?v=8", helper, StringComparison.Ordinal);
+        Assert.Contains("/css/game-intro-stage.css?v=9", helper, StringComparison.Ordinal);
+        Assert.Contains("/css/game-intro-stage-refinements.css?v=4", helper, StringComparison.Ordinal);
         Assert.Contains("output.PreContent.AppendHtml", helper, StringComparison.Ordinal);
+        Assert.Contains("@import url(\"./game-intro-stage.css?v=9\");", sharedStyles, StringComparison.Ordinal);
+        Assert.Contains("@import url(\"./game-intro-stage-refinements.css?v=4\");", sharedStyles, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Intro_stage_styles_keep_content_centered_spaced_and_frameless_without_inner_scrolling()
+    public void Intro_stage_styles_keep_standalone_and_embedded_round_intros_consistent()
     {
         var styles = ReadWebFile("wwwroot", "css", "game-intro-stage.css")
+            .ReplaceLineEndings("\n");
+        var refinements = ReadWebFile("wwwroot", "css", "game-intro-stage-refinements.css")
             .ReplaceLineEndings("\n");
 
         Assert.Contains("body.gameplay-layout:has(.game-intro-page)", styles, StringComparison.Ordinal);
         Assert.Contains("body.gameplay-layout:has(.game-intro-page) > main.page-shell", styles, StringComparison.Ordinal);
+        Assert.Contains(":is(main.page-shell, [data-host-gameplay-view]) > .game-intro-page", styles, StringComparison.Ordinal);
+        Assert.Contains(".host-game-board.host-gameplay-presentation-mode:has(> [data-host-gameplay-view] > .game-intro-page)", styles, StringComparison.Ordinal);
         Assert.Contains(".game-intro-page > .game-intro-group", styles, StringComparison.Ordinal);
         Assert.Contains("align-self: center;", styles, StringComparison.Ordinal);
         Assert.Contains("grid-template-rows: auto auto;", styles, StringComparison.Ordinal);
@@ -69,11 +77,32 @@ public sealed class GameIntroStageRestyleRegressionTests
         Assert.DoesNotContain("main.page-shell > .game-intro-page::before", styles, StringComparison.Ordinal);
         Assert.DoesNotContain("overflow-y: auto;", styles, StringComparison.Ordinal);
         Assert.Contains(".game-intro-page > .game-intro-actions", styles, StringComparison.Ordinal);
+        Assert.Contains("border: 0;", styles, StringComparison.Ordinal);
+        Assert.Contains("background: transparent;", styles, StringComparison.Ordinal);
+        Assert.Contains(".game-intro-actions::before", styles, StringComparison.Ordinal);
+        Assert.Contains("content: none;", styles, StringComparison.Ordinal);
         Assert.Contains(":focus-visible", styles, StringComparison.Ordinal);
         Assert.Contains("@media (max-width: 560px)", styles, StringComparison.Ordinal);
         Assert.Contains("@media (max-height: 620px)", styles, StringComparison.Ordinal);
         Assert.Contains("height: 18vh;", styles, StringComparison.Ordinal);
         Assert.Contains("@media (prefers-reduced-motion: reduce)", styles, StringComparison.Ordinal);
+
+        Assert.Contains("body.gameplay-layout:has([data-host-gameplay-view] > .game-intro-page)", refinements, StringComparison.Ordinal);
+        Assert.Contains("> main.page-shell", refinements, StringComparison.Ordinal);
+        Assert.Contains("width: 100%;", refinements, StringComparison.Ordinal);
+        Assert.Contains("overflow-x: hidden;", refinements, StringComparison.Ordinal);
+        Assert.DoesNotContain("width: 100vw;", refinements, StringComparison.Ordinal);
+        Assert.DoesNotContain("margin-left: -50vw;", refinements, StringComparison.Ordinal);
+        Assert.Contains("position: fixed;", refinements, StringComparison.Ordinal);
+        Assert.Contains("inset: var(--topbar-height, 60px) 0 0;", refinements, StringComparison.Ordinal);
+        Assert.Contains("body.gameplay-layout:has([data-host-gameplay-view] > .game-intro-page)::after", refinements, StringComparison.Ordinal);
+        Assert.Contains("top: calc(var(--topbar-height, 60px) + clamp(-180px, -10vw, -90px));", refinements, StringComparison.Ordinal);
+        Assert.Contains("[data-host-gameplay-view] > .game-intro-page::after", refinements, StringComparison.Ordinal);
+        Assert.Contains("display: none;", refinements, StringComparison.Ordinal);
+        Assert.Contains("repeating-linear-gradient", refinements, StringComparison.Ordinal);
+        Assert.Contains(".game-intro-page .game-intro-text", refinements, StringComparison.Ordinal);
+        Assert.Contains("border: 0 !important;", refinements, StringComparison.Ordinal);
+        Assert.Contains("background: transparent !important;", refinements, StringComparison.Ordinal);
     }
 
     private static string ReadWebFile(params string[] parts)
