@@ -2,145 +2,187 @@
 @model BadWolfQuiz.Web.Pages.Admin.MasterGamesModel
 @{
     ViewData["Title"] = Localizer["MasterGames_Title"];
+    var gameCount = Model.Games.Count;
 }
 
-<div class="page-heading">
-    <div>
-        <p class="eyebrow">@Localizer["Admin_Eyebrow"]</p>
-        <h1>@Localizer["MasterGames_Title"]</h1>
-    </div>
-</div>
-
-@if (TempData["ErrorMessage"] is string errorMessage)
-{
-    <div class="message message-error" role="alert">@errorMessage</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/master-games.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/master-games-review-fixes.css" asp-append-version="true" />
 }
 
-@if (Model.Games.Count == 0)
-{
-    <section class="content-panel empty-state">
-        <h2>@Localizer["MasterGames_Empty"]</h2>
+<div class="master-games-page">
+    <section class="master-games-hero" aria-labelledby="master-games-title">
+        <div class="master-games-hero-copy">
+            <p class="master-games-eyebrow">@Localizer["Admin_Eyebrow"]</p>
+            <h1 id="master-games-title">@Localizer["MasterGames_Title"]</h1>
+        </div>
+
+        <div class="master-games-hero-count"
+             aria-label="@Localizer["MasterGames_Title"]: @gameCount">
+            <strong>@gameCount.ToString("00")</strong>
+        </div>
     </section>
-}
-else
-{
-    <div class="master-game-list">
-        @foreach (var game in Model.Games)
+
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="message message-error master-games-error" role="alert">@errorMessage</div>
+    }
+
+    <main class="master-games-content">
+        @if (gameCount == 0)
         {
-            <article class="content-panel master-game-card">
-                <div class="master-game-heading">
-                    <div>
-                        @if (!string.IsNullOrWhiteSpace(game.QuizTitle))
-                        {
-                            <h2>@game.QuizTitle</h2>
-                        }
-                        <span class="status-pill">
-                            @(game.IsInLobby
-                                ? Localizer["MasterGames_InLobby"]
-                                : Localizer["MasterGames_Playing"])
-                        </span>
-                    </div>
-
-                    <div class="form-actions">
-                        <button class="button button-secondary"
-                                type="button"
-                                data-open-join-code
-                                data-game-code="@game.PublicCode"
-                                data-qr-url="@Url.Page("/Admin/MasterGames", "JoinQrCode", new { id = game.SessionId })">
-                            @Localizer["GameBoard_ShowJoinCode"]
-                        </button>
-
-                        @if (game.CanPlay && game.QuizId is int quizId)
-                        {
-                            <form method="post" asp-page-handler="CreateGame">
-                                <input name="quizId" type="hidden" value="@quizId" />
-                                <button class="button button-primary" type="submit">
-                                    @Localizer["Button_CreateGame"]
-                                </button>
-                            </form>
-                        }
-                    </div>
+            <section class="master-games-empty">
+                <div class="master-games-empty-mark" aria-hidden="true">00</div>
+                <div class="master-games-empty-copy">
+                    <h2>@Localizer["MasterGames_Title"]</h2>
+                    <p>@Localizer["MasterGames_Empty"]</p>
                 </div>
-
-                <dl class="master-game-details">
-                    <div>
-                        <dt>@Localizer["MasterGames_SessionId"]</dt>
-                        <dd><code>@game.SessionId</code></dd>
-                    </div>
-                    @if (!string.IsNullOrWhiteSpace(game.HostId))
-                    {
-                        <div>
-                            <dt>@Localizer["MasterGames_HostId"]</dt>
-                            <dd><code>@game.HostId</code></dd>
-                        </div>
-                    }
-                    @if (!string.IsNullOrWhiteSpace(game.HostName))
-                    {
-                        <div>
-                            <dt>@Localizer["MasterGames_HostName"]</dt>
-                            <dd>@game.HostName</dd>
-                        </div>
-                    }
-                    @if (game.RoundNumber is int roundNumber)
-                    {
-                        <div>
-                            <dt>@Localizer["MasterGames_Round"]</dt>
-                            <dd>
-                                <span>@roundNumber</span>
-                                @if (!string.IsNullOrWhiteSpace(game.RoundTitle))
-                                {
-                                    <text> — @game.RoundTitle</text>
-                                }
-                            </dd>
-                        </div>
-                    }
-                </dl>
-
-                <section class="master-game-players">
-                    <h3>@Localizer["MasterGames_Players"]</h3>
-                    @if (game.Players.Count == 0)
-                    {
-                        <p class="muted">@Localizer["MasterGames_NoPlayers"]</p>
-                    }
-                    else
-                    {
-                        <ul>
-                            @foreach (var player in game.Players)
-                            {
-                                <li>
-                                    <span>@player.Name</span>
-                                    <strong>@player.Score</strong>
-                                </li>
-                            }
-                        </ul>
-                    }
-                </section>
-            </article>
+            </section>
         }
-    </div>
-}
+        else
+        {
+            <div class="master-games-list">
+                @for (var gameIndex = 0; gameIndex < gameCount; gameIndex++)
+                {
+                    var game = Model.Games[gameIndex];
+                    var cardNumber = (gameIndex + 1).ToString("00");
+                    var playerHeadingId = $"master-game-players-{game.SessionId:N}";
 
-<dialog id="join-code-dialog"
-        class="join-code-dialog"
-        aria-labelledby="join-code-title">
-    <div class="join-code-card">
-        <button class="join-code-close"
-                type="button"
-                data-close-join-code
-                aria-label="@Localizer["Button_Close"]">
-            ×
-        </button>
+                    <article class="master-games-card @(game.IsInLobby ? "is-lobby" : "is-playing")"
+                             data-master-game-status="@(game.IsInLobby ? "lobby" : "playing")">
+                        <header class="master-games-card-header">
+                            <div class="master-games-card-index" aria-hidden="true">@cardNumber</div>
 
-        <p class="eyebrow">@Localizer["GameBoard_JoinOverlayHint"]</p>
-        <h2 id="join-code-title">@Localizer["GameBoard_JoinOverlayTitle"]</h2>
-        <img class="join-qr-code"
-             data-join-qr-code
-             width="320"
-             height="320"
-             alt="@Localizer["GameBoard_JoinQrAlt"]" />
-        <strong class="join-code-value" data-join-code-value></strong>
-    </div>
-</dialog>
+                            <div class="master-games-card-heading">
+                                <span class="master-games-status @(game.IsInLobby ? "is-lobby" : "is-playing")">
+                                    @(game.IsInLobby
+                                        ? Localizer["MasterGames_InLobby"]
+                                        : Localizer["MasterGames_Playing"])
+                                </span>
+
+                                @if (!string.IsNullOrWhiteSpace(game.QuizTitle))
+                                {
+                                    <h2>@game.QuizTitle</h2>
+                                }
+                            </div>
+
+                            <div class="master-games-card-actions">
+                                <button class="button button-secondary"
+                                        type="button"
+                                        data-open-join-code
+                                        data-game-code="@game.PublicCode"
+                                        data-qr-url="@Url.Page("/Admin/MasterGames", "JoinQrCode", new { id = game.SessionId })">
+                                    @Localizer["GameBoard_ShowJoinCode"]
+                                </button>
+
+                                @if (game.CanPlay && game.QuizId is int quizId)
+                                {
+                                    <form method="post" asp-page-handler="CreateGame">
+                                        <input name="quizId" type="hidden" value="@quizId" />
+                                        <button class="button button-primary" type="submit">
+                                            @Localizer["Button_CreateGame"]
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </header>
+
+                        <div class="master-games-card-body">
+                            <dl class="master-games-details">
+                                <div class="master-games-detail master-games-detail-session">
+                                    <dt>@Localizer["MasterGames_SessionId"]</dt>
+                                    <dd><code>@game.SessionId</code></dd>
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(game.HostId))
+                                {
+                                    <div class="master-games-detail">
+                                        <dt>@Localizer["MasterGames_HostId"]</dt>
+                                        <dd><code>@game.HostId</code></dd>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(game.HostName))
+                                {
+                                    <div class="master-games-detail">
+                                        <dt>@Localizer["MasterGames_HostName"]</dt>
+                                        <dd>@game.HostName</dd>
+                                    </div>
+                                }
+
+                                @if (game.RoundNumber is int roundNumber)
+                                {
+                                    <div class="master-games-detail master-games-detail-round">
+                                        <dt>@Localizer["MasterGames_Round"]</dt>
+                                        <dd>
+                                            <strong>@roundNumber</strong>
+                                            @if (!string.IsNullOrWhiteSpace(game.RoundTitle))
+                                            {
+                                                <span>@game.RoundTitle</span>
+                                            }
+                                        </dd>
+                                    </div>
+                                }
+                            </dl>
+
+                            <section class="master-games-players" aria-labelledby="@playerHeadingId">
+                                <div class="master-games-players-heading">
+                                    <h3 id="@playerHeadingId">@Localizer["MasterGames_Players"]</h3>
+                                    <span class="master-games-player-count" aria-hidden="true">
+                                        @game.Players.Count.ToString("00")
+                                    </span>
+                                </div>
+
+                                @if (game.Players.Count == 0)
+                                {
+                                    <p class="master-games-no-players">@Localizer["MasterGames_NoPlayers"]</p>
+                                }
+                                else
+                                {
+                                    <ol class="master-games-scoreboard">
+                                        @for (var playerIndex = 0; playerIndex < game.Players.Count; playerIndex++)
+                                        {
+                                            var player = game.Players[playerIndex];
+                                            <li>
+                                                <span class="master-games-player-rank" aria-hidden="true">
+                                                    @((playerIndex + 1).ToString("00"))
+                                                </span>
+                                                <span class="master-games-player-name">@player.Name</span>
+                                                <strong class="@(player.Score < 0 ? "score-negative" : null)">@player.Score</strong>
+                                            </li>
+                                        }
+                                    </ol>
+                                }
+                            </section>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </main>
+
+    <dialog id="join-code-dialog"
+            class="join-code-dialog master-games-join-dialog"
+            aria-labelledby="join-code-title">
+        <div class="join-code-card master-games-join-card">
+            <button class="join-code-close master-games-join-close"
+                    type="button"
+                    data-close-join-code
+                    aria-label="@Localizer["Button_Close"]">
+                ×
+            </button>
+
+            <p class="master-games-join-eyebrow">@Localizer["GameBoard_JoinOverlayHint"]</p>
+            <h2 id="join-code-title">@Localizer["GameBoard_JoinOverlayTitle"]</h2>
+            <img class="join-qr-code master-games-join-qr"
+                 data-join-qr-code
+                 width="320"
+                 height="320"
+                 alt="@Localizer["GameBoard_JoinQrAlt"]" />
+            <strong class="join-code-value master-games-join-code" data-join-code-value></strong>
+        </div>
+    </dialog>
+</div>
 
 @section Scripts {
     <script>

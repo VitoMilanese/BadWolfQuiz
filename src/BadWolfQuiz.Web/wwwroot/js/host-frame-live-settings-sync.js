@@ -6,6 +6,7 @@
 
     const hostCardSelector = "[data-host-card]";
     const hostFramePanelSelector = "[data-contributor-host-frame]";
+    const hostCardMediaSelector = `${hostCardSelector} .host-card-media`;
 
     const synchronizeFrameControls = (allowDisabled = true) => {
         const hostCard = document.querySelector(hostCardSelector);
@@ -63,16 +64,45 @@
         });
     };
 
+    let hostFrameLayoutRefreshQueued = false;
+    const queueHostFrameLayoutRefresh = () => {
+        if (hostFrameLayoutRefreshQueued) {
+            return;
+        }
+
+        hostFrameLayoutRefreshQueued = true;
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                hostFrameLayoutRefreshQueued = false;
+                if (!document.querySelector(hostCardSelector)) {
+                    return;
+                }
+
+                // contributor-frames.js already owns frame positioning on resize.
+                // Reuse that path after the persistent host card is relocated or
+                // its live media becomes visible during restored-game rejoin flow.
+                window.dispatchEvent(new Event("resize"));
+            });
+        });
+    };
+
     const observer = new MutationObserver(records => {
         let shouldRefresh = false;
         let hostFrameStateChanged = false;
+        let shouldRefreshHostFrameLayout = false;
         for (const record of records) {
             if (record.type === "attributes" &&
-                record.attributeName === "data-avatar-frame" &&
                 record.target instanceof Element) {
-                shouldRefresh = true;
-                if (record.target.matches(hostCardSelector)) {
-                    hostFrameStateChanged = true;
+                if (record.attributeName === "data-avatar-frame") {
+                    shouldRefresh = true;
+                    if (record.target.matches(hostCardSelector)) {
+                        hostFrameStateChanged = true;
+                    }
+                }
+
+                if (record.target.matches(hostCardMediaSelector) ||
+                    record.target.matches(hostCardSelector)) {
+                    shouldRefreshHostFrameLayout = true;
                 }
             }
 
@@ -92,30 +122,55 @@
                         hostFrameStateChanged = true;
                     }
                 }
+
+                const targetIsHostCard = record.target instanceof Element &&
+                    (record.target.matches(hostCardSelector) ||
+                     record.target.closest(hostCardSelector));
+                const hostCardMoved = changedNodes.some(node =>
+                    node instanceof Element &&
+                    (node.matches(hostCardSelector) ||
+                     node.querySelector?.(hostCardSelector)));
+                const hostMediaChanged = changedNodes.some(node =>
+                    node instanceof Element &&
+                    (node.matches(".host-card-media") ||
+                     node.querySelector?.(".host-card-media")));
+                if (targetIsHostCard || hostCardMoved || hostMediaChanged) {
+                    shouldRefreshHostFrameLayout = true;
+                }
             }
         }
 
         if (shouldRefresh) {
             queueSynchronization(hostFrameStateChanged);
         }
+        if (shouldRefreshHostFrameLayout) {
+            queueHostFrameLayoutRefresh();
+        }
     });
 
     observer.observe(body, {
         attributes: true,
-        attributeFilter: ["data-avatar-frame"],
+        attributeFilter: ["data-avatar-frame", "hidden", "src"],
         childList: true,
         subtree: true
     });
 
+    const synchronizeAfterHostGameplayChange = () => {
+        queueSynchronization(false);
+        queueHostFrameLayoutRefresh();
+    };
+
     document.addEventListener(
         "badwolf:host-shell-mounted",
-        () => queueSynchronization(false));
+        synchronizeAfterHostGameplayChange);
     document.addEventListener(
         "badwolf:host-gameplay-updated",
-        () => queueSynchronization(false));
+        synchronizeAfterHostGameplayChange);
 
     // Do not overwrite the server-rendered disabled state on initial load. If a
     // frame is already active, however, make sure duplicated lobby/dialog forms
-    // agree on the selected frame immediately.
+    // agree on the selected frame immediately. A second-frame layout pass also
+    // covers restored games where the host card is relocated as players rejoin.
     queueSynchronization(false);
+    queueHostFrameLayoutRefresh();
 })();

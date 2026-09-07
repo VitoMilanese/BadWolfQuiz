@@ -99,6 +99,35 @@ public sealed class HostAvatarFramePresentationRegressionTests
             StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Host_frame_layout_recovers_when_restored_game_rejoin_relocates_host_card()
+    {
+        var syncScript = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "host-frame-live-settings-sync.js"));
+
+        Assert.Contains("queueHostFrameLayoutRefresh", syncScript, StringComparison.Ordinal);
+        Assert.Contains("node.matches(hostCardSelector)", syncScript, StringComparison.Ordinal);
+        Assert.Contains("node.matches(\".host-card-media\")", syncScript, StringComparison.Ordinal);
+        Assert.Contains(
+            "attributeFilter: [\"data-avatar-frame\", \"hidden\", \"src\"]",
+            syncScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.dispatchEvent(new Event(\"resize\"))",
+            syncScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "\"badwolf:host-shell-mounted\"",
+            syncScript,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "\"badwolf:host-gameplay-updated\"",
+            syncScript,
+            StringComparison.Ordinal);
+    }
+
     private static string FindWebFile(params string[] parts)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

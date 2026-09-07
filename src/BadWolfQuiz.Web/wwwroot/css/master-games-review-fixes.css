@@ -1,0 +1,7 @@
+body.portal-layout:has(.master-games-page) > .page-shell {
+    margin-inline: auto;
+}
+
+.master-games-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+}
