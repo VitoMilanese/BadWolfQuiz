@@ -69,6 +69,11 @@ public sealed class PasswordRecoveryPageRestyleRegressionTests
             .ReplaceLineEndings("\n");
 
         Assert.Contains(".password-recovery-page .portal-hero h1", styles, StringComparison.Ordinal);
+        Assert.Contains(".password-recovery-page .portal-hero-mark strong", styles, StringComparison.Ordinal);
+        Assert.Contains("font-size: clamp(2.35rem, 4.2vw, 4.4rem);", styles, StringComparison.Ordinal);
+        Assert.Contains("overflow-wrap: normal;", styles, StringComparison.Ordinal);
+        Assert.Contains("word-break: normal;", styles, StringComparison.Ordinal);
+        Assert.Contains("white-space: nowrap;", styles, StringComparison.Ordinal);
         Assert.Contains(".recovery-state-card", styles, StringComparison.Ordinal);
         Assert.Contains(".recovery-state-glyph", styles, StringComparison.Ordinal);
         Assert.Contains(".recovery-state-glyph-success", styles, StringComparison.Ordinal);
