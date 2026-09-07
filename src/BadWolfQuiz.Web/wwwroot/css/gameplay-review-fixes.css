@@ -47,6 +47,42 @@
     line-height: 0.88;
 }
 
+/* Answer countdown is a separate red state; the number must not keep the buzzer/gold color. */
+.player-lobby:has(.player-buzzer-panel) > #game-timer.player-game-timer.answer-timer {
+    color: color-mix(in srgb, #d1242f 78%, var(--text));
+}
+
+.player-lobby:has(.player-buzzer-panel) > #game-timer.player-game-timer.answer-timer > strong {
+    color: currentColor !important;
+}
+
+/* Keep localized Answer History dialogs inside the viewport without horizontal scrolling. */
+.answer-history-dialog {
+    width: min(680px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
+    overflow-x: hidden;
+}
+
+.answer-history-dialog-card {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.answer-history-dialog-card :is(.dialog-heading, .dialog-target, .dialog-warning, .dialog-actions) {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.answer-history-dialog-card :is(.dialog-target, .dialog-warning, .dialog-heading h2) {
+    overflow-wrap: anywhere;
+}
+
+.answer-history-dialog-card .dialog-actions .button {
+    min-width: 0;
+    max-width: 100%;
+}
+
 @media (max-width: 700px) {
     .player-lobby:has(.player-buzzer-panel) > #game-timer.player-game-timer {
         width: min(100%, 24rem) !important;
@@ -56,5 +92,16 @@
 
     .player-lobby:has(.player-buzzer-panel) > #game-timer.player-game-timer > strong {
         font-size: clamp(3.25rem, 16vw, 5.25rem) !important;
+    }
+}
+
+@media (max-width: 560px) {
+    .answer-history-dialog-card .dialog-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .answer-history-dialog-card .dialog-actions .button {
+        width: 100%;
     }
 }

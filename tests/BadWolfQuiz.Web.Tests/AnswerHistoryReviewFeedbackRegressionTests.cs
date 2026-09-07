@@ -68,7 +68,66 @@ public sealed class AnswerHistoryReviewFeedbackRegressionTests
             styles,
             StringComparison.Ordinal);
         Assert.Contains("font-size: clamp(4rem, 7vw, 6.25rem) !important;", styles, StringComparison.Ordinal);
-        Assert.Contains("/css/gameplay-review-fixes.css?v=1", assets, StringComparison.Ordinal);
+        Assert.Contains("/css/gameplay-review-fixes.css?v=2", assets, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Player_answer_timer_uses_the_answer_color_for_the_digits_too()
+    {
+        var styles = ReadWebFile("wwwroot", "css", "gameplay-review-fixes.css")
+            .ReplaceLineEndings("\n");
+
+        Assert.Contains(
+            ".player-lobby:has(.player-buzzer-panel) > #game-timer.player-game-timer.answer-timer {",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".player-lobby:has(.player-buzzer-panel) > #game-timer.player-game-timer.answer-timer > strong {",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains("color: currentColor !important;", styles, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Answer_history_dialogs_cannot_overflow_horizontally()
+    {
+        var styles = ReadWebFile("wwwroot", "css", "gameplay-review-fixes.css")
+            .ReplaceLineEndings("\n");
+
+        Assert.Contains(".answer-history-dialog {", styles, StringComparison.Ordinal);
+        Assert.Contains("width: min(680px, calc(100vw - 32px));", styles, StringComparison.Ordinal);
+        Assert.Contains("overflow-x: hidden;", styles, StringComparison.Ordinal);
+        Assert.Contains(".answer-history-dialog-card {", styles, StringComparison.Ordinal);
+        Assert.Contains("width: 100%;", styles, StringComparison.Ordinal);
+        Assert.Contains("max-width: 100%;", styles, StringComparison.Ordinal);
+        Assert.Contains("box-sizing: border-box;", styles, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Answer_history_update_and_delete_use_ajax_without_page_navigation()
+    {
+        var script = ReadWebFile("wwwroot", "js", "answer-history-live-edit.js")
+            .ReplaceLineEndings("\n");
+        var model = ReadWebFile("Pages", "Admin", "Games", "AnswerHistory.cshtml.cs")
+            .ReplaceLineEndings("\n");
+        var assets = ReadWebFile("TagHelpers", "HostNavigationGuardAssetsTagHelper.cs");
+
+        Assert.Contains("form.matches(\".answer-history-entry-form\")", script, StringComparison.Ordinal);
+        Assert.Contains("form.closest(\"#delete-answer-history-dialog\")", script, StringComparison.Ordinal);
+        Assert.Contains("event.preventDefault();", script, StringComparison.Ordinal);
+        Assert.Contains("fetch(form.action", script, StringComparison.Ordinal);
+        Assert.Contains("\"X-Requested-With\": \"XMLHttpRequest\"", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.location.reload", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.location.assign", script, StringComparison.Ordinal);
+
+        Assert.Contains("private bool IsAjaxRequest()", model, StringComparison.Ordinal);
+        Assert.Contains("return new JsonResult(new", model, StringComparison.Ordinal);
+        Assert.Contains("CreateUpdateAjaxData", model, StringComparison.Ordinal);
+        Assert.Contains("CreateDeleteAjaxData", model, StringComparison.Ordinal);
+        Assert.Contains("questionIsVisible = IsVisibleInHistory(question)", model, StringComparison.Ordinal);
+        Assert.Contains("noEntriesLabel = localizer[\"AnswerHistory_NoEntries\"].Value", model, StringComparison.Ordinal);
+        Assert.Contains("/js/answer-history-live-edit.js?v=1", assets, StringComparison.Ordinal);
+        Assert.Contains("/css/gameplay-review-fixes.css?v=2", assets, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -77,7 +136,7 @@ public sealed class AnswerHistoryReviewFeedbackRegressionTests
         var assets = ReadWebFile("TagHelpers", "HostNavigationGuardAssetsTagHelper.cs");
 
         Assert.Contains("model is AnswerHistoryModel", assets, StringComparison.Ordinal);
-        Assert.Contains("/css/gameplay-review-fixes.css?v=1", assets, StringComparison.Ordinal);
+        Assert.Contains("/css/gameplay-review-fixes.css?v=2", assets, StringComparison.Ordinal);
     }
 
     private static string ReadWebFile(params string[] parts)

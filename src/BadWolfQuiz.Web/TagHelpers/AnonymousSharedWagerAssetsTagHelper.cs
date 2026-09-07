@@ -16,7 +16,7 @@ public sealed class AnonymousSharedWagerAssetsTagHelper : TagHelper
             output.PreElement.AppendHtml(
                 "<link rel=\"stylesheet\" href=\"/css/player-lobby-waiting-room-fixes.css?v=1\" />");
             output.PreElement.AppendHtml(
-                "<link rel=\"stylesheet\" href=\"/css/gameplay-review-fixes.css?v=1\" />");
+                "<link rel=\"stylesheet\" href=\"/css/gameplay-review-fixes.css?v=2\" />");
             output.PostContent.AppendHtml(
                 "<script src=\"/js/anonymous-shared-wager-player.js?v=1\"></script>");
         }
