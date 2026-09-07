@@ -12,52 +12,87 @@
     }
 }
 
-@if (!embedded)
-{
-    <div class="page-heading">
-        <div><h1>@Localizer["QuestionBot_Title"]</h1></div>
-    </div>
-}
-
-@if (TempData["QuestionBotSuccess"] is string success)
-{
-    <div id="questionBotSuccess" class="message message-success" role="status">@success</div>
-}
-@if (TempData["QuestionBotError"] is string error)
-{
-    <div class="message message-error" role="alert">@error</div>
-}
-
-<form method="post" asp-page-handler="Save" asp-route-embedded="@embedded" class="form-card narrow stack-form question-bot-settings-form">
-    <label class="field-group">
-        <span>@Localizer["QuestionBot_DiscordServer"]</span>
-        <select asp-for="GuildId" id="questionBotGuild">
-            <option value="">@Localizer["QuestionBot_SelectServer"]</option>
-            @foreach (var guild in Model.Guilds)
-            {
-                <option value="@guild.Id">@guild.Name</option>
-            }
-        </select>
-    </label>
-    <label class="field-group">
-        <span>@Localizer["QuestionBot_TextChannel"]</span>
-        <select asp-for="ChannelId" id="questionBotChannel">
-            <option value="">@Localizer["QuestionBot_SelectChannel"]</option>
-            @foreach (var channel in Model.Channels)
-            {
-                <option value="@channel.Id">@channel.Name</option>
-            }
-        </select>
-    </label>
-    <div class="form-actions">
-        <button type="submit" class="button button-primary">@Localizer["Button_Save"]</button>
-    </div>
-</form>
-
 @if (embedded)
 {
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 }
+<link rel="stylesheet" href="~/css/question-bot-settings.css" asp-append-version="true" />
+
+<div class="question-bot-settings-page @(embedded ? "is-embedded" : null)"
+     data-question-bot-settings>
+    @if (!embedded)
+    {
+        <section class="question-bot-settings-hero" aria-labelledby="question-bot-settings-title">
+            <div class="question-bot-settings-hero-copy">
+                <p class="question-bot-settings-eyebrow" aria-hidden="true">BAD WOLF / DISCORD ROUTING</p>
+                <h1 id="question-bot-settings-title">@Localizer["QuestionBot_Title"]</h1>
+            </div>
+
+            <div class="question-bot-settings-hero-mark" aria-hidden="true">
+                <span>QUESTIONS</span>
+                <strong>BOT</strong>
+                <i></i>
+                <small>DISCORD</small>
+            </div>
+        </section>
+    }
+
+    <main class="question-bot-settings-shell">
+        @if (TempData["QuestionBotSuccess"] is string success)
+        {
+            <div id="questionBotSuccess"
+                 class="message message-success question-bot-settings-message"
+                 role="status">
+                @success
+            </div>
+        }
+        @if (TempData["QuestionBotError"] is string error)
+        {
+            <div class="message message-error question-bot-settings-message" role="alert">@error</div>
+        }
+
+        <section class="question-bot-settings-card">
+            <header class="question-bot-settings-card-header">
+                <div>
+                    <span class="question-bot-settings-card-kicker" aria-hidden="true">DISCORD / TEXT CHANNEL</span>
+                    <h2>@Localizer["QuestionBot_Title"]</h2>
+                </div>
+                <span class="question-bot-settings-signal" aria-hidden="true"></span>
+            </header>
+
+            <form method="post"
+                  asp-page-handler="Save"
+                  asp-route-embedded="@embedded"
+                  class="question-bot-settings-form">
+                <label class="question-bot-settings-field">
+                    <span>@Localizer["QuestionBot_DiscordServer"]</span>
+                    <select asp-for="GuildId" id="questionBotGuild">
+                        <option value="">@Localizer["QuestionBot_SelectServer"]</option>
+                        @foreach (var guild in Model.Guilds)
+                        {
+                            <option value="@guild.Id">@guild.Name</option>
+                        }
+                    </select>
+                </label>
+
+                <label class="question-bot-settings-field">
+                    <span>@Localizer["QuestionBot_TextChannel"]</span>
+                    <select asp-for="ChannelId" id="questionBotChannel">
+                        <option value="">@Localizer["QuestionBot_SelectChannel"]</option>
+                        @foreach (var channel in Model.Channels)
+                        {
+                            <option value="@channel.Id">@channel.Name</option>
+                        }
+                    </select>
+                </label>
+
+                <div class="question-bot-settings-actions">
+                    <button type="submit" class="button button-primary">@Localizer["Button_Save"]</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
 
 <script>
     (() => {
