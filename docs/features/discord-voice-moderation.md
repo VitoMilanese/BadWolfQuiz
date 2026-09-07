@@ -129,19 +129,21 @@ credential in the Discord Developer Portal to keep downtime short.
 
 ## Host setup
 
-Open the Discord voice dialog from the global settings page or directly from an
+Open Discord settings from the global host settings page or directly from an
 active host game, connect the host's Discord account, install the bot if necessary,
 and select a server and standard voice channel. Only servers where the user can
-manage the server and where the bot is present are offered. The dialog reports
-bot, server, channel, and permission health.
+manage the server and where the bot is present are offered.
 
-The dialog keeps its configuration actions in one compact action area. On desktop,
-the Discord connection/install action, automatic-mute **Save** action, and close
-action remain on one row when space allows. The page-level heading and redundant
-**Back** action are omitted because the content is already hosted inside a dialog.
-The dialog is sized to its actual content so it does not introduce unnecessary
-empty space or scrolling, while the action layout remains responsive on smaller
-screens.
+The standalone `/Admin/Settings/Discord` page uses the portal presentation with a
+connection-state hero, account/server/channel/health summary, and separate routing,
+automation, and diagnostics/control sections. When the same page is hosted inside
+the Discord settings dialog, it switches to a compact embedded layout and omits
+the standalone hero so the dialog does not duplicate its outer heading.
+
+The automatic-media option is presented as an explicit checkbox with a visible
+unchecked border and a checked mark. Saving it keeps the existing AJAX behavior,
+so changing the preference from an open game is applied without reloading the
+host page. The layout remains responsive for narrower dialog and mobile widths.
 
 OAuth access tokens and CSRF state are kept only in short-lived server memory.
 Only stable Discord IDs, display names, and the automatic-media preference are
