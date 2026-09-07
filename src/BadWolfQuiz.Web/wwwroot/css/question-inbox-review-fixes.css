@@ -71,6 +71,24 @@ body.portal-layout:has(.question-inbox-page) > .page-shell {
     backdrop-filter: blur(16px);
 }
 
+.question-inbox-card.has-floating-reply {
+    padding-bottom: calc(var(--question-inbox-card-padding) + 8.5rem);
+}
+
+.question-inbox-card:only-child.is-awaiting-reply .question-inbox-actions-panel.is-floating-reply {
+    --question-inbox-footer-offset: 0px;
+    --question-inbox-floating-left: 12px;
+    --question-inbox-floating-width: calc(100vw - 24px);
+    --question-inbox-floating-gap: max(10px, env(safe-area-inset-bottom));
+    position: fixed;
+    left: var(--question-inbox-floating-left);
+    bottom: calc(var(--question-inbox-footer-offset) + var(--question-inbox-floating-gap));
+    z-index: 120;
+    width: var(--question-inbox-floating-width);
+    box-sizing: border-box;
+    transition: bottom 120ms ease-out;
+}
+
 .question-inbox-card:only-child.is-awaiting-reply .question-reply-form {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: stretch;
@@ -113,8 +131,17 @@ body.portal-layout:has(.question-inbox-page) > .page-shell {
         padding-inline: .75rem;
     }
 
-    .question-inbox-card:only-child.is-awaiting-reply .question-inbox-actions-panel {
+    .question-inbox-card.has-floating-reply {
+        padding-bottom: var(--question-inbox-card-padding);
+    }
+
+    .question-inbox-card:only-child.is-awaiting-reply .question-inbox-actions-panel,
+    .question-inbox-card:only-child.is-awaiting-reply .question-inbox-actions-panel.is-floating-reply {
         position: static;
+        left: auto;
+        bottom: auto;
+        width: auto;
+        transition: none;
     }
 
     .question-inbox-card:only-child.is-awaiting-reply .question-reply-form {
@@ -147,5 +174,11 @@ body.portal-layout:has(.question-inbox-page) > .page-shell {
 
     .question-inbox-card:only-child.is-awaiting-reply .question-inbox-form-actions {
         flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .question-inbox-card:only-child.is-awaiting-reply .question-inbox-actions-panel.is-floating-reply {
+        transition: none;
     }
 }
