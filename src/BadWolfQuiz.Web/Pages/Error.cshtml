@@ -1,7 +1,30 @@
-﻿@page
+@page
 @model ErrorModel
 @{
     ViewData["Title"] = Localizer["Title_Error"];
 }
-<h1>@Localizer["Error_Unexpected"]</h1>
-<p>@Localizer["Error_CheckLogsAndRetry"]</p>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/public-account-pages.css" asp-append-version="true" />
+}
+
+<div class="portal-page not-found-page error-page">
+    <section class="portal-hero not-found-hero error-hero" aria-labelledby="error-title">
+        <div class="portal-hero-copy">
+            <p class="portal-kicker">BAD WOLF QUIZ / 500</p>
+            <h1 id="error-title">@Localizer["Error_Unexpected"]</h1>
+            <p class="portal-hero-description">@Localizer["Error_CheckLogsAndRetry"]</p>
+            <div class="not-found-actions error-actions">
+                <a class="button button-primary" href="@Url.Content("~/")">
+                    @Localizer["Menu_Home"]
+                </a>
+            </div>
+        </div>
+
+        <div class="portal-hero-mark not-found-mark error-mark" aria-hidden="true">
+            <span>BAD WOLF QUIZ</span>
+            <strong>500</strong>
+            <small>@Localizer["Title_Error"]</small>
+        </div>
+    </section>
+</div>
