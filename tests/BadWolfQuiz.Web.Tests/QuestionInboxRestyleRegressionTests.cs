@@ -10,6 +10,7 @@ public sealed class QuestionInboxRestyleRegressionTests
         Assert.Contains("@model BadWolfQuiz.Web.Pages.Admin.QuestionInboxModel", markup, StringComparison.Ordinal);
         Assert.Contains("~/css/question-inbox.css", markup, StringComparison.Ordinal);
         Assert.Contains("~/css/question-inbox-review-fixes.css", markup, StringComparison.Ordinal);
+        Assert.Contains("~/js/question-inbox-floating-reply.js", markup, StringComparison.Ordinal);
         Assert.Contains("class=\"question-inbox-page\"", markup, StringComparison.Ordinal);
         Assert.Contains("class=\"question-inbox-hero\"", markup, StringComparison.Ordinal);
         Assert.Contains("class=\"question-inbox-count\"", markup, StringComparison.Ordinal);
@@ -81,6 +82,8 @@ public sealed class QuestionInboxRestyleRegressionTests
     {
         var styles = ReadWebFile("wwwroot", "css", "question-inbox-review-fixes.css")
             .ReplaceLineEndings("\n");
+        var script = ReadWebFile("wwwroot", "js", "question-inbox-floating-reply.js")
+            .ReplaceLineEndings("\n");
 
         Assert.Contains("body.portal-layout:has(.question-inbox-page) > .page-shell", styles, StringComparison.Ordinal);
         Assert.Contains("width: 100%;", styles, StringComparison.Ordinal);
@@ -88,17 +91,29 @@ public sealed class QuestionInboxRestyleRegressionTests
         Assert.Contains(".question-inbox-page {", styles, StringComparison.Ordinal);
         Assert.Contains("margin-inline: auto;", styles, StringComparison.Ordinal);
         Assert.Contains("grid-template-areas:\n        \"header\"\n        \"messages\"\n        \"actions\";", styles, StringComparison.Ordinal);
+        Assert.Contains(".question-inbox-card-header {", styles, StringComparison.Ordinal);
+        Assert.Contains("border-bottom:", styles, StringComparison.Ordinal);
         Assert.Contains(".question-messages {", styles, StringComparison.Ordinal);
         Assert.Contains("max-height: none;", styles, StringComparison.Ordinal);
         Assert.Contains("overflow: visible;", styles, StringComparison.Ordinal);
         Assert.Contains("width: min(88%, 74rem);", styles, StringComparison.Ordinal);
-        Assert.Contains(".question-inbox-card:only-child.is-awaiting-reply .question-inbox-actions-panel", styles, StringComparison.Ordinal);
-        Assert.Contains("position: sticky;", styles, StringComparison.Ordinal);
-        Assert.Contains("bottom: 0;", styles, StringComparison.Ordinal);
+        Assert.Contains(".question-inbox-card:only-child.is-awaiting-reply .question-inbox-actions-panel.is-floating-reply", styles, StringComparison.Ordinal);
+        Assert.Contains("position: fixed;", styles, StringComparison.Ordinal);
+        Assert.Contains("--question-inbox-footer-offset", styles, StringComparison.Ordinal);
+        Assert.Contains("bottom: calc(var(--question-inbox-footer-offset)", styles, StringComparison.Ordinal);
         Assert.Contains(".question-inbox-card:only-child.is-awaiting-reply .question-reply-form", styles, StringComparison.Ordinal);
         Assert.Contains("grid-template-columns: minmax(0, 1fr) auto;", styles, StringComparison.Ordinal);
         Assert.Contains("@media (max-width: 700px)", styles, StringComparison.Ordinal);
         Assert.Contains("position: static;", styles, StringComparison.Ordinal);
+
+        Assert.Contains(".question-inbox-card:only-child.is-awaiting-reply", script, StringComparison.Ordinal);
+        Assert.Contains("panel.classList.add(\"is-floating-reply\")", script, StringComparison.Ordinal);
+        Assert.Contains("document.querySelector(\".portal-footer\")", script, StringComparison.Ordinal);
+        Assert.Contains("getBoundingClientRect()", script, StringComparison.Ordinal);
+        Assert.Contains("--question-inbox-footer-offset", script, StringComparison.Ordinal);
+        Assert.Contains("--question-inbox-floating-left", script, StringComparison.Ordinal);
+        Assert.Contains("--question-inbox-floating-width", script, StringComparison.Ordinal);
+        Assert.Contains("ResizeObserver", script, StringComparison.Ordinal);
     }
 
     [Fact]
