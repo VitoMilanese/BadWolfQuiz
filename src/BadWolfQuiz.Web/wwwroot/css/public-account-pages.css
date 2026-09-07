@@ -101,6 +101,7 @@ body:has(.portal-page) > .page-shell {
 
 .portal-hero-mark {
     position: relative;
+    container-type: inline-size;
     display: flex;
     min-width: 0;
     min-height: 270px;
@@ -141,24 +142,28 @@ body:has(.portal-page) > .page-shell {
     display: block;
     margin-top: 14px;
     color: var(--text);
-    font-size: clamp(3.1rem, 6vw, 6rem);
+    font-size: clamp(2.25rem, 18cqw, 4.8rem);
     font-weight: 1000;
-    line-height: .84;
+    line-height: .86;
     letter-spacing: -.07em;
     text-transform: uppercase;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: nowrap;
 }
 
 .portal-hero-mark b {
     display: block;
     margin-top: 4px;
     color: var(--red-bright);
-    font-size: clamp(2.1rem, 4vw, 4rem);
+    font-size: clamp(1.9rem, 14cqw, 3.8rem);
     font-weight: 1000;
     line-height: .9;
     letter-spacing: -.05em;
     text-transform: uppercase;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: nowrap;
 }
 
 .portal-hero-mark small {
