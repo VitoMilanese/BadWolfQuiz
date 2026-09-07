@@ -4,7 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>BadWolfQuiz.Web</RootNamespace>
-    <Version>1.26.31</Version>
+    <Version>1.26.32</Version>
   </PropertyGroup>
 
   <PropertyGroup>

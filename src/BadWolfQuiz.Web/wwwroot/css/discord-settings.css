@@ -1,0 +1,73 @@
+@import url("./discord-settings-layout.css");
+
+/* Review fix: keep the automatic-mute control visually unmistakable as a checkbox. */
+.discord-settings-toggle {
+    padding: 12px 14px;
+    border: 1px solid var(--discord-border-soft);
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.08);
+    transition: border-color 160ms ease, background 160ms ease;
+    user-select: none;
+}
+
+.discord-settings-toggle:hover {
+    border-color: color-mix(in srgb, var(--accent) 42%, rgba(255, 255, 255, 0.12));
+    background: color-mix(in srgb, var(--accent) 6%, rgba(0, 0, 0, 0.08));
+}
+
+.discord-settings-toggle-control {
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 28px;
+    height: 28px;
+    border: 2px solid color-mix(in srgb, var(--text) 88%, var(--accent) 12%);
+    border-radius: 7px;
+    background: color-mix(in srgb, var(--panel) 78%, var(--text) 4%);
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--text) 20%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.discord-settings-toggle:hover .discord-settings-toggle-control {
+    border-color: color-mix(in srgb, var(--text) 72%, var(--accent) 28%);
+    box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.discord-settings-toggle-control::after {
+    content: "✓";
+    position: static;
+    top: auto;
+    left: auto;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: none;
+    color: transparent;
+    font-size: 1.05rem;
+    font-weight: 950;
+    line-height: 1;
+    transform: scale(0.72);
+    transition: color 140ms ease, transform 140ms ease;
+}
+
+.discord-settings-toggle > input:checked + .discord-settings-toggle-control {
+    border-color: color-mix(in srgb, var(--accent) 76%, var(--text) 24%);
+    background: var(--accent);
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--text) 26%, transparent),
+        0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.discord-settings-toggle > input:checked + .discord-settings-toggle-control::after {
+    color: #fff;
+    transform: scale(1);
+}
+
+.discord-settings-toggle > input:focus-visible + .discord-settings-toggle-control {
+    outline: 3px solid color-mix(in srgb, var(--accent) 38%, transparent);
+    outline-offset: 3px;
+}
