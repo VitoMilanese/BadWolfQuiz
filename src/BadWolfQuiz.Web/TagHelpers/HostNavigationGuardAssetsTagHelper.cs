@@ -20,7 +20,19 @@ public sealed class HostNavigationGuardAssetsTagHelper : TagHelper
             return;
         }
 
+        if (model is AnswerHistoryModel)
+        {
+            output.PreContent.AppendHtml(
+                "<link rel=\"stylesheet\" href=\"/css/gameplay-review-fixes.css?v=2\" />");
+        }
+
         output.PostContent.AppendHtml(
             "<script src=\"/js/host-navigation-action-guard.js?v=1.22.10\"></script>");
+
+        if (model is AnswerHistoryModel)
+        {
+            output.PostContent.AppendHtml(
+                "<script src=\"/js/answer-history-live-edit.js?v=1\"></script>");
+        }
     }
 }
