@@ -1096,6 +1096,37 @@ body:has(.minigames-page) .topbar {
     }
 }
 
+@media (max-height: 900px) {
+    .minigames-dialog[data-new-game-dialog] {
+        zoom: 0.94;
+    }
+}
+
+@media (max-height: 800px) {
+    .minigames-dialog[data-new-game-dialog] {
+        zoom: 0.9;
+    }
+}
+
+@media (max-height: 700px) {
+    .minigames-dialog[data-new-game-dialog] {
+        zoom: 0.84;
+    }
+}
+
+@media (max-height: 620px) {
+    .minigames-dialog[data-new-game-dialog] {
+        zoom: 0.78;
+    }
+}
+
+@supports not (zoom: 1) {
+    .minigames-dialog[data-new-game-dialog] {
+        max-height: calc(100dvh - 16px);
+        overflow-y: auto;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .minigames-entry-card,
     .minigame-card-frame,
