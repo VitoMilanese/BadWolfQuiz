@@ -192,13 +192,19 @@ public sealed class PublicAccountPageRestyleRegressionTests
     }
 
     [Fact]
-    public void Shared_styles_widen_faq_balance_answers_and_cover_404_responsive_accessibility_contracts()
+    public void Shared_styles_keep_account_hero_mark_words_intact_and_cover_responsive_accessibility_contracts()
     {
         var styles = File.ReadAllText(FindWebFile("wwwroot", "css", "public-account-pages.css"))
             .ReplaceLineEndings("\n");
 
         Assert.StartsWith("body:has(.portal-page)", styles, StringComparison.Ordinal);
         Assert.DoesNotContain("@page", styles, StringComparison.Ordinal);
+        Assert.Contains("container-type: inline-size;", styles, StringComparison.Ordinal);
+        Assert.Contains("font-size: clamp(2.25rem, 18cqw, 4.8rem);", styles, StringComparison.Ordinal);
+        Assert.Contains("font-size: clamp(1.9rem, 14cqw, 3.8rem);", styles, StringComparison.Ordinal);
+        Assert.Contains("overflow-wrap: normal;", styles, StringComparison.Ordinal);
+        Assert.Contains("word-break: normal;", styles, StringComparison.Ordinal);
+        Assert.Contains("white-space: nowrap;", styles, StringComparison.Ordinal);
         Assert.Contains(".portal-page.faq-page {\n    width: 100%;\n    max-width: none;", styles, StringComparison.Ordinal);
         Assert.Contains(".faq-answer {\n    padding: 18px 22px 22px;", styles, StringComparison.Ordinal);
         Assert.Contains(".not-found-page .portal-hero", styles, StringComparison.Ordinal);
