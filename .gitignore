@@ -436,3 +436,6 @@ FodyWeavers.xsd
 # Bad Wolf Quiz local data
 src/BadWolfQuiz.Web/App_Data/*
 !src/BadWolfQuiz.Web/App_Data/.gitkeep
+
+# Local Codex workspace
+/.codex/
