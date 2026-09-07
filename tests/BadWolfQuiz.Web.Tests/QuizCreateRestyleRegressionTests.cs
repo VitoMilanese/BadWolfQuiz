@@ -17,6 +17,18 @@ public sealed class QuizCreateRestyleRegressionTests
     }
 
     [Fact]
+    public void Decorative_create_markers_do_not_use_fake_step_numbers()
+    {
+        var markup = ReadWebFile("Pages", "Admin", "Quizzes", "Create.cshtml");
+
+        Assert.DoesNotContain("<strong>01</strong>", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("01 / CORE DETAILS", markup, StringComparison.Ordinal);
+        Assert.Contains("<strong>NEW</strong>", markup, StringComparison.Ordinal);
+        Assert.Contains("<strong>+</strong>", markup, StringComparison.Ordinal);
+        Assert.Contains(">CORE DETAILS</span>", markup, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Existing_create_form_contract_and_localization_are_preserved()
     {
         var markup = ReadWebFile("Pages", "Admin", "Quizzes", "Create.cshtml");
