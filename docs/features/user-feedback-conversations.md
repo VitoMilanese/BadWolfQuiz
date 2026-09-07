@@ -70,9 +70,17 @@ server-side conversation.
 
 The developer has a dedicated inbox for user conversations.
 
-The inbox and individual conversation view distinguish user and developer
-messages visually and keep message content, metadata, status, reply controls, and
-destructive actions separate.
+The inbox presents the current conversation count, keeps sender/question metadata
+above each thread, and renders the complete chronological conversation across the
+available card width. User and developer messages remain visually distinct while
+reply controls and destructive actions are kept separate from the message stream.
+
+When a single unanswered conversation is open on a desktop-sized viewport, the
+reply form becomes a floating composer aligned to the conversation card. The
+composer stays above the visible portal footer and recalculates its placement when
+the viewport, conversation card, or footer changes size. On narrow/mobile layouts
+it returns to normal document flow so it does not cover conversation content or
+conflict with the on-screen keyboard.
 
 The developer can open a conversation, review the complete chronological thread,
 reply, and delete the conversation.
@@ -111,6 +119,11 @@ Conversation pages use message cards and distinct visual accents so adjacent
 messages and replies are easy to distinguish. The presentation supports both
 light and dark themes and responsive layouts.
 
+The developer inbox keeps the portal scroll container at full viewport width so
+the desktop scrollbar remains on the far-right edge of the screen while the inbox
+content itself stays centered. The message thread does not introduce a separate
+desktop scrollbar inside the conversation card.
+
 Preview text on the local-history page is normalized for compact display rather
 than preserving formatting whitespace that would create misleading visual gaps.
 
@@ -148,6 +161,10 @@ Regression coverage should verify at minimum that:
 - missing or deleted conversations do not break local history;
 - a user can reopen and delete a saved conversation;
 - the developer can review, reply to, and delete conversations;
+- the developer inbox keeps sender metadata above the conversation and preserves
+  a single page-level desktop scroll container;
+- the desktop floating reply composer remains above the visible portal footer and
+  falls back to normal document flow on narrow/mobile layouts;
 - a new user message creates the expected Discord bot notification;
 - Discord message IDs are associated with the correct user messages;
 - deletion performs the expected Discord cleanup;
