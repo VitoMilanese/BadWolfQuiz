@@ -3,55 +3,82 @@
     ViewData["Title"] = Localizer["Privacy_Title"];
 }
 
-<section class="content-section privacy-page">
-    <div class="content-card privacy-content">
-        <h1>@Localizer["Privacy_Title"]</h1>
+@section Styles {
+    <link rel="stylesheet" href="~/css/public-account-pages.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/legal-pages.css" asp-append-version="true" />
+}
 
-        <p>@Localizer["Privacy_Intro"]</p>
+<div class="portal-page privacy-page">
+    <section class="portal-hero" aria-labelledby="privacy-title">
+        <div class="portal-hero-copy">
+            <p class="portal-kicker">BAD WOLF QUIZ / PRIVACY</p>
+            <h1 id="privacy-title">@Localizer["Privacy_Title"]</h1>
+            <p class="portal-hero-description">@Localizer["Privacy_Intro"]</p>
+        </div>
+        <div class="portal-hero-mark" aria-hidden="true">
+            <span>BAD WOLF QUIZ</span>
+            <strong>PRIVACY</strong>
+            <b>DATA</b>
+            <small>COOKIES / STORAGE / CONTROL</small>
+        </div>
+    </section>
 
-        <h2>@Localizer["Privacy_CookiesTitle"]</h2>
-        <p>@Localizer["Privacy_CookiesIntro"]</p>
+    <main class="portal-content">
+        <div class="privacy-grid">
+            <section class="portal-card privacy-panel privacy-panel-wide">
+                <div class="portal-section-title">
+                    <span>01</span>
+                    <h2>@Localizer["Privacy_CookiesTitle"]</h2>
+                </div>
+                <p>@Localizer["Privacy_CookiesIntro"]</p>
 
-        <h3>@Localizer["Privacy_QuestionHistoryTitle"]</h3>
-        <p>@Localizer["Privacy_QuestionHistoryText"]</p>
+                <div class="privacy-detail-grid">
+                    <article class="privacy-detail">
+                        <h3>@Localizer["Privacy_QuestionHistoryTitle"]</h3>
+                        <p>@Localizer["Privacy_QuestionHistoryText"]</p>
+                    </article>
+                    <article class="privacy-detail">
+                        <h3>@Localizer["Privacy_LanguageTitle"]</h3>
+                        <p>@Localizer["Privacy_LanguageText"]</p>
+                    </article>
+                    <article class="privacy-detail">
+                        <h3>@Localizer["Privacy_SecurityTitle"]</h3>
+                        <p>@Localizer["Privacy_SecurityText"]</p>
+                    </article>
+                </div>
+            </section>
 
-        <h3>@Localizer["Privacy_LanguageTitle"]</h3>
-        <p>@Localizer["Privacy_LanguageText"]</p>
+            <section class="portal-card privacy-panel">
+                <div class="portal-section-title">
+                    <span>02</span>
+                    <h2>@Localizer["Privacy_YouTubeTitle"]</h2>
+                </div>
+                <p>@Localizer["Privacy_YouTubeText"]</p>
+            </section>
 
-        <h3>@Localizer["Privacy_SecurityTitle"]</h3>
-        <p>@Localizer["Privacy_SecurityText"]</p>
+            <section class="portal-card privacy-panel">
+                <div class="portal-section-title">
+                    <span>03</span>
+                    <h2>@Localizer["Privacy_NoAdvertisingTitle"]</h2>
+                </div>
+                <p>@Localizer["Privacy_NoAdvertisingText"]</p>
+            </section>
 
-        <h2>@Localizer["Privacy_YouTubeTitle"]</h2>
-        <p>@Localizer["Privacy_YouTubeText"]</p>
+            <section class="portal-card privacy-panel">
+                <div class="portal-section-title">
+                    <span>04</span>
+                    <h2>@Localizer["Privacy_LocalStorageTitle"]</h2>
+                </div>
+                <p>@Localizer["Privacy_LocalStorageText"]</p>
+            </section>
 
-        <h2>@Localizer["Privacy_NoAdvertisingTitle"]</h2>
-        <p>@Localizer["Privacy_NoAdvertisingText"]</p>
-
-        <h2>@Localizer["Privacy_LocalStorageTitle"]</h2>
-        <p>@Localizer["Privacy_LocalStorageText"]</p>
-
-        <h2>@Localizer["Privacy_ControlTitle"]</h2>
-        <p>@Localizer["Privacy_ControlText"]</p>
-    </div>
-</section>
-
-<style>
-    .privacy-content {
-        max-width: 960px;
-    }
-
-        .privacy-content p {
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-
-        .privacy-content h2 {
-            margin-top: 2rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .privacy-content h3 {
-            margin-top: 1.4rem;
-            margin-bottom: 0.6rem;
-        }
-</style>
+            <section class="portal-card privacy-panel">
+                <div class="portal-section-title">
+                    <span>05</span>
+                    <h2>@Localizer["Privacy_ControlTitle"]</h2>
+                </div>
+                <p>@Localizer["Privacy_ControlText"]</p>
+            </section>
+        </div>
+    </main>
+</div>
