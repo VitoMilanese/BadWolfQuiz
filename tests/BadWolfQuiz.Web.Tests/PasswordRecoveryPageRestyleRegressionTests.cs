@@ -63,17 +63,21 @@ public sealed class PasswordRecoveryPageRestyleRegressionTests
     }
 
     [Fact]
-    public void Recovery_specific_styles_cover_status_cards_actions_and_mobile_layout()
+    public void Recovery_specific_styles_cover_status_cards_actions_and_shared_hero_word_sizing()
     {
         var styles = File.ReadAllText(FindWebFile("wwwroot", "css", "password-recovery-pages.css"))
             .ReplaceLineEndings("\n");
+        var sharedStyles = File.ReadAllText(FindWebFile("wwwroot", "css", "public-account-pages.css"))
+            .ReplaceLineEndings("\n");
 
         Assert.Contains(".password-recovery-page .portal-hero h1", styles, StringComparison.Ordinal);
-        Assert.Contains(".password-recovery-page .portal-hero-mark strong", styles, StringComparison.Ordinal);
-        Assert.Contains("font-size: clamp(2.35rem, 4.2vw, 4.4rem);", styles, StringComparison.Ordinal);
-        Assert.Contains("overflow-wrap: normal;", styles, StringComparison.Ordinal);
-        Assert.Contains("word-break: normal;", styles, StringComparison.Ordinal);
-        Assert.Contains("white-space: nowrap;", styles, StringComparison.Ordinal);
+        Assert.DoesNotContain(".password-recovery-page .portal-hero-mark strong", styles, StringComparison.Ordinal);
+        Assert.Contains("container-type: inline-size;", sharedStyles, StringComparison.Ordinal);
+        Assert.Contains("font-size: clamp(2.25rem, 18cqw, 4.8rem);", sharedStyles, StringComparison.Ordinal);
+        Assert.Contains("font-size: clamp(1.9rem, 14cqw, 3.8rem);", sharedStyles, StringComparison.Ordinal);
+        Assert.Contains("overflow-wrap: normal;", sharedStyles, StringComparison.Ordinal);
+        Assert.Contains("word-break: normal;", sharedStyles, StringComparison.Ordinal);
+        Assert.Contains("white-space: nowrap;", sharedStyles, StringComparison.Ordinal);
         Assert.Contains(".recovery-state-card", styles, StringComparison.Ordinal);
         Assert.Contains(".recovery-state-glyph", styles, StringComparison.Ordinal);
         Assert.Contains(".recovery-state-glyph-success", styles, StringComparison.Ordinal);
