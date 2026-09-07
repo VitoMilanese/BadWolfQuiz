@@ -66,13 +66,18 @@ public sealed class LegalPageRestyleRegressionTests
     [Fact]
     public void Legal_page_styles_cover_summary_cards_license_text_and_responsive_privacy_layout()
     {
-        var styles = File.ReadAllText(FindWebFile("wwwroot", "css", "legal-pages.css"));
+        var styles = File.ReadAllText(FindWebFile("wwwroot", "css", "legal-pages.css"))
+            .ReplaceLineEndings("\n");
 
         Assert.Contains(".license-summary-grid", styles, StringComparison.Ordinal);
         Assert.Contains(".license-summary-card-critical", styles, StringComparison.Ordinal);
         Assert.Contains(".license-text", styles, StringComparison.Ordinal);
         Assert.Contains(".privacy-grid", styles, StringComparison.Ordinal);
         Assert.Contains(".privacy-detail-grid", styles, StringComparison.Ordinal);
+        Assert.Contains(
+            ".privacy-page .portal-hero-mark strong {\n    white-space: nowrap;\n    overflow-wrap: normal;",
+            styles,
+            StringComparison.Ordinal);
         Assert.Contains("@media (max-width: 900px)", styles, StringComparison.Ordinal);
         Assert.Contains("@media (max-width: 620px)", styles, StringComparison.Ordinal);
     }
