@@ -1,0 +1,12 @@
+.answer-key-content .game-content-block:has(> .game-content-image) {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+}
+
+.answer-key-content .game-content-block:has(> .game-content-image) > .game-content-image {
+    background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--text) 8%, var(--line)),
+        0 24px 64px rgb(0 0 0 / 34%);
+}
