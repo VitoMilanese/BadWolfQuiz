@@ -33,7 +33,7 @@ public sealed class QuizEditorWorkspaceAssetsTagHelper : TagHelper
         {
             output.PostContent.AppendHtml(
                 "<link rel=\"stylesheet\" href=\"/css/quiz-editor-workspace.css?v=577.1\" />" +
-                "<link rel=\"stylesheet\" href=\"/css/quiz-editor-workspace-fixes.css?v=577.3\" />" +
+                "<link rel=\"stylesheet\" href=\"/css/quiz-editor-workspace-fixes.css?v=577.4\" />" +
                 "<script src=\"/js/quiz-editor-workspace-interactions.js?v=577.3\"></script>");
             return;
         }
