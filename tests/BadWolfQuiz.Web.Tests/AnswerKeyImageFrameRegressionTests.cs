@@ -42,7 +42,7 @@ public sealed class AnswerKeyImageFrameRegressionTests
     }
 
     [Fact]
-    public void Single_image_is_scaled_up_to_the_available_stage_without_touching_multi_block_layout()
+    public void Single_image_is_scaled_up_to_the_available_stage_without_touching_multi_image_layout()
     {
         var page = File.ReadAllText(FindWebFile(
             "Pages",
@@ -55,17 +55,19 @@ public sealed class AnswerKeyImageFrameRegressionTests
             "answer-key-image-fit.js"));
 
         Assert.Contains("~/js/answer-key-image-fit.js", page, StringComparison.Ordinal);
-        Assert.Contains("if (blocks.length !== 1)", script, StringComparison.Ordinal);
-        Assert.Contains("image.naturalWidth", script, StringComparison.Ordinal);
-        Assert.Contains("image.naturalHeight", script, StringComparison.Ordinal);
-        Assert.Contains("availableWidth / image.naturalWidth", script, StringComparison.Ordinal);
-        Assert.Contains("availableHeight / image.naturalHeight", script, StringComparison.Ordinal);
+        Assert.Contains("const imageEntries = blocks.flatMap", script, StringComparison.Ordinal);
+        Assert.Contains("return imageEntries.length === 1", script, StringComparison.Ordinal);
+        Assert.Contains("otherBlocksHeight", script, StringComparison.Ordinal);
+        Assert.Contains("currentImage.naturalWidth", script, StringComparison.Ordinal);
+        Assert.Contains("currentImage.naturalHeight", script, StringComparison.Ordinal);
+        Assert.Contains("availableWidth / currentImage.naturalWidth", script, StringComparison.Ordinal);
+        Assert.Contains("availableHeight / currentImage.naturalHeight", script, StringComparison.Ordinal);
         Assert.Contains(
-            "image.style.setProperty(\"width\", `${targetWidth}px`, \"important\");",
+            "currentImage.style.setProperty(\"width\", `${targetWidth}px`, \"important\");",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "image.style.setProperty(\"height\", `${targetHeight}px`, \"important\");",
+            "currentImage.style.setProperty(\"height\", `${targetHeight}px`, \"important\");",
             script,
             StringComparison.Ordinal);
         Assert.Contains("MutationObserver", script, StringComparison.Ordinal);
