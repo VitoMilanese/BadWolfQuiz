@@ -13,11 +13,11 @@
         "SubmitMinimumFinalWager",
         "LockFinalWagers",
         "SubmitEmptyFinalAnswer",
-        "LockFinalAnswers"
+        "LockFinalAnswers",
+        "CompleteFinalQuestion"
     ]);
     const feedbackOnlyHandlers = new Set([
-        "JudgeFinalAnswer",
-        "CompleteFinalQuestion"
+        "JudgeFinalAnswer"
     ]);
     const busyDelayMilliseconds = 180;
     const busySafetyMilliseconds = 15000;

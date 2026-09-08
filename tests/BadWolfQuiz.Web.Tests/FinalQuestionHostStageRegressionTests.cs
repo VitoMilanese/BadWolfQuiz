@@ -27,6 +27,10 @@ public sealed class FinalQuestionHostStageRegressionTests
             "wwwroot",
             "css",
             "final-question-host-answer-space.css"));
+        var busyStyles = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "busy-indicators.css"));
         var responsiveness = File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
@@ -49,7 +53,7 @@ public sealed class FinalQuestionHostStageRegressionTests
             helper,
             StringComparison.Ordinal);
         Assert.Contains(
-            "final-question-host-stage.css?v=3",
+            "final-question-host-stage.css?v=4",
             helper,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -57,7 +61,7 @@ public sealed class FinalQuestionHostStageRegressionTests
             helper,
             StringComparison.Ordinal);
         Assert.Contains(
-            "final-question-host-responsiveness.js?v=2",
+            "final-question-host-responsiveness.js?v=3",
             helper,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
@@ -95,7 +99,11 @@ public sealed class FinalQuestionHostStageRegressionTests
             styles,
             StringComparison.Ordinal);
         Assert.Contains(
-            "[data-game-status=\"finaljudging\"] .answer-presentation",
+            ".final-question-host .answer-presentation {",
+            styles,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            ".final-question-host[data-game-status=\"finaljudging\"] .answer-presentation {",
             styles,
             StringComparison.Ordinal);
         Assert.Contains("max-width: none;", styles, StringComparison.Ordinal);
@@ -114,6 +122,34 @@ public sealed class FinalQuestionHostStageRegressionTests
         Assert.Contains("display: none;", answerSpaceStyles, StringComparison.Ordinal);
         Assert.Contains("display: block;", answerSpaceStyles, StringComparison.Ordinal);
         Assert.Contains("text-transform: uppercase;", answerSpaceStyles, StringComparison.Ordinal);
+
+        // These imports live in the persistent <head> stylesheet. The gameplay
+        // view can therefore replace its own asset links without flashing the
+        // unstyled narrow Final Answer layout behind the busy overlay.
+        Assert.Contains(
+            "@import url(\"./final-question-host-stage.css?v=4\");",
+            busyStyles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "@import url(\"./final-question-host-answer-space.css?v=2\");",
+            busyStyles,
+            StringComparison.Ordinal);
+
+        // GameStatusChanged can update the persistent host shell to Completed
+        // before the Final Answer DOM has been replaced. Keep the old answer
+        // panel in its answer geometry during that handoff instead of allowing
+        // completed-podium rules to narrow it for one paint.
+        Assert.Contains(
+            ".final-question-host[data-game-status=\"completed\"]",
+            busyStyles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".final-question-panel:has(> .answer-presentation)",
+            busyStyles,
+            StringComparison.Ordinal);
+        Assert.Contains("display: flex;", busyStyles, StringComparison.Ordinal);
+        Assert.Contains("justify-items: normal;", busyStyles, StringComparison.Ordinal);
+        Assert.Contains("content: none;", busyStyles, StringComparison.Ordinal);
 
         Assert.Contains(
             "final-judging-list",
@@ -149,7 +185,11 @@ public sealed class FinalQuestionHostStageRegressionTests
             responsiveness,
             StringComparison.Ordinal);
         Assert.Contains(
-            "JudgeFinalAnswer",
+            "\"LockFinalAnswers\",\n        \"CompleteFinalQuestion\"",
+            responsiveness,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const feedbackOnlyHandlers = new Set([\n        \"JudgeFinalAnswer\"\n    ]);",
             responsiveness,
             StringComparison.Ordinal);
         Assert.Contains(

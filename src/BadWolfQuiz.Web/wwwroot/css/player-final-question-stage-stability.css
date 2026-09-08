@@ -1,0 +1,35 @@
+/*
+ * Final Question hides the regular player settings from the visible stage, but
+ * contributor-frame runtime still measures the avatar/media subtree on Player/Lobby.
+ * Keeping that subtree laid out off-screen avoids feeding zero-sized hidden media
+ * into its ResizeObserver/mutation-observer loop while preserving the existing
+ * player settings DOM for the core lobby script.
+ */
+.player-lobby:is(
+    [data-final-status="finalwagering"],
+    [data-final-status="finalanswering"],
+    [data-final-status="finaljudging"],
+    [data-final-status="completed"]) > .player-media-settings {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -10000px !important;
+    width: 360px !important;
+    max-width: 360px !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: visible !important;
+}
+
+.player-lobby:is(
+    [data-final-status="finalwagering"],
+    [data-final-status="finalanswering"],
+    [data-final-status="finaljudging"],
+    [data-final-status="completed"]) > .player-media-settings * {
+    pointer-events: none !important;
+}

@@ -218,8 +218,11 @@ body.gameplay-layout:has(.host-game-board.final-question-host) .host-game-board.
     font-weight: 850;
 }
 
-/* Canonical Final Answer uses the same full-stage, transparent treatment. */
-.final-question-host[data-game-status="finaljudging"] .answer-presentation {
+/* Canonical Final Answer remains full-stage while the game status handoff to
+ * Completed happens. The answer element itself is the stable visual contract;
+ * tying these rules to data-game-status caused the layout to collapse for one
+ * frame before the completed markup replaced it. */
+.final-question-host .answer-presentation {
     flex: 1 1 auto;
     width: 100%;
     max-width: none;
@@ -234,7 +237,7 @@ body.gameplay-layout:has(.host-game-board.final-question-host) .host-game-board.
     backdrop-filter: none !important;
 }
 
-.final-question-host[data-game-status="finaljudging"] .answer-presentation > .eyebrow {
+.final-question-host .answer-presentation > .eyebrow {
     color: var(--gold);
     letter-spacing: .2em;
     text-transform: uppercase;
@@ -251,7 +254,7 @@ body.gameplay-layout:has(.host-game-board.final-question-host) .host-game-board.
 
     .final-question-host[data-game-status="finalanswering"] .question-presentation,
     .final-question-host[data-game-status="finaljudging"] .final-player-answer-presentation,
-    .final-question-host[data-game-status="finaljudging"] .answer-presentation {
+    .final-question-host .answer-presentation {
         padding: 10px;
         border-radius: 0;
     }
