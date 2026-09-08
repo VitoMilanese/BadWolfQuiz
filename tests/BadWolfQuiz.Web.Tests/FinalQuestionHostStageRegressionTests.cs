@@ -31,10 +31,10 @@ public sealed class FinalQuestionHostStageRegressionTests
             "wwwroot",
             "css",
             "busy-indicators.css"));
-        var responsiveness = File.ReadAllText(FindWebFile(
+        var responsiveness = NormalizeLineEndings(File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
-            "final-question-host-responsiveness.js"));
+            "final-question-host-responsiveness.js")));
 
         Assert.Contains(
             "FinalQuestionHostStageAssetsTagHelper",
@@ -217,6 +217,10 @@ public sealed class FinalQuestionHostStageRegressionTests
             responsiveness,
             StringComparison.Ordinal);
     }
+
+    private static string NormalizeLineEndings(string content) =>
+        content.Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Replace('\r', '\n');
 
     private static string FindWebFile(params string[] parts)
     {
