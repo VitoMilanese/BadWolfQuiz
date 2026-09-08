@@ -154,6 +154,8 @@
 </section>
 
 @section Scripts {
+    <script src="~/js/answer-key-image-fit.js" asp-append-version="true"></script>
+
     <script>
         (() => {
             const page = document.querySelector(".answer-key-page");
@@ -218,70 +220,33 @@
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
                 .build();
-            const finalQuestionStatuses = new Set([
-                "finalwagering",
-                "finalanswering",
-                "finaljudging"
-            ]);
-            const renderedQuestionId = Number.parseInt(
-                page.dataset.sourceQuestionId ?? "",
-                10);
-            let currentStatus = (page.dataset.gameStatus ?? "").toLowerCase();
-            let currentQuestionId = Number.isInteger(renderedQuestionId)
-                ? renderedQuestionId
-                : null;
-            let reloadRequested = false;
 
-            const requestReload = () => {
-                if (reloadRequested) {
+            connection.on("GameStatusChanged", (gameCode, status) => {
+                if (gameCode !== page.dataset.gameCode) {
                     return;
                 }
 
-                reloadRequested = true;
+                page.dataset.gameStatus = status?.toString().toLowerCase() ?? "";
                 window.location.reload();
-            };
+            });
 
-            connection.on("GameStatusChanged", update => {
-                const nextStatus = typeof update?.status === "string"
-                    ? update.status.toLowerCase()
-                    : null;
-
-                if (!nextStatus) {
+            connection.on("BuzzerStateChanged", (gameCode, sourceQuestionId) => {
+                if (gameCode !== page.dataset.gameCode) {
                     return;
                 }
 
-                const enteredFinalQuestion =
-                    currentStatus === "running" &&
-                    finalQuestionStatuses.has(nextStatus);
-                currentStatus = nextStatus;
-
-                if (enteredFinalQuestion) {
-                    requestReload();
-                }
-            });
-
-            connection.on("BuzzerStateChanged", update => {
-                const nextQuestionId = Number.isInteger(update?.sourceQuestionId)
-                    ? update.sourceQuestionId
-                    : null;
-
-                if (nextQuestionId === null ||
-                    nextQuestionId === currentQuestionId) {
+                const currentSourceQuestionId = page.dataset.sourceQuestionId ?? "";
+                const nextSourceQuestionId = sourceQuestionId?.toString() ?? "";
+                if (currentSourceQuestionId === nextSourceQuestionId) {
                     return;
                 }
 
-                currentQuestionId = nextQuestionId;
-                requestReload();
+                window.location.reload();
             });
 
-            const joinSession = () => connection.invoke(
-                "JoinSession",
-                page.dataset.gameCode);
-
-            connection.onreconnected(joinSession);
-            connection.start()
-                .then(joinSession)
-                .catch(console.error);
+            connection.start().catch(error => {
+                console.error("Answer Key SignalR connection failed.", error);
+            });
         })();
     </script>
 }
