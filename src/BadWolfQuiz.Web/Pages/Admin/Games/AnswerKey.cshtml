@@ -220,33 +220,70 @@
                 .withUrl("/hubs/game")
                 .withAutomaticReconnect()
                 .build();
+            const finalQuestionStatuses = new Set([
+                "finalwagering",
+                "finalanswering",
+                "finaljudging"
+            ]);
+            const renderedQuestionId = Number.parseInt(
+                page.dataset.sourceQuestionId ?? "",
+                10);
+            let currentStatus = (page.dataset.gameStatus ?? "").toLowerCase();
+            let currentQuestionId = Number.isInteger(renderedQuestionId)
+                ? renderedQuestionId
+                : null;
+            let reloadRequested = false;
 
-            connection.on("GameStatusChanged", (gameCode, status) => {
-                if (gameCode !== page.dataset.gameCode) {
+            const requestReload = () => {
+                if (reloadRequested) {
                     return;
                 }
 
-                page.dataset.gameStatus = status?.toString().toLowerCase() ?? "";
+                reloadRequested = true;
                 window.location.reload();
-            });
+            };
 
-            connection.on("BuzzerStateChanged", (gameCode, sourceQuestionId) => {
-                if (gameCode !== page.dataset.gameCode) {
+            connection.on("GameStatusChanged", update => {
+                const nextStatus = typeof update?.status === "string"
+                    ? update.status.toLowerCase()
+                    : null;
+
+                if (!nextStatus) {
                     return;
                 }
 
-                const currentSourceQuestionId = page.dataset.sourceQuestionId ?? "";
-                const nextSourceQuestionId = sourceQuestionId?.toString() ?? "";
-                if (currentSourceQuestionId === nextSourceQuestionId) {
+                const enteredFinalQuestion =
+                    currentStatus === "running" &&
+                    finalQuestionStatuses.has(nextStatus);
+                currentStatus = nextStatus;
+
+                if (enteredFinalQuestion) {
+                    requestReload();
+                }
+            });
+
+            connection.on("BuzzerStateChanged", update => {
+                const nextQuestionId = Number.isInteger(update?.sourceQuestionId)
+                    ? update.sourceQuestionId
+                    : null;
+
+                if (nextQuestionId === null ||
+                    nextQuestionId === currentQuestionId) {
                     return;
                 }
 
-                window.location.reload();
+                currentQuestionId = nextQuestionId;
+                requestReload();
             });
 
-            connection.start().catch(error => {
-                console.error("Answer Key SignalR connection failed.", error);
-            });
+            const joinSession = () => connection.invoke(
+                "JoinSession",
+                page.dataset.gameCode);
+
+            connection.onreconnected(joinSession);
+            connection.start()
+                .then(joinSession)
+                .catch(console.error);
         })();
     </script>
 }
