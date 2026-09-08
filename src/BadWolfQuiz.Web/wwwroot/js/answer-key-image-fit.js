@@ -33,9 +33,14 @@
         image.removeAttribute("data-answer-key-image-fitted");
     };
 
-    const resolvePixelLength = value => {
-        const parsed = Number.parseFloat(value);
-        return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
+    const resolvePixelLength = (value, fallback) => {
+        const match = /^(-?\d+(?:\.\d+)?)px$/i.exec(value?.trim() ?? "");
+        if (!match) {
+            return fallback;
+        }
+
+        const parsed = Number.parseFloat(match[1]);
+        return Number.isFinite(parsed) ? parsed : fallback;
     };
 
     const getElementHeight = element =>
@@ -67,27 +72,32 @@
         clearFit(currentImage);
 
         const containerStyle = window.getComputedStyle(container);
-        const containerGap = resolvePixelLength(containerStyle.rowGap || containerStyle.gap);
+        const containerGap = resolvePixelLength(
+            containerStyle.rowGap || containerStyle.gap,
+            0);
         const otherBlocksHeight = blocks
             .filter(candidate => candidate !== block)
             .reduce((sum, candidate) => sum + getElementHeight(candidate), 0);
-        const containerGapHeight = Number.isFinite(containerGap)
-            ? Math.max(0, blocks.length - 1) * containerGap
-            : 0;
+        const containerGapHeight = Math.max(0, blocks.length - 1) * containerGap;
 
         const blockStyle = window.getComputedStyle(block);
-        const blockGap = resolvePixelLength(blockStyle.rowGap || blockStyle.gap);
+        const blockGap = resolvePixelLength(
+            blockStyle.rowGap || blockStyle.gap,
+            0);
         const imageSiblings = Array.from(block.children).filter(child => child !== currentImage);
         const imageSiblingsHeight = imageSiblings.reduce(
             (sum, sibling) => sum + getElementHeight(sibling),
             0);
-        const blockGapHeight = Number.isFinite(blockGap)
-            ? Math.max(0, block.children.length - 1) * blockGap
-            : 0;
+        const blockGapHeight = Math.max(0, block.children.length - 1) * blockGap;
 
         const imageStyle = window.getComputedStyle(currentImage);
-        const cssMaxWidth = resolvePixelLength(imageStyle.maxWidth);
-        const cssMaxHeight = resolvePixelLength(imageStyle.maxHeight);
+        const responsiveHeightFraction = window.matchMedia("(max-width: 720px)").matches
+            ? 0.62
+            : 0.68;
+        const cssMaxWidth = resolvePixelLength(imageStyle.maxWidth, 1180);
+        const cssMaxHeight = resolvePixelLength(
+            imageStyle.maxHeight,
+            Math.max(1, window.innerHeight * responsiveHeightFraction));
         const availableWidth = Math.max(
             1,
             Math.min(container.clientWidth, block.clientWidth || container.clientWidth, cssMaxWidth));
