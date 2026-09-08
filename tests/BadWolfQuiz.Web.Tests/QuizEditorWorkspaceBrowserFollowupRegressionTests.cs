@@ -87,6 +87,7 @@ public sealed class QuizEditorWorkspaceBrowserFollowupRegressionTests
         Assert.Contains("body[data-quiz-editor-workspace=\"description\"] .question-preview-dialog", css, StringComparison.Ordinal);
         Assert.Contains("body[data-quiz-editor-workspace=\"final\"] .question-preview-dialog", css, StringComparison.Ordinal);
         Assert.Contains("body[data-quiz-editor-workspace] #question-preview-content", css, StringComparison.Ordinal);
+        Assert.Contains("> .game-content-block:not(.all-player-answer-option)", css, StringComparison.Ordinal);
         Assert.Contains("body[data-quiz-editor-workspace] .question-preview-media", css, StringComparison.Ordinal);
         Assert.Contains("BAD WOLF QUIZ", css, StringComparison.Ordinal);
         Assert.Contains("height: min(54vh, 620px) !important;", css, StringComparison.Ordinal);
