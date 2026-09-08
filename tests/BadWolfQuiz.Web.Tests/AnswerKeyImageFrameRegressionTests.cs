@@ -41,6 +41,38 @@ public sealed class AnswerKeyImageFrameRegressionTests
         Assert.Contains("0 0 0 1px", frameCss, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Single_image_is_scaled_up_to_the_available_stage_without_touching_multi_block_layout()
+    {
+        var page = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Admin",
+            "Games",
+            "AnswerKey.cshtml"));
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "answer-key-image-fit.js"));
+
+        Assert.Contains("~/js/answer-key-image-fit.js", page, StringComparison.Ordinal);
+        Assert.Contains("if (blocks.length !== 1)", script, StringComparison.Ordinal);
+        Assert.Contains("image.naturalWidth", script, StringComparison.Ordinal);
+        Assert.Contains("image.naturalHeight", script, StringComparison.Ordinal);
+        Assert.Contains("availableWidth / image.naturalWidth", script, StringComparison.Ordinal);
+        Assert.Contains("availableHeight / image.naturalHeight", script, StringComparison.Ordinal);
+        Assert.Contains(
+            "image.style.setProperty(\"width\", `${targetWidth}px`, \"important\");",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "image.style.setProperty(\"height\", `${targetHeight}px`, \"important\");",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains("MutationObserver", script, StringComparison.Ordinal);
+        Assert.Contains("ResizeObserver", script, StringComparison.Ordinal);
+        Assert.Contains("attributeFilter: [\"hidden\"]", script, StringComparison.Ordinal);
+    }
+
     private static string FindWebFile(params string[] parts)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
