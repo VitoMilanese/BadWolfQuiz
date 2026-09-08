@@ -12,7 +12,7 @@
     width: auto;
     height: auto;
     max-width: min(1180px, 100%);
-    background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+    background: transparent;
     box-shadow:
         0 0 0 1px color-mix(in srgb, var(--text) 8%, var(--line)),
         0 24px 64px rgb(0 0 0 / 34%);
