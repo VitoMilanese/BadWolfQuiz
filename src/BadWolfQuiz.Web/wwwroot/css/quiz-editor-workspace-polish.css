@@ -1,0 +1,140 @@
+/* Final browser-review polish for the redesigned quiz editor workspace. */
+
+/* Keep the reset control visually stable across its reload-based reset. */
+body[data-quiz-editor-workspace] .editor-actions
+    > :is(#question-editor-back-link, #final-question-editor-back-link, #description-editor-back):not(:has(+ [data-editor-reset])) {
+    position: relative;
+    margin-right: 48px;
+}
+
+body[data-quiz-editor-workspace] .editor-actions
+    > :is(#question-editor-back-link, #final-question-editor-back-link, #description-editor-back):not(:has(+ [data-editor-reset]))::after {
+    content: "↻";
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 10px);
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--panel) 88%, transparent);
+    color: var(--text);
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* The delete action is a red danger button; its icon follows normal icon color. */
+body[data-quiz-editor-workspace="board"]
+    .question-card-actions.has-question-copy .js-question-delete {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    border-color: #ff5364 !important;
+    background: #b42336 !important;
+    color: var(--text) !important;
+    font-size: 0;
+}
+
+body[data-quiz-editor-workspace="board"]
+    .question-card-actions.has-question-copy .js-question-delete:hover,
+body[data-quiz-editor-workspace="board"]
+    .question-card-actions.has-question-copy .js-question-delete:focus-visible {
+    border-color: #ff8793 !important;
+    background: #d02d43 !important;
+    color: var(--text) !important;
+}
+
+body[data-quiz-editor-workspace="board"]
+    .question-card-actions.has-question-copy .js-question-delete::before {
+    width: 17px;
+    height: 19px;
+    margin: 0;
+    background-color: currentColor;
+}
+
+/* Tabs already tell the editor which section is active. */
+body[data-quiz-editor-workspace="question"] .question-editor > h2,
+body[data-quiz-editor-workspace="final"] .question-editor > h2 {
+    display: none;
+}
+
+/* Regular question/answer preview should read as gameplay, not as an editor modal. */
+body[data-quiz-editor-workspace="question"] .question-preview-dialog {
+    background:
+        repeating-linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--text) 2.4%, transparent) 0 1px,
+            transparent 1px 20px),
+        radial-gradient(circle at 88% 8%, color-mix(in srgb, var(--red-bright) 13%, transparent), transparent 30rem),
+        radial-gradient(circle at 12% 88%, color-mix(in srgb, var(--gold) 7%, transparent), transparent 34rem),
+        linear-gradient(160deg, color-mix(in srgb, var(--panel-2) 72%, var(--bg)), color-mix(in srgb, var(--bg) 96%, #000) 64%);
+}
+
+body[data-quiz-editor-workspace="question"] .question-preview-screen {
+    grid-template-rows: minmax(0, 1fr);
+    align-content: stretch;
+    padding: clamp(24px, 3.4vw, 52px) clamp(26px, 4.2vw, 64px);
+}
+
+body[data-quiz-editor-workspace="question"] .question-preview-title {
+    display: none;
+}
+
+body[data-quiz-editor-workspace="question"] .question-preview-content {
+    min-height: 0;
+    align-self: stretch;
+    align-content: safe center;
+    gap: clamp(20px, 3vw, 38px);
+    padding: clamp(12px, 1.8vw, 24px);
+    overflow: auto;
+}
+
+body[data-quiz-editor-workspace="question"] .question-preview-text {
+    width: min(1500px, 100%);
+    margin-inline: auto;
+    font-size: clamp(2rem, 4.5vw, 4.8rem);
+    font-weight: 850;
+    line-height: 1.13;
+    text-shadow: 0 12px 34px rgb(0 0 0 / 34%);
+}
+
+body[data-quiz-editor-workspace="question"] .question-preview-media {
+    gap: clamp(10px, 1.6vh, 18px);
+}
+
+body[data-quiz-editor-workspace="question"] .question-preview-caption {
+    width: min(1300px, 100%);
+    margin-inline: auto;
+    color: var(--muted);
+    font-size: clamp(1.26rem, 3.15vw, 2.8rem);
+    line-height: 1.18;
+}
+
+body[data-quiz-editor-workspace="question"]
+    :is(.question-preview-image, .question-preview-video) {
+    max-height: min(68vh, 760px);
+    border-radius: clamp(12px, 1.2vw, 18px);
+    box-shadow: 0 22px 54px rgb(0 0 0 / 28%);
+}
+
+@media (max-width: 760px) {
+    body[data-quiz-editor-workspace="question"] .question-preview-screen {
+        padding: 52px 14px 14px;
+    }
+
+    body[data-quiz-editor-workspace="question"] .question-preview-text {
+        font-size: clamp(1.7rem, 8.5vw, 3.2rem);
+    }
+}
