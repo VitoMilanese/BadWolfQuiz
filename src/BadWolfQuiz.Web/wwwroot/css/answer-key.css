@@ -1,5 +1,6 @@
 body:has(.answer-key-page) {
     overflow: hidden;
+    background: var(--bg);
 }
 
 body:has(.answer-key-page) .page-shell {
@@ -9,29 +10,54 @@ body:has(.answer-key-page) .page-shell {
     min-height: 0;
     padding: 0;
     overflow: hidden;
+    background: var(--bg);
 }
 
 .answer-key-header-context {
     width: 100%;
     justify-content: center;
-    gap: 0.6rem;
+    gap: 0.75rem;
 }
 
 .answer-key-header-context h2 {
     max-width: none;
     margin: 0;
+    color: var(--text);
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 850;
+    letter-spacing: 0.025em;
     text-align: center;
 }
 
 .answer-key-visibility-toggle {
     display: inline-flex;
-    flex: 0 0 40px;
+    flex: 0 0 44px;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    min-width: 40px;
-    height: 40px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
     padding: 0;
+    border-color: color-mix(in srgb, var(--gold) 30%, var(--line));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--panel-2) 92%, transparent);
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent),
+        0 8px 22px rgb(0 0 0 / 22%);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.answer-key-visibility-toggle:hover,
+.answer-key-visibility-toggle:focus-visible {
+    border-color: color-mix(in srgb, var(--gold) 66%, var(--line));
+    background: color-mix(in srgb, var(--gold) 10%, var(--panel-2));
+}
+
+.answer-key-visibility-toggle:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--gold) 48%, transparent);
+    outline-offset: 2px;
 }
 
 .answer-key-visibility-icon,
@@ -65,41 +91,146 @@ body:has(.answer-key-page) .page-shell {
 }
 
 .answer-key-page {
-    height: 100%;
-    min-height: 0;
-    gap: 0;
-}
-
-.answer-key-hidden-placeholder {
-    display: flex;
+    position: relative;
+    isolation: isolate;
     box-sizing: border-box;
     width: 100%;
     height: 100%;
     min-height: 0;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.65rem;
-    padding: 1rem;
+    margin: 0;
+    padding: clamp(16px, 2.8vw, 42px);
+    display: grid;
+    place-items: center;
+    gap: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background:
+        repeating-linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--text) 2.4%, transparent) 0 1px,
+            transparent 1px 18px),
+        radial-gradient(
+            circle at 50% 18%,
+            color-mix(in srgb, var(--red-bright) 15%, transparent),
+            transparent 34rem),
+        radial-gradient(
+            circle at 82% 82%,
+            color-mix(in srgb, var(--gold) 9%, transparent),
+            transparent 30rem),
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--panel-2) 76%, #050506),
+            color-mix(in srgb, var(--bg) 94%, #000));
+}
+
+.answer-key-page::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: clamp(-210px, -11vw, -108px);
+    right: clamp(-210px, -10vw, -96px);
+    width: clamp(250px, 30vw, 570px);
+    aspect-ratio: 1;
+    border: 1px solid color-mix(in srgb, var(--red-bright) 23%, transparent);
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 46px color-mix(in srgb, var(--red-bright) 2.5%, transparent),
+        0 0 0 92px color-mix(in srgb, var(--text) 1.6%, transparent);
+    pointer-events: none;
+}
+
+.answer-key-page::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: clamp(-170px, -8vw, -70px);
+    bottom: clamp(-220px, -13vw, -120px);
+    width: clamp(260px, 32vw, 620px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        color-mix(in srgb, var(--gold) 7%, transparent),
+        transparent 67%);
+    pointer-events: none;
+}
+
+.answer-key-hidden-placeholder,
+.answer-key-waiting {
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    width: min(900px, 100%);
+    min-height: min(620px, calc(100dvh - var(--topbar-height, 60px) - 82px));
+    margin: 0;
+    padding: clamp(24px, 4vw, 58px);
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: clamp(12px, 2vh, 22px);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--text);
     text-align: center;
-    opacity: 0.72;
 }
 
 .answer-key-hidden-placeholder[hidden] {
     display: none;
 }
 
+.answer-key-hidden-placeholder::before,
+.answer-key-waiting::before {
+    content: "BAD WOLF QUIZ";
+    display: block;
+    margin-bottom: clamp(4px, 0.8vh, 10px);
+    color: var(--gold);
+    font-size: clamp(0.7rem, 1.5vw, 0.92rem);
+    line-height: 1;
+    font-weight: 850;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    text-shadow: 0 0 18px color-mix(in srgb, var(--gold) 30%, transparent);
+}
+
 .answer-key-hidden-icon {
-    width: clamp(48px, 6vw, 72px);
-    height: clamp(48px, 6vw, 72px);
+    box-sizing: content-box;
+    width: clamp(72px, 8vw, 112px);
+    height: clamp(72px, 8vw, 112px);
+    margin: clamp(4px, 1vh, 10px) 0 clamp(2px, 0.8vh, 8px);
+    padding: clamp(20px, 2.6vw, 34px);
+    border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line));
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--panel) 72%, transparent);
+    color: color-mix(in srgb, var(--gold) 72%, var(--text));
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent),
+        0 0 0 20px color-mix(in srgb, var(--text) 1.8%, transparent),
+        0 24px 60px rgb(0 0 0 / 30%);
 }
 
 .answer-key-hidden-placeholder strong {
-    font-size: clamp(1.05rem, 2vw, 1.45rem);
+    max-width: 860px;
+    color: var(--text);
+    font-size: clamp(2.6rem, 7vw, 6.4rem);
+    line-height: 0.95;
+    font-weight: 950;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    text-shadow:
+        0 14px 34px rgb(0 0 0 / 38%),
+        0 0 28px color-mix(in srgb, var(--red-bright) 12%, transparent);
 }
 
 .answer-key-hidden-placeholder span {
-    font-size: 0.95rem;
+    max-width: 620px;
+    color: var(--muted);
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    line-height: 1.45;
+    font-weight: 700;
+    text-wrap: balance;
 }
 
 .answer-key-content,
@@ -107,46 +238,247 @@ body:has(.answer-key-page) .page-shell {
     width: 100%;
     max-width: none;
     min-height: 0;
-    margin: 0;
     border: 0;
     border-radius: 0;
 }
 
+.answer-key-waiting {
+    width: min(900px, 100%);
+}
+
+.answer-key-waiting p {
+    max-width: 800px;
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(2.4rem, 6.8vw, 6rem);
+    line-height: 0.98;
+    font-weight: 950;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+    text-shadow:
+        0 14px 34px rgb(0 0 0 / 38%),
+        0 0 28px color-mix(in srgb, var(--red-bright) 12%, transparent);
+}
+
 .answer-key-content {
+    position: relative;
+    z-index: 1;
     height: 100%;
-    padding: clamp(12px, 2vw, 24px);
+    margin: 0;
+    padding: clamp(10px, 1.8vw, 24px);
+    background: transparent;
+    box-shadow: none;
+    overflow: hidden;
 }
 
 .answer-key-content[hidden] {
     display: none;
 }
 
-.answer-key-waiting {
-    padding: 1rem;
-}
-
 .answer-key-content.game-content-presentation {
     width: 100%;
     max-width: none;
+    background: transparent;
+    box-shadow: none;
 }
 
-.answer-key-content .game-content-blocks,
+.answer-key-content .game-content-blocks {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: clamp(12px, 2vw, 26px);
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
 .answer-key-content .game-content-block {
     width: 100%;
     max-width: none;
+    min-height: 0;
+    display: grid;
+    justify-items: center;
+    gap: clamp(8px, 1.3vh, 14px);
 }
 
 .answer-key-content .game-content-text,
 .answer-key-content .game-content-caption {
+    width: min(1100px, 100%);
     max-width: none;
+    margin-inline: auto;
+    text-align: center;
+    text-wrap: balance;
 }
 
-.answer-key-content .game-content-blocks {
-    gap: clamp(12px, 2vw, 24px);
+.answer-key-content .game-content-text {
+    color: var(--text);
+    font-size: clamp(1.8rem, 4.8vw, 5.2rem);
+    line-height: 1.06;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-shadow: 0 10px 28px rgb(0 0 0 / 32%);
+}
+
+.answer-key-content .game-content-caption {
+    color: var(--muted);
+    font-size: clamp(1rem, 2vw, 1.7rem);
+    line-height: 1.35;
+    font-weight: 700;
 }
 
 .answer-key-content .game-content-image,
 .answer-key-content .game-content-video,
 .answer-key-content .youtube-placeholder {
-    max-width: 100%;
+    width: auto;
+    max-width: min(1180px, 100%);
+    max-height: min(68dvh, calc(100dvh - var(--topbar-height, 60px) - 150px));
+    object-fit: contain;
+    border-radius: 18px;
+    box-shadow: 0 24px 64px rgb(0 0 0 / 34%);
+}
+
+.answer-key-content .youtube-placeholder {
+    width: min(1180px, 100%);
+}
+
+.answer-key-content .game-content-audio-shell {
+    box-sizing: border-box;
+    width: min(780px, 100%);
+    max-width: none;
+    padding: clamp(12px, 1.8vw, 18px);
+    border: 1px solid color-mix(in srgb, var(--gold) 24%, var(--line));
+    border-radius: 18px;
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--panel) 94%, transparent),
+        color-mix(in srgb, var(--panel-2) 94%, transparent));
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent),
+        0 20px 48px rgb(0 0 0 / 28%);
+}
+
+.answer-key-content .game-content-audio {
+    width: 100%;
+    max-width: none;
+}
+
+@media (max-width: 720px) {
+    body:has(.answer-key-page) .page-shell {
+        height: calc(100dvh - var(--topbar-height, 60px));
+    }
+
+    .answer-key-header-context {
+        gap: 0.5rem;
+    }
+
+    .answer-key-header-context h2 {
+        font-size: 0.98rem;
+    }
+
+    .answer-key-page {
+        padding: 12px;
+    }
+
+    .answer-key-page::before {
+        top: -150px;
+        right: -170px;
+        width: 330px;
+    }
+
+    .answer-key-hidden-placeholder,
+    .answer-key-waiting {
+        min-height: 0;
+        padding: 20px 8px;
+        gap: 12px;
+    }
+
+    .answer-key-hidden-icon {
+        width: clamp(58px, 18vw, 82px);
+        height: clamp(58px, 18vw, 82px);
+        padding: 18px;
+        box-shadow:
+            inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent),
+            0 0 0 12px color-mix(in srgb, var(--text) 1.8%, transparent),
+            0 18px 40px rgb(0 0 0 / 28%);
+    }
+
+    .answer-key-hidden-placeholder strong,
+    .answer-key-waiting p {
+        font-size: clamp(2.25rem, 12vw, 4.5rem);
+    }
+
+    .answer-key-content {
+        padding: 4px;
+    }
+
+    .answer-key-content .game-content-blocks {
+        gap: 12px;
+    }
+
+    .answer-key-content .game-content-text {
+        font-size: clamp(1.55rem, 8vw, 3.25rem);
+    }
+
+    .answer-key-content .game-content-image,
+    .answer-key-content .game-content-video,
+    .answer-key-content .youtube-placeholder {
+        max-height: min(62dvh, calc(100dvh - var(--topbar-height, 60px) - 120px));
+        border-radius: 14px;
+    }
+
+    .answer-key-content .game-content-audio-shell {
+        padding: 10px;
+        border-radius: 14px;
+    }
+}
+
+@media (max-height: 720px) and (min-width: 721px) {
+    .answer-key-page {
+        padding-block: 10px;
+    }
+
+    .answer-key-hidden-placeholder,
+    .answer-key-waiting {
+        min-height: 0;
+        padding-block: 12px;
+        gap: 10px;
+    }
+
+    .answer-key-hidden-icon {
+        width: 64px;
+        height: 64px;
+        padding: 16px;
+        margin-block: 2px;
+    }
+
+    .answer-key-hidden-placeholder strong,
+    .answer-key-waiting p {
+        font-size: clamp(2.2rem, 8vh, 4.5rem);
+    }
+
+    .answer-key-hidden-placeholder span {
+        font-size: 0.95rem;
+    }
+
+    .answer-key-content .game-content-image,
+    .answer-key-content .game-content-video,
+    .answer-key-content .youtube-placeholder {
+        max-height: calc(100dvh - var(--topbar-height, 60px) - 76px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .answer-key-page *,
+    .answer-key-page *::before,
+    .answer-key-page *::after,
+    .answer-key-header-context * {
+        scroll-behavior: auto !important;
+        transition-duration: 0s !important;
+        animation-duration: 0s !important;
+    }
 }
