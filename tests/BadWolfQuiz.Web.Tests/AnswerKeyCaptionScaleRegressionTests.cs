@@ -5,14 +5,14 @@ public sealed class AnswerKeyCaptionScaleRegressionTests
     [Fact]
     public void Answer_key_caption_scale_matches_regular_gameplay_caption_scale()
     {
-        var gameplayCss = File.ReadAllText(FindWebFile(
+        var gameplayCss = NormalizeLineEndings(File.ReadAllText(FindWebFile(
             "wwwroot",
             "css",
-            "busy-indicators.css"));
-        var answerKeyCss = File.ReadAllText(FindWebFile(
+            "busy-indicators.css")));
+        var answerKeyCss = NormalizeLineEndings(File.ReadAllText(FindWebFile(
             "wwwroot",
             "css",
-            "answer-key-image-frame.css"));
+            "answer-key-image-frame.css")));
 
         const string captionScale = "font-size: clamp(1.26rem, 3.15vw, 2.8rem);";
 
@@ -25,6 +25,10 @@ public sealed class AnswerKeyCaptionScaleRegressionTests
             answerKeyCss,
             StringComparison.Ordinal);
     }
+
+    private static string NormalizeLineEndings(string content) =>
+        content.Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Replace('\r', '\n');
 
     private static string FindWebFile(params string[] parts)
     {
