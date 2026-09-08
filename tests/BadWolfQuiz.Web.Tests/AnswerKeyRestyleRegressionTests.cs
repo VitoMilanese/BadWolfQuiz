@@ -33,6 +33,7 @@ public sealed class AnswerKeyRestyleRegressionTests
         Assert.Contains("overscroll-behavior: contain;", css, StringComparison.Ordinal);
         Assert.Contains(".answer-key-page::before", css, StringComparison.Ordinal);
         Assert.Contains(".answer-key-page::after", css, StringComparison.Ordinal);
+        Assert.DoesNotContain("overflow-y: auto;", css, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -87,6 +88,7 @@ public sealed class AnswerKeyRestyleRegressionTests
         Assert.Contains(".answer-key-content .game-content-blocks {", css, StringComparison.Ordinal);
         Assert.Contains("align-content: center;", css, StringComparison.Ordinal);
         Assert.Contains("justify-items: center;", css, StringComparison.Ordinal);
+        Assert.Contains("overflow: auto;", css, StringComparison.Ordinal);
         Assert.Contains(".answer-key-content .game-content-image,", css, StringComparison.Ordinal);
         Assert.Contains("max-height: min(68dvh", css, StringComparison.Ordinal);
         Assert.Contains("object-fit: contain;", css, StringComparison.Ordinal);
