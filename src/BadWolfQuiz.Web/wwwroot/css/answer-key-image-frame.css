@@ -17,3 +17,8 @@
         0 0 0 1px color-mix(in srgb, var(--text) 8%, var(--line)),
         0 24px 64px rgb(0 0 0 / 34%);
 }
+
+/* Match the caption scale used by regular in-game question and answer content. */
+.answer-key-content .game-content-caption {
+    font-size: clamp(1.26rem, 3.15vw, 2.8rem);
+}
