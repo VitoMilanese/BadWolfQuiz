@@ -18,6 +18,35 @@ public sealed class PlayerBuzzerTouchRegressionTests
     }
 
     [Fact]
+    public void Gameplay_blocks_double_tap_zoom_without_disabling_pinch_zoom()
+    {
+        var root = FindRepositoryRoot();
+        var css = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "css",
+            "busy-indicators.css"));
+        var layout = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Shared",
+            "_Layout.cshtml"));
+
+        Assert.Contains("body.gameplay-layout {", css, StringComparison.Ordinal);
+        Assert.Contains("touch-action: manipulation;", css, StringComparison.Ordinal);
+        Assert.Contains(
+            "content=\"width=device-width, initial-scale=1.0\"",
+            layout,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain("user-scalable=no", layout, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("maximum-scale=1", layout, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Player_buzzer_uses_available_mobile_panel_space()
     {
         var root = FindRepositoryRoot();

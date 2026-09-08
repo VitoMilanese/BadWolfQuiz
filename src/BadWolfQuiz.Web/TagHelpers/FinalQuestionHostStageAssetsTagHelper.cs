@@ -13,8 +13,8 @@ public sealed class FinalQuestionHostStageAssetsTagHelper : TagHelper
         // responsiveness script initializes only once and then survives view
         // replacements through its document-level listeners.
         output.PreContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/final-question-host-stage.css?v=3\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/final-question-host-stage.css?v=4\" />" +
             "<link rel=\"stylesheet\" href=\"/css/final-question-host-answer-space.css?v=2\" />" +
-            "<script src=\"/js/final-question-host-responsiveness.js?v=2\"></script>");
+            "<script src=\"/js/final-question-host-responsiveness.js?v=3\"></script>");
     }
 }

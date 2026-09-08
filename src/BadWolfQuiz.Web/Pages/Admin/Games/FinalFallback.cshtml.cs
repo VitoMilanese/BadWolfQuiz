@@ -1,8 +1,10 @@
 using BadWolfQuiz.Game.Runtime;
+using BadWolfQuiz.Web.Hubs;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Localization;
 
 namespace BadWolfQuiz.Web.Pages.Admin.Games;
@@ -10,12 +12,14 @@ namespace BadWolfQuiz.Web.Pages.Admin.Games;
 public sealed class FinalFallbackModel(
     GameSessionRegistry sessionRegistry,
     CurrentHost currentHost,
+    IHubContext<GameHub> gameHub,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
-    public IActionResult OnPost(
+    public async Task<IActionResult> OnPostAsync(
         Guid gameId,
         Guid playerId,
-        string kind)
+        string kind,
+        CancellationToken cancellationToken)
     {
         var game = sessionRegistry.FindOwned(
             new GameSessionId(gameId),
@@ -32,40 +36,57 @@ public sealed class FinalFallbackModel(
         }
 
         var runtimePlayerId = new GamePlayerId(playerId);
-        var final = game.Session.FinalQuestion;
-        var existingSubmission = final?.Submissions.SingleOrDefault(item =>
-            item.PlayerId == runtimePlayerId);
-        var alreadySubmitted = normalizedKind == "wager"
-            ? existingSubmission?.Wager is not null
-            : existingSubmission?.Answer is not null;
+        bool allSubmitted;
+        var submissionChanged = false;
 
-        if (!alreadySubmitted)
+        lock (game)
         {
-            try
+            var final = game.Session.FinalQuestion;
+            var existingSubmission = final?.Submissions.SingleOrDefault(item =>
+                item.PlayerId == runtimePlayerId);
+            var alreadySubmitted = normalizedKind == "wager"
+                ? existingSubmission?.Wager is not null
+                : existingSubmission?.Answer is not null;
+
+            if (!alreadySubmitted)
             {
-                if (normalizedKind == "wager")
+                try
                 {
-                    sessionRegistry.SubmitMinimumFinalWagerForPlayer(
-                        game.PublicCode,
-                        runtimePlayerId);
+                    if (normalizedKind == "wager")
+                    {
+                        game.Session.SubmitFinalWager(
+                            runtimePlayerId,
+                            FinalQuestion.MinimumWager);
+                    }
+                    else
+                    {
+                        game.Session.SubmitFinalAnswer(runtimePlayerId, "-");
+                    }
+
+                    game.MarkPersistenceChanged();
+                    submissionChanged = true;
                 }
-                else
+                catch (GameRuleViolationException)
                 {
-                    sessionRegistry.SubmitEmptyFinalAnswerForPlayer(
-                        game.PublicCode,
-                        runtimePlayerId);
+                    return Rejected();
                 }
             }
-            catch (GameRuleViolationException)
-            {
-                return Rejected();
-            }
+
+            final = game.Session.FinalQuestion!;
+            allSubmitted = normalizedKind == "wager"
+                ? final.Submissions.All(item => item.Wager is not null)
+                : final.Submissions.All(item => item.Answer is not null);
         }
 
-        final = game.Session.FinalQuestion!;
-        var allSubmitted = normalizedKind == "wager"
-            ? final.Submissions.All(item => item.Wager is not null)
-            : final.Submissions.All(item => item.Answer is not null);
+        if (submissionChanged)
+        {
+            await gameHub.Clients
+                .Group(GameHub.GroupName(game.PublicCode))
+                .SendAsync(
+                    "FinalQuestionPlayerFallbackChanged",
+                    new { playerId = runtimePlayerId.Value },
+                    cancellationToken);
+        }
 
         return new JsonResult(new
         {

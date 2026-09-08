@@ -1,0 +1,501 @@
+/* Player-side Final Question presentation. Keep gameplay contracts in Player/Lobby.cshtml intact. */
+
+/*
+ * The finale is a fixed stage rather than a body :has()-driven layout. The player
+ * page changes timer/warning state while SignalR is connected; keeping expensive
+ * relational selectors and backdrop filters on body made Chrome repeatedly
+ * invalidate the entire document during Final Wagering.
+ */
+.player-lobby:is(
+    [data-final-status="finalwagering"],
+    [data-final-status="finalanswering"],
+    [data-final-status="finaljudging"],
+    [data-final-status="completed"]) {
+    --player-final-line: color-mix(in srgb, var(--gold) 24%, var(--line));
+    --player-final-surface: color-mix(in srgb, var(--panel) 96%, var(--bg));
+    --player-final-surface-strong: color-mix(in srgb, var(--panel-2) 96%, var(--bg));
+    position: fixed;
+    inset: var(--topbar-height, 60px) 0 0;
+    z-index: 20;
+    box-sizing: border-box;
+    width: auto;
+    max-width: none;
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    padding: clamp(18px, 3vw, 44px);
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: clamp(18px, 2.4vh, 28px);
+    border: 0;
+    border-radius: 0;
+    background:
+        repeating-linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--text) 2.5%, transparent) 0 1px,
+            transparent 1px 18px),
+        radial-gradient(circle at 50% 22%, color-mix(in srgb, var(--red-bright) 17%, transparent), transparent 34rem),
+        radial-gradient(circle at 82% 78%, color-mix(in srgb, var(--gold) 9%, transparent), transparent 30rem),
+        linear-gradient(180deg, color-mix(in srgb, var(--panel-2) 76%, #050506), color-mix(in srgb, var(--bg) 92%, #000));
+    box-shadow: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.player-lobby:is(
+    [data-final-status="finalwagering"],
+    [data-final-status="finalanswering"],
+    [data-final-status="finaljudging"],
+    [data-final-status="completed"])::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    width: clamp(240px, 28vw, 560px);
+    aspect-ratio: 1;
+    top: clamp(-210px, -11vw, -105px);
+    right: clamp(-210px, -10vw, -92px);
+    border: 1px solid color-mix(in srgb, var(--red-bright) 23%, transparent);
+    border-radius: 50%;
+    box-shadow:
+        0 0 0 46px color-mix(in srgb, var(--red-bright) 2.5%, transparent),
+        0 0 0 92px color-mix(in srgb, var(--text) 1.7%, transparent);
+    pointer-events: none;
+}
+
+.player-lobby:is(
+    [data-final-status="finalwagering"],
+    [data-final-status="finalanswering"],
+    [data-final-status="finaljudging"],
+    [data-final-status="completed"]) > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Remove the regular waiting-room chrome from the finale stage. */
+.player-lobby:is(
+    [data-final-status="finalwagering"],
+    [data-final-status="finalanswering"],
+    [data-final-status="finaljudging"],
+    [data-final-status="completed"]) > :is(.eyebrow, h1, p, .player-media-settings) {
+    display: none;
+}
+
+.player-lobby:is(
+    [data-final-status="finalwagering"],
+    [data-final-status="finalanswering"],
+    [data-final-status="finaljudging"],
+    [data-final-status="completed"]) > :is(#activity-warning, #rejoin-warning) {
+    position: fixed;
+    z-index: 80;
+    top: calc(var(--topbar-height, 60px) + 10px);
+    left: 50%;
+    width: min(680px, calc(100vw - 24px));
+    margin: 0;
+    translate: -50% 0;
+}
+
+.player-lobby:is(
+    [data-final-status="finalwagering"],
+    [data-final-status="finalanswering"],
+    [data-final-status="finaljudging"],
+    [data-final-status="completed"]) > #game-timer {
+    position: fixed;
+    z-index: 70;
+    top: calc(var(--topbar-height, 60px) + 12px);
+    right: 14px;
+    margin: 0;
+    min-width: 76px;
+    padding: 8px 13px;
+    border: 1px solid var(--player-final-line);
+    border-radius: 999px;
+    background: var(--player-final-surface);
+    box-shadow: 0 12px 28px rgb(0 0 0 / 24%);
+}
+
+#player-final-panel {
+    width: min(920px, 100%);
+    max-width: none;
+    min-height: min(660px, calc(100dvh - var(--topbar-height, 60px) - 72px));
+    margin: 0;
+    padding: clamp(20px, 3.5vw, 52px);
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: clamp(18px, 2.5vh, 30px);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    text-align: center;
+}
+
+#player-final-panel > .eyebrow {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(2.8rem, 7vw, 6.5rem);
+    line-height: .94;
+    font-weight: 950;
+    letter-spacing: -.025em;
+    text-transform: none;
+    text-wrap: balance;
+    text-shadow:
+        0 14px 34px rgb(0 0 0 / 38%),
+        0 0 28px color-mix(in srgb, var(--red-bright) 13%, transparent);
+}
+
+#player-final-panel > .eyebrow::before {
+    content: "BAD WOLF QUIZ";
+    display: block;
+    margin-bottom: clamp(7px, 1vh, 11px);
+    color: var(--gold);
+    font-size: clamp(.68rem, 1.5vw, .9rem);
+    line-height: 1;
+    font-weight: 850;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    text-shadow: 0 0 18px color-mix(in srgb, var(--gold) 30%, transparent);
+}
+
+#player-final-panel > p:not(.eyebrow) {
+    width: min(720px, 100%);
+    margin: 0;
+    padding: clamp(18px, 2.3vw, 28px);
+    border: 1px solid var(--player-final-line);
+    border-radius: 20px;
+    background: linear-gradient(180deg, var(--player-final-surface), var(--player-final-surface-strong));
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent),
+        0 20px 48px rgb(0 0 0 / 26%);
+    color: var(--text);
+    font-size: clamp(1.15rem, 2.2vw, 1.65rem);
+    line-height: 1.4;
+    font-weight: 750;
+    text-wrap: balance;
+}
+
+#player-final-panel > form {
+    margin: 0;
+}
+
+#final-wager-form,
+#final-answer-form {
+    width: min(560px, 100%);
+    padding: clamp(18px, 2.5vw, 28px);
+    display: grid;
+    gap: 14px;
+    border: 1px solid var(--player-final-line);
+    border-radius: 24px;
+    background: linear-gradient(180deg, var(--player-final-surface), var(--player-final-surface-strong));
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent),
+        0 24px 56px rgb(0 0 0 / 30%);
+}
+
+#final-wager-form .wager-display-label,
+#final-answer-form > label {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    color: var(--muted);
+    text-align: left;
+    font-size: .82rem;
+    font-weight: 850;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+#final-wager-form .wager-display {
+    width: 100%;
+    min-height: 76px;
+    padding: 10px 16px;
+    border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--line));
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--bg) 88%, var(--panel));
+    color: var(--text);
+    font-size: clamp(2.4rem, 7vw, 4.4rem);
+    line-height: 1;
+    font-weight: 950;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    box-shadow: inset 0 1px 14px rgb(0 0 0 / 25%);
+}
+
+#final-wager-form .wager-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+}
+
+#final-wager-form .wager-keypad button {
+    min-width: 0;
+    min-height: 54px;
+    padding: 8px;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 14px;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 1.15rem;
+    font-weight: 850;
+    cursor: pointer;
+    transition: transform 110ms ease, border-color 110ms ease, background-color 110ms ease;
+}
+
+#final-wager-form .wager-keypad button:hover {
+    border-color: color-mix(in srgb, var(--red-bright) 56%, var(--line));
+    background: color-mix(in srgb, var(--red) 18%, var(--panel-2));
+}
+
+#final-wager-form .wager-keypad button:active {
+    transform: translateY(1px) scale(.985);
+}
+
+#final-wager-form .wager-keypad .wager-keypad-max {
+    grid-column: 1 / -1;
+    border-color: color-mix(in srgb, var(--gold) 42%, var(--line));
+    color: var(--gold);
+    letter-spacing: .12em;
+}
+
+#final-wager-form .wager-validation {
+    min-height: 1.4em;
+    margin: 0;
+    color: var(--muted);
+    font-size: .92rem;
+    line-height: 1.35;
+    text-align: center;
+}
+
+#final-wager-form .wager-validation.wager-valid {
+    color: var(--gold);
+}
+
+#final-wager-form > .button-primary,
+#final-answer-form > .button-primary {
+    width: 100%;
+    min-height: 54px;
+    margin-top: 2px;
+    font-weight: 850;
+    box-shadow: 0 14px 30px color-mix(in srgb, var(--red) 25%, transparent);
+}
+
+#final-answer-form {
+    width: min(720px, 100%);
+}
+
+#final-answer-form textarea {
+    width: 100%;
+    min-height: clamp(150px, 24dvh, 230px);
+    max-height: 34dvh;
+    padding: 16px 18px;
+    resize: vertical;
+    border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line));
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--bg) 88%, var(--panel));
+    color: var(--text);
+    font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+    line-height: 1.4;
+    box-shadow: inset 0 1px 14px rgb(0 0 0 / 24%);
+}
+
+#final-answer-form textarea:focus,
+#final-wager-form .wager-display:focus {
+    outline: 3px solid color-mix(in srgb, var(--gold) 58%, transparent);
+    outline-offset: 2px;
+}
+
+#final-question-error:not([hidden]) {
+    width: min(680px, 100%);
+    margin: 0;
+}
+
+.player-lobby[data-final-status="finalanswering"] #player-final-panel {
+    gap: clamp(16px, 2.2vh, 24px);
+}
+
+.player-lobby[data-final-status="finaljudging"] #player-final-panel > p:not(.eyebrow) {
+    border-color: color-mix(in srgb, var(--gold) 34%, var(--line));
+}
+
+/* Completed: keep the player's result and rating in one cohesive finale. */
+.player-lobby[data-final-status="completed"]:has(> .quiz-rating-panel) {
+    grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+    align-items: center;
+    justify-content: center;
+    column-gap: clamp(22px, 4vw, 56px);
+}
+
+.player-lobby[data-final-status="completed"] #player-final-panel {
+    width: min(820px, 100%);
+    min-height: 0;
+}
+
+.player-lobby[data-final-status="completed"] > .quiz-rating-panel {
+    width: min(520px, 100%);
+    margin: 0;
+    padding: clamp(20px, 2.6vw, 30px);
+    border: 1px solid var(--player-final-line);
+    border-radius: 22px;
+    background: linear-gradient(180deg, var(--player-final-surface), var(--player-final-surface-strong));
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent),
+        0 22px 50px rgb(0 0 0 / 28%);
+}
+
+.player-lobby[data-final-status="completed"] > .quiz-rating-panel > h2 {
+    margin-top: 0;
+    color: var(--text);
+    font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+}
+
+.player-lobby[data-final-status="completed"] > .quiz-rating-panel > p {
+    color: var(--muted);
+}
+
+/*
+ * The generic peer-rating controller normally supplies these mobile-safe star
+ * hit targets. Final Question intentionally suppresses that controller, so keep
+ * the same touch contract locally for the completed-player quiz rating.
+ */
+.player-lobby[data-final-status="completed"] .star-rating label:not(.zero-rating) {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    flex: 0 0 auto;
+    min-inline-size: 44px;
+    min-block-size: 44px;
+    place-items: center;
+    padding: .1rem;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.player-lobby[data-final-status="completed"] .star-rating input[type="radio"] {
+    pointer-events: none;
+}
+
+@media (max-width: 860px) {
+    .player-lobby[data-final-status="completed"]:has(> .quiz-rating-panel) {
+        grid-template-columns: 1fr;
+        align-content: center;
+    }
+}
+
+@media (max-width: 620px) {
+    .player-lobby:is(
+        [data-final-status="finalwagering"],
+        [data-final-status="finalanswering"],
+        [data-final-status="finaljudging"],
+        [data-final-status="completed"]) {
+        inset: 0;
+        padding: 12px;
+    }
+
+    #player-final-panel {
+        width: 100%;
+        min-height: 0;
+        padding: clamp(20px, 6vw, 30px) 4px;
+        gap: 16px;
+    }
+
+    #player-final-panel > .eyebrow {
+        font-size: clamp(2.5rem, 13vw, 4.4rem);
+    }
+
+    #final-wager-form,
+    #final-answer-form,
+    .player-lobby[data-final-status="completed"] > .quiz-rating-panel {
+        border-radius: 18px;
+    }
+
+    #final-wager-form,
+    #final-answer-form {
+        padding: 16px;
+    }
+
+    #final-wager-form .wager-keypad button {
+        min-height: 50px;
+    }
+
+    #final-answer-form textarea {
+        min-height: 150px;
+        max-height: 38dvh;
+    }
+
+    .player-lobby:is(
+        [data-final-status="finalwagering"],
+        [data-final-status="finalanswering"],
+        [data-final-status="finaljudging"],
+        [data-final-status="completed"]) > #game-timer {
+        top: 8px;
+        right: 8px;
+    }
+}
+
+@media (max-height: 720px) and (min-width: 621px) {
+    .player-lobby:is(
+        [data-final-status="finalwagering"],
+        [data-final-status="finalanswering"],
+        [data-final-status="finaljudging"],
+        [data-final-status="completed"]) {
+        padding-block: 10px;
+    }
+
+    #player-final-panel {
+        min-height: 0;
+        padding-block: 12px;
+        gap: 12px;
+    }
+
+    #player-final-panel > .eyebrow {
+        font-size: clamp(2.3rem, 7vh, 4.4rem);
+    }
+
+    #final-wager-form,
+    #final-answer-form {
+        padding: 14px 18px;
+        gap: 9px;
+    }
+
+    #final-wager-form .wager-display {
+        min-height: 58px;
+        font-size: clamp(2rem, 6vh, 3.2rem);
+    }
+
+    #final-wager-form .wager-keypad {
+        gap: 6px;
+    }
+
+    #final-wager-form .wager-keypad button {
+        min-height: 40px;
+    }
+
+    #final-answer-form textarea {
+        min-height: 110px;
+        max-height: 24dvh;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player-lobby:is(
+        [data-final-status="finalwagering"],
+        [data-final-status="finalanswering"],
+        [data-final-status="finaljudging"],
+        [data-final-status="completed"]) *,
+    .player-lobby:is(
+        [data-final-status="finalwagering"],
+        [data-final-status="finalanswering"],
+        [data-final-status="finaljudging"],
+        [data-final-status="completed"]) *::before,
+    .player-lobby:is(
+        [data-final-status="finalwagering"],
+        [data-final-status="finalanswering"],
+        [data-final-status="finaljudging"],
+        [data-final-status="completed"]) *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0s !important;
+        animation-duration: 0s !important;
+    }
+}

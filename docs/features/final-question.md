@@ -53,6 +53,10 @@ Other players' wagers and answers are not exposed by player projections. SignalR
 - During final wagering, the host gets a stronger centered finale prompt and submission surface while the player progress panel remains available. During final answering, the question/media presentation expands to the available stage instead of being constrained by a nested card.
 - During final judging, player-answer progress is shown as `Answer N / Total`, and the judging presentation uses the full transparent stage. The canonical answer keeps a compact **Answer** eyebrow directly above the configured answer content without a redundant outer **Final Question** label.
 - The redesigned final stages preserve responsive sizing and reduced-motion behavior on narrow, short, and motion-reduced layouts.
+- Player-side Final Wagering, Final Answering, Final Judging/waiting, ineligible, confirmed, and completed states use the same dedicated finale presentation language instead of falling back to the regular buzzer/waiting-room cards.
+- The player finale keeps private wager and answer controls intact, preserves existing keypad and submission behavior, and isolates unrelated player-side controllers so background polling or document-wide observers do not interfere with the final stage.
+- Player devices keep final-state transitions live through SignalR, including targeted fallback updates when the host submits a missing wager or answer for one player. Other players keep any in-progress input unchanged.
+- Completed player finale presentation keeps quiz rating usable on desktop and mobile, including touch-safe star targets and responsive layout on short or narrow viewports.
 - When a final question is available, the host action menu provides a shortcut to leave the current regular round and advance directly to the final phase. The host must confirm the action. Unclosed regular-round questions are left unchanged rather than being force-resolved by this navigation action.
 - During final wagering, player submission state is displayed as an always-visible vertical panel on the right on desktop host layouts. The panel scrolls independently for long player lists so the waiting message and **Show question** action remain available in the main area.
 - During final answering, player submission state moves into a right-side drawer. On pointer-driven desktop layouts the drawer remains collapsed to a narrow player handle until hover or keyboard focus opens it. Narrow/touch layouts keep an inline responsive fallback.
@@ -113,4 +117,4 @@ Regular-round navigation can move backward to the nearest unfinished round and s
 
 ## Release
 
-The redesigned host Final Question transition and stale-navigation fixes shipped in BadWolfQuiz Web `1.26.17` (`web-v1.26.17`). The redesigned live Final Wagering, Final Answering, Final Judging, canonical-answer presentation, and related host responsiveness/polish ship in BadWolfQuiz Web `1.26.19` (`web-v1.26.19`).
+The redesigned host Final Question transition and stale-navigation fixes shipped in BadWolfQuiz Web `1.26.17` (`web-v1.26.17`). The redesigned live Final Wagering, Final Answering, Final Judging, canonical-answer presentation, and related host responsiveness/polish shipped in BadWolfQuiz Web `1.26.19` (`web-v1.26.19`). The redesigned player-side Final Question flow ships in BadWolfQuiz Web `1.26.42` (`web-v1.26.42`).

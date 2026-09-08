@@ -7,8 +7,48 @@
 @import url("./host-running-game.css?v=6");
 @import url("./game-intro-stage.css?v=9");
 @import url("./game-intro-stage-refinements.css?v=4");
+@import url("./final-question-host-stage.css?v=4");
+@import url("./final-question-host-answer-space.css?v=2");
 @import url("./round-summary-podium.css?v=2");
 @import url("./board-click-feedback.css?v=1");
+
+/*
+ * Keep gameplay touch-friendly on phones without disabling pinch zoom.
+ * `manipulation` preserves pan/pinch gestures but removes the browser's
+ * double-tap-to-zoom gesture that can accidentally magnify the game UI.
+ */
+body.gameplay-layout {
+    touch-action: manipulation;
+}
+
+/*
+ * Completing the Final Question updates the host shell's data-game-status to
+ * `completed` before the soft-navigation response replaces the old Final Answer
+ * markup. The completed-podium stylesheet otherwise turns that still-mounted
+ * answer panel into the narrow results grid for one paint. Hold the answer
+ * geometry until the answer markup is actually replaced.
+ */
+body.gameplay-layout
+    .final-question-host[data-game-status="completed"]
+    .final-question-panel:has(> .answer-presentation) {
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    padding: 0 clamp(8px, 1vw, 16px) clamp(8px, 1vw, 16px);
+    display: flex;
+    align-content: normal;
+    align-items: stretch;
+    justify-items: normal;
+    gap: 0;
+    overflow: hidden;
+}
+
+body.gameplay-layout
+    .final-question-host[data-game-status="completed"]
+    .final-question-panel:has(> .answer-presentation)::before {
+    content: none;
+}
 
 body[aria-busy="true"] {
     overflow: hidden;

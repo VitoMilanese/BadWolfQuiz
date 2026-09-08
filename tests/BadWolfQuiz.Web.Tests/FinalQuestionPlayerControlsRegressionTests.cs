@@ -45,6 +45,7 @@ public sealed class FinalQuestionPlayerControlsRegressionTests
     {
         var markup = File.ReadAllText(FindLobbyView());
         var pageModel = File.ReadAllText(FindPageModel());
+        var fallbackPageModel = File.ReadAllText(FindFallbackPageModel());
         var registry = File.ReadAllText(FindRegistry());
 
         Assert.Contains("@if (submission.Wager is null)", markup, StringComparison.Ordinal);
@@ -57,6 +58,35 @@ public sealed class FinalQuestionPlayerControlsRegressionTests
         Assert.Contains("SubmitEmptyFinalAnswerForPlayer", registry, StringComparison.Ordinal);
         Assert.DoesNotContain("ForInactivePlayer", pageModel, StringComparison.Ordinal);
         Assert.DoesNotContain("ForInactivePlayer", registry, StringComparison.Ordinal);
+
+        Assert.Contains(
+            "game.Session.SubmitFinalWager(",
+            fallbackPageModel,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "FinalQuestion.MinimumWager",
+            fallbackPageModel,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "game.Session.SubmitFinalAnswer(runtimePlayerId, \"-\")",
+            fallbackPageModel,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "game.MarkPersistenceChanged();",
+            fallbackPageModel,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "SubmitMinimumFinalWagerForPlayer",
+            fallbackPageModel,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "SubmitEmptyFinalAnswerForPlayer",
+            fallbackPageModel,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "EnsurePlayerInactive",
+            fallbackPageModel,
+            StringComparison.Ordinal);
     }
 
     [Fact]
@@ -104,6 +134,9 @@ public sealed class FinalQuestionPlayerControlsRegressionTests
 
     private static string FindPageModel() =>
         Path.Combine(FindRepositoryRoot(), "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml.cs");
+
+    private static string FindFallbackPageModel() =>
+        Path.Combine(FindRepositoryRoot(), "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "FinalFallback.cshtml.cs");
 
     private static string FindRegistry() =>
         Path.Combine(FindRepositoryRoot(), "src", "BadWolfQuiz.Web", "Services", "GameSessionRegistry.cs");
