@@ -32,9 +32,12 @@ public sealed class AnswerKeyImageFrameRegressionTests
         Assert.Contains("background: transparent;", frameCss, StringComparison.Ordinal);
         Assert.Contains("box-shadow: none;", frameCss, StringComparison.Ordinal);
         Assert.Contains(
-            ".answer-key-content .game-content-block:has(> .game-content-image) > .game-content-image {",
+            ".answer-key-content.game-content-presentation\n    .game-content-blocks:not(.four-clue-grid)\n    > .game-content-block:has(> .game-content-image)\n    > .game-content-image {",
             frameCss,
             StringComparison.Ordinal);
+        Assert.Contains("width: auto;", frameCss, StringComparison.Ordinal);
+        Assert.Contains("height: auto;", frameCss, StringComparison.Ordinal);
+        Assert.Contains("max-width: min(1180px, 100%);", frameCss, StringComparison.Ordinal);
         Assert.Contains("0 0 0 1px", frameCss, StringComparison.Ordinal);
     }
 
