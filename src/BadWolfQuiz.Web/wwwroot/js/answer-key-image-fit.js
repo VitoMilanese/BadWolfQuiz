@@ -11,16 +11,17 @@
 
     let frameHandle = 0;
 
-    const getSingleImage = () => {
+    const getSingleImageContext = () => {
         const blocks = Array.from(container.children)
             .filter(element => element instanceof HTMLElement && element.classList.contains("game-content-block"));
-        if (blocks.length !== 1) {
-            return null;
-        }
+        const imageEntries = blocks.flatMap(block => {
+            const images = Array.from(block.querySelectorAll(":scope > img.game-content-image"))
+                .filter(image => image instanceof HTMLImageElement);
+            return images.map(image => ({ block, image }));
+        });
 
-        const images = blocks[0].querySelectorAll(":scope > img.game-content-image");
-        return images.length === 1 && images[0] instanceof HTMLImageElement
-            ? images[0]
+        return imageEntries.length === 1
+            ? { blocks, block: imageEntries[0].block, image: imageEntries[0].image }
             : null;
     };
 
@@ -37,10 +38,14 @@
         return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
     };
 
+    const getElementHeight = element =>
+        element instanceof HTMLElement ? element.getBoundingClientRect().height : 0;
+
     const fitSingleImage = () => {
         frameHandle = 0;
 
-        const image = getSingleImage();
+        const context = getSingleImageContext();
+        const image = context?.image ?? null;
         container.querySelectorAll("img.game-content-image[data-answer-key-image-fitted]")
             .forEach(candidate => {
                 if (candidate !== image) {
@@ -48,34 +53,39 @@
                 }
             });
 
-        if (!image ||
+        if (!context ||
             content.hidden ||
-            !image.complete ||
-            image.naturalWidth <= 0 ||
-            image.naturalHeight <= 0 ||
+            !context.image.complete ||
+            context.image.naturalWidth <= 0 ||
+            context.image.naturalHeight <= 0 ||
             container.clientWidth <= 0 ||
             container.clientHeight <= 0) {
             return;
         }
 
-        clearFit(image);
+        const { blocks, block, image: currentImage } = context;
+        clearFit(currentImage);
 
-        const block = image.closest(".game-content-block");
-        if (!(block instanceof HTMLElement)) {
-            return;
-        }
-
-        const blockStyle = window.getComputedStyle(block);
-        const gap = resolvePixelLength(blockStyle.rowGap || blockStyle.gap);
-        const siblings = Array.from(block.children).filter(child => child !== image);
-        const siblingsHeight = siblings.reduce((sum, sibling) => {
-            return sum + (sibling instanceof HTMLElement ? sibling.getBoundingClientRect().height : 0);
-        }, 0);
-        const gapHeight = Number.isFinite(gap)
-            ? Math.max(0, block.children.length - 1) * gap
+        const containerStyle = window.getComputedStyle(container);
+        const containerGap = resolvePixelLength(containerStyle.rowGap || containerStyle.gap);
+        const otherBlocksHeight = blocks
+            .filter(candidate => candidate !== block)
+            .reduce((sum, candidate) => sum + getElementHeight(candidate), 0);
+        const containerGapHeight = Number.isFinite(containerGap)
+            ? Math.max(0, blocks.length - 1) * containerGap
             : 0;
 
-        const imageStyle = window.getComputedStyle(image);
+        const blockStyle = window.getComputedStyle(block);
+        const blockGap = resolvePixelLength(blockStyle.rowGap || blockStyle.gap);
+        const imageSiblings = Array.from(block.children).filter(child => child !== currentImage);
+        const imageSiblingsHeight = imageSiblings.reduce(
+            (sum, sibling) => sum + getElementHeight(sibling),
+            0);
+        const blockGapHeight = Number.isFinite(blockGap)
+            ? Math.max(0, block.children.length - 1) * blockGap
+            : 0;
+
+        const imageStyle = window.getComputedStyle(currentImage);
         const cssMaxWidth = resolvePixelLength(imageStyle.maxWidth);
         const cssMaxHeight = resolvePixelLength(imageStyle.maxHeight);
         const availableWidth = Math.max(
@@ -83,23 +93,29 @@
             Math.min(container.clientWidth, block.clientWidth || container.clientWidth, cssMaxWidth));
         const availableHeight = Math.max(
             1,
-            Math.min(container.clientHeight - siblingsHeight - gapHeight, cssMaxHeight));
+            Math.min(
+                container.clientHeight -
+                    otherBlocksHeight -
+                    containerGapHeight -
+                    imageSiblingsHeight -
+                    blockGapHeight,
+                cssMaxHeight));
 
         const scale = Math.min(
-            availableWidth / image.naturalWidth,
-            availableHeight / image.naturalHeight);
+            availableWidth / currentImage.naturalWidth,
+            availableHeight / currentImage.naturalHeight);
         if (!Number.isFinite(scale) || scale <= 0) {
             return;
         }
 
-        const targetWidth = Math.max(1, Math.floor(image.naturalWidth * scale));
-        const targetHeight = Math.max(1, Math.floor(image.naturalHeight * scale));
+        const targetWidth = Math.max(1, Math.floor(currentImage.naturalWidth * scale));
+        const targetHeight = Math.max(1, Math.floor(currentImage.naturalHeight * scale));
 
-        image.style.setProperty("width", `${targetWidth}px`, "important");
-        image.style.setProperty("height", `${targetHeight}px`, "important");
-        image.style.setProperty("max-width", "100%", "important");
-        image.style.setProperty("max-height", `${Math.floor(availableHeight)}px`, "important");
-        image.dataset.answerKeyImageFitted = "true";
+        currentImage.style.setProperty("width", `${targetWidth}px`, "important");
+        currentImage.style.setProperty("height", `${targetHeight}px`, "important");
+        currentImage.style.setProperty("max-width", "100%", "important");
+        currentImage.style.setProperty("max-height", `${Math.floor(availableHeight)}px`, "important");
+        currentImage.dataset.answerKeyImageFitted = "true";
     };
 
     const scheduleFit = () => {
