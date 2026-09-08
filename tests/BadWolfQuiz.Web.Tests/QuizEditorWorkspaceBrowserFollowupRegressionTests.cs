@@ -13,7 +13,7 @@ public sealed class QuizEditorWorkspaceBrowserFollowupRegressionTests
         Assert.Contains("[HtmlTargetElement(\"body\")]", tagHelper, StringComparison.Ordinal);
         Assert.Contains("context.TagName, \"head\"", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/css/quiz-editor-workspace.css?v=577.1", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("/css/quiz-editor-workspace-fixes.css?v=577.3", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("/css/quiz-editor-workspace-fixes.css?v=577.4", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/js/quiz-editor-workspace-interactions.js?v=577.3", tagHelper, StringComparison.Ordinal);
         Assert.Contains("context.TagName, \"body\"", tagHelper, StringComparison.Ordinal);
         Assert.Contains("data-quiz-editor-workspace", tagHelper, StringComparison.Ordinal);
@@ -49,11 +49,36 @@ public sealed class QuizEditorWorkspaceBrowserFollowupRegressionTests
         Assert.Contains("border: 0;", css, StringComparison.Ordinal);
         Assert.Contains("background: transparent;", css, StringComparison.Ordinal);
         Assert.Contains("box-shadow: none;", css, StringComparison.Ordinal);
+        Assert.Contains(".question-card-actions.has-question-copy", css, StringComparison.Ordinal);
+        Assert.Contains("right: 10px;", css, StringComparison.Ordinal);
         Assert.Contains(".js-question-delete::before", css, StringComparison.Ordinal);
-        Assert.Contains("background: currentColor;", css, StringComparison.Ordinal);
+        Assert.Contains("color: #ff5364 !important;", css, StringComparison.Ordinal);
+        Assert.Contains("background-color: #ff5364;", css, StringComparison.Ordinal);
+        Assert.Contains("width: 13px;", css, StringComparison.Ordinal);
+        Assert.Contains("height: 15px;", css, StringComparison.Ordinal);
+        Assert.Contains("place-items: center;", css, StringComparison.Ordinal);
         Assert.Contains("mask: url(", css, StringComparison.Ordinal);
         Assert.Contains("user-select: none;", css, StringComparison.Ordinal);
         Assert.Contains("user-select: text;", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Question_editor_tabs_do_not_repeat_question_and_answer_section_headings()
+    {
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "quiz-editor-workspace-fixes.css"));
+
+        Assert.Contains(
+            "body[data-quiz-editor-workspace=\"question\"] .question-editor > h2",
+            css,
+            StringComparison.Ordinal);
+        Assert.Contains("display: none;", css, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "body[data-quiz-editor-workspace=\"final\"] .question-editor > h2 {\n    display: none;",
+            css,
+            StringComparison.Ordinal);
     }
 
     [Fact]
@@ -92,6 +117,24 @@ public sealed class QuizEditorWorkspaceBrowserFollowupRegressionTests
         Assert.Contains("BAD WOLF QUIZ", css, StringComparison.Ordinal);
         Assert.Contains("height: min(54vh, 620px) !important;", css, StringComparison.Ordinal);
         Assert.Contains("font-size: clamp(1.64rem, 2.28vw, 2.15rem);", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Description_preview_centers_the_intro_group_like_live_gameplay()
+    {
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "quiz-editor-workspace-fixes.css"));
+
+        Assert.Contains("grid-template-rows: auto auto;", css, StringComparison.Ordinal);
+        Assert.Contains("align-content: center;", css, StringComparison.Ordinal);
+        Assert.Contains("gap: clamp(16px, 1.9vh, 24px);", css, StringComparison.Ordinal);
+        Assert.Contains("margin: 0 auto;", css, StringComparison.Ordinal);
+        Assert.Contains("align-self: auto;", css, StringComparison.Ordinal);
+        Assert.Contains("@media (max-height: 760px)", css, StringComparison.Ordinal);
+        Assert.Contains("height: 38vh !important;", css, StringComparison.Ordinal);
+        Assert.Contains("height: 28vh !important;", css, StringComparison.Ordinal);
     }
 
     private static string FindWebFile(params string[] parts)
