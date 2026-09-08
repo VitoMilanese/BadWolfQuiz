@@ -4,7 +4,14 @@
     box-shadow: none;
 }
 
-.answer-key-content .game-content-block:has(> .game-content-image) > .game-content-image {
+.answer-key-content.game-content-presentation
+    .game-content-blocks:not(.four-clue-grid)
+    > .game-content-block:has(> .game-content-image)
+    > .game-content-image {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(1180px, 100%);
     background: color-mix(in srgb, var(--panel-2) 82%, transparent);
     box-shadow:
         0 0 0 1px color-mix(in srgb, var(--text) 8%, var(--line)),
