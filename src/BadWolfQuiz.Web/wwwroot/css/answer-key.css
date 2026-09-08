@@ -102,8 +102,7 @@ body:has(.answer-key-page) .page-shell {
     display: grid;
     place-items: center;
     gap: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden;
     overscroll-behavior: contain;
     background:
         repeating-linear-gradient(
