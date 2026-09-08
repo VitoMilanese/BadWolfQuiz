@@ -1,0 +1,21 @@
+/* Follow-up fixes from browser review of the redesigned quiz editor workspace. */
+
+body[data-quiz-editor-workspace] > .page-shell {
+    padding-bottom: clamp(18px, 2vw, 28px);
+}
+
+body[data-quiz-editor-workspace="board"] .quiz-board-scroll {
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
+}
+
+body[data-quiz-editor-workspace="board"] .quiz-board-actions,
+body[data-quiz-editor-workspace] .editor-actions {
+    bottom: 6px;
+}
+
+@media (max-width: 760px) {
+    body[data-quiz-editor-workspace] > .page-shell {
+        padding-bottom: 16px;
+    }
+}
