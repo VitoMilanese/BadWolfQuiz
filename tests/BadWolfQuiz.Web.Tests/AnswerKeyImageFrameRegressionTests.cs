@@ -5,19 +5,19 @@ public sealed class AnswerKeyImageFrameRegressionTests
     [Fact]
     public void Image_frame_follows_the_image_without_changing_the_layout_block_width()
     {
-        var page = File.ReadAllText(FindWebFile(
+        var page = NormalizeLineEndings(File.ReadAllText(FindWebFile(
             "Pages",
             "Admin",
             "Games",
-            "AnswerKey.cshtml"));
-        var stageCss = File.ReadAllText(FindWebFile(
+            "AnswerKey.cshtml")));
+        var stageCss = NormalizeLineEndings(File.ReadAllText(FindWebFile(
             "wwwroot",
             "css",
-            "answer-key.css"));
-        var frameCss = File.ReadAllText(FindWebFile(
+            "answer-key.css")));
+        var frameCss = NormalizeLineEndings(File.ReadAllText(FindWebFile(
             "wwwroot",
             "css",
-            "answer-key-image-frame.css"));
+            "answer-key-image-frame.css")));
 
         Assert.Contains("answer-key-image-frame.css", page, StringComparison.Ordinal);
         Assert.Contains(
@@ -44,15 +44,15 @@ public sealed class AnswerKeyImageFrameRegressionTests
     [Fact]
     public void Single_image_is_scaled_up_to_the_available_stage_without_touching_multi_image_layout()
     {
-        var page = File.ReadAllText(FindWebFile(
+        var page = NormalizeLineEndings(File.ReadAllText(FindWebFile(
             "Pages",
             "Admin",
             "Games",
-            "AnswerKey.cshtml"));
-        var script = File.ReadAllText(FindWebFile(
+            "AnswerKey.cshtml")));
+        var script = NormalizeLineEndings(File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
-            "answer-key-image-fit.js"));
+            "answer-key-image-fit.js")));
 
         Assert.Contains("~/js/answer-key-image-fit.js", page, StringComparison.Ordinal);
         Assert.Contains("const imageEntries = blocks.flatMap", script, StringComparison.Ordinal);
@@ -74,6 +74,10 @@ public sealed class AnswerKeyImageFrameRegressionTests
         Assert.Contains("ResizeObserver", script, StringComparison.Ordinal);
         Assert.Contains("attributeFilter: [\"hidden\"]", script, StringComparison.Ordinal);
     }
+
+    private static string NormalizeLineEndings(string content) =>
+        content.Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Replace('\r', '\n');
 
     private static string FindWebFile(params string[] parts)
     {
