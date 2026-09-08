@@ -1,0 +1,24 @@
+.answer-key-content .game-content-block:has(> .game-content-image) {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+}
+
+.answer-key-content.game-content-presentation
+    .game-content-blocks:not(.four-clue-grid)
+    > .game-content-block:has(> .game-content-image)
+    > .game-content-image {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(1180px, 100%);
+    background: transparent;
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--text) 8%, var(--line)),
+        0 24px 64px rgb(0 0 0 / 34%);
+}
+
+/* Match the caption scale used by regular in-game question and answer content. */
+.answer-key-content .game-content-caption {
+    font-size: clamp(1.26rem, 3.15vw, 2.8rem);
+}

@@ -76,13 +76,13 @@ public sealed class PlayerFinalQuestionStageRestyleRegressionTests
     public void Player_final_stage_preserves_wager_answer_and_refresh_contracts()
     {
         var root = FindRepositoryRoot();
-        var player = File.ReadAllText(Path.Combine(
+        var player = NormalizeLineEndings(File.ReadAllText(Path.Combine(
             root,
             "src",
             "BadWolfQuiz.Web",
             "Pages",
             "Player",
-            "Lobby.cshtml"));
+            "Lobby.cshtml")));
         var admissionCss = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -225,6 +225,10 @@ public sealed class PlayerFinalQuestionStageRestyleRegressionTests
         Assert.Contains("visibility: hidden !important;", stabilityCss, StringComparison.Ordinal);
         Assert.DoesNotContain("display: none !important;", stabilityCss, StringComparison.Ordinal);
     }
+
+    private static string NormalizeLineEndings(string content) =>
+        content.Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Replace('\r', '\n');
 
     private static string FindRepositoryRoot()
     {

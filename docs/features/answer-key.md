@@ -6,6 +6,18 @@
 
 Direct navigation to the AnswerKey route remains a normal server-rendered page. The multi-display feature changes only how the host opens that page from the game UI.
 
+## Redesigned stage presentation
+
+The AnswerKey route uses the same modern presentation language as the live gameplay surfaces while remaining a separate private host/second-monitor view.
+
+- The page fills the viewport below the shared gameplay topbar and prevents decorative stage elements from creating document-level scrolling.
+- Hidden and waiting states use intentional centered presentation rather than generic content cards.
+- Revealed content remains centered and uses the available viewport without changing the underlying AnswerKey gameplay semantics.
+- Image-only presentation keeps the existing layout block geometry, but the visible frame, border, and shadow follow the actual image box instead of the full-width layout container.
+- When exactly one image is present, client-side fitting uses the image's natural aspect ratio and the currently available stage space so smaller source images can scale up without introducing letterboxing. Multi-image layouts are left untouched.
+- Captions above and below AnswerKey media use the same responsive scale as captions shown during normal gameplay: `clamp(1.26rem, 3.15vw, 2.8rem)`.
+- Real overflowing answer content remains scrollable inside the content area; the outer AnswerKey stage itself does not become a long scrolling page.
+
 ## Multi-display window placement
 
 On the host Lobby/game page, `AnswerKeyWindowAssetsTagHelper` loads `answer-key-window.js`.
@@ -90,8 +102,17 @@ Regression coverage verifies that:
 - eye and crossed-out-eye icons follow `data-answer-visible` reliably;
 - the selected visibility mode is restored from `sessionStorage` after AnswerKey reloads;
 - hidden answer content uses the dedicated placeholder until the host enables visible-answer mode;
+- the outer stage does not regain document-level scrolling while real overflowing answer content remains scrollable internally;
+- image framing follows the actual image without changing the full-width layout block contract;
+- a single image scales to the available stage using its natural aspect ratio while multi-image layouts remain unchanged;
+- AnswerKey captions use the same responsive font scale as regular gameplay captions;
 - rendered session/question identity seeds the refresh filter before SignalR callbacks run;
 - regular AnswerKey refreshes happen only when the source-question ID changes;
 - revealing the already-loaded answer does not cause a redundant second reload;
 - entering the final-question flow still refreshes AnswerKey once;
-- duplicate relevant notifications cannot trigger multiple simultaneous reloads.
+- duplicate relevant notifications cannot trigger multiple simultaneous reloads;
+- multiline regression assertions normalize line endings so the same contracts pass on Windows CRLF and Linux LF checkouts.
+
+## Release
+
+The redesigned AnswerKey presentation ships in BadWolfQuiz Web `1.26.43` (`web-v1.26.43`).

@@ -42,6 +42,7 @@
 
 <link rel="stylesheet" href="~/css/youtube-placeholder.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/answer-key.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/answer-key-image-frame.css" asp-append-version="true" />
 
 <section class="answer-key-page"
          data-game-code="@Model.Game.PublicCode"
@@ -153,6 +154,8 @@
 </section>
 
 @section Scripts {
+    <script src="~/js/answer-key-image-fit.js" asp-append-version="true"></script>
+
     <script>
         (() => {
             const page = document.querySelector(".answer-key-page");
