@@ -23,19 +23,32 @@ body[data-quiz-editor-workspace="board"] .question-editor-preview img {
     box-shadow: none;
 }
 
+body[data-quiz-editor-workspace="board"] .question-card-actions.has-question-copy {
+    right: 10px;
+}
+
 body[data-quiz-editor-workspace="board"] .js-question-delete {
-    color: var(--red-bright) !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    padding: 0 !important;
+    display: grid;
+    place-items: center;
+    overflow: visible;
+    color: #ff5364 !important;
     font-size: 0;
 }
 
 body[data-quiz-editor-workspace="board"] .js-question-delete::before {
     content: "";
     display: block;
-    width: 17px;
-    height: 19px;
-    background: currentColor;
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Cpath d='M6 1h4l1 2h4v2H1V3h4l1-2Zm-2 6h10l-1 12H5L4 7Zm3 2v7h2V9H7Zm4 0v7h2V9h-2Z'/%3E%3C/svg%3E") center / contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Cpath d='M6 1h4l1 2h4v2H1V3h4l1-2Zm-2 6h10l-1 12H5L4 7Zm3 2v7h2V9H7Zm4 0v7h2V9h-2Z'/%3E%3C/svg%3E") center / contain no-repeat;
+    width: 13px;
+    height: 15px;
+    margin: 0;
+    background-color: #ff5364;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 3h6l1 2h5v2H3V5h5l1-2Zm-3 6h12l-1 12H7L6 9Zm3 2v8h2v-8H9Zm4 0v8h2v-8h-2Z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 3h6l1 2h5v2H3V5h5l1-2Zm-3 6h12l-1 12H7L6 9Zm3 2v8h2v-8H9Zm4 0v8h2v-8h-2Z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 body[data-quiz-editor-workspace] {
@@ -46,6 +59,11 @@ body[data-quiz-editor-workspace] {
 body[data-quiz-editor-workspace] :is(input, textarea, [contenteditable="true"]) {
     -webkit-user-select: text;
     user-select: text;
+}
+
+/* The question/answer tabs already identify the active editor section. */
+body[data-quiz-editor-workspace="question"] .question-editor > h2 {
+    display: none;
 }
 
 /* Preview surfaces should look like the presentation they represent, not a nested editor card. */
@@ -126,15 +144,16 @@ body[data-quiz-editor-workspace="final"] :is(.question-preview-image, .question-
 body[data-quiz-editor-workspace="description"]
     .description-preview-modal .question-preview-screen {
     padding: clamp(10px, 1.4vh, 16px) clamp(20px, 3.5vw, 56px) clamp(8px, 1.1vh, 14px);
-    grid-template-rows: auto minmax(0, 1fr);
-    align-content: stretch;
+    grid-template-rows: auto auto;
+    align-content: center;
+    gap: clamp(16px, 1.9vh, 24px);
 }
 
 body[data-quiz-editor-workspace="description"]
     .description-preview-modal .question-preview-title {
     width: 100%;
     max-width: 24ch;
-    margin: auto auto clamp(16px, 1.9vh, 24px);
+    margin: 0 auto;
     color: var(--text);
     font-size: clamp(2.75rem, 6.6vw, 6.7rem);
     line-height: .94;
@@ -166,7 +185,7 @@ body[data-quiz-editor-workspace="description"]
     .description-preview-modal .question-preview-content {
     min-height: 0;
     max-height: none;
-    align-self: stretch;
+    align-self: auto;
     align-content: center;
     gap: clamp(18px, 2vh, 28px);
     padding: 0;
@@ -238,6 +257,7 @@ body[data-quiz-editor-workspace="description"]
     body[data-quiz-editor-workspace="description"]
         .description-preview-modal .question-preview-screen {
         padding: 8px 14px 6px;
+        gap: 14px;
     }
 
     body[data-quiz-editor-workspace="description"]
@@ -252,5 +272,29 @@ body[data-quiz-editor-workspace="description"]
         border-top: 2px solid color-mix(in srgb, var(--red-bright) 62%, var(--line));
         background: linear-gradient(180deg, color-mix(in srgb, var(--panel-2) 70%, transparent), transparent);
         text-align: center;
+    }
+}
+
+@media (max-height: 760px) {
+    body[data-quiz-editor-workspace="description"]
+        .description-preview-modal .question-preview-screen {
+        gap: 10px;
+        padding-block: 5px 4px;
+    }
+
+    body[data-quiz-editor-workspace="description"]
+        .description-preview-modal .question-preview-title {
+        font-size: clamp(2.2rem, 6.2vh, 4.3rem);
+    }
+
+    body[data-quiz-editor-workspace="description"]
+        .description-preview-modal .question-preview-image {
+        height: 38vh !important;
+    }
+
+    body[data-quiz-editor-workspace="description"]
+        .description-preview-modal .question-preview-media:has(> .question-preview-caption:first-child):has(> .question-preview-caption:last-child)
+        .question-preview-image {
+        height: 28vh !important;
     }
 }
