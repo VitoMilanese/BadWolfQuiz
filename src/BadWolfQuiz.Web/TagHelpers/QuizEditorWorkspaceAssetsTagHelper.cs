@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace BadWolfQuiz.Web.TagHelpers;
 
+[HtmlTargetElement("head")]
 [HtmlTargetElement("body")]
 public sealed class QuizEditorWorkspaceAssetsTagHelper : TagHelper
 {
@@ -28,8 +29,17 @@ public sealed class QuizEditorWorkspaceAssetsTagHelper : TagHelper
             return;
         }
 
-        output.Attributes.SetAttribute("data-quiz-editor-workspace", surface);
-        output.PostContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/quiz-editor-workspace.css?v=577.1\" />");
+        if (string.Equals(context.TagName, "head", StringComparison.OrdinalIgnoreCase))
+        {
+            output.PostContent.AppendHtml(
+                "<link rel=\"stylesheet\" href=\"/css/quiz-editor-workspace.css?v=577.1\" />" +
+                "<link rel=\"stylesheet\" href=\"/css/quiz-editor-workspace-fixes.css?v=577.2\" />");
+            return;
+        }
+
+        if (string.Equals(context.TagName, "body", StringComparison.OrdinalIgnoreCase))
+        {
+            output.Attributes.SetAttribute("data-quiz-editor-workspace", surface);
+        }
     }
 }
