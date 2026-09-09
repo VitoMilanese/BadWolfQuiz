@@ -1,0 +1,423 @@
+/* Safe regular-question presentation polish.
+ *
+ * Important: this file never turns .player-lobby into a fixed/fullscreen stage,
+ * never hides the lobby shell based on runtime state, and never requires a new
+ * player-side controller. The existing gameplay JavaScript remains authoritative;
+ * these rules only restyle controls after they already exist in the DOM.
+ */
+
+.player-lobby {
+    --player-regular-line: color-mix(in srgb, var(--gold) 24%, var(--line));
+    --player-regular-surface: color-mix(in srgb, var(--panel) 96%, var(--bg));
+    --player-regular-surface-strong: color-mix(in srgb, var(--panel-2) 96%, var(--bg));
+}
+
+/* Keep the existing synchronized timer as the only visible countdown. */
+.player-lobby .player-all-player-panel .all-player-question-timer {
+    display: none !important;
+}
+
+.player-lobby.all-player-runtime-active > #game-timer.player-game-timer:not([hidden]),
+.player-lobby.is-page-buzzer-active > #game-timer.player-game-timer:not([hidden]) {
+    z-index: 20;
+    width: min(520px, 100%) !important;
+    max-width: 520px !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: clamp(18px, 2.4vh, 28px) auto 0 !important;
+    padding: clamp(.9rem, 1.7vw, 1.25rem) clamp(1.35rem, 3vw, 2rem) !important;
+    display: grid !important;
+    place-items: center;
+    aspect-ratio: auto !important;
+    border: 2px solid color-mix(in srgb, var(--gold) 78%, var(--line));
+    border-radius: 18px;
+    background: linear-gradient(180deg, var(--player-regular-surface), var(--player-regular-surface-strong));
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent),
+        0 22px 50px rgb(0 0 0 / 28%),
+        0 0 30px color-mix(in srgb, var(--gold) 10%, transparent);
+}
+
+.player-lobby.all-player-runtime-active > #game-timer.player-game-timer > strong,
+.player-lobby.is-page-buzzer-active > #game-timer.player-game-timer > strong {
+    min-width: 0 !important;
+    color: var(--gold);
+    font-size: clamp(3.8rem, 7vw, 6rem) !important;
+    font-weight: 1000;
+    line-height: .9;
+    font-variant-numeric: tabular-nums;
+}
+
+.player-lobby.all-player-runtime-active > #game-timer.player-game-timer.answer-timer,
+.player-lobby.is-page-buzzer-active > #game-timer.player-game-timer.answer-timer {
+    border-color: color-mix(in srgb, #d1242f 76%, var(--line));
+}
+
+.player-lobby.all-player-runtime-active > #game-timer.player-game-timer.answer-timer > strong,
+.player-lobby.is-page-buzzer-active > #game-timer.player-game-timer.answer-timer > strong {
+    color: color-mix(in srgb, #d1242f 80%, var(--text)) !important;
+}
+
+/* The existing all-player panel spans the full lobby grid instead of one column. */
+.player-lobby > .player-all-player-panel:not([hidden]) {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: clamp(18px, 2.5vh, 28px) 0 0 !important;
+    padding: clamp(18px, 2.6vw, 30px) !important;
+    display: grid !important;
+    justify-items: center;
+    align-content: center;
+    gap: clamp(14px, 2vh, 24px) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.player-lobby .player-all-player-panel > .eyebrow {
+    width: min(920px, 100%);
+    margin: 0 auto;
+    color: var(--text);
+    font-size: clamp(2.25rem, 5vw, 4.6rem);
+    line-height: .96;
+    font-weight: 950;
+    letter-spacing: -.025em;
+    text-align: center;
+    text-transform: none;
+    text-wrap: balance;
+    text-shadow: 0 14px 34px rgb(0 0 0 / 34%);
+}
+
+.player-lobby .player-all-player-panel > .eyebrow::before {
+    content: "BAD WOLF QUIZ";
+    display: block;
+    margin-bottom: clamp(7px, 1vh, 11px);
+    color: var(--gold);
+    font-size: clamp(.68rem, 1.5vw, .9rem);
+    line-height: 1;
+    font-weight: 850;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+}
+
+.player-lobby .player-all-player-panel > [data-all-player-controls] {
+    width: min(920px, 100%);
+    max-width: none;
+    min-width: 0;
+}
+
+.player-lobby .player-all-player-panel > [data-all-player-status]:not(:empty) {
+    width: min(720px, 100%);
+    box-sizing: border-box;
+    margin: 0;
+    padding: clamp(18px, 2.3vw, 28px);
+    border: 1px solid var(--player-regular-line);
+    border-radius: 20px;
+    background: linear-gradient(180deg, var(--player-regular-surface), var(--player-regular-surface-strong));
+    color: var(--text);
+    text-align: center;
+    font-size: clamp(1.05rem, 2vw, 1.4rem);
+    font-weight: 750;
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent),
+        0 20px 48px rgb(0 0 0 / 26%);
+}
+
+/* Multiple-choice answers now use the whole available player width. */
+.player-lobby .player-all-player-panel .all-player-choice-grid {
+    width: min(900px, 100%) !important;
+    max-width: none;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: clamp(.65rem, 1.3vw, 1rem) !important;
+}
+
+.player-lobby .player-all-player-panel .all-player-choice-option {
+    width: 100%;
+    min-width: 0;
+    min-height: clamp(5rem, 11vh, 8rem) !important;
+    padding: clamp(.9rem, 1.8vw, 1.4rem);
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 18px;
+    background: linear-gradient(180deg, var(--player-regular-surface), var(--player-regular-surface-strong));
+    color: var(--text);
+    font-size: clamp(1.05rem, 2vw, 1.55rem);
+    font-weight: 850;
+    line-height: 1.25;
+    text-align: center;
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent),
+        0 16px 34px rgb(0 0 0 / 22%);
+}
+
+.player-lobby .player-all-player-panel .all-player-choice-option:hover,
+.player-lobby .player-all-player-panel .all-player-choice-option:focus-visible {
+    border-color: color-mix(in srgb, var(--gold) 64%, var(--line));
+    background: color-mix(in srgb, var(--gold) 7%, var(--player-regular-surface-strong));
+}
+
+.player-lobby .player-all-player-panel .all-player-choice-option img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: min(34vh, 22rem);
+    object-fit: contain;
+}
+
+/* Free-text answers reuse the Final Question card language. */
+.player-lobby .player-all-player-panel [data-all-player-controls] > .stack-form {
+    width: min(720px, 100%);
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: clamp(18px, 2.5vw, 28px);
+    display: grid;
+    gap: 14px;
+    border: 1px solid var(--player-regular-line);
+    border-radius: 24px;
+    background: linear-gradient(180deg, var(--player-regular-surface), var(--player-regular-surface-strong));
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent),
+        0 24px 56px rgb(0 0 0 / 30%);
+}
+
+.player-lobby .player-all-player-panel [data-all-player-controls] > .stack-form > label {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    color: var(--muted);
+    text-align: left;
+    font-size: .82rem;
+    font-weight: 850;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.player-lobby .player-all-player-panel [data-all-player-controls] > .stack-form textarea {
+    width: 100%;
+    min-height: clamp(150px, 24vh, 230px) !important;
+    max-height: 34vh;
+    box-sizing: border-box;
+    padding: 16px 18px;
+    resize: vertical;
+    border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line));
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--bg) 88%, var(--panel));
+    color: var(--text);
+    font-size: clamp(1.05rem, 2vw, 1.45rem);
+    line-height: 1.4;
+    box-shadow: inset 0 1px 14px rgb(0 0 0 / 24%);
+}
+
+.player-lobby .player-all-player-panel [data-all-player-controls] > .stack-form > .button-primary {
+    width: 100%;
+    min-height: 54px;
+    font-weight: 850;
+}
+
+/* Regular all-player wager: same keypad proportions as Final Question. */
+.player-lobby .player-all-player-panel .question-wager-form {
+    width: min(560px, 100%) !important;
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: clamp(18px, 2.5vw, 28px);
+    display: grid;
+    gap: 14px;
+    border: 1px solid var(--player-regular-line);
+    border-radius: 24px;
+    background: linear-gradient(180deg, var(--player-regular-surface), var(--player-regular-surface-strong));
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent),
+        0 24px 56px rgb(0 0 0 / 30%);
+}
+
+.player-lobby .player-all-player-panel .question-wager-form .wager-display-label {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    color: var(--muted);
+    text-align: left;
+    font-size: .82rem;
+    font-weight: 850;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.player-lobby .player-all-player-panel .question-wager-form .wager-display {
+    width: 100%;
+    min-height: 76px;
+    box-sizing: border-box;
+    padding: 10px 16px;
+    border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--line));
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--bg) 88%, var(--panel));
+    color: var(--text);
+    font-size: clamp(2.4rem, 7vw, 4.4rem);
+    line-height: 1;
+    font-weight: 950;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    box-shadow: inset 0 1px 14px rgb(0 0 0 / 25%);
+}
+
+.player-lobby .player-all-player-panel .question-wager-form .wager-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.player-lobby .player-all-player-panel .question-wager-form .wager-keypad button {
+    min-width: 0;
+    min-height: 54px;
+    padding: 8px;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 14px;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 1.15rem;
+    font-weight: 850;
+    cursor: pointer;
+}
+
+.player-lobby .player-all-player-panel .question-wager-form .wager-keypad .wager-keypad-max {
+    grid-column: 1 / -1;
+    border-color: color-mix(in srgb, var(--gold) 42%, var(--line));
+    color: var(--gold);
+    letter-spacing: .12em;
+}
+
+.player-lobby .player-all-player-panel .question-wager-form .wager-validation {
+    min-height: 1.4em;
+    margin: 0;
+    color: var(--muted);
+    text-align: center;
+}
+
+.player-lobby .player-all-player-panel .question-wager-form .wager-validation.is-valid {
+    color: var(--gold);
+}
+
+.player-lobby .player-all-player-panel .question-wager-form > .button-primary {
+    width: 100%;
+    min-height: 54px;
+    font-weight: 850;
+}
+
+/* Keep the existing buzzer runtime; only give its live state more room. */
+.player-lobby.is-page-buzzer-active > .player-buzzer-panel:not([hidden]) {
+    grid-column: 1 / -1 !important;
+    width: 100%;
+    max-width: none;
+    margin: clamp(18px, 2.5vh, 28px) 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: .7rem;
+}
+
+.player-lobby.is-page-buzzer-active > .player-buzzer-panel:not([hidden]) > .player-buzzer {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    min-height: clamp(12rem, 30vh, 24rem);
+    height: auto;
+    max-height: none;
+    margin: 0;
+    aspect-ratio: auto;
+    border-radius: clamp(1.8rem, 3vw, 3.2rem);
+    box-shadow: 0 24px 56px rgb(0 0 0 / 30%);
+}
+
+/* Anonymous shared wager already owns its stable runtime. Style the panel itself. */
+.player-lobby > .anonymous-shared-wager-player-panel {
+    grid-column: 1 / -1 !important;
+    width: min(720px, 100%);
+    box-sizing: border-box;
+    margin: clamp(18px, 2.5vh, 28px) auto 0;
+    padding: clamp(18px, 2.5vw, 28px);
+    border: 1px solid var(--player-regular-line);
+    border-radius: 24px;
+    background: linear-gradient(180deg, var(--player-regular-surface), var(--player-regular-surface-strong));
+    box-shadow: 0 24px 56px rgb(0 0 0 / 30%);
+    text-align: center;
+}
+
+.player-lobby > .anonymous-shared-wager-player-panel .anonymous-shared-wager-choices {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 9px;
+}
+
+/* Host timer stays absolutely positioned by the existing gameplay CSS.
+ * Only raise its stacking layer so right-side drawers cannot cover it. */
+.host-game-board .host-game-timer {
+    z-index: 1000 !important;
+}
+
+/* The running-game skin paints the timer value gold with a more specific rule.
+ * Reassert the existing answer-timer semantics after that skin. */
+.host-game-board .host-game-timer.answer-timer {
+    color: color-mix(in srgb, #d1242f 78%, var(--text)) !important;
+    border-color: currentColor !important;
+    box-shadow: 0 0 24px color-mix(in srgb, #d1242f 24%, transparent) !important;
+}
+
+.host-game-board .host-game-timer.answer-timer > strong,
+.host-game-board .host-game-timer.answer-timer .game-timer-control button {
+    color: currentColor !important;
+    border-color: currentColor;
+}
+
+/* Manual all-player judging actions belong at the bottom of the viewport,
+ * but the buttons should float directly over the stage without another panel. */
+.host-game-board .all-player-host-judge-actions {
+    position: fixed !important;
+    z-index: 900;
+    left: 50%;
+    bottom: calc(var(--game-scoreboard-space, 0px) + 12px);
+    translate: -50% 0;
+    width: min(620px, calc(100vw - 28px));
+    margin: 0 !important;
+    padding: 0;
+    display: flex !important;
+    justify-content: center;
+    gap: 10px;
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none;
+}
+
+.host-game-board .all-player-host-judge-actions > .button {
+    min-width: 150px;
+    min-height: 48px;
+}
+
+@media (max-width: 760px) {
+    .player-lobby > .player-all-player-panel:not([hidden]) {
+        padding-inline: 0 !important;
+    }
+
+    .player-lobby .player-all-player-panel .all-player-choice-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .player-lobby > .anonymous-shared-wager-player-panel .anonymous-shared-wager-choices {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .host-game-board .all-player-host-judge-actions {
+        bottom: calc(var(--game-scoreboard-space, 0px) + 8px);
+        width: calc(100vw - 16px);
+    }
+
+    .host-game-board .all-player-host-judge-actions > .button {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+}

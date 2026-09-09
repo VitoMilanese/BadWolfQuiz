@@ -1,0 +1,152 @@
+/* Host-only follow-up for the regular-question redesign.
+ * Keep these fixes presentation-only: the existing host/player runtimes remain authoritative.
+ */
+
+/* Keep manual judgment controls fully inside the framed gameplay area above the scoreboard. */
+.host-game-board .all-player-host-judge-actions {
+    bottom: calc(
+        var(--game-scoreboard-space, 0px) +
+        clamp(28px, 3vh, 40px)) !important;
+}
+
+/* The gameplay refresh can mount the new question view while the persistent question board
+ * is still visible for a short transition. Presentation CSS keys off the mounted question
+ * with :has() and normally expands .host-game-board to the full viewport (including negative
+ * vertical margins). That must never affect the old board underneath the busy overlay. Keep
+ * normal board geometry for the overlap itself; unlike the earlier busy-state guard this is
+ * tied to the actual conflicting DOM state and therefore cannot end too early. */
+.host-game-board:has(> [data-host-gameplay-board]:not([hidden])):has(
+    > [data-host-gameplay-view] > .current-question-summary
+),
+.host-game-board:has(> [data-host-gameplay-board]:not([hidden])):has(
+    > [data-host-gameplay-view] > .question-review-preview
+) {
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+}
+
+/* getBoundingClientRect() returns border-box dimensions. The submit guard writes that measured
+ * size back to the persistent board while the request is pending, so make the frozen width and
+ * height border-box based instead of adding the board's padding on top of them. */
+.host-game-board
+    > .host-board-layout[aria-busy="true"]:not([hidden]) {
+    box-sizing: border-box !important;
+}
+
+@media (min-width: 1700px) {
+    .host-game-board
+        > .host-board-layout[aria-busy="true"]:not([hidden]):has(> .board-host-sidebar) {
+        padding-left: calc(var(--board-host-width, 190px) + 24px) !important;
+    }
+}
+
+/* Once the configured answer is visible, the all-player result summary must no longer
+ * consume a grid row. Keep the drawer at its full geometry and collapse it with a
+ * transform instead of animating width. This avoids reflow/hover oscillation and also
+ * overrides the wager-multiple-choice max-height rule that made some answer drawers
+ * much shorter than others. */
+@media (min-width: 1000px) and (hover: hover) and (pointer: fine) {
+    .host-game-board
+        .current-question-summary:not(.wager-mode):has(> .answer-presentation)
+        > .all-player-host-progress {
+        position: absolute !important;
+        z-index: 45;
+        top: clamp(3.25rem, 8vh, 5rem) !important;
+        right: var(--gameplay-right-overlay-safe-gap, 8px) !important;
+        bottom: clamp(3.5rem, 7vh, 4.75rem) !important;
+        left: auto !important;
+        grid-row: auto !important;
+        grid-template-rows: auto minmax(0, 1fr);
+        align-content: stretch !important;
+        align-self: stretch !important;
+        box-sizing: border-box;
+        width: min(24rem, calc(100% - 1rem)) !important;
+        max-width: min(24rem, calc(100% - 1rem)) !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0.6rem 0.75rem 0.6rem 3.25rem !important;
+        overflow: hidden !important;
+        border: 1px solid var(--line);
+        border-right: 0;
+        border-radius: 0.9rem 0 0 0.9rem;
+        background: var(--panel-glass);
+        box-shadow: -18px 0 38px rgb(0 0 0 / 28%);
+        transform: translateX(calc(100% - 2.75rem)) !important;
+        transition: transform 180ms ease, box-shadow 180ms ease !important;
+    }
+
+    .host-game-board
+        .current-question-summary:not(.wager-mode):has(> .answer-presentation)
+        > .all-player-host-progress::before {
+        content: "👥";
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 2.75rem;
+        display: grid;
+        place-items: center;
+        border-right: 1px solid var(--line);
+        background: var(--panel-2);
+        color: var(--text);
+        font-size: 1.15rem;
+        line-height: 1;
+        pointer-events: none;
+    }
+
+    .host-game-board
+        .current-question-summary:not(.wager-mode):has(> .answer-presentation)
+        > .all-player-host-progress:hover,
+    .host-game-board
+        .current-question-summary:not(.wager-mode):has(> .answer-presentation)
+        > .all-player-host-progress:focus,
+    .host-game-board
+        .current-question-summary:not(.wager-mode):has(> .answer-presentation)
+        > .all-player-host-progress:focus-within {
+        box-shadow: -20px 0 44px rgb(0 0 0 / 36%);
+        transform: translateX(0) !important;
+    }
+
+    .host-game-board
+        .current-question-summary:not(.wager-mode):has(> .answer-presentation)
+        > .all-player-host-progress > strong {
+        min-width: 0;
+        align-self: start;
+    }
+
+    .host-game-board
+        .current-question-summary:not(.wager-mode):has(> .answer-presentation)
+        > .all-player-host-progress .all-player-answer-progress {
+        min-height: 0;
+        align-self: stretch;
+        grid-template-columns: 1fr;
+        grid-auto-rows: max-content;
+        align-content: start !important;
+        gap: 0.4rem;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
+        padding-right: 0.15rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .host-game-board
+        .current-question-summary:not(.wager-mode):has(> .answer-presentation)
+        > .all-player-host-progress {
+        transition: none !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .host-game-board .all-player-host-judge-actions {
+        bottom: calc(var(--game-scoreboard-space, 0px) + 20px) !important;
+    }
+}
