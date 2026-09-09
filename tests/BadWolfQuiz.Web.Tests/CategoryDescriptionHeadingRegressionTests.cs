@@ -38,8 +38,9 @@ public sealed class CategoryDescriptionHeadingRegressionTests
 
         var categoryBranch = method[categoryStart..roundStart];
         Assert.Contains(
-            "if (!string.IsNullOrWhiteSpace(trimmedTitle)) return trimmedTitle;",
+            "if (!string.IsNullOrWhiteSpace(trimmedTitle))",
             categoryBranch);
+        Assert.Contains("return trimmedTitle;", categoryBranch);
         Assert.DoesNotContain("{categoryLabel}: {trimmedTitle}", categoryBranch);
         Assert.DoesNotContain("StartsWithLabel", source);
     }
