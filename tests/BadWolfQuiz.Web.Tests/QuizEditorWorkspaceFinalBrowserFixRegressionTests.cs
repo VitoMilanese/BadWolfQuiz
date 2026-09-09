@@ -10,7 +10,7 @@ public sealed class QuizEditorWorkspaceFinalBrowserFixRegressionTests
             "QuizEditorWorkspaceAssetsTagHelper.cs"));
 
         Assert.Contains(
-            "/css/quiz-editor-workspace-browser-fixes.css?v=577.6",
+            "/css/quiz-editor-workspace-browser-fixes.css?v=577.7",
             tagHelper,
             StringComparison.Ordinal);
     }
@@ -31,26 +31,35 @@ public sealed class QuizEditorWorkspaceFinalBrowserFixRegressionTests
     }
 
     [Fact]
-    public void Question_and_final_preview_images_do_not_stretch_the_image_box_to_the_full_block()
+    public void Question_and_final_preview_images_keep_their_own_box_and_can_upscale()
     {
         var css = ReadBrowserFixCss();
 
         Assert.Contains(
-            "body[data-quiz-editor-workspace=\"question\"] .question-preview-image",
+            "#question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)",
             css,
             StringComparison.Ordinal);
         Assert.Contains(
-            "body[data-quiz-editor-workspace=\"final\"] .question-preview-image",
+            "body[data-quiz-editor-workspace=\"question\"]",
+            css,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "body[data-quiz-editor-workspace=\"final\"]",
             css,
             StringComparison.Ordinal);
         Assert.Contains("width: auto !important;", css, StringComparison.Ordinal);
-        Assert.Contains("height: auto !important;", css, StringComparison.Ordinal);
+        Assert.Contains("height: min(58vh, 640px) !important;", css, StringComparison.Ordinal);
         Assert.Contains("max-width: 100% !important;", css, StringComparison.Ordinal);
-        Assert.Contains("max-height: min(62vh, 680px) !important;", css, StringComparison.Ordinal);
+        Assert.Contains("max-height: min(58vh, 640px) !important;", css, StringComparison.Ordinal);
         Assert.Contains("box-shadow: none !important;", css, StringComparison.Ordinal);
         Assert.Contains("outline: 0 !important;", css, StringComparison.Ordinal);
         Assert.Contains(
             ".content-block-container-layout .question-preview-image",
+            css,
+            StringComparison.Ordinal);
+        Assert.Contains("height: min(50vh, 520px) !important;", css, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "height: auto !important;\n    max-width: 100% !important;\n    max-height: min(62vh, 680px) !important;",
             css,
             StringComparison.Ordinal);
     }
