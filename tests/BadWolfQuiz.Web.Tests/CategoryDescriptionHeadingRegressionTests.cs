@@ -47,16 +47,17 @@ public sealed class CategoryDescriptionHeadingRegressionTests
 
     private static string ExtractMethod(string source, string methodSignature)
     {
-        var start = source.IndexOf(methodSignature, StringComparison.Ordinal);
+        var normalizedSource = source.Replace("\r\n", "\n", StringComparison.Ordinal);
+        var start = normalizedSource.IndexOf(methodSignature, StringComparison.Ordinal);
         Assert.True(start >= 0, $"Could not find {methodSignature}.");
 
-        var end = source.IndexOf(
+        var end = normalizedSource.IndexOf(
             "\n    private ",
             start + 1,
             StringComparison.Ordinal);
         Assert.True(end > start, $"Could not find the end of {methodSignature}.");
 
-        return source[start..end];
+        return normalizedSource[start..end];
     }
 
     private static string FindPageModel(string area, string fileName)
