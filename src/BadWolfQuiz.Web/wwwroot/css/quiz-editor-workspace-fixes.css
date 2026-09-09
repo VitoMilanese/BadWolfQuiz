@@ -1,0 +1,300 @@
+/* Follow-up fixes from browser review of the redesigned quiz editor workspace. */
+
+body[data-quiz-editor-workspace] > .page-shell {
+    padding-bottom: 6px;
+}
+
+body[data-quiz-editor-workspace="board"] .quiz-board-scroll {
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
+}
+
+body[data-quiz-editor-workspace="board"] .quiz-board-actions,
+body[data-quiz-editor-workspace] .editor-actions {
+    bottom: 2px;
+    margin-bottom: 0;
+    background: color-mix(in srgb, var(--panel) 80%, transparent);
+    backdrop-filter: blur(14px);
+}
+
+body[data-quiz-editor-workspace="board"] .question-editor-preview img {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+body[data-quiz-editor-workspace="board"] .question-card-actions.has-question-copy {
+    right: 10px;
+}
+
+body[data-quiz-editor-workspace="board"] .js-question-delete {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    padding: 0 !important;
+    display: grid;
+    place-items: center;
+    overflow: visible;
+    color: #ff5364 !important;
+    font-size: 0;
+}
+
+body[data-quiz-editor-workspace="board"] .js-question-delete::before {
+    content: "";
+    display: block;
+    width: 13px;
+    height: 15px;
+    margin: 0;
+    background-color: #ff5364;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 3h6l1 2h5v2H3V5h5l1-2Zm-3 6h12l-1 12H7L6 9Zm3 2v8h2v-8H9Zm4 0v8h2v-8h-2Z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 3h6l1 2h5v2H3V5h5l1-2Zm-3 6h12l-1 12H7L6 9Zm3 2v8h2v-8H9Zm4 0v8h2v-8h-2Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+body[data-quiz-editor-workspace] {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+body[data-quiz-editor-workspace] :is(input, textarea, [contenteditable="true"]) {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* The question/answer tabs already identify the active editor section. */
+body[data-quiz-editor-workspace="question"] .question-editor > h2 {
+    display: none;
+}
+
+/* Preview surfaces should look like the presentation they represent, not a nested editor card. */
+body[data-quiz-editor-workspace] .question-preview-modal {
+    background: transparent;
+    backdrop-filter: none;
+}
+
+body[data-quiz-editor-workspace] .question-preview-dialog {
+    border: 0;
+    box-shadow: none;
+}
+
+body[data-quiz-editor-workspace="question"] .question-preview-dialog {
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--panel) 90%, var(--bg)),
+            color-mix(in srgb, var(--panel-2) 86%, var(--bg)));
+}
+
+body[data-quiz-editor-workspace="description"] .question-preview-dialog {
+    background:
+        repeating-linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--text) 2.6%, transparent) 0 1px,
+            transparent 1px 20px),
+        radial-gradient(circle at 16% 18%, color-mix(in srgb, var(--red-bright) 18%, transparent), transparent 31rem),
+        radial-gradient(circle at 82% 76%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 34rem),
+        linear-gradient(160deg, color-mix(in srgb, var(--panel-2) 78%, #050506), color-mix(in srgb, var(--bg) 94%, #000) 62%);
+}
+
+body[data-quiz-editor-workspace="final"] .question-preview-dialog {
+    background:
+        repeating-linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--text) 2.5%, transparent) 0 1px,
+            transparent 1px 18px),
+        radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--red-bright) 16%, transparent), transparent 38%),
+        linear-gradient(180deg, color-mix(in srgb, var(--panel-2) 76%, #050506), color-mix(in srgb, var(--bg) 90%, #000));
+}
+
+body[data-quiz-editor-workspace] #question-preview-content {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+body[data-quiz-editor-workspace] #question-preview-content
+    > .game-content-block:not(.all-player-answer-option),
+body[data-quiz-editor-workspace] .question-preview-media {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body[data-quiz-editor-workspace="final"] .question-preview-title {
+    color: var(--gold);
+}
+
+body[data-quiz-editor-workspace="final"] .question-preview-text {
+    font-size: clamp(1.35rem, 2.3vw, 2.5rem);
+    line-height: 1.3;
+    text-shadow: 0 8px 24px rgb(0 0 0 / 28%);
+}
+
+body[data-quiz-editor-workspace="final"] :is(.question-preview-image, .question-preview-video) {
+    border-radius: clamp(14px, 1.4vw, 22px);
+    box-shadow:
+        0 22px 54px rgb(0 0 0 / 32%),
+        0 0 0 1px color-mix(in srgb, var(--gold) 15%, transparent);
+}
+
+/* Round/category description preview mirrors the live intro stage. */
+body[data-quiz-editor-workspace="description"]
+    .description-preview-modal .question-preview-screen {
+    padding: clamp(10px, 1.4vh, 16px) clamp(20px, 3.5vw, 56px) clamp(8px, 1.1vh, 14px);
+    grid-template-rows: auto auto;
+    align-content: center;
+    gap: clamp(16px, 1.9vh, 24px);
+}
+
+body[data-quiz-editor-workspace="description"]
+    .description-preview-modal .question-preview-title {
+    width: 100%;
+    max-width: 24ch;
+    margin: 0 auto;
+    color: var(--text);
+    font-size: clamp(2.75rem, 6.6vw, 6.7rem);
+    line-height: .94;
+    letter-spacing: -.025em;
+    font-weight: 950;
+    text-align: center;
+    text-transform: none;
+    text-wrap: balance;
+    text-shadow:
+        0 14px 34px rgb(0 0 0 / 38%),
+        0 0 28px color-mix(in srgb, var(--red-bright) 13%, transparent);
+}
+
+body[data-quiz-editor-workspace="description"]
+    .description-preview-modal .question-preview-title::before {
+    content: "BAD WOLF QUIZ";
+    display: block;
+    margin-bottom: clamp(5px, .7vh, 8px);
+    color: var(--gold);
+    font-size: clamp(.7rem, .95vw, .88rem);
+    line-height: 1;
+    font-weight: 850;
+    letter-spacing: .26em;
+    text-transform: uppercase;
+    text-shadow: 0 0 18px color-mix(in srgb, var(--gold) 28%, transparent);
+}
+
+body[data-quiz-editor-workspace="description"]
+    .description-preview-modal .question-preview-content {
+    min-height: 0;
+    max-height: none;
+    align-self: auto;
+    align-content: center;
+    gap: clamp(18px, 2vh, 28px);
+    padding: 0;
+    overflow: hidden;
+}
+
+body[data-quiz-editor-workspace="description"]
+    .description-preview-modal .question-preview-text {
+    width: min(1400px, 100%);
+    max-width: none;
+    margin-inline: auto;
+    padding: clamp(10px, 1.2vw, 16px) clamp(16px, 2.2vw, 28px);
+    border-left: 3px solid color-mix(in srgb, var(--red-bright) 72%, var(--line));
+    background: linear-gradient(90deg, color-mix(in srgb, var(--panel-2) 74%, transparent), transparent 94%);
+    color: var(--text);
+    font-size: clamp(1.08rem, 1.8vw, 1.65rem);
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+}
+
+body[data-quiz-editor-workspace="description"]
+    .description-preview-modal .question-preview-media {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 7px;
+    justify-items: center;
+    overflow: hidden;
+}
+
+body[data-quiz-editor-workspace="description"]
+    .description-preview-modal .question-preview-image {
+    display: block;
+    width: auto !important;
+    height: min(54vh, 620px) !important;
+    max-width: 100%;
+    max-height: none;
+    object-fit: contain;
+    border: 0;
+    border-radius: clamp(12px, 1.3vw, 20px);
+    box-shadow: none;
+}
+
+body[data-quiz-editor-workspace="description"]
+    .description-preview-modal .question-preview-media:has(> .question-preview-caption:first-child):has(> .question-preview-caption:last-child)
+    .question-preview-image {
+    height: min(43vh, 500px) !important;
+}
+
+body[data-quiz-editor-workspace="description"]
+    .description-preview-modal .question-preview-caption {
+    width: min(1300px, 100%);
+    max-width: none;
+    margin: 0 auto;
+    color: var(--muted);
+    font-size: clamp(1.64rem, 2.28vw, 2.15rem);
+    line-height: 1.18;
+    text-align: center;
+}
+
+@media (max-width: 760px) {
+    body[data-quiz-editor-workspace] > .page-shell {
+        padding-bottom: 4px;
+    }
+
+    body[data-quiz-editor-workspace="description"]
+        .description-preview-modal .question-preview-screen {
+        padding: 8px 14px 6px;
+        gap: 14px;
+    }
+
+    body[data-quiz-editor-workspace="description"]
+        .description-preview-modal .question-preview-title {
+        max-width: none;
+        font-size: clamp(2.35rem, 11vw, 4.6rem);
+    }
+
+    body[data-quiz-editor-workspace="description"]
+        .description-preview-modal .question-preview-text {
+        border-left: 0;
+        border-top: 2px solid color-mix(in srgb, var(--red-bright) 62%, var(--line));
+        background: linear-gradient(180deg, color-mix(in srgb, var(--panel-2) 70%, transparent), transparent);
+        text-align: center;
+    }
+}
+
+@media (max-height: 760px) {
+    body[data-quiz-editor-workspace="description"]
+        .description-preview-modal .question-preview-screen {
+        gap: 10px;
+        padding-block: 5px 4px;
+    }
+
+    body[data-quiz-editor-workspace="description"]
+        .description-preview-modal .question-preview-title {
+        font-size: clamp(2.2rem, 6.2vh, 4.3rem);
+    }
+
+    body[data-quiz-editor-workspace="description"]
+        .description-preview-modal .question-preview-image {
+        height: 38vh !important;
+    }
+
+    body[data-quiz-editor-workspace="description"]
+        .description-preview-modal .question-preview-media:has(> .question-preview-caption:first-child):has(> .question-preview-caption:last-child)
+        .question-preview-image {
+        height: 28vh !important;
+    }
+}

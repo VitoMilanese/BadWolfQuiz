@@ -1,0 +1,74 @@
+/* Final browser fixes from manual Quiz Editor review. */
+
+/* Keep question-card action buttons vertically balanced inside the card. */
+body[data-quiz-editor-workspace="board"] .question-card-actions.has-question-copy {
+    top: 0;
+    bottom: 0;
+    gap: 6px;
+    justify-content: center;
+    padding-block: 0;
+}
+
+/* Image preview chrome must follow the image itself, never the full content block. */
+body[data-quiz-editor-workspace="question"]
+    #question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)
+    .question-preview-media:has(> .question-preview-image),
+body[data-quiz-editor-workspace="final"]
+    #question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)
+    .question-preview-media:has(> .question-preview-image) {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+
+/* Give normal preview images a gameplay-sized height so small source files are
+   allowed to upscale, while their visible chrome still follows the image. */
+body[data-quiz-editor-workspace="question"]
+    #question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)
+    .question-preview-image,
+body[data-quiz-editor-workspace="final"]
+    #question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)
+    .question-preview-image {
+    display: block;
+    width: auto !important;
+    height: min(58vh, 640px) !important;
+    max-width: 100% !important;
+    max-height: min(58vh, 640px) !important;
+    object-fit: contain;
+    border: 0 !important;
+    border-radius: clamp(12px, 1.3vw, 20px);
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+    justify-self: center;
+}
+
+/* Container layouts normally stretch media to the full grid column. Preserve
+   the grid column, but keep the preview image itself gameplay-sized. */
+body[data-quiz-editor-workspace="question"]
+    #question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)
+    .content-block-container-layout .question-preview-image,
+body[data-quiz-editor-workspace="final"]
+    #question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)
+    .content-block-container-layout .question-preview-image {
+    width: auto !important;
+    height: min(58vh, 640px) !important;
+    max-width: 100% !important;
+    max-height: min(58vh, 640px) !important;
+    justify-self: center;
+}
+
+@media (max-width: 760px) {
+    body[data-quiz-editor-workspace="question"]
+        #question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)
+        .question-preview-image,
+    body[data-quiz-editor-workspace="final"]
+        #question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)
+        .question-preview-image {
+        height: min(50vh, 520px) !important;
+        max-height: min(50vh, 520px) !important;
+    }
+}
