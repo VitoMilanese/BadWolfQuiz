@@ -55,6 +55,7 @@ body.${selectionBodyClass} [contenteditable="true"] {
         let questionBusyOverlayOwned = false;
         let questionErrorObserver = null;
         let lockedQuestionButtons = [];
+        let questionLayoutSnapshot = null;
 
         const isGameplayForm = form =>
             form instanceof HTMLFormElement &&
@@ -114,6 +115,100 @@ body.${selectionBodyClass} [contenteditable="true"] {
             return `${form.method.toUpperCase()} ${action.href} ${fields}`;
         };
 
+        const restoreInlineProperties = snapshot => {
+            for (const property of snapshot.properties) {
+                if (property.value) {
+                    snapshot.element.style.setProperty(
+                        property.name,
+                        property.value,
+                        property.priority);
+                } else {
+                    snapshot.element.style.removeProperty(property.name);
+                }
+            }
+        };
+
+        const restoreQuestionSelectionLayout = () => {
+            const snapshot = questionLayoutSnapshot;
+            questionLayoutSnapshot = null;
+            if (!snapshot) {
+                return;
+            }
+
+            restoreInlineProperties(snapshot.hostBoard);
+            restoreInlineProperties(snapshot.board);
+        };
+
+        const captureInlineProperties = (element, propertyNames) => ({
+            element,
+            properties: propertyNames.map(name => ({
+                name,
+                value: element.style.getPropertyValue(name),
+                priority: element.style.getPropertyPriority(name)
+            }))
+        });
+
+        const freezeQuestionSelectionLayout = board => {
+            const hostBoard = board.closest(".host-game-board");
+            if (!(hostBoard instanceof HTMLElement) ||
+                !(board instanceof HTMLElement)) {
+                return;
+            }
+
+            if (questionLayoutSnapshot?.board.element === board) {
+                return;
+            }
+
+            restoreQuestionSelectionLayout();
+
+            const propertyNames = [
+                "width",
+                "max-width",
+                "height",
+                "min-height",
+                "max-height",
+                "margin-top",
+                "margin-right",
+                "margin-bottom",
+                "margin-left"
+            ];
+            const boardPropertyNames = [
+                "width",
+                "min-width",
+                "max-width",
+                "height",
+                "min-height",
+                "max-height"
+            ];
+            const computedStyle = window.getComputedStyle(hostBoard);
+            const boardBounds = board.getBoundingClientRect();
+            questionLayoutSnapshot = {
+                hostBoard: captureInlineProperties(hostBoard, propertyNames),
+                board: captureInlineProperties(board, boardPropertyNames)
+            };
+
+            for (const property of propertyNames) {
+                const value = computedStyle.getPropertyValue(property);
+                if (value) {
+                    hostBoard.style.setProperty(property, value, "important");
+                }
+            }
+
+            if (boardBounds.width > 0) {
+                const boardWidth = `${boardBounds.width}px`;
+                board.style.setProperty("width", boardWidth, "important");
+                board.style.setProperty("min-width", boardWidth, "important");
+                board.style.setProperty("max-width", boardWidth, "important");
+            }
+
+            if (boardBounds.height > 0) {
+                const boardHeight = `${boardBounds.height}px`;
+                board.style.setProperty("height", boardHeight, "important");
+                board.style.setProperty("min-height", boardHeight, "important");
+                board.style.setProperty("max-height", boardHeight, "important");
+            }
+        };
+
         const releaseQuestionSelectionBusy = () => {
             window.clearTimeout(questionBusyHandle);
             window.clearTimeout(questionSafetyHandle);
@@ -131,6 +226,7 @@ body.${selectionBodyClass} [contenteditable="true"] {
             lockedQuestionButtons = [];
             document.querySelector("[data-host-gameplay-board]")
                 ?.removeAttribute("aria-busy");
+            restoreQuestionSelectionLayout();
 
             if (questionBusyOverlayOwned) {
                 questionBusyOverlayOwned = false;
@@ -163,6 +259,7 @@ body.${selectionBodyClass} [contenteditable="true"] {
                 return;
             }
 
+            freezeQuestionSelectionLayout(board);
             board.querySelectorAll(questionButtonSelector)
                 .forEach(rememberAndDisableQuestionButton);
             board.setAttribute("aria-busy", "true");
@@ -178,6 +275,7 @@ body.${selectionBodyClass} [contenteditable="true"] {
                 return false;
             }
 
+            freezeQuestionSelectionLayout(board);
             questionSelectionBusy = true;
             lockedQuestionButtons = [];
             Array.from(board.querySelectorAll(questionButtonSelector))
