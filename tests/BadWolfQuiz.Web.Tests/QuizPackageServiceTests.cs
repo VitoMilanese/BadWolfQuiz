@@ -12,7 +12,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class QuizPackageServiceTests
 {
     [Fact]
-    public async Task Export_import_round_trip_preserves_round_and_category_descriptions()
+    public async Task Export_import_round_trip_preserves_round_category_descriptions_and_question_tags()
     {
         const string hostId = "host-365";
         await using var connection = new SqliteConnection("Data Source=:memory:");
@@ -92,6 +92,16 @@ public sealed class QuizPackageServiceTests
             BuzzModeOverride = BuzzActivationMode.UseRoundDefault,
             PresentationType = QuestionPresentationType.Standard
         };
+        question.Tags.Add(new QuizQuestionTag
+        {
+            Name = "фільми 90-х",
+            NormalizedName = "фільми 90-х".ToUpperInvariant()
+        });
+        question.Tags.Add(new QuizQuestionTag
+        {
+            Name = "комедія",
+            NormalizedName = "комедія".ToUpperInvariant()
+        });
         question.QuestionBlocks.Add(new QuestionContentBlock
         {
             BlockType = ContentBlockType.Text,
@@ -135,6 +145,9 @@ public sealed class QuizPackageServiceTests
                 .Include(item => item.Rounds).ThenInclude(item => item.Categories)
                     .ThenInclude(item => item.Questions)
                         .ThenInclude(item => item.AnswerBlocks)
+                .Include(item => item.Rounds).ThenInclude(item => item.Categories)
+                    .ThenInclude(item => item.Questions)
+                        .ThenInclude(item => item.Tags)
                 .SingleAsync(item => item.Id == importedId);
 
             var importedRound = Assert.Single(persisted.Rounds);
@@ -167,6 +180,9 @@ public sealed class QuizPackageServiceTests
             var importedQuestion = Assert.Single(importedCategory.Questions);
             Assert.Equal("Question", Assert.Single(importedQuestion.QuestionBlocks).TextContent);
             Assert.Equal("Answer", Assert.Single(importedQuestion.AnswerBlocks).TextContent);
+            Assert.Equal(
+                new[] { "комедія", "фільми 90-х" },
+                importedQuestion.Tags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray());
         }
     }
 }
