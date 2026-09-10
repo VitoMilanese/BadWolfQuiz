@@ -228,6 +228,7 @@ public sealed class QuizQuestion
     public QuizCategory Category { get; set; } = null!;
     public ICollection<QuestionContentBlock> QuestionBlocks { get; set; } = new List<QuestionContentBlock>();
     public ICollection<AnswerContentBlock> AnswerBlocks { get; set; } = new List<AnswerContentBlock>();
+    public ICollection<QuizQuestionTag> Tags { get; set; } = new List<QuizQuestionTag>();
 }
 
 public abstract class ContentBlockBase

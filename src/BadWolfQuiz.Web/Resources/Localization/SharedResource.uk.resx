@@ -2829,4 +2829,19 @@
   <data name="Minigames_QuestionAwaitingResponse" xml:space="preserve">
     <value>Очікуємо відповідь {player}.</value>
   </data>
+  <data name="Label_QuestionTags" xml:space="preserve">
+    <value>Теги</value>
+  </data>
+  <data name="Placeholder_QuestionTag" xml:space="preserve">
+    <value>Додайте або виберіть тег</value>
+  </data>
+  <data name="Button_AddTag" xml:space="preserve">
+    <value>Додати тег</value>
+  </data>
+  <data name="Hint_QuestionTags" xml:space="preserve">
+    <value>Виберіть запропонований тег або введіть власний. Enter додає тег.</value>
+  </data>
+  <data name="QuestionTags_MaxLength" xml:space="preserve">
+    <value>Тег може містити не більше 100 символів.</value>
+  </data>
 </root>

@@ -2829,4 +2829,19 @@
   <data name="Minigames_QuestionAwaitingResponse" xml:space="preserve">
     <value>In attesa della risposta di {player}.</value>
   </data>
+  <data name="Label_QuestionTags" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="Placeholder_QuestionTag" xml:space="preserve">
+    <value>Aggiungi o seleziona un tag</value>
+  </data>
+  <data name="Button_AddTag" xml:space="preserve">
+    <value>Aggiungi tag</value>
+  </data>
+  <data name="Hint_QuestionTags" xml:space="preserve">
+    <value>Scegli un tag suggerito o inseriscine uno personalizzato. Premi Invio per aggiungerlo.</value>
+  </data>
+  <data name="QuestionTags_MaxLength" xml:space="preserve">
+    <value>Un tag può contenere al massimo 100 caratteri.</value>
+  </data>
 </root>

@@ -35,6 +35,10 @@ public static class QuizCloneOperations
                 .ThenInclude(round => round.Categories)
                     .ThenInclude(category => category.Questions)
                         .ThenInclude(question => question.AnswerBlocks)
+            .Include(quiz => quiz.Rounds)
+                .ThenInclude(round => round.Categories)
+                    .ThenInclude(category => category.Questions)
+                        .ThenInclude(question => question.Tags)
             .SingleOrDefaultAsync(
                 quiz => quiz.Id == sourceQuizId &&
                     !quiz.IsArchived &&
@@ -118,6 +122,15 @@ public static class QuizCloneOperations
                         ExcludeFromRandomWagerSelection = sourceQuestion.ExcludeFromRandomWagerSelection,
                         UpdatedAtUtc = now
                     };
+
+                    foreach (var sourceTag in sourceQuestion.Tags.OrderBy(tag => tag.Name))
+                    {
+                        question.Tags.Add(new QuizQuestionTag
+                        {
+                            Name = sourceTag.Name,
+                            NormalizedName = sourceTag.NormalizedName
+                        });
+                    }
 
                     foreach (var sourceBlock in sourceQuestion.QuestionBlocks.OrderBy(block => block.SortOrder))
                     {
