@@ -62,8 +62,34 @@ public sealed class PlayerAchievementServiceTests
         Assert.True(PlayerAchievementService.Catalog.Single(item => item.Code == "SilentRoundGain").IsSecret);
     }
 
-    [Fact]
-    public void Catalog_uses_fifteen_thousand_points_for_big_game()
+    [Theory]
+[InlineData("SuperChupa")]
+[InlineData("superchupa")]
+public async Task LoadForPlayerAsync_returns_every_achievement_unlocked_for_SuperChupa(string playerName)
+{
+    var options = new DbContextOptionsBuilder<QuizDbContext>()
+        .UseSqlite("Data Source=:memory:")
+        .Options;
+    await using var db = new QuizDbContext(options);
+    var service = new PlayerAchievementService(db);
+
+    var achievements = await service.LoadForPlayerAsync(
+        "preview-host",
+        playerName,
+        currentGameCode: null);
+
+    Assert.Equal(PlayerAchievementService.Catalog.Count, achievements.Count);
+    Assert.All(achievements, achievement =>
+    {
+        Assert.True(achievement.IsUnlocked);
+        Assert.False(achievement.IsNewInCurrentGame);
+        Assert.Equal(achievement.Target, achievement.Progress);
+    });
+    Assert.Empty(db.ChangeTracker.Entries<PlayerAchievement>());
+}
+
+[Fact]
+public void Catalog_uses_fifteen_thousand_points_for_big_game()
     {
         var achievement = Assert.Single(
             PlayerAchievementService.Catalog,
