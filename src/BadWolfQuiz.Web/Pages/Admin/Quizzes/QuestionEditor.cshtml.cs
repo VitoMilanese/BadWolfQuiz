@@ -23,6 +23,19 @@ public sealed class QuestionEditorModel(
 
     public int? NextQuestionId { get; private set; }
 
+    public static IReadOnlyList<string> TagSuggestions { get; } =
+    [
+        "фільми до 90-х", "фільми 90-х", "фільми 2000-х",
+        "фільми 2010-х", "фільми 2020-х",
+        "мультфільми до 90-х", "мультфільми 90-х", "мультфільми 2000-х",
+        "мультфільми 2010-х", "мультфільми 2020-х",
+        "серіали до 90-х", "серіали 90-х", "серіали 2000-х",
+        "серіали 2010-х", "серіали 2020-х",
+        "мультсеріали до 90-х", "мультсеріали 90-х", "мультсеріали 2000-х",
+        "мультсеріали 2010-х", "мультсеріали 2020-х",
+        "ретро-ігри", "ігри 90-х", "ігри 2000-х", "ігри 2010-х", "ігри 2020-х"
+    ];
+
     public async Task<IActionResult> OnGetAsync(int id)
     {
         var canEdit = await db.QuizQuestions.AsNoTracking().AnyAsync(x =>
@@ -40,6 +53,7 @@ public sealed class QuestionEditorModel(
                 .ThenInclude(x => x.Round)
             .Include(x => x.QuestionBlocks)
             .Include(x => x.AnswerBlocks)
+            .Include(x => x.Tags)
             .SingleOrDefaultAsync(x => x.Id == id);
 
         if (question is null)
@@ -66,7 +80,10 @@ public sealed class QuestionEditorModel(
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
             BuzzModeOverride = question.BuzzModeOverride,
-            BuzzDelaySeconds = question.BuzzDelaySeconds
+            BuzzDelaySeconds = question.BuzzDelaySeconds,
+            Tags = question.Tags.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase)
+                .Select(x => x.Name)
+                .ToList()
         };
 
         Input.QuestionBlocks = question.QuestionBlocks
@@ -180,6 +197,14 @@ public sealed class QuestionEditorModel(
             ValidateHostMultipleChoiceAnswerOptions();
         }
 
+        Input.Tags = NormalizeTags(Input.Tags);
+        if (Input.Tags.Any(tag => tag.Length > 100))
+        {
+            ModelState.AddModelError(
+                $"{nameof(Input)}.{nameof(Input.Tags)}",
+                localizer["QuestionTags_MaxLength"]);
+        }
+
         if (!ModelState.IsValid)
         {
             if (IsAjaxRequest())
@@ -190,8 +215,10 @@ public sealed class QuestionEditorModel(
         }
 
         var question = await db.QuizQuestions
+            .AsSplitQuery()
             .Include(x => x.QuestionBlocks)
             .Include(x => x.AnswerBlocks)
+            .Include(x => x.Tags)
             .SingleOrDefaultAsync(x => x.Id == Input.Id);
 
         if (question is null)
@@ -223,6 +250,7 @@ public sealed class QuestionEditorModel(
             ? 0
             : Math.Max(0, Input.BuzzDelaySeconds);
         question.UpdatedAtUtc = DateTime.UtcNow;
+        SynchronizeTags(question, Input.Tags);
 
         var submittedQuestionBlockIds = Input.QuestionBlocks
             .Where(x => x.Id.HasValue)
@@ -616,6 +644,58 @@ public sealed class QuestionEditorModel(
         blocks.AddRange(ordered);
     }
 
+    private static List<string> NormalizeTags(IEnumerable<string>? tags)
+    {
+        var result = new List<string>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var value in tags ?? [])
+        {
+            var tag = value?.Trim();
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                continue;
+            }
+
+            var normalized = NormalizeTagName(tag);
+            if (seen.Add(normalized))
+            {
+                result.Add(tag);
+            }
+        }
+
+        return result;
+    }
+
+    private static string NormalizeTagName(string tag) =>
+        tag.Trim().ToUpperInvariant();
+
+    private static void SynchronizeTags(QuizQuestion question, IReadOnlyCollection<string> tags)
+    {
+        var desired = tags.ToDictionary(NormalizeTagName, tag => tag, StringComparer.Ordinal);
+        foreach (var existing in question.Tags.ToArray())
+        {
+            if (!desired.ContainsKey(existing.NormalizedName))
+            {
+                question.Tags.Remove(existing);
+            }
+        }
+
+        var existingNames = question.Tags
+            .Select(tag => tag.NormalizedName)
+            .ToHashSet(StringComparer.Ordinal);
+        foreach (var pair in desired)
+        {
+            if (existingNames.Add(pair.Key))
+            {
+                question.Tags.Add(new QuizQuestionTag
+                {
+                    Name = pair.Value,
+                    NormalizedName = pair.Key
+                });
+            }
+        }
+    }
+
     private bool IsAjaxRequest() => string.Equals(
         Request.Headers["X-Requested-With"],
         "XMLHttpRequest",
@@ -755,6 +835,8 @@ public sealed class QuestionEditorModel(
         [Display(Name = "Label_BuzzDelay")]
         [Range(0, int.MaxValue)]
         public int BuzzDelaySeconds { get; set; }
+
+        public List<string> Tags { get; set; } = [];
 
         public List<ContentBlockInputModel> QuestionBlocks { get; set; } = [];
 

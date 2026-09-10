@@ -2829,4 +2829,19 @@
   <data name="Minigames_QuestionAwaitingResponse" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="Label_QuestionTags" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Placeholder_QuestionTag" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Button_AddTag" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Hint_QuestionTags" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionTags_MaxLength" xml:space="preserve">
+    <value>Україна</value>
+  </data>
 </root>

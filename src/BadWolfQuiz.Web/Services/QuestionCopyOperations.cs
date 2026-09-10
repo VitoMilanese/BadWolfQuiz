@@ -140,6 +140,7 @@ public static class QuestionCopyOperations
                     !question.IsSpecial &&
                     question.PresentationType == default &&
                     !question.ExcludeFromRandomWagerSelection &&
+                    !question.Tags.Any() &&
                     !question.QuestionBlocks.Any(block =>
                         block.BlockType != ContentBlockType.Text ||
                         (block.TextContent != null && block.TextContent.Trim() != string.Empty) ||
@@ -239,6 +240,7 @@ public static class QuestionCopyOperations
                     .ThenInclude(round => round.Quiz)
             .Include(question => question.QuestionBlocks)
             .Include(question => question.AnswerBlocks)
+            .Include(question => question.Tags)
             .SingleOrDefaultAsync(question =>
                 question.Id == sourceQuestionId &&
                 question.Category.Round.Quiz.HostId == hostId &&
@@ -263,6 +265,10 @@ public static class QuestionCopyOperations
                 .ThenInclude(round => round.Categories)
                     .ThenInclude(category => category.Questions)
                         .ThenInclude(question => question.AnswerBlocks)
+            .Include(category => category.Round)
+                .ThenInclude(round => round.Categories)
+                    .ThenInclude(category => category.Questions)
+                        .ThenInclude(question => question.Tags)
             .Include(category => category.Round)
                 .ThenInclude(round => round.Quiz)
             .SingleOrDefaultAsync(category =>
@@ -375,6 +381,7 @@ public static class QuestionCopyOperations
         !question.IsSpecial &&
         question.PresentationType == default &&
         !question.ExcludeFromRandomWagerSelection &&
+        question.Tags.Count == 0 &&
         question.QuestionBlocks.All(IsBlankBlock) &&
         question.AnswerBlocks.All(IsBlankBlock);
 
@@ -407,10 +414,18 @@ public static class QuestionCopyOperations
 
         var existingQuestionBlocks = target.QuestionBlocks.ToArray();
         var existingAnswerBlocks = target.AnswerBlocks.ToArray();
+        var existingTags = target.Tags.ToArray();
         db.QuestionContentBlocks.RemoveRange(existingQuestionBlocks);
         db.AnswerContentBlocks.RemoveRange(existingAnswerBlocks);
+        db.QuizQuestionTags.RemoveRange(existingTags);
         target.QuestionBlocks.Clear();
         target.AnswerBlocks.Clear();
+        target.Tags.Clear();
+
+        foreach (var tag in source.Tags.OrderBy(tag => tag.Name))
+        {
+            target.Tags.Add(CloneTag(tag));
+        }
 
         foreach (var block in source.QuestionBlocks.OrderBy(block => block.SortOrder))
         {
@@ -440,6 +455,11 @@ public static class QuestionCopyOperations
                 source.ExcludeFromRandomWagerSelection,
             UpdatedAtUtc = now
         };
+
+        foreach (var tag in source.Tags.OrderBy(tag => tag.Name))
+        {
+            copy.Tags.Add(CloneTag(tag));
+        }
 
         foreach (var block in source.QuestionBlocks.OrderBy(block => block.SortOrder))
         {
@@ -473,6 +493,12 @@ public static class QuestionCopyOperations
         });
         return question;
     }
+
+    private static QuizQuestionTag CloneTag(QuizQuestionTag source) => new()
+    {
+        Name = source.Name,
+        NormalizedName = source.NormalizedName
+    };
 
     private static QuestionContentBlock CloneQuestionBlock(
         QuestionContentBlock source) => new()

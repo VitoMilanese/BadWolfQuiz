@@ -29,6 +29,15 @@
     </div>
 }
 
+<style>
+    .question-tags-setting { display: grid; gap: .65rem; }
+    .question-tag-list { display: flex; flex-wrap: wrap; gap: .45rem; min-height: 1rem; }
+    .question-tag-chip { display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .55rem; border: 1px solid var(--border-color, #777); border-radius: 999px; }
+    .question-tag-remove { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1.15rem; line-height: 1; padding: 0; }
+    .question-tag-entry { display: flex; gap: .5rem; align-items: center; }
+    .question-tag-entry input { flex: 1 1 18rem; min-width: 0; }
+</style>
+
 <form method="post" class="question-editor" enctype="multipart/form-data"
       data-ajax-question-editor
       data-save-error="@Localizer["Error_Unexpected"]">
@@ -48,6 +57,34 @@
             <option value="3">@Localizer["QuestionType_AllPlayerMultipleChoice"]</option>
         </select>
         <small id="four-clues-help" hidden>@Localizer["FourClues_EditorHint"]</small>
+    </section>
+
+    <section class="content-panel question-tags-setting" data-question-tags-editor>
+        <label for="question-tag-input"><strong>@Localizer["Label_QuestionTags"]</strong></label>
+        <div class="question-tag-list" data-question-tag-list></div>
+        <div class="question-tag-fields" data-question-tag-fields>
+            @foreach (var tag in Model.Input.Tags)
+            {
+                <input type="hidden" name="Input.Tags" value="@tag" />
+            }
+        </div>
+        <div class="question-tag-entry">
+            <input id="question-tag-input" type="text" maxlength="100"
+                   list="question-tag-suggestions"
+                   placeholder="@Localizer["Placeholder_QuestionTag"]"
+                   autocomplete="off" />
+            <button class="button button-secondary" type="button" data-add-question-tag>
+                @Localizer["Button_AddTag"]
+            </button>
+        </div>
+        <datalist id="question-tag-suggestions">
+            @foreach (var tag in QuestionEditorModel.TagSuggestions)
+            {
+                <option value="@tag"></option>
+            }
+        </datalist>
+        <small>@Localizer["Hint_QuestionTags"]</small>
+        <span asp-validation-for="Input.Tags" class="text-danger"></span>
     </section>
 
     <h2>@Localizer["Label_Question"]</h2>
@@ -146,6 +183,77 @@
 
 @section Scripts {
     <script src="~/js/image-clipboard-upload.js" asp-append-version="true"></script>
+    <script>
+        (() => {
+            const editor = document.querySelector("[data-question-tags-editor]");
+            if (!editor) {
+                return;
+            }
+
+            const input = editor.querySelector("#question-tag-input");
+            const list = editor.querySelector("[data-question-tag-list]");
+            const fields = editor.querySelector("[data-question-tag-fields]");
+            const addButton = editor.querySelector("[data-add-question-tag]");
+            let tags = [...fields.querySelectorAll('input[name="Input.Tags"]')]
+                .map(field => field.value.trim())
+                .filter(Boolean);
+
+            const key = value => value.toLocaleUpperCase("uk-UA");
+            const render = () => {
+                list.replaceChildren();
+                fields.replaceChildren();
+                tags.forEach(tag => {
+                    const chip = document.createElement("span");
+                    chip.className = "question-tag-chip";
+
+                    const text = document.createElement("span");
+                    text.textContent = tag;
+                    chip.appendChild(text);
+
+                    const remove = document.createElement("button");
+                    remove.type = "button";
+                    remove.className = "question-tag-remove";
+                    remove.setAttribute("aria-label", `Remove ${tag}`);
+                    remove.textContent = "×";
+                    remove.addEventListener("click", () => {
+                        const normalized = key(tag);
+                        tags = tags.filter(item => key(item) !== normalized);
+                        render();
+                    });
+                    chip.appendChild(remove);
+                    list.appendChild(chip);
+
+                    const hidden = document.createElement("input");
+                    hidden.type = "hidden";
+                    hidden.name = "Input.Tags";
+                    hidden.value = tag;
+                    fields.appendChild(hidden);
+                });
+            };
+
+            const addTag = () => {
+                const value = input.value.trim();
+                if (!value || value.length > 100) {
+                    return;
+                }
+                if (!tags.some(tag => key(tag) === key(value))) {
+                    tags.push(value);
+                    render();
+                }
+                input.value = "";
+                input.focus();
+            };
+
+            addButton?.addEventListener("click", addTag);
+            input?.addEventListener("keydown", event => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    addTag();
+                }
+            });
+            render();
+        })();
+    </script>
     <script>
         (() => {
             const form = document.querySelector("[data-ajax-question-editor]");

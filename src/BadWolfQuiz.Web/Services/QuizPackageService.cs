@@ -39,6 +39,9 @@ public sealed class QuizPackageService(QuizDbContext db)
             .Include(item => item.Rounds).ThenInclude(round => round.Categories)
                 .ThenInclude(category => category.Questions)
                     .ThenInclude(question => question.AnswerBlocks)
+            .Include(item => item.Rounds).ThenInclude(round => round.Categories)
+                .ThenInclude(category => category.Questions)
+                    .ThenInclude(question => question.Tags)
             .SingleOrDefaultAsync(item => item.Id == quizId && !item.IsArchived, cancellationToken);
 
         if (quiz is null)
@@ -104,7 +107,8 @@ public sealed class QuizPackageService(QuizDbContext db)
                                     question.PresentationType,
                                     question.ExcludeFromRandomWagerSelection,
                                     question.QuestionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
-                                    question.AnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray()))
+                                    question.AnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
+                                    question.Tags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray()))
                                 .ToArray(),
                             category.DescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray()))
                         .ToArray(),
@@ -254,6 +258,15 @@ public sealed class QuizPackageService(QuizDbContext db)
                         ExcludeFromRandomWagerSelection = sourceQuestion.ExcludeFromRandomWagerSelection,
                         UpdatedAtUtc = now
                     };
+                    foreach (var tag in sourceQuestion.Tags ?? [])
+                    {
+                        var name = tag.Trim();
+                        question.Tags.Add(new QuizQuestionTag
+                        {
+                            Name = name,
+                            NormalizedName = name.ToUpperInvariant()
+                        });
+                    }
                     foreach (var sourceBlock in sourceQuestion.QuestionBlocks)
                     {
                         var block = new QuestionContentBlock();
@@ -351,7 +364,13 @@ public sealed class QuizPackageService(QuizDbContext db)
                     (!Enum.IsDefined(question.PresentationType) &&
                      !QuestionWagerModes.IsAnonymousShared(question.PresentationType)) ||
                     question.PresentationType == QuestionPresentationType.FourClues &&
-                        (question.IsSpecial || question.QuestionBlocks.Length != 4))
+                        (question.IsSpecial || question.QuestionBlocks.Length != 4) ||
+                    question.Tags is { Length: > 30 } ||
+                    question.Tags?.Any(tag => string.IsNullOrWhiteSpace(tag) || tag.Trim().Length > 100) == true ||
+                    question.Tags is not null && question.Tags
+                        .Select(tag => tag.Trim().ToUpperInvariant())
+                        .Distinct(StringComparer.Ordinal)
+                        .Count() != question.Tags.Length)
                 {
                     throw new InvalidDataException("The quiz manifest contains invalid question data.");
                 }
@@ -415,7 +434,8 @@ public sealed class QuizPackageService(QuizDbContext db)
     private sealed record QuestionData(
         int RowIndex, int? TimeLimitSecondsOverride, BuzzActivationMode BuzzModeOverride,
         int BuzzDelaySeconds, bool IsSpecial, QuestionPresentationType PresentationType,
-        bool ExcludeFromRandomWagerSelection, BlockData[] QuestionBlocks, BlockData[] AnswerBlocks);
+        bool ExcludeFromRandomWagerSelection, BlockData[] QuestionBlocks, BlockData[] AnswerBlocks,
+        string[]? Tags = null);
     private sealed record BlockData(
         ContentBlockType BlockType, string? TextContent, string? TopCaption,
         string? BottomCaption, string? MediaPath, string? ExternalUrl,
