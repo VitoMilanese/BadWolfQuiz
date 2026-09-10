@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -56,6 +57,16 @@ public sealed class AskQuestionModel(
         };
 
         db.UserQuestions.Add(userQuestion);
+        var accountId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!string.IsNullOrWhiteSpace(accountId))
+        {
+            db.UserQuestionAccountLinks.Add(new UserQuestionAccountLink
+            {
+                UserQuestion = userQuestion,
+                AccountId = accountId
+            });
+        }
+
         await db.SaveChangesAsync(cancellationToken);
 
         var discordMessageId = await questionSender.SendAsync(
@@ -79,6 +90,14 @@ public sealed class AskQuestionModel(
 
         userMessage.DiscordMessageId = discordMessageId.Value;
         await db.SaveChangesAsync(cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(accountId))
+        {
+            await new PlayerAchievementService(db).UnlockAccountAsync(
+                accountId,
+                "DeveloperContacted",
+                cancellationToken: cancellationToken);
+        }
 
         questionHistory.Add(Request, Response, userQuestion.PublicToken);
 

@@ -13,6 +13,9 @@ public static class DatabaseMigrationService
     private const string ContentBlockAutoplayMigrationId =
         "20260816103000_AddContentBlockAutoplay";
 
+    private const string PlayerAchievementsMigrationId =
+        "20260909225025_AddPlayerAchievements";
+
     private static readonly string[] ContentBlockAutoplayTables =
     [
         "QuestionContentBlocks",
@@ -32,6 +35,7 @@ public static class DatabaseMigrationService
         await BootstrapMigrationHistoryAsync(db, cancellationToken);
         await UpgradeLegacyQuizRatingsAsync(db, cancellationToken);
         await PrepareContentBlockAutoplayMigrationAsync(db, cancellationToken);
+        await PreparePlayerAchievementsMigrationAsync(db, cancellationToken);
         await db.Database.MigrateAsync(cancellationToken);
         await EnsureContentBlockAutoplayColumnsAsync(db, cancellationToken);
     }
@@ -91,6 +95,198 @@ public static class DatabaseMigrationService
             productVersion.Value = EfProductVersion;
             command.Parameters.Add(productVersion);
             await command.ExecuteNonQueryAsync(cancellationToken);
+        }
+        finally
+        {
+            if (shouldClose)
+            {
+                await connection.CloseAsync();
+            }
+        }
+    }
+
+    private static async Task PreparePlayerAchievementsMigrationAsync(
+        QuizDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var connection = db.Database.GetDbConnection();
+        var shouldClose = connection.State == ConnectionState.Closed;
+
+        if (shouldClose)
+        {
+            await connection.OpenAsync(cancellationToken);
+        }
+
+        try
+        {
+            if (!await TableExistsAsync(connection, "__EFMigrationsHistory", cancellationToken) ||
+                await MigrationAppliedAsync(
+                    connection,
+                    PlayerAchievementsMigrationId,
+                    cancellationToken))
+            {
+                return;
+            }
+
+            var hasPlayerAchievements = await TableExistsAsync(
+                connection,
+                "PlayerAchievements",
+                cancellationToken);
+            var hasPlayerGameAccountLinks = await TableExistsAsync(
+                connection,
+                "PlayerGameAccountLinks",
+                cancellationToken);
+            var hasUserQuestionAccountLinks = await TableExistsAsync(
+                connection,
+                "UserQuestionAccountLinks",
+                cancellationToken);
+
+            if (!hasPlayerAchievements &&
+                !hasPlayerGameAccountLinks &&
+                !hasUserQuestionAccountLinks)
+            {
+                return;
+            }
+
+            var hasAccountId = hasPlayerAchievements &&
+                await ColumnExistsAsync(
+                    connection,
+                    "PlayerAchievements",
+                    "AccountId",
+                    cancellationToken);
+            var playerAchievementsNeedsRebuild = hasPlayerAchievements &&
+                (!hasAccountId ||
+                 !await ColumnAllowsNullAsync(
+                     connection,
+                     "PlayerAchievements",
+                     "HostId",
+                     cancellationToken) ||
+                 !await ColumnAllowsNullAsync(
+                     connection,
+                     "PlayerAchievements",
+                     "PlayerKey",
+                     cancellationToken));
+
+            await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                if (playerAchievementsNeedsRebuild)
+                {
+                    await using var rebuildCommand = connection.CreateCommand();
+                    rebuildCommand.Transaction = transaction;
+                    var accountIdProjection = hasAccountId ? "\"AccountId\"" : "NULL";
+                    rebuildCommand.CommandText =
+                        $"""
+                        DROP INDEX IF EXISTS "IX_PlayerAchievements_AccountId_AchievementCode";
+                        DROP INDEX IF EXISTS "IX_PlayerAchievements_HostId_PlayerKey_AchievementCode";
+                        DROP INDEX IF EXISTS "IX_PlayerAchievements_SourceGameSessionId";
+
+                        ALTER TABLE "PlayerAchievements"
+                            RENAME TO "__PlayerAchievementsLegacy";
+
+                        CREATE TABLE "PlayerAchievements" (
+                            "Id" INTEGER NOT NULL CONSTRAINT "PK_PlayerAchievements" PRIMARY KEY AUTOINCREMENT,
+                            "AccountId" TEXT NULL,
+                            "HostId" TEXT NULL,
+                            "PlayerKey" TEXT NULL,
+                            "AchievementCode" TEXT NOT NULL,
+                            "UnlockedAtUtc" TEXT NOT NULL,
+                            "SourceGameSessionId" INTEGER NULL
+                        );
+
+                        INSERT INTO "PlayerAchievements" (
+                            "Id",
+                            "AccountId",
+                            "HostId",
+                            "PlayerKey",
+                            "AchievementCode",
+                            "UnlockedAtUtc",
+                            "SourceGameSessionId")
+                        SELECT
+                            "Id",
+                            {accountIdProjection},
+                            "HostId",
+                            "PlayerKey",
+                            "AchievementCode",
+                            "UnlockedAtUtc",
+                            "SourceGameSessionId"
+                        FROM "__PlayerAchievementsLegacy";
+
+                        DROP TABLE "__PlayerAchievementsLegacy";
+                        """;
+                    await rebuildCommand.ExecuteNonQueryAsync(cancellationToken);
+                }
+
+                await using var command = connection.CreateCommand();
+                command.Transaction = transaction;
+                command.CommandText =
+                    """
+                    CREATE TABLE IF NOT EXISTS "PlayerAchievements" (
+                        "Id" INTEGER NOT NULL CONSTRAINT "PK_PlayerAchievements" PRIMARY KEY AUTOINCREMENT,
+                        "AccountId" TEXT NULL,
+                        "HostId" TEXT NULL,
+                        "PlayerKey" TEXT NULL,
+                        "AchievementCode" TEXT NOT NULL,
+                        "UnlockedAtUtc" TEXT NOT NULL,
+                        "SourceGameSessionId" INTEGER NULL
+                    );
+
+                    CREATE TABLE IF NOT EXISTS "PlayerGameAccountLinks" (
+                        "Id" INTEGER NOT NULL CONSTRAINT "PK_PlayerGameAccountLinks" PRIMARY KEY AUTOINCREMENT,
+                        "GamePlayerId" INTEGER NOT NULL,
+                        "AccountId" TEXT NOT NULL,
+                        CONSTRAINT "FK_PlayerGameAccountLinks_GamePlayers_GamePlayerId"
+                            FOREIGN KEY ("GamePlayerId") REFERENCES "GamePlayers" ("Id") ON DELETE CASCADE
+                    );
+
+                    CREATE TABLE IF NOT EXISTS "UserQuestionAccountLinks" (
+                        "Id" INTEGER NOT NULL CONSTRAINT "PK_UserQuestionAccountLinks" PRIMARY KEY AUTOINCREMENT,
+                        "UserQuestionId" INTEGER NOT NULL,
+                        "AccountId" TEXT NOT NULL,
+                        CONSTRAINT "FK_UserQuestionAccountLinks_UserQuestions_UserQuestionId"
+                            FOREIGN KEY ("UserQuestionId") REFERENCES "UserQuestions" ("Id") ON DELETE CASCADE
+                    );
+
+                    CREATE UNIQUE INDEX IF NOT EXISTS "IX_PlayerAchievements_AccountId_AchievementCode"
+                        ON "PlayerAchievements" ("AccountId", "AchievementCode");
+                    CREATE UNIQUE INDEX IF NOT EXISTS "IX_PlayerAchievements_HostId_PlayerKey_AchievementCode"
+                        ON "PlayerAchievements" ("HostId", "PlayerKey", "AchievementCode");
+                    CREATE INDEX IF NOT EXISTS "IX_PlayerAchievements_SourceGameSessionId"
+                        ON "PlayerAchievements" ("SourceGameSessionId");
+                    CREATE INDEX IF NOT EXISTS "IX_PlayerGameAccountLinks_AccountId"
+                        ON "PlayerGameAccountLinks" ("AccountId");
+                    CREATE UNIQUE INDEX IF NOT EXISTS "IX_PlayerGameAccountLinks_GamePlayerId"
+                        ON "PlayerGameAccountLinks" ("GamePlayerId");
+                    CREATE INDEX IF NOT EXISTS "IX_UserQuestionAccountLinks_AccountId"
+                        ON "UserQuestionAccountLinks" ("AccountId");
+                    CREATE UNIQUE INDEX IF NOT EXISTS "IX_UserQuestionAccountLinks_UserQuestionId"
+                        ON "UserQuestionAccountLinks" ("UserQuestionId");
+
+                    INSERT OR IGNORE INTO "__EFMigrationsHistory"
+                        ("MigrationId", "ProductVersion")
+                    VALUES
+                        ($migrationId, $productVersion);
+                    """;
+
+                var migrationId = command.CreateParameter();
+                migrationId.ParameterName = "$migrationId";
+                migrationId.Value = PlayerAchievementsMigrationId;
+                command.Parameters.Add(migrationId);
+
+                var productVersion = command.CreateParameter();
+                productVersion.ParameterName = "$productVersion";
+                productVersion.Value = EfProductVersion;
+                command.Parameters.Add(productVersion);
+
+                await command.ExecuteNonQueryAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
         finally
         {
@@ -216,7 +412,6 @@ public static class DatabaseMigrationService
                 connection,
                 "QuizRounds",
                 cancellationToken);
-
             var hasMigrationHistory = await TableExistsAsync(
                 connection,
                 "__EFMigrationsHistory",
@@ -299,6 +494,27 @@ public static class DatabaseMigrationService
             if (string.Equals(reader.GetString(1), columnName, StringComparison.Ordinal))
             {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static async Task<bool> ColumnAllowsNullAsync(
+        System.Data.Common.DbConnection connection,
+        string tableName,
+        string columnName,
+        CancellationToken cancellationToken)
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = $"PRAGMA table_info(\"{tableName}\");";
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            if (string.Equals(reader.GetString(1), columnName, StringComparison.Ordinal))
+            {
+                return reader.GetInt32(3) == 0;
             }
         }
 

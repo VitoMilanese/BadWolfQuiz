@@ -101,6 +101,9 @@ public sealed class ActiveGamePersistenceService(
                 AnonymousSharedWagerWebStore.Restore(
                     game,
                     snapshot.AnonymousSharedWager);
+                PlayerAchievementRuntimeState.Restore(
+                    game,
+                    snapshot.AchievementRuntime);
             }
             catch (Exception exception)
             {
@@ -245,7 +248,8 @@ public sealed class ActiveGamePersistenceService(
                 timeProvider.GetUtcNow(),
                 game.CaptureQuestionOpenSequence(),
                 game.CapturePeerRatedAllPlayerReviews(),
-                AnonymousSharedWagerWebStore.Capture(game));
+                AnonymousSharedWagerWebStore.Capture(game),
+                PlayerAchievementRuntimeState.Capture(game));
         }
     }
 

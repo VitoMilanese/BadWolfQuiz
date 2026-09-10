@@ -8,6 +8,7 @@ public sealed class GameSessionRegistration
     private long _persistenceRevision;
     private long _nextQuestionOpenSequence;
     private readonly Dictionary<int, long> _questionOpenSequence = [];
+    private BuzzerRaceSnapshot? _buzzerRace;
 
     public GameSessionRegistration(
         string publicCode,
@@ -122,6 +123,7 @@ public sealed class GameSessionRegistration
 
             _questionOpenSequence[question.SourceQuestionId] =
                 ++_nextQuestionOpenSequence;
+            PlayerAchievementRuntimeState.RecordQuestionOpened(this, question);
         }
     }
 
@@ -213,7 +215,18 @@ public sealed class GameSessionRegistration
         HostId = hostId;
     }
 
-    public BuzzerRaceSnapshot? BuzzerRace { get; internal set; }
+    public BuzzerRaceSnapshot? BuzzerRace
+    {
+        get => _buzzerRace;
+        internal set
+        {
+            _buzzerRace = value;
+            if (value is not null)
+            {
+                PlayerAchievementRuntimeState.RecordBuzzerRace(this, value);
+            }
+        }
+    }
 
     internal Dictionary<int, AllPlayerTextReviewState> AllPlayerTextReviews { get; } = [];
 
@@ -431,6 +444,7 @@ public sealed class GameSessionRegistration
             PeerRatedAllPlayerReviews.Clear();
             _questionOpenSequence.Clear();
             _nextQuestionOpenSequence = 0;
+            PlayerAchievementRuntimeState.ResetForRestart(this);
             MarkPersistenceChanged();
         }
     }

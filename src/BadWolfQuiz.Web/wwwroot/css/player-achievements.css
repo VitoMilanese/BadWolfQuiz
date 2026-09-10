@@ -1,0 +1,319 @@
+.player-achievements-open {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.player-achievements-open strong {
+    color: var(--gold);
+    text-transform: uppercase;
+}
+
+.player-achievements-open:hover strong,
+.player-achievements-open:focus-visible strong {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.player-achievements-open:focus-visible {
+    outline: 2px solid var(--red-bright);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+.player-achievements-dialog {
+    inset: 0;
+    width: calc(100vw - 16px);
+    height: calc(100dvh - 16px);
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+}
+
+.player-achievements-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.82);
+}
+
+.player-achievements-dialog-card {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background:
+        radial-gradient(
+            circle at 92% 0,
+            color-mix(in srgb, var(--red-bright) 9%, transparent) 0,
+            transparent 21rem),
+        color-mix(in srgb, var(--panel) 97%, var(--bg));
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+}
+
+.player-achievements-dialog-heading {
+    position: relative;
+    z-index: 3;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: clamp(14px, 3vw, 28px);
+    padding-bottom: 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    background: var(--panel);
+}
+
+.player-achievements-dialog-heading h2 {
+    margin: 0;
+}
+
+.player-achievements-dialog-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: clamp(14px, 3vw, 28px);
+}
+
+.player-achievement-unlocked,
+.player-achievements-panel {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.player-achievement-unlocked {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 0 18px;
+    padding: 16px 18px;
+    border: 1px solid color-mix(in srgb, var(--gold) 68%, var(--line));
+    border-radius: 16px;
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--gold) 15%, var(--panel)) 0,
+            color-mix(in srgb, var(--red-bright) 8%, var(--panel)) 100%);
+    box-shadow: 0 12px 32px color-mix(in srgb, #000 20%, transparent);
+}
+
+.player-achievement-unlocked-icon {
+    flex: 0 0 auto;
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.player-achievement-unlocked strong {
+    display: block;
+    color: var(--gold);
+    font-size: 1rem;
+}
+
+.player-achievement-unlocked-list {
+    margin-top: 3px;
+    color: var(--text);
+    font-weight: 750;
+}
+
+.player-achievements-panel {
+    margin: 0;
+    padding: clamp(18px, 3vw, 28px);
+    border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+    border-radius: 20px;
+    background:
+        radial-gradient(
+            circle at 92% 0,
+            color-mix(in srgb, var(--red-bright) 9%, transparent) 0,
+            transparent 21rem),
+        color-mix(in srgb, var(--panel) 94%, var(--bg));
+}
+
+.player-achievements-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.player-achievements-heading p {
+    margin: 0;
+}
+
+.player-achievements-heading p {
+    margin-top: 5px;
+    color: var(--muted);
+}
+
+.player-achievements-kicker {
+    display: block;
+    color: var(--gold);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.player-achievements-count {
+    flex: 0 0 auto;
+    padding: 7px 10px;
+    border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-radius: 999px;
+    color: var(--text);
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.player-achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+    gap: 12px;
+}
+
+.player-achievement-card {
+    position: relative;
+    min-width: 0;
+    padding: 15px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--panel-2) 86%, var(--bg));
+}
+
+.player-achievement-card.is-unlocked {
+    border-color: color-mix(in srgb, var(--gold) 48%, var(--line));
+    background:
+        linear-gradient(
+            145deg,
+            color-mix(in srgb, var(--gold) 9%, var(--panel-2)) 0,
+            color-mix(in srgb, var(--panel) 94%, var(--bg)) 100%);
+}
+
+.player-achievement-card.is-locked {
+    opacity: 0.72;
+}
+
+.player-achievement-card.is-new {
+    outline: 2px solid color-mix(in srgb, var(--gold) 80%, transparent);
+    outline-offset: 2px;
+    box-shadow: 0 0 30px color-mix(in srgb, var(--gold) 16%, transparent);
+}
+
+.player-achievement-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 9px;
+}
+
+.player-achievement-icon {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.player-achievement-state {
+    display: grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-radius: 50%;
+    color: var(--muted);
+    font-weight: 900;
+}
+
+.player-achievement-card.is-unlocked .player-achievement-state {
+    border-color: color-mix(in srgb, var(--gold) 72%, transparent);
+    color: var(--gold);
+}
+
+.player-achievement-card > strong {
+    display: block;
+    color: var(--text);
+    font-size: 0.98rem;
+}
+
+.player-achievement-card > p {
+    min-height: 2.8em;
+    margin: 5px 0 10px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+.player-achievement-progress {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--line) 55%, transparent);
+}
+
+.player-achievement-progress > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--red-bright), var(--gold));
+}
+
+.player-achievement-card > small {
+    display: block;
+    margin-top: 5px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+@media (max-width: 600px) {
+    .player-achievements-dialog {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100dvh;
+        margin: 0;
+    }
+
+    .player-achievements-dialog-card {
+        border: 0;
+        border-radius: 0;
+    }
+
+    .player-achievements-dialog-heading {
+        margin: 0;
+        padding: 12px;
+    }
+
+    .player-achievements-dialog-body {
+        padding: 12px;
+    }
+
+    .player-achievements-panel {
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .player-achievements-heading {
+        display: grid;
+    }
+
+    .player-achievements-count {
+        justify-self: start;
+    }
+
+    .player-achievements-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .player-achievement-card > p {
+        min-height: 0;
+    }
+}

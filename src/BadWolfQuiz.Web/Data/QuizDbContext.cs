@@ -39,6 +39,9 @@ public sealed class QuizDbContext : DbContext
     public DbSet<GameQuestion> GameQuestions => Set<GameQuestion>();
     public DbSet<PlayerBuzz> PlayerBuzzes => Set<PlayerBuzz>();
     public DbSet<PlayerQuestionResult> PlayerQuestionResults => Set<PlayerQuestionResult>();
+    public DbSet<PlayerAchievement> PlayerAchievements => Set<PlayerAchievement>();
+    public DbSet<PlayerGameAccountLink> PlayerGameAccountLinks => Set<PlayerGameAccountLink>();
+    public DbSet<UserQuestionAccountLink> UserQuestionAccountLinks => Set<UserQuestionAccountLink>();
     public DbSet<QuizRating> QuizRatings => Set<QuizRating>();
     public DbSet<HostDiscordConnection> HostDiscordConnections => Set<HostDiscordConnection>();
     public DbSet<UserQuestion> UserQuestions => Set<UserQuestion>();
@@ -70,6 +73,18 @@ public sealed class QuizDbContext : DbContext
             .HasOne(x => x.UserQuestion)
             .WithMany(x => x.Messages)
             .HasForeignKey(x => x.UserQuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PlayerGameAccountLink>()
+            .HasOne(x => x.Player)
+            .WithOne()
+            .HasForeignKey<PlayerGameAccountLink>(x => x.GamePlayerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserQuestionAccountLink>()
+            .HasOne(x => x.UserQuestion)
+            .WithOne()
+            .HasForeignKey<UserQuestionAccountLink>(x => x.UserQuestionId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Quiz>()

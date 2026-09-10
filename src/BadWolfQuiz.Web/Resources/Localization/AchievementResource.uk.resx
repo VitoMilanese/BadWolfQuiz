@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Achievements_Title" xml:space="preserve"><value>Досягнення</value></data>
+  <data name="Achievements_PlayerLabel" xml:space="preserve"><value>Досягнення гравця</value></data>
+  <data name="Achievements_Close" xml:space="preserve"><value>Закрити досягнення</value></data>
+  <data name="Achievements_Subtitle" xml:space="preserve"><value>Твої довгострокові досягнення в Bad Wolf</value></data>
+  <data name="Achievements_UnlockedCount" xml:space="preserve"><value>Відкрито {0} / {1}</value></data>
+  <data name="Achievements_NewUnlocked" xml:space="preserve"><value>Нове досягнення!</value></data>
+  <data name="Achievements_NewUnlockedMany" xml:space="preserve"><value>Нові досягнення!</value></data>
+  <data name="Achievements_SecretTitle" xml:space="preserve"><value>???</value></data>
+  <data name="Achievements_SecretDescription" xml:space="preserve"><value>Секретне досягнення. Умова відкриється після отримання.</value></data>
+  <data name="FirstGame_Name" xml:space="preserve"><value>Перша гра</value></data>
+  <data name="FirstGame_Description" xml:space="preserve"><value>Завершити першу гру.</value></data>
+  <data name="FirstBite_Name" xml:space="preserve"><value>Перший укус</value></data>
+  <data name="FirstBite_Description" xml:space="preserve"><value>Дати першу правильну відповідь.</value></data>
+  <data name="Regular_Name" xml:space="preserve"><value>Завсідник</value></data>
+  <data name="Regular_Description" xml:space="preserve"><value>Завершити 5 ігор.</value></data>
+  <data name="Veteran_Name" xml:space="preserve"><value>Ветеран</value></data>
+  <data name="Veteran_Description" xml:space="preserve"><value>Завершити 25 ігор.</value></data>
+  <data name="Accurate_Name" xml:space="preserve"><value>Влучний</value></data>
+  <data name="Accurate_Description" xml:space="preserve"><value>Дати 25 правильних відповідей.</value></data>
+  <data name="KnowledgeMachine_Name" xml:space="preserve"><value>Машина знань</value></data>
+  <data name="KnowledgeMachine_Description" xml:space="preserve"><value>Дати 100 правильних відповідей.</value></data>
+  <data name="Winner_Name" xml:space="preserve"><value>Переможець</value></data>
+  <data name="Winner_Description" xml:space="preserve"><value>Завершити гру на першому місці. Нічия за перше місце теж рахується.</value></data>
+  <data name="Champion_Name" xml:space="preserve"><value>Чемпіон</value></data>
+  <data name="Champion_Description" xml:space="preserve"><value>Виграти 5 ігор.</value></data>
+  <data name="Streak_Name" xml:space="preserve"><value>Серія</value></data>
+  <data name="Streak_Description" xml:space="preserve"><value>Дати 5 правильних відповідей поспіль в одній грі.</value></data>
+  <data name="BigGame_Name" xml:space="preserve"><value>Велика гра</value></data>
+  <data name="BigGame_Description" xml:space="preserve"><value>Завершити гру з 15 000 або більше очок.</value></data>
+  <data name="Score30K_Name" xml:space="preserve"><value>Джекпот</value></data>
+  <data name="Score30K_Description" xml:space="preserve"><value>Завершити гру з 30 000 або більше балів.</value></data>
+  <data name="TotalScore100K_Name" xml:space="preserve"><value>Сто тисяч</value></data>
+  <data name="TotalScore100K_Description" xml:space="preserve"><value>Назбирати сумарно за всі завершені ігри щонайменше 100 000 балів.</value></data>
+  <data name="TotalScore500K_Name" xml:space="preserve"><value>Пів мільйона</value></data>
+  <data name="TotalScore500K_Description" xml:space="preserve"><value>Назбирати сумарно за всі завершені ігри щонайменше 500 000 балів.</value></data>
+  <data name="TotalScore1M_Name" xml:space="preserve"><value>Мільйонер</value></data>
+  <data name="TotalScore1M_Description" xml:space="preserve"><value>Назбирати сумарно за всі завершені ігри щонайменше 1 000 000 балів.</value></data>
+  <data name="Flawless_Name" xml:space="preserve"><value>Бездоганно</value></data>
+  <data name="Flawless_Description" xml:space="preserve"><value>Дати щонайменше 10 відповідей в одній грі без жодної помилки.</value></data>
+  <data name="FromAbyss_Name" xml:space="preserve"><value>З безодні</value></data>
+  <data name="FromAbyss_Description" xml:space="preserve"><value>Побувати в мінусі та завершити ту саму гру з додатним рахунком.</value></data>
+  <data name="Registered_Name" xml:space="preserve"><value>До зграї</value></data>
+  <data name="Registered_Description" xml:space="preserve"><value>Зареєструвати обліковий запис у Bad Wolf.</value></data>
+  <data name="OwnQuizWithOthers_Name" xml:space="preserve"><value>Своя арена</value></data>
+  <data name="OwnQuizWithOthers_Description" xml:space="preserve"><value>Створити власний квіз і зіграти його щонайменше з двома іншими гравцями.</value></data>
+  <data name="PublicQuizGuest_Name" xml:space="preserve"><value>Гра на виїзді</value></data>
+  <data name="PublicQuizGuest_Description" xml:space="preserve"><value>Зіграти у публічний квіз, який проводить не його автор.</value></data>
+  <data name="SoloAi_Name" xml:space="preserve"><value>Проти машини</value></data>
+  <data name="SoloAi_Description" xml:space="preserve"><value>Зіграти у «Вгадай, у що я граю?» проти ШІ.</value></data>
+  <data name="RoomCreatorWin_Name" xml:space="preserve"><value>Господар кімнати</value></data>
+  <data name="RoomCreatorWin_Description" xml:space="preserve"><value>Створити кімнату «Вгадай, у що я граю?», зіграти з іншим гравцем і перемогти.</value></data>
+  <data name="GitHubVisitor_Name" xml:space="preserve"><value>Під капотом</value></data>
+  <data name="GitHubVisitor_Description" xml:space="preserve"><value>Відвідати репозиторій Bad Wolf Quiz на GitHub через посилання на сайті.</value></data>
+  <data name="QuizRated_Name" xml:space="preserve"><value>Суддя</value></data>
+  <data name="QuizRated_Description" xml:space="preserve"><value>Оцінити квіз після фінального питання.</value></data>
+  <data name="AllInCorrect_Name" xml:space="preserve"><value>Все на стіл</value></data>
+  <data name="AllInCorrect_Description" xml:space="preserve"><value>Поставити All In і дати правильну відповідь.</value></data>
+  <data name="AllInWrong_Name" xml:space="preserve"><value>Ва-банк не зайшов</value></data>
+  <data name="AllInWrong_Description" xml:space="preserve"><value>Поставити All In і дати неправильну відповідь.</value></data>
+  <data name="PasswordChanged_Name" xml:space="preserve"><value>Новий ключ</value></data>
+  <data name="PasswordChanged_Description" xml:space="preserve"><value>Змінити пароль облікового запису.</value></data>
+  <data name="DeveloperContacted_Name" xml:space="preserve"><value>Сигнал у лігво</value></data>
+  <data name="DeveloperContacted_Description" xml:space="preserve"><value>Написати розробнику.</value></data>
+  <data name="DeveloperReplied_Name" xml:space="preserve"><value>Відповідь із лігва</value></data>
+  <data name="DeveloperReplied_Description" xml:space="preserve"><value>Написати розробнику й отримати від нього відповідь.</value></data>
+  <data name="Contributor_Name" xml:space="preserve"><value>У зграї творців</value></data>
+  <data name="Contributor_Description" xml:space="preserve"><value>Стати контриб’ютором Bad Wolf Quiz.</value></data>
+  <data name="FirstPick_Name" xml:space="preserve"><value>Перший вибір</value></data>
+  <data name="FirstPick_Description" xml:space="preserve"><value>Першим серед гравців обрати питання у грі.</value></data>
+  <data name="SecondRoundFirstPick_Name" xml:space="preserve"><value>Відкривач другого раунду</value></data>
+  <data name="SecondRoundFirstPick_Description" xml:space="preserve"><value>Першим серед гравців обрати питання у другому раунді.</value></data>
+  <data name="LastRoundComebackWin_Name" xml:space="preserve"><value>З останнього — в перші</value></data>
+  <data name="LastRoundComebackWin_Description" xml:space="preserve"><value>Мати найменше балів на початку останнього звичайного раунду, обрати його перше питання й завершити гру на першому місці.</value></data>
+  <data name="FinalLeaderZero_Name" xml:space="preserve"><value>З вершини в нуль</value></data>
+  <data name="FinalLeaderZero_Description" xml:space="preserve"><value>Лідирувати на момент початку фінального питання й завершити гру рівно з 0 балів.</value></data>
+  <data name="EveryCategoryAttempt_Name" xml:space="preserve"><value>Скрізь був</value></data>
+  <data name="EveryCategoryAttempt_Description" xml:space="preserve"><value>Спробувати відповісти хоча б на одне питання в кожній категорії раунду, де є щонайменше 5 категорій.</value></data>
+  <data name="EveryCategoryCorrect_Name" xml:space="preserve"><value>Повне покриття</value></data>
+  <data name="EveryCategoryCorrect_Description" xml:space="preserve"><value>Дати хоча б одну правильну відповідь у кожній категорії раунду, де є щонайменше 5 категорій.</value></data>
+  <data name="SilentRound_Name" xml:space="preserve"><value>Мовчазний вовк</value></data>
+  <data name="SilentRound_Description" xml:space="preserve"><value>Провести цілий раунд, жодного разу не натиснувши на буззер.</value></data>
+  <data name="SilentRoundGain_Name" xml:space="preserve"><value>Мовчання — золото</value></data>
+  <data name="SilentRoundGain_Description" xml:space="preserve"><value>Завершити раунд з більшою кількістю балів, ніж на початку, жодного разу не натиснувши на буззер.</value></data>
+</root>
