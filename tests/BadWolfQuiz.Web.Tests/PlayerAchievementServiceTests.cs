@@ -210,6 +210,43 @@ public sealed class PlayerAchievementServiceTests
     }
 
     [Fact]
+    public void Catalog_uses_media_metrics_for_audio_and_video_achievements()
+    {
+        var audio = PlayerAchievementService.Catalog.Single(item => item.Code == "AudioQuestions25");
+        var video = PlayerAchievementService.Catalog.Single(item => item.Code == "VideoQuestions25");
+
+        Assert.Equal(PlayerAchievementMetric.AudioQuestionAnswers, audio.Metric);
+        Assert.Equal(PlayerAchievementMetric.VideoQuestionAnswers, video.Metric);
+        Assert.Null(audio.TagGroup);
+        Assert.Null(video.TagGroup);
+    }
+
+    [Fact]
+    public void BuildHistory_counts_audio_and_video_blocks_instead_of_media_tags()
+    {
+        var now = new DateTime(2026, 9, 11, 1, 0, 0, DateTimeKind.Utc);
+        PlayerAchievementGameSource[] appearances = [new(1, 10, "Wolf", 0, now)];
+        PlayerAchievementGameScoreSource[] scores = [new(10, 0)];
+        PlayerAchievementAnswerSource[] answers =
+        [
+            new(1, false, 0, now, ["audio question"], HasAudioBlock: true),
+            new(1, true, 0, now.AddSeconds(1), ["video question"], HasVideoBlock: true),
+            new(1, true, 0, now.AddSeconds(2), ["аудіопитання", "відеопитання"]),
+            new(1, false, 0, now.AddSeconds(3), null, HasAudioBlock: true, HasVideoBlock: true)
+        ];
+
+        var history = PlayerAchievementService.BuildHistory(appearances, scores, answers);
+        var progress = PlayerAchievementService.BuildProgress(history, []);
+
+        Assert.Equal(2, history.AudioQuestionAnswers);
+        Assert.Equal(2, history.VideoQuestionAnswers);
+        Assert.False(history.TaggedAnswers!.ContainsKey("AudioQuestions25"));
+        Assert.False(history.TaggedAnswers.ContainsKey("VideoQuestions25"));
+        Assert.Equal(2, progress.Single(item => item.Code == "AudioQuestions25").Progress);
+        Assert.Equal(2, progress.Single(item => item.Code == "VideoQuestions25").Progress);
+    }
+
+    [Fact]
     public async Task EvaluateCompletedGameAsync_persists_each_unlock_once()
     {
         await using var connection = new SqliteConnection("Data Source=:memory:");
