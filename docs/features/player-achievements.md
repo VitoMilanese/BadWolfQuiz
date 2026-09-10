@@ -63,9 +63,9 @@ Achievement cards use the shared responsive dialog layout with a fixed header an
 
 ## Localization
 
-Achievement UI text, names, and descriptions follow the normal localization model and are provided for English, Ukrainian, Italian, and Russian in `Resources/Localization/AchievementResource*.resx`.
+Achievement resources follow the site's existing localization policy. English, Ukrainian, and Italian contain localized achievement UI text, names, and descriptions. Russian achievement resources intentionally use the shared `Україна` marker, matching the repository-wide Russian localization rule enforced by regression tests.
 
-Localization regression coverage verifies that every catalog achievement has a non-empty name and description in every supported achievement resource and that placeholder values are not accidentally shipped.
+Achievement-specific regression coverage verifies that every catalog achievement has a non-empty name and description entry in every supported achievement resource, while the existing repository-wide localization regression continues to enforce the intentional Russian marker policy.
 
 ## Regression coverage
 

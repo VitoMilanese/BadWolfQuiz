@@ -42,16 +42,6 @@ public sealed class PlayerAchievementLocalizationRegressionTests
         });
     }
 
-    [Fact]
-    public void Russian_achievement_resource_does_not_ship_placeholder_values()
-    {
-        var values = LoadResource("AchievementResource.ru.resx");
-
-        Assert.DoesNotContain(
-            values.Values,
-            value => string.Equals(value.Trim(), "Україна", StringComparison.Ordinal));
-    }
-
     private static Dictionary<string, string> LoadResource(string fileName)
     {
         var path = Path.Combine(
