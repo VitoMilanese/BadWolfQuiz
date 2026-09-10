@@ -535,7 +535,9 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             .AsNoTracking()
             .Where(block =>
                 quizQuestionIds.Contains(block.QuizQuestionId) &&
-                (block.BlockType == ContentBlockType.Audio || block.BlockType == ContentBlockType.Video))
+                (block.BlockType == ContentBlockType.Audio ||
+                 block.BlockType == ContentBlockType.Video ||
+                 block.BlockType == ContentBlockType.YouTube))
             .Select(block => new { block.QuizQuestionId, block.BlockType })
             .ToListAsync(cancellationToken);
         var audioQuestionIds = mediaRows
@@ -543,7 +545,8 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             .Select(block => block.QuizQuestionId)
             .ToHashSet();
         var videoQuestionIds = mediaRows
-            .Where(block => block.BlockType == ContentBlockType.Video)
+            .Where(block =>
+                block.BlockType == ContentBlockType.Video || block.BlockType == ContentBlockType.YouTube)
             .Select(block => block.QuizQuestionId)
             .ToHashSet();
         var tagRows = await db.QuizQuestionTags
@@ -650,8 +653,8 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             recoveredFromNegative,
             TotalScore: totalScore,
             TaggedAnswers: PlayerTagAchievementCatalog.CountAnswers(answers),
-            AudioQuestionAnswers: answers.Count(answer => answer.HasAudioBlock),
-            VideoQuestionAnswers: answers.Count(answer => answer.HasVideoBlock));
+            AudioQuestionAnswers: answers.Count(answer => answer.IsCorrect == true && answer.HasAudioBlock),
+            VideoQuestionAnswers: answers.Count(answer => answer.IsCorrect == true && answer.HasVideoBlock));
     }
 
     public static IReadOnlyList<PlayerAchievementProgress> BuildProgress(

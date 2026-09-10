@@ -59,7 +59,7 @@ public static class PlayerTagAchievementCatalog
         var counts = TagGroups.Keys.ToDictionary(key => key, _ => 0, StringComparer.Ordinal);
         foreach (var answer in answers)
         {
-            if (answer.Tags is null || answer.Tags.Count == 0)
+            if (answer.IsCorrect != true || answer.Tags is null || answer.Tags.Count == 0)
             {
                 continue;
             }

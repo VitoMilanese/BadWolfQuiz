@@ -85,7 +85,7 @@ public sealed class PlayerTagAchievementCatalogTests
     {
         var answer = new PlayerAchievementAnswerSource(
             1,
-            false,
+            true,
             0,
             DateTime.UtcNow,
             [$"  {tag.ToLowerInvariant()}  "]);
@@ -108,5 +108,20 @@ public sealed class PlayerTagAchievementCatalogTests
         var counts = PlayerTagAchievementCatalog.CountAnswers([answer]);
 
         Assert.Equal(1, counts["Films25"]);
+    }
+
+    [Fact]
+    public void Incorrect_answer_does_not_count_for_tag_achievements()
+    {
+        var answer = new PlayerAchievementAnswerSource(
+            1,
+            false,
+            0,
+            DateTime.UtcNow,
+            ["films", "Doctor Who", "Robocop", "Terminator", "Mafia"]);
+
+        var counts = PlayerTagAchievementCatalog.CountAnswers([answer]);
+
+        Assert.All(counts.Values, count => Assert.Equal(0, count));
     }
 }

@@ -184,15 +184,15 @@ public sealed class PlayerAchievementServiceTests
     }
 
     [Fact]
-    public void BuildHistory_counts_tagged_answers_regardless_of_correctness()
+    public void BuildHistory_counts_only_correct_tagged_answers()
     {
         var now = new DateTime(2026, 9, 11, 0, 0, 0, DateTimeKind.Utc);
         PlayerAchievementGameSource[] appearances = [new(1, 10, "Wolf", 0, now)];
         PlayerAchievementGameScoreSource[] scores = [new(10, 0)];
-        var answers = Enumerable.Range(0, 25)
+        var answers = Enumerable.Range(0, 26)
             .Select(index => new PlayerAchievementAnswerSource(
                 1,
-                index % 2 == 0,
+                index < 25,
                 0,
                 now.AddSeconds(index),
                 index == 0
@@ -229,10 +229,11 @@ public sealed class PlayerAchievementServiceTests
         PlayerAchievementGameScoreSource[] scores = [new(10, 0)];
         PlayerAchievementAnswerSource[] answers =
         [
-            new(1, false, 0, now, ["audio question"], HasAudioBlock: true),
+            new(1, true, 0, now, ["audio question"], HasAudioBlock: true),
             new(1, true, 0, now.AddSeconds(1), ["video question"], HasVideoBlock: true),
             new(1, true, 0, now.AddSeconds(2), ["аудіопитання", "відеопитання"]),
-            new(1, false, 0, now.AddSeconds(3), null, HasAudioBlock: true, HasVideoBlock: true)
+            new(1, false, 0, now.AddSeconds(3), null, HasAudioBlock: true, HasVideoBlock: true),
+            new(1, true, 0, now.AddSeconds(4), null, HasAudioBlock: true, HasVideoBlock: true)
         ];
 
         var history = PlayerAchievementService.BuildHistory(appearances, scores, answers);
