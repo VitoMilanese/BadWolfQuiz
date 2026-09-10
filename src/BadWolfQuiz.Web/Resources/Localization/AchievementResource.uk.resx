@@ -142,5 +142,5 @@
   <data name="TerminatorTag_Name" xml:space="preserve"><value>Я повернуся</value></data>
   <data name="TerminatorTag_Description" xml:space="preserve"><value>Відповісти на питання з тегом «Термінатор» або «Terminator».</value></data>
   <data name="MafiaGodfatherTag_Name" xml:space="preserve"><value>Сімейна справа</value></data>
-  <data name="MafiaGodfatherTag_Description" xml:space="preserve"><value>Відповісти на питання з тегом «Мафія», «Maffia», «Хрещений Батько» або «Godfather».</value></data>
+  <data name="MafiaGodfatherTag_Description" xml:space="preserve"><value>Відповісти на питання з тегом «Мафія», «Mafia», «Хрещений Батько» або «Godfather».</value></data>
 </root>

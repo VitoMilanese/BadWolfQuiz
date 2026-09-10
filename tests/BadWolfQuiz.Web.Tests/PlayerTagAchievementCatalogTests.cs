@@ -82,7 +82,7 @@ public sealed class PlayerTagAchievementCatalogTests
     [InlineData("TerminatorTag", "Термінатор")]
     [InlineData("TerminatorTag", "Terminator")]
     [InlineData("MafiaGodfatherTag", "Мафія")]
-    [InlineData("MafiaGodfatherTag", "Maffia")]
+    [InlineData("MafiaGodfatherTag", "Mafia")]
     [InlineData("MafiaGodfatherTag", "Хрещений Батько")]
     [InlineData("MafiaGodfatherTag", "Godfather")]
     public void Every_requested_tag_matches_its_achievement_group(string group, string tag)

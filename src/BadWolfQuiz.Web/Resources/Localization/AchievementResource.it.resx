@@ -142,5 +142,5 @@
   <data name="TerminatorTag_Name" xml:space="preserve"><value>Tornerò</value></data>
   <data name="TerminatorTag_Description" xml:space="preserve"><value>Rispondi a una domanda con tag Terminator.</value></data>
   <data name="MafiaGodfatherTag_Name" xml:space="preserve"><value>Affari di famiglia</value></data>
-  <data name="MafiaGodfatherTag_Description" xml:space="preserve"><value>Rispondi a una domanda con tag Mafia, Maffia, Padrino o Godfather.</value></data>
+  <data name="MafiaGodfatherTag_Description" xml:space="preserve"><value>Rispondi a una domanda con tag Mafia, Padrino o Godfather.</value></data>
 </root>

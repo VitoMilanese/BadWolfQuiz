@@ -52,7 +52,7 @@ public static class PlayerTagAchievementCatalog
             ["DoctorWhoTag"] = Tags("Доктор Хто", "Doctor Who"),
             ["RobocopTag"] = Tags("Робокоп", "Robocop"),
             ["TerminatorTag"] = Tags("Термінатор", "Terminator"),
-            ["MafiaGodfatherTag"] = Tags("Мафія", "Maffia", "Хрещений Батько", "Godfather")
+            ["MafiaGodfatherTag"] = Tags("Мафія", "Mafia", "Хрещений Батько", "Godfather")
         };
 
     public static IReadOnlyDictionary<string, int> CountAnswers(
