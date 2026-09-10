@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,6 +13,7 @@ namespace BadWolfQuiz.Web.Pages.Account;
 public sealed class ChangePasswordModel(
     HostAccountService accounts,
     CurrentHost currentHost,
+    QuizDbContext db,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
     [BindProperty] public InputModel Input { get; set; } = new();
@@ -24,6 +26,12 @@ public sealed class ChangePasswordModel(
             ModelState.AddModelError(string.Empty, localizer["Account_CurrentPasswordInvalid"]);
             return Page();
         }
+
+        await new PlayerAchievementService(db).UnlockAccountAsync(
+            currentHost.RequiredId,
+            "PasswordChanged",
+            cancellationToken: cancellationToken);
+
         return RedirectToPage("/Index");
     }
 

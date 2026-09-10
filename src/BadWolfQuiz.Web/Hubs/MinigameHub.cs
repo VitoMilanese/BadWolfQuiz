@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.SignalR;
@@ -309,10 +310,21 @@ public sealed class MinigameHub(
         string playerToken,
         string fileName)
     {
-        return await MutateRoom(
+        var wasSoloGame = SoloAi.IsSoloGame(roomCode, playerToken);
+        var state = await MutateRoom(
             roomCode,
             playerToken,
             () => roomStore.SubmitGuess(roomCode, playerToken, fileName));
+
+        if (!wasSoloGame &&
+            state.PlayerNumber == 1 &&
+            state.PlayerCount >= 2 &&
+            state.WinnerPlayerNumber == 1)
+        {
+            await UnlockCurrentAccountAchievementAsync("RoomCreatorWin");
+        }
+
+        return state;
     }
 
     public bool GetHintsEnabled(
@@ -454,6 +466,12 @@ public sealed class MinigameHub(
 
             Hints.SetEnabled(state.RoomCode, hintsEnabled);
             await BroadcastRoomChanged(state);
+
+            if (soloAi)
+            {
+                await UnlockCurrentAccountAchievementAsync("SoloAi");
+            }
+
             return state;
         }
         catch (MinigameRoomException exception)
@@ -484,6 +502,21 @@ public sealed class MinigameHub(
         {
             throw CreateHubException(exception);
         }
+    }
+
+    private async Task UnlockCurrentAccountAchievementAsync(string achievementCode)
+    {
+        var accountId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(accountId))
+        {
+            return;
+        }
+
+        await using var db = await dbFactory.CreateDbContextAsync(Context.ConnectionAborted);
+        await new PlayerAchievementService(db).UnlockAccountAsync(
+            accountId,
+            achievementCode,
+            cancellationToken: Context.ConnectionAborted);
     }
 
     private Task JoinRoomGroup(string roomCode) =>

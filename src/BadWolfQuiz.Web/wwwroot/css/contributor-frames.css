@@ -212,8 +212,51 @@
     box-shadow: none !important;
 }
 
+/* Keep avatar-picker titles and close buttons visible while only the picker body scrolls. */
+.avatar-picker-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+}
+
+.avatar-picker-card > .dialog-heading {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+}
+
+.avatar-picker-card > [data-avatar-category-step],
+.avatar-picker-card > [data-avatar-list-step],
+.avatar-picker-card > .contributor-frame-option-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 20px;
+}
+
+.avatar-picker-card > .contributor-frame-option-grid {
+    max-height: none;
+}
+
 @media (max-width: 700px) {
     .host-avatar-frame-settings-row {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .avatar-picker-card > .dialog-heading,
+    .avatar-picker-card > [data-avatar-category-step],
+    .avatar-picker-card > [data-avatar-list-step],
+    .avatar-picker-card > .contributor-frame-option-grid {
+        padding: 12px;
+    }
+
+    .avatar-picker-card > .dialog-heading {
+        padding-bottom: 10px;
     }
 }

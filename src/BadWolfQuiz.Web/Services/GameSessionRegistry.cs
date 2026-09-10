@@ -221,6 +221,7 @@ public sealed class GameSessionRegistry
                     return PlayerJoinResult.Failed(PlayerJoinStatus.NameAlreadyUsed);
                 }
 
+                PlayerAchievementRuntimeState.RecordPlayerReconnected(game, existingPlayer.Id);
                 var reconnectAccessToken = CreatePlayerAccess(game, existingPlayer);
                 return PlayerJoinResult.Succeeded(
                     game,
@@ -248,6 +249,7 @@ public sealed class GameSessionRegistry
                 }
 
                 var restoredPlayer = game.Session.RestoreRemovedPlayer(removedPlayer.Id);
+                PlayerAchievementRuntimeState.RecordKickedPlayerReturned(game, restoredPlayer.Id);
                 game.MarkPersistenceChanged();
                 var restoredAccessToken = CreatePlayerAccess(game, restoredPlayer);
                 return PlayerJoinResult.Succeeded(
@@ -263,6 +265,7 @@ public sealed class GameSessionRegistry
             }
 
             var player = game.Session.AddPlayer(playerName);
+            PlayerAchievementRuntimeState.RecordNewPlayerJoined(game, player.Id);
             if (!string.IsNullOrWhiteSpace(avatarId))
             {
                 player.SetAvatar(avatarId);
@@ -306,6 +309,7 @@ public sealed class GameSessionRegistry
         lock (game)
         {
             player = game.Session.RemovePlayer(playerId);
+            PlayerAchievementRuntimeState.RecordPlayerKicked(game, playerId);
             game.MarkPersistenceChanged();
         }
 
@@ -416,7 +420,11 @@ public sealed class GameSessionRegistry
 
         lock (access.Game)
         {
-            access.Game.DisconnectedPlayerIdsAwaitingReconnect.Remove(access.Player.Id);
+            var wasDisconnected = access.Game.DisconnectedPlayerIdsAwaitingReconnect.Remove(access.Player.Id);
+            if (wasDisconnected && !hasValidTransition)
+            {
+                PlayerAchievementRuntimeState.RecordPlayerReconnected(access.Game, access.Player.Id);
+            }
         }
 
         return new PlayerConnectionResult(access.Game, access.Player, requiresApproval);
@@ -486,7 +494,18 @@ public sealed class GameSessionRegistry
 
         lock (connection.Access.Game)
         {
-            connection.Access.Player.SetAvatar(avatarId);
+            var player = connection.Access.Player;
+            var hadAvatar = player.UsesUploadedImage || !string.IsNullOrWhiteSpace(player.AvatarId);
+            var changedAvatar = player.UsesUploadedImage ||
+                !string.Equals(player.AvatarId, avatarId, StringComparison.Ordinal);
+            player.SetAvatar(avatarId);
+            if (hadAvatar && changedAvatar)
+            {
+                PlayerAchievementRuntimeState.MarkPendingAchievement(
+                    connection.Access.Game,
+                    player.Id,
+                    "AvatarChanged");
+            }
             connection.Access.Game.MarkPersistenceChanged();
         }
 
@@ -512,7 +531,18 @@ public sealed class GameSessionRegistry
 
         lock (connection.Access.Game)
         {
-            connection.Access.Player.SetUploadedImage(imageDataUrl);
+            var player = connection.Access.Player;
+            var hadAvatar = player.UsesUploadedImage || !string.IsNullOrWhiteSpace(player.AvatarId);
+            var changedAvatar = !player.UsesUploadedImage ||
+                !string.Equals(player.UploadedImageDataUrl, imageDataUrl, StringComparison.Ordinal);
+            player.SetUploadedImage(imageDataUrl);
+            if (hadAvatar && changedAvatar)
+            {
+                PlayerAchievementRuntimeState.MarkPendingAchievement(
+                    connection.Access.Game,
+                    player.Id,
+                    "AvatarChanged");
+            }
             connection.Access.Game.MarkPersistenceChanged();
         }
 
@@ -546,6 +576,10 @@ public sealed class GameSessionRegistry
             lock (connection.Access.Game)
             {
                 connection.Access.Player.ClearWebcamUrl();
+                PlayerAchievementRuntimeState.MarkPendingAchievement(
+                    connection.Access.Game,
+                    connection.Access.Player.Id,
+                    "WebcamEnabled");
                 connection.Access.Game.MarkPersistenceChanged();
             }
         }
@@ -578,6 +612,10 @@ public sealed class GameSessionRegistry
         lock (connection.Access.Game)
         {
             connection.Access.Player.SetWebcamUrl(webcamUrl);
+            PlayerAchievementRuntimeState.MarkPendingAchievement(
+                connection.Access.Game,
+                connection.Access.Player.Id,
+                "WebcamEnabled");
             connection.Access.Game.MarkPersistenceChanged();
         }
 
@@ -620,11 +658,21 @@ public sealed class GameSessionRegistry
                 var hasRemainingConnection = _playerConnections.Values.Any(item =>
                     item.Access.Game == connection.Access.Game &&
                     item.Access.Player.Id == connection.Access.Player.Id);
+                var now = _timeProvider.GetUtcNow();
+                var hasPendingTransition = _playerTransitionAccessByTokenHash.Values.Any(item =>
+                    item.Access == connection.Access &&
+                    item.ExpiresAtUtc > now);
 
                 if (!hasRemainingConnection)
                 {
                     connection.Access.Game.DisconnectedPlayerIdsAwaitingReconnect.Add(
                         connection.Access.Player.Id);
+                    if (!hasPendingTransition)
+                    {
+                        PlayerAchievementRuntimeState.RecordPlayerDisconnected(
+                            connection.Access.Game,
+                            connection.Access.Player.Id);
+                    }
                 }
             }
         }

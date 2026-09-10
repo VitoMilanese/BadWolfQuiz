@@ -14,7 +14,8 @@ public sealed record ActiveGameSnapshot(
     DateTimeOffset? SavedAtUtc = null,
     IReadOnlyList<QuestionOpenSequenceState>? QuestionOpenSequence = null,
     IReadOnlyList<PeerRatedAllPlayerReviewSnapshot>? PeerRatedAllPlayerReviews = null,
-    AnonymousSharedWagerState? AnonymousSharedWager = null);
+    AnonymousSharedWagerState? AnonymousSharedWager = null,
+    PlayerAchievementRuntimeSnapshot? AchievementRuntime = null);
 
 public sealed class ActiveGameStore
 {
