@@ -87,4 +87,24 @@
   <data name="SilentRound_Description" xml:space="preserve"><value>Play an entire round without pressing the buzzer once.</value></data>
   <data name="SilentRoundGain_Name" xml:space="preserve"><value>Silence Is Golden</value></data>
   <data name="SilentRoundGain_Description" xml:space="preserve"><value>Finish a round with more points than you started it with without pressing the buzzer once.</value></data>
+  <data name="AnonymousStake100Profit_Name" xml:space="preserve"><value>Full Confidence</value></data>
+  <data name="AnonymousStake100Profit_Description" xml:space="preserve"><value>Stake 100% on another player in an anonymous wager and gain points when they answer incorrectly.</value></data>
+  <data name="AnonymousStakeZeroSave_Name" xml:space="preserve"><value>Zero Risk</value></data>
+  <data name="AnonymousStakeZeroSave_Description" xml:space="preserve"><value>Stake 0% on another player in an anonymous wager and keep your points when they answer correctly.</value></data>
+  <data name="FourCluesTwoClues_Name" xml:space="preserve"><value>Two Are Enough</value></data>
+  <data name="FourCluesTwoClues_Description" xml:space="preserve"><value>Answer a Four Clues question correctly while only the first two clues are revealed.</value></data>
+  <data name="BuzzerPhotoFinishFirst_Name" xml:space="preserve"><value>Photo Finish: First</value></data>
+  <data name="BuzzerPhotoFinishFirst_Description" xml:space="preserve"><value>Buzz first when the second player buzzes less than 50 ms later.</value></data>
+  <data name="BuzzerPhotoFinishSecond_Name" xml:space="preserve"><value>Photo Finish: Second</value></data>
+  <data name="BuzzerPhotoFinishSecond_Description" xml:space="preserve"><value>Buzz second less than 50 ms after the first player.</value></data>
+  <data name="KickedAndReturned_Name" xml:space="preserve"><value>The Exile Returns</value></data>
+  <data name="KickedAndReturned_Description" xml:space="preserve"><value>Get removed from a game by the host and return to that same game.</value></data>
+  <data name="FirstToThirdReturn_Name" xml:space="preserve"><value>Skipped a Round</value></data>
+  <data name="FirstToThirdReturn_Description" xml:space="preserve"><value>Play in round one, disconnect, return in round three, and finish the game.</value></data>
+  <data name="LateJoiner_Name" xml:space="preserve"><value>Late Wolf</value></data>
+  <data name="LateJoiner_Description" xml:space="preserve"><value>Join a game for the first time only in round two or later.</value></data>
+  <data name="AvatarChanged_Name" xml:space="preserve"><value>New Look</value></data>
+  <data name="AvatarChanged_Description" xml:space="preserve"><value>Change your avatar after making your first avatar choice.</value></data>
+  <data name="WebcamEnabled_Name" xml:space="preserve"><value>On Air</value></data>
+  <data name="WebcamEnabled_Description" xml:space="preserve"><value>Enable either a regular webcam or a URL webcam during a game.</value></data>
 </root>

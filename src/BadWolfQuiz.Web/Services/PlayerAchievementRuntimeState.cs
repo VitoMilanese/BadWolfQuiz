@@ -3,7 +3,7 @@ using BadWolfQuiz.Game.Runtime;
 
 namespace BadWolfQuiz.Web.Services;
 
-public static class PlayerAchievementRuntimeState
+public static partial class PlayerAchievementRuntimeState
 {
     private static readonly ConditionalWeakTable<GameSessionRegistration, RuntimeState> States = new();
 
@@ -102,6 +102,8 @@ public static class PlayerAchievementRuntimeState
         var state = States.GetOrCreateValue(game);
         lock (state)
         {
+            RecordFirstRoundParticipantsLocked(game, question, state);
+
             if (state.RoundFirstPicks.ContainsKey(question.SourceRoundId))
             {
                 return;
@@ -174,6 +176,8 @@ public static class PlayerAchievementRuntimeState
             {
                 changed |= playerIds.Add(latePlayer.PlayerId);
             }
+
+            changed |= RecordCloseBuzzerAchievementsLocked(state, race);
         }
 
         if (changed)
@@ -215,6 +219,7 @@ public static class PlayerAchievementRuntimeState
             state.AllInWagers.Clear();
             state.RoundFirstPicks.Clear();
             state.BuzzerPressedPlayerIdsByRound.Clear();
+            ResetExpansionLocked(state);
         }
     }
 
@@ -228,7 +233,7 @@ public static class PlayerAchievementRuntimeState
 
         lock (state)
         {
-            return new PlayerAchievementRuntimeSnapshot(
+            var snapshot = new PlayerAchievementRuntimeSnapshot(
                 state.PlayerAccountIds
                     .OrderBy(item => item.Key.Value)
                     .Select(item => new PlayerAccountLinkSnapshot(item.Key, item.Value))
@@ -246,6 +251,7 @@ public static class PlayerAchievementRuntimeState
                 state.RoundFirstPicks.Values
                     .OrderBy(item => item.SourceRoundId)
                     .ToArray());
+            return CaptureExpansionLocked(state, snapshot);
         }
     }
 
@@ -275,6 +281,7 @@ public static class PlayerAchievementRuntimeState
             state.AllInWagers.Clear();
             state.RoundFirstPicks.Clear();
             state.BuzzerPressedPlayerIdsByRound.Clear();
+            ResetExpansionLocked(state);
 
             foreach (var link in snapshot.PlayerAccounts ?? [])
             {
@@ -327,10 +334,12 @@ public static class PlayerAchievementRuntimeState
                         .ToArray()
                 };
             }
+
+            RestoreExpansionLocked(state, snapshot, validPlayerIds);
         }
     }
 
-    private sealed class RuntimeState
+    private sealed partial class RuntimeState
     {
         public Dictionary<GamePlayerId, string> PlayerAccountIds { get; } = [];
         public HashSet<AllInWagerSnapshot> AllInWagers { get; } = [];
@@ -339,7 +348,7 @@ public static class PlayerAchievementRuntimeState
     }
 }
 
-public sealed record PlayerAchievementRuntimeSnapshot(
+public sealed partial record PlayerAchievementRuntimeSnapshot(
     IReadOnlyList<PlayerAccountLinkSnapshot>? PlayerAccounts,
     IReadOnlyList<AllInWagerSnapshot>? AllInWagers,
     IReadOnlyList<RoundBuzzerPressSnapshot>? BuzzerPresses = null,

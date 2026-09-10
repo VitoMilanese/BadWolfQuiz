@@ -87,4 +87,24 @@
   <data name="SilentRound_Description" xml:space="preserve"><value>Україна</value></data>
   <data name="SilentRoundGain_Name" xml:space="preserve"><value>Україна</value></data>
   <data name="SilentRoundGain_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnonymousStake100Profit_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnonymousStake100Profit_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnonymousStakeZeroSave_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnonymousStakeZeroSave_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="FourCluesTwoClues_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="FourCluesTwoClues_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="BuzzerPhotoFinishFirst_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="BuzzerPhotoFinishFirst_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="BuzzerPhotoFinishSecond_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="BuzzerPhotoFinishSecond_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="KickedAndReturned_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="KickedAndReturned_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="FirstToThirdReturn_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="FirstToThirdReturn_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="LateJoiner_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="LateJoiner_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="AvatarChanged_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="AvatarChanged_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WebcamEnabled_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WebcamEnabled_Description" xml:space="preserve"><value>Україна</value></data>
 </root>

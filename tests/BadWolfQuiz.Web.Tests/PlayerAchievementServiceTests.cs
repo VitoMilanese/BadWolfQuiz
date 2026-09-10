@@ -9,9 +9,9 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class PlayerAchievementServiceTests
 {
     [Fact]
-    public void Catalog_contains_all_thirty_seven_achievements()
+    public void Catalog_contains_all_forty_seven_achievements()
     {
-        Assert.Equal(37, PlayerAchievementService.Catalog.Count);
+        Assert.Equal(47, PlayerAchievementService.Catalog.Count);
 
         var expectedCodes = new[]
         {
@@ -39,7 +39,17 @@ public sealed class PlayerAchievementServiceTests
             "Score30K",
             "TotalScore100K",
             "TotalScore500K",
-            "TotalScore1M"
+            "TotalScore1M",
+            "AnonymousStake100Profit",
+            "AnonymousStakeZeroSave",
+            "FourCluesTwoClues",
+            "BuzzerPhotoFinishFirst",
+            "BuzzerPhotoFinishSecond",
+            "KickedAndReturned",
+            "FirstToThirdReturn",
+            "LateJoiner",
+            "AvatarChanged",
+            "WebcamEnabled"
         };
 
         Assert.All(

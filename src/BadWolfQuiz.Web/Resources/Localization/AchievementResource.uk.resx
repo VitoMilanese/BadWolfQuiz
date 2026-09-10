@@ -87,4 +87,24 @@
   <data name="SilentRound_Description" xml:space="preserve"><value>Провести цілий раунд, жодного разу не натиснувши на буззер.</value></data>
   <data name="SilentRoundGain_Name" xml:space="preserve"><value>Мовчання — золото</value></data>
   <data name="SilentRoundGain_Description" xml:space="preserve"><value>Завершити раунд з більшою кількістю балів, ніж на початку, жодного разу не натиснувши на буззер.</value></data>
+  <data name="AnonymousStake100Profit_Name" xml:space="preserve"><value>Сто відсотків довіри</value></data>
+  <data name="AnonymousStake100Profit_Description" xml:space="preserve"><value>Поставити 100% на іншого гравця під час анонімної ставки та заробити бали, коли він відповість неправильно.</value></data>
+  <data name="AnonymousStakeZeroSave_Name" xml:space="preserve"><value>Нуль ризику</value></data>
+  <data name="AnonymousStakeZeroSave_Description" xml:space="preserve"><value>Поставити 0% на іншого гравця під час анонімної ставки та зберегти свої бали, коли він відповість правильно.</value></data>
+  <data name="FourCluesTwoClues_Name" xml:space="preserve"><value>Досить двох</value></data>
+  <data name="FourCluesTwoClues_Description" xml:space="preserve"><value>Правильно відповісти на питання «4 підказки», коли відкрито лише перші 2 підказки.</value></data>
+  <data name="BuzzerPhotoFinishFirst_Name" xml:space="preserve"><value>Фотофініш: перший</value></data>
+  <data name="BuzzerPhotoFinishFirst_Description" xml:space="preserve"><value>Натиснути на буззер першим, коли другий гравець натисне менш ніж через 50 мс.</value></data>
+  <data name="BuzzerPhotoFinishSecond_Name" xml:space="preserve"><value>Фотофініш: другий</value></data>
+  <data name="BuzzerPhotoFinishSecond_Description" xml:space="preserve"><value>Натиснути на буззер другим менш ніж через 50 мс після першого гравця.</value></data>
+  <data name="KickedAndReturned_Name" xml:space="preserve"><value>Повернення вигнанця</value></data>
+  <data name="KickedAndReturned_Description" xml:space="preserve"><value>Бути виключеним хостом із гри та повернутися до цієї ж гри.</value></data>
+  <data name="FirstToThirdReturn_Name" xml:space="preserve"><value>Пропущений раунд</value></data>
+  <data name="FirstToThirdReturn_Description" xml:space="preserve"><value>Зіграти в першому раунді, від’єднатися, повернутися у третьому раунді та дограти до кінця.</value></data>
+  <data name="LateJoiner_Name" xml:space="preserve"><value>Запізнілий вовк</value></data>
+  <data name="LateJoiner_Description" xml:space="preserve"><value>Уперше приєднатися до гри лише у другому раунді або пізніше.</value></data>
+  <data name="AvatarChanged_Name" xml:space="preserve"><value>Новий образ</value></data>
+  <data name="AvatarChanged_Description" xml:space="preserve"><value>Змінити аватарку після її першого вибору.</value></data>
+  <data name="WebcamEnabled_Name" xml:space="preserve"><value>В ефірі</value></data>
+  <data name="WebcamEnabled_Description" xml:space="preserve"><value>Увімкнути звичайну або URL-вебкамеру під час гри.</value></data>
 </root>

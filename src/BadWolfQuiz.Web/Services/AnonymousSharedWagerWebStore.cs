@@ -106,10 +106,28 @@ public static class AnonymousSharedWagerWebStore
                 ? current
                 : throw new GameRuleViolationException(
                     "The anonymous shared wager state is unavailable.");
+            var question = game.Session.Board.Questions.Single(item =>
+                item.SourceQuestionId == state.SourceQuestionId);
+            var calculation = AnonymousSharedWagerLifecycle.Complete(state, question.Points);
             var attempt = AnonymousSharedWagerCoordinator.SettleAnswer(
                 game.Session,
                 state,
                 isCorrect);
+
+            foreach (var contribution in calculation.Contributions.Where(item => !item.IsForced))
+            {
+                if (!isCorrect && contribution.Percentage == 100 && contribution.Amount > 0)
+                {
+                    PlayerAchievementRuntimeState.MarkPendingAchievement(
+                        game, contribution.PlayerId, "AnonymousStake100Profit");
+                }
+                else if (isCorrect && contribution.Percentage == 0)
+                {
+                    PlayerAchievementRuntimeState.MarkPendingAchievement(
+                        game, contribution.PlayerId, "AnonymousStakeZeroSave");
+                }
+            }
+
             game.BuzzerRace = null;
             game.MarkPersistenceChanged();
             States.TryRemove(game.Session.Id, out _);

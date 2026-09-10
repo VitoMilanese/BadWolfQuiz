@@ -44,7 +44,17 @@ public sealed class PlayerAchievementService(QuizDbContext db)
         new("EveryCategoryAttempt", "🧭", true, PlayerAchievementMetric.DirectUnlock, 1),
         new("EveryCategoryCorrect", "🧠", true, PlayerAchievementMetric.DirectUnlock, 1),
         new("SilentRound", "🤐", true, PlayerAchievementMetric.DirectUnlock, 1),
-        new("SilentRoundGain", "📈", true, PlayerAchievementMetric.DirectUnlock, 1)
+        new("SilentRoundGain", "📈", true, PlayerAchievementMetric.DirectUnlock, 1),
+        new("AnonymousStake100Profit", "💯", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("AnonymousStakeZeroSave", "🛡️", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("FourCluesTwoClues", "✌️", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("BuzzerPhotoFinishFirst", "⚡", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("BuzzerPhotoFinishSecond", "🏎️", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("KickedAndReturned", "🚪", true, PlayerAchievementMetric.DirectUnlock, 1),
+        new("FirstToThirdReturn", "🕳️", true, PlayerAchievementMetric.DirectUnlock, 1),
+        new("LateJoiner", "🕒", true, PlayerAchievementMetric.DirectUnlock, 1),
+        new("AvatarChanged", "🎭", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WebcamEnabled", "📷", false, PlayerAchievementMetric.DirectUnlock, 1)
     ];
 
     public async Task AdoptHostNicknameHistoryAsync(

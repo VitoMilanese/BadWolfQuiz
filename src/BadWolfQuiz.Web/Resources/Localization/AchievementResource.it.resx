@@ -87,4 +87,24 @@
   <data name="SilentRound_Description" xml:space="preserve"><value>Gioca un intero round senza premere mai il buzzer.</value></data>
   <data name="SilentRoundGain_Name" xml:space="preserve"><value>Il silenzio è d&apos;oro</value></data>
   <data name="SilentRoundGain_Description" xml:space="preserve"><value>Termina un round con più punti di quanti ne avevi all&apos;inizio, senza premere mai il buzzer.</value></data>
+  <data name="AnonymousStake100Profit_Name" xml:space="preserve"><value>Fiducia totale</value></data>
+  <data name="AnonymousStake100Profit_Description" xml:space="preserve"><value>Punta il 100% su un altro giocatore in una puntata anonima e guadagna punti quando risponde in modo errato.</value></data>
+  <data name="AnonymousStakeZeroSave_Name" xml:space="preserve"><value>Rischio zero</value></data>
+  <data name="AnonymousStakeZeroSave_Description" xml:space="preserve"><value>Punta lo 0% su un altro giocatore in una puntata anonima e conserva i tuoi punti quando risponde correttamente.</value></data>
+  <data name="FourCluesTwoClues_Name" xml:space="preserve"><value>Ne bastano due</value></data>
+  <data name="FourCluesTwoClues_Description" xml:space="preserve"><value>Rispondi correttamente a una domanda Quattro indizi quando sono visibili solo i primi due indizi.</value></data>
+  <data name="BuzzerPhotoFinishFirst_Name" xml:space="preserve"><value>Fotofinish: primo</value></data>
+  <data name="BuzzerPhotoFinishFirst_Description" xml:space="preserve"><value>Premi il buzzer per primo quando il secondo giocatore lo preme meno di 50 ms dopo.</value></data>
+  <data name="BuzzerPhotoFinishSecond_Name" xml:space="preserve"><value>Fotofinish: secondo</value></data>
+  <data name="BuzzerPhotoFinishSecond_Description" xml:space="preserve"><value>Premi il buzzer per secondo meno di 50 ms dopo il primo giocatore.</value></data>
+  <data name="KickedAndReturned_Name" xml:space="preserve"><value>Il ritorno dell’esiliato</value></data>
+  <data name="KickedAndReturned_Description" xml:space="preserve"><value>Fatti espellere dalla partita dall’host e torna nella stessa partita.</value></data>
+  <data name="FirstToThirdReturn_Name" xml:space="preserve"><value>Un round saltato</value></data>
+  <data name="FirstToThirdReturn_Description" xml:space="preserve"><value>Gioca nel primo round, disconnettiti, torna nel terzo round e termina la partita.</value></data>
+  <data name="LateJoiner_Name" xml:space="preserve"><value>Lupo in ritardo</value></data>
+  <data name="LateJoiner_Description" xml:space="preserve"><value>Entra per la prima volta in una partita solo dal secondo round in poi.</value></data>
+  <data name="AvatarChanged_Name" xml:space="preserve"><value>Nuovo look</value></data>
+  <data name="AvatarChanged_Description" xml:space="preserve"><value>Cambia avatar dopo la prima scelta dell’avatar.</value></data>
+  <data name="WebcamEnabled_Name" xml:space="preserve"><value>In onda</value></data>
+  <data name="WebcamEnabled_Description" xml:space="preserve"><value>Attiva una webcam normale o una webcam tramite URL durante una partita.</value></data>
 </root>

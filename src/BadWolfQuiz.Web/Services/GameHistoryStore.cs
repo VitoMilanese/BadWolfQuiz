@@ -286,6 +286,20 @@ public sealed class GameHistoryStore(QuizDbContext db)
             }
         }
 
+        foreach (var question in runtime.Board.Questions.Where(question =>
+                     question.PresentationType == QuestionPresentationType.FourClues &&
+                     question.RevealedClueCount == 2))
+        {
+            foreach (var attempt in question.AnswerAttempts.Where(attempt => attempt.IsCorrect))
+            {
+                var player = runtime.AllPlayers.SingleOrDefault(item => item.Id == attempt.PlayerId);
+                if (player is not null)
+                {
+                    await UnlockAsync(player, "FourCluesTwoClues");
+                }
+            }
+        }
+
         if (runtime.FinalQuestion is { } finalQuestion)
         {
             var finalStartingScores = finalQuestion.Submissions
@@ -324,6 +338,17 @@ public sealed class GameHistoryStore(QuizDbContext db)
 
         foreach (var player in runtime.AllPlayers)
         {
+            foreach (var achievementCode in
+                     PlayerAchievementRuntimeState.GetPendingAchievementCodes(registration, player.Id))
+            {
+                await UnlockAsync(player, achievementCode);
+            }
+
+            if (PlayerAchievementRuntimeState.DidCompleteFirstToThirdReturn(registration, player.Id))
+            {
+                await UnlockAsync(player, "FirstToThirdReturn");
+            }
+
             var attemptedEveryCategory = false;
             var correctInEveryCategory = false;
             var silentRound = false;
