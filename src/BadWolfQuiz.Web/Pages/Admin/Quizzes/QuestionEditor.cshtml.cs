@@ -23,18 +23,17 @@ public sealed class QuestionEditorModel(
 
     public int? NextQuestionId { get; private set; }
 
-    public static IReadOnlyList<string> TagSuggestions { get; } =
-    [
-        "фільми до 90-х", "фільми 90-х", "фільми 2000-х",
-        "фільми 2010-х", "фільми 2020-х",
-        "мультфільми до 90-х", "мультфільми 90-х", "мультфільми 2000-х",
-        "мультфільми 2010-х", "мультфільми 2020-х",
-        "серіали до 90-х", "серіали 90-х", "серіали 2000-х",
-        "серіали 2010-х", "серіали 2020-х",
-        "мультсеріали до 90-х", "мультсеріали 90-х", "мультсеріали 2000-х",
-        "мультсеріали 2010-х", "мультсеріали 2020-х",
-        "ретро-ігри", "ігри 90-х", "ігри 2000-х", "ігри 2010-х", "ігри 2020-х"
-    ];
+
+    public async Task<IActionResult> OnGetTagSuggestionsAsync(
+    string? query,
+    CancellationToken cancellationToken)
+{
+    var suggestions = await QuestionTagSuggestionQuery.GetAsync(
+        db,
+        query,
+        cancellationToken);
+    return new JsonResult(suggestions);
+}
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
