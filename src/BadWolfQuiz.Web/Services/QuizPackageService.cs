@@ -185,6 +185,10 @@ public sealed class QuizPackageService(QuizDbContext db)
             CreatedAtUtc = now,
             UpdatedAtUtc = now
         };
+        var importedTags = new List<(
+            QuizQuestion Question,
+            string Name,
+            string NormalizedName)>();
 
         async Task ApplyBlockAsync(ContentBlockBase target, BlockData source)
         {
@@ -261,11 +265,7 @@ public sealed class QuizPackageService(QuizDbContext db)
                     foreach (var tag in sourceQuestion.Tags ?? [])
                     {
                         var name = tag.Trim();
-                        question.Tags.Add(new QuizQuestionTag
-                        {
-                            Name = name,
-                            NormalizedName = name.ToUpperInvariant()
-                        });
+                        importedTags.Add((question, name, name.ToUpperInvariant()));
                     }
                     foreach (var sourceBlock in sourceQuestion.QuestionBlocks)
                     {
@@ -305,8 +305,42 @@ public sealed class QuizPackageService(QuizDbContext db)
             quiz.FinalAnswerBlocks.Add(block);
         }
 
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         db.Quizzes.Add(quiz);
         await db.SaveChangesAsync(cancellationToken);
+
+        if (importedTags.Count > 0)
+        {
+            var tagEntities = importedTags
+                .Select(tag => new QuizQuestionTag
+                {
+                    QuizQuestionId = tag.Question.Id,
+                    Question = tag.Question,
+                    Name = tag.Name,
+                    NormalizedName = tag.NormalizedName
+                })
+                .ToArray();
+            db.QuizQuestionTags.AddRange(tagEntities);
+            await db.SaveChangesAsync(cancellationToken);
+
+            var importedQuestionIds = importedTags
+                .Select(tag => tag.Question.Id)
+                .Distinct()
+                .ToArray();
+            var persistedTagCount = await db.QuizQuestionTags
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .CountAsync(
+                    tag => importedQuestionIds.Contains(tag.QuizQuestionId),
+                    cancellationToken);
+            if (persistedTagCount != importedTags.Count)
+            {
+                throw new InvalidDataException(
+                    "The quiz package question tags could not be persisted completely.");
+            }
+        }
+
+        await transaction.CommitAsync(cancellationToken);
         return quiz;
     }
 
