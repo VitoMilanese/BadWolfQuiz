@@ -658,14 +658,21 @@ public sealed class GameSessionRegistry
                 var hasRemainingConnection = _playerConnections.Values.Any(item =>
                     item.Access.Game == connection.Access.Game &&
                     item.Access.Player.Id == connection.Access.Player.Id);
+                var now = _timeProvider.GetUtcNow();
+                var hasPendingTransition = _playerTransitionAccessByTokenHash.Values.Any(item =>
+                    item.Access == connection.Access &&
+                    item.ExpiresAtUtc > now);
 
                 if (!hasRemainingConnection)
                 {
                     connection.Access.Game.DisconnectedPlayerIdsAwaitingReconnect.Add(
                         connection.Access.Player.Id);
-                    PlayerAchievementRuntimeState.RecordPlayerDisconnected(
-                        connection.Access.Game,
-                        connection.Access.Player.Id);
+                    if (!hasPendingTransition)
+                    {
+                        PlayerAchievementRuntimeState.RecordPlayerDisconnected(
+                            connection.Access.Game,
+                            connection.Access.Player.Id);
+                    }
                 }
             }
         }

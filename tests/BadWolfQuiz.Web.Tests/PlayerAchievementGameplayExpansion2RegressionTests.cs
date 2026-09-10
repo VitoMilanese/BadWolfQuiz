@@ -45,6 +45,8 @@ public sealed class PlayerAchievementGameplayExpansion2RegressionTests
         Assert.Contains("RecordPlayerKicked", registry, StringComparison.Ordinal);
         Assert.Contains("RecordKickedPlayerReturned", registry, StringComparison.Ordinal);
         Assert.Contains("RecordPlayerDisconnected", registry, StringComparison.Ordinal);
+        Assert.Contains("hasPendingTransition", registry, StringComparison.Ordinal);
+        Assert.Contains("!hasPendingTransition", registry, StringComparison.Ordinal);
         Assert.Contains("RecordPlayerReconnected", registry, StringComparison.Ordinal);
         Assert.Contains("CurrentRoundIndex != 2", runtime, StringComparison.Ordinal);
         Assert.Contains("CurrentRoundIndex < 1", runtime, StringComparison.Ordinal);
