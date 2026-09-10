@@ -9,9 +9,9 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class PlayerAchievementServiceTests
 {
     [Fact]
-    public void Catalog_contains_all_forty_seven_achievements()
+    public void Catalog_contains_all_sixty_five_achievements()
     {
-        Assert.Equal(47, PlayerAchievementService.Catalog.Count);
+        Assert.Equal(65, PlayerAchievementService.Catalog.Count);
 
         var expectedCodes = new[]
         {
@@ -49,7 +49,25 @@ public sealed class PlayerAchievementServiceTests
             "FirstToThirdReturn",
             "LateJoiner",
             "AvatarChanged",
-            "WebcamEnabled"
+            "WebcamEnabled",
+            "Films25",
+            "Series25",
+            "Cartoons25",
+            "AnimatedSeries25",
+            "Games25",
+            "AudioQuestions25",
+            "VideoQuestions25",
+            "HarryPotter25",
+            "StarWars25",
+            "Fantasy25",
+            "SciFi25",
+            "Animals25",
+            "Horrors25",
+            "Music25",
+            "DoctorWhoTag",
+            "RobocopTag",
+            "TerminatorTag",
+            "MafiaGodfatherTag"
         };
 
         Assert.All(
@@ -70,36 +88,42 @@ public sealed class PlayerAchievementServiceTests
         Assert.True(PlayerAchievementService.Catalog.Single(item => item.Code == "EveryCategoryCorrect").IsSecret);
         Assert.True(PlayerAchievementService.Catalog.Single(item => item.Code == "SilentRound").IsSecret);
         Assert.True(PlayerAchievementService.Catalog.Single(item => item.Code == "SilentRoundGain").IsSecret);
+        Assert.All(
+            PlayerTagAchievementCatalog.Definitions.Where(item => item.Target == 25),
+            item => Assert.False(item.IsSecret));
+        Assert.All(
+            PlayerTagAchievementCatalog.Definitions.Where(item => item.Target == 1),
+            item => Assert.True(item.IsSecret));
     }
 
     [Theory]
-[InlineData("SuperChupa")]
-[InlineData("superchupa")]
-public async Task LoadForPlayerAsync_returns_every_achievement_unlocked_for_SuperChupa(string playerName)
-{
-    var options = new DbContextOptionsBuilder<QuizDbContext>()
-        .UseSqlite("Data Source=:memory:")
-        .Options;
-    await using var db = new QuizDbContext(options);
-    var service = new PlayerAchievementService(db);
-
-    var achievements = await service.LoadForPlayerAsync(
-        "preview-host",
-        playerName,
-        currentGameCode: null);
-
-    Assert.Equal(PlayerAchievementService.Catalog.Count, achievements.Count);
-    Assert.All(achievements, achievement =>
+    [InlineData("SuperChupa")]
+    [InlineData("superchupa")]
+    public async Task LoadForPlayerAsync_returns_every_achievement_unlocked_for_SuperChupa(string playerName)
     {
-        Assert.True(achievement.IsUnlocked);
-        Assert.False(achievement.IsNewInCurrentGame);
-        Assert.Equal(achievement.Target, achievement.Progress);
-    });
-    Assert.Empty(db.ChangeTracker.Entries<PlayerAchievement>());
-}
+        var options = new DbContextOptionsBuilder<QuizDbContext>()
+            .UseSqlite("Data Source=:memory:")
+            .Options;
+        await using var db = new QuizDbContext(options);
+        var service = new PlayerAchievementService(db);
 
-[Fact]
-public void Catalog_uses_fifteen_thousand_points_for_big_game()
+        var achievements = await service.LoadForPlayerAsync(
+            "preview-host",
+            playerName,
+            currentGameCode: null);
+
+        Assert.Equal(PlayerAchievementService.Catalog.Count, achievements.Count);
+        Assert.All(achievements, achievement =>
+        {
+            Assert.True(achievement.IsUnlocked);
+            Assert.False(achievement.IsNewInCurrentGame);
+            Assert.Equal(achievement.Target, achievement.Progress);
+        });
+        Assert.Empty(db.ChangeTracker.Entries<PlayerAchievement>());
+    }
+
+    [Fact]
+    public void Catalog_uses_fifteen_thousand_points_for_big_game()
     {
         var achievement = Assert.Single(
             PlayerAchievementService.Catalog,
@@ -157,6 +181,32 @@ public void Catalog_uses_fifteen_thousand_points_for_big_game()
         Assert.Equal(17_000, history.TotalScore);
         Assert.Equal(10, history.BestFlawlessAttempts);
         Assert.True(history.RecoveredFromNegative);
+    }
+
+    [Fact]
+    public void BuildHistory_counts_tagged_answers_regardless_of_correctness()
+    {
+        var now = new DateTime(2026, 9, 11, 0, 0, 0, DateTimeKind.Utc);
+        PlayerAchievementGameSource[] appearances = [new(1, 10, "Wolf", 0, now)];
+        PlayerAchievementGameScoreSource[] scores = [new(10, 0)];
+        var answers = Enumerable.Range(0, 25)
+            .Select(index => new PlayerAchievementAnswerSource(
+                1,
+                index % 2 == 0,
+                0,
+                now.AddSeconds(index),
+                index == 0
+                    ? ["films 90", "Doctor Who"]
+                    : ["ФІЛЬМИ 2000Х"]))
+            .ToArray();
+
+        var history = PlayerAchievementService.BuildHistory(appearances, scores, answers);
+        var progress = PlayerAchievementService.BuildProgress(history, []);
+
+        Assert.Equal(25, history.TaggedAnswers!["Films25"]);
+        Assert.Equal(1, history.TaggedAnswers["DoctorWhoTag"]);
+        Assert.Equal(25, progress.Single(item => item.Code == "Films25").Progress);
+        Assert.Equal(1, progress.Single(item => item.Code == "DoctorWhoTag").Progress);
     }
 
     [Fact]

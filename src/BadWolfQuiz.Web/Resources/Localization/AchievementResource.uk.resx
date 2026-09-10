@@ -107,4 +107,40 @@
   <data name="AvatarChanged_Description" xml:space="preserve"><value>Змінити аватарку після її першого вибору.</value></data>
   <data name="WebcamEnabled_Name" xml:space="preserve"><value>В ефірі</value></data>
   <data name="WebcamEnabled_Description" xml:space="preserve"><value>Увімкнути звичайну або URL-вебкамеру під час гри.</value></data>
+  <data name="Films25_Name" xml:space="preserve"><value>Кіноман</value></data>
+  <data name="Films25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами про фільми.</value></data>
+  <data name="Series25_Name" xml:space="preserve"><value>Серіаломан</value></data>
+  <data name="Series25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами про серіали.</value></data>
+  <data name="Cartoons25_Name" xml:space="preserve"><value>Мультоман</value></data>
+  <data name="Cartoons25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами про мультфільми.</value></data>
+  <data name="AnimatedSeries25_Name" xml:space="preserve"><value>Мультсеріаломан</value></data>
+  <data name="AnimatedSeries25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами про мультсеріали.</value></data>
+  <data name="Games25_Name" xml:space="preserve"><value>Геймер</value></data>
+  <data name="Games25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами про ігри.</value></data>
+  <data name="AudioQuestions25_Name" xml:space="preserve"><value>На слух</value></data>
+  <data name="AudioQuestions25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами аудіопитань.</value></data>
+  <data name="VideoQuestions25_Name" xml:space="preserve"><value>На екрані</value></data>
+  <data name="VideoQuestions25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами відеопитань.</value></data>
+  <data name="HarryPotter25_Name" xml:space="preserve"><value>Чарівник</value></data>
+  <data name="HarryPotter25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами про Гаррі Поттера.</value></data>
+  <data name="StarWars25_Name" xml:space="preserve"><value>Далека галактика</value></data>
+  <data name="StarWars25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами про Зоряні Війни.</value></data>
+  <data name="Fantasy25_Name" xml:space="preserve"><value>Знавець фентезі</value></data>
+  <data name="Fantasy25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами фантастики / fantasy.</value></data>
+  <data name="SciFi25_Name" xml:space="preserve"><value>Знавець sci-fi</value></data>
+  <data name="SciFi25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами наукової фантастики / sci-fi.</value></data>
+  <data name="Animals25_Name" xml:space="preserve"><value>Зоознавець</value></data>
+  <data name="Animals25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами про тварин.</value></data>
+  <data name="Horrors25_Name" xml:space="preserve"><value>Не з лякливих</value></data>
+  <data name="Horrors25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами про жахи.</value></data>
+  <data name="Music25_Name" xml:space="preserve"><value>Меломан</value></data>
+  <data name="Music25_Description" xml:space="preserve"><value>Відповісти на 25 питань із тегами про музику.</value></data>
+  <data name="DoctorWhoTag_Name" xml:space="preserve"><value>Повелитель часу</value></data>
+  <data name="DoctorWhoTag_Description" xml:space="preserve"><value>Відповісти на питання з тегом «Доктор Хто» або «Doctor Who».</value></data>
+  <data name="RobocopTag_Name" xml:space="preserve"><value>Живий чи мертвий</value></data>
+  <data name="RobocopTag_Description" xml:space="preserve"><value>Відповісти на питання з тегом «Робокоп» або «Robocop».</value></data>
+  <data name="TerminatorTag_Name" xml:space="preserve"><value>Я повернуся</value></data>
+  <data name="TerminatorTag_Description" xml:space="preserve"><value>Відповісти на питання з тегом «Термінатор» або «Terminator».</value></data>
+  <data name="MafiaGodfatherTag_Name" xml:space="preserve"><value>Сімейна справа</value></data>
+  <data name="MafiaGodfatherTag_Description" xml:space="preserve"><value>Відповісти на питання з тегом «Мафія», «Maffia», «Хрещений Батько» або «Godfather».</value></data>
 </root>

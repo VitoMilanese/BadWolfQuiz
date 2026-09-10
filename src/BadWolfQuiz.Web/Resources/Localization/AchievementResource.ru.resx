@@ -107,4 +107,40 @@
   <data name="AvatarChanged_Description" xml:space="preserve"><value>Україна</value></data>
   <data name="WebcamEnabled_Name" xml:space="preserve"><value>Україна</value></data>
   <data name="WebcamEnabled_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="Films25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="Films25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="Series25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="Series25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="Cartoons25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="Cartoons25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnimatedSeries25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="AnimatedSeries25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="Games25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="Games25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="AudioQuestions25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="AudioQuestions25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="VideoQuestions25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="VideoQuestions25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="HarryPotter25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="HarryPotter25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="StarWars25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="StarWars25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="Fantasy25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="Fantasy25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="SciFi25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="SciFi25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="Animals25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="Animals25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="Horrors25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="Horrors25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="Music25_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="Music25_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="DoctorWhoTag_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="DoctorWhoTag_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="RobocopTag_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="RobocopTag_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="TerminatorTag_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="TerminatorTag_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="MafiaGodfatherTag_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="MafiaGodfatherTag_Description" xml:space="preserve"><value>Україна</value></data>
 </root>
