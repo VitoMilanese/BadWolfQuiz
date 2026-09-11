@@ -13,9 +13,10 @@
     const achievementSortGroup = item => item.isUnlocked ? 0 : item.isSecret ? 2 : 1;
 
     const secretUnlockedStateIcon = `
-        <svg class="player-achievement-state-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-            <rect x="3" y="11" width="18" height="10" rx="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+        <svg class="player-achievement-state-icon player-achievement-secret-revealed" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+            <path d="M7.8 8.4a4.2 4.2 0 1 1 6.8 3.3c-1.5 1-2.4 1.6-2.4 3.1"></path>
+            <circle cx="12.2" cy="17.6" r="0.8" fill="currentColor" stroke="none"></circle>
+            <path d="m15.2 16.6 1.5 1.5 3.3-3.8"></path>
         </svg>`;
 
     const ensureDialog = () => {
