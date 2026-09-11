@@ -39,6 +39,7 @@ jobs:
 
           script = Path("tools/apply_issue_601.py")
           text = script.read_text(encoding="utf-8")
+
           old = "                        presentationType,\\n                        buzzerMode,\\n                        Math.Max(0, question.BuzzDelaySeconds)"
           new = "            presentationType,\\n            buzzerMode,\\n            Math.Max(0, question.BuzzDelaySeconds)"
           if text.count(old) != 2:
@@ -50,6 +51,12 @@ jobs:
           if text.count("question.AllowAnswerRewardModifiers)))") != 1:
               raise RuntimeError("QuizSnapshotFactory replacement closing-paren precondition was not found exactly once")
           text = text.replace("question.AllowAnswerRewardModifiers)))", "question.AllowAnswerRewardModifiers));", 1)
+
+          helper_old = '''    count = text.count(old)\n    if count != 1:\n        raise RuntimeError(f"{path}: expected one occurrence, found {count}: {old[:120]!r}")\n    write(path, text.replace(old, new, 1))\n'''
+          helper_new = '''    count = text.count(old)\n    if (\n        path == "src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml"\n        and "judgment-correct-button" in old\n        and "judgment-incorrect-button" in old\n    ):\n        if count < 1:\n            raise RuntimeError(f"{path}: host judgment block was not found")\n        write(path, text.replace(old, new, 1))\n        return\n    if count != 1:\n        raise RuntimeError(f"{path}: expected one occurrence, found {count}: {old[:120]!r}")\n    write(path, text.replace(old, new, 1))\n'''
+          if text.count(helper_old) != 1:
+              raise RuntimeError("replace_once helper precondition was not found exactly once")
+          text = text.replace(helper_old, helper_new, 1)
           script.write_text(text, encoding="utf-8")
           PY
 
