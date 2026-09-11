@@ -59,6 +59,10 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("data-achievement-history-session-count", page);
         Assert.Contains("player-achievement-history-body", page);
         Assert.Contains("player-achievement-history-sidebar", page);
+        Assert.Contains("(isPendingMode && Model.PendingConfirmations.Count > 0)", page);
+        Assert.Contains("@foreach (var pendingPlayer in Model.PendingConfirmations)", page);
+        Assert.Contains("Model.SelectedPendingConfirmation?.PlayerId == pendingPlayer.PlayerId", page);
+        Assert.Contains("asp-route-selectedPlayerId=\"@pendingPlayer.PlayerId\"", page);
         Assert.Contains("data-achievement-history-time", page);
         Assert.Contains("data-achievement-history-confirm-form", page);
         Assert.Contains("asp-page-handler=\"ConfirmIdentity\"", page);
@@ -76,12 +80,16 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("SourceGameSessionId", model);
         Assert.Contains("definition is null", model);
         Assert.Contains("public const string PendingMode = \"pending\"", model);
+        Assert.Contains("SelectedPendingConfirmation", model);
+        Assert.Contains("PendingConfirmations.FirstOrDefault", model);
+        Assert.Contains("SelectedPlayerId = SelectedPendingConfirmation?.PlayerId", model);
         Assert.Contains("OnPostConfirmIdentityAsync", model);
         Assert.Contains("PlayerAchievementRuntimeState.GetPlayerAccountId", model);
         Assert.Contains("PlayerAchievementHistoryConfirmationService", model);
         Assert.Contains("confirmationService.ConfirmAsync", model);
         Assert.Contains("confirmationService.LoadPendingAsync", model);
         Assert.Contains("remaining.Count > 0 ? PendingMode : PlayersMode", model);
+        Assert.Contains("remaining[0].PlayerId", model);
 
         Assert.Contains("justify-content: center", css);
         Assert.Contains("grid-template-columns: minmax(230px, 290px) minmax(0, 1fr)", css);
@@ -91,6 +99,8 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.DoesNotContain("overflow: auto", css);
         Assert.Contains("player-achievement-history-confirm-form", confirmationCss);
         Assert.Contains("player-achievement-history-pending-card", confirmationCss);
+        Assert.Contains(".player-achievement-history-body.is-pending-mode", confirmationCss);
+        Assert.Contains("grid-template-columns: minmax(230px, 290px) minmax(0, 1fr)", confirmationCss);
         Assert.DoesNotContain("overflow: auto", confirmationCss);
 
         Assert.Contains("Intl.DateTimeFormat", script);

@@ -83,6 +83,7 @@
                        asp-page="/Admin/Games/PlayerAchievements"
                        asp-route-id="@Model.Game.Session.Id.Value"
                        asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PendingMode"
+                       asp-route-selectedPlayerId="@(Model.SelectedPendingConfirmation?.PlayerId)"
                        data-achievement-history-nav
                        data-achievement-history-view-nav
                        data-achievement-history-pending-tab>
@@ -105,25 +106,46 @@
         </div>
 
         <div class="player-achievement-history-body @(isGameMode ? "is-game-mode" : isPlayersMode ? "is-players-mode" : "is-pending-mode")">
-            @if (isPlayersMode && Model.Players.Count > 0)
+            @if ((isPlayersMode && Model.Players.Count > 0) ||
+                 (isPendingMode && Model.PendingConfirmations.Count > 0))
             {
                 <aside class="player-achievement-history-sidebar">
                     <span class="player-achievement-history-sidebar-title">@HistoryLocalizer["History_PlayerSelector"]</span>
                     <div class="player-achievement-history-player-picker"
                          aria-label="@HistoryLocalizer["History_PlayerSelector"]">
-                        @foreach (var player in Model.Players)
+                        @if (isPendingMode)
                         {
-                            var isSelected = Model.SelectedPlayerId == player.Id;
-                            <a class="player-achievement-history-player @(isSelected ? "is-active" : null)"
-                               aria-current="@(isSelected ? "true" : null)"
-                               asp-page="/Admin/Games/PlayerAchievements"
-                               asp-route-id="@Model.Game.Session.Id.Value"
-                               asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode"
-                               asp-route-selectedPlayerId="@player.Id"
-                               data-achievement-history-nav
-                               data-achievement-history-view-nav>
-                                @player.Name
-                            </a>
+                            @foreach (var pendingPlayer in Model.PendingConfirmations)
+                            {
+                                var isSelected = Model.SelectedPendingConfirmation?.PlayerId == pendingPlayer.PlayerId;
+                                <a class="player-achievement-history-player @(isSelected ? "is-active" : null)"
+                                   aria-current="@(isSelected ? "true" : null)"
+                                   asp-page="/Admin/Games/PlayerAchievements"
+                                   asp-route-id="@Model.Game.Session.Id.Value"
+                                   asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PendingMode"
+                                   asp-route-selectedPlayerId="@pendingPlayer.PlayerId"
+                                   data-achievement-history-nav
+                                   data-achievement-history-view-nav>
+                                    @pendingPlayer.PlayerName
+                                </a>
+                            }
+                        }
+                        else
+                        {
+                            @foreach (var player in Model.Players)
+                            {
+                                var isSelected = Model.SelectedPlayerId == player.Id;
+                                <a class="player-achievement-history-player @(isSelected ? "is-active" : null)"
+                                   aria-current="@(isSelected ? "true" : null)"
+                                   asp-page="/Admin/Games/PlayerAchievements"
+                                   asp-route-id="@Model.Game.Session.Id.Value"
+                                   asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode"
+                                   asp-route-selectedPlayerId="@player.Id"
+                                   data-achievement-history-nav
+                                   data-achievement-history-view-nav>
+                                    @player.Name
+                                </a>
+                            }
                         }
                     </div>
                 </aside>
@@ -132,88 +154,86 @@
             @if (isPendingMode)
             {
                 <section class="player-achievement-history-results player-achievement-history-pending-results">
-                    <div class="player-achievement-history-pending-list">
-                        @foreach (var pending in Model.PendingConfirmations)
-                        {
-                            <article class="answer-history-question-card player-achievement-history-pending-card"
-                                     data-achievement-history-pending-player="@pending.PlayerId">
-                                <header class="player-achievement-history-pending-header">
-                                    <div>
-                                        <span>@HistoryLocalizer["History_PendingPlayer"]</span>
-                                        <strong>@pending.PlayerName</strong>
-                                    </div>
-                                    <b>@HistoryLocalizer["History_PendingPreviousGames", pending.PendingGameCount]</b>
-                                </header>
+                    @if (Model.SelectedPendingConfirmation is { } pending)
+                    {
+                        <article class="answer-history-question-card player-achievement-history-pending-card"
+                                 data-achievement-history-pending-player="@pending.PlayerId">
+                            <header class="player-achievement-history-pending-header">
+                                <div>
+                                    <span>@HistoryLocalizer["History_PendingPlayer"]</span>
+                                    <strong>@pending.PlayerName</strong>
+                                </div>
+                                <b>@HistoryLocalizer["History_PendingPreviousGames", pending.PendingGameCount]</b>
+                            </header>
 
-                                <p class="player-achievement-history-pending-description">
-                                    @HistoryLocalizer["History_PendingPlayerDescription", pending.PlayerName]
+                            <p class="player-achievement-history-pending-description">
+                                @HistoryLocalizer["History_PendingPlayerDescription", pending.PlayerName]
+                            </p>
+
+                            @if (pending.Achievements.Count > 0)
+                            {
+                                <div class="player-achievement-history-pending-achievements-heading">
+                                    @HistoryLocalizer["History_PendingAchievements"]
+                                </div>
+                                <div class="player-achievement-history-list player-achievement-history-pending-achievements">
+                                    @foreach (var entry in pending.Achievements)
+                                    {
+                                        <article class="answer-history-question-card player-achievement-history-entry"
+                                                 data-achievement-code="@entry.AchievementCode"
+                                                 data-player-id="@entry.PlayerId">
+                                            <div class="player-achievement-history-artwork" aria-hidden="true">
+                                                @if (!string.IsNullOrWhiteSpace(entry.ArtworkUrl))
+                                                {
+                                                    <img src="@entry.ArtworkUrl"
+                                                         alt=""
+                                                         loading="lazy"
+                                                         decoding="async" />
+                                                }
+                                                else
+                                                {
+                                                    <span>🏆</span>
+                                                }
+                                            </div>
+
+                                            <div class="player-achievement-history-copy">
+                                                <span class="player-achievement-history-player-name">@entry.PlayerName</span>
+                                                <strong>@entry.Name</strong>
+                                                <p>@entry.Description</p>
+                                            </div>
+
+                                            <div class="player-achievement-history-time">
+                                                <span>@HistoryLocalizer["History_UnlockedAt"]</span>
+                                                <time datetime="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.ToUtcIso(entry.UnlockedAtUtc)"
+                                                      data-achievement-history-time>
+                                                    @BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.FormatUtcFallback(entry.UnlockedAtUtc)
+                                                </time>
+                                            </div>
+                                        </article>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="player-achievement-history-pending-progress-only">
+                                    @HistoryLocalizer["History_PendingNoVisibleUnlocks"]
                                 </p>
+                            }
 
-                                @if (pending.Achievements.Count > 0)
-                                {
-                                    <div class="player-achievement-history-pending-achievements-heading">
-                                        @HistoryLocalizer["History_PendingAchievements"]
-                                    </div>
-                                    <div class="player-achievement-history-list player-achievement-history-pending-achievements">
-                                        @foreach (var entry in pending.Achievements)
-                                        {
-                                            <article class="answer-history-question-card player-achievement-history-entry"
-                                                     data-achievement-code="@entry.AchievementCode"
-                                                     data-player-id="@entry.PlayerId">
-                                                <div class="player-achievement-history-artwork" aria-hidden="true">
-                                                    @if (!string.IsNullOrWhiteSpace(entry.ArtworkUrl))
-                                                    {
-                                                        <img src="@entry.ArtworkUrl"
-                                                             alt=""
-                                                             loading="lazy"
-                                                             decoding="async" />
-                                                    }
-                                                    else
-                                                    {
-                                                        <span>🏆</span>
-                                                    }
-                                                </div>
-
-                                                <div class="player-achievement-history-copy">
-                                                    <span class="player-achievement-history-player-name">@entry.PlayerName</span>
-                                                    <strong>@entry.Name</strong>
-                                                    <p>@entry.Description</p>
-                                                </div>
-
-                                                <div class="player-achievement-history-time">
-                                                    <span>@HistoryLocalizer["History_UnlockedAt"]</span>
-                                                    <time datetime="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.ToUtcIso(entry.UnlockedAtUtc)"
-                                                          data-achievement-history-time>
-                                                        @BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.FormatUtcFallback(entry.UnlockedAtUtc)
-                                                    </time>
-                                                </div>
-                                            </article>
-                                        }
-                                    </div>
-                                }
-                                else
-                                {
-                                    <p class="player-achievement-history-pending-progress-only">
-                                        @HistoryLocalizer["History_PendingNoVisibleUnlocks"]
-                                    </p>
-                                }
-
-                                <form method="post"
-                                      asp-page="/Admin/Games/PlayerAchievements"
-                                      asp-page-handler="ConfirmIdentity"
-                                      asp-route-id="@Model.Game.Session.Id.Value"
-                                      class="player-achievement-history-confirm-form"
-                                      data-achievement-history-confirm-form
-                                      data-confirm-message="@HistoryLocalizer["History_ConfirmPrompt", pending.PlayerName]"
-                                      data-error-message="@HistoryLocalizer["History_ConfirmError"]">
-                                    <input type="hidden" name="playerId" value="@pending.PlayerId" />
-                                    <button type="submit" class="button button-primary player-achievement-history-confirm-button">
-                                        @HistoryLocalizer["History_ConfirmIdentity"]
-                                    </button>
-                                </form>
-                            </article>
-                        }
-                    </div>
+                            <form method="post"
+                                  asp-page="/Admin/Games/PlayerAchievements"
+                                  asp-page-handler="ConfirmIdentity"
+                                  asp-route-id="@Model.Game.Session.Id.Value"
+                                  class="player-achievement-history-confirm-form"
+                                  data-achievement-history-confirm-form
+                                  data-confirm-message="@HistoryLocalizer["History_ConfirmPrompt", pending.PlayerName]"
+                                  data-error-message="@HistoryLocalizer["History_ConfirmError"]">
+                                <input type="hidden" name="playerId" value="@pending.PlayerId" />
+                                <button type="submit" class="button button-primary player-achievement-history-confirm-button">
+                                    @HistoryLocalizer["History_ConfirmIdentity"]
+                                </button>
+                            </form>
+                        </article>
+                    }
                 </section>
             }
             else

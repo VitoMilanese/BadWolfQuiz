@@ -30,6 +30,7 @@ public sealed class PlayerAchievementsModel(
     public Guid? SelectedPlayerId { get; private set; }
     public IReadOnlyList<PlayerAchievementHistoryEntry> Entries { get; private set; } = [];
     public IReadOnlyList<PlayerAchievementPendingConfirmation> PendingConfirmations { get; private set; } = [];
+    public PlayerAchievementPendingConfirmation? SelectedPendingConfirmation { get; private set; }
     public bool HasPendingConfirmations => PendingConfirmations.Count > 0;
     public int CurrentModeCount => Mode == PendingMode ? PendingConfirmations.Count : Entries.Count;
 
@@ -121,13 +122,16 @@ public sealed class PlayerAchievementsModel(
 
         var remaining = await LoadPendingConfirmationsAsync(game, cancellationToken);
         var nextMode = remaining.Count > 0 ? PendingMode : PlayersMode;
+        var nextSelectedPlayerId = remaining.Count > 0
+            ? remaining[0].PlayerId
+            : playerId;
         var nextUrl = Url.Page(
             "/Admin/Games/PlayerAchievements",
             new
             {
                 id = game.Session.Id.Value,
                 mode = nextMode,
-                selectedPlayerId = playerId
+                selectedPlayerId = nextSelectedPlayerId
             });
         return new JsonResult(new
         {
@@ -228,11 +232,6 @@ public sealed class PlayerAchievementsModel(
                 PlayerAchievementRuntimeState.GetPlayerAccountId(game, player.Id)))
             .ToArray();
 
-        var selectedPlayer = Players.FirstOrDefault(player =>
-                selectedPlayerId.HasValue && player.Id == selectedPlayerId.Value)
-            ?? Players.FirstOrDefault();
-        SelectedPlayerId = selectedPlayer?.Id;
-
         PendingConfirmations = await LoadPendingConfirmationsAsync(game, cancellationToken);
         Mode = string.Equals(mode, PendingMode, StringComparison.OrdinalIgnoreCase) && HasPendingConfirmations
             ? PendingMode
@@ -242,9 +241,18 @@ public sealed class PlayerAchievementsModel(
 
         if (Mode == PendingMode)
         {
+            SelectedPendingConfirmation = PendingConfirmations.FirstOrDefault(pending =>
+                    selectedPlayerId.HasValue && pending.PlayerId == selectedPlayerId.Value)
+                ?? PendingConfirmations.FirstOrDefault();
+            SelectedPlayerId = SelectedPendingConfirmation?.PlayerId;
             Entries = [];
             return Page();
         }
+
+        var selectedPlayer = Players.FirstOrDefault(player =>
+                selectedPlayerId.HasValue && player.Id == selectedPlayerId.Value)
+            ?? Players.FirstOrDefault();
+        SelectedPlayerId = selectedPlayer?.Id;
 
         var achievementService = new PlayerAchievementService(db);
         if (Mode == PlayersMode)
