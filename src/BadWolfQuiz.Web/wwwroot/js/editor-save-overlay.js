@@ -8,7 +8,7 @@
     window.badWolfEditorSaveOverlayInitialized = true;
 
     const editor = document.querySelector(
-        "form.quiz-board-form, form.question-editor");
+        "form.quiz-board-form, form.question-editor, form[data-ajax-custom-achievement-editor]");
     if (!editor) {
         return;
     }
@@ -118,7 +118,7 @@ body .editor-save-overlay[hidden] {
     };
 
     document.querySelectorAll(
-        "[data-editor-save-status], #success-message, [data-quiz-save-status], [data-question-save-status]")
+        "[data-editor-save-status], #success-message, [data-quiz-save-status], [data-question-save-status], [data-custom-achievement-save-status]")
         .forEach(watchStatus);
 
     const validationCandidates = editor.querySelectorAll(
