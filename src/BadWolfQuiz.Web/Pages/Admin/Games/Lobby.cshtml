@@ -1093,6 +1093,7 @@
                 </aside>
             }
             <div class="host-board-grid"
+                 data-category-colors-enabled="@Model.Game.Session.Settings.CategoryColorsEnabled.ToString().ToLowerInvariant()"
                  data-source-round-id="@Model.Game.Session.CurrentRound.SourceRoundId"
                  style="--board-columns: @Model.BoardCategories.Count">
             @foreach (var category in Model.BoardCategories)
@@ -2114,6 +2115,9 @@
         };
 
         const syncCategoryColorMetadata = (currentGrid, nextGrid) => {
+            currentGrid.dataset.categoryColorsEnabled =
+                nextGrid.dataset.categoryColorsEnabled || "true";
+
             const getCategoryId = column =>
                 column.querySelector("[data-source-category-id]")
                     ?.dataset.sourceCategoryId ?? null;

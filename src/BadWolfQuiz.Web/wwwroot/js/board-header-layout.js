@@ -131,8 +131,20 @@
         const grid = document.querySelector(".host-board-grid");
         if (!(grid instanceof HTMLElement)) return;
 
-        Array.from(grid.querySelectorAll(".host-board-column"))
-            .forEach((column, index) => {
+        const columns = Array.from(grid.querySelectorAll(".host-board-column"));
+        const colorsEnabled = (
+            grid.dataset.categoryColorsPreview ??
+            grid.dataset.categoryColorsEnabled ??
+            "true") !== "false";
+
+        if (!colorsEnabled) {
+            columns.forEach(column => {
+                if (column instanceof HTMLElement) clearCategoryColors(column);
+            });
+            return;
+        }
+
+        columns.forEach((column, index) => {
                 if (!(column instanceof HTMLElement)) return;
 
                 const mode = column.dataset.categoryColorMode || "automatic";
@@ -205,6 +217,9 @@
 
     document.addEventListener(
         "badwolf:host-gameplay-updated",
+        syncBeforePaint);
+    document.addEventListener(
+        "badwolf:category-colors-enabled-changed",
         syncBeforePaint);
     window.addEventListener("resize", syncBeforePaint);
 

@@ -2898,4 +2898,7 @@
   <data name="CategoryColor_Invalid" xml:space="preserve">
     <value>Seleziona un colore categoria valido.</value>
   </data>
+  <data name="GameSettings_CategoryColorsEnabled" xml:space="preserve">
+    <value>Categorie colorate</value>
+  </data>
 </root>
