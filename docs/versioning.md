@@ -82,6 +82,8 @@ Web `1.32.1` is a PATCH release that replaces achievement-card emoji with dedica
 
 Web `1.32.2` is a PATCH release that fixes contributor-framed gameplay player media resizing. Framed avatars, uploaded images, webcam feeds, and webcam URL media now re-measure against the player card's current available media area so they can grow as well as shrink when the card is resized, while preserving the existing frame inset and preview-parity behavior.
 
+Web `1.33.0` is a MINOR release that adds optional per-question `x2` and `1/2` correct-answer scoring to the standard host judgment flow. Quiz authors explicitly enable the two extra actions in the Question Editor; the option is off by default and persists through normal snapshot, copy, clone, and `.bwquiz` import/export paths. Both actions reuse the authoritative answer-reward modifier pipeline, preserve normal correct-answer side effects and duplicate-submission protection, record the actual awarded delta, and provide the gameplay path for the `DoubleReward` and `HalfReward` achievements. See [`docs/features/question-judging.md`](features/question-judging.md) for the scoring and integration rules.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.

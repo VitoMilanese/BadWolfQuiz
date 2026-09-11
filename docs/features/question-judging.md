@@ -18,6 +18,24 @@ For each judged attempt:
 
 When a player answers correctly, that player becomes the active player. If the current active player answers correctly, the active player remains unchanged.
 
+### Optional x2 and 1/2 correct-answer rewards
+
+Quiz authors can opt an individual question into special correct-answer scoring from the Question Editor. The setting is disabled by default, and legacy questions without an explicit value are treated as disabled.
+
+When the option is disabled, the standard host judgment controls remain **Correct | Incorrect**. When enabled for a question that uses the generic host judgment flow, the controls are **Correct | x2 | 1/2 | Incorrect**. The Question Editor presents this opt-in after the wager-mode and buzzer-mode selectors.
+
+All three positive actions are authoritative correct judgments and follow the same normal answer lifecycle; only the awarded positive score delta and recorded reward modifier differ:
+
+- **Correct** awards the normal currently available correct-answer value and records `AnswerRewardModifier.Normal`;
+- **x2** awards twice that positive value and records `AnswerRewardModifier.Double`;
+- **1/2** awards half that positive value using midpoint rounding away from zero, with a minimum positive award of 1 point, and records `AnswerRewardModifier.Half`.
+
+The multiplier applies only to the current answer attempt. It does not mutate the authored question value or the current value used by later attempts. The actual applied delta is used by score feedback, answer history, persisted attempts, recovery, and gameplay statistics. Duplicate submissions remain rejected by the existing attempt guards.
+
+The explicit `Double` and `Half` modifiers are also the only normal gameplay path that qualifies a correct attempt for the `DoubleReward` and `HalfReward` player achievements. Unrelated mechanics that happen to produce a doubled or halved numeric score do not unlock those achievements.
+
+Dedicated settlement flows that do not use the generic Correct/Incorrect controls remain unchanged.
+
 The host can explicitly resolve a regular question with no correct answer while the buzzer phase is available. The control is hidden while a specific player is answering. Explicit no-correct-answer resolution applies no additional score and the existing active player keeps the right to select the next question. Timer expiration never performs this resolution automatically; it only notifies the host, who remains responsible for the next gameplay action.
 
 Question selection is submitted asynchronously. If the Engine rejects the
