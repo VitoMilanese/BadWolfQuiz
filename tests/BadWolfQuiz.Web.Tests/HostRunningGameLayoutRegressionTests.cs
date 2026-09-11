@@ -42,6 +42,39 @@ public sealed class HostRunningGameLayoutRegressionTests
     }
 
     [Fact]
+    public void Category_color_overrides_change_paint_only_and_not_board_geometry()
+    {
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "host-running-game.css"))
+            .Replace("\r\n", "\n");
+
+        Assert.Contains("var(--board-category-header-bg,", css);
+        Assert.Contains("var(--board-category-cell-bg,", css);
+        Assert.Contains("var(--board-category-resolved-bg,", css);
+        Assert.Contains("var(--board-category-header-foreground, var(--board-category-foreground, var(--text)))", css);
+        Assert.Contains("var(--board-category-cell-foreground, var(--board-category-foreground, var(--gold)))", css);
+
+        var colorLines = css.Split('\n')
+            .Where(line => line.Contains("--board-category-", StringComparison.Ordinal))
+            .ToArray();
+
+        Assert.NotEmpty(colorLines);
+        Assert.All(colorLines, line =>
+        {
+            Assert.DoesNotContain("grid-template", line, StringComparison.Ordinal);
+            Assert.DoesNotContain("width:", line, StringComparison.Ordinal);
+            Assert.DoesNotContain("height:", line, StringComparison.Ordinal);
+            Assert.DoesNotContain("padding:", line, StringComparison.Ordinal);
+            Assert.DoesNotContain("margin:", line, StringComparison.Ordinal);
+            Assert.DoesNotContain("gap:", line, StringComparison.Ordinal);
+            Assert.DoesNotContain("position:", line, StringComparison.Ordinal);
+            Assert.DoesNotContain("transform:", line, StringComparison.Ordinal);
+        });
+    }
+
+    [Fact]
     public void Narrow_viewport_does_not_reintroduce_width_based_question_minimum_height()
     {
         var css = File.ReadAllText(FindWebFile(

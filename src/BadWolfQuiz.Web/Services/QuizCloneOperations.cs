@@ -111,7 +111,9 @@ public static class QuizCloneOperations
                 var category = new QuizCategory
                 {
                     Title = sourceCategory.Title,
-                    SortOrder = sourceCategory.SortOrder
+                    SortOrder = sourceCategory.SortOrder,
+                    ColorMode = sourceCategory.ColorMode,
+                    CustomColor = sourceCategory.CustomColor
                 };
 
                 foreach (var sourceBlock in sourceCategory.DescriptionBlocks.OrderBy(block => block.SortOrder))

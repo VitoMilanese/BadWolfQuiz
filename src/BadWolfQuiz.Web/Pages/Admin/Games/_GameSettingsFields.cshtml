@@ -94,6 +94,12 @@
         <input asp-for="SettingsInput.AllowNegativeScoreFinalPlayers" type="checkbox" />
         <span>@Localizer["GameSettings_AllowNegativeFinalPlayers"]</span>
     </label>
+    <label class="settings-checkbox">
+        <input asp-for="SettingsInput.CategoryColorsEnabled"
+               type="checkbox"
+               data-category-colors-enabled-toggle />
+        <span>@Localizer["GameSettings_CategoryColorsEnabled"]</span>
+    </label>
     <label>
         <span>@Localizer["HostCard_Name"]</span>
         <input asp-for="SettingsInput.HostName" maxlength="80" />
@@ -181,6 +187,49 @@
     (() => {
         const toggle = document.querySelector("[data-answer-reward-decay-toggle]");
         const settings = document.querySelectorAll("[data-answer-reward-decay-setting]");
+        const settingsForm = document.currentScript?.closest("form");
+        const categoryColorsToggle = settingsForm?.querySelector(
+            "[data-category-colors-enabled-toggle]");
+        const categoryColorsDialog = categoryColorsToggle?.closest("dialog");
+        let categoryColorsSavePending = false;
+
+        const notifyCategoryColorsChanged = () => {
+            document.dispatchEvent(new CustomEvent("badwolf:category-colors-enabled-changed"));
+        };
+
+        const previewCategoryColors = () => {
+            const grid = document.querySelector(".host-board-grid");
+            if (!(grid instanceof HTMLElement) || !categoryColorsToggle) return;
+
+            grid.dataset.categoryColorsPreview = categoryColorsToggle.checked ? "true" : "false";
+            notifyCategoryColorsChanged();
+        };
+
+        const clearCategoryColorsPreview = () => {
+            const grid = document.querySelector(".host-board-grid");
+            if (!(grid instanceof HTMLElement)) return;
+
+            grid.removeAttribute("data-category-colors-preview");
+            notifyCategoryColorsChanged();
+        };
+
+        const commitCategoryColorsPreview = () => {
+            const grid = document.querySelector(".host-board-grid");
+            if (!(grid instanceof HTMLElement) || !categoryColorsToggle) return;
+
+            grid.dataset.categoryColorsEnabled =
+                categoryColorsToggle.checked ? "true" : "false";
+            grid.removeAttribute("data-category-colors-preview");
+            notifyCategoryColorsChanged();
+        };
+
+        const syncCategoryColorsToggleFromPersisted = () => {
+            const grid = document.querySelector(".host-board-grid");
+            if (!(grid instanceof HTMLElement) || !categoryColorsToggle) return;
+
+            categoryColorsToggle.checked =
+                (grid.dataset.categoryColorsEnabled ?? "true") !== "false";
+        };
 
         const updateRewardDecaySettings = () => {
             const enabled = toggle?.checked ?? false;
@@ -197,6 +246,25 @@
         };
 
         toggle?.addEventListener("change", updateRewardDecaySettings);
+        categoryColorsToggle?.addEventListener("change", previewCategoryColors);
+        if (categoryColorsDialog) {
+            document.querySelector("[data-open-game-settings]")
+                ?.addEventListener("click", () => {
+                    categoryColorsSavePending = false;
+                    syncCategoryColorsToggleFromPersisted();
+                });
+            settingsForm?.addEventListener("submit", () => {
+                categoryColorsSavePending = true;
+            });
+            categoryColorsDialog.addEventListener("close", () => {
+                if (categoryColorsSavePending) {
+                    categoryColorsSavePending = false;
+                    commitCategoryColorsPreview();
+                    return;
+                }
+                clearCategoryColorsPreview();
+            });
+        }
         updateRewardDecaySettings();
     })();
 </script>

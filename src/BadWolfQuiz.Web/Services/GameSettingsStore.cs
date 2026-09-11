@@ -200,6 +200,8 @@ public sealed class GameSettingsStore(
         public string SiteThemeId { get; set; } = SiteThemeCatalog.DefaultId;
         public SiteThemeColors CustomThemeColors { get; set; } = SiteThemeColors.Default;
 
+        public bool CategoryColorsEnabled { get; set; } = true;
+
         public bool AnswerRewardDecayEnabled { get; set; }
 
         public int AnswerRewardDecayStartAfterSeconds { get; set; } =
@@ -229,7 +231,8 @@ public sealed class GameSettingsStore(
             AnswerRewardDecayStartAfterSeconds,
             AnswerRewardDecayMinimumPercent,
             HostAvatarFrameEnabled,
-            HostAvatarFrameId);
+            HostAvatarFrameId,
+            CategoryColorsEnabled);
 
         public static StoredGameSettings From(GameSessionSettings settings) => new()
         {
@@ -252,6 +255,7 @@ public sealed class GameSettingsStore(
             SiteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId),
             CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors),
             AnswerRewardDecayEnabled = settings.AnswerRewardDecayEnabled,
+            CategoryColorsEnabled = settings.CategoryColorsEnabled,
             AnswerRewardDecayStartAfterSeconds =
                 settings.AnswerRewardDecayStartAfterSeconds,
             AnswerRewardDecayMinimumPercent =
@@ -284,6 +288,8 @@ public sealed class GameSettingsInput
     public string? HostAvatarFrameId { get; set; }
     public string SiteThemeId { get; set; } = SiteThemeCatalog.DefaultId;
     public SiteThemeColors CustomThemeColors { get; set; } = SiteThemeColors.Default;
+
+    public bool CategoryColorsEnabled { get; set; } = true;
 
     public bool AnswerRewardDecayEnabled { get; set; }
 
@@ -354,7 +360,8 @@ public sealed class GameSettingsInput
             AnswerRewardDecayStartAfterSeconds,
             AnswerRewardDecayMinimumPercent,
             HostAvatarFrameEnabled,
-            HostAvatarFrameId);
+            HostAvatarFrameId,
+            CategoryColorsEnabled);
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)
@@ -379,6 +386,7 @@ public sealed class GameSettingsInput
             SiteThemeId = SiteThemeCatalog.Normalize(settings.SiteThemeId),
             CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors),
             AnswerRewardDecayEnabled = settings.AnswerRewardDecayEnabled,
+            CategoryColorsEnabled = settings.CategoryColorsEnabled,
             AnswerRewardDecayStartAfterSeconds = settings.AnswerRewardDecayStartAfterSeconds,
             AnswerRewardDecayMinimumPercent = settings.AnswerRewardDecayMinimumPercent
         };

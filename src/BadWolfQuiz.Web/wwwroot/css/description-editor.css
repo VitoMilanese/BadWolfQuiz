@@ -1,0 +1,181 @@
+.category-color-settings {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: clamp(1rem, 2vw, 1.4rem);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--panel) 94%, transparent);
+}
+
+.category-color-settings-heading h2,
+.category-color-settings-heading p { margin: 0; }
+
+.category-color-settings-heading p {
+    margin-top: 0.3rem;
+    color: var(--muted);
+}
+
+.category-color-mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.category-color-mode-card {
+    display: grid;
+    grid-template-columns: 1.1rem minmax(0, 1fr);
+    align-items: start;
+    gap: 0.65rem;
+    padding: 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 0.85rem;
+    background: var(--panel-2);
+    cursor: pointer;
+}
+
+.category-color-mode-card:has(input:checked) {
+    border-color: var(--gold);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 60%, transparent);
+}
+
+.category-color-mode-card input[type="radio"] {
+    width: 1.1rem;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    margin: 0.15rem 0 0;
+    padding: 0;
+}
+
+.category-color-mode-card span {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.category-color-mode-card strong { color: var(--text); }
+.category-color-mode-card small {
+    color: var(--muted);
+    line-height: 1.35;
+}
+
+.category-custom-color {
+    display: grid;
+    gap: 0.45rem;
+    max-width: 20rem;
+}
+
+.category-custom-color[hidden] { display: none; }
+
+.category-custom-color-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.category-color-picker-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: auto;
+    min-height: 2.75rem;
+    padding: 0.3rem 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 0.65rem;
+    background: var(--panel-2);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.category-color-picker-swatch {
+    display: block;
+    width: 3.25rem;
+    height: 2rem;
+    border: 1px solid color-mix(in srgb, var(--text) 24%, transparent);
+    border-radius: 0.45rem;
+}
+
+.category-color-picker-popover {
+    position: absolute;
+    z-index: 80;
+    top: calc(100% + 0.45rem);
+    left: 0;
+    display: grid;
+    gap: 0.7rem;
+    width: min(18rem, calc(100vw - 2rem));
+    padding: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--panel);
+    box-shadow: 0 14px 34px rgb(0 0 0 / 35%);
+}
+
+.category-color-picker-popover[hidden] { display: none; }
+
+.category-color-picker-spectrum {
+    --category-picker-hue: 0;
+    position: relative;
+    height: 10rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    background:
+        linear-gradient(to top, #000, transparent),
+        linear-gradient(to right, #fff, hsl(var(--category-picker-hue) 100% 50%));
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.category-color-picker-spectrum-thumb {
+    position: absolute;
+    width: 0.9rem;
+    height: 0.9rem;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px #000, 0 1px 4px rgb(0 0 0 / 65%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.category-color-picker-hue-row {
+    display: grid;
+    grid-template-columns: 1rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.category-color-picker-hue-row input[type="range"] {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+
+.category-color-picker-rgb-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.category-color-picker-rgb-grid label {
+    display: grid;
+    grid-template-columns: 1rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.category-color-picker-rgb-grid input[type="number"] {
+    min-width: 0;
+    width: 100%;
+    padding: 0.4rem;
+}
+
+.category-custom-color output {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--text);
+}
+
+@media (max-width: 760px) {
+    .category-color-mode-grid { grid-template-columns: 1fr; }
+}

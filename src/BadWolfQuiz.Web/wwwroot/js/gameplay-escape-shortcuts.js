@@ -404,8 +404,37 @@
     });
 
     const hostGameplayTarget = document.querySelector(".host-game-board");
-    if (hostGameplayTarget) {
-        loadSharedScript("/js/board-header-layout.js");
+    const findHostGameplayTarget = () =>
+        hostGameplayTarget?.isConnected
+            ? hostGameplayTarget
+            : document.querySelector(".host-game-board");
+
+    let boardHeaderLayoutLoading = false;
+    const ensureBoardHeaderLayout = () => {
+        if (window.badWolfBoardHeaderLayoutInitialized ||
+            boardHeaderLayoutLoading ||
+            !findHostGameplayTarget()) {
+            return;
+        }
+
+        boardHeaderLayoutLoading = true;
+        loadSharedScript("/js/board-header-layout.js", {
+            onLoad: () => {
+                boardHeaderLayoutLoading = false;
+            },
+            onError: () => {
+                boardHeaderLayoutLoading = false;
+                console.error("Board header layout could not be loaded.");
+            }
+        });
+    };
+
+    ensureBoardHeaderLayout();
+    for (const eventName of [
+        "badwolf:host-shell-mounted",
+        "badwolf:host-gameplay-updated"
+    ]) {
+        document.addEventListener(eventName, ensureBoardHeaderLayout);
     }
 
     const playerNameMarqueeVersion = "3";

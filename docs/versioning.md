@@ -74,6 +74,8 @@ Web `1.29.2` is a PATCH release that fixes the quiz title/description dialog on 
 
 Web `1.30.0` is a MINOR release that adds a dedicated lightweight quiz-metadata editor for title, description, and up to 20 normalized quiz-level tags. The editor uses the shared Save/Reset/Back, keyboard-shortcut, save-overlay, and unsaved-change behavior; host-scoped suggestions reuse quiz tags and fall back to question tags. Quiz tags are preserved through cloning and `.bwquiz` export/import, appear on shareable quiz-description pages, and are summarized in one bounded row on social-preview images. The shareable page also moves the quiz rating into the announcement-card rail.
 
+Web `1.31.0` is a MINOR release that adds configurable colored category columns to the host game board. Quiz authors can use Automatic, Theme, or Custom category colors with contrast-aware text; preferences persist through cloning and `.bwquiz` import/export. Hosts can enable or disable colored categories globally or per game, with immediate running-game preview and reliable cancel/reset behavior even directly after the lobby-to-game transition. This release also includes the shared custom-theme color-picker UX and avoids loading stored media blobs unnecessarily during question/category description saves. See [`docs/features/category-colors.md`](features/category-colors.md) for the full behavior.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.

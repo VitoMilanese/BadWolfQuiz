@@ -1,0 +1,162 @@
+.host-settings-theme-picker .theme-option {
+    min-height: 76px;
+    padding: 10px 12px;
+    gap: 7px;
+}
+
+.host-settings-theme-picker .custom-theme-colors {
+    align-items: stretch;
+}
+
+.host-theme-color-field {
+    position: relative;
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 64px;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--line) 74%, transparent);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--panel-2) 70%, transparent);
+}
+
+.host-theme-color-field > span {
+    min-width: 0;
+    color: var(--text);
+    font-size: 0.77rem;
+    font-weight: 900;
+    line-height: 1.25;
+    letter-spacing: 0.04em;
+    overflow-wrap: anywhere;
+    text-transform: uppercase;
+}
+
+.host-theme-color-picker-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    width: auto;
+    min-width: 0;
+    min-height: 2.55rem;
+    padding: 0.28rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 0.65rem;
+    background: var(--panel-2);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.host-theme-color-picker-trigger:hover,
+.host-theme-color-picker-trigger:focus-visible {
+    border-color: var(--red-bright);
+}
+
+.host-theme-color-picker-swatch {
+    display: block;
+    width: 3.25rem;
+    height: 2rem;
+    flex: 0 0 auto;
+    border: 1px solid color-mix(in srgb, var(--text) 24%, transparent);
+    border-radius: 0.45rem;
+}
+
+.host-theme-color-picker-trigger output {
+    min-width: 4.8rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    color: var(--text);
+}
+
+.host-theme-color-picker-popover {
+    position: fixed;
+    z-index: 1200;
+    display: grid;
+    gap: 0.7rem;
+    width: min(18rem, calc(100vw - 1rem));
+    padding: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--panel);
+    box-shadow: 0 14px 34px rgb(0 0 0 / 35%);
+}
+
+.host-theme-color-picker-popover[hidden] {
+    display: none;
+}
+
+.host-theme-color-picker-spectrum {
+    --category-picker-hue: 0;
+    position: relative;
+    height: 10rem;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    background:
+        linear-gradient(to top, #000, transparent),
+        linear-gradient(to right, #fff, hsl(var(--category-picker-hue) 100% 50%));
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.host-theme-color-picker-spectrum-thumb {
+    position: absolute;
+    width: 0.9rem;
+    height: 0.9rem;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px #000, 0 1px 4px rgb(0 0 0 / 65%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.host-theme-color-picker-hue-row {
+    display: grid;
+    grid-template-columns: 1rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.host-theme-color-picker-hue-row input[type="range"] {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+
+.host-theme-color-picker-rgb-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.host-theme-color-channel {
+    display: grid;
+    grid-template-columns: 1rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.host-theme-color-channel input[type="number"] {
+    min-width: 0;
+    width: 100%;
+    padding: 0.4rem;
+}
+
+@media (max-width: 1180px) {
+    .host-settings-theme-picker .custom-theme-colors {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .host-settings-theme-picker .theme-option {
+        min-height: 70px;
+        padding: 9px 10px;
+    }
+
+    .host-settings-theme-picker .custom-theme-colors {
+        grid-template-columns: 1fr;
+    }
+}

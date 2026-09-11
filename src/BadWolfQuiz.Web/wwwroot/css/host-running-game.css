@@ -65,18 +65,20 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-boa
     place-items: center;
     margin: 0;
     padding: clamp(0.55rem, 1vw, 0.9rem);
-    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+    border: 1px solid var(--board-category-border, color-mix(in srgb, var(--line) 88%, transparent));
     border-radius: clamp(0.75rem, 1vw, 1rem);
     background:
-        linear-gradient(145deg, color-mix(in srgb, var(--panel-2) 96%, transparent), color-mix(in srgb, var(--panel) 84%, transparent));
-    color: var(--text);
+        linear-gradient(145deg,
+            var(--board-category-header-bg, color-mix(in srgb, var(--panel-2) 96%, transparent)),
+            var(--board-category-header-bg-end, color-mix(in srgb, var(--panel) 84%, transparent)));
+    color: var(--board-category-header-foreground, var(--board-category-foreground, var(--text)));
     font-size: clamp(0.82rem, 1.35vw, 1.15rem);
     font-weight: 950;
     letter-spacing: 0.035em;
     line-height: 1.05;
     text-align: center;
     text-wrap: balance;
-    box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--red-bright) 30%, transparent);
+    box-shadow: inset 0 -2px 0 var(--board-category-accent, color-mix(in srgb, var(--red-bright) 30%, transparent));
 }
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question {
@@ -90,11 +92,13 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-boa
     min-height: 0;
     height: 100%;
     max-height: 100%;
-    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+    border: 1px solid var(--board-category-border, color-mix(in srgb, var(--line) 88%, transparent));
     border-radius: clamp(0.7rem, 0.9vw, 0.95rem);
     background:
-        linear-gradient(150deg, color-mix(in srgb, var(--panel) 93%, transparent), color-mix(in srgb, var(--panel-2) 90%, transparent));
-    color: var(--gold);
+        linear-gradient(150deg,
+            var(--board-category-cell-bg, color-mix(in srgb, var(--panel) 93%, transparent)),
+            var(--board-category-cell-bg-end, color-mix(in srgb, var(--panel-2) 90%, transparent)));
+    color: var(--board-category-cell-foreground, var(--board-category-foreground, var(--gold)));
     font-size: clamp(1.2rem, 2.4vw, 2.15rem);
     font-weight: 950;
     font-variant-numeric: tabular-nums;
@@ -110,16 +114,19 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-boa
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question.status-available:hover,
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question.status-available:focus-visible {
     z-index: 1;
-    border-color: color-mix(in srgb, var(--gold) 72%, var(--line));
+    border-color: var(--board-category-accent, color-mix(in srgb, var(--gold) 72%, var(--line)));
     box-shadow:
         0 14px 30px rgb(0 0 0 / 20%),
-        0 0 0 2px color-mix(in srgb, var(--gold) 14%, transparent);
+        0 0 0 2px color-mix(in srgb, var(--board-category-accent, var(--gold)) 32%, transparent);
 }
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question.status-resolved {
-    border-color: color-mix(in srgb, var(--line) 52%, transparent);
-    background: color-mix(in srgb, var(--panel) 56%, transparent);
-    color: color-mix(in srgb, var(--muted) 62%, transparent);
+    border-color: var(--board-category-border, color-mix(in srgb, var(--line) 52%, transparent));
+    background:
+        linear-gradient(150deg,
+            var(--board-category-resolved-bg, color-mix(in srgb, var(--panel) 56%, transparent)),
+            var(--board-category-resolved-bg-end, color-mix(in srgb, var(--panel) 48%, transparent)));
+    color: var(--board-category-resolved-foreground, color-mix(in srgb, var(--muted) 62%, transparent));
     box-shadow: none;
     filter: saturate(0.45);
 }

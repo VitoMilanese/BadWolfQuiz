@@ -19,6 +19,10 @@
         : Localizer["QuizEditor_RoundTitle"].Value;
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/description-editor.css" asp-append-version="true" />
+}
+
 <div class="page-heading">
     <div>
         <p class="eyebrow">@Localizer["Label_Description"]</p>
@@ -47,10 +51,91 @@
 
 <form method="post"
       enctype="multipart/form-data"
+      id="description-editor-form"
       class="question-editor description-editor">
     <input type="hidden" asp-for="Input.QuizId" />
     <input type="hidden" asp-for="Input.RoundId" />
     <input type="hidden" asp-for="Input.CategoryId" />
+
+    @if (Model.IsCategory)
+    {
+        <section class="category-color-settings" data-category-color-settings>
+            <div class="category-color-settings-heading">
+                <h2>@Localizer["CategoryColor_Title"]</h2>
+                <p>@Localizer["CategoryColor_Help"]</p>
+            </div>
+
+            <div class="category-color-mode-grid" role="radiogroup" aria-label="@Localizer["CategoryColor_Title"]">
+                <label class="category-color-mode-card">
+                    <input asp-for="Input.ColorMode" type="radio" value="Automatic" />
+                    <span>
+                        <strong>@Localizer["CategoryColor_Automatic"]</strong>
+                        <small>@Localizer["CategoryColor_AutomaticHelp"]</small>
+                    </span>
+                </label>
+                <label class="category-color-mode-card">
+                    <input asp-for="Input.ColorMode" type="radio" value="Custom" />
+                    <span>
+                        <strong>@Localizer["CategoryColor_Custom"]</strong>
+                        <small>@Localizer["CategoryColor_CustomHelp"]</small>
+                    </span>
+                </label>
+                <label class="category-color-mode-card">
+                    <input asp-for="Input.ColorMode" type="radio" value="Theme" />
+                    <span>
+                        <strong>@Localizer["CategoryColor_Theme"]</strong>
+                        <small>@Localizer["CategoryColor_ThemeHelp"]</small>
+                    </span>
+                </label>
+            </div>
+
+            <div class="category-custom-color" data-category-custom-color>
+                <label asp-for="Input.CustomColor">@Localizer["CategoryColor_Picker"]</label>
+                <div class="category-custom-color-row">
+                    <input asp-for="Input.CustomColor"
+                           type="hidden"
+                           data-category-color-picker />
+                    <button type="button"
+                            class="category-color-picker-trigger"
+                            data-category-color-picker-trigger
+                            aria-haspopup="true"
+                            aria-expanded="false">
+                        <span class="category-color-picker-swatch"
+                              data-category-color-picker-swatch
+                              aria-hidden="true"></span>
+                        <output data-category-color-value>@Model.Input.CustomColor</output>
+                    </button>
+                    <div class="category-color-picker-popover"
+                         data-category-color-picker-popover
+                         hidden>
+                        <div class="category-color-picker-spectrum"
+                             data-category-color-spectrum
+                             tabindex="0"
+                             aria-label="@Localizer["CategoryColor_Picker"]">
+                            <span class="category-color-picker-spectrum-thumb"
+                                  data-category-color-spectrum-thumb
+                                  aria-hidden="true"></span>
+                        </div>
+                        <label class="category-color-picker-hue-row">
+                            <span>H</span>
+                            <input type="range"
+                                   min="0"
+                                   max="360"
+                                   step="1"
+                                   data-category-color-hue
+                                   aria-label="@Localizer["CategoryColor_Picker"] H" />
+                        </label>
+                        <div class="category-color-picker-rgb-grid">
+                            <label><span>R</span><input type="number" min="0" max="255" data-category-color-r /></label>
+                            <label><span>G</span><input type="number" min="0" max="255" data-category-color-g /></label>
+                            <label><span>B</span><input type="number" min="0" max="255" data-category-color-b /></label>
+                        </div>
+                    </div>
+                </div>
+                <span asp-validation-for="Input.CustomColor" class="field-validation-error"></span>
+            </div>
+        </section>
+    }
 
     <partial name="Shared/_ContentBlockCollection"
              model="blockCollection" />
@@ -129,6 +214,7 @@
     <script src="~/js/image-clipboard-upload.js" asp-append-version="true"></script>
     <script>
         (() => {
+            const editorForm = document.getElementById("description-editor-form");
             const renameDialog = document.getElementById("description-rename-dialog");
             const renameForm = document.getElementById("description-rename-form");
             const renameInput = document.getElementById("description-rename-title");
@@ -136,6 +222,19 @@
             const renameError = document.querySelector("[data-description-rename-error]");
             const entityTitle = document.querySelector("[data-description-entity-title]");
             const previewButton = document.querySelector("[data-open-description-preview]");
+            const categoryColorSettings = document.querySelector("[data-category-color-settings]");
+            const categoryCustomColor = categoryColorSettings?.querySelector("[data-category-custom-color]");
+            const categoryColorPicker = categoryColorSettings?.querySelector("[data-category-color-picker]");
+            const categoryColorValue = categoryColorSettings?.querySelector("[data-category-color-value]");
+            const categoryColorPickerTrigger = categoryColorSettings?.querySelector("[data-category-color-picker-trigger]");
+            const categoryColorPickerPopover = categoryColorSettings?.querySelector("[data-category-color-picker-popover]");
+            const categoryColorPickerSwatch = categoryColorSettings?.querySelector("[data-category-color-picker-swatch]");
+            const categoryColorSpectrum = categoryColorSettings?.querySelector("[data-category-color-spectrum]");
+            const categoryColorSpectrumThumb = categoryColorSettings?.querySelector("[data-category-color-spectrum-thumb]");
+            const categoryColorHue = categoryColorSettings?.querySelector("[data-category-color-hue]");
+            const categoryColorRed = categoryColorSettings?.querySelector("[data-category-color-r]");
+            const categoryColorGreen = categoryColorSettings?.querySelector("[data-category-color-g]");
+            const categoryColorBlue = categoryColorSettings?.querySelector("[data-category-color-b]");
 
             const closeRenameDialog = () => {
                 if (renameDialog?.open) {
@@ -209,6 +308,184 @@
                     }
                 }
             });
+
+            const syncCategoryColorUi = () => {
+                if (!categoryColorSettings || !categoryCustomColor) return;
+                const selectedMode = categoryColorSettings.querySelector(
+                    'input[name="Input.ColorMode"]:checked')?.value;
+                categoryCustomColor.hidden = selectedMode !== "Custom";
+            };
+
+            categoryColorSettings?.querySelectorAll('input[name="Input.ColorMode"]')
+                .forEach(input => input.addEventListener("change", syncCategoryColorUi));
+
+            const clampColorChannel = value => Math.max(0, Math.min(255, Math.round(value)));
+            const parsePickerHex = value => {
+                const match = /^#([0-9a-f]{6})$/i.exec(value || "");
+                if (!match) return null;
+                const number = Number.parseInt(match[1], 16);
+                return {
+                    r: (number >> 16) & 255,
+                    g: (number >> 8) & 255,
+                    b: number & 255
+                };
+            };
+            const pickerHex = rgb => `#${[rgb.r, rgb.g, rgb.b]
+                .map(channel => clampColorChannel(channel).toString(16).padStart(2, "0"))
+                .join("")}`.toUpperCase();
+            const rgbToHsv = rgb => {
+                const r = rgb.r / 255;
+                const g = rgb.g / 255;
+                const b = rgb.b / 255;
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                const delta = max - min;
+                let hue = 0;
+                if (delta) {
+                    if (max === r) hue = 60 * (((g - b) / delta) % 6);
+                    else if (max === g) hue = 60 * (((b - r) / delta) + 2);
+                    else hue = 60 * (((r - g) / delta) + 4);
+                }
+                if (hue < 0) hue += 360;
+                return {
+                    h: hue,
+                    s: max === 0 ? 0 : delta / max,
+                    v: max
+                };
+            };
+            const hsvToRgb = hsv => {
+                const chroma = hsv.v * hsv.s;
+                const section = ((hsv.h % 360) + 360) % 360 / 60;
+                const x = chroma * (1 - Math.abs((section % 2) - 1));
+                const offset = hsv.v - chroma;
+                let channels = [0, 0, 0];
+                if (section < 1) channels = [chroma, x, 0];
+                else if (section < 2) channels = [x, chroma, 0];
+                else if (section < 3) channels = [0, chroma, x];
+                else if (section < 4) channels = [0, x, chroma];
+                else if (section < 5) channels = [x, 0, chroma];
+                else channels = [chroma, 0, x];
+                return {
+                    r: clampColorChannel((channels[0] + offset) * 255),
+                    g: clampColorChannel((channels[1] + offset) * 255),
+                    b: clampColorChannel((channels[2] + offset) * 255)
+                };
+            };
+
+            let categoryPickerState = { h: 0, s: 1, v: 1 };
+            const renderCategoryColorPicker = rgb => {
+                if (!categoryColorPicker) return;
+                categoryPickerState = rgbToHsv(rgb);
+                const hex = pickerHex(rgb);
+                categoryColorPicker.value = hex;
+                if (categoryColorValue) categoryColorValue.textContent = hex;
+                if (categoryColorPickerSwatch instanceof HTMLElement) {
+                    categoryColorPickerSwatch.style.backgroundColor = hex;
+                }
+                if (categoryColorSpectrum instanceof HTMLElement) {
+                    categoryColorSpectrum.style.setProperty(
+                        "--category-picker-hue",
+                        String(categoryPickerState.h));
+                }
+                if (categoryColorSpectrumThumb instanceof HTMLElement) {
+                    categoryColorSpectrumThumb.style.left = `${categoryPickerState.s * 100}%`;
+                    categoryColorSpectrumThumb.style.top = `${(1 - categoryPickerState.v) * 100}%`;
+                }
+                if (categoryColorHue instanceof HTMLInputElement) {
+                    categoryColorHue.value = String(Math.round(categoryPickerState.h));
+                }
+                if (categoryColorRed instanceof HTMLInputElement) categoryColorRed.value = String(rgb.r);
+                if (categoryColorGreen instanceof HTMLInputElement) categoryColorGreen.value = String(rgb.g);
+                if (categoryColorBlue instanceof HTMLInputElement) categoryColorBlue.value = String(rgb.b);
+            };
+            const renderCategoryColorPickerFromState = () =>
+                renderCategoryColorPicker(hsvToRgb(categoryPickerState));
+            const setCategoryPickerOpen = open => {
+                if (!(categoryColorPickerPopover instanceof HTMLElement)) return;
+                categoryColorPickerPopover.hidden = !open;
+                categoryColorPickerTrigger?.setAttribute("aria-expanded", open ? "true" : "false");
+            };
+            const updateCategorySpectrumFromPointer = event => {
+                if (!(categoryColorSpectrum instanceof HTMLElement)) return;
+                const rect = categoryColorSpectrum.getBoundingClientRect();
+                categoryPickerState.s = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+                categoryPickerState.v = 1 - Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+                renderCategoryColorPickerFromState();
+            };
+
+            categoryColorPickerTrigger?.addEventListener("click", () => {
+                const isOpen = categoryColorPickerPopover instanceof HTMLElement &&
+                    !categoryColorPickerPopover.hidden;
+                setCategoryPickerOpen(!isOpen);
+            });
+            categoryColorSpectrum?.addEventListener("pointerdown", event => {
+                event.preventDefault();
+                categoryColorSpectrum.setPointerCapture?.(event.pointerId);
+                updateCategorySpectrumFromPointer(event);
+            });
+            categoryColorSpectrum?.addEventListener("pointermove", event => {
+                if (categoryColorSpectrum.hasPointerCapture?.(event.pointerId)) {
+                    updateCategorySpectrumFromPointer(event);
+                }
+            });
+            categoryColorHue?.addEventListener("input", () => {
+                categoryPickerState.h = Number(categoryColorHue.value) || 0;
+                renderCategoryColorPickerFromState();
+            });
+            [categoryColorRed, categoryColorGreen, categoryColorBlue].forEach(input => {
+                input?.addEventListener("input", () => {
+                    const values = [categoryColorRed, categoryColorGreen, categoryColorBlue]
+                        .map(channel => Number(channel?.value));
+                    if (values.some(value => !Number.isFinite(value))) return;
+                    renderCategoryColorPicker({
+                        r: clampColorChannel(values[0]),
+                        g: clampColorChannel(values[1]),
+                        b: clampColorChannel(values[2])
+                    });
+                });
+            });
+            document.addEventListener("pointerdown", event => {
+                if (categoryColorPickerPopover?.hidden ||
+                    categoryColorPickerPopover?.contains(event.target) ||
+                    categoryColorPickerTrigger?.contains(event.target)) {
+                    return;
+                }
+                setCategoryPickerOpen(false);
+            });
+            document.addEventListener("keydown", event => {
+                if (event.key !== "Escape" || categoryColorPickerPopover?.hidden) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                setCategoryPickerOpen(false);
+                categoryColorPickerTrigger?.focus();
+            }, { capture: true });
+
+            const initialCategoryColor = parsePickerHex(categoryColorPicker?.value) ||
+                { r: 15, g: 76, b: 129 };
+            renderCategoryColorPicker(initialCategoryColor);
+            syncCategoryColorUi();
+
+            document.addEventListener("keydown", event => {
+                const isSaveKey =
+                    event.code === "KeyS" ||
+                    (event.key || "").toLowerCase() === "s";
+                const hasSaveModifier = event.ctrlKey || event.metaKey;
+                if (!isSaveKey || !hasSaveModifier || event.altKey) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                if (renameDialog?.open && renameForm instanceof HTMLFormElement) {
+                    renameForm.requestSubmit();
+                    return;
+                }
+
+                if (editorForm instanceof HTMLFormElement) {
+                    editorForm.requestSubmit();
+                }
+            }, { capture: true });
 
             const section = document.getElementById("description-blocks");
             const backLink = document.getElementById("description-editor-back");

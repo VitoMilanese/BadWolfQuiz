@@ -50,6 +50,13 @@ public enum QuizMediaState
     Failed = 4
 }
 
+public enum QuizCategoryColorMode
+{
+    Automatic = 0,
+    Custom = 1,
+    Theme = 2
+}
+
 public sealed class HostAccount
 {
     [MaxLength(36)]
@@ -206,6 +213,9 @@ public sealed class QuizCategory
     public string Title { get; set; } = string.Empty;
 
     public int SortOrder { get; set; }
+    public QuizCategoryColorMode ColorMode { get; set; } = QuizCategoryColorMode.Automatic;
+    [MaxLength(7)]
+    public string? CustomColor { get; set; }
 
     public QuizRound Round { get; set; } = null!;
     public ICollection<QuizQuestion> Questions { get; set; } = new List<QuizQuestion>();
