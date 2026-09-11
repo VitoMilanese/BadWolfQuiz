@@ -70,6 +70,8 @@ Web `1.29.0` is a MINOR release that expands persistent player achievements from
 
 Web `1.29.1` is a PATCH release that fixes host question-card overlap when browser zoom changes. Running question tiles are constrained to their fractional grid rows, hover/focus no longer shifts a tile vertically into a neighbouring row, and narrow viewport styling no longer reintroduces width-based minimum heights that can exceed the assigned row.
 
+Web `1.29.2` is a PATCH release that fixes the quiz title/description dialog on My quizzes so its header uses existing localized resources instead of rendering missing localization key names. Regression coverage verifies the dialog uses valid shared-resource keys across the supported localization files.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
