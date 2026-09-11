@@ -86,8 +86,8 @@ jobs:
                   'Consenti la valutazione delle risposte x2 e 1/2.',
                   'Il conduttore potrà assegnare a una risposta corretta una ricompensa doppia o dimezzata.'),
               'SharedResource.ru.resx': (
-                  'Разрешить оценивание ответа x2 и 1/2.',
-                  'Ведущий сможет засчитать правильный ответ с удвоенной или половинной наградой.'),
+                  'Україна',
+                  'Україна'),
           }
 
           def replace_value(text, key, value):
