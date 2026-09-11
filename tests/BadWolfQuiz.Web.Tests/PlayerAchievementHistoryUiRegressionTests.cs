@@ -98,9 +98,14 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.DoesNotContain("overflow: auto", css);
         Assert.Contains("player-achievement-history-confirm-form", confirmationCss);
         Assert.Contains("player-achievement-history-pending-card", confirmationCss);
+        Assert.Contains("padding: 0", confirmationCss);
+        Assert.Contains("border: 0", confirmationCss);
+        Assert.Contains("background: transparent", confirmationCss);
+        Assert.Contains("box-shadow: none", confirmationCss);
         Assert.Contains("align-items: center", confirmationCss);
         Assert.Contains("justify-content: space-between", confirmationCss);
         Assert.Contains("justify-content: flex-end", confirmationCss);
+        Assert.DoesNotContain(".player-achievement-history-pending-achievements .player-achievement-history-entry", confirmationCss);
         Assert.DoesNotContain("overflow: auto", confirmationCss);
 
         Assert.Contains("Intl.DateTimeFormat", script);
