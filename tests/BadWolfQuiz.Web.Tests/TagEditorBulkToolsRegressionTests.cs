@@ -68,6 +68,24 @@ public sealed class TagEditorBulkToolsRegressionTests
         Assert.Contains("clearButton?.addEventListener", source, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("src/BadWolfQuiz.Web/Pages/Admin/Quizzes/QuestionEditor.cshtml")]
+    [InlineData("src/BadWolfQuiz.Web/Pages/Admin/Quizzes/FinalQuestionEditor.cshtml")]
+    [InlineData("src/BadWolfQuiz.Web/Pages/Admin/Quizzes/QuizMetadataEditor.cshtml")]
+    public void Escape_closes_open_tag_dropdown_without_leaving_editor(string relativePath)
+    {
+        var source = ReadSource(relativePath);
+        var escapeStart = source.IndexOf("if (event.key === \"Escape\")", StringComparison.Ordinal);
+        Assert.True(escapeStart >= 0);
+
+        var branchLength = Math.Min(320, source.Length - escapeStart);
+        var escapeBranch = source.Substring(escapeStart, branchLength);
+        Assert.Contains("if (!suggestionBox.hidden)", escapeBranch, StringComparison.Ordinal);
+        Assert.Contains("event.preventDefault();", escapeBranch, StringComparison.Ordinal);
+        Assert.Contains("event.stopPropagation();", escapeBranch, StringComparison.Ordinal);
+        Assert.Contains("hideSuggestions();", escapeBranch, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void Quiz_metadata_bulk_add_stops_at_the_existing_maximum_tag_count()
     {

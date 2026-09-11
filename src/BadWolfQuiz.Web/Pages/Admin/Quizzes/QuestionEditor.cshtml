@@ -484,8 +484,12 @@
           return;
             }
             if (event.key === "Escape") {
-          hideSuggestions();
-          return;
+                if (!suggestionBox.hidden) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    hideSuggestions();
+                }
+                return;
             }
             if (event.key === "Enter") {
           event.preventDefault();
