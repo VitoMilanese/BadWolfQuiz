@@ -25,16 +25,11 @@ public sealed class QuizDbContext : DbContext
     public DbSet<QuizQuestion> QuizQuestions => Set<QuizQuestion>();
     public DbSet<QuizQuestionTag> QuizQuestionTags => Set<QuizQuestionTag>();
     public DbSet<FinalQuestionTag> FinalQuestionTags => Set<FinalQuestionTag>();
-    public DbSet<FinalDescriptionContentBlock> FinalDescriptionContentBlocks =>
-        Set<FinalDescriptionContentBlock>();
-    public DbSet<FinalQuestionContentBlock> FinalQuestionContentBlocks =>
-        Set<FinalQuestionContentBlock>();
-    public DbSet<FinalAnswerContentBlock> FinalAnswerContentBlocks =>
-        Set<FinalAnswerContentBlock>();
-    public DbSet<RoundDescriptionContentBlock> RoundDescriptionContentBlocks =>
-        Set<RoundDescriptionContentBlock>();
-    public DbSet<CategoryDescriptionContentBlock> CategoryDescriptionContentBlocks =>
-        Set<CategoryDescriptionContentBlock>();
+    public DbSet<FinalDescriptionContentBlock> FinalDescriptionContentBlocks => Set<FinalDescriptionContentBlock>();
+    public DbSet<FinalQuestionContentBlock> FinalQuestionContentBlocks => Set<FinalQuestionContentBlock>();
+    public DbSet<FinalAnswerContentBlock> FinalAnswerContentBlocks => Set<FinalAnswerContentBlock>();
+    public DbSet<RoundDescriptionContentBlock> RoundDescriptionContentBlocks => Set<RoundDescriptionContentBlock>();
+    public DbSet<CategoryDescriptionContentBlock> CategoryDescriptionContentBlocks => Set<CategoryDescriptionContentBlock>();
     public DbSet<QuestionContentBlock> QuestionContentBlocks => Set<QuestionContentBlock>();
     public DbSet<AnswerContentBlock> AnswerContentBlocks => Set<AnswerContentBlock>();
     public DbSet<GameSession> GameSessions => Set<GameSession>();
@@ -43,6 +38,8 @@ public sealed class QuizDbContext : DbContext
     public DbSet<PlayerBuzz> PlayerBuzzes => Set<PlayerBuzz>();
     public DbSet<PlayerQuestionResult> PlayerQuestionResults => Set<PlayerQuestionResult>();
     public DbSet<PlayerAchievement> PlayerAchievements => Set<PlayerAchievement>();
+    public DbSet<HostCustomAchievement> HostCustomAchievements => Set<HostCustomAchievement>();
+    public DbSet<HostCustomAchievementTag> HostCustomAchievementTags => Set<HostCustomAchievementTag>();
     public DbSet<PlayerGameAccountLink> PlayerGameAccountLinks => Set<PlayerGameAccountLink>();
     public DbSet<UserQuestionAccountLink> UserQuestionAccountLinks => Set<UserQuestionAccountLink>();
     public DbSet<QuizRating> QuizRatings => Set<QuizRating>();
@@ -106,6 +103,21 @@ public sealed class QuizDbContext : DbContext
             .WithMany(x => x.GameSessions)
             .HasForeignKey(x => x.HostId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<HostCustomAchievement>()
+            .HasOne<HostAccount>()
+            .WithMany()
+            .HasForeignKey(x => x.HostId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<HostCustomAchievement>()
+            .HasQueryFilter(x => x.HostId == CurrentHostId);
+        modelBuilder.Entity<HostCustomAchievementTag>()
+            .HasOne(x => x.Achievement)
+            .WithMany(x => x.Tags)
+            .HasForeignKey(x => x.HostCustomAchievementId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<HostCustomAchievementTag>()
+            .HasQueryFilter(x => x.Achievement.HostId == CurrentHostId);
 
         modelBuilder.Entity<Quiz>()
             .HasQueryFilter(x => x.HostId == CurrentHostId);

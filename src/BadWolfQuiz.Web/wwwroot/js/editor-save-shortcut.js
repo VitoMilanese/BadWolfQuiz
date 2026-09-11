@@ -25,6 +25,16 @@
             };
         }
 
+        const customAchievementEditorForm =
+            document.querySelector("form[data-ajax-custom-achievement-editor]");
+        if (customAchievementEditorForm) {
+            return {
+                form: customAchievementEditorForm,
+                submitter: customAchievementEditorForm.querySelector(
+                    'button[data-custom-achievement-save-button]')
+            };
+        }
+
         const questionEditorForm =
             document.querySelector("form[data-ajax-question-editor]");
         if (questionEditorForm) {
