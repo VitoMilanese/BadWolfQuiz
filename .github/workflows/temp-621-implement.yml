@@ -1,0 +1,1169 @@
+name: Temporary issue 621 implementation
+
+on:
+  push:
+    branches:
+      - feature/621-player-achievement-history
+    paths:
+      - .github/workflows/temp-621-implement.yml
+
+permissions:
+  contents: write
+
+jobs:
+  implement-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Apply implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              file = Path(path)
+              text = file.read_text(encoding="utf-8-sig")
+              if old not in text:
+                  raise SystemExit(f"Anchor not found in {path}: {old[:120]!r}")
+              file.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          replace_once(
+              "src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml",
+              "@model BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel\n@{",
+              "@model BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel\n@inject Microsoft.Extensions.Localization.IStringLocalizer<BadWolfQuiz.Web.Localization.PlayerAchievementHistoryResource> AchievementHistoryLocalizer\n@{")
+
+          replace_once(
+              "src/BadWolfQuiz.Web/Pages/Admin/Games/Lobby.cshtml",
+              "                <div class=\"action-menu-popover\">\n                    @if (Model.CurrentQuestion is null)",
+              "                <div class=\"action-menu-popover\">\n                    <a class=\"action-menu-item\"\n                       asp-page=\"/Admin/Games/PlayerAchievements\"\n                       asp-route-id=\"@Model.Game.Session.Id.Value\">\n                        @AchievementHistoryLocalizer[\"History_Open\"]\n                    </a>\n\n                    @if (Model.CurrentQuestion is null)")
+
+          replace_once(
+              "src/BadWolfQuiz.Web/Pages/Shared/_Layout.cshtml",
+              "@inject IStringLocalizer<ProductVersionResource> ProductVersionLocalizer\n",
+              "@inject IStringLocalizer<ProductVersionResource> ProductVersionLocalizer\n@inject IStringLocalizer<PlayerAchievementHistoryResource> AchievementHistoryLocalizer\n")
+
+          replace_once(
+              "src/BadWolfQuiz.Web/Pages/Shared/_Layout.cshtml",
+              "                    <div class=\"action-menu-popover\">\n                        <a class=\"action-menu-item\"\n                           asp-page=\"/Admin/Games/AnswerHistory\"",
+              "                    <div class=\"action-menu-popover\">\n                        <a class=\"action-menu-item\"\n                           asp-page=\"/Admin/Games/PlayerAchievements\"\n                           asp-route-id=\"@finalQuestionGame.Session.Id.Value\">\n                            @AchievementHistoryLocalizer[\"History_Open\"]\n                        </a>\n\n                        <a class=\"action-menu-item\"\n                           asp-page=\"/Admin/Games/AnswerHistory\"")
+
+          service_path = "src/BadWolfQuiz.Web/Services/PlayerAchievementService.cs"
+          service_anchor = "    public Task<bool> UnlockAccountAsync(\n"
+          service_method = '''    /// <summary>\n    /// Reads already-persisted unlocks for one authoritative player identity.\n    /// This method never evaluates, unlocks, adopts, or otherwise changes achievement state.\n    /// </summary>\n    public async Task<IReadOnlyList<PlayerAchievement>> LoadPersistedUnlocksAsync(\n        string? accountId,\n        string? hostId,\n        string playerName,\n        int? sourceGameSessionId = null,\n        CancellationToken cancellationToken = default)\n    {\n        var identity = PlayerAchievementIdentity.Create(accountId, hostId, playerName);\n        if (!identity.IsValid)\n        {\n            return [];\n        }\n\n        var query = QueryForIdentity(identity)\n            .AsNoTracking()\n            .Where(item => !item.AchievementCode.StartsWith("__"));\n        if (sourceGameSessionId.HasValue)\n        {\n            query = query.Where(item => item.SourceGameSessionId == sourceGameSessionId.Value);\n        }\n\n        return await query\n            .OrderByDescending(item => item.UnlockedAtUtc)\n            .ThenByDescending(item => item.Id)\n            .ToListAsync(cancellationToken);\n    }\n\n'''
+          replace_once(service_path, service_anchor, service_method + service_anchor)
+
+          replace_once(
+              "docs/features/player-achievements.md",
+              "The host lobby exposes a trophy action on each player row. It opens a host-owned achievement dialog for that specific player; the endpoint verifies ownership of the active game before returning achievement data.\n",
+              "The host lobby exposes a trophy action on each player row. It opens a host-owned achievement dialog for that specific player; the endpoint verifies ownership of the active game before returning achievement data.\n\nThe active-game **Tools** menu also exposes **Player achievements**, which opens a dedicated host-owned, read-only history page. Its **Unlocked in this game** view shows persisted unlocks whose `SourceGameSessionId` belongs to the current stored game and associates each row with the matching current player identity. Its **Players' histories** view lets the host select any current player and inspect that player's complete persisted unlock history, newest first. Signed-in players use their account identity; anonymous players use the existing host + normalized-name fallback identity, so the page follows the same confirmed adoption rules as gameplay without triggering adoption itself.\n\nThe history page never calls achievement evaluation or unlock logic. It reads `PlayerAchievements` with no tracking, excludes internal progress-helper rows, refreshes from persistence on every request, and remains available while the game is running. Player selection limits the full-history view to one current player at a time and the result list uses a bounded scrolling region so large histories do not make the host UI unusable. Unknown non-internal achievement codes remain displayable with fallback presentation so future host-defined achievements can plug their own metadata/artwork into the same history surface.\n")
+          PY
+
+          mkdir -p src/BadWolfQuiz.Web/Localization
+          mkdir -p src/BadWolfQuiz.Web/Resources/Localization
+          mkdir -p src/BadWolfQuiz.Web/wwwroot/css
+          mkdir -p src/BadWolfQuiz.Web/wwwroot/js
+          mkdir -p tests/BadWolfQuiz.Web.Tests
+
+          cat > src/BadWolfQuiz.Web/Localization/PlayerAchievementHistoryResource.cs <<'EOF'
+          namespace BadWolfQuiz.Web.Localization;
+
+          /// <summary>
+          /// Marker class used to access host player-achievement history localization resources.
+          /// </summary>
+          public sealed class PlayerAchievementHistoryResource
+          {
+          }
+          EOF
+
+          cat > src/BadWolfQuiz.Web/Resources/Localization/PlayerAchievementHistoryResource.resx <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <root>
+            <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+            <resheader name="version"><value>2.0</value></resheader>
+            <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+            <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+            <data name="History_Open" xml:space="preserve"><value>Player achievements</value></data>
+            <data name="History_Title" xml:space="preserve"><value>Player achievement history</value></data>
+            <data name="History_Eyebrow" xml:space="preserve"><value>GAME / ACHIEVEMENTS</value></data>
+            <data name="History_Description" xml:space="preserve"><value>Review persisted achievement unlocks for this game and its current players.</value></data>
+            <data name="History_BackToGame" xml:space="preserve"><value>Back to game</value></data>
+            <data name="History_FilterLabel" xml:space="preserve"><value>Achievement history filter</value></data>
+            <data name="History_FilterGame" xml:space="preserve"><value>Unlocked in this game</value></data>
+            <data name="History_FilterPlayers" xml:space="preserve"><value>Players' histories</value></data>
+            <data name="History_PlayerSelector" xml:space="preserve"><value>Player</value></data>
+            <data name="History_NoPlayers" xml:space="preserve"><value>There are no current players to inspect.</value></data>
+            <data name="History_NoGameUnlocks" xml:space="preserve"><value>No achievements have been unlocked in this game yet.</value></data>
+            <data name="History_NoPlayerUnlocks" xml:space="preserve"><value>This player has no persisted achievements yet.</value></data>
+            <data name="History_UnlockedAt" xml:space="preserve"><value>Unlocked</value></data>
+            <data name="History_ReadOnly" xml:space="preserve"><value>This page is read-only and shows persisted unlocks only.</value></data>
+            <data name="History_UnknownDescription" xml:space="preserve"><value>Achievement details are not available.</value></data>
+            <data name="History_EntryCount" xml:space="preserve"><value>{0} achievements</value></data>
+            <data name="History_CurrentGame" xml:space="preserve"><value>Current game</value></data>
+          </root>
+          EOF
+
+          cat > src/BadWolfQuiz.Web/Resources/Localization/PlayerAchievementHistoryResource.uk.resx <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <root>
+            <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+            <resheader name="version"><value>2.0</value></resheader>
+            <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+            <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+            <data name="History_Open" xml:space="preserve"><value>Досягнення гравців</value></data>
+            <data name="History_Title" xml:space="preserve"><value>Історія досягнень гравців</value></data>
+            <data name="History_Eyebrow" xml:space="preserve"><value>ГРА / ДОСЯГНЕННЯ</value></data>
+            <data name="History_Description" xml:space="preserve"><value>Перегляд збережених досягнень у цій грі та повної історії її поточних гравців.</value></data>
+            <data name="History_BackToGame" xml:space="preserve"><value>Назад до гри</value></data>
+            <data name="History_FilterLabel" xml:space="preserve"><value>Фільтр історії досягнень</value></data>
+            <data name="History_FilterGame" xml:space="preserve"><value>Отримані в цій грі</value></data>
+            <data name="History_FilterPlayers" xml:space="preserve"><value>Історія гравців</value></data>
+            <data name="History_PlayerSelector" xml:space="preserve"><value>Гравець</value></data>
+            <data name="History_NoPlayers" xml:space="preserve"><value>У грі немає поточних гравців для перегляду.</value></data>
+            <data name="History_NoGameUnlocks" xml:space="preserve"><value>У цій грі ще не отримано жодного досягнення.</value></data>
+            <data name="History_NoPlayerUnlocks" xml:space="preserve"><value>У цього гравця ще немає збережених досягнень.</value></data>
+            <data name="History_UnlockedAt" xml:space="preserve"><value>Отримано</value></data>
+            <data name="History_ReadOnly" xml:space="preserve"><value>Ця сторінка працює лише для перегляду й показує тільки вже збережені досягнення.</value></data>
+            <data name="History_UnknownDescription" xml:space="preserve"><value>Деталі досягнення недоступні.</value></data>
+            <data name="History_EntryCount" xml:space="preserve"><value>Досягнень: {0}</value></data>
+            <data name="History_CurrentGame" xml:space="preserve"><value>Поточна гра</value></data>
+          </root>
+          EOF
+
+          cat > src/BadWolfQuiz.Web/Resources/Localization/PlayerAchievementHistoryResource.it.resx <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <root>
+            <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+            <resheader name="version"><value>2.0</value></resheader>
+            <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+            <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+            <data name="History_Open" xml:space="preserve"><value>Traguardi dei giocatori</value></data>
+            <data name="History_Title" xml:space="preserve"><value>Cronologia dei traguardi dei giocatori</value></data>
+            <data name="History_Eyebrow" xml:space="preserve"><value>PARTITA / TRAGUARDI</value></data>
+            <data name="History_Description" xml:space="preserve"><value>Consulta i traguardi salvati per questa partita e la cronologia completa dei giocatori attuali.</value></data>
+            <data name="History_BackToGame" xml:space="preserve"><value>Torna alla partita</value></data>
+            <data name="History_FilterLabel" xml:space="preserve"><value>Filtro cronologia traguardi</value></data>
+            <data name="History_FilterGame" xml:space="preserve"><value>Sbloccati in questa partita</value></data>
+            <data name="History_FilterPlayers" xml:space="preserve"><value>Cronologia giocatori</value></data>
+            <data name="History_PlayerSelector" xml:space="preserve"><value>Giocatore</value></data>
+            <data name="History_NoPlayers" xml:space="preserve"><value>Non ci sono giocatori attuali da consultare.</value></data>
+            <data name="History_NoGameUnlocks" xml:space="preserve"><value>Nessun traguardo è stato sbloccato in questa partita.</value></data>
+            <data name="History_NoPlayerUnlocks" xml:space="preserve"><value>Questo giocatore non ha ancora traguardi salvati.</value></data>
+            <data name="History_UnlockedAt" xml:space="preserve"><value>Sbloccato</value></data>
+            <data name="History_ReadOnly" xml:space="preserve"><value>Questa pagina è di sola lettura e mostra solo gli sblocchi già salvati.</value></data>
+            <data name="History_UnknownDescription" xml:space="preserve"><value>I dettagli del traguardo non sono disponibili.</value></data>
+            <data name="History_EntryCount" xml:space="preserve"><value>{0} traguardi</value></data>
+            <data name="History_CurrentGame" xml:space="preserve"><value>Partita attuale</value></data>
+          </root>
+          EOF
+
+          cat > src/BadWolfQuiz.Web/Resources/Localization/PlayerAchievementHistoryResource.ru.resx <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <root>
+            <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+            <resheader name="version"><value>2.0</value></resheader>
+            <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+            <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+            <data name="History_Open" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_Title" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_Eyebrow" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_Description" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_BackToGame" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_FilterLabel" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_FilterGame" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_FilterPlayers" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_PlayerSelector" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_NoPlayers" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_NoGameUnlocks" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_NoPlayerUnlocks" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_UnlockedAt" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_ReadOnly" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_UnknownDescription" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_EntryCount" xml:space="preserve"><value>Україна</value></data>
+            <data name="History_CurrentGame" xml:space="preserve"><value>Україна</value></data>
+          </root>
+          EOF
+
+          cat > src/BadWolfQuiz.Web/Pages/Admin/Games/PlayerAchievements.cshtml.cs <<'EOF'
+          using System.Globalization;
+          using BadWolfQuiz.Game.Runtime;
+          using BadWolfQuiz.Web.Data;
+          using BadWolfQuiz.Web.Localization;
+          using BadWolfQuiz.Web.Models;
+          using BadWolfQuiz.Web.Services;
+          using Microsoft.AspNetCore.Mvc;
+          using Microsoft.AspNetCore.Mvc.RazorPages;
+          using Microsoft.EntityFrameworkCore;
+          using Microsoft.Extensions.Localization;
+          using Microsoft.Extensions.Options;
+
+          namespace BadWolfQuiz.Web.Pages.Admin.Games;
+
+          public sealed class PlayerAchievementsModel(
+              QuizDbContext db,
+              GameSessionRegistry sessionRegistry,
+              CurrentHost currentHost,
+              IStringLocalizer<AchievementResource> localizer,
+              IStringLocalizer<PlayerAchievementHistoryResource> historyLocalizer,
+              IOptions<FooterOptions> footerOptions) : PageModel
+          {
+              public const string GameMode = "game";
+              public const string PlayersMode = "players";
+
+              public GameSessionRegistration Game { get; private set; } = null!;
+              public string Mode { get; private set; } = GameMode;
+              public IReadOnlyList<PlayerAchievementHistoryPlayer> Players { get; private set; } = [];
+              public Guid? SelectedPlayerId { get; private set; }
+              public IReadOnlyList<PlayerAchievementHistoryEntry> Entries { get; private set; } = [];
+
+              public async Task<IActionResult> OnGetAsync(
+                  Guid id,
+                  Guid? playerId,
+                  string? mode,
+                  Guid? selectedPlayerId,
+                  CancellationToken cancellationToken)
+              {
+                  var game = sessionRegistry.FindOwned(
+                      new GameSessionId(id),
+                      currentHost.RequiredId);
+                  if (game is null)
+                  {
+                      return NotFound();
+                  }
+
+                  if (playerId.HasValue)
+                  {
+                      return await BuildPlayerDialogJsonAsync(
+                          game,
+                          playerId.Value,
+                          cancellationToken);
+                  }
+
+                  return await LoadHistoryPageAsync(
+                      game,
+                      mode,
+                      selectedPlayerId,
+                      cancellationToken);
+              }
+
+              public static string ToUtcIso(DateTime value) =>
+                  EnsureUtc(value).ToString("O", CultureInfo.InvariantCulture);
+
+              public static string FormatUtcFallback(DateTime value) =>
+                  $"{EnsureUtc(value).ToString("g", CultureInfo.CurrentCulture)} UTC";
+
+              private async Task<IActionResult> BuildPlayerDialogJsonAsync(
+                  GameSessionRegistration game,
+                  Guid playerId,
+                  CancellationToken cancellationToken)
+              {
+                  var player = sessionRegistry
+                      .GetPlayers(game)
+                      .FirstOrDefault(item => item.Id == new GamePlayerId(playerId));
+                  if (player is null)
+                  {
+                      return NotFound();
+                  }
+
+                  var accountId = PlayerAchievementRuntimeState.GetPlayerAccountId(game, player.Id);
+                  var isContributor = player.HasTemporaryContributorPrivileges ||
+                      ContributorRecognition.IsContributor(
+                          footerOptions.Value,
+                          player.OriginalName);
+
+                  if (!isContributor && !string.IsNullOrWhiteSpace(accountId))
+                  {
+                      var accountDisplayName = await db.Hosts
+                          .IgnoreQueryFilters()
+                          .AsNoTracking()
+                          .Where(host => host.Id == accountId)
+                          .Select(host => host.DisplayName)
+                          .SingleOrDefaultAsync(cancellationToken);
+                      isContributor = ContributorRecognition.IsContributor(
+                          footerOptions.Value,
+                          accountDisplayName);
+                  }
+
+                  var achievements = await new PlayerAchievementService(db).LoadForPlayerAsync(
+                      game.HostId,
+                      player.Name,
+                      game.PublicCode,
+                      accountId,
+                      isContributor,
+                      cancellationToken);
+
+                  var unlockedCount = achievements.Count(item => item.IsUnlocked);
+                  return new JsonResult(new
+                  {
+                      playerName = player.Name,
+                      title = localizer["Achievements_Title"].Value,
+                      subtitle = localizer["Achievements_Subtitle"].Value,
+                      closeLabel = localizer["Achievements_Close"].Value,
+                      unlockedCountText = localizer[
+                          "Achievements_UnlockedCount",
+                          unlockedCount,
+                          achievements.Count].Value,
+                      secretTitle = localizer["Achievements_SecretTitle"].Value,
+                      secretDescription = localizer["Achievements_SecretDescription"].Value,
+                      achievements = achievements.Select(item => new
+                      {
+                          item.Code,
+                          item.Icon,
+                          item.IsUnlocked,
+                          item.IsSecret,
+                          item.IsNewInCurrentGame,
+                          item.Progress,
+                          item.Target,
+                          name = localizer[$"{item.Code}_Name"].Value,
+                          description = localizer[$"{item.Code}_Description"].Value
+                      })
+                  });
+              }
+
+              private async Task<IActionResult> LoadHistoryPageAsync(
+                  GameSessionRegistration game,
+                  string? mode,
+                  Guid? selectedPlayerId,
+                  CancellationToken cancellationToken)
+              {
+                  Game = game;
+                  Mode = string.Equals(mode, PlayersMode, StringComparison.OrdinalIgnoreCase)
+                      ? PlayersMode
+                      : GameMode;
+
+                  Players = sessionRegistry
+                      .GetPlayers(game)
+                      .OrderBy(player => player.Name, StringComparer.CurrentCultureIgnoreCase)
+                      .Select(player => new PlayerAchievementHistoryPlayer(
+                          player.Id.Value,
+                          player.Name,
+                          PlayerAchievementRuntimeState.GetPlayerAccountId(game, player.Id)))
+                      .ToArray();
+
+                  var selectedPlayer = Players.FirstOrDefault(player =>
+                          selectedPlayerId.HasValue && player.Id == selectedPlayerId.Value)
+                      ?? Players.FirstOrDefault();
+                  SelectedPlayerId = selectedPlayer?.Id;
+
+                  var achievementService = new PlayerAchievementService(db);
+                  if (Mode == PlayersMode)
+                  {
+                      if (selectedPlayer is null)
+                      {
+                          Entries = [];
+                          return Page();
+                      }
+
+                      var persisted = await achievementService.LoadPersistedUnlocksAsync(
+                          selectedPlayer.AccountId,
+                          game.HostId,
+                          selectedPlayer.Name,
+                          cancellationToken: cancellationToken);
+                      Entries = persisted
+                          .Select(item => CreateHistoryEntry(selectedPlayer, item))
+                          .ToArray();
+                      return Page();
+                  }
+
+                  var storedGameSessionId = await db.GameSessions
+                      .IgnoreQueryFilters()
+                      .AsNoTracking()
+                      .Where(session =>
+                          session.PublicCode == game.PublicCode &&
+                          session.HostId == currentHost.RequiredId)
+                      .Select(session => (int?)session.Id)
+                      .SingleOrDefaultAsync(cancellationToken);
+                  if (!storedGameSessionId.HasValue)
+                  {
+                      Entries = [];
+                      return Page();
+                  }
+
+                  var entries = new List<PlayerAchievementHistoryEntry>();
+                  foreach (var player in Players)
+                  {
+                      var persisted = await achievementService.LoadPersistedUnlocksAsync(
+                          player.AccountId,
+                          game.HostId,
+                          player.Name,
+                          storedGameSessionId.Value,
+                          cancellationToken);
+                      entries.AddRange(persisted.Select(item => CreateHistoryEntry(player, item)));
+                  }
+
+                  Entries = entries
+                      .OrderByDescending(item => item.UnlockedAtUtc)
+                      .ThenByDescending(item => item.RecordId)
+                      .ThenBy(item => item.PlayerName, StringComparer.CurrentCultureIgnoreCase)
+                      .ToArray();
+                  return Page();
+              }
+
+              private PlayerAchievementHistoryEntry CreateHistoryEntry(
+                  PlayerAchievementHistoryPlayer player,
+                  PlayerAchievement achievement)
+              {
+                  var definition = PlayerAchievementService.Catalog.FirstOrDefault(item =>
+                      string.Equals(item.Code, achievement.AchievementCode, StringComparison.Ordinal));
+                  var name = localizer[$"{achievement.AchievementCode}_Name"];
+                  var description = localizer[$"{achievement.AchievementCode}_Description"];
+
+                  return new PlayerAchievementHistoryEntry(
+                      achievement.Id,
+                      player.Id,
+                      player.Name,
+                      achievement.AchievementCode,
+                      name.ResourceNotFound ? achievement.AchievementCode : name.Value,
+                      description.ResourceNotFound
+                          ? historyLocalizer["History_UnknownDescription"].Value
+                          : description.Value,
+                      definition is null
+                          ? null
+                          : $"/images/achievements/{Uri.EscapeDataString(achievement.AchievementCode)}.png",
+                      achievement.UnlockedAtUtc,
+                      achievement.SourceGameSessionId);
+              }
+
+              private static DateTime EnsureUtc(DateTime value) => value.Kind switch
+              {
+                  DateTimeKind.Utc => value,
+                  DateTimeKind.Local => value.ToUniversalTime(),
+                  _ => DateTime.SpecifyKind(value, DateTimeKind.Utc)
+              };
+          }
+
+          public sealed record PlayerAchievementHistoryPlayer(
+              Guid Id,
+              string Name,
+              string? AccountId);
+
+          public sealed record PlayerAchievementHistoryEntry(
+              int RecordId,
+              Guid PlayerId,
+              string PlayerName,
+              string AchievementCode,
+              string Name,
+              string Description,
+              string? ArtworkUrl,
+              DateTime UnlockedAtUtc,
+              int? SourceGameSessionId);
+          EOF
+
+          cat > src/BadWolfQuiz.Web/Pages/Admin/Games/PlayerAchievements.cshtml <<'EOF'
+          @page
+          @model BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel
+          @inject Microsoft.Extensions.Localization.IStringLocalizer<BadWolfQuiz.Web.Localization.PlayerAchievementHistoryResource> HistoryLocalizer
+          @{
+              ViewData["Title"] = HistoryLocalizer["History_Title"];
+              var isGameMode = Model.Mode == BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.GameMode;
+          }
+
+          @section Styles {
+              <link rel="stylesheet" href="~/css/player-achievement-history.css" asp-append-version="true" />
+          }
+
+          <section class="player-achievement-history-page" aria-labelledby="player-achievement-history-title">
+              <header class="player-achievement-history-hero">
+                  <div class="player-achievement-history-hero-copy">
+                      <p class="player-achievement-history-kicker">@HistoryLocalizer["History_Eyebrow"]</p>
+                      <h1 id="player-achievement-history-title">@HistoryLocalizer["History_Title"]</h1>
+                      <p class="player-achievement-history-description">@HistoryLocalizer["History_Description"]</p>
+
+                      <a class="button button-secondary player-achievement-history-back"
+                         asp-page="/Admin/Games/Lobby"
+                         asp-route-id="@Model.Game.Session.Id.Value">
+                          <span aria-hidden="true">←</span>
+                          <span>@HistoryLocalizer["History_BackToGame"]</span>
+                      </a>
+                  </div>
+
+                  <aside class="player-achievement-history-session" aria-label="@Model.Game.Session.Quiz.Title">
+                      <span>@HistoryLocalizer["History_CurrentGame"]</span>
+                      <strong>@Model.Game.Session.Quiz.Title</strong>
+                      <small>@HistoryLocalizer["History_EntryCount", Model.Entries.Count]</small>
+                  </aside>
+              </header>
+
+              <main class="player-achievement-history-content">
+                  <nav class="player-achievement-history-filters"
+                       aria-label="@HistoryLocalizer["History_FilterLabel"]">
+                      <a class="button button-secondary player-achievement-history-filter @(isGameMode ? "is-active" : null)"
+                         aria-current="@(isGameMode ? "page" : null)"
+                         asp-page="/Admin/Games/PlayerAchievements"
+                         asp-route-id="@Model.Game.Session.Id.Value"
+                         asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.GameMode">
+                          @HistoryLocalizer["History_FilterGame"]
+                      </a>
+                      <a class="button button-secondary player-achievement-history-filter @(!isGameMode ? "is-active" : null)"
+                         aria-current="@(!isGameMode ? "page" : null)"
+                         asp-page="/Admin/Games/PlayerAchievements"
+                         asp-route-id="@Model.Game.Session.Id.Value"
+                         asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode"
+                         asp-route-selected-player-id="@Model.SelectedPlayerId">
+                          @HistoryLocalizer["History_FilterPlayers"]
+                      </a>
+                  </nav>
+
+                  <p class="player-achievement-history-readonly">@HistoryLocalizer["History_ReadOnly"]</p>
+
+                  @if (Model.Players.Count == 0)
+                  {
+                      <div class="player-achievement-history-empty" role="status">
+                          <span aria-hidden="true">🏆</span>
+                          <p>@HistoryLocalizer["History_NoPlayers"]</p>
+                      </div>
+                  }
+                  else
+                  {
+                      @if (!isGameMode)
+                      {
+                          <div class="player-achievement-history-player-picker"
+                               aria-label="@HistoryLocalizer["History_PlayerSelector"]">
+                              @foreach (var player in Model.Players)
+                              {
+                                  var isSelected = Model.SelectedPlayerId == player.Id;
+                                  <a class="player-achievement-history-player @(isSelected ? "is-active" : null)"
+                                     aria-current="@(isSelected ? "true" : null)"
+                                     asp-page="/Admin/Games/PlayerAchievements"
+                                     asp-route-id="@Model.Game.Session.Id.Value"
+                                     asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode"
+                                     asp-route-selected-player-id="@player.Id">
+                                      @player.Name
+                                  </a>
+                              }
+                          </div>
+                      }
+
+                      @if (Model.Entries.Count == 0)
+                      {
+                          <div class="player-achievement-history-empty" role="status">
+                              <span aria-hidden="true">🏆</span>
+                              <p>@HistoryLocalizer[isGameMode ? "History_NoGameUnlocks" : "History_NoPlayerUnlocks"]</p>
+                          </div>
+                      }
+                      else
+                      {
+                          <div class="player-achievement-history-list">
+                              @foreach (var entry in Model.Entries)
+                              {
+                                  <article class="player-achievement-history-entry"
+                                           data-achievement-code="@entry.AchievementCode"
+                                           data-player-id="@entry.PlayerId">
+                                      <div class="player-achievement-history-artwork" aria-hidden="true">
+                                          @if (!string.IsNullOrWhiteSpace(entry.ArtworkUrl))
+                                          {
+                                              <img src="@entry.ArtworkUrl"
+                                                   alt=""
+                                                   loading="lazy"
+                                                   decoding="async" />
+                                          }
+                                          else
+                                          {
+                                              <span>🏆</span>
+                                          }
+                                      </div>
+
+                                      <div class="player-achievement-history-copy">
+                                          <span class="player-achievement-history-player-name">@entry.PlayerName</span>
+                                          <strong>@entry.Name</strong>
+                                          <p>@entry.Description</p>
+                                      </div>
+
+                                      <div class="player-achievement-history-time">
+                                          <span>@HistoryLocalizer["History_UnlockedAt"]</span>
+                                          <time datetime="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.ToUtcIso(entry.UnlockedAtUtc)"
+                                                data-achievement-history-time>
+                                              @BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.FormatUtcFallback(entry.UnlockedAtUtc)
+                                          </time>
+                                      </div>
+                                  </article>
+                              }
+                          </div>
+                      }
+                  }
+              </main>
+          </section>
+
+          @section Scripts {
+              <script defer src="~/js/player-achievement-history.js" asp-append-version="true"></script>
+          }
+          EOF
+
+          cat > src/BadWolfQuiz.Web/wwwroot/css/player-achievement-history.css <<'EOF'
+          .player-achievement-history-page {
+              width: min(1180px, calc(100% - 32px));
+              margin: 0 auto;
+              padding: 28px 0 40px;
+          }
+
+          .player-achievement-history-hero {
+              display: grid;
+              grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+              gap: 24px;
+              align-items: end;
+              margin-bottom: 22px;
+          }
+
+          .player-achievement-history-kicker {
+              margin: 0 0 8px;
+              font-size: .78rem;
+              font-weight: 800;
+              letter-spacing: .14em;
+              color: var(--muted);
+          }
+
+          .player-achievement-history-hero h1 {
+              margin: 0;
+          }
+
+          .player-achievement-history-description {
+              max-width: 760px;
+              margin: 10px 0 18px;
+              color: var(--muted);
+          }
+
+          .player-achievement-history-back {
+              display: inline-flex;
+              align-items: center;
+              gap: 8px;
+          }
+
+          .player-achievement-history-session {
+              display: grid;
+              gap: 6px;
+              padding: 18px;
+              border: 1px solid var(--line);
+              border-radius: 18px;
+              background: var(--panel);
+          }
+
+          .player-achievement-history-session span,
+          .player-achievement-history-session small {
+              color: var(--muted);
+          }
+
+          .player-achievement-history-session strong {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+          }
+
+          .player-achievement-history-content {
+              display: grid;
+              gap: 14px;
+              min-height: 0;
+              padding: 18px;
+              border: 1px solid var(--line);
+              border-radius: 20px;
+              background: var(--panel);
+          }
+
+          .player-achievement-history-filters {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 8px;
+          }
+
+          .player-achievement-history-filter.is-active {
+              border-color: var(--gold);
+              box-shadow: inset 0 0 0 1px var(--gold);
+          }
+
+          .player-achievement-history-readonly {
+              margin: 0;
+              color: var(--muted);
+              font-size: .92rem;
+          }
+
+          .player-achievement-history-player-picker {
+              display: flex;
+              gap: 8px;
+              overflow-x: auto;
+              padding: 2px 0 6px;
+              scrollbar-width: thin;
+          }
+
+          .player-achievement-history-player {
+              flex: 0 0 auto;
+              max-width: 240px;
+              overflow: hidden;
+              padding: 8px 12px;
+              border: 1px solid var(--line);
+              border-radius: 999px;
+              color: var(--text);
+              text-decoration: none;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              background: color-mix(in srgb, var(--panel) 88%, var(--bg));
+          }
+
+          .player-achievement-history-player.is-active {
+              border-color: var(--gold);
+              box-shadow: inset 0 0 0 1px var(--gold);
+          }
+
+          .player-achievement-history-list {
+              display: grid;
+              gap: 10px;
+              max-height: min(68vh, 720px);
+              overflow: auto;
+              padding-right: 4px;
+              scrollbar-width: thin;
+          }
+
+          .player-achievement-history-entry {
+              display: grid;
+              grid-template-columns: 76px minmax(0, 1fr) minmax(150px, auto);
+              gap: 14px;
+              align-items: center;
+              padding: 12px 14px;
+              border: 1px solid var(--line);
+              border-radius: 16px;
+              background: color-mix(in srgb, var(--panel) 92%, var(--bg));
+          }
+
+          .player-achievement-history-artwork {
+              display: grid;
+              place-items: center;
+              width: 64px;
+              height: 64px;
+              overflow: hidden;
+              border-radius: 14px;
+              background: color-mix(in srgb, var(--bg) 74%, transparent);
+              font-size: 2rem;
+          }
+
+          .player-achievement-history-artwork img {
+              display: block;
+              width: 60px;
+              height: 60px;
+              object-fit: contain;
+          }
+
+          .player-achievement-history-copy {
+              min-width: 0;
+          }
+
+          .player-achievement-history-copy strong,
+          .player-achievement-history-copy p {
+              display: block;
+          }
+
+          .player-achievement-history-copy strong {
+              margin-top: 3px;
+              font-size: 1.02rem;
+          }
+
+          .player-achievement-history-copy p {
+              margin: 5px 0 0;
+              color: var(--muted);
+          }
+
+          .player-achievement-history-player-name {
+              display: inline-block;
+              max-width: 100%;
+              overflow: hidden;
+              color: var(--gold);
+              font-size: .78rem;
+              font-weight: 800;
+              letter-spacing: .04em;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+          }
+
+          .player-achievement-history-time {
+              display: grid;
+              justify-items: end;
+              gap: 4px;
+              text-align: right;
+          }
+
+          .player-achievement-history-time span {
+              color: var(--muted);
+              font-size: .76rem;
+              text-transform: uppercase;
+              letter-spacing: .06em;
+          }
+
+          .player-achievement-history-time time {
+              font-weight: 700;
+          }
+
+          .player-achievement-history-empty {
+              display: grid;
+              place-items: center;
+              gap: 8px;
+              min-height: 220px;
+              padding: 28px;
+              border: 1px dashed var(--line);
+              border-radius: 16px;
+              color: var(--muted);
+              text-align: center;
+          }
+
+          .player-achievement-history-empty > span {
+              font-size: 2rem;
+          }
+
+          .player-achievement-history-empty p {
+              margin: 0;
+          }
+
+          @media (max-width: 760px) {
+              .player-achievement-history-page {
+                  width: min(100% - 20px, 1180px);
+                  padding-top: 18px;
+              }
+
+              .player-achievement-history-hero {
+                  grid-template-columns: 1fr;
+                  align-items: stretch;
+              }
+
+              .player-achievement-history-entry {
+                  grid-template-columns: 64px minmax(0, 1fr);
+              }
+
+              .player-achievement-history-time {
+                  grid-column: 1 / -1;
+                  justify-items: start;
+                  padding-left: 78px;
+                  text-align: left;
+              }
+          }
+
+          @media (max-width: 480px) {
+              .player-achievement-history-content {
+                  padding: 12px;
+              }
+
+              .player-achievement-history-entry {
+                  grid-template-columns: 52px minmax(0, 1fr);
+                  gap: 10px;
+                  padding: 10px;
+              }
+
+              .player-achievement-history-artwork {
+                  width: 48px;
+                  height: 48px;
+                  border-radius: 12px;
+              }
+
+              .player-achievement-history-artwork img {
+                  width: 46px;
+                  height: 46px;
+              }
+
+              .player-achievement-history-time {
+                  padding-left: 62px;
+              }
+          }
+          EOF
+
+          cat > src/BadWolfQuiz.Web/wwwroot/js/player-achievement-history.js <<'EOF'
+          (() => {
+              const language = document.documentElement.lang || undefined;
+              let formatter;
+              try {
+                  formatter = new Intl.DateTimeFormat(language, {
+                      dateStyle: "medium",
+                      timeStyle: "short"
+                  });
+              } catch {
+                  formatter = new Intl.DateTimeFormat(undefined, {
+                      dateStyle: "medium",
+                      timeStyle: "short"
+                  });
+              }
+
+              for (const element of document.querySelectorAll("time[data-achievement-history-time]")) {
+                  const value = element.getAttribute("datetime");
+                  if (!value) continue;
+
+                  const date = new Date(value);
+                  if (Number.isNaN(date.valueOf())) continue;
+                  element.textContent = formatter.format(date);
+              }
+          })();
+          EOF
+
+          cat > tests/BadWolfQuiz.Web.Tests/PlayerAchievementHistoryServiceTests.cs <<'EOF'
+          using BadWolfQuiz.Web.Data;
+          using BadWolfQuiz.Web.Models;
+          using BadWolfQuiz.Web.Services;
+          using Microsoft.Data.Sqlite;
+          using Microsoft.EntityFrameworkCore;
+
+          namespace BadWolfQuiz.Web.Tests;
+
+          public sealed class PlayerAchievementHistoryServiceTests
+          {
+              [Fact]
+              public async Task LoadPersistedUnlocksAsync_is_read_only_and_uses_the_authoritative_identity()
+              {
+                  await using var connection = new SqliteConnection("Data Source=:memory:");
+                  await connection.OpenAsync();
+                  var options = new DbContextOptionsBuilder<QuizDbContext>()
+                      .UseSqlite(connection)
+                      .Options;
+                  await using var db = new QuizDbContext(options);
+                  await db.Database.EnsureCreatedAsync();
+
+                  var start = new DateTime(2026, 9, 11, 10, 0, 0, DateTimeKind.Utc);
+                  db.PlayerAchievements.AddRange(
+                      new PlayerAchievement
+                      {
+                          AccountId = "account-1",
+                          AchievementCode = "FirstGame",
+                          UnlockedAtUtc = start.AddMinutes(1),
+                          SourceGameSessionId = 9
+                      },
+                      new PlayerAchievement
+                      {
+                          AccountId = "account-1",
+                          AchievementCode = "DoubleReward",
+                          UnlockedAtUtc = start.AddMinutes(3),
+                          SourceGameSessionId = 10
+                      },
+                      new PlayerAchievement
+                      {
+                          AccountId = "account-1",
+                          AchievementCode = "__Peer5:internal",
+                          UnlockedAtUtc = start.AddMinutes(4),
+                          SourceGameSessionId = 10
+                      },
+                      new PlayerAchievement
+                      {
+                          HostId = "host-1",
+                          PlayerKey = PlayerAchievementService.NormalizePlayerKey("Rose"),
+                          AchievementCode = "Winner",
+                          UnlockedAtUtc = start,
+                          SourceGameSessionId = 10
+                      },
+                      new PlayerAchievement
+                      {
+                          HostId = "host-1",
+                          PlayerKey = PlayerAchievementService.NormalizePlayerKey("Rose"),
+                          AchievementCode = "HalfReward",
+                          UnlockedAtUtc = start.AddMinutes(2),
+                          SourceGameSessionId = 12
+                      });
+                  await db.SaveChangesAsync();
+                  db.ChangeTracker.Clear();
+
+                  var service = new PlayerAchievementService(db);
+                  var accountCurrentGame = await service.LoadPersistedUnlocksAsync(
+                      "account-1",
+                      "host-1",
+                      "Rose",
+                      sourceGameSessionId: 10);
+
+                  var accountUnlock = Assert.Single(accountCurrentGame);
+                  Assert.Equal("DoubleReward", accountUnlock.AchievementCode);
+                  Assert.Empty(db.ChangeTracker.Entries<PlayerAchievement>());
+
+                  var anonymousHistory = await service.LoadPersistedUnlocksAsync(
+                      accountId: null,
+                      hostId: "host-1",
+                      playerName: "rose");
+
+                  Assert.Equal(
+                      ["HalfReward", "Winner"],
+                      anonymousHistory.Select(item => item.AchievementCode).ToArray());
+                  Assert.DoesNotContain(
+                      anonymousHistory,
+                      item => item.AchievementCode.StartsWith("__", StringComparison.Ordinal));
+                  Assert.Empty(db.ChangeTracker.Entries<PlayerAchievement>());
+              }
+
+              [Fact]
+              public async Task LoadPersistedUnlocksAsync_reads_new_rows_on_each_request()
+              {
+                  await using var connection = new SqliteConnection("Data Source=:memory:");
+                  await connection.OpenAsync();
+                  var options = new DbContextOptionsBuilder<QuizDbContext>()
+                      .UseSqlite(connection)
+                      .Options;
+                  await using var db = new QuizDbContext(options);
+                  await db.Database.EnsureCreatedAsync();
+
+                  var service = new PlayerAchievementService(db);
+                  var first = await service.LoadPersistedUnlocksAsync(
+                      null,
+                      "host-1",
+                      "Donna");
+                  Assert.Empty(first);
+
+                  db.PlayerAchievements.Add(new PlayerAchievement
+                  {
+                      HostId = "host-1",
+                      PlayerKey = PlayerAchievementService.NormalizePlayerKey("Donna"),
+                      AchievementCode = "FirstGame",
+                      UnlockedAtUtc = DateTime.UtcNow,
+                      SourceGameSessionId = 42
+                  });
+                  await db.SaveChangesAsync();
+                  db.ChangeTracker.Clear();
+
+                  var refreshed = await service.LoadPersistedUnlocksAsync(
+                      null,
+                      "host-1",
+                      "Donna");
+
+                  Assert.Equal("FirstGame", Assert.Single(refreshed).AchievementCode);
+                  Assert.Empty(db.ChangeTracker.Entries<PlayerAchievement>());
+              }
+          }
+          EOF
+
+          cat > tests/BadWolfQuiz.Web.Tests/PlayerAchievementHistoryUiRegressionTests.cs <<'EOF'
+          using System.Xml.Linq;
+
+          namespace BadWolfQuiz.Web.Tests;
+
+          public sealed class PlayerAchievementHistoryUiRegressionTests
+          {
+              [Fact]
+              public void Host_tools_and_history_page_are_wired_without_replacing_the_existing_player_dialog_endpoint()
+              {
+                  var root = FindRepositoryRoot();
+                  var lobby = File.ReadAllText(Path.Combine(
+                      root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "Lobby.cshtml"));
+                  var layout = File.ReadAllText(Path.Combine(
+                      root, "src", "BadWolfQuiz.Web", "Pages", "Shared", "_Layout.cshtml"));
+                  var page = File.ReadAllText(Path.Combine(
+                      root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "PlayerAchievements.cshtml"));
+                  var model = File.ReadAllText(Path.Combine(
+                      root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "PlayerAchievements.cshtml.cs"));
+                  var css = File.ReadAllText(Path.Combine(
+                      root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "player-achievement-history.css"));
+                  var script = File.ReadAllText(Path.Combine(
+                      root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "player-achievement-history.js"));
+
+                  Assert.Contains("asp-page=\"/Admin/Games/PlayerAchievements\"", lobby);
+                  Assert.Contains("History_Open", lobby);
+                  Assert.Contains("asp-page=\"/Admin/Games/PlayerAchievements\"", layout);
+                  Assert.Contains("History_Open", layout);
+
+                  Assert.Contains("History_FilterGame", page);
+                  Assert.Contains("History_FilterPlayers", page);
+                  Assert.Contains("asp-route-selected-player-id", page);
+                  Assert.Contains("History_NoGameUnlocks", page);
+                  Assert.Contains("History_NoPlayerUnlocks", page);
+                  Assert.Contains("History_NoPlayers", page);
+                  Assert.Contains("data-achievement-history-time", page);
+                  Assert.Contains("player-achievement-history.js", page);
+
+                  Assert.Contains("sessionRegistry.FindOwned", model);
+                  Assert.Contains("if (playerId.HasValue)", model);
+                  Assert.Contains("BuildPlayerDialogJsonAsync", model);
+                  Assert.Contains("LoadForPlayerAsync", model);
+                  Assert.Contains("LoadPersistedUnlocksAsync", model);
+                  Assert.Contains("SourceGameSessionId", model);
+                  Assert.Contains("definition is null", model);
+
+                  Assert.Contains("max-height: min(68vh, 720px)", css);
+                  Assert.Contains("overflow: auto", css);
+                  Assert.Contains("Intl.DateTimeFormat", script);
+                  Assert.Contains("data-achievement-history-time", script);
+              }
+
+              [Theory]
+              [InlineData("PlayerAchievementHistoryResource.resx")]
+              [InlineData("PlayerAchievementHistoryResource.uk.resx")]
+              [InlineData("PlayerAchievementHistoryResource.it.resx")]
+              [InlineData("PlayerAchievementHistoryResource.ru.resx")]
+              public void History_resources_have_every_required_ui_key(string fileName)
+              {
+                  var root = FindRepositoryRoot();
+                  var document = XDocument.Load(Path.Combine(
+                      root,
+                      "src",
+                      "BadWolfQuiz.Web",
+                      "Resources",
+                      "Localization",
+                      fileName));
+                  var values = document.Root!
+                      .Elements("data")
+                      .ToDictionary(
+                          element => element.Attribute("name")!.Value,
+                          element => element.Element("value")!.Value,
+                          StringComparer.Ordinal);
+                  var keys = new[]
+                  {
+                      "History_Open",
+                      "History_Title",
+                      "History_Eyebrow",
+                      "History_Description",
+                      "History_BackToGame",
+                      "History_FilterLabel",
+                      "History_FilterGame",
+                      "History_FilterPlayers",
+                      "History_PlayerSelector",
+                      "History_NoPlayers",
+                      "History_NoGameUnlocks",
+                      "History_NoPlayerUnlocks",
+                      "History_UnlockedAt",
+                      "History_ReadOnly",
+                      "History_UnknownDescription",
+                      "History_EntryCount",
+                      "History_CurrentGame"
+                  };
+
+                  Assert.All(keys, key => Assert.True(
+                      values.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value),
+                      $"Missing or empty {key} in {fileName}."));
+
+                  if (fileName.EndsWith(".ru.resx", StringComparison.Ordinal))
+                  {
+                      Assert.All(keys, key => Assert.Equal("Україна", values[key]));
+                  }
+              }
+
+              private static string FindRepositoryRoot()
+              {
+                  var directory = new DirectoryInfo(AppContext.BaseDirectory);
+                  while (directory is not null)
+                  {
+                      if (Directory.Exists(Path.Combine(directory.FullName, "src")) &&
+                          Directory.Exists(Path.Combine(directory.FullName, "tests")))
+                      {
+                          return directory.FullName;
+                      }
+                      directory = directory.Parent;
+                  }
+
+                  throw new DirectoryNotFoundException("Repository root was not found.");
+              }
+          }
+          EOF
+
+          git diff --check
+
+      - name: Build web
+        run: dotnet build src/BadWolfQuiz.Web/BadWolfQuiz.Web.csproj --configuration Release
+
+      - name: Test game
+        run: dotnet test tests/BadWolfQuiz.Game.Tests/BadWolfQuiz.Game.Tests.csproj --configuration Release
+
+      - name: Test web
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release
+
+      - name: Commit implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs src tests
+          git commit -m "Add host player achievement history page"
+          git push origin HEAD:feature/621-player-achievement-history
