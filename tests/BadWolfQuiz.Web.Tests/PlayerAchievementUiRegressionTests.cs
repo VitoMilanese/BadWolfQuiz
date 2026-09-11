@@ -63,12 +63,12 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("PlayerAchievementAssetsTagHelper", imports);
         Assert.Contains("PlayerAchievementsTagHelper", imports);
         Assert.Contains("GitHubAchievementLinkTagHelper", imports);
-        Assert.Contains("/css/player-achievements.css?v=10", tagHelper);
+        Assert.Contains("/css/player-achievements.css?v=11", tagHelper);
         Assert.Contains("/js/achievement-image-trim.js?v=1", tagHelper);
         Assert.Contains("/js/player-achievements.js?v=1", tagHelper);
-        Assert.Contains("/css/player-achievements.css?v=10", hostTagHelper);
+        Assert.Contains("/css/player-achievements.css?v=11", hostTagHelper);
         Assert.Contains("/js/achievement-image-trim.js?v=1", hostTagHelper);
-        Assert.Contains("/js/host-player-achievements.js?v=6", hostTagHelper);
+        Assert.Contains("/js/host-player-achievements.js?v=7", hostTagHelper);
         Assert.Contains("data-player-achievements-label", tagHelper);
         Assert.Contains("Achievements_PlayerLabel", tagHelper);
         Assert.Contains("player-achievements-dialog", tagHelper);
@@ -86,7 +86,11 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("player-achievement-image", tagHelper);
         Assert.Contains("player-achievement-state is-secret-unlocked", tagHelper);
         Assert.Contains("player-achievement-secret-revealed", tagHelper);
-        Assert.DoesNotContain("M7 11V7a5 5 0 0 1 9.9-1", tagHelper);
+        Assert.Contains("player-achievement-secret-eye", tagHelper);
+        Assert.Contains("player-achievement-secret-pupil", tagHelper);
+        Assert.Contains("player-achievement-secret-check", tagHelper);
+        Assert.Contains("M2.4 12s3.5-5.2", tagHelper);
+        Assert.DoesNotContain("M7.8 8.4a4.2", tagHelper);
         Assert.Contains("achievement.Progress", tagHelper);
         Assert.Contains("achievement.Target", tagHelper);
         Assert.Contains("LinkPlayerAccount", tagHelper);
@@ -115,6 +119,11 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains(".player-achievement-card.is-locked .player-achievement-image", css);
         Assert.Contains("filter: grayscale(1)", css);
         Assert.Contains(".player-achievement-state-icon", css);
+        Assert.Contains("width: 19px", css);
+        Assert.Contains(".player-achievement-secret-pupil", css);
+        Assert.Contains(".player-achievement-secret-check", css);
+        Assert.Contains("stroke: var(--bg)", css);
+        Assert.DoesNotContain(".player-achievement-state-check", css);
         Assert.DoesNotContain(".player-achievement-card.is-unlocked .player-achievement-image", css);
         Assert.DoesNotContain("margin: -18px -18px 16px", css);
         Assert.DoesNotContain("padding: 24px 18px 28px", css);
@@ -135,7 +144,11 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("player-achievement-state is-secret-unlocked", hostScript);
         Assert.Contains("player-achievement-secret-revealed", hostScript);
         Assert.Contains("secretUnlockedStateIcon", hostScript);
-        Assert.DoesNotContain("M7 11V7a5 5 0 0 1 9.9-1", hostScript);
+        Assert.Contains("player-achievement-secret-eye", hostScript);
+        Assert.Contains("player-achievement-secret-pupil", hostScript);
+        Assert.Contains("player-achievement-secret-check", hostScript);
+        Assert.Contains("M2.4 12s3.5-5.2", hostScript);
+        Assert.DoesNotContain("M7.8 8.4a4.2", hostScript);
 
         Assert.Contains(".player-achievement-image", trimScript);
         Assert.Contains("image.naturalWidth", trimScript);
