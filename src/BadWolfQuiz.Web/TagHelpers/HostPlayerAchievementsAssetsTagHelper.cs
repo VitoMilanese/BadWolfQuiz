@@ -29,7 +29,7 @@ public sealed class HostPlayerAchievementsAssetsTagHelper(
         output.PostContent.AppendHtml(
             "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=10\" />" +
             "<script defer src=\"/js/achievement-image-trim.js?v=1\"></script>" +
-            "<script defer src=\"/js/host-player-achievements.js?v=5\"></script>");
+            "<script defer src=\"/js/host-player-achievements.js?v=6\"></script>");
     }
 }
 
