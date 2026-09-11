@@ -4,10 +4,31 @@
     ViewData["Title"] = Localizer["Title_QuizMetadataEditor"];
 }
 
+@section Styles {
+    <style>
+        .quiz-metadata-save-status:not(.editor-save-overlay) { display: none !important; }
+        .quiz-metadata-editor .editor-reset-button {
+            width: 38px;
+            min-width: 38px;
+            height: 38px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+        .quiz-metadata-editor .editor-reset-button > span {
+            display: inline-block;
+            transform: translateY(-1px);
+        }
+    </style>
+}
+
 @if (Model.Saved)
 {
     <div id="success-message"
-         class="alert alert-success"
+         class="alert alert-success quiz-metadata-save-status"
          role="status"
          data-editor-save-status>
         @Localizer["QuizMetadata_Saved"]
@@ -162,6 +183,13 @@
            asp-route-selectedRoundId="@Model.Input.SelectedRoundId">
             @Localizer["Button_Back"]
         </a>
+        <button class="button button-secondary editor-reset-button"
+                type="button"
+                data-editor-reset="true"
+                title="@Localizer["Button_Reset"]"
+                aria-label="@Localizer["Button_Reset"]">
+            <span aria-hidden="true">↻</span>
+        </button>
         <button class="button button-primary" type="submit">@Localizer["Button_Save"]</button>
     </div>
 </form>
@@ -181,7 +209,8 @@
         const suggestionBox = editor.querySelector("[data-quiz-tag-suggestions]");
         const counter = editor.querySelector("[data-quiz-tag-counter]");
         const suggestionsUrl = combobox?.dataset.suggestionsUrl;
-        const maxTags = Number.parseInt(editor.dataset.maxTags ?? "10", 10) || 10;
+        const maxTags = Number.parseInt(editor.dataset.maxTags ?? "20", 10) || 20;
+        const maxSuggestionResults = 8;
         let tags = [...fields.querySelectorAll('input[name="Input.Tags"]')]
             .map(field => field.value.trim())
             .filter(Boolean);
@@ -231,7 +260,8 @@
             const selected = new Set(tags.map(key));
             suggestions = values
                 .map(value => value?.trim())
-                .filter(value => value && !selected.has(key(value)));
+                .filter(value => value && !selected.has(key(value)))
+                .slice(0, maxSuggestionResults);
             activeSuggestion = -1;
             suggestionBox.replaceChildren();
             suggestions.forEach((suggestion, index) => {
@@ -319,11 +349,14 @@
             if (!tagValue || tagValue.length > 100) return;
             if (!tags.some(tag => key(tag) === key(tagValue))) {
                 tags.push(tagValue);
-                render();
-            }
-            if (!input.disabled) {
                 input.value = "";
                 hideSuggestions();
+                render();
+            } else {
+                input.value = "";
+                hideSuggestions();
+            }
+            if (!input.disabled) {
                 input.focus();
                 loadSuggestions();
             }

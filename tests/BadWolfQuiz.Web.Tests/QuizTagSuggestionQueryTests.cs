@@ -11,45 +11,52 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class QuizTagSuggestionQueryTests
 {
     [Fact]
-    public async Task Suggestions_are_host_scoped_ranked_filtered_and_limited()
+    public async Task Suggestions_prefer_quiz_tags_fill_from_question_tags_and_stay_host_scoped()
     {
         await using var connection = new SqliteConnection("Data Source=:memory:");
         await connection.OpenAsync();
-        var options = new DbContextOptionsBuilder<QuizDbContext>().UseSqlite(connection).Options;
+
+        var options = new DbContextOptionsBuilder<QuizDbContext>()
+            .UseSqlite(connection)
+            .Options;
         var httpContext = new DefaultHttpContext
         {
             User = new ClaimsPrincipal(new ClaimsIdentity(
-                [new Claim(ClaimTypes.NameIdentifier, "host-a")], "Test"))
+                [new Claim(ClaimTypes.NameIdentifier, "host-a")],
+                "Test"))
         };
-        await using var db = new QuizDbContext(
-            options,
-            new HttpContextAccessor { HttpContext = httpContext });
+        var accessor = new HttpContextAccessor { HttpContext = httpContext };
+        await using var db = new QuizDbContext(options, accessor);
         await db.Database.EnsureCreatedAsync();
 
         var hostA = CreateHost("host-a");
-        AddQuiz(hostA, "A1", "movies", "comedy", "tag 1");
-        AddQuiz(hostA, "A2", "movies", "comedy", "tag 2");
-        AddQuiz(hostA, "A3", "movies", "tag 3");
-        AddQuiz(hostA, "A4", "movies", "tag 4");
-        AddQuiz(hostA, "A5", "series", "tag 5");
-        AddQuiz(hostA, "A6", "tag 6");
-        AddQuiz(hostA, "A7", "tag 7");
-        AddQuiz(hostA, "A8", "tag 8");
-        AddQuiz(hostA, "A9", "tag 9");
+        var quizTags = Enumerable.Range(1, 10)
+            .Select(index => $"quiz-{index:00}")
+            .ToArray();
+        AddQuiz(hostA, "Host A", quizTags, [
+            "question-popular", "question-popular", "question-popular",
+            "question-second", "question-third"
+        ]);
 
         var hostB = CreateHost("host-b");
-        for (var index = 0; index < 12; index++) AddQuiz(hostB, $"B{index}", "movies");
+        AddQuiz(hostB, "Host B", ["other-host-quiz"], ["other-host-question"]);
 
         db.Hosts.AddRange(hostA, hostB);
         await db.SaveChangesAsync();
 
-        var top = await QuizTagSuggestionQuery.GetAsync(db, null);
-        Assert.Equal(QuizTagSuggestionQuery.MaxResults, top.Count);
-        Assert.Equal("movies", top[0]);
-        Assert.Equal("comedy", top[1]);
+        var suggestions = await QuizTagSuggestionQuery.GetAsync(db, null);
 
-        var filtered = await QuizTagSuggestionQuery.GetAsync(db, "MOV");
-        Assert.Equal(["movies"], filtered);
+        Assert.True(suggestions.Count > QuizTagSuggestionQuery.MaxResults);
+        Assert.Equal("quiz-01", suggestions[0]);
+        Assert.Contains("quiz-10", suggestions);
+        Assert.Contains("question-popular", suggestions);
+        Assert.Contains("question-second", suggestions);
+        Assert.DoesNotContain("other-host-quiz", suggestions);
+        Assert.DoesNotContain("other-host-question", suggestions);
+
+        var filtered = await QuizTagSuggestionQuery.GetAsync(db, "QUESTION");
+        Assert.Equal("question-popular", filtered[0]);
+        Assert.Contains("question-second", filtered);
     }
 
     private static HostAccount CreateHost(string id) => new()
@@ -60,13 +67,44 @@ public sealed class QuizTagSuggestionQueryTests
         PasswordHash = "test"
     };
 
-    private static void AddQuiz(HostAccount host, string title, params string[] tags)
+    private static void AddQuiz(
+        HostAccount host,
+        string title,
+        IEnumerable<string> quizTags,
+        IEnumerable<string> questionTags)
     {
         var quiz = new Quiz { HostId = host.Id, Title = title };
-        foreach (var tag in tags)
+        foreach (var tagName in quizTags)
         {
-            quiz.Tags.Add(new QuizTag { Name = tag, NormalizedName = tag.ToUpperInvariant() });
+            quiz.Tags.Add(new QuizTag
+            {
+                Name = tagName,
+                NormalizedName = tagName.ToUpperInvariant()
+            });
         }
+
+        var round = new QuizRound { Title = "Round", SortOrder = 1 };
+        var category = new QuizCategory { Title = "Category", SortOrder = 1 };
+        var rowIndex = 1;
+        foreach (var tagName in questionTags)
+        {
+            var question = new QuizQuestion { RowIndex = rowIndex };
+            question.Tags.Add(new QuizQuestionTag
+            {
+                Name = tagName,
+                NormalizedName = tagName.ToUpperInvariant()
+            });
+            category.Questions.Add(question);
+            round.Rows.Add(new QuizRoundRow
+            {
+                RowIndex = rowIndex,
+                Points = rowIndex * 100
+            });
+            rowIndex++;
+        }
+
+        round.Categories.Add(category);
+        quiz.Rounds.Add(round);
         host.Quizzes.Add(quiz);
     }
 }

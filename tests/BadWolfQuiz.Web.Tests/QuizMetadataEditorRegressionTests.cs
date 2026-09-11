@@ -18,7 +18,7 @@ public sealed class QuizMetadataEditorRegressionTests
     }
 
     [Fact]
-    public void Metadata_editor_has_title_description_ten_tags_and_standard_bottom_actions()
+    public void Metadata_editor_has_title_description_twenty_tags_and_stable_standard_actions()
     {
         var markup = ReadWebFile("Pages", "Admin", "Quizzes", "QuizMetadataEditor.cshtml");
         var source = ReadWebFile("Pages", "Admin", "Quizzes", "QuizMetadataEditor.cshtml.cs");
@@ -30,11 +30,17 @@ public sealed class QuizMetadataEditorRegressionTests
         Assert.Contains("asp-page=\"Editor\"", markup, StringComparison.Ordinal);
         Assert.Contains("@Localizer[\"Button_Back\"]", markup, StringComparison.Ordinal);
         Assert.Contains("@Localizer[\"Button_Save\"]", markup, StringComparison.Ordinal);
-        Assert.Contains("public const int MaximumTagCount = 10;", source, StringComparison.Ordinal);
+        Assert.Contains("public const int MaximumTagCount = 20;", source, StringComparison.Ordinal);
         Assert.Contains("Validation_QuizTagLimit", source, StringComparison.Ordinal);
         Assert.DoesNotContain("_ValidationScriptsPartial", markup, StringComparison.Ordinal);
         Assert.Contains("id=\"success-message\"", markup, StringComparison.Ordinal);
         Assert.Contains("data-editor-save-status", markup, StringComparison.Ordinal);
+        Assert.Contains("quiz-metadata-save-status:not(.editor-save-overlay)", markup, StringComparison.Ordinal);
+        Assert.Contains("data-editor-reset=\"true\"", markup, StringComparison.Ordinal);
+        Assert.Contains("editor-reset-button", markup, StringComparison.Ordinal);
+        Assert.Contains("maxSuggestionResults = 8", markup, StringComparison.Ordinal);
+        Assert.Contains(".slice(0, maxSuggestionResults)", markup, StringComparison.Ordinal);
+        Assert.Contains("tags.push(tagValue);\n                input.value = \"\";\n                hideSuggestions();\n                render();", markup, StringComparison.Ordinal);
         Assert.Contains("event.key !== \"Escape\"", markup, StringComparison.Ordinal);
         Assert.Contains("backLink.click();", markup, StringComparison.Ordinal);
         Assert.DoesNotContain("data-max-message", markup, StringComparison.Ordinal);

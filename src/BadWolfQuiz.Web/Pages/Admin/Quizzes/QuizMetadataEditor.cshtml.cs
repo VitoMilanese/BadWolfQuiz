@@ -13,7 +13,7 @@ public sealed class QuizMetadataEditorModel(
     QuizDbContext db,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
-    public const int MaximumTagCount = 10;
+    public const int MaximumTagCount = 20;
     private const int MaximumTagLength = 100;
 
     [BindProperty]
@@ -130,7 +130,7 @@ public sealed class QuizMetadataEditorModel(
             return Page();
         }
 
-        // Saving also stays narrow: the quiz row plus at most ten tag rows.
+        // Saving also stays narrow: the quiz row plus a bounded set of tag rows.
         var quiz = await db.Quizzes
             .Include(x => x.Tags)
             .SingleOrDefaultAsync(x => x.Id == Input.Id, cancellationToken);
