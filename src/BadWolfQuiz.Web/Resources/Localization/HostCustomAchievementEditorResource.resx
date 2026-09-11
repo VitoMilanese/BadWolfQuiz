@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Achievement editor</value></data>
+  <data name="Description" xml:space="preserve"><value>Create host-specific achievements that players earn by answering questions with the tags you choose.</value></data>
+  <data name="HeroCountLabel" xml:space="preserve"><value>HOST / RULES</value></data>
+  <data name="HeroCountFootnote" xml:space="preserve"><value>CUSTOM MILESTONES</value></data>
+  <data name="CreateTitle" xml:space="preserve"><value>Create achievement</value></data>
+  <data name="EditTitle" xml:space="preserve"><value>Edit achievement</value></data>
+  <data name="EditorKickerNew" xml:space="preserve"><value>NEW / RULE</value></data>
+  <data name="EditorKickerEdit" xml:space="preserve"><value>EDIT / RULE</value></data>
+  <data name="New" xml:space="preserve"><value>New achievement</value></data>
+  <data name="Name" xml:space="preserve"><value>Title</value></data>
+  <data name="DescriptionLabel" xml:space="preserve"><value>Description</value></data>
+  <data name="Target" xml:space="preserve"><value>Correct answers required</value></data>
+  <data name="TargetHint" xml:space="preserve"><value>A matching question counts once even when it contains several selected tags.</value></data>
+  <data name="Tags" xml:space="preserve"><value>Question tags</value></data>
+  <data name="TagsHint" xml:space="preserve"><value>Choose 1–20 tags. Matching uses the same case-insensitive rules as question tags.</value></data>
+  <data name="Artwork" xml:space="preserve"><value>Artwork</value></data>
+  <data name="ArtworkHint" xml:space="preserve"><value>PNG only, exactly 250 × 250 px, maximum 2 MB. Transparency is preserved.</value></data>
+  <data name="ArtworkKeepHint" xml:space="preserve"><value>Leave the file empty to keep the current artwork.</value></data>
+  <data name="CurrentArtworkAlt" xml:space="preserve"><value>Current achievement artwork</value></data>
+  <data name="ArtworkPlaceholder" xml:space="preserve"><value>250 × 250</value></data>
+  <data name="Saved" xml:space="preserve"><value>Achievement saved.</value></data>
+  <data name="ListKicker" xml:space="preserve"><value>HOST / MILESTONES</value></data>
+  <data name="ListTitle" xml:space="preserve"><value>Your achievements</value></data>
+  <data name="EmptyTitle" xml:space="preserve"><value>No custom achievements yet</value></data>
+  <data name="EmptyDescription" xml:space="preserve"><value>Create the first rule on the left. It will become available to players in games you host.</value></data>
+  <data name="CorrectCount" xml:space="preserve"><value>{0} correct</value></data>
+  <data name="TagCount" xml:space="preserve"><value>{0} tags</value></data>
+  <data name="Edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="DeleteConfirm" xml:space="preserve"><value>Delete this achievement? Existing player unlock history will be kept.</value></data>
+  <data name="Back" xml:space="preserve"><value>Back</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="AddTag" xml:space="preserve"><value>Add</value></data>
+  <data name="TagPlaceholder" xml:space="preserve"><value>Type or choose a tag</value></data>
+  <data name="CopyTags" xml:space="preserve"><value>Copy tags</value></data>
+  <data name="ClearTags" xml:space="preserve"><value>Clear tags</value></data>
+  <data name="TagsInvalid" xml:space="preserve"><value>Choose between 1 and {0} tags.</value></data>
+  <data name="ArtworkTooLarge" xml:space="preserve"><value>PNG artwork must be 2 MB or smaller.</value></data>
+  <data name="ArtworkInvalid" xml:space="preserve"><value>Artwork must be a valid PNG image exactly 250 × 250 pixels.</value></data>
+  <data name="ArtworkRequired" xml:space="preserve"><value>PNG artwork is required.</value></data>
+</root>

@@ -1,0 +1,571 @@
+@page
+@model BadWolfQuiz.Web.Pages.Admin.CustomAchievementsModel
+@inject IStringLocalizer<BadWolfQuiz.Web.Localization.HostCustomAchievementEditorResource> CustomAchievementLocalizer
+@{
+    ViewData["Title"] = CustomAchievementLocalizer["Title"];
+    var editing = Model.Input.Id.HasValue;
+    var deleteConfirmMessage = CustomAchievementLocalizer["DeleteConfirm"].Value;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/custom-achievements.css" asp-append-version="true" />
+}
+
+<div class="custom-achievements-page">
+    <section class="custom-achievements-hero" aria-labelledby="custom-achievements-title">
+        <div class="custom-achievements-hero-copy">
+            <p class="custom-achievements-kicker">
+                <span>BAD WOLF</span>
+                <span aria-hidden="true">/ HOST TOOLS</span>
+            </p>
+            <h1 id="custom-achievements-title">@CustomAchievementLocalizer["Title"]</h1>
+            <p class="custom-achievements-description">@CustomAchievementLocalizer["Description"]</p>
+        </div>
+
+        <div class="custom-achievements-hero-mark" aria-hidden="true">
+            <span class="custom-achievements-hero-label">@CustomAchievementLocalizer["HeroCountLabel"]</span>
+            <strong>@Model.Achievements.Count.ToString("00")</strong>
+            <div class="custom-achievements-signal">
+                <i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <small>BAD WOLF / @CustomAchievementLocalizer["HeroCountFootnote"]</small>
+        </div>
+    </section>
+
+    <main class="custom-achievements-content">
+        @if (TempData["CustomAchievementSaved"] is true)
+        {
+            <div class="custom-achievements-flash" role="status">
+                <span aria-hidden="true">✓</span>
+                <strong>@CustomAchievementLocalizer["Saved"]</strong>
+            </div>
+        }
+
+        <div class="custom-achievements-workspace">
+            <section class="custom-achievements-editor-panel" aria-labelledby="custom-achievement-editor-title">
+                <div class="custom-achievements-section-heading">
+                    <div>
+                        <span>@CustomAchievementLocalizer[editing ? "EditorKickerEdit" : "EditorKickerNew"]</span>
+                        <h2 id="custom-achievement-editor-title">
+                            @CustomAchievementLocalizer[editing ? "EditTitle" : "CreateTitle"]
+                        </h2>
+                    </div>
+                    @if (editing)
+                    {
+                        <a class="button button-secondary custom-achievements-new-button"
+                           asp-page="/Admin/CustomAchievements">
+                            @CustomAchievementLocalizer["New"]
+                        </a>
+                    }
+                </div>
+
+                <form method="post"
+                      enctype="multipart/form-data"
+                      asp-page-handler="Save"
+                      class="custom-achievement-form">
+                    <input type="hidden" asp-for="Input.Id" />
+
+                    <div class="custom-achievement-field-grid">
+                        <div class="custom-achievement-field">
+                            <label asp-for="Input.Name">@CustomAchievementLocalizer["Name"]</label>
+                            <input asp-for="Input.Name" maxlength="160" autocomplete="off" />
+                            <span asp-validation-for="Input.Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="custom-achievement-field custom-achievement-target-field">
+                            <label asp-for="Input.Target">@CustomAchievementLocalizer["Target"]</label>
+                            <input asp-for="Input.Target" type="number" min="1" max="1000000" />
+                            <small>@CustomAchievementLocalizer["TargetHint"]</small>
+                            <span asp-validation-for="Input.Target" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="custom-achievement-field">
+                        <label asp-for="Input.Description">@CustomAchievementLocalizer["DescriptionLabel"]</label>
+                        <textarea asp-for="Input.Description" maxlength="1000" rows="5"></textarea>
+                        <span asp-validation-for="Input.Description" class="text-danger"></span>
+                    </div>
+
+                    <section class="custom-achievement-field question-tags-setting" data-question-tags-editor>
+                        <label for="question-tag-input">@CustomAchievementLocalizer["Tags"]</label>
+                        <div class="question-tag-list" data-question-tag-list>
+                            <button class="button button-secondary question-tag-action"
+                                    type="button"
+                                    data-copy-question-tags
+                                    title="@CustomAchievementLocalizer["CopyTags"]"
+                                    aria-label="@CustomAchievementLocalizer["CopyTags"]"
+                                    hidden>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+                                    <path d="M15 9V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
+                                </svg>
+                            </button>
+                            <button class="button button-secondary question-tag-action"
+                                    type="button"
+                                    data-clear-question-tags
+                                    title="@CustomAchievementLocalizer["ClearTags"]"
+                                    aria-label="@CustomAchievementLocalizer["ClearTags"]"
+                                    hidden>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M8 6V4h8v2"></path>
+                                    <path d="M19 6l-1 14H6L5 6"></path>
+                                    <path d="M10 11v5"></path>
+                                    <path d="M14 11v5"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="question-tag-fields" data-question-tag-fields>
+                            @foreach (var tag in Model.Input.Tags)
+                            {
+                                <input type="hidden" name="Input.Tags" value="@tag" />
+                            }
+                        </div>
+                        <div class="question-tag-entry">
+                            <div class="question-tag-combobox"
+                                 data-question-tag-combobox
+                                 data-suggestions-url="@Url.Page("/Admin/CustomAchievements", "TagSuggestions")">
+                                <input id="question-tag-input"
+                                       type="text"
+                                       placeholder="@CustomAchievementLocalizer["TagPlaceholder"]"
+                                       autocomplete="off"
+                                       role="combobox"
+                                       aria-autocomplete="list"
+                                       aria-expanded="false"
+                                       aria-controls="question-tag-suggestions" />
+                                <div id="question-tag-suggestions"
+                                     class="question-tag-suggestions"
+                                     data-question-tag-suggestions
+                                     role="listbox"
+                                     hidden></div>
+                            </div>
+                            <button class="button button-secondary" type="button" data-add-question-tag>
+                                @CustomAchievementLocalizer["AddTag"]
+                            </button>
+                        </div>
+                        <small>@CustomAchievementLocalizer["TagsHint"]</small>
+                        <span asp-validation-for="Input.Tags" class="text-danger"></span>
+                    </section>
+
+                    <div class="custom-achievement-field custom-achievement-artwork-field">
+                        <label asp-for="Input.Artwork">@CustomAchievementLocalizer["Artwork"]</label>
+                        <div class="custom-achievement-artwork-row">
+                            <div class="custom-achievement-artwork-frame" data-custom-achievement-artwork-frame>
+                                @if (editing)
+                                {
+                                    <img class="custom-achievement-artwork-preview"
+                                         src="/AchievementArtwork/@Model.Input.Id.Value"
+                                         alt="@CustomAchievementLocalizer["CurrentArtworkAlt"]"
+                                         data-custom-achievement-artwork-preview />
+                                }
+                                else
+                                {
+                                    <span class="custom-achievement-artwork-placeholder"
+                                          data-custom-achievement-artwork-placeholder>
+                                        @CustomAchievementLocalizer["ArtworkPlaceholder"]
+                                    </span>
+                                    <img class="custom-achievement-artwork-preview"
+                                         alt=""
+                                         data-custom-achievement-artwork-preview
+                                         hidden />
+                                }
+                            </div>
+                            <div class="custom-achievement-artwork-control">
+                                <input asp-for="Input.Artwork"
+                                       type="file"
+                                       accept="image/png,.png"
+                                       data-custom-achievement-artwork-input />
+                                <small>@CustomAchievementLocalizer["ArtworkHint"]</small>
+                                @if (editing)
+                                {
+                                    <small>@CustomAchievementLocalizer["ArtworkKeepHint"]</small>
+                                }
+                            </div>
+                        </div>
+                        <span asp-validation-for="Input.Artwork" class="text-danger"></span>
+                    </div>
+
+                    <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                    <div class="custom-achievement-editor-actions">
+                        <a class="button button-secondary" asp-page="/Achievements">
+                            @CustomAchievementLocalizer["Back"]
+                        </a>
+                        <button class="button button-primary" type="submit">
+                            @CustomAchievementLocalizer["Save"]
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="custom-achievements-list-panel" aria-labelledby="custom-achievement-list-title">
+                <div class="custom-achievements-section-heading">
+                    <div>
+                        <span>@CustomAchievementLocalizer["ListKicker"]</span>
+                        <h2 id="custom-achievement-list-title">@CustomAchievementLocalizer["ListTitle"]</h2>
+                    </div>
+                    <strong class="custom-achievements-section-count">@Model.Achievements.Count.ToString("00")</strong>
+                </div>
+
+                @if (Model.Achievements.Count == 0)
+                {
+                    <div class="custom-achievements-empty">
+                        <span class="custom-achievements-empty-mark" aria-hidden="true">00</span>
+                        <div>
+                            <h3>@CustomAchievementLocalizer["EmptyTitle"]</h3>
+                            <p>@CustomAchievementLocalizer["EmptyDescription"]</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="custom-achievement-list">
+                        @foreach (var achievement in Model.Achievements)
+                        {
+                            <article class="custom-achievement-list-card @(Model.Input.Id == achievement.Id ? "is-selected" : null)">
+                                <div class="custom-achievement-list-artwork">
+                                    <img src="/AchievementArtwork/@achievement.Id" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                                </div>
+                                <div class="custom-achievement-list-copy">
+                                    <div class="custom-achievement-list-title">
+                                        <strong>@achievement.Name</strong>
+                                        <span class="custom-achievement-host-badge">HOST</span>
+                                    </div>
+                                    <p>@achievement.Description</p>
+                                    <div class="custom-achievement-list-meta">
+                                        <span>@CustomAchievementLocalizer["CorrectCount", achievement.Target]</span>
+                                        <span>@CustomAchievementLocalizer["TagCount", achievement.Tags.Count]</span>
+                                    </div>
+                                    <div class="custom-achievement-tag-list">
+                                        @foreach (var tag in achievement.Tags)
+                                        {
+                                            <span>@tag.Name</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="custom-achievement-list-actions">
+                                    <a class="button button-secondary"
+                                       asp-page="/Admin/CustomAchievements"
+                                       asp-route-edit="@achievement.Id">
+                                        @CustomAchievementLocalizer["Edit"]
+                                    </a>
+                                    <form method="post"
+                                          asp-page-handler="Delete"
+                                          asp-route-id="@achievement.Id"
+                                          onsubmit="return confirm('@deleteConfirmMessage');">
+                                        <button class="button button-danger" type="submit">
+                                            @CustomAchievementLocalizer["Delete"]
+                                        </button>
+                                    </form>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                }
+            </section>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const editor = document.querySelector("[data-question-tags-editor]");
+            if (!editor) {
+                return;
+            }
+
+            const input = editor.querySelector("#question-tag-input");
+            const list = editor.querySelector("[data-question-tag-list]");
+            const fields = editor.querySelector("[data-question-tag-fields]");
+            const addButton = editor.querySelector("[data-add-question-tag]");
+            const copyButton = editor.querySelector("[data-copy-question-tags]");
+            const clearButton = editor.querySelector("[data-clear-question-tags]");
+            const combobox = editor.querySelector("[data-question-tag-combobox]");
+            const suggestionBox = editor.querySelector("[data-question-tag-suggestions]");
+            const suggestionsUrl = combobox?.dataset.suggestionsUrl;
+            let tags = [...fields.querySelectorAll('input[name="Input.Tags"]')]
+                .map(field => field.value.trim())
+                .filter(Boolean);
+            let suggestions = [];
+            let activeSuggestion = -1;
+            let requestSequence = 0;
+            let suggestionTimer;
+
+            const key = value => value.toLocaleUpperCase("uk-UA");
+            const hideSuggestions = () => {
+                suggestions = [];
+                activeSuggestion = -1;
+                suggestionBox.replaceChildren();
+                suggestionBox.hidden = true;
+                input.setAttribute("aria-expanded", "false");
+                input.removeAttribute("aria-activedescendant");
+            };
+
+            const setActiveSuggestion = index => {
+                const options = [...suggestionBox.querySelectorAll("[data-question-tag-suggestion]")];
+                options.forEach(option => option.classList.remove("is-active"));
+                if (!options.length) {
+                    activeSuggestion = -1;
+                    input.removeAttribute("aria-activedescendant");
+                    return;
+                }
+
+                activeSuggestion = (index + options.length) % options.length;
+                const option = options[activeSuggestion];
+                option.classList.add("is-active");
+                option.scrollIntoView({ block: "nearest" });
+                input.setAttribute("aria-activedescendant", option.id);
+            };
+
+            const renderSuggestions = values => {
+                const selected = new Set(tags.map(key));
+                suggestions = values
+                    .map(value => value?.trim())
+                    .filter(value => value && !selected.has(key(value)));
+                activeSuggestion = -1;
+                suggestionBox.replaceChildren();
+
+                suggestions.forEach((suggestion, index) => {
+                    const option = document.createElement("button");
+                    option.type = "button";
+                    option.id = `question-tag-suggestion-${index}`;
+                    option.className = "question-tag-suggestion";
+                    option.dataset.questionTagSuggestion = "";
+                    option.setAttribute("role", "option");
+                    option.textContent = suggestion;
+                    option.addEventListener("mousedown", event => event.preventDefault());
+                    option.addEventListener("click", () => addTag(suggestion));
+                    suggestionBox.appendChild(option);
+                });
+
+                suggestionBox.hidden = suggestions.length === 0;
+                input.setAttribute("aria-expanded", suggestions.length ? "true" : "false");
+                if (!suggestions.length) {
+                    input.removeAttribute("aria-activedescendant");
+                }
+            };
+
+            const loadSuggestions = async () => {
+                if (!suggestionsUrl) {
+                    hideSuggestions();
+                    return;
+                }
+
+                const sequence = ++requestSequence;
+                const url = new URL(suggestionsUrl, window.location.href);
+                const searchText = input.value.trim();
+                if (searchText) {
+                    url.searchParams.set("query", searchText);
+                } else {
+                    url.searchParams.delete("query");
+                }
+
+                try {
+                    const response = await fetch(url, {
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+                    if (!response.ok || sequence !== requestSequence) {
+                        if (sequence === requestSequence) {
+                            hideSuggestions();
+                        }
+                        return;
+                    }
+
+                    const values = await response.json();
+                    if (sequence === requestSequence) {
+                        renderSuggestions(Array.isArray(values) ? values : []);
+                    }
+                } catch {
+                    if (sequence === requestSequence) {
+                        hideSuggestions();
+                    }
+                }
+            };
+
+            const scheduleSuggestions = () => {
+                clearTimeout(suggestionTimer);
+                suggestionTimer = setTimeout(loadSuggestions, 150);
+            };
+
+            const copyTags = async () => {
+                const text = tags.join("; ");
+                if (!text) {
+                    return;
+                }
+
+                if (navigator.clipboard?.writeText) {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        return;
+                    } catch {
+                        // Fall through to the legacy copy path.
+                    }
+                }
+
+                const textarea = document.createElement("textarea");
+                textarea.value = text;
+                textarea.setAttribute("readonly", "");
+                textarea.style.position = "fixed";
+                textarea.style.opacity = "0";
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand("copy");
+                } finally {
+                    textarea.remove();
+                }
+            };
+
+            const clearTags = () => {
+                if (!tags.length) {
+                    return;
+                }
+                tags = [];
+                input.value = "";
+                hideSuggestions();
+                render();
+                input.focus();
+                loadSuggestions();
+            };
+
+            const render = () => {
+                list.replaceChildren();
+                if (copyButton) {
+                    copyButton.hidden = tags.length === 0;
+                    list.appendChild(copyButton);
+                }
+                if (clearButton) {
+                    clearButton.hidden = tags.length === 0;
+                    list.appendChild(clearButton);
+                }
+                fields.replaceChildren();
+                tags.forEach(tag => {
+                    const chip = document.createElement("span");
+                    chip.className = "question-tag-chip";
+
+                    const text = document.createElement("span");
+                    text.textContent = tag;
+                    chip.appendChild(text);
+
+                    const remove = document.createElement("button");
+                    remove.type = "button";
+                    remove.className = "question-tag-remove";
+                    remove.setAttribute("aria-label", `Remove ${tag}`);
+                    remove.textContent = "×";
+                    remove.addEventListener("click", () => {
+                        const normalized = key(tag);
+                        tags = tags.filter(item => key(item) !== normalized);
+                        render();
+                        if (document.activeElement === input) {
+                            scheduleSuggestions();
+                        }
+                    });
+                    chip.appendChild(remove);
+                    list.appendChild(chip);
+
+                    const hidden = document.createElement("input");
+                    hidden.type = "hidden";
+                    hidden.name = "Input.Tags";
+                    hidden.value = tag;
+                    fields.appendChild(hidden);
+                });
+            };
+
+            const splitTagValues = value => String(value ?? input.value)
+                .split(/[;,]/)
+                .map(item => item.trim())
+                .filter(Boolean);
+
+            const addTag = value => {
+                let changed = false;
+                for (const tagValue of splitTagValues(value)) {
+                    if (tagValue.length > 100) {
+                        continue;
+                    }
+                    if (!tags.some(tag => key(tag) === key(tagValue))) {
+                        tags.push(tagValue);
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    render();
+                }
+                input.value = "";
+                hideSuggestions();
+                input.focus();
+                loadSuggestions();
+            };
+
+            copyButton?.addEventListener("click", copyTags);
+            clearButton?.addEventListener("click", clearTags);
+            addButton?.addEventListener("click", () => addTag());
+            input?.addEventListener("focus", loadSuggestions);
+            input?.addEventListener("input", scheduleSuggestions);
+            input?.addEventListener("blur", () => {
+                window.setTimeout(hideSuggestions, 120);
+            });
+            input?.addEventListener("keydown", event => {
+                if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    if (suggestionBox.hidden) {
+                        loadSuggestions();
+                    } else {
+                        setActiveSuggestion(activeSuggestion + 1);
+                    }
+                    return;
+                }
+                if (event.key === "ArrowUp" && !suggestionBox.hidden) {
+                    event.preventDefault();
+                    setActiveSuggestion(activeSuggestion - 1);
+                    return;
+                }
+                if (event.key === "Escape") {
+                    if (!suggestionBox.hidden) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        hideSuggestions();
+                    }
+                    return;
+                }
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    if (!suggestionBox.hidden && activeSuggestion >= 0) {
+                        addTag(suggestions[activeSuggestion]);
+                    } else {
+                        addTag();
+                    }
+                }
+            });
+            render();
+        })();
+    </script>
+    <script>
+        (() => {
+            const input = document.querySelector("[data-custom-achievement-artwork-input]");
+            const preview = document.querySelector("[data-custom-achievement-artwork-preview]");
+            const placeholder = document.querySelector("[data-custom-achievement-artwork-placeholder]");
+            if (!input || !preview) {
+                return;
+            }
+
+            let objectUrl;
+            input.addEventListener("change", () => {
+                if (objectUrl) {
+                    URL.revokeObjectURL(objectUrl);
+                    objectUrl = undefined;
+                }
+                const file = input.files?.[0];
+                if (!file) {
+                    return;
+                }
+                objectUrl = URL.createObjectURL(file);
+                preview.src = objectUrl;
+                preview.hidden = false;
+                if (placeholder) {
+                    placeholder.hidden = true;
+                }
+            });
+        })();
+    </script>
+}

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Україна</value></data>
+  <data name="Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="HeroCountLabel" xml:space="preserve"><value>Україна</value></data>
+  <data name="HeroCountFootnote" xml:space="preserve"><value>Україна</value></data>
+  <data name="CreateTitle" xml:space="preserve"><value>Україна</value></data>
+  <data name="EditTitle" xml:space="preserve"><value>Україна</value></data>
+  <data name="EditorKickerNew" xml:space="preserve"><value>Україна</value></data>
+  <data name="EditorKickerEdit" xml:space="preserve"><value>Україна</value></data>
+  <data name="New" xml:space="preserve"><value>Україна</value></data>
+  <data name="Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="DescriptionLabel" xml:space="preserve"><value>Україна</value></data>
+  <data name="Target" xml:space="preserve"><value>Україна</value></data>
+  <data name="TargetHint" xml:space="preserve"><value>Україна</value></data>
+  <data name="Tags" xml:space="preserve"><value>Україна</value></data>
+  <data name="TagsHint" xml:space="preserve"><value>Україна</value></data>
+  <data name="Artwork" xml:space="preserve"><value>Україна</value></data>
+  <data name="ArtworkHint" xml:space="preserve"><value>Україна</value></data>
+  <data name="ArtworkKeepHint" xml:space="preserve"><value>Україна</value></data>
+  <data name="CurrentArtworkAlt" xml:space="preserve"><value>Україна</value></data>
+  <data name="ArtworkPlaceholder" xml:space="preserve"><value>Україна</value></data>
+  <data name="Saved" xml:space="preserve"><value>Україна</value></data>
+  <data name="ListKicker" xml:space="preserve"><value>Україна</value></data>
+  <data name="ListTitle" xml:space="preserve"><value>Україна</value></data>
+  <data name="EmptyTitle" xml:space="preserve"><value>Україна</value></data>
+  <data name="EmptyDescription" xml:space="preserve"><value>Україна</value></data>
+  <data name="CorrectCount" xml:space="preserve"><value>Україна</value></data>
+  <data name="TagCount" xml:space="preserve"><value>Україна</value></data>
+  <data name="Edit" xml:space="preserve"><value>Україна</value></data>
+  <data name="Delete" xml:space="preserve"><value>Україна</value></data>
+  <data name="DeleteConfirm" xml:space="preserve"><value>Україна</value></data>
+  <data name="Back" xml:space="preserve"><value>Україна</value></data>
+  <data name="Save" xml:space="preserve"><value>Україна</value></data>
+  <data name="AddTag" xml:space="preserve"><value>Україна</value></data>
+  <data name="TagPlaceholder" xml:space="preserve"><value>Україна</value></data>
+  <data name="CopyTags" xml:space="preserve"><value>Україна</value></data>
+  <data name="ClearTags" xml:space="preserve"><value>Україна</value></data>
+  <data name="TagsInvalid" xml:space="preserve"><value>Україна</value></data>
+  <data name="ArtworkTooLarge" xml:space="preserve"><value>Україна</value></data>
+  <data name="ArtworkInvalid" xml:space="preserve"><value>Україна</value></data>
+  <data name="ArtworkRequired" xml:space="preserve"><value>Україна</value></data>
+</root>
