@@ -133,6 +133,35 @@ public sealed class HostCustomAchievementEditorRegressionTests
         Assert.DoesNotContain("HostCustomAchievementMenuTagHelper", tagHelpers, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Editor_save_is_ajax_compact_and_uses_shared_save_shortcut()
+    {
+        var root = FindRepositoryRoot();
+        var editor = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "CustomAchievements.cshtml"));
+        var source = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "CustomAchievements.cshtml.cs"));
+        var css = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "custom-achievements.css"));
+        var script = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "custom-achievement-editor.js"));
+        var shortcut = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "editor-save-shortcut.js"));
+        var shortcutHelper = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "TagHelpers", "EditorSaveShortcutAssetsTagHelper.cs"));
+
+        Assert.Contains("data-ajax-custom-achievement-editor", editor, StringComparison.Ordinal);
+        Assert.Contains("data-custom-achievement-save-status", editor, StringComparison.Ordinal);
+        Assert.Contains("ajax-save-status", editor, StringComparison.Ordinal);
+        Assert.DoesNotContain("CustomAchievementLocalizer[\"Back\"]", editor, StringComparison.Ordinal);
+        Assert.DoesNotContain(">HOST</span>", editor, StringComparison.Ordinal);
+        Assert.Contains("CustomAchievementLocalizer[editing ? \"Save\" : \"Add\"]", editor, StringComparison.Ordinal);
+        Assert.Contains("data-custom-achievement-new-button", editor, StringComparison.Ordinal);
+        Assert.Contains("IsAjaxRequest()", source, StringComparison.Ordinal);
+        Assert.Contains("X-Requested-With", script, StringComparison.Ordinal);
+        Assert.Contains("window.BadWolfBusy?.show?.()", script, StringComparison.Ordinal);
+        Assert.Contains("window.BadWolfBusy?.hide?.()", script, StringComparison.Ordinal);
+        Assert.Contains("window.history.replaceState", script, StringComparison.Ordinal);
+        Assert.Contains("form[data-ajax-custom-achievement-editor]", shortcut, StringComparison.Ordinal);
+        Assert.Contains("CustomAchievementsModel", shortcutHelper, StringComparison.Ordinal);
+        Assert.Contains("align-content: start;", css, StringComparison.Ordinal);
+        Assert.Contains("max-height: 48px;", css, StringComparison.Ordinal);
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

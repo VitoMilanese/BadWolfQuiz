@@ -24,7 +24,7 @@
 
         <div class="custom-achievements-hero-mark" aria-hidden="true">
             <span class="custom-achievements-hero-label">@CustomAchievementLocalizer["HeroCountLabel"]</span>
-            <strong>@Model.Achievements.Count.ToString("00")</strong>
+            <strong data-custom-achievement-total>@Model.Achievements.Count.ToString("00")</strong>
             <div class="custom-achievements-signal">
                 <i></i><i></i><i></i><i></i><i></i>
             </div>
@@ -45,24 +45,19 @@
             <section class="custom-achievements-editor-panel" aria-labelledby="custom-achievement-editor-title">
                 <div class="custom-achievements-section-heading">
                     <div>
-                        <span>@CustomAchievementLocalizer[editing ? "EditorKickerEdit" : "EditorKickerNew"]</span>
-                        <h2 id="custom-achievement-editor-title">
+                        <span data-custom-achievement-editor-kicker>@CustomAchievementLocalizer[editing ? "EditorKickerEdit" : "EditorKickerNew"]</span>
+                        <h2 id="custom-achievement-editor-title" data-custom-achievement-editor-title>
                             @CustomAchievementLocalizer[editing ? "EditTitle" : "CreateTitle"]
                         </h2>
                     </div>
-                    @if (editing)
-                    {
-                        <a class="button button-secondary custom-achievements-new-button"
-                           asp-page="/Admin/CustomAchievements">
-                            @CustomAchievementLocalizer["New"]
-                        </a>
-                    }
                 </div>
 
                 <form method="post"
                       enctype="multipart/form-data"
                       asp-page-handler="Save"
-                      class="custom-achievement-form">
+                      class="custom-achievement-form"
+                      data-ajax-custom-achievement-editor
+                      data-save-error="@CustomAchievementLocalizer["SaveFailed"]">
                     <input type="hidden" asp-for="Input.Id" />
 
                     <div class="custom-achievement-field-grid">
@@ -188,28 +183,37 @@
                     <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
                     <div class="custom-achievement-editor-actions">
-                        <a class="button button-secondary" asp-page="/Achievements">
-                            @CustomAchievementLocalizer["Back"]
+                        <span class="alert ajax-save-status"
+                              role="status"
+                              data-custom-achievement-save-status
+                              hidden></span>
+                        <a class="button button-secondary custom-achievements-new-button"
+                           asp-page="/Admin/CustomAchievements"
+                           data-custom-achievement-new-button
+                           hidden="@(!editing)">
+                            @CustomAchievementLocalizer["New"]
                         </a>
-                        <button class="button button-primary" type="submit">
-                            @CustomAchievementLocalizer["Save"]
+                        <button class="button button-primary"
+                                type="submit"
+                                data-custom-achievement-save-button>
+                            @CustomAchievementLocalizer[editing ? "Save" : "Add"]
                         </button>
                     </div>
                 </form>
             </section>
 
-            <section class="custom-achievements-list-panel" aria-labelledby="custom-achievement-list-title">
+            <section class="custom-achievements-list-panel" aria-labelledby="custom-achievement-list-title" data-custom-achievement-list-panel>
                 <div class="custom-achievements-section-heading">
                     <div>
                         <span>@CustomAchievementLocalizer["ListKicker"]</span>
                         <h2 id="custom-achievement-list-title">@CustomAchievementLocalizer["ListTitle"]</h2>
                     </div>
-                    <strong class="custom-achievements-section-count">@Model.Achievements.Count.ToString("00")</strong>
+                    <strong class="custom-achievements-section-count" data-custom-achievement-total>@Model.Achievements.Count.ToString("00")</strong>
                 </div>
 
                 @if (Model.Achievements.Count == 0)
                 {
-                    <div class="custom-achievements-empty">
+                    <div class="custom-achievements-empty" data-custom-achievement-empty>
                         <span class="custom-achievements-empty-mark" aria-hidden="true">00</span>
                         <div>
                             <h3>@CustomAchievementLocalizer["EmptyTitle"]</h3>
@@ -219,17 +223,16 @@
                 }
                 else
                 {
-                    <div class="custom-achievement-list">
+                    <div class="custom-achievement-list" data-custom-achievement-list>
                         @foreach (var achievement in Model.Achievements)
                         {
-                            <article class="custom-achievement-list-card @(Model.Input.Id == achievement.Id ? "is-selected" : null)">
+                            <article class="custom-achievement-list-card @(Model.Input.Id == achievement.Id ? "is-selected" : null)" data-custom-achievement-card data-achievement-id="@achievement.Id">
                                 <div class="custom-achievement-list-artwork">
                                     <img src="/AchievementArtwork/@achievement.Id" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                                 </div>
                                 <div class="custom-achievement-list-copy">
                                     <div class="custom-achievement-list-title">
                                         <strong>@achievement.Name</strong>
-                                        <span class="custom-achievement-host-badge">HOST</span>
                                     </div>
                                     <p>@achievement.Description</p>
                                     <div class="custom-achievement-list-meta">
@@ -268,6 +271,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/custom-achievement-editor.js" asp-append-version="true"></script>
     <script>
         (() => {
             const editor = document.querySelector("[data-question-tags-editor]");

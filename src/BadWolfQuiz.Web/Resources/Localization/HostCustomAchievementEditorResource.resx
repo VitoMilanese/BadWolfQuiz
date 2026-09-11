@@ -35,6 +35,7 @@
   <data name="Delete" xml:space="preserve"><value>Delete</value></data>
   <data name="DeleteConfirm" xml:space="preserve"><value>Delete this achievement? Existing player unlock history will be kept.</value></data>
   <data name="Back" xml:space="preserve"><value>Back</value></data>
+  <data name="Add" xml:space="preserve"><value>Add</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>
   <data name="AddTag" xml:space="preserve"><value>Add</value></data>
   <data name="TagPlaceholder" xml:space="preserve"><value>Type or choose a tag</value></data>
@@ -44,4 +45,5 @@
   <data name="ArtworkTooLarge" xml:space="preserve"><value>PNG artwork must be 2 MB or smaller.</value></data>
   <data name="ArtworkInvalid" xml:space="preserve"><value>Artwork must be a valid PNG image exactly 250 × 250 pixels.</value></data>
   <data name="ArtworkRequired" xml:space="preserve"><value>PNG artwork is required.</value></data>
+  <data name="SaveFailed" xml:space="preserve"><value>Could not save the achievement.</value></data>
 </root>

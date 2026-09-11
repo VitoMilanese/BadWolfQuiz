@@ -80,7 +80,9 @@ public sealed class CustomAchievementsModel(
                     cancellationToken);
             if (achievement is null)
             {
-                return NotFound();
+                return IsAjaxRequest()
+                    ? NotFound(new { success = false, error = localizer["SaveFailed"].Value })
+                    : NotFound();
             }
         }
 
@@ -128,10 +130,16 @@ public sealed class CustomAchievementsModel(
 
         if (!ModelState.IsValid)
         {
+            if (IsAjaxRequest())
+            {
+                return AjaxValidationError();
+            }
+
             await LoadListAsync(cancellationToken);
             return Page();
         }
 
+        var isNew = achievement is null;
         if (achievement is null)
         {
             achievement = new HostCustomAchievement
@@ -162,8 +170,62 @@ public sealed class CustomAchievementsModel(
         }
 
         await db.SaveChangesAsync(cancellationToken);
+
+        if (IsAjaxRequest())
+        {
+            var totalCount = await db.HostCustomAchievements
+                .IgnoreQueryFilters()
+                .CountAsync(
+                    item => item.HostId == hostId && !item.IsDeleted,
+                    cancellationToken);
+            var savedTags = achievement.Tags
+                .OrderBy(tag => tag.Name, StringComparer.CurrentCultureIgnoreCase)
+                .Select(tag => tag.Name)
+                .ToArray();
+
+            return new JsonResult(new
+            {
+                success = true,
+                message = localizer["Saved"].Value,
+                id = achievement.Id.ToString("D"),
+                isNew,
+                name = achievement.Name,
+                description = achievement.Description,
+                target = achievement.Target,
+                tags = savedTags,
+                artworkUrl = $"/AchievementArtwork/{achievement.Id:D}?v={achievement.UpdatedAtUtc.Ticks}",
+                totalCount,
+                correctCountLabel = localizer["CorrectCount", achievement.Target].Value,
+                tagCountLabel = localizer["TagCount", savedTags.Length].Value,
+                editLabel = localizer["Edit"].Value,
+                deleteLabel = localizer["Delete"].Value,
+                deleteConfirm = localizer["DeleteConfirm"].Value,
+                editUrl = Url.Page("/Admin/CustomAchievements", null, new { edit = achievement.Id }),
+                deleteUrl = Url.Page("/Admin/CustomAchievements", "Delete", new { id = achievement.Id }),
+                editorKicker = localizer["EditorKickerEdit"].Value,
+                editorTitle = localizer["EditTitle"].Value,
+                saveLabel = localizer["Save"].Value
+            });
+        }
+
         TempData["CustomAchievementSaved"] = true;
         return RedirectToPage(new { edit = achievement.Id });
+    }
+
+    private bool IsAjaxRequest() => string.Equals(
+        Request.Headers["X-Requested-With"],
+        "XMLHttpRequest",
+        StringComparison.OrdinalIgnoreCase);
+
+    private IActionResult AjaxValidationError()
+    {
+        var error = ModelState.Values
+            .SelectMany(value => value.Errors)
+            .Select(item => item.ErrorMessage)
+            .FirstOrDefault(message => !string.IsNullOrWhiteSpace(message))
+            ?? localizer["SaveFailed"].Value;
+
+        return BadRequest(new { success = false, error });
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(Guid id, CancellationToken cancellationToken)

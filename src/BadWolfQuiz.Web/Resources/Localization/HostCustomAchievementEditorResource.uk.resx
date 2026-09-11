@@ -35,6 +35,7 @@
   <data name="Delete" xml:space="preserve"><value>Видалити</value></data>
   <data name="DeleteConfirm" xml:space="preserve"><value>Видалити це досягнення? Історія вже отриманих досягнень гравців буде збережена.</value></data>
   <data name="Back" xml:space="preserve"><value>Назад</value></data>
+  <data name="Add" xml:space="preserve"><value>Додати</value></data>
   <data name="Save" xml:space="preserve"><value>Зберегти</value></data>
   <data name="AddTag" xml:space="preserve"><value>Додати</value></data>
   <data name="TagPlaceholder" xml:space="preserve"><value>Введіть або виберіть тег</value></data>
@@ -44,4 +45,5 @@
   <data name="ArtworkTooLarge" xml:space="preserve"><value>PNG-зображення повинно мати розмір не більше 2 MB.</value></data>
   <data name="ArtworkInvalid" xml:space="preserve"><value>Зображення повинно бути коректним PNG-файлом розміром рівно 250 × 250 пікселів.</value></data>
   <data name="ArtworkRequired" xml:space="preserve"><value>Потрібно вибрати PNG-зображення.</value></data>
+  <data name="SaveFailed" xml:space="preserve"><value>Не вдалося зберегти досягнення.</value></data>
 </root>

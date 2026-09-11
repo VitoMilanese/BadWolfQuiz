@@ -35,6 +35,7 @@
   <data name="Delete" xml:space="preserve"><value>Elimina</value></data>
   <data name="DeleteConfirm" xml:space="preserve"><value>Eliminare questo obiettivo? La cronologia degli obiettivi già ottenuti dai giocatori verrà mantenuta.</value></data>
   <data name="Back" xml:space="preserve"><value>Indietro</value></data>
+  <data name="Add" xml:space="preserve"><value>Aggiungi</value></data>
   <data name="Save" xml:space="preserve"><value>Salva</value></data>
   <data name="AddTag" xml:space="preserve"><value>Aggiungi</value></data>
   <data name="TagPlaceholder" xml:space="preserve"><value>Digita o scegli un tag</value></data>
@@ -44,4 +45,5 @@
   <data name="ArtworkTooLarge" xml:space="preserve"><value>L'immagine PNG deve essere di massimo 2 MB.</value></data>
   <data name="ArtworkInvalid" xml:space="preserve"><value>L'immagine deve essere un PNG valido di esattamente 250 × 250 pixel.</value></data>
   <data name="ArtworkRequired" xml:space="preserve"><value>È richiesta un'immagine PNG.</value></data>
+  <data name="SaveFailed" xml:space="preserve"><value>Impossibile salvare l'achievement.</value></data>
 </root>

@@ -35,6 +35,7 @@
   <data name="Delete" xml:space="preserve"><value>Україна</value></data>
   <data name="DeleteConfirm" xml:space="preserve"><value>Україна</value></data>
   <data name="Back" xml:space="preserve"><value>Україна</value></data>
+  <data name="Add" xml:space="preserve"><value>Україна</value></data>
   <data name="Save" xml:space="preserve"><value>Україна</value></data>
   <data name="AddTag" xml:space="preserve"><value>Україна</value></data>
   <data name="TagPlaceholder" xml:space="preserve"><value>Україна</value></data>
@@ -44,4 +45,5 @@
   <data name="ArtworkTooLarge" xml:space="preserve"><value>Україна</value></data>
   <data name="ArtworkInvalid" xml:space="preserve"><value>Україна</value></data>
   <data name="ArtworkRequired" xml:space="preserve"><value>Україна</value></data>
+  <data name="SaveFailed" xml:space="preserve"><value>Україна</value></data>
 </root>
