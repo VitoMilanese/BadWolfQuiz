@@ -1,0 +1,142 @@
+.player-achievement-history-pending-results,
+.player-achievement-history-pending-list {
+    min-width: 0;
+}
+
+.player-achievement-history-pending-list {
+    display: grid;
+    gap: 24px;
+}
+
+.player-achievement-history-pending-card {
+    display: grid;
+    gap: 18px;
+    padding: clamp(20px, 2.4vw, 30px);
+    border-color: color-mix(in srgb, var(--gold) 28%, var(--line));
+}
+
+.player-achievement-history-pending-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--red-bright), transparent 78%);
+}
+
+.player-achievement-history-pending-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.player-achievement-history-pending-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.player-achievement-history-pending-header > div {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.player-achievement-history-pending-header span,
+.player-achievement-history-pending-achievements-heading {
+    color: var(--gold);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.player-achievement-history-pending-header strong {
+    overflow-wrap: anywhere;
+    color: var(--text);
+    font-size: clamp(1.45rem, 2.1vw, 2rem);
+    font-weight: 950;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+}
+
+.player-achievement-history-pending-header b {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    border: 1px solid color-mix(in srgb, var(--gold) 38%, var(--line));
+    border-radius: 999px;
+    color: var(--gold);
+    background: color-mix(in srgb, var(--gold) 7%, var(--panel-2));
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+}
+
+.player-achievement-history-pending-description,
+.player-achievement-history-pending-progress-only {
+    max-width: 980px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.96rem;
+    line-height: 1.6;
+}
+
+.player-achievement-history-pending-achievements-heading {
+    margin-top: 4px;
+    padding-top: 18px;
+    border-top: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+}
+
+.player-achievement-history-pending-achievements {
+    gap: 12px;
+}
+
+.player-achievement-history-pending-achievements .player-achievement-history-entry {
+    background: color-mix(in srgb, var(--panel-2) 86%, var(--bg));
+    box-shadow: none;
+}
+
+.player-achievement-history-pending-progress-only {
+    padding: 16px 18px;
+    border: 1px dashed color-mix(in srgb, var(--gold) 28%, var(--line));
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--gold) 4%, var(--panel-2));
+}
+
+.player-achievement-history-confirm-form {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+    padding-top: 18px;
+    border-top: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+}
+
+.player-achievement-history-confirm-button {
+    min-width: 240px;
+    justify-content: center;
+}
+
+.player-achievement-history-confirm-button:disabled {
+    cursor: wait;
+    opacity: 0.62;
+}
+
+@media (max-width: 760px) {
+    .player-achievement-history-pending-header {
+        display: grid;
+    }
+
+    .player-achievement-history-pending-header b {
+        justify-self: start;
+    }
+
+    .player-achievement-history-confirm-form {
+        justify-content: stretch;
+    }
+
+    .player-achievement-history-confirm-button {
+        width: 100%;
+        min-width: 0;
+    }
+}

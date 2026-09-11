@@ -12,6 +12,7 @@
   <data name="History_FilterLabel" xml:space="preserve"><value>Фільтр історії досягнень</value></data>
   <data name="History_FilterGame" xml:space="preserve"><value>Отримані в цій грі</value></data>
   <data name="History_FilterPlayers" xml:space="preserve"><value>Історія гравців</value></data>
+  <data name="History_FilterPending" xml:space="preserve"><value>Очікують підтвердження</value></data>
   <data name="History_PlayerSelector" xml:space="preserve"><value>Гравець</value></data>
   <data name="History_NoPlayers" xml:space="preserve"><value>У грі немає поточних гравців для перегляду.</value></data>
   <data name="History_NoGameUnlocks" xml:space="preserve"><value>У цій грі ще не отримано жодного досягнення.</value></data>
@@ -21,4 +22,15 @@
   <data name="History_UnknownDescription" xml:space="preserve"><value>Деталі досягнення недоступні.</value></data>
   <data name="History_EntryCount" xml:space="preserve"><value>Досягнень: {0}</value></data>
   <data name="History_CurrentGame" xml:space="preserve"><value>Поточна гра</value></data>
+  <data name="History_PendingNotice" xml:space="preserve"><value>Підтверджуйте гравця лише тоді, коли впевнені, що поточний акаунт належить людині, яка раніше використовувала цей нікнейм.</value></data>
+  <data name="History_PendingPlayer" xml:space="preserve"><value>Гравець з акаунтом</value></data>
+  <data name="History_PendingPlayerDescription" xml:space="preserve"><value>Попередня придатна історія завершених ігор для «{0}» досі зберігається за цим хостом і нікнеймом. Підтвердження особи відразу прив'яже її до поточного акаунта гравця.</value></data>
+  <data name="History_PendingPreviousGames" xml:space="preserve"><value>Попередніх ігор для прив'язки: {0}</value></data>
+  <data name="History_PendingAchievements" xml:space="preserve"><value>Досягнення для синхронізації</value></data>
+  <data name="History_PendingNoVisibleUnlocks" xml:space="preserve"><value>Нових карток досягнень для копіювання немає, але попередня історія придатних ігор ще не прив'язана й може вплинути на прогрес акаунта.</value></data>
+  <data name="History_ConfirmIdentity" xml:space="preserve"><value>Підтвердити особу та синхронізувати</value></data>
+  <data name="History_ConfirmPrompt" xml:space="preserve"><value>Підтвердити, що поточний акаунт належить гравцю «{0}»? Попередня придатна історія цього нікнейма буде негайно прив'язана до цього акаунта.</value></data>
+  <data name="History_ConfirmError" xml:space="preserve"><value>Не вдалося синхронізувати історію. Оновіть сторінку й спробуйте ще раз.</value></data>
+  <data name="History_ConfirmConflict" xml:space="preserve"><value>Цю історію нікнейма більше не можна підтвердити, оскільки вона вже пов'язана з іншим акаунтом.</value></data>
+  <data name="History_PendingPlayerCount" xml:space="preserve"><value>Очікують підтвердження: {0}</value></data>
 </root>

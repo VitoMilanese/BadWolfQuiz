@@ -18,6 +18,8 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
             root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "Games", "PlayerAchievements.cshtml.cs"));
         var css = File.ReadAllText(Path.Combine(
             root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "player-achievement-history.css"));
+        var confirmationCss = File.ReadAllText(Path.Combine(
+            root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "player-achievement-history-confirmation.css"));
         var script = File.ReadAllText(Path.Combine(
             root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "player-achievement-history.js"));
 
@@ -32,6 +34,7 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
 
         Assert.Contains("~/css/answer-history.css", page);
         Assert.Contains("~/css/gameplay-review-fixes.css", page);
+        Assert.Contains("~/css/player-achievement-history-confirmation.css", page);
         Assert.Contains("answer-history-page player-achievement-history-page", page);
         Assert.Contains("answer-history-hero", page);
         Assert.Contains("answer-history-session", page);
@@ -40,6 +43,9 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("answer-history-question-card", page);
         Assert.Contains("History_FilterGame", page);
         Assert.Contains("History_FilterPlayers", page);
+        Assert.Contains("History_FilterPending", page);
+        Assert.Contains("Model.HasPendingConfirmations", page);
+        Assert.Contains("data-achievement-history-pending-tab", page);
         Assert.Contains("asp-route-selectedPlayerId", page);
         Assert.DoesNotContain("asp-route-selected-player-id", page);
         Assert.Contains("History_NoGameUnlocks", page);
@@ -54,6 +60,12 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("player-achievement-history-body", page);
         Assert.Contains("player-achievement-history-sidebar", page);
         Assert.Contains("data-achievement-history-time", page);
+        Assert.Contains("data-achievement-history-confirm-form", page);
+        Assert.Contains("asp-page-handler=\"ConfirmIdentity\"", page);
+        Assert.Contains("name=\"playerId\"", page);
+        Assert.DoesNotContain("name=\"accountId\"", page);
+        Assert.Contains("History_ConfirmPrompt", page);
+        Assert.Contains("History_ConfirmIdentity", page);
         Assert.Contains("player-achievement-history.js", page);
 
         Assert.Contains("sessionRegistry.FindOwned", model);
@@ -63,6 +75,13 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("LoadPersistedUnlocksAsync", model);
         Assert.Contains("SourceGameSessionId", model);
         Assert.Contains("definition is null", model);
+        Assert.Contains("public const string PendingMode = \"pending\"", model);
+        Assert.Contains("OnPostConfirmIdentityAsync", model);
+        Assert.Contains("PlayerAchievementRuntimeState.GetPlayerAccountId", model);
+        Assert.Contains("PlayerAchievementHistoryConfirmationService", model);
+        Assert.Contains("confirmationService.ConfirmAsync", model);
+        Assert.Contains("confirmationService.LoadPendingAsync", model);
+        Assert.Contains("remaining.Count > 0 ? PendingMode : PlayersMode", model);
 
         Assert.Contains("justify-content: center", css);
         Assert.Contains("grid-template-columns: minmax(230px, 290px) minmax(0, 1fr)", css);
@@ -70,6 +89,9 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("linear-gradient(90deg, var(--red-bright), var(--gold), transparent 76%)", css);
         Assert.DoesNotContain("max-height: min(68vh, 720px)", css);
         Assert.DoesNotContain("overflow: auto", css);
+        Assert.Contains("player-achievement-history-confirm-form", confirmationCss);
+        Assert.Contains("player-achievement-history-pending-card", confirmationCss);
+        Assert.DoesNotContain("overflow: auto", confirmationCss);
 
         Assert.Contains("Intl.DateTimeFormat", script);
         Assert.Contains("data-achievement-history-time", script);
@@ -84,6 +106,12 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("BadWolfBusy?.hide?.()", script);
         Assert.Contains("event.key !== \"Escape\"", script);
         Assert.Contains("BadWolfBusy?.navigate", script);
+        Assert.Contains("form[data-achievement-history-confirm-form]", script);
+        Assert.Contains("window.confirm(confirmationMessage)", script);
+        Assert.Contains("method: \"POST\"", script);
+        Assert.Contains("new FormData(form)", script);
+        Assert.Contains("forceRefresh = false", script);
+        Assert.Contains("updateView(absoluteNextUrl, changesAddress, true)", script);
     }
 
     [Theory]
@@ -117,6 +145,7 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
             "History_FilterLabel",
             "History_FilterGame",
             "History_FilterPlayers",
+            "History_FilterPending",
             "History_PlayerSelector",
             "History_NoPlayers",
             "History_NoGameUnlocks",
@@ -125,7 +154,18 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
             "History_ReadOnly",
             "History_UnknownDescription",
             "History_EntryCount",
-            "History_CurrentGame"
+            "History_CurrentGame",
+            "History_PendingNotice",
+            "History_PendingPlayer",
+            "History_PendingPlayerDescription",
+            "History_PendingPreviousGames",
+            "History_PendingAchievements",
+            "History_PendingNoVisibleUnlocks",
+            "History_ConfirmIdentity",
+            "History_ConfirmPrompt",
+            "History_ConfirmError",
+            "History_ConfirmConflict",
+            "History_PendingPlayerCount"
         };
 
         Assert.All(keys, key => Assert.True(

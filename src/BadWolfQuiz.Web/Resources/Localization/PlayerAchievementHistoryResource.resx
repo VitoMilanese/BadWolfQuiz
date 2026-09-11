@@ -12,6 +12,7 @@
   <data name="History_FilterLabel" xml:space="preserve"><value>Achievement history filter</value></data>
   <data name="History_FilterGame" xml:space="preserve"><value>Unlocked in this game</value></data>
   <data name="History_FilterPlayers" xml:space="preserve"><value>Players' histories</value></data>
+  <data name="History_FilterPending" xml:space="preserve"><value>Pending confirmation</value></data>
   <data name="History_PlayerSelector" xml:space="preserve"><value>Player</value></data>
   <data name="History_NoPlayers" xml:space="preserve"><value>There are no current players to inspect.</value></data>
   <data name="History_NoGameUnlocks" xml:space="preserve"><value>No achievements have been unlocked in this game yet.</value></data>
@@ -21,4 +22,15 @@
   <data name="History_UnknownDescription" xml:space="preserve"><value>Achievement details are not available.</value></data>
   <data name="History_EntryCount" xml:space="preserve"><value>{0} achievements</value></data>
   <data name="History_CurrentGame" xml:space="preserve"><value>Current game</value></data>
+  <data name="History_PendingNotice" xml:space="preserve"><value>Confirm a signed-in player only when you know the current account belongs to the person who used this nickname before.</value></data>
+  <data name="History_PendingPlayer" xml:space="preserve"><value>Signed-in player</value></data>
+  <data name="History_PendingPlayerDescription" xml:space="preserve"><value>Older eligible finished-game history for {0} is still stored under this host and nickname. Confirming the identity links it to the player's current account immediately.</value></data>
+  <data name="History_PendingPreviousGames" xml:space="preserve"><value>{0} previous games to link</value></data>
+  <data name="History_PendingAchievements" xml:space="preserve"><value>Achievements to synchronize</value></data>
+  <data name="History_PendingNoVisibleUnlocks" xml:space="preserve"><value>No additional achievement cards need copying, but previous eligible game history is still waiting to be linked and may affect account progress.</value></data>
+  <data name="History_ConfirmIdentity" xml:space="preserve"><value>Confirm identity and sync</value></data>
+  <data name="History_ConfirmPrompt" xml:space="preserve"><value>Confirm that the current signed-in account belongs to &quot;{0}&quot;? Previous eligible history for this nickname will be linked to that account immediately.</value></data>
+  <data name="History_ConfirmError" xml:space="preserve"><value>The history could not be synchronized. Refresh the page and try again.</value></data>
+  <data name="History_ConfirmConflict" xml:space="preserve"><value>This nickname history is no longer available for confirmation because it is already associated with another account.</value></data>
+  <data name="History_PendingPlayerCount" xml:space="preserve"><value>{0} players awaiting confirmation</value></data>
 </root>

@@ -12,6 +12,7 @@
   <data name="History_FilterLabel" xml:space="preserve"><value>Filtro cronologia traguardi</value></data>
   <data name="History_FilterGame" xml:space="preserve"><value>Sbloccati in questa partita</value></data>
   <data name="History_FilterPlayers" xml:space="preserve"><value>Cronologia giocatori</value></data>
+  <data name="History_FilterPending" xml:space="preserve"><value>In attesa di conferma</value></data>
   <data name="History_PlayerSelector" xml:space="preserve"><value>Giocatore</value></data>
   <data name="History_NoPlayers" xml:space="preserve"><value>Non ci sono giocatori attuali da consultare.</value></data>
   <data name="History_NoGameUnlocks" xml:space="preserve"><value>Nessun traguardo è stato sbloccato in questa partita.</value></data>
@@ -21,4 +22,15 @@
   <data name="History_UnknownDescription" xml:space="preserve"><value>I dettagli del traguardo non sono disponibili.</value></data>
   <data name="History_EntryCount" xml:space="preserve"><value>{0} traguardi</value></data>
   <data name="History_CurrentGame" xml:space="preserve"><value>Partita attuale</value></data>
+  <data name="History_PendingNotice" xml:space="preserve"><value>Conferma un giocatore autenticato solo quando sai che l'account attuale appartiene alla persona che usava in precedenza questo nickname.</value></data>
+  <data name="History_PendingPlayer" xml:space="preserve"><value>Giocatore autenticato</value></data>
+  <data name="History_PendingPlayerDescription" xml:space="preserve"><value>La cronologia precedente delle partite concluse e valide di {0} è ancora memorizzata per questo host e nickname. La conferma dell'identità la collega immediatamente all'account attuale del giocatore.</value></data>
+  <data name="History_PendingPreviousGames" xml:space="preserve"><value>{0} partite precedenti da collegare</value></data>
+  <data name="History_PendingAchievements" xml:space="preserve"><value>Traguardi da sincronizzare</value></data>
+  <data name="History_PendingNoVisibleUnlocks" xml:space="preserve"><value>Non ci sono altre schede traguardo da copiare, ma la cronologia precedente delle partite valide deve ancora essere collegata e può influire sui progressi dell'account.</value></data>
+  <data name="History_ConfirmIdentity" xml:space="preserve"><value>Conferma identità e sincronizza</value></data>
+  <data name="History_ConfirmPrompt" xml:space="preserve"><value>Confermare che l'account attualmente autenticato appartiene a &quot;{0}&quot;? La cronologia precedente e valida di questo nickname verrà collegata immediatamente all'account.</value></data>
+  <data name="History_ConfirmError" xml:space="preserve"><value>Impossibile sincronizzare la cronologia. Aggiorna la pagina e riprova.</value></data>
+  <data name="History_ConfirmConflict" xml:space="preserve"><value>La cronologia di questo nickname non è più disponibile per la conferma perché è già associata a un altro account.</value></data>
+  <data name="History_PendingPlayerCount" xml:space="preserve"><value>{0} giocatori in attesa di conferma</value></data>
 </root>
