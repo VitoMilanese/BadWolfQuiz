@@ -175,14 +175,14 @@
 
 .player-achievements-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
     gap: 12px;
 }
 
 .player-achievement-card {
     position: relative;
     min-width: 0;
-    padding: 15px;
+    padding: 18px;
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
     border-radius: 16px;
@@ -209,26 +209,35 @@
 }
 
 .player-achievement-card-top {
+    position: relative;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 9px;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 144px;
+    margin-bottom: 14px;
 }
 
 .player-achievement-icon {
-    font-size: 1.75rem;
+    display: grid;
+    place-items: center;
+    width: 144px;
+    height: 144px;
+    flex: 0 0 144px;
+    border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    font-size: 3.5rem;
     line-height: 1;
 }
 
 .player-achievement-image {
     display: block;
-    width: 64px;
-    height: 64px;
-    flex: 0 0 64px;
+    width: 144px;
+    height: 144px;
+    flex: 0 0 144px;
     object-fit: cover;
     border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
-    border-radius: 14px;
+    border-radius: 18px;
     background: color-mix(in srgb, var(--bg) 70%, transparent);
 }
 
@@ -237,6 +246,10 @@
 }
 
 .player-achievement-state {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
     display: grid;
     place-items: center;
     width: 25px;
@@ -244,6 +257,7 @@
     border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
     border-radius: 50%;
     color: var(--muted);
+    background: color-mix(in srgb, var(--panel-2) 92%, transparent);
     font-weight: 900;
 }
 
