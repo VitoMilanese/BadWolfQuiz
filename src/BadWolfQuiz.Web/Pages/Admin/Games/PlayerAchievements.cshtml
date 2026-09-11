@@ -47,7 +47,7 @@
                asp-page="/Admin/Games/PlayerAchievements"
                asp-route-id="@Model.Game.Session.Id.Value"
                asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode"
-               asp-route-selected-player-id="@Model.SelectedPlayerId">
+               asp-route-selectedPlayerId="@Model.SelectedPlayerId">
                 @HistoryLocalizer["History_FilterPlayers"]
             </a>
         </nav>
@@ -75,7 +75,7 @@
                            asp-page="/Admin/Games/PlayerAchievements"
                            asp-route-id="@Model.Game.Session.Id.Value"
                            asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode"
-                           asp-route-selected-player-id="@player.Id">
+                           asp-route-selectedPlayerId="@player.Id">
                             @player.Name
                         </a>
                     }

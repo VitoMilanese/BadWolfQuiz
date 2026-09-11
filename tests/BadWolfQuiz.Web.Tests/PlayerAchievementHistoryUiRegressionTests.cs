@@ -28,7 +28,8 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
 
         Assert.Contains("History_FilterGame", page);
         Assert.Contains("History_FilterPlayers", page);
-        Assert.Contains("asp-route-selected-player-id", page);
+        Assert.Contains("asp-route-selectedPlayerId", page);
+        Assert.DoesNotContain("asp-route-selected-player-id", page);
         Assert.Contains("History_NoGameUnlocks", page);
         Assert.Contains("History_NoPlayerUnlocks", page);
         Assert.Contains("History_NoPlayers", page);
