@@ -63,12 +63,17 @@ jobs:
       - name: Apply issue 601 changes
         run: python3 tools/apply_issue_601.py
 
+      - name: Build web before migration
+        run: dotnet build src/BadWolfQuiz.Web/BadWolfQuiz.Web.csproj --configuration Release
+
       - name: Generate EF Core migration
         run: |
           dotnet tool install --global dotnet-ef --version 8.0.29
           ~/.dotnet/tools/dotnet-ef migrations add AddQuestionAnswerRewardModifiers \
             --project src/BadWolfQuiz.Web/BadWolfQuiz.Web.csproj \
-            --startup-project src/BadWolfQuiz.Web/BadWolfQuiz.Web.csproj
+            --startup-project src/BadWolfQuiz.Web/BadWolfQuiz.Web.csproj \
+            --configuration Release \
+            --no-build
 
       - name: Check diff formatting
         run: git diff --check
