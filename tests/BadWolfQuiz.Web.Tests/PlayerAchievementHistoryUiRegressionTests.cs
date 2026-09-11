@@ -90,7 +90,8 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("remaining.Count > 0 ? PendingMode : PlayersMode", model);
 
         Assert.Contains("justify-content: center", css);
-        Assert.Contains(".player-achievement-history-body.is-players-mode,\n.player-achievement-history-body.is-pending-mode", css);
+        Assert.Contains(".player-achievement-history-body.is-players-mode,", css);
+        Assert.Contains(".player-achievement-history-body.is-pending-mode {", css);
         Assert.Contains("grid-template-columns: minmax(230px, 290px) minmax(0, 1fr)", css);
         Assert.Contains("width: 124px", css);
         Assert.Contains("linear-gradient(90deg, var(--red-bright), var(--gold), transparent 76%)", css);
