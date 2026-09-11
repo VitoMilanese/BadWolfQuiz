@@ -919,6 +919,9 @@ public sealed class EditorModel(
         await db.FinalAnswerContentBlocks
             .Where(x => x.QuizId == quiz.Id)
             .ExecuteDeleteAsync();
+        await db.FinalQuestionTags
+            .Where(x => x.QuizId == quiz.Id)
+            .ExecuteDeleteAsync();
 
         quiz.UpdatedAtUtc = DateTime.UtcNow;
 

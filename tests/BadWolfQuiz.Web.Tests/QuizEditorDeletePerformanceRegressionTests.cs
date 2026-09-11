@@ -43,7 +43,8 @@ public sealed class QuizEditorDeletePerformanceRegressionTests
         Assert.DoesNotContain("RemoveRange(quiz.FinalAnswerBlocks)", handler);
         Assert.Contains("db.FinalQuestionContentBlocks", handler);
         Assert.Contains("db.FinalAnswerContentBlocks", handler);
-        Assert.Equal(2, CountOccurrences(handler, ".ExecuteDeleteAsync()"));
+        Assert.Contains("db.FinalQuestionTags", handler);
+        Assert.Equal(3, CountOccurrences(handler, ".ExecuteDeleteAsync()"));
         Assert.Contains("BeginTransactionAsync()", handler);
         Assert.Contains("CommitAsync()", handler);
     }

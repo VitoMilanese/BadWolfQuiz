@@ -150,6 +150,8 @@ public sealed class Quiz
         new List<FinalQuestionContentBlock>();
     public ICollection<FinalAnswerContentBlock> FinalAnswerBlocks { get; set; } =
         new List<FinalAnswerContentBlock>();
+    public ICollection<FinalQuestionTag> FinalQuestionTags { get; set; } =
+        new List<FinalQuestionTag>();
     public ICollection<GameSession> Sessions { get; set; } = new List<GameSession>();
     public ICollection<QuizRating> Ratings { get; set; } = new List<QuizRating>();
     public ICollection<QuizTag> Tags { get; set; } = new List<QuizTag>();

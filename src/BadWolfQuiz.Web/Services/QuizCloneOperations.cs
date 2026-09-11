@@ -21,6 +21,7 @@ public static class QuizCloneOperations
             .Include(quiz => quiz.FinalDescriptionBlocks)
             .Include(quiz => quiz.FinalQuestionBlocks)
             .Include(quiz => quiz.FinalAnswerBlocks)
+            .Include(quiz => quiz.FinalQuestionTags)
             .Include(quiz => quiz.Rounds)
                 .ThenInclude(round => round.Rows)
             .Include(quiz => quiz.Rounds)
@@ -162,6 +163,15 @@ public static class QuizCloneOperations
             }
 
             clone.Rounds.Add(round);
+        }
+
+        foreach (var sourceTag in source.FinalQuestionTags.OrderBy(tag => tag.Name))
+        {
+            clone.FinalQuestionTags.Add(new FinalQuestionTag
+            {
+                Name = sourceTag.Name,
+                NormalizedName = sourceTag.NormalizedName
+            });
         }
 
         foreach (var sourceBlock in source.FinalDescriptionBlocks.OrderBy(block => block.SortOrder))
