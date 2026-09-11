@@ -11,6 +11,12 @@ stored in the browser and restored before the gameplay layout is first painted
 after a page reload, preventing a visible jump from the default height to the
 saved height.
 
+When a contributor frame is active on a gameplay player card, the framed avatar,
+uploaded image, webcam feed, or webcam URL re-measures against the card's current
+media area whenever the card layout changes. The frame/media pair therefore
+follows both shrinking and growing card sizes instead of retaining a previous
+pixel size.
+
 ## Current question states
 
 While a question is active:

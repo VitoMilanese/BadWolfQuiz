@@ -80,6 +80,8 @@ Web `1.32.0` is a MINOR release that expands persistent player achievements from
 
 Web `1.32.1` is a PATCH release that replaces achievement-card emoji with dedicated PNG artwork for all 80 achievements in both player and host achievement dialogs. Secret locked achievements keep the shared hidden placeholder until they are unlocked.
 
+Web `1.32.2` is a PATCH release that fixes contributor-framed gameplay player media resizing. Framed avatars, uploaded images, webcam feeds, and webcam URL media now re-measure against the player card's current available media area so they can grow as well as shrink when the card is resized, while preserving the existing frame inset and preview-parity behavior.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
