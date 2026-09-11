@@ -70,7 +70,6 @@
                         <div class="custom-achievement-field custom-achievement-target-field">
                             <label asp-for="Input.Target">@CustomAchievementLocalizer["Target"]</label>
                             <input asp-for="Input.Target" type="number" min="1" max="1000000" />
-                            <small>@CustomAchievementLocalizer["TargetHint"]</small>
                             <span asp-validation-for="Input.Target" class="text-danger"></span>
                         </div>
                     </div>
@@ -272,6 +271,7 @@
 
 @section Scripts {
     <script src="~/js/custom-achievement-editor.js" asp-append-version="true"></script>
+    <script src="~/js/editor-save-overlay.js" asp-append-version="true"></script>
     <script>
         (() => {
             const editor = document.querySelector("[data-question-tags-editor]");
