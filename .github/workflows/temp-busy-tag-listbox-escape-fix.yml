@@ -27,34 +27,24 @@ jobs:
 
           script_path = Path("src/BadWolfQuiz.Web/wwwroot/js/busy-indicators.js")
           script = script_path.read_text(encoding="utf-8")
-          old = '''        if (preview && !preview.hidden) {
+          anchor = '        return [...document.querySelectorAll("dialog[open]")]'
+          replacement = '''        if (document.querySelector("[role='listbox']:not([hidden])")) {
               return true;
           }
 
           return [...document.querySelectorAll("dialog[open]")]'''
-          new = '''        if (preview && !preview.hidden) {
-              return true;
-          }
-
-          if (document.querySelector("[role='listbox']:not([hidden])")) {
-              return true;
-          }
-
-          return [...document.querySelectorAll("dialog[open]")]'''
-          if old not in script:
-              raise SystemExit("busy-indicators Escape guard anchor not found")
-          script_path.write_text(script.replace(old, new, 1), encoding="utf-8")
+          if anchor not in script:
+              raise SystemExit("busy-indicators dialog anchor not found")
+          script_path.write_text(script.replace(anchor, replacement, 1), encoding="utf-8")
 
           test_path = Path("tests/BadWolfQuiz.Web.Tests/BusyIndicatorRegressionTests.cs")
           test = test_path.read_text(encoding="utf-8")
-          old_test = '''        Assert.Contains("hasOpenEditorModal", script, StringComparison.Ordinal);
-              Assert.Contains("runAfterPaint", script, StringComparison.Ordinal);'''
-          new_test = '''        Assert.Contains("hasOpenEditorModal", script, StringComparison.Ordinal);
-              Assert.Contains("[role='listbox']:not([hidden])", script, StringComparison.Ordinal);
-              Assert.Contains("runAfterPaint", script, StringComparison.Ordinal);'''
-          if old_test not in test:
+          anchor_test = '        Assert.Contains("hasOpenEditorModal", script, StringComparison.Ordinal);'
+          replacement_test = '''        Assert.Contains("hasOpenEditorModal", script, StringComparison.Ordinal);
+              Assert.Contains("[role='listbox']:not([hidden])", script, StringComparison.Ordinal);'''
+          if anchor_test not in test:
               raise SystemExit("BusyIndicatorRegressionTests Escape assertion anchor not found")
-          test_path.write_text(test.replace(old_test, new_test, 1), encoding="utf-8")
+          test_path.write_text(test.replace(anchor_test, replacement_test, 1), encoding="utf-8")
           PY
       - name: Test game runtime
         run: dotnet test tests/BadWolfQuiz.Game.Tests/BadWolfQuiz.Game.Tests.csproj --configuration Release
