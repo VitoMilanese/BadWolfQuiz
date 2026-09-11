@@ -175,6 +175,8 @@ public sealed class QuizDescriptionLinkTests
             root, "src", "BadWolfQuiz.Web", "Services", "QuizDescriptionLink.cs"));
         var publicCatalog = File.ReadAllText(Path.Combine(
             root, "src", "BadWolfQuiz.Web", "Pages", "PublicQuizzes.cshtml.cs"));
+        var styles = File.ReadAllText(Path.Combine(
+            root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "quiz-description.css"));
 
         Assert.Contains("@page \"/quiz-description/{id:int}/{token}\"", markup);
         Assert.Contains("SocialTitleViewDataKey", markup);
@@ -184,6 +186,14 @@ public sealed class QuizDescriptionLinkTests
         Assert.Contains("Model.Quiz.PreviewPath", markup);
         Assert.Contains("Model.Quiz.AverageRating", markup);
         Assert.Contains("quiz-announcement-rating", markup);
+        Assert.Contains("quiz-announcement-card-rating", markup);
+        var railStart = markup.IndexOf("<aside class=\"quiz-announcement-rail\"", StringComparison.Ordinal);
+        var ratingStart = markup.IndexOf("quiz-announcement-card-rating", StringComparison.Ordinal);
+        var railEnd = markup.IndexOf("</aside>", railStart, StringComparison.Ordinal);
+        Assert.True(railStart >= 0 && ratingStart > railStart && railEnd > ratingStart);
+        Assert.Contains(".quiz-announcement-card-rating", styles);
+        Assert.DoesNotContain(".quiz-announcement-rail strong", styles);
+        Assert.DoesNotContain(".quiz-announcement-rail small", styles);
         Assert.Contains("quiz-announcement-tags", markup);
         Assert.Contains("Model.Quiz.Tags", markup);
         Assert.Contains("X-Robots-Tag", model);

@@ -21,7 +21,6 @@ public sealed class QuizMetadataEditorRegressionTests
     public void Metadata_editor_has_title_description_twenty_tags_and_stable_standard_actions()
     {
         var markup = ReadWebFile("Pages", "Admin", "Quizzes", "QuizMetadataEditor.cshtml");
-        var normalizedMarkup = markup.Replace("\r\n", "\n", StringComparison.Ordinal);
         var source = ReadWebFile("Pages", "Admin", "Quizzes", "QuizMetadataEditor.cshtml.cs");
         Assert.Contains("asp-for=\"Input.Title\"", markup, StringComparison.Ordinal);
         Assert.Contains("asp-for=\"Input.Description\"", markup, StringComparison.Ordinal);
@@ -41,7 +40,7 @@ public sealed class QuizMetadataEditorRegressionTests
         Assert.Contains("editor-reset-button", markup, StringComparison.Ordinal);
         Assert.Contains("maxSuggestionResults = 8", markup, StringComparison.Ordinal);
         Assert.Contains(".slice(0, maxSuggestionResults)", markup, StringComparison.Ordinal);
-        Assert.Contains("tags.push(tagValue);\n                input.value = \"\";\n                hideSuggestions();\n                render();", normalizedMarkup, StringComparison.Ordinal);
+        Assert.Contains("tags.push(tagValue);\n                input.value = \"\";\n                hideSuggestions();\n                render();", markup, StringComparison.Ordinal);
         Assert.Contains("event.key !== \"Escape\"", markup, StringComparison.Ordinal);
         Assert.Contains("backLink.click();", markup, StringComparison.Ordinal);
         Assert.DoesNotContain("data-max-message", markup, StringComparison.Ordinal);
@@ -96,7 +95,11 @@ public sealed class QuizMetadataEditorRegressionTests
         }
     }
 
-    private static string ReadWebFile(params string[] parts) => File.ReadAllText(FindWebFile(parts));
+    private static string ReadWebFile(params string[] parts) =>
+        NormalizeLineEndings(File.ReadAllText(FindWebFile(parts)));
+
+    private static string NormalizeLineEndings(string value) =>
+        value.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
 
     private static string FindWebFile(params string[] parts)
     {

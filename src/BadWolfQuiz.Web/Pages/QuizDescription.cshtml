@@ -23,16 +23,6 @@
             <p class="quiz-announcement-kicker">@QuizDescriptionLocalizer["Eyebrow"]</p>
             <h1 id="quiz-announcement-title">@Model.Quiz.Title</h1>
 
-            @if (Model.Quiz.AverageRating is { } average)
-            {
-                <div class="quiz-announcement-rating"
-                     aria-label="@Localizer["QuizRating_AccessibleSummary", average, Model.Quiz.RatingCount]">
-                    <span aria-hidden="true">★</span>
-                    <strong>@average.ToString("0.0")</strong>
-                    <span>@Localizer["QuizRating_Count", Model.Quiz.RatingCount]</span>
-                </div>
-            }
-
             @if (Model.Quiz.Tags.Count > 0)
             {
                 <div class="quiz-announcement-tags" aria-label="@Localizer["Label_QuizTags"]">
@@ -54,9 +44,20 @@
 
     <main class="quiz-announcement-content">
         <article class="quiz-announcement-card">
-            <aside class="quiz-announcement-rail" aria-hidden="true">
-                <span>BAD WOLF / QUIZ</span>
-                <div>
+            <aside class="quiz-announcement-rail">
+                <span aria-hidden="true">BAD WOLF / QUIZ</span>
+
+                @if (Model.Quiz.AverageRating is { } average)
+                {
+                    <div class="quiz-announcement-rating quiz-announcement-card-rating"
+                         aria-label="@Localizer["QuizRating_AccessibleSummary", average, Model.Quiz.RatingCount]">
+                        <span aria-hidden="true">★</span>
+                        <strong>@average.ToString("0.0")</strong>
+                        <span>@Localizer["QuizRating_Count", Model.Quiz.RatingCount]</span>
+                    </div>
+                }
+
+                <div class="quiz-announcement-share-mark" aria-hidden="true">
                     <strong>SHARE</strong>
                     <small>ANNOUNCEMENT</small>
                 </div>
