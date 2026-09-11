@@ -81,7 +81,15 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-boa
 
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question {
     position: relative;
-    min-height: clamp(3.8rem, 7vw, 6.6rem);
+    /*
+     * Question rows are fractional grid tracks. Width-based minimum heights
+     * can outgrow those tracks when browser zoom changes the CSS viewport,
+     * causing neighbouring cards to paint on top of each other. Keep each
+     * card constrained to its assigned row instead.
+     */
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
     border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
     border-radius: clamp(0.7rem, 0.9vw, 0.95rem);
     background:
@@ -102,7 +110,6 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-boa
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question.status-available:hover,
 body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question.status-available:focus-visible {
     z-index: 1;
-    transform: translateY(-2px);
     border-color: color-mix(in srgb, var(--gold) 72%, var(--line));
     box-shadow:
         0 14px 30px rgb(0 0 0 / 20%),
@@ -167,10 +174,6 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .current-
 @media (max-width: 900px) {
     body.gameplay-layout:has(.host-game-board[data-game-status="running"]) > .page-shell {
         padding: 0.45rem;
-    }
-
-    body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-question {
-        min-height: clamp(3.2rem, 10vw, 4.8rem);
     }
 }
 
