@@ -11,7 +11,8 @@
     const backLinkIds = [
         "question-editor-back-link",
         "final-question-editor-back-link",
-        "description-editor-back"
+        "description-editor-back",
+        "quiz-metadata-editor-back"
     ];
     const editorForm = document.querySelector("form.question-editor");
 

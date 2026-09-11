@@ -59,6 +59,14 @@ public sealed class EditorSaveOverlayRegressionTests
             "Admin",
             "Quizzes",
             "DescriptionEditor.cshtml"));
+        var metadataEditor = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Quizzes",
+            "QuizMetadataEditor.cshtml"));
         var descriptionEditorModel = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -103,6 +111,8 @@ public sealed class EditorSaveOverlayRegressionTests
         Assert.Contains("id=\"success-message\"", finalQuestionEditor, StringComparison.Ordinal);
         Assert.Contains("bool.TryParse(Request.Query[\"saved\"].ToString()", descriptionEditor, StringComparison.Ordinal);
         Assert.Contains("data-editor-save-status", descriptionEditor, StringComparison.Ordinal);
+        Assert.Contains("data-editor-save-status", metadataEditor, StringComparison.Ordinal);
+        Assert.Contains("QuizMetadata_Saved", metadataEditor, StringComparison.Ordinal);
         Assert.Contains("Message_Saved", descriptionEditor, StringComparison.Ordinal);
         Assert.Contains("Input.CategoryId", descriptionEditor, StringComparison.Ordinal);
         Assert.Contains("saved = true", descriptionEditorModel, StringComparison.Ordinal);

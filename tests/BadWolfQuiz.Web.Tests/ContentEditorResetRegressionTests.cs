@@ -30,6 +30,14 @@ public sealed class ContentEditorResetRegressionTests
             "Admin",
             "Quizzes",
             "DescriptionEditor.cshtml"));
+        var metadataEditor = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Quizzes",
+            "QuizMetadataEditor.cshtml"));
         var bootstrap = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -55,6 +63,7 @@ public sealed class ContentEditorResetRegressionTests
         Assert.Contains("question-editor-back-link", questionEditor, StringComparison.Ordinal);
         Assert.Contains("final-question-editor-back-link", finalQuestionEditor, StringComparison.Ordinal);
         Assert.Contains("description-editor-back", descriptionEditor, StringComparison.Ordinal);
+        Assert.Contains("quiz-metadata-editor-back", metadataEditor, StringComparison.Ordinal);
         Assert.Contains("Button_NextQuestion", questionEditor, StringComparison.Ordinal);
         Assert.DoesNotContain("window.location.assign(backLink.href)", questionEditor, StringComparison.Ordinal);
         Assert.DoesNotContain("window.location.assign(backLink.href)", finalQuestionEditor, StringComparison.Ordinal);
@@ -64,6 +73,7 @@ public sealed class ContentEditorResetRegressionTests
         Assert.Contains("#question-editor-back-link", bootstrap, StringComparison.Ordinal);
         Assert.Contains("#final-question-editor-back-link", bootstrap, StringComparison.Ordinal);
         Assert.Contains("#description-editor-back", bootstrap, StringComparison.Ordinal);
+        Assert.Contains("#quiz-metadata-editor-back", bootstrap, StringComparison.Ordinal);
         Assert.Contains("/css/editor-reset-button.css", bootstrap, StringComparison.Ordinal);
         Assert.Contains("/js/editor-reset-button.js", bootstrap, StringComparison.Ordinal);
         Assert.Contains("a.brand[href]", bootstrap, StringComparison.Ordinal);
@@ -74,6 +84,7 @@ public sealed class ContentEditorResetRegressionTests
         Assert.Contains("onLoad: initializeEditorBrandNavigation", bootstrap, StringComparison.Ordinal);
 
         Assert.Contains("button.type = \"button\"", script, StringComparison.Ordinal);
+        Assert.Contains("quiz-metadata-editor-back", script, StringComparison.Ordinal);
         Assert.Contains("data-editor-reset", script, StringComparison.Ordinal);
         Assert.Contains("insertAdjacentElement(\"afterend\", button)", script, StringComparison.Ordinal);
         Assert.Contains("targetUrl.searchParams.delete(\"saved\")", script, StringComparison.Ordinal);

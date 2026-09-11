@@ -11,8 +11,10 @@ public sealed class QuizMetadataEditorRegressionTests
         Assert.Contains("asp-route-id=\"@Model.Quiz.Id\"", markup, StringComparison.Ordinal);
         Assert.Contains("asp-route-selectedRoundId=\"@Model.SelectedRoundId\"", markup, StringComparison.Ordinal);
         Assert.Contains("QuizMetadata_Edit", markup, StringComparison.Ordinal);
-        Assert.Contains(".quiz-editor-title-row { display: inline-flex;", markup, StringComparison.Ordinal);
-        Assert.Contains("max-width: 100%;", markup, StringComparison.Ordinal);
+        Assert.Contains("class=\"quiz-editor-title-with-action\"", markup, StringComparison.Ordinal);
+        Assert.Contains("<span>@Model.Quiz.Title</span>", markup, StringComparison.Ordinal);
+        Assert.Contains("vertical-align: middle;", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("quiz-editor-title-row", markup, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -31,6 +33,13 @@ public sealed class QuizMetadataEditorRegressionTests
         Assert.Contains("public const int MaximumTagCount = 10;", source, StringComparison.Ordinal);
         Assert.Contains("Validation_QuizTagLimit", source, StringComparison.Ordinal);
         Assert.DoesNotContain("_ValidationScriptsPartial", markup, StringComparison.Ordinal);
+        Assert.Contains("id=\"success-message\"", markup, StringComparison.Ordinal);
+        Assert.Contains("data-editor-save-status", markup, StringComparison.Ordinal);
+        Assert.Contains("event.key !== \"Escape\"", markup, StringComparison.Ordinal);
+        Assert.Contains("backLink.click();", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-max-message", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-quiz-tag-limit-message", markup, StringComparison.Ordinal);
+        Assert.Contains("if (Input.Tags.Count > MaximumTagCount)", source, StringComparison.Ordinal);
     }
 
     [Fact]

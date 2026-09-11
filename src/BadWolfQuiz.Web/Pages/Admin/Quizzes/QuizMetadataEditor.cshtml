@@ -6,7 +6,10 @@
 
 @if (Model.Saved)
 {
-    <div class="alert alert-success" role="status">
+    <div id="success-message"
+         class="alert alert-success"
+         role="status"
+         data-editor-save-status>
         @Localizer["QuizMetadata_Saved"]
     </div>
 }
@@ -107,8 +110,7 @@
 
     <section class="content-panel quiz-tags-setting"
              data-quiz-tags-editor
-             data-max-tags="@BadWolfQuiz.Web.Pages.Admin.Quizzes.QuizMetadataEditorModel.MaximumTagCount"
-             data-max-message="@Localizer["Validation_QuizTagLimit", BadWolfQuiz.Web.Pages.Admin.Quizzes.QuizMetadataEditorModel.MaximumTagCount]">
+             data-max-tags="@BadWolfQuiz.Web.Pages.Admin.Quizzes.QuizMetadataEditorModel.MaximumTagCount">
         <div class="quiz-tag-heading">
             <label for="quiz-tag-input"><strong>@Localizer["Label_QuizTags"]</strong></label>
             <span class="quiz-tag-counter" data-quiz-tag-counter aria-live="polite"></span>
@@ -147,7 +149,6 @@
         </div>
 
         <small>@Localizer["Hint_QuizTags", BadWolfQuiz.Web.Pages.Admin.Quizzes.QuizMetadataEditorModel.MaximumTagCount]</small>
-        <small class="text-danger" data-quiz-tag-limit-message hidden></small>
         <span asp-validation-for="Input.Tags" class="text-danger"></span>
     </section>
 
@@ -172,16 +173,15 @@
         if (!editor) return;
 
         const input = editor.querySelector("#quiz-tag-input");
+        const backLink = document.getElementById("quiz-metadata-editor-back");
         const list = editor.querySelector("[data-quiz-tag-list]");
         const fields = editor.querySelector("[data-quiz-tag-fields]");
         const addButton = editor.querySelector("[data-add-quiz-tag]");
         const combobox = editor.querySelector("[data-quiz-tag-combobox]");
         const suggestionBox = editor.querySelector("[data-quiz-tag-suggestions]");
         const counter = editor.querySelector("[data-quiz-tag-counter]");
-        const limitMessage = editor.querySelector("[data-quiz-tag-limit-message]");
         const suggestionsUrl = combobox?.dataset.suggestionsUrl;
         const maxTags = Number.parseInt(editor.dataset.maxTags ?? "10", 10) || 10;
-        const maxMessage = editor.dataset.maxMessage ?? "";
         let tags = [...fields.querySelectorAll('input[name="Input.Tags"]')]
             .map(field => field.value.trim())
             .filter(Boolean);
@@ -205,8 +205,6 @@
             counter.textContent = `${tags.length} / ${maxTags}`;
             input.disabled = atLimit;
             addButton.disabled = atLimit;
-            limitMessage.textContent = atLimit ? maxMessage : "";
-            limitMessage.hidden = !atLimit;
             if (atLimit) hideSuggestions();
         };
 
@@ -335,6 +333,12 @@
         input.addEventListener("focus", loadSuggestions);
         input.addEventListener("input", scheduleSuggestions);
         input.addEventListener("blur", () => window.setTimeout(hideSuggestions, 120));
+        document.addEventListener("keydown", event => {
+            if (event.key !== "Escape" || !backLink || document.querySelector("dialog[open]")) return;
+            event.preventDefault();
+            backLink.click();
+        });
+
         input.addEventListener("keydown", event => {
             if (event.key === "ArrowDown") {
                 event.preventDefault();

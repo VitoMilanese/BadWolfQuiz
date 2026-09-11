@@ -35,6 +35,7 @@ public sealed class EditorSaveShortcutRegressionTests
         Assert.Contains("QuestionEditorModel", tagHelper, StringComparison.Ordinal);
         Assert.Contains("FinalQuestionEditorModel", tagHelper, StringComparison.Ordinal);
         Assert.Contains("DescriptionEditorModel", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("QuizMetadataEditorModel", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/js/editor-save-shortcut.js?v=1", tagHelper, StringComparison.Ordinal);
 
         Assert.Contains("event.code === \"KeyS\"", script, StringComparison.Ordinal);
@@ -47,6 +48,7 @@ public sealed class EditorSaveShortcutRegressionTests
         Assert.Contains("button[data-ajax-save-round]", script, StringComparison.Ordinal);
         Assert.Contains("form[data-ajax-question-editor]", script, StringComparison.Ordinal);
         Assert.Contains("form.description-editor", script, StringComparison.Ordinal);
+        Assert.Contains("form.quiz-metadata-editor", script, StringComparison.Ordinal);
         Assert.Contains("form.question-editor", script, StringComparison.Ordinal);
         Assert.Contains("target.form.requestSubmit(target.submitter);", script, StringComparison.Ordinal);
     }

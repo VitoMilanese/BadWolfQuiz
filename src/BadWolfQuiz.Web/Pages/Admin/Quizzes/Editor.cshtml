@@ -86,8 +86,7 @@
 }
 
 <style>
-    .quiz-editor-title-row { display: inline-flex; align-items: center; gap: .75rem; min-width: 0; max-width: 100%; }
-    .quiz-editor-title-row h1 { min-width: 0; }
+    .quiz-editor-title-with-action { min-width: 0; }
     .quiz-metadata-edit-button {
         width: 44px;
         min-width: 44px;
@@ -101,6 +100,8 @@
         border-radius: 12px;
         color: var(--text);
         background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+        margin-left: .45rem;
+        vertical-align: middle;
         text-decoration: none;
         transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
     }
@@ -116,8 +117,8 @@
 <div class="editor-toolbar quiz-editor-toolbar">
     <div>
         <p class="eyebrow">@Localizer["Title_QuizEditor"]</p>
-        <div class="quiz-editor-title-row">
-            <h1>@Model.Quiz.Title</h1>
+        <h1 class="quiz-editor-title-with-action">
+            <span>@Model.Quiz.Title</span>
             <a class="quiz-metadata-edit-button"
                asp-page="QuizMetadataEditor"
                asp-route-id="@Model.Quiz.Id"
@@ -129,7 +130,7 @@
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
                 </svg>
             </a>
-        </div>
+        </h1>
     </div>
 
     <div class="round-navigation">
