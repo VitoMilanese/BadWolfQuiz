@@ -87,6 +87,18 @@ public sealed class TagEditorBulkToolsRegressionTests
     }
 
     [Fact]
+    public void Global_escape_shortcut_treats_open_listbox_as_blocking_ui()
+    {
+        var source = ReadSource(
+            "src/BadWolfQuiz.Web/wwwroot/js/gameplay-escape-shortcuts.js");
+
+        Assert.Contains(
+            "[role='listbox']:not([hidden])",
+            source,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Quiz_metadata_bulk_add_stops_at_the_existing_maximum_tag_count()
     {
         var source = ReadSource(
