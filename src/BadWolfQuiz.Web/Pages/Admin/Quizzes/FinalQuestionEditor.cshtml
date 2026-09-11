@@ -1,4 +1,4 @@
-﻿@page "{id:int}"
+@page "{id:int}"
 @model BadWolfQuiz.Web.Pages.Admin.Quizzes.FinalQuestionEditorModel
 @{
     ViewData["Title"] = Localizer["Title_FinalQuestionEditor"];
@@ -43,11 +43,58 @@
     </div>
 }
 
+<style>
+    .question-tags-setting { display: grid; gap: .65rem; }
+    .question-tag-list { display: flex; flex-wrap: wrap; gap: .45rem; min-height: 1rem; }
+    .question-tag-chip { display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .55rem; border: 1px solid var(--border-color, #777); border-radius: 999px; }
+    .question-tag-remove { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1.15rem; line-height: 1; padding: 0; }
+    .question-tag-entry { display: flex; gap: .5rem; align-items: flex-start; }
+    .question-tag-combobox { position: relative; flex: 1 1 18rem; min-width: 0; }
+    .question-tag-combobox input { width: 100%; }
+    .question-tag-suggestions { position: absolute; z-index: 100; top: calc(100% + .35rem); left: 0; right: 0; max-height: 16rem; overflow-y: auto; padding: .3rem; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 30px rgba(0, 0, 0, .35); }
+    .question-tag-suggestion { display: block; width: 100%; border: 0; border-radius: 8px; padding: .55rem .7rem; background: transparent; color: var(--text); text-align: left; cursor: pointer; }
+    .question-tag-suggestion:hover, .question-tag-suggestion.is-active { background: var(--panel-2); }
+</style>
+
 <form method="post" class="question-editor" enctype="multipart/form-data">
     <input type="hidden" asp-for="Input.Id" />
     <input type="hidden" asp-for="Input.QuizId" />
 
     <h1>@Localizer["Title_FinalQuestionEditor"]</h1>
+
+    <section class="content-panel question-tags-setting" data-question-tags-editor>
+    <label for="question-tag-input"><strong>@Localizer["Label_QuestionTags"]</strong></label>
+    <div class="question-tag-list" data-question-tag-list></div>
+    <div class="question-tag-fields" data-question-tag-fields>
+        @foreach (var tag in Model.Input.Tags)
+        {
+            <input type="hidden" name="Input.Tags" value="@tag" />
+        }
+    </div>
+    <div class="question-tag-entry">
+        <div class="question-tag-combobox"
+             data-question-tag-combobox
+             data-suggestions-url="@Url.Page("FinalQuestionEditor", "TagSuggestions", new { id = Model.Input.Id })">
+            <input id="question-tag-input" type="text" maxlength="100"
+         placeholder="@Localizer["Placeholder_QuestionTag"]"
+         autocomplete="off"
+         role="combobox"
+         aria-autocomplete="list"
+         aria-expanded="false"
+         aria-controls="question-tag-suggestions" />
+            <div id="question-tag-suggestions"
+       class="question-tag-suggestions"
+       data-question-tag-suggestions
+       role="listbox"
+       hidden></div>
+        </div>
+        <button class="button button-secondary" type="button" data-add-question-tag>
+            @Localizer["Button_AddTag"]
+        </button>
+    </div>
+    <small>@Localizer["Hint_QuestionTags"]</small>
+    <span asp-validation-for="Input.Tags" class="text-danger"></span>
+</section>
 
     <h2>@Localizer["Label_Description"]</h2>
 
@@ -103,6 +150,211 @@
 
 @section Scripts {
     <script src="~/js/image-clipboard-upload.js" asp-append-version="true"></script>
+    <script>
+    (() => {
+        const editor = document.querySelector("[data-question-tags-editor]");
+        if (!editor) {
+            return;
+        }
+
+        const input = editor.querySelector("#question-tag-input");
+        const list = editor.querySelector("[data-question-tag-list]");
+        const fields = editor.querySelector("[data-question-tag-fields]");
+        const addButton = editor.querySelector("[data-add-question-tag]");
+        const combobox = editor.querySelector("[data-question-tag-combobox]");
+        const suggestionBox = editor.querySelector("[data-question-tag-suggestions]");
+        const suggestionsUrl = combobox?.dataset.suggestionsUrl;
+        let tags = [...fields.querySelectorAll('input[name="Input.Tags"]')]
+            .map(field => field.value.trim())
+            .filter(Boolean);
+        let suggestions = [];
+        let activeSuggestion = -1;
+        let requestSequence = 0;
+        let suggestionTimer;
+
+        const key = value => value.toLocaleUpperCase("uk-UA");
+        const hideSuggestions = () => {
+            suggestions = [];
+            activeSuggestion = -1;
+            suggestionBox.replaceChildren();
+            suggestionBox.hidden = true;
+            input.setAttribute("aria-expanded", "false");
+            input.removeAttribute("aria-activedescendant");
+        };
+
+        const setActiveSuggestion = index => {
+            const options = [...suggestionBox.querySelectorAll("[data-question-tag-suggestion]")];
+            options.forEach(option => option.classList.remove("is-active"));
+            if (!options.length) {
+          activeSuggestion = -1;
+          input.removeAttribute("aria-activedescendant");
+          return;
+            }
+
+            activeSuggestion = (index + options.length) % options.length;
+            const option = options[activeSuggestion];
+            option.classList.add("is-active");
+            option.scrollIntoView({ block: "nearest" });
+            input.setAttribute("aria-activedescendant", option.id);
+        };
+
+        const renderSuggestions = values => {
+            const selected = new Set(tags.map(key));
+            suggestions = values
+          .map(value => value?.trim())
+          .filter(value => value && !selected.has(key(value)));
+            activeSuggestion = -1;
+            suggestionBox.replaceChildren();
+
+            suggestions.forEach((suggestion, index) => {
+          const option = document.createElement("button");
+          option.type = "button";
+          option.id = `question-tag-suggestion-${index}`;
+          option.className = "question-tag-suggestion";
+          option.dataset.questionTagSuggestion = "";
+          option.setAttribute("role", "option");
+          option.textContent = suggestion;
+          option.addEventListener("mousedown", event => event.preventDefault());
+          option.addEventListener("click", () => addTag(suggestion));
+          suggestionBox.appendChild(option);
+            });
+
+            suggestionBox.hidden = suggestions.length === 0;
+            input.setAttribute("aria-expanded", suggestions.length ? "true" : "false");
+            if (!suggestions.length) {
+          input.removeAttribute("aria-activedescendant");
+            }
+        };
+
+        const loadSuggestions = async () => {
+            if (!suggestionsUrl) {
+          hideSuggestions();
+          return;
+            }
+
+            const sequence = ++requestSequence;
+            const url = new URL(suggestionsUrl, window.location.href);
+            const searchText = input.value.trim();
+            if (searchText) {
+          url.searchParams.set("query", searchText);
+            } else {
+          url.searchParams.delete("query");
+            }
+
+            try {
+          const response = await fetch(url, {
+              headers: { "X-Requested-With": "XMLHttpRequest" }
+          });
+          if (!response.ok || sequence !== requestSequence) {
+              if (sequence === requestSequence) {
+                  hideSuggestions();
+              }
+              return;
+          }
+
+          const values = await response.json();
+          if (sequence === requestSequence) {
+              renderSuggestions(Array.isArray(values) ? values : []);
+          }
+            } catch {
+          if (sequence === requestSequence) {
+              hideSuggestions();
+          }
+            }
+        };
+
+        const scheduleSuggestions = () => {
+            clearTimeout(suggestionTimer);
+            suggestionTimer = setTimeout(loadSuggestions, 150);
+        };
+
+        const render = () => {
+            list.replaceChildren();
+            fields.replaceChildren();
+            tags.forEach(tag => {
+          const chip = document.createElement("span");
+          chip.className = "question-tag-chip";
+
+          const text = document.createElement("span");
+          text.textContent = tag;
+          chip.appendChild(text);
+
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "question-tag-remove";
+          remove.setAttribute("aria-label", `Remove ${tag}`);
+          remove.textContent = "×";
+          remove.addEventListener("click", () => {
+              const normalized = key(tag);
+              tags = tags.filter(item => key(item) !== normalized);
+              render();
+              if (document.activeElement === input) {
+                  scheduleSuggestions();
+              }
+          });
+          chip.appendChild(remove);
+          list.appendChild(chip);
+
+          const hidden = document.createElement("input");
+          hidden.type = "hidden";
+          hidden.name = "Input.Tags";
+          hidden.value = tag;
+          fields.appendChild(hidden);
+            });
+        };
+
+        const addTag = value => {
+            const tagValue = (value ?? input.value).trim();
+            if (!tagValue || tagValue.length > 100) {
+          return;
+            }
+            if (!tags.some(tag => key(tag) === key(tagValue))) {
+          tags.push(tagValue);
+          render();
+            }
+            input.value = "";
+            hideSuggestions();
+            input.focus();
+            loadSuggestions();
+        };
+
+        addButton?.addEventListener("click", () => addTag());
+        input?.addEventListener("focus", loadSuggestions);
+        input?.addEventListener("input", scheduleSuggestions);
+        input?.addEventListener("blur", () => {
+            window.setTimeout(hideSuggestions, 120);
+        });
+        input?.addEventListener("keydown", event => {
+            if (event.key === "ArrowDown") {
+          event.preventDefault();
+          if (suggestionBox.hidden) {
+              loadSuggestions();
+          } else {
+              setActiveSuggestion(activeSuggestion + 1);
+          }
+          return;
+            }
+            if (event.key === "ArrowUp" && !suggestionBox.hidden) {
+          event.preventDefault();
+          setActiveSuggestion(activeSuggestion - 1);
+          return;
+            }
+            if (event.key === "Escape") {
+          hideSuggestions();
+          return;
+            }
+            if (event.key === "Enter") {
+          event.preventDefault();
+          if (!suggestionBox.hidden && activeSuggestion >= 0) {
+              addTag(suggestions[activeSuggestion]);
+          } else {
+              addTag();
+          }
+            }
+        });
+        render();
+    })();
+</script>
     <script>
         const questionPreviewModal =
             document.getElementById("question-preview-modal");

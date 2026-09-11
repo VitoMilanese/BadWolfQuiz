@@ -20,12 +20,24 @@ public sealed class FinalQuestionEditorModel(
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
+    public async Task<IActionResult> OnGetTagSuggestionsAsync(
+        string? query,
+        CancellationToken cancellationToken)
+    {
+        var suggestions = await QuestionTagSuggestionQuery.GetAsync(
+            db,
+            query,
+            cancellationToken);
+        return new JsonResult(suggestions);
+    }
+
     public async Task<IActionResult> OnGetAsync(int id)
     {
         var quiz = await db.Quizzes
             .Include(x => x.FinalDescriptionBlocks)
             .Include(x => x.FinalQuestionBlocks)
             .Include(x => x.FinalAnswerBlocks)
+            .Include(x => x.FinalQuestionTags)
             .SingleOrDefaultAsync(x => x.Id == id);
 
         if (quiz is null)
@@ -42,6 +54,10 @@ public sealed class FinalQuestionEditorModel(
         {
             Id = quiz.Id,
             QuizId = quiz.Id,
+            Tags = quiz.FinalQuestionTags
+                .OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase)
+                .Select(x => x.Name)
+                .ToList(),
             DescriptionBlocks = quiz.FinalDescriptionBlocks
                 .OrderBy(x => x.SortOrder)
                 .Select(x => CreateInputBlock(
@@ -93,6 +109,7 @@ public sealed class FinalQuestionEditorModel(
         Input.DescriptionBlocks ??= [];
         Input.QuestionBlocks ??= [];
         Input.AnswerBlocks ??= [];
+        Input.Tags = NormalizeTags(Input.Tags);
         ApplyDescriptionStoredHandlers(Input.DescriptionBlocks);
 
         if (!await db.Quizzes.AsNoTracking().AnyAsync(
@@ -117,6 +134,13 @@ public sealed class FinalQuestionEditorModel(
                 localizer["AnswerBlocksRequired"]);
         }
 
+        if (Input.Tags.Any(tag => tag.Length > 100))
+        {
+            ModelState.AddModelError(
+                $"{nameof(Input)}.{nameof(Input.Tags)}",
+                localizer["QuestionTags_MaxLength"]);
+        }
+
         if (!ModelState.IsValid)
         {
             return Page();
@@ -126,6 +150,7 @@ public sealed class FinalQuestionEditorModel(
             .Include(x => x.FinalDescriptionBlocks)
             .Include(x => x.FinalQuestionBlocks)
             .Include(x => x.FinalAnswerBlocks)
+            .Include(x => x.FinalQuestionTags)
             .SingleOrDefaultAsync(x => x.Id == Input.Id);
 
         if (quiz is null)
@@ -149,6 +174,7 @@ public sealed class FinalQuestionEditorModel(
             return Page();
         }
 
+        SynchronizeTags(quiz, Input.Tags);
         quiz.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
         TempData["SuccessMessage"] = localizer["Message_FinalQuestionSaved"].Value;
@@ -299,6 +325,63 @@ public sealed class FinalQuestionEditorModel(
             : File(block.FileData, block.FileContentType, block.FileName);
     }
 
+    private static List<string> NormalizeTags(IEnumerable<string>? tags)
+    {
+        var result = new List<string>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var value in tags ?? [])
+        {
+            var tag = value?.Trim();
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                continue;
+            }
+
+            var normalized = NormalizeTagName(tag);
+            if (seen.Add(normalized))
+            {
+                result.Add(tag);
+            }
+        }
+
+        return result;
+    }
+
+    private static string NormalizeTagName(string tag) =>
+        tag.Trim().ToUpperInvariant();
+
+    private static void SynchronizeTags(
+        Quiz quiz,
+        IReadOnlyCollection<string> tags)
+    {
+        var desired = tags.ToDictionary(
+            NormalizeTagName,
+            tag => tag,
+            StringComparer.Ordinal);
+        foreach (var existing in quiz.FinalQuestionTags.ToArray())
+        {
+            if (!desired.ContainsKey(existing.NormalizedName))
+            {
+                quiz.FinalQuestionTags.Remove(existing);
+            }
+        }
+
+        var existingNames = quiz.FinalQuestionTags
+            .Select(tag => tag.NormalizedName)
+            .ToHashSet(StringComparer.Ordinal);
+        foreach (var pair in desired)
+        {
+            if (existingNames.Add(pair.Key))
+            {
+                quiz.FinalQuestionTags.Add(new FinalQuestionTag
+                {
+                    Name = pair.Value,
+                    NormalizedName = pair.Key
+                });
+            }
+        }
+    }
+
     private static void ApplyDescriptionStoredHandlers(
         IEnumerable<ContentBlockInputModel> blocks)
     {
@@ -313,6 +396,7 @@ public sealed class FinalQuestionEditorModel(
     {
         public int Id { get; set; }
         public int QuizId { get; set; }
+        public List<string> Tags { get; set; } = [];
 
         [Display(Name = "Label_SpecialQuestion")]
         public bool IsSpecial { get; set; }

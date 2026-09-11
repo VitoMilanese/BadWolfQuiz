@@ -30,6 +30,7 @@ public sealed class QuizPackageService(QuizDbContext db)
             .Include(item => item.FinalDescriptionBlocks)
             .Include(item => item.FinalQuestionBlocks)
             .Include(item => item.FinalAnswerBlocks)
+            .Include(item => item.FinalQuestionTags)
             .Include(item => item.Rounds).ThenInclude(round => round.Rows)
             .Include(item => item.Rounds).ThenInclude(round => round.DescriptionBlocks)
             .Include(item => item.Rounds).ThenInclude(round => round.Categories)
@@ -123,7 +124,8 @@ public sealed class QuizPackageService(QuizDbContext db)
                 quiz.FinalQuestionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                 quiz.FinalAnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                 quiz.FinalDescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
-                quiz.Tags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray());
+                quiz.Tags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray(),
+                quiz.FinalQuestionTags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray());
 
                 var manifestEntry = archive.CreateEntry("manifest.json", CompressionLevel.Optimal);
                 await using var manifestStream = manifestEntry.Open();
@@ -194,6 +196,15 @@ public sealed class QuizPackageService(QuizDbContext db)
         {
             var name = tag.Trim();
             quiz.Tags.Add(new QuizTag
+            {
+                Name = name,
+                NormalizedName = name.ToUpperInvariant()
+            });
+        }
+        foreach (var tag in manifest.FinalQuestionTags ?? [])
+        {
+            var name = tag.Trim();
+            quiz.FinalQuestionTags.Add(new FinalQuestionTag
             {
                 Name = name,
                 NormalizedName = name.ToUpperInvariant()
@@ -394,6 +405,13 @@ public sealed class QuizPackageService(QuizDbContext db)
                 .Select(tag => tag.Trim().ToUpperInvariant())
                 .Distinct(StringComparer.Ordinal)
                 .Count() != package.Tags.Length ||
+            package.FinalQuestionTags is { Length: > 30 } ||
+            package.FinalQuestionTags?.Any(tag =>
+                string.IsNullOrWhiteSpace(tag) || tag.Trim().Length > 100) == true ||
+            package.FinalQuestionTags is not null && package.FinalQuestionTags
+                .Select(tag => tag.Trim().ToUpperInvariant())
+                .Distinct(StringComparer.Ordinal)
+                .Count() != package.FinalQuestionTags.Length ||
             package.FinalQuestionBlocks is null || package.FinalAnswerBlocks is null ||
             package.Rounds.Length is < 1 or > 100)
         {
@@ -496,7 +514,8 @@ public sealed class QuizPackageService(QuizDbContext db)
     private sealed record PackageData(
         int FormatVersion, string Title, string? Description, RoundData[] Rounds,
         BlockData[] FinalQuestionBlocks, BlockData[] FinalAnswerBlocks,
-        BlockData[]? FinalDescriptionBlocks = null, string[]? Tags = null);
+        BlockData[]? FinalDescriptionBlocks = null, string[]? Tags = null,
+        string[]? FinalQuestionTags = null);
     private sealed record RoundData(
         string Title, int SortOrder, int DefaultTimeLimitSeconds,
         BuzzActivationMode DefaultBuzzMode, bool UseRandomWagerQuestions,

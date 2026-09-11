@@ -18,7 +18,12 @@ internal static class QuestionTagSuggestionQuery
             normalizedSearchText = normalizedSearchText[..100];
         }
 
-        var query = db.QuizQuestionTags.AsNoTracking();
+        var query = db.QuizQuestionTags
+            .AsNoTracking()
+            .Select(tag => new { tag.Name, tag.NormalizedName })
+            .Concat(db.FinalQuestionTags
+                .AsNoTracking()
+                .Select(tag => new { tag.Name, tag.NormalizedName }));
         if (!string.IsNullOrWhiteSpace(normalizedSearchText))
         {
             query = query.Where(tag =>
