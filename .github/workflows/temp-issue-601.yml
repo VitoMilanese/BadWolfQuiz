@@ -72,6 +72,7 @@ jobs:
           ~/.dotnet/tools/dotnet-ef migrations add AddQuestionAnswerRewardModifiers \
             --project src/BadWolfQuiz.Web/BadWolfQuiz.Web.csproj \
             --startup-project src/BadWolfQuiz.Web/BadWolfQuiz.Web.csproj \
+            --context QuizDbContext \
             --configuration Release \
             --no-build
 
