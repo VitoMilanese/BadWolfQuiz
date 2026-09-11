@@ -68,7 +68,7 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("/js/player-achievements.js?v=1", tagHelper);
         Assert.Contains("/css/player-achievements.css?v=10", hostTagHelper);
         Assert.Contains("/js/achievement-image-trim.js?v=1", hostTagHelper);
-        Assert.Contains("/js/host-player-achievements.js?v=5", hostTagHelper);
+        Assert.Contains("/js/host-player-achievements.js?v=6", hostTagHelper);
         Assert.Contains("data-player-achievements-label", tagHelper);
         Assert.Contains("Achievements_PlayerLabel", tagHelper);
         Assert.Contains("player-achievements-dialog", tagHelper);
@@ -85,7 +85,8 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("/images/achievements/", tagHelper);
         Assert.Contains("player-achievement-image", tagHelper);
         Assert.Contains("player-achievement-state is-secret-unlocked", tagHelper);
-        Assert.Contains("player-achievement-state-icon", tagHelper);
+        Assert.Contains("player-achievement-secret-revealed", tagHelper);
+        Assert.DoesNotContain("M7 11V7a5 5 0 0 1 9.9-1", tagHelper);
         Assert.Contains("achievement.Progress", tagHelper);
         Assert.Contains("achievement.Target", tagHelper);
         Assert.Contains("LinkPlayerAccount", tagHelper);
@@ -132,8 +133,9 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("achievementSortGroup", hostScript);
         Assert.Contains("item.isUnlocked ? 0 : item.isSecret ? 2 : 1", hostScript);
         Assert.Contains("player-achievement-state is-secret-unlocked", hostScript);
-        Assert.Contains("player-achievement-state-icon", hostScript);
+        Assert.Contains("player-achievement-secret-revealed", hostScript);
         Assert.Contains("secretUnlockedStateIcon", hostScript);
+        Assert.DoesNotContain("M7 11V7a5 5 0 0 1 9.9-1", hostScript);
 
         Assert.Contains(".player-achievement-image", trimScript);
         Assert.Contains("image.naturalWidth", trimScript);
