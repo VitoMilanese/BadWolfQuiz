@@ -38,6 +38,13 @@ public sealed class PlayerAchievementUiRegressionTests
             "wwwroot",
             "js",
             "player-achievements.js"));
+        var trimScript = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "achievement-image-trim.js"));
         var ukrainian = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -49,9 +56,11 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("PlayerAchievementAssetsTagHelper", imports);
         Assert.Contains("PlayerAchievementsTagHelper", imports);
         Assert.Contains("GitHubAchievementLinkTagHelper", imports);
-        Assert.Contains("/css/player-achievements.css?v=8", tagHelper);
+        Assert.Contains("/css/player-achievements.css?v=9", tagHelper);
+        Assert.Contains("/js/achievement-image-trim.js?v=1", tagHelper);
         Assert.Contains("/js/player-achievements.js?v=1", tagHelper);
-        Assert.Contains("/css/player-achievements.css?v=8", hostTagHelper);
+        Assert.Contains("/css/player-achievements.css?v=9", hostTagHelper);
+        Assert.Contains("/js/achievement-image-trim.js?v=1", hostTagHelper);
         Assert.Contains("/js/host-player-achievements.js?v=4", hostTagHelper);
         Assert.Contains("data-player-achievements-label", tagHelper);
         Assert.Contains("Achievements_PlayerLabel", tagHelper);
@@ -79,16 +88,21 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.DoesNotContain("position: sticky", css);
         Assert.Contains(".player-achievements-grid", css);
         Assert.Contains("minmax(min(100%, 240px), 1fr)", css);
+        Assert.Contains("align-items: start", css);
+        Assert.Contains("padding: 10px 12px", css);
         Assert.Contains(".player-achievement-card-top", css);
-        Assert.Contains("margin: -18px -18px 16px", css);
+        Assert.Contains("height: 176px", css);
+        Assert.Contains("margin: -10px -12px 6px", css);
+        Assert.Contains("padding: 4px 12px", css);
         Assert.Contains("linear-gradient(", css);
         Assert.Contains(".player-achievement-image", css);
         Assert.Contains("width: 168px", css);
         Assert.Contains("height: 168px", css);
-        Assert.Contains("min-height: 168px", css);
         Assert.Contains("object-fit: contain", css);
         Assert.Contains("background: transparent", css);
         Assert.DoesNotContain(".player-achievement-card.is-unlocked .player-achievement-image", css);
+        Assert.DoesNotContain("margin: -18px -18px 16px", css);
+        Assert.DoesNotContain("padding: 24px 18px 28px", css);
         Assert.DoesNotContain("width: 64px", css);
         Assert.Contains(".player-achievement-progress", css);
         Assert.Contains(".player-achievement-card.is-new", css);
@@ -100,6 +114,18 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("dialog.showModal()", script);
         Assert.Contains("dialog.close()", script);
         Assert.Contains("playerLine.replaceChildren(opener)", script);
+
+        Assert.Contains(".player-achievement-image", trimScript);
+        Assert.Contains("image.naturalWidth", trimScript);
+        Assert.Contains("image.naturalHeight", trimScript);
+        Assert.Contains("context.getImageData", trimScript);
+        Assert.Contains("+ 3] === 0", trimScript);
+        Assert.Contains("visibleWidth", trimScript);
+        Assert.Contains("visibleHeight", trimScript);
+        Assert.Contains("artworkSize / visibleWidth", trimScript);
+        Assert.Contains("artworkSize / visibleHeight", trimScript);
+        Assert.Contains("image.dataset.alphaTrimmed = \"true\"", trimScript);
+        Assert.Contains("MutationObserver", trimScript);
 
         Assert.Contains("<value>Досягнення</value>", ukrainian);
         Assert.Contains("<value>Досягнення гравця</value>", ukrainian);
