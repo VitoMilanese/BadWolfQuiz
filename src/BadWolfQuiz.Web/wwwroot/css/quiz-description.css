@@ -156,6 +156,29 @@ body:has(.quiz-announcement-page) .topbar {
     font-size: 1.02rem;
 }
 
+.quiz-announcement-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-width: 820px;
+    margin-top: 16px;
+}
+
+.quiz-announcement-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 5px 11px;
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--panel-2) 70%, transparent);
+    color: var(--text);
+    font-size: .78rem;
+    font-weight: 750;
+    line-height: 1.15;
+    backdrop-filter: blur(10px);
+}
+
 .quiz-announcement-hero-art {
     position: relative;
     display: grid;

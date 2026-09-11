@@ -32,6 +32,16 @@
                     <span>@Localizer["QuizRating_Count", Model.Quiz.RatingCount]</span>
                 </div>
             }
+
+            @if (Model.Quiz.Tags.Count > 0)
+            {
+                <div class="quiz-announcement-tags" aria-label="@Localizer["Label_QuizTags"]">
+                    @foreach (var tag in Model.Quiz.Tags)
+                    {
+                        <span class="quiz-announcement-tag">@tag</span>
+                    }
+                </div>
+            }
         </div>
 
         <div class="quiz-announcement-hero-art" aria-hidden="true">

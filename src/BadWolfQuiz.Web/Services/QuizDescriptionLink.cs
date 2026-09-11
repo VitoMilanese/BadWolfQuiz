@@ -74,6 +74,10 @@ public static class QuizDescriptionLink
                 quiz.CreatedAtUtc,
                 quiz.Title,
                 quiz.Description,
+                quiz.Tags
+                    .OrderBy(tag => tag.Name)
+                    .Select(tag => tag.Name)
+                    .ToList(),
                 quiz.Ratings.Average(rating => (double?)rating.Score),
                 quiz.Ratings.Count))
             .SingleOrDefaultAsync(cancellationToken);
@@ -96,6 +100,7 @@ public static class QuizDescriptionLink
             candidate.Id,
             candidate.Title,
             candidate.Description,
+            candidate.Tags,
             candidate.AverageRating,
             candidate.RatingCount,
             canonicalToken);
@@ -107,6 +112,7 @@ public static class QuizDescriptionLink
         DateTime CreatedAtUtc,
         string Title,
         string? Description,
+        List<string> Tags,
         double? AverageRating,
         int RatingCount);
 }
@@ -115,6 +121,7 @@ public sealed record QuizDescriptionData(
     int Id,
     string Title,
     string? Description,
+    IReadOnlyList<string> Tags,
     double? AverageRating,
     int RatingCount,
     string Token)
