@@ -95,6 +95,7 @@ public sealed class QuizCloneOperationsTests
         Assert.Equal(3, cloneQuestion.BuzzDelaySeconds);
         Assert.True(cloneQuestion.IsSpecial);
         Assert.True(cloneQuestion.ExcludeFromRandomWagerSelection);
+        Assert.True(cloneQuestion.AllowAnswerRewardModifiers);
 
         var cloneQuestionBlock = Assert.Single(cloneQuestion.QuestionBlocks);
         Assert.NotEqual(sourceQuestionBlockId, cloneQuestionBlock.Id);
@@ -256,7 +257,8 @@ public sealed class QuizCloneOperationsTests
             BuzzDelaySeconds = 3,
             IsSpecial = true,
             PresentationType = QuestionPresentationType.Standard,
-            ExcludeFromRandomWagerSelection = true
+            ExcludeFromRandomWagerSelection = true,
+            AllowAnswerRewardModifiers = true
         };
         question.QuestionBlocks.Add(new QuestionContentBlock
         {

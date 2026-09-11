@@ -357,6 +357,12 @@
   <data name="Hint_ExcludeFromRandomWagerSelection" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="Label_AllowAnswerRewardModifiers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Hint_AllowAnswerRewardModifiers" xml:space="preserve">
+    <value>Україна</value>
+  </data>
   <data name="Label_Created" xml:space="preserve">
     <value>Україна</value>
   </data>

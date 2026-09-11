@@ -140,6 +140,7 @@ public static class QuestionCopyOperations
                     !question.IsSpecial &&
                     question.PresentationType == default &&
                     !question.ExcludeFromRandomWagerSelection &&
+                    !question.AllowAnswerRewardModifiers &&
                     !question.Tags.Any() &&
                     !question.QuestionBlocks.Any(block =>
                         block.BlockType != ContentBlockType.Text ||
@@ -381,6 +382,7 @@ public static class QuestionCopyOperations
         !question.IsSpecial &&
         question.PresentationType == default &&
         !question.ExcludeFromRandomWagerSelection &&
+        !question.AllowAnswerRewardModifiers &&
         question.Tags.Count == 0 &&
         question.QuestionBlocks.All(IsBlankBlock) &&
         question.AnswerBlocks.All(IsBlankBlock);
@@ -410,6 +412,7 @@ public static class QuestionCopyOperations
         target.IsSpecial = source.IsSpecial;
         target.PresentationType = source.PresentationType;
         target.ExcludeFromRandomWagerSelection = source.ExcludeFromRandomWagerSelection;
+        target.AllowAnswerRewardModifiers = source.AllowAnswerRewardModifiers;
         target.UpdatedAtUtc = now;
 
         var existingQuestionBlocks = target.QuestionBlocks.ToArray();
@@ -453,6 +456,7 @@ public static class QuestionCopyOperations
             PresentationType = source.PresentationType,
             ExcludeFromRandomWagerSelection =
                 source.ExcludeFromRandomWagerSelection,
+            AllowAnswerRewardModifiers = source.AllowAnswerRewardModifiers,
             UpdatedAtUtc = now
         };
 

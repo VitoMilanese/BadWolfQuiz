@@ -64,6 +64,7 @@ public sealed class QuestionCopyOperationsTests
         Assert.True(copied.IsSpecial);
         Assert.Equal(sourceQuestion.PresentationType, copied.PresentationType);
         Assert.True(copied.ExcludeFromRandomWagerSelection);
+        Assert.True(copied.AllowAnswerRewardModifiers);
 
         var copiedBlock = Assert.Single(copied.QuestionBlocks);
         Assert.NotEqual(sourceQuestionBlockId, copiedBlock.Id);
@@ -296,7 +297,8 @@ public sealed class QuestionCopyOperationsTests
             BuzzModeOverride = BuzzActivationMode.AfterMedia,
             BuzzDelaySeconds = 3,
             IsSpecial = true,
-            ExcludeFromRandomWagerSelection = true
+            ExcludeFromRandomWagerSelection = true,
+            AllowAnswerRewardModifiers = true
         };
         question.QuestionBlocks.Add(new QuestionContentBlock
         {

@@ -130,7 +130,8 @@ public sealed class DeferredGameMediaStore(
                     MaterializeBlock(block, DeferredGameMediaRole.Answer)),
                 question.PresentationType,
                 question.BuzzerMode,
-                question.BuzzDelaySeconds)),
+                question.BuzzDelaySeconds,
+                question.AllowAnswerRewardModifiers)),
             round.UseRandomWagerQuestions,
             round.RandomWagerQuestionCount,
             round.DescriptionBlocks.Select(block =>

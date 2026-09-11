@@ -112,7 +112,8 @@ public sealed class QuizSnapshotFactory
                 CreateContentBlock(block, copyFileData)),
             presentationType,
             buzzerMode,
-            Math.Max(0, question.BuzzDelaySeconds));
+            Math.Max(0, question.BuzzDelaySeconds),
+                        question.AllowAnswerRewardModifiers);
     }
 
     private static QuestionBuzzerMode ResolveBuzzerMode(

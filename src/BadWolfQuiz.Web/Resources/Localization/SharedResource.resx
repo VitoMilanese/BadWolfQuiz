@@ -357,6 +357,12 @@
   <data name="Hint_ExcludeFromRandomWagerSelection" xml:space="preserve">
     <value>This question will never be chosen as a random wager question.</value>
   </data>
+  <data name="Label_AllowAnswerRewardModifiers" xml:space="preserve">
+    <value>Allow x2 and 1/2 answer scoring</value>
+  </data>
+  <data name="Hint_AllowAnswerRewardModifiers" xml:space="preserve">
+    <value>The host can mark a correct answer for double or half of the normal reward.</value>
+  </data>
   <data name="Label_Created" xml:space="preserve">
     <value>Created</value>
   </data>

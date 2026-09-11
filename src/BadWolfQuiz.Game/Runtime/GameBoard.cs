@@ -67,7 +67,8 @@ public sealed class GameBoard
                 isSpecial,
                 presentationType,
                 question.QuestionBlocks,
-                question.AnswerBlocks);
+                question.AnswerBlocks,
+                question.AllowAnswerRewardModifiers);
         });
     }
 
@@ -127,7 +128,8 @@ public sealed class RuntimeQuestion
         bool isSpecial,
         QuestionPresentationType presentationType,
         IReadOnlyList<ContentBlockSnapshot> questionBlocks,
-        IReadOnlyList<ContentBlockSnapshot> answerBlocks)
+        IReadOnlyList<ContentBlockSnapshot> answerBlocks,
+        bool allowAnswerRewardModifiers = false)
     {
         SourceRoundId = sourceRoundId;
         SourceQuestionId = sourceQuestionId;
@@ -137,6 +139,7 @@ public sealed class RuntimeQuestion
         Points = points;
         IsSpecial = isSpecial;
         PresentationType = presentationType;
+        AllowAnswerRewardModifiers = allowAnswerRewardModifiers;
         RevealedClueCount = presentationType == QuestionPresentationType.FourClues ? 2 : 0;
         QuestionBlocks = questionBlocks;
         AnswerBlocks = answerBlocks;
@@ -169,6 +172,8 @@ public sealed class RuntimeQuestion
     public bool IsSpecial { get; private set; }
 
     public QuestionPresentationType PresentationType { get; }
+
+    public bool AllowAnswerRewardModifiers { get; }
 
     public bool IsAllPlayerQuestion => PresentationType is
         QuestionPresentationType.AllPlayerText or
@@ -492,6 +497,14 @@ public sealed class RuntimeQuestion
         {
             throw new GameRuleViolationException(
                 "Only the wager player can answer a wager question.");
+        }
+
+        if (isCorrect &&
+            rewardModifier != AnswerRewardModifier.Normal &&
+            !AllowAnswerRewardModifiers)
+        {
+            throw new GameRuleViolationException(
+                "Answer reward modifiers are not enabled for this question.");
         }
 
         var value = IsSpecial

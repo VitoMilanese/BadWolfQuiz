@@ -357,6 +357,12 @@
   <data name="Hint_ExcludeFromRandomWagerSelection" xml:space="preserve">
     <value>Це питання ніколи не буде вибране як випадкове питання зі ставкою.</value>
   </data>
+  <data name="Label_AllowAnswerRewardModifiers" xml:space="preserve">
+    <value>Дозволити оцінювання відповіді x2 та 1/2</value>
+  </data>
+  <data name="Hint_AllowAnswerRewardModifiers" xml:space="preserve">
+    <value>Ведучий зможе зарахувати правильну відповідь із подвійною або половинною нагородою.</value>
+  </data>
   <data name="Label_Created" xml:space="preserve">
     <value>Створено</value>
   </data>

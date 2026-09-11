@@ -132,6 +132,7 @@ public static class QuizCloneOperations
                         IsSpecial = sourceQuestion.IsSpecial,
                         PresentationType = sourceQuestion.PresentationType,
                         ExcludeFromRandomWagerSelection = sourceQuestion.ExcludeFromRandomWagerSelection,
+                        AllowAnswerRewardModifiers = sourceQuestion.AllowAnswerRewardModifiers,
                         UpdatedAtUtc = now
                     };
 
