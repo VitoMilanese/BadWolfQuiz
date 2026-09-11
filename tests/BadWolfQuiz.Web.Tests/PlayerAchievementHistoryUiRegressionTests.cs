@@ -30,6 +30,13 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("data-achievement-history-open", layout);
         Assert.Contains("BadWolfBusy.navigate(this.href)", layout);
 
+        Assert.Contains("~/css/answer-history.css", page);
+        Assert.Contains("answer-history-page player-achievement-history-page", page);
+        Assert.Contains("answer-history-hero", page);
+        Assert.Contains("answer-history-session", page);
+        Assert.Contains("answer-history-content", page);
+        Assert.Contains("answer-history-section-heading", page);
+        Assert.Contains("answer-history-question-card", page);
         Assert.Contains("History_FilterGame", page);
         Assert.Contains("History_FilterPlayers", page);
         Assert.Contains("asp-route-selectedPlayerId", page);
@@ -53,10 +60,10 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("SourceGameSessionId", model);
         Assert.Contains("definition is null", model);
 
-        Assert.Contains("width: min(1720px, calc(100% - 40px))", css);
         Assert.Contains("justify-content: center", css);
-        Assert.Contains("grid-template-columns: minmax(220px, 280px) minmax(0, 1fr)", css);
-        Assert.Contains("width: 104px", css);
+        Assert.Contains("grid-template-columns: minmax(230px, 290px) minmax(0, 1fr)", css);
+        Assert.Contains("width: 124px", css);
+        Assert.Contains("linear-gradient(90deg, var(--red-bright), var(--gold), transparent 76%)", css);
         Assert.DoesNotContain("max-height: min(68vh, 720px)", css);
         Assert.DoesNotContain("overflow: auto", css);
 
