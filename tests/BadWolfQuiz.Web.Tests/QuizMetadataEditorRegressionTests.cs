@@ -40,7 +40,9 @@ public sealed class QuizMetadataEditorRegressionTests
         Assert.Contains("editor-reset-button", markup, StringComparison.Ordinal);
         Assert.Contains("maxSuggestionResults = 8", markup, StringComparison.Ordinal);
         Assert.Contains(".slice(0, maxSuggestionResults)", markup, StringComparison.Ordinal);
-        Assert.Contains("tags.push(tagValue);\n                input.value = \"\";\n                hideSuggestions();\n                render();", markup, StringComparison.Ordinal);
+        Assert.Contains("for (const tagValue of splitTagValues(value))", markup, StringComparison.Ordinal);
+        Assert.Contains("if (tags.length >= maxTags)", markup, StringComparison.Ordinal);
+        Assert.Contains("tags.push(tagValue);", markup, StringComparison.Ordinal);
         Assert.Contains("event.key !== \"Escape\"", markup, StringComparison.Ordinal);
         Assert.Contains("backLink.click();", markup, StringComparison.Ordinal);
         Assert.DoesNotContain("data-max-message", markup, StringComparison.Ordinal);

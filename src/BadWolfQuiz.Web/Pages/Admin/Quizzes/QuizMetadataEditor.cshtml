@@ -86,6 +86,9 @@
         background: color-mix(in srgb, var(--panel-2) 76%, transparent);
     }
     .quiz-tag-remove { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1.15rem; line-height: 1; padding: 0; }
+    .quiz-tag-action { flex: 0 0 2.75rem; width: 2.75rem; min-width: 2.75rem; max-width: 2.75rem; height: 2.75rem; min-height: 2.75rem; aspect-ratio: 1 / 1; padding: 0; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; }
+    .quiz-tag-action[hidden] { display: none; }
+    .quiz-tag-action svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .quiz-tag-entry { display: flex; gap: .5rem; align-items: flex-start; }
     .quiz-tag-combobox { position: relative; flex: 1 1 18rem; min-width: 0; }
     .quiz-tag-combobox input { width: 100%; }
@@ -137,7 +140,33 @@
             <span class="quiz-tag-counter" data-quiz-tag-counter aria-live="polite"></span>
         </div>
 
-        <div class="quiz-tag-list" data-quiz-tag-list></div>
+        <div class="quiz-tag-list" data-quiz-tag-list>
+            <button class="button button-secondary quiz-tag-action"
+                    type="button"
+                    data-copy-quiz-tags
+                    title="@Localizer["Button_Copy"]"
+                    aria-label="@Localizer["Button_Copy"]"
+                    hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+                    <path d="M15 9V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
+                </svg>
+            </button>
+            <button class="button button-secondary quiz-tag-action"
+                    type="button"
+                    data-clear-quiz-tags
+                    title="@Localizer["Button_Delete"]"
+                    aria-label="@Localizer["Button_Delete"]"
+                    hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M3 6h18"></path>
+                    <path d="M8 6V4h8v2"></path>
+                    <path d="M19 6l-1 14H6L5 6"></path>
+                    <path d="M10 11v5"></path>
+                    <path d="M14 11v5"></path>
+                </svg>
+            </button>
+        </div>
         <div data-quiz-tag-fields>
             @foreach (var tag in Model.Input.Tags)
             {
@@ -151,7 +180,6 @@
                  data-suggestions-url="@Url.Page("QuizMetadataEditor", "TagSuggestions", new { id = Model.Input.Id })">
                 <input id="quiz-tag-input"
                        type="text"
-                       maxlength="100"
                        placeholder="@Localizer["Placeholder_QuizTag"]"
                        autocomplete="off"
                        role="combobox"
@@ -205,6 +233,8 @@
         const list = editor.querySelector("[data-quiz-tag-list]");
         const fields = editor.querySelector("[data-quiz-tag-fields]");
         const addButton = editor.querySelector("[data-add-quiz-tag]");
+        const copyButton = editor.querySelector("[data-copy-quiz-tags]");
+        const clearButton = editor.querySelector("[data-clear-quiz-tags]");
         const combobox = editor.querySelector("[data-quiz-tag-combobox]");
         const suggestionBox = editor.querySelector("[data-quiz-tag-suggestions]");
         const counter = editor.querySelector("[data-quiz-tag-counter]");
@@ -308,8 +338,55 @@
             suggestionTimer = setTimeout(loadSuggestions, 150);
         };
 
+        const copyTags = async () => {
+            const text = tags.join("; ");
+            if (!text) return;
+
+            if (navigator.clipboard?.writeText) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return;
+                } catch {
+                    // Fall through to the legacy copy path.
+                }
+            }
+
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand("copy");
+            } finally {
+                textarea.remove();
+            }
+        };
+
+        const clearTags = () => {
+            if (!tags.length) return;
+            tags = [];
+            input.value = "";
+            hideSuggestions();
+            render();
+            if (!input.disabled) {
+                input.focus();
+                loadSuggestions();
+            }
+        };
+
         const render = () => {
             list.replaceChildren();
+            if (copyButton) {
+                copyButton.hidden = tags.length === 0;
+                list.appendChild(copyButton);
+            }
+            if (clearButton) {
+                clearButton.hidden = tags.length === 0;
+                list.appendChild(clearButton);
+            }
             fields.replaceChildren();
             tags.forEach(tag => {
                 const chip = document.createElement("span");
@@ -340,21 +417,31 @@
             updateLimitState();
         };
 
+        const splitTagValues = value => String(value ?? input.value)
+            .split(/[;,]/)
+            .map(item => item.trim())
+            .filter(Boolean);
+
         const addTag = value => {
-            if (tags.length >= maxTags) {
-                updateLimitState();
-                return;
+            let changed = false;
+            for (const tagValue of splitTagValues(value)) {
+                if (tags.length >= maxTags) {
+                    break;
+                }
+                if (tagValue.length > 100) {
+                    continue;
+                }
+                if (!tags.some(tag => key(tag) === key(tagValue))) {
+                    tags.push(tagValue);
+                    changed = true;
+                }
             }
-            const tagValue = (value ?? input.value).trim();
-            if (!tagValue || tagValue.length > 100) return;
-            if (!tags.some(tag => key(tag) === key(tagValue))) {
-                tags.push(tagValue);
-                input.value = "";
-                hideSuggestions();
+            input.value = "";
+            hideSuggestions();
+            if (changed) {
                 render();
             } else {
-                input.value = "";
-                hideSuggestions();
+                updateLimitState();
             }
             if (!input.disabled) {
                 input.focus();
@@ -362,6 +449,8 @@
             }
         };
 
+        copyButton?.addEventListener("click", copyTags);
+        clearButton?.addEventListener("click", clearTags);
         addButton.addEventListener("click", () => addTag());
         input.addEventListener("focus", loadSuggestions);
         input.addEventListener("input", scheduleSuggestions);
@@ -385,7 +474,11 @@
                 return;
             }
             if (event.key === "Escape") {
-                hideSuggestions();
+                if (!suggestionBox.hidden) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    hideSuggestions();
+                }
                 return;
             }
             if (event.key === "Enter") {

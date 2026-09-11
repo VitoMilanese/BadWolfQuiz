@@ -526,7 +526,7 @@
 
     const hasBlockingUi = () =>
         document.querySelector(
-            "dialog[open], details.action-menu[open], .language-menu.open, [role='menu']:not([hidden])") !== null;
+            "dialog[open], details.action-menu[open], .language-menu.open, [role='menu']:not([hidden]), [role='listbox']:not([hidden])") !== null;
 
     const findQuestionReviewReturnLink = () => {
         const links = document.querySelectorAll(

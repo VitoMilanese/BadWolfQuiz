@@ -48,6 +48,9 @@
     .question-tag-list { display: flex; flex-wrap: wrap; gap: .45rem; min-height: 1rem; }
     .question-tag-chip { display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .55rem; border: 1px solid var(--border-color, #777); border-radius: 999px; }
     .question-tag-remove { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1.15rem; line-height: 1; padding: 0; }
+    .question-tag-action { flex: 0 0 2.75rem; width: 2.75rem; min-width: 2.75rem; max-width: 2.75rem; height: 2.75rem; min-height: 2.75rem; aspect-ratio: 1 / 1; padding: 0; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; }
+    .question-tag-action[hidden] { display: none; }
+    .question-tag-action svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     .question-tag-entry { display: flex; gap: .5rem; align-items: flex-start; }
     .question-tag-combobox { position: relative; flex: 1 1 18rem; min-width: 0; }
     .question-tag-combobox input { width: 100%; }
@@ -64,7 +67,33 @@
 
     <section class="content-panel question-tags-setting" data-question-tags-editor>
     <label for="question-tag-input"><strong>@Localizer["Label_QuestionTags"]</strong></label>
-    <div class="question-tag-list" data-question-tag-list></div>
+    <div class="question-tag-list" data-question-tag-list>
+        <button class="button button-secondary question-tag-action"
+                type="button"
+                data-copy-question-tags
+                title="@Localizer["Button_Copy"]"
+                aria-label="@Localizer["Button_Copy"]"
+                hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <rect x="9" y="9" width="10" height="10" rx="2"></rect>
+                <path d="M15 9V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
+            </svg>
+        </button>
+        <button class="button button-secondary question-tag-action"
+                type="button"
+                data-clear-question-tags
+                title="@Localizer["Button_Delete"]"
+                aria-label="@Localizer["Button_Delete"]"
+                hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M3 6h18"></path>
+                <path d="M8 6V4h8v2"></path>
+                <path d="M19 6l-1 14H6L5 6"></path>
+                <path d="M10 11v5"></path>
+                <path d="M14 11v5"></path>
+            </svg>
+        </button>
+    </div>
     <div class="question-tag-fields" data-question-tag-fields>
         @foreach (var tag in Model.Input.Tags)
         {
@@ -75,7 +104,7 @@
         <div class="question-tag-combobox"
              data-question-tag-combobox
              data-suggestions-url="@Url.Page("FinalQuestionEditor", "TagSuggestions", new { id = Model.Input.Id })">
-            <input id="question-tag-input" type="text" maxlength="100"
+            <input id="question-tag-input" type="text"
          placeholder="@Localizer["Placeholder_QuestionTag"]"
          autocomplete="off"
          role="combobox"
@@ -161,6 +190,8 @@
         const list = editor.querySelector("[data-question-tag-list]");
         const fields = editor.querySelector("[data-question-tag-fields]");
         const addButton = editor.querySelector("[data-add-question-tag]");
+        const copyButton = editor.querySelector("[data-copy-question-tags]");
+        const clearButton = editor.querySelector("[data-clear-question-tags]");
         const combobox = editor.querySelector("[data-question-tag-combobox]");
         const suggestionBox = editor.querySelector("[data-question-tag-suggestions]");
         const suggestionsUrl = combobox?.dataset.suggestionsUrl;
@@ -268,8 +299,57 @@
             suggestionTimer = setTimeout(loadSuggestions, 150);
         };
 
+        const copyTags = async () => {
+            const text = tags.join("; ");
+            if (!text) {
+                return;
+            }
+
+            if (navigator.clipboard?.writeText) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return;
+                } catch {
+                    // Fall through to the legacy copy path.
+                }
+            }
+
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand("copy");
+            } finally {
+                textarea.remove();
+            }
+        };
+
+        const clearTags = () => {
+            if (!tags.length) {
+                return;
+            }
+            tags = [];
+            input.value = "";
+            hideSuggestions();
+            render();
+            input.focus();
+            loadSuggestions();
+        };
+
         const render = () => {
             list.replaceChildren();
+            if (copyButton) {
+                copyButton.hidden = tags.length === 0;
+                list.appendChild(copyButton);
+            }
+            if (clearButton) {
+                clearButton.hidden = tags.length === 0;
+                list.appendChild(clearButton);
+            }
             fields.replaceChildren();
             tags.forEach(tag => {
           const chip = document.createElement("span");
@@ -303,14 +383,24 @@
             });
         };
 
+        const splitTagValues = value => String(value ?? input.value)
+            .split(/[;,]/)
+            .map(item => item.trim())
+            .filter(Boolean);
+
         const addTag = value => {
-            const tagValue = (value ?? input.value).trim();
-            if (!tagValue || tagValue.length > 100) {
-          return;
+            let changed = false;
+            for (const tagValue of splitTagValues(value)) {
+                if (tagValue.length > 100) {
+                    continue;
+                }
+                if (!tags.some(tag => key(tag) === key(tagValue))) {
+                    tags.push(tagValue);
+                    changed = true;
+                }
             }
-            if (!tags.some(tag => key(tag) === key(tagValue))) {
-          tags.push(tagValue);
-          render();
+            if (changed) {
+                render();
             }
             input.value = "";
             hideSuggestions();
@@ -318,6 +408,8 @@
             loadSuggestions();
         };
 
+        copyButton?.addEventListener("click", copyTags);
+        clearButton?.addEventListener("click", clearTags);
         addButton?.addEventListener("click", () => addTag());
         input?.addEventListener("focus", loadSuggestions);
         input?.addEventListener("input", scheduleSuggestions);
@@ -340,8 +432,12 @@
           return;
             }
             if (event.key === "Escape") {
-          hideSuggestions();
-          return;
+                if (!suggestionBox.hidden) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    hideSuggestions();
+                }
+                return;
             }
             if (event.key === "Enter") {
           event.preventDefault();
