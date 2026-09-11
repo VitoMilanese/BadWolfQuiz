@@ -176,13 +176,14 @@
 .player-achievements-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    align-items: start;
     gap: 12px;
 }
 
 .player-achievement-card {
     position: relative;
     min-width: 0;
-    padding: 18px;
+    padding: 10px 12px;
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
     border-radius: 16px;
@@ -211,12 +212,13 @@
 .player-achievement-card-top {
     position: relative;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    min-height: 168px;
-    margin: -18px -18px 16px;
-    padding: 24px 18px 28px;
+    height: 176px;
+    margin: -10px -12px 6px;
+    padding: 4px 12px;
     overflow: hidden;
+    box-sizing: border-box;
     background:
         radial-gradient(
             circle at 50% 10%,
@@ -256,8 +258,8 @@
 
 .player-achievement-state {
     position: absolute;
-    top: 18px;
-    right: 18px;
+    top: 8px;
+    right: 10px;
     z-index: 1;
     display: grid;
     place-items: center;
@@ -282,8 +284,8 @@
 }
 
 .player-achievement-card > p {
-    min-height: 2.8em;
-    margin: 5px 0 10px;
+    min-height: 2.6em;
+    margin: 4px 0 6px;
     color: var(--muted);
     font-size: 0.82rem;
     line-height: 1.4;
@@ -305,7 +307,7 @@
 
 .player-achievement-card > small {
     display: block;
-    margin-top: 5px;
+    margin-top: 4px;
     color: var(--muted);
     font-variant-numeric: tabular-nums;
     text-align: right;
