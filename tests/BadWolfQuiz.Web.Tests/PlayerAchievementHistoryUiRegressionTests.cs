@@ -23,8 +23,12 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
 
         Assert.Contains("asp-page=\"/Admin/Games/PlayerAchievements\"", lobby);
         Assert.Contains("History_Open", lobby);
+        Assert.Contains("data-achievement-history-open", lobby);
+        Assert.Contains("BadWolfBusy.navigate(this.href)", lobby);
         Assert.Contains("asp-page=\"/Admin/Games/PlayerAchievements\"", layout);
         Assert.Contains("History_Open", layout);
+        Assert.Contains("data-achievement-history-open", layout);
+        Assert.Contains("BadWolfBusy.navigate(this.href)", layout);
 
         Assert.Contains("History_FilterGame", page);
         Assert.Contains("History_FilterPlayers", page);
@@ -33,6 +37,11 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("History_NoGameUnlocks", page);
         Assert.Contains("History_NoPlayerUnlocks", page);
         Assert.Contains("History_NoPlayers", page);
+        Assert.Contains("data-achievement-history-root", page);
+        Assert.Contains("data-back-url", page);
+        Assert.Contains("data-achievement-history-nav", page);
+        Assert.Contains("player-achievement-history-body", page);
+        Assert.Contains("player-achievement-history-sidebar", page);
         Assert.Contains("data-achievement-history-time", page);
         Assert.Contains("player-achievement-history.js", page);
 
@@ -44,10 +53,18 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("SourceGameSessionId", model);
         Assert.Contains("definition is null", model);
 
-        Assert.Contains("max-height: min(68vh, 720px)", css);
-        Assert.Contains("overflow: auto", css);
+        Assert.Contains("width: min(1720px, calc(100% - 40px))", css);
+        Assert.Contains("justify-content: center", css);
+        Assert.Contains("grid-template-columns: minmax(220px, 280px) minmax(0, 1fr)", css);
+        Assert.Contains("width: 104px", css);
+        Assert.DoesNotContain("max-height: min(68vh, 720px)", css);
+        Assert.DoesNotContain("overflow: auto", css);
+
         Assert.Contains("Intl.DateTimeFormat", script);
         Assert.Contains("data-achievement-history-time", script);
+        Assert.Contains("data-achievement-history-nav", script);
+        Assert.Contains("event.key !== \"Escape\"", script);
+        Assert.Contains("BadWolfBusy?.navigate", script);
     }
 
     [Theory]

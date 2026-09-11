@@ -36,7 +36,9 @@
                 <div class="action-menu-popover">
                     <a class="action-menu-item"
                        asp-page="/Admin/Games/PlayerAchievements"
-                       asp-route-id="@Model.Game.Session.Id.Value">
+                       asp-route-id="@Model.Game.Session.Id.Value"
+                       data-achievement-history-open
+                       onclick="if(window.BadWolfBusy){window.BadWolfBusy.navigate(this.href);return false;}">
                         @AchievementHistoryLocalizer["History_Open"]
                     </a>
 
