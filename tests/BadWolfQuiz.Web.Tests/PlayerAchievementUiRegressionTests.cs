@@ -43,7 +43,7 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("PlayerAchievementAssetsTagHelper", imports);
         Assert.Contains("PlayerAchievementsTagHelper", imports);
         Assert.Contains("GitHubAchievementLinkTagHelper", imports);
-        Assert.Contains("/css/player-achievements.css?v=5", tagHelper);
+        Assert.Contains("/css/player-achievements.css?v=6", tagHelper);
         Assert.Contains("/js/player-achievements.js?v=1", tagHelper);
         Assert.Contains("data-player-achievements-label", tagHelper);
         Assert.Contains("Achievements_PlayerLabel", tagHelper);
@@ -56,6 +56,8 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("Achievements_SecretTitle", tagHelper);
         Assert.Contains("Achievements_SecretDescription", tagHelper);
         Assert.Contains("lockedSecret", tagHelper);
+        Assert.Contains("/images/achievements/", tagHelper);
+        Assert.Contains("player-achievement-image", tagHelper);
         Assert.Contains("achievement.Progress", tagHelper);
         Assert.Contains("achievement.Target", tagHelper);
         Assert.Contains("LinkPlayerAccount", tagHelper);
@@ -68,6 +70,7 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("overflow: hidden", css);
         Assert.DoesNotContain("position: sticky", css);
         Assert.Contains(".player-achievements-grid", css);
+        Assert.Contains(".player-achievement-image", css);
         Assert.Contains(".player-achievement-progress", css);
         Assert.Contains(".player-achievement-card.is-new", css);
         Assert.Contains("@media (max-width: 600px)", css);

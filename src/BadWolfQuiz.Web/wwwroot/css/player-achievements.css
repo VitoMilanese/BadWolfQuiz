@@ -221,6 +221,21 @@
     line-height: 1;
 }
 
+.player-achievement-image {
+    display: block;
+    width: 64px;
+    height: 64px;
+    flex: 0 0 64px;
+    object-fit: cover;
+    border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+.player-achievement-card.is-unlocked .player-achievement-image {
+    border-color: color-mix(in srgb, var(--gold) 42%, var(--line));
+}
+
 .player-achievement-state {
     display: grid;
     place-items: center;

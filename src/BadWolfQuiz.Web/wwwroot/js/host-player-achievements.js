@@ -47,9 +47,13 @@
                 progress = `<div class="player-achievement-progress" aria-label="${current} / ${target}"><span style="width:${percentage}%"></span></div><small>${current} / ${target}</small>`;
             }
 
+            const icon = lockedSecret
+                ? '<span class="player-achievement-icon" aria-hidden="true">❔</span>'
+                : `<img class="player-achievement-image" src="/images/achievements/${encodeURIComponent(item.code)}.png" alt="" aria-hidden="true" loading="lazy" decoding="async">`;
+
             return `<article class="${classes}">
                 <div class="player-achievement-card-top">
-                    <span class="player-achievement-icon" aria-hidden="true">${escapeHtml(lockedSecret ? "❔" : item.icon)}</span>
+                    ${icon}
                     <span class="player-achievement-state" aria-hidden="true">${item.isUnlocked ? "✓" : "○"}</span>
                 </div>
                 <strong>${escapeHtml(name)}</strong>

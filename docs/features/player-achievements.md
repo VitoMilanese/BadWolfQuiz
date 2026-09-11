@@ -26,7 +26,7 @@ Direct events that need the result of the current game are tracked as pending ru
 
 ## Catalog
 
-The initial catalog in Web `1.27.0` contained 47 achievements. Web `1.29.0` expanded the catalog to 65 achievements, and Web `1.32.0` expands it again to 80. The source of truth for codes, icons, secrecy, metrics, and numeric targets is `PlayerAchievementService.Catalog`.
+The initial catalog in Web `1.27.0` contained 47 achievements. Web `1.29.0` expanded the catalog to 65 achievements, and Web `1.32.0` expands it again to 80. The source of truth for codes, secrecy, metrics, and numeric targets is `PlayerAchievementService.Catalog`.
 
 Long-term progression includes the first completed game, first correct answer, 5 and 25 completed games, 25 and 100 correct answers, first and fifth wins, a five-answer correct streak, score milestones, flawless play, recovery from a negative score, consecutive wins, and one-month / six-month / one-year participation spans. `BigGame` unlocks at a final score of at least **15,000** points; additional score milestones cover 30,000 in one game and 100,000 / 500,000 / 1,000,000 accumulated points.
 
@@ -93,6 +93,8 @@ The catalog intentionally mixes normal and secret milestones. Secrecy is a catal
 Players can open an achievement dialog that shows unlocked milestones and progress for visible locked milestones. Newly earned achievements are highlighted without interrupting active gameplay.
 
 The host lobby exposes a trophy action on each player row. It opens a host-owned achievement dialog for that specific player; the endpoint verifies ownership of the active game before returning achievement data.
+
+Achievement cards use dedicated PNG artwork from `wwwroot/images/achievements/{AchievementCode}.png` in both player and host dialogs. Locked secret achievements keep the shared question-mark placeholder until they are unlocked.
 
 Achievement cards use the shared responsive dialog layout with a fixed header and independently scrolling body so the title and close action remain visible on smaller screens.
 

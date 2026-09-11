@@ -31,7 +31,7 @@ public sealed class PlayerAchievementAssetsTagHelper : TagHelper
         }
 
         output.PostContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=5\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=6\" />" +
             "<script defer src=\"/js/player-achievements.js?v=1\"></script>");
     }
 }
@@ -185,9 +185,18 @@ public sealed class PlayerAchievementsTagHelper(
             html.Append("<article class=\"");
             html.Append(cardClasses);
             html.Append("\">");
-            html.Append("<div class=\"player-achievement-card-top\"><span class=\"player-achievement-icon\" aria-hidden=\"true\">");
-            html.Append(Encode(lockedSecret ? "❔" : achievement.Icon));
-            html.Append("</span><span class=\"player-achievement-state\" aria-hidden=\"true\">");
+            html.Append("<div class=\"player-achievement-card-top\">");
+            if (lockedSecret)
+            {
+                html.Append("<span class=\"player-achievement-icon\" aria-hidden=\"true\">❔</span>");
+            }
+            else
+            {
+                html.Append("<img class=\"player-achievement-image\" src=\"/images/achievements/");
+                html.Append(Encode(achievement.Code));
+                html.Append(".png\" alt=\"\" aria-hidden=\"true\" loading=\"lazy\" decoding=\"async\" />");
+            }
+            html.Append("<span class=\"player-achievement-state\" aria-hidden=\"true\">");
             html.Append(achievement.IsUnlocked ? "✓" : "○");
             html.Append("</span></div><strong>");
             html.Append(Encode(lockedSecret
