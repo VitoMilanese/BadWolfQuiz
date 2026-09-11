@@ -203,6 +203,10 @@
     opacity: 0.72;
 }
 
+.player-achievement-card.is-locked .player-achievement-image {
+    filter: grayscale(1);
+}
+
 .player-achievement-card.is-new {
     outline: 2px solid color-mix(in srgb, var(--gold) 80%, transparent);
     outline-offset: 2px;
@@ -275,6 +279,16 @@
 .player-achievement-card.is-unlocked .player-achievement-state {
     border-color: color-mix(in srgb, var(--gold) 72%, transparent);
     color: var(--gold);
+}
+
+.player-achievement-state-icon {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .player-achievement-card > strong {
