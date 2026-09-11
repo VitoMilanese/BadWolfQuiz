@@ -129,6 +129,33 @@ public sealed class GameHistoryStore(QuizDbContext db)
         await db.SaveChangesAsync(cancellationToken);
 
         var achievements = new PlayerAchievementService(db);
+        var peerMaximumRatingEvents = new List<PlayerMaximumRatingEventSource>();
+        foreach (var review in registration.CapturePeerRatedAllPlayerReviews())
+        {
+            foreach (var rating in review.Ratings.Where(item => item.Stars == 5))
+            {
+                var answerPlayer = runtime.AllPlayers.SingleOrDefault(player =>
+                    player.Id == rating.AnswerPlayerId);
+                if (answerPlayer is null)
+                {
+                    continue;
+                }
+
+                peerMaximumRatingEvents.Add(new PlayerMaximumRatingEventSource(
+                    PlayerAchievementRuntimeState.GetPlayerAccountId(
+                        registration,
+                        answerPlayer.Id),
+                    registration.HostId,
+                    answerPlayer.Name,
+                    review.SourceQuestionId,
+                    rating.RaterPlayerId));
+            }
+        }
+        await achievements.RecordPeerMaximumRatingEventsAsync(
+            stored.Id,
+            peerMaximumRatingEvents,
+            cancellationToken);
+
         var allAttempts = runtime.Board.Questions
             .SelectMany(question => question.AnswerAttempts)
             .ToArray();
@@ -207,10 +234,13 @@ public sealed class GameHistoryStore(QuizDbContext db)
             runtime,
             stored.Id,
             cancellationToken);
-
-        await achievements.EvaluateCompletedGameAsync(
+        await UnlockBeatPreviousWinnerAsync(
+            achievements,
+            registration,
+            runtime,
             stored.Id,
             cancellationToken);
+        await achievements.EvaluateCompletedGameAsync(stored.Id, cancellationToken);
         return true;
     }
 
@@ -282,6 +312,29 @@ public sealed class GameHistoryStore(QuizDbContext db)
                 if (lastRoundPlayer is not null && lastRoundPlayer.Score == winningScore)
                 {
                     await UnlockAsync(lastRoundPlayer, "LastRoundComebackWin");
+                }
+            }
+        }
+
+        foreach (var question in runtime.Board.Questions)
+        {
+            foreach (var attempt in question.AnswerAttempts.Where(item => item.IsCorrect))
+            {
+                var achievementCode = attempt.RewardModifier switch
+                {
+                    AnswerRewardModifier.Double => "DoubleReward",
+                    AnswerRewardModifier.Half => "HalfReward",
+                    _ => null
+                };
+                if (achievementCode is null)
+                {
+                    continue;
+                }
+
+                var player = runtime.AllPlayers.SingleOrDefault(item => item.Id == attempt.PlayerId);
+                if (player is not null)
+                {
+                    await UnlockAsync(player, achievementCode);
                 }
             }
         }
@@ -427,6 +480,113 @@ public sealed class GameHistoryStore(QuizDbContext db)
                 await UnlockAsync(player, "SilentRoundGain");
             }
         }
+    }
+
+    private async Task UnlockBeatPreviousWinnerAsync(
+        PlayerAchievementService achievements,
+        GameSessionRegistration registration,
+        BadWolfQuiz.Game.Runtime.GameSession runtime,
+        int currentGameSessionId,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(registration.HostId) || runtime.AllPlayers.Count == 0)
+        {
+            return;
+        }
+
+        var previousGameId = await db.GameSessions
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(session =>
+                session.HostId == registration.HostId &&
+                session.Status == BadWolfQuiz.Web.Models.GameSessionStatus.Finished &&
+                session.Id != currentGameSessionId &&
+                session.FinishedAtUtc != null)
+            .OrderByDescending(session => session.FinishedAtUtc)
+            .ThenByDescending(session => session.Id)
+            .Select(session => session.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (previousGameId == 0)
+        {
+            return;
+        }
+
+        var previousPlayers = await db.GamePlayers
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(player => player.GameSessionId == previousGameId)
+            .Select(player => new
+            {
+                player.Name,
+                player.TotalScore,
+                AccountId = db.PlayerGameAccountLinks
+                    .Where(link => link.GamePlayerId == player.Id)
+                    .Select(link => link.AccountId)
+                    .FirstOrDefault()
+            })
+            .ToListAsync(cancellationToken);
+        if (previousPlayers.Count == 0)
+        {
+            return;
+        }
+
+        var previousWinningScore = previousPlayers.Max(player => player.TotalScore);
+        var previousWinners = previousPlayers
+            .Where(player => player.TotalScore == previousWinningScore)
+            .ToArray();
+        var currentWinningScore = runtime.AllPlayers.Max(player => player.Score);
+        var currentPlayers = runtime.AllPlayers
+            .Select(player => new
+            {
+                Player = player,
+                AccountId = PlayerAchievementRuntimeState.GetPlayerAccountId(
+                    registration,
+                    player.Id)
+            })
+            .ToArray();
+
+        var previousWinnerLost = previousWinners.Any(previous =>
+            currentPlayers.Any(current =>
+                current.Player.Score < currentWinningScore &&
+                SameCompetitionIdentity(
+                    previous.AccountId,
+                    previous.Name,
+                    current.AccountId,
+                    current.Player.Name)));
+        if (!previousWinnerLost)
+        {
+            return;
+        }
+
+        foreach (var current in currentPlayers.Where(item =>
+                     item.Player.Score == currentWinningScore))
+        {
+            await achievements.UnlockPlayerAsync(
+                current.AccountId,
+                registration.HostId,
+                current.Player.Name,
+                "BeatPreviousWinner",
+                currentGameSessionId,
+                cancellationToken);
+        }
+    }
+
+    private static bool SameCompetitionIdentity(
+        string? firstAccountId,
+        string firstName,
+        string? secondAccountId,
+        string secondName)
+    {
+        if (!string.IsNullOrWhiteSpace(firstAccountId) &&
+            !string.IsNullOrWhiteSpace(secondAccountId))
+        {
+            return string.Equals(firstAccountId, secondAccountId, StringComparison.Ordinal);
+        }
+
+        return string.Equals(
+            PlayerAchievementService.NormalizePlayerKey(firstName),
+            PlayerAchievementService.NormalizePlayerKey(secondName),
+            StringComparison.Ordinal);
     }
 
     private static bool IsComplete(RuntimeGameSession session)

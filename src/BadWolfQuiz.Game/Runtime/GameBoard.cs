@@ -464,7 +464,8 @@ public sealed class RuntimeQuestion
         GamePlayerId playerId,
         bool isCorrect,
         DateTimeOffset judgedAtUtc,
-        int? correctAnswerValue = null)
+        int? correctAnswerValue = null,
+        AnswerRewardModifier rewardModifier = AnswerRewardModifier.Normal)
     {
         if (IsHostMultipleChoice)
         {
@@ -498,8 +499,14 @@ public sealed class RuntimeQuestion
                 "A wager question cannot be judged before its wager is accepted.")
             : correctAnswerValue ?? CorrectAnswerValue;
 
+        var appliedRewardModifier = isCorrect
+            ? rewardModifier
+            : AnswerRewardModifier.Normal;
+        var awardedValue = isCorrect
+            ? ApplyRewardModifier(value, appliedRewardModifier)
+            : value;
         var scoreDelta = isCorrect
-            ? value
+            ? awardedValue
             : IsSpecial
                 ? -value
                 : -Points;
@@ -508,7 +515,8 @@ public sealed class RuntimeQuestion
             playerId,
             isCorrect,
             scoreDelta,
-            judgedAtUtc);
+            judgedAtUtc,
+            appliedRewardModifier);
 
         _answerAttempts.Add(attempt);
 
@@ -526,6 +534,18 @@ public sealed class RuntimeQuestion
 
         return attempt;
     }
+
+    private static int ApplyRewardModifier(
+        int value,
+        AnswerRewardModifier rewardModifier) => rewardModifier switch
+    {
+        AnswerRewardModifier.Normal => value,
+        AnswerRewardModifier.Double => checked(value * 2),
+        AnswerRewardModifier.Half => Math.Max(
+            1,
+            (int)Math.Round(value / 2.0, MidpointRounding.AwayFromZero)),
+        _ => throw new GameRuleViolationException("Unknown answer reward modifier.")
+    };
 
     internal HostMultipleChoiceSelectionResult SelectHostMultipleChoiceOption(
         GamePlayerId playerId,

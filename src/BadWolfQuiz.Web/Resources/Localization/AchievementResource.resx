@@ -143,4 +143,34 @@
   <data name="TerminatorTag_Description" xml:space="preserve"><value>Answer a question about Terminator.</value></data>
   <data name="MafiaGodfatherTag_Name" xml:space="preserve"><value>Family Business</value></data>
   <data name="MafiaGodfatherTag_Description" xml:space="preserve"><value>Answer a question about the Mafia.</value></data>
+  <data name="StarTrekTag_Name" xml:space="preserve"><value>Live Long and Prosper</value></data>
+  <data name="StarTrekTag_Description" xml:space="preserve"><value>Correctly answer a question tagged Star Trek.</value></data>
+  <data name="Anime25_Name" xml:space="preserve"><value>Anime</value></data>
+  <data name="Anime25_Description" xml:space="preserve"><value>Correctly answer 25 questions tagged anime.</value></data>
+  <data name="CounterStrike25_Name" xml:space="preserve"><value>Counter-Strike</value></data>
+  <data name="CounterStrike25_Description" xml:space="preserve"><value>Correctly answer 25 questions tagged Counter-Strike.</value></data>
+  <data name="Dota25_Name" xml:space="preserve"><value>Dota 2</value></data>
+  <data name="Dota25_Description" xml:space="preserve"><value>Correctly answer 25 questions tagged Dota or Dota 2.</value></data>
+  <data name="Ukraine25_Name" xml:space="preserve"><value>Ukraine</value></data>
+  <data name="Ukraine25_Description" xml:space="preserve"><value>Correctly answer 25 questions tagged Ukraine.</value></data>
+  <data name="DoubleReward_Name" xml:space="preserve"><value>Double Reward</value></data>
+  <data name="DoubleReward_Description" xml:space="preserve"><value>Receive a x2 reward for a correct answer.</value></data>
+  <data name="HalfReward_Name" xml:space="preserve"><value>Half Reward</value></data>
+  <data name="HalfReward_Description" xml:space="preserve"><value>Receive only half of the normal reward for a correct answer.</value></data>
+  <data name="TwoWinsInRow_Name" xml:space="preserve"><value>Back-to-Back</value></data>
+  <data name="TwoWinsInRow_Description" xml:space="preserve"><value>Win two completed games in a row.</value></data>
+  <data name="BeatPreviousWinner_Name" xml:space="preserve"><value>New Champion</value></data>
+  <data name="BeatPreviousWinner_Description" xml:space="preserve"><value>Win a game in which a winner of the previous game also played and did not win.</value></data>
+  <data name="Geography25_Name" xml:space="preserve"><value>Geography</value></data>
+  <data name="Geography25_Description" xml:space="preserve"><value>Correctly answer 25 questions tagged geography.</value></data>
+  <data name="History25_Name" xml:space="preserve"><value>History</value></data>
+  <data name="History25_Description" xml:space="preserve"><value>Correctly answer 25 questions tagged history.</value></data>
+  <data name="PeerMaxRatings10_Name" xml:space="preserve"><value>Five Stars</value></data>
+  <data name="PeerMaxRatings10_Description" xml:space="preserve"><value>Receive the maximum 5-star rating from another player 10 times in peer-rated questions.</value></data>
+  <data name="PlayOneMonth_Name" xml:space="preserve"><value>One Month</value></data>
+  <data name="PlayOneMonth_Description" xml:space="preserve"><value>Keep playing Bad Wolf for at least one full month.</value></data>
+  <data name="PlaySixMonths_Name" xml:space="preserve"><value>Six Months</value></data>
+  <data name="PlaySixMonths_Description" xml:space="preserve"><value>Keep playing Bad Wolf for at least six full months.</value></data>
+  <data name="PlayOneYear_Name" xml:space="preserve"><value>One Year</value></data>
+  <data name="PlayOneYear_Description" xml:space="preserve"><value>Keep playing Bad Wolf for at least one full year.</value></data>
 </root>

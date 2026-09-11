@@ -19,30 +19,55 @@ Unlock conditions are evaluated from server-owned game state and persisted histo
 
 Two kinds of conditions are used:
 
-- historical metrics such as completed games, correct answers, wins, streaks, best final score, accumulated score, and flawless-answer streaks;
-- direct server-observed events such as all-in wagers, first question selection, buzzer races, anonymous shared wagers, avatar/webcam actions, account/community actions, disconnect/rejoin flows, and other unusual gameplay situations.
+- historical metrics such as completed games, correct answers, wins, streaks, best final score, accumulated score, peer-rating progress, and long-term participation;
+- direct server-observed events such as all-in wagers, first question selection, buzzer races, reward modifiers, anonymous shared wagers, avatar/webcam actions, account/community actions, disconnect/rejoin flows, and other unusual gameplay situations.
 
 Direct events that need the result of the current game are tracked as pending runtime unlocks and persisted through the completed-game achievement evaluation.
 
-## Initial catalog
+## Catalog
 
-The initial catalog in Web `1.27.0` contained 47 achievements. Web `1.29.0` expands the catalog to 65 achievements. The source of truth for codes, icons, secrecy, metrics, and numeric targets is `PlayerAchievementService.Catalog`.
+The initial catalog in Web `1.27.0` contained 47 achievements. Web `1.29.0` expanded the catalog to 65 achievements, and Web `1.32.0` expands it again to 80. The source of truth for codes, icons, secrecy, metrics, and numeric targets is `PlayerAchievementService.Catalog`.
 
-Long-term progression includes the first completed game, first correct answer, 5 and 25 completed games, 25 and 100 correct answers, first and fifth wins, a five-answer correct streak, score milestones, flawless play, and recovery from a negative score. `BigGame` unlocks at a final score of at least **15,000** points; additional score milestones cover 30,000 in one game and 100,000 / 500,000 / 1,000,000 accumulated points.
+Long-term progression includes the first completed game, first correct answer, 5 and 25 completed games, 25 and 100 correct answers, first and fifth wins, a five-answer correct streak, score milestones, flawless play, recovery from a negative score, consecutive wins, and one-month / six-month / one-year participation spans. `BigGame` unlocks at a final score of at least **15,000** points; additional score milestones cover 30,000 in one game and 100,000 / 500,000 / 1,000,000 accumulated points.
 
-Account and community milestones include account registration, playing an owned quiz with at least two other players, playing a public quiz hosted by somebody other than its author, Minigames/AI milestones, visiting the project repository from the site, rating a quiz, changing a password, developer conversations, and contributor recognition.
+Account and community milestones include account registration, playing an owned quiz with at least two other players, playing a public quiz hosted by somebody other than its author, Minigames/AI milestones, visiting the project repository from the site, rating a quiz, changing a password, developer conversations, contributor recognition, and receiving maximum peer ratings on answer-review questions.
 
-Gameplay-specific milestones include first question selection, opening the second round, last-to-first comeback wins, final-question reversals, category coverage, silent rounds, all-in outcomes, anonymous shared wagers, Four Clues performance, close buzzer races, kick/rejoin behavior, late joining, avatar changes, and webcam use.
+Gameplay-specific milestones include first question selection, opening the second round, last-to-first comeback wins, final-question reversals, category coverage, silent rounds, all-in outcomes, explicit double/half answer rewards, defeating the immediately previous game's winner, anonymous shared wagers, Four Clues performance, close buzzer races, kick/rejoin behavior, late joining, avatar changes, and webcam use.
 
 ### Topic and media milestones
 
-Web `1.29.0` adds 18 topic and media achievements, expanding the catalog to 65. All 18 advance only for correct answers; wrong, unresolved, or otherwise non-correct results add no progress.
+Web `1.29.0` added 18 topic and media achievements. Web `1.32.0` adds seven more tag-driven milestones while preserving the same correct-answer-only progression rule: Star Trek, anime, Counter-Strike, Dota, Ukraine, geography, and history.
 
-Twelve 25-answer topic milestones use normalized question tags: films, series, cartoons, animated series, games, Harry Potter, Star Wars, fantasy, science fiction, animals, horror, and music. Tag matching trims surrounding whitespace and is case-insensitive. A correct answer advances a given topic at most once even if the question carries multiple matching tags from that topic group.
+The 25-answer topic milestones use normalized question tags. Tag matching trims surrounding whitespace and is case-insensitive. A correct answer advances a given topic at most once even if the question carries multiple matching tags from that topic group.
+
+The Web `1.32.0` aliases are:
+
+- `StarTrekTag` (secret, one correct answer): `Зоряний Шлях`, `Star Trek`;
+- `Anime25`: `аніме`, `anime`;
+- `CounterStrike25`: `кс`, `cs`, `counter strike`;
+- `Dota25`: `dota`, `dota2`;
+- `Ukraine25`: `Україна`, `Ukraine`;
+- `Geography25`: `географія`, `geography`;
+- `History25`: `історія`, `history`.
+
+Earlier 25-answer topic milestones cover films, series, cartoons, animated series, games, Harry Potter, Star Wars, fantasy, science fiction, animals, horror, and music.
 
 `AudioQuestions25` / **На слух** requires 25 correct answers to questions containing an `Audio` content block. `VideoQuestions25` / **На екрані** requires 25 correct answers to questions containing either a `Video` or `YouTube` content block. These media milestones are derived from question content blocks and do not depend on media-related tags.
 
-Four secret milestones unlock after one correct answer in their topic group: Doctor Who, Robocop, Terminator, and Mafia / The Godfather.
+The one-answer secret topic milestones include Doctor Who, Robocop, Terminator, Mafia / The Godfather, and Star Trek.
+
+### Reward, competition, rating, and longevity milestones
+
+Web `1.32.0` adds milestone types that are not derived from ordinary answer totals:
+
+- `DoubleReward`: unlocks from a correct answer explicitly judged with the `Double` reward modifier.
+- `HalfReward`: unlocks from a correct answer explicitly judged with the `Half` reward modifier.
+- `TwoWinsInRow`: unlocks when the player's best consecutive finished-game win streak reaches two.
+- `BeatPreviousWinner`: unlocks for the current winner when a winner of the immediately previous finished game for the same host also participated in the current game and lost.
+- `PeerMaxRatings10`: unlocks after receiving ten maximum five-star ratings from other players on peer-rated answer-review questions. Progress events are de-duplicated per game/question/rater and are adopted together with nickname history when an account becomes available.
+- `PlayOneMonth`, `PlaySixMonths`, and `PlayOneYear`: use completed calendar months between the player's first and latest finished-game appearances, with targets of 1, 6, and 12 months.
+
+Double/half reward achievements use the explicit runtime `AnswerRewardModifier` stored on the authoritative answer attempt. They are not inferred from raw point values, which avoids false positives from wagers, Four Clues, multiple-choice reward scaling, or other scoring mechanics.
 
 ### Special gameplay rules
 
@@ -79,4 +104,4 @@ Achievement-specific regression coverage verifies that every catalog achievement
 
 ## Regression coverage
 
-The achievement test suite covers catalog composition, the 15,000-point Big Game threshold, history metrics, duplicate prevention, account/nickname adoption, current-game highlighting, persistence/recovery, gameplay-specific direct unlocks, topic-tag normalization, correct-answer-only topic/media progress, Audio/Video/YouTube block detection, migration compatibility, player/host UI wiring, and localization-resource completeness.
+The achievement test suite covers catalog composition and ordering, the 15,000-point Big Game threshold, history metrics, duplicate prevention, account/nickname adoption, current-game highlighting, persistence/recovery, gameplay-specific direct unlocks, explicit double/half reward modifiers, consecutive wins, previous-winner competition, peer five-star rating progress, completed playing months, topic-tag normalization, correct-answer-only topic/media progress, Audio/Video/YouTube block detection, migration compatibility, player/host UI wiring, and localization-resource completeness.
