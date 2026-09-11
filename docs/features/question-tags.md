@@ -8,9 +8,15 @@ Regular questions and the Final Question both support question-level tags. Final
 
 ## Editing tags
 
-The regular Question Editor and Final Question Editor use the same tag-combobox interaction. Hosts can add custom text or select an existing suggestion from the autocomplete dropdown below the tag input. Selected tags are rendered as removable chips, and the combobox supports the same keyboard navigation and add/remove behavior in both editors.
+The regular Question Editor and Final Question Editor use the same tag-combobox interaction. Hosts can add custom text or select an existing suggestion from the autocomplete dropdown below the tag input. Selected tags are rendered as removable chips, and the combobox supports the same keyboard navigation and add/remove behavior in both editors. The quiz metadata editor uses the same bulk tag-authoring controls for quiz-level tags.
+
+When at least one tag is selected, the tag list starts with square icon-only Copy and Delete-all actions. Copy writes all current tags to the clipboard as a semicolon-separated string. Delete-all clears the current tag selection in one action.
+
+The tag input accepts either a single tag or multiple tags separated by commas and/or semicolons. Bulk input is split, trimmed, and added in order as individual tags. Blank values and case-insensitive duplicates are ignored. Quiz-level bulk input still honors the existing 20-tag maximum and stops adding values once the limit is reached; regular and final questions keep their existing behavior without a separate tag-count limit.
 
 Tag names are trimmed before saving. Blank values are ignored, tag names are limited to 100 characters, and duplicate tags on the same question are prevented case-insensitively. Removing a tag from either editor removes the corresponding question/tag association when that editor is saved.
+
+When the autocomplete listbox is open, Escape closes only that dropdown. The surrounding editor stays open; a later Escape, after the dropdown is closed, keeps the normal editor Back behavior. The global capture-phase editor shortcut handler treats a visible listbox as blocking UI so it cannot navigate away before the combobox handles the key.
 
 ## Suggestions
 
@@ -39,3 +45,5 @@ The Final Question Editor keeps its existing content-block save behavior while l
 Question tags were introduced for regular questions in BadWolfQuiz Web `1.28.0`.
 
 BadWolfQuiz Web `1.36.0` extends the same question-tag authoring experience to the Final Question Editor, including shared suggestions, persistence, deletion cleanup, quiz cloning, and `.bwquiz` import/export support.
+
+BadWolfQuiz Web `1.37.0` improves all three tag-authoring surfaces with square Copy/Delete-all actions and comma/semicolon bulk input while preserving existing validation and quiz-level limits. It also fixes Escape handling so closing an open tag dropdown does not navigate away from the regular or Final Question Editor.
