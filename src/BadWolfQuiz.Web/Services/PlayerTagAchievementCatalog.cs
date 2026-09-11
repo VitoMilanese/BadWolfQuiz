@@ -50,7 +50,14 @@ public static class PlayerTagAchievementCatalog
             ["DoctorWhoTag"] = Tags("Доктор Хто", "Doctor Who"),
             ["RobocopTag"] = Tags("Робокоп", "Robocop"),
             ["TerminatorTag"] = Tags("Термінатор", "Terminator"),
-            ["MafiaGodfatherTag"] = Tags("Мафія", "Mafia", "Хрещений Батько", "Godfather")
+            ["MafiaGodfatherTag"] = Tags("Мафія", "Mafia", "Хрещений Батько", "Godfather"),
+            ["StarTrekTag"] = Tags("Зоряний Шлях", "Star Trek"),
+            ["Anime25"] = Tags("аніме", "anime"),
+            ["CounterStrike25"] = Tags("кс", "cs", "counter strike"),
+            ["Dota25"] = Tags("dota", "dota2"),
+            ["Ukraine25"] = Tags("Україна", "Ukraine"),
+            ["Geography25"] = Tags("географія", "geography"),
+            ["History25"] = Tags("історія", "history")
         };
 
     public static IReadOnlyDictionary<string, int> CountAnswers(

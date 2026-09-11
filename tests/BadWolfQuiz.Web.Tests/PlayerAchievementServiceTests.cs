@@ -9,9 +9,9 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class PlayerAchievementServiceTests
 {
     [Fact]
-    public void Catalog_contains_all_sixty_five_achievements()
+    public void Catalog_contains_all_eighty_achievements()
     {
-        Assert.Equal(65, PlayerAchievementService.Catalog.Count);
+        Assert.Equal(80, PlayerAchievementService.Catalog.Count);
 
         var expectedCodes = new[]
         {

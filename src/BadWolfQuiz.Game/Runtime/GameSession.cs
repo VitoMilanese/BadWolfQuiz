@@ -609,7 +609,8 @@ public sealed class GameSession
     public QuestionAnswerAttempt JudgeQuestionAnswer(
         int sourceQuestionId,
         GamePlayerId playerId,
-        bool isCorrect)
+        bool isCorrect,
+        AnswerRewardModifier rewardModifier = AnswerRewardModifier.Normal)
     {
         EnsureRunning();
 
@@ -625,7 +626,8 @@ public sealed class GameSession
             player.Id,
             isCorrect,
             _timeProvider.GetUtcNow(),
-            correctAnswerValue);
+            correctAnswerValue,
+            rewardModifier);
 
         player.ApplyScore(attempt.ScoreDelta);
         AnswerTimer.Stop();

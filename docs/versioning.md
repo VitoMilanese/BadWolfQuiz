@@ -76,6 +76,8 @@ Web `1.30.0` is a MINOR release that adds a dedicated lightweight quiz-metadata 
 
 Web `1.31.0` is a MINOR release that adds configurable colored category columns to the host game board. Quiz authors can use Automatic, Theme, or Custom category colors with contrast-aware text; preferences persist through cloning and `.bwquiz` import/export. Hosts can enable or disable colored categories globally or per game, with immediate running-game preview and reliable cancel/reset behavior even directly after the lobby-to-game transition. This release also includes the shared custom-theme color-picker UX and avoids loading stored media blobs unnecessarily during question/category description saves. See [`docs/features/category-colors.md`](features/category-colors.md) for the full behavior.
 
+Web `1.32.0` is a MINOR release that expands persistent player achievements from 65 to 80. It adds Star Trek, anime, Counter-Strike, Dota, Ukraine, geography, and history tag milestones; explicit double/half answer-reward achievements; consecutive-win and previous-winner competition milestones; a ten-times maximum peer-rating milestone; and one-month, six-month, and one-year participation milestones. Reward achievements are driven by an explicit authoritative runtime modifier instead of inferred score deltas, while rating progress is de-duplicated and preserved across nickname-to-account history adoption. See [`docs/features/player-achievements.md`](features/player-achievements.md) for the detailed rules.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.

@@ -1,3 +1,4 @@
+using RuntimeGamePlayerId = BadWolfQuiz.Game.Runtime.GamePlayerId;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Models;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,8 @@ namespace BadWolfQuiz.Web.Services;
 
 public sealed class PlayerAchievementService(QuizDbContext db)
 {
+    private const string PeerMaximumRatingEventPrefix = "__Peer5:";
+
     public static IReadOnlyList<PlayerAchievementDefinition> Catalog { get; } =
     [
         new("FirstGame", "🐾", false, PlayerAchievementMetric.GamesPlayed, 1),
@@ -55,7 +58,22 @@ public sealed class PlayerAchievementService(QuizDbContext db)
         new("LateJoiner", "🕒", true, PlayerAchievementMetric.DirectUnlock, 1),
         new("AvatarChanged", "🎭", false, PlayerAchievementMetric.DirectUnlock, 1),
         new("WebcamEnabled", "📷", false, PlayerAchievementMetric.DirectUnlock, 1),
-        .. PlayerTagAchievementCatalog.Definitions
+        .. PlayerTagAchievementCatalog.Definitions,
+        new("StarTrekTag", "🖖", true, PlayerAchievementMetric.TaggedAnswers, 1, "StarTrekTag"),
+        new("Anime25", "🌸", false, PlayerAchievementMetric.TaggedAnswers, 25, "Anime25"),
+        new("CounterStrike25", "🎯", false, PlayerAchievementMetric.TaggedAnswers, 25, "CounterStrike25"),
+        new("Dota25", "⚔️", false, PlayerAchievementMetric.TaggedAnswers, 25, "Dota25"),
+        new("Ukraine25", "🇺🇦", false, PlayerAchievementMetric.TaggedAnswers, 25, "Ukraine25"),
+        new("DoubleReward", "2️⃣", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("HalfReward", "½", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("TwoWinsInRow", "🏆🏆", false, PlayerAchievementMetric.BestWinStreak, 2),
+        new("BeatPreviousWinner", "👑", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("Geography25", "🌍", false, PlayerAchievementMetric.TaggedAnswers, 25, "Geography25"),
+        new("History25", "📜", false, PlayerAchievementMetric.TaggedAnswers, 25, "History25"),
+        new("PeerMaxRatings10", "⭐", false, PlayerAchievementMetric.PeerMaximumRatingsReceived, 10),
+        new("PlayOneMonth", "🗓️", false, PlayerAchievementMetric.PlayingMonths, 1),
+        new("PlaySixMonths", "📆", false, PlayerAchievementMetric.PlayingMonths, 6),
+        new("PlayOneYear", "🎂", false, PlayerAchievementMetric.PlayingMonths, 12)
     ];
 
     public async Task AdoptHostNicknameHistoryAsync(
@@ -110,6 +128,32 @@ public sealed class PlayerAchievementService(QuizDbContext db)
                 GamePlayerId = playerId,
                 AccountId = accountId.Trim()
             });
+        }
+
+        var accountIdentity = PlayerAchievementIdentity.Create(accountId, null, null);
+        var fallbackEvents = await db.PlayerAchievements
+            .AsNoTracking()
+            .Where(item =>
+                item.AccountId == null &&
+                item.HostId == hostId &&
+                item.PlayerKey == playerKey &&
+                item.AchievementCode.StartsWith(PeerMaximumRatingEventPrefix))
+            .ToListAsync(cancellationToken);
+        var accountEventCodes = (await QueryForIdentity(accountIdentity)
+                .AsNoTracking()
+                .Where(item => item.AchievementCode.StartsWith(PeerMaximumRatingEventPrefix))
+                .Select(item => item.AchievementCode)
+                .ToListAsync(cancellationToken))
+            .ToHashSet(StringComparer.Ordinal);
+        foreach (var progressEvent in fallbackEvents)
+        {
+            if (accountEventCodes.Add(progressEvent.AchievementCode))
+            {
+                AddUnlock(
+                    accountIdentity,
+                    progressEvent.AchievementCode,
+                    progressEvent.SourceGameSessionId);
+            }
         }
 
         await db.SaveChangesAsync(cancellationToken);
@@ -265,6 +309,72 @@ public sealed class PlayerAchievementService(QuizDbContext db)
         return changed;
     }
 
+    public async Task<int> RecordPeerMaximumRatingEventsAsync(
+        int gameSessionId,
+        IReadOnlyCollection<PlayerMaximumRatingEventSource> events,
+        CancellationToken cancellationToken = default)
+    {
+        if (events.Count == 0)
+        {
+            return 0;
+        }
+
+        var existingRows = await db.PlayerAchievements
+            .AsNoTracking()
+            .Where(item =>
+                item.SourceGameSessionId == gameSessionId &&
+                item.AchievementCode.StartsWith(PeerMaximumRatingEventPrefix))
+            .ToListAsync(cancellationToken);
+        var existing = existingRows
+            .Select(item => $"{GetProgressIdentityKey(item)}|{item.AchievementCode}")
+            .ToHashSet(StringComparer.Ordinal);
+        var added = 0;
+
+        foreach (var progressEvent in events)
+        {
+            var eventCode = $"{PeerMaximumRatingEventPrefix}{gameSessionId:X8}:{progressEvent.SourceQuestionId:X8}:{progressEvent.RaterPlayerId.Value:N}";
+            var fallback = PlayerAchievementIdentity.Create(
+                null,
+                progressEvent.HostId,
+                progressEvent.PlayerName);
+            if (fallback.IsValid &&
+                existing.Add($"{GetProgressIdentityKey(fallback)}|{eventCode}"))
+            {
+                AddUnlock(fallback, eventCode, gameSessionId);
+                added++;
+            }
+
+            if (!string.IsNullOrWhiteSpace(progressEvent.AccountId))
+            {
+                var account = PlayerAchievementIdentity.Create(
+                    progressEvent.AccountId,
+                    null,
+                    null);
+                if (existing.Add($"{GetProgressIdentityKey(account)}|{eventCode}"))
+                {
+                    AddUnlock(account, eventCode, gameSessionId);
+                    added++;
+                }
+            }
+        }
+
+        if (added > 0)
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        return added;
+    }
+
+    private static string GetProgressIdentityKey(PlayerAchievement achievement) =>
+        achievement.AccountId is not null
+            ? $"account:{achievement.AccountId}"
+            : $"host:{achievement.HostId}:{achievement.PlayerKey}";
+
+    private static string GetProgressIdentityKey(PlayerAchievementIdentity identity) =>
+        identity.AccountId is not null
+            ? $"account:{identity.AccountId}"
+            : $"host:{identity.HostId}:{identity.PlayerKey}";
+
     private async Task<bool> UnlockAsync(
         PlayerAchievementIdentity identity,
         string achievementCode,
@@ -397,6 +507,15 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             .Where(item => string.Equals(NormalizePlayerKey(item.Name), playerKey, StringComparison.Ordinal))
             .ToArray();
         var history = await BuildHistoryForAppearancesAsync(appearances, cancellationToken);
+        var peerMaximumRatingsReceived = await db.PlayerAchievements
+            .AsNoTracking()
+            .CountAsync(item =>
+                item.AccountId == null &&
+                item.HostId == hostId &&
+                item.PlayerKey == playerKey &&
+                item.AchievementCode.StartsWith(PeerMaximumRatingEventPrefix),
+                cancellationToken);
+        history = history with { PeerMaximumRatingsReceived = peerMaximumRatingsReceived };
         if (appearances.Length == 0)
         {
             return history;
@@ -448,6 +567,13 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             .ToListAsync(cancellationToken);
 
         var history = await BuildHistoryForAppearancesAsync(appearances, cancellationToken);
+        var peerMaximumRatingsReceived = await db.PlayerAchievements
+            .AsNoTracking()
+            .CountAsync(item =>
+                item.AccountId == accountId &&
+                item.AchievementCode.StartsWith(PeerMaximumRatingEventPrefix),
+                cancellationToken);
+        history = history with { PeerMaximumRatingsReceived = peerMaximumRatingsReceived };
         var registered = await db.Hosts
             .IgnoreQueryFilters()
             .AsNoTracking()
@@ -600,6 +726,20 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             .ToDictionary(group => group.Key, group => group.Max(item => item.FinalScore));
         var wins = playersByGame.Count(player =>
             maxScoreByGame.TryGetValue(player.GameSessionId, out var maximum) && player.FinalScore == maximum);
+        var bestWinStreak = 0;
+        var currentWinStreak = 0;
+        foreach (var player in playersByGame
+                     .OrderBy(item => item.FinishedAtUtc)
+                     .ThenBy(item => item.GameSessionId))
+        {
+            var won = maxScoreByGame.TryGetValue(player.GameSessionId, out var maximum) &&
+                player.FinalScore == maximum;
+            currentWinStreak = won ? currentWinStreak + 1 : 0;
+            bestWinStreak = Math.Max(bestWinStreak, currentWinStreak);
+        }
+        var firstPlayedAtUtc = playersByGame.Min(player => player.FinishedAtUtc);
+        var lastPlayedAtUtc = playersByGame.Max(player => player.FinishedAtUtc);
+        var playingMonths = CalculateCompletedMonths(firstPlayedAtUtc, lastPlayedAtUtc);
         var correctAnswers = answers.Count(answer => answer.IsCorrect == true);
         var bestFinalScore = playersByGame.Max(player => player.FinalScore);
         var totalScore = playersByGame.Sum(player => player.FinalScore);
@@ -654,7 +794,9 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             TotalScore: totalScore,
             TaggedAnswers: PlayerTagAchievementCatalog.CountAnswers(answers),
             AudioQuestionAnswers: answers.Count(answer => answer.IsCorrect == true && answer.HasAudioBlock),
-            VideoQuestionAnswers: answers.Count(answer => answer.IsCorrect == true && answer.HasVideoBlock));
+            VideoQuestionAnswers: answers.Count(answer => answer.IsCorrect == true && answer.HasVideoBlock),
+            BestWinStreak: bestWinStreak,
+            PlayingMonths: playingMonths);
     }
 
     public static IReadOnlyList<PlayerAchievementProgress> BuildProgress(
@@ -720,9 +862,27 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             PlayerAchievementMetric.DeveloperReplied => history.DeveloperReplied ? 1 : 0,
             PlayerAchievementMetric.AudioQuestionAnswers => history.AudioQuestionAnswers,
             PlayerAchievementMetric.VideoQuestionAnswers => history.VideoQuestionAnswers,
+            PlayerAchievementMetric.BestWinStreak => history.BestWinStreak,
+            PlayerAchievementMetric.PeerMaximumRatingsReceived => history.PeerMaximumRatingsReceived,
+            PlayerAchievementMetric.PlayingMonths => history.PlayingMonths,
             PlayerAchievementMetric.DirectUnlock => 0,
             _ => 0
         };
+    }
+
+    private static int CalculateCompletedMonths(DateTime first, DateTime last)
+    {
+        if (last <= first)
+        {
+            return 0;
+        }
+
+        var months = ((last.Year - first.Year) * 12) + last.Month - first.Month;
+        if (months > 0 && last < first.AddMonths(months))
+        {
+            months--;
+        }
+        return Math.Max(0, months);
     }
 
     public static string NormalizePlayerKey(string? name) =>
@@ -748,6 +908,9 @@ public enum PlayerAchievementMetric
     TaggedAnswers,
     AudioQuestionAnswers,
     VideoQuestionAnswers,
+    BestWinStreak,
+    PeerMaximumRatingsReceived,
+    PlayingMonths,
     DirectUnlock
 }
 
@@ -806,7 +969,10 @@ public sealed record PlayerAchievementHistory(
     int TotalScore = 0,
     IReadOnlyDictionary<string, int>? TaggedAnswers = null,
     int AudioQuestionAnswers = 0,
-    int VideoQuestionAnswers = 0)
+    int VideoQuestionAnswers = 0,
+    int BestWinStreak = 0,
+    int PeerMaximumRatingsReceived = 0,
+    int PlayingMonths = 0)
 {
     public static PlayerAchievementHistory Empty { get; } = new(0, 0, 0, 0, 0, 0, false);
 }
@@ -834,3 +1000,10 @@ public sealed record PlayerAchievementAnswerSource(
     bool HasVideoBlock = false);
 
 public sealed record PlayerAchievementRatingSource(int GameSessionId, string RaterKey);
+
+public sealed record PlayerMaximumRatingEventSource(
+    string? AccountId,
+    string? HostId,
+    string PlayerName,
+    int SourceQuestionId,
+    RuntimeGamePlayerId RaterPlayerId);
