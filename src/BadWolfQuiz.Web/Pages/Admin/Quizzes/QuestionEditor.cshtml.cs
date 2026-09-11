@@ -214,16 +214,25 @@ public sealed class QuestionEditorModel(
         }
 
         var question = await db.QuizQuestions
-            .AsSplitQuery()
-            .Include(x => x.QuestionBlocks)
-            .Include(x => x.AnswerBlocks)
             .Include(x => x.Tags)
-            .SingleOrDefaultAsync(x => x.Id == Input.Id);
+            .SingleOrDefaultAsync(
+                x => x.Id == Input.Id &&
+                    x.Category.Round.QuizId == Input.QuizId,
+                cancellationToken);
 
         if (question is null)
         {
             return NotFound();
         }
+
+        var questionBlockSnapshots = await GetQuestionBlockEditMetadataQuery(
+                db,
+                question.Id)
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
+        var answerBlockSnapshots = await GetAnswerBlockEditMetadataQuery(
+                db,
+                question.Id)
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
 
         var isAllPlayer = Input.PresentationType is
             QuestionPresentationType.AllPlayerText or
@@ -256,11 +265,31 @@ public sealed class QuestionEditorModel(
             .Select(x => x.Id!.Value)
             .ToHashSet();
 
-        var questionBlocksToDelete = question.QuestionBlocks
-            .Where(x => !submittedQuestionBlockIds.Contains(x.Id))
-            .ToList();
+        if (submittedQuestionBlockIds.Count !=
+                Input.QuestionBlocks.Count(x => x.Id.HasValue) ||
+            submittedQuestionBlockIds.Any(id =>
+                !questionBlockSnapshots.ContainsKey(id)))
+        {
+            ModelState.AddModelError(string.Empty, localizer["Error_Unexpected"]);
+            if (IsAjaxRequest())
+            {
+                return AjaxValidationError();
+            }
+            return Page();
+        }
 
-        db.RemoveRange(questionBlocksToDelete);
+        foreach (var snapshot in questionBlockSnapshots.Values
+                     .Where(x => !submittedQuestionBlockIds.Contains(x.Id)))
+        {
+            db.QuestionContentBlocks.Remove(new QuestionContentBlock
+            {
+                Id = snapshot.Id,
+                QuizQuestionId = question.Id
+            });
+        }
+
+        var persistedQuestionBlocks =
+            new List<QuestionContentBlock>(Input.QuestionBlocks.Count);
 
         foreach (var inputBlock in Input.QuestionBlocks.OrderBy(x => x.SortOrder))
         {
@@ -268,21 +297,24 @@ public sealed class QuestionEditorModel(
 
             if (inputBlock.Id.HasValue)
             {
-                entity = question.QuestionBlocks
-                    .Single(x => x.Id == inputBlock.Id.Value);
+                entity = AttachQuestionBlockForUpdate(
+                    db,
+                    question.Id,
+                    questionBlockSnapshots[inputBlock.Id.Value]);
             }
             else
             {
-                entity = new QuestionContentBlock();
-                question.QuestionBlocks.Add(entity);
+                entity = new QuestionContentBlock
+                {
+                    QuizQuestionId = question.Id
+                };
+                db.QuestionContentBlocks.Add(entity);
             }
 
             if (inputBlock.RemoveFile &&
                 inputBlock.BlockType is ContentBlockType.Image or ContentBlockType.Audio)
             {
-                entity.FileData = null;
-                entity.FileContentType = null;
-                entity.FileName = null;
+                ClearStoredFile(entity);
             }
 
             if (inputBlock.UploadedFile is not null &&
@@ -322,6 +354,7 @@ public sealed class QuestionEditorModel(
             entity.AudioOnly = inputBlock.AudioOnly;
             entity.Autoplay = inputBlock.Autoplay &&
                 inputBlock.BlockType is ContentBlockType.Audio or ContentBlockType.Video or ContentBlockType.YouTube;
+            persistedQuestionBlocks.Add(entity);
         }
 
         var submittedAnswerBlockIds = Input.AnswerBlocks
@@ -329,11 +362,31 @@ public sealed class QuestionEditorModel(
             .Select(x => x.Id!.Value)
             .ToHashSet();
 
-        var answerBlocksToDelete = question.AnswerBlocks
-            .Where(x => !submittedAnswerBlockIds.Contains(x.Id))
-            .ToList();
+        if (submittedAnswerBlockIds.Count !=
+                Input.AnswerBlocks.Count(x => x.Id.HasValue) ||
+            submittedAnswerBlockIds.Any(id =>
+                !answerBlockSnapshots.ContainsKey(id)))
+        {
+            ModelState.AddModelError(string.Empty, localizer["Error_Unexpected"]);
+            if (IsAjaxRequest())
+            {
+                return AjaxValidationError();
+            }
+            return Page();
+        }
 
-        db.RemoveRange(answerBlocksToDelete);
+        foreach (var snapshot in answerBlockSnapshots.Values
+                     .Where(x => !submittedAnswerBlockIds.Contains(x.Id)))
+        {
+            db.AnswerContentBlocks.Remove(new AnswerContentBlock
+            {
+                Id = snapshot.Id,
+                QuizQuestionId = question.Id
+            });
+        }
+
+        var persistedAnswerBlocks =
+            new List<AnswerContentBlock>(Input.AnswerBlocks.Count);
 
         foreach (var inputBlock in Input.AnswerBlocks.OrderBy(x => x.SortOrder))
         {
@@ -341,13 +394,18 @@ public sealed class QuestionEditorModel(
 
             if (inputBlock.Id.HasValue)
             {
-                entity = question.AnswerBlocks
-                    .Single(x => x.Id == inputBlock.Id.Value);
+                entity = AttachAnswerBlockForUpdate(
+                    db,
+                    question.Id,
+                    answerBlockSnapshots[inputBlock.Id.Value]);
             }
             else
             {
-                entity = new AnswerContentBlock();
-                question.AnswerBlocks.Add(entity);
+                entity = new AnswerContentBlock
+                {
+                    QuizQuestionId = question.Id
+                };
+                db.AnswerContentBlocks.Add(entity);
             }
 
             var isAnswerOptionsMarker =
@@ -359,9 +417,7 @@ public sealed class QuestionEditorModel(
                 inputBlock.RemoveFile &&
                 inputBlock.BlockType is ContentBlockType.Image or ContentBlockType.Audio)
             {
-                entity.FileData = null;
-                entity.FileContentType = null;
-                entity.FileName = null;
+                ClearStoredFile(entity);
             }
 
             if (!isAnswerOptionsMarker &&
@@ -423,40 +479,140 @@ public sealed class QuestionEditorModel(
                 inputBlock.BlockType is ContentBlockType.Audio or ContentBlockType.Video or ContentBlockType.YouTube;
             if (isAnswerOptionsMarker || isHostAnswerOption)
             {
-                entity.FileData = null;
-                entity.FileContentType = null;
-                entity.FileName = null;
+                ClearStoredFile(entity);
             }
+            persistedAnswerBlocks.Add(entity);
         }
 
         await db.SaveChangesAsync(cancellationToken);
 
         if (IsAjaxRequest())
         {
-            var questionBlocks = await db.QuestionContentBlocks
-                .AsNoTracking()
-                .Where(x => x.QuizQuestionId == question.Id)
-                .OrderBy(x => x.SortOrder)
-                .Select(x => new { id = x.Id, sortOrder = x.SortOrder })
-                .ToListAsync(cancellationToken);
-            var answerBlocks = await db.AnswerContentBlocks
-                .AsNoTracking()
-                .Where(x => x.QuizQuestionId == question.Id)
-                .OrderBy(x => x.SortOrder)
-                .Select(x => new { id = x.Id, sortOrder = x.SortOrder })
-                .ToListAsync(cancellationToken);
-
             return new JsonResult(new
             {
                 success = true,
                 message = localizer["Message_QuestionSaved"].Value,
-                questionBlocks,
-                answerBlocks
+                questionBlocks = persistedQuestionBlocks
+                    .OrderBy(x => x.SortOrder)
+                    .Select(x => new { id = x.Id, sortOrder = x.SortOrder })
+                    .ToArray(),
+                answerBlocks = persistedAnswerBlocks
+                    .OrderBy(x => x.SortOrder)
+                    .Select(x => new { id = x.Id, sortOrder = x.SortOrder })
+                    .ToArray()
             });
         }
 
         TempData["SuccessMessage"] = localizer["Message_QuestionSaved"].Value;
         return RedirectToPage(new { id = Input.Id });
+    }
+
+    internal sealed record EditableContentBlockSnapshot(
+        int Id,
+        int SortOrder,
+        ContentBlockType BlockType,
+        string? TextContent,
+        string? TopCaption,
+        string? BottomCaption,
+        string? ExternalUrl,
+        bool AudioOnly,
+        bool Autoplay);
+
+    internal static IQueryable<EditableContentBlockSnapshot>
+        GetQuestionBlockEditMetadataQuery(
+            QuizDbContext db,
+            int questionId) =>
+        db.QuestionContentBlocks
+            .AsNoTracking()
+            .Where(x => x.QuizQuestionId == questionId)
+            .Select(x => new EditableContentBlockSnapshot(
+                x.Id,
+                x.SortOrder,
+                x.BlockType,
+                x.TextContent,
+                x.TopCaption,
+                x.BottomCaption,
+                x.ExternalUrl,
+                x.AudioOnly,
+                x.Autoplay));
+
+    internal static IQueryable<EditableContentBlockSnapshot>
+        GetAnswerBlockEditMetadataQuery(
+            QuizDbContext db,
+            int questionId) =>
+        db.AnswerContentBlocks
+            .AsNoTracking()
+            .Where(x => x.QuizQuestionId == questionId)
+            .Select(x => new EditableContentBlockSnapshot(
+                x.Id,
+                x.SortOrder,
+                x.BlockType,
+                x.TextContent,
+                x.TopCaption,
+                x.BottomCaption,
+                x.ExternalUrl,
+                x.AudioOnly,
+                x.Autoplay));
+
+    internal static QuestionContentBlock AttachQuestionBlockForUpdate(
+        QuizDbContext db,
+        int questionId,
+        EditableContentBlockSnapshot snapshot)
+    {
+        var entity = new QuestionContentBlock
+        {
+            Id = snapshot.Id,
+            QuizQuestionId = questionId
+        };
+        ApplyEditableSnapshot(entity, snapshot);
+        db.QuestionContentBlocks.Attach(entity);
+        return entity;
+    }
+
+    internal static AnswerContentBlock AttachAnswerBlockForUpdate(
+        QuizDbContext db,
+        int questionId,
+        EditableContentBlockSnapshot snapshot)
+    {
+        var entity = new AnswerContentBlock
+        {
+            Id = snapshot.Id,
+            QuizQuestionId = questionId
+        };
+        ApplyEditableSnapshot(entity, snapshot);
+        db.AnswerContentBlocks.Attach(entity);
+        return entity;
+    }
+
+    private static void ApplyEditableSnapshot(
+        ContentBlockBase entity,
+        EditableContentBlockSnapshot snapshot)
+    {
+        entity.SortOrder = snapshot.SortOrder;
+        entity.BlockType = snapshot.BlockType;
+        entity.TextContent = snapshot.TextContent;
+        entity.TopCaption = snapshot.TopCaption;
+        entity.BottomCaption = snapshot.BottomCaption;
+        entity.ExternalUrl = snapshot.ExternalUrl;
+        entity.AudioOnly = snapshot.AudioOnly;
+        entity.Autoplay = snapshot.Autoplay;
+    }
+
+    private void ClearStoredFile(ContentBlockBase entity)
+    {
+        entity.FileData = null;
+        entity.FileContentType = null;
+        entity.FileName = null;
+
+        var entry = db.Entry(entity);
+        if (entry.State == EntityState.Added)
+        {
+            return;
+        }
+
+        entry.Property(nameof(ContentBlockBase.FileData)).IsModified = true;
+        entry.Property(nameof(ContentBlockBase.FileContentType)).IsModified = true;
+        entry.Property(nameof(ContentBlockBase.FileName)).IsModified = true;
     }
 
     private void ValidateAllPlayerMultipleChoiceAnswerOptions()
