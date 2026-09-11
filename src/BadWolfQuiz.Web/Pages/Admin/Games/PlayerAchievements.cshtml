@@ -1,2 +1,172 @@
 @page
 @model BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel
+@inject Microsoft.Extensions.Localization.IStringLocalizer<BadWolfQuiz.Web.Localization.PlayerAchievementHistoryResource> HistoryLocalizer
+@{
+    ViewData["Title"] = HistoryLocalizer["History_Title"];
+    var isGameMode = Model.Mode == BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.GameMode;
+    var backUrl = Url.Page("/Admin/Games/Lobby", new { id = Model.Game.Session.Id.Value });
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/answer-history.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/player-achievement-history.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/gameplay-review-fixes.css" asp-append-version="true" />
+}
+
+<section class="answer-history-page player-achievement-history-page"
+         aria-labelledby="player-achievement-history-title"
+         data-achievement-history-root
+         data-back-url="@backUrl">
+    <header class="answer-history-hero player-achievement-history-hero">
+        <div class="answer-history-hero-copy">
+            <p class="answer-history-kicker">@HistoryLocalizer["History_Eyebrow"]</p>
+            <h1 id="player-achievement-history-title">@HistoryLocalizer["History_Title"]</h1>
+            <p class="answer-history-description">@HistoryLocalizer["History_Description"]</p>
+
+            <a class="button button-secondary answer-history-back player-achievement-history-back"
+               asp-page="/Admin/Games/Lobby"
+               asp-route-id="@Model.Game.Session.Id.Value"
+               data-achievement-history-nav>
+                <span aria-hidden="true">←</span>
+                <span>@HistoryLocalizer["History_BackToGame"]</span>
+            </a>
+        </div>
+
+        <aside class="answer-history-session player-achievement-history-session"
+               aria-label="@Model.Game.Session.Quiz.Title">
+            <span class="player-achievement-history-session-label">@HistoryLocalizer["History_CurrentGame"]</span>
+            <strong>@Model.Game.Session.Quiz.Title</strong>
+            <div class="player-achievement-history-session-meta">
+                <span data-achievement-history-session-count>@HistoryLocalizer["History_EntryCount", Model.Entries.Count]</span>
+            </div>
+        </aside>
+    </header>
+
+    <main class="answer-history-content player-achievement-history-content"
+          data-achievement-history-view>
+        <section class="player-achievement-history-toolbar"
+                 aria-label="@HistoryLocalizer["History_FilterLabel"]">
+            <nav class="player-achievement-history-filters">
+                <a class="button button-secondary player-achievement-history-filter @(isGameMode ? "is-active" : null)"
+                   aria-current="@(isGameMode ? "page" : null)"
+                   asp-page="/Admin/Games/PlayerAchievements"
+                   asp-route-id="@Model.Game.Session.Id.Value"
+                   asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.GameMode"
+                   data-achievement-history-nav
+                   data-achievement-history-view-nav>
+                    @HistoryLocalizer["History_FilterGame"]
+                </a>
+                <a class="button button-secondary player-achievement-history-filter @(!isGameMode ? "is-active" : null)"
+                   aria-current="@(!isGameMode ? "page" : null)"
+                   asp-page="/Admin/Games/PlayerAchievements"
+                   asp-route-id="@Model.Game.Session.Id.Value"
+                   asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode"
+                   asp-route-selectedPlayerId="@Model.SelectedPlayerId"
+                   data-achievement-history-nav
+                   data-achievement-history-view-nav>
+                    @HistoryLocalizer["History_FilterPlayers"]
+                </a>
+            </nav>
+
+            <p class="player-achievement-history-readonly">@HistoryLocalizer["History_ReadOnly"]</p>
+        </section>
+
+        <div class="answer-history-section-heading player-achievement-history-section-heading">
+            <div>
+                <span>@HistoryLocalizer["History_Eyebrow"]</span>
+                <strong>@HistoryLocalizer[isGameMode ? "History_FilterGame" : "History_FilterPlayers"]</strong>
+            </div>
+            <b>@Model.Entries.Count.ToString("00")</b>
+        </div>
+
+        <div class="player-achievement-history-body @(isGameMode ? "is-game-mode" : "is-players-mode")">
+            @if (!isGameMode && Model.Players.Count > 0)
+            {
+                <aside class="player-achievement-history-sidebar">
+                    <span class="player-achievement-history-sidebar-title">@HistoryLocalizer["History_PlayerSelector"]</span>
+                    <div class="player-achievement-history-player-picker"
+                         aria-label="@HistoryLocalizer["History_PlayerSelector"]">
+                        @foreach (var player in Model.Players)
+                        {
+                            var isSelected = Model.SelectedPlayerId == player.Id;
+                            <a class="player-achievement-history-player @(isSelected ? "is-active" : null)"
+                               aria-current="@(isSelected ? "true" : null)"
+                               asp-page="/Admin/Games/PlayerAchievements"
+                               asp-route-id="@Model.Game.Session.Id.Value"
+                               asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode"
+                               asp-route-selectedPlayerId="@player.Id"
+                               data-achievement-history-nav
+                               data-achievement-history-view-nav>
+                                @player.Name
+                            </a>
+                        }
+                    </div>
+                </aside>
+            }
+
+            <section class="player-achievement-history-results">
+                @if (Model.Players.Count == 0)
+                {
+                    <div class="answer-history-question-card player-achievement-history-empty-card">
+                        <div class="answer-history-empty-row player-achievement-history-empty" role="status">
+                            <span aria-hidden="true">🏆</span>
+                            <p>@HistoryLocalizer["History_NoPlayers"]</p>
+                        </div>
+                    </div>
+                }
+                else if (Model.Entries.Count == 0)
+                {
+                    <div class="answer-history-question-card player-achievement-history-empty-card">
+                        <div class="answer-history-empty-row player-achievement-history-empty" role="status">
+                            <span aria-hidden="true">🏆</span>
+                            <p>@HistoryLocalizer[isGameMode ? "History_NoGameUnlocks" : "History_NoPlayerUnlocks"]</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="player-achievement-history-list">
+                        @foreach (var entry in Model.Entries)
+                        {
+                            <article class="answer-history-question-card player-achievement-history-entry"
+                                     data-achievement-code="@entry.AchievementCode"
+                                     data-player-id="@entry.PlayerId">
+                                <div class="player-achievement-history-artwork" aria-hidden="true">
+                                    @if (!string.IsNullOrWhiteSpace(entry.ArtworkUrl))
+                                    {
+                                        <img src="@entry.ArtworkUrl"
+                                             alt=""
+                                             loading="lazy"
+                                             decoding="async" />
+                                    }
+                                    else
+                                    {
+                                        <span>🏆</span>
+                                    }
+                                </div>
+
+                                <div class="player-achievement-history-copy">
+                                    <span class="player-achievement-history-player-name">@entry.PlayerName</span>
+                                    <strong>@entry.Name</strong>
+                                    <p>@entry.Description</p>
+                                </div>
+
+                                <div class="player-achievement-history-time">
+                                    <span>@HistoryLocalizer["History_UnlockedAt"]</span>
+                                    <time datetime="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.ToUtcIso(entry.UnlockedAtUtc)"
+                                          data-achievement-history-time>
+                                        @BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.FormatUtcFallback(entry.UnlockedAtUtc)
+                                    </time>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                }
+            </section>
+        </div>
+    </main>
+</section>
+
+@section Scripts {
+    <script defer src="~/js/player-achievement-history.js" asp-append-version="true"></script>
+}

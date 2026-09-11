@@ -8,6 +8,7 @@
 @inject IConfiguration Configuration
 @inject Microsoft.Extensions.Options.IOptions<SiteDefaultsOptions> SiteDefaults
 @inject IStringLocalizer<ProductVersionResource> ProductVersionLocalizer
+@inject IStringLocalizer<PlayerAchievementHistoryResource> AchievementHistoryLocalizer
 
 @{
     var currentCulture = CultureInfo.CurrentUICulture.Name;
@@ -186,6 +187,14 @@
                         @Localizer["Menu_Tools"]
                     </summary>
                     <div class="action-menu-popover">
+                        <a class="action-menu-item"
+                           asp-page="/Admin/Games/PlayerAchievements"
+                           asp-route-id="@finalQuestionGame.Session.Id.Value"
+                           data-achievement-history-open
+                           onclick="if(window.BadWolfBusy){window.BadWolfBusy.navigate(this.href);return false;}">
+                            @AchievementHistoryLocalizer["History_Open"]
+                        </a>
+
                         <a class="action-menu-item"
                            asp-page="/Admin/Games/AnswerHistory"
                            asp-route-id="@finalQuestionGame.Session.Id.Value">

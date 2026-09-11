@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="History_Open" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_Title" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_Eyebrow" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_BackToGame" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_FilterLabel" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_FilterGame" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_FilterPlayers" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_PlayerSelector" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_NoPlayers" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_NoGameUnlocks" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_NoPlayerUnlocks" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_UnlockedAt" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_ReadOnly" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_UnknownDescription" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_EntryCount" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_CurrentGame" xml:space="preserve"><value>Україна</value></data>
+</root>
