@@ -68,6 +68,8 @@ Web `1.28.0` is a MINOR release that adds first-class question tags to quiz auth
 
 Web `1.29.0` is a MINOR release that expands persistent player achievements from 47 to 65 with 18 topic and media milestones. All new milestones require correct answers. Topic achievements use normalized question tags, while **By Ear / На слух** detects `Audio` content blocks and **On Screen / На екрані** detects both `Video` and `YouTube` content blocks without relying on media tags. Four one-answer topic milestones remain secret until unlocked. See [`docs/features/player-achievements.md`](features/player-achievements.md) for the detailed rules.
 
+Web `1.29.1` is a PATCH release that fixes host question-card overlap when browser zoom changes. Running question tiles are constrained to their fractional grid rows, hover/focus no longer shifts a tile vertically into a neighbouring row, and narrow viewport styling no longer reintroduces width-based minimum heights that can exceed the assigned row.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
