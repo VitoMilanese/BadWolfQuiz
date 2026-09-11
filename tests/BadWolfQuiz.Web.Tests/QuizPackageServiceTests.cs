@@ -12,7 +12,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class QuizPackageServiceTests
 {
     [Fact]
-    public async Task Export_import_round_trip_preserves_round_category_descriptions_and_question_tags()
+    public async Task Export_import_round_trip_preserves_quiz_tags_round_category_descriptions_and_question_tags()
     {
         const string hostId = "host-365";
         await using var connection = new SqliteConnection("Data Source=:memory:");
@@ -44,6 +44,17 @@ public sealed class QuizPackageServiceTests
             Title = "Package descriptions",
             Description = "Quiz description"
         };
+        quiz.Tags.Add(new QuizTag
+        {
+            Name = "cinema",
+            NormalizedName = "CINEMA"
+        });
+        quiz.Tags.Add(new QuizTag
+        {
+            Name = "friends",
+            NormalizedName = "FRIENDS"
+        });
+
         var round = new QuizRound
         {
             Title = "Round 1",
@@ -136,6 +147,7 @@ public sealed class QuizPackageServiceTests
             db.ChangeTracker.Clear();
             var persisted = await db.Quizzes
                 .AsSplitQuery()
+                .Include(item => item.Tags)
                 .Include(item => item.Rounds).ThenInclude(item => item.DescriptionBlocks)
                 .Include(item => item.Rounds).ThenInclude(item => item.Categories)
                     .ThenInclude(item => item.DescriptionBlocks)
@@ -149,6 +161,10 @@ public sealed class QuizPackageServiceTests
                     .ThenInclude(item => item.Questions)
                         .ThenInclude(item => item.Tags)
                 .SingleAsync(item => item.Id == importedId);
+
+            Assert.Equal(
+                new[] { "cinema", "friends" },
+                persisted.Tags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray());
 
             var importedRound = Assert.Single(persisted.Rounds);
             var roundDescription = Assert.Single(importedRound.DescriptionBlocks);

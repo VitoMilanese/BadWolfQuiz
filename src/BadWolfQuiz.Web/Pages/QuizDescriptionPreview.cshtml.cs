@@ -29,7 +29,8 @@ public sealed class QuizDescriptionPreviewModel(QuizDbContext db) : PageModel
                 quiz.Title,
                 quiz.Description,
                 quiz.AverageRating,
-                quiz.RatingCount),
+                quiz.RatingCount,
+                quiz.Tags),
             "image/png");
     }
 }

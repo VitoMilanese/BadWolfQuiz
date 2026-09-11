@@ -35,6 +35,16 @@
             };
         }
 
+        const metadataEditorForm =
+            document.querySelector("form.quiz-metadata-editor");
+        if (metadataEditorForm) {
+            return {
+                form: metadataEditorForm,
+                submitter: metadataEditorForm.querySelector(
+                    'button[type="submit"].button-primary')
+            };
+        }
+
         const descriptionEditorForm =
             document.querySelector("form.description-editor");
         if (descriptionEditorForm) {

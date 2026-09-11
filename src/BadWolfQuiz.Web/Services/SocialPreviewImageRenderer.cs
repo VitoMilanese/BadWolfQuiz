@@ -44,7 +44,8 @@ public static class SocialPreviewImageRenderer
         string title,
         string? description,
         double? averageRating,
-        int ratingCount)
+        int ratingCount,
+        IReadOnlyList<string>? tags = null)
     {
         var palette = SocialPreviewThemePalette.Resolve(null, null);
         var background = ParseColor(palette.Background);
@@ -73,7 +74,8 @@ public static class SocialPreviewImageRenderer
             ratingCount,
             text,
             muted,
-            accentBright);
+            accentBright,
+            tags);
 
         return Encode(bitmap);
     }
@@ -338,7 +340,8 @@ public static class SocialPreviewImageRenderer
         int ratingCount,
         SKColor text,
         SKColor muted,
-        SKColor accentBright)
+        SKColor accentBright,
+        IReadOnlyList<string>? tags)
     {
         using var boldTypeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold);
         using var regularTypeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Normal);
@@ -398,6 +401,8 @@ public static class SocialPreviewImageRenderer
                 3);
         }
 
+        DrawQuizDescriptionTags(canvas, tags, text, accentBright);
+
         if (averageRating is { } rating && ratingCount > 0)
         {
             using var ratingPaint = new SKPaint
@@ -422,6 +427,117 @@ public static class SocialPreviewImageRenderer
             Typeface = regularTypeface ?? SKTypeface.Default
         };
         canvas.DrawText("badwolf.buzz", 572, 566, domainPaint);
+    }
+
+    private static void DrawQuizDescriptionTags(
+        SKCanvas canvas,
+        IReadOnlyList<string>? tags,
+        SKColor text,
+        SKColor accentBright)
+    {
+        var values = (tags ?? [])
+            .Where(tag => !string.IsNullOrWhiteSpace(tag))
+            .Select(tag => tag.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(20)
+            .ToList();
+        if (values.Count == 0)
+        {
+            return;
+        }
+
+        using var typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold);
+        using var tagPaint = new SKPaint
+        {
+            Color = text,
+            IsAntialias = true,
+            TextSize = 18,
+            Typeface = typeface ?? SKTypeface.Default
+        };
+        using var fillPaint = new SKPaint
+        {
+            Color = WithAlpha(accentBright, 34),
+            IsAntialias = true,
+            Style = SKPaintStyle.Fill
+        };
+        using var borderPaint = new SKPaint
+        {
+            Color = WithAlpha(accentBright, 118),
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke,
+            StrokeWidth = 1
+        };
+        using var overflowFillPaint = new SKPaint
+        {
+            Color = WithAlpha(accentBright, 70),
+            IsAntialias = true,
+            Style = SKPaintStyle.Fill
+        };
+
+        const float startX = 572;
+        const float maxRight = 1095;
+        const float top = 445;
+        const float chipHeight = 32;
+        const float horizontalPadding = 11;
+        const float gap = 8;
+        const float maxTagTextWidth = 145;
+
+        float ChipWidth(string label) =>
+            tagPaint.MeasureText(label) + horizontalPadding * 2;
+
+        void DrawChip(string label, ref float x, bool overflow = false)
+        {
+            var width = ChipWidth(label);
+            var rect = new SKRect(x, top, x + width, top + chipHeight);
+            canvas.DrawRoundRect(
+                rect,
+                chipHeight / 2,
+                chipHeight / 2,
+                overflow ? overflowFillPaint : fillPaint);
+            canvas.DrawRoundRect(rect, chipHeight / 2, chipHeight / 2, borderPaint);
+            canvas.DrawText(label, x + horizontalPadding, top + 22, tagPaint);
+            x += width + gap;
+        }
+
+        var x = startX;
+        for (var index = 0; index < values.Count; index++)
+        {
+            var label = FitText(values[index], tagPaint, maxTagTextWidth);
+            var tagWidth = ChipWidth(label);
+            var remainingAfter = values.Count - index - 1;
+
+            if (remainingAfter == 0)
+            {
+                if (x + tagWidth <= maxRight)
+                {
+                    DrawChip(label, ref x);
+                }
+                else
+                {
+                    const string overflowLabel = "+1";
+                    if (x + ChipWidth(overflowLabel) <= maxRight)
+                    {
+                        DrawChip(overflowLabel, ref x, overflow: true);
+                    }
+                }
+                break;
+            }
+
+            var overflowAfterLabel = $"+{remainingAfter}";
+            var requiredWidth = tagWidth + gap + ChipWidth(overflowAfterLabel);
+            if (x + requiredWidth <= maxRight)
+            {
+                DrawChip(label, ref x);
+                continue;
+            }
+
+            var overflowLabelForRest = $"+{values.Count - index}";
+            if (x + ChipWidth(overflowLabelForRest) <= maxRight)
+            {
+                DrawChip(overflowLabelForRest, ref x, overflow: true);
+            }
+            break;
+        }
     }
 
     private static float DrawWrappedText(

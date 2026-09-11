@@ -2844,4 +2844,28 @@
   <data name="QuestionTags_MaxLength" xml:space="preserve">
     <value>Тег може містити не більше 100 символів.</value>
   </data>
+  <data name="Title_QuizMetadataEditor" xml:space="preserve">
+    <value>Інформація про квіз</value>
+  </data>
+  <data name="QuizMetadata_Edit" xml:space="preserve">
+    <value>Змінити назву, опис і теги квіза</value>
+  </data>
+  <data name="Label_QuizTags" xml:space="preserve">
+    <value>Теги квіза</value>
+  </data>
+  <data name="Placeholder_QuizTag" xml:space="preserve">
+    <value>Додати тег</value>
+  </data>
+  <data name="Hint_QuizTags" xml:space="preserve">
+    <value>Додайте до {0} тегів для майбутнього пошуку квізів.</value>
+  </data>
+  <data name="Validation_QuizTagLimit" xml:space="preserve">
+    <value>До квіза можна додати максимум {0} тегів.</value>
+  </data>
+  <data name="Validation_QuizTagTooLong" xml:space="preserve">
+    <value>Кожен тег квіза може містити максимум 100 символів.</value>
+  </data>
+  <data name="QuizMetadata_Saved" xml:space="preserve">
+    <value>Інформацію про квіз збережено.</value>
+  </data>
 </root>

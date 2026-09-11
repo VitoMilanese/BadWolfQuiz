@@ -475,7 +475,7 @@
     };
 
     const editorResetTarget = document.querySelector(
-        "#question-editor-back-link, #final-question-editor-back-link, #description-editor-back");
+        "#question-editor-back-link, #final-question-editor-back-link, #description-editor-back, #quiz-metadata-editor-back");
     if (editorResetTarget) {
         loadSharedStyle("/css/editor-reset-button.css");
         loadSharedScript("/js/editor-reset-button.js", {

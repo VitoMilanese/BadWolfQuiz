@@ -18,6 +18,7 @@ public sealed class QuizDbContext : DbContext
 
     public DbSet<HostAccount> Hosts => Set<HostAccount>();
     public DbSet<Quiz> Quizzes => Set<Quiz>();
+    public DbSet<QuizTag> QuizTags => Set<QuizTag>();
     public DbSet<QuizRound> QuizRounds => Set<QuizRound>();
     public DbSet<QuizRoundRow> QuizRoundRows => Set<QuizRoundRow>();
     public DbSet<QuizCategory> QuizCategories => Set<QuizCategory>();
@@ -102,6 +103,8 @@ public sealed class QuizDbContext : DbContext
 
         modelBuilder.Entity<Quiz>()
             .HasQueryFilter(x => x.HostId == CurrentHostId);
+        modelBuilder.Entity<QuizTag>()
+            .HasQueryFilter(x => x.Quiz.HostId == CurrentHostId);
         modelBuilder.Entity<QuizRound>()
             .HasQueryFilter(x => x.Quiz.HostId == CurrentHostId);
         modelBuilder.Entity<QuizRoundRow>()
@@ -151,6 +154,16 @@ public sealed class QuizDbContext : DbContext
 
         modelBuilder.Entity<QuizQuestion>()
             .HasIndex(x => new { x.QuizCategoryId, x.RowIndex })
+            .IsUnique();
+
+        modelBuilder.Entity<QuizTag>()
+            .HasOne(x => x.Quiz)
+            .WithMany(x => x.Tags)
+            .HasForeignKey(x => x.QuizId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<QuizTag>()
+            .HasIndex(x => new { x.QuizId, x.NormalizedName })
             .IsUnique();
 
         modelBuilder.Entity<QuizQuestionTag>()

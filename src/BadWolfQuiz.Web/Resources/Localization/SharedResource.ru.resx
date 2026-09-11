@@ -2844,4 +2844,28 @@
   <data name="QuestionTags_MaxLength" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="Title_QuizMetadataEditor" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizMetadata_Edit" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_QuizTags" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Placeholder_QuizTag" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Hint_QuizTags" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Validation_QuizTagLimit" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Validation_QuizTagTooLong" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizMetadata_Saved" xml:space="preserve">
+    <value>Україна</value>
+  </data>
 </root>

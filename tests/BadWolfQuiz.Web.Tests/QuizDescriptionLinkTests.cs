@@ -47,6 +47,8 @@ public sealed class QuizDescriptionLinkTests
             UpdatedAtUtc = createdAt,
             IsPublic = false
         };
+        quiz.Tags.Add(new QuizTag { Name = "films", NormalizedName = "FILMS" });
+        quiz.Tags.Add(new QuizTag { Name = "series", NormalizedName = "SERIES" });
         db.Quizzes.Add(quiz);
         await db.SaveChangesAsync();
 
@@ -56,6 +58,7 @@ public sealed class QuizDescriptionLinkTests
         Assert.NotNull(result);
         Assert.Equal(quiz.Title, result.Title);
         Assert.Equal(quiz.Description, result.Description);
+        Assert.Equal(["films", "series"], result.Tags);
         Assert.Null(result.AverageRating);
         Assert.Equal(0, result.RatingCount);
         Assert.False(await db.Quizzes.IgnoreQueryFilters()
@@ -172,6 +175,8 @@ public sealed class QuizDescriptionLinkTests
             root, "src", "BadWolfQuiz.Web", "Services", "QuizDescriptionLink.cs"));
         var publicCatalog = File.ReadAllText(Path.Combine(
             root, "src", "BadWolfQuiz.Web", "Pages", "PublicQuizzes.cshtml.cs"));
+        var styles = File.ReadAllText(Path.Combine(
+            root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "quiz-description.css"));
 
         Assert.Contains("@page \"/quiz-description/{id:int}/{token}\"", markup);
         Assert.Contains("SocialTitleViewDataKey", markup);
@@ -181,6 +186,16 @@ public sealed class QuizDescriptionLinkTests
         Assert.Contains("Model.Quiz.PreviewPath", markup);
         Assert.Contains("Model.Quiz.AverageRating", markup);
         Assert.Contains("quiz-announcement-rating", markup);
+        Assert.Contains("quiz-announcement-card-rating", markup);
+        var railStart = markup.IndexOf("<aside class=\"quiz-announcement-rail\"", StringComparison.Ordinal);
+        var ratingStart = markup.IndexOf("quiz-announcement-card-rating", StringComparison.Ordinal);
+        var railEnd = markup.IndexOf("</aside>", railStart, StringComparison.Ordinal);
+        Assert.True(railStart >= 0 && ratingStart > railStart && railEnd > ratingStart);
+        Assert.Contains(".quiz-announcement-card-rating", styles);
+        Assert.DoesNotContain(".quiz-announcement-rail strong", styles);
+        Assert.DoesNotContain(".quiz-announcement-rail small", styles);
+        Assert.Contains("quiz-announcement-tags", markup);
+        Assert.Contains("Model.Quiz.Tags", markup);
         Assert.Contains("X-Robots-Tag", model);
         Assert.Contains("noindex, nofollow", model);
         Assert.Contains(".IgnoreQueryFilters()", linkService);
@@ -202,7 +217,8 @@ public sealed class QuizDescriptionLinkTests
             "Cinema night",
             "A quiz about films, series and animation.",
             4.7,
-            23);
+            23,
+            Enumerable.Range(1, 20).Select(index => $"tag {index}").ToArray());
 
         using var bitmap = SKBitmap.Decode(bytes);
         Assert.NotNull(bitmap);

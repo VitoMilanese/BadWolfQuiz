@@ -72,6 +72,8 @@ Web `1.29.1` is a PATCH release that fixes host question-card overlap when brows
 
 Web `1.29.2` is a PATCH release that fixes the quiz title/description dialog on My quizzes so its header uses existing localized resources instead of rendering missing localization key names. Regression coverage verifies the dialog uses valid shared-resource keys across the supported localization files.
 
+Web `1.30.0` is a MINOR release that adds a dedicated lightweight quiz-metadata editor for title, description, and up to 20 normalized quiz-level tags. The editor uses the shared Save/Reset/Back, keyboard-shortcut, save-overlay, and unsaved-change behavior; host-scoped suggestions reuse quiz tags and fall back to question tags. Quiz tags are preserved through cloning and `.bwquiz` export/import, appear on shareable quiz-description pages, and are summarized in one bounded row on social-preview images. The shareable page also moves the quiz rating into the announcement-card rail.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.

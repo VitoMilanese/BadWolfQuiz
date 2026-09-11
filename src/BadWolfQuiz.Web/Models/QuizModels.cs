@@ -145,6 +145,7 @@ public sealed class Quiz
         new List<FinalAnswerContentBlock>();
     public ICollection<GameSession> Sessions { get; set; } = new List<GameSession>();
     public ICollection<QuizRating> Ratings { get; set; } = new List<QuizRating>();
+    public ICollection<QuizTag> Tags { get; set; } = new List<QuizTag>();
     public HostAccount? Host { get; set; }
 }
 

@@ -18,7 +18,8 @@ public sealed class EditorSaveShortcutAssetsTagHelper : TagHelper
         if (model is not EditorModel &&
             model is not QuestionEditorModel &&
             model is not FinalQuestionEditorModel &&
-            model is not DescriptionEditorModel)
+            model is not DescriptionEditorModel &&
+            model is not QuizMetadataEditorModel)
         {
             return;
         }

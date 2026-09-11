@@ -135,7 +135,7 @@ body:has(.quiz-announcement-page) .topbar {
     display: inline-flex;
     align-items: center;
     gap: 9px;
-    margin-top: 26px;
+    margin: 0;
     padding: 10px 14px;
     border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
     border-radius: 999px;
@@ -154,6 +154,37 @@ body:has(.quiz-announcement-page) .topbar {
 .quiz-announcement-rating strong {
     color: var(--text);
     font-size: 1.02rem;
+}
+
+.quiz-announcement-card-rating {
+    align-self: flex-start;
+    max-width: 100%;
+    background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .16);
+    white-space: nowrap;
+}
+
+.quiz-announcement-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-width: 820px;
+    margin-top: 16px;
+}
+
+.quiz-announcement-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 5px 11px;
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--panel-2) 70%, transparent);
+    color: var(--text);
+    font-size: .78rem;
+    font-weight: 750;
+    line-height: 1.15;
+    backdrop-filter: blur(10px);
 }
 
 .quiz-announcement-hero-art {
@@ -289,12 +320,12 @@ body:has(.quiz-announcement-page) .topbar {
     letter-spacing: .18em;
 }
 
-.quiz-announcement-rail div {
+.quiz-announcement-share-mark {
     display: grid;
     gap: 4px;
 }
 
-.quiz-announcement-rail strong {
+.quiz-announcement-share-mark strong {
     color: var(--text);
     font-size: clamp(2.5rem, 4vw, 4.2rem);
     font-weight: 1000;
@@ -302,7 +333,7 @@ body:has(.quiz-announcement-page) .topbar {
     letter-spacing: -.06em;
 }
 
-.quiz-announcement-rail small {
+.quiz-announcement-share-mark small {
     color: var(--red-bright);
     font-size: .72rem;
     font-weight: 900;
@@ -399,17 +430,17 @@ body:has(.quiz-announcement-page) .topbar {
     .quiz-announcement-rail {
         min-height: 0;
         flex-direction: row;
-        align-items: end;
+        align-items: center;
         padding: 24px 28px;
         border-right: 0;
         border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
     }
 
-    .quiz-announcement-rail div {
+    .quiz-announcement-share-mark {
         justify-items: end;
     }
 
-    .quiz-announcement-rail strong {
+    .quiz-announcement-share-mark strong {
         font-size: 2.2rem;
     }
 
@@ -434,10 +465,6 @@ body:has(.quiz-announcement-page) .topbar {
         letter-spacing: .14em;
     }
 
-    .quiz-announcement-rating {
-        margin-top: 20px;
-    }
-
     .quiz-announcement-content {
         width: min(100% - 28px, 1320px);
         padding: 0 0 56px;
@@ -457,11 +484,11 @@ body:has(.quiz-announcement-page) .topbar {
         line-height: 1.45;
     }
 
-    .quiz-announcement-rail strong {
+    .quiz-announcement-share-mark strong {
         font-size: 1.9rem;
     }
 
-    .quiz-announcement-rail small {
+    .quiz-announcement-share-mark small {
         font-size: .62rem;
     }
 
