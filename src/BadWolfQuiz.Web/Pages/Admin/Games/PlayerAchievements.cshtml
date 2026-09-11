@@ -36,12 +36,13 @@
             <span class="player-achievement-history-session-label">@HistoryLocalizer["History_CurrentGame"]</span>
             <strong>@Model.Game.Session.Quiz.Title</strong>
             <div class="player-achievement-history-session-meta">
-                <span>@HistoryLocalizer["History_EntryCount", Model.Entries.Count]</span>
+                <span data-achievement-history-session-count>@HistoryLocalizer["History_EntryCount", Model.Entries.Count]</span>
             </div>
         </aside>
     </header>
 
-    <main class="answer-history-content player-achievement-history-content">
+    <main class="answer-history-content player-achievement-history-content"
+          data-achievement-history-view>
         <section class="player-achievement-history-toolbar"
                  aria-label="@HistoryLocalizer["History_FilterLabel"]">
             <nav class="player-achievement-history-filters">
@@ -50,7 +51,8 @@
                    asp-page="/Admin/Games/PlayerAchievements"
                    asp-route-id="@Model.Game.Session.Id.Value"
                    asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.GameMode"
-                   data-achievement-history-nav>
+                   data-achievement-history-nav
+                   data-achievement-history-view-nav>
                     @HistoryLocalizer["History_FilterGame"]
                 </a>
                 <a class="button button-secondary player-achievement-history-filter @(!isGameMode ? "is-active" : null)"
@@ -59,7 +61,8 @@
                    asp-route-id="@Model.Game.Session.Id.Value"
                    asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode"
                    asp-route-selectedPlayerId="@Model.SelectedPlayerId"
-                   data-achievement-history-nav>
+                   data-achievement-history-nav
+                   data-achievement-history-view-nav>
                     @HistoryLocalizer["History_FilterPlayers"]
                 </a>
             </nav>
@@ -91,7 +94,8 @@
                                asp-route-id="@Model.Game.Session.Id.Value"
                                asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode"
                                asp-route-selectedPlayerId="@player.Id"
-                               data-achievement-history-nav>
+                               data-achievement-history-nav
+                               data-achievement-history-view-nav>
                                 @player.Name
                             </a>
                         }

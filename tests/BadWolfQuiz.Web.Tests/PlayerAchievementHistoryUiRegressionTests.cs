@@ -47,6 +47,9 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("data-achievement-history-root", page);
         Assert.Contains("data-back-url", page);
         Assert.Contains("data-achievement-history-nav", page);
+        Assert.Contains("data-achievement-history-view-nav", page);
+        Assert.Contains("data-achievement-history-view", page);
+        Assert.Contains("data-achievement-history-session-count", page);
         Assert.Contains("player-achievement-history-body", page);
         Assert.Contains("player-achievement-history-sidebar", page);
         Assert.Contains("data-achievement-history-time", page);
@@ -70,6 +73,14 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("Intl.DateTimeFormat", script);
         Assert.Contains("data-achievement-history-time", script);
         Assert.Contains("data-achievement-history-nav", script);
+        Assert.Contains("data-achievement-history-view-nav", script);
+        Assert.Contains("data-achievement-history-view", script);
+        Assert.Contains("await fetch(targetUrl.href", script);
+        Assert.Contains("window.history.pushState", script);
+        Assert.Contains("window.addEventListener(\"popstate\"", script);
+        Assert.Contains("window.scrollTo(scrollLeft, scrollTop)", script);
+        Assert.Contains("BadWolfBusy?.show?.()", script);
+        Assert.Contains("BadWolfBusy?.hide?.()", script);
         Assert.Contains("event.key !== \"Escape\"", script);
         Assert.Contains("BadWolfBusy?.navigate", script);
     }
