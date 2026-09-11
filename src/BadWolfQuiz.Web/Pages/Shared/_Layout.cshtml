@@ -9,6 +9,7 @@
 @inject Microsoft.Extensions.Options.IOptions<SiteDefaultsOptions> SiteDefaults
 @inject IStringLocalizer<ProductVersionResource> ProductVersionLocalizer
 @inject IStringLocalizer<PlayerAchievementHistoryResource> AchievementHistoryLocalizer
+@inject IStringLocalizer<AchievementResource> AchievementLocalizer
 
 @{
     var currentCulture = CultureInfo.CurrentUICulture.Name;
@@ -375,6 +376,7 @@
                     <div class="header-side-menu-group">
                         <a class="header-side-menu-item" asp-page="/Admin/Games/History">@Localizer["Menu_GameHistory"]</a>
                         <a class="header-side-menu-item" asp-page="/Admin/Games/Statistics">@Localizer["Menu_PlayerStatistics"]</a>
+                        <a class="header-side-menu-item" asp-page="/Achievements">@AchievementLocalizer["Achievements_Title"]</a>
                         @if (isMasterHost)
                         {
                             <a class="header-side-menu-item" asp-page="/Admin/MasterGames">@Localizer["Menu_ActiveGames"]</a>

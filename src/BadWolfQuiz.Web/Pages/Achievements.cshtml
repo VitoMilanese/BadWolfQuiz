@@ -1,0 +1,131 @@
+@page
+@model BadWolfQuiz.Web.Pages.AchievementsModel
+@inject IStringLocalizer<AchievementResource> AchievementLocalizer
+@{
+    ViewData["Title"] = AchievementLocalizer["Achievements_Title"];
+    var orderedAchievements = Model.Achievements
+        .OrderBy(item => item.IsUnlocked ? 0 : item.IsSecret ? 2 : 1)
+        .ToArray();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/player-achievements.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/achievements-page.css" asp-append-version="true" />
+}
+
+<div class="self-achievements-page">
+    <section class="self-achievements-hero" aria-labelledby="self-achievements-title">
+        <div class="self-achievements-hero-copy">
+            <p class="self-achievements-kicker">
+                <span>BAD WOLF</span>
+                <span aria-hidden="true">/ PLAYER PROFILE</span>
+            </p>
+            <h1 id="self-achievements-title">@AchievementLocalizer["Achievements_Title"]</h1>
+            <p class="self-achievements-description">@AchievementLocalizer["Achievements_Subtitle"]</p>
+        </div>
+
+        <div class="self-achievements-hero-mark" aria-hidden="true">
+            <span class="self-achievements-hero-label">UNLOCKED / TOTAL</span>
+            <strong>@Model.UnlockedCount.ToString("00")</strong>
+            <div class="self-achievements-meter">
+                <span style="width:@(Model.Achievements.Count == 0 ? 0 : (int)Math.Round(Model.UnlockedCount * 100d / Model.Achievements.Count))%"></span>
+            </div>
+            <small>@Model.UnlockedCount / @Model.Achievements.Count · BAD WOLF MILESTONES</small>
+        </div>
+    </section>
+
+    <main class="self-achievements-content">
+        <section class="player-achievements-panel self-achievements-panel" aria-describedby="self-achievements-subtitle">
+            <div class="player-achievements-heading">
+                <div>
+                    <span class="player-achievements-kicker">BAD WOLF / MILESTONES</span>
+                    <p id="self-achievements-subtitle">@AchievementLocalizer["Achievements_Subtitle"]</p>
+                </div>
+                <strong class="player-achievements-count">
+                    @AchievementLocalizer["Achievements_UnlockedCount", Model.UnlockedCount, Model.Achievements.Count]
+                </strong>
+            </div>
+
+            <div class="player-achievements-grid">
+                @foreach (var achievement in orderedAchievements)
+                {
+                    var lockedSecret = achievement.IsSecret && !achievement.IsUnlocked;
+                    var cardClasses = achievement.IsUnlocked
+                        ? "player-achievement-card is-unlocked"
+                        : "player-achievement-card is-locked";
+                    if (achievement.IsNewInCurrentGame)
+                    {
+                        cardClasses += " is-new";
+                    }
+                    var percentage = achievement.Target <= 0
+                        ? 0
+                        : Math.Clamp(
+                            (int)Math.Round(achievement.Progress * 100d / achievement.Target),
+                            0,
+                            100);
+
+                    <article class="@cardClasses">
+                        <div class="player-achievement-card-top">
+                            @if (lockedSecret)
+                            {
+                                <span class="player-achievement-icon" aria-hidden="true">❔</span>
+                            }
+                            else
+                            {
+                                <img class="player-achievement-image"
+                                     src="/images/achievements/@(achievement.Code).png"
+                                     alt=""
+                                     aria-hidden="true"
+                                     loading="lazy"
+                                     decoding="async" />
+                            }
+
+                            @if (achievement.IsUnlocked && achievement.IsSecret)
+                            {
+                                <span class="player-achievement-state is-secret-unlocked" aria-hidden="true">
+                                    <svg class="player-achievement-state-icon player-achievement-secret-revealed"
+                                         viewBox="0 0 24 24"
+                                         focusable="false">
+                                        <path class="player-achievement-secret-eye" d="M2.4 12s3.5-5.2 9.6-5.2 9.6 5.2 9.6 5.2-3.5 5.2-9.6 5.2S2.4 12 2.4 12Z"></path>
+                                        <circle class="player-achievement-secret-pupil" cx="12" cy="12" r="4"></circle>
+                                        <path class="player-achievement-secret-check" d="m10.15 12.05 1.35 1.35 2.75-3.05"></path>
+                                    </svg>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="player-achievement-state" aria-hidden="true">
+                                    @(achievement.IsUnlocked ? "✓" : "○")
+                                </span>
+                            }
+                        </div>
+
+                        <strong>
+                            @(lockedSecret
+                                ? AchievementLocalizer["Achievements_SecretTitle"]
+                                : AchievementLocalizer[$"{achievement.Code}_Name"])
+                        </strong>
+                        <p>
+                            @(lockedSecret
+                                ? AchievementLocalizer["Achievements_SecretDescription"]
+                                : AchievementLocalizer[$"{achievement.Code}_Description"])
+                        </p>
+
+                        @if (!lockedSecret && !achievement.IsUnlocked)
+                        {
+                            <div class="player-achievement-progress"
+                                 aria-label="@achievement.Progress / @achievement.Target">
+                                <span style="width:@percentage%"></span>
+                            </div>
+                            <small>@achievement.Progress / @achievement.Target</small>
+                        }
+                    </article>
+                }
+            </div>
+        </section>
+    </main>
+</div>
+
+@section Scripts {
+    <script src="~/js/achievement-image-trim.js" asp-append-version="true"></script>
+}
