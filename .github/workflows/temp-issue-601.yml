@@ -42,8 +42,15 @@ jobs:
           old = "                        presentationType,\\n                        buzzerMode,\\n                        Math.Max(0, question.BuzzDelaySeconds)"
           new = "            presentationType,\\n            buzzerMode,\\n            Math.Max(0, question.BuzzDelaySeconds)"
           if text.count(old) != 2:
-              raise RuntimeError(f"QuizSnapshotFactory script precondition count was {text.count(old)}, expected 2")
-          script.write_text(text.replace(old, new), encoding="utf-8")
+              raise RuntimeError(f"QuizSnapshotFactory indentation precondition count was {text.count(old)}, expected 2")
+          text = text.replace(old, new)
+          if text.count("question.BuzzDelaySeconds)))") != 1:
+              raise RuntimeError("QuizSnapshotFactory closing-paren precondition was not found exactly once")
+          text = text.replace("question.BuzzDelaySeconds)))", "question.BuzzDelaySeconds));", 1)
+          if text.count("question.AllowAnswerRewardModifiers)))") != 1:
+              raise RuntimeError("QuizSnapshotFactory replacement closing-paren precondition was not found exactly once")
+          text = text.replace("question.AllowAnswerRewardModifiers)))", "question.AllowAnswerRewardModifiers));", 1)
+          script.write_text(text, encoding="utf-8")
           PY
 
       - name: Apply issue 601 changes
