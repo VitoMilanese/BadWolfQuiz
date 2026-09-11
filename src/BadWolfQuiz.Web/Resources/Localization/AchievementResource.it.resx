@@ -144,15 +144,15 @@
   <data name="MafiaGodfatherTag_Name" xml:space="preserve"><value>Affari di famiglia</value></data>
   <data name="MafiaGodfatherTag_Description" xml:space="preserve"><value>Rispondi a una domanda sulla mafia.</value></data>
   <data name="StarTrekTag_Name" xml:space="preserve"><value>Lunga vita e prosperità</value></data>
-  <data name="StarTrekTag_Description" xml:space="preserve"><value>Rispondi correttamente a una domanda con tag Star Trek.</value></data>
+  <data name="StarTrekTag_Description" xml:space="preserve"><value>Rispondi correttamente a una domanda su Star Trek.</value></data>
   <data name="Anime25_Name" xml:space="preserve"><value>Anime</value></data>
-  <data name="Anime25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande con tag anime.</value></data>
+  <data name="Anime25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande sugli anime.</value></data>
   <data name="CounterStrike25_Name" xml:space="preserve"><value>Counter-Strike</value></data>
-  <data name="CounterStrike25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande con tag Counter-Strike.</value></data>
+  <data name="CounterStrike25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande su Counter-Strike.</value></data>
   <data name="Dota25_Name" xml:space="preserve"><value>Dota 2</value></data>
-  <data name="Dota25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande con tag Dota o Dota 2.</value></data>
+  <data name="Dota25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande su Dota 2.</value></data>
   <data name="Ukraine25_Name" xml:space="preserve"><value>Ucraina</value></data>
-  <data name="Ukraine25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande con tag Ucraina.</value></data>
+  <data name="Ukraine25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande sull'Ucraina.</value></data>
   <data name="DoubleReward_Name" xml:space="preserve"><value>Ricompensa doppia</value></data>
   <data name="DoubleReward_Description" xml:space="preserve"><value>Ottieni una ricompensa x2 per una risposta corretta.</value></data>
   <data name="HalfReward_Name" xml:space="preserve"><value>Mezza ricompensa</value></data>
@@ -162,11 +162,11 @@
   <data name="BeatPreviousWinner_Name" xml:space="preserve"><value>Nuovo campione</value></data>
   <data name="BeatPreviousWinner_Description" xml:space="preserve"><value>Vinci una partita in cui partecipa anche un vincitore della partita precedente, che questa volta non vince.</value></data>
   <data name="Geography25_Name" xml:space="preserve"><value>Geografia</value></data>
-  <data name="Geography25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande con tag geografia.</value></data>
+  <data name="Geography25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande sulla geografia.</value></data>
   <data name="History25_Name" xml:space="preserve"><value>Storia</value></data>
-  <data name="History25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande con tag storia.</value></data>
+  <data name="History25_Description" xml:space="preserve"><value>Rispondi correttamente a 25 domande sulla storia.</value></data>
   <data name="PeerMaxRatings10_Name" xml:space="preserve"><value>Cinque stelle</value></data>
-  <data name="PeerMaxRatings10_Description" xml:space="preserve"><value>Ricevi 10 volte la valutazione massima di 5 stelle da un altro giocatore nelle domande valutate dai giocatori.</value></data>
+  <data name="PeerMaxRatings10_Description" xml:space="preserve"><value>Ricevi 10 volte la valutazione massima di 5 stelle da un altro giocatore.</value></data>
   <data name="PlayOneMonth_Name" xml:space="preserve"><value>Un mese</value></data>
   <data name="PlayOneMonth_Description" xml:space="preserve"><value>Continua a giocare a Bad Wolf per almeno un mese intero.</value></data>
   <data name="PlaySixMonths_Name" xml:space="preserve"><value>Sei mesi</value></data>
