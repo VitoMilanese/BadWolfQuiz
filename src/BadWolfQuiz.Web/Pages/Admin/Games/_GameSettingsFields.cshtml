@@ -191,6 +191,7 @@
         const categoryColorsToggle = settingsForm?.querySelector(
             "[data-category-colors-enabled-toggle]");
         const categoryColorsDialog = categoryColorsToggle?.closest("dialog");
+        let categoryColorsSavePending = false;
 
         const notifyCategoryColorsChanged = () => {
             document.dispatchEvent(new CustomEvent("badwolf:category-colors-enabled-changed"));
@@ -208,6 +209,16 @@
             const grid = document.querySelector(".host-board-grid");
             if (!(grid instanceof HTMLElement)) return;
 
+            grid.removeAttribute("data-category-colors-preview");
+            notifyCategoryColorsChanged();
+        };
+
+        const commitCategoryColorsPreview = () => {
+            const grid = document.querySelector(".host-board-grid");
+            if (!(grid instanceof HTMLElement) || !categoryColorsToggle) return;
+
+            grid.dataset.categoryColorsEnabled =
+                categoryColorsToggle.checked ? "true" : "false";
             grid.removeAttribute("data-category-colors-preview");
             notifyCategoryColorsChanged();
         };
@@ -238,8 +249,21 @@
         categoryColorsToggle?.addEventListener("change", previewCategoryColors);
         if (categoryColorsDialog) {
             document.querySelector("[data-open-game-settings]")
-                ?.addEventListener("click", syncCategoryColorsToggleFromPersisted);
-            categoryColorsDialog.addEventListener("close", clearCategoryColorsPreview);
+                ?.addEventListener("click", () => {
+                    categoryColorsSavePending = false;
+                    syncCategoryColorsToggleFromPersisted();
+                });
+            settingsForm?.addEventListener("submit", () => {
+                categoryColorsSavePending = true;
+            });
+            categoryColorsDialog.addEventListener("close", () => {
+                if (categoryColorsSavePending) {
+                    categoryColorsSavePending = false;
+                    commitCategoryColorsPreview();
+                    return;
+                }
+                clearCategoryColorsPreview();
+            });
         }
         updateRewardDecaySettings();
     })();

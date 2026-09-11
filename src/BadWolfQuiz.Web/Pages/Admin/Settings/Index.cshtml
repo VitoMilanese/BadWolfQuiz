@@ -6,6 +6,7 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/host-settings.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/host-settings-theme-color-picker.css" asp-append-version="true" />
 }
 
 <div class="host-settings-page">
@@ -144,14 +145,14 @@
                             </label>
                         </div>
                         <div class="custom-theme-colors" data-custom-theme-colors>
-                            <label><span>@Localizer["SiteTheme_Background"]</span><input asp-for="Input.CustomThemeColors.Background" type="color" data-theme-variable="--bg" /></label>
-                            <label><span>@Localizer["SiteTheme_Panel"]</span><input asp-for="Input.CustomThemeColors.Panel" type="color" data-theme-variable="--panel" /></label>
-                            <label><span>@Localizer["SiteTheme_PanelSecondary"]</span><input asp-for="Input.CustomThemeColors.PanelSecondary" type="color" data-theme-variable="--panel-2" /></label>
-                            <label><span>@Localizer["SiteTheme_Text"]</span><input asp-for="Input.CustomThemeColors.Text" type="color" data-theme-variable="--text" /></label>
-                            <label><span>@Localizer["SiteTheme_MutedText"]</span><input asp-for="Input.CustomThemeColors.MutedText" type="color" data-theme-variable="--muted" /></label>
-                            <label><span>@Localizer["SiteTheme_Accent"]</span><input asp-for="Input.CustomThemeColors.Accent" type="color" data-theme-variable="--red" /></label>
-                            <label><span>@Localizer["SiteTheme_AccentBright"]</span><input asp-for="Input.CustomThemeColors.AccentBright" type="color" data-theme-variable="--red-bright" /></label>
-                            <label><span>@Localizer["SiteTheme_Highlight"]</span><input asp-for="Input.CustomThemeColors.Highlight" type="color" data-theme-variable="--gold" /></label>
+                            <label><span>@Localizer["SiteTheme_Background"]</span><input asp-for="Input.CustomThemeColors.Background" type="hidden" data-theme-variable="--bg" /></label>
+                            <label><span>@Localizer["SiteTheme_Panel"]</span><input asp-for="Input.CustomThemeColors.Panel" type="hidden" data-theme-variable="--panel" /></label>
+                            <label><span>@Localizer["SiteTheme_PanelSecondary"]</span><input asp-for="Input.CustomThemeColors.PanelSecondary" type="hidden" data-theme-variable="--panel-2" /></label>
+                            <label><span>@Localizer["SiteTheme_Text"]</span><input asp-for="Input.CustomThemeColors.Text" type="hidden" data-theme-variable="--text" /></label>
+                            <label><span>@Localizer["SiteTheme_MutedText"]</span><input asp-for="Input.CustomThemeColors.MutedText" type="hidden" data-theme-variable="--muted" /></label>
+                            <label><span>@Localizer["SiteTheme_Accent"]</span><input asp-for="Input.CustomThemeColors.Accent" type="hidden" data-theme-variable="--red" /></label>
+                            <label><span>@Localizer["SiteTheme_AccentBright"]</span><input asp-for="Input.CustomThemeColors.AccentBright" type="hidden" data-theme-variable="--red-bright" /></label>
+                            <label><span>@Localizer["SiteTheme_Highlight"]</span><input asp-for="Input.CustomThemeColors.Highlight" type="hidden" data-theme-variable="--gold" /></label>
                         </div>
                     </div>
                 </details>
@@ -439,5 +440,6 @@
             });
         })();
     </script>
+    <script src="~/js/host-settings-theme-color-picker.js" asp-append-version="true"></script>
     <script src="~/js/avatar-picker.js" asp-append-version="true"></script>
 }
