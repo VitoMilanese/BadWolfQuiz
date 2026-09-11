@@ -308,6 +308,12 @@ body:has(.custom-achievements-page) .topbar {
     align-content: start;
 }
 
+.custom-achievement-field-grid > .custom-achievement-field > label {
+    display: flex;
+    align-items: flex-end;
+    min-height: 2.35em;
+}
+
 .custom-achievement-field > label,
 .question-tags-setting > label {
     color: color-mix(in srgb, var(--text) 94%, transparent);
@@ -358,6 +364,10 @@ body:has(.custom-achievements-page) .topbar {
     line-height: 1.45;
 }
 
+.custom-achievement-target-field > small {
+    display: none;
+}
+
 .custom-achievement-target-field input {
     font-size: 1.2rem;
     font-weight: 850;
@@ -372,7 +382,14 @@ body:has(.custom-achievements-page) .topbar {
     display: flex;
     flex-wrap: wrap;
     gap: .45rem;
-    min-height: 1rem;
+}
+
+.question-tag-list:not(:has(.question-tag-chip, .question-tag-action:not([hidden]))) {
+    display: none;
+}
+
+.question-tag-fields {
+    display: none;
 }
 
 .question-tag-chip {
@@ -729,6 +746,10 @@ body:has(.custom-achievements-page) .topbar {
 @media (max-width: 720px) {
     .custom-achievement-field-grid {
         grid-template-columns: 1fr;
+    }
+
+    .custom-achievement-field-grid > .custom-achievement-field > label {
+        min-height: 0;
     }
 
     .custom-achievement-list-card {
