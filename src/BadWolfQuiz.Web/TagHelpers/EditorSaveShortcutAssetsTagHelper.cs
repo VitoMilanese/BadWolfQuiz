@@ -1,3 +1,4 @@
+using BadWolfQuiz.Web.Pages.Admin;
 using BadWolfQuiz.Web.Pages.Admin.Quizzes;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -15,7 +16,8 @@ public sealed class EditorSaveShortcutAssetsTagHelper : TagHelper
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
         var model = ViewContext.ViewData.Model;
-        if (model is not EditorModel &&
+        if (model is not CustomAchievementsModel &&
+            model is not EditorModel &&
             model is not QuestionEditorModel &&
             model is not FinalQuestionEditorModel &&
             model is not DescriptionEditorModel &&

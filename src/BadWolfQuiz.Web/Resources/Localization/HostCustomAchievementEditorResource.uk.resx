@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Редактор досягнень</value></data>
+  <data name="Description" xml:space="preserve"><value>Створюйте власні досягнення хоста, які гравці отримують за правильні відповіді на питання з вибраними тегами.</value></data>
+  <data name="HeroCountLabel" xml:space="preserve"><value>ХОСТ / ПРАВИЛА</value></data>
+  <data name="HeroCountFootnote" xml:space="preserve"><value>ВЛАСНІ ДОСЯГНЕННЯ</value></data>
+  <data name="CreateTitle" xml:space="preserve"><value>Створити досягнення</value></data>
+  <data name="EditTitle" xml:space="preserve"><value>Редагувати досягнення</value></data>
+  <data name="EditorKickerNew" xml:space="preserve"><value>НОВЕ / ПРАВИЛО</value></data>
+  <data name="EditorKickerEdit" xml:space="preserve"><value>РЕДАГУВАННЯ / ПРАВИЛО</value></data>
+  <data name="New" xml:space="preserve"><value>Нове досягнення</value></data>
+  <data name="Name" xml:space="preserve"><value>Назва</value></data>
+  <data name="DescriptionLabel" xml:space="preserve"><value>Опис</value></data>
+  <data name="Target" xml:space="preserve"><value>Потрібно правильних відповідей</value></data>
+  <data name="TargetHint" xml:space="preserve"><value>Одне питання зараховується лише один раз, навіть якщо воно має кілька вибраних тегів.</value></data>
+  <data name="Tags" xml:space="preserve"><value>Теги питань</value></data>
+  <data name="TagsHint" xml:space="preserve"><value>Виберіть від 1 до 20 тегів. Порівняння працює так само, як у редакторі тегів питання, без урахування регістру.</value></data>
+  <data name="Artwork" xml:space="preserve"><value>Зображення</value></data>
+  <data name="ArtworkHint" xml:space="preserve"><value>Лише PNG, рівно 250 × 250 px, максимум 2 MB. Прозорість зберігається.</value></data>
+  <data name="ArtworkKeepHint" xml:space="preserve"><value>Не вибирайте новий файл, щоб залишити поточне зображення.</value></data>
+  <data name="CurrentArtworkAlt" xml:space="preserve"><value>Поточне зображення досягнення</value></data>
+  <data name="ArtworkPlaceholder" xml:space="preserve"><value>250 × 250</value></data>
+  <data name="Saved" xml:space="preserve"><value>Досягнення збережено.</value></data>
+  <data name="ListKicker" xml:space="preserve"><value>ХОСТ / ДОСЯГНЕННЯ</value></data>
+  <data name="ListTitle" xml:space="preserve"><value>Ваші досягнення</value></data>
+  <data name="EmptyTitle" xml:space="preserve"><value>Власних досягнень ще немає</value></data>
+  <data name="EmptyDescription" xml:space="preserve"><value>Створіть перше правило зліва. Воно стане доступним гравцям у ваших іграх.</value></data>
+  <data name="CorrectCount" xml:space="preserve"><value>Правильних: {0}</value></data>
+  <data name="TagCount" xml:space="preserve"><value>Тегів: {0}</value></data>
+  <data name="Edit" xml:space="preserve"><value>Редагувати</value></data>
+  <data name="Delete" xml:space="preserve"><value>Видалити</value></data>
+  <data name="DeleteConfirm" xml:space="preserve"><value>Видалити це досягнення? Історія вже отриманих досягнень гравців буде збережена.</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Скасувати</value></data>
+  <data name="Close" xml:space="preserve"><value>Закрити</value></data>
+  <data name="Back" xml:space="preserve"><value>Назад</value></data>
+  <data name="Add" xml:space="preserve"><value>Додати</value></data>
+  <data name="Save" xml:space="preserve"><value>Зберегти</value></data>
+  <data name="AddTag" xml:space="preserve"><value>Додати</value></data>
+  <data name="TagPlaceholder" xml:space="preserve"><value>Введіть або виберіть тег</value></data>
+  <data name="CopyTags" xml:space="preserve"><value>Копіювати теги</value></data>
+  <data name="ClearTags" xml:space="preserve"><value>Очистити теги</value></data>
+  <data name="TagsInvalid" xml:space="preserve"><value>Виберіть від 1 до {0} тегів.</value></data>
+  <data name="ArtworkTooLarge" xml:space="preserve"><value>PNG-зображення повинно мати розмір не більше 2 MB.</value></data>
+  <data name="ArtworkInvalid" xml:space="preserve"><value>Зображення повинно бути коректним PNG-файлом розміром рівно 250 × 250 пікселів.</value></data>
+  <data name="ArtworkRequired" xml:space="preserve"><value>Потрібно вибрати PNG-зображення.</value></data>
+  <data name="SaveFailed" xml:space="preserve"><value>Не вдалося зберегти досягнення.</value></data>
+</root>

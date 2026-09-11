@@ -10,6 +10,7 @@
 @inject IStringLocalizer<ProductVersionResource> ProductVersionLocalizer
 @inject IStringLocalizer<PlayerAchievementHistoryResource> AchievementHistoryLocalizer
 @inject IStringLocalizer<AchievementResource> AchievementLocalizer
+@inject IStringLocalizer<HostCustomAchievementEditorResource> CustomAchievementLocalizer
 
 @{
     var currentCulture = CultureInfo.CurrentUICulture.Name;
@@ -377,6 +378,7 @@
                         <a class="header-side-menu-item" asp-page="/Admin/Games/History">@Localizer["Menu_GameHistory"]</a>
                         <a class="header-side-menu-item" asp-page="/Admin/Games/Statistics">@Localizer["Menu_PlayerStatistics"]</a>
                         <a class="header-side-menu-item" asp-page="/Achievements">@AchievementLocalizer["Achievements_Title"]</a>
+                        <a class="header-side-menu-item" asp-page="/Admin/CustomAchievements">@CustomAchievementLocalizer["Title"]</a>
                         @if (isMasterHost)
                         {
                             <a class="header-side-menu-item" asp-page="/Admin/MasterGames">@Localizer["Menu_ActiveGames"]</a>
