@@ -413,6 +413,16 @@ body[data-quiz-editor-workspace="question"] .question-settings > .checkbox-row {
     background: color-mix(in srgb, var(--panel-2) 66%, transparent);
 }
 
+body[data-quiz-editor-workspace="question"] .answer-reward-modifier-setting > span > strong,
+body[data-quiz-editor-workspace="question"] .answer-reward-modifier-setting > span > small {
+    display: block;
+}
+
+body[data-quiz-editor-workspace="question"] .answer-reward-modifier-setting > span > small {
+    margin-top: 4px;
+    color: var(--muted);
+}
+
 body[data-quiz-editor-workspace] .content-block-section {
     padding: clamp(18px, 2.2vw, 28px);
 }

@@ -132,13 +132,6 @@
             </span>
         </label>
 
-        <label class="checkbox-row answer-reward-modifier-setting">
-            <input asp-for="Input.AllowAnswerRewardModifiers" />
-            <span>
-                <strong>@Localizer["Label_AllowAnswerRewardModifiers"]</strong>
-                <small>@Localizer["Hint_AllowAnswerRewardModifiers"]</small>
-            </span>
-        </label>
 
         <div id="wager-mode-setting">
             <label asp-for="Input.WagerMode">
@@ -164,6 +157,14 @@
                 <option value="5">@Localizer["BuzzMode_Disabled"]</option>
             </select>
         </div>
+
+        <label class="checkbox-row answer-reward-modifier-setting">
+            <input asp-for="Input.AllowAnswerRewardModifiers" />
+            <span>
+                <strong>@Localizer["Label_AllowAnswerRewardModifiers"]</strong>
+                <small>@Localizer["Hint_AllowAnswerRewardModifiers"]</small>
+            </span>
+        </label>
     </section>
 
     <div class="editor-actions">

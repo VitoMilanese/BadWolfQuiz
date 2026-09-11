@@ -358,10 +358,10 @@
     <value>Questa domanda non verrà mai scelta come domanda con puntata casuale.</value>
   </data>
   <data name="Label_AllowAnswerRewardModifiers" xml:space="preserve">
-    <value>Consenti punteggio x2 e 1/2 per la risposta</value>
+    <value>Consenti la valutazione delle risposte x2 e 1/2.</value>
   </data>
   <data name="Hint_AllowAnswerRewardModifiers" xml:space="preserve">
-    <value>Il presentatore può segnare una risposta corretta con il doppio o la metà della ricompensa normale.</value>
+    <value>Il conduttore potrà assegnare a una risposta corretta una ricompensa doppia o dimezzata.</value>
   </data>
   <data name="Label_Created" xml:space="preserve">
     <value>Creato</value>
