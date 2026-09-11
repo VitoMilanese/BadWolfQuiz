@@ -26,13 +26,23 @@ Direct events that need the result of the current game are tracked as pending ru
 
 ## Initial catalog
 
-The initial catalog contains 47 achievements. The source of truth for codes, icons, secrecy, metrics, and numeric targets is `PlayerAchievementService.Catalog`.
+The initial catalog in Web `1.27.0` contained 47 achievements. Web `1.29.0` expands the catalog to 65 achievements. The source of truth for codes, icons, secrecy, metrics, and numeric targets is `PlayerAchievementService.Catalog`.
 
 Long-term progression includes the first completed game, first correct answer, 5 and 25 completed games, 25 and 100 correct answers, first and fifth wins, a five-answer correct streak, score milestones, flawless play, and recovery from a negative score. `BigGame` unlocks at a final score of at least **15,000** points; additional score milestones cover 30,000 in one game and 100,000 / 500,000 / 1,000,000 accumulated points.
 
 Account and community milestones include account registration, playing an owned quiz with at least two other players, playing a public quiz hosted by somebody other than its author, Minigames/AI milestones, visiting the project repository from the site, rating a quiz, changing a password, developer conversations, and contributor recognition.
 
 Gameplay-specific milestones include first question selection, opening the second round, last-to-first comeback wins, final-question reversals, category coverage, silent rounds, all-in outcomes, anonymous shared wagers, Four Clues performance, close buzzer races, kick/rejoin behavior, late joining, avatar changes, and webcam use.
+
+### Topic and media milestones
+
+Web `1.29.0` adds 18 topic and media achievements, expanding the catalog to 65. All 18 advance only for correct answers; wrong, unresolved, or otherwise non-correct results add no progress.
+
+Twelve 25-answer topic milestones use normalized question tags: films, series, cartoons, animated series, games, Harry Potter, Star Wars, fantasy, science fiction, animals, horror, and music. Tag matching trims surrounding whitespace and is case-insensitive. A correct answer advances a given topic at most once even if the question carries multiple matching tags from that topic group.
+
+`AudioQuestions25` / **На слух** requires 25 correct answers to questions containing an `Audio` content block. `VideoQuestions25` / **На екрані** requires 25 correct answers to questions containing either a `Video` or `YouTube` content block. These media milestones are derived from question content blocks and do not depend on media-related tags.
+
+Four secret milestones unlock after one correct answer in their topic group: Doctor Who, Robocop, Terminator, and Mafia / The Godfather.
 
 ### Special gameplay rules
 
@@ -69,4 +79,4 @@ Achievement-specific regression coverage verifies that every catalog achievement
 
 ## Regression coverage
 
-The achievement test suite covers catalog composition, the 15,000-point Big Game threshold, history metrics, duplicate prevention, account/nickname adoption, current-game highlighting, persistence/recovery, gameplay-specific direct unlocks, migration compatibility, player/host UI wiring, and localization-resource completeness.
+The achievement test suite covers catalog composition, the 15,000-point Big Game threshold, history metrics, duplicate prevention, account/nickname adoption, current-game highlighting, persistence/recovery, gameplay-specific direct unlocks, topic-tag normalization, correct-answer-only topic/media progress, Audio/Video/YouTube block detection, migration compatibility, player/host UI wiring, and localization-resource completeness.

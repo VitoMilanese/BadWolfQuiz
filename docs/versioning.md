@@ -64,6 +64,10 @@ Web `1.26.2` is a PATCH release that speeds up **Copy Question** destination loa
 
 Web `1.27.0` is a MINOR release that introduces persistent player achievements. It ships an initial catalog of 47 localized milestones, server-authoritative metric and gameplay-event evaluation, account/nickname history adoption, active-game recovery for pending achievement state, player achievement dialogs, host-lobby per-player achievement inspection, secret achievements, and migration compatibility for development databases created during the feature work. The Big Game milestone unlocks at a final score of at least 15,000 points. See [`docs/features/player-achievements.md`](features/player-achievements.md) for the full behavior and catalog rules.
 
+Web `1.28.0` is a MINOR release that adds first-class question tags to quiz authoring and persistence. Tags are normalized case-insensitively and preserved through question editing, cloning, import/export flows, and quiz APIs so authored topic metadata can be reused reliably.
+
+Web `1.29.0` is a MINOR release that expands persistent player achievements from 47 to 65 with 18 topic and media milestones. All new milestones require correct answers. Topic achievements use normalized question tags, while **By Ear / На слух** detects `Audio` content blocks and **On Screen / На екрані** detects both `Video` and `YouTube` content blocks without relying on media tags. Four one-answer topic milestones remain secret until unlocked. See [`docs/features/player-achievements.md`](features/player-achievements.md) for the detailed rules.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
