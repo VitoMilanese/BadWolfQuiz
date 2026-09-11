@@ -27,9 +27,9 @@ public sealed class HostPlayerAchievementsAssetsTagHelper(
             "data-host-player-achievements-label",
             localizer["Achievements_Title"].Value);
         output.PostContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=10\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=11\" />" +
             "<script defer src=\"/js/achievement-image-trim.js?v=1\"></script>" +
-            "<script defer src=\"/js/host-player-achievements.js?v=6\"></script>");
+            "<script defer src=\"/js/host-player-achievements.js?v=7\"></script>");
     }
 }
 
