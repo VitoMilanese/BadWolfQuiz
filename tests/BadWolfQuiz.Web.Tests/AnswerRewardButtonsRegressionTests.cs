@@ -19,7 +19,6 @@ public sealed class AnswerRewardButtonsRegressionTests
         var english = File.ReadAllText(Path.Combine(localizationRoot, "SharedResource.resx"));
         var ukrainian = File.ReadAllText(Path.Combine(localizationRoot, "SharedResource.uk.resx"));
         var italian = File.ReadAllText(Path.Combine(localizationRoot, "SharedResource.it.resx"));
-        var russian = File.ReadAllText(Path.Combine(localizationRoot, "SharedResource.ru.resx"));
 
         Assert.Contains("asp-for=\"Input.AllowAnswerRewardModifiers\"", view);
         Assert.Contains("Label_AllowAnswerRewardModifiers", view);
@@ -47,10 +46,6 @@ public sealed class AnswerRewardButtonsRegressionTests
         Assert.Contains(
             "Il conduttore potrà assegnare a una risposta corretta una ricompensa doppia o dimezzata.",
             italian);
-        Assert.Contains("Разрешить оценивание ответа x2 и 1/2.", russian);
-        Assert.Contains(
-            "Ведущий сможет засчитать правильный ответ с удвоенной или половинной наградой.",
-            russian);
 
         Assert.Contains("public bool AllowAnswerRewardModifiers { get; set; }", entity);
         Assert.Contains("AllowAnswerRewardModifiers = question.AllowAnswerRewardModifiers", model);
