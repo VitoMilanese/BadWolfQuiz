@@ -32,9 +32,13 @@
 
 .player-achievement-history-pending-header {
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
     gap: 18px;
+}
+
+.player-achievement-history-pending-header .player-achievement-history-pending-description {
+    flex: 1 1 auto;
 }
 
 .player-achievement-history-pending-header b {
