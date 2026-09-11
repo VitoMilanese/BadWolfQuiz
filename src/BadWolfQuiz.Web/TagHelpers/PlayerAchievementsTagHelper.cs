@@ -31,7 +31,8 @@ public sealed class PlayerAchievementAssetsTagHelper : TagHelper
         }
 
         output.PostContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=8\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=9\" />" +
+            "<script defer src=\"/js/achievement-image-trim.js?v=1\"></script>" +
             "<script defer src=\"/js/player-achievements.js?v=1\"></script>");
     }
 }
