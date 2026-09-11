@@ -24,7 +24,9 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Apply issue 622 implementation
-        run: python3 .github/issue622_impl.py
+        run: |
+          python3 .github/issue622_impl.py
+          python3 .github/issue622_fix.py
 
       - name: Install dotnet-ef
         run: dotnet tool install dotnet-ef --version 8.0.29 --tool-path ./.tools
@@ -46,7 +48,7 @@ jobs:
 
       - name: Commit verified implementation
         run: |
-          rm -f .github/workflows/issue622.yml .github/issue622_impl.py
+          rm -f .github/workflows/issue622.yml .github/issue622_impl.py .github/issue622_fix.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
