@@ -2868,4 +2868,34 @@
   <data name="QuizMetadata_Saved" xml:space="preserve">
     <value>Quiz details saved.</value>
   </data>
+  <data name="CategoryColor_Title" xml:space="preserve">
+    <value>Category color</value>
+  </data>
+  <data name="CategoryColor_Help" xml:space="preserve">
+    <value>Choose how this category is colored on the game board.</value>
+  </data>
+  <data name="CategoryColor_Automatic" xml:space="preserve">
+    <value>Automatic</value>
+  </data>
+  <data name="CategoryColor_AutomaticHelp" xml:space="preserve">
+    <value>Uses the automatic Bad Wolf Quiz category palette.</value>
+  </data>
+  <data name="CategoryColor_Custom" xml:space="preserve">
+    <value>My color</value>
+  </data>
+  <data name="CategoryColor_CustomHelp" xml:space="preserve">
+    <value>Uses the color selected below.</value>
+  </data>
+  <data name="CategoryColor_Theme" xml:space="preserve">
+    <value>No category color (site theme)</value>
+  </data>
+  <data name="CategoryColor_ThemeHelp" xml:space="preserve">
+    <value>Uses the colors from the current site theme.</value>
+  </data>
+  <data name="CategoryColor_Picker" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="CategoryColor_Invalid" xml:space="preserve">
+    <value>Choose a valid category color.</value>
+  </data>
 </root>

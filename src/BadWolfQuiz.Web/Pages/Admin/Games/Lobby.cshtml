@@ -1097,7 +1097,9 @@
                  style="--board-columns: @Model.BoardCategories.Count">
             @foreach (var category in Model.BoardCategories)
             {
-                <section class="host-board-column">
+                <section class="host-board-column"
+                         data-category-color-mode="@category.ColorMode.ToString().ToLowerInvariant()"
+                         data-category-custom-color="@category.CustomColor">
                     <h3 data-category-context
                         data-source-category-id="@category.SourceCategoryId"
                         data-category-label="@category.Title"

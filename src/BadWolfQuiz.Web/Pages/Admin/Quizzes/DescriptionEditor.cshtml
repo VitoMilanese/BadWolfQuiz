@@ -19,6 +19,10 @@
         : Localizer["QuizEditor_RoundTitle"].Value;
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/description-editor.css" asp-append-version="true" />
+}
+
 <div class="page-heading">
     <div>
         <p class="eyebrow">@Localizer["Label_Description"]</p>
@@ -51,6 +55,51 @@
     <input type="hidden" asp-for="Input.QuizId" />
     <input type="hidden" asp-for="Input.RoundId" />
     <input type="hidden" asp-for="Input.CategoryId" />
+
+    @if (Model.IsCategory)
+    {
+        <section class="category-color-settings" data-category-color-settings>
+            <div class="category-color-settings-heading">
+                <h2>@Localizer["CategoryColor_Title"]</h2>
+                <p>@Localizer["CategoryColor_Help"]</p>
+            </div>
+
+            <div class="category-color-mode-grid" role="radiogroup" aria-label="@Localizer["CategoryColor_Title"]">
+                <label class="category-color-mode-card">
+                    <input asp-for="Input.ColorMode" type="radio" value="Automatic" />
+                    <span>
+                        <strong>@Localizer["CategoryColor_Automatic"]</strong>
+                        <small>@Localizer["CategoryColor_AutomaticHelp"]</small>
+                    </span>
+                </label>
+                <label class="category-color-mode-card">
+                    <input asp-for="Input.ColorMode" type="radio" value="Custom" />
+                    <span>
+                        <strong>@Localizer["CategoryColor_Custom"]</strong>
+                        <small>@Localizer["CategoryColor_CustomHelp"]</small>
+                    </span>
+                </label>
+                <label class="category-color-mode-card">
+                    <input asp-for="Input.ColorMode" type="radio" value="Theme" />
+                    <span>
+                        <strong>@Localizer["CategoryColor_Theme"]</strong>
+                        <small>@Localizer["CategoryColor_ThemeHelp"]</small>
+                    </span>
+                </label>
+            </div>
+
+            <div class="category-custom-color" data-category-custom-color>
+                <label asp-for="Input.CustomColor">@Localizer["CategoryColor_Picker"]</label>
+                <div class="category-custom-color-row">
+                    <input asp-for="Input.CustomColor"
+                           type="color"
+                           data-category-color-picker />
+                    <output data-category-color-value>@Model.Input.CustomColor</output>
+                </div>
+                <span asp-validation-for="Input.CustomColor" class="field-validation-error"></span>
+            </div>
+        </section>
+    }
 
     <partial name="Shared/_ContentBlockCollection"
              model="blockCollection" />
@@ -136,6 +185,10 @@
             const renameError = document.querySelector("[data-description-rename-error]");
             const entityTitle = document.querySelector("[data-description-entity-title]");
             const previewButton = document.querySelector("[data-open-description-preview]");
+            const categoryColorSettings = document.querySelector("[data-category-color-settings]");
+            const categoryCustomColor = categoryColorSettings?.querySelector("[data-category-custom-color]");
+            const categoryColorPicker = categoryColorSettings?.querySelector("[data-category-color-picker]");
+            const categoryColorValue = categoryColorSettings?.querySelector("[data-category-color-value]");
 
             const closeRenameDialog = () => {
                 if (renameDialog?.open) {
@@ -209,6 +262,22 @@
                     }
                 }
             });
+
+            const syncCategoryColorUi = () => {
+                if (!categoryColorSettings || !categoryCustomColor) return;
+                const selectedMode = categoryColorSettings.querySelector(
+                    'input[name="Input.ColorMode"]:checked')?.value;
+                categoryCustomColor.hidden = selectedMode !== "Custom";
+            };
+
+            categoryColorSettings?.querySelectorAll('input[name="Input.ColorMode"]')
+                .forEach(input => input.addEventListener("change", syncCategoryColorUi));
+            categoryColorPicker?.addEventListener("input", () => {
+                if (categoryColorValue) {
+                    categoryColorValue.textContent = categoryColorPicker.value.toUpperCase();
+                }
+            });
+            syncCategoryColorUi();
 
             const section = document.getElementById("description-blocks");
             const backLink = document.getElementById("description-editor-back");

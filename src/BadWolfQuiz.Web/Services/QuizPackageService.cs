@@ -111,7 +111,9 @@ public sealed class QuizPackageService(QuizDbContext db)
                                     question.AnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                                     question.Tags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray()))
                                 .ToArray(),
-                            category.DescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray()))
+                            category.DescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
+                            category.ColorMode,
+                            category.CustomColor))
                         .ToArray(),
                     round.DescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                     round.UseRandomAnonymousSharedWagerQuestions,
@@ -254,7 +256,13 @@ public sealed class QuizPackageService(QuizDbContext db)
             }
             foreach (var sourceCategory in sourceRound.Categories.OrderBy(category => category.SortOrder))
             {
-                var category = new QuizCategory { Title = sourceCategory.Title, SortOrder = sourceCategory.SortOrder };
+                var category = new QuizCategory
+                {
+                    Title = sourceCategory.Title,
+                    SortOrder = sourceCategory.SortOrder,
+                    ColorMode = sourceCategory.ColorMode,
+                    CustomColor = NormalizeCategoryColor(sourceCategory.CustomColor)
+                };
                 foreach (var sourceBlock in sourceCategory.DescriptionBlocks ?? [])
                 {
                     var block = new CategoryDescriptionContentBlock();
@@ -396,6 +404,11 @@ public sealed class QuizPackageService(QuizDbContext db)
             round.Categories.Any(category => category is null ||
                 string.IsNullOrWhiteSpace(category.Title) ||
                 category.Title.Length > 100 || category.Questions is null ||
+                !Enum.IsDefined(category.ColorMode) ||
+                (category.ColorMode == QuizCategoryColorMode.Custom &&
+                    NormalizeCategoryColor(category.CustomColor) is null) ||
+                (category.CustomColor is not null &&
+                    NormalizeCategoryColor(category.CustomColor) is null) ||
                 category.Questions.Length > 100 || category.Questions.Any(question =>
                     question is null || question.QuestionBlocks is null || question.AnswerBlocks is null))))
         {
@@ -452,6 +465,16 @@ public sealed class QuizPackageService(QuizDbContext db)
         }
     }
 
+    private static string? NormalizeCategoryColor(string? value)
+    {
+        var normalized = value?.Trim().ToUpperInvariant();
+        return normalized is { Length: 7 } &&
+            normalized[0] == '#' &&
+            normalized.Skip(1).All(Uri.IsHexDigit)
+                ? normalized
+                : null;
+    }
+
     private static string NormalizeEntryName(string name)
     {
         var normalized = name.Replace('\\', '/').TrimStart('/');
@@ -482,7 +505,9 @@ public sealed class QuizPackageService(QuizDbContext db)
     private sealed record RowData(int RowIndex, int Points);
     private sealed record CategoryData(
         string Title, int SortOrder, QuestionData[] Questions,
-        BlockData[]? DescriptionBlocks = null);
+        BlockData[]? DescriptionBlocks = null,
+        QuizCategoryColorMode ColorMode = QuizCategoryColorMode.Automatic,
+        string? CustomColor = null);
     private sealed record QuestionData(
         int RowIndex, int? TimeLimitSecondsOverride, BuzzActivationMode BuzzModeOverride,
         int BuzzDelaySeconds, bool IsSpecial, QuestionPresentationType PresentationType,

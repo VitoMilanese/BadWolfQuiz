@@ -17,6 +17,8 @@ public sealed class DescriptionEditorModel(
     PremiumHostAccess premiumHostAccess,
     IStringLocalizer<SharedResource> localizer) : PageModel
 {
+    private const string DefaultCategoryColor = "#2563EB";
+
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
@@ -30,6 +32,8 @@ public sealed class DescriptionEditorModel(
         public int QuizId { get; set; }
         public int RoundId { get; set; }
         public int? CategoryId { get; set; }
+        public QuizCategoryColorMode ColorMode { get; set; } = QuizCategoryColorMode.Automatic;
+        public string CustomColor { get; set; } = DefaultCategoryColor;
         public List<ContentBlockInputModel> Blocks { get; set; } = new();
     }
 
@@ -47,6 +51,8 @@ public sealed class DescriptionEditorModel(
                 {
                     x.Id,
                     x.Title,
+                    x.ColorMode,
+                    x.CustomColor,
                     RoundId = x.QuizRoundId,
                     QuizId = x.Round.QuizId,
                     MediaState = x.Round.Quiz.MediaState
@@ -91,6 +97,8 @@ public sealed class DescriptionEditorModel(
                 QuizId = category.QuizId,
                 RoundId = category.RoundId,
                 CategoryId = category.Id,
+                ColorMode = category.ColorMode,
+                CustomColor = category.CustomColor ?? DefaultCategoryColor,
                 Blocks = blocks
             };
             EntityTitle = category.Title;
@@ -195,6 +203,23 @@ public sealed class DescriptionEditorModel(
                 category.Id,
                 category.Title,
                 cancellationToken);
+            var normalizedCustomColor = NormalizeCategoryCustomColor(Input.CustomColor);
+            if (!Enum.IsDefined(Input.ColorMode) ||
+                (Input.ColorMode == QuizCategoryColorMode.Custom && normalizedCustomColor is null))
+            {
+                ModelState.AddModelError(
+                    "Input.CustomColor",
+                    localizer["CategoryColor_Invalid"].Value);
+                ApplyStoredHandlers(
+                    Input.Blocks,
+                    "CategoryDescriptionBlockFile",
+                    "CategoryDescriptionBlockAudio");
+                return Page();
+            }
+
+            category.ColorMode = Input.ColorMode;
+            category.CustomColor = normalizedCustomColor;
+
             if (!await SyncBlocksAsync(category.DescriptionBlocks, cancellationToken))
             {
                 ApplyStoredHandlers(
@@ -500,6 +525,20 @@ public sealed class DescriptionEditorModel(
             .ToListAsync(cancellationToken);
         var roundPosition = roundIds.IndexOf(roundId) + 1;
         return $"{roundLabel} {Math.Max(roundPosition, 1)}";
+    }
+
+    private static string? NormalizeCategoryCustomColor(string? value)
+    {
+        var normalized = value?.Trim().ToUpperInvariant();
+        if (normalized is null ||
+            normalized.Length != 7 ||
+            normalized[0] != '#' ||
+            normalized.Skip(1).Any(character => !Uri.IsHexDigit(character)))
+        {
+            return null;
+        }
+
+        return normalized;
     }
 
     private static void ApplyStoredHandlers(

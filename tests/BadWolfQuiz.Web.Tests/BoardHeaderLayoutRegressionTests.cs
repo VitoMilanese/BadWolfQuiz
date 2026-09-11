@@ -71,6 +71,22 @@ public sealed class BoardHeaderLayoutRegressionTests
     }
 
     [Fact]
+    public void Host_board_supports_custom_and_theme_category_color_modes()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "board-header-layout.js"));
+
+        Assert.Contains("column.dataset.categoryCustomColor", script, StringComparison.Ordinal);
+        Assert.Contains("applyCustomCategoryColor", script, StringComparison.Ordinal);
+        Assert.Contains("gradientEndForForeground", script, StringComparison.Ordinal);
+        Assert.Contains("chooseForeground", script, StringComparison.Ordinal);
+        Assert.Contains("--board-category-header-foreground", script, StringComparison.Ordinal);
+        Assert.Contains("--board-category-cell-foreground", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Host_gameplay_bootstrap_loads_board_header_layout()
     {
         var script = File.ReadAllText(FindWebFile(

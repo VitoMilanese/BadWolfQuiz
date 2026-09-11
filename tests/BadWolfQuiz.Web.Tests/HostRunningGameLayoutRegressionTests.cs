@@ -53,8 +53,8 @@ public sealed class HostRunningGameLayoutRegressionTests
         Assert.Contains("var(--board-category-header-bg,", css);
         Assert.Contains("var(--board-category-cell-bg,", css);
         Assert.Contains("var(--board-category-resolved-bg,", css);
-        Assert.Contains("var(--board-category-foreground, var(--text))", css);
-        Assert.Contains("var(--board-category-foreground, var(--gold))", css);
+        Assert.Contains("var(--board-category-header-foreground, var(--board-category-foreground, var(--text)))", css);
+        Assert.Contains("var(--board-category-cell-foreground, var(--board-category-foreground, var(--gold)))", css);
 
         var colorLines = css.Split('\n')
             .Where(line => line.Contains("--board-category-", StringComparison.Ordinal))

@@ -150,6 +150,7 @@ public sealed class LobbyModel(
         var result = LoadPage(id, previewQuestionId, previewAnswer);
         if (result is PageResult)
         {
+            await LoadBoardCategoryColorsAsync(cancellationToken);
             await LoadContentBlockAutoplayOverridesAsync(cancellationToken);
 
             AnswerResultOverlay =
@@ -168,6 +169,41 @@ public sealed class LobbyModel(
             ExistingRating = rating.Score;
         }
         return result;
+    }
+
+    private async Task LoadBoardCategoryColorsAsync(
+        CancellationToken cancellationToken)
+    {
+        if (BoardCategories.Count == 0)
+        {
+            return;
+        }
+
+        var categoryIds = BoardCategories
+            .Select(category => category.SourceCategoryId)
+            .ToArray();
+        var colors = await db.QuizCategories
+            .AsNoTracking()
+            .Where(category =>
+                categoryIds.Contains(category.Id) &&
+                category.Round.QuizId == Game.Session.Quiz.SourceQuizId)
+            .Select(category => new
+            {
+                category.Id,
+                category.ColorMode,
+                category.CustomColor
+            })
+            .ToDictionaryAsync(category => category.Id, cancellationToken);
+
+        BoardCategories = BoardCategories
+            .Select(category => colors.TryGetValue(category.SourceCategoryId, out var color)
+                ? category with
+                {
+                    ColorMode = color.ColorMode,
+                    CustomColor = color.CustomColor
+                }
+                : category)
+            .ToArray();
     }
 
     private async Task LoadContentBlockAutoplayOverridesAsync(
@@ -2066,7 +2102,9 @@ public sealed class LobbyModel(
 public sealed record GameBoardCategory(
     int SourceCategoryId,
     string Title,
-    IReadOnlyList<RuntimeQuestion> Questions);
+    IReadOnlyList<RuntimeQuestion> Questions,
+    BadWolfQuiz.Web.Models.QuizCategoryColorMode ColorMode = BadWolfQuiz.Web.Models.QuizCategoryColorMode.Automatic,
+    string? CustomColor = null);
 
 
 public sealed record RoundLeaderboardEntry(

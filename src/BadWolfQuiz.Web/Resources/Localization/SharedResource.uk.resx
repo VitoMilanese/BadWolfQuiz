@@ -2868,4 +2868,34 @@
   <data name="QuizMetadata_Saved" xml:space="preserve">
     <value>Інформацію про квіз збережено.</value>
   </data>
+  <data name="CategoryColor_Title" xml:space="preserve">
+    <value>Колір категорії</value>
+  </data>
+  <data name="CategoryColor_Help" xml:space="preserve">
+    <value>Оберіть, як ця категорія буде оформлена на таблиці питань.</value>
+  </data>
+  <data name="CategoryColor_Automatic" xml:space="preserve">
+    <value>Автоматичний</value>
+  </data>
+  <data name="CategoryColor_AutomaticHelp" xml:space="preserve">
+    <value>Використовує автоматичну палітру категорій Bad Wolf Quiz.</value>
+  </data>
+  <data name="CategoryColor_Custom" xml:space="preserve">
+    <value>Мій колір</value>
+  </data>
+  <data name="CategoryColor_CustomHelp" xml:space="preserve">
+    <value>Використовує вибраний нижче колір.</value>
+  </data>
+  <data name="CategoryColor_Theme" xml:space="preserve">
+    <value>Без кольору (тема оформлення)</value>
+  </data>
+  <data name="CategoryColor_ThemeHelp" xml:space="preserve">
+    <value>Використовує кольори поточної теми оформлення сайту.</value>
+  </data>
+  <data name="CategoryColor_Picker" xml:space="preserve">
+    <value>Колір</value>
+  </data>
+  <data name="CategoryColor_Invalid" xml:space="preserve">
+    <value>Оберіть коректний колір категорії.</value>
+  </data>
 </root>

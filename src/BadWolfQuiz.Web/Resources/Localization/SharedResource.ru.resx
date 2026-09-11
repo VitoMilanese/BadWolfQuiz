@@ -2868,4 +2868,34 @@
   <data name="QuizMetadata_Saved" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="CategoryColor_Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="CategoryColor_Help" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="CategoryColor_Automatic" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="CategoryColor_AutomaticHelp" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="CategoryColor_Custom" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="CategoryColor_CustomHelp" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="CategoryColor_Theme" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="CategoryColor_ThemeHelp" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="CategoryColor_Picker" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="CategoryColor_Invalid" xml:space="preserve">
+    <value>Україна</value>
+  </data>
 </root>

@@ -16,6 +16,9 @@ public static class DatabaseMigrationService
     private const string PlayerAchievementsMigrationId =
         "20260909225025_AddPlayerAchievements";
 
+    private const string QuizCategoryColorsMigrationSuffix =
+        "_AddQuizCategoryColors";
+
     private static readonly string[] ContentBlockAutoplayTables =
     [
         "QuestionContentBlocks",
@@ -36,6 +39,7 @@ public static class DatabaseMigrationService
         await UpgradeLegacyQuizRatingsAsync(db, cancellationToken);
         await PrepareContentBlockAutoplayMigrationAsync(db, cancellationToken);
         await PreparePlayerAchievementsMigrationAsync(db, cancellationToken);
+        await PrepareQuizCategoryColorsMigrationAsync(db, cancellationToken);
         await db.Database.MigrateAsync(cancellationToken);
         await EnsureContentBlockAutoplayColumnsAsync(db, cancellationToken);
     }
@@ -287,6 +291,65 @@ public static class DatabaseMigrationService
                 await transaction.RollbackAsync(cancellationToken);
                 throw;
             }
+        }
+        finally
+        {
+            if (shouldClose)
+            {
+                await connection.CloseAsync();
+            }
+        }
+    }
+
+    private static async Task PrepareQuizCategoryColorsMigrationAsync(
+        QuizDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var migrationId = db.Database.GetMigrations()
+            .SingleOrDefault(id => id.EndsWith(
+                QuizCategoryColorsMigrationSuffix,
+                StringComparison.Ordinal));
+        if (migrationId is null)
+        {
+            return;
+        }
+
+        var connection = db.Database.GetDbConnection();
+        var shouldClose = connection.State == ConnectionState.Closed;
+        if (shouldClose)
+        {
+            await connection.OpenAsync(cancellationToken);
+        }
+
+        try
+        {
+            if (!await TableExistsAsync(connection, "__EFMigrationsHistory", cancellationToken) ||
+                await MigrationAppliedAsync(connection, migrationId, cancellationToken) ||
+                await TableExistsAsync(connection, "QuizCategories", cancellationToken))
+            {
+                return;
+            }
+
+            await using var command = connection.CreateCommand();
+            command.CommandText =
+                """
+                INSERT OR IGNORE INTO "__EFMigrationsHistory"
+                    ("MigrationId", "ProductVersion")
+                VALUES
+                    ($migrationId, $productVersion);
+                """;
+
+            var migrationParameter = command.CreateParameter();
+            migrationParameter.ParameterName = "$migrationId";
+            migrationParameter.Value = migrationId;
+            command.Parameters.Add(migrationParameter);
+
+            var productVersion = command.CreateParameter();
+            productVersion.ParameterName = "$productVersion";
+            productVersion.Value = EfProductVersion;
+            command.Parameters.Add(productVersion);
+
+            await command.ExecuteNonQueryAsync(cancellationToken);
         }
         finally
         {

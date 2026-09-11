@@ -2868,4 +2868,34 @@
   <data name="QuizMetadata_Saved" xml:space="preserve">
     <value>Dettagli del quiz salvati.</value>
   </data>
+  <data name="CategoryColor_Title" xml:space="preserve">
+    <value>Colore categoria</value>
+  </data>
+  <data name="CategoryColor_Help" xml:space="preserve">
+    <value>Scegli come colorare questa categoria sul tabellone di gioco.</value>
+  </data>
+  <data name="CategoryColor_Automatic" xml:space="preserve">
+    <value>Automatico</value>
+  </data>
+  <data name="CategoryColor_AutomaticHelp" xml:space="preserve">
+    <value>Usa la palette automatica delle categorie di Bad Wolf Quiz.</value>
+  </data>
+  <data name="CategoryColor_Custom" xml:space="preserve">
+    <value>Il mio colore</value>
+  </data>
+  <data name="CategoryColor_CustomHelp" xml:space="preserve">
+    <value>Usa il colore selezionato qui sotto.</value>
+  </data>
+  <data name="CategoryColor_Theme" xml:space="preserve">
+    <value>Nessun colore categoria (tema del sito)</value>
+  </data>
+  <data name="CategoryColor_ThemeHelp" xml:space="preserve">
+    <value>Usa i colori del tema attuale del sito.</value>
+  </data>
+  <data name="CategoryColor_Picker" xml:space="preserve">
+    <value>Colore</value>
+  </data>
+  <data name="CategoryColor_Invalid" xml:space="preserve">
+    <value>Seleziona un colore categoria valido.</value>
+  </data>
 </root>
