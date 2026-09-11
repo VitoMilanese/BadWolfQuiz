@@ -20,6 +20,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 ## Features
 
 - [Quiz and question editing](features/quiz-editor.md)
+- [Colored game board categories](features/category-colors.md)
 - [Question tags](features/question-tags.md)
 - [Question copying and cloning](features/question-copying.md)
 - [Shareable quiz description links](features/shareable-quiz-descriptions.md)
