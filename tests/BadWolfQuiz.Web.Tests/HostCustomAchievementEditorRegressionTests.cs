@@ -134,7 +134,7 @@ public sealed class HostCustomAchievementEditorRegressionTests
     }
 
     [Fact]
-    public void Editor_save_is_ajax_compact_and_uses_shared_save_shortcut()
+    public void Editor_save_is_ajax_compact_and_uses_shared_save_shortcut_and_popup()
     {
         var root = FindRepositoryRoot();
         var editor = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "Pages", "Admin", "CustomAchievements.cshtml"));
@@ -142,12 +142,15 @@ public sealed class HostCustomAchievementEditorRegressionTests
         var css = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "custom-achievements.css"));
         var script = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "custom-achievement-editor.js"));
         var shortcut = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "editor-save-shortcut.js"));
+        var overlay = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "editor-save-overlay.js"));
         var shortcutHelper = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "TagHelpers", "EditorSaveShortcutAssetsTagHelper.cs"));
 
         Assert.Contains("data-ajax-custom-achievement-editor", editor, StringComparison.Ordinal);
         Assert.Contains("data-custom-achievement-save-status", editor, StringComparison.Ordinal);
         Assert.Contains("ajax-save-status", editor, StringComparison.Ordinal);
+        Assert.Contains("~/js/editor-save-overlay.js", editor, StringComparison.Ordinal);
         Assert.DoesNotContain("CustomAchievementLocalizer[\"Back\"]", editor, StringComparison.Ordinal);
+        Assert.DoesNotContain("CustomAchievementLocalizer[\"TargetHint\"]", editor, StringComparison.Ordinal);
         Assert.DoesNotContain(">HOST</span>", editor, StringComparison.Ordinal);
         Assert.Contains("CustomAchievementLocalizer[editing ? \"Save\" : \"Add\"]", editor, StringComparison.Ordinal);
         Assert.Contains("data-custom-achievement-new-button", editor, StringComparison.Ordinal);
@@ -158,8 +161,14 @@ public sealed class HostCustomAchievementEditorRegressionTests
         Assert.Contains("window.history.replaceState", script, StringComparison.Ordinal);
         Assert.Contains("form[data-ajax-custom-achievement-editor]", shortcut, StringComparison.Ordinal);
         Assert.Contains("CustomAchievementsModel", shortcutHelper, StringComparison.Ordinal);
+        Assert.Contains("form[data-ajax-custom-achievement-editor]", overlay, StringComparison.Ordinal);
+        Assert.Contains("[data-custom-achievement-save-status]", overlay, StringComparison.Ordinal);
+        Assert.Contains("editor-save-overlay", overlay, StringComparison.Ordinal);
         Assert.Contains("align-content: start;", css, StringComparison.Ordinal);
         Assert.Contains("max-height: 48px;", css, StringComparison.Ordinal);
+        Assert.Contains("min-height: 2.35em;", css, StringComparison.Ordinal);
+        Assert.Contains(".question-tag-list:not(:has(", css, StringComparison.Ordinal);
+        Assert.Contains(".question-tag-fields", css, StringComparison.Ordinal);
     }
 
     private static string FindRepositoryRoot()
