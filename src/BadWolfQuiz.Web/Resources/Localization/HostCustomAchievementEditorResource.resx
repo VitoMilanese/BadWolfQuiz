@@ -34,6 +34,8 @@
   <data name="Edit" xml:space="preserve"><value>Edit</value></data>
   <data name="Delete" xml:space="preserve"><value>Delete</value></data>
   <data name="DeleteConfirm" xml:space="preserve"><value>Delete this achievement? Existing player unlock history will be kept.</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Close" xml:space="preserve"><value>Close</value></data>
   <data name="Back" xml:space="preserve"><value>Back</value></data>
   <data name="Add" xml:space="preserve"><value>Add</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>

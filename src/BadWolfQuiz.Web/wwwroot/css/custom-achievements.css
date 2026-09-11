@@ -311,7 +311,10 @@ body:has(.custom-achievements-page) .topbar {
 .custom-achievement-field-grid > .custom-achievement-field > label {
     display: flex;
     align-items: flex-end;
-    min-height: 2.35em;
+    height: 34px;
+    min-height: 34px;
+    box-sizing: border-box;
+    line-height: 1.15;
 }
 
 .custom-achievement-field > label,

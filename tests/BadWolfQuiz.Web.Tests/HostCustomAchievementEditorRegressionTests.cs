@@ -166,9 +166,18 @@ public sealed class HostCustomAchievementEditorRegressionTests
         Assert.Contains("editor-save-overlay", overlay, StringComparison.Ordinal);
         Assert.Contains("align-content: start;", css, StringComparison.Ordinal);
         Assert.Contains("max-height: 48px;", css, StringComparison.Ordinal);
-        Assert.Contains("min-height: 2.35em;", css, StringComparison.Ordinal);
+        Assert.Contains("height: 34px;", css, StringComparison.Ordinal);
         Assert.Contains(".question-tag-list:not(:has(", css, StringComparison.Ordinal);
         Assert.Contains(".question-tag-fields", css, StringComparison.Ordinal);
+        Assert.Contains("data-custom-achievement-edit", editor, StringComparison.Ordinal);
+        Assert.Contains("data-custom-achievement-delete-form", editor, StringComparison.Ordinal);
+        Assert.Contains("data-custom-achievement-delete-dialog", editor, StringComparison.Ordinal);
+        Assert.Contains("class=\"app-dialog\"", editor, StringComparison.Ordinal);
+        Assert.DoesNotContain("onsubmit=\"return confirm", editor, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.confirm", script, StringComparison.Ordinal);
+        Assert.Contains("enterEditMode", script, StringComparison.Ordinal);
+        Assert.Contains("enterCreateMode", script, StringComparison.Ordinal);
+        Assert.Contains("custom-achievement:set-tags", script, StringComparison.Ordinal);
     }
 
     private static string FindRepositoryRoot()

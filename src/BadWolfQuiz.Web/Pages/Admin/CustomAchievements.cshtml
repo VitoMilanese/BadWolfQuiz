@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = CustomAchievementLocalizer["Title"];
     var editing = Model.Input.Id.HasValue;
-    var deleteConfirmMessage = CustomAchievementLocalizer["DeleteConfirm"].Value;
 }
 
 @section Styles {
@@ -57,7 +56,13 @@
                       asp-page-handler="Save"
                       class="custom-achievement-form"
                       data-ajax-custom-achievement-editor
-                      data-save-error="@CustomAchievementLocalizer["SaveFailed"]">
+                      data-save-error="@CustomAchievementLocalizer["SaveFailed"]"
+                      data-create-kicker="@CustomAchievementLocalizer["EditorKickerNew"]"
+                      data-create-title="@CustomAchievementLocalizer["CreateTitle"]"
+                      data-add-label="@CustomAchievementLocalizer["Add"]"
+                      data-edit-kicker="@CustomAchievementLocalizer["EditorKickerEdit"]"
+                      data-edit-title="@CustomAchievementLocalizer["EditTitle"]"
+                      data-save-label="@CustomAchievementLocalizer["Save"]">
                     <input type="hidden" asp-for="Input.Id" />
 
                     <div class="custom-achievement-field-grid">
@@ -145,24 +150,16 @@
                         <label asp-for="Input.Artwork">@CustomAchievementLocalizer["Artwork"]</label>
                         <div class="custom-achievement-artwork-row">
                             <div class="custom-achievement-artwork-frame" data-custom-achievement-artwork-frame>
-                                @if (editing)
-                                {
-                                    <img class="custom-achievement-artwork-preview"
-                                         src="/AchievementArtwork/@Model.Input.Id.Value"
-                                         alt="@CustomAchievementLocalizer["CurrentArtworkAlt"]"
-                                         data-custom-achievement-artwork-preview />
-                                }
-                                else
-                                {
-                                    <span class="custom-achievement-artwork-placeholder"
-                                          data-custom-achievement-artwork-placeholder>
-                                        @CustomAchievementLocalizer["ArtworkPlaceholder"]
-                                    </span>
-                                    <img class="custom-achievement-artwork-preview"
-                                         alt=""
-                                         data-custom-achievement-artwork-preview
-                                         hidden />
-                                }
+                                <span class="custom-achievement-artwork-placeholder"
+                                      data-custom-achievement-artwork-placeholder
+                                      hidden="@editing">
+                                    @CustomAchievementLocalizer["ArtworkPlaceholder"]
+                                </span>
+                                <img class="custom-achievement-artwork-preview"
+                                     src="@(editing ? $"/AchievementArtwork/{Model.Input.Id.Value}" : string.Empty)"
+                                     alt="@(editing ? CustomAchievementLocalizer["CurrentArtworkAlt"].Value : string.Empty)"
+                                     data-custom-achievement-artwork-preview
+                                     hidden="@(!editing)" />
                             </div>
                             <div class="custom-achievement-artwork-control">
                                 <input asp-for="Input.Artwork"
@@ -170,10 +167,9 @@
                                        accept="image/png,.png"
                                        data-custom-achievement-artwork-input />
                                 <small>@CustomAchievementLocalizer["ArtworkHint"]</small>
-                                @if (editing)
-                                {
-                                    <small>@CustomAchievementLocalizer["ArtworkKeepHint"]</small>
-                                }
+                                <small data-custom-achievement-artwork-keep-hint hidden="@(!editing)">
+                                    @CustomAchievementLocalizer["ArtworkKeepHint"]
+                                </small>
                             </div>
                         </div>
                         <span asp-validation-for="Input.Artwork" class="text-danger"></span>
@@ -225,7 +221,10 @@
                     <div class="custom-achievement-list" data-custom-achievement-list>
                         @foreach (var achievement in Model.Achievements)
                         {
-                            <article class="custom-achievement-list-card @(Model.Input.Id == achievement.Id ? "is-selected" : null)" data-custom-achievement-card data-achievement-id="@achievement.Id">
+                            <article class="custom-achievement-list-card @(Model.Input.Id == achievement.Id ? "is-selected" : null)"
+                                     data-custom-achievement-card
+                                     data-achievement-id="@achievement.Id"
+                                     data-achievement-target="@achievement.Target">
                                 <div class="custom-achievement-list-artwork">
                                     <img src="/AchievementArtwork/@achievement.Id" alt="" aria-hidden="true" loading="lazy" decoding="async" />
                                 </div>
@@ -248,13 +247,14 @@
                                 <div class="custom-achievement-list-actions">
                                     <a class="button button-secondary"
                                        asp-page="/Admin/CustomAchievements"
-                                       asp-route-edit="@achievement.Id">
+                                       asp-route-edit="@achievement.Id"
+                                       data-custom-achievement-edit>
                                         @CustomAchievementLocalizer["Edit"]
                                     </a>
                                     <form method="post"
                                           asp-page-handler="Delete"
                                           asp-route-id="@achievement.Id"
-                                          onsubmit="return confirm('@deleteConfirmMessage');">
+                                          data-custom-achievement-delete-form>
                                         <button class="button button-danger" type="submit">
                                             @CustomAchievementLocalizer["Delete"]
                                         </button>
@@ -268,6 +268,33 @@
         </div>
     </main>
 </div>
+
+<dialog id="custom-achievement-delete-dialog"
+        class="app-dialog"
+        data-custom-achievement-delete-dialog>
+    <form method="dialog" class="dialog-card dialog-card-danger">
+        <div class="dialog-heading">
+            <div>
+                <h2>@CustomAchievementLocalizer["Delete"]</h2>
+            </div>
+            <button class="dialog-close"
+                    type="submit"
+                    value="cancel"
+                    aria-label="@CustomAchievementLocalizer["Close"]">×</button>
+        </div>
+
+        <p class="dialog-warning">@CustomAchievementLocalizer["DeleteConfirm"]</p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary" type="submit" value="cancel">
+                @CustomAchievementLocalizer["Cancel"]
+            </button>
+            <button class="button button-danger" type="button" data-custom-achievement-delete-confirm>
+                @CustomAchievementLocalizer["Delete"]
+            </button>
+        </div>
+    </form>
+</dialog>
 
 @section Scripts {
     <script src="~/js/custom-achievement-editor.js" asp-append-version="true"></script>
@@ -541,6 +568,23 @@
                     }
                 }
             });
+            editor.addEventListener("custom-achievement:set-tags", event => {
+                const incoming = Array.isArray(event.detail?.tags) ? event.detail.tags : [];
+                const seen = new Set();
+                tags = incoming
+                    .map(value => String(value ?? "").trim())
+                    .filter(value => {
+                        if (!value) return false;
+                        const normalized = key(value);
+                        if (seen.has(normalized)) return false;
+                        seen.add(normalized);
+                        return true;
+                    });
+                input.value = "";
+                hideSuggestions();
+                render();
+            });
+
             render();
         })();
     </script>
