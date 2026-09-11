@@ -68,6 +68,10 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("History_ConfirmIdentity", page);
         Assert.DoesNotContain("@HistoryLocalizer[\"History_PendingPlayer\"]", page);
         Assert.DoesNotContain("<strong>@pending.PlayerName</strong>", page);
+        Assert.Contains("<header class=\"player-achievement-history-pending-header\">", page);
+        Assert.Contains("<p class=\"player-achievement-history-pending-description\">", page);
+        Assert.Contains("@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode", page);
+        Assert.DoesNotContain("@BadWolfQuiz.Web.Pages.Admin/Games/PlayerAchievementsModel.PlayersMode", page);
         Assert.Contains("player-achievement-history.js", page);
 
         Assert.Contains("sessionRegistry.FindOwned", model);
@@ -86,6 +90,7 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("remaining.Count > 0 ? PendingMode : PlayersMode", model);
 
         Assert.Contains("justify-content: center", css);
+        Assert.Contains(".player-achievement-history-body.is-players-mode,\n.player-achievement-history-body.is-pending-mode", css);
         Assert.Contains("grid-template-columns: minmax(230px, 290px) minmax(0, 1fr)", css);
         Assert.Contains("width: 124px", css);
         Assert.Contains("linear-gradient(90deg, var(--red-bright), var(--gold), transparent 76%)", css);
@@ -93,6 +98,8 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.DoesNotContain("overflow: auto", css);
         Assert.Contains("player-achievement-history-confirm-form", confirmationCss);
         Assert.Contains("player-achievement-history-pending-card", confirmationCss);
+        Assert.Contains("align-items: center", confirmationCss);
+        Assert.Contains("justify-content: space-between", confirmationCss);
         Assert.Contains("justify-content: flex-end", confirmationCss);
         Assert.DoesNotContain("overflow: auto", confirmationCss);
 
