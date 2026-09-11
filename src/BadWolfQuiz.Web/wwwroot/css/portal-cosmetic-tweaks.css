@@ -1,0 +1,173 @@
+/* Desktop-only compaction for the large portal heroes.
+ * Keep the existing responsive layouts untouched on smaller screens.
+ */
+@media (min-width: 1200px) {
+    body:has(.my-quizzes-page) .my-quizzes-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(210px, 0.34fr);
+        gap: clamp(28px, 4vw, 64px);
+        min-height: clamp(330px, 40dvh, 430px);
+        padding-top: clamp(30px, 3.5vw, 54px);
+        padding-bottom: clamp(24px, 2.8vw, 40px);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-heading h1 {
+        font-size: clamp(3.6rem, 6.6vw, 7.6rem);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-art {
+        min-height: 190px;
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-art::before {
+        width: min(18vw, 285px);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-word {
+        top: 13%;
+        right: 12%;
+        font-size: clamp(2.2rem, 3.8vw, 4rem);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-slash {
+        width: 9px;
+        height: min(20vw, 220px);
+        box-shadow: 7px 7px 0 color-mix(in srgb, var(--gold) 72%, transparent);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-art strong {
+        font-size: clamp(3.5rem, 5.8vw, 6rem);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-art strong small {
+        margin-top: 12px;
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 0.34fr);
+        gap: clamp(28px, 4vw, 68px);
+        padding-top: clamp(30px, 3.5vw, 54px);
+        padding-bottom: clamp(22px, 2.6vw, 36px);
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-heading h1 {
+        font-size: clamp(3.7rem, 7vw, 8rem);
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-intro {
+        margin-top: 24px;
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-hero-art {
+        min-height: 175px;
+        padding: 18px 22px 14px;
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-hero-word {
+        top: 10px;
+        right: 20px;
+        font-size: clamp(2.5rem, 4.2vw, 4.8rem);
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-hero-slash {
+        top: 60px;
+        right: 4px;
+        width: 112px;
+        height: 9px;
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-hero-art strong {
+        font-size: clamp(1.9rem, 3.3vw, 3.7rem);
+    }
+
+    body:has(.join-entry-page) .join-entry-copy h1 {
+        font-size: clamp(3.5rem, 6.4vw, 7.4rem);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(190px, 0.3fr);
+        gap: clamp(28px, 4vw, 64px);
+        min-height: clamp(330px, 40dvh, 430px);
+        padding-top: clamp(30px, 3.5vw, 54px);
+        padding-bottom: clamp(24px, 2.8vw, 40px);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero h1 {
+        font-size: clamp(3.6rem, 6.5vw, 7.6rem);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter {
+        width: clamp(180px, 16vw, 220px);
+        min-height: 0;
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter::before,
+    body:has(.game-history-index-page) .game-history-hero-counter::after {
+        width: 7px;
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter::after {
+        right: calc(17% - 8px);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter > span,
+    body:has(.game-history-index-page) .game-history-hero-counter > small {
+        font-size: 0.56rem;
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter > strong {
+        margin: 8px 0 7px;
+        font-size: clamp(3.4rem, 5.4vw, 5.9rem);
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 0.3fr);
+        gap: clamp(28px, 4vw, 64px);
+        min-height: clamp(340px, 41dvh, 440px);
+        padding-top: clamp(30px, 3.5vw, 54px);
+        padding-bottom: 28px;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero h1 {
+        font-size: clamp(3.6rem, 6.5vw, 7.5rem);
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero-mark {
+        width: clamp(220px, 18vw, 280px);
+        min-height: 190px;
+        justify-self: end;
+        padding: 26px 24px 22px;
+        clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero-mark::before {
+        width: 8px;
+        box-shadow: -11px 0 0 color-mix(in srgb, var(--gold) 80%, transparent);
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero-label {
+        font-size: 0.58rem;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero-mark strong {
+        margin: 10px 0 8px;
+        font-size: clamp(3.6rem, 5.8vw, 6.2rem);
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero-mark small {
+        margin-top: 10px;
+        font-size: 0.56rem;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-signal {
+        gap: 5px;
+        height: 26px;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-signal i {
+        width: 5px;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-roster {
+        margin-top: 28px;
+    }
+}

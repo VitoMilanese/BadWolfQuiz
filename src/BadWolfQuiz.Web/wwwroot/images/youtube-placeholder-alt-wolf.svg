@@ -1,31 +1,88 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#17181d" />
-      <stop offset="0.5" stop-color="#08090c" />
-      <stop offset="1" stop-color="#19060a" />
+      <stop offset="0" stop-color="#070b12" />
+      <stop offset="0.58" stop-color="#0b0d13" />
+      <stop offset="1" stop-color="#16070b" />
     </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="47%" r="48%">
+    <radialGradient id="halo" cx="50%" cy="47%" r="50%">
       <stop offset="0" stop-color="#ef233c" stop-opacity="0.24" />
+      <stop offset="0.55" stop-color="#ef233c" stop-opacity="0.07" />
       <stop offset="1" stop-color="#ef233c" stop-opacity="0" />
     </radialGradient>
-    <linearGradient id="fur" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#2a2b31" />
-      <stop offset="1" stop-color="#0c0d11" />
+    <linearGradient id="wolf" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#232833" />
+      <stop offset="0.5" stop-color="#11151d" />
+      <stop offset="1" stop-color="#07090f" />
     </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff334d" />
+      <stop offset="1" stop-color="#8c1225" />
+    </linearGradient>
+    <linearGradient id="eye" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffd83d" />
+      <stop offset="0.45" stop-color="#ff8b2b" />
+      <stop offset="1" stop-color="#ef233c" />
+    </linearGradient>
+    <filter id="redGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="eyeGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
   </defs>
 
   <rect width="1600" height="900" fill="url(#bg)" />
-  <ellipse cx="800" cy="430" rx="560" ry="340" fill="url(#glow)" />
-  <g transform="translate(800 445) scale(1.58)" opacity="0.82">
-    <path d="M-205-82-120-215-55-122-20-162 0-132 20-162 55-122 120-215 205-82 154 110 78 180 0 215-78 180-154 110Z" fill="url(#fur)" stroke="#ef233c" stroke-opacity="0.62" stroke-width="5" />
-    <path d="M-154-78-76-42-28 0-88-4Z" fill="#ef233c" fill-opacity="0.82" />
-    <path d="M154-78 76-42 28 0 88-4Z" fill="#ef233c" fill-opacity="0.82" />
-    <path d="M-125 62-54 38-18 70-76 106Z" fill="#d7d7dc" fill-opacity="0.11" />
-    <path d="M125 62 54 38 18 70 76 106Z" fill="#d7d7dc" fill-opacity="0.11" />
-    <path d="M-40 112 0 135 40 112 0 164Z" fill="#f4f4f5" fill-opacity="0.72" />
-    <path d="M-135-138-112-198-72-142Z" fill="#ef233c" fill-opacity="0.2" />
-    <path d="M135-138 112-198 72-142Z" fill="#ef233c" fill-opacity="0.2" />
+  <ellipse cx="800" cy="430" rx="550" ry="350" fill="url(#halo)" />
+
+  <g opacity="0.22" stroke="#ffffff" stroke-width="2">
+    <path d="M130 160H500" />
+    <path d="M1100 160H1470" />
+    <path d="M130 740H510" />
+    <path d="M1090 740H1470" />
   </g>
-  <path d="M270 744H1330" stroke="#ffffff" stroke-opacity="0.045" stroke-width="2" />
+
+  <g transform="translate(800 446)">
+    <path d="M-360-160-215-315-106-204-46-259 0-207 46-259 106-204 215-315 360-160 302 102 218 214 92 294 0 332-92 294-218 214-302 102Z"
+          fill="url(#wolf)" stroke="url(#edge)" stroke-width="9" stroke-linejoin="round" filter="url(#redGlow)" />
+
+    <path d="M-216-312-147-142-285-169Z" fill="#32131b" opacity="0.9" />
+    <path d="M216-312 147-142 285-169Z" fill="#32131b" opacity="0.9" />
+
+    <path d="M-270-92-140-42-60 24-174 10Z" fill="#1b2029" />
+    <path d="M270-92 140-42 60 24 174 10Z" fill="#1b2029" />
+
+    <path d="M-250-82-142-48-79 0-180-5Z" fill="url(#eye)" filter="url(#eyeGlow)" />
+    <path d="M250-82 142-48 79 0 180-5Z" fill="url(#eye)" filter="url(#eyeGlow)" />
+
+    <path d="M-122 63-55 34-15 69-82 116Z" fill="#2a2f39" />
+    <path d="M122 63 55 34 15 69 82 116Z" fill="#2a2f39" />
+
+    <path d="M-60 148 0 181 60 148 0 222Z" fill="#d6d9df" />
+    <path d="M-118 188-55 228 0 266 55 228 118 188 89 260 0 306-89 260Z" fill="#0b0e14" opacity="0.94" />
+
+    <path d="M-194 18-120 34-54 88-135 71Z" fill="#ef233c" opacity="0.17" />
+    <path d="M194 18 120 34 54 88 135 71Z" fill="#ef233c" opacity="0.17" />
+
+    <path d="M0-207 0 140" stroke="#ffffff" stroke-opacity="0.05" stroke-width="3" />
+    <path d="M-304 101-217 213-91 293 0 331" stroke="#ff334d" stroke-opacity="0.25" stroke-width="3" fill="none" />
+    <path d="M304 101 217 213 91 293 0 331" stroke="#ff334d" stroke-opacity="0.25" stroke-width="3" fill="none" />
+  </g>
+
+  <g opacity="0.35" fill="#ef233c">
+    <rect x="250" y="240" width="90" height="4" />
+    <rect x="1260" y="240" width="90" height="4" />
+    <rect x="250" y="655" width="90" height="4" />
+    <rect x="1260" y="655" width="90" height="4" />
+  </g>
+
+  <path d="M235 764H1365" stroke="#ffffff" stroke-opacity="0.05" stroke-width="2" />
 </svg>
