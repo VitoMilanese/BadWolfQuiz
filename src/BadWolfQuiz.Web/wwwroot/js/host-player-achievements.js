@@ -10,6 +10,14 @@
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#39;");
 
+    const achievementSortGroup = item => item.isUnlocked ? 0 : item.isSecret ? 2 : 1;
+
+    const secretUnlockedStateIcon = `
+        <svg class="player-achievement-state-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+        </svg>`;
+
     const ensureDialog = () => {
         if (dialog) return dialog;
 
@@ -26,7 +34,10 @@
     };
 
     const renderDialog = data => {
-        const achievements = Array.isArray(data.achievements) ? data.achievements : [];
+        const achievements = Array.isArray(data.achievements)
+            ? [...data.achievements].sort((left, right) =>
+                achievementSortGroup(left) - achievementSortGroup(right))
+            : [];
         const cards = achievements.map(item => {
             const lockedSecret = item.isSecret && !item.isUnlocked;
             const classes = [
@@ -50,11 +61,17 @@
             const icon = lockedSecret
                 ? '<span class="player-achievement-icon" aria-hidden="true">❔</span>'
                 : `<img class="player-achievement-image" src="/images/achievements/${encodeURIComponent(item.code)}.png" alt="" aria-hidden="true" loading="lazy" decoding="async">`;
+            const stateClass = item.isUnlocked && item.isSecret
+                ? "player-achievement-state is-secret-unlocked"
+                : "player-achievement-state";
+            const stateIcon = item.isUnlocked
+                ? (item.isSecret ? secretUnlockedStateIcon : "✓")
+                : "○";
 
             return `<article class="${classes}">
                 <div class="player-achievement-card-top">
                     ${icon}
-                    <span class="player-achievement-state" aria-hidden="true">${item.isUnlocked ? "✓" : "○"}</span>
+                    <span class="${stateClass}" aria-hidden="true">${stateIcon}</span>
                 </div>
                 <strong>${escapeHtml(name)}</strong>
                 <p>${escapeHtml(description)}</p>
