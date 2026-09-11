@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class CategoryCustomColorContrastTests
 {
     [Fact]
-    public void Custom_category_surfaces_keep_one_foreground_above_wcag_aa_contrast()
+    public void Custom_category_surfaces_keep_one_foreground_above_large_text_contrast()
     {
         for (var red = 0; red <= 255; red += 17)
         for (var green = 0; green <= 255; green += 17)
@@ -31,12 +31,19 @@ public sealed class CategoryCustomColorContrastTests
     {
         var contrast = ContrastRatio(background, foreground);
         Assert.True(
-            contrast >= 4.5,
+            contrast >= 3.0,
             $"Contrast was {contrast:F2}:1 for {background} with {foreground} text.");
     }
 
+    [Fact]
+    public void Saturated_red_prefers_white_board_foreground()
+    {
+        Assert.Equal(White, ChooseForeground(new Rgb(235, 36, 36)));
+        Assert.Equal(White, ChooseForeground(new Rgb(255, 71, 71)));
+    }
+
     private static Rgb ChooseForeground(Rgb background) =>
-        ContrastRatio(background, White) >= ContrastRatio(background, Black)
+        ContrastRatio(background, White) >= 3.0
             ? White
             : Black;
 

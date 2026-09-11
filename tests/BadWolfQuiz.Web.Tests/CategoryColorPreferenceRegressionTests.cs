@@ -22,6 +22,11 @@ public sealed class CategoryColorPreferenceRegressionTests
         Assert.Contains("value=\"Custom\"", markup, StringComparison.Ordinal);
         Assert.Contains("value=\"Theme\"", markup, StringComparison.Ordinal);
         Assert.Contains("data-category-color-picker", markup, StringComparison.Ordinal);
+        Assert.Contains("data-category-color-picker-trigger", markup, StringComparison.Ordinal);
+        Assert.Contains("data-category-color-picker-popover", markup, StringComparison.Ordinal);
+        Assert.Contains("data-category-color-spectrum", markup, StringComparison.Ordinal);
+        Assert.Contains("data-category-color-hue", markup, StringComparison.Ordinal);
+        Assert.DoesNotContain("type=\"color\"", markup, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -39,6 +44,8 @@ public sealed class CategoryColorPreferenceRegressionTests
         Assert.Contains(@".category-color-mode-card input[type=""radio""]", css, StringComparison.Ordinal);
         Assert.Contains("width: 1.1rem;", css, StringComparison.Ordinal);
         Assert.Contains("grid-template-columns: 1.1rem minmax(0, 1fr);", css, StringComparison.Ordinal);
+        Assert.Contains(".category-color-picker-popover", css, StringComparison.Ordinal);
+        Assert.Contains(".category-color-picker-spectrum", css, StringComparison.Ordinal);
     }
 
     [Fact]

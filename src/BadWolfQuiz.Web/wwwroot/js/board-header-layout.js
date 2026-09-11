@@ -69,8 +69,7 @@
 
     const chooseForeground = background => {
         const white = { r: 255, g: 255, b: 255 };
-        const black = { r: 0, g: 0, b: 0 };
-        return contrastRatio(background, white) >= contrastRatio(background, black)
+        return contrastRatio(background, white) >= 3
             ? "#ffffff"
             : "#000000";
     };
