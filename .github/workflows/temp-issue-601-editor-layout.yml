@@ -1,0 +1,176 @@
+name: Temporary issue 601 editor layout
+
+on:
+  push:
+    branches:
+      - feature/601-answer-reward-buttons
+    paths:
+      - .github/workflows/temp-issue-601-editor-layout.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Update editor layout and localization
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+
+          # Move the reward-modifier checkbox after both select settings.
+          view_path = root / 'src/BadWolfQuiz.Web/Pages/Admin/Quizzes/QuestionEditor.cshtml'
+          view = view_path.read_text(encoding='utf-8-sig')
+          label_pattern = re.compile(
+              r'\n        <label class="checkbox-row answer-reward-modifier-setting">.*?\n        </label>\n',
+              re.S)
+          matches = list(label_pattern.finditer(view))
+          if len(matches) != 1:
+              raise RuntimeError(f'Expected one reward modifier setting block, found {len(matches)}')
+          label_match = matches[0]
+          label_block = label_match.group(0).strip('\n')
+          view_without_label = view[:label_match.start()] + '\n' + view[label_match.end():]
+
+          buzz_pattern = re.compile(
+              r'        <div id="buzz-mode-setting">.*?\n        </div>',
+              re.S)
+          buzz_matches = list(buzz_pattern.finditer(view_without_label))
+          if len(buzz_matches) != 1:
+              raise RuntimeError(f'Expected one buzz mode setting block, found {len(buzz_matches)}')
+          buzz_match = buzz_matches[0]
+          view = (
+              view_without_label[:buzz_match.end()] +
+              '\n\n' + label_block +
+              view_without_label[buzz_match.end():]
+          )
+          view_path.write_text(view, encoding='utf-8')
+
+          # Force the title and explanation to occupy separate lines.
+          css_path = root / 'src/BadWolfQuiz.Web/wwwroot/css/quiz-editor-workspace.css'
+          css = css_path.read_text(encoding='utf-8-sig')
+          rules = '''body[data-quiz-editor-workspace="question"] .answer-reward-modifier-setting > span > strong,
+          body[data-quiz-editor-workspace="question"] .answer-reward-modifier-setting > span > small {
+              display: block;
+          }
+
+          body[data-quiz-editor-workspace="question"] .answer-reward-modifier-setting > span > small {
+              margin-top: 4px;
+              color: var(--muted);
+          }
+
+          '''
+          if 'body[data-quiz-editor-workspace="question"] .answer-reward-modifier-setting > span > strong' not in css:
+              marker = 'body[data-quiz-editor-workspace] .content-block-section {'
+              if css.count(marker) != 1:
+                  raise RuntimeError('Question editor CSS insertion marker was not found exactly once')
+              css = css.replace(marker, rules + marker, 1)
+          css_path.write_text(css, encoding='utf-8')
+
+          # Keep the title and explanation as two concise sentences in every locale.
+          localized = {
+              'SharedResource.resx': (
+                  'Allow x2 and 1/2 answer scoring.',
+                  'The host can award a correct answer double or half its normal reward.'),
+              'SharedResource.uk.resx': (
+                  'Дозволити оцінювання відповіді x2 та 1/2.',
+                  'Ведучий зможе зарахувати правильну відповідь із її подвійною або половинною нагородою.'),
+              'SharedResource.it.resx': (
+                  'Consenti la valutazione delle risposte x2 e 1/2.',
+                  'Il conduttore potrà assegnare a una risposta corretta una ricompensa doppia o dimezzata.'),
+              'SharedResource.ru.resx': (
+                  'Разрешить оценивание ответа x2 и 1/2.',
+                  'Ведущий сможет засчитать правильный ответ с удвоенной или половинной наградой.'),
+          }
+
+          def replace_value(text: str, key: str, value: str) -> str:
+              pattern = re.compile(
+                  rf'(<data name="{re.escape(key)}" xml:space="preserve">\s*<value>).*?(</value>)',
+                  re.S)
+              updated, count = pattern.subn(lambda m: m.group(1) + value + m.group(2), text, count=1)
+              if count != 1:
+                  raise RuntimeError(f'Localization key {key} was not found exactly once')
+              return updated
+
+          localization_root = root / 'src/BadWolfQuiz.Web/Resources/Localization'
+          for filename, (label, hint) in localized.items():
+              path = localization_root / filename
+              text = path.read_text(encoding='utf-8-sig')
+              text = replace_value(text, 'Label_AllowAnswerRewardModifiers', label)
+              text = replace_value(text, 'Hint_AllowAnswerRewardModifiers', hint)
+              path.write_text(text, encoding='utf-8')
+
+          # Extend the existing regression test without increasing the test count.
+          test_path = root / 'tests/BadWolfQuiz.Web.Tests/AnswerRewardButtonsRegressionTests.cs'
+          test = test_path.read_text(encoding='utf-8-sig')
+          old = '''        var entity = File.ReadAllText(Path.Combine(
+              root, "src", "BadWolfQuiz.Web", "Models", "QuizModels.cs"));
+
+              Assert.Contains("asp-for=\\\"Input.AllowAnswerRewardModifiers\\\"", view);'''
+          new = '''        var entity = File.ReadAllText(Path.Combine(
+              root, "src", "BadWolfQuiz.Web", "Models", "QuizModels.cs"));
+          var workspaceStyles = File.ReadAllText(Path.Combine(
+              root, "src", "BadWolfQuiz.Web", "wwwroot", "css", "quiz-editor-workspace.css"));
+          var localizationRoot = Path.Combine(
+              root, "src", "BadWolfQuiz.Web", "Resources", "Localization");
+          var english = File.ReadAllText(Path.Combine(localizationRoot, "SharedResource.resx"));
+          var ukrainian = File.ReadAllText(Path.Combine(localizationRoot, "SharedResource.uk.resx"));
+          var italian = File.ReadAllText(Path.Combine(localizationRoot, "SharedResource.it.resx"));
+          var russian = File.ReadAllText(Path.Combine(localizationRoot, "SharedResource.ru.resx"));
+
+          Assert.Contains("asp-for=\\\"Input.AllowAnswerRewardModifiers\\\"", view);'''
+          if test.count(old) != 1:
+              raise RuntimeError('Regression test setup insertion point was not found exactly once')
+          test = test.replace(old, new, 1)
+
+          old = '''        Assert.Contains("Hint_AllowAnswerRewardModifiers", view);
+              Assert.Contains("public bool AllowAnswerRewardModifiers { get; set; }", entity);'''
+          new = '''        Assert.Contains("Hint_AllowAnswerRewardModifiers", view);
+          var wagerMode = view.IndexOf("id=\\\"wager-mode-setting\\\"", StringComparison.Ordinal);
+          var buzzMode = view.IndexOf("id=\\\"buzz-mode-setting\\\"", StringComparison.Ordinal);
+          var rewardSetting = view.IndexOf("class=\\\"checkbox-row answer-reward-modifier-setting\\\"", StringComparison.Ordinal);
+          Assert.True(wagerMode >= 0 && buzzMode > wagerMode && rewardSetting > buzzMode);
+          Assert.Contains(
+              "body[data-quiz-editor-workspace=\\\"question\\\"] .answer-reward-modifier-setting > span > strong",
+              workspaceStyles);
+          Assert.Contains("Дозволити оцінювання відповіді x2 та 1/2.", ukrainian);
+          Assert.Contains("Ведучий зможе зарахувати правильну відповідь із її подвійною або половинною нагородою.", ukrainian);
+          Assert.Contains("Allow x2 and 1/2 answer scoring.", english);
+          Assert.Contains("The host can award a correct answer double or half its normal reward.", english);
+          Assert.Contains("Consenti la valutazione delle risposte x2 e 1/2.", italian);
+          Assert.Contains("Il conduttore potrà assegnare a una risposta corretta una ricompensa doppia o dimezzata.", italian);
+          Assert.Contains("Разрешить оценивание ответа x2 и 1/2.", russian);
+          Assert.Contains("Ведущий сможет засчитать правильный ответ с удвоенной или половинной наградой.", russian);
+          Assert.Contains("public bool AllowAnswerRewardModifiers { get; set; }", entity);'''
+          if test.count(old) != 1:
+              raise RuntimeError('Regression test assertion insertion point was not found exactly once')
+          test = test.replace(old, new, 1)
+          test_path.write_text(test, encoding='utf-8')
+          PY
+
+      - name: Check diff formatting
+        run: git diff --check
+
+      - name: Test web
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release
+
+      - name: Commit validated UI refinement
+        run: |
+          rm -f .github/workflows/temp-issue-601-editor-layout.yml
+          git config user.name "Vitalii Hanych"
+          git config user.email "64318287+VitoMilanese@users.noreply.github.com"
+          git add -A
+          git commit -m "Refine answer reward editor setting layout"
+          git push origin HEAD:feature/601-answer-reward-buttons
