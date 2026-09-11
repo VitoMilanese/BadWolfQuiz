@@ -11,6 +11,8 @@ public sealed class QuizMetadataEditorRegressionTests
         Assert.Contains("asp-route-id=\"@Model.Quiz.Id\"", markup, StringComparison.Ordinal);
         Assert.Contains("asp-route-selectedRoundId=\"@Model.SelectedRoundId\"", markup, StringComparison.Ordinal);
         Assert.Contains("QuizMetadata_Edit", markup, StringComparison.Ordinal);
+        Assert.Contains(".quiz-editor-title-row { display: inline-flex;", markup, StringComparison.Ordinal);
+        Assert.Contains("max-width: 100%;", markup, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -28,6 +30,7 @@ public sealed class QuizMetadataEditorRegressionTests
         Assert.Contains("@Localizer[\"Button_Save\"]", markup, StringComparison.Ordinal);
         Assert.Contains("public const int MaximumTagCount = 10;", source, StringComparison.Ordinal);
         Assert.Contains("Validation_QuizTagLimit", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("_ValidationScriptsPartial", markup, StringComparison.Ordinal);
     }
 
     [Fact]
