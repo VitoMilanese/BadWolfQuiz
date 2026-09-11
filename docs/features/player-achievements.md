@@ -102,6 +102,8 @@ The catalog intentionally mixes normal and secret milestones. Secrecy is a catal
 
 ## Player and host UX
 
+Web `1.38.0` adds a dedicated authenticated `/Achievements` page linked from the main menu. The page resolves the current signed-in account as the authoritative achievement identity, preserves contributor recognition, and evaluates progress without requiring an active game, host-scoped nickname fallback, or current game code. Its milestone cards reuse the same PNG artwork, unlocked/locked/secret states, progress bars, ordering, and transparent-margin trimming as the player achievement dialog on the buzzer page, while the surrounding page follows the redesigned full-width portal visual language with an unlocked/total summary.
+
 Players can open an achievement dialog that shows unlocked milestones and progress for visible locked milestones. Newly earned achievements are highlighted without interrupting active gameplay.
 
 The host lobby exposes a trophy action on each player row. It opens a host-owned achievement dialog for that specific player; the endpoint verifies ownership of the active game before returning achievement data.
