@@ -177,32 +177,34 @@ public sealed class DescriptionEditorModel(
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
-        if (!await db.Quizzes.AsNoTracking().AnyAsync(
-                x => x.Id == Input.QuizId && x.MediaState == QuizMediaState.Active,
-                cancellationToken))
+        Input.Blocks ??= new List<ContentBlockInputModel>();
+
+        var quiz = await db.Quizzes.SingleOrDefaultAsync(
+            x => x.Id == Input.QuizId,
+            cancellationToken);
+        if (quiz is null || quiz.MediaState != QuizMediaState.Active)
         {
             TempData["ErrorMessage"] = localizer["MediaArchive_RestoreBeforeEditing"].Value;
             return RedirectToPage("Index");
         }
 
-        Input.Blocks ??= new List<ContentBlockInputModel>();
         if (Input.CategoryId.HasValue)
         {
             var category = await db.QuizCategories
-                .Include(x => x.DescriptionBlocks)
-                .Include(x => x.Round)
                 .SingleOrDefaultAsync(
                     x => x.Id == Input.CategoryId.Value &&
                         x.QuizRoundId == Input.RoundId &&
                         x.Round.QuizId == Input.QuizId,
                     cancellationToken);
             if (category is null) return NotFound();
+
             EntityTitle = category.Title;
             PreviewTitle = await BuildPreviewTitleAsync(
-                category.Round.Id,
+                category.QuizRoundId,
                 category.Id,
                 category.Title,
                 cancellationToken);
+
             var normalizedCustomColor = NormalizeCategoryCustomColor(Input.CustomColor);
             if (!Enum.IsDefined(Input.ColorMode) ||
                 (Input.ColorMode == QuizCategoryColorMode.Custom && normalizedCustomColor is null))
@@ -220,7 +222,19 @@ public sealed class DescriptionEditorModel(
             category.ColorMode = Input.ColorMode;
             category.CustomColor = normalizedCustomColor;
 
-            if (!await SyncBlocksAsync(category.DescriptionBlocks, cancellationToken))
+            var existingBlocks = await GetCategoryDescriptionBlockEditMetadataQuery(
+                    db,
+                    category.Id)
+                .ToDictionaryAsync(x => x.Id, cancellationToken);
+            if (!await SyncBlocksAsync(
+                    db.CategoryDescriptionContentBlocks,
+                    existingBlocks,
+                    id => new CategoryDescriptionContentBlock
+                    {
+                        Id = id,
+                        QuizCategoryId = category.Id
+                    },
+                    cancellationToken))
             {
                 ApplyStoredHandlers(
                     Input.Blocks,
@@ -232,18 +246,31 @@ public sealed class DescriptionEditorModel(
         else
         {
             var round = await db.QuizRounds
-                .Include(x => x.DescriptionBlocks)
                 .SingleOrDefaultAsync(
                     x => x.Id == Input.RoundId && x.QuizId == Input.QuizId,
                     cancellationToken);
             if (round is null) return NotFound();
+
             EntityTitle = round.Title;
             PreviewTitle = await BuildPreviewTitleAsync(
                 round.Id,
                 null,
                 round.Title,
                 cancellationToken);
-            if (!await SyncBlocksAsync(round.DescriptionBlocks, cancellationToken))
+
+            var existingBlocks = await GetRoundDescriptionBlockEditMetadataQuery(
+                    db,
+                    round.Id)
+                .ToDictionaryAsync(x => x.Id, cancellationToken);
+            if (!await SyncBlocksAsync(
+                    db.RoundDescriptionContentBlocks,
+                    existingBlocks,
+                    id => new RoundDescriptionContentBlock
+                    {
+                        Id = id,
+                        QuizRoundId = round.Id
+                    },
+                    cancellationToken))
             {
                 ApplyStoredHandlers(
                     Input.Blocks,
@@ -253,9 +280,6 @@ public sealed class DescriptionEditorModel(
             }
         }
 
-        var quiz = await db.Quizzes.SingleAsync(
-            x => x.Id == Input.QuizId,
-            cancellationToken);
         quiz.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
         return RedirectToPage(new
@@ -399,44 +423,117 @@ public sealed class DescriptionEditorModel(
             : File(block.FileData, block.FileContentType, block.FileName);
     }
 
-    private async Task<bool> SyncBlocksAsync<TBlock>(
-        ICollection<TBlock> existingBlocks,
-        CancellationToken cancellationToken)
-        where TBlock : ContentBlockBase, new()
+    internal sealed record EditableDescriptionBlockSnapshot(
+        int Id,
+        int SortOrder,
+        ContentBlockType BlockType,
+        string? TextContent,
+        string? TopCaption,
+        string? BottomCaption,
+        string? ExternalUrl,
+        bool AudioOnly,
+        string? FileContentType,
+        string? FileName);
+
+    internal static IQueryable<EditableDescriptionBlockSnapshot>
+        GetCategoryDescriptionBlockEditMetadataQuery(
+            QuizDbContext db,
+            int categoryId) =>
+        db.CategoryDescriptionContentBlocks
+            .AsNoTracking()
+            .Where(x => x.QuizCategoryId == categoryId)
+            .Select(x => new EditableDescriptionBlockSnapshot(
+                x.Id,
+                x.SortOrder,
+                x.BlockType,
+                x.TextContent,
+                x.TopCaption,
+                x.BottomCaption,
+                x.ExternalUrl,
+                x.AudioOnly,
+                x.FileContentType,
+                x.FileName));
+
+    internal static IQueryable<EditableDescriptionBlockSnapshot>
+        GetRoundDescriptionBlockEditMetadataQuery(
+            QuizDbContext db,
+            int roundId) =>
+        db.RoundDescriptionContentBlocks
+            .AsNoTracking()
+            .Where(x => x.QuizRoundId == roundId)
+            .Select(x => new EditableDescriptionBlockSnapshot(
+                x.Id,
+                x.SortOrder,
+                x.BlockType,
+                x.TextContent,
+                x.TopCaption,
+                x.BottomCaption,
+                x.ExternalUrl,
+                x.AudioOnly,
+                x.FileContentType,
+                x.FileName));
+
+    internal static CategoryDescriptionContentBlock
+        AttachCategoryDescriptionBlockForUpdate(
+            QuizDbContext db,
+            int categoryId,
+            EditableDescriptionBlockSnapshot snapshot)
     {
-        var submittedIds = Input.Blocks
+        var entity = new CategoryDescriptionContentBlock
+        {
+            Id = snapshot.Id,
+            QuizCategoryId = categoryId
+        };
+        ApplyEditableSnapshot(entity, snapshot);
+        db.CategoryDescriptionContentBlocks.Attach(entity);
+        return entity;
+    }
+
+    private async Task<bool> SyncBlocksAsync<TBlock>(
+        DbSet<TBlock> blockSet,
+        IReadOnlyDictionary<int, EditableDescriptionBlockSnapshot> existingBlocks,
+        Func<int, TBlock> createBlock,
+        CancellationToken cancellationToken)
+        where TBlock : ContentBlockBase
+    {
+        var submittedIdValues = Input.Blocks
             .Where(x => x.Id.HasValue)
             .Select(x => x.Id!.Value)
-            .ToHashSet();
-        if (submittedIds.Any(id => existingBlocks.All(x => x.Id != id)))
+            .ToList();
+        var submittedIds = submittedIdValues.ToHashSet();
+        if (submittedIds.Count != submittedIdValues.Count ||
+            submittedIds.Any(id => !existingBlocks.ContainsKey(id)))
         {
             ModelState.AddModelError(string.Empty, localizer["Error_Unexpected"]);
             return false;
         }
 
-        db.RemoveRange(existingBlocks
-            .Where(x => !submittedIds.Contains(x.Id))
-            .ToList());
+        foreach (var existing in existingBlocks.Values
+                     .Where(x => !submittedIds.Contains(x.Id)))
+        {
+            blockSet.Remove(createBlock(existing.Id));
+        }
+
         var sortOrder = 1;
         foreach (var inputBlock in Input.Blocks)
         {
             TBlock entity;
             if (inputBlock.Id.HasValue)
             {
-                entity = existingBlocks.Single(x => x.Id == inputBlock.Id.Value);
+                entity = createBlock(inputBlock.Id.Value);
+                ApplyEditableSnapshot(entity, existingBlocks[inputBlock.Id.Value]);
+                blockSet.Attach(entity);
             }
             else
             {
-                entity = new TBlock();
-                existingBlocks.Add(entity);
+                entity = createBlock(0);
+                blockSet.Add(entity);
             }
 
             if (inputBlock.RemoveFile &&
                 inputBlock.BlockType is ContentBlockType.Image or ContentBlockType.Audio)
             {
-                entity.FileData = null;
-                entity.FileContentType = null;
-                entity.FileName = null;
+                ClearStoredFile(entity);
             }
 
             if (inputBlock.UploadedFile is not null && inputBlock.UploadedFile.Length > 0)
@@ -471,6 +568,38 @@ public sealed class DescriptionEditorModel(
         }
 
         return true;
+    }
+
+    private static void ApplyEditableSnapshot(
+        ContentBlockBase entity,
+        EditableDescriptionBlockSnapshot snapshot)
+    {
+        entity.SortOrder = snapshot.SortOrder;
+        entity.BlockType = snapshot.BlockType;
+        entity.TextContent = snapshot.TextContent;
+        entity.TopCaption = snapshot.TopCaption;
+        entity.BottomCaption = snapshot.BottomCaption;
+        entity.ExternalUrl = snapshot.ExternalUrl;
+        entity.AudioOnly = snapshot.AudioOnly;
+        entity.FileContentType = snapshot.FileContentType;
+        entity.FileName = snapshot.FileName;
+    }
+
+    private void ClearStoredFile(ContentBlockBase entity)
+    {
+        entity.FileData = null;
+        entity.FileContentType = null;
+        entity.FileName = null;
+
+        var entry = db.Entry(entity);
+        if (entry.State == EntityState.Added)
+        {
+            return;
+        }
+
+        entry.Property(nameof(ContentBlockBase.FileData)).IsModified = true;
+        entry.Property(nameof(ContentBlockBase.FileContentType)).IsModified = true;
+        entry.Property(nameof(ContentBlockBase.FileName)).IsModified = true;
     }
 
     private async Task<string> BuildPreviewTitleAsync(
