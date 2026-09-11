@@ -267,3 +267,116 @@
         max-width: none;
     }
 }
+
+/* Final desktop alignment refinements after the second visual pass. */
+@media (min-width: 1200px) {
+    body:has(.about-page) .about-page .portal-hero {
+        padding-top: clamp(26px, 3vw, 48px);
+        padding-bottom: clamp(20px, 2.2vw, 34px);
+    }
+
+    body:has(.host-settings-page) .host-settings-hero {
+        min-height: 0;
+        padding-bottom: clamp(11px, 1.25vw, 18px);
+    }
+
+    body:has(.host-settings-page) .host-settings-hero-actions {
+        width: min(calc(100vw - clamp(28px, 5vw, 78px) - clamp(28px, 5vw, 78px)), 1604px);
+        justify-content: center;
+    }
+
+    body:has(.support-compose-page) .support-hero {
+        min-height: 0;
+        padding-bottom: clamp(11px, 1.25vw, 17px);
+    }
+
+    body:has(.support-compose-page) .support-hero-actions {
+        width: min(calc(100vw - clamp(26px, 5vw, 78px) - clamp(26px, 5vw, 78px)), 1604px);
+        justify-content: center;
+    }
+
+    body:has(.support-compose-page) .support-content {
+        padding-top: 9px;
+    }
+
+    body:has(.minigame-editor-heading) .minigame-editor-heading {
+        padding-top: clamp(14px, 1.5vw, 25px);
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(210px, 0.30fr);
+        gap: clamp(28px, 4vw, 64px);
+        min-height: 0;
+        padding-top: clamp(14px, 1.5vw, 24px);
+        padding-bottom: clamp(11px, 1.25vw, 17px);
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero h1 {
+        font-size: clamp(3.45rem, 6.2vw, 7.2rem);
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-description {
+        margin-top: 20px;
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero-mark {
+        width: clamp(210px, 18vw, 270px);
+        min-height: 185px;
+        justify-self: end;
+        padding: 24px 22px 20px;
+        clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero-mark::before {
+        width: 8px;
+        box-shadow: -11px 0 0 color-mix(in srgb, var(--gold) 80%, transparent);
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero-label {
+        font-size: 0.58rem;
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero-mark strong {
+        margin: 10px 0 12px;
+        font-size: clamp(3.6rem, 5.6vw, 6rem);
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-signal {
+        gap: 5px;
+        height: 7px;
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero-mark small {
+        margin-top: 12px;
+        font-size: 0.56rem;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero h1 {
+        font-size: clamp(3rem, 5.4vw, 6.25rem);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter::before {
+        top: 50%;
+        left: 50%;
+        right: auto;
+        z-index: 1;
+        width: 7px;
+        height: 70%;
+        background: var(--red-bright);
+        box-shadow: 7px 7px 0 color-mix(in srgb, var(--gold) 78%, transparent);
+        transform: translate(-50%, -50%) rotate(18deg);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter::after {
+        display: none;
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-hero {
+        padding-top: clamp(16px, 1.9vw, 30px);
+        padding-bottom: clamp(12px, 1.55vw, 22px);
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-heading h1 {
+        font-size: clamp(3.6rem, 6.6vw, 7.6rem);
+    }
+}
