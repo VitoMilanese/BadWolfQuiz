@@ -267,8 +267,8 @@
     z-index: 1;
     display: grid;
     place-items: center;
-    width: 25px;
-    height: 25px;
+    width: 27px;
+    height: 27px;
     border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
     border-radius: 50%;
     color: var(--muted);
@@ -282,11 +282,24 @@
 }
 
 .player-achievement-state-icon {
-    width: 14px;
-    height: 14px;
+    width: 19px;
+    height: 19px;
     fill: none;
     stroke: currentColor;
-    stroke-width: 2;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.player-achievement-secret-pupil {
+    fill: currentColor;
+    stroke: none;
+}
+
+.player-achievement-secret-check {
+    fill: none;
+    stroke: var(--bg);
+    stroke-width: 2.45;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
