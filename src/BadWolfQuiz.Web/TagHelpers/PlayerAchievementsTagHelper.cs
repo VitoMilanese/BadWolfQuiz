@@ -31,7 +31,7 @@ public sealed class PlayerAchievementAssetsTagHelper : TagHelper
         }
 
         output.PostContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=10\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=11\" />" +
             "<script defer src=\"/js/achievement-image-trim.js?v=1\"></script>" +
             "<script defer src=\"/js/player-achievements.js?v=1\"></script>");
     }
@@ -204,7 +204,7 @@ public sealed class PlayerAchievementsTagHelper(
             if (achievement.IsUnlocked && achievement.IsSecret)
             {
                 html.Append("<span class=\"player-achievement-state is-secret-unlocked\" aria-hidden=\"true\">");
-                html.Append("<svg class=\"player-achievement-state-icon player-achievement-secret-revealed\" viewBox=\"0 0 24 24\" focusable=\"false\"><path d=\"M7.8 8.4a4.2 4.2 0 1 1 6.8 3.3c-1.5 1-2.4 1.6-2.4 3.1\"></path><circle cx=\"12.2\" cy=\"17.6\" r=\"0.8\" fill=\"currentColor\" stroke=\"none\"></circle><path d=\"m15.2 16.6 1.5 1.5 3.3-3.8\"></path></svg>");
+                html.Append("<svg class=\"player-achievement-state-icon player-achievement-secret-revealed\" viewBox=\"0 0 24 24\" focusable=\"false\"><path class=\"player-achievement-secret-eye\" d=\"M2.4 12s3.5-5.2 9.6-5.2 9.6 5.2 9.6 5.2-3.5 5.2-9.6 5.2S2.4 12 2.4 12Z\"></path><circle class=\"player-achievement-secret-pupil\" cx=\"12\" cy=\"12\" r=\"4\"></circle><path class=\"player-achievement-secret-check\" d=\"m10.15 12.05 1.35 1.35 2.75-3.05\"></path></svg>");
                 html.Append("</span>");
             }
             else
