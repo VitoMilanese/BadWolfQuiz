@@ -1,0 +1,274 @@
+body:has(.self-achievements-page) {
+    background: var(--bg);
+}
+
+body.portal-layout:has(.self-achievements-page) > .page-shell {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body:has(.self-achievements-page) .topbar {
+    border-bottom-color: color-mix(in srgb, var(--line) 72%, transparent);
+    background: color-mix(in srgb, var(--topbar-bg) 94%, transparent);
+}
+
+.self-achievements-page {
+    position: relative;
+    min-height: 100%;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--bg) 96%, #000) 0,
+            var(--bg) 100%);
+}
+
+.self-achievements-page::before,
+.self-achievements-page::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    pointer-events: none;
+}
+
+.self-achievements-page::before {
+    background:
+        radial-gradient(
+            circle at 82% 9%,
+            color-mix(in srgb, var(--red-bright) 18%, transparent) 0,
+            transparent 30rem),
+        radial-gradient(
+            circle at 10% 56%,
+            color-mix(in srgb, var(--gold) 8%, transparent) 0,
+            transparent 29rem);
+}
+
+.self-achievements-page::after {
+    z-index: -2;
+    background-image:
+        linear-gradient(
+            color-mix(in srgb, var(--line) 13%, transparent) 1px,
+            transparent 1px),
+        linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--line) 11%, transparent) 1px,
+            transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, #000, transparent 72%);
+    opacity: 0.18;
+}
+
+.self-achievements-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.38fr);
+    align-items: center;
+    gap: clamp(36px, 6vw, 92px);
+    width: min(100%, 1760px);
+    min-height: clamp(390px, 50dvh, 570px);
+    margin: 0 auto;
+    padding: clamp(56px, 7vw, 98px) clamp(28px, 5vw, 78px) clamp(46px, 6vw, 76px);
+}
+
+.self-achievements-hero::after {
+    content: "MILESTONES";
+    position: absolute;
+    left: -0.03em;
+    bottom: 0.01em;
+    z-index: -1;
+    color: color-mix(in srgb, var(--text) 3.5%, transparent);
+    font-size: clamp(7rem, 18vw, 20rem);
+    font-weight: 1000;
+    line-height: 0.68;
+    letter-spacing: -0.09em;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.self-achievements-hero-copy {
+    position: relative;
+    z-index: 2;
+    max-width: 1080px;
+}
+
+.self-achievements-kicker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 0 0 20px;
+    color: var(--gold);
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+}
+
+.self-achievements-kicker::before {
+    content: "";
+    width: 42px;
+    height: 2px;
+    flex: 0 0 auto;
+    background: var(--red-bright);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--red-bright) 72%, transparent);
+}
+
+.self-achievements-hero h1 {
+    max-width: 1120px;
+    margin: 0;
+    font-size: clamp(4rem, 8vw, 9.2rem);
+    font-weight: 1000;
+    line-height: 0.8;
+    letter-spacing: -0.07em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    filter: drop-shadow(0 24px 32px rgba(0, 0, 0, 0.32));
+}
+
+.self-achievements-description {
+    max-width: 760px;
+    margin: 28px 0 0;
+    color: var(--muted);
+    font-size: clamp(1rem, 1.5vw, 1.18rem);
+    line-height: 1.65;
+}
+
+.self-achievements-hero-mark {
+    position: relative;
+    display: grid;
+    align-content: center;
+    min-height: 310px;
+    padding: 46px 40px 36px;
+    justify-self: stretch;
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    background:
+        linear-gradient(
+            145deg,
+            color-mix(in srgb, var(--panel) 90%, transparent),
+            color-mix(in srgb, var(--panel-2) 80%, transparent));
+    box-shadow:
+        inset 0 0 70px rgba(0, 0, 0, 0.24),
+        0 24px 80px rgba(0, 0, 0, 0.28);
+    clip-path: polygon(0 0, calc(100% - 34px) 0, 100% 34px, 100% 100%, 34px 100%, 0 calc(100% - 34px));
+    overflow: hidden;
+}
+
+.self-achievements-hero-mark::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 24%;
+    width: 12px;
+    height: 100%;
+    transform: skewX(-13deg);
+    background: var(--red-bright);
+    box-shadow: -17px 0 0 color-mix(in srgb, var(--gold) 80%, transparent);
+    opacity: 0.92;
+}
+
+.self-achievements-hero-label,
+.self-achievements-hero-mark strong,
+.self-achievements-hero-mark small,
+.self-achievements-meter {
+    position: relative;
+    z-index: 2;
+}
+
+.self-achievements-hero-label {
+    color: var(--gold);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.19em;
+}
+
+.self-achievements-hero-mark strong {
+    margin: 18px 0 22px;
+    font-size: clamp(6rem, 10vw, 10.5rem);
+    font-weight: 1000;
+    line-height: 0.72;
+    letter-spacing: -0.09em;
+}
+
+.self-achievements-meter {
+    height: 7px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--line) 58%, transparent);
+}
+
+.self-achievements-meter > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--red-bright), var(--gold));
+}
+
+.self-achievements-hero-mark small {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 0.66rem;
+    font-weight: 850;
+    letter-spacing: 0.13em;
+}
+
+.self-achievements-content {
+    width: min(100%, 1760px);
+    margin: 0 auto;
+    padding: 0 clamp(28px, 5vw, 78px) clamp(84px, 9vw, 140px);
+}
+
+.self-achievements-panel {
+    margin: 0;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.22);
+}
+
+@media (max-width: 900px) {
+    .self-achievements-hero {
+        grid-template-columns: 1fr;
+        min-height: 0;
+        padding-top: 52px;
+    }
+
+    .self-achievements-hero-mark {
+        min-height: 230px;
+    }
+}
+
+@media (max-width: 600px) {
+    .self-achievements-hero {
+        gap: 28px;
+        padding: 38px 14px 34px;
+    }
+
+    .self-achievements-hero::after {
+        font-size: 7rem;
+    }
+
+    .self-achievements-hero h1 {
+        font-size: clamp(3rem, 16vw, 5rem);
+    }
+
+    .self-achievements-description {
+        margin-top: 20px;
+    }
+
+    .self-achievements-hero-mark {
+        min-height: 200px;
+        padding: 34px 28px 30px;
+    }
+
+    .self-achievements-hero-mark strong {
+        font-size: 6.2rem;
+    }
+
+    .self-achievements-content {
+        padding: 0 12px 72px;
+    }
+
+    .self-achievements-panel {
+        border-radius: 16px;
+    }
+}
