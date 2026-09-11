@@ -1,0 +1,53 @@
+name: Temporary issue 601 implementation
+
+on:
+  push:
+    branches:
+      - feature/601-answer-reward-buttons
+    paths:
+      - tools/apply_issue_601.py
+      - .github/workflows/temp-issue-601.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  implement-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Apply issue 601 changes
+        run: python3 tools/apply_issue_601.py
+
+      - name: Generate EF Core migration
+        run: |
+          dotnet tool install --global dotnet-ef --version 8.0.29
+          ~/.dotnet/tools/dotnet-ef migrations add AddQuestionAnswerRewardModifiers \
+            --project src/BadWolfQuiz.Web/BadWolfQuiz.Web.csproj \
+            --startup-project src/BadWolfQuiz.Web/BadWolfQuiz.Web.csproj
+
+      - name: Check diff formatting
+        run: git diff --check
+
+      - name: Test game engine
+        run: dotnet test tests/BadWolfQuiz.Game.Tests/BadWolfQuiz.Game.Tests.csproj --configuration Release
+
+      - name: Test web
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release
+
+      - name: Commit validated implementation
+        run: |
+          rm -f tools/apply_issue_601.py .github/workflows/temp-issue-601.yml
+          git config user.name "Vitalii Hanych"
+          git config user.email "64318287+VitoMilanese@users.noreply.github.com"
+          git add -A
+          git commit -m "Add optional x2 and half answer scoring"
+          git push origin HEAD:feature/601-answer-reward-buttons
