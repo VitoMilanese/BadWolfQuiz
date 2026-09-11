@@ -340,6 +340,37 @@ public sealed class PlayerAchievementService(QuizDbContext db)
         return BuildProgress(history, unlocked, currentGameSessionId);
     }
 
+    /// <summary>
+    /// Reads already-persisted unlocks for one authoritative player identity.
+    /// This method never evaluates, unlocks, adopts, or otherwise changes achievement state.
+    /// </summary>
+    public async Task<IReadOnlyList<PlayerAchievement>> LoadPersistedUnlocksAsync(
+        string? accountId,
+        string? hostId,
+        string playerName,
+        int? sourceGameSessionId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var identity = PlayerAchievementIdentity.Create(accountId, hostId, playerName);
+        if (!identity.IsValid)
+        {
+            return [];
+        }
+
+        var query = QueryForIdentity(identity)
+            .AsNoTracking()
+            .Where(item => !item.AchievementCode.StartsWith("__"));
+        if (sourceGameSessionId.HasValue)
+        {
+            query = query.Where(item => item.SourceGameSessionId == sourceGameSessionId.Value);
+        }
+
+        return await query
+            .OrderByDescending(item => item.UnlockedAtUtc)
+            .ThenByDescending(item => item.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<bool> UnlockAccountAsync(
         string? accountId,
         string achievementCode,

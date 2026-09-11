@@ -1,5 +1,6 @@
 @page "{id:guid}"
 @model BadWolfQuiz.Web.Pages.Admin.Games.LobbyModel
+@inject Microsoft.Extensions.Localization.IStringLocalizer<BadWolfQuiz.Web.Localization.PlayerAchievementHistoryResource> AchievementHistoryLocalizer
 @{
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
     ViewData["HidePortalFooter"] = true;
@@ -33,6 +34,12 @@
                     @Localizer["Menu_Tools"]
                 </summary>
                 <div class="action-menu-popover">
+                    <a class="action-menu-item"
+                       asp-page="/Admin/Games/PlayerAchievements"
+                       asp-route-id="@Model.Game.Session.Id.Value">
+                        @AchievementHistoryLocalizer["History_Open"]
+                    </a>
+
                     @if (Model.CurrentQuestion is null)
                     {
                         <a class="action-menu-item"

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="History_Open" xml:space="preserve"><value>Player achievements</value></data>
+  <data name="History_Title" xml:space="preserve"><value>Player achievement history</value></data>
+  <data name="History_Eyebrow" xml:space="preserve"><value>GAME / ACHIEVEMENTS</value></data>
+  <data name="History_Description" xml:space="preserve"><value>Review persisted achievement unlocks for this game and its current players.</value></data>
+  <data name="History_BackToGame" xml:space="preserve"><value>Back to game</value></data>
+  <data name="History_FilterLabel" xml:space="preserve"><value>Achievement history filter</value></data>
+  <data name="History_FilterGame" xml:space="preserve"><value>Unlocked in this game</value></data>
+  <data name="History_FilterPlayers" xml:space="preserve"><value>Players' histories</value></data>
+  <data name="History_PlayerSelector" xml:space="preserve"><value>Player</value></data>
+  <data name="History_NoPlayers" xml:space="preserve"><value>There are no current players to inspect.</value></data>
+  <data name="History_NoGameUnlocks" xml:space="preserve"><value>No achievements have been unlocked in this game yet.</value></data>
+  <data name="History_NoPlayerUnlocks" xml:space="preserve"><value>This player has no persisted achievements yet.</value></data>
+  <data name="History_UnlockedAt" xml:space="preserve"><value>Unlocked</value></data>
+  <data name="History_ReadOnly" xml:space="preserve"><value>This page is read-only and shows persisted unlocks only.</value></data>
+  <data name="History_UnknownDescription" xml:space="preserve"><value>Achievement details are not available.</value></data>
+  <data name="History_EntryCount" xml:space="preserve"><value>{0} achievements</value></data>
+  <data name="History_CurrentGame" xml:space="preserve"><value>Current game</value></data>
+</root>
