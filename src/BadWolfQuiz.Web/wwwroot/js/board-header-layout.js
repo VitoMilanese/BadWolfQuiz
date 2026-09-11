@@ -89,16 +89,15 @@
 
         const black = { r: 0, g: 0, b: 0 };
         const white = { r: 255, g: 255, b: 255 };
-        const headerForeground = chooseForeground(base);
-        const headerEnd = gradientEndForForeground(base, headerForeground, 0.12);
-        const cell = mixColor(base, black, 0.22);
-        const cellForeground = chooseForeground(cell);
-        const cellEnd = gradientEndForForeground(cell, cellForeground, 0.12);
+        const foreground = chooseForeground(base);
+        const contrastTarget = foreground === "#ffffff" ? black : white;
+        const headerEnd = gradientEndForForeground(base, foreground, 0.12);
+        const cell = mixColor(base, contrastTarget, 0.22);
+        const cellEnd = gradientEndForForeground(cell, foreground, 0.12);
         const border = mixColor(base, white, 0.18);
         const accent = mixColor(base, white, 0.10);
-        const resolved = mixColor(base, black, 0.60);
-        const resolvedForeground = chooseForeground(resolved);
-        const resolvedEnd = gradientEndForForeground(resolved, resolvedForeground, 0.10);
+        const resolved = mixColor(base, contrastTarget, 0.60);
+        const resolvedEnd = gradientEndForForeground(resolved, foreground, 0.10);
 
         column.style.setProperty("--board-category-header-bg", rgbCss(base));
         column.style.setProperty("--board-category-header-bg-end", rgbCss(headerEnd));
@@ -108,9 +107,9 @@
         column.style.setProperty("--board-category-accent", rgbCss(accent));
         column.style.setProperty("--board-category-resolved-bg", rgbCss(resolved));
         column.style.setProperty("--board-category-resolved-bg-end", rgbCss(resolvedEnd));
-        column.style.setProperty("--board-category-header-foreground", headerForeground);
-        column.style.setProperty("--board-category-cell-foreground", cellForeground);
-        column.style.setProperty("--board-category-resolved-foreground", resolvedForeground);
+        column.style.setProperty("--board-category-header-foreground", foreground);
+        column.style.setProperty("--board-category-cell-foreground", foreground);
+        column.style.setProperty("--board-category-resolved-foreground", foreground);
         return true;
     };
 

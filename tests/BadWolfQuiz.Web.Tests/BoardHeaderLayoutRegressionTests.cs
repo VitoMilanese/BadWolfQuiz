@@ -87,6 +87,23 @@ public sealed class BoardHeaderLayoutRegressionTests
     }
 
     [Fact]
+    public void Custom_category_color_uses_one_foreground_for_the_entire_column()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "board-header-layout.js"));
+
+        Assert.Contains("const foreground = chooseForeground(base);", script, StringComparison.Ordinal);
+        Assert.Contains(@"const contrastTarget = foreground === ""#ffffff"" ? black : white;", script, StringComparison.Ordinal);
+        Assert.Contains(@"""--board-category-header-foreground"", foreground", script, StringComparison.Ordinal);
+        Assert.Contains(@"""--board-category-cell-foreground"", foreground", script, StringComparison.Ordinal);
+        Assert.Contains(@"""--board-category-resolved-foreground"", foreground", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("const cellForeground =", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("const resolvedForeground =", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Host_gameplay_bootstrap_loads_board_header_layout()
     {
         var script = File.ReadAllText(FindWebFile(
@@ -95,8 +112,11 @@ public sealed class BoardHeaderLayoutRegressionTests
             "gameplay-escape-shortcuts.js"));
 
         Assert.Contains(
-            "loadSharedScript(\"/js/board-header-layout.js\");",
+            "loadSharedScript(\"/js/board-header-layout.js\"",
             script);
+        Assert.Contains("const ensureBoardHeaderLayout = () =>", script, StringComparison.Ordinal);
+        Assert.Contains("\"badwolf:host-shell-mounted\"", script, StringComparison.Ordinal);
+        Assert.Contains("document.addEventListener(eventName, ensureBoardHeaderLayout);", script, StringComparison.Ordinal);
     }
 
     private static (double R, double G, double B) HslToRgb(

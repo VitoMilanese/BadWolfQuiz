@@ -51,6 +51,7 @@
 
 <form method="post"
       enctype="multipart/form-data"
+      id="description-editor-form"
       class="question-editor description-editor">
     <input type="hidden" asp-for="Input.QuizId" />
     <input type="hidden" asp-for="Input.RoundId" />
@@ -178,6 +179,7 @@
     <script src="~/js/image-clipboard-upload.js" asp-append-version="true"></script>
     <script>
         (() => {
+            const editorForm = document.getElementById("description-editor-form");
             const renameDialog = document.getElementById("description-rename-dialog");
             const renameForm = document.getElementById("description-rename-form");
             const renameInput = document.getElementById("description-rename-title");
@@ -278,6 +280,28 @@
                 }
             });
             syncCategoryColorUi();
+
+            document.addEventListener("keydown", event => {
+                const isSaveKey =
+                    event.code === "KeyS" ||
+                    (event.key || "").toLowerCase() === "s";
+                const hasSaveModifier = event.ctrlKey || event.metaKey;
+                if (!isSaveKey || !hasSaveModifier || event.altKey) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                if (renameDialog?.open && renameForm instanceof HTMLFormElement) {
+                    renameForm.requestSubmit();
+                    return;
+                }
+
+                if (editorForm instanceof HTMLFormElement) {
+                    editorForm.requestSubmit();
+                }
+            }, { capture: true });
 
             const section = document.getElementById("description-blocks");
             const backLink = document.getElementById("description-editor-back");

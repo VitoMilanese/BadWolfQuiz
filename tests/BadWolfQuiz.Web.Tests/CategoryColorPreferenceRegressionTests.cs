@@ -25,6 +25,23 @@ public sealed class CategoryColorPreferenceRegressionTests
     }
 
     [Fact]
+    public void Category_description_editor_has_compact_radios_and_save_shortcut()
+    {
+        var markup = ReadWebFile("Pages", "Admin", "Quizzes", "DescriptionEditor.cshtml");
+        var css = ReadWebFile("wwwroot", "css", "description-editor.css");
+
+        Assert.Contains(@"id=""description-editor-form""", markup, StringComparison.Ordinal);
+        Assert.Contains(@"event.code === ""KeyS""", markup, StringComparison.Ordinal);
+        Assert.Contains("event.ctrlKey || event.metaKey", markup, StringComparison.Ordinal);
+        Assert.Contains("event.preventDefault();", markup, StringComparison.Ordinal);
+        Assert.Contains("event.stopImmediatePropagation();", markup, StringComparison.Ordinal);
+        Assert.Contains("editorForm.requestSubmit();", markup, StringComparison.Ordinal);
+        Assert.Contains(@".category-color-mode-card input[type=""radio""]", css, StringComparison.Ordinal);
+        Assert.Contains("width: 1.1rem;", css, StringComparison.Ordinal);
+        Assert.Contains("grid-template-columns: 1.1rem minmax(0, 1fr);", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Category_description_editor_persists_mode_and_custom_color()
     {
         var source = ReadWebFile("Pages", "Admin", "Quizzes", "DescriptionEditor.cshtml.cs");
@@ -44,6 +61,16 @@ public sealed class CategoryColorPreferenceRegressionTests
         Assert.Contains("LoadBoardCategoryColorsAsync", model, StringComparison.Ordinal);
         Assert.Contains("category.ColorMode", model, StringComparison.Ordinal);
         Assert.Contains("category.CustomColor", model, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Persistent_host_board_syncs_category_color_metadata()
+    {
+        var markup = ReadWebFile("Pages", "Admin", "Games", "Lobby.cshtml");
+        Assert.Contains("const syncCategoryColorMetadata =", markup, StringComparison.Ordinal);
+        Assert.Contains("data-category-color-mode", markup, StringComparison.Ordinal);
+        Assert.Contains("data-category-custom-color", markup, StringComparison.Ordinal);
+        Assert.Contains("syncCategoryColorMetadata(currentGrid, nextGrid);", markup, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -2113,12 +2113,48 @@
                 .trim();
         };
 
+        const syncCategoryColorMetadata = (currentGrid, nextGrid) => {
+            const getCategoryId = column =>
+                column.querySelector("[data-source-category-id]")
+                    ?.dataset.sourceCategoryId ?? null;
+            const nextColumnsByCategoryId = new Map(
+                Array.from(nextGrid.querySelectorAll(".host-board-column"))
+                    .map(column => [getCategoryId(column), column])
+                    .filter(([categoryId]) => categoryId));
+
+            for (const currentColumn of currentGrid.querySelectorAll(
+                ".host-board-column")) {
+                const categoryId = getCategoryId(currentColumn);
+                const nextColumn = categoryId
+                    ? nextColumnsByCategoryId.get(categoryId)
+                    : null;
+                if (!nextColumn) {
+                    continue;
+                }
+
+                for (const attribute of [
+                    "data-category-color-mode",
+                    "data-category-custom-color"
+                ]) {
+                    if (nextColumn.hasAttribute(attribute)) {
+                        currentColumn.setAttribute(
+                            attribute,
+                            nextColumn.getAttribute(attribute) ?? "");
+                    } else {
+                        currentColumn.removeAttribute(attribute);
+                    }
+                }
+            }
+        };
+
         const syncPersistentRoundBoard = (currentBoard, nextBoard) => {
             const currentGrid = currentBoard.querySelector(".host-board-grid");
             const nextGrid = nextBoard.querySelector(".host-board-grid");
             if (!currentGrid || !nextGrid) {
                 return;
             }
+
+            syncCategoryColorMetadata(currentGrid, nextGrid);
 
             const currentRoundId = currentGrid.dataset.sourceRoundId;
             const nextRoundId = nextGrid.dataset.sourceRoundId;
