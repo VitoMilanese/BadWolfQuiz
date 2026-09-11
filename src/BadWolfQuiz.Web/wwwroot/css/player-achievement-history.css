@@ -99,7 +99,8 @@
     min-width: 0;
 }
 
-.player-achievement-history-body.is-players-mode {
+.player-achievement-history-body.is-players-mode,
+.player-achievement-history-body.is-pending-mode {
     display: grid;
     grid-template-columns: minmax(230px, 290px) minmax(0, 1fr);
     gap: 24px;
@@ -306,7 +307,8 @@
 }
 
 @media (max-width: 1050px) {
-    .player-achievement-history-body.is-players-mode {
+    .player-achievement-history-body.is-players-mode,
+    .player-achievement-history-body.is-pending-mode {
         grid-template-columns: 1fr;
     }
 
