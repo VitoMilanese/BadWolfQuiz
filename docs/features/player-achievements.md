@@ -26,7 +26,7 @@ Direct events that need the result of the current game are tracked as pending ru
 
 ## Catalog
 
-The initial catalog in Web `1.27.0` contained 47 achievements. Web `1.29.0` expanded the catalog to 65 achievements, and Web `1.32.0` expands it again to 80. The source of truth for codes, icons, secrecy, metrics, and numeric targets is `PlayerAchievementService.Catalog`.
+The initial catalog in Web `1.27.0` contained 47 achievements. Web `1.29.0` expanded the catalog to 65 achievements, and Web `1.32.0` expands it again to 80. The source of truth for codes, secrecy, metrics, and numeric targets is `PlayerAchievementService.Catalog`.
 
 Long-term progression includes the first completed game, first correct answer, 5 and 25 completed games, 25 and 100 correct answers, first and fifth wins, a five-answer correct streak, score milestones, flawless play, recovery from a negative score, consecutive wins, and one-month / six-month / one-year participation spans. `BigGame` unlocks at a final score of at least **15,000** points; additional score milestones cover 30,000 in one game and 100,000 / 500,000 / 1,000,000 accumulated points.
 
@@ -94,6 +94,10 @@ Players can open an achievement dialog that shows unlocked milestones and progre
 
 The host lobby exposes a trophy action on each player row. It opens a host-owned achievement dialog for that specific player; the endpoint verifies ownership of the active game before returning achievement data.
 
+Web `1.32.1` replaces achievement-card emoji with dedicated PNG artwork from `wwwroot/images/achievements/{AchievementCode}.png` in both player and host dialogs. Artwork is shown borderlessly on a dark header area that fades into the card background, and fully transparent PNG margins are ignored when fitting the visible artwork without modifying the source asset.
+
+Cards are ordered consistently in both dialogs: unlocked achievements first, then locked public achievements, then locked secret achievements. Locked public artwork is rendered in grayscale. Locked achievements use the hollow-circle state, unlocked public achievements use the gold check state, and unlocked secret achievements use a distinct revealed-secret eye state with a check inside the pupil. Locked secret achievements keep the shared question-mark placeholder and do not expose their artwork until unlocked.
+
 Achievement cards use the shared responsive dialog layout with a fixed header and independently scrolling body so the title and close action remain visible on smaller screens.
 
 ## Localization
@@ -102,6 +106,8 @@ Achievement resources follow the site's existing localization policy. English, U
 
 Achievement-specific regression coverage verifies that every catalog achievement has a non-empty name and description entry in every supported achievement resource, while the existing repository-wide localization regression continues to enforce the intentional Russian marker policy.
 
+The 15 achievements added in Web `1.32.0` use user-facing English, Ukrainian, and Italian descriptions that describe the subject or action directly rather than exposing the internal tag aliases used for matching.
+
 ## Regression coverage
 
-The achievement test suite covers catalog composition and ordering, the 15,000-point Big Game threshold, history metrics, duplicate prevention, account/nickname adoption, current-game highlighting, persistence/recovery, gameplay-specific direct unlocks, explicit double/half reward modifiers, consecutive wins, previous-winner competition, peer five-star rating progress, completed playing months, topic-tag normalization, correct-answer-only topic/media progress, Audio/Video/YouTube block detection, migration compatibility, player/host UI wiring, and localization-resource completeness.
+The achievement test suite covers catalog composition and ordering, the 15,000-point Big Game threshold, history metrics, duplicate prevention, account/nickname adoption, current-game highlighting, persistence/recovery, gameplay-specific direct unlocks, explicit double/half reward modifiers, consecutive wins, previous-winner competition, peer five-star rating progress, completed playing months, topic-tag normalization, correct-answer-only topic/media progress, Audio/Video/YouTube block detection, migration compatibility, player/host UI wiring, PNG artwork and cache-busted asset wiring, compact card layout, alpha-margin trimming, unlocked/public/secret card ordering, locked-artwork grayscale presentation, secret reveal state rendering, and localization-resource completeness.

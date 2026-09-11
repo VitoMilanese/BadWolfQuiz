@@ -78,6 +78,8 @@ Web `1.31.0` is a MINOR release that adds configurable colored category columns 
 
 Web `1.32.0` is a MINOR release that expands persistent player achievements from 65 to 80. It adds Star Trek, anime, Counter-Strike, Dota, Ukraine, geography, and history tag milestones; explicit double/half answer-reward achievements; consecutive-win and previous-winner competition milestones; a ten-times maximum peer-rating milestone; and one-month, six-month, and one-year participation milestones. Reward achievements are driven by an explicit authoritative runtime modifier instead of inferred score deltas, while rating progress is de-duplicated and preserved across nickname-to-account history adoption. See [`docs/features/player-achievements.md`](features/player-achievements.md) for the detailed rules.
 
+Web `1.32.1` is a PATCH release that replaces achievement-card emoji with dedicated PNG artwork for all 80 achievements in both player and host achievement dialogs. Secret locked achievements keep the shared hidden placeholder until they are unlocked.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.

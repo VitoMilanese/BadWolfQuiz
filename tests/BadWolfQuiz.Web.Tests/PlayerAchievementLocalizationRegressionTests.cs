@@ -42,6 +42,54 @@ public sealed class PlayerAchievementLocalizationRegressionTests
         });
     }
 
+    [Fact]
+    public void Recent_achievement_descriptions_do_not_expose_internal_tag_matching()
+    {
+        var recentCodes = PlayerAchievementService.Catalog
+            .TakeLast(15)
+            .Select(achievement => achievement.Code)
+            .ToArray();
+
+        foreach (var (fileName, forbiddenTerm) in new[]
+                 {
+                     ("AchievementResource.resx", "tag"),
+                     ("AchievementResource.uk.resx", "тег"),
+                     ("AchievementResource.it.resx", "tag")
+                 })
+        {
+            var values = LoadResource(fileName);
+            foreach (var code in recentCodes)
+            {
+                var description = values[$"{code}_Description"];
+                Assert.False(
+                    description.Contains(forbiddenTerm, StringComparison.OrdinalIgnoreCase),
+                    $"{fileName} exposes internal tag matching in {code}_Description: {description}");
+            }
+        }
+
+        var english = LoadResource("AchievementResource.resx");
+        Assert.Equal("Correctly answer a question about Star Trek.", english["StarTrekTag_Description"]);
+        Assert.Equal("Correctly answer 25 questions about geography.", english["Geography25_Description"]);
+        Assert.Equal("Correctly answer 25 questions about history.", english["History25_Description"]);
+
+        var ukrainian = LoadResource("AchievementResource.uk.resx");
+        Assert.Equal("Правильно відповісти на питання про «Зоряний Шлях».", ukrainian["StarTrekTag_Description"]);
+        Assert.Equal("Правильно відповісти на 25 питань про географію.", ukrainian["Geography25_Description"]);
+        Assert.Equal("Правильно відповісти на 25 питань про історію.", ukrainian["History25_Description"]);
+
+        var italian = LoadResource("AchievementResource.it.resx");
+        Assert.Equal("Rispondi correttamente a una domanda su Star Trek.", italian["StarTrekTag_Description"]);
+        Assert.Equal("Rispondi correttamente a 25 domande sulla geografia.", italian["Geography25_Description"]);
+        Assert.Equal("Rispondi correttamente a 25 domande sulla storia.", italian["History25_Description"]);
+
+        var russian = LoadResource("AchievementResource.ru.resx");
+        foreach (var code in recentCodes)
+        {
+            Assert.Equal("Україна", russian[$"{code}_Name"]);
+            Assert.Equal("Україна", russian[$"{code}_Description"]);
+        }
+    }
+
     private static Dictionary<string, string> LoadResource(string fileName)
     {
         var path = Path.Combine(

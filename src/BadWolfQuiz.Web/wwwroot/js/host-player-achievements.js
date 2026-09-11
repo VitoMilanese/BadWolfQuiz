@@ -10,6 +10,15 @@
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#39;");
 
+    const achievementSortGroup = item => item.isUnlocked ? 0 : item.isSecret ? 2 : 1;
+
+    const secretUnlockedStateIcon = `
+        <svg class="player-achievement-state-icon player-achievement-secret-revealed" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+            <path class="player-achievement-secret-eye" d="M2.4 12s3.5-5.2 9.6-5.2 9.6 5.2 9.6 5.2-3.5 5.2-9.6 5.2S2.4 12 2.4 12Z"></path>
+            <circle class="player-achievement-secret-pupil" cx="12" cy="12" r="4"></circle>
+            <path class="player-achievement-secret-check" d="m10.15 12.05 1.35 1.35 2.75-3.05"></path>
+        </svg>`;
+
     const ensureDialog = () => {
         if (dialog) return dialog;
 
@@ -26,7 +35,10 @@
     };
 
     const renderDialog = data => {
-        const achievements = Array.isArray(data.achievements) ? data.achievements : [];
+        const achievements = Array.isArray(data.achievements)
+            ? [...data.achievements].sort((left, right) =>
+                achievementSortGroup(left) - achievementSortGroup(right))
+            : [];
         const cards = achievements.map(item => {
             const lockedSecret = item.isSecret && !item.isUnlocked;
             const classes = [
@@ -47,10 +59,20 @@
                 progress = `<div class="player-achievement-progress" aria-label="${current} / ${target}"><span style="width:${percentage}%"></span></div><small>${current} / ${target}</small>`;
             }
 
+            const icon = lockedSecret
+                ? '<span class="player-achievement-icon" aria-hidden="true">❔</span>'
+                : `<img class="player-achievement-image" src="/images/achievements/${encodeURIComponent(item.code)}.png" alt="" aria-hidden="true" loading="lazy" decoding="async">`;
+            const stateClass = item.isUnlocked && item.isSecret
+                ? "player-achievement-state is-secret-unlocked"
+                : "player-achievement-state";
+            const stateIcon = item.isUnlocked
+                ? (item.isSecret ? secretUnlockedStateIcon : "✓")
+                : "○";
+
             return `<article class="${classes}">
                 <div class="player-achievement-card-top">
-                    <span class="player-achievement-icon" aria-hidden="true">${escapeHtml(lockedSecret ? "❔" : item.icon)}</span>
-                    <span class="player-achievement-state" aria-hidden="true">${item.isUnlocked ? "✓" : "○"}</span>
+                    ${icon}
+                    <span class="${stateClass}" aria-hidden="true">${stateIcon}</span>
                 </div>
                 <strong>${escapeHtml(name)}</strong>
                 <p>${escapeHtml(description)}</p>

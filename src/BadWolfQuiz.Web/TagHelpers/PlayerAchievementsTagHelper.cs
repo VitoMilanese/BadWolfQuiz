@@ -31,7 +31,8 @@ public sealed class PlayerAchievementAssetsTagHelper : TagHelper
         }
 
         output.PostContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=5\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=11\" />" +
+            "<script defer src=\"/js/achievement-image-trim.js?v=1\"></script>" +
             "<script defer src=\"/js/player-achievements.js?v=1\"></script>");
     }
 }
@@ -133,6 +134,9 @@ public sealed class PlayerAchievementsTagHelper(
         var newlyUnlocked = achievements
             .Where(item => item.IsNewInCurrentGame)
             .ToArray();
+        var orderedAchievements = achievements
+            .OrderBy(GetAchievementSortGroup)
+            .ToArray();
 
         html.Append("<dialog id=\"player-achievements-dialog\" class=\"player-achievements-dialog\" data-player-achievements-dialog aria-labelledby=\"player-achievements-title\">");
         html.Append("<div class=\"player-achievements-dialog-card\">");
@@ -172,7 +176,7 @@ public sealed class PlayerAchievementsTagHelper(
         html.Append("</strong></div>");
 
         html.Append("<div class=\"player-achievements-grid\">");
-        foreach (var achievement in achievements)
+        foreach (var achievement in orderedAchievements)
         {
             var lockedSecret = achievement.IsSecret && !achievement.IsUnlocked;
             var cardClasses = new StringBuilder("player-achievement-card");
@@ -185,11 +189,32 @@ public sealed class PlayerAchievementsTagHelper(
             html.Append("<article class=\"");
             html.Append(cardClasses);
             html.Append("\">");
-            html.Append("<div class=\"player-achievement-card-top\"><span class=\"player-achievement-icon\" aria-hidden=\"true\">");
-            html.Append(Encode(lockedSecret ? "❔" : achievement.Icon));
-            html.Append("</span><span class=\"player-achievement-state\" aria-hidden=\"true\">");
-            html.Append(achievement.IsUnlocked ? "✓" : "○");
-            html.Append("</span></div><strong>");
+            html.Append("<div class=\"player-achievement-card-top\">");
+            if (lockedSecret)
+            {
+                html.Append("<span class=\"player-achievement-icon\" aria-hidden=\"true\">❔</span>");
+            }
+            else
+            {
+                html.Append("<img class=\"player-achievement-image\" src=\"/images/achievements/");
+                html.Append(Encode(achievement.Code));
+                html.Append(".png\" alt=\"\" aria-hidden=\"true\" loading=\"lazy\" decoding=\"async\" />");
+            }
+
+            if (achievement.IsUnlocked && achievement.IsSecret)
+            {
+                html.Append("<span class=\"player-achievement-state is-secret-unlocked\" aria-hidden=\"true\">");
+                html.Append("<svg class=\"player-achievement-state-icon player-achievement-secret-revealed\" viewBox=\"0 0 24 24\" focusable=\"false\"><path class=\"player-achievement-secret-eye\" d=\"M2.4 12s3.5-5.2 9.6-5.2 9.6 5.2 9.6 5.2-3.5 5.2-9.6 5.2S2.4 12 2.4 12Z\"></path><circle class=\"player-achievement-secret-pupil\" cx=\"12\" cy=\"12\" r=\"4\"></circle><path class=\"player-achievement-secret-check\" d=\"m10.15 12.05 1.35 1.35 2.75-3.05\"></path></svg>");
+                html.Append("</span>");
+            }
+            else
+            {
+                html.Append("<span class=\"player-achievement-state\" aria-hidden=\"true\">");
+                html.Append(achievement.IsUnlocked ? "✓" : "○");
+                html.Append("</span>");
+            }
+
+            html.Append("</div><strong>");
             html.Append(Encode(lockedSecret
                 ? localizer["Achievements_SecretTitle"].Value
                 : GetName(achievement)));
@@ -225,6 +250,9 @@ public sealed class PlayerAchievementsTagHelper(
         html.Append("</div></section></div></div></dialog>");
         return html.ToString();
     }
+
+    private static int GetAchievementSortGroup(PlayerAchievementProgress achievement) =>
+        achievement.IsUnlocked ? 0 : achievement.IsSecret ? 2 : 1;
 
     private string GetName(PlayerAchievementProgress achievement) =>
         localizer[$"{achievement.Code}_Name"].Value;
