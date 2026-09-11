@@ -1216,7 +1216,8 @@ public sealed class LobbyModel(
         Guid id,
         int sourceQuestionId,
         Guid playerId,
-        bool isCorrect,
+        string? judgment,
+        bool? isCorrect,
         CancellationToken cancellationToken)
     {
         var game = sessionRegistry.FindOwned(new GameSessionId(id), currentHost.RequiredId);
@@ -1234,11 +1235,23 @@ public sealed class LobbyModel(
 
         try
         {
+            var resolvedJudgment = judgment switch
+            {
+                "correct" => (IsCorrect: true, RewardModifier: AnswerRewardModifier.Normal),
+                "double" => (IsCorrect: true, RewardModifier: AnswerRewardModifier.Double),
+                "half" => (IsCorrect: true, RewardModifier: AnswerRewardModifier.Half),
+                "incorrect" => (IsCorrect: false, RewardModifier: AnswerRewardModifier.Normal),
+                null when isCorrect.HasValue =>
+                    (IsCorrect: isCorrect.Value, RewardModifier: AnswerRewardModifier.Normal),
+                _ => throw new GameRuleViolationException("Unknown answer judgment.")
+            };
+
             var attempt = sessionRegistry.JudgeQuestionAnswer(
                 game.PublicCode,
                 sourceQuestionId,
                 new GamePlayerId(playerId),
-                isCorrect);
+                resolvedJudgment.IsCorrect,
+                resolvedJudgment.RewardModifier);
 
             if (attempt is not null)
             {
@@ -1249,7 +1262,7 @@ public sealed class LobbyModel(
                     game,
                     player,
                     attempt,
-                    isCorrect ? "correct" : "incorrect");
+                    resolvedJudgment.IsCorrect ? "correct" : "incorrect");
             }
         }
         catch (GameRuleViolationException)

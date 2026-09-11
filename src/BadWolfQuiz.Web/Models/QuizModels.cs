@@ -234,6 +234,9 @@ public sealed class QuizQuestion
     public bool IsSpecial { get; set; }
     public QuestionPresentationType PresentationType { get; set; }
     public bool ExcludeFromRandomWagerSelection { get; set; }
+
+    public bool AllowAnswerRewardModifiers { get; set; }
+
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public QuizCategory Category { get; set; } = null!;

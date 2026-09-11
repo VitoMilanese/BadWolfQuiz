@@ -78,6 +78,7 @@ public sealed class QuestionEditorModel(
                 presentationType),
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
+            AllowAnswerRewardModifiers = question.AllowAnswerRewardModifiers,
             BuzzModeOverride = question.BuzzModeOverride,
             BuzzDelaySeconds = question.BuzzDelaySeconds,
             Tags = question.Tags.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase)
@@ -251,6 +252,7 @@ public sealed class QuestionEditorModel(
             Input.IsSpecial;
         question.ExcludeFromRandomWagerSelection =
             isHostMultipleChoice || Input.ExcludeFromRandomWagerSelection;
+        question.AllowAnswerRewardModifiers = Input.AllowAnswerRewardModifiers;
         question.BuzzModeOverride = question.IsSpecial || isAllPlayer
             ? BuzzActivationMode.Disabled
             : Input.BuzzModeOverride;
@@ -983,6 +985,9 @@ public sealed class QuestionEditorModel(
 
         [Display(Name = "Label_ExcludeFromRandomWagerSelection")]
         public bool ExcludeFromRandomWagerSelection { get; set; }
+
+        [Display(Name = "Label_AllowAnswerRewardModifiers")]
+        public bool AllowAnswerRewardModifiers { get; set; }
 
         [Display(Name = "Label_BuzzMode")]
         public BuzzActivationMode BuzzModeOverride { get; set; }

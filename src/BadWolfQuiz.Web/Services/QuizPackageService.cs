@@ -109,7 +109,8 @@ public sealed class QuizPackageService(QuizDbContext db)
                                     question.ExcludeFromRandomWagerSelection,
                                     question.QuestionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                                     question.AnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
-                                    question.Tags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray()))
+                                    question.Tags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray(),
+                                    question.AllowAnswerRewardModifiers))
                                 .ToArray(),
                             category.DescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                             category.ColorMode,
@@ -280,6 +281,7 @@ public sealed class QuizPackageService(QuizDbContext db)
                         IsSpecial = sourceQuestion.IsSpecial,
                         PresentationType = sourceQuestion.PresentationType,
                         ExcludeFromRandomWagerSelection = sourceQuestion.ExcludeFromRandomWagerSelection,
+                        AllowAnswerRewardModifiers = sourceQuestion.AllowAnswerRewardModifiers,
                         UpdatedAtUtc = now
                     };
                     foreach (var tag in sourceQuestion.Tags ?? [])
@@ -512,7 +514,7 @@ public sealed class QuizPackageService(QuizDbContext db)
         int RowIndex, int? TimeLimitSecondsOverride, BuzzActivationMode BuzzModeOverride,
         int BuzzDelaySeconds, bool IsSpecial, QuestionPresentationType PresentationType,
         bool ExcludeFromRandomWagerSelection, BlockData[] QuestionBlocks, BlockData[] AnswerBlocks,
-        string[]? Tags = null);
+        string[]? Tags = null, bool AllowAnswerRewardModifiers = false);
     private sealed record BlockData(
         ContentBlockType BlockType, string? TextContent, string? TopCaption,
         string? BottomCaption, string? MediaPath, string? ExternalUrl,

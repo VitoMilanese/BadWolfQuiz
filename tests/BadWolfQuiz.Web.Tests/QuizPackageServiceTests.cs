@@ -101,7 +101,8 @@ public sealed class QuizPackageServiceTests
         {
             RowIndex = 0,
             BuzzModeOverride = BuzzActivationMode.UseRoundDefault,
-            PresentationType = QuestionPresentationType.Standard
+            PresentationType = QuestionPresentationType.Standard,
+            AllowAnswerRewardModifiers = true
         };
         question.Tags.Add(new QuizQuestionTag
         {
@@ -196,6 +197,7 @@ public sealed class QuizPackageServiceTests
             var importedQuestion = Assert.Single(importedCategory.Questions);
             Assert.Equal("Question", Assert.Single(importedQuestion.QuestionBlocks).TextContent);
             Assert.Equal("Answer", Assert.Single(importedQuestion.AnswerBlocks).TextContent);
+            Assert.True(importedQuestion.AllowAnswerRewardModifiers);
             Assert.Equal(
                 new[] { "комедія", "фільми 90-х" },
                 importedQuestion.Tags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray());

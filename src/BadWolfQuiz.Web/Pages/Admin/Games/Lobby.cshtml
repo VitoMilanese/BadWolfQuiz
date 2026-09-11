@@ -923,15 +923,26 @@
                                    type="hidden"
                                    value="@player.Id.Value" />
                             <button class="button judgment-correct-button"
-                                    name="isCorrect"
+                                    name="judgment"
                                     type="submit"
-                                    value="true">
+                                    value="correct">
                                 @Localizer["Message_Correct"]
                             </button>
+                            @if (Model.CurrentQuestion.AllowAnswerRewardModifiers)
+                            {
+                                <button class="button button-secondary judgment-reward-button"
+                                        name="judgment"
+                                        type="submit"
+                                        value="double">x2</button>
+                                <button class="button button-secondary judgment-reward-button"
+                                        name="judgment"
+                                        type="submit"
+                                        value="half">1/2</button>
+                            }
                             <button class="button judgment-incorrect-button"
-                                    name="isCorrect"
+                                    name="judgment"
                                     type="submit"
-                                    value="false">
+                                    value="incorrect">
                                 @Localizer["Message_Wrong"]
                             </button>
                         </form>
@@ -5275,6 +5286,8 @@
                         : null;
                     if (judgingButton?.name === "isCorrect") {
                         playAnswerFeedbackSound(judgingButton.value === "true");
+                    } else if (judgingButton?.name === "judgment") {
+                        playAnswerFeedbackSound(judgingButton.value !== "incorrect");
                     }
                     const gameplayView = document.querySelector(
                         "[data-host-gameplay-view]");

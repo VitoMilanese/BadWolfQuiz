@@ -49,6 +49,7 @@ public static class AllPlayerQuestionCompatibility
 
         if (question.PresentationType != QuestionPresentationType.Standard ||
             question.IsSpecial ||
+            question.AllowAnswerRewardModifiers ||
             !question.ExcludeFromRandomWagerSelection ||
             question.BuzzModeOverride != BuzzActivationMode.Disabled)
         {

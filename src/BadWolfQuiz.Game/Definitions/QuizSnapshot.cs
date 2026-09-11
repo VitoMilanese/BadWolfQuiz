@@ -249,7 +249,8 @@ public sealed class QuizQuestionSnapshot
         IEnumerable<ContentBlockSnapshot>? answerBlocks = null,
         QuestionPresentationType presentationType = QuestionPresentationType.Standard,
         QuestionBuzzerMode buzzerMode = QuestionBuzzerMode.UseGameSetting,
-        int buzzDelaySeconds = 0)
+        int buzzDelaySeconds = 0,
+        bool allowAnswerRewardModifiers = false)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceQuestionId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sourceCategoryId);
@@ -366,6 +367,7 @@ public sealed class QuizQuestionSnapshot
         ExcludeFromRandomWagerSelection =
             presentationType == QuestionPresentationType.HostMultipleChoice ||
             excludeFromRandomWagerSelection;
+        AllowAnswerRewardModifiers = allowAnswerRewardModifiers;
         CategoryTitle = string.IsNullOrWhiteSpace(categoryTitle)
             ? sourceCategoryId.ToString()
             : categoryTitle.Trim();
@@ -419,6 +421,8 @@ public sealed class QuizQuestionSnapshot
     public int BuzzDelaySeconds { get; }
 
     public bool ExcludeFromRandomWagerSelection { get; }
+
+    public bool AllowAnswerRewardModifiers { get; }
 
     public bool IsEligibleForRandomWagerSelection =>
         !ExcludeFromRandomWagerSelection &&

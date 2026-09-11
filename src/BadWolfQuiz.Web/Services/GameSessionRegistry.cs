@@ -1263,7 +1263,8 @@ public sealed class GameSessionRegistry
         string publicCode,
         int sourceQuestionId,
         GamePlayerId playerId,
-        bool isCorrect)
+        bool isCorrect,
+        AnswerRewardModifier rewardModifier = AnswerRewardModifier.Normal)
     {
         var game = Find(publicCode);
 
@@ -1277,7 +1278,8 @@ public sealed class GameSessionRegistry
             var attempt = game.Session.JudgeQuestionAnswer(
                 sourceQuestionId,
                 playerId,
-                isCorrect);
+                isCorrect,
+                rewardModifier);
             game.BuzzerRace = null;
             game.MarkPersistenceChanged();
             return attempt;
