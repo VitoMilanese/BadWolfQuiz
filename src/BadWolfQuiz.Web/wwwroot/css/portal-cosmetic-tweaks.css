@@ -1,3 +1,5 @@
+@import url("./portal-compact-heroes.css?v=1");
+
 /* Desktop-only compaction for the large portal heroes.
  * Keep the existing responsive layouts untouched on smaller screens.
  */
