@@ -1,10 +1,3 @@
-.player-achievement-history-body.is-pending-mode {
-    display: grid;
-    grid-template-columns: minmax(230px, 290px) minmax(0, 1fr);
-    gap: 24px;
-    align-items: start;
-}
-
 .player-achievement-history-pending-results,
 .player-achievement-history-pending-list {
     min-width: 0;
@@ -40,32 +33,8 @@
 .player-achievement-history-pending-header {
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 18px;
-}
-
-.player-achievement-history-pending-header > div {
-    display: grid;
-    gap: 5px;
-    min-width: 0;
-}
-
-.player-achievement-history-pending-header span,
-.player-achievement-history-pending-achievements-heading {
-    color: var(--gold);
-    font-size: 0.68rem;
-    font-weight: 900;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-}
-
-.player-achievement-history-pending-header strong {
-    overflow-wrap: anywhere;
-    color: var(--text);
-    font-size: clamp(1.45rem, 2.1vw, 2rem);
-    font-weight: 950;
-    line-height: 1.05;
-    letter-spacing: -0.025em;
 }
 
 .player-achievement-history-pending-header b {
@@ -90,6 +59,11 @@
 }
 
 .player-achievement-history-pending-achievements-heading {
+    color: var(--gold);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     margin-top: 4px;
     padding-top: 18px;
     border-top: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
@@ -129,19 +103,13 @@
     opacity: 0.62;
 }
 
-@media (max-width: 1050px) {
-    .player-achievement-history-body.is-pending-mode {
-        grid-template-columns: 1fr;
-    }
-}
-
 @media (max-width: 760px) {
     .player-achievement-history-pending-header {
         display: grid;
     }
 
     .player-achievement-history-pending-header b {
-        justify-self: start;
+        justify-self: end;
     }
 
     .player-achievement-history-confirm-form {
