@@ -12,6 +12,12 @@ public sealed class PlayerAchievementUiRegressionTests
             "BadWolfQuiz.Web",
             "TagHelpers",
             "PlayerAchievementsTagHelper.cs"));
+        var hostTagHelper = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "TagHelpers",
+            "HostPlayerAchievementsAssetsTagHelper.cs"));
         var imports = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -43,8 +49,10 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("PlayerAchievementAssetsTagHelper", imports);
         Assert.Contains("PlayerAchievementsTagHelper", imports);
         Assert.Contains("GitHubAchievementLinkTagHelper", imports);
-        Assert.Contains("/css/player-achievements.css?v=6", tagHelper);
+        Assert.Contains("/css/player-achievements.css?v=7", tagHelper);
         Assert.Contains("/js/player-achievements.js?v=1", tagHelper);
+        Assert.Contains("/css/player-achievements.css?v=7", hostTagHelper);
+        Assert.Contains("/js/host-player-achievements.js?v=4", hostTagHelper);
         Assert.Contains("data-player-achievements-label", tagHelper);
         Assert.Contains("Achievements_PlayerLabel", tagHelper);
         Assert.Contains("player-achievements-dialog", tagHelper);
@@ -70,7 +78,12 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("overflow: hidden", css);
         Assert.DoesNotContain("position: sticky", css);
         Assert.Contains(".player-achievements-grid", css);
+        Assert.Contains("minmax(min(100%, 240px), 1fr)", css);
         Assert.Contains(".player-achievement-image", css);
+        Assert.Contains("width: 144px", css);
+        Assert.Contains("height: 144px", css);
+        Assert.Contains("min-height: 144px", css);
+        Assert.DoesNotContain("width: 64px", css);
         Assert.Contains(".player-achievement-progress", css);
         Assert.Contains(".player-achievement-card.is-new", css);
         Assert.Contains("@media (max-width: 600px)", css);
