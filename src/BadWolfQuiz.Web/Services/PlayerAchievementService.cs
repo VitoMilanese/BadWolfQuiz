@@ -54,7 +54,8 @@ public sealed class PlayerAchievementService(QuizDbContext db)
         new("FirstToThirdReturn", "🕳️", true, PlayerAchievementMetric.DirectUnlock, 1),
         new("LateJoiner", "🕒", true, PlayerAchievementMetric.DirectUnlock, 1),
         new("AvatarChanged", "🎭", false, PlayerAchievementMetric.DirectUnlock, 1),
-        new("WebcamEnabled", "📷", false, PlayerAchievementMetric.DirectUnlock, 1)
+        new("WebcamEnabled", "📷", false, PlayerAchievementMetric.DirectUnlock, 1),
+        .. PlayerTagAchievementCatalog.Definitions
     ];
 
     public async Task AdoptHostNicknameHistoryAsync(
@@ -511,14 +512,67 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             .Where(player => gameIds.Contains(player.GameSessionId))
             .Select(player => new PlayerAchievementGameScoreSource(player.GameSessionId, player.TotalScore))
             .ToListAsync(cancellationToken);
-        var answers = await db.PlayerQuestionResults
+        var answerRows = await db.PlayerQuestionResults
             .IgnoreQueryFilters()
             .AsNoTracking()
             .Where(result => playerIds.Contains(result.GamePlayerId))
             .OrderBy(result => result.CreatedAtUtc)
-            .Select(result => new PlayerAchievementAnswerSource(
-                result.GamePlayerId, result.IsCorrect, result.PointsAwarded, result.CreatedAtUtc))
+            .Select(result => new
+            {
+                result.GamePlayerId,
+                result.IsCorrect,
+                result.PointsAwarded,
+                result.CreatedAtUtc,
+                result.GameQuestion.QuizQuestionId
+            })
             .ToListAsync(cancellationToken);
+        var quizQuestionIds = answerRows
+            .Select(answer => answer.QuizQuestionId)
+            .Distinct()
+            .ToArray();
+        var mediaRows = await db.QuestionContentBlocks
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(block =>
+                quizQuestionIds.Contains(block.QuizQuestionId) &&
+                (block.BlockType == ContentBlockType.Audio ||
+                 block.BlockType == ContentBlockType.Video ||
+                 block.BlockType == ContentBlockType.YouTube))
+            .Select(block => new { block.QuizQuestionId, block.BlockType })
+            .ToListAsync(cancellationToken);
+        var audioQuestionIds = mediaRows
+            .Where(block => block.BlockType == ContentBlockType.Audio)
+            .Select(block => block.QuizQuestionId)
+            .ToHashSet();
+        var videoQuestionIds = mediaRows
+            .Where(block =>
+                block.BlockType == ContentBlockType.Video || block.BlockType == ContentBlockType.YouTube)
+            .Select(block => block.QuizQuestionId)
+            .ToHashSet();
+        var tagRows = await db.QuizQuestionTags
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(tag => quizQuestionIds.Contains(tag.QuizQuestionId))
+            .Select(tag => new { tag.QuizQuestionId, tag.NormalizedName })
+            .ToListAsync(cancellationToken);
+        var tagsByQuestion = tagRows
+            .GroupBy(tag => tag.QuizQuestionId)
+            .ToDictionary(
+                group => group.Key,
+                group => (IReadOnlyCollection<string>)group
+                    .Select(tag => tag.NormalizedName)
+                    .Distinct(StringComparer.Ordinal)
+                    .ToArray());
+        var answers = answerRows
+            .Select(answer => new PlayerAchievementAnswerSource(
+                answer.GamePlayerId,
+                answer.IsCorrect,
+                answer.PointsAwarded,
+                answer.CreatedAtUtc,
+                tagsByQuestion.TryGetValue(answer.QuizQuestionId, out var tags) ? tags : [],
+                audioQuestionIds.Contains(answer.QuizQuestionId),
+                videoQuestionIds.Contains(answer.QuizQuestionId)))
+            .ToArray();
         return BuildHistory(appearances, gameScores, answers);
     }
 
@@ -597,7 +651,10 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             bestFinalScore,
             bestFlawlessAttempts,
             recoveredFromNegative,
-            TotalScore: totalScore);
+            TotalScore: totalScore,
+            TaggedAnswers: PlayerTagAchievementCatalog.CountAnswers(answers),
+            AudioQuestionAnswers: answers.Count(answer => answer.IsCorrect == true && answer.HasAudioBlock),
+            VideoQuestionAnswers: answers.Count(answer => answer.IsCorrect == true && answer.HasVideoBlock));
     }
 
     public static IReadOnlyList<PlayerAchievementProgress> BuildProgress(
@@ -614,7 +671,7 @@ public sealed class PlayerAchievementService(QuizDbContext db)
         return Catalog
             .Select((definition, index) =>
             {
-                var metricValue = GetMetricValue(definition.Metric, history);
+                var metricValue = GetMetricValue(definition, history);
                 var isUnlocked = unlockedByCode.TryGetValue(definition.Code, out var record);
                 return new
                 {
@@ -636,27 +693,37 @@ public sealed class PlayerAchievementService(QuizDbContext db)
     }
 
     private static bool IsSatisfied(PlayerAchievementDefinition definition, PlayerAchievementHistory history) =>
-        GetMetricValue(definition.Metric, history) >= definition.Target;
+        GetMetricValue(definition, history) >= definition.Target;
 
-    private static int GetMetricValue(PlayerAchievementMetric metric, PlayerAchievementHistory history) => metric switch
+    private static int GetMetricValue(PlayerAchievementDefinition definition, PlayerAchievementHistory history)
     {
-        PlayerAchievementMetric.GamesPlayed => history.GamesPlayed,
-        PlayerAchievementMetric.CorrectAnswers => history.CorrectAnswers,
-        PlayerAchievementMetric.Wins => history.Wins,
-        PlayerAchievementMetric.BestCorrectStreak => history.BestCorrectStreak,
-        PlayerAchievementMetric.BestFinalScore => Math.Max(0, history.BestFinalScore),
-        PlayerAchievementMetric.TotalScore => Math.Max(0, history.TotalScore),
-        PlayerAchievementMetric.BestFlawlessAttempts => history.BestFlawlessAttempts,
-        PlayerAchievementMetric.RecoveredFromNegative => history.RecoveredFromNegative ? 1 : 0,
-        PlayerAchievementMetric.Registered => history.Registered ? 1 : 0,
-        PlayerAchievementMetric.OwnQuizWithOthers => history.OwnQuizWithOthers ? 1 : 0,
-        PlayerAchievementMetric.PublicQuizGuest => history.PublicQuizGuest ? 1 : 0,
-        PlayerAchievementMetric.QuizRated => history.QuizRated ? 1 : 0,
-        PlayerAchievementMetric.DeveloperContacted => history.DeveloperContacted ? 1 : 0,
-        PlayerAchievementMetric.DeveloperReplied => history.DeveloperReplied ? 1 : 0,
-        PlayerAchievementMetric.DirectUnlock => 0,
-        _ => 0
-    };
+        if (definition.Metric == PlayerAchievementMetric.TaggedAnswers)
+        {
+            return PlayerTagAchievementCatalog.GetCount(history, definition.TagGroup);
+        }
+
+        return definition.Metric switch
+        {
+            PlayerAchievementMetric.GamesPlayed => history.GamesPlayed,
+            PlayerAchievementMetric.CorrectAnswers => history.CorrectAnswers,
+            PlayerAchievementMetric.Wins => history.Wins,
+            PlayerAchievementMetric.BestCorrectStreak => history.BestCorrectStreak,
+            PlayerAchievementMetric.BestFinalScore => Math.Max(0, history.BestFinalScore),
+            PlayerAchievementMetric.TotalScore => Math.Max(0, history.TotalScore),
+            PlayerAchievementMetric.BestFlawlessAttempts => history.BestFlawlessAttempts,
+            PlayerAchievementMetric.RecoveredFromNegative => history.RecoveredFromNegative ? 1 : 0,
+            PlayerAchievementMetric.Registered => history.Registered ? 1 : 0,
+            PlayerAchievementMetric.OwnQuizWithOthers => history.OwnQuizWithOthers ? 1 : 0,
+            PlayerAchievementMetric.PublicQuizGuest => history.PublicQuizGuest ? 1 : 0,
+            PlayerAchievementMetric.QuizRated => history.QuizRated ? 1 : 0,
+            PlayerAchievementMetric.DeveloperContacted => history.DeveloperContacted ? 1 : 0,
+            PlayerAchievementMetric.DeveloperReplied => history.DeveloperReplied ? 1 : 0,
+            PlayerAchievementMetric.AudioQuestionAnswers => history.AudioQuestionAnswers,
+            PlayerAchievementMetric.VideoQuestionAnswers => history.VideoQuestionAnswers,
+            PlayerAchievementMetric.DirectUnlock => 0,
+            _ => 0
+        };
+    }
 
     public static string NormalizePlayerKey(string? name) =>
         (name ?? string.Empty).Trim().ToUpperInvariant();
@@ -678,6 +745,9 @@ public enum PlayerAchievementMetric
     QuizRated,
     DeveloperContacted,
     DeveloperReplied,
+    TaggedAnswers,
+    AudioQuestionAnswers,
+    VideoQuestionAnswers,
     DirectUnlock
 }
 
@@ -686,7 +756,8 @@ public sealed record PlayerAchievementDefinition(
     string Icon,
     bool IsSecret,
     PlayerAchievementMetric Metric,
-    int Target);
+    int Target,
+    string? TagGroup = null);
 
 public sealed record PlayerAchievementProgress(
     string Code,
@@ -732,7 +803,10 @@ public sealed record PlayerAchievementHistory(
     bool QuizRated = false,
     bool DeveloperContacted = false,
     bool DeveloperReplied = false,
-    int TotalScore = 0)
+    int TotalScore = 0,
+    IReadOnlyDictionary<string, int>? TaggedAnswers = null,
+    int AudioQuestionAnswers = 0,
+    int VideoQuestionAnswers = 0)
 {
     public static PlayerAchievementHistory Empty { get; } = new(0, 0, 0, 0, 0, 0, false);
 }
@@ -754,6 +828,9 @@ public sealed record PlayerAchievementAnswerSource(
     int GamePlayerId,
     bool? IsCorrect,
     int PointsAwarded,
-    DateTime CreatedAtUtc);
+    DateTime CreatedAtUtc,
+    IReadOnlyCollection<string>? Tags = null,
+    bool HasAudioBlock = false,
+    bool HasVideoBlock = false);
 
 public sealed record PlayerAchievementRatingSource(int GameSessionId, string RaterKey);

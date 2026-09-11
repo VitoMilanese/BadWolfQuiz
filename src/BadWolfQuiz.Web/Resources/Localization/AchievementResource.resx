@@ -107,4 +107,40 @@
   <data name="AvatarChanged_Description" xml:space="preserve"><value>Change your avatar after making your first avatar choice.</value></data>
   <data name="WebcamEnabled_Name" xml:space="preserve"><value>On Air</value></data>
   <data name="WebcamEnabled_Description" xml:space="preserve"><value>Enable either a regular webcam or a URL webcam during a game.</value></data>
+  <data name="Films25_Name" xml:space="preserve"><value>Movie Buff</value></data>
+  <data name="Films25_Description" xml:space="preserve"><value>Answer 25 questions about films.</value></data>
+  <data name="Series25_Name" xml:space="preserve"><value>Series Buff</value></data>
+  <data name="Series25_Description" xml:space="preserve"><value>Answer 25 questions about series.</value></data>
+  <data name="Cartoons25_Name" xml:space="preserve"><value>Cartoon Buff</value></data>
+  <data name="Cartoons25_Description" xml:space="preserve"><value>Answer 25 questions about cartoons.</value></data>
+  <data name="AnimatedSeries25_Name" xml:space="preserve"><value>Animated Series Buff</value></data>
+  <data name="AnimatedSeries25_Description" xml:space="preserve"><value>Answer 25 questions about animated series.</value></data>
+  <data name="Games25_Name" xml:space="preserve"><value>Gamer</value></data>
+  <data name="Games25_Description" xml:space="preserve"><value>Answer 25 questions about games.</value></data>
+  <data name="AudioQuestions25_Name" xml:space="preserve"><value>By Ear</value></data>
+  <data name="AudioQuestions25_Description" xml:space="preserve"><value>Answer 25 audio questions.</value></data>
+  <data name="VideoQuestions25_Name" xml:space="preserve"><value>On Screen</value></data>
+  <data name="VideoQuestions25_Description" xml:space="preserve"><value>Answer 25 video questions.</value></data>
+  <data name="HarryPotter25_Name" xml:space="preserve"><value>Wizard</value></data>
+  <data name="HarryPotter25_Description" xml:space="preserve"><value>Answer 25 questions about Harry Potter.</value></data>
+  <data name="StarWars25_Name" xml:space="preserve"><value>Faraway Galaxy</value></data>
+  <data name="StarWars25_Description" xml:space="preserve"><value>Answer 25 questions about Star Wars.</value></data>
+  <data name="Fantasy25_Name" xml:space="preserve"><value>Fantasy Expert</value></data>
+  <data name="Fantasy25_Description" xml:space="preserve"><value>Answer 25 questions about fantasy.</value></data>
+  <data name="SciFi25_Name" xml:space="preserve"><value>Sci-Fi Expert</value></data>
+  <data name="SciFi25_Description" xml:space="preserve"><value>Answer 25 questions about science fiction.</value></data>
+  <data name="Animals25_Name" xml:space="preserve"><value>Animal Expert</value></data>
+  <data name="Animals25_Description" xml:space="preserve"><value>Answer 25 questions about animals.</value></data>
+  <data name="Horrors25_Name" xml:space="preserve"><value>Fearless</value></data>
+  <data name="Horrors25_Description" xml:space="preserve"><value>Answer 25 questions about horror.</value></data>
+  <data name="Music25_Name" xml:space="preserve"><value>Music Lover</value></data>
+  <data name="Music25_Description" xml:space="preserve"><value>Answer 25 questions about music.</value></data>
+  <data name="DoctorWhoTag_Name" xml:space="preserve"><value>Time Lord</value></data>
+  <data name="DoctorWhoTag_Description" xml:space="preserve"><value>Answer a question about Doctor Who.</value></data>
+  <data name="RobocopTag_Name" xml:space="preserve"><value>Dead or Alive</value></data>
+  <data name="RobocopTag_Description" xml:space="preserve"><value>Answer a question about Robocop.</value></data>
+  <data name="TerminatorTag_Name" xml:space="preserve"><value>I'll Be Back</value></data>
+  <data name="TerminatorTag_Description" xml:space="preserve"><value>Answer a question about Terminator.</value></data>
+  <data name="MafiaGodfatherTag_Name" xml:space="preserve"><value>Family Business</value></data>
+  <data name="MafiaGodfatherTag_Description" xml:space="preserve"><value>Answer a question about the Mafia.</value></data>
 </root>

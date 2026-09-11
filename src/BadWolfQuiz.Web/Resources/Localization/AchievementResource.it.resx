@@ -107,4 +107,40 @@
   <data name="AvatarChanged_Description" xml:space="preserve"><value>Cambia avatar dopo la prima scelta dell’avatar.</value></data>
   <data name="WebcamEnabled_Name" xml:space="preserve"><value>In onda</value></data>
   <data name="WebcamEnabled_Description" xml:space="preserve"><value>Attiva una webcam normale o una webcam tramite URL durante una partita.</value></data>
+  <data name="Films25_Name" xml:space="preserve"><value>Cinefilo</value></data>
+  <data name="Films25_Description" xml:space="preserve"><value>Rispondi a 25 domande sui film.</value></data>
+  <data name="Series25_Name" xml:space="preserve"><value>Maratoneta di serie</value></data>
+  <data name="Series25_Description" xml:space="preserve"><value>Rispondi a 25 domande sulle serie TV.</value></data>
+  <data name="Cartoons25_Name" xml:space="preserve"><value>Fan dei cartoni</value></data>
+  <data name="Cartoons25_Description" xml:space="preserve"><value>Rispondi a 25 domande sui cartoni animati.</value></data>
+  <data name="AnimatedSeries25_Name" xml:space="preserve"><value>Fan delle serie animate</value></data>
+  <data name="AnimatedSeries25_Description" xml:space="preserve"><value>Rispondi a 25 domande sulle serie animate.</value></data>
+  <data name="Games25_Name" xml:space="preserve"><value>Gamer</value></data>
+  <data name="Games25_Description" xml:space="preserve"><value>Rispondi a 25 domande sui videogiochi.</value></data>
+  <data name="AudioQuestions25_Name" xml:space="preserve"><value>Orecchio fino</value></data>
+  <data name="AudioQuestions25_Description" xml:space="preserve"><value>Rispondi a 25 domande audio.</value></data>
+  <data name="VideoQuestions25_Name" xml:space="preserve"><value>Sullo schermo</value></data>
+  <data name="VideoQuestions25_Description" xml:space="preserve"><value>Rispondi a 25 domande video.</value></data>
+  <data name="HarryPotter25_Name" xml:space="preserve"><value>Mago</value></data>
+  <data name="HarryPotter25_Description" xml:space="preserve"><value>Rispondi a 25 domande su Harry Potter.</value></data>
+  <data name="StarWars25_Name" xml:space="preserve"><value>Galassia lontana</value></data>
+  <data name="StarWars25_Description" xml:space="preserve"><value>Rispondi a 25 domande su Star Wars.</value></data>
+  <data name="Fantasy25_Name" xml:space="preserve"><value>Esperto fantasy</value></data>
+  <data name="Fantasy25_Description" xml:space="preserve"><value>Rispondi a 25 domande sul fantasy.</value></data>
+  <data name="SciFi25_Name" xml:space="preserve"><value>Esperto sci-fi</value></data>
+  <data name="SciFi25_Description" xml:space="preserve"><value>Rispondi a 25 domande sulla fantascienza.</value></data>
+  <data name="Animals25_Name" xml:space="preserve"><value>Esperto di animali</value></data>
+  <data name="Animals25_Description" xml:space="preserve"><value>Rispondi a 25 domande sugli animali.</value></data>
+  <data name="Horrors25_Name" xml:space="preserve"><value>Senza paura</value></data>
+  <data name="Horrors25_Description" xml:space="preserve"><value>Rispondi a 25 domande sull'horror.</value></data>
+  <data name="Music25_Name" xml:space="preserve"><value>Melomane</value></data>
+  <data name="Music25_Description" xml:space="preserve"><value>Rispondi a 25 domande sulla musica.</value></data>
+  <data name="DoctorWhoTag_Name" xml:space="preserve"><value>Signore del Tempo</value></data>
+  <data name="DoctorWhoTag_Description" xml:space="preserve"><value>Rispondi a una domanda su Doctor Who.</value></data>
+  <data name="RobocopTag_Name" xml:space="preserve"><value>Vivo o morto</value></data>
+  <data name="RobocopTag_Description" xml:space="preserve"><value>Rispondi a una domanda su Robocop.</value></data>
+  <data name="TerminatorTag_Name" xml:space="preserve"><value>Tornerò</value></data>
+  <data name="TerminatorTag_Description" xml:space="preserve"><value>Rispondi a una domanda su Terminator.</value></data>
+  <data name="MafiaGodfatherTag_Name" xml:space="preserve"><value>Affari di famiglia</value></data>
+  <data name="MafiaGodfatherTag_Description" xml:space="preserve"><value>Rispondi a una domanda sulla mafia.</value></data>
 </root>
