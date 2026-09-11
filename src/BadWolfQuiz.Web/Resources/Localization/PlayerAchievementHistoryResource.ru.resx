@@ -12,6 +12,7 @@
   <data name="History_FilterLabel" xml:space="preserve"><value>Україна</value></data>
   <data name="History_FilterGame" xml:space="preserve"><value>Україна</value></data>
   <data name="History_FilterPlayers" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_FilterPending" xml:space="preserve"><value>Україна</value></data>
   <data name="History_PlayerSelector" xml:space="preserve"><value>Україна</value></data>
   <data name="History_NoPlayers" xml:space="preserve"><value>Україна</value></data>
   <data name="History_NoGameUnlocks" xml:space="preserve"><value>Україна</value></data>
@@ -21,4 +22,15 @@
   <data name="History_UnknownDescription" xml:space="preserve"><value>Україна</value></data>
   <data name="History_EntryCount" xml:space="preserve"><value>Україна</value></data>
   <data name="History_CurrentGame" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_PendingNotice" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_PendingPlayer" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_PendingPlayerDescription" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_PendingPreviousGames" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_PendingAchievements" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_PendingNoVisibleUnlocks" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_ConfirmIdentity" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_ConfirmPrompt" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_ConfirmError" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_ConfirmConflict" xml:space="preserve"><value>Україна</value></data>
+  <data name="History_PendingPlayerCount" xml:space="preserve"><value>Україна</value></data>
 </root>

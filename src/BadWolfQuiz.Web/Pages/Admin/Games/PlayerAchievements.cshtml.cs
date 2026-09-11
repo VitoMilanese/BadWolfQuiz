@@ -22,12 +22,17 @@ public sealed class PlayerAchievementsModel(
 {
     public const string GameMode = "game";
     public const string PlayersMode = "players";
+    public const string PendingMode = "pending";
 
     public GameSessionRegistration Game { get; private set; } = null!;
     public string Mode { get; private set; } = GameMode;
     public IReadOnlyList<PlayerAchievementHistoryPlayer> Players { get; private set; } = [];
     public Guid? SelectedPlayerId { get; private set; }
     public IReadOnlyList<PlayerAchievementHistoryEntry> Entries { get; private set; } = [];
+    public IReadOnlyList<PlayerAchievementPendingConfirmation> PendingConfirmations { get; private set; } = [];
+    public PlayerAchievementPendingConfirmation? SelectedPendingConfirmation { get; private set; }
+    public bool HasPendingConfirmations => PendingConfirmations.Count > 0;
+    public int CurrentModeCount => Mode == PendingMode ? PendingConfirmations.Count : Entries.Count;
 
     public async Task<IActionResult> OnGetAsync(
         Guid id,
@@ -57,6 +62,83 @@ public sealed class PlayerAchievementsModel(
             mode,
             selectedPlayerId,
             cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostConfirmIdentityAsync(
+        Guid id,
+        Guid playerId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var runtimePlayer = sessionRegistry
+            .GetPlayers(game)
+            .FirstOrDefault(item => item.Id == new GamePlayerId(playerId));
+        if (runtimePlayer is null)
+        {
+            return NotFound();
+        }
+
+        // The account identity is always resolved from authoritative runtime state.
+        // It is intentionally never accepted from the browser.
+        var accountId = PlayerAchievementRuntimeState.GetPlayerAccountId(game, runtimePlayer.Id);
+        if (string.IsNullOrWhiteSpace(accountId))
+        {
+            return BadRequest(new
+            {
+                message = historyLocalizer["History_ConfirmError"].Value
+            });
+        }
+
+        var confirmationService = new PlayerAchievementHistoryConfirmationService(db);
+        var status = await confirmationService.ConfirmAsync(
+            accountId,
+            game.HostId,
+            runtimePlayer.Name,
+            cancellationToken);
+        if (status == PlayerAchievementHistoryConfirmationStatus.ConflictingAccountClaim)
+        {
+            return new JsonResult(new
+            {
+                message = historyLocalizer["History_ConfirmConflict"].Value
+            })
+            {
+                StatusCode = StatusCodes.Status409Conflict
+            };
+        }
+        if (status == PlayerAchievementHistoryConfirmationStatus.InvalidIdentity)
+        {
+            return BadRequest(new
+            {
+                message = historyLocalizer["History_ConfirmError"].Value
+            });
+        }
+
+        var remaining = await LoadPendingConfirmationsAsync(game, cancellationToken);
+        var nextMode = remaining.Count > 0 ? PendingMode : PlayersMode;
+        var nextSelectedPlayerId = remaining.Count > 0
+            ? remaining[0].PlayerId
+            : playerId;
+        var nextUrl = Url.Page(
+            "/Admin/Games/PlayerAchievements",
+            new
+            {
+                id = game.Session.Id.Value,
+                mode = nextMode,
+                selectedPlayerId = nextSelectedPlayerId
+            });
+        return new JsonResult(new
+        {
+            success = true,
+            confirmed = status == PlayerAchievementHistoryConfirmationStatus.Confirmed,
+            nextUrl
+        });
     }
 
     public static string ToUtcIso(DateTime value) =>
@@ -140,9 +222,6 @@ public sealed class PlayerAchievementsModel(
         CancellationToken cancellationToken)
     {
         Game = game;
-        Mode = string.Equals(mode, PlayersMode, StringComparison.OrdinalIgnoreCase)
-            ? PlayersMode
-            : GameMode;
 
         Players = sessionRegistry
             .GetPlayers(game)
@@ -152,6 +231,23 @@ public sealed class PlayerAchievementsModel(
                 player.Name,
                 PlayerAchievementRuntimeState.GetPlayerAccountId(game, player.Id)))
             .ToArray();
+
+        PendingConfirmations = await LoadPendingConfirmationsAsync(game, cancellationToken);
+        Mode = string.Equals(mode, PendingMode, StringComparison.OrdinalIgnoreCase) && HasPendingConfirmations
+            ? PendingMode
+            : string.Equals(mode, PlayersMode, StringComparison.OrdinalIgnoreCase)
+                ? PlayersMode
+                : GameMode;
+
+        if (Mode == PendingMode)
+        {
+            SelectedPendingConfirmation = PendingConfirmations.FirstOrDefault(pending =>
+                    selectedPlayerId.HasValue && pending.PlayerId == selectedPlayerId.Value)
+                ?? PendingConfirmations.FirstOrDefault();
+            SelectedPlayerId = SelectedPendingConfirmation?.PlayerId;
+            Entries = [];
+            return Page();
+        }
 
         var selectedPlayer = Players.FirstOrDefault(player =>
                 selectedPlayerId.HasValue && player.Id == selectedPlayerId.Value)
@@ -212,6 +308,48 @@ public sealed class PlayerAchievementsModel(
         return Page();
     }
 
+    private async Task<IReadOnlyList<PlayerAchievementPendingConfirmation>> LoadPendingConfirmationsAsync(
+        GameSessionRegistration game,
+        CancellationToken cancellationToken)
+    {
+        var confirmationService = new PlayerAchievementHistoryConfirmationService(db);
+        var pending = new List<PlayerAchievementPendingConfirmation>();
+        foreach (var player in sessionRegistry
+                     .GetPlayers(game)
+                     .OrderBy(item => item.Name, StringComparer.CurrentCultureIgnoreCase))
+        {
+            var accountId = PlayerAchievementRuntimeState.GetPlayerAccountId(game, player.Id);
+            if (string.IsNullOrWhiteSpace(accountId))
+            {
+                continue;
+            }
+
+            var preview = await confirmationService.LoadPendingAsync(
+                accountId,
+                game.HostId,
+                player.Name,
+                cancellationToken);
+            if (preview is null)
+            {
+                continue;
+            }
+
+            var historyPlayer = new PlayerAchievementHistoryPlayer(
+                player.Id.Value,
+                player.Name,
+                accountId);
+            pending.Add(new PlayerAchievementPendingConfirmation(
+                player.Id.Value,
+                player.Name,
+                preview.PendingGameCount,
+                preview.PendingAchievements
+                    .Select(item => CreateHistoryEntry(historyPlayer, item))
+                    .ToArray()));
+        }
+
+        return pending;
+    }
+
     private PlayerAchievementHistoryEntry CreateHistoryEntry(
         PlayerAchievementHistoryPlayer player,
         PlayerAchievement achievement)
@@ -249,6 +387,12 @@ public sealed record PlayerAchievementHistoryPlayer(
     Guid Id,
     string Name,
     string? AccountId);
+
+public sealed record PlayerAchievementPendingConfirmation(
+    Guid PlayerId,
+    string PlayerName,
+    int PendingGameCount,
+    IReadOnlyList<PlayerAchievementHistoryEntry> Achievements);
 
 public sealed record PlayerAchievementHistoryEntry(
     int RecordId,

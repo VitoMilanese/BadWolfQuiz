@@ -73,7 +73,7 @@
         }
     };
 
-    const updateView = async (href, updateHistory) => {
+    const updateView = async (href, updateHistory, forceRefresh = false) => {
         const currentView = root.querySelector("[data-achievement-history-view]");
         if (!currentView || !href) {
             navigate(href);
@@ -93,7 +93,7 @@
             return;
         }
 
-        if (updateHistory && targetUrl.href === window.location.href) {
+        if (!forceRefresh && updateHistory && targetUrl.href === window.location.href) {
             return;
         }
 
@@ -174,6 +174,71 @@
         }
     };
 
+    const confirmIdentity = async form => {
+        if (!(form instanceof HTMLFormElement) || form.dataset.submitting === "true") {
+            return;
+        }
+
+        const confirmationMessage = form.dataset.confirmMessage;
+        if (confirmationMessage && !window.confirm(confirmationMessage)) {
+            return;
+        }
+
+        const submitButton = form.querySelector("button[type='submit']");
+        form.dataset.submitting = "true";
+        if (submitButton instanceof HTMLButtonElement) {
+            submitButton.disabled = true;
+        }
+        startBusyDelay();
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: new FormData(form)
+            });
+
+            let payload = null;
+            try {
+                payload = await response.json();
+            } catch {
+                payload = null;
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    payload?.message ||
+                    form.dataset.errorMessage ||
+                    `Achievement history confirmation failed with ${response.status}.`);
+            }
+
+            finishBusy();
+            const nextUrl = payload?.nextUrl || window.location.href;
+            const absoluteNextUrl = new URL(nextUrl, window.location.href).href;
+            const changesAddress = absoluteNextUrl !== window.location.href;
+            await updateView(absoluteNextUrl, changesAddress, true);
+        } catch (error) {
+            console.error("Achievement history confirmation failed:", error);
+            finishBusy();
+            window.alert(
+                error?.message ||
+                form.dataset.errorMessage ||
+                "Achievement history confirmation failed.");
+        } finally {
+            if (form.isConnected) {
+                delete form.dataset.submitting;
+                if (submitButton instanceof HTMLButtonElement) {
+                    submitButton.disabled = false;
+                }
+            }
+            finishBusy();
+        }
+    };
+
     root.addEventListener("click", event => {
         const link = event.target.closest("a[data-achievement-history-nav]");
         if (!(link instanceof HTMLAnchorElement) || !isPlainLeftClick(event)) {
@@ -187,6 +252,16 @@
         }
 
         navigate(link.href);
+    });
+
+    root.addEventListener("submit", event => {
+        const form = event.target.closest("form[data-achievement-history-confirm-form]");
+        if (!(form instanceof HTMLFormElement)) {
+            return;
+        }
+
+        event.preventDefault();
+        void confirmIdentity(form);
     });
 
     window.addEventListener("popstate", () => {
