@@ -1,113 +1,157 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#070a10" />
-      <stop offset="0.55" stop-color="#0b0d13" />
-      <stop offset="1" stop-color="#15080c" />
+      <stop offset="0" stop-color="#07111f" />
+      <stop offset="0.55" stop-color="#09101a" />
+      <stop offset="1" stop-color="#12080d" />
     </linearGradient>
-    <radialGradient id="moon" cx="50%" cy="43%" r="48%">
-      <stop offset="0" stop-color="#642132" stop-opacity="0.42" />
-      <stop offset="0.62" stop-color="#35121d" stop-opacity="0.18" />
-      <stop offset="1" stop-color="#12090d" stop-opacity="0" />
+    <radialGradient id="halo" cx="50%" cy="45%" r="48%">
+      <stop offset="0" stop-color="#a51e34" stop-opacity="0.18" />
+      <stop offset="0.58" stop-color="#5b1423" stop-opacity="0.08" />
+      <stop offset="1" stop-color="#10131a" stop-opacity="0" />
     </radialGradient>
-    <linearGradient id="fur" x1="0.2" y1="0.08" x2="0.75" y2="0.92">
-      <stop offset="0" stop-color="#343944" />
-      <stop offset="0.42" stop-color="#20242d" />
-      <stop offset="1" stop-color="#090b10" />
+    <linearGradient id="fur" x1="0.18" y1="0.08" x2="0.82" y2="0.94">
+      <stop offset="0" stop-color="#3f4653" />
+      <stop offset="0.46" stop-color="#252b36" />
+      <stop offset="1" stop-color="#0b0f16" />
+    </linearGradient>
+    <linearGradient id="furSide" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#202633" />
+      <stop offset="1" stop-color="#11151d" />
     </linearGradient>
     <linearGradient id="muzzle" x1="0.5" y1="0" x2="0.5" y2="1">
-      <stop offset="0" stop-color="#babdc4" stop-opacity="0.5" />
-      <stop offset="1" stop-color="#666b75" stop-opacity="0.12" />
+      <stop offset="0" stop-color="#9aa0aa" stop-opacity="0.52" />
+      <stop offset="1" stop-color="#444b56" stop-opacity="0.22" />
     </linearGradient>
-    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="24" />
-      <feOffset dy="18" />
-      <feComponentTransfer>
+    <linearGradient id="eye" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f6d868" />
+      <stop offset="0.5" stop-color="#ffbd2f" />
+      <stop offset="1" stop-color="#d99016" />
+    </linearGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="170%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="18" result="blur" />
+      <feOffset dy="20" result="offset" />
+      <feComponentTransfer in="offset" result="fade">
         <feFuncA type="linear" slope="0.55" />
       </feComponentTransfer>
       <feMerge>
-        <feMergeNode />
+        <feMergeNode in="fade" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="eyeGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="9" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
         <feMergeNode in="SourceGraphic" />
       </feMerge>
     </filter>
   </defs>
 
   <rect width="1600" height="900" fill="url(#bg)" />
-  <ellipse cx="800" cy="420" rx="520" ry="365" fill="url(#moon)" />
-  <circle cx="800" cy="425" r="305" fill="none" stroke="#d22b42" stroke-opacity="0.12" stroke-width="2" />
+  <ellipse cx="800" cy="405" rx="520" ry="360" fill="url(#halo)" />
+  <circle cx="800" cy="420" r="320" fill="none" stroke="#cf2941" stroke-opacity="0.10" stroke-width="2" />
 
   <g filter="url(#shadow)">
-    <path d="M800 130
-      C720 130 655 166 617 224
-      C566 195 512 174 455 184
-      C482 258 492 322 468 389
-      C442 461 453 558 498 637
-      C548 724 655 790 800 826
-      C945 790 1052 724 1102 637
-      C1147 558 1158 461 1132 389
-      C1108 322 1118 258 1145 184
-      C1088 174 1034 195 983 224
-      C945 166 880 130 800 130Z"
+    <!-- Strong wolf silhouette: tall ears, cheek tufts and long tapered muzzle. -->
+    <path d="M800 112
+      C738 112 683 128 629 163
+      L480 74
+      L438 318
+      C410 380 407 466 427 540
+      C447 617 487 676 548 724
+      L520 808
+      L659 776
+      L800 850
+      L941 776
+      L1080 808
+      L1052 724
+      C1113 676 1153 617 1173 540
+      C1193 466 1190 380 1162 318
+      L1120 74
+      L971 163
+      C917 128 862 112 800 112Z"
       fill="url(#fur)" />
 
-    <path d="M468 202 C500 214 548 246 605 301 C560 286 516 270 480 272Z"
-      fill="#161920" />
-    <path d="M1132 202 C1100 214 1052 246 995 301 C1040 286 1084 270 1120 272Z"
-      fill="#161920" />
+    <!-- Ears -->
+    <path d="M492 110 L620 188 L470 305Z" fill="#111720" />
+    <path d="M1108 110 L980 188 L1130 305Z" fill="#111720" />
+    <path d="M502 125 L586 181 L480 259Z" fill="#8f2336" fill-opacity="0.20" />
+    <path d="M1098 125 L1014 181 L1120 259Z" fill="#8f2336" fill-opacity="0.20" />
 
-    <path d="M513 382 C583 329 666 316 746 351 C690 361 628 389 571 444 C546 430 527 410 513 382Z"
-      fill="#11141b" />
-    <path d="M1087 382 C1017 329 934 316 854 351 C910 361 972 389 1029 444 C1054 430 1073 410 1087 382Z"
-      fill="#11141b" />
+    <!-- Forehead and temple planes -->
+    <path d="M800 138 C733 139 674 160 622 207 L680 332 L800 384Z" fill="#313844" />
+    <path d="M800 138 C867 139 926 160 978 207 L920 332 L800 384Z" fill="#292f3a" />
+    <path d="M622 207 L486 326 L596 378 L680 332Z" fill="#1a202b" />
+    <path d="M978 207 L1114 326 L1004 378 L920 332Z" fill="#161c26" />
 
-    <path d="M555 391 C615 362 674 360 727 379 C684 385 638 400 594 425 C578 418 565 407 555 391Z"
-      fill="#d9a72e" />
-    <path d="M1045 391 C985 362 926 360 873 379 C916 385 962 400 1006 425 C1022 418 1035 407 1045 391Z"
-      fill="#d9a72e" />
-    <path d="M579 397 C630 382 674 383 711 393 C667 399 628 412 594 429Z"
-      fill="#f2cf5b" fill-opacity="0.72" />
-    <path d="M1021 397 C970 382 926 383 889 393 C933 399 972 412 1006 429Z"
-      fill="#f2cf5b" fill-opacity="0.72" />
+    <!-- Brow / eye sockets -->
+    <path d="M472 376 C544 326 640 307 738 341 L690 401 C621 383 556 390 500 430Z" fill="#080c12" />
+    <path d="M1128 376 C1056 326 960 307 862 341 L910 401 C979 383 1044 390 1100 430Z" fill="#080c12" />
 
-    <path d="M682 490 C716 462 759 447 800 450 C841 447 884 462 918 490
-      C891 536 858 577 800 600 C742 577 709 536 682 490Z"
-      fill="#292d36" />
-    <path d="M708 548 C736 530 768 520 800 522 C832 520 864 530 892 548
-      C875 596 845 634 800 653 C755 634 725 596 708 548Z"
+    <!-- Eyes -->
+    <path d="M520 375 C578 350 632 347 685 360 C643 369 600 386 557 409 C542 401 529 389 520 375Z"
+      fill="url(#eye)" filter="url(#eyeGlow)" />
+    <path d="M1080 375 C1022 350 968 347 915 360 C957 369 1000 386 1043 409 C1058 401 1071 389 1080 375Z"
+      fill="url(#eye)" filter="url(#eyeGlow)" />
+    <path d="M566 374 C605 360 640 359 671 365 C640 370 610 381 581 394Z" fill="#fff0a7" fill-opacity="0.65" />
+    <path d="M1034 374 C995 360 960 359 929 365 C960 370 990 381 1019 394Z" fill="#fff0a7" fill-opacity="0.65" />
+    <path d="M609 360 L621 391" stroke="#07090d" stroke-width="8" stroke-linecap="round" />
+    <path d="M991 360 L979 391" stroke="#07090d" stroke-width="8" stroke-linecap="round" />
+
+    <!-- Long wolf muzzle bridge -->
+    <path d="M706 386 C739 369 770 361 800 362 C830 361 861 369 894 386
+      L925 503 C901 567 862 621 800 659
+      C738 621 699 567 675 503Z"
+      fill="#202631" />
+    <path d="M742 414 C762 398 781 391 800 391 C819 391 838 398 858 414
+      L872 510 C853 548 830 577 800 600
+      C770 577 747 548 728 510Z"
+      fill="#343b46" />
+
+    <!-- Cheeks -->
+    <path d="M488 438 C560 401 628 398 687 420 L650 502 L555 542 L463 511Z" fill="url(#furSide)" />
+    <path d="M1112 438 C1040 401 972 398 913 420 L950 502 L1045 542 L1137 511Z" fill="url(#furSide)" />
+    <path d="M454 522 L555 542 L624 590 L533 602 L575 657 L493 623Z" fill="#151a23" />
+    <path d="M1146 522 L1045 542 L976 590 L1067 602 L1025 657 L1107 623Z" fill="#121720" />
+
+    <!-- Muzzle and nose -->
+    <path d="M673 520 C706 492 752 478 800 478 C848 478 894 492 927 520
+      C910 574 875 626 800 674
+      C725 626 690 574 673 520Z"
       fill="url(#muzzle)" />
-    <path d="M748 589 C766 576 784 570 800 571 C816 570 834 576 852 589
-      C841 612 824 624 800 626 C776 624 759 612 748 589Z"
+    <path d="M718 563 C744 546 772 538 800 539 C828 538 856 546 882 563
+      C867 610 842 642 800 658 C758 642 733 610 718 563Z"
+      fill="#6f7680" fill-opacity="0.22" />
+    <path d="M744 601 C762 585 782 578 800 578 C818 578 838 585 856 601
+      C847 625 827 639 800 640 C773 639 753 625 744 601Z"
       fill="#05070a" />
+    <path d="M762 603 C777 597 790 595 800 595 C810 595 823 597 838 603"
+      fill="none" stroke="#4a5059" stroke-opacity="0.45" stroke-width="3" stroke-linecap="round" />
 
-    <path d="M800 628 C798 670 770 693 735 705"
-      fill="none" stroke="#777c85" stroke-opacity="0.32" stroke-width="4" stroke-linecap="round" />
-    <path d="M800 628 C802 670 830 693 865 705"
-      fill="none" stroke="#777c85" stroke-opacity="0.32" stroke-width="4" stroke-linecap="round" />
+    <!-- Jaw, mouth and neck ruff -->
+    <path d="M800 642 C796 687 773 714 736 728" fill="none" stroke="#737984" stroke-opacity="0.35" stroke-width="4" stroke-linecap="round" />
+    <path d="M800 642 C804 687 827 714 864 728" fill="none" stroke="#737984" stroke-opacity="0.35" stroke-width="4" stroke-linecap="round" />
+    <path d="M724 735 L800 790 L876 735 L941 776 L800 850 L659 776Z" fill="#0a0e15" fill-opacity="0.78" />
 
-    <path d="M594 426 C625 472 648 520 657 576"
-      fill="none" stroke="#8f939c" stroke-opacity="0.13" stroke-width="10" stroke-linecap="round" />
-    <path d="M1006 426 C975 472 952 520 943 576"
-      fill="none" stroke="#8f939c" stroke-opacity="0.13" stroke-width="10" stroke-linecap="round" />
-    <path d="M636 255 C675 290 702 317 722 347"
-      fill="none" stroke="#b8bbc2" stroke-opacity="0.12" stroke-width="8" stroke-linecap="round" />
-    <path d="M964 255 C925 290 898 317 878 347"
-      fill="none" stroke="#b8bbc2" stroke-opacity="0.12" stroke-width="8" stroke-linecap="round" />
+    <!-- Fur direction accents -->
+    <path d="M537 309 C585 278 627 264 662 261" fill="none" stroke="#aeb4be" stroke-opacity="0.10" stroke-width="8" stroke-linecap="round" />
+    <path d="M1063 309 C1015 278 973 264 938 261" fill="none" stroke="#aeb4be" stroke-opacity="0.10" stroke-width="8" stroke-linecap="round" />
+    <path d="M548 548 C592 574 622 609 639 653" fill="none" stroke="#b7bdc5" stroke-opacity="0.08" stroke-width="8" stroke-linecap="round" />
+    <path d="M1052 548 C1008 574 978 609 961 653" fill="none" stroke="#b7bdc5" stroke-opacity="0.08" stroke-width="8" stroke-linecap="round" />
 
-    <path d="M469 390 C447 478 459 568 505 640 C543 700 602 748 664 777"
-      fill="none" stroke="#c7283f" stroke-opacity="0.5" stroke-width="5" stroke-linecap="round" />
-    <path d="M1131 390 C1153 478 1141 568 1095 640 C1057 700 998 748 936 777"
-      fill="none" stroke="#c7283f" stroke-opacity="0.5" stroke-width="5" stroke-linecap="round" />
-    <path d="M470 186 C512 186 560 208 617 244"
-      fill="none" stroke="#c7283f" stroke-opacity="0.42" stroke-width="5" stroke-linecap="round" />
-    <path d="M1130 186 C1088 186 1040 208 983 244"
-      fill="none" stroke="#c7283f" stroke-opacity="0.42" stroke-width="5" stroke-linecap="round" />
+    <!-- Bad Wolf red trim -->
+    <path d="M484 82 L441 319" fill="none" stroke="#d32943" stroke-opacity="0.58" stroke-width="5" stroke-linecap="round" />
+    <path d="M1116 82 L1159 319" fill="none" stroke="#d32943" stroke-opacity="0.58" stroke-width="5" stroke-linecap="round" />
+    <path d="M443 533 C464 620 505 681 571 729" fill="none" stroke="#d32943" stroke-opacity="0.48" stroke-width="5" stroke-linecap="round" />
+    <path d="M1157 533 C1136 620 1095 681 1029 729" fill="none" stroke="#d32943" stroke-opacity="0.48" stroke-width="5" stroke-linecap="round" />
   </g>
 
-  <g opacity="0.22" fill="#d22b42">
-    <rect x="225" y="202" width="105" height="4" />
-    <rect x="1270" y="202" width="105" height="4" />
-    <rect x="225" y="694" width="105" height="4" />
-    <rect x="1270" y="694" width="105" height="4" />
+  <g opacity="0.20" fill="#d32943">
+    <rect x="210" y="205" width="115" height="4" />
+    <rect x="1275" y="205" width="115" height="4" />
+    <rect x="210" y="700" width="115" height="4" />
+    <rect x="1275" y="700" width="115" height="4" />
   </g>
-  <path d="M235 765H1365" stroke="#ffffff" stroke-opacity="0.045" stroke-width="2" />
+  <path d="M230 770H1370" stroke="#ffffff" stroke-opacity="0.045" stroke-width="2" />
 </svg>
