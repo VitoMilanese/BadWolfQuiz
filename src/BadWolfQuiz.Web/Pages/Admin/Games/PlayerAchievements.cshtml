@@ -139,7 +139,7 @@
                                    aria-current="@(isSelected ? "true" : null)"
                                    asp-page="/Admin/Games/PlayerAchievements"
                                    asp-route-id="@Model.Game.Session.Id.Value"
-                                   asp-route-mode="@BadWolfQuiz.Web.Pages.Admin.Games.PlayerAchievementsModel.PlayersMode"
+                                   asp-route-mode="@BadWolfQuiz.Web.Pages.Admin/Games/PlayerAchievementsModel.PlayersMode"
                                    asp-route-selectedPlayerId="@player.Id"
                                    data-achievement-history-nav
                                    data-achievement-history-view-nav>
@@ -159,12 +159,11 @@
                         <article class="answer-history-question-card player-achievement-history-pending-card"
                                  data-achievement-history-pending-player="@pending.PlayerId">
                             <header class="player-achievement-history-pending-header">
+                                <p class="player-achievement-history-pending-description">
+                                    @HistoryLocalizer["History_PendingPlayerDescription", pending.PlayerName]
+                                </p>
                                 <b>@HistoryLocalizer["History_PendingPreviousGames", pending.PendingGameCount]</b>
                             </header>
-
-                            <p class="player-achievement-history-pending-description">
-                                @HistoryLocalizer["History_PendingPlayerDescription", pending.PlayerName]
-                            </p>
 
                             @if (pending.Achievements.Count > 0)
                             {
