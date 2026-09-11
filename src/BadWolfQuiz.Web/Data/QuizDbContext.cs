@@ -77,6 +77,11 @@ public sealed class QuizDbContext : DbContext
             .HasForeignKey(x => x.UserQuestionId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<GamePlayer>()
+            .Property(x => x.CountsForAchievementHistory)
+            .HasDefaultValue(true)
+            .HasSentinel(true);
+
         modelBuilder.Entity<PlayerGameAccountLink>()
             .HasOne(x => x.Player)
             .WithOne()

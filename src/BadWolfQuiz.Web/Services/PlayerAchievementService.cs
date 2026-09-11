@@ -80,13 +80,18 @@ public sealed class PlayerAchievementService(QuizDbContext db)
         string? accountId,
         string? hostId,
         string playerName,
+        int confirmedGameSessionId,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(hostId))
+        if (string.IsNullOrWhiteSpace(accountId) ||
+            string.IsNullOrWhiteSpace(hostId) ||
+            confirmedGameSessionId <= 0)
         {
             return;
         }
 
+        var normalizedAccountId = accountId.Trim();
+        var normalizedHostId = hostId.Trim();
         var playerKey = NormalizePlayerKey(playerName);
         if (playerKey.Length == 0)
         {
@@ -97,63 +102,135 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             .IgnoreQueryFilters()
             .AsNoTracking()
             .Where(player =>
-                player.Session.HostId == hostId &&
-                player.Session.Status == GameSessionStatus.Finished)
-            .Select(player => new { player.Id, player.Name })
+                player.Session.HostId == normalizedHostId &&
+                player.Session.Status == GameSessionStatus.Finished &&
+                player.CountsForAchievementHistory)
+            .Select(player => new
+            {
+                player.Id,
+                player.GameSessionId,
+                player.Name
+            })
             .ToListAsync(cancellationToken);
-        var candidateIds = candidates
+        var matchingCandidates = candidates
             .Where(player => string.Equals(
                 NormalizePlayerKey(player.Name),
                 playerKey,
                 StringComparison.Ordinal))
-            .Select(player => player.Id)
-            .Distinct()
             .ToArray();
-        if (candidateIds.Length == 0)
+        var confirmedCandidate = matchingCandidates
+            .SingleOrDefault(player => player.GameSessionId == confirmedGameSessionId);
+        if (confirmedCandidate is null)
         {
             return;
         }
 
-        var linkedIds = (await db.PlayerGameAccountLinks
-                .AsNoTracking()
-                .Where(link => candidateIds.Contains(link.GamePlayerId))
-                .Select(link => link.GamePlayerId)
-                .ToListAsync(cancellationToken))
-            .ToHashSet();
+        var candidateIds = matchingCandidates
+            .Select(player => player.Id)
+            .Distinct()
+            .ToArray();
+        var existingLinks = await db.PlayerGameAccountLinks
+            .AsNoTracking()
+            .Where(link => candidateIds.Contains(link.GamePlayerId))
+            .Select(link => new { link.GamePlayerId, link.AccountId })
+            .ToListAsync(cancellationToken);
+        var linkByPlayerId = existingLinks
+            .ToDictionary(link => link.GamePlayerId, link => link.AccountId);
 
-        foreach (var playerId in candidateIds.Where(id => !linkedIds.Contains(id)))
+        if (linkByPlayerId.TryGetValue(confirmedCandidate.Id, out var confirmedAccountId) &&
+            !string.Equals(confirmedAccountId, normalizedAccountId, StringComparison.Ordinal))
         {
-            db.PlayerGameAccountLinks.Add(new PlayerGameAccountLink
-            {
-                GamePlayerId = playerId,
-                AccountId = accountId.Trim()
-            });
+            return;
         }
 
-        var accountIdentity = PlayerAchievementIdentity.Create(accountId, null, null);
-        var fallbackEvents = await db.PlayerAchievements
+        var hasConflictingClaim = existingLinks.Any(link =>
+            !string.Equals(link.AccountId, normalizedAccountId, StringComparison.Ordinal));
+
+        bool CanClaimCandidate(int gamePlayerId)
+        {
+            if (gamePlayerId == confirmedCandidate.Id)
+            {
+                return true;
+            }
+            if (linkByPlayerId.TryGetValue(gamePlayerId, out var linkedAccountId))
+            {
+                return string.Equals(
+                    linkedAccountId,
+                    normalizedAccountId,
+                    StringComparison.Ordinal);
+            }
+            return !hasConflictingClaim;
+        }
+
+        var claimableCandidates = matchingCandidates
+            .Where(candidate => CanClaimCandidate(candidate.Id))
+            .ToArray();
+        foreach (var candidate in claimableCandidates)
+        {
+            if (linkByPlayerId.ContainsKey(candidate.Id))
+            {
+                continue;
+            }
+            db.PlayerGameAccountLinks.Add(new PlayerGameAccountLink
+            {
+                GamePlayerId = candidate.Id,
+                AccountId = normalizedAccountId
+            });
+            linkByPlayerId[candidate.Id] = normalizedAccountId;
+        }
+
+        var claimableGameIds = claimableCandidates
+            .Select(candidate => candidate.GameSessionId)
+            .ToHashSet();
+        var fallbackUnlocks = await db.PlayerAchievements
             .AsNoTracking()
             .Where(item =>
                 item.AccountId == null &&
-                item.HostId == hostId &&
-                item.PlayerKey == playerKey &&
-                item.AchievementCode.StartsWith(PeerMaximumRatingEventPrefix))
+                item.HostId == normalizedHostId &&
+                item.PlayerKey == playerKey)
+            .OrderBy(item => item.UnlockedAtUtc)
+            .ThenBy(item => item.Id)
             .ToListAsync(cancellationToken);
-        var accountEventCodes = (await QueryForIdentity(accountIdentity)
-                .AsNoTracking()
-                .Where(item => item.AchievementCode.StartsWith(PeerMaximumRatingEventPrefix))
-                .Select(item => item.AchievementCode)
-                .ToListAsync(cancellationToken))
-            .ToHashSet(StringComparer.Ordinal);
-        foreach (var progressEvent in fallbackEvents)
+        var accountUnlocks = await db.PlayerAchievements
+            .Where(item => item.AccountId == normalizedAccountId)
+            .ToListAsync(cancellationToken);
+        var accountByCode = accountUnlocks
+            .ToDictionary(item => item.AchievementCode, StringComparer.Ordinal);
+
+        foreach (var fallback in fallbackUnlocks)
         {
-            if (accountEventCodes.Add(progressEvent.AchievementCode))
+            if (fallback.SourceGameSessionId is { } sourceGameSessionId &&
+                !claimableGameIds.Contains(sourceGameSessionId))
             {
-                AddUnlock(
-                    accountIdentity,
-                    progressEvent.AchievementCode,
-                    progressEvent.SourceGameSessionId);
+                continue;
             }
+            if (fallback.SourceGameSessionId is null && hasConflictingClaim)
+            {
+                continue;
+            }
+
+            if (accountByCode.TryGetValue(fallback.AchievementCode, out var existing))
+            {
+                if (fallback.UnlockedAtUtc < existing.UnlockedAtUtc ||
+                    fallback.UnlockedAtUtc == existing.UnlockedAtUtc &&
+                    existing.SourceGameSessionId is null &&
+                    fallback.SourceGameSessionId is not null)
+                {
+                    existing.UnlockedAtUtc = fallback.UnlockedAtUtc;
+                    existing.SourceGameSessionId = fallback.SourceGameSessionId;
+                }
+                continue;
+            }
+
+            var adopted = new PlayerAchievement
+            {
+                AccountId = normalizedAccountId,
+                AchievementCode = fallback.AchievementCode,
+                UnlockedAtUtc = fallback.UnlockedAtUtc,
+                SourceGameSessionId = fallback.SourceGameSessionId
+            };
+            db.PlayerAchievements.Add(adopted);
+            accountByCode.Add(adopted.AchievementCode, adopted);
         }
 
         await db.SaveChangesAsync(cancellationToken);
@@ -175,7 +252,9 @@ public sealed class PlayerAchievementService(QuizDbContext db)
 
         var players = await db.GamePlayers
             .IgnoreQueryFilters()
-            .Where(player => player.GameSessionId == gameSessionId)
+            .Where(player =>
+                player.GameSessionId == gameSessionId &&
+                player.CountsForAchievementHistory)
             .Select(player => new
             {
                 player.Id,
@@ -230,11 +309,6 @@ public sealed class PlayerAchievementService(QuizDbContext db)
                     Progress: definition.Target,
                     Target: definition.Target))
                 .ToArray();
-        }
-
-        if (!string.IsNullOrWhiteSpace(accountId))
-        {
-            await AdoptHostNicknameHistoryAsync(accountId, hostId, playerName, cancellationToken);
         }
 
         var identity = PlayerAchievementIdentity.Create(accountId, hostId, playerName);
@@ -491,7 +565,8 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             .AsNoTracking()
             .Where(player =>
                 player.Session.HostId == hostId &&
-                player.Session.Status == GameSessionStatus.Finished)
+                player.Session.Status == GameSessionStatus.Finished &&
+                player.CountsForAchievementHistory)
             .Select(player => new PlayerAchievementGameSource(
                 player.Id,
                 player.GameSessionId,
@@ -501,7 +576,7 @@ public sealed class PlayerAchievementService(QuizDbContext db)
                 player.Session.Quiz.HostId,
                 player.Session.Quiz.IsPublic,
                 player.Session.HostId,
-                player.Session.Players.Count))
+                player.Session.Players.Count(item => item.CountsForAchievementHistory)))
             .ToListAsync(cancellationToken);
         var appearances = candidates
             .Where(item => string.Equals(NormalizePlayerKey(item.Name), playerKey, StringComparison.Ordinal))
@@ -553,7 +628,8 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             .AsNoTracking()
             .Where(link =>
                 link.AccountId == accountId &&
-                link.Player.Session.Status == GameSessionStatus.Finished)
+                link.Player.Session.Status == GameSessionStatus.Finished &&
+                link.Player.CountsForAchievementHistory)
             .Select(link => new PlayerAchievementGameSource(
                 link.Player.Id,
                 link.Player.GameSessionId,
@@ -563,7 +639,7 @@ public sealed class PlayerAchievementService(QuizDbContext db)
                 link.Player.Session.Quiz.HostId,
                 link.Player.Session.Quiz.IsPublic,
                 link.Player.Session.HostId,
-                link.Player.Session.Players.Count))
+                link.Player.Session.Players.Count(item => item.CountsForAchievementHistory)))
             .ToListAsync(cancellationToken);
 
         var history = await BuildHistoryForAppearancesAsync(appearances, cancellationToken);
@@ -635,7 +711,9 @@ public sealed class PlayerAchievementService(QuizDbContext db)
         var gameScores = await db.GamePlayers
             .IgnoreQueryFilters()
             .AsNoTracking()
-            .Where(player => gameIds.Contains(player.GameSessionId))
+            .Where(player =>
+                gameIds.Contains(player.GameSessionId) &&
+                player.CountsForAchievementHistory)
             .Select(player => new PlayerAchievementGameScoreSource(player.GameSessionId, player.TotalScore))
             .ToListAsync(cancellationToken);
         var answerRows = await db.PlayerQuestionResults

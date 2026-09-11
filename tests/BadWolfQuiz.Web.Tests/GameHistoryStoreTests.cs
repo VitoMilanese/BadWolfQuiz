@@ -41,6 +41,26 @@ public sealed class GameHistoryStoreTests
     }
 
     [Fact]
+    public async Task SaveCompletedGameAsync_marks_removed_players_ineligible_for_achievement_history()
+    {
+        await using var fixture = await HistoryFixture.CreateAsync();
+        var registration = fixture.CreateCompletedGame();
+        var removed = registration.Session.AllPlayers.Single(player => player.Name == "Mickey");
+        registration.Session.RemovePlayer(removed.Id);
+
+        var saved = await fixture.Store.SaveCompletedGameAsync(registration);
+
+        Assert.True(saved);
+        var players = await fixture.Db.GamePlayers
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .OrderBy(player => player.Name)
+            .ToListAsync();
+        Assert.True(players.Single(player => player.Name == "Rose").CountsForAchievementHistory);
+        Assert.False(players.Single(player => player.Name == "Mickey").CountsForAchievementHistory);
+    }
+
+    [Fact]
     public async Task SaveCompletedGameAsync_updates_existing_history_after_correction()
     {
         await using var fixture = await HistoryFixture.CreateAsync();

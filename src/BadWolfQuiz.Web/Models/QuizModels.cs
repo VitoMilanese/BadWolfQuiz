@@ -340,6 +340,7 @@ public sealed class GamePlayer
     public DateTime JoinedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? LastSeenAtUtc { get; set; }
     public bool IsActive { get; set; } = true;
+    public bool CountsForAchievementHistory { get; set; } = true;
 
     public GameSession Session { get; set; } = null!;
     public ICollection<PlayerQuestionResult> Results { get; set; } = new List<PlayerQuestionResult>();
