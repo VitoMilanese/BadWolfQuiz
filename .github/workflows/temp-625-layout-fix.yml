@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   fix-and-validate:
-    if: github.event.head_commit.message == 'Add temporary pending layout fix workflow'
+    if: github.event.head_commit.message == 'Fix temporary pending layout workflow'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,8 +22,8 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Fix pending layout and header alignment
-        shell: python
         run: |
+          python3 - <<'PY'
           from pathlib import Path
 
           css_path = Path('src/BadWolfQuiz.Web/wwwroot/css/player-achievement-history.css')
@@ -57,14 +57,13 @@ jobs:
 
           confirm_css_path = Path('src/BadWolfQuiz.Web/wwwroot/css/player-achievement-history-confirmation.css')
           confirm_css = confirm_css_path.read_text()
-          confirm_css = confirm_css.replace(
-              '''.player-achievement-history-pending-header {
+          old_css = '''.player-achievement-history-pending-header {
     display: flex;
     align-items: flex-start;
     justify-content: flex-end;
     gap: 18px;
-}''',
-              '''.player-achievement-history-pending-header {
+}'''
+          new_css = '''.player-achievement-history-pending-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -73,8 +72,10 @@ jobs:
 
 .player-achievement-history-pending-header .player-achievement-history-pending-description {
     flex: 1 1 auto;
-}''')
-          confirm_css_path.write_text(confirm_css)
+}'''
+          if old_css not in confirm_css:
+              raise SystemExit('Pending header CSS block not found')
+          confirm_css_path.write_text(confirm_css.replace(old_css, new_css))
 
           test_path = Path('tests/BadWolfQuiz.Web.Tests/PlayerAchievementHistoryUiRegressionTests.cs')
           test = test_path.read_text()
@@ -88,6 +89,7 @@ jobs:
               '        Assert.DoesNotContain("<strong>@pending.PlayerName</strong>", page);',
               '        Assert.DoesNotContain("<strong>@pending.PlayerName</strong>", page);\n        Assert.Contains("<header class=\\\"player-achievement-history-pending-header\\\">", page);\n        Assert.Contains("<p class=\\\"player-achievement-history-pending-description\\\">", page);')
           test_path.write_text(test)
+          PY
 
       - name: Build Web
         run: dotnet build src/BadWolfQuiz.Web/BadWolfQuiz.Web.csproj --configuration Release
