@@ -1,0 +1,22 @@
+name: Temporary 625 line-ending validation
+
+on:
+  push:
+    branches:
+      - feature/625-manual-achievement-history-confirmation
+
+jobs:
+  validate:
+    if: github.event.head_commit.message == 'Add temporary line-ending regression validation'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Run Web tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release
+      - name: Check whitespace
+        run: git diff --check origin/main...HEAD
