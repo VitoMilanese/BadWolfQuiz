@@ -6,6 +6,28 @@ The quiz editor manages the reusable quiz definition without changing any game
 snapshot that has already been created. It combines a visual board editor with
 dedicated regular-question and final-question editors.
 
+## Quiz metadata
+
+The quiz title in the Quiz Editor has a compact pencil action that opens a dedicated
+metadata editor. The page edits the quiz title, description, and up to 20 quiz-level
+tags without materializing the quiz's rounds, categories, questions, content blocks,
+or stored media payloads.
+
+Quiz tags are normalized and de-duplicated case-insensitively within the quiz. The
+tag input suggests tags the current host already uses on other quizzes and falls
+back to the host's existing question tags when more suggestions are needed. Tags
+can be removed individually, and the add-tag input is cleared after each successful
+addition.
+
+The metadata editor follows the shared editor interaction model: **Back**, **Reset**,
+and **Save** use the standard actions; **Escape** navigates back; **Ctrl+S** / **Cmd+S**
+saves; save results use the temporary editor overlay; and unsaved changes are
+protected by the shared dirty-state warning. Reset restores the persisted title,
+description, and tag set.
+
+Quiz-level tags are part of the reusable quiz definition. They are preserved when
+a quiz is cloned and when a `.bwquiz` package is exported and imported.
+
 ## Cloning quizzes
 
 On `/Admin/Quizzes`, an active quiz provides **Clone** immediately after **Edit**
@@ -14,7 +36,7 @@ name of the new quiz before anything is created. After a successful clone, the
 new quiz opens directly in the quiz editor.
 
 Cloning creates a new independent editable quiz graph. It copies the source quiz
-description, rounds, rows, categories, questions, round/category descriptions,
+description, quiz-level tags, rounds, rows, categories, questions, round/category descriptions,
 final-description, final-question, and final-answer content, question settings,
 content-block order and metadata, captions, URLs, and stored media bytes. Every
 cloned quiz, round, category, question, and content block receives its own database
@@ -49,8 +71,8 @@ round.
 
 ## Save feedback
 
-The quiz editor, regular-question editor, final-question editor,
-round-description editor, and category-description editor share the same
+The quiz editor, quiz-metadata editor, regular-question editor, final-question
+editor, round-description editor, and category-description editor share the same
 save-result presentation. Success and failure results appear in a prominent,
 non-interactive overlay below the top bar for approximately 1.5 seconds and then
 fade automatically. The overlay uses `pointer-events: none`, so it never blocks
@@ -63,12 +85,12 @@ boolean so the shared success overlay is rendered reliably after that redirect.
 
 ## Reset and unsaved changes
 
-The regular-question, final-question, round-description, and category-description
-editors provide a compact **↻ Reset** action immediately to the right of **Back**.
-Reset intentionally discards the current client-side state without saving and
-reloads the editor from the persisted server state. This restores edited fields,
-content-block order, captions, media selections, removed blocks, and other
-unsaved changes, and removes newly added unsaved blocks.
+The quiz-metadata, regular-question, final-question, round-description, and
+category-description editors provide a compact **↻ Reset** action immediately to
+the right of **Back**. Reset intentionally discards the current client-side state
+without saving and reloads the editor from the persisted server state. This
+restores edited fields, content-block order, captions, media selections, removed
+blocks, tags, and other unsaved changes, and removes newly added unsaved blocks.
 
 Reset uses a fresh GET navigation with a one-time `_editorReset` query token so
 browser form-state restoration cannot revive stale values from the page being

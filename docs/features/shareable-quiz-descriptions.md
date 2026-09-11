@@ -16,13 +16,18 @@ The page exposes only announcement information:
 
 - quiz title;
 - quiz description;
+- quiz-level tags when configured;
 - rating and rating count when available.
+
+Configured tags are rendered as wrapping chips beneath the quiz title. The rating summary is presented inside the left rail of the announcement card instead of competing with the title and tag area.
 
 It does not expose questions, answers, editor controls, host-only actions, credentials, or private quiz configuration. Invalid tokens and unavailable quizzes return the normal not-found result.
 
 ## Social previews
 
 The description page emits server-rendered Open Graph and Twitter metadata and references a quiz-specific 1200×630 Bad Wolf Quiz preview image. The preview uses the current quiz title and description and can include rating information when available.
+
+Quiz-level tags are also included in the preview in a single bounded row. Only tags that fit are rendered; when more tags remain, the row ends with a compact `+N` summary so a quiz with up to 20 tags does not overcrowd the image.
 
 Social services such as Telegram fetch the URL from their own servers. A URL using `localhost`, a private LAN address, or another externally unreachable origin cannot produce a Telegram preview even when it works in the host's browser. Preview testing therefore requires a publicly reachable HTTPS URL, such as the production BadWolfQuiz site or a temporary public HTTPS tunnel.
 
