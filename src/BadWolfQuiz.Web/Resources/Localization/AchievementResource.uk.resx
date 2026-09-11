@@ -144,15 +144,15 @@
   <data name="MafiaGodfatherTag_Name" xml:space="preserve"><value>Сімейна справа</value></data>
   <data name="MafiaGodfatherTag_Description" xml:space="preserve"><value>Відповісти на питання про мафію.</value></data>
   <data name="StarTrekTag_Name" xml:space="preserve"><value>Живи довго і процвітай</value></data>
-  <data name="StarTrekTag_Description" xml:space="preserve"><value>Правильно відповісти на питання з тегом «Зоряний Шлях» або «Star Trek».</value></data>
+  <data name="StarTrekTag_Description" xml:space="preserve"><value>Правильно відповісти на питання про «Зоряний Шлях».</value></data>
   <data name="Anime25_Name" xml:space="preserve"><value>Аніме</value></data>
-  <data name="Anime25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань з тегом «аніме» або «anime».</value></data>
+  <data name="Anime25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань про аніме.</value></data>
   <data name="CounterStrike25_Name" xml:space="preserve"><value>Counter-Strike</value></data>
-  <data name="CounterStrike25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань з тегом «кс», «cs» або «counter strike».</value></data>
+  <data name="CounterStrike25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань про Counter-Strike.</value></data>
   <data name="Dota25_Name" xml:space="preserve"><value>Dota 2</value></data>
-  <data name="Dota25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань з тегом «dota» або «dota2».</value></data>
+  <data name="Dota25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань про Dota 2.</value></data>
   <data name="Ukraine25_Name" xml:space="preserve"><value>Україна</value></data>
-  <data name="Ukraine25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань з тегом «Україна» або «Ukraine».</value></data>
+  <data name="Ukraine25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань про Україну.</value></data>
   <data name="DoubleReward_Name" xml:space="preserve"><value>Подвійна нагорода</value></data>
   <data name="DoubleReward_Description" xml:space="preserve"><value>Отримати подвійну нагороду x2 за правильну відповідь.</value></data>
   <data name="HalfReward_Name" xml:space="preserve"><value>Половина нагороди</value></data>
@@ -162,11 +162,11 @@
   <data name="BeatPreviousWinner_Name" xml:space="preserve"><value>Зміна чемпіона</value></data>
   <data name="BeatPreviousWinner_Description" xml:space="preserve"><value>Перемогти у грі, в якій також грав переможець попередньої гри, але цього разу не переміг.</value></data>
   <data name="Geography25_Name" xml:space="preserve"><value>Географія</value></data>
-  <data name="Geography25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань з тегом «географія» або «geography».</value></data>
+  <data name="Geography25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань про географію.</value></data>
   <data name="History25_Name" xml:space="preserve"><value>Історія</value></data>
-  <data name="History25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань з тегом «історія» або «history».</value></data>
+  <data name="History25_Description" xml:space="preserve"><value>Правильно відповісти на 25 питань про історію.</value></data>
   <data name="PeerMaxRatings10_Name" xml:space="preserve"><value>П’ять зірок</value></data>
-  <data name="PeerMaxRatings10_Description" xml:space="preserve"><value>10 разів отримати максимальну оцінку 5 зірок від іншого гравця у питаннях з оцінюванням відповідей гравцями.</value></data>
+  <data name="PeerMaxRatings10_Description" xml:space="preserve"><value>10 разів отримати максимальну оцінку 5 зірок від іншого гравця.</value></data>
   <data name="PlayOneMonth_Name" xml:space="preserve"><value>Місяць у грі</value></data>
   <data name="PlayOneMonth_Description" xml:space="preserve"><value>Грати в Bad Wolf протягом щонайменше одного повного місяця.</value></data>
   <data name="PlaySixMonths_Name" xml:space="preserve"><value>Пів року у грі</value></data>
