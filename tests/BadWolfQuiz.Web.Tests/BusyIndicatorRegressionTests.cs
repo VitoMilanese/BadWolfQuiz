@@ -114,6 +114,7 @@ public sealed class BusyIndicatorRegressionTests
         Assert.Contains("final-question-editor-back-link", script, StringComparison.Ordinal);
         Assert.Contains("description-editor-back", script, StringComparison.Ordinal);
         Assert.Contains("hasOpenEditorModal", script, StringComparison.Ordinal);
+    Assert.Contains("[role='listbox']:not([hidden])", script, StringComparison.Ordinal);
         Assert.Contains("runAfterPaint", script, StringComparison.Ordinal);
         Assert.Contains("window.requestAnimationFrame(() =>", script, StringComparison.Ordinal);
         Assert.Contains("backLink.click()", script, StringComparison.Ordinal);

@@ -637,7 +637,11 @@
             return true;
         }
 
-        return [...document.querySelectorAll("dialog[open]")]
+        if (document.querySelector("[role='listbox']:not([hidden])")) {
+    return true;
+}
+
+return [...document.querySelectorAll("dialog[open]")]
             .some(dialog => dialog.id !== overlayId);
     };
 
