@@ -48,6 +48,31 @@ public sealed class ContributorFrameMediaParityRegressionTests
         Assert.Contains("\"src\"", script, StringComparison.Ordinal);
 
         Assert.Contains(
+            "measureResponsiveHostPlayerCardSize",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "media.style.setProperty(paritySizeProperty, \"100%\");",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const width = media.offsetWidth || 0;",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const height = media.offsetHeight || 0;",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const renderedSize = isHostPlayerCardMedia",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "? measureResponsiveHostPlayerCardSize(media)",
+            script,
+            StringComparison.Ordinal);
+
+        Assert.Contains(
             "padding: var(--contributor-frame-preview-parity-inset, 0px) !important;",
             styles,
             StringComparison.Ordinal);

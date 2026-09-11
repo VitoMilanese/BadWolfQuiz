@@ -25,6 +25,7 @@
 
     const hostPlayerCardMediaSelector =
         ".game-scoreboard .scoreboard-player:not(.host-card) > .player-card-avatar";
+    const paritySizeProperty = "--contributor-frame-preview-parity-size";
 
     const findMedia = owner => {
         for (const selector of mediaSelectors) {
@@ -40,7 +41,31 @@
     const clearMedia = media => {
         media.classList.remove("contributor-frame-preview-parity-media");
         media.style.removeProperty("--contributor-frame-preview-parity-inset");
-        media.style.removeProperty("--contributor-frame-preview-parity-size");
+        media.style.removeProperty(paritySizeProperty);
+    };
+
+    const measureResponsiveHostPlayerCardSize = media => {
+        const previousSize = media.style.getPropertyValue(paritySizeProperty);
+
+        // The parity size is normally a fixed pixel value. Temporarily let the
+        // media fill its current grid cell so a card that has grown can grow its
+        // framed avatar/image/webcam as well. Measuring the old frame size here
+        // would create a one-way feedback loop where shrinking works but growing
+        // can never exceed the previously stored size.
+        media.style.setProperty(paritySizeProperty, "100%");
+        const width = media.offsetWidth || 0;
+        const height = media.offsetHeight || 0;
+        const size = Math.min(width, height);
+
+        if (size <= 0) {
+            if (previousSize) {
+                media.style.setProperty(paritySizeProperty, previousSize);
+            } else {
+                media.style.removeProperty(paritySizeProperty);
+            }
+        }
+
+        return size;
     };
 
     let refreshQueued = false;
@@ -88,11 +113,18 @@
                 overlay.naturalWidth || 0,
                 overlay.naturalHeight || 0
             );
-            const renderedSize = Math.min(
-                overlay.offsetWidth || 0,
-                overlay.offsetHeight || 0
-            );
-            if (naturalSize <= 0 || renderedSize <= 0) {
+            if (naturalSize <= 0) {
+                return;
+            }
+
+            const isHostPlayerCardMedia = media.matches(hostPlayerCardMediaSelector);
+            const renderedSize = isHostPlayerCardMedia
+                ? measureResponsiveHostPlayerCardSize(media)
+                : Math.min(
+                    overlay.offsetWidth || 0,
+                    overlay.offsetHeight || 0
+                );
+            if (renderedSize <= 0) {
                 return;
             }
 
@@ -105,15 +137,13 @@
                 `${scaledInset}px`
             );
 
-            if (media.matches(hostPlayerCardMediaSelector)) {
+            if (isHostPlayerCardMedia) {
                 media.style.setProperty(
-                    "--contributor-frame-preview-parity-size",
+                    paritySizeProperty,
                     `${renderedSize}px`
                 );
             } else {
-                media.style.removeProperty(
-                    "--contributor-frame-preview-parity-size"
-                );
+                media.style.removeProperty(paritySizeProperty);
             }
         };
 
