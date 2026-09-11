@@ -85,10 +85,51 @@
     </div>
 }
 
+<style>
+    .quiz-editor-title-row { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+    .quiz-editor-title-row h1 { min-width: 0; }
+    .quiz-metadata-edit-button {
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        border: 1px solid var(--quiz-editor-line);
+        border-radius: 12px;
+        color: var(--text);
+        background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+        text-decoration: none;
+        transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+    }
+    .quiz-metadata-edit-button:hover,
+    .quiz-metadata-edit-button:focus-visible {
+        border-color: color-mix(in srgb, var(--gold) 65%, var(--quiz-editor-line));
+        background: color-mix(in srgb, var(--gold) 10%, var(--panel-2));
+        color: var(--gold);
+    }
+    .quiz-metadata-edit-button svg { width: 22px; height: 22px; }
+</style>
+
 <div class="editor-toolbar quiz-editor-toolbar">
     <div>
         <p class="eyebrow">@Localizer["Title_QuizEditor"]</p>
-        <h1>@Model.Quiz.Title</h1>
+        <div class="quiz-editor-title-row">
+            <h1>@Model.Quiz.Title</h1>
+            <a class="quiz-metadata-edit-button"
+               asp-page="QuizMetadataEditor"
+               asp-route-id="@Model.Quiz.Id"
+               asp-route-selectedRoundId="@Model.SelectedRoundId"
+               title="@Localizer["QuizMetadata_Edit"]"
+               aria-label="@Localizer["QuizMetadata_Edit"]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
+            </a>
+        </div>
     </div>
 
     <div class="round-navigation">

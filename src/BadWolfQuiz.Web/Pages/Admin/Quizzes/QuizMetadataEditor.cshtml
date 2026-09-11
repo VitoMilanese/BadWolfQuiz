@@ -1,0 +1,365 @@
+@page "{id:int}"
+@model BadWolfQuiz.Web.Pages.Admin.Quizzes.QuizMetadataEditorModel
+@{
+    ViewData["Title"] = Localizer["Title_QuizMetadataEditor"];
+}
+
+@if (Model.Saved)
+{
+    <div class="alert alert-success" role="status">
+        @Localizer["QuizMetadata_Saved"]
+    </div>
+}
+
+<style>
+    body[data-quiz-editor-workspace="metadata"] .page-heading,
+    body[data-quiz-editor-workspace="metadata"] .quiz-metadata-editor {
+        width: min(1100px, 100%);
+        margin-inline: auto;
+    }
+
+    body[data-quiz-editor-workspace="metadata"] .page-heading {
+        margin-bottom: 18px;
+        padding: clamp(22px, 3vw, 34px);
+        border: 1px solid var(--quiz-editor-line);
+        border-radius: 20px;
+        background: linear-gradient(128deg, color-mix(in srgb, var(--red) 10%, var(--quiz-editor-panel)), var(--quiz-editor-panel-2));
+        box-shadow: var(--quiz-editor-shadow);
+    }
+
+    body[data-quiz-editor-workspace="metadata"] .page-heading .eyebrow { color: var(--gold); }
+    body[data-quiz-editor-workspace="metadata"] .page-heading h1 {
+        margin: 0;
+        font-size: clamp(2rem, 3.6vw, 4.2rem);
+        font-weight: 1000;
+        line-height: .95;
+        letter-spacing: -.045em;
+    }
+
+    .quiz-metadata-editor { display: grid; gap: 18px; }
+    .quiz-metadata-fields,
+    .quiz-tags-setting {
+        display: grid;
+        gap: .75rem;
+        padding: clamp(18px, 2.2vw, 28px);
+        border: 1px solid var(--quiz-editor-line);
+        border-radius: 18px;
+        background: linear-gradient(145deg, color-mix(in srgb, var(--panel) 96%, #000), color-mix(in srgb, var(--panel-2) 88%, var(--bg)));
+        box-shadow: 0 16px 38px rgba(0, 0, 0, .18);
+    }
+
+    .quiz-metadata-fields textarea { min-height: 9rem; resize: vertical; }
+    .quiz-tag-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .quiz-tag-counter { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .quiz-tag-list { display: flex; flex-wrap: wrap; gap: .45rem; min-height: 1rem; }
+    .quiz-tag-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .35rem .55rem;
+        border: 1px solid var(--quiz-editor-line);
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--panel-2) 76%, transparent);
+    }
+    .quiz-tag-remove { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1.15rem; line-height: 1; padding: 0; }
+    .quiz-tag-entry { display: flex; gap: .5rem; align-items: flex-start; }
+    .quiz-tag-combobox { position: relative; flex: 1 1 18rem; min-width: 0; }
+    .quiz-tag-combobox input { width: 100%; }
+    .quiz-tag-suggestions {
+        position: absolute;
+        z-index: 100;
+        top: calc(100% + .35rem);
+        left: 0;
+        right: 0;
+        max-height: 16rem;
+        overflow-y: auto;
+        padding: .3rem;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
+    }
+    .quiz-tag-suggestion { display: block; width: 100%; border: 0; border-radius: 8px; padding: .55rem .7rem; background: transparent; color: var(--text); text-align: left; cursor: pointer; }
+    .quiz-tag-suggestion:hover,
+    .quiz-tag-suggestion.is-active { background: var(--panel-2); }
+</style>
+
+<div class="page-heading">
+    <p class="eyebrow">@Localizer["Title_QuizEditor"]</p>
+    <h1>@Localizer["Title_QuizMetadataEditor"]</h1>
+</div>
+
+<form method="post"
+      class="question-editor quiz-metadata-editor"
+      data-quiz-metadata-editor>
+    <input type="hidden" asp-for="Input.Id" />
+    <input type="hidden" asp-for="Input.SelectedRoundId" />
+
+    <section class="content-panel quiz-metadata-fields">
+        <label asp-for="Input.Title"><strong>@Localizer["Label_QuizName"]</strong></label>
+        <input asp-for="Input.Title" maxlength="160" autocomplete="off" />
+        <span asp-validation-for="Input.Title" class="text-danger"></span>
+
+        <label asp-for="Input.Description"><strong>@Localizer["Label_Description"]</strong></label>
+        <textarea asp-for="Input.Description" maxlength="1000" rows="6"></textarea>
+        <span asp-validation-for="Input.Description" class="text-danger"></span>
+    </section>
+
+    <section class="content-panel quiz-tags-setting"
+             data-quiz-tags-editor
+             data-max-tags="@BadWolfQuiz.Web.Pages.Admin.Quizzes.QuizMetadataEditorModel.MaximumTagCount"
+             data-max-message="@Localizer["Validation_QuizTagLimit", BadWolfQuiz.Web.Pages.Admin.Quizzes.QuizMetadataEditorModel.MaximumTagCount]">
+        <div class="quiz-tag-heading">
+            <label for="quiz-tag-input"><strong>@Localizer["Label_QuizTags"]</strong></label>
+            <span class="quiz-tag-counter" data-quiz-tag-counter aria-live="polite"></span>
+        </div>
+
+        <div class="quiz-tag-list" data-quiz-tag-list></div>
+        <div data-quiz-tag-fields>
+            @foreach (var tag in Model.Input.Tags)
+            {
+                <input type="hidden" name="Input.Tags" value="@tag" />
+            }
+        </div>
+
+        <div class="quiz-tag-entry">
+            <div class="quiz-tag-combobox"
+                 data-quiz-tag-combobox
+                 data-suggestions-url="@Url.Page("QuizMetadataEditor", "TagSuggestions", new { id = Model.Input.Id })">
+                <input id="quiz-tag-input"
+                       type="text"
+                       maxlength="100"
+                       placeholder="@Localizer["Placeholder_QuizTag"]"
+                       autocomplete="off"
+                       role="combobox"
+                       aria-autocomplete="list"
+                       aria-expanded="false"
+                       aria-controls="quiz-tag-suggestions" />
+                <div id="quiz-tag-suggestions"
+                     class="quiz-tag-suggestions"
+                     data-quiz-tag-suggestions
+                     role="listbox"
+                     hidden></div>
+            </div>
+            <button class="button button-secondary" type="button" data-add-quiz-tag>
+                @Localizer["Button_AddTag"]
+            </button>
+        </div>
+
+        <small>@Localizer["Hint_QuizTags", BadWolfQuiz.Web.Pages.Admin.Quizzes.QuizMetadataEditorModel.MaximumTagCount]</small>
+        <small class="text-danger" data-quiz-tag-limit-message hidden></small>
+        <span asp-validation-for="Input.Tags" class="text-danger"></span>
+    </section>
+
+    <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+    <div class="editor-actions">
+        <a id="quiz-metadata-editor-back"
+           class="button button-secondary"
+           asp-page="Editor"
+           asp-route-id="@Model.Input.Id"
+           asp-route-selectedRoundId="@Model.Input.SelectedRoundId">
+            @Localizer["Button_Back"]
+        </a>
+        <button class="button button-primary" type="submit">@Localizer["Button_Save"]</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+    (() => {
+        const editor = document.querySelector("[data-quiz-tags-editor]");
+        if (!editor) return;
+
+        const input = editor.querySelector("#quiz-tag-input");
+        const list = editor.querySelector("[data-quiz-tag-list]");
+        const fields = editor.querySelector("[data-quiz-tag-fields]");
+        const addButton = editor.querySelector("[data-add-quiz-tag]");
+        const combobox = editor.querySelector("[data-quiz-tag-combobox]");
+        const suggestionBox = editor.querySelector("[data-quiz-tag-suggestions]");
+        const counter = editor.querySelector("[data-quiz-tag-counter]");
+        const limitMessage = editor.querySelector("[data-quiz-tag-limit-message]");
+        const suggestionsUrl = combobox?.dataset.suggestionsUrl;
+        const maxTags = Number.parseInt(editor.dataset.maxTags ?? "10", 10) || 10;
+        const maxMessage = editor.dataset.maxMessage ?? "";
+        let tags = [...fields.querySelectorAll('input[name="Input.Tags"]')]
+            .map(field => field.value.trim())
+            .filter(Boolean);
+        let suggestions = [];
+        let activeSuggestion = -1;
+        let requestSequence = 0;
+        let suggestionTimer;
+
+        const key = value => value.trim().toUpperCase();
+        const hideSuggestions = () => {
+            suggestions = [];
+            activeSuggestion = -1;
+            suggestionBox.replaceChildren();
+            suggestionBox.hidden = true;
+            input.setAttribute("aria-expanded", "false");
+            input.removeAttribute("aria-activedescendant");
+        };
+
+        const updateLimitState = () => {
+            const atLimit = tags.length >= maxTags;
+            counter.textContent = `${tags.length} / ${maxTags}`;
+            input.disabled = atLimit;
+            addButton.disabled = atLimit;
+            limitMessage.textContent = atLimit ? maxMessage : "";
+            limitMessage.hidden = !atLimit;
+            if (atLimit) hideSuggestions();
+        };
+
+        const setActiveSuggestion = index => {
+            const options = [...suggestionBox.querySelectorAll("[data-quiz-tag-suggestion]")];
+            options.forEach(option => option.classList.remove("is-active"));
+            if (!options.length) {
+                activeSuggestion = -1;
+                input.removeAttribute("aria-activedescendant");
+                return;
+            }
+            activeSuggestion = (index + options.length) % options.length;
+            const option = options[activeSuggestion];
+            option.classList.add("is-active");
+            option.scrollIntoView({ block: "nearest" });
+            input.setAttribute("aria-activedescendant", option.id);
+        };
+
+        const renderSuggestions = values => {
+            if (tags.length >= maxTags) {
+                hideSuggestions();
+                return;
+            }
+            const selected = new Set(tags.map(key));
+            suggestions = values
+                .map(value => value?.trim())
+                .filter(value => value && !selected.has(key(value)));
+            activeSuggestion = -1;
+            suggestionBox.replaceChildren();
+            suggestions.forEach((suggestion, index) => {
+                const option = document.createElement("button");
+                option.type = "button";
+                option.id = `quiz-tag-suggestion-${index}`;
+                option.className = "quiz-tag-suggestion";
+                option.dataset.quizTagSuggestion = "";
+                option.setAttribute("role", "option");
+                option.textContent = suggestion;
+                option.addEventListener("mousedown", event => event.preventDefault());
+                option.addEventListener("click", () => addTag(suggestion));
+                suggestionBox.appendChild(option);
+            });
+            suggestionBox.hidden = suggestions.length === 0;
+            input.setAttribute("aria-expanded", suggestions.length ? "true" : "false");
+        };
+
+        const loadSuggestions = async () => {
+            if (!suggestionsUrl || tags.length >= maxTags) {
+                hideSuggestions();
+                return;
+            }
+            const sequence = ++requestSequence;
+            const url = new URL(suggestionsUrl, window.location.href);
+            const searchText = input.value.trim();
+            if (searchText) url.searchParams.set("query", searchText);
+            else url.searchParams.delete("query");
+            try {
+                const response = await fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+                if (!response.ok || sequence !== requestSequence) {
+                    if (sequence === requestSequence) hideSuggestions();
+                    return;
+                }
+                const values = await response.json();
+                if (sequence === requestSequence) renderSuggestions(Array.isArray(values) ? values : []);
+            } catch {
+                if (sequence === requestSequence) hideSuggestions();
+            }
+        };
+
+        const scheduleSuggestions = () => {
+            clearTimeout(suggestionTimer);
+            suggestionTimer = setTimeout(loadSuggestions, 150);
+        };
+
+        const render = () => {
+            list.replaceChildren();
+            fields.replaceChildren();
+            tags.forEach(tag => {
+                const chip = document.createElement("span");
+                chip.className = "quiz-tag-chip";
+                const text = document.createElement("span");
+                text.textContent = tag;
+                chip.appendChild(text);
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.className = "quiz-tag-remove";
+                remove.setAttribute("aria-label", `Remove ${tag}`);
+                remove.textContent = "×";
+                remove.addEventListener("click", () => {
+                    const normalized = key(tag);
+                    tags = tags.filter(item => key(item) !== normalized);
+                    render();
+                    input.focus();
+                    loadSuggestions();
+                });
+                chip.appendChild(remove);
+                list.appendChild(chip);
+                const hidden = document.createElement("input");
+                hidden.type = "hidden";
+                hidden.name = "Input.Tags";
+                hidden.value = tag;
+                fields.appendChild(hidden);
+            });
+            updateLimitState();
+        };
+
+        const addTag = value => {
+            if (tags.length >= maxTags) {
+                updateLimitState();
+                return;
+            }
+            const tagValue = (value ?? input.value).trim();
+            if (!tagValue || tagValue.length > 100) return;
+            if (!tags.some(tag => key(tag) === key(tagValue))) {
+                tags.push(tagValue);
+                render();
+            }
+            if (!input.disabled) {
+                input.value = "";
+                hideSuggestions();
+                input.focus();
+                loadSuggestions();
+            }
+        };
+
+        addButton.addEventListener("click", () => addTag());
+        input.addEventListener("focus", loadSuggestions);
+        input.addEventListener("input", scheduleSuggestions);
+        input.addEventListener("blur", () => window.setTimeout(hideSuggestions, 120));
+        input.addEventListener("keydown", event => {
+            if (event.key === "ArrowDown") {
+                event.preventDefault();
+                if (suggestionBox.hidden) loadSuggestions();
+                else setActiveSuggestion(activeSuggestion + 1);
+                return;
+            }
+            if (event.key === "ArrowUp" && !suggestionBox.hidden) {
+                event.preventDefault();
+                setActiveSuggestion(activeSuggestion - 1);
+                return;
+            }
+            if (event.key === "Escape") {
+                hideSuggestions();
+                return;
+            }
+            if (event.key === "Enter") {
+                event.preventDefault();
+                if (!suggestionBox.hidden && activeSuggestion >= 0) addTag(suggestions[activeSuggestion]);
+                else addTag();
+            }
+        });
+
+        render();
+    })();
+    </script>
+}

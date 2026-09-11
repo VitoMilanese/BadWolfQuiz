@@ -17,6 +17,7 @@ public static class QuizCloneOperations
         var source = await db.Quizzes
             .AsNoTracking()
             .AsSplitQuery()
+            .Include(quiz => quiz.Tags)
             .Include(quiz => quiz.FinalDescriptionBlocks)
             .Include(quiz => quiz.FinalQuestionBlocks)
             .Include(quiz => quiz.FinalAnswerBlocks)
@@ -65,6 +66,15 @@ public static class QuizCloneOperations
             IsPublic = false,
             PublishedAtUtc = null
         };
+
+        foreach (var sourceTag in source.Tags.OrderBy(tag => tag.Name))
+        {
+            clone.Tags.Add(new QuizTag
+            {
+                Name = sourceTag.Name,
+                NormalizedName = sourceTag.NormalizedName
+            });
+        }
 
         foreach (var sourceRound in source.Rounds.OrderBy(round => round.SortOrder))
         {

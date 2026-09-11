@@ -71,6 +71,9 @@ public sealed class QuizCloneOperationsTests
         Assert.Null(clone.MediaRestoredAtUtc);
         Assert.Null(clone.MediaArchiveFailureReason);
         Assert.True(clone.PreventAutomaticArchiving);
+        Assert.Equal(
+            new[] { "movies", "party" },
+            clone.Tags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray());
 
         var cloneRound = Assert.Single(clone.Rounds);
         Assert.NotEqual(sourceRoundId, cloneRound.Id);
@@ -206,6 +209,8 @@ public sealed class QuizCloneOperationsTests
             MediaRestoredAtUtc = DateTime.UtcNow.AddDays(-3),
             MediaArchiveFailureReason = "old failure"
         };
+        source.Tags.Add(new QuizTag { Name = "movies", NormalizedName = "MOVIES" });
+        source.Tags.Add(new QuizTag { Name = "party", NormalizedName = "PARTY" });
         source.FinalQuestionBlocks.Add(new FinalQuestionContentBlock
         {
             BlockType = ContentBlockType.Text,

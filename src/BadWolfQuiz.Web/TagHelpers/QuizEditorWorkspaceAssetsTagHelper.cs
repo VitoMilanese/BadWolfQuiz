@@ -21,6 +21,7 @@ public sealed class QuizEditorWorkspaceAssetsTagHelper : TagHelper
             QuestionEditorModel => "question",
             FinalQuestionEditorModel => "final",
             DescriptionEditorModel => "description",
+            QuizMetadataEditorModel => "metadata",
             _ => null
         };
 

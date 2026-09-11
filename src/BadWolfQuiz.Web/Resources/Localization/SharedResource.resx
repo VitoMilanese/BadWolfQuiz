@@ -2844,4 +2844,28 @@
   <data name="QuestionTags_MaxLength" xml:space="preserve">
     <value>A tag can contain at most 100 characters.</value>
   </data>
+  <data name="Title_QuizMetadataEditor" xml:space="preserve">
+    <value>Quiz details</value>
+  </data>
+  <data name="QuizMetadata_Edit" xml:space="preserve">
+    <value>Edit quiz title, description and tags</value>
+  </data>
+  <data name="Label_QuizTags" xml:space="preserve">
+    <value>Quiz tags</value>
+  </data>
+  <data name="Placeholder_QuizTag" xml:space="preserve">
+    <value>Add a tag</value>
+  </data>
+  <data name="Hint_QuizTags" xml:space="preserve">
+    <value>Add up to {0} tags for future quiz search.</value>
+  </data>
+  <data name="Validation_QuizTagLimit" xml:space="preserve">
+    <value>A quiz can have at most {0} tags.</value>
+  </data>
+  <data name="Validation_QuizTagTooLong" xml:space="preserve">
+    <value>Each quiz tag can be at most 100 characters.</value>
+  </data>
+  <data name="QuizMetadata_Saved" xml:space="preserve">
+    <value>Quiz details saved.</value>
+  </data>
 </root>
