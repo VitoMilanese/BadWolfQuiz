@@ -5,11 +5,21 @@ They provide persistent long-term milestones without changing normal quiz scorin
 
 ## Identity and persistence
 
-Achievement records are stored in the main SQLite database. When a stable Bad Wolf account is known, achievements are associated with that account. Anonymous gameplay can fall back to the host plus normalized player name, and later account linking can adopt matching nickname history.
+Achievement records are stored in the main SQLite database. When a stable Bad Wolf account is known, achievements are associated with that account. Anonymous gameplay falls back to the host plus normalized player name. A signed-in player may be associated with the current runtime immediately, but matching anonymous nickname history is adopted into the account only after that player remains an eligible participant in a successfully finished game with the same host.
 
 The persistence model also stores game/account and user-question/account links used by achievements that depend on gameplay identity or developer conversations. One-time achievements are de-duplicated before persistence, so evaluating the same completed game again does not create duplicate unlocks.
 
 Active-game achievement runtime state is included in the normal active-game snapshot. Pending event milestones therefore survive application restart together with the rest of the recoverable game state.
+
+### Finished-game boundary and account adoption
+
+Gameplay-derived achievement history is authoritative only for persisted games whose status is `Finished`. Running, interrupted, abandoned, or otherwise unfinished games do not contribute to completed-game counts, correct-answer totals, wins, streaks, score milestones, tag/media progress, longevity, peer-rating progress, or gameplay-event unlocks. Gameplay achievements are finalized from this finished-game history when a completed game is persisted. Account/community achievements that do not depend on game completion can still unlock immediately from their authoritative server-side event.
+
+Stored `GamePlayer` history records carry `CountsForAchievementHistory`. Players who are still legitimate participants when the game finishes are stored with the flag enabled. Players removed by the host are kept in stored game/audit history with the flag disabled and are excluded from achievement metrics, winner comparisons, gameplay-event unlocks, peer-rating progress, and account-history adoption. If a removed player is restored and finishes as a participant, the flag is enabled normally. Legacy stored players created before this marker existed default to enabled because their historical removed state cannot be reconstructed safely.
+
+Signing in during a game only records the account as a candidate/current-game identity. It does not immediately claim old `HostId + normalized nickname` history. After an eligible finished-game participation confirms the identity, the service links eligible finished appearances for that host/nickname to the account and adopts the matching fallback unlock records. Adoption preserves the original achievement code, unlock timestamp, and source game-session ID, including direct event-based achievements, and de-duplicates an achievement by retaining the earliest authoritative unlock. History already claimed by a different account is never reassigned automatically.
+
+Once confirmed game links exist, built-in account achievement metrics aggregate eligible finished-game history across all hosts. A registered player can therefore continue the same built-in counters while playing with different hosts. Future host-defined custom achievements remain host-scoped and must not merge progress across hosts.
 
 The `20260909225025_AddPlayerAchievements` migration creates the achievement tables and indexes. Startup contains compatibility handling for development databases that already contain an older physical version of those tables but do not contain the current migration-history entry.
 

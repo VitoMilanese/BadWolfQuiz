@@ -19,6 +19,9 @@ public static class DatabaseMigrationService
     private const string QuizCategoryColorsMigrationSuffix =
         "_AddQuizCategoryColors";
 
+    private const string AchievementHistoryEligibilityMigrationSuffix =
+        "_AddAchievementHistoryEligibility";
+
     private static readonly string[] ContentBlockAutoplayTables =
     [
         "QuestionContentBlocks",
@@ -40,6 +43,7 @@ public static class DatabaseMigrationService
         await PrepareContentBlockAutoplayMigrationAsync(db, cancellationToken);
         await PreparePlayerAchievementsMigrationAsync(db, cancellationToken);
         await PrepareQuizCategoryColorsMigrationAsync(db, cancellationToken);
+        await PrepareAchievementHistoryEligibilityMigrationAsync(db, cancellationToken);
         await db.Database.MigrateAsync(cancellationToken);
         await EnsureContentBlockAutoplayColumnsAsync(db, cancellationToken);
     }
@@ -330,6 +334,82 @@ public static class DatabaseMigrationService
                 return;
             }
 
+            await using var command = connection.CreateCommand();
+            command.CommandText =
+                """
+                INSERT OR IGNORE INTO "__EFMigrationsHistory"
+                    ("MigrationId", "ProductVersion")
+                VALUES
+                    ($migrationId, $productVersion);
+                """;
+
+            var migrationParameter = command.CreateParameter();
+            migrationParameter.ParameterName = "$migrationId";
+            migrationParameter.Value = migrationId;
+            command.Parameters.Add(migrationParameter);
+
+            var productVersion = command.CreateParameter();
+            productVersion.ParameterName = "$productVersion";
+            productVersion.Value = EfProductVersion;
+            command.Parameters.Add(productVersion);
+
+            await command.ExecuteNonQueryAsync(cancellationToken);
+        }
+        finally
+        {
+            if (shouldClose)
+            {
+                await connection.CloseAsync();
+            }
+        }
+    }
+
+    private static async Task PrepareAchievementHistoryEligibilityMigrationAsync(
+        QuizDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var migrationId = db.Database.GetMigrations()
+            .SingleOrDefault(id => id.EndsWith(
+                AchievementHistoryEligibilityMigrationSuffix,
+                StringComparison.Ordinal));
+        if (migrationId is null)
+        {
+            return;
+        }
+
+        var connection = db.Database.GetDbConnection();
+        var shouldClose = connection.State == ConnectionState.Closed;
+        if (shouldClose)
+        {
+            await connection.OpenAsync(cancellationToken);
+        }
+
+        try
+        {
+            if (!await TableExistsAsync(connection, "__EFMigrationsHistory", cancellationToken) ||
+                await MigrationAppliedAsync(connection, migrationId, cancellationToken))
+            {
+                return;
+            }
+
+            var hasGamePlayers = await TableExistsAsync(
+                connection,
+                "GamePlayers",
+                cancellationToken);
+            if (hasGamePlayers &&
+                !await ColumnExistsAsync(
+                    connection,
+                    "GamePlayers",
+                    "CountsForAchievementHistory",
+                    cancellationToken))
+            {
+                return;
+            }
+
+            // Legacy/bootstrap databases can intentionally lack GamePlayers, while development
+            // databases may already contain the physical column without the migration-history row.
+            // In both cases, executing ALTER TABLE would fail or duplicate the column, so mark the
+            // migration as physically satisfied.
             await using var command = connection.CreateCommand();
             command.CommandText =
                 """

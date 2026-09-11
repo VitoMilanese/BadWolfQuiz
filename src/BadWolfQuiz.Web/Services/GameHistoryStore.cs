@@ -70,6 +70,9 @@ public sealed class GameHistoryStore(QuizDbContext db)
         stored.StartedAtUtc = runtime.StartedAtUtc?.UtcDateTime;
         stored.FinishedAtUtc = DateTime.UtcNow;
 
+        var eligiblePlayerIds = runtime.Players
+            .Select(player => player.Id)
+            .ToHashSet();
         var players = runtime.AllPlayers.ToDictionary(
             player => player.Id,
             player => new StoredGamePlayer
@@ -79,24 +82,13 @@ public sealed class GameHistoryStore(QuizDbContext db)
                 TotalScore = player.Score,
                 JoinedAtUtc = player.JoinedAtUtc.UtcDateTime,
                 LastSeenAtUtc = stored.FinishedAtUtc,
-                IsActive = false
+                IsActive = false,
+                CountsForAchievementHistory = eligiblePlayerIds.Contains(player.Id)
             });
 
         foreach (var pair in players)
         {
             stored.Players.Add(pair.Value);
-
-            var accountId = PlayerAchievementRuntimeState.GetPlayerAccountId(
-                registration,
-                pair.Key);
-            if (!string.IsNullOrWhiteSpace(accountId))
-            {
-                db.PlayerGameAccountLinks.Add(new PlayerGameAccountLink
-                {
-                    Player = pair.Value,
-                    AccountId = accountId
-                });
-            }
         }
 
         foreach (var question in runtime.Board.Questions)
@@ -129,12 +121,34 @@ public sealed class GameHistoryStore(QuizDbContext db)
         await db.SaveChangesAsync(cancellationToken);
 
         var achievements = new PlayerAchievementService(db);
+        foreach (var player in runtime.Players)
+        {
+            var accountId = PlayerAchievementRuntimeState.GetPlayerAccountId(
+                registration,
+                player.Id);
+            if (!string.IsNullOrWhiteSpace(accountId))
+            {
+                await achievements.AdoptHostNicknameHistoryAsync(
+                    accountId,
+                    registration.HostId,
+                    player.Name,
+                    stored.Id,
+                    cancellationToken);
+            }
+        }
+
         var peerMaximumRatingEvents = new List<PlayerMaximumRatingEventSource>();
         foreach (var review in registration.CapturePeerRatedAllPlayerReviews())
         {
             foreach (var rating in review.Ratings.Where(item => item.Stars == 5))
             {
-                var answerPlayer = runtime.AllPlayers.SingleOrDefault(player =>
+                if (!eligiblePlayerIds.Contains(rating.AnswerPlayerId) ||
+                    !eligiblePlayerIds.Contains(rating.RaterPlayerId))
+                {
+                    continue;
+                }
+
+                var answerPlayer = runtime.Players.SingleOrDefault(player =>
                     player.Id == rating.AnswerPlayerId);
                 if (answerPlayer is null)
                 {
@@ -189,7 +203,7 @@ public sealed class GameHistoryStore(QuizDbContext db)
                     continue;
                 }
 
-                var player = runtime.AllPlayers.SingleOrDefault(item => item.Id == wager.PlayerId);
+                var player = runtime.Players.SingleOrDefault(item => item.Id == wager.PlayerId);
                 if (player is null)
                 {
                     continue;
@@ -213,7 +227,7 @@ public sealed class GameHistoryStore(QuizDbContext db)
                 continue;
             }
 
-            var player = runtime.AllPlayers.SingleOrDefault(item => item.Id == submission.PlayerId);
+            var player = runtime.Players.SingleOrDefault(item => item.Id == submission.PlayerId);
             if (player is null)
             {
                 continue;
@@ -279,7 +293,7 @@ public sealed class GameHistoryStore(QuizDbContext db)
 
         if (selectedQuestions.FirstOrDefault()?.Question.SelectedByPlayerId is { } firstPlayerId)
         {
-            var firstPlayer = runtime.AllPlayers.SingleOrDefault(player => player.Id == firstPlayerId);
+            var firstPlayer = runtime.Players.SingleOrDefault(player => player.Id == firstPlayerId);
             if (firstPlayer is not null)
             {
                 await UnlockAsync(firstPlayer, "FirstPick");
@@ -293,7 +307,7 @@ public sealed class GameHistoryStore(QuizDbContext db)
                 orderedRounds[1].SourceRoundId);
             if (secondRoundFirst is not null)
             {
-                var secondRoundPlayer = runtime.AllPlayers.SingleOrDefault(player =>
+                var secondRoundPlayer = runtime.Players.SingleOrDefault(player =>
                     player.Id == secondRoundFirst.PlayerId);
                 if (secondRoundPlayer is not null)
                 {
@@ -304,10 +318,10 @@ public sealed class GameHistoryStore(QuizDbContext db)
             var lastRoundFirst = PlayerAchievementRuntimeState.GetRoundFirstPick(
                 registration,
                 orderedRounds[^1].SourceRoundId);
-            if (lastRoundFirst is { WasLowestScore: true } && runtime.AllPlayers.Count > 0)
+            if (lastRoundFirst is { WasLowestScore: true } && runtime.Players.Count > 0)
             {
-                var winningScore = runtime.AllPlayers.Max(player => player.Score);
-                var lastRoundPlayer = runtime.AllPlayers.SingleOrDefault(player =>
+                var winningScore = runtime.Players.Max(player => player.Score);
+                var lastRoundPlayer = runtime.Players.SingleOrDefault(player =>
                     player.Id == lastRoundFirst.PlayerId);
                 if (lastRoundPlayer is not null && lastRoundPlayer.Score == winningScore)
                 {
@@ -331,7 +345,7 @@ public sealed class GameHistoryStore(QuizDbContext db)
                     continue;
                 }
 
-                var player = runtime.AllPlayers.SingleOrDefault(item => item.Id == attempt.PlayerId);
+                var player = runtime.Players.SingleOrDefault(item => item.Id == attempt.PlayerId);
                 if (player is not null)
                 {
                     await UnlockAsync(player, achievementCode);
@@ -345,7 +359,7 @@ public sealed class GameHistoryStore(QuizDbContext db)
         {
             foreach (var attempt in question.AnswerAttempts.Where(attempt => attempt.IsCorrect))
             {
-                var player = runtime.AllPlayers.SingleOrDefault(item => item.Id == attempt.PlayerId);
+                var player = runtime.Players.SingleOrDefault(item => item.Id == attempt.PlayerId);
                 if (player is not null)
                 {
                     await UnlockAsync(player, "FourCluesTwoClues");
@@ -361,7 +375,7 @@ public sealed class GameHistoryStore(QuizDbContext db)
                     submission.IsCorrect.HasValue)
                 .Select(submission =>
                 {
-                    var player = runtime.AllPlayers.SingleOrDefault(item =>
+                    var player = runtime.Players.SingleOrDefault(item =>
                         item.Id == submission.PlayerId);
                     if (player is null)
                     {
@@ -389,7 +403,7 @@ public sealed class GameHistoryStore(QuizDbContext db)
             }
         }
 
-        foreach (var player in runtime.AllPlayers)
+        foreach (var player in runtime.Players)
         {
             foreach (var achievementCode in
                      PlayerAchievementRuntimeState.GetPendingAchievementCodes(registration, player.Id))
@@ -489,7 +503,7 @@ public sealed class GameHistoryStore(QuizDbContext db)
         int currentGameSessionId,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(registration.HostId) || runtime.AllPlayers.Count == 0)
+        if (string.IsNullOrWhiteSpace(registration.HostId) || runtime.Players.Count == 0)
         {
             return;
         }
@@ -514,7 +528,9 @@ public sealed class GameHistoryStore(QuizDbContext db)
         var previousPlayers = await db.GamePlayers
             .IgnoreQueryFilters()
             .AsNoTracking()
-            .Where(player => player.GameSessionId == previousGameId)
+            .Where(player =>
+                player.GameSessionId == previousGameId &&
+                player.CountsForAchievementHistory)
             .Select(player => new
             {
                 player.Name,
@@ -534,8 +550,8 @@ public sealed class GameHistoryStore(QuizDbContext db)
         var previousWinners = previousPlayers
             .Where(player => player.TotalScore == previousWinningScore)
             .ToArray();
-        var currentWinningScore = runtime.AllPlayers.Max(player => player.Score);
-        var currentPlayers = runtime.AllPlayers
+        var currentWinningScore = runtime.Players.Max(player => player.Score);
+        var currentPlayers = runtime.Players
             .Select(player => new
             {
                 Player = player,
