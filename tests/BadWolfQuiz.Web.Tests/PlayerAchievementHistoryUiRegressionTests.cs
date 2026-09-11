@@ -31,6 +31,7 @@ public sealed class PlayerAchievementHistoryUiRegressionTests
         Assert.Contains("BadWolfBusy.navigate(this.href)", layout);
 
         Assert.Contains("~/css/answer-history.css", page);
+        Assert.Contains("~/css/gameplay-review-fixes.css", page);
         Assert.Contains("answer-history-page player-achievement-history-page", page);
         Assert.Contains("answer-history-hero", page);
         Assert.Contains("answer-history-session", page);
