@@ -145,23 +145,148 @@
         }
 
         columns.forEach((column, index) => {
-                if (!(column instanceof HTMLElement)) return;
+            if (!(column instanceof HTMLElement)) return;
 
-                const mode = column.dataset.categoryColorMode || "automatic";
-                if (mode === "theme") {
-                    clearCategoryColors(column);
-                    return;
-                }
-
-                if (mode === "custom") {
-                    clearCategoryColors(column);
-                    if (applyCustomCategoryColor(column, column.dataset.categoryCustomColor)) return;
-                }
-
+            const mode = column.dataset.categoryColorMode || "automatic";
+            if (mode === "theme") {
                 clearCategoryColors(column);
-                applyAutomaticCategoryColor(column, index);
-            });
+                return;
+            }
+
+            if (mode === "custom") {
+                clearCategoryColors(column);
+                if (applyCustomCategoryColor(column, column.dataset.categoryCustomColor)) return;
+            }
+
+            clearCategoryColors(column);
+            applyAutomaticCategoryColor(column, index);
+        });
     };
+
+    const categoryColorsToggleSelector =
+        "[data-category-colors-enabled-toggle]";
+    let categoryColorsSavePending = false;
+
+    const getCategoryColorsGrid = () => {
+        const grid = document.querySelector(".host-board-grid");
+        return grid instanceof HTMLElement ? grid : null;
+    };
+
+    const getCategoryColorsToggle = scope => {
+        const toggle = (scope ?? document).querySelector(
+            categoryColorsToggleSelector);
+        return toggle instanceof HTMLInputElement ? toggle : null;
+    };
+
+    const notifyCategoryColorsChanged = () => {
+        document.dispatchEvent(new CustomEvent(
+            "badwolf:category-colors-enabled-changed"));
+    };
+
+    const previewCategoryColors = toggle => {
+        const grid = getCategoryColorsGrid();
+        if (!grid || !toggle) return;
+
+        grid.dataset.categoryColorsPreview = toggle.checked ? "true" : "false";
+        notifyCategoryColorsChanged();
+    };
+
+    const syncCategoryColorsToggleFromPersisted = toggle => {
+        const grid = getCategoryColorsGrid();
+        if (!grid || !toggle) return;
+
+        toggle.checked =
+            (grid.dataset.categoryColorsEnabled ?? "true") !== "false";
+    };
+
+    const clearCategoryColorsPreview = toggle => {
+        const grid = getCategoryColorsGrid();
+        if (!grid) return;
+
+        grid.removeAttribute("data-category-colors-preview");
+        syncCategoryColorsToggleFromPersisted(toggle);
+        notifyCategoryColorsChanged();
+    };
+
+    const commitCategoryColorsPreview = toggle => {
+        const grid = getCategoryColorsGrid();
+        if (!grid || !toggle) return;
+
+        grid.dataset.categoryColorsEnabled = toggle.checked ? "true" : "false";
+        grid.removeAttribute("data-category-colors-preview");
+        notifyCategoryColorsChanged();
+    };
+
+    document.addEventListener("change", event => {
+        const toggle = event.target instanceof HTMLInputElement &&
+            event.target.matches(categoryColorsToggleSelector)
+            ? event.target
+            : null;
+        if (toggle) {
+            previewCategoryColors(toggle);
+        }
+    });
+
+    document.addEventListener("click", event => {
+        const target = event.target instanceof Element ? event.target : null;
+        if (!target) return;
+
+        if (target.closest("[data-open-game-settings]")) {
+            categoryColorsSavePending = false;
+            const dialog = document.getElementById("game-settings-dialog");
+            syncCategoryColorsToggleFromPersisted(
+                getCategoryColorsToggle(dialog));
+            return;
+        }
+
+        const dialog = target.closest("#game-settings-dialog");
+        if (!dialog) return;
+
+        if (target.closest("[data-close-game-settings]") || target === dialog) {
+            categoryColorsSavePending = false;
+            clearCategoryColorsPreview(getCategoryColorsToggle(dialog));
+        }
+    }, true);
+
+    document.addEventListener("submit", event => {
+        const form = event.target instanceof HTMLFormElement
+            ? event.target
+            : null;
+        if (!form?.closest("#game-settings-dialog") ||
+            !form.querySelector(categoryColorsToggleSelector)) {
+            return;
+        }
+
+        categoryColorsSavePending = true;
+    }, true);
+
+    document.addEventListener("cancel", event => {
+        const dialog = event.target instanceof HTMLDialogElement &&
+            event.target.id === "game-settings-dialog"
+            ? event.target
+            : null;
+        if (!dialog) return;
+
+        categoryColorsSavePending = false;
+        clearCategoryColorsPreview(getCategoryColorsToggle(dialog));
+    }, true);
+
+    document.addEventListener("close", event => {
+        const dialog = event.target instanceof HTMLDialogElement &&
+            event.target.id === "game-settings-dialog"
+            ? event.target
+            : null;
+        if (!dialog) return;
+
+        const toggle = getCategoryColorsToggle(dialog);
+        if (categoryColorsSavePending) {
+            categoryColorsSavePending = false;
+            commitCategoryColorsPreview(toggle);
+            return;
+        }
+
+        clearCategoryColorsPreview(toggle);
+    }, true);
 
     if (!document.querySelector("script[data-host-gameplay-submit-guard]")) {
         const submitGuard = document.createElement("script");

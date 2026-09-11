@@ -64,6 +64,12 @@ public sealed class CategoryColorsSettingsTests
         Assert.Contains("grid.dataset.categoryColorsPreview ??", boardScript, StringComparison.Ordinal);
         Assert.Contains("grid.dataset.categoryColorsEnabled ??", boardScript, StringComparison.Ordinal);
         Assert.Contains("badwolf:category-colors-enabled-changed", boardScript, StringComparison.Ordinal);
+        Assert.Contains("categoryColorsToggleSelector", boardScript, StringComparison.Ordinal);
+        Assert.Contains("document.addEventListener(\"change\", event =>", boardScript, StringComparison.Ordinal);
+        Assert.Contains("document.addEventListener(\"close\", event =>", boardScript, StringComparison.Ordinal);
+        Assert.Contains("document.addEventListener(\"cancel\", event =>", boardScript, StringComparison.Ordinal);
+        Assert.Contains("syncCategoryColorsToggleFromPersisted", boardScript, StringComparison.Ordinal);
+        Assert.Contains("clearCategoryColorsPreview(getCategoryColorsToggle(dialog))", boardScript, StringComparison.Ordinal);
 
         var disabledGate = boardScript.IndexOf("if (!colorsEnabled)", StringComparison.Ordinal);
         var perCategoryMode = boardScript.IndexOf("const mode = column.dataset.categoryColorMode", StringComparison.Ordinal);
