@@ -38,6 +38,10 @@ public sealed class ContributorFrameMediaParityRegressionTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
+            ".board-host-card-list > .scoreboard-player.host-card > .host-card-media",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
             "badwolf:host-gameplay-updated",
             script,
             StringComparison.Ordinal);
@@ -48,7 +52,7 @@ public sealed class ContributorFrameMediaParityRegressionTests
         Assert.Contains("\"src\"", script, StringComparison.Ordinal);
 
         Assert.Contains(
-            "measureResponsiveHostPlayerCardSize",
+            "measureResponsiveGameplayCardSize",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -64,11 +68,11 @@ public sealed class ContributorFrameMediaParityRegressionTests
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "const renderedSize = isHostPlayerCardMedia",
+            "const renderedSize = isResponsiveGameplayCardMedia",
             script,
             StringComparison.Ordinal);
         Assert.Contains(
-            "? measureResponsiveHostPlayerCardSize(media)",
+            "? measureResponsiveGameplayCardSize(media)",
             script,
             StringComparison.Ordinal);
 
@@ -86,6 +90,14 @@ public sealed class ContributorFrameMediaParityRegressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             "background: transparent !important;",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".board-host-card-list > .scoreboard-player.host-card",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "> .host-card-media.contributor-frame-preview-parity-media",
             styles,
             StringComparison.Ordinal);
         Assert.Contains(

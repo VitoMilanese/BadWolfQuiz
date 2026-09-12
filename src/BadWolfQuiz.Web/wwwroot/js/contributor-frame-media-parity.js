@@ -23,8 +23,10 @@
         ".host-card-media iframe:not([hidden])"
     ];
 
-    const hostPlayerCardMediaSelector =
-        ".game-scoreboard .scoreboard-player:not(.host-card) > .player-card-avatar";
+    const responsiveGameplayCardMediaSelector = [
+        ".game-scoreboard .scoreboard-player:not(.host-card) > .player-card-avatar",
+        ".board-host-card-list > .scoreboard-player.host-card > .host-card-media"
+    ].join(", ");
     const paritySizeProperty = "--contributor-frame-preview-parity-size";
 
     const findMedia = owner => {
@@ -44,7 +46,7 @@
         media.style.removeProperty(paritySizeProperty);
     };
 
-    const measureResponsiveHostPlayerCardSize = media => {
+    const measureResponsiveGameplayCardSize = media => {
         const previousSize = media.style.getPropertyValue(paritySizeProperty);
 
         // The parity size is normally a fixed pixel value. Temporarily let the
@@ -117,9 +119,10 @@
                 return;
             }
 
-            const isHostPlayerCardMedia = media.matches(hostPlayerCardMediaSelector);
-            const renderedSize = isHostPlayerCardMedia
-                ? measureResponsiveHostPlayerCardSize(media)
+            const isResponsiveGameplayCardMedia = media.matches(
+                responsiveGameplayCardMediaSelector);
+            const renderedSize = isResponsiveGameplayCardMedia
+                ? measureResponsiveGameplayCardSize(media)
                 : Math.min(
                     overlay.offsetWidth || 0,
                     overlay.offsetHeight || 0
@@ -137,7 +140,7 @@
                 `${scaledInset}px`
             );
 
-            if (isHostPlayerCardMedia) {
+            if (isResponsiveGameplayCardMedia) {
                 media.style.setProperty(
                     paritySizeProperty,
                     `${renderedSize}px`
