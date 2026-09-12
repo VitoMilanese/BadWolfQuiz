@@ -74,8 +74,8 @@ public sealed class AchievementUnlockNotificationRegressionTests
         Assert.Contains("/Admin/Games/RoundIntro", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/Admin/Games/RunningRoundIntro", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/Admin/Games/FinalQuestionTransition", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("achievement-unlock-notifications.css?v=3", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("achievement-unlock-notifications.js?v=3", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("achievement-unlock-notifications.css?v=4", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("achievement-unlock-notifications.js?v=4", tagHelper, StringComparison.Ordinal);
         Assert.Contains(
             "@addTagHelper BadWolfQuiz.Web.TagHelpers.AchievementUnlockNotificationAssetsTagHelper, BadWolfQuiz.Web",
             imports,
@@ -93,8 +93,8 @@ public sealed class AchievementUnlockNotificationRegressionTests
         Assert.Contains("document.body.appendChild(burst)", script, StringComparison.Ordinal);
         Assert.Contains("syncHostBurstToCard", script, StringComparison.Ordinal);
         Assert.Contains("BadWolfAchievementUnlockNotifications", script, StringComparison.Ordinal);
-        Assert.Contains("await wait(7200)", script, StringComparison.Ordinal);
-        Assert.Contains("await wait(2400)", script, StringComparison.Ordinal);
+        Assert.Contains("await wait(5700)", script, StringComparison.Ordinal);
+        Assert.Contains("await wait(900)", script, StringComparison.Ordinal);
 
         Assert.Contains(".achievement-unlock-player-card", styles, StringComparison.Ordinal);
         Assert.Contains(".achievement-unlock-host-burst", styles, StringComparison.Ordinal);

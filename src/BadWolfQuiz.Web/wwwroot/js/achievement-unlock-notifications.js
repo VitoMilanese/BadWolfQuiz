@@ -144,7 +144,7 @@
 
                     const stack = ensurePlayerStack();
                     stack.replaceChildren(card);
-                    await wait(7200);
+                    await wait(5700);
                     card.classList.add("is-leaving");
                     await wait(520);
                     card.remove();
@@ -218,7 +218,7 @@
                     };
                     window.requestAnimationFrame(sync);
 
-                    await wait(2400);
+                    await wait(900);
                     burst.classList.add("is-leaving");
                     await wait(420);
                     burst.remove();
