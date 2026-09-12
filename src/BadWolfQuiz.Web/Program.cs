@@ -213,6 +213,7 @@ builder.Services.AddSingleton<DeferredGameMediaStore>();
 builder.Services.AddSingleton<ActiveGameAvailability>();
 builder.Services.AddSingleton<CrashLog>();
 builder.Services.AddHostedService<ActiveGamePersistenceService>();
+builder.Services.AddHostedService<AchievementUnlockNotificationBackgroundService>();
 builder.Services.AddSingleton<GameSettingsStore>();
 builder.Services.AddSingleton<AvatarCatalog>();
 builder.Services.AddSingleton(provider =>

@@ -177,6 +177,52 @@ public static partial class PlayerAchievementRuntimeState
         }
     }
 
+    public static bool TryMarkAchievementUnlockNotified(
+        GameSessionRegistration game,
+        GamePlayerId playerId,
+        string achievementCode)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        ArgumentException.ThrowIfNullOrWhiteSpace(achievementCode);
+
+        var state = States.GetOrCreateValue(game);
+        bool changed;
+        lock (state)
+        {
+            changed = state.NotifiedUnlocks.Add(new PendingAchievementSnapshot(
+                playerId,
+                achievementCode));
+        }
+
+        if (changed)
+        {
+            game.MarkPersistenceChanged();
+        }
+
+        return changed;
+    }
+
+    public static IReadOnlyList<string> GetNotifiedAchievementCodes(
+        GameSessionRegistration game,
+        GamePlayerId playerId)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        if (!States.TryGetValue(game, out var state))
+        {
+            return [];
+        }
+
+        lock (state)
+        {
+            return state.NotifiedUnlocks
+                .Where(item => item.PlayerId == playerId)
+                .Select(item => item.AchievementCode)
+                .Distinct(StringComparer.Ordinal)
+                .OrderBy(code => code, StringComparer.Ordinal)
+                .ToArray();
+        }
+    }
+
     private static bool RecordCloseBuzzerAchievementsLocked(
         RuntimeState state,
         BuzzerRaceSnapshot race)
@@ -231,6 +277,7 @@ public static partial class PlayerAchievementRuntimeState
     private static void ResetExpansionLocked(RuntimeState state)
     {
         state.PendingUnlocks.Clear();
+        state.NotifiedUnlocks.Clear();
         state.KickedPlayerIds.Clear();
         state.FirstRoundParticipantIds.Clear();
         state.DisconnectedBeforeThirdRoundPlayerIds.Clear();
@@ -242,6 +289,10 @@ public static partial class PlayerAchievementRuntimeState
         PlayerAchievementRuntimeSnapshot snapshot) => snapshot with
     {
         PendingUnlocks = state.PendingUnlocks
+            .OrderBy(item => item.PlayerId.Value)
+            .ThenBy(item => item.AchievementCode, StringComparer.Ordinal)
+            .ToArray(),
+        NotifiedUnlocks = state.NotifiedUnlocks
             .OrderBy(item => item.PlayerId.Value)
             .ThenBy(item => item.AchievementCode, StringComparer.Ordinal)
             .ToArray(),
@@ -266,6 +317,15 @@ public static partial class PlayerAchievementRuntimeState
                 !string.IsNullOrWhiteSpace(pending.AchievementCode))
             {
                 state.PendingUnlocks.Add(pending);
+            }
+        }
+
+        foreach (var notified in snapshot.NotifiedUnlocks ?? [])
+        {
+            if (validPlayerIds.Contains(notified.PlayerId) &&
+                !string.IsNullOrWhiteSpace(notified.AchievementCode))
+            {
+                state.NotifiedUnlocks.Add(notified);
             }
         }
 
@@ -298,6 +358,7 @@ public static partial class PlayerAchievementRuntimeState
     private sealed partial class RuntimeState
     {
         public HashSet<PendingAchievementSnapshot> PendingUnlocks { get; } = [];
+        public HashSet<PendingAchievementSnapshot> NotifiedUnlocks { get; } = [];
         public HashSet<GamePlayerId> KickedPlayerIds { get; } = [];
         public HashSet<GamePlayerId> FirstRoundParticipantIds { get; } = [];
         public HashSet<GamePlayerId> DisconnectedBeforeThirdRoundPlayerIds { get; } = [];
@@ -308,6 +369,7 @@ public static partial class PlayerAchievementRuntimeState
 public sealed partial record PlayerAchievementRuntimeSnapshot
 {
     public IReadOnlyList<PendingAchievementSnapshot>? PendingUnlocks { get; init; }
+    public IReadOnlyList<PendingAchievementSnapshot>? NotifiedUnlocks { get; init; }
     public IReadOnlyList<GamePlayerId>? KickedPlayerIds { get; init; }
     public IReadOnlyList<GamePlayerId>? FirstRoundParticipantIds { get; init; }
     public IReadOnlyList<GamePlayerId>? DisconnectedBeforeThirdRoundPlayerIds { get; init; }
