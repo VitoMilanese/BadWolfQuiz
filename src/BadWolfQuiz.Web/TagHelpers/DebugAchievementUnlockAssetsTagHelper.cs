@@ -43,7 +43,7 @@ public sealed class DebugAchievementUnlockAssetsTagHelper(
             <input type="hidden"
                    value="{{HtmlEncoder.Default.Encode(requestToken)}}"
                    data-debug-achievement-antiforgery />
-            <script src="/js/debug-achievement-unlock.js?v=1" defer></script>
+            <script src="/js/debug-achievement-unlock.js?v=2" defer></script>
             """);
     }
 }
