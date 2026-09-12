@@ -3,6 +3,9 @@
 @inject IStringLocalizer<AchievementResource> AchievementLocalizer
 @{
     ViewData["Title"] = AchievementLocalizer["Achievements_Title"];
+    var resetLabels = AchievementResetText.Current;
+    var secretTitle = AchievementLocalizer["Achievements_SecretTitle"].Value;
+    var secretDescription = AchievementLocalizer["Achievements_SecretDescription"].Value;
     var orderedAchievements = Model.Achievements
         .OrderBy(item => item.IsUnlocked ? 0 : item.IsSecret ? 2 : 1)
         .ToArray();
@@ -64,7 +67,7 @@
                             0,
                             100);
 
-                    <article class="@cardClasses">
+                    <article class="@cardClasses" data-achievement-code="@achievement.Code">
                         <div class="player-achievement-card-top">
                             @if (lockedSecret)
                             {
@@ -102,12 +105,12 @@
 
                         <strong>
                             @(lockedSecret
-                                ? AchievementLocalizer["Achievements_SecretTitle"]
+                                ? secretTitle
                                 : AchievementLocalizer[$"{achievement.Code}_Name"])
                         </strong>
                         <p>
                             @(lockedSecret
-                                ? AchievementLocalizer["Achievements_SecretDescription"]
+                                ? secretDescription
                                 : AchievementLocalizer[$"{achievement.Code}_Description"])
                         </p>
 
@@ -126,6 +129,45 @@
     </main>
 </div>
 
+<dialog class="app-dialog achievement-reset-dialog"
+        data-achievement-reset-dialog
+        data-action-label="@resetLabels.Action"
+        data-confirm-template="@resetLabels.MessageTemplate"
+        data-error-label="@resetLabels.Error"
+        data-secret-title="@secretTitle"
+        data-secret-description="@secretDescription"
+        aria-labelledby="achievement-reset-title">
+    <form method="post"
+          asp-page-handler="ResetAchievement"
+          class="dialog-card dialog-card-danger"
+          data-achievement-reset-form>
+        <input type="hidden" name="achievementCode" />
+
+        <div class="dialog-heading">
+            <h2 id="achievement-reset-title">@resetLabels.Title</h2>
+            <button type="button"
+                    class="dialog-close"
+                    data-achievement-reset-cancel
+                    aria-label="@resetLabels.Cancel">×</button>
+        </div>
+
+        <p class="achievement-reset-dialog-message" data-achievement-reset-message></p>
+        <div class="message message-error" data-achievement-reset-error hidden></div>
+
+        <div class="dialog-actions">
+            <button type="button"
+                    class="button button-secondary"
+                    data-achievement-reset-cancel>
+                @resetLabels.Cancel
+            </button>
+            <button type="submit" class="button button-danger">
+                @resetLabels.Confirm
+            </button>
+        </div>
+    </form>
+</dialog>
+
 @section Scripts {
     <script src="~/js/achievement-image-trim.js" asp-append-version="true"></script>
+    <script src="~/js/achievement-reset.js" asp-append-version="true"></script>
 }

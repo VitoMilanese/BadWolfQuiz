@@ -56,6 +56,12 @@ public sealed class DebugRandomAchievementModel(
         await using var db = await dbFactory.CreateDbContextAsync(HttpContext.RequestAborted);
         var achievements = new PlayerAchievementService(db);
         var accountId = PlayerAchievementRuntimeState.GetPlayerAccountId(game, player.Id);
+        var storedGameSessionId = await db.GameSessions
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(session => session.PublicCode == game.PublicCode)
+            .Select(session => (int?)session.Id)
+            .SingleOrDefaultAsync(HttpContext.RequestAborted);
         var persisted = await achievements.LoadPersistedUnlocksAsync(
             accountId,
             game.HostId,
@@ -80,7 +86,7 @@ public sealed class DebugRandomAchievementModel(
                 game.HostId,
                 player.Name,
                 definition.Code,
-                sourceGameSessionId: null,
+                sourceGameSessionId: storedGameSessionId,
                 cancellationToken: HttpContext.RequestAborted);
             if (!unlocked)
             {

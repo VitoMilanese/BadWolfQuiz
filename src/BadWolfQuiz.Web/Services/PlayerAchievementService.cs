@@ -337,7 +337,11 @@ public sealed class PlayerAchievementService(QuizDbContext db)
         var unlocked = await QueryForIdentity(identity)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
-        return BuildProgress(history, unlocked, currentGameSessionId);
+        var resetCodes = (await new PlayerAchievementResetService(db)
+                .LoadMarkersAsync(identity, cancellationToken))
+            .Keys
+            .ToHashSet(StringComparer.Ordinal);
+        return BuildProgress(history, unlocked, currentGameSessionId, resetCodes);
     }
 
     /// <summary>
@@ -502,6 +506,33 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             return false;
         }
 
+        var resetService = new PlayerAchievementResetService(db);
+        var resetMarker = await resetService.FindMarkerAsync(
+            identity,
+            achievementCode,
+            cancellationToken);
+        if (resetMarker?.SourceGameSessionId is int resetGameSessionId &&
+            !sourceGameSessionId.HasValue)
+        {
+            var resetGameStillOpen = await db.GameSessions
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .AnyAsync(
+                    session =>
+                        session.Id == resetGameSessionId &&
+                        session.Status != GameSessionStatus.Finished,
+                    cancellationToken);
+            if (resetGameStillOpen)
+            {
+                return false;
+            }
+        }
+
+        if (resetMarker is not null)
+        {
+            db.PlayerAchievements.Remove(resetMarker);
+        }
+
         AddUnlock(identity, achievementCode, sourceGameSessionId);
         await db.SaveChangesAsync(cancellationToken);
         return true;
@@ -527,12 +558,32 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             existing.Add(tracked.AchievementCode);
         }
 
+        var resetService = new PlayerAchievementResetService(db);
+        var resetMarkers = await resetService.LoadMarkersAsync(identity, cancellationToken);
         foreach (var definition in Catalog)
         {
-            if (existing.Contains(definition.Code) || !IsSatisfied(definition, history))
+            if (existing.Contains(definition.Code))
             {
                 continue;
             }
+
+            if (resetMarkers.ContainsKey(definition.Code))
+            {
+                if (!sourceGameSessionId.HasValue || !IsSatisfied(definition, history))
+                {
+                    continue;
+                }
+
+                await resetService.RemoveMarkerAsync(
+                    identity,
+                    definition.Code,
+                    cancellationToken);
+            }
+            else if (!IsSatisfied(definition, history))
+            {
+                continue;
+            }
+
             AddUnlock(identity, definition.Code, sourceGameSessionId);
             existing.Add(definition.Code);
         }
@@ -550,7 +601,9 @@ public sealed class PlayerAchievementService(QuizDbContext db)
                 .Any(item => item.AchievementCode == achievementCode && MatchesIdentity(item, identity)) ||
             await QueryForIdentity(identity)
                 .AsNoTracking()
-                .AnyAsync(item => item.AchievementCode == achievementCode, cancellationToken))
+                .AnyAsync(item => item.AchievementCode == achievementCode, cancellationToken) ||
+            await new PlayerAchievementResetService(db)
+                .FindMarkerAsync(identity, achievementCode, cancellationToken) is not null)
         {
             return;
         }
@@ -911,9 +964,11 @@ public sealed class PlayerAchievementService(QuizDbContext db)
     public static IReadOnlyList<PlayerAchievementProgress> BuildProgress(
         PlayerAchievementHistory history,
         IReadOnlyCollection<PlayerAchievement> unlocked,
-        int? currentGameSessionId = null)
+        int? currentGameSessionId = null,
+        IReadOnlySet<string>? resetCodes = null)
     {
         var unlockedByCode = unlocked
+            .Where(item => !item.AchievementCode.StartsWith(PlayerAchievementResetService.MarkerPrefix))
             .GroupBy(item => item.AchievementCode, StringComparer.Ordinal)
             .ToDictionary(
                 group => group.Key,
@@ -923,7 +978,9 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             .Select((definition, index) =>
             {
                 var metricValue = GetMetricValue(definition, history);
-                var isUnlocked = unlockedByCode.TryGetValue(definition.Code, out var record);
+                var isReset = resetCodes?.Contains(definition.Code) == true;
+                var hasUnlockRecord = unlockedByCode.TryGetValue(definition.Code, out var record);
+                var isUnlocked = !isReset && hasUnlockRecord;
                 return new
                 {
                     Index = index,
@@ -933,7 +990,7 @@ public sealed class PlayerAchievementService(QuizDbContext db)
                         definition.IsSecret,
                         isUnlocked,
                         isUnlocked && currentGameSessionId.HasValue && record!.SourceGameSessionId == currentGameSessionId,
-                        isUnlocked ? definition.Target : Math.Min(metricValue, definition.Target),
+                        isReset ? 0 : isUnlocked ? definition.Target : Math.Min(metricValue, definition.Target),
                         definition.Target)
                 };
             })

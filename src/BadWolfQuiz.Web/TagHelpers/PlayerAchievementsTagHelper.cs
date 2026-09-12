@@ -5,6 +5,7 @@ using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Localization;
 using BadWolfQuiz.Web.Services;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -31,9 +32,10 @@ public sealed class PlayerAchievementAssetsTagHelper : TagHelper
         }
 
         output.PostContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=11\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=12\" />" +
             "<script defer src=\"/js/achievement-image-trim.js?v=1\"></script>" +
-            "<script defer src=\"/js/player-achievements.js?v=1\"></script>");
+            "<script defer src=\"/js/player-achievements.js?v=1\"></script>" +
+            "<script defer src=\"/js/achievement-reset.js?v=1\"></script>");
     }
 }
 
@@ -42,7 +44,8 @@ public sealed class PlayerAchievementsTagHelper(
     QuizDbContext db,
     GameSessionRegistry sessionRegistry,
     IStringLocalizer<AchievementResource> localizer,
-    IOptions<FooterOptions> footerOptions) : TagHelper
+    IOptions<FooterOptions> footerOptions,
+    IAntiforgery antiforgery) : TagHelper
 {
     [ViewContext]
     [HtmlAttributeNotBound]
@@ -62,6 +65,7 @@ public sealed class PlayerAchievementsTagHelper(
 
         var code = output.Attributes["data-game-code"]?.Value?.ToString();
         var playerIdText = output.Attributes["data-player-id"]?.Value?.ToString();
+        var accessToken = output.Attributes["data-access-token"]?.Value?.ToString();
         if (string.IsNullOrWhiteSpace(code) ||
             !Guid.TryParse(playerIdText, out var playerId))
         {
@@ -121,13 +125,26 @@ public sealed class PlayerAchievementsTagHelper(
             return;
         }
 
+        var antiforgeryTokens = antiforgery.GetAndStoreTokens(ViewContext.HttpContext);
         output.Attributes.SetAttribute(
             "data-player-achievements-label",
             localizer["Achievements_PlayerLabel"].Value);
-        output.PostContent.AppendHtml(BuildMarkup(achievements));
+        output.PostContent.AppendHtml(BuildMarkup(
+            achievements,
+            game.PublicCode,
+            player.Id.Value,
+            accessToken,
+            antiforgeryTokens.FormFieldName,
+            antiforgeryTokens.RequestToken ?? string.Empty));
     }
 
-    private string BuildMarkup(IReadOnlyList<PlayerAchievementProgress> achievements)
+    private string BuildMarkup(
+        IReadOnlyList<PlayerAchievementProgress> achievements,
+        string gameCode,
+        Guid playerId,
+        string? accessToken,
+        string antiforgeryFieldName,
+        string antiforgeryToken)
     {
         var html = new StringBuilder();
         var unlockedCount = achievements.Count(item => item.IsUnlocked);
@@ -188,6 +205,8 @@ public sealed class PlayerAchievementsTagHelper(
 
             html.Append("<article class=\"");
             html.Append(cardClasses);
+            html.Append("\" data-achievement-code=\"");
+            html.Append(Encode(achievement.Code));
             html.Append("\">");
             html.Append("<div class=\"player-achievement-card-top\">");
             if (lockedSecret)
@@ -248,7 +267,65 @@ public sealed class PlayerAchievementsTagHelper(
         }
 
         html.Append("</div></section></div></div></dialog>");
+        AppendResetDialog(
+            html,
+            gameCode,
+            playerId,
+            accessToken,
+            antiforgeryFieldName,
+            antiforgeryToken);
         return html.ToString();
+    }
+
+    private void AppendResetDialog(
+        StringBuilder html,
+        string gameCode,
+        Guid playerId,
+        string? accessToken,
+        string antiforgeryFieldName,
+        string antiforgeryToken)
+    {
+        var labels = AchievementResetText.Current;
+        var action = $"{ViewContext.HttpContext.Request.PathBase}/Player/ResetAchievement";
+
+        html.Append("<dialog class=\"app-dialog achievement-reset-dialog\" data-achievement-reset-dialog data-action-label=\"");
+        html.Append(Encode(labels.Action));
+        html.Append("\" data-confirm-template=\"");
+        html.Append(Encode(labels.MessageTemplate));
+        html.Append("\" data-error-label=\"");
+        html.Append(Encode(labels.Error));
+        html.Append("\" data-secret-title=\"");
+        html.Append(Encode(localizer["Achievements_SecretTitle"].Value));
+        html.Append("\" data-secret-description=\"");
+        html.Append(Encode(localizer["Achievements_SecretDescription"].Value));
+        html.Append("\" aria-labelledby=\"player-achievement-reset-title\">");
+        html.Append("<form method=\"post\" action=\"");
+        html.Append(Encode(action));
+        html.Append("\" class=\"dialog-card dialog-card-danger\" data-achievement-reset-form>");
+        html.Append("<input type=\"hidden\" name=\"");
+        html.Append(Encode(antiforgeryFieldName));
+        html.Append("\" value=\"");
+        html.Append(Encode(antiforgeryToken));
+        html.Append("\" />");
+        html.Append("<input type=\"hidden\" name=\"code\" value=\"");
+        html.Append(Encode(gameCode));
+        html.Append("\" /><input type=\"hidden\" name=\"playerId\" value=\"");
+        html.Append(playerId.ToString("D"));
+        html.Append("\" /><input type=\"hidden\" name=\"accessToken\" value=\"");
+        html.Append(Encode(accessToken ?? string.Empty));
+        html.Append("\" /><input type=\"hidden\" name=\"achievementCode\" />");
+        html.Append("<div class=\"dialog-heading\"><h2 id=\"player-achievement-reset-title\">");
+        html.Append(Encode(labels.Title));
+        html.Append("</h2><button type=\"button\" class=\"dialog-close\" data-achievement-reset-cancel aria-label=\"");
+        html.Append(Encode(labels.Cancel));
+        html.Append("\">×</button></div>");
+        html.Append("<p class=\"achievement-reset-dialog-message\" data-achievement-reset-message></p>");
+        html.Append("<div class=\"message message-error\" data-achievement-reset-error hidden></div>");
+        html.Append("<div class=\"dialog-actions\"><button type=\"button\" class=\"button button-secondary\" data-achievement-reset-cancel>");
+        html.Append(Encode(labels.Cancel));
+        html.Append("</button><button type=\"submit\" class=\"button button-danger\">");
+        html.Append(Encode(labels.Confirm));
+        html.Append("</button></div></form></dialog>");
     }
 
     private static int GetAchievementSortGroup(PlayerAchievementProgress achievement) =>

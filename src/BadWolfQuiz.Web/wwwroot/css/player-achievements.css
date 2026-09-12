@@ -340,6 +340,95 @@
     text-align: right;
 }
 
+.player-achievement-reset-button {
+    position: absolute;
+    top: 43px;
+    right: 10px;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid #ff6b6b;
+    border-radius: 8px;
+    color: #fff;
+    background: #c62828;
+    box-shadow: 0 7px 18px rgba(198, 40, 40, 0.34);
+    cursor: pointer;
+    transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease;
+}
+
+.player-achievement-reset-button:hover,
+.player-achievement-reset-button:focus-visible {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+}
+
+.player-achievement-reset-button:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.player-achievement-reset-button svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.self-achievements-page .player-achievement-reset-button {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+}
+
+.self-achievements-page .player-achievement-card.is-unlocked:hover .player-achievement-reset-button,
+.self-achievements-page .player-achievement-card.is-unlocked:focus-within .player-achievement-reset-button,
+.self-achievements-page .player-achievement-reset-button:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+}
+
+.achievement-reset-dialog .dialog-card {
+    width: min(520px, calc(100vw - 32px));
+}
+
+.achievement-reset-dialog .dialog-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.achievement-reset-dialog .button-danger {
+    background: #c62828;
+    border-color: #ff6b6b;
+    color: #fff;
+}
+
+.achievement-reset-dialog-message {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.55;
+}
+
+.achievement-reset-dialog .message-error {
+    margin: 14px 0 0;
+}
+
+@media (hover: none) {
+    .self-achievements-page .player-achievement-reset-button {
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+    }
+}
+
 @media (max-width: 600px) {
     .player-achievements-dialog {
         position: fixed;
