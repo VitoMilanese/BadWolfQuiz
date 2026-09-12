@@ -26,179 +26,125 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          from textwrap import dedent
 
           editor_path = Path('src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Editor.cshtml.cs')
           editor = editor_path.read_text(encoding='utf-8')
 
-          old_query = '''        var quiz = await db.Quizzes
-              .Include(x => x.Rounds)
-                  .ThenInclude(x => x.Rows)
-              .Include(x => x.Rounds)
-                  .ThenInclude(x => x.Categories)
-                      .ThenInclude(x => x.DescriptionBlocks)
-              .SingleOrDefaultAsync(x => x.Id == AddRound.QuizId);
-
-          if (quiz is null)
-          {
-              return NotFound();
-          }
-
-          var title = AddRound.Title?.Trim();
-
-          if (string.IsNullOrWhiteSpace(title))
-          {
-              title = string.Format(
-                  localizer["Round_DefaultTitle"].Value,
-                  quiz.Rounds.Count + 1);
-          }
-
-          var nextSortOrder = quiz.Rounds.Count == 0
-              ? 0
-              : quiz.Rounds.Max(x => x.SortOrder) + 1;
-
-          var templateRound = quiz.Rounds
-              .OrderBy(x => x.SortOrder)
-              .LastOrDefault();
-          '''
-
-          new_query = '''        var quiz = await db.Quizzes
-              .SingleOrDefaultAsync(x => x.Id == AddRound.QuizId);
-
-          if (quiz is null)
-          {
-              return NotFound();
-          }
-
-          var roundCount = await db.QuizRounds
-              .AsNoTracking()
-              .CountAsync(x => x.QuizId == quiz.Id);
-
-          // Only the latest round is needed as a template. Loading every round
-          // together with rows and category description BLOBs caused a large
-          // cartesian result for media-heavy quizzes and made adding a round
-          // take tens of seconds.
-          var templateRound = await db.QuizRounds
-              .AsNoTracking()
-              .Where(x => x.QuizId == quiz.Id)
-              .OrderByDescending(x => x.SortOrder)
-              .ThenByDescending(x => x.Id)
-              .Include(x => x.Rows)
-              .Include(x => x.Categories)
-                  .ThenInclude(x => x.DescriptionBlocks)
-              .AsSplitQuery()
-              .FirstOrDefaultAsync();
-
-          var title = AddRound.Title?.Trim();
-
-          if (string.IsNullOrWhiteSpace(title))
-          {
-              title = string.Format(
-                  localizer["Round_DefaultTitle"].Value,
-                  roundCount + 1);
-          }
-
-          var nextSortOrder = templateRound is null
-              ? 0
-              : templateRound.SortOrder + 1;
-          '''
-
-          if editor.count(old_query) != 1:
-              raise SystemExit('Expected AddRound eager-loading block was not found exactly once.')
-          editor = editor.replace(old_query, new_query)
+          method_start = editor.index('    public async Task<IActionResult> OnPostAddRoundAsync()')
+          round_marker = editor.index('        var round = new QuizRound', method_start)
+          new_prefix = (
+              '    public async Task<IActionResult> OnPostAddRoundAsync()\n'
+              '    {\n'
+              '        var quiz = await db.Quizzes\n'
+              '            .SingleOrDefaultAsync(x => x.Id == AddRound.QuizId);\n'
+              '\n'
+              '        if (quiz is null)\n'
+              '        {\n'
+              '            return NotFound();\n'
+              '        }\n'
+              '\n'
+              '        var roundCount = await db.QuizRounds\n'
+              '            .AsNoTracking()\n'
+              '            .CountAsync(x => x.QuizId == quiz.Id);\n'
+              '\n'
+              '        // Only the latest round is needed as a template. Loading every round\n'
+              '        // together with rows and category description BLOBs caused a large\n'
+              '        // cartesian result for media-heavy quizzes and made adding a round\n'
+              '        // take tens of seconds.\n'
+              '        var templateRound = await db.QuizRounds\n'
+              '            .AsNoTracking()\n'
+              '            .Where(x => x.QuizId == quiz.Id)\n'
+              '            .OrderByDescending(x => x.SortOrder)\n'
+              '            .ThenByDescending(x => x.Id)\n'
+              '            .Include(x => x.Rows)\n'
+              '            .Include(x => x.Categories)\n'
+              '                .ThenInclude(x => x.DescriptionBlocks)\n'
+              '            .AsSplitQuery()\n'
+              '            .FirstOrDefaultAsync();\n'
+              '\n'
+              '        var title = AddRound.Title?.Trim();\n'
+              '\n'
+              '        if (string.IsNullOrWhiteSpace(title))\n'
+              '        {\n'
+              '            title = string.Format(\n'
+              '                localizer["Round_DefaultTitle"].Value,\n'
+              '                roundCount + 1);\n'
+              '        }\n'
+              '\n'
+              '        var nextSortOrder = templateRound is null\n'
+              '            ? 0\n'
+              '            : templateRound.SortOrder + 1;\n'
+              '\n'
+          )
+          editor = editor[:method_start] + new_prefix + editor[round_marker:]
 
           old_round_number = '        var roundNumber = quiz.Rounds.Count + 1;'
-          new_round_number = '        var roundNumber = roundCount + 1;'
           if editor.count(old_round_number) != 1:
               raise SystemExit('Expected AddRound round-number expression was not found exactly once.')
-          editor = editor.replace(old_round_number, new_round_number)
+          editor = editor.replace(
+              old_round_number,
+              '        var roundNumber = roundCount + 1;')
 
           old_add = '        quiz.Rounds.Add(round);\n        quiz.UpdatedAtUtc = DateTime.UtcNow;'
-          new_add = '        db.QuizRounds.Add(round);\n        quiz.UpdatedAtUtc = DateTime.UtcNow;'
           if editor.count(old_add) != 1:
               raise SystemExit('Expected AddRound persistence block was not found exactly once.')
-          editor = editor.replace(old_add, new_add)
+          editor = editor.replace(
+              old_add,
+              '        db.QuizRounds.Add(round);\n        quiz.UpdatedAtUtc = DateTime.UtcNow;')
           editor_path.write_text(editor, encoding='utf-8')
 
           busy_path = Path('src/BadWolfQuiz.Web/wwwroot/js/busy-indicators.js')
           busy = busy_path.read_text(encoding='utf-8')
 
-          old_routes = '''    const routes = {
-              quizzes: "/admin/quizzes",
-              publicQuizzes: "/public-quizzes",'''
-          new_routes = '''    const routes = {
-              quizzes: "/admin/quizzes",
-              quizCreate: "/admin/quizzes/create",
-              publicQuizzes: "/public-quizzes",'''
-          if busy.count(old_routes) != 1:
-              raise SystemExit('Expected busy-indicator route block was not found exactly once.')
-          busy = busy.replace(old_routes, new_routes)
+          route_line = '        quizzes: "/admin/quizzes",\n'
+          if busy.count(route_line) != 1:
+              raise SystemExit('Expected quizzes route was not found exactly once.')
+          busy = busy.replace(
+              route_line,
+              route_line + '        quizCreate: "/admin/quizzes/create",\n')
 
-          old_import_lock = '''    const lockQuizImportControl = form => {
-              if (handlerName(form) !== "import") {
-                  return;
-              }
+          rename_marker = '    const renameTitleInput = (form, handler) => {'
+          rename_index = busy.index(rename_marker)
+          create_lock = (
+              '    const lockQuizCreateSubmitter = submitter => {\n'
+              '        if (normalisePath(window.location.pathname) !== routes.quizCreate ||\n'
+              '            !(submitter instanceof HTMLButtonElement ||\n'
+              '              submitter instanceof HTMLInputElement)) {\n'
+              '            return;\n'
+              '        }\n'
+              '\n'
+              '        lockedQuizControls = [{\n'
+              '            button: submitter,\n'
+              '            wasDisabled: submitter.disabled\n'
+              '        }];\n'
+              '        submitter.disabled = true;\n'
+              '    };\n'
+              '\n'
+          )
+          busy = busy[:rename_index] + create_lock + busy[rename_index:]
 
-              const button = form.querySelector("[data-quiz-import-select]");
-              if (!(button instanceof HTMLButtonElement)) {
-                  return;
-              }
+          track_start = busy.index('    const shouldTrackForm = (form, submitter) => {')
+          index_marker = '        if (isQuizzesIndex(currentPath)) {'
+          index_pos = busy.index(index_marker, track_start)
+          create_track = (
+              '        if (currentPath === routes.quizCreate) {\n'
+              '            return form.method.toLowerCase() === "post";\n'
+              '        }\n'
+              '\n'
+          )
+          busy = busy[:index_pos] + create_track + busy[index_pos:]
 
-              lockedQuizControls = [{ button, wasDisabled: button.disabled }];
-              button.disabled = true;
-          };
-          '''
-          new_import_lock = old_import_lock + '''
-          const lockQuizCreateSubmitter = submitter => {
-              if (normalisePath(window.location.pathname) !== routes.quizCreate ||
-                  !(submitter instanceof HTMLButtonElement ||
-                    submitter instanceof HTMLInputElement)) {
-                  return;
-              }
-
-              lockedQuizControls = [{
-                  button: submitter,
-                  wasDisabled: submitter.disabled
-              }];
-              submitter.disabled = true;
-          };
-          '''
-          if busy.count(old_import_lock) != 1:
-              raise SystemExit('Expected quiz-import lock block was not found exactly once.')
-          busy = busy.replace(old_import_lock, new_import_lock)
-
-          old_track = '''        if (isQuizzesIndex(currentPath)) {
-              return handler === "creategame" ||
-                  handler === "continuegame" ||
-                  handler === "import";
-          }
-          '''
-          new_track = '''        if (currentPath === routes.quizCreate) {
-              return form.method.toLowerCase() === "post";
-          }
-
-          if (isQuizzesIndex(currentPath)) {
-              return handler === "creategame" ||
-                  handler === "continuegame" ||
-                  handler === "import";
-          }
-          '''
-          if busy.count(old_track) != 1:
-              raise SystemExit('Expected form tracking block was not found exactly once.')
-          busy = busy.replace(old_track, new_track)
-
-          old_submit_locks = '''        lockAddRoundDialogButtons(form);
-          lockQuizImportControl(form);
-          show();'''
-          new_submit_locks = '''        lockAddRoundDialogButtons(form);
-          lockQuizImportControl(form);
-          lockQuizCreateSubmitter(submitter);
-          show();'''
-          if busy.count(old_submit_locks) != 1:
+          submit_locks = '        lockQuizImportControl(form);\n        show();'
+          if busy.count(submit_locks) != 1:
               raise SystemExit('Expected submit lock sequence was not found exactly once.')
-          busy = busy.replace(old_submit_locks, new_submit_locks)
+          busy = busy.replace(
+              submit_locks,
+              '        lockQuizImportControl(form);\n        lockQuizCreateSubmitter(submitter);\n        show();')
           busy_path.write_text(busy, encoding='utf-8')
 
-          performance_test = '''namespace BadWolfQuiz.Web.Tests;
+          performance_test = dedent('''\
+          namespace BadWolfQuiz.Web.Tests;
 
           public sealed class AddRoundPerformanceRegressionTests
           {
@@ -252,12 +198,13 @@ jobs:
                   throw new DirectoryNotFoundException("Repository root was not found.");
               }
           }
-          '''
+          ''')
           Path('tests/BadWolfQuiz.Web.Tests/AddRoundPerformanceRegressionTests.cs').write_text(
-              performance_test.replace('\n          ', '\n').lstrip(),
+              performance_test,
               encoding='utf-8')
 
-          duplicate_test = '''namespace BadWolfQuiz.Web.Tests;
+          duplicate_test = dedent('''\
+          namespace BadWolfQuiz.Web.Tests;
 
           public sealed class QuizCreateDoubleSubmitRegressionTests
           {
@@ -281,11 +228,11 @@ jobs:
                       "Quizzes",
                       "Create.cshtml"));
 
-                  Assert.Contains("quizCreate: \\\"/admin/quizzes/create\\\"", script, StringComparison.Ordinal);
+                  Assert.Contains("quizCreate: \\"/admin/quizzes/create\\"", script, StringComparison.Ordinal);
                   Assert.Contains("currentPath === routes.quizCreate", script, StringComparison.Ordinal);
                   Assert.Contains("lockQuizCreateSubmitter(submitter)", script, StringComparison.Ordinal);
                   Assert.Contains("submitter.disabled = true", script, StringComparison.Ordinal);
-                  Assert.Contains("form.dataset.busyLocked === \\\"true\\\"", script, StringComparison.Ordinal);
+                  Assert.Contains("form.dataset.busyLocked === \\"true\\"", script, StringComparison.Ordinal);
                   Assert.Contains("quiz-create-submit", page, StringComparison.Ordinal);
               }
 
@@ -306,9 +253,9 @@ jobs:
                   throw new DirectoryNotFoundException("Repository root was not found.");
               }
           }
-          '''
+          ''')
           Path('tests/BadWolfQuiz.Web.Tests/QuizCreateDoubleSubmitRegressionTests.cs').write_text(
-              duplicate_test.replace('\n          ', '\n').lstrip(),
+              duplicate_test,
               encoding='utf-8')
           PY
 
