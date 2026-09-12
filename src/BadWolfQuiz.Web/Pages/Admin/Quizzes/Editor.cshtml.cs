@@ -401,11 +401,6 @@ public sealed class EditorModel(
     public async Task<IActionResult> OnPostAddRoundAsync()
     {
         var quiz = await db.Quizzes
-            .Include(x => x.Rounds)
-                .ThenInclude(x => x.Rows)
-            .Include(x => x.Rounds)
-                .ThenInclude(x => x.Categories)
-                    .ThenInclude(x => x.DescriptionBlocks)
             .SingleOrDefaultAsync(x => x.Id == AddRound.QuizId);
 
         if (quiz is null)
@@ -413,22 +408,37 @@ public sealed class EditorModel(
             return NotFound();
         }
 
+        var roundCount = await db.QuizRounds
+            .AsNoTracking()
+            .CountAsync(x => x.QuizId == quiz.Id);
+
+        // Only the latest round is needed as a template. Loading every round
+        // together with rows and category description BLOBs caused a large
+        // cartesian result for media-heavy quizzes and made adding a round
+        // take tens of seconds.
+        var templateRound = await db.QuizRounds
+            .AsNoTracking()
+            .Where(x => x.QuizId == quiz.Id)
+            .OrderByDescending(x => x.SortOrder)
+            .ThenByDescending(x => x.Id)
+            .Include(x => x.Rows)
+            .Include(x => x.Categories)
+                .ThenInclude(x => x.DescriptionBlocks)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync();
+
         var title = AddRound.Title?.Trim();
 
         if (string.IsNullOrWhiteSpace(title))
         {
             title = string.Format(
                 localizer["Round_DefaultTitle"].Value,
-                quiz.Rounds.Count + 1);
+                roundCount + 1);
         }
 
-        var nextSortOrder = quiz.Rounds.Count == 0
+        var nextSortOrder = templateRound is null
             ? 0
-            : quiz.Rounds.Max(x => x.SortOrder) + 1;
-
-        var templateRound = quiz.Rounds
-            .OrderBy(x => x.SortOrder)
-            .LastOrDefault();
+            : templateRound.SortOrder + 1;
 
         var round = new QuizRound
         {
@@ -446,7 +456,7 @@ public sealed class EditorModel(
             templateRows?.Count ?? editorOptions.Value.MinimumQuestionCount,
             editorOptions.Value.MinimumQuestionCount,
             editorOptions.Value.MaximumQuestionCount);
-        var roundNumber = quiz.Rounds.Count + 1;
+        var roundNumber = roundCount + 1;
 
         for (var rowIndex = 1; rowIndex <= questionCount; rowIndex++)
         {
@@ -527,7 +537,7 @@ public sealed class EditorModel(
             round.Categories.Add(category);
         }
 
-        quiz.Rounds.Add(round);
+        db.QuizRounds.Add(round);
         quiz.UpdatedAtUtc = DateTime.UtcNow;
 
         await db.SaveChangesAsync();
