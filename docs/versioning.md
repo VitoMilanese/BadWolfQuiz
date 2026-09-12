@@ -96,6 +96,12 @@ Web `1.37.0` is a MINOR release that improves tag authoring across the regular Q
 
 Web `1.38.0` is a MINOR release that adds a dedicated personal **Achievements** page for signed-in users. The authenticated main menu now links to `/Achievements`, where the current account can inspect its account-wide achievement progress outside an active game. The page reuses the buzzer achievement dialog card presentation, PNG artwork, secret/locked states, progress bars, ordering, and alpha-margin trimming, while presenting them in the redesigned full-width portal layout with an unlocked/total summary. See [`docs/features/player-achievements.md`](features/player-achievements.md) for identity and presentation details.
 
+Web `1.39.0` is a MINOR release that introduces host-defined tag-based player achievements. Hosts can author custom achievements with titles, descriptions, PNG artwork, explicit correct-answer targets, and question tags. Progress is host-scoped and uses eligible persisted finished games, while signed-in unlocks are stored against the player's account and guest identities remain host/nickname scoped. See [`docs/features/host-custom-achievements.md`](features/host-custom-achievements.md) for the full behavior.
+
+Web `1.39.1` is a PATCH release that refines portal presentation across public, account, host, achievement, history, minigame, and legal pages. It compacts oversized hero sections, improves related-page visual consistency, replaces and refines the homepage wolf artwork, corrects decorative ring details, and removes duplicate My Questions actions without changing product workflows or persistence.
+
+Web `1.39.2` is a PATCH release that fixes two gameplay presentation regressions. Floating host cards no longer restore a stale enlarged size while being shrunk, and contributor-framed host media stays square and contained inside its decorative frame. Signed-in players also retain every host-defined achievement they already unlocked when playing with another host, while unrelated locked/in-progress achievements remain hidden, current-host progress remains visible, historical soft-deleted unlocks still resolve, and guest identities remain host-scoped. See [`docs/features/host-custom-achievements.md`](features/host-custom-achievements.md) for the custom-achievement visibility rules.
+
 ## BadWolfQuizLogDownloaderWpf
 
 `BadWolfQuizLogDownloaderWpf` maintains a separate version in its own project file. Its version is displayed in the application title bar and changes independently of the web application.
