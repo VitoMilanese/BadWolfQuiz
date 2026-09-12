@@ -1,0 +1,382 @@
+@import url("./portal-compact-heroes.css?v=1");
+
+/* Desktop-only compaction for the large portal heroes.
+ * Keep the existing responsive layouts untouched on smaller screens.
+ */
+@media (min-width: 1200px) {
+    body:has(.my-quizzes-page) .my-quizzes-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(210px, 0.34fr);
+        gap: clamp(28px, 4vw, 64px);
+        min-height: clamp(330px, 40dvh, 430px);
+        padding-top: clamp(30px, 3.5vw, 54px);
+        padding-bottom: clamp(24px, 2.8vw, 40px);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-heading h1 {
+        font-size: clamp(3.6rem, 6.6vw, 7.6rem);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-art {
+        min-height: 190px;
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-art::before {
+        width: min(18vw, 285px);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-word {
+        top: 13%;
+        right: 12%;
+        font-size: clamp(2.2rem, 3.8vw, 4rem);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-slash {
+        width: 9px;
+        height: min(20vw, 220px);
+        box-shadow: 7px 7px 0 color-mix(in srgb, var(--gold) 72%, transparent);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-art strong {
+        font-size: clamp(3.5rem, 5.8vw, 6rem);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero-art strong small {
+        margin-top: 12px;
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 0.34fr);
+        gap: clamp(28px, 4vw, 68px);
+        padding-top: clamp(30px, 3.5vw, 54px);
+        padding-bottom: clamp(22px, 2.6vw, 36px);
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-heading h1 {
+        font-size: clamp(3.7rem, 7vw, 8rem);
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-intro {
+        margin-top: 24px;
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-hero-art {
+        min-height: 175px;
+        padding: 18px 22px 14px;
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-hero-word {
+        top: 10px;
+        right: 20px;
+        font-size: clamp(2.5rem, 4.2vw, 4.8rem);
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-hero-slash {
+        top: 60px;
+        right: 4px;
+        width: 112px;
+        height: 9px;
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-hero-art strong {
+        font-size: clamp(1.9rem, 3.3vw, 3.7rem);
+    }
+
+    body:has(.join-entry-page) .join-entry-copy h1 {
+        font-size: clamp(3.5rem, 6.4vw, 7.4rem);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(190px, 0.3fr);
+        gap: clamp(28px, 4vw, 64px);
+        min-height: clamp(330px, 40dvh, 430px);
+        padding-top: clamp(30px, 3.5vw, 54px);
+        padding-bottom: clamp(24px, 2.8vw, 40px);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero h1 {
+        font-size: clamp(3.6rem, 6.5vw, 7.6rem);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter {
+        width: clamp(180px, 16vw, 220px);
+        min-height: 0;
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter::before,
+    body:has(.game-history-index-page) .game-history-hero-counter::after {
+        width: 7px;
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter::after {
+        right: calc(17% - 8px);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter > span,
+    body:has(.game-history-index-page) .game-history-hero-counter > small {
+        font-size: 0.56rem;
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter > strong {
+        margin: 8px 0 7px;
+        font-size: clamp(3.4rem, 5.4vw, 5.9rem);
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 0.3fr);
+        gap: clamp(28px, 4vw, 64px);
+        min-height: clamp(340px, 41dvh, 440px);
+        padding-top: clamp(30px, 3.5vw, 54px);
+        padding-bottom: 28px;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero h1 {
+        font-size: clamp(3.6rem, 6.5vw, 7.5rem);
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero-mark {
+        width: clamp(220px, 18vw, 280px);
+        min-height: 190px;
+        justify-self: end;
+        padding: 26px 24px 22px;
+        clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero-mark::before {
+        width: 8px;
+        box-shadow: -11px 0 0 color-mix(in srgb, var(--gold) 80%, transparent);
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero-label {
+        font-size: 0.58rem;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero-mark strong {
+        margin: 10px 0 8px;
+        font-size: clamp(3.6rem, 5.8vw, 6.2rem);
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero-mark small {
+        margin-top: 10px;
+        font-size: 0.56rem;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-signal {
+        gap: 5px;
+        height: 26px;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-signal i {
+        width: 5px;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-roster {
+        margin-top: 28px;
+    }
+}
+
+/* Follow-up desktop density refinements after visual review. */
+@media (min-width: 1200px) {
+    body:has(.host-settings-page) .host-settings-hero h1 {
+        font-size: clamp(2.4rem, 4.3vw, 4.9rem);
+    }
+
+    body:has(.minigame-editor-heading) .minigame-editor-heading h1 {
+        font-size: clamp(2.3rem, 4.3vw, 4.9rem);
+    }
+
+    body:has(.about-page) .about-page .portal-hero h1 {
+        font-size: clamp(2.3rem, 4.9vw, 5.4rem);
+    }
+
+    body:has(.self-achievements-page) .self-achievements-hero {
+        min-height: 0;
+        padding-top: clamp(14px, 1.5vw, 24px);
+        padding-bottom: clamp(11px, 1.25vw, 17px);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero {
+        min-height: 0;
+        padding-top: clamp(15px, 1.75vw, 27px);
+        padding-bottom: clamp(12px, 1.4vw, 20px);
+    }
+
+    body:has(.my-quizzes-page) .my-quizzes-hero {
+        min-height: 0;
+        padding-top: clamp(16px, 1.9vw, 30px);
+        padding-bottom: clamp(12px, 1.55vw, 22px);
+    }
+
+    body:has(.public-quizzes-page) .public-quizzes-hero {
+        min-height: 0;
+        padding-top: clamp(21px, 2.45vw, 38px);
+        padding-bottom: clamp(15px, 1.8vw, 25px);
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero {
+        min-height: 0;
+        padding-top: clamp(20px, 2.3vw, 35px);
+        padding-bottom: 18px;
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(190px, 0.30fr);
+        gap: clamp(28px, 4vw, 64px);
+        min-height: 0;
+        padding-top: clamp(38px, 4.5vw, 70px);
+        padding-bottom: clamp(31px, 3.8vw, 54px);
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-hero-art {
+        min-height: clamp(190px, 16.5vw, 260px);
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-orbit {
+        width: min(16.5vw, 260px);
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-hero-word {
+        font-size: clamp(1.8rem, 3.5vw, 3.6rem);
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-hero-slash {
+        width: 8px;
+        height: min(17vw, 190px);
+        box-shadow: 6px 6px 0 color-mix(in srgb, var(--gold) 72%, transparent);
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-hero-art strong {
+        font-size: clamp(2.75rem, 5vw, 5rem);
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-hero-art strong small {
+        margin-top: 10px;
+    }
+
+    body:has(.license-page) .license-page .portal-hero-copy {
+        max-width: none;
+    }
+
+    body:has(.license-page) .license-page .portal-hero h1 {
+        max-width: none;
+        white-space: nowrap;
+        text-wrap: nowrap;
+        overflow-wrap: normal;
+    }
+
+    body:has(.license-page) .license-page .license-hero-description {
+        max-width: none;
+    }
+}
+
+/* Final desktop alignment refinements after the second visual pass. */
+@media (min-width: 1200px) {
+    body:has(.about-page) .about-page .portal-hero {
+        padding-top: clamp(26px, 3vw, 48px);
+        padding-bottom: clamp(20px, 2.2vw, 34px);
+    }
+
+    body:has(.host-settings-page) .host-settings-hero {
+        min-height: 0;
+        padding-bottom: clamp(11px, 1.25vw, 18px);
+    }
+
+    body:has(.host-settings-page) .host-settings-hero-actions {
+        width: min(calc(100vw - clamp(28px, 5vw, 78px) - clamp(28px, 5vw, 78px)), 1604px);
+        justify-content: center;
+    }
+
+    body:has(.support-compose-page) .support-hero {
+        min-height: 0;
+        padding-bottom: clamp(11px, 1.25vw, 17px);
+    }
+
+    body:has(.support-compose-page) .support-hero-actions {
+        width: min(calc(100vw - clamp(26px, 5vw, 78px) - clamp(26px, 5vw, 78px)), 1604px);
+        justify-content: center;
+    }
+
+    body:has(.support-compose-page) .support-content {
+        padding-top: 9px;
+    }
+
+    body:has(.minigame-editor-heading) .minigame-editor-heading {
+        padding-top: clamp(14px, 1.5vw, 25px);
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(210px, 0.30fr);
+        gap: clamp(28px, 4vw, 64px);
+        min-height: 0;
+        padding-top: clamp(14px, 1.5vw, 24px);
+        padding-bottom: clamp(11px, 1.25vw, 17px);
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero h1 {
+        font-size: clamp(3.45rem, 6.2vw, 7.2rem);
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-description {
+        margin-top: 20px;
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero-mark {
+        width: clamp(210px, 18vw, 270px);
+        min-height: 185px;
+        justify-self: end;
+        padding: 24px 22px 20px;
+        clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero-mark::before {
+        width: 8px;
+        box-shadow: -11px 0 0 color-mix(in srgb, var(--gold) 80%, transparent);
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero-label {
+        font-size: 0.58rem;
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero-mark strong {
+        margin: 10px 0 12px;
+        font-size: clamp(3.6rem, 5.6vw, 6rem);
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-signal {
+        gap: 5px;
+        height: 7px;
+    }
+
+    body:has(.custom-achievements-page) .custom-achievements-hero-mark small {
+        margin-top: 12px;
+        font-size: 0.56rem;
+    }
+
+    body:has(.player-statistics-page) .player-statistics-hero h1 {
+        font-size: clamp(3rem, 5.4vw, 6.25rem);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter::before {
+        top: 50%;
+        left: 50%;
+        right: auto;
+        z-index: 1;
+        width: 7px;
+        height: 70%;
+        background: var(--red-bright);
+        box-shadow: 7px 7px 0 color-mix(in srgb, var(--gold) 78%, transparent);
+        transform: translate(-50%, -50%) rotate(18deg);
+    }
+
+    body:has(.game-history-index-page) .game-history-hero-counter::after {
+        display: none;
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-hero {
+        padding-top: clamp(16px, 1.9vw, 30px);
+        padding-bottom: clamp(12px, 1.55vw, 22px);
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-heading h1 {
+        font-size: clamp(3.6rem, 6.6vw, 7.6rem);
+    }
+}

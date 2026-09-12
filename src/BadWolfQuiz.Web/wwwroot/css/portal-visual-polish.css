@@ -1,0 +1,55 @@
+/* Final desktop visual polish for portal hero elements. */
+@media (min-width: 1200px) {
+    /* Match the About hero mark to the compact Change Password hero mark. */
+    body:has(.about-page) .about-page .portal-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(190px, 0.28fr);
+        gap: clamp(26px, 3.5vw, 58px);
+    }
+
+    body:has(.about-page) .about-page .portal-hero-mark {
+        min-height: 165px;
+        padding: 20px;
+    }
+
+    body:has(.about-page) .about-page .portal-hero-mark span,
+    body:has(.about-page) .about-page .portal-hero-mark small {
+        font-size: 0.56rem;
+    }
+
+    /* Center the My Questions CTA and tighten the space before the archive. */
+    body:has(.support-archive-page) .support-hero {
+        min-height: 0;
+        padding-bottom: clamp(11px, 1.25vw, 17px);
+    }
+
+    body:has(.support-archive-page) .support-hero-actions {
+        width: min(calc(100vw - clamp(26px, 5vw, 78px) - clamp(26px, 5vw, 78px)), 1604px);
+        justify-content: center;
+    }
+
+    body:has(.support-archive-page) .support-content {
+        padding-top: 9px;
+    }
+
+    /* Reduce only the Minigames orbit and its paired diagonal bars by another 30%. */
+    body:has(.minigames-catalog-page) .minigames-catalog-hero-art {
+        min-height: clamp(145px, 13vw, 190px);
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-orbit {
+        width: min(11.55vw, 182px);
+    }
+
+    body:has(.minigames-catalog-page) .minigames-catalog-hero-slash {
+        width: 6px;
+        height: min(11.9vw, 133px);
+        box-shadow: 4px 4px 0 color-mix(in srgb, var(--gold) 72%, transparent);
+    }
+
+    /* Keep the third License summary card at one-column width, but center it. */
+    body:has(.license-page) .license-summary-grid > .license-summary-card:nth-child(3) {
+        grid-column: 1 / -1;
+        width: calc(50% - 10px);
+        justify-self: center;
+    }
+}
