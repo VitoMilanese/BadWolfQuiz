@@ -218,7 +218,7 @@
                     };
                     window.requestAnimationFrame(sync);
 
-                    await wait(4800);
+                    await wait(2400);
                     burst.classList.add("is-leaving");
                     await wait(420);
                     burst.remove();
