@@ -35,7 +35,7 @@ public sealed class IndexModel(
         }
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public IActionResult OnPost()
     {
         Input.GameCode = GameSessionRegistry.NormalizeCode(Input.GameCode ?? string.Empty);
         Input.PlayerName = Input.PlayerName?.Trim() ?? string.Empty;
@@ -87,24 +87,7 @@ public sealed class IndexModel(
                         accessToken = result.AccessToken
                     });
 
-                try
-                {
-                    await gameHub.Clients
-                        .Group(GameHub.GroupName(game.PublicCode))
-                        .SendAsync(
-                            "PlayersChanged",
-                            GameHub.CreatePlayersUpdate(sessionRegistry, game),
-                            CancellationToken.None);
-                }
-                catch (Exception exception)
-                {
-                    logger.LogWarning(
-                        exception,
-                        "Failed to broadcast player join for game {GameCode} and player {PlayerId}; continuing with player redirect.",
-                        game.PublicCode,
-                        player.Id.Value);
-                }
-
+                _ = BroadcastPlayersChangedBestEffortAsync(game, player.Id);
                 return redirect;
             }
 
@@ -140,6 +123,37 @@ public sealed class IndexModel(
         }
 
         return Page();
+    }
+
+    private async Task BroadcastPlayersChangedBestEffortAsync(
+        GameSessionRegistration game,
+        GamePlayerId playerId)
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+        try
+        {
+            await gameHub.Clients
+                .Group(GameHub.GroupName(game.PublicCode))
+                .SendAsync(
+                    "PlayersChanged",
+                    GameHub.CreatePlayersUpdate(sessionRegistry, game),
+                    timeout.Token);
+        }
+        catch (OperationCanceledException) when (timeout.IsCancellationRequested)
+        {
+            logger.LogWarning(
+                "Timed out broadcasting player join for game {GameCode} and player {PlayerId}; player navigation already continues.",
+                game.PublicCode,
+                playerId.Value);
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(
+                exception,
+                "Failed to broadcast player join for game {GameCode} and player {PlayerId}; player navigation already continues.",
+                game.PublicCode,
+                playerId.Value);
+        }
     }
 
     private void ApplyGameContext(GameSessionRegistration? game)
