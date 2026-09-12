@@ -10,8 +10,8 @@
     const originalFetch = window.fetch.bind(window);
 
     // Prevent the older polish layer from installing its own ReturnToBoard
-    // wrapper. That wrapper forced window.location.reload() after success,
-    // while the peer-rated runtime already refreshes the host shell via AJAX.
+    // wrapper. That wrapper forced a full page reload after success, while the
+    // peer-rated runtime already refreshes the host shell via AJAX.
     window.badWolfPeerRatedReturnFetchWrapped = true;
 
     const isReturnToBoardRequest = input => {
