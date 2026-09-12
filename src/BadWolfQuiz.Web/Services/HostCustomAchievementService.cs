@@ -54,6 +54,9 @@ public sealed class HostCustomAchievementService(QuizDbContext db)
             return [];
         }
 
+        var resetService = new PlayerAchievementResetService(db);
+        var activeResetMarkers = (await resetService.LoadMarkersAsync(identity, cancellationToken))
+            .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
         var existingUnlocks = await QueryUnlocks(identity)
             .AsNoTracking()
             .Where(item => item.AchievementCode.StartsWith(CodePrefix))
@@ -76,13 +79,41 @@ public sealed class HostCustomAchievementService(QuizDbContext db)
                 var normalizedTags = definition.Tags
                     .Select(tag => tag.NormalizedName)
                     .ToHashSet(StringComparer.Ordinal);
+                var code = BuildCode(definition.Id);
+                activeResetMarkers.TryGetValue(code, out var resetMarker);
+                var isUnlocked = unlockedByCode.TryGetValue(code, out var unlock);
+
+                if (isUnlocked && resetMarker is not null)
+                {
+                    if (unlock!.UnlockedAtUtc > resetMarker.ResetAtUtc)
+                    {
+                        await resetService.RemoveMarkerAsync(identity, code, cancellationToken);
+                        activeResetMarkers.Remove(code);
+                        resetMarker = null;
+                    }
+                    else
+                    {
+                        var staleUnlock = await QueryUnlocks(identity)
+                            .SingleOrDefaultAsync(
+                                item => item.AchievementCode == code,
+                                cancellationToken);
+                        if (staleUnlock is not null)
+                        {
+                            db.PlayerAchievements.Remove(staleUnlock);
+                        }
+                        unlockedByCode.Remove(code);
+                        unlock = null;
+                        isUnlocked = false;
+                    }
+                }
+
                 var matches = contributions
-                    .Where(item => item.Tags.Overlaps(normalizedTags))
+                    .Where(item =>
+                        item.Tags.Overlaps(normalizedTags) &&
+                        (resetMarker is null || item.CreatedAtUtc > resetMarker.ResetAtUtc))
                     .OrderBy(item => item.CreatedAtUtc)
                     .ThenBy(item => item.ResultId)
                     .ToArray();
-                var code = BuildCode(definition.Id);
-                var isUnlocked = unlockedByCode.TryGetValue(code, out var unlock);
 
                 if (!isUnlocked && matches.Length >= definition.Target)
                 {
@@ -99,6 +130,13 @@ public sealed class HostCustomAchievementService(QuizDbContext db)
                     db.PlayerAchievements.Add(unlock);
                     unlockedByCode[code] = unlock;
                     isUnlocked = true;
+
+                    if (resetMarker is not null)
+                    {
+                        await resetService.RemoveMarkerAsync(identity, code, cancellationToken);
+                        activeResetMarkers.Remove(code);
+                        resetMarker = null;
+                    }
                 }
 
                 progress.Add(new HostCustomAchievementProgress(

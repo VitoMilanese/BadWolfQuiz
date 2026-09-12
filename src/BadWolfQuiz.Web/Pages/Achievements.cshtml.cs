@@ -1,6 +1,7 @@
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -37,5 +38,36 @@ public sealed class AchievementsModel(
             accountId: accountId,
             isContributor: isContributor,
             cancellationToken: cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostResetAchievementAsync(
+        string achievementCode,
+        CancellationToken cancellationToken)
+    {
+        var result = await new PlayerAchievementResetService(db).ResetAccountAsync(
+            currentHost.RequiredId,
+            achievementCode,
+            cancellationToken);
+        if (result is null)
+        {
+            return BadRequest(new { message = AchievementResetText.Current.Error });
+        }
+
+        if (!result.Reset)
+        {
+            return new JsonResult(new { message = AchievementResetText.Current.Error })
+            {
+                StatusCode = StatusCodes.Status409Conflict
+            };
+        }
+
+        return new JsonResult(new
+        {
+            reset = true,
+            achievementCode = result.AchievementCode,
+            target = result.Target,
+            isSecret = result.IsSecret,
+            isHostDefined = result.IsHostDefined
+        });
     }
 }

@@ -63,7 +63,7 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("PlayerAchievementAssetsTagHelper", imports);
         Assert.Contains("PlayerAchievementsTagHelper", imports);
         Assert.Contains("GitHubAchievementLinkTagHelper", imports);
-        Assert.Contains("/css/player-achievements.css?v=11", tagHelper);
+        Assert.Contains("/css/player-achievements.css?v=12", tagHelper);
         Assert.Contains("/js/achievement-image-trim.js?v=1", tagHelper);
         Assert.Contains("/js/player-achievements.js?v=1", tagHelper);
         Assert.Contains("/css/player-achievements.css?v=11", hostTagHelper);
