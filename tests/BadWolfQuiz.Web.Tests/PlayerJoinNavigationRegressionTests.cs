@@ -3,22 +3,42 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class PlayerJoinNavigationRegressionTests
 {
     [Fact]
-    public void Successful_join_redirect_does_not_depend_on_players_changed_broadcast()
+    public void Successful_join_redirect_is_returned_without_awaiting_players_changed_broadcast()
     {
         var source = File.ReadAllText(FindWebFile(
             "Pages",
             "Join",
             "Index.cshtml.cs"));
 
+        Assert.Contains("public IActionResult OnPost()", source, StringComparison.Ordinal);
         Assert.Contains("var redirect = RedirectToPage(", source, StringComparison.Ordinal);
-        Assert.Contains("CancellationToken.None", source, StringComparison.Ordinal);
-        Assert.Contains("catch (Exception exception)", source, StringComparison.Ordinal);
-        Assert.Contains("continuing with player redirect", source, StringComparison.Ordinal);
-        Assert.Contains("return redirect;", source, StringComparison.Ordinal);
-        Assert.DoesNotContain(
-            "OnPostAsync(CancellationToken cancellationToken)",
+        Assert.Contains(
+            "_ = BroadcastPlayersChangedBestEffortAsync(game, player.Id);",
             source,
             StringComparison.Ordinal);
+        Assert.Contains("return redirect;", source, StringComparison.Ordinal);
+        Assert.Contains(
+            "new CancellationTokenSource(TimeSpan.FromSeconds(2))",
+            source,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "player navigation already continues",
+            source,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "await BroadcastPlayersChangedBestEffortAsync",
+            source,
+            StringComparison.Ordinal);
+
+        var postStart = source.IndexOf(
+            "public IActionResult OnPost()",
+            StringComparison.Ordinal);
+        var helperStart = source.IndexOf(
+            "private async Task BroadcastPlayersChangedBestEffortAsync",
+            StringComparison.Ordinal);
+        Assert.True(postStart >= 0 && helperStart > postStart);
+        var postBody = source[postStart..helperStart];
+        Assert.DoesNotContain("await gameHub.Clients", postBody, StringComparison.Ordinal);
     }
 
     [Fact]
