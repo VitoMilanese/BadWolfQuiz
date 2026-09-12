@@ -27,7 +27,7 @@ public sealed class AchievementUnlockNotificationAssetsTagHelper : TagHelper
         }
 
         output.PostContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/achievement-unlock-notifications.css?v=1\" />" +
-            "<script defer src=\"/js/achievement-unlock-notifications.js?v=1\"></script>");
+            "<link rel=\"stylesheet\" href=\"/css/achievement-unlock-notifications.css?v=2\" />" +
+            "<script defer src=\"/js/achievement-unlock-notifications.js?v=2\"></script>");
     }
 }

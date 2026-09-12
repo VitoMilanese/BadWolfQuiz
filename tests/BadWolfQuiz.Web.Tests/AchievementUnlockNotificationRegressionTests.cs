@@ -71,8 +71,8 @@ public sealed class AchievementUnlockNotificationRegressionTests
 
         Assert.Contains("/Player/Lobby", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/Admin/Games/Lobby", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("achievement-unlock-notifications.css", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("achievement-unlock-notifications.js", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("achievement-unlock-notifications.css?v=2", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("achievement-unlock-notifications.js?v=2", tagHelper, StringComparison.Ordinal);
         Assert.Contains(
             "@addTagHelper BadWolfQuiz.Web.TagHelpers.AchievementUnlockNotificationAssetsTagHelper, BadWolfQuiz.Web",
             imports,
@@ -81,16 +81,20 @@ public sealed class AchievementUnlockNotificationRegressionTests
         Assert.Contains("new signalR.HubConnectionBuilder()", script, StringComparison.Ordinal);
         Assert.Contains("connection.on(\"AchievementUnlocked\"", script, StringComparison.Ordinal);
         Assert.Contains("connection.invoke(\"JoinSession\", gameCode)", script, StringComparison.Ordinal);
+        Assert.Contains("connection.invoke(\"RegisterHostSession\", gameCode)", script, StringComparison.Ordinal);
         Assert.Contains("const playerQueue = []", script, StringComparison.Ordinal);
         Assert.Contains("const hostQueues = new Map()", script, StringComparison.Ordinal);
         Assert.Contains(".scoreboard-player[data-player-id]", script, StringComparison.Ordinal);
         Assert.Contains("sessionStorage", script, StringComparison.Ordinal);
-        Assert.Contains("replaceChildren(toast)", script, StringComparison.Ordinal);
-        Assert.Contains("card.appendChild(overlay)", script, StringComparison.Ordinal);
+        Assert.Contains("stack.replaceChildren(card)", script, StringComparison.Ordinal);
+        Assert.Contains("document.body.appendChild(burst)", script, StringComparison.Ordinal);
+        Assert.Contains("syncHostBurstToCard", script, StringComparison.Ordinal);
+        Assert.Contains("BadWolfAchievementUnlockNotifications", script, StringComparison.Ordinal);
+        Assert.Contains("await wait(7200)", script, StringComparison.Ordinal);
 
-        Assert.Contains(".achievement-unlock-player-toast", styles, StringComparison.Ordinal);
-        Assert.Contains(".achievement-unlock-host-overlay", styles, StringComparison.Ordinal);
-        Assert.Contains("z-index: 40;", styles, StringComparison.Ordinal);
+        Assert.Contains(".achievement-unlock-player-card", styles, StringComparison.Ordinal);
+        Assert.Contains(".achievement-unlock-host-burst", styles, StringComparison.Ordinal);
+        Assert.Contains("z-index: 3600;", styles, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion: reduce", styles, StringComparison.Ordinal);
     }
 

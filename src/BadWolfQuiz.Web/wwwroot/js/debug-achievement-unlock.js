@@ -48,6 +48,7 @@
 
             const result = await response.json();
             if (result?.success) {
+                window.BadWolfAchievementUnlockNotifications?.handle?.(result.notification);
                 setTemporaryTitle(
                     button,
                     `Unlocked ${result.achievementCode} for ${result.playerName}`

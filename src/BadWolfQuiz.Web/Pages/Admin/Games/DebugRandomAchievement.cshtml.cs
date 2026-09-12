@@ -108,7 +108,8 @@ public sealed class DebugRandomAchievementModel(
                 success = true,
                 playerId = player.Id.Value,
                 playerName = player.Name,
-                achievementCode = definition.Code
+                achievementCode = definition.Code,
+                notification
             });
         }
 

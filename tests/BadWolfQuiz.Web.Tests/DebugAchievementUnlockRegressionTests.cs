@@ -41,6 +41,7 @@ public sealed class DebugAchievementUnlockRegressionTests
         Assert.Contains("UnlockPlayerAsync", endpoint, StringComparison.Ordinal);
         Assert.Contains("Group(GameHub.GroupName(game.PublicCode))", endpoint, StringComparison.Ordinal);
         Assert.Contains("\"AchievementUnlocked\"", endpoint, StringComparison.Ordinal);
+        Assert.Contains("notification", endpoint, StringComparison.Ordinal);
 
         Assert.Contains("configuration.GetValue<bool>(\"DebugMode\")", assets, StringComparison.Ordinal);
         Assert.Contains("/Admin/Games/Lobby", assets, StringComparison.Ordinal);
@@ -51,6 +52,7 @@ public sealed class DebugAchievementUnlockRegressionTests
         Assert.Contains("data-debug-achievement-unlock", script, StringComparison.Ordinal);
         Assert.Contains("/Admin/Games/DebugRandomAchievement", script, StringComparison.Ordinal);
         Assert.Contains("__RequestVerificationToken", script, StringComparison.Ordinal);
+        Assert.Contains("BadWolfAchievementUnlockNotifications?.handle?.(result.notification)", script, StringComparison.Ordinal);
         Assert.Contains("🏆", script, StringComparison.Ordinal);
 
         Assert.Contains(
