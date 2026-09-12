@@ -268,3 +268,61 @@ body[aria-busy="true"] {
     width: min(900px, 100%);
     height: auto;
 }
+
+/* Keep category and intro titles visually consistent while preserving stored casing. */
+body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-board-column > h3,
+body[data-quiz-editor-workspace="board"] .category-title,
+body.gameplay-layout .game-intro-page .game-intro-heading,
+body[data-quiz-editor-workspace="description"] .description-preview-modal .question-preview-screen .question-preview-title {
+    text-transform: uppercase;
+}
+
+/* Keep the add-block popup above the description cards in round/category editors. */
+body[data-quiz-editor-workspace="description"] .content-block-section {
+    overflow: visible;
+}
+
+body[data-quiz-editor-workspace="description"] .content-block-section-header {
+    position: relative;
+    z-index: 50;
+    overflow: visible;
+}
+
+body[data-quiz-editor-workspace="description"] .content-block-add-menu {
+    z-index: 51;
+}
+
+body[data-quiz-editor-workspace="description"] .content-block-type-menu {
+    z-index: 52;
+}
+
+body[data-quiz-editor-workspace="description"] .content-block-list {
+    position: relative;
+    z-index: 1;
+}
+
+/* Hide the player-side achievement reset action on pointer desktops until the card is hovered. */
+@media (hover: hover) and (pointer: fine) {
+    .player-achievements-dialog .player-achievement-card.is-unlocked .player-achievement-reset-button {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-4px);
+    }
+
+    .player-achievements-dialog .player-achievement-card.is-unlocked:hover .player-achievement-reset-button,
+    .player-achievements-dialog .player-achievement-card.is-unlocked:focus-within .player-achievement-reset-button,
+    .player-achievements-dialog .player-achievement-reset-button:focus-visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+    }
+}
+
+/* Touch/mobile layouts keep the reset action visible because there is no reliable hover state. */
+@media (hover: none), (pointer: coarse), (max-width: 600px) {
+    .player-achievements-dialog .player-achievement-card.is-unlocked .player-achievement-reset-button {
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+    }
+}
