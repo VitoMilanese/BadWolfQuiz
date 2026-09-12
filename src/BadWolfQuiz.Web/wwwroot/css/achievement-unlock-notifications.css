@@ -1,0 +1,318 @@
+.achievement-unlock-player-stack {
+    position: fixed;
+    top: clamp(78px, 12vh, 150px);
+    left: 50%;
+    z-index: 3200;
+    width: min(92vw, 430px);
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.achievement-unlock-player-card {
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--gold) 72%, var(--line));
+    border-radius: 22px;
+    background:
+        radial-gradient(
+            circle at 50% 18%,
+            color-mix(in srgb, var(--gold) 12%, transparent) 0,
+            transparent 42%),
+        linear-gradient(
+            160deg,
+            color-mix(in srgb, var(--panel-2) 94%, var(--bg)) 0%,
+            color-mix(in srgb, var(--panel) 96%, var(--red-bright) 4%) 100%);
+    box-shadow:
+        0 28px 80px rgb(0 0 0 / 46%),
+        0 0 44px color-mix(in srgb, var(--gold) 18%, transparent),
+        inset 0 0 0 1px color-mix(in srgb, var(--text) 5%, transparent);
+    color: var(--text);
+    backdrop-filter: blur(18px);
+    animation: achievement-unlock-player-card-in 520ms cubic-bezier(.16, .9, .24, 1.15) both;
+}
+
+.achievement-unlock-player-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(
+        115deg,
+        transparent 10%,
+        color-mix(in srgb, var(--gold) 18%, transparent) 42%,
+        transparent 70%);
+    transform: translateX(-120%);
+    animation: achievement-unlock-player-sheen 1200ms 420ms ease-out both;
+    pointer-events: none;
+}
+
+.achievement-unlock-player-visual {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    min-height: 250px;
+    padding: 18px 22px 8px;
+    background:
+        radial-gradient(
+            circle at 50% 42%,
+            color-mix(in srgb, var(--gold) 12%, transparent) 0,
+            transparent 56%),
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--bg) 92%, #000) 0%,
+            color-mix(in srgb, var(--bg) 78%, var(--panel-2)) 72%,
+            transparent 100%);
+}
+
+.achievement-unlock-player-card .achievement-unlock-artwork {
+    width: min(72vw, 240px);
+    height: min(72vw, 240px);
+    max-width: 240px;
+    max-height: 240px;
+    object-fit: contain;
+    filter:
+        drop-shadow(0 14px 28px rgb(0 0 0 / 38%))
+        drop-shadow(0 0 18px color-mix(in srgb, var(--gold) 18%, transparent));
+    animation: achievement-unlock-artwork-pop 850ms 120ms cubic-bezier(.17, .89, .2, 1.15) both;
+}
+
+.achievement-unlock-player-content {
+    position: relative;
+    z-index: 1;
+    padding: 16px 20px 20px;
+    border-top: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    background: color-mix(in srgb, var(--panel) 84%, transparent);
+}
+
+.achievement-unlock-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+}
+
+.achievement-unlock-kicker {
+    color: var(--gold);
+    font-size: 0.72rem;
+    font-weight: 1000;
+    line-height: 1;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.achievement-unlock-title {
+    color: var(--text);
+    font-size: clamp(1.25rem, 3vw, 1.65rem);
+    font-weight: 1000;
+    line-height: 1.08;
+}
+
+.achievement-unlock-description {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.achievement-unlock-player-card.is-leaving {
+    animation: achievement-unlock-player-card-out 500ms ease-in both;
+}
+
+.game-scoreboard .scoreboard-player:not(.host-card).achievement-unlock-active {
+    position: relative;
+    z-index: 2;
+    animation: achievement-unlock-host-card-pulse 900ms ease-out both;
+}
+
+.achievement-unlock-host-burst {
+    position: fixed;
+    z-index: 3600;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    overflow: hidden;
+    border: 2px solid color-mix(in srgb, var(--gold) 78%, var(--red-bright));
+    background:
+        radial-gradient(
+            circle at 50% 50%,
+            color-mix(in srgb, var(--gold) 16%, transparent) 0,
+            color-mix(in srgb, var(--panel) 90%, transparent) 62%,
+            color-mix(in srgb, var(--bg) 96%, transparent) 100%);
+    box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--gold) 18%, transparent),
+        0 0 36px color-mix(in srgb, var(--gold) 34%, transparent),
+        0 16px 48px rgb(0 0 0 / 42%);
+    pointer-events: none;
+    backdrop-filter: blur(7px);
+    animation: achievement-unlock-host-burst-in 460ms cubic-bezier(.16, .88, .24, 1.18) both;
+}
+
+.achievement-unlock-host-halo {
+    position: absolute;
+    width: 72%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        color-mix(in srgb, var(--gold) 30%, transparent) 0,
+        color-mix(in srgb, var(--red-bright) 14%, transparent) 42%,
+        transparent 72%);
+    animation: achievement-unlock-host-halo 1700ms ease-in-out infinite alternate;
+}
+
+.achievement-unlock-host-artwork {
+    position: relative;
+    z-index: 1;
+    width: min(88%, 220px);
+    height: 88%;
+    max-height: 220px;
+    object-fit: contain;
+    filter:
+        drop-shadow(0 12px 22px rgb(0 0 0 / 38%))
+        drop-shadow(0 0 16px color-mix(in srgb, var(--gold) 28%, transparent));
+    animation: achievement-unlock-host-artwork-in 720ms cubic-bezier(.18, .88, .25, 1.18) both;
+}
+
+.achievement-unlock-host-burst.is-leaving {
+    animation: achievement-unlock-host-burst-out 390ms ease-in both;
+}
+
+@keyframes achievement-unlock-player-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(-34px) scale(.78) rotate(-1.5deg);
+        filter: blur(6px);
+    }
+    72% {
+        opacity: 1;
+        transform: translateY(5px) scale(1.025) rotate(.3deg);
+        filter: blur(0);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes achievement-unlock-player-card-out {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-24px) scale(.92);
+    }
+}
+
+@keyframes achievement-unlock-player-sheen {
+    from { transform: translateX(-120%); }
+    to { transform: translateX(130%); }
+}
+
+@keyframes achievement-unlock-artwork-pop {
+    from {
+        opacity: 0;
+        transform: scale(.48) rotate(-5deg);
+    }
+    70% {
+        opacity: 1;
+        transform: scale(1.06) rotate(1deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+@keyframes achievement-unlock-host-burst-in {
+    from {
+        opacity: 0;
+        transform: scale(.55) rotate(-4deg);
+    }
+    68% {
+        opacity: 1;
+        transform: scale(1.08) rotate(1deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+@keyframes achievement-unlock-host-artwork-in {
+    from {
+        opacity: 0;
+        transform: scale(.3) rotate(-10deg);
+    }
+    70% {
+        opacity: 1;
+        transform: scale(1.1) rotate(2deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+@keyframes achievement-unlock-host-halo {
+    from {
+        opacity: .55;
+        transform: scale(.86);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1.12);
+    }
+}
+
+@keyframes achievement-unlock-host-card-pulse {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 0%, transparent); }
+    45% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--gold) 38%, transparent); }
+    100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--gold) 0%, transparent); }
+}
+
+@keyframes achievement-unlock-host-burst-out {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(.82);
+    }
+}
+
+@media (max-width: 640px) {
+    .achievement-unlock-player-stack {
+        top: calc(var(--topbar-height, 56px) + 14px);
+        width: calc(100vw - 20px);
+    }
+
+    .achievement-unlock-player-visual {
+        min-height: 210px;
+    }
+
+    .achievement-unlock-player-card .achievement-unlock-artwork {
+        width: 200px;
+        height: 200px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .achievement-unlock-player-card,
+    .achievement-unlock-player-card::before,
+    .achievement-unlock-player-card .achievement-unlock-artwork,
+    .achievement-unlock-player-card.is-leaving,
+    .achievement-unlock-host-burst,
+    .achievement-unlock-host-burst.is-leaving,
+    .achievement-unlock-host-artwork,
+    .achievement-unlock-host-halo,
+    .game-scoreboard .scoreboard-player:not(.host-card).achievement-unlock-active {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

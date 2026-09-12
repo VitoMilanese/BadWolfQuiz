@@ -27,6 +27,7 @@ public sealed class HostMultipleChoiceAssetsTagHelper : TagHelper
 
         output.PostContent.AppendHtml(
             $"<script src=\"/js/host-multiple-choice.js?v=1.20.0-259.8\" data-saved-question-type=\"{savedPresentationType}\"></script>" +
-            "<script src=\"/js/host-multiple-choice-bootstrap.js?v=1.26.5\"></script>");
+            "<script src=\"/js/host-multiple-choice-bootstrap.js?v=1.26.5\"></script>" +
+            "<script src=\"/js/host-multiple-choice-no-reload.js?v=1\"></script>");
     }
 }
