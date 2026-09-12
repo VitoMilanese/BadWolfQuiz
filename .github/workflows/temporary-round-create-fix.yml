@@ -1,0 +1,333 @@
+name: Temporary round creation fix
+
+on:
+  push:
+    branches:
+      - fix/quiz-editor-round-creation-performance
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/quiz-editor-round-creation-performance
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Apply focused fixes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          editor_path = Path('src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Editor.cshtml.cs')
+          editor = editor_path.read_text(encoding='utf-8')
+
+          old_query = '''        var quiz = await db.Quizzes
+              .Include(x => x.Rounds)
+                  .ThenInclude(x => x.Rows)
+              .Include(x => x.Rounds)
+                  .ThenInclude(x => x.Categories)
+                      .ThenInclude(x => x.DescriptionBlocks)
+              .SingleOrDefaultAsync(x => x.Id == AddRound.QuizId);
+
+          if (quiz is null)
+          {
+              return NotFound();
+          }
+
+          var title = AddRound.Title?.Trim();
+
+          if (string.IsNullOrWhiteSpace(title))
+          {
+              title = string.Format(
+                  localizer["Round_DefaultTitle"].Value,
+                  quiz.Rounds.Count + 1);
+          }
+
+          var nextSortOrder = quiz.Rounds.Count == 0
+              ? 0
+              : quiz.Rounds.Max(x => x.SortOrder) + 1;
+
+          var templateRound = quiz.Rounds
+              .OrderBy(x => x.SortOrder)
+              .LastOrDefault();
+          '''
+
+          new_query = '''        var quiz = await db.Quizzes
+              .SingleOrDefaultAsync(x => x.Id == AddRound.QuizId);
+
+          if (quiz is null)
+          {
+              return NotFound();
+          }
+
+          var roundCount = await db.QuizRounds
+              .AsNoTracking()
+              .CountAsync(x => x.QuizId == quiz.Id);
+
+          // Only the latest round is needed as a template. Loading every round
+          // together with rows and category description BLOBs caused a large
+          // cartesian result for media-heavy quizzes and made adding a round
+          // take tens of seconds.
+          var templateRound = await db.QuizRounds
+              .AsNoTracking()
+              .Where(x => x.QuizId == quiz.Id)
+              .OrderByDescending(x => x.SortOrder)
+              .ThenByDescending(x => x.Id)
+              .Include(x => x.Rows)
+              .Include(x => x.Categories)
+                  .ThenInclude(x => x.DescriptionBlocks)
+              .AsSplitQuery()
+              .FirstOrDefaultAsync();
+
+          var title = AddRound.Title?.Trim();
+
+          if (string.IsNullOrWhiteSpace(title))
+          {
+              title = string.Format(
+                  localizer["Round_DefaultTitle"].Value,
+                  roundCount + 1);
+          }
+
+          var nextSortOrder = templateRound is null
+              ? 0
+              : templateRound.SortOrder + 1;
+          '''
+
+          if editor.count(old_query) != 1:
+              raise SystemExit('Expected AddRound eager-loading block was not found exactly once.')
+          editor = editor.replace(old_query, new_query)
+
+          old_round_number = '        var roundNumber = quiz.Rounds.Count + 1;'
+          new_round_number = '        var roundNumber = roundCount + 1;'
+          if editor.count(old_round_number) != 1:
+              raise SystemExit('Expected AddRound round-number expression was not found exactly once.')
+          editor = editor.replace(old_round_number, new_round_number)
+
+          old_add = '        quiz.Rounds.Add(round);\n        quiz.UpdatedAtUtc = DateTime.UtcNow;'
+          new_add = '        db.QuizRounds.Add(round);\n        quiz.UpdatedAtUtc = DateTime.UtcNow;'
+          if editor.count(old_add) != 1:
+              raise SystemExit('Expected AddRound persistence block was not found exactly once.')
+          editor = editor.replace(old_add, new_add)
+          editor_path.write_text(editor, encoding='utf-8')
+
+          busy_path = Path('src/BadWolfQuiz.Web/wwwroot/js/busy-indicators.js')
+          busy = busy_path.read_text(encoding='utf-8')
+
+          old_routes = '''    const routes = {
+              quizzes: "/admin/quizzes",
+              publicQuizzes: "/public-quizzes",'''
+          new_routes = '''    const routes = {
+              quizzes: "/admin/quizzes",
+              quizCreate: "/admin/quizzes/create",
+              publicQuizzes: "/public-quizzes",'''
+          if busy.count(old_routes) != 1:
+              raise SystemExit('Expected busy-indicator route block was not found exactly once.')
+          busy = busy.replace(old_routes, new_routes)
+
+          old_import_lock = '''    const lockQuizImportControl = form => {
+              if (handlerName(form) !== "import") {
+                  return;
+              }
+
+              const button = form.querySelector("[data-quiz-import-select]");
+              if (!(button instanceof HTMLButtonElement)) {
+                  return;
+              }
+
+              lockedQuizControls = [{ button, wasDisabled: button.disabled }];
+              button.disabled = true;
+          };
+          '''
+          new_import_lock = old_import_lock + '''
+          const lockQuizCreateSubmitter = submitter => {
+              if (normalisePath(window.location.pathname) !== routes.quizCreate ||
+                  !(submitter instanceof HTMLButtonElement ||
+                    submitter instanceof HTMLInputElement)) {
+                  return;
+              }
+
+              lockedQuizControls = [{
+                  button: submitter,
+                  wasDisabled: submitter.disabled
+              }];
+              submitter.disabled = true;
+          };
+          '''
+          if busy.count(old_import_lock) != 1:
+              raise SystemExit('Expected quiz-import lock block was not found exactly once.')
+          busy = busy.replace(old_import_lock, new_import_lock)
+
+          old_track = '''        if (isQuizzesIndex(currentPath)) {
+              return handler === "creategame" ||
+                  handler === "continuegame" ||
+                  handler === "import";
+          }
+          '''
+          new_track = '''        if (currentPath === routes.quizCreate) {
+              return form.method.toLowerCase() === "post";
+          }
+
+          if (isQuizzesIndex(currentPath)) {
+              return handler === "creategame" ||
+                  handler === "continuegame" ||
+                  handler === "import";
+          }
+          '''
+          if busy.count(old_track) != 1:
+              raise SystemExit('Expected form tracking block was not found exactly once.')
+          busy = busy.replace(old_track, new_track)
+
+          old_submit_locks = '''        lockAddRoundDialogButtons(form);
+          lockQuizImportControl(form);
+          show();'''
+          new_submit_locks = '''        lockAddRoundDialogButtons(form);
+          lockQuizImportControl(form);
+          lockQuizCreateSubmitter(submitter);
+          show();'''
+          if busy.count(old_submit_locks) != 1:
+              raise SystemExit('Expected submit lock sequence was not found exactly once.')
+          busy = busy.replace(old_submit_locks, new_submit_locks)
+          busy_path.write_text(busy, encoding='utf-8')
+
+          performance_test = '''namespace BadWolfQuiz.Web.Tests;
+
+          public sealed class AddRoundPerformanceRegressionTests
+          {
+              [Fact]
+              public void Add_round_loads_only_the_latest_round_template_without_cartesian_eager_loading()
+              {
+                  var root = FindRepositoryRoot();
+                  var editor = File.ReadAllText(Path.Combine(
+                      root,
+                      "src",
+                      "BadWolfQuiz.Web",
+                      "Pages",
+                      "Admin",
+                      "Quizzes",
+                      "Editor.cshtml.cs"));
+
+                  var start = editor.IndexOf(
+                      "public async Task<IActionResult> OnPostAddRoundAsync()",
+                      StringComparison.Ordinal);
+                  var end = editor.IndexOf(
+                      "public async Task<IActionResult> OnPostReorderRoundsAsync()",
+                      start,
+                      StringComparison.Ordinal);
+
+                  Assert.True(start >= 0 && end > start);
+                  var method = editor[start..end];
+
+                  Assert.Contains("db.QuizRounds", method, StringComparison.Ordinal);
+                  Assert.Contains(".AsNoTracking()", method, StringComparison.Ordinal);
+                  Assert.Contains(".OrderByDescending(x => x.SortOrder)", method, StringComparison.Ordinal);
+                  Assert.Contains(".AsSplitQuery()", method, StringComparison.Ordinal);
+                  Assert.Contains("db.QuizRounds.Add(round)", method, StringComparison.Ordinal);
+                  Assert.DoesNotContain(".Include(x => x.Rounds)", method, StringComparison.Ordinal);
+                  Assert.DoesNotContain("quiz.Rounds.Count", method, StringComparison.Ordinal);
+              }
+
+              private static string FindRepositoryRoot()
+              {
+                  var directory = new DirectoryInfo(AppContext.BaseDirectory);
+                  while (directory is not null)
+                  {
+                      if (Directory.Exists(Path.Combine(directory.FullName, "src")) &&
+                          Directory.Exists(Path.Combine(directory.FullName, "tests")))
+                      {
+                          return directory.FullName;
+                      }
+
+                      directory = directory.Parent;
+                  }
+
+                  throw new DirectoryNotFoundException("Repository root was not found.");
+              }
+          }
+          '''
+          Path('tests/BadWolfQuiz.Web.Tests/AddRoundPerformanceRegressionTests.cs').write_text(
+              performance_test.replace('\n          ', '\n').lstrip(),
+              encoding='utf-8')
+
+          duplicate_test = '''namespace BadWolfQuiz.Web.Tests;
+
+          public sealed class QuizCreateDoubleSubmitRegressionTests
+          {
+              [Fact]
+              public void Create_quiz_submit_is_locked_after_the_first_submission()
+              {
+                  var root = FindRepositoryRoot();
+                  var script = File.ReadAllText(Path.Combine(
+                      root,
+                      "src",
+                      "BadWolfQuiz.Web",
+                      "wwwroot",
+                      "js",
+                      "busy-indicators.js"));
+                  var page = File.ReadAllText(Path.Combine(
+                      root,
+                      "src",
+                      "BadWolfQuiz.Web",
+                      "Pages",
+                      "Admin",
+                      "Quizzes",
+                      "Create.cshtml"));
+
+                  Assert.Contains("quizCreate: \\\"/admin/quizzes/create\\\"", script, StringComparison.Ordinal);
+                  Assert.Contains("currentPath === routes.quizCreate", script, StringComparison.Ordinal);
+                  Assert.Contains("lockQuizCreateSubmitter(submitter)", script, StringComparison.Ordinal);
+                  Assert.Contains("submitter.disabled = true", script, StringComparison.Ordinal);
+                  Assert.Contains("form.dataset.busyLocked === \\\"true\\\"", script, StringComparison.Ordinal);
+                  Assert.Contains("quiz-create-submit", page, StringComparison.Ordinal);
+              }
+
+              private static string FindRepositoryRoot()
+              {
+                  var directory = new DirectoryInfo(AppContext.BaseDirectory);
+                  while (directory is not null)
+                  {
+                      if (Directory.Exists(Path.Combine(directory.FullName, "src")) &&
+                          Directory.Exists(Path.Combine(directory.FullName, "tests")))
+                      {
+                          return directory.FullName;
+                      }
+
+                      directory = directory.Parent;
+                  }
+
+                  throw new DirectoryNotFoundException("Repository root was not found.");
+              }
+          }
+          '''
+          Path('tests/BadWolfQuiz.Web.Tests/QuizCreateDoubleSubmitRegressionTests.cs').write_text(
+              duplicate_test.replace('\n          ', '\n').lstrip(),
+              encoding='utf-8')
+          PY
+
+      - name: Run focused regression tests
+        run: >-
+          dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
+          --configuration Release
+          --filter "FullyQualifiedName~AddRoundPerformanceRegressionTests|FullyQualifiedName~QuizCreateDoubleSubmitRegressionTests|FullyQualifiedName~AddRoundBusyIndicatorRegressionTests"
+
+      - name: Commit fix and remove temporary workflow
+        shell: bash
+        run: |
+          rm .github/workflows/temporary-round-create-fix.yml
+          git config user.name "Vitalii Hanych"
+          git config user.email "64318287+VitoMilanese@users.noreply.github.com"
+          git add src/BadWolfQuiz.Web/Pages/Admin/Quizzes/Editor.cshtml.cs \
+                  src/BadWolfQuiz.Web/wwwroot/js/busy-indicators.js \
+                  tests/BadWolfQuiz.Web.Tests/AddRoundPerformanceRegressionTests.cs \
+                  tests/BadWolfQuiz.Web.Tests/QuizCreateDoubleSubmitRegressionTests.cs \
+                  .github/workflows/temporary-round-create-fix.yml
+          git commit -m "Speed up round creation and prevent duplicate quizzes"
+          git push origin HEAD:fix/quiz-editor-round-creation-performance
