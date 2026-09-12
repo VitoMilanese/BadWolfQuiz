@@ -22,4 +22,8 @@ The `20260911210000_AddHostCustomAchievements` migration adds the custom definit
 
 ## Player and host views
 
-Host-defined cards reuse the normal achievement-card presentation and are marked with a **HOST** badge. They are available in the player's achievement UI, the authenticated account achievement page, host player-achievement dialogs, and achievement history metadata. Historical custom unlocks retain their title, description, and persisted artwork even after the host deletes the active definition.
+Host-defined cards reuse the normal achievement-card presentation and are marked with a **HOST** badge outside the host editor list. They are available in the player's achievement UI, the authenticated account achievement page, host player-achievement dialogs, and achievement history metadata.
+
+During an active game, anonymous/nickname-only players remain scoped to custom achievements created by the current host. Signed-in players see the current host's active custom achievements, including locked/progress state, plus every host-defined achievement that the account already unlocked with any other host. Locked or in-progress achievements from unrelated hosts are not exposed. The two sets are merged by stable custom-achievement code so current-host unlocks are not duplicated.
+
+Persisted account unlocks remain visible during games hosted by other accounts and continue to resolve their original title, description, and artwork even if the creator later soft-deletes the definition. `IsNewInCurrentGame` is reserved for an unlock whose persisted source game-session ID matches the game currently being viewed.

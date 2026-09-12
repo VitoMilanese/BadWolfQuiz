@@ -33,7 +33,7 @@ public sealed class CustomPlayerAchievementsModel(
         }
 
         var accountId = PlayerAchievementRuntimeState.GetPlayerAccountId(game, player.Id);
-        var achievements = await new HostCustomAchievementService(db).LoadForPlayerAsync(
+        var achievements = await new HostCustomAchievementVisibilityService(db).LoadForGameAsync(
             game.HostId,
             player.Name,
             game.PublicCode,
