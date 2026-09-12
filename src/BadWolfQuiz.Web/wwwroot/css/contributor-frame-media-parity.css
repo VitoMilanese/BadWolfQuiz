@@ -16,12 +16,14 @@
     object-fit: cover !important;
 }
 
-/* Host player cards give the media cell a rectangular area. The frame overlay
- * is square, so keep the framed image/webcam square too; otherwise object-fit
- * fills the wider media box and makes the content look larger than the same
- * frame preview on the player page. */
+/* Gameplay cards can give their media cell a rectangular area while the
+ * contributor frame itself is always square. Keep framed media square too;
+ * otherwise object-fit fills the rectangular card cell and lets the avatar,
+ * image or webcam extend beyond the frame opening. */
 .game-scoreboard .scoreboard-player:not(.host-card)
-    > .player-card-avatar.contributor-frame-preview-parity-media {
+    > .player-card-avatar.contributor-frame-preview-parity-media,
+.board-host-card-list > .scoreboard-player.host-card
+    > .host-card-media.contributor-frame-preview-parity-media {
     width: var(--contributor-frame-preview-parity-size) !important;
     height: var(--contributor-frame-preview-parity-size) !important;
     max-width: 100% !important;
