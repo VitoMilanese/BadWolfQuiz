@@ -59,6 +59,8 @@ public sealed class HostGameplayAjaxTransitionRegressionTests
             "window.badWolfPeerRatedReturnFetchWrapped = true",
             guard,
             StringComparison.Ordinal);
+        Assert.Contains("const originalFetch = window.fetch.bind(window)", guard, StringComparison.Ordinal);
+        Assert.Contains("setReturningToBoard(true)", guard, StringComparison.Ordinal);
         Assert.DoesNotContain("window.location.reload", guard, StringComparison.Ordinal);
         Assert.Contains(
             "if (handler === \"ReturnToBoard\")",
@@ -70,7 +72,7 @@ public sealed class HostGameplayAjaxTransitionRegressionTests
             StringComparison.Ordinal);
 
         var guardIndex = assets.IndexOf(
-            "peer-rated-return-no-reload.js?v=1",
+            "peer-rated-return-no-reload.js?v=2",
             StringComparison.Ordinal);
         var polishIndex = assets.IndexOf(
             "peer-rated-all-player-polish.js?v=3",
