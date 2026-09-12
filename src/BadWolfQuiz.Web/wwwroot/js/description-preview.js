@@ -95,6 +95,7 @@
     const close = () => { modal.hidden = true; modal.setAttribute("aria-hidden", "true"); document.body.classList.remove("question-preview-open"); trigger.focus(); };
     trigger.addEventListener("click", open); closeButton?.addEventListener("click", close);
     modal.addEventListener("click", event => { if (event.target === modal) close(); });
-    document.addEventListener("keydown", event => { if (event.key === "Escape" && !modal.hidden) { event.preventDefault(); event.stopImmediatePropagation(); close(); } }, true);
+    // Listen on window capture so editor-level document handlers cannot swallow Escape first.
+    window.addEventListener("keydown", event => { if (event.key === "Escape" && !modal.hidden) { event.preventDefault(); event.stopImmediatePropagation(); close(); } }, true);
     window.addEventListener("beforeunload", () => { section.querySelectorAll(".unified-file-preview").forEach(revokeTemporaryImageUrl); });
 })();
