@@ -92,7 +92,12 @@ public sealed class ActiveGameStore
 
             if (remaining.Length == _snapshots.Count)
             {
-                return false;
+                // Deletion is intentionally idempotent. The background persistence
+                // loop may already have removed this snapshot after the runtime
+                // session was discarded but before the explicit delete reached
+                // the store. Keeping the deletion cutoff still prevents an older
+                // in-flight snapshot from being written back afterward.
+                return true;
             }
 
             await WriteSnapshotsAsync(remaining);
