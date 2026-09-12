@@ -63,11 +63,20 @@ public sealed class AchievementUnlockNotificationRegressionTests
             "wwwroot",
             "css",
             "achievement-unlock-notifications.css");
+        var imports = Read(
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "_ViewImports.cshtml");
 
         Assert.Contains("/Player/Lobby", tagHelper, StringComparison.Ordinal);
         Assert.Contains("/Admin/Games/Lobby", tagHelper, StringComparison.Ordinal);
         Assert.Contains("achievement-unlock-notifications.css", tagHelper, StringComparison.Ordinal);
         Assert.Contains("achievement-unlock-notifications.js", tagHelper, StringComparison.Ordinal);
+        Assert.Contains(
+            "@addTagHelper BadWolfQuiz.Web.TagHelpers.AchievementUnlockNotificationAssetsTagHelper, BadWolfQuiz.Web",
+            imports,
+            StringComparison.Ordinal);
 
         Assert.Contains("new signalR.HubConnectionBuilder()", script, StringComparison.Ordinal);
         Assert.Contains("connection.on(\"AchievementUnlocked\"", script, StringComparison.Ordinal);
