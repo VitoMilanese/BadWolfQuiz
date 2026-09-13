@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Word into the ring</value></data>
+  <data name="Description" xml:space="preserve"><value>Discover three hidden rules and place every word into the correct ring intersections.</value></data>
+  <data name="EditorMenu" xml:space="preserve"><value>Word-rings editor</value></data>
+  <data name="EditorTitle" xml:space="preserve"><value>Word-rings editor</value></data>
+  <data name="EditorPlaceholder" xml:space="preserve"><value>The editor page is ready. Puzzle editing will be added in the next step.</value></data>
+  <data name="Instructions" xml:space="preserve"><value>Each ring follows a hidden rule. Drag every word into the area whose rings match that word. Words may belong to one, two, all three, or none of the rings.</value></data>
+  <data name="WordBank" xml:space="preserve"><value>Words</value></data>
+  <data name="Outside" xml:space="preserve"><value>Outside all rings</value></data>
+  <data name="Check" xml:space="preserve"><value>Check</value></data>
+  <data name="Reset" xml:space="preserve"><value>Reset</value></data>
+  <data name="RevealRules" xml:space="preserve"><value>Reveal rules</value></data>
+  <data name="HideRules" xml:space="preserve"><value>Hide rules</value></data>
+  <data name="RuleA" xml:space="preserve"><value>A: the word names an animal</value></data>
+  <data name="RuleB" xml:space="preserve"><value>B: the word contains the letter “a”</value></data>
+  <data name="RuleC" xml:space="preserve"><value>C: the word has exactly 5 letters</value></data>
+  <data name="Progress" xml:space="preserve"><value>{0} of {1} words placed</value></data>
+  <data name="AllCorrect" xml:space="preserve"><value>Perfect! Every word is in the correct area.</value></data>
+  <data name="HasErrors" xml:space="preserve"><value>{0} word(s) are in the wrong area.</value></data>
+  <data name="PlaceAll" xml:space="preserve"><value>Place all words before checking.</value></data>
+</root>

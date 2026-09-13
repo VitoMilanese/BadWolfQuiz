@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-hidden="true">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="44%" r="72%">
+      <stop offset="0" stop-color="#242936"/>
+      <stop offset="1" stop-color="#0b0d12"/>
+    </radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <g fill="none" stroke-width="22" filter="url(#glow)" opacity=".9">
+    <circle cx="610" cy="375" r="250" stroke="#e85d5d"/>
+    <circle cx="990" cy="375" r="250" stroke="#5f86ee"/>
+    <circle cx="800" cy="605" r="250" stroke="#e0b43c"/>
+  </g>
+  <g fill="#f4f5f7" opacity=".94">
+    <rect x="270" y="180" width="160" height="58" rx="29"/>
+    <rect x="1120" y="215" width="190" height="58" rx="29"/>
+    <rect x="715" y="382" width="170" height="58" rx="29"/>
+    <rect x="486" y="535" width="165" height="58" rx="29"/>
+    <rect x="948" y="545" width="190" height="58" rx="29"/>
+    <rect x="735" y="690" width="135" height="58" rx="29"/>
+  </g>
+  <g fill="#d6d9df" opacity=".36">
+    <rect x="310" y="199" width="80" height="18" rx="9"/>
+    <rect x="1160" y="234" width="110" height="18" rx="9"/>
+    <rect x="755" y="401" width="90" height="18" rx="9"/>
+    <rect x="526" y="554" width="85" height="18" rx="9"/>
+    <rect x="990" y="564" width="106" height="18" rx="9"/>
+    <rect x="767" y="709" width="71" height="18" rx="9"/>
+  </g>
+</svg>

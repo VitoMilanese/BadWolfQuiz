@@ -1,0 +1,12 @@
+@page "/Admin/WordRingsEditor"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject IStringLocalizer<WordRingsResource> WordRingsLocalizer
+@{
+    ViewData["Title"] = WordRingsLocalizer["EditorTitle"];
+}
+
+<section class="panel" style="max-width: 980px; margin: 40px auto; padding: 28px;">
+    <p style="margin:0 0 8px; color:var(--gold); font-weight:900; letter-spacing:.12em;">BAD WOLF / MINIGAME EDITOR</p>
+    <h1 style="margin:0 0 16px;">@WordRingsLocalizer["EditorTitle"]</h1>
+    <p style="margin:0; color:var(--muted); line-height:1.6;">@WordRingsLocalizer["EditorPlaceholder"]</p>
+</section>

@@ -1,0 +1,71 @@
+@page "/minigames/word-rings"
+@inject IStringLocalizer<WordRingsResource> WordRingsLocalizer
+@{
+    ViewData["Title"] = WordRingsLocalizer["Title"];
+    ViewData["HidePortalFooter"] = true;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/word-rings.css" asp-append-version="true" />
+}
+
+<div class="word-rings-page"
+     data-word-rings-root
+     data-progress-template="@WordRingsLocalizer["Progress"]"
+     data-all-correct="@WordRingsLocalizer["AllCorrect"]"
+     data-has-errors-template="@WordRingsLocalizer["HasErrors"]"
+     data-place-all="@WordRingsLocalizer["PlaceAll"]"
+     data-reveal-rules="@WordRingsLocalizer["RevealRules"]"
+     data-hide-rules="@WordRingsLocalizer["HideRules"]">
+    <header class="word-rings-header">
+        <div>
+            <p class="word-rings-kicker">BAD WOLF / MINIGAME 02</p>
+            <h1>@WordRingsLocalizer["Title"]</h1>
+            <p class="word-rings-lead">@WordRingsLocalizer["Instructions"]</p>
+        </div>
+        <div class="word-rings-actions">
+            <button class="button" type="button" data-reveal-rules>@WordRingsLocalizer["RevealRules"]</button>
+            <button class="button" type="button" data-reset>@WordRingsLocalizer["Reset"]</button>
+            <button class="button button-primary" type="button" data-check>@WordRingsLocalizer["Check"]</button>
+        </div>
+    </header>
+
+    <section class="word-rings-rules is-hidden" data-rules aria-live="polite">
+        <div><strong>A</strong><span>@WordRingsLocalizer["RuleA"]</span></div>
+        <div><strong>B</strong><span>@WordRingsLocalizer["RuleB"]</span></div>
+        <div><strong>C</strong><span>@WordRingsLocalizer["RuleC"]</span></div>
+    </section>
+
+    <div class="word-rings-layout">
+        <aside class="word-rings-bank" data-word-bank>
+            <div class="word-rings-bank-heading">
+                <h2>@WordRingsLocalizer["WordBank"]</h2>
+                <span data-progress></span>
+            </div>
+            <div class="word-rings-word-list" data-word-list>
+                @foreach (var word in new[] { "кіт", "вовк", "ракета", "машина", "лісок", "човен", "жаба", "собака", "песик", "олень", "лампа", "банка", "панда", "коала", "дім", "сир" })
+                {
+                    <button class="word-rings-word" type="button" draggable="true" data-word="@word">@word</button>
+                }
+            </div>
+            <div class="word-rings-outside" data-outside-zone>
+                <strong>@WordRingsLocalizer["Outside"]</strong>
+                <div data-outside-list></div>
+            </div>
+        </aside>
+
+        <main class="word-rings-stage-wrap">
+            <div class="word-rings-stage" data-ring-stage aria-label="@WordRingsLocalizer["Title"]">
+                <div class="word-rings-circle word-rings-circle-a"><span>A</span></div>
+                <div class="word-rings-circle word-rings-circle-b"><span>B</span></div>
+                <div class="word-rings-circle word-rings-circle-c"><span>C</span></div>
+                <div class="word-rings-placed" data-placed-layer></div>
+            </div>
+            <p class="word-rings-status" data-status aria-live="polite"></p>
+        </main>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/word-rings.js" asp-append-version="true"></script>
+}

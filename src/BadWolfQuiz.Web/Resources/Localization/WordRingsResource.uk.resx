@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Слівце в кільце</value></data>
+  <data name="Description" xml:space="preserve"><value>Розгадай три приховані правила та розклади слова у правильні перетини кілець.</value></data>
+  <data name="EditorMenu" xml:space="preserve"><value>Редактор «Слівце в кільце»</value></data>
+  <data name="EditorTitle" xml:space="preserve"><value>Редактор «Слівце в кільце»</value></data>
+  <data name="EditorPlaceholder" xml:space="preserve"><value>Сторінка редактора готова. Редагування наборів і правил додамо наступним кроком.</value></data>
+  <data name="Instructions" xml:space="preserve"><value>Кожне кільце має приховану умову. Перетягни кожне слово в область, кільця якої йому відповідають. Слово може належати одному, двом, усім трьом кільцям або жодному.</value></data>
+  <data name="WordBank" xml:space="preserve"><value>Слова</value></data>
+  <data name="Outside" xml:space="preserve"><value>Поза всіма кільцями</value></data>
+  <data name="Check" xml:space="preserve"><value>Перевірити</value></data>
+  <data name="Reset" xml:space="preserve"><value>Скинути</value></data>
+  <data name="RevealRules" xml:space="preserve"><value>Показати правила</value></data>
+  <data name="HideRules" xml:space="preserve"><value>Сховати правила</value></data>
+  <data name="RuleA" xml:space="preserve"><value>A: слово означає тварину</value></data>
+  <data name="RuleB" xml:space="preserve"><value>B: у слові є літера «а»</value></data>
+  <data name="RuleC" xml:space="preserve"><value>C: у слові рівно 5 літер</value></data>
+  <data name="Progress" xml:space="preserve"><value>Розкладено {0} з {1} слів</value></data>
+  <data name="AllCorrect" xml:space="preserve"><value>Ідеально! Усі слова розкладені правильно.</value></data>
+  <data name="HasErrors" xml:space="preserve"><value>Неправильно розкладено слів: {0}.</value></data>
+  <data name="PlaceAll" xml:space="preserve"><value>Спочатку розклади всі слова.</value></data>
+</root>
