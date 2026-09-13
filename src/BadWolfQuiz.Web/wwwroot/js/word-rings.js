@@ -14,6 +14,12 @@
     const checkButton = root.querySelector('[data-check]');
     const resetButton = root.querySelector('[data-reset]');
 
+    const ringElements = [
+        ['A', root.querySelector('.word-rings-circle-a')],
+        ['B', root.querySelector('.word-rings-circle-b')],
+        ['C', root.querySelector('.word-rings-circle-c')]
+    ];
+
     const expected = new Map([
         ['кіт', 'A'], ['вовк', 'A'],
         ['ракета', 'B'], ['машина', 'B'],
@@ -55,7 +61,7 @@
         token.hidden = false;
         token.classList.remove('is-placed');
         token.classList.add('is-on-stage');
-        token.dataset.membership = membership;
+        token.dataset.membership = canonical(membership);
         token.style.left = `${x}%`;
         token.style.top = `${y}%`;
         token.draggable = true;
@@ -74,20 +80,26 @@
         if (source) source.hidden = false;
     };
 
+    const pointIsInsideRing = (clientX, clientY, ring) => {
+        if (!ring) return false;
+
+        const rect = ring.getBoundingClientRect();
+        const centerX = rect.left + (rect.width / 2);
+        const centerY = rect.top + (rect.height / 2);
+        const radius = Math.min(rect.width, rect.height) / 2;
+
+        return Math.hypot(clientX - centerX, clientY - centerY) <= radius;
+    };
+
     const membershipAt = (clientX, clientY) => {
-        const rect = stage.getBoundingClientRect();
-        const x = (clientX - rect.left) / rect.width;
-        const y = (clientY - rect.top) / rect.height;
-        const circles = [
-            ['A', 0.38, 0.39],
-            ['B', 0.62, 0.39],
-            ['C', 0.50, 0.62]
-        ];
-        const radius = 0.285;
-        const membership = circles
-            .filter(([, cx, cy]) => Math.hypot(x - cx, y - cy) <= radius)
+        const stageRect = stage.getBoundingClientRect();
+        const x = (clientX - stageRect.left) / stageRect.width;
+        const y = (clientY - stageRect.top) / stageRect.height;
+        const membership = ringElements
+            .filter(([, ring]) => pointIsInsideRing(clientX, clientY, ring))
             .map(([name]) => name)
             .join('');
+
         return {
             membership: canonical(membership),
             x: Math.max(4, Math.min(96, x * 100)),
@@ -113,6 +125,7 @@
         const token = source.cloneNode(true);
         token.hidden = false;
         token.classList.add('is-outside');
+        token.dataset.membership = '';
         token.draggable = true;
         outsideList.append(token);
         wireWord(token);

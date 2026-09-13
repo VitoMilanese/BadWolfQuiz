@@ -71,19 +71,19 @@
 .word-rings-editor-ring-a {
     top: 24px;
     left: 5%;
-    color: var(--red-bright);
+    color: #5f86ee;
 }
 
 .word-rings-editor-ring-b {
     top: 24px;
     right: 5%;
-    color: var(--gold);
+    color: #e0b43c;
 }
 
 .word-rings-editor-ring-c {
     left: 50%;
     bottom: 14px;
-    color: color-mix(in srgb, var(--text) 70%, #4f8cff);
+    color: #e85d5d;
     transform: translateX(-50%);
 }
 
@@ -186,19 +186,19 @@
 .word-rings-editor-mini-venn span:nth-child(1) {
     top: 3%;
     left: 9%;
-    border-color: var(--red-bright);
+    border-color: #5f86ee;
 }
 
 .word-rings-editor-mini-venn span:nth-child(2) {
     top: 3%;
     right: 9%;
-    border-color: var(--gold);
+    border-color: #e0b43c;
 }
 
 .word-rings-editor-mini-venn span:nth-child(3) {
     left: 50%;
     bottom: 2%;
-    border-color: color-mix(in srgb, var(--text) 70%, #4f8cff);
+    border-color: #e85d5d;
     transform: translateX(-50%);
 }
 
