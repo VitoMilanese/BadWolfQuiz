@@ -13,6 +13,31 @@
     bottom: 9%;
 }
 
+.word-rings-word {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    touch-action: none;
+}
+
+.word-rings-pointer-preview {
+    position: fixed !important;
+    z-index: 2147483647 !important;
+    margin: 0 !important;
+    opacity: .98 !important;
+    pointer-events: none !important;
+    cursor: grabbing !important;
+    transition: none !important;
+    transform: none !important;
+    box-shadow: 0 10px 24px rgb(0 0 0 / 28%) !important;
+}
+
+.word-rings-word-list.is-drop-target {
+    outline: 2px dashed color-mix(in srgb, var(--line) 86%, transparent);
+    outline-offset: 6px;
+    border-radius: 10px;
+}
+
 .word-rings-stage > .word-rings-rules {
     position: absolute;
     inset: 0;
