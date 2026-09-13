@@ -41,11 +41,11 @@ public sealed class WordRingsRuleStore
     private const int MaximumWordsPerRule = 250;
 
     private static readonly Regex WordListPattern = new(
-        @"^\s*[\p{L}\p{M}\p{N}'’\-]+(?:[\s,;]+[\p{L}\p{M}\p{N}'’\-]+)*[\s,;]*$",
+        @"^ *[\p{L}\p{M}\p{N}'’\-]+(?:[ ,;]+[\p{L}\p{M}\p{N}'’\-]+)*[ ,;]*$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private static readonly Regex WordSeparatorPattern = new(
-        @"[\s,;]+",
+        @"[ ,;]+",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private static readonly IReadOnlyList<WordRingRule> DefaultRules =

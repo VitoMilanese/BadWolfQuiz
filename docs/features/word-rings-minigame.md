@@ -29,6 +29,6 @@ A rule contains only:
 - the condition text;
 - a set of words.
 
-Words may be separated only by commas, semicolons, or whitespace. Other separator punctuation is rejected on both the client and server. Words are de-duplicated case-insensitively before persistence.
+Words may be separated only by commas, semicolons, or literal spaces. Tabs, line breaks, and other separator characters are rejected on both the client and server. Words are de-duplicated case-insensitively before persistence.
 
 Rules are persisted in `App_Data/word-rings-rules.json`. Deletion is performed through the styled BadWolfQuiz `<dialog>` confirmation rather than a browser alert/confirm prompt. The trash action has an explicit dark-red `#9f101b` background with a red border so destructive styling does not depend only on a semantic CSS class name.

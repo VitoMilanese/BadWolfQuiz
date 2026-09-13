@@ -7,7 +7,7 @@
     const wordsInput = createDialog?.querySelector('[data-word-rings-words]');
     const createForm = createDialog?.querySelector('[data-word-rings-create-form]');
 
-    const allowedWordList = /^\s*[\p{L}\p{M}\p{N}'’\-]+(?:[\s,;]+[\p{L}\p{M}\p{N}'’\-]+)*[\s,;]*$/u;
+    const allowedWordList = /^ *[\p{L}\p{M}\p{N}'’\-]+(?:[ ,;]+[\p{L}\p{M}\p{N}'’\-]+)*[ ,;]*$/u;
 
     const closeDialog = dialog => {
         if (dialog instanceof HTMLDialogElement && dialog.open) {

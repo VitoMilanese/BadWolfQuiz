@@ -111,7 +111,8 @@ public sealed class WordRingsMinigameRegressionTests
 
         Assert.Contains("App_Data", store);
         Assert.Contains("word-rings-rules.json", store);
-        Assert.Contains("[\\s,;]+", store);
+        Assert.Contains("[ ,;]+", store);
+        Assert.DoesNotContain("[\\s,;]+", store);
         Assert.Contains("WordRingRuleMutationResult.LastRule", store);
         Assert.Contains("OnPostCreateRuleAsync", model);
         Assert.Contains("OnPostDeleteRuleAsync", model);
@@ -119,6 +120,8 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("asp-page-handler=\"DeleteRule\"", editor);
         Assert.Contains("dialog-card-danger", editor);
         Assert.Contains("showModal()", script);
+        Assert.Contains("[ ,;]+", script);
+        Assert.DoesNotContain("[\\s,;]+", script);
         Assert.DoesNotContain("window.confirm", script);
         Assert.DoesNotContain("alert(", script);
         Assert.Contains("background: #9f101b !important", styles);
