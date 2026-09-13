@@ -419,14 +419,6 @@ body:has(.public-quizzes-page) .topbar {
         box-shadow 180ms ease;
 }
 
-.public-quiz-card:nth-child(3n + 2) {
-    --card-accent: var(--gold);
-}
-
-.public-quiz-card:nth-child(3n + 3) {
-    --card-accent: color-mix(in srgb, var(--red-bright) 56%, var(--gold));
-}
-
 .public-quiz-card:hover {
     transform: translateY(-6px);
     border-color: color-mix(in srgb, var(--card-accent) 56%, var(--line));
