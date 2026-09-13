@@ -5,8 +5,36 @@
     ViewData["Title"] = WordRingsLocalizer["EditorTitle"];
 }
 
-<section class="panel" style="max-width: 980px; margin: 40px auto; padding: 28px;">
-    <p style="margin:0 0 8px; color:var(--gold); font-weight:900; letter-spacing:.12em;">BAD WOLF / MINIGAME EDITOR</p>
-    <h1 style="margin:0 0 16px;">@WordRingsLocalizer["EditorTitle"]</h1>
-    <p style="margin:0; color:var(--muted); line-height:1.6;">@WordRingsLocalizer["EditorPlaceholder"]</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/minigame-editor.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/word-rings-editor.css" asp-append-version="true" />
+}
+
+<div class="page-heading minigame-editor-heading word-rings-editor-heading">
+    <div>
+        <p class="eyebrow">BAD WOLF / MINIGAME EDITOR</p>
+        <h1>@WordRingsLocalizer["EditorTitle"]</h1>
+        <p class="muted">@WordRingsLocalizer["EditorPlaceholder"]</p>
+    </div>
+
+    <div class="word-rings-editor-mark" aria-hidden="true">
+        <span class="word-rings-editor-ring word-rings-editor-ring-a"><strong>A</strong></span>
+        <span class="word-rings-editor-ring word-rings-editor-ring-b"><strong>B</strong></span>
+        <span class="word-rings-editor-ring word-rings-editor-ring-c"><strong>C</strong></span>
+        <span class="word-rings-editor-mark-caption">WORD / RINGS</span>
+    </div>
+</div>
+
+<section class="content-panel word-rings-editor-coming-soon">
+    <div>
+        <span class="word-rings-editor-panel-kicker">EDITOR / NEXT STEP</span>
+        <h2>@WordRingsLocalizer["EditorTitle"]</h2>
+        <p>@WordRingsLocalizer["EditorPlaceholder"]</p>
+    </div>
+
+    <div class="word-rings-editor-mini-venn" aria-hidden="true">
+        <span>A</span>
+        <span>B</span>
+        <span>C</span>
+    </div>
 </section>

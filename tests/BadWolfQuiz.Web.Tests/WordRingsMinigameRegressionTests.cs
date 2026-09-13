@@ -7,17 +7,34 @@ public sealed class WordRingsMinigameRegressionTests
     {
         var catalog = ReadWebFile("Pages", "Minigames.cshtml");
         var layout = ReadWebFile("Pages", "Shared", "_Layout.cshtml");
+        var navigation = ReadWebFile("TagHelpers", "HeaderSeoNavigationTagHelper.cs");
         var game = ReadWebFile("Pages", "WordRings.cshtml");
         var editor = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml");
+        var editorStyles = ReadWebFile("wwwroot", "css", "word-rings-editor.css");
 
         Assert.Contains("asp-page=\"/WordRings\"", catalog);
+        Assert.DoesNotContain("<strong>02</strong>", catalog);
         Assert.Contains("asp-page=\"/Admin/WordRingsEditor\"", layout);
+        Assert.Contains("wordRingsLocalizer", navigation);
+        Assert.Contains("output.SuppressOutput()", navigation);
+        Assert.Contains("href=\\\"/Admin/MinigameEditor\\\"", navigation);
+        Assert.Contains("href=\\\"/Admin/WordRingsEditor\\\"", navigation);
+        Assert.True(
+            navigation.LastIndexOf("href=\\\"/Admin/MinigameEditor\\\"", StringComparison.Ordinal) <
+            navigation.LastIndexOf("href=\\\"/Admin/WordRingsEditor\\\"", StringComparison.Ordinal),
+            "Word-rings editor must render after the existing minigame editor for MasterHost navigation.");
         Assert.Contains("@page \"/minigames/word-rings\"", game);
         Assert.Contains("data-ring-stage", game);
         Assert.Contains("data-word-list", game);
         Assert.Contains("data-outside-zone", game);
         Assert.Contains("@page \"/Admin/WordRingsEditor\"", editor);
         Assert.Contains("Authorize", editor);
+        Assert.Contains("~/css/minigame-editor.css", editor);
+        Assert.Contains("~/css/word-rings-editor.css", editor);
+        Assert.Contains("word-rings-editor-heading", editor);
+        Assert.DoesNotContain("style=\"", editor);
+        Assert.Contains("word-rings-editor-coming-soon", editorStyles);
+        Assert.Contains("@media (max-width: 600px)", editorStyles);
     }
 
     [Fact]

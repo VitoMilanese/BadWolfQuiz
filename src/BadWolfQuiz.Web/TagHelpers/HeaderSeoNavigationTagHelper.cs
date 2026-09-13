@@ -12,7 +12,8 @@ namespace BadWolfQuiz.Web.TagHelpers;
 public sealed class HeaderSeoNavigationTagHelper(
     IHttpContextAccessor httpContextAccessor,
     IConfiguration configuration,
-    IStringLocalizer<MinigameEditorResource> minigameEditorLocalizer) : TagHelper
+    IStringLocalizer<MinigameEditorResource> minigameEditorLocalizer,
+    IStringLocalizer<WordRingsResource> wordRingsLocalizer) : TagHelper
 {
     private const string LegacyMenuItemClass = "action-menu-item";
     private const string SideMenuItemClass = "header-side-menu-item";
@@ -30,17 +31,32 @@ public sealed class HeaderSeoNavigationTagHelper(
 
         var classes = classAttribute.Value?.ToString();
         var page = pageAttribute.Value?.ToString();
-        if (page == "/Admin/MasterGames" && IsMasterHost())
+        var isMasterHost = IsMasterHost();
+
+        if (page == "/Admin/WordRingsEditor" && isMasterHost)
         {
-            var label = HtmlEncoder.Default.Encode(
+            output.SuppressOutput();
+            return;
+        }
+
+        if (page == "/Admin/MasterGames" && isMasterHost)
+        {
+            var minigameEditorLabel = HtmlEncoder.Default.Encode(
                 minigameEditorLocalizer["MenuTitle"].Value);
+            var wordRingsEditorLabel = HtmlEncoder.Default.Encode(
+                wordRingsLocalizer["EditorMenu"].Value);
             var menuItemClass = HasCssClass(classes, SideMenuItemClass)
                 ? SideMenuItemClass
                 : LegacyMenuItemClass;
+            var busyNavigation =
+                "onclick=\"if(window.BadWolfBusy){window.BadWolfBusy.navigate(this.href);return false;}\"";
+
             output.PostElement.AppendHtml(
-                $"<a class=\"{menuItemClass}\" href=\"/Admin/MinigameEditor\" " +
-                "onclick=\"if(window.BadWolfBusy){window.BadWolfBusy.navigate(this.href);return false;}\">" +
-                label +
+                $"<a class=\"{menuItemClass}\" href=\"/Admin/MinigameEditor\" {busyNavigation}>" +
+                minigameEditorLabel +
+                "</a>" +
+                $"<a class=\"{menuItemClass}\" href=\"/Admin/WordRingsEditor\" {busyNavigation}>" +
+                wordRingsEditorLabel +
                 "</a>");
             return;
         }
