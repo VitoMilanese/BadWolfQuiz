@@ -16,9 +16,9 @@
   <data name="Reset" xml:space="preserve"><value>Скинути</value></data>
   <data name="RevealRules" xml:space="preserve"><value>Показати правила</value></data>
   <data name="HideRules" xml:space="preserve"><value>Сховати правила</value></data>
-  <data name="RuleA" xml:space="preserve"><value>A: слово означає тварину</value></data>
-  <data name="RuleB" xml:space="preserve"><value>B: у слові є літера «а»</value></data>
-  <data name="RuleC" xml:space="preserve"><value>C: у слові рівно 5 літер</value></data>
+  <data name="RuleA" xml:space="preserve"><value>Слово означає тварину</value></data>
+  <data name="RuleB" xml:space="preserve"><value>У слові є літера «а»</value></data>
+  <data name="RuleC" xml:space="preserve"><value>У слові рівно 5 літер</value></data>
   <data name="Progress" xml:space="preserve"><value>Розкладено {0} з {1} слів</value></data>
   <data name="AllCorrect" xml:space="preserve"><value>Ідеально! Усі слова розкладені правильно.</value></data>
   <data name="HasErrors" xml:space="preserve"><value>Неправильно розкладено слів: {0}.</value></data>
