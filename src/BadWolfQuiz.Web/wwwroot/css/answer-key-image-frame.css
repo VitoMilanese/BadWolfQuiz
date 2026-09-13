@@ -18,6 +18,18 @@
         0 24px 64px rgb(0 0 0 / 34%);
 }
 
+/* Keep tall mixed answers in normal document flow. The base AnswerKey layout
+ * centers short answers, but plain center alignment on an overflowing grid can
+ * place the first rows above the scroll origin. Max-content rows also prevent
+ * a long text row from shrinking underneath the following image. */
+.answer-key-content .game-content-blocks:not(.four-clue-grid) {
+    grid-auto-rows: max-content;
+    align-content: safe center;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+
 /* Match the caption scale used by regular in-game question and answer content. */
 .answer-key-content .game-content-caption {
     font-size: clamp(1.26rem, 3.15vw, 2.8rem);
