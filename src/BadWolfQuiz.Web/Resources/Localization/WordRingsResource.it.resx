@@ -8,7 +8,7 @@
   <data name="Description" xml:space="preserve"><value>Scopri tre regole nascoste e sistema ogni parola nelle corrette intersezioni dei cerchi.</value></data>
   <data name="EditorMenu" xml:space="preserve"><value>Editor Parola nel cerchio</value></data>
   <data name="EditorTitle" xml:space="preserve"><value>Editor Parola nel cerchio</value></data>
-  <data name="EditorPlaceholder" xml:space="preserve"><value>La pagina dell'editor è pronta. La modifica di set e regole verrà aggiunta nel prossimo passaggio.</value></data>
+  <data name="EditorPlaceholder" xml:space="preserve"><value>Gestisci i gruppi di regole usati dai cerchi blu, giallo e rosso.</value></data>
   <data name="Instructions" xml:space="preserve"><value>Ogni cerchio segue una regola nascosta. Trascina ogni parola nell'area i cui cerchi corrispondono alla parola. Una parola può appartenere a uno, due, tutti e tre o nessun cerchio.</value></data>
   <data name="WordBank" xml:space="preserve"><value>Parole</value></data>
   <data name="Outside" xml:space="preserve"><value>Fuori da tutti i cerchi</value></data>
@@ -23,4 +23,29 @@
   <data name="AllCorrect" xml:space="preserve"><value>Perfetto! Tutte le parole sono nell'area corretta.</value></data>
   <data name="HasErrors" xml:space="preserve"><value>Parole nell'area sbagliata: {0}.</value></data>
   <data name="PlaceAll" xml:space="preserve"><value>Posiziona tutte le parole prima di controllare.</value></data>
+  <data name="EditorBlueTab" xml:space="preserve"><value>Cerchio blu</value></data>
+  <data name="EditorYellowTab" xml:space="preserve"><value>Cerchio giallo</value></data>
+  <data name="EditorRedTab" xml:space="preserve"><value>Cerchio rosso</value></data>
+  <data name="EditorRulesLabel" xml:space="preserve"><value>Regole</value></data>
+  <data name="EditorAddRule" xml:space="preserve"><value>Nuova regola</value></data>
+  <data name="EditorConditionLabel" xml:space="preserve"><value>Condizione</value></data>
+  <data name="EditorWordsLabel" xml:space="preserve"><value>Parole</value></data>
+  <data name="EditorWordCount" xml:space="preserve"><value>{0} parole</value></data>
+  <data name="EditorNoRules" xml:space="preserve"><value>Non ci sono ancora regole per questo cerchio.</value></data>
+  <data name="EditorCreateRuleTitle" xml:space="preserve"><value>Crea regola</value></data>
+  <data name="EditorWordsHint" xml:space="preserve"><value>Separa le parole solo con virgole, punti e virgola o spazi.</value></data>
+  <data name="EditorInvalidSeparators" xml:space="preserve"><value>Le parole possono essere separate solo da virgole, punti e virgola o spazi.</value></data>
+  <data name="EditorCreate" xml:space="preserve"><value>Crea</value></data>
+  <data name="EditorCancel" xml:space="preserve"><value>Annulla</value></data>
+  <data name="EditorDeleteRuleTitle" xml:space="preserve"><value>Eliminare la regola?</value></data>
+  <data name="EditorDeleteRulePrompt" xml:space="preserve"><value>La regola verrà rimossa da questo cerchio. L'azione non può essere annullata.</value></data>
+  <data name="EditorDelete" xml:space="preserve"><value>Elimina</value></data>
+  <data name="EditorDeleteAria" xml:space="preserve"><value>Elimina regola</value></data>
+  <data name="EditorRuleCreated" xml:space="preserve"><value>Regola creata.</value></data>
+  <data name="EditorRuleDeleted" xml:space="preserve"><value>Regola eliminata.</value></data>
+  <data name="EditorRuleDuplicate" xml:space="preserve"><value>Esiste già una regola con questo testo per il cerchio selezionato.</value></data>
+  <data name="EditorRuleInvalidText" xml:space="preserve"><value>Inserisci un testo della regola di massimo 300 caratteri.</value></data>
+  <data name="EditorRuleInvalidWords" xml:space="preserve"><value>Inserisci almeno una parola valida. Sono consentiti solo virgole, punti e virgola e spazi come separatori.</value></data>
+  <data name="EditorRuleNotFound" xml:space="preserve"><value>Regola non trovata.</value></data>
+  <data name="EditorLastRuleCannotDelete" xml:space="preserve"><value>Ogni cerchio deve mantenere almeno una regola. Creane un'altra prima di eliminare questa.</value></data>
 </root>

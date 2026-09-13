@@ -8,7 +8,7 @@
   <data name="Description" xml:space="preserve"><value>Discover three hidden rules and place every word into the correct ring intersections.</value></data>
   <data name="EditorMenu" xml:space="preserve"><value>Word-rings editor</value></data>
   <data name="EditorTitle" xml:space="preserve"><value>Word-rings editor</value></data>
-  <data name="EditorPlaceholder" xml:space="preserve"><value>The editor page is ready. Puzzle editing will be added in the next step.</value></data>
+  <data name="EditorPlaceholder" xml:space="preserve"><value>Manage the rule pools used by the blue, yellow, and red rings.</value></data>
   <data name="Instructions" xml:space="preserve"><value>Each ring follows a hidden rule. Drag every word into the area whose rings match that word. Words may belong to one, two, all three, or none of the rings.</value></data>
   <data name="WordBank" xml:space="preserve"><value>Words</value></data>
   <data name="Outside" xml:space="preserve"><value>Outside all rings</value></data>
@@ -23,4 +23,29 @@
   <data name="AllCorrect" xml:space="preserve"><value>Perfect! Every word is in the correct area.</value></data>
   <data name="HasErrors" xml:space="preserve"><value>{0} word(s) are in the wrong area.</value></data>
   <data name="PlaceAll" xml:space="preserve"><value>Place all words before checking.</value></data>
+  <data name="EditorBlueTab" xml:space="preserve"><value>Blue ring</value></data>
+  <data name="EditorYellowTab" xml:space="preserve"><value>Yellow ring</value></data>
+  <data name="EditorRedTab" xml:space="preserve"><value>Red ring</value></data>
+  <data name="EditorRulesLabel" xml:space="preserve"><value>Rules</value></data>
+  <data name="EditorAddRule" xml:space="preserve"><value>New rule</value></data>
+  <data name="EditorConditionLabel" xml:space="preserve"><value>Condition</value></data>
+  <data name="EditorWordsLabel" xml:space="preserve"><value>Words</value></data>
+  <data name="EditorWordCount" xml:space="preserve"><value>{0} words</value></data>
+  <data name="EditorNoRules" xml:space="preserve"><value>No rules have been created for this ring yet.</value></data>
+  <data name="EditorCreateRuleTitle" xml:space="preserve"><value>Create rule</value></data>
+  <data name="EditorWordsHint" xml:space="preserve"><value>Separate words only with commas, semicolons, or spaces.</value></data>
+  <data name="EditorInvalidSeparators" xml:space="preserve"><value>Words may be separated only by commas, semicolons, or spaces.</value></data>
+  <data name="EditorCreate" xml:space="preserve"><value>Create</value></data>
+  <data name="EditorCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="EditorDeleteRuleTitle" xml:space="preserve"><value>Delete rule?</value></data>
+  <data name="EditorDeleteRulePrompt" xml:space="preserve"><value>The rule will be removed from this ring. This action cannot be undone.</value></data>
+  <data name="EditorDelete" xml:space="preserve"><value>Delete</value></data>
+  <data name="EditorDeleteAria" xml:space="preserve"><value>Delete rule</value></data>
+  <data name="EditorRuleCreated" xml:space="preserve"><value>Rule created.</value></data>
+  <data name="EditorRuleDeleted" xml:space="preserve"><value>Rule deleted.</value></data>
+  <data name="EditorRuleDuplicate" xml:space="preserve"><value>A rule with this text already exists for the selected ring.</value></data>
+  <data name="EditorRuleInvalidText" xml:space="preserve"><value>Enter a rule text up to 300 characters.</value></data>
+  <data name="EditorRuleInvalidWords" xml:space="preserve"><value>Enter at least one valid word. Only commas, semicolons, and whitespace may separate words.</value></data>
+  <data name="EditorRuleNotFound" xml:space="preserve"><value>The rule could not be found.</value></data>
+  <data name="EditorLastRuleCannotDelete" xml:space="preserve"><value>Each ring must keep at least one rule. Create another rule before deleting this one.</value></data>
 </root>

@@ -13,6 +13,7 @@
     const revealButton = root.querySelector('[data-reveal-rules]');
     const checkButton = root.querySelector('[data-check]');
     const resetButton = root.querySelector('[data-reset]');
+    const puzzleConfig = root.querySelector('[data-word-rings-puzzle]');
 
     const ringElements = [
         ['A', root.querySelector('.word-rings-circle-a')],
@@ -20,16 +21,12 @@
         ['C', root.querySelector('.word-rings-circle-c')]
     ];
 
-    const expected = new Map([
-        ['кіт', 'A'], ['вовк', 'A'],
-        ['ракета', 'B'], ['машина', 'B'],
-        ['лісок', 'C'], ['човен', 'C'],
-        ['жаба', 'AB'], ['собака', 'AB'],
-        ['песик', 'AC'], ['олень', 'AC'],
-        ['лампа', 'BC'], ['банка', 'BC'],
-        ['панда', 'ABC'], ['коала', 'ABC'],
-        ['дім', ''], ['сир', '']
-    ]);
+    let expected = new Map();
+    try {
+        expected = new Map(Object.entries(JSON.parse(puzzleConfig?.textContent || '{}')));
+    } catch (error) {
+        console.error('Failed to read word-rings puzzle config.', error);
+    }
 
     const assignments = new Map();
     let wireWord = null;

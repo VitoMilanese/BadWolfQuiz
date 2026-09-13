@@ -10,16 +10,25 @@ Placement membership is calculated from the actual rendered circle geometry in t
 
 Word movement uses pointer events rather than the browser's native HTML drag-and-drop mechanism. This keeps the dragged preview identical to the pill-shaped word token and avoids browser-generated square or rectangular drag ghosts.
 
-The first built-in puzzle uses these hidden rules:
+## Rule selection
 
-- blue: the word names an animal;
-- yellow: the word contains the letter `а`;
-- red: the word contains exactly five letters.
+Each color has its own persistent pool of rules. When the game page is opened, one rule is selected independently at random for the blue, yellow, and red rings. The board word bank is built from the words attached to those three selected rules, and the expected Venn membership is generated from the selected word sets. Up to two words that do not match any selected rule are added as outside-ring distractors when available; the legacy `дім` and `сир` words are fallback distractors.
 
-The player can reset the board, reveal or hide the rules, and validate the completed arrangement. Revealed rules appear beside their matching rings and are identified by color only. Validation marks correct and incorrect placements without replacing the membership-colored border.
+The default installation seeds the original three conditions so the minigame remains immediately playable. At least one rule must remain for each ring.
+
+The player can reset the board, reveal or hide the selected rules, and validate the completed arrangement. Revealed rules appear beside their matching rings and are identified by color only. Validation marks correct and incorrect placements without replacing the membership-colored border.
 
 The public `/minigames` catalog exposes the game as the second minigame.
 
 ## Editor
 
-Authenticated hosts see a **Word-rings editor** entry in the header menu. The route `/Admin/WordRingsEditor` currently contains a placeholder page only. Puzzle persistence, custom rule definitions, word-set editing, and host-specific game management are intentionally deferred to the next editor implementation step.
+The Master Host editor is available at `/Admin/WordRingsEditor`. The page uses three color-coded tabs, one per ring. Each tab lists the persistent rules for that ring and provides a **New rule** action.
+
+A rule contains only:
+
+- the condition text;
+- a set of words.
+
+Words may be separated only by commas, semicolons, or whitespace. Other separator punctuation is rejected on both the client and server. Words are de-duplicated case-insensitively before persistence.
+
+Rules are persisted in `App_Data/word-rings-rules.json`. Deletion is performed through the styled BadWolfQuiz `<dialog>` confirmation rather than a browser alert/confirm prompt. The trash action has an explicit dark-red `#9f101b` background with a red border so destructive styling does not depend only on a semantic CSS class name.

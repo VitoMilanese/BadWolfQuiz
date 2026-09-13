@@ -8,7 +8,7 @@
   <data name="Description" xml:space="preserve"><value>Розгадай три приховані правила та розклади слова у правильні перетини кілець.</value></data>
   <data name="EditorMenu" xml:space="preserve"><value>Редактор «Слівце в кільце»</value></data>
   <data name="EditorTitle" xml:space="preserve"><value>Редактор «Слівце в кільце»</value></data>
-  <data name="EditorPlaceholder" xml:space="preserve"><value>Сторінка редактора готова. Редагування наборів і правил додамо наступним кроком.</value></data>
+  <data name="EditorPlaceholder" xml:space="preserve"><value>Керуй наборами правил для синього, жовтого та червоного кілець.</value></data>
   <data name="Instructions" xml:space="preserve"><value>Кожне кільце має приховану умову. Перетягни кожне слово в область, кільця якої йому відповідають. Слово може належати одному, двом, усім трьом кільцям або жодному.</value></data>
   <data name="WordBank" xml:space="preserve"><value>Слова</value></data>
   <data name="Outside" xml:space="preserve"><value>Поза всіма кільцями</value></data>
@@ -23,4 +23,29 @@
   <data name="AllCorrect" xml:space="preserve"><value>Ідеально! Усі слова розкладені правильно.</value></data>
   <data name="HasErrors" xml:space="preserve"><value>Неправильно розкладено слів: {0}.</value></data>
   <data name="PlaceAll" xml:space="preserve"><value>Спочатку розклади всі слова.</value></data>
+  <data name="EditorBlueTab" xml:space="preserve"><value>Синє кільце</value></data>
+  <data name="EditorYellowTab" xml:space="preserve"><value>Жовте кільце</value></data>
+  <data name="EditorRedTab" xml:space="preserve"><value>Червоне кільце</value></data>
+  <data name="EditorRulesLabel" xml:space="preserve"><value>Правила</value></data>
+  <data name="EditorAddRule" xml:space="preserve"><value>Нове правило</value></data>
+  <data name="EditorConditionLabel" xml:space="preserve"><value>Умова</value></data>
+  <data name="EditorWordsLabel" xml:space="preserve"><value>Слова</value></data>
+  <data name="EditorWordCount" xml:space="preserve"><value>Слів: {0}</value></data>
+  <data name="EditorNoRules" xml:space="preserve"><value>Для цього кільця ще немає правил.</value></data>
+  <data name="EditorCreateRuleTitle" xml:space="preserve"><value>Створити правило</value></data>
+  <data name="EditorWordsHint" xml:space="preserve"><value>Розділяй слова лише комами, крапками з комою або пробілами.</value></data>
+  <data name="EditorInvalidSeparators" xml:space="preserve"><value>Для розділення слів дозволені лише кома, крапка з комою або пробіл.</value></data>
+  <data name="EditorCreate" xml:space="preserve"><value>Створити</value></data>
+  <data name="EditorCancel" xml:space="preserve"><value>Скасувати</value></data>
+  <data name="EditorDeleteRuleTitle" xml:space="preserve"><value>Видалити правило?</value></data>
+  <data name="EditorDeleteRulePrompt" xml:space="preserve"><value>Правило буде видалене з цього кільця. Цю дію неможливо скасувати.</value></data>
+  <data name="EditorDelete" xml:space="preserve"><value>Видалити</value></data>
+  <data name="EditorDeleteAria" xml:space="preserve"><value>Видалити правило</value></data>
+  <data name="EditorRuleCreated" xml:space="preserve"><value>Правило створено.</value></data>
+  <data name="EditorRuleDeleted" xml:space="preserve"><value>Правило видалено.</value></data>
+  <data name="EditorRuleDuplicate" xml:space="preserve"><value>Правило з таким текстом уже існує для цього кільця.</value></data>
+  <data name="EditorRuleInvalidText" xml:space="preserve"><value>Введи текст правила довжиною до 300 символів.</value></data>
+  <data name="EditorRuleInvalidWords" xml:space="preserve"><value>Додай хоча б одне коректне слово. Слова можна розділяти лише комами, крапками з комою або пробілами.</value></data>
+  <data name="EditorRuleNotFound" xml:space="preserve"><value>Правило не знайдено.</value></data>
+  <data name="EditorLastRuleCannotDelete" xml:space="preserve"><value>Для кожного кільця потрібно залишити щонайменше одне правило. Спочатку створи інше правило.</value></data>
 </root>
