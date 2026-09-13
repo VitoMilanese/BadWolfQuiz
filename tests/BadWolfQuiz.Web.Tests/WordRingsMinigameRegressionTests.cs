@@ -28,12 +28,22 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("data-word-list", game);
         Assert.Contains("data-outside-zone", game);
         Assert.Contains("word-rings-refinements.css", game);
-        Assert.Contains("word-rings-drag-visuals.js", game);
+        Assert.Contains("word-rings-pointer-drag.js", game);
+        Assert.DoesNotContain("word-rings-drag-visuals.js", game);
+        Assert.Contains("word-rings-circle word-rings-circle-a\"></div>", game);
+        Assert.Contains("word-rings-circle word-rings-circle-b\"></div>", game);
+        Assert.Contains("word-rings-circle word-rings-circle-c\"></div>", game);
         Assert.Contains("@page \"/Admin/WordRingsEditor\"", editor);
         Assert.Contains("Authorize", editor);
         Assert.Contains("~/css/minigame-editor.css", editor);
         Assert.Contains("~/css/word-rings-editor.css", editor);
         Assert.Contains("word-rings-editor-heading", editor);
+        Assert.DoesNotContain("<strong>A</strong>", editor);
+        Assert.DoesNotContain("<strong>B</strong>", editor);
+        Assert.DoesNotContain("<strong>C</strong>", editor);
+        Assert.DoesNotContain("<span>A</span>", editor);
+        Assert.DoesNotContain("<span>B</span>", editor);
+        Assert.DoesNotContain("<span>C</span>", editor);
         Assert.DoesNotContain("style=\"", editor);
         Assert.Contains("word-rings-editor-coming-soon", editorStyles);
         Assert.Contains("@media (max-width: 600px)", editorStyles);
@@ -86,24 +96,40 @@ public sealed class WordRingsMinigameRegressionTests
     }
 
     [Fact]
-    public void Drag_visuals_use_a_canvas_pill_preview_and_clear_transient_drag_state_after_drop()
+    public void Dragging_uses_pointer_events_instead_of_native_browser_drag_images()
     {
-        var dragVisuals = ReadWebFile("wwwroot", "js", "word-rings-drag-visuals.js");
+        var game = ReadWebFile("Pages", "WordRings.cshtml");
+        var script = ReadWebFile("wwwroot", "js", "word-rings.js");
+        var pointerDrag = ReadWebFile("wwwroot", "js", "word-rings-pointer-drag.js");
+        var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
 
-        Assert.Contains("document.createElement('canvas')", dragVisuals);
-        Assert.Contains("roundedRect", dragVisuals);
-        Assert.Contains("createConicGradient", dragVisuals);
-        Assert.Contains("setDragImage(canvas", dragVisuals);
-        Assert.Contains("requestAnimationFrame(clearDragVisuals)", dragVisuals);
-        Assert.Contains("classList.remove('is-dragging')", dragVisuals);
-        Assert.Contains("source.dataset.membership", dragVisuals);
+        Assert.DoesNotContain("draggable=\"true\"", game);
+        Assert.DoesNotContain("dragstart", script);
+        Assert.DoesNotContain("dataTransfer", script);
+        Assert.Contains("pointerdown", pointerDrag);
+        Assert.Contains("pointermove", pointerDrag);
+        Assert.Contains("pointerup", pointerDrag);
+        Assert.Contains("pointercancel", pointerDrag);
+        Assert.Contains("setPointerCapture", pointerDrag);
+        Assert.Contains("document.elementFromPoint", pointerDrag);
+        Assert.Contains("word-rings-pointer-preview", pointerDrag);
+        Assert.Contains("word.draggable = false", pointerDrag);
+        Assert.DoesNotContain("dataTransfer", pointerDrag);
+        Assert.DoesNotContain("setDragImage", pointerDrag);
+        Assert.DoesNotContain("dragstart", pointerDrag);
+        Assert.Contains("-webkit-user-drag: none", refinements);
+        Assert.Contains("touch-action: none", refinements);
+        Assert.Contains(".word-rings-pointer-preview", refinements);
     }
 
     [Fact]
-    public void Revealed_rules_are_positioned_next_to_their_rings_inside_the_board()
+    public void Revealed_rules_are_positioned_by_color_without_visible_ring_letters()
     {
         var game = ReadWebFile("Pages", "WordRings.cshtml");
         var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
+        var en = ReadWebFile("Resources", "Localization", "WordRingsResource.resx");
+        var uk = ReadWebFile("Resources", "Localization", "WordRingsResource.uk.resx");
+        var it = ReadWebFile("Resources", "Localization", "WordRingsResource.it.resx");
 
         Assert.True(
             game.IndexOf("word-rings-stage", StringComparison.Ordinal) <
@@ -115,6 +141,15 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("border-color: var(--word-ring-a)", refinements);
         Assert.Contains("border-color: var(--word-ring-b)", refinements);
         Assert.Contains("border-color: var(--word-ring-c)", refinements);
+        Assert.DoesNotContain("<value>A:", en);
+        Assert.DoesNotContain("<value>B:", en);
+        Assert.DoesNotContain("<value>C:", en);
+        Assert.DoesNotContain("<value>A:", uk);
+        Assert.DoesNotContain("<value>B:", uk);
+        Assert.DoesNotContain("<value>C:", uk);
+        Assert.DoesNotContain("<value>A:", it);
+        Assert.DoesNotContain("<value>B:", it);
+        Assert.DoesNotContain("<value>C:", it);
     }
 
     private static string ReadWebFile(params string[] parts)
