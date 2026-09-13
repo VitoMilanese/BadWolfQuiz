@@ -106,6 +106,14 @@ The host timer exposes `+10`, `+15`, `+20`, and `+30` quick adjustments while th
 
 Quick-adjust forms use the same AJAX contract as pause/resume and must not enter the HTML gameplay-navigation path. Keeping `.game-timer-adjust` outside the general gameplay form interceptor is important: routing a quick adjustment through that interceptor would rebuild the gameplay DOM, briefly remove the timer, and close the quick-actions panel. With the lightweight command path, repeated additions can be made while the pointer remains over the timer/action area and the timer DOM stays mounted.
 
+## Question-selection recovery
+
+Question selection uses an AJAX POST and expects JSON from the Lobby handler. A normal gameplay rule rejection returns JSON and is surfaced to the host without retrying.
+
+If the selection POST instead returns a non-JSON HTTP 400, the host treats it as a likely request-validation failure rather than a gameplay-rule rejection. The client fetches fresh server-rendered Lobby markup, adopts the latest `__RequestVerificationToken`, updates matching token inputs in the mounted document, and retries the selection once. This recovery is intentionally limited to question selection and to non-JSON 400 responses so real gameplay validation errors are not hidden or repeated.
+
+Production logging also enables the antiforgery authorization filter at `Information` level while the broader ASP.NET Core category remains at `Warning`. This makes future request-token failures diagnosable without enabling noisy framework-wide information logging.
+
 ## Failure model
 
 The asynchronous navigation layer is an optimization over the authoritative server-rendered flow, not a separate source of game state. If a fetch fails, a response is unsupported, authentication redirects outside the expected route, or the client cannot safely mount the response, normal navigation/reload remains the fallback. Reloading the page must reconstruct the same authoritative state from the server.
