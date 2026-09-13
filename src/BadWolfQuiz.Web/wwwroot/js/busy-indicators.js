@@ -1,6 +1,7 @@
 (() => {
     const routes = {
         quizzes: "/admin/quizzes",
+        quizCreate: "/admin/quizzes/create",
         publicQuizzes: "/public-quizzes",
         editor: "/admin/quizzes/editor",
         questionEditor: "/admin/quizzes/questioneditor",
@@ -257,6 +258,20 @@
         button.disabled = true;
     };
 
+    const lockQuizCreateSubmitter = submitter => {
+        if (normalisePath(window.location.pathname) !== routes.quizCreate ||
+            !(submitter instanceof HTMLButtonElement ||
+              submitter instanceof HTMLInputElement)) {
+            return;
+        }
+
+        lockedQuizControls = [{
+            button: submitter,
+            wasDisabled: submitter.disabled
+        }];
+        submitter.disabled = true;
+    };
+
     const renameTitleInput = (form, handler) => {
         const name = handler === "renameround"
             ? "RenameRound.Title"
@@ -483,6 +498,10 @@
     const shouldTrackForm = (form, submitter) => {
         const currentPath = normalisePath(window.location.pathname);
         const handler = handlerName(form);
+
+        if (currentPath === routes.quizCreate) {
+            return form.method.toLowerCase() === "post";
+        }
 
         if (isQuizzesIndex(currentPath)) {
             return handler === "creategame" ||
@@ -732,6 +751,7 @@ return [...document.querySelectorAll("dialog[open]")]
         form.dataset.busyLocked = "true";
         lockAddRoundDialogButtons(form);
         lockQuizImportControl(form);
+        lockQuizCreateSubmitter(submitter);
         show();
 
         const currentPath = normalisePath(window.location.pathname);
