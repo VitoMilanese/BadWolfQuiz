@@ -24,7 +24,7 @@ public sealed class HostNormalWagerRestyleRegressionTests
             helper,
             StringComparison.Ordinal);
         Assert.Contains(
-            "/css/host-normal-wager-viewport-center.css?v=1",
+            "/css/host-normal-wager-viewport-center.css?v=2",
             helper,
             StringComparison.Ordinal);
 
@@ -85,7 +85,7 @@ public sealed class HostNormalWagerRestyleRegressionTests
     }
 
     [Fact]
-    public void Host_normal_wager_fills_available_desktop_stage_and_centers_vertically()
+    public void Host_normal_wager_matches_the_two_card_left_rail_mockup()
     {
         var styles = File.ReadAllText(FindWebFile(
             "wwwroot",
@@ -102,7 +102,15 @@ public sealed class HostNormalWagerRestyleRegressionTests
         Assert.Contains("100dvh -", styles, StringComparison.Ordinal);
         Assert.Contains("var(--topbar-height, 60px) -", styles, StringComparison.Ordinal);
         Assert.Contains("var(--game-scoreboard-space, 130px) -", styles, StringComparison.Ordinal);
-        Assert.Contains("align-content: safe center !important;", styles, StringComparison.Ordinal);
+        Assert.Contains(
+            "grid-template-rows: auto minmax(0, 1fr) !important;",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains("align-content: stretch !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("align-items: stretch !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("row-gap: 32px !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("height: 100% !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("row-gap: 18px !important;", styles, StringComparison.Ordinal);
     }
 
     [Fact]
