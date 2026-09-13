@@ -9,5 +9,7 @@ public sealed class HostGameplaySubmitGuardAssetsTagHelper : TagHelper
     {
         output.PreContent.AppendHtml(
             "<script src=\"/js/host-gameplay-submit-guard.js?v=5\" data-host-gameplay-submit-guard></script>");
+        output.PreContent.AppendHtml(
+            "<script src=\"/js/host-question-selection-recovery.js?v=1\" data-host-question-selection-recovery></script>");
     }
 }

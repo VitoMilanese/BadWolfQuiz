@@ -4,7 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>BadWolfQuiz.Web</RootNamespace>
-    <Version>1.40.6</Version>
+    <Version>1.40.7</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -32,7 +32,6 @@
     <Folder Include="Resources\Avatars\M\" />
     <Folder Include="Resources\Avatars\F\" />
     <Folder Include="Resources\Frames\" />
-    <Folder Include="Resources\Minigames\GameCards\" />
     <None Update="Resources\Avatars\**\*.png;Resources\Avatars\**\*.webp;Resources\Avatars\**\*.jpg;Resources\Avatars\**\*.jpeg;Resources\Frames\*.png"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest" />
