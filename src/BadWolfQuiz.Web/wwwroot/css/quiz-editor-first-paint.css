@@ -4,3 +4,8 @@
 .quiz-editor-toolbar .round-tabs > .round-action-button {
     display: none;
 }
+
+/* Give long category titles more usable width in the Quiz Editor board. */
+body[data-quiz-editor-workspace="board"] .category-title {
+    padding-inline: 6px;
+}
