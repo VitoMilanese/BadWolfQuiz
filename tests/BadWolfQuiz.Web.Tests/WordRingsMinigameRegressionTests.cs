@@ -1,4 +1,5 @@
 using BadWolfQuiz.Web.Services;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BadWolfQuiz.Web.Tests;
 
