@@ -39,7 +39,7 @@ public sealed class HostMultipleChoiceAnswerWidthRegressionTests
         Assert.Contains("width: 100% !important;", bootstrap, StringComparison.Ordinal);
         Assert.Contains("max-width: none !important;", bootstrap, StringComparison.Ordinal);
         Assert.Contains(
-            "host-multiple-choice-bootstrap.js?v=1.26.5",
+            "host-multiple-choice-bootstrap.js?v=1.26.6",
             assets,
             StringComparison.Ordinal);
     }

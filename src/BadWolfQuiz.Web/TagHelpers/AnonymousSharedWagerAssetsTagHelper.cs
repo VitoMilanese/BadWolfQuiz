@@ -29,6 +29,8 @@ public sealed class AnonymousSharedWagerAssetsTagHelper : TagHelper
                 "<link rel=\"stylesheet\" href=\"/css/player-regular-gameplay-safe.css?v=3\" />");
             output.PreElement.AppendHtml(
                 "<link rel=\"stylesheet\" href=\"/css/player-regular-gameplay-host-followup.css?v=6\" />");
+            output.PreElement.AppendHtml(
+                "<link rel=\"stylesheet\" href=\"/css/host-normal-wager-restyle.css?v=3\" />");
             output.PostContent.AppendHtml(
                 "<script src=\"/js/host-gameplay-submit-guard.js?v=4\" data-host-gameplay-submit-guard></script>");
             output.PostContent.AppendHtml(
