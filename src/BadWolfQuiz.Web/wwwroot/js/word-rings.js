@@ -32,7 +32,7 @@
     ]);
 
     const assignments = new Map();
-    let dragging = null;
+    let wireWord = null;
 
     const canonical = value => [...value].sort().join('');
     const progressText = () => root.dataset.progressTemplate
@@ -51,7 +51,7 @@
     };
 
     const createPlacedWord = (word, x, y, membership) => {
-        const source = root.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
+        const source = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
         if (!source) return;
 
         source.classList.add('is-placed');
@@ -59,14 +59,14 @@
 
         const token = source.cloneNode(true);
         token.hidden = false;
-        token.classList.remove('is-placed');
+        token.classList.remove('is-placed', 'is-dragging', 'is-correct', 'is-wrong');
         token.classList.add('is-on-stage');
         token.dataset.membership = canonical(membership);
         token.style.left = `${x}%`;
         token.style.top = `${y}%`;
-        token.draggable = true;
+        token.draggable = false;
         placedLayer.append(token);
-        wireWord(token);
+        wireWord?.(token);
     };
 
     const removePlacedWord = word => {
@@ -77,7 +77,10 @@
             if (token.dataset.word === word) token.remove();
         });
         const source = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
-        if (source) source.hidden = false;
+        if (source) {
+            source.hidden = false;
+            source.classList.remove('is-placed', 'is-dragging');
+        }
     };
 
     const pointIsInsideRing = (clientX, clientY, ring) => {
@@ -107,13 +110,11 @@
         };
     };
 
-    const assignToStage = (word, event) => {
+    const assignToStage = (word, clientX, clientY) => {
         removePlacedWord(word);
-        const target = membershipAt(event.clientX, event.clientY);
+        const target = membershipAt(clientX, clientY);
         assignments.set(word, target.membership);
         createPlacedWord(word, target.x, target.y, target.membership);
-        resetFeedback();
-        updateProgress();
     };
 
     const assignOutside = word => {
@@ -121,69 +122,45 @@
         assignments.set(word, '');
         const source = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
         if (!source) return;
+
         source.hidden = true;
+        source.classList.add('is-placed');
         const token = source.cloneNode(true);
         token.hidden = false;
+        token.classList.remove('is-placed', 'is-dragging', 'is-correct', 'is-wrong');
         token.classList.add('is-outside');
         token.dataset.membership = '';
-        token.draggable = true;
+        token.draggable = false;
         outsideList.append(token);
-        wireWord(token);
+        wireWord?.(token);
+    };
+
+    const returnToBank = word => {
+        assignments.delete(word);
+        removePlacedWord(word);
+    };
+
+    const onPlacementChanged = () => {
         resetFeedback();
         updateProgress();
     };
 
-    function wireWord(word) {
-        word.addEventListener('dragstart', event => {
-            dragging = word.dataset.word;
-            event.dataTransfer.effectAllowed = 'move';
-            event.dataTransfer.setData('text/plain', dragging);
-            requestAnimationFrame(() => word.classList.add('is-dragging'));
-        });
-        word.addEventListener('dragend', () => {
-            dragging = null;
-            word.classList.remove('is-dragging');
+    if (typeof window.BadWolfWordRingsPointerDrag === 'function') {
+        wireWord = window.BadWolfWordRingsPointerDrag({
+            stage,
+            wordList,
+            outsideZone,
+            membershipAt,
+            assignToStage,
+            assignOutside,
+            returnToBank,
+            onChanged: onPlacementChanged
         });
     }
 
-    root.querySelectorAll('.word-rings-word').forEach(wireWord);
-
-    stage.addEventListener('dragover', event => {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'move';
-        stage.classList.add('is-drop-target');
-    });
-    stage.addEventListener('dragleave', event => {
-        if (!stage.contains(event.relatedTarget)) stage.classList.remove('is-drop-target');
-    });
-    stage.addEventListener('drop', event => {
-        event.preventDefault();
-        stage.classList.remove('is-drop-target');
-        const word = dragging || event.dataTransfer.getData('text/plain');
-        if (word) assignToStage(word, event);
-    });
-
-    outsideZone.addEventListener('dragover', event => {
-        event.preventDefault();
-        outsideZone.classList.add('is-drop-target');
-    });
-    outsideZone.addEventListener('dragleave', () => outsideZone.classList.remove('is-drop-target'));
-    outsideZone.addEventListener('drop', event => {
-        event.preventDefault();
-        outsideZone.classList.remove('is-drop-target');
-        const word = dragging || event.dataTransfer.getData('text/plain');
-        if (word) assignOutside(word);
-    });
-
-    wordList.addEventListener('dragover', event => event.preventDefault());
-    wordList.addEventListener('drop', event => {
-        event.preventDefault();
-        const word = dragging || event.dataTransfer.getData('text/plain');
-        if (!word) return;
-        assignments.delete(word);
-        removePlacedWord(word);
-        resetFeedback();
-        updateProgress();
+    root.querySelectorAll('.word-rings-word').forEach(word => {
+        word.draggable = false;
+        wireWord?.(word);
     });
 
     revealButton.addEventListener('click', () => {
@@ -197,7 +174,8 @@
         outsideList.innerHTML = '';
         wordList.querySelectorAll('.word-rings-word').forEach(word => {
             word.hidden = false;
-            word.classList.remove('is-correct', 'is-wrong');
+            word.draggable = false;
+            word.classList.remove('is-correct', 'is-wrong', 'is-placed', 'is-dragging');
         });
         resetFeedback();
         updateProgress();
