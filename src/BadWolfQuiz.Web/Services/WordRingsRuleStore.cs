@@ -231,7 +231,7 @@ public sealed class WordRingsRuleStore
 
     private IReadOnlyList<string>? ParseWords(string? value)
     {
-        var input = value?.Trim() ?? string.Empty;
+        var input = value ?? string.Empty;
         if (input.Length == 0 ||
             input.Length > MaximumWordsInputLength ||
             !WordListPattern.IsMatch(input))
