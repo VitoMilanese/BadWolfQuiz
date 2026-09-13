@@ -9,6 +9,24 @@ body[data-quiz-editor-workspace="board"] .question-card-actions.has-question-cop
     padding-block: 0;
 }
 
+/* Every regular editor preview uses the whole available preview stage. Later
+   workspace polish used 1500/1300px reading caps, which left large side gutters
+   on wide screens and made editor previews disagree with gameplay/AnswerKey. */
+body[data-quiz-editor-workspace]
+    #question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid) {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+body[data-quiz-editor-workspace]
+    #question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)
+    :is(.question-preview-text, .question-preview-caption, .question-preview-media) {
+    width: 100% !important;
+    max-width: none !important;
+    margin-inline: 0 !important;
+    box-sizing: border-box !important;
+}
+
 /* Image preview chrome must follow the image itself, never the full content block. */
 body[data-quiz-editor-workspace="question"]
     #question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)

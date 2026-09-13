@@ -1,7 +1,8 @@
 /* Keep the host-entered normal wager group centered in the gameplay viewport.
- * The right wager card defines the full desktop stage height. The compact status
- * card stays at the top-left and the player card fills the remaining left rail,
- * matching the host mock-up without introducing another runtime wrapper. */
+ * The stage may use the available viewport height for centering, but the cards
+ * themselves keep their intrinsic height. The spanning wager form defines the
+ * compact two-row grid; the lower left player card stretches only inside that
+ * compact grid so its bottom stays aligned with the wager card. */
 @media (min-width: 821px) {
     .host-game-board
         .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel) {
@@ -15,8 +16,8 @@
             var(--topbar-height, 60px) -
             var(--game-scoreboard-space, 130px) -
             12px) !important;
-        grid-template-rows: auto minmax(0, 1fr) !important;
-        align-content: stretch !important;
+        grid-template-rows: max-content auto !important;
+        align-content: safe center !important;
         align-items: stretch !important;
         row-gap: 32px !important;
     }
@@ -31,7 +32,7 @@
         .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)
         > .wager-entry-panel > .wager-player-summary {
         min-height: 0 !important;
-        height: 100% !important;
+        height: auto !important;
         align-self: stretch !important;
     }
 
@@ -39,7 +40,7 @@
         .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)
         > .wager-entry-panel > .question-wager-form {
         min-height: 0 !important;
-        height: 100% !important;
+        height: auto !important;
         align-self: stretch !important;
     }
 }

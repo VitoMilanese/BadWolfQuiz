@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class QuizEditorWorkspacePolishRegressionTests
 {
     [Fact]
-    public void Workspace_loads_the_final_polish_stylesheet()
+    public void Workspace_loads_the_final_polish_and_browser_fix_stylesheets()
     {
         var tagHelper = File.ReadAllText(FindWebFile(
             "TagHelpers",
@@ -11,6 +11,10 @@ public sealed class QuizEditorWorkspacePolishRegressionTests
 
         Assert.Contains(
             "/css/quiz-editor-workspace-polish.css?v=577.5",
+            tagHelper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "/css/quiz-editor-workspace-browser-fixes.css?v=577.8",
             tagHelper,
             StringComparison.Ordinal);
     }
@@ -58,6 +62,10 @@ public sealed class QuizEditorWorkspacePolishRegressionTests
     public void Regular_question_and_answer_preview_use_a_full_gameplay_stage()
     {
         var css = ReadPolishCss();
+        var browserFixes = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "quiz-editor-workspace-browser-fixes.css"));
 
         Assert.Contains("body[data-quiz-editor-workspace=\"question\"] .question-preview-dialog", css, StringComparison.Ordinal);
         Assert.Contains("repeating-linear-gradient(", css, StringComparison.Ordinal);
@@ -68,6 +76,18 @@ public sealed class QuizEditorWorkspacePolishRegressionTests
         Assert.Contains("font-size: clamp(2rem, 4.5vw, 4.8rem);", css, StringComparison.Ordinal);
         Assert.Contains("font-size: clamp(1.26rem, 3.15vw, 2.8rem);", css, StringComparison.Ordinal);
         Assert.Contains("max-height: min(68vh, 760px);", css, StringComparison.Ordinal);
+
+        Assert.Contains(
+            "#question-preview-content:not(.four-clue-grid):not(.all-player-answer-grid)",
+            browserFixes,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ":is(.question-preview-text, .question-preview-caption, .question-preview-media)",
+            browserFixes,
+            StringComparison.Ordinal);
+        Assert.Contains("width: 100% !important;", browserFixes, StringComparison.Ordinal);
+        Assert.Contains("max-width: none !important;", browserFixes, StringComparison.Ordinal);
+        Assert.Contains("margin-inline: 0 !important;", browserFixes, StringComparison.Ordinal);
     }
 
     private static string ReadPolishCss() => File.ReadAllText(FindWebFile(

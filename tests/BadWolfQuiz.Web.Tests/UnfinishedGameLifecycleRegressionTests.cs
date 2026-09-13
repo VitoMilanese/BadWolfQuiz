@@ -91,6 +91,30 @@ public sealed class UnfinishedGameLifecycleRegressionTests
     }
 
     [Fact]
+    public void Quiz_editor_play_uses_the_same_unfinished_game_confirmation_before_submitting()
+    {
+        var root = FindRepositoryRoot();
+        var guard = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "TagHelpers",
+            "QuizEditorUnfinishedGameGuardTagHelper.cs"));
+
+        Assert.Contains("quiz-board-form", guard, StringComparison.Ordinal);
+        Assert.Contains("activeGameStore.Find(currentHost.RequiredId, quizId)", guard, StringComparison.Ordinal);
+        Assert.Contains("activeGameAvailability.CanResume(unfinished)", guard, StringComparison.Ordinal);
+        Assert.Contains("ReplaceDialogTitle", guard, StringComparison.Ordinal);
+        Assert.Contains("ReplaceDialogText", guard, StringComparison.Ordinal);
+        Assert.Contains("StartNewGame", guard, StringComparison.Ordinal);
+        Assert.Contains("name=\\\"replaceUnfinished\\\"", guard, StringComparison.Ordinal);
+        Assert.Contains("playButton.type = 'button';", guard, StringComparison.Ordinal);
+        Assert.Contains("dialog.showModal();", guard, StringComparison.Ordinal);
+        Assert.Contains("replaceInput.value = 'true';", guard, StringComparison.Ordinal);
+        Assert.Contains("form.requestSubmit(playButton);", guard, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Russian_unfinished_game_resources_follow_project_convention()
     {
         var root = FindRepositoryRoot();
