@@ -27,6 +27,8 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("data-ring-stage", game);
         Assert.Contains("data-word-list", game);
         Assert.Contains("data-outside-zone", game);
+        Assert.Contains("word-rings-refinements.css", game);
+        Assert.Contains("word-rings-drag-visuals.js", game);
         Assert.Contains("@page \"/Admin/WordRingsEditor\"", editor);
         Assert.Contains("Authorize", editor);
         Assert.Contains("~/css/minigame-editor.css", editor);
@@ -57,18 +59,21 @@ public sealed class WordRingsMinigameRegressionTests
     }
 
     [Fact]
-    public void Board_uses_symmetric_ring_geometry_and_membership_colored_word_borders()
+    public void Board_uses_centered_symmetric_ring_geometry_and_membership_colored_word_borders()
     {
         var styles = ReadWebFile("wwwroot", "css", "word-rings.css");
+        var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
         var editorStyles = ReadWebFile("wwwroot", "css", "word-rings-editor.css");
 
         Assert.Contains("--word-ring-a: #5f86ee", styles);
         Assert.Contains("--word-ring-b: #e0b43c", styles);
         Assert.Contains("--word-ring-c: #e85d5d", styles);
         Assert.Contains("width: 48%", styles);
-        Assert.Contains("left: 13%", styles);
-        Assert.Contains("right: 13%", styles);
-        Assert.Contains("left: 26%", styles);
+        Assert.Contains("left: 16%", refinements);
+        Assert.Contains("right: 16%", refinements);
+        Assert.Contains("top: 4.5%", refinements);
+        Assert.Contains("left: 26%", refinements);
+        Assert.Contains("bottom: 9%", refinements);
         Assert.Contains("data-membership=\"AB\"", styles);
         Assert.Contains("data-membership=\"AC\"", styles);
         Assert.Contains("data-membership=\"BC\"", styles);
@@ -78,6 +83,21 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("color: #5f86ee", editorStyles);
         Assert.Contains("color: #e0b43c", editorStyles);
         Assert.Contains("color: #e85d5d", editorStyles);
+    }
+
+    [Fact]
+    public void Drag_visuals_use_a_clean_custom_ghost_and_clear_transient_drag_state_after_drop()
+    {
+        var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
+        var dragVisuals = ReadWebFile("wwwroot", "js", "word-rings-drag-visuals.js");
+
+        Assert.Contains("word-rings-drag-ghost", refinements);
+        Assert.Contains("opacity: 1 !important", refinements);
+        Assert.Contains("document.createElement('span')", dragVisuals);
+        Assert.Contains("setDragImage", dragVisuals);
+        Assert.Contains("requestAnimationFrame(clearDragVisuals)", dragVisuals);
+        Assert.Contains("classList.remove('is-dragging')", dragVisuals);
+        Assert.Contains("source.dataset.membership", dragVisuals);
     }
 
     private static string ReadWebFile(params string[] parts)
