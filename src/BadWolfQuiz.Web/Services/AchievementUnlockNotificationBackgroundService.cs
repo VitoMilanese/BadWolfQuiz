@@ -325,6 +325,8 @@ public sealed class AchievementUnlockNotificationBackgroundService(
         IReadOnlyDictionary<int, HashSet<string>> tagsByQuestion)
     {
         var orderedAttempts = questions
+            .Where(question => question.PresentationType !=
+                QuestionPresentationType.AllPlayerPeerRatedText)
             .SelectMany(question => question.AnswerAttempts
                 .Where(attempt => attempt.PlayerId == playerId)
                 .Select(attempt => new QuestionAttempt(question, attempt)))
@@ -451,6 +453,11 @@ public sealed class AchievementUnlockNotificationBackgroundService(
 
         foreach (var question in questions)
         {
+            if (question.PresentationType == QuestionPresentationType.AllPlayerPeerRatedText)
+            {
+                continue;
+            }
+
             foreach (var attempt in question.AnswerAttempts.Where(attempt => attempt.PlayerId == player.Id))
             {
                 if (attempt.IsCorrect && attempt.RewardModifier == AnswerRewardModifier.Double)
@@ -500,12 +507,22 @@ public sealed class AchievementUnlockNotificationBackgroundService(
                 result.Add("EveryCategoryAttempt");
             }
 
+            var correctnessCategoryIds = roundQuestions
+                .Where(question => question.PresentationType !=
+                    QuestionPresentationType.AllPlayerPeerRatedText)
+                .Select(question => question.SourceCategoryId)
+                .Distinct()
+                .ToArray();
             var correct = roundQuestions
-                .Where(question => question.AnswerAttempts.Any(attempt =>
-                    attempt.PlayerId == player.Id && attempt.IsCorrect))
+                .Where(question =>
+                    question.PresentationType !=
+                        QuestionPresentationType.AllPlayerPeerRatedText &&
+                    question.AnswerAttempts.Any(attempt =>
+                        attempt.PlayerId == player.Id && attempt.IsCorrect))
                 .Select(question => question.SourceCategoryId)
                 .ToHashSet();
-            if (categoryIds.All(correct.Contains))
+            if (correctnessCategoryIds.Length > 0 &&
+                correctnessCategoryIds.All(correct.Contains))
             {
                 result.Add("EveryCategoryCorrect");
             }
