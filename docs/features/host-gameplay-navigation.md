@@ -114,6 +114,16 @@ If the selection POST instead returns a non-JSON HTTP 400, the host treats it as
 
 Production logging also enables the antiforgery authorization filter at `Information` level while the broader ASP.NET Core category remains at `Warning`. This makes future request-token failures diagnosable without enabling noisy framework-wide information logging.
 
+## Transient host-state recovery
+
+Persistent host navigation can replace parts of the gameplay DOM without recreating the surrounding page. Any class or event binding that describes only a temporary question phase therefore has to be reconciled with the fresh server state after a mount.
+
+Peer-rated all-player questions use temporary host classes while answers are being reviewed. When navigation returns to the persistent board, `peer-rated-returning-to-board` is removed as soon as the board is visible again so it cannot keep a later `.current-question-summary` hidden. Stale `question-answering-player` and `question-attempted-player` classes are also cleared while the peer-rated shell or the returned board is authoritative, preventing player cards from remaining gray after visiting an auxiliary host page such as Player achievement history.
+
+Question selection receives the same replacement-aware treatment. The initial Lobby script still owns the direct submit handlers for forms rendered with the first board. If a later host partial navigation imports a fresh board grid, a delegated fallback handles any newly inserted `.question-selection-form` that was not already consumed by the normal listener. It submits through the existing JSON/AJAX contract and refreshes the host gameplay view; forms already handled by the normal listener are ignored through `event.defaultPrevented`, so the fallback does not create duplicate submissions.
+
+The transient-state recovery layer is loaded before the generic host gameplay submit guard. This ordering lets replaced question forms use the normal recovered AJAX path before the generic fallback can replay them as navigation submissions.
+
 ## Failure model
 
 The asynchronous navigation layer is an optimization over the authoritative server-rendered flow, not a separate source of game state. If a fetch fails, a response is unsupported, authentication redirects outside the expected route, or the client cannot safely mount the response, normal navigation/reload remains the fallback. Reloading the page must reconstruct the same authoritative state from the server.
