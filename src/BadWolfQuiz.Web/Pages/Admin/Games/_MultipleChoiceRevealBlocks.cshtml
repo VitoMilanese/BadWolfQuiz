@@ -41,7 +41,9 @@
 
     /* Legacy all-player answer styles used a narrow answer column. The reveal
        now owns the available gameplay width while preserving correct-option
-       highlighting and the existing centered text treatment. */
+       highlighting and the existing centered text treatment. Flex items must
+       not shrink below their rendered content height, otherwise a long text
+       block can collapse and the following media block paints over the text. */
     .game-content-blocks.multiple-choice-answer-reveal-grid
         .game-content-block,
     html.all-player-multiple-choice-answer-layout
@@ -53,6 +55,7 @@
         > .game-content-blocks.multiple-choice-answer-reveal-grid
         .game-content-block {
         display: block !important;
+        flex: 0 0 auto !important;
         width: 100% !important;
         max-width: none !important;
         min-width: 0 !important;

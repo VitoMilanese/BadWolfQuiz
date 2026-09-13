@@ -45,6 +45,10 @@ public sealed class HostMultipleChoiceAnswerCenteringRegressionTests
             reveal,
             StringComparison.Ordinal);
         Assert.Contains(
+            "flex: 0 0 auto !important;",
+            reveal,
+            StringComparison.Ordinal);
+        Assert.Contains(
             "multiple-choice-additional-answer-block",
             reveal,
             StringComparison.Ordinal);
