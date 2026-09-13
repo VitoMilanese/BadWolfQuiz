@@ -16,9 +16,9 @@
   <data name="Reset" xml:space="preserve"><value>Reset</value></data>
   <data name="RevealRules" xml:space="preserve"><value>Reveal rules</value></data>
   <data name="HideRules" xml:space="preserve"><value>Hide rules</value></data>
-  <data name="RuleA" xml:space="preserve"><value>A: the word names an animal</value></data>
-  <data name="RuleB" xml:space="preserve"><value>B: the word contains the letter “a”</value></data>
-  <data name="RuleC" xml:space="preserve"><value>C: the word has exactly 5 letters</value></data>
+  <data name="RuleA" xml:space="preserve"><value>The word names an animal</value></data>
+  <data name="RuleB" xml:space="preserve"><value>The word contains the letter “a”</value></data>
+  <data name="RuleC" xml:space="preserve"><value>The word has exactly 5 letters</value></data>
   <data name="Progress" xml:space="preserve"><value>{0} of {1} words placed</value></data>
   <data name="AllCorrect" xml:space="preserve"><value>Perfect! Every word is in the correct area.</value></data>
   <data name="HasErrors" xml:space="preserve"><value>{0} word(s) are in the wrong area.</value></data>
