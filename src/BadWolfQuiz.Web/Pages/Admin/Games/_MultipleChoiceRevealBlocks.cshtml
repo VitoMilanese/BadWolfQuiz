@@ -18,30 +18,30 @@
         > .game-content-blocks.multiple-choice-answer-reveal-grid {
         display: flex !important;
         flex-direction: column !important;
-        align-items: center !important;
+        align-items: stretch !important;
         align-content: safe center !important;
         grid-template-columns: none !important;
         grid-auto-rows: auto !important;
         width: 100% !important;
+        max-width: none !important;
         min-width: 0 !important;
         gap: clamp(9px, 1.5vw, 18px) !important;
         overflow-x: hidden !important;
         overflow-y: auto !important;
     }
 
-    /* Center the complete live Host Multiple Choice reveal in the free middle
-       row, including the correct answer and any additional description/content.
-       `safe center` falls back to the start edge when the stack is taller than
-       the available area, so tall answers remain scrollable instead of clipping.
-       All-player multiple-choice never receives this host-only class. */
-    .game-content-blocks.multiple-choice-answer-reveal-grid.host-multiple-choice-answer-centered {
+    /* Center the complete multiple-choice reveal stack in the free gameplay
+       area for both host-selected and all-player multiple choice. `safe center`
+       falls back to the start edge when the stack is taller than the available
+       area so long descriptions stay scrollable instead of clipping. */
+    .game-content-blocks.multiple-choice-answer-reveal-grid.multiple-choice-answer-centered {
         align-self: stretch !important;
         justify-content: safe center !important;
     }
 
-    /* Legacy all-player answer styles treat every descendant block as an answer
-       option. Reset them across the whole shared reveal, including blocks moved
-       inside a runtime content container. */
+    /* Legacy all-player answer styles used a narrow answer column. The reveal
+       now owns the available gameplay width while preserving correct-option
+       highlighting and the existing centered text treatment. */
     .game-content-blocks.multiple-choice-answer-reveal-grid
         .game-content-block,
     html.all-player-multiple-choice-answer-layout
@@ -53,16 +53,27 @@
         > .game-content-blocks.multiple-choice-answer-reveal-grid
         .game-content-block {
         display: block !important;
-        width: min(100%, 1100px) !important;
+        width: 100% !important;
+        max-width: none !important;
         min-width: 0 !important;
         min-height: 0 !important;
         height: auto !important;
-        margin: 0 auto !important;
+        margin: 0 !important;
         padding: 0 !important;
         overflow: visible !important;
         border: 0 !important;
         border-radius: 0 !important;
         text-align: inherit !important;
+        box-sizing: border-box !important;
+    }
+
+    .game-content-blocks.multiple-choice-answer-reveal-grid
+        .game-content-text,
+    .game-content-blocks.multiple-choice-answer-reveal-grid
+        .game-content-caption {
+        width: 100% !important;
+        max-width: none !important;
+        box-sizing: border-box !important;
     }
 
     .game-content-blocks.multiple-choice-answer-reveal-grid

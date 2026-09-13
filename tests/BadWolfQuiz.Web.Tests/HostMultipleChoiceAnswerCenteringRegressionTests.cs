@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class HostMultipleChoiceAnswerCenteringRegressionTests
 {
     [Fact]
-    public void Live_host_answer_stack_is_centered_with_additional_reveal_content()
+    public void Every_live_multiple_choice_answer_stack_is_centered_with_additional_reveal_content()
     {
         var root = FindRepositoryRoot();
         var tagHelper = Read(root,
@@ -12,24 +12,24 @@ public sealed class HostMultipleChoiceAnswerCenteringRegressionTests
             "src/BadWolfQuiz.Web/Pages/Admin/Games/_MultipleChoiceRevealBlocks.cshtml");
 
         Assert.Contains(
-            "question.PresentationType == QuestionPresentationType.HostMultipleChoice &&",
+            "!MultipleChoiceAnswerContract.IsMultipleChoice(question.PresentationType)",
             tagHelper,
             StringComparison.Ordinal);
         Assert.Contains(
-            "blocks.Any();",
+            "var centerMultipleChoiceAnswerReveal = blocks.Any();",
             tagHelper,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
-            "blocks.All(block => correctOptionIds.Contains(block.SourceContentBlockId))",
+            "question.PresentationType == QuestionPresentationType.HostMultipleChoice",
             tagHelper,
             StringComparison.Ordinal);
         Assert.Contains(
-            "classes.Add(\"host-multiple-choice-answer-centered\")",
+            "classes.Add(\"multiple-choice-answer-centered\")",
             tagHelper,
             StringComparison.Ordinal);
 
         Assert.Contains(
-            ".game-content-blocks.multiple-choice-answer-reveal-grid.host-multiple-choice-answer-centered",
+            ".game-content-blocks.multiple-choice-answer-reveal-grid.multiple-choice-answer-centered",
             reveal,
             StringComparison.Ordinal);
         Assert.Contains(
@@ -46,6 +46,10 @@ public sealed class HostMultipleChoiceAnswerCenteringRegressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             "multiple-choice-additional-answer-block",
+            reveal,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "all-player-answer-option all-player-answer-option-correct",
             reveal,
             StringComparison.Ordinal);
     }

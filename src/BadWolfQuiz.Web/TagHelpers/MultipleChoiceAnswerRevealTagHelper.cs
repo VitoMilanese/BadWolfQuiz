@@ -38,9 +38,7 @@ public sealed class MultipleChoiceAnswerRevealTagHelper(
                 .Take(1)
                 .Select(block => block.SourceContentBlockId)
                 .ToArray();
-        var centerHostAnswerReveal =
-            question.PresentationType == QuestionPresentationType.HostMultipleChoice &&
-            blocks.Any();
+        var centerMultipleChoiceAnswerReveal = blocks.Any();
 
         var classValue = output.Attributes["class"]?.Value?.ToString() ?? string.Empty;
         var classes = classValue
@@ -52,9 +50,9 @@ public sealed class MultipleChoiceAnswerRevealTagHelper(
             .Append("multiple-choice-answer-reveal-grid")
             .Distinct(StringComparer.Ordinal)
             .ToList();
-        if (centerHostAnswerReveal)
+        if (centerMultipleChoiceAnswerReveal)
         {
-            classes.Add("host-multiple-choice-answer-centered");
+            classes.Add("multiple-choice-answer-centered");
         }
         output.Attributes.SetAttribute("class", string.Join(' ', classes));
 
