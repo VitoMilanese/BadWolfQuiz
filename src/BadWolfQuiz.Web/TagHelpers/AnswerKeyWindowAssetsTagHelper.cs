@@ -14,12 +14,18 @@ public sealed class AnswerKeyWindowAssetsTagHelper : TagHelper
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        if (ViewContext.ViewData.Model is not LobbyModel)
+        var model = ViewContext.ViewData.Model;
+        if (model is LobbyModel)
         {
+            output.PostContent.AppendHtml(
+                "<script src=\"/js/answer-key-window.js?v=1.22.0-281.2\"></script>");
             return;
         }
 
-        output.PostContent.AppendHtml(
-            "<script src=\"/js/answer-key-window.js?v=1.22.0-281.2\"></script>");
+        if (model is AnswerKeyModel)
+        {
+            output.PreContent.AppendHtml(
+                "<link rel=\"stylesheet\" href=\"/css/answer-key-answer-width-fix.css?v=1\" />");
+        }
     }
 }

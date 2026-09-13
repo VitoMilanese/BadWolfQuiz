@@ -1,0 +1,16 @@
+/* Answer and answer-preview text should use the complete host gameplay stage.
+ * site.css keeps a legacy 1100px reading cap for generic content; that cap is
+ * useful elsewhere, but it leaves large empty side gutters on answer screens. */
+.host-game-board
+    .current-question-summary:not(.wager-mode)
+    > .answer-presentation
+    :is(.game-content-text, .game-content-caption),
+.host-game-board
+    .question-review-preview
+    .answer-presentation
+    :is(.game-content-text, .game-content-caption) {
+    width: 100% !important;
+    max-width: none !important;
+    margin-inline: 0 !important;
+    box-sizing: border-box !important;
+}

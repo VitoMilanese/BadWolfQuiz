@@ -1,0 +1,11 @@
+/* The private AnswerKey/second-monitor surface should use the full answer stage.
+ * answer-key.css intentionally centers content, but its legacy 1100px text cap
+ * leaves large side margins on wide displays. Keep the centering and remove only
+ * that width cap for revealed text and captions. */
+.answer-key-content .game-content-text,
+.answer-key-content .game-content-caption {
+    width: 100% !important;
+    max-width: none !important;
+    margin-inline: 0 !important;
+    box-sizing: border-box !important;
+}

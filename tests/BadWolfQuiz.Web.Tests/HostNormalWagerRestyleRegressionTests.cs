@@ -23,6 +23,10 @@ public sealed class HostNormalWagerRestyleRegressionTests
             "/css/host-normal-wager-restyle.css?v=3",
             helper,
             StringComparison.Ordinal);
+        Assert.Contains(
+            "/css/host-normal-wager-viewport-center.css?v=3",
+            helper,
+            StringComparison.Ordinal);
 
         Assert.Contains(
             ".current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)",
@@ -81,16 +85,54 @@ public sealed class HostNormalWagerRestyleRegressionTests
     }
 
     [Fact]
+    public void Host_normal_wager_centers_a_compact_two_card_left_rail_without_stretching_cards_to_viewport()
+    {
+        var styles = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "host-normal-wager-viewport-center.css"))
+            .ReplaceLineEndings("\n");
+
+        Assert.Contains("@media (min-width: 821px)", styles, StringComparison.Ordinal);
+        Assert.Contains(
+            ".current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains("height: calc(", styles, StringComparison.Ordinal);
+        Assert.Contains("100dvh -", styles, StringComparison.Ordinal);
+        Assert.Contains("var(--topbar-height, 60px) -", styles, StringComparison.Ordinal);
+        Assert.Contains("var(--game-scoreboard-space, 130px) -", styles, StringComparison.Ordinal);
+        Assert.Contains(
+            "grid-template-rows: max-content auto !important;",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains("align-content: safe center !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("align-items: stretch !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("row-gap: 32px !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("height: auto !important;", styles, StringComparison.Ordinal);
+        Assert.DoesNotContain("height: 100% !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("row-gap: 18px !important;", styles, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Host_normal_wager_restyle_does_not_target_all_player_or_anonymous_shared_wagers()
     {
         var styles = File.ReadAllText(FindWebFile(
             "wwwroot",
             "css",
             "host-normal-wager-restyle.css"));
+        var centerStyles = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "host-normal-wager-viewport-center.css"));
 
         Assert.Contains(
             ":not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)",
             styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ":not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)",
+            centerStyles,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
             ".all-player-wager-waiting {",
@@ -99,6 +141,14 @@ public sealed class HostNormalWagerRestyleRegressionTests
         Assert.DoesNotContain(
             ".anonymous-shared-wager-host-panel {",
             styles,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            ".all-player-wager-waiting {",
+            centerStyles,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            ".anonymous-shared-wager-host-panel {",
+            centerStyles,
             StringComparison.Ordinal);
     }
 
