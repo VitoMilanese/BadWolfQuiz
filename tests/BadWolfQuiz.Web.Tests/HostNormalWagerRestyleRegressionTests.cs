@@ -20,7 +20,7 @@ public sealed class HostNormalWagerRestyleRegressionTests
             "Lobby.cshtml"));
 
         Assert.Contains(
-            "/css/host-normal-wager-restyle.css?v=1",
+            "/css/host-normal-wager-restyle.css?v=2",
             helper,
             StringComparison.Ordinal);
 
@@ -42,6 +42,31 @@ public sealed class HostNormalWagerRestyleRegressionTests
         Assert.Contains("asp-page-handler=\"SubmitQuestionWager\"", lobby, StringComparison.Ordinal);
         Assert.Contains("data-minimum=\"@wagerLimits.Minimum\"", lobby, StringComparison.Ordinal);
         Assert.Contains("data-maximum=\"@wagerLimits.Maximum\"", lobby, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Host_normal_wager_resets_legacy_two_column_child_placement()
+    {
+        var styles = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "host-normal-wager-restyle.css"))
+            .ReplaceLineEndings("\n");
+
+        Assert.Contains(
+            "> .wager-entry-panel > .wager-player-summary,",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "> .wager-entry-panel > .question-wager-form {",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains("position: static !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("grid-column: 1 !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("grid-row: auto !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("order: 1 !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("order: 2 !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("overflow: hidden !important;", styles, StringComparison.Ordinal);
     }
 
     [Fact]
