@@ -1,6 +1,7 @@
 /* Keep the host-entered normal wager group centered in the gameplay viewport.
- * The base restyle already centers the grid contents, but its container had only
- * a max-height, so it collapsed to content height and stayed at the top edge. */
+ * The right wager card defines the full desktop stage height. The compact status
+ * card stays at the top-left and the player card fills the remaining left rail,
+ * matching the host mock-up without introducing another runtime wrapper. */
 @media (min-width: 821px) {
     .host-game-board
         .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel) {
@@ -14,6 +15,38 @@
             var(--topbar-height, 60px) -
             var(--game-scoreboard-space, 130px) -
             12px) !important;
-        align-content: safe center !important;
+        grid-template-rows: auto minmax(0, 1fr) !important;
+        align-content: stretch !important;
+        align-items: stretch !important;
+        row-gap: 32px !important;
+    }
+
+    .host-game-board
+        .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)
+        > .current-question-heading {
+        align-self: start !important;
+    }
+
+    .host-game-board
+        .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)
+        > .wager-entry-panel > .wager-player-summary {
+        min-height: 0 !important;
+        height: 100% !important;
+        align-self: stretch !important;
+    }
+
+    .host-game-board
+        .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)
+        > .wager-entry-panel > .question-wager-form {
+        min-height: 0 !important;
+        height: 100% !important;
+        align-self: stretch !important;
+    }
+}
+
+@media (max-height: 760px) and (min-width: 821px) {
+    .host-game-board
+        .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel) {
+        row-gap: 18px !important;
     }
 }
