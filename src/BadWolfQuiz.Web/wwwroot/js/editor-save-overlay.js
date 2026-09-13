@@ -91,8 +91,28 @@ body .editor-save-overlay[hidden] {
 
     const showStatus = status => {
         moveToOverlay(status);
+        status.hidden = false;
         status.classList.remove("editor-save-overlay-hiding", "message-hidden");
         scheduleHide(status);
+    };
+
+    let dynamicStatus = null;
+    window.badWolfShowEditorStatus = (message, isError = false) => {
+        if (!message) {
+            return;
+        }
+
+        if (!dynamicStatus) {
+            dynamicStatus = document.createElement("div");
+            dynamicStatus.className = "alert editor-save-overlay";
+            document.body.appendChild(dynamicStatus);
+        }
+
+        dynamicStatus.classList.toggle("alert-error", isError);
+        dynamicStatus.classList.toggle("alert-success", !isError);
+        dynamicStatus.setAttribute("role", isError ? "alert" : "status");
+        dynamicStatus.textContent = message;
+        showStatus(dynamicStatus);
     };
 
     const watchStatus = status => {

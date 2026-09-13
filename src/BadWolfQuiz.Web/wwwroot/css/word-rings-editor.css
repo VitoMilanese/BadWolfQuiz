@@ -82,6 +82,12 @@
 .word-rings-editor-shell {
     width: min(1500px, calc(100% - 56px));
     margin: -20px auto 80px;
+    transition: opacity .14s ease;
+}
+
+.word-rings-editor-shell.is-loading {
+    opacity: .62;
+    pointer-events: none;
 }
 
 .word-rings-editor-tabs {
@@ -175,7 +181,7 @@
 
 .word-rings-editor-rule-card {
     position: relative;
-    padding: 20px 210px 20px 20px;
+    padding: 20px 270px 20px 20px;
     border: 1px solid color-mix(in srgb, var(--ring-color) 34%, var(--line));
     border-left: 5px solid var(--ring-color);
     border-radius: 16px;
@@ -227,7 +233,7 @@
     right: 16px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .word-rings-editor-enabled-form {
@@ -258,13 +264,7 @@
     cursor: pointer;
 }
 
-.word-rings-rule-delete,
-.word-rings-rule-delete-confirm {
-    background: #9f101b !important;
-    border-color: #ff5b66 !important;
-    color: #fff !important;
-}
-
+.word-rings-rule-edit,
 .word-rings-rule-delete {
     display: grid;
     place-items: center;
@@ -274,6 +274,24 @@
     padding: 0;
 }
 
+.word-rings-rule-edit {
+    border-color: #4d91e8 !important;
+    background: #123b63 !important;
+    color: #fff !important;
+}
+
+.word-rings-rule-edit:hover {
+    background: #174d80 !important;
+}
+
+.word-rings-rule-delete,
+.word-rings-rule-delete-confirm {
+    background: #9f101b !important;
+    border-color: #ff5b66 !important;
+    color: #fff !important;
+}
+
+.word-rings-rule-edit svg,
 .word-rings-rule-delete svg {
     display: block;
     width: 20px;

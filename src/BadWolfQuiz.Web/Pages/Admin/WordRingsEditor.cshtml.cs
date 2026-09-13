@@ -31,8 +31,19 @@ public sealed class WordRingsEditorModel(
     {
         var color = ParseRing(ring);
         var result = await Store.AddAsync(color, text, words, cancellationToken);
-        SetMutationMessage(result, deleting: false);
-        return RedirectToPage(new { ring = ToKey(color) });
+        return MutationResponse(result, color, "EditorRuleCreated");
+    }
+
+    public async Task<IActionResult> OnPostUpdateRuleAsync(
+        string? ring,
+        Guid ruleId,
+        string? text,
+        string? words,
+        CancellationToken cancellationToken)
+    {
+        var color = ParseRing(ring);
+        var result = await Store.UpdateAsync(ruleId, text, words, cancellationToken);
+        return MutationResponse(result, color, "EditorRuleUpdated");
     }
 
     public async Task<IActionResult> OnPostSetRuleEnabledAsync(
@@ -43,17 +54,10 @@ public sealed class WordRingsEditorModel(
     {
         var color = ParseRing(ring);
         var result = await Store.SetEnabledAsync(ruleId, enabled, cancellationToken);
-        if (result == WordRingRuleMutationResult.Success)
-        {
-            TempData["StatusMessage"] = localizer[
-                enabled ? "EditorRuleEnabled" : "EditorRuleDisabled"].Value;
-        }
-        else
-        {
-            SetMutationMessage(result, deleting: false);
-        }
-
-        return RedirectToPage(new { ring = ToKey(color) });
+        return MutationResponse(
+            result,
+            color,
+            enabled ? "EditorRuleEnabled" : "EditorRuleDisabled");
     }
 
     public async Task<IActionResult> OnPostDeleteRuleAsync(
@@ -63,8 +67,7 @@ public sealed class WordRingsEditorModel(
     {
         var color = ParseRing(ring);
         var result = await Store.DeleteAsync(ruleId, cancellationToken);
-        SetMutationMessage(result, deleting: true);
-        return RedirectToPage(new { ring = ToKey(color) });
+        return MutationResponse(result, color, "EditorRuleDeleted");
     }
 
     private void Load(string? ring)
@@ -73,28 +76,46 @@ public sealed class WordRingsEditorModel(
         Rules = Store.GetRules(Ring);
     }
 
-    private void SetMutationMessage(
+    private IActionResult MutationResponse(
         WordRingRuleMutationResult result,
-        bool deleting)
+        WordRingColor color,
+        string successMessageKey)
     {
-        if (result == WordRingRuleMutationResult.Success)
+        var success = result == WordRingRuleMutationResult.Success;
+        var message = success
+            ? localizer[successMessageKey].Value
+            : ErrorMessage(result);
+
+        if (IsAjaxRequest())
         {
-            TempData["StatusMessage"] = localizer[
-                deleting ? "EditorRuleDeleted" : "EditorRuleCreated"].Value;
-            return;
+            return new JsonResult(new
+            {
+                success,
+                message,
+                ring = ToKey(color)
+            });
         }
 
-        TempData["ErrorMessage"] = result switch
-        {
-            WordRingRuleMutationResult.Duplicate => localizer["EditorRuleDuplicate"].Value,
-            WordRingRuleMutationResult.InvalidText => localizer["EditorRuleInvalidText"].Value,
-            WordRingRuleMutationResult.InvalidWords => localizer["EditorRuleInvalidWords"].Value,
-            WordRingRuleMutationResult.NotFound => localizer["EditorRuleNotFound"].Value,
-            WordRingRuleMutationResult.LastRule => localizer["EditorLastRuleCannotDelete"].Value,
-            WordRingRuleMutationResult.LastEnabledRule => localizer["EditorLastEnabledRule"].Value,
-            _ => localizer["EditorRuleInvalidWords"].Value
-        };
+        TempData[success ? "StatusMessage" : "ErrorMessage"] = message;
+        return RedirectToPage(new { ring = ToKey(color) });
     }
+
+    private string ErrorMessage(WordRingRuleMutationResult result) => result switch
+    {
+        WordRingRuleMutationResult.Duplicate => localizer["EditorRuleDuplicate"].Value,
+        WordRingRuleMutationResult.InvalidText => localizer["EditorRuleInvalidText"].Value,
+        WordRingRuleMutationResult.InvalidWords => localizer["EditorRuleInvalidWords"].Value,
+        WordRingRuleMutationResult.NotFound => localizer["EditorRuleNotFound"].Value,
+        WordRingRuleMutationResult.LastRule => localizer["EditorLastRuleCannotDelete"].Value,
+        WordRingRuleMutationResult.LastEnabledRule => localizer["EditorLastEnabledRule"].Value,
+        _ => localizer["EditorRuleInvalidWords"].Value
+    };
+
+    private bool IsAjaxRequest() =>
+        string.Equals(
+            Request.Headers["X-Requested-With"].ToString(),
+            "XMLHttpRequest",
+            StringComparison.OrdinalIgnoreCase);
 
     private static WordRingColor ParseRing(string? ring) =>
         ring?.Trim().ToLowerInvariant() switch

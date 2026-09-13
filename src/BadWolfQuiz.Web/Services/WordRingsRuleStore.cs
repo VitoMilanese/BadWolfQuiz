@@ -176,8 +176,8 @@ public sealed class WordRingsRuleStore
         string? words,
         CancellationToken cancellationToken)
     {
-        var normalizedText = text?.Trim() ?? string.Empty;
-        if (normalizedText.Length is 0 or > MaximumRuleTextLength)
+        var normalizedText = NormalizeText(text);
+        if (normalizedText is null)
         {
             return WordRingRuleMutationResult.InvalidText;
         }
@@ -200,6 +200,56 @@ public sealed class WordRingsRuleStore
 
             var next = _rules
                 .Append(new WordRingRule(Guid.NewGuid(), ring, normalizedText, parsedWords, true))
+                .ToArray();
+            await WriteAsync(next);
+            _rules = next;
+            return WordRingRuleMutationResult.Success;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<WordRingRuleMutationResult> UpdateAsync(
+        Guid id,
+        string? text,
+        string? words,
+        CancellationToken cancellationToken)
+    {
+        var normalizedText = NormalizeText(text);
+        if (normalizedText is null)
+        {
+            return WordRingRuleMutationResult.InvalidText;
+        }
+
+        var parsedWords = ParseWords(words);
+        if (parsedWords is null)
+        {
+            return WordRingRuleMutationResult.InvalidWords;
+        }
+
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            var rule = _rules.FirstOrDefault(item => item.Id == id);
+            if (rule is null)
+            {
+                return WordRingRuleMutationResult.NotFound;
+            }
+
+            if (_rules.Any(item =>
+                    item.Id != id &&
+                    item.Ring == rule.Ring &&
+                    string.Equals(item.Text, normalizedText, StringComparison.OrdinalIgnoreCase)))
+            {
+                return WordRingRuleMutationResult.Duplicate;
+            }
+
+            var next = _rules
+                .Select(item => item.Id == id
+                    ? item with { Text = normalizedText, Words = parsedWords }
+                    : item)
                 .ToArray();
             await WriteAsync(next);
             _rules = next;
@@ -283,6 +333,14 @@ public sealed class WordRingsRuleStore
         {
             _gate.Release();
         }
+    }
+
+    private static string? NormalizeText(string? value)
+    {
+        var normalized = value?.Trim() ?? string.Empty;
+        return normalized.Length is > 0 and <= MaximumRuleTextLength
+            ? normalized
+            : null;
     }
 
     private IReadOnlyList<string>? ParseWords(string? value)

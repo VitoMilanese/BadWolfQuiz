@@ -35,15 +35,19 @@
   <data name="EditorUseInGames" xml:space="preserve"><value>Use in games</value></data>
   <data name="EditorEnabledAria" xml:space="preserve"><value>Use this rule in games</value></data>
   <data name="EditorCreateRuleTitle" xml:space="preserve"><value>Create rule</value></data>
+  <data name="EditorEditRuleTitle" xml:space="preserve"><value>Edit rule</value></data>
+  <data name="EditorEditAria" xml:space="preserve"><value>Edit rule</value></data>
   <data name="EditorWordsHint" xml:space="preserve"><value>Separate words only with commas, semicolons, or spaces.</value></data>
   <data name="EditorInvalidSeparators" xml:space="preserve"><value>Words may be separated only by commas, semicolons, or spaces.</value></data>
   <data name="EditorCreate" xml:space="preserve"><value>Create</value></data>
+  <data name="EditorSave" xml:space="preserve"><value>Save</value></data>
   <data name="EditorCancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="EditorDeleteRuleTitle" xml:space="preserve"><value>Delete rule?</value></data>
   <data name="EditorDeleteRulePrompt" xml:space="preserve"><value>The rule will be removed from this ring. This action cannot be undone.</value></data>
   <data name="EditorDelete" xml:space="preserve"><value>Delete</value></data>
   <data name="EditorDeleteAria" xml:space="preserve"><value>Delete rule</value></data>
   <data name="EditorRuleCreated" xml:space="preserve"><value>Rule created.</value></data>
+  <data name="EditorRuleUpdated" xml:space="preserve"><value>Rule updated.</value></data>
   <data name="EditorRuleDeleted" xml:space="preserve"><value>Rule deleted.</value></data>
   <data name="EditorRuleEnabled" xml:space="preserve"><value>Rule enabled for games.</value></data>
   <data name="EditorRuleDisabled" xml:space="preserve"><value>Rule disabled for games.</value></data>
@@ -53,4 +57,5 @@
   <data name="EditorRuleNotFound" xml:space="preserve"><value>The rule could not be found.</value></data>
   <data name="EditorLastRuleCannotDelete" xml:space="preserve"><value>Each ring must keep at least one rule. Create another rule before deleting this one.</value></data>
   <data name="EditorLastEnabledRule" xml:space="preserve"><value>Each ring must keep at least one rule enabled for games.</value></data>
+  <data name="EditorRequestFailed" xml:space="preserve"><value>The operation could not be completed. Try again.</value></data>
 </root>

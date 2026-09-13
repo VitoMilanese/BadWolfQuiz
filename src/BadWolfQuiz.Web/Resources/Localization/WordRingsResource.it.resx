@@ -35,15 +35,19 @@
   <data name="EditorUseInGames" xml:space="preserve"><value>Usa nel gioco</value></data>
   <data name="EditorEnabledAria" xml:space="preserve"><value>Usa questa regola nelle partite</value></data>
   <data name="EditorCreateRuleTitle" xml:space="preserve"><value>Crea regola</value></data>
+  <data name="EditorEditRuleTitle" xml:space="preserve"><value>Modifica regola</value></data>
+  <data name="EditorEditAria" xml:space="preserve"><value>Modifica regola</value></data>
   <data name="EditorWordsHint" xml:space="preserve"><value>Separa le parole solo con virgole, punti e virgola o spazi.</value></data>
   <data name="EditorInvalidSeparators" xml:space="preserve"><value>Le parole possono essere separate solo da virgole, punti e virgola o spazi.</value></data>
   <data name="EditorCreate" xml:space="preserve"><value>Crea</value></data>
+  <data name="EditorSave" xml:space="preserve"><value>Salva</value></data>
   <data name="EditorCancel" xml:space="preserve"><value>Annulla</value></data>
   <data name="EditorDeleteRuleTitle" xml:space="preserve"><value>Eliminare la regola?</value></data>
   <data name="EditorDeleteRulePrompt" xml:space="preserve"><value>La regola verrà rimossa da questo cerchio. L'azione non può essere annullata.</value></data>
   <data name="EditorDelete" xml:space="preserve"><value>Elimina</value></data>
   <data name="EditorDeleteAria" xml:space="preserve"><value>Elimina regola</value></data>
   <data name="EditorRuleCreated" xml:space="preserve"><value>Regola creata.</value></data>
+  <data name="EditorRuleUpdated" xml:space="preserve"><value>Regola aggiornata.</value></data>
   <data name="EditorRuleDeleted" xml:space="preserve"><value>Regola eliminata.</value></data>
   <data name="EditorRuleEnabled" xml:space="preserve"><value>Regola abilitata per le partite.</value></data>
   <data name="EditorRuleDisabled" xml:space="preserve"><value>Regola disabilitata per le partite.</value></data>
@@ -53,4 +57,5 @@
   <data name="EditorRuleNotFound" xml:space="preserve"><value>Regola non trovata.</value></data>
   <data name="EditorLastRuleCannotDelete" xml:space="preserve"><value>Ogni cerchio deve mantenere almeno una regola. Creane un'altra prima di eliminare questa.</value></data>
   <data name="EditorLastEnabledRule" xml:space="preserve"><value>Ogni cerchio deve mantenere almeno una regola abilitata per le partite.</value></data>
+  <data name="EditorRequestFailed" xml:space="preserve"><value>Impossibile completare l'operazione. Riprova.</value></data>
 </root>

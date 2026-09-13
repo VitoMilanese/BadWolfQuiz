@@ -24,7 +24,7 @@ The public `/minigames` catalog exposes the game as the second minigame.
 
 ## Editor
 
-The Master Host editor is available at `/Admin/WordRingsEditor`. The page uses three color-coded tabs, one per ring. Each tab lists the persistent rules for that ring and provides a **New rule** action.
+The Master Host editor is available at `/Admin/WordRingsEditor`. The page uses three color-coded tabs, one per ring. Each tab lists the persistent rules for that ring and provides a **New rule** action. Tab switching is loaded asynchronously and does not perform a full page navigation.
 
 A rule contains only:
 
@@ -32,8 +32,10 @@ A rule contains only:
 - a set of words;
 - an enabled/disabled game-participation flag.
 
+Rules can be created, edited, enabled/disabled, and deleted without a full page refresh. The pencil action between the enabled checkbox and trash action opens the same styled editor dialog pattern and allows both the condition text and attached words to be changed. All rule mutations are submitted through AJAX and the visible rule list is refreshed in-place.
+
 Words may be separated only by commas, semicolons, or literal spaces. Tabs, line breaks, and other separator characters are rejected on both the client and server. Words are de-duplicated case-insensitively before persistence.
 
 Rules are persisted in `App_Data/word-rings-rules.json`. Existing rule files created before the enabled flag was introduced are treated as enabled for backward compatibility. The editor uses the shared short-lived save/error popup used by the quiz editors instead of leaving permanent page-level status banners.
 
-Deletion is performed through the styled BadWolfQuiz `<dialog>` confirmation rather than a browser alert/confirm prompt. The create and delete dialogs are constrained to the viewport without horizontal overflow. The trash action stays in the rule card's upper-right control area, uses a complete stroke-based trash icon, and has an explicit dark-red `#9f101b` background with a red border so destructive styling does not depend only on a semantic CSS class name.
+Deletion is performed through the styled BadWolfQuiz `<dialog>` confirmation rather than a browser alert/confirm prompt. The create, edit, and delete dialogs are constrained to the viewport without horizontal overflow. The trash action stays in the rule card's upper-right control area, uses a complete stroke-based trash icon, and has an explicit dark-red `#9f101b` background with a red border so destructive styling does not depend only on a semantic CSS class name.

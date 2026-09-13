@@ -30,6 +30,7 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("Authorize(Policy = \"MasterHost\")", editor);
         Assert.Contains("word-rings-editor-tabs", editor);
         Assert.Contains("data-open-word-rings-create", editor);
+        Assert.Contains("data-word-rings-edit-dialog", editor);
         Assert.Contains("data-word-rings-delete-dialog", editor);
         Assert.DoesNotContain("word-rings-editor-coming-soon", editor);
         Assert.DoesNotContain("word-rings-editor-coming-soon", editorStyles);
@@ -62,7 +63,7 @@ public sealed class WordRingsMinigameRegressionTests
     }
 
     [Fact]
-    public async Task Rule_store_excludes_disabled_rules_and_keeps_one_enabled_rule_per_ring()
+    public async Task Rule_store_supports_editing_excludes_disabled_rules_and_keeps_one_enabled_rule_per_ring()
     {
         var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-{Guid.NewGuid():N}");
         Directory.CreateDirectory(root);
@@ -83,6 +84,18 @@ public sealed class WordRingsMinigameRegressionTests
                 .Single(rule => rule.Id != originalBlue.Id);
             Assert.True(addedBlue.IsEnabled);
 
+            var updateResult = await store.UpdateAsync(
+                addedBlue.Id,
+                "Тестове відредаговане правило",
+                "гамма; дельта",
+                CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.Success, updateResult);
+
+            var updatedBlue = store.GetRules(WordRingColor.Blue)
+                .Single(rule => rule.Id == addedBlue.Id);
+            Assert.Equal("Тестове відредаговане правило", updatedBlue.Text);
+            Assert.Equal(["гамма", "дельта"], updatedBlue.Words);
+
             var disableOriginal = await store.SetEnabledAsync(
                 originalBlue.Id,
                 enabled: false,
@@ -92,7 +105,9 @@ public sealed class WordRingsMinigameRegressionTests
             for (var attempt = 0; attempt < 8; attempt++)
             {
                 var puzzle = store.CreatePuzzle();
-                Assert.Equal("Тестове активне правило", puzzle.BlueRuleText);
+                Assert.Equal("Тестове відредаговане правило", puzzle.BlueRuleText);
+                Assert.Contains("гамма", puzzle.Words);
+                Assert.Contains("дельта", puzzle.Words);
                 Assert.DoesNotContain("кіт", puzzle.Words);
                 Assert.DoesNotContain("вовк", puzzle.Words);
             }
@@ -154,7 +169,7 @@ public sealed class WordRingsMinigameRegressionTests
     }
 
     [Fact]
-    public void Editor_persists_validated_rules_and_uses_styled_confirmation_dialog()
+    public void Editor_mutations_and_tabs_are_ajax_and_rules_can_be_edited()
     {
         var editor = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml");
         var model = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml.cs");
@@ -169,13 +184,20 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.DoesNotContain("[\\s,;]+", store);
         Assert.Contains("bool? Enabled = null", store);
         Assert.Contains("public bool IsEnabled => Enabled is not false", store);
+        Assert.Contains("UpdateAsync", store);
         Assert.Contains("SetEnabledAsync", store);
         Assert.Contains("WordRingRuleMutationResult.LastRule", store);
         Assert.Contains("WordRingRuleMutationResult.LastEnabledRule", store);
         Assert.Contains("OnPostCreateRuleAsync", model);
+        Assert.Contains("OnPostUpdateRuleAsync", model);
         Assert.Contains("OnPostSetRuleEnabledAsync", model);
         Assert.Contains("OnPostDeleteRuleAsync", model);
+        Assert.Contains("X-Requested-With", model);
+        Assert.Contains("new JsonResult", model);
         Assert.Contains("asp-page-handler=\"CreateRule\"", editor);
+        Assert.Contains("asp-page-handler=\"UpdateRule\"", editor);
+        Assert.Contains("data-edit-word-rings-rule", editor);
+        Assert.Contains("data-word-rings-edit-dialog", editor);
         Assert.Contains("asp-page-handler=\"SetRuleEnabled\"", editor);
         Assert.Contains("data-word-rings-rule-enabled", editor);
         Assert.Contains("type=\"checkbox\"", editor);
@@ -185,14 +207,21 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("data-editor-save-overlay-root", editor);
         Assert.Contains("~/js/editor-save-overlay.js", editor);
         Assert.Contains("[data-editor-save-overlay-root]", overlay);
+        Assert.Contains("badWolfShowEditorStatus", overlay);
         Assert.Contains("showModal()", script);
-        Assert.Contains("requestSubmit()", script);
+        Assert.Contains("fetch(", script);
+        Assert.Contains("window.history.pushState", script);
+        Assert.Contains("event.preventDefault()", script);
+        Assert.Contains("X-Requested-With", script);
+        Assert.DoesNotContain("requestSubmit()", script);
+        Assert.DoesNotContain("location.reload", script);
         Assert.Contains("[ ,;]+", script);
         Assert.DoesNotContain("[\\s,;]+", script);
         Assert.DoesNotContain("window.confirm", script);
         Assert.DoesNotContain("alert(", script);
         Assert.Contains("background: #9f101b !important", styles);
         Assert.Contains("border-color: #ff5b66 !important", styles);
+        Assert.Contains(".word-rings-rule-edit", styles);
         Assert.Contains(".word-rings-editor-rule-controls", styles);
         Assert.Contains("top: 16px", styles);
         Assert.Contains("right: 16px", styles);
