@@ -93,12 +93,38 @@ public sealed class BusyIndicatorRegressionTests
         var script = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "busy-indicators.js"));
 
         Assert.Contains("event.defaultPrevented", script, StringComparison.Ordinal);
-        Assert.Contains("watchAjaxCompletion", script, StringComparison.Ordinal);
-        Assert.Contains("new MutationObserver", script, StringComparison.Ordinal);
-        Assert.Contains("attributeFilter: [\"disabled\"]", script, StringComparison.Ordinal);
-        Assert.Contains("if (!submitter.disabled)", script, StringComparison.Ordinal);
-        Assert.DoesNotContain("submitter.disabled = true", script, StringComparison.Ordinal);
-        Assert.DoesNotContain("submitter.setAttribute(\"disabled\"", script, StringComparison.Ordinal);
+
+        var watcherStart = script.IndexOf(
+            "const watchAjaxCompletion = submitter =>",
+            StringComparison.Ordinal);
+        Assert.True(watcherStart >= 0);
+
+        var watcherEnd = script.IndexOf(
+            "document.addEventListener(\"submit\"",
+            watcherStart,
+            StringComparison.Ordinal);
+        Assert.True(watcherEnd > watcherStart);
+
+        var watcher = script[watcherStart..watcherEnd];
+        Assert.Contains("watchAjaxCompletion", watcher, StringComparison.Ordinal);
+        Assert.Contains("new MutationObserver", watcher, StringComparison.Ordinal);
+        Assert.Contains("attributeFilter: [\"disabled\"]", watcher, StringComparison.Ordinal);
+        Assert.Contains("if (!submitter.disabled)", watcher, StringComparison.Ordinal);
+        Assert.DoesNotContain("submitter.disabled = true", watcher, StringComparison.Ordinal);
+        Assert.DoesNotContain("submitter.setAttribute(\"disabled\"", watcher, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BusyIndicatorLocksQuizCreateSubmitterAgainstDuplicateSubmissions()
+    {
+        var root = FindRepositoryRoot();
+        var script = File.ReadAllText(Path.Combine(root, "src", "BadWolfQuiz.Web", "wwwroot", "js", "busy-indicators.js"));
+
+        Assert.Contains("quizCreate: \"/admin/quizzes/create\"", script, StringComparison.Ordinal);
+        Assert.Contains("const lockQuizCreateSubmitter = submitter =>", script, StringComparison.Ordinal);
+        Assert.Contains("normalisePath(window.location.pathname) !== routes.quizCreate", script, StringComparison.Ordinal);
+        Assert.Contains("submitter.disabled = true", script, StringComparison.Ordinal);
+        Assert.Contains("lockQuizCreateSubmitter(submitter);", script, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -114,7 +140,7 @@ public sealed class BusyIndicatorRegressionTests
         Assert.Contains("final-question-editor-back-link", script, StringComparison.Ordinal);
         Assert.Contains("description-editor-back", script, StringComparison.Ordinal);
         Assert.Contains("hasOpenEditorModal", script, StringComparison.Ordinal);
-    Assert.Contains("[role='listbox']:not([hidden])", script, StringComparison.Ordinal);
+        Assert.Contains("[role='listbox']:not([hidden])", script, StringComparison.Ordinal);
         Assert.Contains("runAfterPaint", script, StringComparison.Ordinal);
         Assert.Contains("window.requestAnimationFrame(() =>", script, StringComparison.Ordinal);
         Assert.Contains("backLink.click()", script, StringComparison.Ordinal);
