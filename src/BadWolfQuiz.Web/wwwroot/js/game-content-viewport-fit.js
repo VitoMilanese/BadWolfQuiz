@@ -144,6 +144,22 @@
             return;
         }
 
+        const imageBlock = image.closest(".game-content-block");
+        const imageBlockHeight = imageBlock instanceof HTMLElement
+            ? imageBlock.getBoundingClientRect().height
+            : fullImageHeight;
+        const overflowWithoutImage =
+            container.scrollHeight - imageBlockHeight - container.clientHeight;
+
+        // If the text/other blocks already need scrolling, shrinking the image
+        // cannot remove the scrollbar. Keep the image at its normal presentation
+        // size and let the existing scroll container expose the full answer.
+        if (overflowWithoutImage > overflowTolerance) {
+            clearImageFit(image);
+            settleInitialFit(image);
+            return;
+        }
+
         const minimumHeight = getMinimumImageHeight();
         const targetHeight = Math.max(
             minimumHeight,
