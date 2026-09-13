@@ -51,6 +51,8 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("WordRingColor.Blue", store);
         Assert.Contains("WordRingColor.Yellow", store);
         Assert.Contains("WordRingColor.Red", store);
+        Assert.Contains("activeSnapshot", store);
+        Assert.Contains("snapshot.Where(rule => rule.IsEnabled)", store);
         Assert.Contains("DefaultOutsideWords", store);
         Assert.Contains("assignOutside", script);
         Assert.Contains("errors === 0", script);
@@ -107,25 +109,45 @@ public sealed class WordRingsMinigameRegressionTests
         var model = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml.cs");
         var store = ReadWebFile("Services", "WordRingsRuleStore.cs");
         var script = ReadWebFile("wwwroot", "js", "word-rings-editor.js");
+        var overlay = ReadWebFile("wwwroot", "js", "editor-save-overlay.js");
         var styles = ReadWebFile("wwwroot", "css", "word-rings-editor.css");
 
         Assert.Contains("App_Data", store);
         Assert.Contains("word-rings-rules.json", store);
         Assert.Contains("[ ,;]+", store);
         Assert.DoesNotContain("[\\s,;]+", store);
+        Assert.Contains("bool? Enabled = null", store);
+        Assert.Contains("public bool IsEnabled => Enabled is not false", store);
+        Assert.Contains("SetEnabledAsync", store);
         Assert.Contains("WordRingRuleMutationResult.LastRule", store);
+        Assert.Contains("WordRingRuleMutationResult.LastEnabledRule", store);
         Assert.Contains("OnPostCreateRuleAsync", model);
+        Assert.Contains("OnPostSetRuleEnabledAsync", model);
         Assert.Contains("OnPostDeleteRuleAsync", model);
         Assert.Contains("asp-page-handler=\"CreateRule\"", editor);
+        Assert.Contains("asp-page-handler=\"SetRuleEnabled\"", editor);
+        Assert.Contains("data-word-rings-rule-enabled", editor);
+        Assert.Contains("type=\"checkbox\"", editor);
         Assert.Contains("asp-page-handler=\"DeleteRule\"", editor);
         Assert.Contains("dialog-card-danger", editor);
+        Assert.Contains("data-editor-save-status", editor);
+        Assert.Contains("data-editor-save-overlay-root", editor);
+        Assert.Contains("~/js/editor-save-overlay.js", editor);
+        Assert.Contains("[data-editor-save-overlay-root]", overlay);
         Assert.Contains("showModal()", script);
+        Assert.Contains("requestSubmit()", script);
         Assert.Contains("[ ,;]+", script);
         Assert.DoesNotContain("[\\s,;]+", script);
         Assert.DoesNotContain("window.confirm", script);
         Assert.DoesNotContain("alert(", script);
         Assert.Contains("background: #9f101b !important", styles);
         Assert.Contains("border-color: #ff5b66 !important", styles);
+        Assert.Contains(".word-rings-editor-rule-controls", styles);
+        Assert.Contains("top: 16px", styles);
+        Assert.Contains("right: 16px", styles);
+        Assert.Contains("overflow-x: hidden", styles);
+        Assert.Contains("box-sizing: border-box", styles);
+        Assert.Contains("stroke: currentColor", styles);
     }
 
     [Fact]

@@ -32,6 +32,8 @@
   <data name="EditorWordsLabel" xml:space="preserve"><value>Слова</value></data>
   <data name="EditorWordCount" xml:space="preserve"><value>Слів: {0}</value></data>
   <data name="EditorNoRules" xml:space="preserve"><value>Для цього кільця ще немає правил.</value></data>
+  <data name="EditorUseInGames" xml:space="preserve"><value>У грі</value></data>
+  <data name="EditorEnabledAria" xml:space="preserve"><value>Використовувати це правило в іграх</value></data>
   <data name="EditorCreateRuleTitle" xml:space="preserve"><value>Створити правило</value></data>
   <data name="EditorWordsHint" xml:space="preserve"><value>Розділяй слова лише комами, крапками з комою або пробілами.</value></data>
   <data name="EditorInvalidSeparators" xml:space="preserve"><value>Для розділення слів дозволені лише кома, крапка з комою або пробіл.</value></data>
@@ -43,9 +45,12 @@
   <data name="EditorDeleteAria" xml:space="preserve"><value>Видалити правило</value></data>
   <data name="EditorRuleCreated" xml:space="preserve"><value>Правило створено.</value></data>
   <data name="EditorRuleDeleted" xml:space="preserve"><value>Правило видалено.</value></data>
+  <data name="EditorRuleEnabled" xml:space="preserve"><value>Правило увімкнено для ігор.</value></data>
+  <data name="EditorRuleDisabled" xml:space="preserve"><value>Правило вимкнено для ігор.</value></data>
   <data name="EditorRuleDuplicate" xml:space="preserve"><value>Правило з таким текстом уже існує для цього кільця.</value></data>
   <data name="EditorRuleInvalidText" xml:space="preserve"><value>Введи текст правила довжиною до 300 символів.</value></data>
   <data name="EditorRuleInvalidWords" xml:space="preserve"><value>Додай хоча б одне коректне слово. Слова можна розділяти лише комами, крапками з комою або пробілами.</value></data>
   <data name="EditorRuleNotFound" xml:space="preserve"><value>Правило не знайдено.</value></data>
   <data name="EditorLastRuleCannotDelete" xml:space="preserve"><value>Для кожного кільця потрібно залишити щонайменше одне правило. Спочатку створи інше правило.</value></data>
+  <data name="EditorLastEnabledRule" xml:space="preserve"><value>Для кожного кільця потрібно залишити щонайменше одне правило, увімкнене для ігор.</value></data>
 </root>

@@ -35,6 +35,27 @@ public sealed class WordRingsEditorModel(
         return RedirectToPage(new { ring = ToKey(color) });
     }
 
+    public async Task<IActionResult> OnPostSetRuleEnabledAsync(
+        string? ring,
+        Guid ruleId,
+        bool enabled,
+        CancellationToken cancellationToken)
+    {
+        var color = ParseRing(ring);
+        var result = await Store.SetEnabledAsync(ruleId, enabled, cancellationToken);
+        if (result == WordRingRuleMutationResult.Success)
+        {
+            TempData["StatusMessage"] = localizer[
+                enabled ? "EditorRuleEnabled" : "EditorRuleDisabled"].Value;
+        }
+        else
+        {
+            SetMutationMessage(result, deleting: false);
+        }
+
+        return RedirectToPage(new { ring = ToKey(color) });
+    }
+
     public async Task<IActionResult> OnPostDeleteRuleAsync(
         string? ring,
         Guid ruleId,
@@ -70,6 +91,7 @@ public sealed class WordRingsEditorModel(
             WordRingRuleMutationResult.InvalidWords => localizer["EditorRuleInvalidWords"].Value,
             WordRingRuleMutationResult.NotFound => localizer["EditorRuleNotFound"].Value,
             WordRingRuleMutationResult.LastRule => localizer["EditorLastRuleCannotDelete"].Value,
+            WordRingRuleMutationResult.LastEnabledRule => localizer["EditorLastEnabledRule"].Value,
             _ => localizer["EditorRuleInvalidWords"].Value
         };
     }

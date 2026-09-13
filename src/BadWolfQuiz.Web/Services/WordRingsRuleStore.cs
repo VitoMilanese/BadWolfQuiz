@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace BadWolfQuiz.Web.Services;
@@ -18,14 +19,20 @@ public enum WordRingRuleMutationResult
     InvalidText,
     InvalidWords,
     NotFound,
-    LastRule
+    LastRule,
+    LastEnabledRule
 }
 
 public sealed record WordRingRule(
     Guid Id,
     WordRingColor Ring,
     string Text,
-    IReadOnlyList<string> Words);
+    IReadOnlyList<string> Words,
+    bool? Enabled = null)
+{
+    [JsonIgnore]
+    public bool IsEnabled => Enabled is not false;
+}
 
 public sealed record WordRingsPuzzle(
     string BlueRuleText,
@@ -54,17 +61,20 @@ public sealed class WordRingsRuleStore
             Guid.Parse("04f315e5-53c2-41f0-b5c3-ef267be0a47d"),
             WordRingColor.Blue,
             "Слово означає тварину",
-            ["кіт", "вовк", "жаба", "собака", "песик", "олень", "панда", "коала"]),
+            ["кіт", "вовк", "жаба", "собака", "песик", "олень", "панда", "коала"],
+            true),
         new(
             Guid.Parse("948bb753-8a8c-4522-a848-2d6de8b6595c"),
             WordRingColor.Yellow,
             "У слові є літера «а»",
-            ["ракета", "машина", "жаба", "собака", "лампа", "банка", "панда", "коала"]),
+            ["ракета", "машина", "жаба", "собака", "лампа", "банка", "панда", "коала"],
+            true),
         new(
             Guid.Parse("c2fd4315-8a39-4e37-99aa-9a046ff39e10"),
             WordRingColor.Red,
             "У слові рівно 5 літер",
-            ["лісок", "човен", "песик", "олень", "лампа", "банка", "панда", "коала"])
+            ["лісок", "човен", "песик", "олень", "лампа", "банка", "панда", "коала"],
+            true)
     ];
 
     private static readonly string[] DefaultOutsideWords = ["дім", "сир"];
@@ -104,9 +114,10 @@ public sealed class WordRingsRuleStore
     public WordRingsPuzzle CreatePuzzle()
     {
         var snapshot = EnsureEveryRingHasRule(_rules);
-        var blue = Pick(snapshot, WordRingColor.Blue);
-        var yellow = Pick(snapshot, WordRingColor.Yellow);
-        var red = Pick(snapshot, WordRingColor.Red);
+        var activeSnapshot = snapshot.Where(rule => rule.IsEnabled).ToArray();
+        var blue = Pick(activeSnapshot, WordRingColor.Blue);
+        var yellow = Pick(activeSnapshot, WordRingColor.Yellow);
+        var red = Pick(activeSnapshot, WordRingColor.Red);
         var selected = new[] { blue, yellow, red };
 
         var comparer = StringComparer.OrdinalIgnoreCase;
@@ -116,7 +127,7 @@ public sealed class WordRingsRuleStore
             .ToList();
 
         var selectedIds = selected.Select(rule => rule.Id).ToHashSet();
-        var outsideWords = snapshot
+        var outsideWords = activeSnapshot
             .Where(rule => !selectedIds.Contains(rule.Id))
             .SelectMany(rule => rule.Words)
             .Distinct(comparer)
@@ -188,7 +199,46 @@ public sealed class WordRingsRuleStore
             }
 
             var next = _rules
-                .Append(new WordRingRule(Guid.NewGuid(), ring, normalizedText, parsedWords))
+                .Append(new WordRingRule(Guid.NewGuid(), ring, normalizedText, parsedWords, true))
+                .ToArray();
+            await WriteAsync(next);
+            _rules = next;
+            return WordRingRuleMutationResult.Success;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<WordRingRuleMutationResult> SetEnabledAsync(
+        Guid id,
+        bool enabled,
+        CancellationToken cancellationToken)
+    {
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            var rule = _rules.FirstOrDefault(item => item.Id == id);
+            if (rule is null)
+            {
+                return WordRingRuleMutationResult.NotFound;
+            }
+
+            if (!enabled &&
+                rule.IsEnabled &&
+                _rules.Count(item => item.Ring == rule.Ring && item.IsEnabled) <= 1)
+            {
+                return WordRingRuleMutationResult.LastEnabledRule;
+            }
+
+            if (rule.IsEnabled == enabled)
+            {
+                return WordRingRuleMutationResult.Success;
+            }
+
+            var next = _rules
+                .Select(item => item.Id == id ? item with { Enabled = enabled } : item)
                 .ToArray();
             await WriteAsync(next);
             _rules = next;
@@ -216,6 +266,12 @@ public sealed class WordRingsRuleStore
             if (_rules.Count(item => item.Ring == rule.Ring) <= 1)
             {
                 return WordRingRuleMutationResult.LastRule;
+            }
+
+            if (rule.IsEnabled &&
+                _rules.Count(item => item.Ring == rule.Ring && item.IsEnabled) <= 1)
+            {
+                return WordRingRuleMutationResult.LastEnabledRule;
             }
 
             var next = _rules.Where(item => item.Id != id).ToArray();
@@ -295,12 +351,18 @@ public sealed class WordRingsRuleStore
         var result = source.ToList();
         foreach (var ring in Enum.GetValues<WordRingColor>())
         {
-            if (result.Any(rule => rule.Ring == ring))
+            if (!result.Any(rule => rule.Ring == ring))
+            {
+                result.Add(DefaultRules.Single(rule => rule.Ring == ring));
+            }
+
+            if (result.Any(rule => rule.Ring == ring && rule.IsEnabled))
             {
                 continue;
             }
 
-            result.Add(DefaultRules.Single(rule => rule.Ring == ring));
+            var index = result.FindIndex(rule => rule.Ring == ring);
+            result[index] = result[index] with { Enabled = true };
         }
         return result;
     }
@@ -309,7 +371,9 @@ public sealed class WordRingsRuleStore
         IReadOnlyList<WordRingRule> rules,
         WordRingColor ring)
     {
-        var candidates = rules.Where(rule => rule.Ring == ring).ToArray();
+        var candidates = rules
+            .Where(rule => rule.Ring == ring && rule.IsEnabled)
+            .ToArray();
         return candidates[Random.Shared.Next(candidates.Length)];
     }
 

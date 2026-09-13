@@ -37,6 +37,12 @@
         });
     });
 
+    document.querySelectorAll('[data-word-rings-rule-enabled]').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            checkbox.form?.requestSubmit();
+        });
+    });
+
     document.querySelectorAll('[data-close-word-rings-dialog]').forEach(button => {
         button.addEventListener('click', () => closeDialog(button.closest('dialog')));
     });

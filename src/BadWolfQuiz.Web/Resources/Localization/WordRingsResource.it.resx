@@ -32,6 +32,8 @@
   <data name="EditorWordsLabel" xml:space="preserve"><value>Parole</value></data>
   <data name="EditorWordCount" xml:space="preserve"><value>{0} parole</value></data>
   <data name="EditorNoRules" xml:space="preserve"><value>Non ci sono ancora regole per questo cerchio.</value></data>
+  <data name="EditorUseInGames" xml:space="preserve"><value>Usa nel gioco</value></data>
+  <data name="EditorEnabledAria" xml:space="preserve"><value>Usa questa regola nelle partite</value></data>
   <data name="EditorCreateRuleTitle" xml:space="preserve"><value>Crea regola</value></data>
   <data name="EditorWordsHint" xml:space="preserve"><value>Separa le parole solo con virgole, punti e virgola o spazi.</value></data>
   <data name="EditorInvalidSeparators" xml:space="preserve"><value>Le parole possono essere separate solo da virgole, punti e virgola o spazi.</value></data>
@@ -43,9 +45,12 @@
   <data name="EditorDeleteAria" xml:space="preserve"><value>Elimina regola</value></data>
   <data name="EditorRuleCreated" xml:space="preserve"><value>Regola creata.</value></data>
   <data name="EditorRuleDeleted" xml:space="preserve"><value>Regola eliminata.</value></data>
+  <data name="EditorRuleEnabled" xml:space="preserve"><value>Regola abilitata per le partite.</value></data>
+  <data name="EditorRuleDisabled" xml:space="preserve"><value>Regola disabilitata per le partite.</value></data>
   <data name="EditorRuleDuplicate" xml:space="preserve"><value>Esiste già una regola con questo testo per il cerchio selezionato.</value></data>
   <data name="EditorRuleInvalidText" xml:space="preserve"><value>Inserisci un testo della regola di massimo 300 caratteri.</value></data>
   <data name="EditorRuleInvalidWords" xml:space="preserve"><value>Inserisci almeno una parola valida. Sono consentiti solo virgole, punti e virgola e spazi come separatori.</value></data>
   <data name="EditorRuleNotFound" xml:space="preserve"><value>Regola non trovata.</value></data>
   <data name="EditorLastRuleCannotDelete" xml:space="preserve"><value>Ogni cerchio deve mantenere almeno una regola. Creane un'altra prima di eliminare questa.</value></data>
+  <data name="EditorLastEnabledRule" xml:space="preserve"><value>Ogni cerchio deve mantenere almeno una regola abilitata per le partite.</value></data>
 </root>

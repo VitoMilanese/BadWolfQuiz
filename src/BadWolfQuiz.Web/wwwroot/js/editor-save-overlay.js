@@ -8,7 +8,7 @@
     window.badWolfEditorSaveOverlayInitialized = true;
 
     const editor = document.querySelector(
-        "form.quiz-board-form, form.question-editor, form[data-ajax-custom-achievement-editor]");
+        "form.quiz-board-form, form.question-editor, form[data-ajax-custom-achievement-editor], [data-editor-save-overlay-root]");
     if (!editor) {
         return;
     }

@@ -32,14 +32,22 @@
     </div>
 </div>
 
-<div class="word-rings-editor-shell">
+<div class="word-rings-editor-shell" data-editor-save-overlay-root>
     @if (TempData["StatusMessage"] is string statusMessage)
     {
-        <div class="message message-success" role="status">@statusMessage</div>
+        <div class="alert alert-success word-rings-editor-status"
+             role="status"
+             data-editor-save-status>
+            @statusMessage
+        </div>
     }
     @if (TempData["ErrorMessage"] is string errorMessage)
     {
-        <div class="message message-error" role="alert">@errorMessage</div>
+        <div class="alert alert-error word-rings-editor-status"
+             role="alert"
+             data-editor-save-status>
+            @errorMessage
+        </div>
     }
 
     <nav class="word-rings-editor-tabs" aria-label="@WordRingsLocalizer["EditorTitle"]">
@@ -90,7 +98,7 @@
         <div class="word-rings-editor-rule-list word-rings-editor-ring-@Model.RingKey">
             @foreach (var rule in Model.Rules)
             {
-                <article class="word-rings-editor-rule-card">
+                <article class="word-rings-editor-rule-card @(!rule.IsEnabled ? "is-disabled" : null)">
                     <div class="word-rings-editor-rule-content">
                         <span class="word-rings-editor-rule-label">@WordRingsLocalizer["EditorConditionLabel"]</span>
                         <h3>@rule.Text</h3>
@@ -100,16 +108,35 @@
                         </div>
                         <span class="word-rings-editor-rule-count">@WordRingsLocalizer["EditorWordCount", rule.Words.Count]</span>
                     </div>
-                    <button class="button word-rings-rule-delete"
-                            type="button"
-                            data-delete-word-rings-rule
-                            data-rule-id="@rule.Id"
-                            data-rule-text="@rule.Text"
-                            aria-label="@WordRingsLocalizer["EditorDeleteAria"]">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 11H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z" />
-                        </svg>
-                    </button>
+
+                    <div class="word-rings-editor-rule-controls">
+                        <form method="post"
+                              asp-page-handler="SetRuleEnabled"
+                              class="word-rings-editor-enabled-form">
+                            <input type="hidden" name="ring" value="@Model.RingKey" />
+                            <input type="hidden" name="ruleId" value="@rule.Id" />
+                            <label class="word-rings-editor-enabled-toggle">
+                                <span>@WordRingsLocalizer["EditorUseInGames"]</span>
+                                <input type="checkbox"
+                                       name="enabled"
+                                       value="true"
+                                       checked="@(rule.IsEnabled ? "checked" : null)"
+                                       data-word-rings-rule-enabled
+                                       aria-label="@WordRingsLocalizer["EditorEnabledAria"]" />
+                            </label>
+                        </form>
+
+                        <button class="button word-rings-rule-delete"
+                                type="button"
+                                data-delete-word-rings-rule
+                                data-rule-id="@rule.Id"
+                                data-rule-text="@rule.Text"
+                                aria-label="@WordRingsLocalizer["EditorDeleteAria"]">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5" />
+                            </svg>
+                        </button>
+                    </div>
                 </article>
             }
         </div>
@@ -192,4 +219,5 @@
 
 @section Scripts {
     <script src="~/js/word-rings-editor.js" asp-append-version="true"></script>
+    <script src="~/js/editor-save-overlay.js" asp-append-version="true"></script>
 }

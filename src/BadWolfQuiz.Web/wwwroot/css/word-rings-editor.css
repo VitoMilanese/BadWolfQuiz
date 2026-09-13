@@ -174,16 +174,18 @@
 }
 
 .word-rings-editor-rule-card {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 18px;
-    align-items: center;
-    padding: 20px;
+    position: relative;
+    padding: 20px 210px 20px 20px;
     border: 1px solid color-mix(in srgb, var(--ring-color) 34%, var(--line));
     border-left: 5px solid var(--ring-color);
     border-radius: 16px;
     background: color-mix(in srgb, var(--panel) 96%, transparent);
     box-shadow: 0 14px 34px rgb(0 0 0 / 16%);
+    transition: opacity .15s ease, border-color .15s ease;
+}
+
+.word-rings-editor-rule-card.is-disabled .word-rings-editor-rule-content {
+    opacity: .5;
 }
 
 .word-rings-editor-rule-content h3 {
@@ -219,6 +221,43 @@
     font-size: .8rem;
 }
 
+.word-rings-editor-rule-controls {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.word-rings-editor-enabled-form {
+    margin: 0;
+}
+
+.word-rings-editor-enabled-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 11px;
+    border: 1px solid color-mix(in srgb, var(--ring-color) 34%, var(--line));
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--panel-2) 75%, transparent);
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 850;
+    cursor: pointer;
+    user-select: none;
+}
+
+.word-rings-editor-enabled-toggle input[type="checkbox"] {
+    width: 19px;
+    height: 19px;
+    margin: 0;
+    accent-color: var(--ring-color);
+    cursor: pointer;
+}
+
 .word-rings-rule-delete,
 .word-rings-rule-delete-confirm {
     background: #9f101b !important;
@@ -227,36 +266,86 @@
 }
 
 .word-rings-rule-delete {
+    display: grid;
+    place-items: center;
     width: 46px;
     height: 46px;
     min-width: 46px;
     padding: 0;
-    display: grid;
-    place-items: center;
 }
 
 .word-rings-rule-delete svg {
-    width: 21px;
-    height: 21px;
-    fill: currentColor;
+    display: block;
+    width: 20px;
+    height: 20px;
+    overflow: visible;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .word-rings-editor-empty {
     text-align: center;
 }
 
+.word-rings-editor-dialog {
+    width: min(680px, calc(100vw - 32px));
+    max-width: min(680px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 0;
+    border: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    background: transparent;
+}
+
 .word-rings-editor-dialog-card {
-    width: min(640px, calc(100vw - 32px));
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.word-rings-editor-dialog .dialog-heading,
+.word-rings-editor-dialog .dialog-actions {
+    min-width: 0;
+}
+
+.word-rings-editor-dialog .dialog-heading > div {
+    min-width: 0;
+}
+
+.word-rings-editor-dialog .dialog-heading h2 {
+    overflow-wrap: anywhere;
+}
+
+.word-rings-editor-dialog .dialog-actions {
+    flex-wrap: wrap;
 }
 
 .word-rings-editor-field {
     display: grid;
     gap: 7px;
+    min-width: 0;
     margin-top: 14px;
 }
 
 .word-rings-editor-field > span {
     font-weight: 850;
+}
+
+.word-rings-editor-field input,
+.word-rings-editor-field textarea {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .word-rings-editor-field textarea {
@@ -280,6 +369,22 @@
 
     .word-rings-editor-tabs {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .word-rings-editor-rule-card {
+        padding-right: 20px;
+        padding-top: 78px;
+    }
+
+    .word-rings-editor-rule-controls {
+        top: 14px;
+        right: 14px;
+    }
+
+    .word-rings-editor-enabled-toggle {
+        min-height: 42px;
     }
 }
 
@@ -307,11 +412,18 @@
         flex-direction: column;
     }
 
-    .word-rings-editor-rule-card {
-        grid-template-columns: 1fr;
+    .word-rings-editor-dialog {
+        width: calc(100vw - 20px);
+        max-width: calc(100vw - 20px);
+        max-height: calc(100dvh - 20px);
     }
 
-    .word-rings-rule-delete {
-        justify-self: end;
+    .word-rings-editor-dialog-card {
+        padding: 20px;
+    }
+
+    .word-rings-editor-dialog .dialog-actions > .button {
+        flex: 1 1 140px;
+        min-width: 0;
     }
 }
