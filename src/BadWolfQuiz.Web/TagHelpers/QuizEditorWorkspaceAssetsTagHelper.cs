@@ -36,7 +36,7 @@ public sealed class QuizEditorWorkspaceAssetsTagHelper : TagHelper
                 "<link rel=\"stylesheet\" href=\"/css/quiz-editor-workspace.css?v=577.1\" />" +
                 "<link rel=\"stylesheet\" href=\"/css/quiz-editor-workspace-fixes.css?v=577.4\" />" +
                 "<link rel=\"stylesheet\" href=\"/css/quiz-editor-workspace-polish.css?v=577.5\" />" +
-                "<link rel=\"stylesheet\" href=\"/css/quiz-editor-workspace-browser-fixes.css?v=577.7\" />" +
+                "<link rel=\"stylesheet\" href=\"/css/quiz-editor-workspace-browser-fixes.css?v=577.8\" />" +
                 "<script src=\"/js/quiz-editor-workspace-interactions.js?v=577.3\"></script>");
             return;
         }

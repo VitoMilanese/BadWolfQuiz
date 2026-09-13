@@ -9,6 +9,7 @@
         return;
     }
 
+    const overflowTolerance = 2;
     let frameHandle = 0;
 
     const getSingleImageContext = () => {
@@ -89,6 +90,19 @@
             (sum, sibling) => sum + getElementHeight(sibling),
             0);
         const blockGapHeight = Math.max(0, block.children.length - 1) * blockGap;
+        const nonImageContentHeight =
+            otherBlocksHeight +
+            containerGapHeight +
+            imageSiblingsHeight +
+            blockGapHeight;
+
+        // If the answer already needs scrolling before the image is counted,
+        // there is no useful compact size to calculate. Leaving the image at
+        // its normal CSS size prevents the old 1px squeeze on long answers.
+        if (nonImageContentHeight >= container.clientHeight - overflowTolerance) {
+            clearFit(currentImage);
+            return;
+        }
 
         const imageStyle = window.getComputedStyle(currentImage);
         const responsiveHeightFraction = window.matchMedia("(max-width: 720px)").matches
@@ -101,15 +115,14 @@
         const availableWidth = Math.max(
             1,
             Math.min(container.clientWidth, block.clientWidth || container.clientWidth, cssMaxWidth));
-        const availableHeight = Math.max(
-            1,
-            Math.min(
-                container.clientHeight -
-                    otherBlocksHeight -
-                    containerGapHeight -
-                    imageSiblingsHeight -
-                    blockGapHeight,
-                cssMaxHeight));
+        const availableHeight = Math.min(
+            container.clientHeight - nonImageContentHeight,
+            cssMaxHeight);
+
+        if (!Number.isFinite(availableHeight) || availableHeight <= 0) {
+            clearFit(currentImage);
+            return;
+        }
 
         const scale = Math.min(
             availableWidth / currentImage.naturalWidth,

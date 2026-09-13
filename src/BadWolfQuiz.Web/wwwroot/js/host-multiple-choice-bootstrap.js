@@ -16,9 +16,12 @@
 body.youtube-auto-expanded-open > .host-multiple-choice-panel {
     display: none !important;
 }
-.host-game-board .answer-presentation > .game-content-blocks.multiple-choice-answer-reveal-grid:not(:has(> .all-player-answer-option-correct)) .game-content-block {
+.host-game-board .answer-presentation > .game-content-blocks.multiple-choice-answer-reveal-grid .game-content-block,
+.host-game-board .answer-presentation > .game-content-blocks.multiple-choice-answer-reveal-grid .game-content-text,
+.host-game-board .answer-presentation > .game-content-blocks.multiple-choice-answer-reveal-grid .game-content-caption {
     width: 100% !important;
     max-width: none !important;
+    box-sizing: border-box !important;
 }
 @media (min-width: 801px) {
     body:has(> .host-multiple-choice-panel)

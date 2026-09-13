@@ -1,0 +1,53 @@
+/* Keep the host-entered normal wager group centered in the gameplay viewport.
+ * The stage may use the available viewport height for centering, but the cards
+ * themselves keep their intrinsic height. The spanning wager form defines the
+ * compact two-row grid; the lower left player card stretches only inside that
+ * compact grid so its bottom stays aligned with the wager card. */
+@media (min-width: 821px) {
+    .host-game-board
+        .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel) {
+        height: calc(
+            100dvh -
+            var(--topbar-height, 60px) -
+            var(--game-scoreboard-space, 130px) -
+            12px) !important;
+        max-height: calc(
+            100dvh -
+            var(--topbar-height, 60px) -
+            var(--game-scoreboard-space, 130px) -
+            12px) !important;
+        grid-template-rows: max-content auto !important;
+        align-content: safe center !important;
+        align-items: stretch !important;
+        row-gap: 32px !important;
+    }
+
+    .host-game-board
+        .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)
+        > .current-question-heading {
+        align-self: start !important;
+    }
+
+    .host-game-board
+        .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)
+        > .wager-entry-panel > .wager-player-summary {
+        min-height: 0 !important;
+        height: auto !important;
+        align-self: stretch !important;
+    }
+
+    .host-game-board
+        .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)
+        > .wager-entry-panel > .question-wager-form {
+        min-height: 0 !important;
+        height: auto !important;
+        align-self: stretch !important;
+    }
+}
+
+@media (max-height: 760px) and (min-width: 821px) {
+    .host-game-board
+        .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel) {
+        row-gap: 18px !important;
+    }
+}

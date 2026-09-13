@@ -3,22 +3,41 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class AnswerKeyWindowRegressionTests
 {
     [Fact]
-    public void Lobby_registers_the_dedicated_answer_key_window_helper()
+    public void Lobby_registers_the_dedicated_answer_key_window_helper_and_answer_key_width_fix()
     {
         var imports = File.ReadAllText(FindWebFile("Pages", "_ViewImports.cshtml"));
         var tagHelper = File.ReadAllText(FindWebFile(
             "TagHelpers",
             "AnswerKeyWindowAssetsTagHelper.cs"));
+        var widthFix = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "answer-key-answer-width-fix.css"));
 
         Assert.Contains(
             "AnswerKeyWindowAssetsTagHelper, BadWolfQuiz.Web",
             imports,
             StringComparison.Ordinal);
-        Assert.Contains("is not LobbyModel", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("model is LobbyModel", tagHelper, StringComparison.Ordinal);
         Assert.Contains(
             "/js/answer-key-window.js?v=1.22.0-281.2",
             tagHelper,
             StringComparison.Ordinal);
+        Assert.Contains("model is AnswerKeyModel", tagHelper, StringComparison.Ordinal);
+        Assert.Contains(
+            "/css/answer-key-answer-width-fix.css?v=1",
+            tagHelper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".answer-key-content .game-content-text,",
+            widthFix,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            ".answer-key-content .game-content-caption {",
+            widthFix,
+            StringComparison.Ordinal);
+        Assert.Contains("width: 100% !important;", widthFix, StringComparison.Ordinal);
+        Assert.Contains("max-width: none !important;", widthFix, StringComparison.Ordinal);
     }
 
     [Fact]
