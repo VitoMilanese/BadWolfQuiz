@@ -1,4 +1,5 @@
 @page "/minigames/word-rings"
+@model BadWolfQuiz.Web.Pages.WordRingsModel
 @inject IStringLocalizer<WordRingsResource> WordRingsLocalizer
 @{
     ViewData["Title"] = WordRingsLocalizer["Title"];
@@ -18,6 +19,8 @@
      data-place-all="@WordRingsLocalizer["PlaceAll"]"
      data-reveal-rules="@WordRingsLocalizer["RevealRules"]"
      data-hide-rules="@WordRingsLocalizer["HideRules"]">
+    <script type="application/json" data-word-rings-puzzle>@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Puzzle.Expected))</script>
+
     <header class="word-rings-header">
         <div>
             <p class="word-rings-kicker">BAD WOLF / MINIGAME 02</p>
@@ -38,7 +41,7 @@
                 <span data-progress></span>
             </div>
             <div class="word-rings-word-list" data-word-list>
-                @foreach (var word in new[] { "кіт", "вовк", "ракета", "машина", "лісок", "човен", "жаба", "собака", "песик", "олень", "лампа", "банка", "панда", "коала", "дім", "сир" })
+                @foreach (var word in Model.Puzzle.Words)
                 {
                     <button class="word-rings-word" type="button" data-word="@word">@word</button>
                 }
@@ -55,9 +58,9 @@
                 <div class="word-rings-circle word-rings-circle-b"></div>
                 <div class="word-rings-circle word-rings-circle-c"></div>
                 <section class="word-rings-rules is-hidden" data-rules aria-live="polite">
-                    <div class="word-rings-rule word-rings-rule-a"><span>@WordRingsLocalizer["RuleA"]</span></div>
-                    <div class="word-rings-rule word-rings-rule-b"><span>@WordRingsLocalizer["RuleB"]</span></div>
-                    <div class="word-rings-rule word-rings-rule-c"><span>@WordRingsLocalizer["RuleC"]</span></div>
+                    <div class="word-rings-rule word-rings-rule-a"><span>@Model.Puzzle.BlueRuleText</span></div>
+                    <div class="word-rings-rule word-rings-rule-b"><span>@Model.Puzzle.YellowRuleText</span></div>
+                    <div class="word-rings-rule word-rings-rule-c"><span>@Model.Puzzle.RedRuleText</span></div>
                 </section>
                 <div class="word-rings-placed" data-placed-layer></div>
             </div>
