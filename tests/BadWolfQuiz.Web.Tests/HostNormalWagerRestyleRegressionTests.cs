@@ -20,7 +20,7 @@ public sealed class HostNormalWagerRestyleRegressionTests
             "Lobby.cshtml"));
 
         Assert.Contains(
-            "/css/host-normal-wager-restyle.css?v=2",
+            "/css/host-normal-wager-restyle.css?v=3",
             helper,
             StringComparison.Ordinal);
 
@@ -28,12 +28,14 @@ public sealed class HostNormalWagerRestyleRegressionTests
             ".current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel)",
             styles,
             StringComparison.Ordinal);
-        Assert.Contains("width: min(560px, 100%) !important;", styles, StringComparison.Ordinal);
+        Assert.Contains(
+            "grid-template-columns: minmax(220px, 300px) minmax(340px, 520px) !important;",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains("display: contents !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("width: min(520px, 100%) !important;", styles, StringComparison.Ordinal);
         Assert.Contains("border-radius: 24px !important;", styles, StringComparison.Ordinal);
         Assert.Contains("grid-template-columns: repeat(3, minmax(0, 1fr)) !important;", styles, StringComparison.Ordinal);
-        Assert.Contains("min-height: 76px !important;", styles, StringComparison.Ordinal);
-        Assert.Contains("font-size: clamp(2.4rem, 7vw, 4.4rem) !important;", styles, StringComparison.Ordinal);
-        Assert.Contains("min-height: 54px !important;", styles, StringComparison.Ordinal);
         Assert.Contains("grid-column: 1 / -1 !important;", styles, StringComparison.Ordinal);
         Assert.Contains(".wager-validation.wager-valid", styles, StringComparison.Ordinal);
 
@@ -45,7 +47,7 @@ public sealed class HostNormalWagerRestyleRegressionTests
     }
 
     [Fact]
-    public void Host_normal_wager_resets_legacy_two_column_child_placement()
+    public void Host_normal_wager_keeps_context_beside_keypad_and_compacts_for_zoom()
     {
         var styles = File.ReadAllText(FindWebFile(
             "wwwroot",
@@ -54,19 +56,28 @@ public sealed class HostNormalWagerRestyleRegressionTests
             .ReplaceLineEndings("\n");
 
         Assert.Contains(
-            "> .wager-entry-panel > .wager-player-summary,",
+            "> .wager-entry-panel > .wager-player-summary {",
             styles,
             StringComparison.Ordinal);
+        Assert.Contains("grid-column: 1 !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("grid-row: 2 !important;", styles, StringComparison.Ordinal);
         Assert.Contains(
             "> .wager-entry-panel > .question-wager-form {",
             styles,
             StringComparison.Ordinal);
+        Assert.Contains("grid-column: 2 !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("grid-row: 1 / span 2 !important;", styles, StringComparison.Ordinal);
         Assert.Contains("position: static !important;", styles, StringComparison.Ordinal);
-        Assert.Contains("grid-column: 1 !important;", styles, StringComparison.Ordinal);
-        Assert.Contains("grid-row: auto !important;", styles, StringComparison.Ordinal);
-        Assert.Contains("order: 1 !important;", styles, StringComparison.Ordinal);
-        Assert.Contains("order: 2 !important;", styles, StringComparison.Ordinal);
-        Assert.Contains("overflow: hidden !important;", styles, StringComparison.Ordinal);
+        Assert.Contains("content: none !important;", styles, StringComparison.Ordinal);
+        Assert.Contains(
+            "@media (max-height: 760px) and (min-width: 821px)",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains("min-height: 38px !important;", styles, StringComparison.Ordinal);
+        Assert.Contains(
+            "@media (max-width: 820px)",
+            styles,
+            StringComparison.Ordinal);
     }
 
     [Fact]
