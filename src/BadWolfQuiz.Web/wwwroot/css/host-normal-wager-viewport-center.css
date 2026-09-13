@@ -1,0 +1,19 @@
+/* Keep the host-entered normal wager group centered in the gameplay viewport.
+ * The base restyle already centers the grid contents, but its container had only
+ * a max-height, so it collapsed to content height and stayed at the top edge. */
+@media (min-width: 821px) {
+    .host-game-board
+        .current-question-summary.wager-mode:not(.anonymous-shared-wager-mode):has(> .wager-entry-panel) {
+        height: calc(
+            100dvh -
+            var(--topbar-height, 60px) -
+            var(--game-scoreboard-space, 130px) -
+            12px) !important;
+        max-height: calc(
+            100dvh -
+            var(--topbar-height, 60px) -
+            var(--game-scoreboard-space, 130px) -
+            12px) !important;
+        align-content: safe center !important;
+    }
+}
