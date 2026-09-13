@@ -64,7 +64,7 @@ body.gameplay-layout:has(.host-game-board[data-game-status="running"]) .host-boa
     display: grid;
     place-items: center;
     margin: 0;
-    padding: clamp(0.55rem, 1vw, 0.9rem);
+    padding: clamp(0.55rem, 1vw, 0.9rem) clamp(0.25rem, 0.45vw, 0.45rem);
     border: 1px solid var(--board-category-border, color-mix(in srgb, var(--line) 88%, transparent));
     border-radius: clamp(0.75rem, 1vw, 1rem);
     background:
