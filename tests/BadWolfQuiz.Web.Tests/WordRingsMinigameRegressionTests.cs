@@ -1,3 +1,5 @@
+using BadWolfQuiz.Web.Services;
+
 namespace BadWolfQuiz.Web.Tests;
 
 public sealed class WordRingsMinigameRegressionTests
@@ -56,6 +58,54 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("DefaultOutsideWords", store);
         Assert.Contains("assignOutside", script);
         Assert.Contains("errors === 0", script);
+    }
+
+    [Fact]
+    public async Task Rule_store_excludes_disabled_rules_and_keeps_one_enabled_rule_per_ring()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            var store = WordRingsRuleStore.Get(new TestWebHostEnvironment(root));
+            var originalBlue = Assert.Single(store.GetRules(WordRingColor.Blue));
+
+            var addResult = await store.AddAsync(
+                WordRingColor.Blue,
+                "Тестове активне правило",
+                "альфа, бета",
+                CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.Success, addResult);
+
+            var addedBlue = store.GetRules(WordRingColor.Blue)
+                .Single(rule => rule.Id != originalBlue.Id);
+            Assert.True(addedBlue.IsEnabled);
+
+            var disableOriginal = await store.SetEnabledAsync(
+                originalBlue.Id,
+                enabled: false,
+                CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.Success, disableOriginal);
+
+            for (var attempt = 0; attempt < 8; attempt++)
+            {
+                var puzzle = store.CreatePuzzle();
+                Assert.Equal("Тестове активне правило", puzzle.BlueRuleText);
+                Assert.DoesNotContain("кіт", puzzle.Words);
+                Assert.DoesNotContain("вовк", puzzle.Words);
+            }
+
+            var disableLastEnabled = await store.SetEnabledAsync(
+                addedBlue.Id,
+                enabled: false,
+                CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.LastEnabledRule, disableLastEnabled);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
     }
 
     [Fact]
@@ -181,5 +231,17 @@ public sealed class WordRingsMinigameRegressionTests
         }
 
         throw new FileNotFoundException($"Could not locate BadWolfQuiz.Web file: {Path.Combine(parts)}");
+    }
+
+    private sealed class TestWebHostEnvironment(string root) : IWebHostEnvironment
+    {
+        public string ApplicationName { get; set; } = "BadWolfQuiz.Web.Tests";
+        public Microsoft.Extensions.FileProviders.IFileProvider WebRootFileProvider { get; set; } =
+            new Microsoft.Extensions.FileProviders.NullFileProvider();
+        public string WebRootPath { get; set; } = root;
+        public string EnvironmentName { get; set; } = "Development";
+        public string ContentRootPath { get; set; } = root;
+        public Microsoft.Extensions.FileProviders.IFileProvider ContentRootFileProvider { get; set; } =
+            new Microsoft.Extensions.FileProviders.NullFileProvider();
     }
 }
