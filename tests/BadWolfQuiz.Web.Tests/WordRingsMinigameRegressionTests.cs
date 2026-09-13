@@ -86,18 +86,35 @@ public sealed class WordRingsMinigameRegressionTests
     }
 
     [Fact]
-    public void Drag_visuals_use_a_clean_custom_ghost_and_clear_transient_drag_state_after_drop()
+    public void Drag_visuals_use_a_canvas_pill_preview_and_clear_transient_drag_state_after_drop()
     {
-        var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
         var dragVisuals = ReadWebFile("wwwroot", "js", "word-rings-drag-visuals.js");
 
-        Assert.Contains("word-rings-drag-ghost", refinements);
-        Assert.Contains("opacity: 1 !important", refinements);
-        Assert.Contains("document.createElement('span')", dragVisuals);
-        Assert.Contains("setDragImage", dragVisuals);
+        Assert.Contains("document.createElement('canvas')", dragVisuals);
+        Assert.Contains("roundedRect", dragVisuals);
+        Assert.Contains("createConicGradient", dragVisuals);
+        Assert.Contains("setDragImage(canvas", dragVisuals);
         Assert.Contains("requestAnimationFrame(clearDragVisuals)", dragVisuals);
         Assert.Contains("classList.remove('is-dragging')", dragVisuals);
         Assert.Contains("source.dataset.membership", dragVisuals);
+    }
+
+    [Fact]
+    public void Revealed_rules_are_positioned_next_to_their_rings_inside_the_board()
+    {
+        var game = ReadWebFile("Pages", "WordRings.cshtml");
+        var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
+
+        Assert.True(
+            game.IndexOf("word-rings-stage", StringComparison.Ordinal) <
+            game.IndexOf("word-rings-rules", StringComparison.Ordinal));
+        Assert.Contains("word-rings-rule-a", game);
+        Assert.Contains("word-rings-rule-b", game);
+        Assert.Contains("word-rings-rule-c", game);
+        Assert.Contains(".word-rings-stage > .word-rings-rules", refinements);
+        Assert.Contains("border-color: var(--word-ring-a)", refinements);
+        Assert.Contains("border-color: var(--word-ring-b)", refinements);
+        Assert.Contains("border-color: var(--word-ring-c)", refinements);
     }
 
     private static string ReadWebFile(params string[] parts)

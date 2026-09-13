@@ -31,12 +31,6 @@
         </div>
     </header>
 
-    <section class="word-rings-rules is-hidden" data-rules aria-live="polite">
-        <div><strong>A</strong><span>@WordRingsLocalizer["RuleA"]</span></div>
-        <div><strong>B</strong><span>@WordRingsLocalizer["RuleB"]</span></div>
-        <div><strong>C</strong><span>@WordRingsLocalizer["RuleC"]</span></div>
-    </section>
-
     <div class="word-rings-layout">
         <aside class="word-rings-bank" data-word-bank>
             <div class="word-rings-bank-heading">
@@ -60,6 +54,11 @@
                 <div class="word-rings-circle word-rings-circle-a"><span>A</span></div>
                 <div class="word-rings-circle word-rings-circle-b"><span>B</span></div>
                 <div class="word-rings-circle word-rings-circle-c"><span>C</span></div>
+                <section class="word-rings-rules is-hidden" data-rules aria-live="polite">
+                    <div class="word-rings-rule word-rings-rule-a"><span>@WordRingsLocalizer["RuleA"]</span></div>
+                    <div class="word-rings-rule word-rings-rule-b"><span>@WordRingsLocalizer["RuleB"]</span></div>
+                    <div class="word-rings-rule word-rings-rule-c"><span>@WordRingsLocalizer["RuleC"]</span></div>
+                </section>
                 <div class="word-rings-placed" data-placed-layer></div>
             </div>
             <p class="word-rings-status" data-status aria-live="polite"></p>

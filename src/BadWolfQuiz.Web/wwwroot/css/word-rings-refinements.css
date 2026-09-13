@@ -13,17 +13,68 @@
     bottom: 9%;
 }
 
-.word-rings-drag-ghost {
-    position: fixed !important;
-    left: -2000px !important;
-    top: -2000px !important;
-    z-index: 2147483647;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
+.word-rings-stage > .word-rings-rules {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: block;
+    max-width: none;
     margin: 0;
-    opacity: 1 !important;
     pointer-events: none;
-    white-space: nowrap;
+}
+
+.word-rings-stage > .word-rings-rules.is-hidden {
+    display: none;
+}
+
+.word-rings-stage > .word-rings-rules > .word-rings-rule {
+    position: absolute;
+    display: block;
+    max-width: min(250px, 27%);
+    padding: 8px 11px;
+    border: 2px solid currentColor;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel) 94%, transparent);
+    box-shadow: 0 10px 24px rgb(0 0 0 / 24%);
+    color: var(--text);
+    font-size: clamp(.72rem, 1.15vw, .92rem);
+    font-weight: 850;
+    line-height: 1.25;
+    backdrop-filter: blur(5px);
+}
+
+.word-rings-stage > .word-rings-rules > .word-rings-rule-a {
+    left: 2%;
+    top: 9%;
+    border-color: var(--word-ring-a);
+}
+
+.word-rings-stage > .word-rings-rules > .word-rings-rule-b {
+    right: 2%;
+    top: 9%;
+    border-color: var(--word-ring-b);
+}
+
+.word-rings-stage > .word-rings-rules > .word-rings-rule-c {
+    left: 50%;
+    bottom: 2%;
+    border-color: var(--word-ring-c);
+    transform: translateX(-50%);
+}
+
+@media (max-width: 640px) {
+    .word-rings-stage > .word-rings-rules > .word-rings-rule {
+        max-width: 34%;
+        padding: 6px 8px;
+        font-size: .68rem;
+    }
+
+    .word-rings-stage > .word-rings-rules > .word-rings-rule-a,
+    .word-rings-stage > .word-rings-rules > .word-rings-rule-b {
+        top: 4%;
+    }
+
+    .word-rings-stage > .word-rings-rules > .word-rings-rule-c {
+        bottom: 1%;
+    }
 }
