@@ -13,6 +13,9 @@
     top: 13rem !important;
     max-height: calc(100vh - 14.5rem) !important;
 }
+body.youtube-auto-expanded-open > .host-multiple-choice-panel {
+    display: none !important;
+}
 .host-game-board .answer-presentation > .game-content-blocks.multiple-choice-answer-reveal-grid:not(:has(> .all-player-answer-option-correct)) .game-content-block {
     width: 100% !important;
     max-width: none !important;
