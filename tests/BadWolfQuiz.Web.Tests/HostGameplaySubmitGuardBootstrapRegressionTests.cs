@@ -19,6 +19,14 @@ public sealed class HostGameplaySubmitGuardBootstrapRegressionTests
             "data-host-gameplay-submit-guard",
             helper,
             StringComparison.Ordinal);
+        Assert.Contains(
+            "/js/host-question-selection-recovery.js?v=1",
+            helper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "data-host-question-selection-recovery",
+            helper,
+            StringComparison.Ordinal);
     }
 
     [Fact]
@@ -56,6 +64,55 @@ public sealed class HostGameplaySubmitGuardBootstrapRegressionTests
         Assert.Contains(
             "restoreInlineProperties(snapshot.board);",
             script,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Question_selection_recovers_once_from_non_json_bad_request_with_fresh_antiforgery_token()
+    {
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "host-question-selection-recovery.js"));
+
+        Assert.Contains(
+            "window.fetch = async (input, init) =>",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "url.searchParams.get(\"handler\")?.toLowerCase() === \"selectquestion\"",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "response.status !== 400",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "contentType.toLowerCase().includes(\"application/json\")",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const token = await getFreshAntiforgeryToken();",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "body: cloneFormDataWithToken(init.body, token)",
+            script,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "return await nativeFetch(input, retryInit);",
+            script,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Antiforgery_validation_failures_are_logged_at_information_level()
+    {
+        var settings = File.ReadAllText(FindWebFile("appsettings.json"));
+
+        Assert.Contains(
+            "\"Microsoft.AspNetCore.Mvc.ViewFeatures.Filters.ValidateAntiforgeryTokenAuthorizationFilter\": \"Information\"",
+            settings,
             StringComparison.Ordinal);
     }
 
