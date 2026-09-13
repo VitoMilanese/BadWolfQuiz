@@ -1,0 +1,29 @@
+.word-rings-circle-a {
+    left: 16%;
+    top: 4.5%;
+}
+
+.word-rings-circle-b {
+    right: 16%;
+    top: 4.5%;
+}
+
+.word-rings-circle-c {
+    left: 26%;
+    bottom: 9%;
+}
+
+.word-rings-drag-ghost {
+    position: fixed !important;
+    left: -2000px !important;
+    top: -2000px !important;
+    z-index: 2147483647;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    margin: 0;
+    opacity: 1 !important;
+    pointer-events: none;
+    white-space: nowrap;
+}
