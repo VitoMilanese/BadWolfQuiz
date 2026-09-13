@@ -109,7 +109,10 @@ public sealed class GameHistoryStore(QuizDbContext db)
                 storedQuestion.Results.Add(new PlayerQuestionResult
                 {
                     Player = players[attempt.PlayerId],
-                    IsCorrect = attempt.IsCorrect,
+                    IsCorrect = question.PresentationType ==
+                        QuestionPresentationType.AllPlayerPeerRatedText
+                            ? null
+                            : attempt.IsCorrect,
                     PointsAwarded = attempt.ScoreDelta,
                     CreatedAtUtc = attempt.JudgedAtUtc.UtcDateTime
                 });
@@ -174,7 +177,8 @@ public sealed class GameHistoryStore(QuizDbContext db)
             .SelectMany(question => question.AnswerAttempts)
             .ToArray();
 
-        foreach (var question in runtime.Board.Questions)
+        foreach (var question in runtime.Board.Questions.Where(question =>
+                     question.PresentationType != QuestionPresentationType.AllPlayerPeerRatedText))
         {
             var highestQuestionValue = runtime.Board.Questions
                 .Where(item => item.SourceRoundId == question.SourceRoundId)
@@ -330,7 +334,8 @@ public sealed class GameHistoryStore(QuizDbContext db)
             }
         }
 
-        foreach (var question in runtime.Board.Questions)
+        foreach (var question in runtime.Board.Questions.Where(question =>
+                     question.PresentationType != QuestionPresentationType.AllPlayerPeerRatedText))
         {
             foreach (var attempt in question.AnswerAttempts.Where(item => item.IsCorrect))
             {
@@ -438,14 +443,24 @@ public sealed class GameHistoryStore(QuizDbContext db)
                             attempt.PlayerId == player.Id))
                         .Select(question => question.SourceCategoryId)
                         .ToHashSet();
+                    var correctnessCategoryIds = roundQuestions
+                        .Where(question => question.PresentationType !=
+                            QuestionPresentationType.AllPlayerPeerRatedText)
+                        .Select(question => question.SourceCategoryId)
+                        .Distinct()
+                        .ToArray();
                     var correctCategoryIds = roundQuestions
-                        .Where(question => question.AnswerAttempts.Any(attempt =>
-                            attempt.PlayerId == player.Id && attempt.IsCorrect))
+                        .Where(question =>
+                            question.PresentationType !=
+                                QuestionPresentationType.AllPlayerPeerRatedText &&
+                            question.AnswerAttempts.Any(attempt =>
+                                attempt.PlayerId == player.Id && attempt.IsCorrect))
                         .Select(question => question.SourceCategoryId)
                         .ToHashSet();
 
                     attemptedEveryCategory |= categoryIds.All(attemptedCategoryIds.Contains);
-                    correctInEveryCategory |= categoryIds.All(correctCategoryIds.Contains);
+                    correctInEveryCategory |= correctnessCategoryIds.Length > 0 &&
+                        correctnessCategoryIds.All(correctCategoryIds.Contains);
                 }
 
                 var firstPick = PlayerAchievementRuntimeState.GetRoundFirstPick(

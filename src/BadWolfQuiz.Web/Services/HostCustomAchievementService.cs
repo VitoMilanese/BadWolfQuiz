@@ -1,3 +1,4 @@
+using BadWolfQuiz.Game.Definitions;
 using BadWolfQuiz.Web.Data;
 using BadWolfQuiz.Web.Models;
 using Microsoft.EntityFrameworkCore;
@@ -107,13 +108,38 @@ public sealed class HostCustomAchievementService(QuizDbContext db)
                     }
                 }
 
-                var matches = contributions
+                var matchingContributions = contributions
                     .Where(item =>
                         item.Tags.Overlaps(normalizedTags) &&
                         (resetMarker is null || item.CreatedAtUtc > resetMarker.ResetAtUtc))
                     .OrderBy(item => item.CreatedAtUtc)
                     .ThenBy(item => item.ResultId)
                     .ToArray();
+                var matches = matchingContributions
+                    .Where(item => item.CountsForCorrectnessAchievements)
+                    .ToArray();
+
+                // Only revoke a legacy source-backed custom unlock when the old
+                // peer-rated-as-correct behavior can actually explain it. This
+                // preserves authoritative/source-backed unlocks that are below
+                // today's reconstructed progress for unrelated reasons.
+                if (isUnlocked &&
+                    unlock!.SourceGameSessionId.HasValue &&
+                    matchingContributions.Length >= definition.Target &&
+                    matches.Length < definition.Target)
+                {
+                    var staleUnlock = await QueryUnlocks(identity)
+                        .SingleOrDefaultAsync(
+                            item => item.AchievementCode == code,
+                            cancellationToken);
+                    if (staleUnlock is not null && staleUnlock.SourceGameSessionId.HasValue)
+                    {
+                        db.PlayerAchievements.Remove(staleUnlock);
+                        unlockedByCode.Remove(code);
+                        unlock = null;
+                        isUnlocked = false;
+                    }
+                }
 
                 if (!isUnlocked && matches.Length >= definition.Target)
                 {
@@ -184,8 +210,7 @@ public sealed class HostCustomAchievementService(QuizDbContext db)
             .IgnoreQueryFilters()
             .Include(item => item.Tags)
             .SingleOrDefaultAsync(
-                item => item.Id == id && item.HostId == hostId && (includeDeleted || !item.IsDeleted),
-                cancellationToken);
+                item => item.Id == id && item.HostId == hostId && (includeDeleted || !item.IsDeleted), cancellationToken);
 
     public async Task<HostCustomAchievement?> LoadDefinitionByCodeAsync(
         string code,
@@ -358,13 +383,16 @@ public sealed class HostCustomAchievementService(QuizDbContext db)
         var answers = await db.PlayerQuestionResults
             .IgnoreQueryFilters()
             .AsNoTracking()
-            .Where(result => playerIds.Contains(result.GamePlayerId) && result.IsCorrect == true)
+            .Where(result =>
+                playerIds.Contains(result.GamePlayerId) &&
+                result.IsCorrect == true)
             .Select(result => new
             {
                 result.Id,
                 result.CreatedAtUtc,
                 result.GameQuestion.GameSessionId,
-                result.GameQuestion.QuizQuestionId
+                result.GameQuestion.QuizQuestionId,
+                result.GameQuestion.QuizQuestion.PresentationType
             })
             .ToListAsync(cancellationToken);
         if (answers.Count == 0)
@@ -392,7 +420,9 @@ public sealed class HostCustomAchievementService(QuizDbContext db)
                 answer.CreatedAtUtc,
                 tagsByQuestion.TryGetValue(answer.QuizQuestionId, out var questionTags)
                     ? questionTags
-                    : new HashSet<string>(StringComparer.Ordinal)))
+                    : new HashSet<string>(StringComparer.Ordinal),
+                CountsForCorrectnessAchievements: answer.PresentationType !=
+                    QuestionPresentationType.AllPlayerPeerRatedText))
             .ToArray();
     }
 
@@ -406,7 +436,8 @@ public sealed class HostCustomAchievementService(QuizDbContext db)
         int ResultId,
         int GameSessionId,
         DateTime CreatedAtUtc,
-        HashSet<string> Tags);
+        HashSet<string> Tags,
+        bool CountsForCorrectnessAchievements);
 }
 
 public sealed record HostCustomAchievementProgress(
