@@ -1,0 +1,1 @@
+After a successful import, each detail dialog sorts its full result set alphabetically before applying the five-item pager. New words use localized case-insensitive word collation; new rules and updated existing rules are ordered by rule text, with ring color used only as a deterministic tie-breaker. Added-word lists inside updated-rule cards are alphabetized as well.
