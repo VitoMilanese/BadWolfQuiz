@@ -6,7 +6,7 @@ namespace BadWolfQuiz.Web.Pages;
 public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
 {
     private const int MaximumDisplayedWords = 10;
-    private const int PuzzleRefreshAttempts = 24;
+    private const int PuzzleSelectionAttempts = 32;
 
     public WordRingsPuzzle Puzzle { get; private set; } = null!;
     public IReadOnlyList<string> DisplayedWords { get; private set; } = [];
@@ -20,24 +20,27 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         string? previousWords)
     {
         var store = WordRingsRuleStore.Get(environment);
-        Puzzle = PickFreshPuzzle(
+        var previousWordList = ParsePreviousWords(previousWords);
+        var selection = PickFreshPuzzle(
             store,
             previousBlueRule,
             previousYellowRule,
-            previousRedRule);
+            previousRedRule,
+            previousWordList);
 
-        var previousWordList = ParsePreviousWords(previousWords);
-        DisplayedWords = BuildDisplayedWords(Puzzle, previousWordList);
+        Puzzle = selection.Puzzle;
+        DisplayedWords = selection.Words;
         DisplayedExpected = Puzzle.Expected
             .Where(item => DisplayedWords.Contains(item.Key, StringComparer.Ordinal))
             .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
     }
 
-    private static WordRingsPuzzle PickFreshPuzzle(
+    private static PuzzleSelection PickFreshPuzzle(
         WordRingsRuleStore store,
         string? previousBlueRule,
         string? previousYellowRule,
-        string? previousRedRule)
+        string? previousRedRule,
+        IReadOnlyList<string> previousWords)
     {
         var previousRules = new[]
         {
@@ -45,45 +48,124 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
             previousYellowRule?.Trim(),
             previousRedRule?.Trim()
         };
-        var requestedDifferences = previousRules.Count(rule => !string.IsNullOrWhiteSpace(rule));
-        WordRingsPuzzle? best = null;
-        var bestDifferenceCount = -1;
 
-        for (var attempt = 0; attempt < PuzzleRefreshAttempts; attempt++)
+        PuzzleSelection? best = null;
+        for (var attempt = 0; attempt < PuzzleSelectionAttempts; attempt++)
         {
             var candidate = store.CreatePuzzle();
-            var currentRules = new[]
-            {
-                candidate.BlueRuleText,
-                candidate.YellowRuleText,
-                candidate.RedRuleText
-            };
-            var differenceCount = 0;
-            for (var index = 0; index < previousRules.Length; index++)
-            {
-                if (!string.IsNullOrWhiteSpace(previousRules[index]) &&
-                    !string.Equals(
-                        previousRules[index],
-                        currentRules[index],
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    differenceCount++;
-                }
-            }
+            var candidateWords = BuildDisplayedWords(candidate, previousWords);
+            var differenceCount = CountRuleDifferences(candidate, previousRules);
+            var qualityScore = ScoreDisplayedWords(candidate, candidateWords);
 
-            if (differenceCount > bestDifferenceCount)
+            if (best is null ||
+                differenceCount > best.RuleDifferenceCount ||
+                (differenceCount == best.RuleDifferenceCount && qualityScore > best.QualityScore))
             {
-                best = candidate;
-                bestDifferenceCount = differenceCount;
-            }
-
-            if (requestedDifferences == 0 || differenceCount == requestedDifferences)
-            {
-                return candidate;
+                best = new PuzzleSelection(
+                    candidate,
+                    candidateWords,
+                    differenceCount,
+                    qualityScore);
             }
         }
 
-        return best ?? store.CreatePuzzle();
+        if (best is not null)
+        {
+            return best;
+        }
+
+        var fallback = store.CreatePuzzle();
+        return new PuzzleSelection(
+            fallback,
+            BuildDisplayedWords(fallback, previousWords),
+            0,
+            int.MinValue);
+    }
+
+    private static int CountRuleDifferences(
+        WordRingsPuzzle puzzle,
+        IReadOnlyList<string?> previousRules)
+    {
+        var currentRules = new[]
+        {
+            puzzle.BlueRuleText,
+            puzzle.YellowRuleText,
+            puzzle.RedRuleText
+        };
+        var differenceCount = 0;
+        for (var index = 0; index < currentRules.Length; index++)
+        {
+            if (!string.IsNullOrWhiteSpace(previousRules[index]) &&
+                !string.Equals(
+                    previousRules[index],
+                    currentRules[index],
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                differenceCount++;
+            }
+        }
+
+        return differenceCount;
+    }
+
+    private static int ScoreDisplayedWords(
+        WordRingsPuzzle puzzle,
+        IReadOnlyList<string> words)
+    {
+        var ringUse = new Dictionary<char, int>
+        {
+            ['A'] = 0,
+            ['B'] = 0,
+            ['C'] = 0
+        };
+        var matchingCount = 0;
+        var dualCount = 0;
+        var tripleCount = 0;
+        var regions = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var word in words)
+        {
+            if (!puzzle.Expected.TryGetValue(word, out var membership) ||
+                string.IsNullOrEmpty(membership))
+            {
+                continue;
+            }
+
+            matchingCount++;
+            regions.Add(membership);
+            if (membership.Length >= 3)
+            {
+                tripleCount++;
+            }
+            else if (membership.Length == 2)
+            {
+                dualCount++;
+            }
+
+            foreach (var ring in membership.Where(ringUse.ContainsKey))
+            {
+                ringUse[ring]++;
+            }
+        }
+
+        if (matchingCount == 0)
+        {
+            return int.MinValue / 2;
+        }
+
+        var minimumRingUse = ringUse.Values.Min();
+        var maximumRingUse = ringUse.Values.Max();
+        var representedRings = ringUse.Values.Count(value => value > 0);
+        var spread = maximumRingUse - minimumRingUse;
+
+        return
+            (matchingCount * 200) +
+            (tripleCount * 1500) +
+            (dualCount * 900) +
+            (representedRings * 600) +
+            (minimumRingUse * 250) +
+            (regions.Count * 100) -
+            (spread * 350);
     }
 
     private static IReadOnlyList<string> BuildDisplayedWords(
@@ -174,25 +256,40 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
             ['B'] = 0,
             ['C'] = 0
         };
+        var regionUse = new Dictionary<string, int>(StringComparer.Ordinal);
 
         while (selected.Count < count && remaining.Count > 0)
         {
-            var currentMax = ringUse.Values.Max();
+            var minimumUse = ringUse.Values.Min();
             MatchingWordCandidate? best = null;
             var bestScore = double.MinValue;
 
             foreach (var candidate in remaining)
             {
-                var balanceBonus = candidate.Membership
+                var membershipRings = candidate.Membership
                     .Where(ringUse.ContainsKey)
-                    .Sum(ring => (currentMax - ringUse[ring]) * 55.0);
+                    .Distinct()
+                    .ToArray();
+                var underrepresentedRings = membershipRings.Count(ring => ringUse[ring] == minimumUse);
+                var balanceBonus = underrepresentedRings * 1000.0;
                 var overlapBonus = candidate.Membership.Length switch
                 {
-                    >= 3 => 360.0,
-                    2 => 220.0,
-                    _ => 100.0
+                    >= 3 => 750.0,
+                    2 => 450.0,
+                    _ => 0.0
                 };
-                var score = overlapBonus + balanceBonus + (Random.Shared.NextDouble() * 12.0);
+                var saturationPenalty = membershipRings.Sum(ring => ringUse[ring]) * 90.0;
+                var existingRegionUse = regionUse.GetValueOrDefault(candidate.Membership);
+                var regionVarietyBonus = existingRegionUse == 0
+                    ? 180.0
+                    : -(existingRegionUse * 60.0);
+                var score =
+                    balanceBonus +
+                    overlapBonus +
+                    regionVarietyBonus -
+                    saturationPenalty +
+                    (Random.Shared.NextDouble() * 10.0);
+
                 if (score <= bestScore)
                 {
                     continue;
@@ -208,10 +305,11 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
             }
 
             selected.Add(best.Word);
-            foreach (var ring in best.Membership.Where(ringUse.ContainsKey))
+            foreach (var ring in best.Membership.Where(ringUse.ContainsKey).Distinct())
             {
                 ringUse[ring]++;
             }
+            regionUse[best.Membership] = regionUse.GetValueOrDefault(best.Membership) + 1;
             remaining.Remove(best);
         }
 
@@ -240,4 +338,10 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
     }
 
     private sealed record MatchingWordCandidate(string Word, string Membership);
+
+    private sealed record PuzzleSelection(
+        WordRingsPuzzle Puzzle,
+        IReadOnlyList<string> Words,
+        int RuleDifferenceCount,
+        int QualityScore);
 }
