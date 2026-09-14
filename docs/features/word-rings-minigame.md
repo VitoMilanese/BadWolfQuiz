@@ -10,6 +10,32 @@ Placement membership is calculated from the actual rendered circle geometry in t
 
 Word movement uses pointer events rather than the browser's native HTML drag-and-drop mechanism. This keeps the dragged preview identical to the pill-shaped word token and avoids browser-generated square or rectangular drag ghosts.
 
+## Solo play
+
+Solo play uses a maximum 20-word session pool with at most 10 words visible in the right-side bank at once. As soon as a bank word is dragged onto the table, the next queued word is streamed into the bank. Only one unchecked new word can be placed at a time.
+
+The solo selector strongly prefers words that satisfy one or more selected rules, prioritizes three-ring and two-ring overlaps, and balances coverage across all three rings. Incorrect checked words are moved automatically into their correct region while retaining red error feedback. A solo game ends after 10 correct placements or when all 20 available words have been attempted.
+
+When a solo game ends, a custom animated victory/defeat dialog is shown instead of a browser alert.
+
+## Cooperative rooms
+
+The Word Rings toolbar can create or join a cooperative room. The creator chooses a target score from **5 to 15** and can optionally enable **0.5-point partial placement scoring**. Partial scoring is disabled by default. Rooms use six-character shareable codes and can be joined through `/minigames/word-rings?room=CODE`.
+
+The host can start after at least two players have joined. Each participant receives a personal, separately randomized word queue of up to 20 words with at most 10 visible at once. The left side of the game shows the room players, each player's score contribution, remaining-word count, host marker, and the current turn.
+
+Cooperative scoring and turn progression are server-authoritative:
+
+- a fully correct placement awards **1 point**;
+- when partial scoring is enabled, a non-exact placement that overlaps at least one required ring awards **0.5 points**;
+- a fully correct placement keeps the turn with the same player;
+- an incorrect or partially correct placement passes the turn to the next player;
+- a correctly placed word outside all rings can award only **1 point per continuing turn**; additional correct outside-ring words in that same turn remain correct but award 0 points until the turn changes;
+- the room wins when the shared team score reaches the configured target;
+- if every player's personal queue is exhausted before reaching the target, the room loses.
+
+The browser submits the word, detected Venn membership, and board coordinates, while the server calculates correctness, points, turn ownership, and the final outcome. Room state is kept in memory and expires after inactivity. Cooperative victory and defeat use the same animated result-dialog system as solo play.
+
 ## Rule selection
 
 Each color has its own persistent pool of rules. Every new rule is enabled for games by default, and the editor can temporarily disable a rule without deleting it. Disabled rules and their word sets are excluded entirely from game generation, including outside-ring distractor selection.
@@ -18,7 +44,7 @@ When the game page is opened, one enabled, non-empty rule is selected independen
 
 The default installation seeds the original three conditions so the minigame remains immediately playable. At least one rule must remain for each ring, and at least one non-empty rule per ring must remain enabled for games.
 
-The player can reset the board, reveal or hide the selected rules, and validate the completed arrangement. Revealed rules appear beside their matching rings and are identified by color only. Validation marks correct and incorrect placements without replacing the membership-colored border.
+The player can reset the board and reveal or hide the selected rules. Revealed rules appear beside their matching rings and are identified by color only. Validation happens one newly placed word at a time and marks correct and incorrect placements without replacing the membership-colored border.
 
 The public `/minigames` catalog exposes the game as the second minigame.
 
@@ -28,7 +54,7 @@ The Master Host editor is available at `/Admin/WordRingsEditor`. Its first tab i
 
 ### All words
 
-The **All words** tab derives one case-insensitive catalog from every word referenced by any rule. The catalog is sorted alphabetically using Ukrainian collation and displayed in pages of 25, with the same pager shown above and below the list. Each row also shows how many rules in each ring currently contain the word.
+The **All words** tab derives one case-insensitive catalog from every word referenced by any rule. The catalog is sorted alphabetically using Ukrainian collation and displayed in pages of 25, with the same pager shown above and below the list. Each row also shows the total number of rules using the word plus how many rules in each ring currently contain it.
 
 Every word row provides edit and delete actions. Edit opens a styled dialog where the host selects a ring and browses that ring's rules in pages of 10. A checkbox is checked when the current word belongs to that rule, and an optional filter shows only rules that already contain the word. Changes can be made across multiple rule pages and rings, then saved as one batched mutation so the JSON rule file is written only once. The **Add word** action uses the same membership dialog with an editable word field; a word must contain at least three characters and becomes part of the catalog once it is assigned to at least one rule.
 
