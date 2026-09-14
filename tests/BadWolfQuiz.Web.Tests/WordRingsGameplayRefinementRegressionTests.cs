@@ -1,3 +1,7 @@
+using BadWolfQuiz.Web.Pages;
+using BadWolfQuiz.Web.Services;
+using System.Reflection;
+
 namespace BadWolfQuiz.Web.Tests;
 
 public sealed class WordRingsGameplayRefinementRegressionTests
@@ -23,6 +27,8 @@ public sealed class WordRingsGameplayRefinementRegressionTests
         Assert.Contains("MaximumBankWords = 10", model, StringComparison.Ordinal);
         Assert.Contains("MaximumGameWords = 20", model, StringComparison.Ordinal);
         Assert.Contains("CorrectWordsToWin = 10", model, StringComparison.Ordinal);
+        Assert.Contains("InitialWords = DisplayedWords.Take(MaximumBankWords)", model, StringComparison.Ordinal);
+        Assert.Contains("QueuedWords = DisplayedWords.Skip(MaximumBankWords)", model, StringComparison.Ordinal);
         Assert.Contains("Math.Ceiling(targetCount * 0.8)", model, StringComparison.Ordinal);
         Assert.Contains("InterleaveOutsideWords", model, StringComparison.Ordinal);
         Assert.Contains("SelectBalancedMatchingWords", model, StringComparison.Ordinal);
@@ -39,6 +45,7 @@ public sealed class WordRingsGameplayRefinementRegressionTests
         Assert.Contains("replenishWordBank", script, StringComparison.Ordinal);
         Assert.Contains("visibleBankWords().length < maximumBankWords", script, StringComparison.Ordinal);
         Assert.Contains("queuedWords.shift()", script, StringComparison.Ordinal);
+        Assert.Contains("trimWordBankToLimit", script, StringComparison.Ordinal);
         Assert.Contains("correctCount()", script, StringComparison.Ordinal);
         Assert.Contains("finishGameIfNeeded", script, StringComparison.Ordinal);
         Assert.Contains("successful < correctWordTarget && attempts < maximumAttempts", script, StringComparison.Ordinal);
@@ -56,6 +63,98 @@ public sealed class WordRingsGameplayRefinementRegressionTests
         Assert.Contains("grid-template-areas: \"stage bank\"", styles, StringComparison.Ordinal);
         Assert.Contains("grid-area: bank", styles, StringComparison.Ordinal);
         Assert.Contains("height: 100%", styles, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Solo_word_selection_prefers_overlap_and_balances_ring_coverage()
+    {
+        var expected = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["abc1"] = "ABC",
+            ["abc2"] = "ABC",
+            ["ab1"] = "AB",
+            ["ab2"] = "AB",
+            ["ac1"] = "AC",
+            ["ac2"] = "AC",
+            ["bc1"] = "BC",
+            ["bc2"] = "BC",
+            ["a1"] = "A",
+            ["a2"] = "A",
+            ["a3"] = "A",
+            ["b1"] = "B",
+            ["b2"] = "B",
+            ["b3"] = "B",
+            ["c1"] = "C",
+            ["c2"] = "C",
+            ["c3"] = "C",
+            ["outside1"] = string.Empty,
+            ["outside2"] = string.Empty
+        };
+        var puzzle = new WordRingsPuzzle(
+            "blue",
+            "yellow",
+            "red",
+            expected.Keys.ToArray(),
+            expected);
+
+        var selected = InvokeBuildDisplayedWords(puzzle);
+        var memberships = selected
+            .Select(word => expected[word])
+            .Where(membership => membership.Length > 0)
+            .ToArray();
+
+        Assert.Equal(19, selected.Count);
+        Assert.Equal(17, memberships.Length);
+        Assert.True(
+            memberships.Count(membership => membership.Length >= 2) >= 8,
+            "Expected the solo selector to strongly prefer words that belong to multiple rings.");
+        Assert.All(
+            new[] { 'A', 'B', 'C' },
+            ring => Assert.Contains(memberships, membership => membership.Contains(ring)));
+    }
+
+    [Fact]
+    public void Solo_word_selection_balances_single_ring_words_when_overlaps_do_not_exist()
+    {
+        var expected = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var ring in new[] { 'A', 'B', 'C' })
+        {
+            for (var index = 1; index <= 8; index++)
+            {
+                expected[$"{char.ToLowerInvariant(ring)}{index}"] = ring.ToString();
+            }
+        }
+        expected["outside1"] = string.Empty;
+        expected["outside2"] = string.Empty;
+
+        var puzzle = new WordRingsPuzzle(
+            "blue",
+            "yellow",
+            "red",
+            expected.Keys.ToArray(),
+            expected);
+        var selected = InvokeBuildDisplayedWords(puzzle);
+        var ringCounts = new Dictionary<char, int>
+        {
+            ['A'] = 0,
+            ['B'] = 0,
+            ['C'] = 0
+        };
+
+        foreach (var word in selected)
+        {
+            var membership = expected[word];
+            foreach (var ring in membership)
+            {
+                ringCounts[ring]++;
+            }
+        }
+
+        Assert.Equal(20, selected.Count);
+        Assert.Equal(18, ringCounts.Values.Sum());
+        Assert.True(
+            ringCounts.Values.Max() - ringCounts.Values.Min() <= 1,
+            $"Expected near-even single-ring coverage, got A={ringCounts['A']}, B={ringCounts['B']}, C={ringCounts['C']}.");
     }
 
     [Fact]
@@ -118,6 +217,17 @@ public sealed class WordRingsGameplayRefinementRegressionTests
         Assert.Contains("cx=\"800\" cy=\"610\" r=\"255\" stroke=\"#e85d5d\"", svg, StringComparison.Ordinal);
         Assert.DoesNotContain("fill=\"#f4f5f7\"", svg, StringComparison.Ordinal);
         Assert.DoesNotContain("rx=\"29\"", svg, StringComparison.Ordinal);
+    }
+
+    private static IReadOnlyList<string> InvokeBuildDisplayedWords(WordRingsPuzzle puzzle)
+    {
+        var method = typeof(WordRingsModel).GetMethod(
+            "BuildDisplayedWords",
+            BindingFlags.NonPublic | BindingFlags.Static);
+        Assert.NotNull(method);
+
+        return Assert.IsAssignableFrom<IReadOnlyList<string>>(
+            method!.Invoke(null, [puzzle, Array.Empty<string>()]));
     }
 
     private static string ReadWebFile(params string[] parts) => File.ReadAllText(FindWebFile(parts));
