@@ -31,6 +31,18 @@ jobs:
           script = '\n'.join(line[10:] if line.startswith('          ') else line for line in lines)
           exec(compile(script, 'embedded-word-rings-fix.py', 'exec'))
           PY
+      - name: Fix regression string literals
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('tests/BadWolfQuiz.Web.Tests/WordRingsCooperativeRoomRegressionTests.cs')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace('Assert.Contains("content: "✓"", refinements, StringComparison.Ordinal);', r'Assert.Contains("content: \"✓\"", refinements, StringComparison.Ordinal);')
+          text = text.replace('Assert.Contains("content: "×"", refinements, StringComparison.Ordinal);', r'Assert.Contains("content: \"×\"", refinements, StringComparison.Ordinal);')
+          text = text.replace('Assert.Contains("content: "½"", styles, StringComparison.Ordinal);', r'Assert.Contains("content: \"½\"", styles, StringComparison.Ordinal);')
+          path.write_text(text, encoding='utf-8')
+          PY
       - name: JavaScript syntax checks
         run: |
           node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings.js
