@@ -70,4 +70,4 @@ Import and export use the same three-note Web Audio completion tone as quiz impo
 
 The rule store keeps one immutable in-memory snapshot containing both rules and a precomputed unique-word index. Read-only word paging therefore does not repeatedly flatten and sort every rule. Mutations are serialized through the existing store gate, build a new snapshot only after a successful write, and publish it atomically. Word membership edits are batched, and a CSV merge performs a single persistence write regardless of how many rows changed.
 
-New-word import details use pages of 50 entries, while imported-rule detail dialogs keep their five-item pages.
+New-word import details use responsive pages containing as many chips as fit into nine visual rows at the current dialog width; imported-rule detail dialogs keep their five-item pages. The nine-row layout is measured once per width and recalculated after a resize.

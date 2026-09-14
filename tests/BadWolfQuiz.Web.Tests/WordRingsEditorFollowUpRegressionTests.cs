@@ -31,7 +31,11 @@ public sealed class WordRingsEditorFollowUpRegressionTests
         Assert.Contains("data-word-rings-import-detail", script);
         Assert.Contains("word-rings-editor-import-details-dialog", script);
         Assert.Contains("importRuleDetailPageSize = 5", script);
-        Assert.Contains("importNewWordDetailPageSize = 50", script);
+        Assert.Contains("importNewWordDetailRowsPerPage = 9", script);
+        Assert.Contains("measureNewWordDetailPages", script);
+        Assert.Contains("Math.floor(rowIndex / importNewWordDetailRowsPerPage)", script);
+        Assert.Contains("activeImportDetailTotalPages", script);
+        Assert.DoesNotContain("importNewWordDetailPageSize = 50", script);
         Assert.Contains("word-rings-editor-import-detail-eye", script);
         Assert.Contains("data-word-rings-import-details-page=\"last\"", script);
         Assert.Contains("changeImportDetailsPage", script);
@@ -44,7 +48,7 @@ public sealed class WordRingsEditorFollowUpRegressionTests
         Assert.Contains("word-rings-editor-import-details-pager", styles);
         Assert.Contains("word-rings-editor-import-rule-detail-blue", styles);
         Assert.Contains("word-rings-editor-followup.css?v=3", assets);
-        Assert.Contains("word-rings-editor-followup.js?v=6", assets);
+        Assert.Contains("word-rings-editor-followup.js?v=7", assets);
         Assert.Contains("data-word-rings-import-error-dialog", page);
         Assert.Contains("data-word-rings-import-error-location", page);
         Assert.Contains("data-word-rings-import-error-message", page);

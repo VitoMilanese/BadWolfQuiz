@@ -4,13 +4,14 @@
     const rootSelector = '[data-word-rings-editor-shell]';
     const minimumWordLength = 3;
     const importRuleDetailPageSize = 5;
-    const importNewWordDetailPageSize = 50;
-    const importDetailPageSize = type =>
-        type === 'newWords' ? importNewWordDetailPageSize : importRuleDetailPageSize;
+    const importNewWordDetailRowsPerPage = 9;
     const originalFetch = window.fetch.bind(window);
     let lastImportDetails = emptyImportDetails();
     let activeImportDetailType = '';
     let activeImportDetailPage = 1;
+    let activeImportDetailTotalPages = 1;
+    let newWordDetailLayout = { source: null, width: 0, pages: [] };
+    let newWordDetailResizeTimer = 0;
 
     const membershipInput = () =>
         document.querySelector('[data-word-rings-membership-word]');
@@ -436,6 +437,61 @@
         return card;
     };
 
+    const measureNewWordDetailPages = (sourceItems, sortedItems, body, text) => {
+        const bodyStyle = window.getComputedStyle(body);
+        const horizontalPadding =
+            (Number.parseFloat(bodyStyle.paddingLeft) || 0) +
+            (Number.parseFloat(bodyStyle.paddingRight) || 0);
+        const width = Math.max(1, Math.floor(body.clientWidth - horizontalPadding));
+
+        if (newWordDetailLayout.source === sourceItems &&
+            newWordDetailLayout.width === width) {
+            return newWordDetailLayout.pages;
+        }
+
+        const measurement = document.createElement('div');
+        measurement.className = 'word-rings-editor-import-word-list';
+        measurement.setAttribute('aria-hidden', 'true');
+        Object.assign(measurement.style, {
+            position: 'fixed',
+            left: '-100000px',
+            top: '0',
+            width: `${width}px`,
+            visibility: 'hidden',
+            pointerEvents: 'none'
+        });
+        measurement.style.fontFamily = bodyStyle.fontFamily;
+        measurement.style.fontSize = bodyStyle.fontSize;
+        measurement.style.letterSpacing = bodyStyle.letterSpacing;
+
+        const entries = sortedItems.map(item => {
+            const node = renderImportDetailItem('newWords', item, text);
+            measurement.appendChild(node);
+            return { item, node };
+        });
+        document.body.appendChild(measurement);
+
+        const pages = [];
+        let rowIndex = -1;
+        let lastTop = null;
+        for (const entry of entries) {
+            const top = entry.node.offsetTop;
+            if (lastTop === null || Math.abs(top - lastTop) > 0.5) {
+                rowIndex += 1;
+                lastTop = top;
+            }
+
+            const pageIndex = Math.floor(rowIndex / importNewWordDetailRowsPerPage);
+            if (!pages[pageIndex]) pages[pageIndex] = [];
+            pages[pageIndex].push(entry.item);
+        }
+
+        measurement.remove();
+        if (pages.length === 0) pages.push([]);
+        newWordDetailLayout = { source: sourceItems, width, pages };
+        return pages;
+    };
+
     const renderImportDetailsPage = () => {
         const dialog = ensureDetailDialog();
         const body = dialog.querySelector('[data-word-rings-import-details-body]');
@@ -450,11 +506,20 @@
         const items = activeImportDetailType === 'newWords'
             ? sortWords(sourceItems)
             : sortRules(sourceItems);
-        const pageSize = importDetailPageSize(activeImportDetailType);
-        const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
-        activeImportDetailPage = Math.min(Math.max(activeImportDetailPage, 1), totalPages);
-        const start = (activeImportDetailPage - 1) * pageSize;
-        const pageItems = items.slice(start, start + pageSize);
+        let totalPages;
+        let pageItems;
+        if (activeImportDetailType === 'newWords') {
+            const pages = measureNewWordDetailPages(sourceItems, items, body, text);
+            totalPages = Math.max(1, pages.length);
+            activeImportDetailPage = Math.min(Math.max(activeImportDetailPage, 1), totalPages);
+            pageItems = pages[activeImportDetailPage - 1] ?? [];
+        } else {
+            totalPages = Math.max(1, Math.ceil(items.length / importRuleDetailPageSize));
+            activeImportDetailPage = Math.min(Math.max(activeImportDetailPage, 1), totalPages);
+            const start = (activeImportDetailPage - 1) * importRuleDetailPageSize;
+            pageItems = items.slice(start, start + importRuleDetailPageSize);
+        }
+        activeImportDetailTotalPages = totalPages;
 
         body.replaceChildren();
         if (pageItems.length === 0) {
@@ -483,7 +548,7 @@
         if (next instanceof HTMLButtonElement) next.disabled = isLast;
         if (last instanceof HTMLButtonElement) last.disabled = isLast;
         status.textContent = `${text.page} ${activeImportDetailPage} ${text.of} ${totalPages}`;
-        pager.hidden = items.length <= pageSize;
+        pager.hidden = totalPages <= 1;
     };
 
     const openImportDetails = type => {
@@ -499,18 +564,13 @@
             : type === 'newRules'
                 ? text.newRulesTitle
                 : text.updatedRulesTitle;
-        renderImportDetailsPage();
-
         if (!dialog.open) dialog.showModal();
+        renderImportDetailsPage();
     };
 
     const changeImportDetailsPage = action => {
         if (!activeImportDetailType) return;
-        const items = Array.isArray(lastImportDetails[activeImportDetailType])
-            ? lastImportDetails[activeImportDetailType]
-            : [];
-        const totalPages = Math.max(1, Math.ceil(
-            items.length / importDetailPageSize(activeImportDetailType)));
+        const totalPages = Math.max(1, activeImportDetailTotalPages);
 
         if (action === 'first') activeImportDetailPage = 1;
         else if (action === 'previous') activeImportDetailPage = Math.max(1, activeImportDetailPage - 1);
@@ -541,6 +601,21 @@
         }
         return response;
     };
+
+    window.addEventListener('resize', () => {
+        const dialog = document.querySelector('[data-word-rings-import-details-dialog]');
+        if (!(dialog instanceof HTMLDialogElement) ||
+            !dialog.open ||
+            activeImportDetailType !== 'newWords') {
+            return;
+        }
+
+        window.clearTimeout(newWordDetailResizeTimer);
+        newWordDetailResizeTimer = window.setTimeout(() => {
+            newWordDetailLayout = { source: null, width: 0, pages: [] };
+            renderImportDetailsPage();
+        }, 120);
+    });
 
     const enhance = () => {
         enforceMinimumWordLength();

@@ -26,7 +26,8 @@ public sealed class WordRingsEditorBulkActionsRegressionTests
         Assert.Contains("dialog-card-danger", page, StringComparison.Ordinal);
         Assert.Contains("DeleteAllWordsAsync", store, StringComparison.Ordinal);
         Assert.Contains("DeleteAllRulesAsync", store, StringComparison.Ordinal);
-        Assert.Contains("importNewWordDetailPageSize = 50", followup, StringComparison.Ordinal);
+        Assert.Contains("importNewWordDetailRowsPerPage = 9", followup, StringComparison.Ordinal);
+        Assert.Contains("measureNewWordDetailPages", followup, StringComparison.Ordinal);
         Assert.Contains("importRuleDetailPageSize = 5", followup, StringComparison.Ordinal);
         Assert.DoesNotContain("window.confirm", script, StringComparison.Ordinal);
         Assert.DoesNotContain("alert(", script, StringComparison.Ordinal);

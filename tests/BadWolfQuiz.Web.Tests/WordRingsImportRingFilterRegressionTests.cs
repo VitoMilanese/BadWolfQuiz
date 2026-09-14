@@ -13,7 +13,7 @@ public sealed class WordRingsImportRingFilterRegressionTests
         Assert.Contains("word-rings-import-filters.js?v=1", assets);
         Assert.True(
             assets.IndexOf("word-rings-import-filters.js?v=1", StringComparison.Ordinal) <
-            assets.IndexOf("word-rings-editor-followup.js?v=6", StringComparison.Ordinal));
+            assets.IndexOf("word-rings-editor-followup.js?v=7", StringComparison.Ordinal));
 
         Assert.Contains("importRuleDetailPageSize = 5", script);
         Assert.Contains("activeRingFilter = 'all'", script);
