@@ -390,9 +390,7 @@
                 heading?.after(stats);
             }
             const activeCount = cards.filter(card => card.querySelector('[data-word-rings-rule-enabled]')?.checked).length;
-            stats.textContent = isRussian()
-                ? 'Україна'
-                : `${labels().rules}: ${cards.length} · ${labels().active}: ${activeCount}`;
+            stats.textContent = `${labels().rules}: ${cards.length} · ${labels().active}: ${activeCount}`;
         }
 
         if (cards.length === 0) return;
@@ -451,7 +449,7 @@
             enhanceWordCatalog(root);
             enhanceRingRules(root);
         }
-        patchRussianGeneratedUi();
+        // Dynamic Word Rings UI localizes itself through labels().
     };
 
     const queueEnhance = () => {
