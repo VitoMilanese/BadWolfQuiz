@@ -167,17 +167,27 @@ body:has(.word-rings-page) .page-shell {
     touch-action: none;
 }
 
+.word-rings-placed .word-rings-word {
+    transition:
+        left 240ms ease,
+        top 240ms ease,
+        background 160ms ease,
+        box-shadow 160ms ease;
+}
+
 .word-rings-word.is-correct {
-    --word-token-fill: color-mix(in srgb, #33c46f 16%, var(--panel-2));
+    --word-token-fill: color-mix(in srgb, #33c46f 30%, var(--panel-2));
     box-shadow:
-        0 0 0 2px rgb(51 196 111 / 26%),
+        inset 0 0 0 1px rgb(51 196 111 / 28%),
+        0 0 0 2px rgb(51 196 111 / 52%),
         0 7px 18px rgb(0 0 0 / 16%);
 }
 
 .word-rings-word.is-wrong {
-    --word-token-fill: color-mix(in srgb, #e85d5d 16%, var(--panel-2));
+    --word-token-fill: color-mix(in srgb, #e85d5d 30%, var(--panel-2));
     box-shadow:
-        0 0 0 2px rgb(232 93 93 / 26%),
+        inset 0 0 0 1px rgb(232 93 93 / 30%),
+        0 0 0 2px rgb(232 93 93 / 54%),
         0 7px 18px rgb(0 0 0 / 16%);
 }
 

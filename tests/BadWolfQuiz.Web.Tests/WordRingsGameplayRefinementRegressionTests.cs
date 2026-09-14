@@ -10,7 +10,10 @@ public sealed class WordRingsGameplayRefinementRegressionTests
 
         Assert.Contains("~/css/minigames.css", page, StringComparison.Ordinal);
         Assert.Contains("minigames-toolbar word-rings-toolbar", page, StringComparison.Ordinal);
-        Assert.Contains("Model.Puzzle.Words.Take(10)", page, StringComparison.Ordinal);
+        Assert.Contains("data-game-mode=\"solo\"", page, StringComparison.Ordinal);
+        Assert.Contains("Math.Min(8, matchingWords.Count)", page, StringComparison.Ordinal);
+        Assert.Contains("selectedMatchingCount / 4", page, StringComparison.Ordinal);
+        Assert.Contains("Take(10)", page, StringComparison.Ordinal);
         Assert.Contains("data-check disabled", page, StringComparison.Ordinal);
         Assert.Contains("data-word-rings-players hidden", page, StringComparison.Ordinal);
         Assert.True(
@@ -24,19 +27,21 @@ public sealed class WordRingsGameplayRefinementRegressionTests
     }
 
     [Fact]
-    public void Rings_are_thicker_outlined_and_checked_words_keep_soft_feedback_fill()
+    public void Rings_are_thicker_outlined_and_checked_words_keep_contrast_feedback_fill()
     {
         var styles = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
 
         Assert.Contains("border-width: clamp(4px, .56vw, 8px)", styles, StringComparison.Ordinal);
         Assert.Contains("outline: 1px solid", styles, StringComparison.Ordinal);
         Assert.Contains("inset 0 0 0 1px", styles, StringComparison.Ordinal);
-        Assert.Contains("#33c46f 16%", styles, StringComparison.Ordinal);
-        Assert.Contains("#e85d5d 16%", styles, StringComparison.Ordinal);
+        Assert.Contains("#33c46f 30%", styles, StringComparison.Ordinal);
+        Assert.Contains("#e85d5d 30%", styles, StringComparison.Ordinal);
+        Assert.Contains("left 240ms ease", styles, StringComparison.Ordinal);
+        Assert.Contains("top 240ms ease", styles, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Gameplay_checks_one_new_word_at_a_time_locks_checked_membership_and_raises_clicked_words()
+    public void Gameplay_checks_one_new_word_at_a_time_auto_corrects_solo_errors_and_raises_clicked_words()
     {
         var script = ReadWebFile("wwwroot", "js", "word-rings.js");
         var pointerDrag = ReadWebFile("wwwroot", "js", "word-rings-pointer-drag.js");
@@ -44,7 +49,14 @@ public sealed class WordRingsGameplayRefinementRegressionTests
         Assert.Contains("let pendingWord = null", script, StringComparison.Ordinal);
         Assert.Contains("const verdicts = new Map()", script, StringComparison.Ordinal);
         Assert.Contains("const lockedMemberships = new Map()", script, StringComparison.Ordinal);
+        Assert.Contains("const isSoloMode", script, StringComparison.Ordinal);
         Assert.Contains("checkButton.disabled = pendingWord === null", script, StringComparison.Ordinal);
+        Assert.Contains("const findBestPlacement", script, StringComparison.Ordinal);
+        Assert.Contains("const moveWordToCorrectMembership", script, StringComparison.Ordinal);
+        Assert.Contains("membershipFromGeometry", script, StringComparison.Ordinal);
+        Assert.Contains("overlapArea", script, StringComparison.Ordinal);
+        Assert.Contains("moveWordToCorrectMembership(word, expectedMembership)", script, StringComparison.Ordinal);
+        Assert.Contains("lockedMemberships.set(word, expectedMembership)", script, StringComparison.Ordinal);
         Assert.Contains("lockedMemberships.get(word) === normalized", script, StringComparison.Ordinal);
         Assert.Contains("canReturnToBank = word => !verdicts.has(word)", script, StringComparison.Ordinal);
         Assert.Contains("bringToFront", script, StringComparison.Ordinal);

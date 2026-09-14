@@ -5,7 +5,32 @@
     ViewData["Title"] = WordRingsLocalizer["Title"];
     ViewData["HidePortalFooter"] = true;
 
-    var displayedWords = Model.Puzzle.Words.Take(10).ToArray();
+    var matchingWords = Model.Puzzle.Words
+        .Where(word => Model.Puzzle.Expected.TryGetValue(word, out var membership) && !string.IsNullOrEmpty(membership))
+        .OrderBy(_ => Random.Shared.Next())
+        .ToList();
+    var outsideWords = Model.Puzzle.Words
+        .Where(word => !Model.Puzzle.Expected.TryGetValue(word, out var membership) || string.IsNullOrEmpty(membership))
+        .OrderBy(_ => Random.Shared.Next())
+        .ToList();
+
+    var selectedMatchingCount = Math.Min(8, matchingWords.Count);
+    var displayedWordList = matchingWords.Take(selectedMatchingCount).ToList();
+    var maximumDistractors = Math.Min(2, selectedMatchingCount / 4);
+    displayedWordList.AddRange(outsideWords.Take(maximumDistractors));
+
+    if (displayedWordList.Count < 10)
+    {
+        displayedWordList.AddRange(
+            matchingWords
+                .Skip(selectedMatchingCount)
+                .Take(10 - displayedWordList.Count));
+    }
+
+    var displayedWords = displayedWordList
+        .OrderBy(_ => Random.Shared.Next())
+        .Take(10)
+        .ToArray();
     var displayedExpected = Model.Puzzle.Expected
         .Where(item => displayedWords.Contains(item.Key))
         .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
@@ -19,6 +44,7 @@
 
 <div class="minigames-page word-rings-page"
      data-word-rings-root
+     data-game-mode="solo"
      data-progress-template="@WordRingsLocalizer["Progress"]"
      data-all-correct="@WordRingsLocalizer["AllCorrect"]"
      data-has-errors-template="@WordRingsLocalizer["HasErrors"]"
