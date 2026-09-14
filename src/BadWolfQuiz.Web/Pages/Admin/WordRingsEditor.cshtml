@@ -35,8 +35,11 @@
 <div class="word-rings-editor-shell"
      data-editor-save-overlay-root
      data-word-rings-editor-shell
-     data-active-ring="@Model.RingKey"
-     data-request-failed="@WordRingsLocalizer["EditorRequestFailed"]">
+     data-active-ring="@Model.TabKey"
+     data-request-failed="@WordRingsLocalizer["EditorRequestFailed"]"
+     data-word-rules-url="@Url.Page("/Admin/WordRingsEditor", "WordRules")"
+     data-add-word-title="@WordRingsLocalizer["EditorAddWordTitle"]"
+     data-edit-word-title="@WordRingsLocalizer["EditorEditWordTitle"]">
     @if (TempData["StatusMessage"] is string statusMessage)
     {
         <div class="alert alert-success word-rings-editor-status"
@@ -55,117 +58,282 @@
     }
 
     <nav class="word-rings-editor-tabs" aria-label="@WordRingsLocalizer["EditorTitle"]">
-        <a class="word-rings-editor-tab word-rings-editor-tab-blue @(Model.RingKey == "blue" ? "is-active" : null)"
+        <a class="word-rings-editor-tab word-rings-editor-tab-words @(Model.IsAllWords ? "is-active" : null)"
+           asp-page="/Admin/WordRingsEditor"
+           asp-route-ring="words"
+           data-word-rings-tab
+           data-ring="words"
+           aria-current="@(Model.IsAllWords ? "page" : null)">
+            <span class="word-rings-editor-tab-word-icon" aria-hidden="true">Aa</span>
+            @WordRingsLocalizer["EditorAllWordsTab"]
+        </a>
+        <a class="word-rings-editor-tab word-rings-editor-tab-blue @(!Model.IsAllWords && Model.RingKey == "blue" ? "is-active" : null)"
            asp-page="/Admin/WordRingsEditor"
            asp-route-ring="blue"
            data-word-rings-tab
            data-ring="blue"
-           aria-current="@(Model.RingKey == "blue" ? "page" : null)">
+           aria-current="@(!Model.IsAllWords && Model.RingKey == "blue" ? "page" : null)">
             <span class="word-rings-editor-tab-dot" aria-hidden="true"></span>
             @WordRingsLocalizer["EditorBlueTab"]
         </a>
-        <a class="word-rings-editor-tab word-rings-editor-tab-yellow @(Model.RingKey == "yellow" ? "is-active" : null)"
+        <a class="word-rings-editor-tab word-rings-editor-tab-yellow @(!Model.IsAllWords && Model.RingKey == "yellow" ? "is-active" : null)"
            asp-page="/Admin/WordRingsEditor"
            asp-route-ring="yellow"
            data-word-rings-tab
            data-ring="yellow"
-           aria-current="@(Model.RingKey == "yellow" ? "page" : null)">
+           aria-current="@(!Model.IsAllWords && Model.RingKey == "yellow" ? "page" : null)">
             <span class="word-rings-editor-tab-dot" aria-hidden="true"></span>
             @WordRingsLocalizer["EditorYellowTab"]
         </a>
-        <a class="word-rings-editor-tab word-rings-editor-tab-red @(Model.RingKey == "red" ? "is-active" : null)"
+        <a class="word-rings-editor-tab word-rings-editor-tab-red @(!Model.IsAllWords && Model.RingKey == "red" ? "is-active" : null)"
            asp-page="/Admin/WordRingsEditor"
            asp-route-ring="red"
            data-word-rings-tab
            data-ring="red"
-           aria-current="@(Model.RingKey == "red" ? "page" : null)">
+           aria-current="@(!Model.IsAllWords && Model.RingKey == "red" ? "page" : null)">
             <span class="word-rings-editor-tab-dot" aria-hidden="true"></span>
             @WordRingsLocalizer["EditorRedTab"]
         </a>
     </nav>
 
-    <section class="word-rings-editor-toolbar word-rings-editor-ring-@Model.RingKey">
-        <div>
-            <span class="word-rings-editor-ring-chip" aria-hidden="true"></span>
-            <div>
-                <p class="word-rings-editor-section-kicker">@WordRingsLocalizer["EditorRulesLabel"]</p>
-                <h2>@activeRingTitle</h2>
-            </div>
-        </div>
-        <button class="button button-primary" type="button" data-open-word-rings-create>
-            + @WordRingsLocalizer["EditorAddRule"]
-        </button>
-    </section>
-
-    @if (Model.Rules.Count == 0)
+    @if (Model.IsAllWords)
     {
-        <section class="content-panel empty-state word-rings-editor-empty">
-            <h2>@WordRingsLocalizer["EditorNoRules"]</h2>
+        <section class="word-rings-editor-toolbar word-rings-editor-toolbar-words">
+            <div>
+                <span class="word-rings-editor-tab-word-icon" aria-hidden="true">Aa</span>
+                <div>
+                    <p class="word-rings-editor-section-kicker">@WordRingsLocalizer["EditorWordsLabel"]</p>
+                    <h2>@WordRingsLocalizer["EditorAllWordsTab"]</h2>
+                    <p class="muted word-rings-editor-total-words">@WordRingsLocalizer["EditorTotalWords", Model.WordPagination.TotalCount]</p>
+                </div>
+            </div>
+            <div class="word-rings-editor-word-toolbar-actions">
+                <button class="button button-primary"
+                        type="button"
+                        data-open-word-rings-word-add>
+                    + @WordRingsLocalizer["EditorAddWord"]
+                </button>
+                <a class="button button-secondary"
+                   asp-page="/Admin/WordRingsEditor"
+                   asp-page-handler="ExportCsv"
+                   data-word-rings-export
+                   data-word-rings-transfer-control>
+                    @WordRingsLocalizer["EditorExportCsv"]
+                </a>
+                <form method="post"
+                      enctype="multipart/form-data"
+                      asp-page-handler="ImportCsv"
+                      class="word-rings-editor-import-form"
+                      data-word-rings-import-form>
+                    <input type="file"
+                           name="csvFile"
+                           accept=".csv,text/csv"
+                           data-word-rings-import-file
+                           hidden />
+                    <button class="button button-secondary"
+                            type="button"
+                            data-word-rings-import-trigger
+                            data-word-rings-transfer-control>
+                        @WordRingsLocalizer["EditorImportCsv"]
+                    </button>
+                </form>
+            </div>
         </section>
+
+        @if (Model.Words.Count == 0)
+        {
+            <section class="content-panel empty-state word-rings-editor-empty">
+                <h2>@WordRingsLocalizer["EditorNoWords"]</h2>
+            </section>
+        }
+        else
+        {
+            <section class="word-rings-editor-word-list" aria-label="@WordRingsLocalizer["EditorAllWordsTab"]">
+                @foreach (var word in Model.Words)
+                {
+                    <article class="word-rings-editor-word-row" data-word-rings-word-row data-word="@word.Word">
+                        <div class="word-rings-editor-word-main">
+                            <strong>@word.Word</strong>
+                            <div class="word-rings-editor-word-usage">
+                                <span class="word-rings-editor-word-usage-blue">@WordRingsLocalizer["EditorBlueTab"] · @word.BlueRuleCount</span>
+                                <span class="word-rings-editor-word-usage-yellow">@WordRingsLocalizer["EditorYellowTab"] · @word.YellowRuleCount</span>
+                                <span class="word-rings-editor-word-usage-red">@WordRingsLocalizer["EditorRedTab"] · @word.RedRuleCount</span>
+                            </div>
+                        </div>
+                        <div class="word-rings-editor-word-actions">
+                            <button class="button word-rings-rule-edit"
+                                    type="button"
+                                    data-edit-word-rings-word
+                                    data-word="@word.Word"
+                                    aria-label="@WordRingsLocalizer["EditorEditWordAria", word.Word]">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z" />
+                                    <path d="m13.5 6.5 4 4" />
+                                </svg>
+                            </button>
+                            <button class="button word-rings-rule-delete"
+                                    type="button"
+                                    data-delete-word-rings-word
+                                    data-word="@word.Word"
+                                    aria-label="@WordRingsLocalizer["EditorDeleteWordAria", word.Word]">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5" />
+                                </svg>
+                            </button>
+                        </div>
+                    </article>
+                }
+            </section>
+
+            @if (Model.WordPagination.TotalPages > 1)
+            {
+                <nav class="minigame-editor-pager word-rings-editor-word-pager"
+                     aria-label="@WordRingsLocalizer["EditorPagination"]">
+                    @if (Model.WordPagination.HasPrevious)
+                    {
+                        <a class="button button-secondary"
+                           asp-page="/Admin/WordRingsEditor"
+                           asp-route-ring="words"
+                           asp-route-pageNumber="@(Model.WordPagination.CurrentPage - 1)"
+                           data-word-rings-word-page>
+                            @WordRingsLocalizer["EditorPreviousPage"]
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="button button-secondary is-disabled" aria-disabled="true">@WordRingsLocalizer["EditorPreviousPage"]</span>
+                    }
+
+                    <div class="word-rings-editor-page-numbers">
+                        @foreach (var pageNumber in Model.WordPageNumbers)
+                        {
+                            if (pageNumber is null)
+                            {
+                                <span class="word-rings-editor-page-ellipsis" aria-hidden="true">…</span>
+                            }
+                            else if (pageNumber.Value == Model.WordPagination.CurrentPage)
+                            {
+                                <span class="button button-secondary word-rings-editor-page-number is-current"
+                                      aria-current="page">@pageNumber.Value</span>
+                            }
+                            else
+                            {
+                                <a class="button button-secondary word-rings-editor-page-number"
+                                   asp-page="/Admin/WordRingsEditor"
+                                   asp-route-ring="words"
+                                   asp-route-pageNumber="@pageNumber.Value"
+                                   data-word-rings-word-page>@pageNumber.Value</a>
+                            }
+                        }
+                    </div>
+
+                    <span class="minigame-editor-pager-status">
+                        @WordRingsLocalizer["EditorPageStatus", Model.WordPagination.CurrentPage, Model.WordPagination.TotalPages]
+                    </span>
+
+                    @if (Model.WordPagination.HasNext)
+                    {
+                        <a class="button button-secondary"
+                           asp-page="/Admin/WordRingsEditor"
+                           asp-route-ring="words"
+                           asp-route-pageNumber="@(Model.WordPagination.CurrentPage + 1)"
+                           data-word-rings-word-page>
+                            @WordRingsLocalizer["EditorNextPage"]
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="button button-secondary is-disabled" aria-disabled="true">@WordRingsLocalizer["EditorNextPage"]</span>
+                    }
+                </nav>
+            }
+        }
     }
     else
     {
-        <div class="word-rings-editor-rule-list word-rings-editor-ring-@Model.RingKey">
-            @foreach (var rule in Model.Rules)
-            {
-                <article class="word-rings-editor-rule-card @(!rule.IsEnabled ? "is-disabled" : null)"
-                         data-word-rings-rule-card
-                         data-rule-id="@rule.Id">
-                    <div class="word-rings-editor-rule-content">
-                        <span class="word-rings-editor-rule-label">@WordRingsLocalizer["EditorConditionLabel"]</span>
-                        <h3>@rule.Text</h3>
-                        <div class="word-rings-editor-rule-words">
-                            <span>@WordRingsLocalizer["EditorWordsLabel"]</span>
-                            <p>@string.Join(", ", rule.Words)</p>
+        <section class="word-rings-editor-toolbar word-rings-editor-ring-@Model.RingKey">
+            <div>
+                <span class="word-rings-editor-ring-chip" aria-hidden="true"></span>
+                <div>
+                    <p class="word-rings-editor-section-kicker">@WordRingsLocalizer["EditorRulesLabel"]</p>
+                    <h2>@activeRingTitle</h2>
+                </div>
+            </div>
+            <button class="button button-primary" type="button" data-open-word-rings-create>
+                + @WordRingsLocalizer["EditorAddRule"]
+            </button>
+        </section>
+
+        @if (Model.Rules.Count == 0)
+        {
+            <section class="content-panel empty-state word-rings-editor-empty">
+                <h2>@WordRingsLocalizer["EditorNoRules"]</h2>
+            </section>
+        }
+        else
+        {
+            <div class="word-rings-editor-rule-list word-rings-editor-ring-@Model.RingKey">
+                @foreach (var rule in Model.Rules)
+                {
+                    <article class="word-rings-editor-rule-card @(!rule.IsEnabled ? "is-disabled" : null)"
+                             data-word-rings-rule-card
+                             data-rule-id="@rule.Id">
+                        <div class="word-rings-editor-rule-content">
+                            <span class="word-rings-editor-rule-label">@WordRingsLocalizer["EditorConditionLabel"]</span>
+                            <h3>@rule.Text</h3>
+                            <div class="word-rings-editor-rule-words">
+                                <span>@WordRingsLocalizer["EditorWordsLabel"]</span>
+                                <p>@string.Join(", ", rule.Words)</p>
+                            </div>
+                            <span class="word-rings-editor-rule-count">@WordRingsLocalizer["EditorWordCount", rule.Words.Count]</span>
                         </div>
-                        <span class="word-rings-editor-rule-count">@WordRingsLocalizer["EditorWordCount", rule.Words.Count]</span>
-                    </div>
 
-                    <div class="word-rings-editor-rule-controls">
-                        <form method="post"
-                              asp-page-handler="SetRuleEnabled"
-                              class="word-rings-editor-enabled-form"
-                              data-word-rings-ajax-form>
-                            <input type="hidden" name="ring" value="@Model.RingKey" />
-                            <input type="hidden" name="ruleId" value="@rule.Id" />
-                            <label class="word-rings-editor-enabled-toggle">
-                                <span>@WordRingsLocalizer["EditorUseInGames"]</span>
-                                <input type="checkbox"
-                                       name="enabled"
-                                       value="true"
-                                       checked="@(rule.IsEnabled ? "checked" : null)"
-                                       data-word-rings-rule-enabled
-                                       aria-label="@WordRingsLocalizer["EditorEnabledAria"]" />
-                            </label>
-                        </form>
+                        <div class="word-rings-editor-rule-controls">
+                            <form method="post"
+                                  asp-page-handler="SetRuleEnabled"
+                                  class="word-rings-editor-enabled-form"
+                                  data-word-rings-ajax-form>
+                                <input type="hidden" name="ring" value="@Model.RingKey" />
+                                <input type="hidden" name="ruleId" value="@rule.Id" />
+                                <label class="word-rings-editor-enabled-toggle">
+                                    <span>@WordRingsLocalizer["EditorUseInGames"]</span>
+                                    <input type="checkbox"
+                                           name="enabled"
+                                           value="true"
+                                           checked="@(rule.IsEnabled ? "checked" : null)"
+                                           data-word-rings-rule-enabled
+                                           aria-label="@WordRingsLocalizer["EditorEnabledAria"]" />
+                                </label>
+                            </form>
 
-                        <button class="button word-rings-rule-edit"
-                                type="button"
-                                data-edit-word-rings-rule
-                                data-rule-id="@rule.Id"
-                                data-rule-text="@rule.Text"
-                                data-rule-words="@string.Join(", ", rule.Words)"
-                                aria-label="@WordRingsLocalizer["EditorEditAria"]">
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z" />
-                                <path d="m13.5 6.5 4 4" />
-                            </svg>
-                        </button>
+                            <button class="button word-rings-rule-edit"
+                                    type="button"
+                                    data-edit-word-rings-rule
+                                    data-rule-id="@rule.Id"
+                                    data-rule-text="@rule.Text"
+                                    data-rule-words="@string.Join(", ", rule.Words)"
+                                    aria-label="@WordRingsLocalizer["EditorEditAria"]">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4Z" />
+                                    <path d="m13.5 6.5 4 4" />
+                                </svg>
+                            </button>
 
-                        <button class="button word-rings-rule-delete"
-                                type="button"
-                                data-delete-word-rings-rule
-                                data-rule-id="@rule.Id"
-                                data-rule-text="@rule.Text"
-                                aria-label="@WordRingsLocalizer["EditorDeleteAria"]">
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5" />
-                            </svg>
-                        </button>
-                    </div>
-                </article>
-            }
-        </div>
+                            <button class="button word-rings-rule-delete"
+                                    type="button"
+                                    data-delete-word-rings-rule
+                                    data-rule-id="@rule.Id"
+                                    data-rule-text="@rule.Text"
+                                    aria-label="@WordRingsLocalizer["EditorDeleteAria"]">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5" />
+                                </svg>
+                            </button>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
     }
 </div>
 
@@ -177,13 +345,8 @@
           data-word-rings-ajax-form>
         <input type="hidden" name="ring" value="@Model.RingKey" data-word-rings-dialog-ring />
         <div class="dialog-heading">
-            <div>
-                <h2>@WordRingsLocalizer["EditorCreateRuleTitle"]</h2>
-            </div>
-            <button class="dialog-close"
-                    type="button"
-                    data-close-word-rings-dialog
-                    aria-label="@WordRingsLocalizer["EditorCancel"]">×</button>
+            <div><h2>@WordRingsLocalizer["EditorCreateRuleTitle"]</h2></div>
+            <button class="dialog-close" type="button" data-close-word-rings-dialog aria-label="@WordRingsLocalizer["EditorCancel"]">×</button>
         </div>
 
         <label class="word-rings-editor-field">
@@ -203,12 +366,8 @@
         <p class="muted word-rings-editor-words-hint">@WordRingsLocalizer["EditorWordsHint"]</p>
 
         <div class="form-actions dialog-actions">
-            <button class="button button-secondary" type="button" data-close-word-rings-dialog>
-                @WordRingsLocalizer["EditorCancel"]
-            </button>
-            <button class="button button-primary" type="submit">
-                @WordRingsLocalizer["EditorCreate"]
-            </button>
+            <button class="button button-secondary" type="button" data-close-word-rings-dialog>@WordRingsLocalizer["EditorCancel"]</button>
+            <button class="button button-primary" type="submit">@WordRingsLocalizer["EditorCreate"]</button>
         </div>
     </form>
 </dialog>
@@ -223,13 +382,8 @@
         <input type="hidden" name="ruleId" data-word-rings-edit-id />
 
         <div class="dialog-heading">
-            <div>
-                <h2>@WordRingsLocalizer["EditorEditRuleTitle"]</h2>
-            </div>
-            <button class="dialog-close"
-                    type="button"
-                    data-close-word-rings-dialog
-                    aria-label="@WordRingsLocalizer["EditorCancel"]">×</button>
+            <div><h2>@WordRingsLocalizer["EditorEditRuleTitle"]</h2></div>
+            <button class="dialog-close" type="button" data-close-word-rings-dialog aria-label="@WordRingsLocalizer["EditorCancel"]">×</button>
         </div>
 
         <label class="word-rings-editor-field">
@@ -250,12 +404,8 @@
         <p class="muted word-rings-editor-words-hint">@WordRingsLocalizer["EditorWordsHint"]</p>
 
         <div class="form-actions dialog-actions">
-            <button class="button button-secondary" type="button" data-close-word-rings-dialog>
-                @WordRingsLocalizer["EditorCancel"]
-            </button>
-            <button class="button button-primary" type="submit">
-                @WordRingsLocalizer["EditorSave"]
-            </button>
+            <button class="button button-secondary" type="button" data-close-word-rings-dialog>@WordRingsLocalizer["EditorCancel"]</button>
+            <button class="button button-primary" type="submit">@WordRingsLocalizer["EditorSave"]</button>
         </div>
     </form>
 </dialog>
@@ -270,27 +420,130 @@
         <input type="hidden" name="ruleId" data-word-rings-delete-id />
 
         <div class="dialog-heading">
-            <div>
-                <h2>@WordRingsLocalizer["EditorDeleteRuleTitle"]</h2>
-            </div>
-            <button class="dialog-close"
-                    type="button"
-                    data-close-word-rings-dialog
-                    aria-label="@WordRingsLocalizer["EditorCancel"]">×</button>
+            <div><h2>@WordRingsLocalizer["EditorDeleteRuleTitle"]</h2></div>
+            <button class="dialog-close" type="button" data-close-word-rings-dialog aria-label="@WordRingsLocalizer["EditorCancel"]">×</button>
         </div>
 
         <p class="dialog-target" data-word-rings-delete-target></p>
         <p class="dialog-warning">@WordRingsLocalizer["EditorDeleteRulePrompt"]</p>
 
         <div class="form-actions dialog-actions">
-            <button class="button button-secondary" type="button" data-close-word-rings-dialog>
-                @WordRingsLocalizer["EditorCancel"]
-            </button>
-            <button class="button word-rings-rule-delete-confirm" type="submit">
-                @WordRingsLocalizer["EditorDelete"]
-            </button>
+            <button class="button button-secondary" type="button" data-close-word-rings-dialog>@WordRingsLocalizer["EditorCancel"]</button>
+            <button class="button word-rings-rule-delete-confirm" type="submit">@WordRingsLocalizer["EditorDelete"]</button>
         </div>
     </form>
+</dialog>
+
+<dialog class="app-dialog word-rings-editor-dialog word-rings-editor-membership-dialog" data-word-rings-membership-dialog>
+    <form method="post"
+          asp-page-handler="SaveWordMemberships"
+          class="dialog-card word-rings-editor-dialog-card"
+          data-word-rings-membership-form
+          data-word-rings-ajax-form>
+        <input type="hidden" name="changesJson" data-word-rings-membership-changes />
+
+        <div class="dialog-heading">
+            <div><h2 data-word-rings-membership-title>@WordRingsLocalizer["EditorEditWordTitle"]</h2></div>
+            <button class="dialog-close" type="button" data-close-word-rings-dialog aria-label="@WordRingsLocalizer["EditorCancel"]">×</button>
+        </div>
+
+        <label class="word-rings-editor-field">
+            <span>@WordRingsLocalizer["EditorWordLabel"]</span>
+            <input name="word"
+                   type="text"
+                   maxlength="120"
+                   required
+                   autocomplete="off"
+                   data-word-rings-membership-word />
+        </label>
+
+        <label class="word-rings-editor-field">
+            <span>@WordRingsLocalizer["EditorRingLabel"]</span>
+            <select data-word-rings-membership-ring>
+                <option value="blue">@WordRingsLocalizer["EditorBlueTab"]</option>
+                <option value="yellow">@WordRingsLocalizer["EditorYellowTab"]</option>
+                <option value="red">@WordRingsLocalizer["EditorRedTab"]</option>
+            </select>
+        </label>
+
+        <div class="word-rings-editor-membership-list-wrap">
+            <div class="word-rings-editor-membership-loading" data-word-rings-membership-loading hidden>
+                <span class="word-rings-editor-inline-spinner" aria-hidden="true"></span>
+                <span>@WordRingsLocalizer["EditorLoadingRules"]</span>
+            </div>
+            <div class="word-rings-editor-membership-list" data-word-rings-membership-list></div>
+        </div>
+
+        <div class="word-rings-editor-membership-pager">
+            <button class="button button-secondary" type="button" data-word-rings-membership-previous>@WordRingsLocalizer["EditorPreviousPage"]</button>
+            <span data-word-rings-membership-page>@WordRingsLocalizer["EditorPageStatus", 1, 1]</span>
+            <button class="button button-secondary" type="button" data-word-rings-membership-next>@WordRingsLocalizer["EditorNextPage"]</button>
+        </div>
+
+        <p class="muted word-rings-editor-words-hint">@WordRingsLocalizer["EditorWordMembershipHint"]</p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary" type="button" data-close-word-rings-dialog>@WordRingsLocalizer["EditorCancel"]</button>
+            <button class="button button-primary" type="submit" data-word-rings-membership-save disabled>@WordRingsLocalizer["EditorSave"]</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog class="app-dialog word-rings-editor-dialog" data-word-rings-delete-word-dialog>
+    <form method="post"
+          asp-page-handler="DeleteWord"
+          class="dialog-card dialog-card-danger word-rings-editor-dialog-card"
+          data-word-rings-delete-word-form
+          data-word-rings-ajax-form>
+        <input type="hidden" name="word" data-word-rings-delete-word-value />
+
+        <div class="dialog-heading">
+            <div><h2>@WordRingsLocalizer["EditorDeleteWordTitle"]</h2></div>
+            <button class="dialog-close" type="button" data-close-word-rings-dialog aria-label="@WordRingsLocalizer["EditorCancel"]">×</button>
+        </div>
+
+        <p class="dialog-target" data-word-rings-delete-word-target></p>
+        <p class="dialog-warning">@WordRingsLocalizer["EditorDeleteWordPrompt"]</p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary" type="button" data-close-word-rings-dialog>@WordRingsLocalizer["EditorCancel"]</button>
+            <button class="button word-rings-rule-delete-confirm" type="submit">@WordRingsLocalizer["EditorDelete"]</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog class="app-dialog word-rings-editor-dialog" data-word-rings-import-summary-dialog>
+    <div class="dialog-card word-rings-editor-dialog-card">
+        <div class="dialog-heading">
+            <div><h2>@WordRingsLocalizer["EditorImportSummaryTitle"]</h2></div>
+            <button class="dialog-close" type="button" data-close-word-rings-dialog aria-label="@WordRingsLocalizer["EditorClose"]">×</button>
+        </div>
+
+        <p class="word-rings-editor-import-no-changes" data-word-rings-import-no-changes hidden>
+            @WordRingsLocalizer["EditorImportNothingAdded"]
+        </p>
+        <div class="word-rings-editor-import-summary" data-word-rings-import-summary>
+            <div class="word-rings-editor-import-summary-row word-rings-editor-import-summary-blue">
+                <strong>@WordRingsLocalizer["EditorBlueTab"]</strong>
+                <span>@WordRingsLocalizer["EditorImportWordsAdded"] <b data-summary-blue-words>0</b></span>
+                <span>@WordRingsLocalizer["EditorImportRulesCreated"] <b data-summary-blue-rules>0</b></span>
+            </div>
+            <div class="word-rings-editor-import-summary-row word-rings-editor-import-summary-yellow">
+                <strong>@WordRingsLocalizer["EditorYellowTab"]</strong>
+                <span>@WordRingsLocalizer["EditorImportWordsAdded"] <b data-summary-yellow-words>0</b></span>
+                <span>@WordRingsLocalizer["EditorImportRulesCreated"] <b data-summary-yellow-rules>0</b></span>
+            </div>
+            <div class="word-rings-editor-import-summary-row word-rings-editor-import-summary-red">
+                <strong>@WordRingsLocalizer["EditorRedTab"]</strong>
+                <span>@WordRingsLocalizer["EditorImportWordsAdded"] <b data-summary-red-words>0</b></span>
+                <span>@WordRingsLocalizer["EditorImportRulesCreated"] <b data-summary-red-rules>0</b></span>
+            </div>
+        </div>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-primary" type="button" data-close-word-rings-dialog>@WordRingsLocalizer["EditorClose"]</button>
+        </div>
+    </div>
 </dialog>
 
 @section Scripts {

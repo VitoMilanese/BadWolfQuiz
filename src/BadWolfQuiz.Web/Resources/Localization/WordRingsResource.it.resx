@@ -23,6 +23,7 @@
   <data name="AllCorrect" xml:space="preserve"><value>Perfetto! Tutte le parole sono nell'area corretta.</value></data>
   <data name="HasErrors" xml:space="preserve"><value>Parole nell'area sbagliata: {0}.</value></data>
   <data name="PlaceAll" xml:space="preserve"><value>Posiziona tutte le parole prima di controllare.</value></data>
+  <data name="EditorAllWordsTab" xml:space="preserve"><value>Tutte le parole</value></data>
   <data name="EditorBlueTab" xml:space="preserve"><value>Cerchio blu</value></data>
   <data name="EditorYellowTab" xml:space="preserve"><value>Cerchio giallo</value></data>
   <data name="EditorRedTab" xml:space="preserve"><value>Cerchio rosso</value></data>
@@ -31,7 +32,9 @@
   <data name="EditorConditionLabel" xml:space="preserve"><value>Condizione</value></data>
   <data name="EditorWordsLabel" xml:space="preserve"><value>Parole</value></data>
   <data name="EditorWordCount" xml:space="preserve"><value>{0} parole</value></data>
+  <data name="EditorTotalWords" xml:space="preserve"><value>Parole totali: {0}</value></data>
   <data name="EditorNoRules" xml:space="preserve"><value>Non ci sono ancora regole per questo cerchio.</value></data>
+  <data name="EditorNoWords" xml:space="preserve"><value>Non ci sono ancora parole associate ad almeno una regola.</value></data>
   <data name="EditorUseInGames" xml:space="preserve"><value>Usa nel gioco</value></data>
   <data name="EditorEnabledAria" xml:space="preserve"><value>Usa questa regola nelle partite</value></data>
   <data name="EditorCreateRuleTitle" xml:space="preserve"><value>Crea regola</value></data>
@@ -42,6 +45,7 @@
   <data name="EditorCreate" xml:space="preserve"><value>Crea</value></data>
   <data name="EditorSave" xml:space="preserve"><value>Salva</value></data>
   <data name="EditorCancel" xml:space="preserve"><value>Annulla</value></data>
+  <data name="EditorClose" xml:space="preserve"><value>Chiudi</value></data>
   <data name="EditorDeleteRuleTitle" xml:space="preserve"><value>Eliminare la regola?</value></data>
   <data name="EditorDeleteRulePrompt" xml:space="preserve"><value>La regola verrà rimossa da questo cerchio. L'azione non può essere annullata.</value></data>
   <data name="EditorDelete" xml:space="preserve"><value>Elimina</value></data>
@@ -56,6 +60,34 @@
   <data name="EditorRuleInvalidWords" xml:space="preserve"><value>Inserisci almeno una parola valida. Sono consentiti solo virgole, punti e virgola e spazi come separatori.</value></data>
   <data name="EditorRuleNotFound" xml:space="preserve"><value>Regola non trovata.</value></data>
   <data name="EditorLastRuleCannotDelete" xml:space="preserve"><value>Ogni cerchio deve mantenere almeno una regola. Creane un'altra prima di eliminare questa.</value></data>
-  <data name="EditorLastEnabledRule" xml:space="preserve"><value>Ogni cerchio deve mantenere almeno una regola abilitata per le partite.</value></data>
+  <data name="EditorLastEnabledRule" xml:space="preserve"><value>Ogni cerchio deve mantenere almeno una regola non vuota abilitata per le partite.</value></data>
   <data name="EditorRequestFailed" xml:space="preserve"><value>Impossibile completare l'operazione. Riprova.</value></data>
+  <data name="EditorAddWord" xml:space="preserve"><value>Aggiungi parola</value></data>
+  <data name="EditorAddWordTitle" xml:space="preserve"><value>Aggiungi parola</value></data>
+  <data name="EditorEditWordTitle" xml:space="preserve"><value>Modifica parola</value></data>
+  <data name="EditorEditWordAria" xml:space="preserve"><value>Modifica la parola {0}</value></data>
+  <data name="EditorDeleteWordAria" xml:space="preserve"><value>Elimina la parola {0}</value></data>
+  <data name="EditorWordLabel" xml:space="preserve"><value>Parola</value></data>
+  <data name="EditorRingLabel" xml:space="preserve"><value>Cerchio</value></data>
+  <data name="EditorLoadingRules" xml:space="preserve"><value>Caricamento regole…</value></data>
+  <data name="EditorWordMembershipHint" xml:space="preserve"><value>Seleziona un cerchio e scegli le regole che devono contenere questa parola. Le modifiche su pagine e cerchi diversi vengono salvate insieme.</value></data>
+  <data name="EditorWordMembershipSaved" xml:space="preserve"><value>Associazioni della parola aggiornate.</value></data>
+  <data name="EditorWordDeleted" xml:space="preserve"><value>Parola rimossa da tutte le regole.</value></data>
+  <data name="EditorWordInvalid" xml:space="preserve"><value>Inserisci una sola parola valida senza spazi o separatori.</value></data>
+  <data name="EditorDeleteWordTitle" xml:space="preserve"><value>Eliminare la parola?</value></data>
+  <data name="EditorDeleteWordPrompt" xml:space="preserve"><value>La parola verrà rimossa da tutte le regole dei tre cerchi. L'azione non può essere annullata.</value></data>
+  <data name="EditorExportCsv" xml:space="preserve"><value>Esporta CSV</value></data>
+  <data name="EditorImportCsv" xml:space="preserve"><value>Importa CSV</value></data>
+  <data name="EditorCsvFileRequired" xml:space="preserve"><value>Seleziona un file CSV da importare.</value></data>
+  <data name="EditorCsvFileTooLarge" xml:space="preserve"><value>Il file CSV è troppo grande. Dimensione massima: 5 MB.</value></data>
+  <data name="EditorCsvInvalid" xml:space="preserve"><value>File CSV non valido. Usa il formato esportato Ring, Rule, Enabled, Words.</value></data>
+  <data name="EditorImportCompleted" xml:space="preserve"><value>Unione CSV completata.</value></data>
+  <data name="EditorImportSummaryTitle" xml:space="preserve"><value>Riepilogo importazione</value></data>
+  <data name="EditorImportNothingAdded" xml:space="preserve"><value>Non è stato aggiunto nulla. Tutte le regole e le parole importate esistono già.</value></data>
+  <data name="EditorImportWordsAdded" xml:space="preserve"><value>Parole aggiunte alle regole:</value></data>
+  <data name="EditorImportRulesCreated" xml:space="preserve"><value>Regole create:</value></data>
+  <data name="EditorPagination" xml:space="preserve"><value>Pagine delle parole</value></data>
+  <data name="EditorPreviousPage" xml:space="preserve"><value>Precedente</value></data>
+  <data name="EditorNextPage" xml:space="preserve"><value>Successiva</value></data>
+  <data name="EditorPageStatus" xml:space="preserve"><value>Pagina {0} di {1}</value></data>
 </root>

@@ -23,6 +23,7 @@
   <data name="AllCorrect" xml:space="preserve"><value>Perfect! Every word is in the correct area.</value></data>
   <data name="HasErrors" xml:space="preserve"><value>{0} word(s) are in the wrong area.</value></data>
   <data name="PlaceAll" xml:space="preserve"><value>Place all words before checking.</value></data>
+  <data name="EditorAllWordsTab" xml:space="preserve"><value>All words</value></data>
   <data name="EditorBlueTab" xml:space="preserve"><value>Blue ring</value></data>
   <data name="EditorYellowTab" xml:space="preserve"><value>Yellow ring</value></data>
   <data name="EditorRedTab" xml:space="preserve"><value>Red ring</value></data>
@@ -31,7 +32,9 @@
   <data name="EditorConditionLabel" xml:space="preserve"><value>Condition</value></data>
   <data name="EditorWordsLabel" xml:space="preserve"><value>Words</value></data>
   <data name="EditorWordCount" xml:space="preserve"><value>{0} words</value></data>
+  <data name="EditorTotalWords" xml:space="preserve"><value>Total words: {0}</value></data>
   <data name="EditorNoRules" xml:space="preserve"><value>No rules have been created for this ring yet.</value></data>
+  <data name="EditorNoWords" xml:space="preserve"><value>No words have been added to any rule yet.</value></data>
   <data name="EditorUseInGames" xml:space="preserve"><value>Use in games</value></data>
   <data name="EditorEnabledAria" xml:space="preserve"><value>Use this rule in games</value></data>
   <data name="EditorCreateRuleTitle" xml:space="preserve"><value>Create rule</value></data>
@@ -42,6 +45,7 @@
   <data name="EditorCreate" xml:space="preserve"><value>Create</value></data>
   <data name="EditorSave" xml:space="preserve"><value>Save</value></data>
   <data name="EditorCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="EditorClose" xml:space="preserve"><value>Close</value></data>
   <data name="EditorDeleteRuleTitle" xml:space="preserve"><value>Delete rule?</value></data>
   <data name="EditorDeleteRulePrompt" xml:space="preserve"><value>The rule will be removed from this ring. This action cannot be undone.</value></data>
   <data name="EditorDelete" xml:space="preserve"><value>Delete</value></data>
@@ -56,6 +60,34 @@
   <data name="EditorRuleInvalidWords" xml:space="preserve"><value>Enter at least one valid word. Only commas, semicolons, and spaces may separate words.</value></data>
   <data name="EditorRuleNotFound" xml:space="preserve"><value>The rule could not be found.</value></data>
   <data name="EditorLastRuleCannotDelete" xml:space="preserve"><value>Each ring must keep at least one rule. Create another rule before deleting this one.</value></data>
-  <data name="EditorLastEnabledRule" xml:space="preserve"><value>Each ring must keep at least one rule enabled for games.</value></data>
+  <data name="EditorLastEnabledRule" xml:space="preserve"><value>Each ring must keep at least one non-empty rule enabled for games.</value></data>
   <data name="EditorRequestFailed" xml:space="preserve"><value>The operation could not be completed. Try again.</value></data>
+  <data name="EditorAddWord" xml:space="preserve"><value>Add word</value></data>
+  <data name="EditorAddWordTitle" xml:space="preserve"><value>Add word</value></data>
+  <data name="EditorEditWordTitle" xml:space="preserve"><value>Edit word</value></data>
+  <data name="EditorEditWordAria" xml:space="preserve"><value>Edit word {0}</value></data>
+  <data name="EditorDeleteWordAria" xml:space="preserve"><value>Delete word {0}</value></data>
+  <data name="EditorWordLabel" xml:space="preserve"><value>Word</value></data>
+  <data name="EditorRingLabel" xml:space="preserve"><value>Ring</value></data>
+  <data name="EditorLoadingRules" xml:space="preserve"><value>Loading rules…</value></data>
+  <data name="EditorWordMembershipHint" xml:space="preserve"><value>Select a ring and choose the rules that should contain this word. Changes across pages and rings are saved together.</value></data>
+  <data name="EditorWordMembershipSaved" xml:space="preserve"><value>Word memberships updated.</value></data>
+  <data name="EditorWordDeleted" xml:space="preserve"><value>Word removed from all rules.</value></data>
+  <data name="EditorWordInvalid" xml:space="preserve"><value>Enter one valid word without separators or spaces.</value></data>
+  <data name="EditorDeleteWordTitle" xml:space="preserve"><value>Delete word?</value></data>
+  <data name="EditorDeleteWordPrompt" xml:space="preserve"><value>The word will be removed from every rule in all three rings. This action cannot be undone.</value></data>
+  <data name="EditorExportCsv" xml:space="preserve"><value>Export CSV</value></data>
+  <data name="EditorImportCsv" xml:space="preserve"><value>Import CSV</value></data>
+  <data name="EditorCsvFileRequired" xml:space="preserve"><value>Select a CSV file to import.</value></data>
+  <data name="EditorCsvFileTooLarge" xml:space="preserve"><value>The CSV file is too large. Maximum size is 5 MB.</value></data>
+  <data name="EditorCsvInvalid" xml:space="preserve"><value>The CSV file is invalid. Use the exported Ring, Rule, Enabled, Words format.</value></data>
+  <data name="EditorImportCompleted" xml:space="preserve"><value>CSV merge completed.</value></data>
+  <data name="EditorImportSummaryTitle" xml:space="preserve"><value>Import summary</value></data>
+  <data name="EditorImportNothingAdded" xml:space="preserve"><value>Nothing was added. All imported rules and words already exist.</value></data>
+  <data name="EditorImportWordsAdded" xml:space="preserve"><value>Words added to rules:</value></data>
+  <data name="EditorImportRulesCreated" xml:space="preserve"><value>Rules created:</value></data>
+  <data name="EditorPagination" xml:space="preserve"><value>Word pages</value></data>
+  <data name="EditorPreviousPage" xml:space="preserve"><value>Previous</value></data>
+  <data name="EditorNextPage" xml:space="preserve"><value>Next</value></data>
+  <data name="EditorPageStatus" xml:space="preserve"><value>Page {0} of {1}</value></data>
 </root>

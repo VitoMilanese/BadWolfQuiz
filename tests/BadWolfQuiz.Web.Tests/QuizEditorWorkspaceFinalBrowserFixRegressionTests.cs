@@ -10,7 +10,7 @@ public sealed class QuizEditorWorkspaceFinalBrowserFixRegressionTests
             "QuizEditorWorkspaceAssetsTagHelper.cs"));
 
         Assert.Contains(
-            "/css/quiz-editor-workspace-browser-fixes.css?v=577.7",
+            "/css/quiz-editor-workspace-browser-fixes.css?v=577.8",
             tagHelper,
             StringComparison.Ordinal);
     }

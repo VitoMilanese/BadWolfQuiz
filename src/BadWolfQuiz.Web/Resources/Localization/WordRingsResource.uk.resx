@@ -23,6 +23,7 @@
   <data name="AllCorrect" xml:space="preserve"><value>Ідеально! Усі слова розкладені правильно.</value></data>
   <data name="HasErrors" xml:space="preserve"><value>Неправильно розкладено слів: {0}.</value></data>
   <data name="PlaceAll" xml:space="preserve"><value>Спочатку розклади всі слова.</value></data>
+  <data name="EditorAllWordsTab" xml:space="preserve"><value>Усі слова</value></data>
   <data name="EditorBlueTab" xml:space="preserve"><value>Синє кільце</value></data>
   <data name="EditorYellowTab" xml:space="preserve"><value>Жовте кільце</value></data>
   <data name="EditorRedTab" xml:space="preserve"><value>Червоне кільце</value></data>
@@ -31,7 +32,9 @@
   <data name="EditorConditionLabel" xml:space="preserve"><value>Умова</value></data>
   <data name="EditorWordsLabel" xml:space="preserve"><value>Слова</value></data>
   <data name="EditorWordCount" xml:space="preserve"><value>Слів: {0}</value></data>
+  <data name="EditorTotalWords" xml:space="preserve"><value>Усього слів: {0}</value></data>
   <data name="EditorNoRules" xml:space="preserve"><value>Для цього кільця ще немає правил.</value></data>
+  <data name="EditorNoWords" xml:space="preserve"><value>Ще немає слів, доданих хоча б до одного правила.</value></data>
   <data name="EditorUseInGames" xml:space="preserve"><value>У грі</value></data>
   <data name="EditorEnabledAria" xml:space="preserve"><value>Використовувати це правило в іграх</value></data>
   <data name="EditorCreateRuleTitle" xml:space="preserve"><value>Створити правило</value></data>
@@ -42,6 +45,7 @@
   <data name="EditorCreate" xml:space="preserve"><value>Створити</value></data>
   <data name="EditorSave" xml:space="preserve"><value>Зберегти</value></data>
   <data name="EditorCancel" xml:space="preserve"><value>Скасувати</value></data>
+  <data name="EditorClose" xml:space="preserve"><value>Закрити</value></data>
   <data name="EditorDeleteRuleTitle" xml:space="preserve"><value>Видалити правило?</value></data>
   <data name="EditorDeleteRulePrompt" xml:space="preserve"><value>Правило буде видалене з цього кільця. Цю дію неможливо скасувати.</value></data>
   <data name="EditorDelete" xml:space="preserve"><value>Видалити</value></data>
@@ -56,6 +60,34 @@
   <data name="EditorRuleInvalidWords" xml:space="preserve"><value>Додай хоча б одне коректне слово. Слова можна розділяти лише комами, крапками з комою або пробілами.</value></data>
   <data name="EditorRuleNotFound" xml:space="preserve"><value>Правило не знайдено.</value></data>
   <data name="EditorLastRuleCannotDelete" xml:space="preserve"><value>Для кожного кільця потрібно залишити щонайменше одне правило. Спочатку створи інше правило.</value></data>
-  <data name="EditorLastEnabledRule" xml:space="preserve"><value>Для кожного кільця потрібно залишити щонайменше одне правило, увімкнене для ігор.</value></data>
+  <data name="EditorLastEnabledRule" xml:space="preserve"><value>Для кожного кільця потрібно залишити щонайменше одне непусте правило, увімкнене для ігор.</value></data>
   <data name="EditorRequestFailed" xml:space="preserve"><value>Не вдалося виконати операцію. Спробуй ще раз.</value></data>
+  <data name="EditorAddWord" xml:space="preserve"><value>Додати слово</value></data>
+  <data name="EditorAddWordTitle" xml:space="preserve"><value>Додати слово</value></data>
+  <data name="EditorEditWordTitle" xml:space="preserve"><value>Редагувати слово</value></data>
+  <data name="EditorEditWordAria" xml:space="preserve"><value>Редагувати слово «{0}»</value></data>
+  <data name="EditorDeleteWordAria" xml:space="preserve"><value>Видалити слово «{0}»</value></data>
+  <data name="EditorWordLabel" xml:space="preserve"><value>Слово</value></data>
+  <data name="EditorRingLabel" xml:space="preserve"><value>Кільце</value></data>
+  <data name="EditorLoadingRules" xml:space="preserve"><value>Завантаження правил…</value></data>
+  <data name="EditorWordMembershipHint" xml:space="preserve"><value>Обери кільце та познач правила, до яких має входити слово. Зміни з різних сторінок і кілець зберігаються разом.</value></data>
+  <data name="EditorWordMembershipSaved" xml:space="preserve"><value>Прив’язки слова до правил оновлено.</value></data>
+  <data name="EditorWordDeleted" xml:space="preserve"><value>Слово видалено з усіх правил.</value></data>
+  <data name="EditorWordInvalid" xml:space="preserve"><value>Введи одне коректне слово без пробілів і розділювачів.</value></data>
+  <data name="EditorDeleteWordTitle" xml:space="preserve"><value>Видалити слово?</value></data>
+  <data name="EditorDeleteWordPrompt" xml:space="preserve"><value>Слово буде видалене з усіх правил усіх трьох кілець. Цю дію неможливо скасувати.</value></data>
+  <data name="EditorExportCsv" xml:space="preserve"><value>Експорт CSV</value></data>
+  <data name="EditorImportCsv" xml:space="preserve"><value>Імпорт CSV</value></data>
+  <data name="EditorCsvFileRequired" xml:space="preserve"><value>Обери CSV-файл для імпорту.</value></data>
+  <data name="EditorCsvFileTooLarge" xml:space="preserve"><value>CSV-файл завеликий. Максимальний розмір — 5 МБ.</value></data>
+  <data name="EditorCsvInvalid" xml:space="preserve"><value>Некоректний CSV-файл. Використовуй формат експорту Ring, Rule, Enabled, Words.</value></data>
+  <data name="EditorImportCompleted" xml:space="preserve"><value>Злиття CSV завершено.</value></data>
+  <data name="EditorImportSummaryTitle" xml:space="preserve"><value>Підсумок імпорту</value></data>
+  <data name="EditorImportNothingAdded" xml:space="preserve"><value>Нічого не було додано. Усі імпортовані правила та слова вже існують.</value></data>
+  <data name="EditorImportWordsAdded" xml:space="preserve"><value>Додано слів до правил:</value></data>
+  <data name="EditorImportRulesCreated" xml:space="preserve"><value>Створено правил:</value></data>
+  <data name="EditorPagination" xml:space="preserve"><value>Сторінки слів</value></data>
+  <data name="EditorPreviousPage" xml:space="preserve"><value>Назад</value></data>
+  <data name="EditorNextPage" xml:space="preserve"><value>Далі</value></data>
+  <data name="EditorPageStatus" xml:space="preserve"><value>Сторінка {0} з {1}</value></data>
 </root>

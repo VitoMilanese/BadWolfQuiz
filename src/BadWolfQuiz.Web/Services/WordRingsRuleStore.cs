@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -18,6 +20,7 @@ public enum WordRingRuleMutationResult
     Duplicate,
     InvalidText,
     InvalidWords,
+    InvalidCsv,
     NotFound,
     LastRule,
     LastEnabledRule
@@ -34,6 +37,45 @@ public sealed record WordRingRule(
     public bool IsEnabled => Enabled is not false;
 }
 
+public sealed record WordRingsWordItem(
+    string Word,
+    int BlueRuleCount,
+    int YellowRuleCount,
+    int RedRuleCount)
+{
+    public int TotalRuleCount => BlueRuleCount + YellowRuleCount + RedRuleCount;
+}
+
+public sealed record WordRingRuleMembershipItem(
+    Guid Id,
+    string Text,
+    bool IsEnabled,
+    bool ContainsWord);
+
+public sealed record WordRingsImportRingSummary(
+    int WordsAdded,
+    int RulesCreated);
+
+public sealed record WordRingsImportSummary(
+    WordRingsImportRingSummary Blue,
+    WordRingsImportRingSummary Yellow,
+    WordRingsImportRingSummary Red)
+{
+    public bool HasChanges =>
+        Blue.WordsAdded > 0 || Blue.RulesCreated > 0 ||
+        Yellow.WordsAdded > 0 || Yellow.RulesCreated > 0 ||
+        Red.WordsAdded > 0 || Red.RulesCreated > 0;
+
+    public static WordRingsImportSummary Empty { get; } = new(
+        new WordRingsImportRingSummary(0, 0),
+        new WordRingsImportRingSummary(0, 0),
+        new WordRingsImportRingSummary(0, 0));
+}
+
+public sealed record WordRingsImportResult(
+    WordRingRuleMutationResult Result,
+    WordRingsImportSummary Summary);
+
 public sealed record WordRingsPuzzle(
     string BlueRuleText,
     string YellowRuleText,
@@ -46,6 +88,8 @@ public sealed class WordRingsRuleStore
     private const int MaximumRuleTextLength = 300;
     private const int MaximumWordsInputLength = 12_000;
     private const int MaximumWordsPerRule = 250;
+    private const int MaximumSingleWordLength = 120;
+    private const int MaximumCsvRows = 10_000;
 
     private static readonly Regex WordListPattern = new(
         @"^ *[\p{L}\p{M}\p{N}'’\-]+(?:[ ,;]+[\p{L}\p{M}\p{N}'’\-]+)*[ ,;]*$",
@@ -54,6 +98,17 @@ public sealed class WordRingsRuleStore
     private static readonly Regex WordSeparatorPattern = new(
         @"[ ,;]+",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly Regex SingleWordPattern = new(
+        @"^[\p{L}\p{M}\p{N}'’\-]+$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly CompareInfo WordCompareInfo =
+        CultureInfo.GetCultureInfo("uk-UA").CompareInfo;
+
+    private static readonly IComparer<string> WordAlphabeticalComparer =
+        Comparer<string>.Create((left, right) =>
+            WordCompareInfo.Compare(left, right, CompareOptions.IgnoreCase));
 
     private static readonly IReadOnlyList<WordRingRule> DefaultRules =
     [
@@ -87,12 +142,13 @@ public sealed class WordRingsRuleStore
     {
         WriteIndented = true
     };
-    private IReadOnlyList<WordRingRule> _rules;
+    private StoreState _state;
 
     private WordRingsRuleStore(string contentRootPath)
     {
         _path = Path.Combine(contentRootPath, "App_Data", "word-rings-rules.json");
-        _rules = EnsureEveryRingHasRule(LoadFromDisk());
+        var rules = EnsureEveryRingHasRule(LoadFromDisk());
+        _state = BuildState(rules);
     }
 
     public static WordRingsRuleStore Get(IWebHostEnvironment environment)
@@ -105,16 +161,56 @@ public sealed class WordRingsRuleStore
                 LazyThreadSafetyMode.ExecutionAndPublication)).Value;
     }
 
+    private StoreState Snapshot => Volatile.Read(ref _state);
+
     public IReadOnlyList<WordRingRule> GetRules(WordRingColor ring) =>
-        _rules
+        Snapshot.Rules
             .Where(rule => rule.Ring == ring)
             .OrderBy(rule => rule.Text, StringComparer.CurrentCultureIgnoreCase)
             .ToArray();
 
+    public int GetRuleCount(WordRingColor ring) =>
+        Snapshot.Rules.Count(rule => rule.Ring == ring);
+
+    public int GetWordCount() => Snapshot.Words.Count;
+
+    public IReadOnlyList<WordRingsWordItem> GetWordsPage(int skip, int take)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(skip);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(take);
+        return Snapshot.Words.Skip(skip).Take(take).ToArray();
+    }
+
+    public IReadOnlyList<WordRingRuleMembershipItem> GetRuleMembershipPage(
+        WordRingColor ring,
+        string? word,
+        int skip,
+        int take)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(skip);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(take);
+
+        var normalizedWord = NormalizeSingleWord(word);
+        return Snapshot.Rules
+            .Where(rule => rule.Ring == ring)
+            .OrderBy(rule => rule.Text, StringComparer.CurrentCultureIgnoreCase)
+            .Skip(skip)
+            .Take(take)
+            .Select(rule => new WordRingRuleMembershipItem(
+                rule.Id,
+                rule.Text,
+                rule.IsEnabled,
+                normalizedWord is not null &&
+                rule.Words.Contains(normalizedWord, StringComparer.OrdinalIgnoreCase)))
+            .ToArray();
+    }
+
     public WordRingsPuzzle CreatePuzzle()
     {
-        var snapshot = EnsureEveryRingHasRule(_rules);
-        var activeSnapshot = snapshot.Where(rule => rule.IsEnabled).ToArray();
+        var snapshot = EnsureEveryRingHasRule(Snapshot.Rules);
+        var activeSnapshot = snapshot
+            .Where(rule => rule.IsEnabled && rule.Words.Count > 0)
+            .ToArray();
         var blue = Pick(activeSnapshot, WordRingColor.Blue);
         var yellow = Pick(activeSnapshot, WordRingColor.Yellow);
         var red = Pick(activeSnapshot, WordRingColor.Red);
@@ -191,18 +287,18 @@ public sealed class WordRingsRuleStore
         await _gate.WaitAsync(cancellationToken);
         try
         {
-            if (_rules.Any(rule =>
+            var rules = Snapshot.Rules;
+            if (rules.Any(rule =>
                     rule.Ring == ring &&
                     string.Equals(rule.Text, normalizedText, StringComparison.OrdinalIgnoreCase)))
             {
                 return WordRingRuleMutationResult.Duplicate;
             }
 
-            var next = _rules
+            var next = rules
                 .Append(new WordRingRule(Guid.NewGuid(), ring, normalizedText, parsedWords, true))
                 .ToArray();
-            await WriteAsync(next);
-            _rules = next;
+            await PersistAsync(next);
             return WordRingRuleMutationResult.Success;
         }
         finally
@@ -232,13 +328,14 @@ public sealed class WordRingsRuleStore
         await _gate.WaitAsync(cancellationToken);
         try
         {
-            var rule = _rules.FirstOrDefault(item => item.Id == id);
+            var rules = Snapshot.Rules;
+            var rule = rules.FirstOrDefault(item => item.Id == id);
             if (rule is null)
             {
                 return WordRingRuleMutationResult.NotFound;
             }
 
-            if (_rules.Any(item =>
+            if (rules.Any(item =>
                     item.Id != id &&
                     item.Ring == rule.Ring &&
                     string.Equals(item.Text, normalizedText, StringComparison.OrdinalIgnoreCase)))
@@ -246,13 +343,12 @@ public sealed class WordRingsRuleStore
                 return WordRingRuleMutationResult.Duplicate;
             }
 
-            var next = _rules
+            var next = rules
                 .Select(item => item.Id == id
                     ? item with { Text = normalizedText, Words = parsedWords }
                     : item)
                 .ToArray();
-            await WriteAsync(next);
-            _rules = next;
+            await PersistAsync(next);
             return WordRingRuleMutationResult.Success;
         }
         finally
@@ -269,15 +365,24 @@ public sealed class WordRingsRuleStore
         await _gate.WaitAsync(cancellationToken);
         try
         {
-            var rule = _rules.FirstOrDefault(item => item.Id == id);
+            var rules = Snapshot.Rules;
+            var rule = rules.FirstOrDefault(item => item.Id == id);
             if (rule is null)
             {
                 return WordRingRuleMutationResult.NotFound;
             }
 
+            if (enabled && rule.Words.Count == 0)
+            {
+                return WordRingRuleMutationResult.InvalidWords;
+            }
+
             if (!enabled &&
                 rule.IsEnabled &&
-                _rules.Count(item => item.Ring == rule.Ring && item.IsEnabled) <= 1)
+                rules.Count(item =>
+                    item.Ring == rule.Ring &&
+                    item.IsEnabled &&
+                    item.Words.Count > 0) <= 1)
             {
                 return WordRingRuleMutationResult.LastEnabledRule;
             }
@@ -287,11 +392,10 @@ public sealed class WordRingsRuleStore
                 return WordRingRuleMutationResult.Success;
             }
 
-            var next = _rules
+            var next = rules
                 .Select(item => item.Id == id ? item with { Enabled = enabled } : item)
                 .ToArray();
-            await WriteAsync(next);
-            _rules = next;
+            await PersistAsync(next);
             return WordRingRuleMutationResult.Success;
         }
         finally
@@ -307,27 +411,273 @@ public sealed class WordRingsRuleStore
         await _gate.WaitAsync(cancellationToken);
         try
         {
-            var rule = _rules.FirstOrDefault(item => item.Id == id);
+            var rules = Snapshot.Rules;
+            var rule = rules.FirstOrDefault(item => item.Id == id);
             if (rule is null)
             {
                 return WordRingRuleMutationResult.NotFound;
             }
 
-            if (_rules.Count(item => item.Ring == rule.Ring) <= 1)
+            if (rules.Count(item => item.Ring == rule.Ring) <= 1)
             {
                 return WordRingRuleMutationResult.LastRule;
             }
 
             if (rule.IsEnabled &&
-                _rules.Count(item => item.Ring == rule.Ring && item.IsEnabled) <= 1)
+                rule.Words.Count > 0 &&
+                rules.Count(item =>
+                    item.Ring == rule.Ring &&
+                    item.IsEnabled &&
+                    item.Words.Count > 0) <= 1)
             {
                 return WordRingRuleMutationResult.LastEnabledRule;
             }
 
-            var next = _rules.Where(item => item.Id != id).ToArray();
-            await WriteAsync(next);
-            _rules = next;
+            var next = rules.Where(item => item.Id != id).ToArray();
+            await PersistAsync(next);
             return WordRingRuleMutationResult.Success;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<WordRingRuleMutationResult> ApplyWordMembershipChangesAsync(
+        string? word,
+        IReadOnlyDictionary<Guid, bool> changes,
+        CancellationToken cancellationToken)
+    {
+        var normalizedWord = NormalizeSingleWord(word);
+        if (normalizedWord is null || changes.Count == 0)
+        {
+            return WordRingRuleMutationResult.InvalidWords;
+        }
+
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            var rules = Snapshot.Rules;
+            var knownIds = rules.Select(rule => rule.Id).ToHashSet();
+            if (changes.Keys.Any(id => !knownIds.Contains(id)))
+            {
+                return WordRingRuleMutationResult.NotFound;
+            }
+
+            var changed = false;
+            var candidate = new List<WordRingRule>(rules.Count);
+            foreach (var rule in rules)
+            {
+                if (!changes.TryGetValue(rule.Id, out var include))
+                {
+                    candidate.Add(rule);
+                    continue;
+                }
+
+                var contains = rule.Words.Contains(
+                    normalizedWord,
+                    StringComparer.OrdinalIgnoreCase);
+                if (contains == include)
+                {
+                    candidate.Add(rule);
+                    continue;
+                }
+
+                if (include)
+                {
+                    if (rule.Words.Count >= MaximumWordsPerRule)
+                    {
+                        return WordRingRuleMutationResult.InvalidWords;
+                    }
+
+                    candidate.Add(rule with
+                    {
+                        Words = rule.Words.Append(normalizedWord).ToArray()
+                    });
+                }
+                else
+                {
+                    candidate.Add(rule with
+                    {
+                        Words = rule.Words
+                            .Where(item => !string.Equals(
+                                item,
+                                normalizedWord,
+                                StringComparison.OrdinalIgnoreCase))
+                            .ToArray()
+                    });
+                }
+                changed = true;
+            }
+
+            if (!changed)
+            {
+                return WordRingRuleMutationResult.Success;
+            }
+
+            var playableResult = NormalizePlayableRules(candidate, out var next);
+            if (playableResult != WordRingRuleMutationResult.Success)
+            {
+                return playableResult;
+            }
+
+            await PersistAsync(next);
+            return WordRingRuleMutationResult.Success;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<WordRingRuleMutationResult> DeleteWordAsync(
+        string? word,
+        CancellationToken cancellationToken)
+    {
+        var normalizedWord = NormalizeSingleWord(word);
+        if (normalizedWord is null)
+        {
+            return WordRingRuleMutationResult.InvalidWords;
+        }
+
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            var rules = Snapshot.Rules;
+            if (!rules.Any(rule => rule.Words.Contains(
+                    normalizedWord,
+                    StringComparer.OrdinalIgnoreCase)))
+            {
+                return WordRingRuleMutationResult.NotFound;
+            }
+
+            var candidate = rules
+                .Select(rule => rule with
+                {
+                    Words = rule.Words
+                        .Where(item => !string.Equals(
+                            item,
+                            normalizedWord,
+                            StringComparison.OrdinalIgnoreCase))
+                        .ToArray()
+                })
+                .ToArray();
+
+            var playableResult = NormalizePlayableRules(candidate, out var next);
+            if (playableResult != WordRingRuleMutationResult.Success)
+            {
+                return playableResult;
+            }
+
+            await PersistAsync(next);
+            return WordRingRuleMutationResult.Success;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public string ExportCsv()
+    {
+        var builder = new StringBuilder();
+        builder.AppendLine("Ring,Rule,Enabled,Words");
+
+        foreach (var rule in Snapshot.Rules
+                     .OrderBy(rule => rule.Ring)
+                     .ThenBy(rule => rule.Text, StringComparer.CurrentCultureIgnoreCase))
+        {
+            builder.Append(CsvEscape(ToRingKey(rule.Ring))).Append(',')
+                .Append(CsvEscape(rule.Text)).Append(',')
+                .Append(CsvEscape(rule.IsEnabled ? "true" : "false")).Append(',')
+                .Append(CsvEscape(string.Join("; ", rule.Words)))
+                .AppendLine();
+        }
+
+        return builder.ToString();
+    }
+
+    public async Task<WordRingsImportResult> ImportCsvAsync(
+        string? content,
+        CancellationToken cancellationToken)
+    {
+        var parsed = ParseCsv(content);
+        if (parsed is null)
+        {
+            return new WordRingsImportResult(
+                WordRingRuleMutationResult.InvalidCsv,
+                WordRingsImportSummary.Empty);
+        }
+
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            var rules = Snapshot.Rules;
+            var next = rules.ToList();
+            var wordsAdded = new int[3];
+            var rulesCreated = new int[3];
+            var changed = false;
+
+            foreach (var row in parsed)
+            {
+                var index = next.FindIndex(rule =>
+                    rule.Ring == row.Ring &&
+                    string.Equals(rule.Text, row.Text, StringComparison.OrdinalIgnoreCase));
+                var ringIndex = (int)row.Ring;
+
+                if (index >= 0)
+                {
+                    var existing = next[index];
+                    var additions = row.Words
+                        .Where(word => !existing.Words.Contains(
+                            word,
+                            StringComparer.OrdinalIgnoreCase))
+                        .ToArray();
+                    if (existing.Words.Count + additions.Length > MaximumWordsPerRule)
+                    {
+                        return new WordRingsImportResult(
+                            WordRingRuleMutationResult.InvalidWords,
+                            WordRingsImportSummary.Empty);
+                    }
+
+                    if (additions.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    next[index] = existing with
+                    {
+                        Words = existing.Words.Concat(additions).ToArray()
+                    };
+                    wordsAdded[ringIndex] += additions.Length;
+                    changed = true;
+                    continue;
+                }
+
+                next.Add(new WordRingRule(
+                    Guid.NewGuid(),
+                    row.Ring,
+                    row.Text,
+                    row.Words,
+                    row.Enabled));
+                wordsAdded[ringIndex] += row.Words.Count;
+                rulesCreated[ringIndex] += 1;
+                changed = true;
+            }
+
+            var summary = new WordRingsImportSummary(
+                new WordRingsImportRingSummary(wordsAdded[(int)WordRingColor.Blue], rulesCreated[(int)WordRingColor.Blue]),
+                new WordRingsImportRingSummary(wordsAdded[(int)WordRingColor.Yellow], rulesCreated[(int)WordRingColor.Yellow]),
+                new WordRingsImportRingSummary(wordsAdded[(int)WordRingColor.Red], rulesCreated[(int)WordRingColor.Red]));
+
+            if (changed)
+            {
+                await PersistAsync(next.ToArray());
+            }
+
+            return new WordRingsImportResult(
+                WordRingRuleMutationResult.Success,
+                summary);
         }
         finally
         {
@@ -343,7 +693,19 @@ public sealed class WordRingsRuleStore
             : null;
     }
 
-    private IReadOnlyList<string>? ParseWords(string? value)
+    private static string? NormalizeSingleWord(string? value)
+    {
+        var normalized = value?.Trim() ?? string.Empty;
+        if (normalized.Length is <= 0 or > MaximumSingleWordLength ||
+            !SingleWordPattern.IsMatch(normalized))
+        {
+            return null;
+        }
+
+        return normalized;
+    }
+
+    private static IReadOnlyList<string>? ParseWords(string? value)
     {
         var input = value ?? string.Empty;
         if (input.Length == 0 ||
@@ -380,17 +742,18 @@ public sealed class WordRingsRuleStore
                     Enum.IsDefined(rule.Ring) &&
                     rule.Id != Guid.Empty &&
                     !string.IsNullOrWhiteSpace(rule.Text) &&
-                    rule.Words is { Count: > 0 })
+                    rule.Words is not null)
                 .Select(rule => rule with
                 {
                     Text = rule.Text.Trim(),
                     Words = rule.Words
                         .Where(word => !string.IsNullOrWhiteSpace(word))
                         .Select(word => word.Trim())
+                        .Where(word => NormalizeSingleWord(word) is not null)
                         .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Take(MaximumWordsPerRule)
                         .ToArray()
                 })
-                .Where(rule => rule.Words.Count > 0)
                 .ToArray();
         }
         catch (Exception exception) when (
@@ -414,15 +777,60 @@ public sealed class WordRingsRuleStore
                 result.Add(DefaultRules.Single(rule => rule.Ring == ring));
             }
 
-            if (result.Any(rule => rule.Ring == ring && rule.IsEnabled))
+            if (result.Any(rule =>
+                    rule.Ring == ring &&
+                    rule.IsEnabled &&
+                    rule.Words.Count > 0))
             {
                 continue;
             }
 
-            var index = result.FindIndex(rule => rule.Ring == ring);
-            result[index] = result[index] with { Enabled = true };
+            var playableIndex = result.FindIndex(rule =>
+                rule.Ring == ring && rule.Words.Count > 0);
+            if (playableIndex >= 0)
+            {
+                result[playableIndex] = result[playableIndex] with { Enabled = true };
+                continue;
+            }
+
+            var fallback = DefaultRules.Single(rule => rule.Ring == ring);
+            var existingFallback = result.FindIndex(rule => rule.Id == fallback.Id);
+            if (existingFallback >= 0)
+            {
+                result[existingFallback] = fallback;
+            }
+            else
+            {
+                result.Add(fallback);
+            }
         }
         return result;
+    }
+
+    private static WordRingRuleMutationResult NormalizePlayableRules(
+        IEnumerable<WordRingRule> source,
+        out WordRingRule[] normalized)
+    {
+        var candidate = source
+            .Select(rule => rule.IsEnabled && rule.Words.Count == 0
+                ? rule with { Enabled = false }
+                : rule)
+            .ToArray();
+
+        foreach (var ring in Enum.GetValues<WordRingColor>())
+        {
+            if (!candidate.Any(rule =>
+                    rule.Ring == ring &&
+                    rule.IsEnabled &&
+                    rule.Words.Count > 0))
+            {
+                normalized = [];
+                return WordRingRuleMutationResult.LastEnabledRule;
+            }
+        }
+
+        normalized = candidate;
+        return WordRingRuleMutationResult.Success;
     }
 
     private static WordRingRule Pick(
@@ -430,7 +838,10 @@ public sealed class WordRingsRuleStore
         WordRingColor ring)
     {
         var candidates = rules
-            .Where(rule => rule.Ring == ring && rule.IsEnabled)
+            .Where(rule =>
+                rule.Ring == ring &&
+                rule.IsEnabled &&
+                rule.Words.Count > 0)
             .ToArray();
         return candidates[Random.Shared.Next(candidates.Length)];
     }
@@ -442,6 +853,37 @@ public sealed class WordRingsRuleStore
             var swapIndex = Random.Shared.Next(index + 1);
             (items[index], items[swapIndex]) = (items[swapIndex], items[index]);
         }
+    }
+
+    private static StoreState BuildState(IReadOnlyList<WordRingRule> rules)
+    {
+        var usage = new Dictionary<string, WordUsageBuilder>(StringComparer.OrdinalIgnoreCase);
+        foreach (var rule in rules)
+        {
+            foreach (var word in rule.Words)
+            {
+                if (!usage.TryGetValue(word, out var item))
+                {
+                    item = new WordUsageBuilder(word);
+                    usage[word] = item;
+                }
+
+                item.Increment(rule.Ring);
+            }
+        }
+
+        var words = usage.Values
+            .Select(item => item.ToItem())
+            .OrderBy(item => item.Word, WordAlphabeticalComparer)
+            .ThenBy(item => item.Word, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        return new StoreState(rules, words);
+    }
+
+    private async Task PersistAsync(IReadOnlyList<WordRingRule> rules)
+    {
+        await WriteAsync(rules);
+        Volatile.Write(ref _state, BuildState(rules));
     }
 
     private async Task WriteAsync(IReadOnlyList<WordRingRule> rules)
@@ -465,5 +907,216 @@ public sealed class WordRingsRuleStore
         }
 
         File.Move(temporaryPath, _path, overwrite: true);
+    }
+
+    private static IReadOnlyList<CsvRuleRow>? ParseCsv(string? content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return null;
+        }
+
+        using var reader = new StringReader(content);
+        var headerLine = reader.ReadLine();
+        if (headerLine is null)
+        {
+            return null;
+        }
+
+        var header = ParseCsvLine(headerLine);
+        if (header is null ||
+            header.Length != 4 ||
+            !string.Equals(header[0].TrimStart('\uFEFF'), "Ring", StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(header[1], "Rule", StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(header[2], "Enabled", StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(header[3], "Words", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var rows = new Dictionary<string, CsvRuleRow>(StringComparer.OrdinalIgnoreCase);
+        var rowCount = 0;
+        string? line;
+        while ((line = reader.ReadLine()) is not null)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            rowCount += 1;
+            if (rowCount > MaximumCsvRows)
+            {
+                return null;
+            }
+
+            var fields = ParseCsvLine(line);
+            if (fields is null || fields.Length != 4 ||
+                !TryParseRingKey(fields[0], out var ring))
+            {
+                return null;
+            }
+
+            var text = NormalizeText(fields[1]);
+            var words = ParseWords(fields[3]);
+            if (text is null || words is null || !TryParseBoolean(fields[2], out var enabled))
+            {
+                return null;
+            }
+
+            var key = $"{(int)ring}\u001f{text}";
+            if (!rows.TryGetValue(key, out var existing))
+            {
+                rows[key] = new CsvRuleRow(ring, text, enabled, words);
+                continue;
+            }
+
+            var mergedWords = existing.Words
+                .Concat(words)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            if (mergedWords.Length > MaximumWordsPerRule)
+            {
+                return null;
+            }
+
+            rows[key] = existing with
+            {
+                Enabled = existing.Enabled || enabled,
+                Words = mergedWords
+            };
+        }
+
+        return rows.Values.ToArray();
+    }
+
+    private static string[]? ParseCsvLine(string line)
+    {
+        var fields = new List<string>(4);
+        var builder = new StringBuilder();
+        var quoted = false;
+
+        for (var index = 0; index < line.Length; index++)
+        {
+            var character = line[index];
+            if (character == '"')
+            {
+                if (quoted && index + 1 < line.Length && line[index + 1] == '"')
+                {
+                    builder.Append('"');
+                    index += 1;
+                }
+                else
+                {
+                    quoted = !quoted;
+                }
+                continue;
+            }
+
+            if (character == ',' && !quoted)
+            {
+                fields.Add(builder.ToString());
+                builder.Clear();
+                continue;
+            }
+
+            builder.Append(character);
+        }
+
+        if (quoted)
+        {
+            return null;
+        }
+
+        fields.Add(builder.ToString());
+        return fields.ToArray();
+    }
+
+    private static bool TryParseBoolean(string value, out bool result)
+    {
+        var normalized = value.Trim();
+        if (bool.TryParse(normalized, out result))
+        {
+            return true;
+        }
+
+        if (normalized == "1")
+        {
+            result = true;
+            return true;
+        }
+
+        if (normalized == "0")
+        {
+            result = false;
+            return true;
+        }
+
+        result = false;
+        return false;
+    }
+
+    private static bool TryParseRingKey(string value, out WordRingColor ring)
+    {
+        switch (value.Trim().ToLowerInvariant())
+        {
+            case "blue":
+                ring = WordRingColor.Blue;
+                return true;
+            case "yellow":
+                ring = WordRingColor.Yellow;
+                return true;
+            case "red":
+                ring = WordRingColor.Red;
+                return true;
+            default:
+                ring = WordRingColor.Blue;
+                return false;
+        }
+    }
+
+    private static string ToRingKey(WordRingColor ring) => ring switch
+    {
+        WordRingColor.Yellow => "yellow",
+        WordRingColor.Red => "red",
+        _ => "blue"
+    };
+
+    private static string CsvEscape(string value) =>
+        $"\"{value.Replace("\"", "\"\"")}\"";
+
+    private sealed record StoreState(
+        IReadOnlyList<WordRingRule> Rules,
+        IReadOnlyList<WordRingsWordItem> Words);
+
+    private sealed record CsvRuleRow(
+        WordRingColor Ring,
+        string Text,
+        bool Enabled,
+        IReadOnlyList<string> Words);
+
+    private sealed class WordUsageBuilder(string word)
+    {
+        private int _blue;
+        private int _yellow;
+        private int _red;
+
+        public void Increment(WordRingColor ring)
+        {
+            switch (ring)
+            {
+                case WordRingColor.Blue:
+                    _blue += 1;
+                    break;
+                case WordRingColor.Yellow:
+                    _yellow += 1;
+                    break;
+                case WordRingColor.Red:
+                    _red += 1;
+                    break;
+            }
+        }
+
+        public WordRingsWordItem ToItem() => new(word, _blue, _yellow, _red);
     }
 }

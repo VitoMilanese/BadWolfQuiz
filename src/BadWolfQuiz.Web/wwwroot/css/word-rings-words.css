@@ -1,0 +1,357 @@
+.word-rings-editor-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.word-rings-editor-tab-words {
+    --ring-color: #aeb8c8;
+}
+
+.word-rings-editor-tab-word-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border: 1px solid color-mix(in srgb, currentColor 42%, transparent);
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--panel-2) 76%, transparent);
+    font-size: .73rem;
+    font-weight: 1000;
+    letter-spacing: -.05em;
+}
+
+.word-rings-editor-toolbar-words {
+    --ring-color: #aeb8c8;
+    align-items: center;
+}
+
+.word-rings-editor-total-words {
+    margin: 4px 0 0;
+    font-size: .82rem;
+}
+
+.word-rings-editor-word-toolbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.word-rings-editor-import-form {
+    margin: 0;
+}
+
+.word-rings-editor-word-list {
+    display: grid;
+    gap: 10px;
+}
+
+.word-rings-editor-word-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    min-height: 74px;
+    padding: 13px 16px 13px 18px;
+    border: 1px solid color-mix(in srgb, var(--line) 86%, transparent);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--panel) 96%, transparent);
+    box-shadow: 0 10px 26px rgb(0 0 0 / 12%);
+}
+
+.word-rings-editor-word-main {
+    min-width: 0;
+}
+
+.word-rings-editor-word-main > strong {
+    display: block;
+    overflow-wrap: anywhere;
+    font-size: 1.08rem;
+}
+
+.word-rings-editor-word-usage {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 7px;
+}
+
+.word-rings-editor-word-usage > span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    padding: 3px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 850;
+}
+
+.word-rings-editor-word-usage-blue {
+    border-color: color-mix(in srgb, #5f86ee 58%, var(--line)) !important;
+    background: color-mix(in srgb, #5f86ee 10%, transparent);
+}
+
+.word-rings-editor-word-usage-yellow {
+    border-color: color-mix(in srgb, #e0b43c 58%, var(--line)) !important;
+    background: color-mix(in srgb, #e0b43c 10%, transparent);
+}
+
+.word-rings-editor-word-usage-red {
+    border-color: color-mix(in srgb, #e85d5d 58%, var(--line)) !important;
+    background: color-mix(in srgb, #e85d5d 10%, transparent);
+}
+
+.word-rings-editor-word-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.word-rings-editor-word-pager {
+    margin-top: 18px;
+}
+
+.word-rings-editor-page-numbers {
+    display: flex;
+    flex: 1 1 320px;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.word-rings-editor-page-number {
+    display: inline-grid !important;
+    place-items: center;
+    box-sizing: border-box;
+    width: 40px;
+    min-width: 40px !important;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 !important;
+    font-variant-numeric: tabular-nums;
+}
+
+.word-rings-editor-page-number.is-current {
+    border-color: var(--gold);
+    color: var(--text);
+}
+
+.word-rings-editor-page-ellipsis {
+    min-width: 18px;
+    text-align: center;
+}
+
+.word-rings-editor-membership-dialog {
+    width: min(760px, calc(100vw - 32px));
+    max-width: min(760px, calc(100vw - 32px));
+}
+
+.word-rings-editor-membership-list-wrap {
+    position: relative;
+    min-height: 260px;
+    margin-top: 16px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--panel-2) 78%, transparent);
+}
+
+.word-rings-editor-membership-list {
+    display: grid;
+    gap: 7px;
+}
+
+.word-rings-editor-membership-rule {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 7px 10px;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--panel) 88%, transparent);
+    cursor: pointer;
+}
+
+.word-rings-editor-membership-rule:hover {
+    border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+}
+
+.word-rings-editor-membership-rule.is-disabled-rule {
+    opacity: .65;
+}
+
+.word-rings-editor-membership-rule input[type="checkbox"] {
+    width: 19px;
+    height: 19px;
+    margin: 0;
+    accent-color: var(--gold);
+}
+
+.word-rings-editor-membership-rule span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.word-rings-editor-membership-loading {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 10px;
+    border-radius: inherit;
+    background: color-mix(in srgb, var(--panel) 88%, transparent);
+    backdrop-filter: blur(2px);
+    color: var(--muted);
+    font-weight: 850;
+}
+
+.word-rings-editor-membership-loading[hidden] {
+    display: none;
+}
+
+.word-rings-editor-inline-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid color-mix(in srgb, var(--line) 70%, transparent);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: word-rings-editor-spin .7s linear infinite;
+}
+
+@keyframes word-rings-editor-spin {
+    to { transform: rotate(360deg); }
+}
+
+.word-rings-editor-membership-pager {
+    display: grid;
+    grid-template-columns: auto minmax(90px, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.word-rings-editor-membership-pager > span {
+    text-align: center;
+    color: var(--muted);
+    font-weight: 850;
+    font-variant-numeric: tabular-nums;
+}
+
+.word-rings-editor-import-summary {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.word-rings-editor-import-summary[hidden],
+.word-rings-editor-import-no-changes[hidden] {
+    display: none;
+}
+
+.word-rings-editor-import-summary-row {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-left-width: 5px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-2) 76%, transparent);
+}
+
+.word-rings-editor-import-summary-blue { border-left-color: #5f86ee; }
+.word-rings-editor-import-summary-yellow { border-left-color: #e0b43c; }
+.word-rings-editor-import-summary-red { border-left-color: #e85d5d; }
+
+.word-rings-editor-import-summary-row span {
+    color: var(--muted);
+    font-size: .82rem;
+}
+
+.word-rings-editor-import-summary-row b {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.word-rings-editor-import-no-changes {
+    margin: 14px 0 0;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-2) 76%, transparent);
+}
+
+[data-word-rings-transfer-control].is-disabled {
+    opacity: .55;
+    pointer-events: none;
+}
+
+@media (max-width: 1000px) {
+    .word-rings-editor-tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .word-rings-editor-toolbar-words {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .word-rings-editor-word-toolbar-actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 700px) {
+    .word-rings-editor-word-row {
+        grid-template-columns: 1fr;
+    }
+
+    .word-rings-editor-word-actions {
+        justify-content: flex-end;
+    }
+
+    .word-rings-editor-import-summary-row {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 600px) {
+    .word-rings-editor-tabs {
+        grid-template-columns: 1fr;
+    }
+
+    .word-rings-editor-word-toolbar-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .word-rings-editor-word-toolbar-actions .button,
+    .word-rings-editor-import-form,
+    .word-rings-editor-import-form .button {
+        width: 100%;
+    }
+
+    .word-rings-editor-page-numbers {
+        order: 3;
+        flex-basis: 100%;
+    }
+
+    .word-rings-editor-membership-pager {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .word-rings-editor-membership-pager > span {
+        grid-column: 1 / -1;
+        grid-row: 1;
+    }
+}
