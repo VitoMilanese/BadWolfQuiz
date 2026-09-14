@@ -347,7 +347,7 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("OnPostDeleteWordAsync", model);
         Assert.Contains("OnPostImportCsvAsync", model);
         Assert.Contains("WordPageSize = 25", model);
-        Assert.Contains("MembershipRulePageSize = 25", model);
+        Assert.Contains("MembershipRulePageSize = 50", model);
         Assert.Contains("MaximumCsvImportBytes = 5L * 1024 * 1024", model);
         Assert.Contains("GetWordsPage", store);
         Assert.Contains("ApplyWordMembershipChangesAsync", store);
