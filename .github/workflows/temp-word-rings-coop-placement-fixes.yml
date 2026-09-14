@@ -1,0 +1,804 @@
+name: temp-word-rings-coop-placement-fixes
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Apply cooperative placement fixes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def patch(path, old, new, count=1):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              actual = text.count(old)
+              if actual < count:
+                  raise SystemExit(f'{path}: expected at least {count} occurrence(s), found {actual}: {old[:120]!r}')
+              text = text.replace(old, new, count)
+              p.write_text(text, encoding='utf-8')
+
+          # WordRingsRoomStore: replacing an old host room, moving checked placements in the locked region.
+          path = 'src/BadWolfQuiz.Web/Services/WordRingsRoomStore.cs'
+          patch(path,
+          '''    public WordRingsRoomConnection CreateRoom(
+                  string? playerName,
+                  int targetScore,
+                  bool partialScoreEnabled)
+          ''',
+          '''    public WordRingsRoomConnection CreateRoom(
+                  string? playerName,
+                  int targetScore,
+                  bool partialScoreEnabled,
+                  string? previousRoomCode = null,
+                  string? previousPlayerToken = null)
+          ''')
+          patch(path,
+          '''            _rooms.Add(code, room);
+                      return CreateConnection(room, host);
+          ''',
+          '''            _rooms.Add(code, room);
+                      RemoveOwnedRoomCore(previousRoomCode, previousPlayerToken, code);
+                      return CreateConnection(room, host);
+          ''')
+          patch(path,
+          '''    private static bool IsPlayable(WordRingsPuzzle puzzle) =>
+          ''',
+          '''    public WordRingsRoomSnapshot MovePlacement(
+                  string? roomCode,
+                  string? playerToken,
+                  long placementId,
+                  string? membership,
+                  double x,
+                  double y)
+              {
+                  lock (_sync)
+                  {
+                      var now = _timeProvider.GetUtcNow();
+                      var room = GetActiveRoom(roomCode, now);
+                      var player = GetPlayer(room, playerToken);
+                      if (room.Phase != RoomPhase.Playing)
+                      {
+                          throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
+                      }
+
+                      var normalizedMembership = NormalizeMembership(membership);
+                      if (normalizedMembership is null)
+                      {
+                          throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+                      }
+
+                      var placementIndex = room.Placements.FindIndex(item => item.Id == placementId);
+                      if (placementIndex < 0)
+                      {
+                          throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+                      }
+
+                      var placement = room.Placements[placementIndex];
+                      if (!string.Equals(
+                              placement.Membership,
+                              normalizedMembership,
+                              StringComparison.Ordinal))
+                      {
+                          throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+                      }
+
+                      room.Placements[placementIndex] = placement with
+                      {
+                          X = Math.Clamp(x, 3, 97),
+                          Y = Math.Clamp(y, 3, 97)
+                      };
+                      Touch(room, now);
+                      return CreateSnapshot(room, player);
+                  }
+              }
+
+              private void RemoveOwnedRoomCore(
+                  string? roomCode,
+                  string? playerToken,
+                  string exceptRoomCode)
+              {
+                  if (string.IsNullOrWhiteSpace(roomCode) || string.IsNullOrWhiteSpace(playerToken))
+                  {
+                      return;
+                  }
+
+                  string normalizedCode;
+                  try
+                  {
+                      normalizedCode = NormalizeRoomCode(roomCode);
+                  }
+                  catch (WordRingsRoomException)
+                  {
+                      return;
+                  }
+
+                  if (string.Equals(normalizedCode, exceptRoomCode, StringComparison.OrdinalIgnoreCase) ||
+                      !_rooms.TryGetValue(normalizedCode, out var room))
+                  {
+                      return;
+                  }
+
+                  var host = room.Players.FirstOrDefault(item => item.IsHost);
+                  if (host is null ||
+                      !string.Equals(host.Token, playerToken, StringComparison.Ordinal))
+                  {
+                      return;
+                  }
+
+                  _rooms.Remove(normalizedCode);
+              }
+
+              private static bool IsPlayable(WordRingsPuzzle puzzle) =>
+          ''')
+
+          # API: parse JS decimal coordinates invariantly and expose checked-placement movement.
+          path = 'src/BadWolfQuiz.Web/Pages/WordRingsRoomApi.cshtml.cs'
+          patch(path,
+          '''using BadWolfQuiz.Web.Services;
+          ''',
+          '''using BadWolfQuiz.Web.Services;
+          using System.Globalization;
+          ''')
+          patch(path,
+          '''    public IActionResult OnPostCreateRoom(
+                  string? playerName,
+                  int targetScore,
+                  bool partialScoreEnabled)
+              {
+                  return Execute(() => new
+                  {
+                      success = true,
+                      connection = Store.CreateRoom(playerName, targetScore, partialScoreEnabled)
+                  });
+              }
+          ''',
+          '''    public IActionResult OnPostCreateRoom(
+                  string? playerName,
+                  int targetScore,
+                  bool partialScoreEnabled,
+                  string? previousRoomCode,
+                  string? previousPlayerToken)
+              {
+                  return Execute(() => new
+                  {
+                      success = true,
+                      connection = Store.CreateRoom(
+                          playerName,
+                          targetScore,
+                          partialScoreEnabled,
+                          previousRoomCode,
+                          previousPlayerToken)
+                  });
+              }
+          ''')
+          patch(path,
+          '''    public IActionResult OnPostSubmitRoomWord(
+                  string? roomCode,
+                  string? playerToken,
+                  string? word,
+                  string? membership,
+                  double x,
+                  double y)
+              {
+                  return Execute(() => new
+                  {
+                      success = true,
+                      result = Store.SubmitPlacement(
+                          roomCode,
+                          playerToken,
+                          word,
+                          membership,
+                          x,
+                          y)
+                  });
+              }
+
+              private IActionResult Execute(Func<object> operation)
+          ''',
+          '''    public IActionResult OnPostSubmitRoomWord(
+                  string? roomCode,
+                  string? playerToken,
+                  string? word,
+                  string? membership,
+                  string? x,
+                  string? y)
+              {
+                  return Execute(() => new
+                  {
+                      success = true,
+                      result = Store.SubmitPlacement(
+                          roomCode,
+                          playerToken,
+                          word,
+                          membership,
+                          ParseCoordinate(x),
+                          ParseCoordinate(y))
+                  });
+              }
+
+              public IActionResult OnPostMoveRoomPlacement(
+                  string? roomCode,
+                  string? playerToken,
+                  long placementId,
+                  string? membership,
+                  string? x,
+                  string? y)
+              {
+                  return Execute(() => new
+                  {
+                      success = true,
+                      state = Store.MovePlacement(
+                          roomCode,
+                          playerToken,
+                          placementId,
+                          membership,
+                          ParseCoordinate(x),
+                          ParseCoordinate(y))
+                  });
+              }
+
+              private static double ParseCoordinate(string? value)
+              {
+                  if (!double.TryParse(
+                          value,
+                          NumberStyles.Float,
+                          CultureInfo.InvariantCulture,
+                          out var coordinate) ||
+                      !double.IsFinite(coordinate))
+                  {
+                      throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+                  }
+
+                  return coordinate;
+              }
+
+              private IActionResult Execute(Func<object> operation)
+          ''')
+
+          # Pointer drag callbacks receive the concrete source token, allowing checked room placements to move.
+          path = 'src/BadWolfQuiz.Web/wwwroot/js/word-rings-pointer-drag.js'
+          p = Path(path)
+          text = p.read_text(encoding='utf-8')
+          replacements = {
+              'canDropStage(drag.word, membership)': 'canDropStage(drag.word, membership, drag.source)',
+              'canDropOutside(drag.word)': 'canDropOutside(drag.word, drag.source)',
+              'canReturnToBank(drag.word)': 'canReturnToBank(drag.word, drag.source)',
+              'assignToStage(drag.word, event.clientX, event.clientY);': 'assignToStage(drag.word, event.clientX, event.clientY, drag.source);',
+              'assignOutside(drag.word);': 'assignOutside(drag.word, drag.source);',
+              'returnToBank(drag.word);': 'returnToBank(drag.word, drag.source);',
+              'if (!value || !canBegin(value)) return;': 'if (!value || !canBegin(value, word)) return;'
+          }
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit(f'{path}: missing {old!r}')
+              text = text.replace(old, new)
+          p.write_text(text, encoding='utf-8')
+
+          # Cooperative client: keep submitted coordinates, make checked words repositionable inside their locked region.
+          path = 'src/BadWolfQuiz.Web/wwwroot/js/word-rings-coop.js'
+          patch(path,
+          '''    const assignToStage = (word, clientX, clientY) => {
+                  const source = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
+                  const movedFromBank = source instanceof HTMLElement && !source.hidden;
+                  const placement = membershipAt(clientX, clientY);
+                  pending = { word, ...placement };
+                  createPendingToken(word, placement);
+                  if (movedFromBank) replenishLocalBank();
+                  setStatus('');
+                  updateControls();
+              };
+
+              const assignOutside = word => {
+                  const rect = stage.getBoundingClientRect();
+                  assignToStage(word, rect.left + 12, rect.bottom - 12);
+              };
+
+              const returnToBank = word => {
+                  if (!pending || pending.word !== word) return;
+          ''',
+          '''    const isServerPlacementToken = source =>
+                  source instanceof HTMLElement && Boolean(source.dataset.roomServerPlacement);
+
+              const moveServerPlacement = async (source, placement) => {
+                  if (!isServerPlacementToken(source) || !session?.token || requestInFlight) return;
+                  const placementId = Number.parseInt(source.dataset.roomServerPlacement || '', 10);
+                  if (!Number.isFinite(placementId)) return;
+
+                  source.style.left = `${placement.x}%`;
+                  source.style.top = `${placement.y}%`;
+                  bringToFront(source);
+                  requestInFlight = true;
+                  updateControls();
+                  try {
+                      const payload = await post('MoveRoomPlacement', {
+                          roomCode,
+                          playerToken: session.token,
+                          placementId,
+                          membership: placement.membership,
+                          x: placement.x,
+                          y: placement.y
+                      });
+                      if (!payload.success) {
+                          setStatus(root.dataset.roomError, 'error');
+                          await requestState({ preservePending: pending !== null });
+                          return;
+                      }
+                      renderState(payload.state, { preservePending: pending !== null });
+                  } catch (error) {
+                      console.error('Could not move checked Word Rings placement.', error);
+                      setStatus(root.dataset.roomError, 'error');
+                      await requestState({ preservePending: pending !== null });
+                  } finally {
+                      requestInFlight = false;
+                      updateControls();
+                  }
+              };
+
+              const assignToStage = (word, clientX, clientY, dragSource) => {
+                  const placement = membershipAt(clientX, clientY);
+                  if (isServerPlacementToken(dragSource)) {
+                      void moveServerPlacement(dragSource, placement);
+                      return;
+                  }
+
+                  const source = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
+                  const movedFromBank = source instanceof HTMLElement && !source.hidden;
+                  pending = { word, ...placement };
+                  createPendingToken(word, placement);
+                  if (movedFromBank) replenishLocalBank();
+                  setStatus('');
+                  updateControls();
+              };
+
+              const assignOutside = (word, dragSource) => {
+                  const rect = stage.getBoundingClientRect();
+                  assignToStage(word, rect.left + 12, rect.bottom - 12, dragSource);
+              };
+
+              const returnToBank = (word, dragSource) => {
+                  if (isServerPlacementToken(dragSource)) return;
+                  if (!pending || pending.word !== word) return;
+          ''')
+          patch(path,
+          '''    const canBegin = word => !requestInFlight && isOwnTurn() &&
+                  (pending === null || pending.word === word);
+              const canDropStage = word => canBegin(word);
+              const canDropOutside = word => canBegin(word);
+              const canReturnToBank = word => isOwnTurn() && pending?.word === word;
+          ''',
+          '''    const canBegin = (word, source) => {
+                  if (isServerPlacementToken(source)) {
+                      return !requestInFlight && state?.phase === 'playing';
+                  }
+                  return !requestInFlight && isOwnTurn() &&
+                      (pending === null || pending.word === word);
+              };
+              const canDropStage = (word, membership, source) => {
+                  if (isServerPlacementToken(source)) {
+                      return canBegin(word, source) &&
+                          canonical(membership) === canonical(source.dataset.membership);
+                  }
+                  return canBegin(word, source);
+              };
+              const canDropOutside = (word, source) => {
+                  if (isServerPlacementToken(source)) {
+                      return canBegin(word, source) && canonical(source.dataset.membership) === '';
+                  }
+                  return canBegin(word, source);
+              };
+              const canReturnToBank = (word, source) =>
+                  !isServerPlacementToken(source) && isOwnTurn() && pending?.word === word;
+          ''')
+          patch(path,
+          '''            token.type = 'button';
+                      token.disabled = true;
+                      token.className = 'word-rings-word is-on-stage is-room-server-placement';
+          ''',
+          '''            token.type = 'button';
+                      token.disabled = false;
+                      token.className = 'word-rings-word is-on-stage is-room-server-placement';
+          ''')
+          patch(path,
+          '''            placedLayer.append(token);
+                  }
+              };
+          ''',
+          '''            placedLayer.append(token);
+                      wireWord?.(token);
+                  }
+              };
+          ''', count=1)
+          patch(path,
+          '''        if (!session?.token || requestInFlight || state?.phase === 'finished') return;
+                  requestState({ preservePending: pending !== null });
+          ''',
+          '''        if (!session?.token ||
+                      requestInFlight ||
+                      state?.phase === 'finished' ||
+                      root.querySelector('.word-rings-word.is-dragging')) return;
+                  requestState({ preservePending: pending !== null });
+          ''')
+
+          # Remember the previously hosted room and tell the server to remove it only after a new room is successfully created.
+          path = 'src/BadWolfQuiz.Web/wwwroot/js/word-rings-room-entry.js'
+          patch(path,
+          '''    const nicknameKey = 'badwolf.wordrings.nickname';
+          ''',
+          '''    const nicknameKey = 'badwolf.wordrings.nickname';
+              const hostRoomKey = 'badwolf.wordrings.host-room';
+          ''')
+          patch(path,
+          '''    const savedNickname = localStorage.getItem(nicknameKey) || '';
+          ''',
+          '''    const loadPreviousHostRoom = () => {
+                  try {
+                      const parsed = JSON.parse(localStorage.getItem(hostRoomKey) || 'null');
+                      const code = normalizeCode(parsed?.code);
+                      const token = String(parsed?.token || '');
+                      return code.length === 6 && token ? { code, token } : null;
+                  } catch {
+                      localStorage.removeItem(hostRoomKey);
+                      return null;
+                  }
+              };
+
+              const savedNickname = localStorage.getItem(nicknameKey) || '';
+          ''')
+          patch(path,
+          '''        localStorage.setItem(nicknameKey, name);
+                  localStorage.setItem(sessionKey(code), JSON.stringify({ token, name }));
+                  return true;
+          ''',
+          '''        const isHost = connection?.state?.isHost === true;
+                  localStorage.setItem(nicknameKey, name);
+                  localStorage.setItem(sessionKey(code), JSON.stringify({ token, name, isHost }));
+                  if (isHost) {
+                      localStorage.setItem(hostRoomKey, JSON.stringify({ code, token }));
+                  }
+                  return true;
+          ''')
+          patch(path,
+          '''        try {
+                      const payload = await post('CreateRoom', {
+                          playerName: name,
+                          targetScore,
+                          partialScoreEnabled: createPartial?.checked === true
+                      });
+                      if (!payload.success || !saveConnection(payload.connection, name)) {
+                          setError(createError, friendlyError(payload.error));
+                          return;
+                      }
+                      goToRoom(payload.connection.roomCode);
+          ''',
+          '''        try {
+                      const previousHostRoom = loadPreviousHostRoom();
+                      const payload = await post('CreateRoom', {
+                          playerName: name,
+                          targetScore,
+                          partialScoreEnabled: createPartial?.checked === true,
+                          previousRoomCode: previousHostRoom?.code || '',
+                          previousPlayerToken: previousHostRoom?.token || ''
+                      });
+                      if (!payload.success || !saveConnection(payload.connection, name)) {
+                          setError(createError, friendlyError(payload.error));
+                          return;
+                      }
+                      const nextCode = normalizeCode(payload.connection.roomCode);
+                      if (previousHostRoom && previousHostRoom.code !== nextCode) {
+                          localStorage.removeItem(sessionKey(previousHostRoom.code));
+                      }
+                      goToRoom(nextCode);
+          ''')
+
+          # Verdict icons for color-blind accessibility and draggable checked room cards.
+          path = 'src/BadWolfQuiz.Web/wwwroot/css/word-rings-refinements.css'
+          patch(path,
+          '''.word-rings-word.is-wrong {
+              --word-token-fill: color-mix(in srgb, #e85d5d 30%, var(--panel-2));
+              box-shadow:
+                  inset 0 0 0 1px rgb(232 93 93 / 30%),
+                  0 0 0 2px rgb(232 93 93 / 54%),
+                  0 7px 18px rgb(0 0 0 / 16%);
+          }
+          ''',
+          '''.word-rings-word.is-wrong {
+              --word-token-fill: color-mix(in srgb, #e85d5d 30%, var(--panel-2));
+              box-shadow:
+                  inset 0 0 0 1px rgb(232 93 93 / 30%),
+                  0 0 0 2px rgb(232 93 93 / 54%),
+                  0 7px 18px rgb(0 0 0 / 16%);
+          }
+
+          .word-rings-word.is-correct::after,
+          .word-rings-word.is-wrong::after {
+              position: absolute;
+              right: -8px;
+              top: -9px;
+              display: grid;
+              place-items: center;
+              width: 18px;
+              height: 18px;
+              border: 2px solid color-mix(in srgb, var(--panel) 86%, white);
+              border-radius: 50%;
+              color: white;
+              font-size: 12px;
+              font-weight: 1000;
+              line-height: 1;
+              box-shadow: 0 3px 9px rgb(0 0 0 / 34%);
+              pointer-events: none;
+          }
+
+          .word-rings-word.is-correct::after {
+              content: "✓";
+              background: #159451;
+          }
+
+          .word-rings-word.is-wrong::after {
+              content: "×";
+              background: #c4313d;
+          }
+          ''')
+          path = 'src/BadWolfQuiz.Web/wwwroot/css/word-rings-room.css'
+          patch(path,
+          '''.word-rings-word.is-room-server-placement:disabled {
+              opacity: 1;
+              cursor: default;
+          }
+          ''',
+          '''.word-rings-word.is-room-server-placement {
+              opacity: 1;
+              cursor: grab;
+          }
+
+          .word-rings-word.is-room-server-placement:active {
+              cursor: grabbing;
+          }
+
+          .word-rings-word.is-partial::after {
+              content: "½";
+              position: absolute;
+              right: -8px;
+              top: -9px;
+              display: grid;
+              place-items: center;
+              width: 18px;
+              height: 18px;
+              border: 2px solid color-mix(in srgb, var(--panel) 86%, white);
+              border-radius: 50%;
+              background: #a97c08;
+              color: white;
+              font-size: 10px;
+              font-weight: 1000;
+              line-height: 1;
+              box-shadow: 0 3px 9px rgb(0 0 0 / 34%);
+              pointer-events: none;
+          }
+          ''')
+
+          # Behavioral and regression coverage.
+          path = 'tests/BadWolfQuiz.Web.Tests/WordRingsCooperativeRoomRegressionTests.cs'
+          patch(path,
+          '''using BadWolfQuiz.Web.Services;
+          using Microsoft.AspNetCore.Hosting;
+          using Microsoft.Extensions.FileProviders;
+          ''',
+          '''using BadWolfQuiz.Web.Pages;
+          using BadWolfQuiz.Web.Services;
+          using Microsoft.AspNetCore.Hosting;
+          using Microsoft.AspNetCore.Mvc;
+          using Microsoft.Extensions.FileProviders;
+          using System.Globalization;
+          ''')
+          patch(path,
+          '''        var resultScript = ReadWebFile("wwwroot", "js", "word-rings-end-dialog.js");
+                  var styles = ReadWebFile("wwwroot", "css", "word-rings-room.css");
+          ''',
+          '''        var resultScript = ReadWebFile("wwwroot", "js", "word-rings-end-dialog.js");
+                  var pointerScript = ReadWebFile("wwwroot", "js", "word-rings-pointer-drag.js");
+                  var styles = ReadWebFile("wwwroot", "css", "word-rings-room.css");
+                  var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
+                  var api = ReadWebFile("Pages", "WordRingsRoomApi.cshtml.cs");
+          ''')
+          patch(path,
+          '''        Assert.Contains("JoinRoom", entryScript, StringComparison.Ordinal);
+
+                  Assert.Contains("showModal()", resultScript, StringComparison.Ordinal);
+          ''',
+          '''        Assert.Contains("JoinRoom", entryScript, StringComparison.Ordinal);
+                  Assert.Contains("hostRoomKey", entryScript, StringComparison.Ordinal);
+                  Assert.Contains("previousRoomCode", entryScript, StringComparison.Ordinal);
+                  Assert.Contains("MoveRoomPlacement", roomScript, StringComparison.Ordinal);
+                  Assert.Contains("roomServerPlacement", roomScript, StringComparison.Ordinal);
+                  Assert.Contains("canDropStage = (word, membership, source)", roomScript, StringComparison.Ordinal);
+                  Assert.Contains("canBegin(value, word)", pointerScript, StringComparison.Ordinal);
+                  Assert.Contains("CultureInfo.InvariantCulture", api, StringComparison.Ordinal);
+                  Assert.Contains("string? x", api, StringComparison.Ordinal);
+
+                  Assert.Contains("showModal()", resultScript, StringComparison.Ordinal);
+          ''')
+          patch(path,
+          '''        Assert.Contains("prefers-reduced-motion", styles, StringComparison.Ordinal);
+              }
+
+              [Fact]
+              public void Cooperative_room_store_enforces_target_turns_and_outside_scoring()
+          ''',
+          '''        Assert.Contains("prefers-reduced-motion", styles, StringComparison.Ordinal);
+                  Assert.Contains(".word-rings-word.is-correct::after", refinements, StringComparison.Ordinal);
+                  Assert.Contains("content: \"✓\"", refinements, StringComparison.Ordinal);
+                  Assert.Contains("content: \"×\"", refinements, StringComparison.Ordinal);
+                  Assert.Contains("content: \"½\"", styles, StringComparison.Ordinal);
+              }
+
+              [Fact]
+              public void Creating_new_room_removes_previous_room_owned_by_the_same_host()
+              {
+                  var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-replace-{Guid.NewGuid():N}");
+                  Directory.CreateDirectory(root);
+
+                  try
+                  {
+                      var store = WordRingsRoomStore.Get(new TestWebHostEnvironment(root));
+                      var first = store.CreateRoom("Host", 10, partialScoreEnabled: false);
+                      var second = store.CreateRoom(
+                          "Host",
+                          10,
+                          partialScoreEnabled: false,
+                          first.RoomCode,
+                          first.PlayerToken);
+
+                      Assert.NotEqual(first.RoomCode, second.RoomCode);
+                      Assert.Equal(
+                          WordRingsRoomError.RoomNotFound,
+                          Assert.Throws<WordRingsRoomException>(() =>
+                              store.GetState(first.RoomCode, first.PlayerToken)).Error);
+                      Assert.Equal(second.RoomCode, store.GetState(second.RoomCode, second.PlayerToken).RoomCode);
+                  }
+                  finally
+                  {
+                      Directory.Delete(root, recursive: true);
+                  }
+              }
+
+              [Fact]
+              public void Checked_cooperative_placement_can_move_only_inside_its_locked_region()
+              {
+                  var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-move-{Guid.NewGuid():N}");
+                  Directory.CreateDirectory(root);
+
+                  try
+                  {
+                      var store = WordRingsRoomStore.Get(new TestWebHostEnvironment(root));
+                      var host = store.CreateRoom("Host", 15, partialScoreEnabled: false);
+                      _ = store.JoinRoom(host.RoomCode, "Guest");
+                      var state = store.StartGame(host.RoomCode, host.PlayerToken);
+                      var word = state.BankWords
+                          .Concat(state.QueuedWords)
+                          .First(candidate => GetDefaultMembership(candidate).Length > 0);
+                      var membership = GetDefaultMembership(word);
+                      var submitted = store.SubmitPlacement(
+                          host.RoomCode,
+                          host.PlayerToken,
+                          word,
+                          membership,
+                          41.5,
+                          37.25);
+                      var placement = Assert.Single(
+                          submitted.State.Placements,
+                          item => string.Equals(item.Word, word, StringComparison.OrdinalIgnoreCase));
+
+                      var moved = store.MovePlacement(
+                          host.RoomCode,
+                          host.PlayerToken,
+                          placement.Id,
+                          membership,
+                          63.5,
+                          54.25);
+                      var movedPlacement = Assert.Single(
+                          moved.Placements,
+                          item => item.Id == placement.Id);
+                      Assert.Equal(63.5, movedPlacement.X);
+                      Assert.Equal(54.25, movedPlacement.Y);
+
+                      Assert.Equal(
+                          WordRingsRoomError.InvalidPlacement,
+                          Assert.Throws<WordRingsRoomException>(() =>
+                              store.MovePlacement(
+                                  host.RoomCode,
+                                  host.PlayerToken,
+                                  placement.Id,
+                                  string.Empty,
+                                  10,
+                                  10)).Error);
+                  }
+                  finally
+                  {
+                      Directory.Delete(root, recursive: true);
+                  }
+              }
+
+              [Fact]
+              public void Room_api_parses_browser_coordinates_with_invariant_decimal_separator()
+              {
+                  var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-api-{Guid.NewGuid():N}");
+                  Directory.CreateDirectory(root);
+                  var previousCulture = CultureInfo.CurrentCulture;
+
+                  try
+                  {
+                      CultureInfo.CurrentCulture = new CultureInfo("it-IT");
+                      var environment = new TestWebHostEnvironment(root);
+                      var store = WordRingsRoomStore.Get(environment);
+                      var host = store.CreateRoom("Host", 15, partialScoreEnabled: false);
+                      _ = store.JoinRoom(host.RoomCode, "Guest");
+                      var state = store.StartGame(host.RoomCode, host.PlayerToken);
+                      var word = state.BankWords
+                          .Concat(state.QueuedWords)
+                          .First(candidate => GetDefaultMembership(candidate).Length > 0);
+                      var membership = GetDefaultMembership(word);
+                      var api = new WordRingsRoomApiModel(environment);
+
+                      var json = Assert.IsType<JsonResult>(api.OnPostSubmitRoomWord(
+                          host.RoomCode,
+                          host.PlayerToken,
+                          word,
+                          membership,
+                          "47.5",
+                          "62.25"));
+                      var payload = Assert.NotNull(json.Value);
+                      var resultProperty = Assert.NotNull(payload.GetType().GetProperty("result"));
+                      var result = Assert.IsType<WordRingsRoomPlacementResult>(resultProperty.GetValue(payload));
+                      var placement = Assert.Single(
+                          result.State.Placements,
+                          item => string.Equals(item.Word, word, StringComparison.OrdinalIgnoreCase));
+
+                      Assert.Equal(47.5, placement.X);
+                      Assert.Equal(62.25, placement.Y);
+                  }
+                  finally
+                  {
+                      CultureInfo.CurrentCulture = previousCulture;
+                      Directory.Delete(root, recursive: true);
+                  }
+              }
+
+              [Fact]
+              public void Cooperative_room_store_enforces_target_turns_and_outside_scoring()
+          ''')
+
+          PY
+      - name: JavaScript syntax checks
+        run: |
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-pointer-drag.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-end-dialog.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-room-entry.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-coop.js
+      - name: Restore
+        run: dotnet restore tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
+      - name: Tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj -c Release --no-restore --logger "console;verbosity=minimal"
+      - name: Commit validated clean tree
+        if: success()
+        shell: bash
+        run: |
+          git rm .github/workflows/temp-word-rings-coop-placement-fixes.yml
+          git config user.name "Vitalii Hanych"
+          git config user.email "64318287+VitoMilanese@users.noreply.github.com"
+          git add src/BadWolfQuiz.Web tests/BadWolfQuiz.Web.Tests
+          git commit -m "TEMP validated cooperative placement fixes"
+          git push origin HEAD:feature/666-word-rings-minigame
