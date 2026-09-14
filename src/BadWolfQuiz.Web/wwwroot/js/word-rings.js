@@ -476,8 +476,9 @@
         if (finishGameIfNeeded()) return;
 
         const errors = [...verdicts.values()].filter(result => !result).length;
+        const hasNoErrors = errors === 0;
         status.classList.remove('is-success');
-        status.classList.toggle('is-error', errors > 0);
+        status.classList.toggle('is-error', !hasNoErrors);
         status.textContent = correct
             ? ''
             : root.dataset.hasErrorsTemplate.replace('{0}', errors);
