@@ -15,7 +15,7 @@ public sealed class WordRingsEditorModel(
     IStringLocalizer<WordRingsResource> localizer) : PageModel
 {
     private const int WordPageSize = 25;
-    private const int MembershipRulePageSize = 25;
+    private const int MembershipRulePageSize = 10;
     private const long MaximumCsvImportBytes = 5L * 1024 * 1024;
     private const int MaximumMembershipChanges = 2_000;
 
