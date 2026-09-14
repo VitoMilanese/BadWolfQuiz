@@ -13,7 +13,7 @@
         return;
     }
 
-    const editorSaveOverlayDurationMs = 1500;
+    const editorSaveOverlayDurationMs = 3500;
     const editorSaveOverlayTransitionMs = 150;
     const editorSaveOverlayTimers = new WeakMap();
 
