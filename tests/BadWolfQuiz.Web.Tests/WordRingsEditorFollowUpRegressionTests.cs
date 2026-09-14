@@ -19,12 +19,23 @@ public sealed class WordRingsEditorFollowUpRegressionTests
         Assert.Contains("input.minLength = minimumWordLength", script);
         Assert.Contains("data-word-rings-word-pager-position", script);
         Assert.Contains("cloneNode(true)", script);
+        Assert.Contains("captureImportDetails", script);
+        Assert.Contains("parseConfigurationCsv", script);
+        Assert.Contains("compareConfigurations", script);
+        Assert.Contains("newWords", script);
+        Assert.Contains("newRules", script);
+        Assert.Contains("updatedExistingRules", script);
+        Assert.Contains("response.clone().json()", script);
+        Assert.Contains("data-word-rings-import-detail", script);
+        Assert.Contains("word-rings-editor-import-details-dialog", script);
         Assert.Contains("word-rings-editor-word-pager-top", styles);
         Assert.Contains("text-transform: uppercase", styles);
         Assert.Contains("[data-word-rings-membership-word]", styles);
         Assert.Contains("[data-word-rings-delete-word-target]", styles);
-        Assert.Contains("word-rings-editor-followup.css?v=1", assets);
-        Assert.Contains("word-rings-editor-followup.js?v=1", assets);
+        Assert.Contains("word-rings-editor-import-detail-actions", styles);
+        Assert.Contains("word-rings-editor-import-rule-detail-blue", styles);
+        Assert.Contains("word-rings-editor-followup.css?v=2", assets);
+        Assert.Contains("word-rings-editor-followup.js?v=2", assets);
     }
 
     [Fact]

@@ -9,3 +9,138 @@
     margin-top: 0;
     margin-bottom: 18px;
 }
+
+.word-rings-editor-import-detail-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.word-rings-editor-import-detail-action {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-2) 76%, transparent);
+}
+
+.word-rings-editor-import-detail-action > span {
+    min-width: 0;
+    color: var(--muted);
+    font-size: .82rem;
+    font-weight: 800;
+}
+
+.word-rings-editor-import-detail-action b {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.word-rings-editor-import-detail-action .button {
+    min-width: 96px;
+}
+
+.word-rings-editor-import-detail-action .button:disabled {
+    opacity: .45;
+    cursor: default;
+}
+
+.word-rings-editor-import-details-dialog {
+    width: min(760px, calc(100vw - 32px));
+    max-width: min(760px, calc(100vw - 32px));
+}
+
+.word-rings-editor-import-details-body {
+    max-height: min(58vh, 620px);
+    overflow: auto;
+    margin-top: 14px;
+    padding-right: 4px;
+}
+
+.word-rings-editor-import-word-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.word-rings-editor-import-word-list > span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--panel-2) 78%, transparent);
+    font-weight: 900;
+}
+
+.word-rings-editor-import-rule-list {
+    display: grid;
+    gap: 10px;
+}
+
+.word-rings-editor-import-rule-detail {
+    display: grid;
+    gap: 8px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-left-width: 5px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-2) 76%, transparent);
+}
+
+.word-rings-editor-import-rule-detail-blue { border-left-color: #5f86ee; }
+.word-rings-editor-import-rule-detail-yellow { border-left-color: #e0b43c; }
+.word-rings-editor-import-rule-detail-red { border-left-color: #e85d5d; }
+
+.word-rings-editor-import-rule-detail > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 850;
+}
+
+.word-rings-editor-import-rule-detail > strong {
+    overflow-wrap: anywhere;
+    font-size: .96rem;
+}
+
+.word-rings-editor-import-rule-detail > p {
+    display: grid;
+    gap: 5px;
+    margin: 0;
+}
+
+.word-rings-editor-import-rule-detail > p > span {
+    color: var(--muted);
+    font-size: .8rem;
+}
+
+.word-rings-editor-import-rule-detail > p > small {
+    color: var(--text);
+    font-size: .84rem;
+    font-weight: 850;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 800px) {
+    .word-rings-editor-import-detail-actions {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .word-rings-editor-import-detail-action {
+        grid-template-columns: 1fr;
+    }
+
+    .word-rings-editor-import-detail-action .button {
+        width: 100%;
+    }
+}
