@@ -41,7 +41,7 @@ public sealed class WordRingsEditorFollowUpRegressionTests
         Assert.Contains("word-rings-editor-import-details-pager", styles);
         Assert.Contains("word-rings-editor-import-rule-detail-blue", styles);
         Assert.Contains("word-rings-editor-followup.css?v=3", assets);
-        Assert.Contains("word-rings-editor-followup.js?v=3", assets);
+        Assert.Contains("word-rings-editor-followup.js?v=4", assets);
     }
 
     [Fact]
