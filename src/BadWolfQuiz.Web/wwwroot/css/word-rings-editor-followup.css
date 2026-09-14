@@ -1,0 +1,11 @@
+.word-rings-editor-word-main > strong,
+.word-rings-editor-rule-words p,
+[data-word-rings-membership-word],
+[data-word-rings-delete-word-target] {
+    text-transform: uppercase;
+}
+
+.word-rings-editor-word-pager-top {
+    margin-top: 0;
+    margin-bottom: 18px;
+}
