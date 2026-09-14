@@ -135,9 +135,33 @@
         0 7px 18px rgb(0 0 0 / 16%);
 }
 
-.word-rings-word.is-room-server-placement:disabled {
+.word-rings-word.is-room-server-placement {
     opacity: 1;
-    cursor: default;
+    cursor: grab;
+}
+
+.word-rings-word.is-room-server-placement:active {
+    cursor: grabbing;
+}
+
+.word-rings-word.is-partial::after {
+    content: "½";
+    position: absolute;
+    right: -8px;
+    top: -9px;
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border: 2px solid color-mix(in srgb, var(--panel) 86%, white);
+    border-radius: 50%;
+    background: #a97c08;
+    color: white;
+    font-size: 10px;
+    font-weight: 1000;
+    line-height: 1;
+    box-shadow: 0 3px 9px rgb(0 0 0 / 34%);
+    pointer-events: none;
 }
 
 .word-rings-word.is-room-pending {

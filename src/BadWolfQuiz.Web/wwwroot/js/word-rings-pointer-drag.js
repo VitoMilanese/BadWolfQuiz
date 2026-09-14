@@ -71,7 +71,7 @@
 
             if (element && stage.contains(element)) {
                 const membership = membershipAt(clientX, clientY).membership;
-                const allowed = canDropStage(drag.word, membership);
+                const allowed = canDropStage(drag.word, membership, drag.source);
                 drag.preview.classList.add('is-on-stage');
                 drag.preview.classList.remove('is-outside');
                 drag.preview.dataset.membership = membership;
@@ -84,7 +84,7 @@
             drag.preview.dataset.membership = '';
 
             if (element && outsideZone?.contains(element)) {
-                const allowed = canDropOutside(drag.word);
+                const allowed = canDropOutside(drag.word, drag.source);
                 drag.preview.classList.add('is-outside');
                 drag.preview.classList.toggle('is-drop-blocked', !allowed);
                 if (allowed) outsideZone.classList.add('is-drop-target');
@@ -93,7 +93,7 @@
 
             drag.preview.classList.remove('is-outside');
             if (element && wordList.contains(element)) {
-                const allowed = canReturnToBank(drag.word);
+                const allowed = canReturnToBank(drag.word, drag.source);
                 drag.preview.classList.toggle('is-drop-blocked', !allowed);
                 if (allowed) wordList.classList.add('is-drop-target');
             }
@@ -128,21 +128,21 @@
 
             if (stage.contains(dropTarget)) {
                 const membership = membershipAt(event.clientX, event.clientY).membership;
-                if (!canDropStage(drag.word, membership)) return;
-                assignToStage(drag.word, event.clientX, event.clientY);
+                if (!canDropStage(drag.word, membership, drag.source)) return;
+                assignToStage(drag.word, event.clientX, event.clientY, drag.source);
                 onChanged();
                 return;
             }
 
             if (outsideZone?.contains(dropTarget)) {
-                if (!canDropOutside(drag.word)) return;
-                assignOutside(drag.word);
+                if (!canDropOutside(drag.word, drag.source)) return;
+                assignOutside(drag.word, drag.source);
                 onChanged();
                 return;
             }
 
-            if (wordList.contains(dropTarget) && canReturnToBank(drag.word)) {
-                returnToBank(drag.word);
+            if (wordList.contains(dropTarget) && canReturnToBank(drag.word, drag.source)) {
+                returnToBank(drag.word, drag.source);
                 onChanged();
             }
         };
@@ -152,7 +152,7 @@
             if (event.pointerType === 'mouse' && event.button !== 0) return;
 
             const value = word.dataset.word;
-            if (!value || !canBegin(value)) return;
+            if (!value || !canBegin(value, word)) return;
 
             bringToFront(word);
             const previewState = createPreview(word, event);

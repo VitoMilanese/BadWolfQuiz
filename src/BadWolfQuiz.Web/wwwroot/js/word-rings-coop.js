@@ -200,10 +200,53 @@
         wireWord?.(token);
     };
 
-    const assignToStage = (word, clientX, clientY) => {
+    const isServerPlacementToken = source =>
+        source instanceof HTMLElement && Boolean(source.dataset.roomServerPlacement);
+
+    const moveServerPlacement = async (source, placement) => {
+        if (!isServerPlacementToken(source) || !session?.token || requestInFlight) return;
+        const placementId = Number.parseInt(source.dataset.roomServerPlacement || '', 10);
+        if (!Number.isFinite(placementId)) return;
+
+        source.style.left = `${placement.x}%`;
+        source.style.top = `${placement.y}%`;
+        bringToFront(source);
+        requestInFlight = true;
+        updateControls();
+        try {
+            const payload = await post('MoveRoomPlacement', {
+                roomCode,
+                playerToken: session.token,
+                placementId,
+                membership: placement.membership,
+                x: placement.x,
+                y: placement.y
+            });
+            if (!payload.success) {
+                setStatus(root.dataset.roomError, 'error');
+                await requestState({ preservePending: pending !== null });
+                return;
+            }
+            renderState(payload.state, { preservePending: pending !== null });
+        } catch (error) {
+            console.error('Could not move checked Word Rings placement.', error);
+            setStatus(root.dataset.roomError, 'error');
+            await requestState({ preservePending: pending !== null });
+        } finally {
+            requestInFlight = false;
+            updateControls();
+        }
+    };
+
+    const assignToStage = (word, clientX, clientY, dragSource) => {
+        const placement = membershipAt(clientX, clientY);
+        if (isServerPlacementToken(dragSource)) {
+            void moveServerPlacement(dragSource, placement);
+            return;
+        }
+
         const source = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
         const movedFromBank = source instanceof HTMLElement && !source.hidden;
-        const placement = membershipAt(clientX, clientY);
         pending = { word, ...placement };
         createPendingToken(word, placement);
         if (movedFromBank) replenishLocalBank();
@@ -211,12 +254,13 @@
         updateControls();
     };
 
-    const assignOutside = word => {
+    const assignOutside = (word, dragSource) => {
         const rect = stage.getBoundingClientRect();
-        assignToStage(word, rect.left + 12, rect.bottom - 12);
+        assignToStage(word, rect.left + 12, rect.bottom - 12, dragSource);
     };
 
-    const returnToBank = word => {
+    const returnToBank = (word, dragSource) => {
+        if (isServerPlacementToken(dragSource)) return;
         if (!pending || pending.word !== word) return;
         removePendingToken();
         const source = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
@@ -229,11 +273,28 @@
         updateControls();
     };
 
-    const canBegin = word => !requestInFlight && isOwnTurn() &&
-        (pending === null || pending.word === word);
-    const canDropStage = word => canBegin(word);
-    const canDropOutside = word => canBegin(word);
-    const canReturnToBank = word => isOwnTurn() && pending?.word === word;
+    const canBegin = (word, source) => {
+        if (isServerPlacementToken(source)) {
+            return !requestInFlight && state?.phase === 'playing';
+        }
+        return !requestInFlight && isOwnTurn() &&
+            (pending === null || pending.word === word);
+    };
+    const canDropStage = (word, membership, source) => {
+        if (isServerPlacementToken(source)) {
+            return canBegin(word, source) &&
+                canonical(membership) === canonical(source.dataset.membership);
+        }
+        return canBegin(word, source);
+    };
+    const canDropOutside = (word, source) => {
+        if (isServerPlacementToken(source)) {
+            return canBegin(word, source) && canonical(source.dataset.membership) === '';
+        }
+        return canBegin(word, source);
+    };
+    const canReturnToBank = (word, source) =>
+        !isServerPlacementToken(source) && isOwnTurn() && pending?.word === word;
     const onPlacementChanged = () => updateControls();
 
     if (typeof window.BadWolfWordRingsPointerDrag === 'function') {
@@ -259,7 +320,7 @@
         for (const placement of placements || []) {
             const token = document.createElement('button');
             token.type = 'button';
-            token.disabled = true;
+            token.disabled = false;
             token.className = 'word-rings-word is-on-stage is-room-server-placement';
             token.dataset.roomServerPlacement = String(placement.id);
             token.dataset.membership = canonical(placement.membership);
@@ -275,6 +336,7 @@
                 'is-wrong',
                 placement.isCorrect !== true && !(placement.isPartial === true && Number(placement.pointsAwarded) > 0));
             placedLayer.append(token);
+            wireWord?.(token);
         }
     };
 
@@ -548,7 +610,10 @@
     };
 
     window.setInterval(() => {
-        if (!session?.token || requestInFlight || state?.phase === 'finished') return;
+        if (!session?.token ||
+            requestInFlight ||
+            state?.phase === 'finished' ||
+            root.querySelector('.word-rings-word.is-dragging')) return;
         requestState({ preservePending: pending !== null });
     }, 900);
 

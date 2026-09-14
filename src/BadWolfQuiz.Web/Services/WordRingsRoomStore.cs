@@ -122,7 +122,9 @@ public sealed class WordRingsRoomStore
     public WordRingsRoomConnection CreateRoom(
         string? playerName,
         int targetScore,
-        bool partialScoreEnabled)
+        bool partialScoreEnabled,
+        string? previousRoomCode = null,
+        string? previousPlayerToken = null)
     {
         var normalizedName = NormalizePlayerName(playerName);
         if (normalizedName is null)
@@ -155,6 +157,7 @@ public sealed class WordRingsRoomStore
                 host,
                 now);
             _rooms.Add(code, room);
+            RemoveOwnedRoomCore(previousRoomCode, previousPlayerToken, code);
             return CreateConnection(room, host);
         }
     }
@@ -367,6 +370,91 @@ public sealed class WordRingsRoomStore
                 points,
                 turnContinues);
         }
+    }
+
+    public WordRingsRoomSnapshot MovePlacement(
+        string? roomCode,
+        string? playerToken,
+        long placementId,
+        string? membership,
+        double x,
+        double y)
+    {
+        lock (_sync)
+        {
+            var now = _timeProvider.GetUtcNow();
+            var room = GetActiveRoom(roomCode, now);
+            var player = GetPlayer(room, playerToken);
+            if (room.Phase != RoomPhase.Playing)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
+            }
+
+            var normalizedMembership = NormalizeMembership(membership);
+            if (normalizedMembership is null)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+            }
+
+            var placementIndex = room.Placements.FindIndex(item => item.Id == placementId);
+            if (placementIndex < 0)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+            }
+
+            var placement = room.Placements[placementIndex];
+            if (!string.Equals(
+                    placement.Membership,
+                    normalizedMembership,
+                    StringComparison.Ordinal))
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+            }
+
+            room.Placements[placementIndex] = placement with
+            {
+                X = Math.Clamp(x, 3, 97),
+                Y = Math.Clamp(y, 3, 97)
+            };
+            Touch(room, now);
+            return CreateSnapshot(room, player);
+        }
+    }
+
+    private void RemoveOwnedRoomCore(
+        string? roomCode,
+        string? playerToken,
+        string exceptRoomCode)
+    {
+        if (string.IsNullOrWhiteSpace(roomCode) || string.IsNullOrWhiteSpace(playerToken))
+        {
+            return;
+        }
+
+        string normalizedCode;
+        try
+        {
+            normalizedCode = NormalizeRoomCode(roomCode);
+        }
+        catch (WordRingsRoomException)
+        {
+            return;
+        }
+
+        if (string.Equals(normalizedCode, exceptRoomCode, StringComparison.OrdinalIgnoreCase) ||
+            !_rooms.TryGetValue(normalizedCode, out var room))
+        {
+            return;
+        }
+
+        var host = room.Players.FirstOrDefault(item => item.IsHost);
+        if (host is null ||
+            !string.Equals(host.Token, playerToken, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _rooms.Remove(normalizedCode);
     }
 
     private static bool IsPlayable(WordRingsPuzzle puzzle) =>

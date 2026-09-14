@@ -200,6 +200,35 @@ body:has(.word-rings-page) .page-shell {
         0 7px 18px rgb(0 0 0 / 16%);
 }
 
+.word-rings-word.is-correct::after,
+.word-rings-word.is-wrong::after {
+    position: absolute;
+    right: -8px;
+    top: -9px;
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border: 2px solid color-mix(in srgb, var(--panel) 86%, white);
+    border-radius: 50%;
+    color: white;
+    font-size: 12px;
+    font-weight: 1000;
+    line-height: 1;
+    box-shadow: 0 3px 9px rgb(0 0 0 / 34%);
+    pointer-events: none;
+}
+
+.word-rings-word.is-correct::after {
+    content: "✓";
+    background: #159451;
+}
+
+.word-rings-word.is-wrong::after {
+    content: "×";
+    background: #c4313d;
+}
+
 .word-rings-pointer-preview {
     position: fixed !important;
     z-index: 2147483647 !important;

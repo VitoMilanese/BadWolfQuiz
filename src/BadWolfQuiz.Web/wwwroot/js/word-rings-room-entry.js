@@ -16,11 +16,24 @@
     const antiForgery = root.querySelector('[data-word-rings-antiforgery] input[name="__RequestVerificationToken"]');
     const apiUrl = root.dataset.roomApiUrl;
     const nicknameKey = 'badwolf.wordrings.nickname';
+    const hostRoomKey = 'badwolf.wordrings.host-room';
 
     if (!(dialog instanceof HTMLDialogElement) || !apiUrl) return;
 
     const normalizeCode = value => String(value || '').trim().toUpperCase();
     const sessionKey = code => `badwolf.wordrings.room.${normalizeCode(code)}`;
+
+    const loadPreviousHostRoom = () => {
+        try {
+            const parsed = JSON.parse(localStorage.getItem(hostRoomKey) || 'null');
+            const code = normalizeCode(parsed?.code);
+            const token = String(parsed?.token || '');
+            return code.length === 6 && token ? { code, token } : null;
+        } catch {
+            localStorage.removeItem(hostRoomKey);
+            return null;
+        }
+    };
 
     const savedNickname = localStorage.getItem(nicknameKey) || '';
     if (createName instanceof HTMLInputElement) createName.value = savedNickname;
@@ -49,8 +62,12 @@
         const code = normalizeCode(connection?.roomCode);
         const token = connection?.playerToken;
         if (!code || !token) return false;
+        const isHost = connection?.state?.isHost === true;
         localStorage.setItem(nicknameKey, name);
-        localStorage.setItem(sessionKey(code), JSON.stringify({ token, name }));
+        localStorage.setItem(sessionKey(code), JSON.stringify({ token, name, isHost }));
+        if (isHost) {
+            localStorage.setItem(hostRoomKey, JSON.stringify({ code, token }));
+        }
         return true;
     };
 
@@ -92,16 +109,23 @@
         if (submit instanceof HTMLButtonElement) submit.disabled = true;
         setError(createError, '');
         try {
+            const previousHostRoom = loadPreviousHostRoom();
             const payload = await post('CreateRoom', {
                 playerName: name,
                 targetScore,
-                partialScoreEnabled: createPartial?.checked === true
+                partialScoreEnabled: createPartial?.checked === true,
+                previousRoomCode: previousHostRoom?.code || '',
+                previousPlayerToken: previousHostRoom?.token || ''
             });
             if (!payload.success || !saveConnection(payload.connection, name)) {
                 setError(createError, friendlyError(payload.error));
                 return;
             }
-            goToRoom(payload.connection.roomCode);
+            const nextCode = normalizeCode(payload.connection.roomCode);
+            if (previousHostRoom && previousHostRoom.code !== nextCode) {
+                localStorage.removeItem(sessionKey(previousHostRoom.code));
+            }
+            goToRoom(nextCode);
         } catch (error) {
             console.error('Could not create Word Rings room.', error);
             setError(createError, root.dataset.roomError);

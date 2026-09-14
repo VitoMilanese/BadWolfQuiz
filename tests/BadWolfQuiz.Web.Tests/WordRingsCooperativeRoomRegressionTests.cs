@@ -1,6 +1,9 @@
+using BadWolfQuiz.Web.Pages;
 using BadWolfQuiz.Web.Services;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
+using System.Globalization;
 
 namespace BadWolfQuiz.Web.Tests;
 
@@ -13,7 +16,10 @@ public sealed class WordRingsCooperativeRoomRegressionTests
         var roomScript = ReadWebFile("wwwroot", "js", "word-rings-coop.js");
         var entryScript = ReadWebFile("wwwroot", "js", "word-rings-room-entry.js");
         var resultScript = ReadWebFile("wwwroot", "js", "word-rings-end-dialog.js");
+        var pointerScript = ReadWebFile("wwwroot", "js", "word-rings-pointer-drag.js");
         var styles = ReadWebFile("wwwroot", "css", "word-rings-room.css");
+        var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
+        var api = ReadWebFile("Pages", "WordRingsRoomApi.cshtml.cs");
 
         Assert.Contains("data-open-coop-room", page, StringComparison.Ordinal);
         Assert.Contains("data-create-room-dialog", page, StringComparison.Ordinal);
@@ -33,6 +39,14 @@ public sealed class WordRingsCooperativeRoomRegressionTests
         Assert.Contains("localStorage", entryScript, StringComparison.Ordinal);
         Assert.Contains("CreateRoom", entryScript, StringComparison.Ordinal);
         Assert.Contains("JoinRoom", entryScript, StringComparison.Ordinal);
+        Assert.Contains("hostRoomKey", entryScript, StringComparison.Ordinal);
+        Assert.Contains("previousRoomCode", entryScript, StringComparison.Ordinal);
+        Assert.Contains("MoveRoomPlacement", roomScript, StringComparison.Ordinal);
+        Assert.Contains("roomServerPlacement", roomScript, StringComparison.Ordinal);
+        Assert.Contains("canDropStage = (word, membership, source)", roomScript, StringComparison.Ordinal);
+        Assert.Contains("canBegin(value, word)", pointerScript, StringComparison.Ordinal);
+        Assert.Contains("CultureInfo.InvariantCulture", api, StringComparison.Ordinal);
+        Assert.Contains("string? x", api, StringComparison.Ordinal);
 
         Assert.Contains("showModal()", resultScript, StringComparison.Ordinal);
         Assert.Contains("word-rings-result-particle", resultScript, StringComparison.Ordinal);
@@ -41,6 +55,144 @@ public sealed class WordRingsCooperativeRoomRegressionTests
         Assert.Contains("@keyframes word-rings-result-card-in", styles, StringComparison.Ordinal);
         Assert.Contains("@keyframes word-rings-result-particle", styles, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", styles, StringComparison.Ordinal);
+        Assert.Contains(".word-rings-word.is-correct::after", refinements, StringComparison.Ordinal);
+        Assert.Contains("content: \"✓\"", refinements, StringComparison.Ordinal);
+        Assert.Contains("content: \"×\"", refinements, StringComparison.Ordinal);
+        Assert.Contains("content: \"½\"", styles, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Creating_new_room_removes_previous_room_owned_by_the_same_host()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-replace-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            var store = WordRingsRoomStore.Get(new TestWebHostEnvironment(root));
+            var first = store.CreateRoom("Host", 10, partialScoreEnabled: false);
+            var second = store.CreateRoom(
+                "Host",
+                10,
+                partialScoreEnabled: false,
+                first.RoomCode,
+                first.PlayerToken);
+
+            Assert.NotEqual(first.RoomCode, second.RoomCode);
+            Assert.Equal(
+                WordRingsRoomError.RoomNotFound,
+                Assert.Throws<WordRingsRoomException>(() =>
+                    store.GetState(first.RoomCode, first.PlayerToken)).Error);
+            Assert.Equal(second.RoomCode, store.GetState(second.RoomCode, second.PlayerToken).RoomCode);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Checked_cooperative_placement_can_move_only_inside_its_locked_region()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-move-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            var store = WordRingsRoomStore.Get(new TestWebHostEnvironment(root));
+            var host = store.CreateRoom("Host", 15, partialScoreEnabled: false);
+            _ = store.JoinRoom(host.RoomCode, "Guest");
+            var state = store.StartGame(host.RoomCode, host.PlayerToken);
+            var word = state.BankWords
+                .Concat(state.QueuedWords)
+                .First(candidate => GetDefaultMembership(candidate).Length > 0);
+            var membership = GetDefaultMembership(word);
+            var submitted = store.SubmitPlacement(
+                host.RoomCode,
+                host.PlayerToken,
+                word,
+                membership,
+                41.5,
+                37.25);
+            var placement = Assert.Single(
+                submitted.State.Placements,
+                item => string.Equals(item.Word, word, StringComparison.OrdinalIgnoreCase));
+
+            var moved = store.MovePlacement(
+                host.RoomCode,
+                host.PlayerToken,
+                placement.Id,
+                membership,
+                63.5,
+                54.25);
+            var movedPlacement = Assert.Single(
+                moved.Placements,
+                item => item.Id == placement.Id);
+            Assert.Equal(63.5, movedPlacement.X);
+            Assert.Equal(54.25, movedPlacement.Y);
+
+            Assert.Equal(
+                WordRingsRoomError.InvalidPlacement,
+                Assert.Throws<WordRingsRoomException>(() =>
+                    store.MovePlacement(
+                        host.RoomCode,
+                        host.PlayerToken,
+                        placement.Id,
+                        string.Empty,
+                        10,
+                        10)).Error);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Room_api_parses_browser_coordinates_with_invariant_decimal_separator()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-api-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        var previousCulture = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("it-IT");
+            var environment = new TestWebHostEnvironment(root);
+            var store = WordRingsRoomStore.Get(environment);
+            var host = store.CreateRoom("Host", 15, partialScoreEnabled: false);
+            _ = store.JoinRoom(host.RoomCode, "Guest");
+            var state = store.StartGame(host.RoomCode, host.PlayerToken);
+            var word = state.BankWords
+                .Concat(state.QueuedWords)
+                .First(candidate => GetDefaultMembership(candidate).Length > 0);
+            var membership = GetDefaultMembership(word);
+            var api = new WordRingsRoomApiModel(environment);
+
+            var json = Assert.IsType<JsonResult>(api.OnPostSubmitRoomWord(
+                host.RoomCode,
+                host.PlayerToken,
+                word,
+                membership,
+                "47.5",
+                "62.25"));
+            Assert.NotNull(json.Value);
+            var payload = json.Value!;
+            var resultProperty = payload.GetType().GetProperty("result");
+            Assert.NotNull(resultProperty);
+            var result = Assert.IsType<WordRingsRoomPlacementResult>(resultProperty!.GetValue(payload));
+            var placement = Assert.Single(
+                result.State.Placements,
+                item => string.Equals(item.Word, word, StringComparison.OrdinalIgnoreCase));
+
+            Assert.Equal(47.5, placement.X);
+            Assert.Equal(62.25, placement.Y);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previousCulture;
+            Directory.Delete(root, recursive: true);
+        }
     }
 
     [Fact]
