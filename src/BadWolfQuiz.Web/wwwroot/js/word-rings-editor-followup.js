@@ -210,15 +210,17 @@
         return rules;
     };
 
-    const sortWords = values => [...values].sort((left, right) =>
-        left.localeCompare(right, document.documentElement.lang || 'uk', { sensitivity: 'base' }));
+    const compareAlphabetically = (left, right) =>
+        String(left ?? '').localeCompare(
+            String(right ?? ''),
+            document.documentElement.lang || 'uk',
+            { sensitivity: 'base' });
 
-    const sortRules = values => {
-        const ringOrder = new Map([['blue', 0], ['yellow', 1], ['red', 2]]);
-        return [...values].sort((left, right) =>
-            (ringOrder.get(left.ring) ?? 99) - (ringOrder.get(right.ring) ?? 99) ||
-            left.text.localeCompare(right.text, document.documentElement.lang || 'uk', { sensitivity: 'base' }));
-    };
+    const sortWords = values => [...values].sort(compareAlphabetically);
+
+    const sortRules = values => [...values].sort((left, right) =>
+        compareAlphabetically(left.text, right.text) ||
+        compareAlphabetically(left.ring, right.ring));
 
     const compareConfigurations = (beforeRules, importedRules) => {
         if (!(beforeRules instanceof Map) || !(importedRules instanceof Map)) {
@@ -439,9 +441,12 @@
         if (!(body instanceof HTMLElement) || !(pager instanceof HTMLElement) || !(status instanceof HTMLElement)) return;
 
         const text = labels();
-        const items = Array.isArray(lastImportDetails[activeImportDetailType])
+        const sourceItems = Array.isArray(lastImportDetails[activeImportDetailType])
             ? lastImportDetails[activeImportDetailType]
             : [];
+        const items = activeImportDetailType === 'newWords'
+            ? sortWords(sourceItems)
+            : sortRules(sourceItems);
         const totalPages = Math.max(1, Math.ceil(items.length / importDetailPageSize));
         activeImportDetailPage = Math.min(Math.max(activeImportDetailPage, 1), totalPages);
         const start = (activeImportDetailPage - 1) * importDetailPageSize;
