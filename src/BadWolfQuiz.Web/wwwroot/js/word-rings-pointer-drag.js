@@ -152,9 +152,11 @@
             if (event.pointerType === 'mouse' && event.button !== 0) return;
 
             const value = word.dataset.word;
-            if (!value || !canBegin(value, word)) return;
+            if (!value) return;
 
             bringToFront(word);
+            if (!canBegin(value, word)) return;
+
             const previewState = createPreview(word, event);
             active = {
                 word: value,

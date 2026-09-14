@@ -45,6 +45,10 @@
      data-room-error="@roomText.RoomError"
      data-room-need-players="@roomText.NeedMorePlayers"
      data-room-invalid-name="@roomText.InvalidName"
+     data-room-copy-code="@roomText.CopyLink"
+     data-room-code-copied="@roomText.CodeCopied"
+     data-room-show-code="@roomText.ShowCode"
+     data-room-hide-code="@roomText.HideCode"
      data-room-score-award="@roomText.ScoreAwardTemplate"
      data-room-partial-award="@roomText.PartialAwardTemplate"
      data-room-outside-no-point="@roomText.CorrectNoPointTemplate">
@@ -63,8 +67,9 @@
             @if (isCooperativeRoom)
             {
                 <span class="word-rings-room-code">
-                    @roomText.RoomCode: <strong data-room-code-label>@requestedRoomCode</strong>
-                    <button class="word-rings-room-link" type="button" data-copy-room-link title="@roomText.CopyLink" aria-label="@roomText.CopyLink">↗</button>
+                    @roomText.RoomCode: <strong data-room-code-label aria-live="polite">••••••</strong>
+                    <button class="word-rings-room-link" type="button" data-copy-room-code title="@roomText.CopyLink" aria-label="@roomText.CopyLink">⧉</button>
+                    <button class="word-rings-room-link" type="button" data-toggle-room-code title="@roomText.ShowCode" aria-label="@roomText.ShowCode" aria-pressed="false">👁</button>
                 </span>
             }
             <span class="word-rings-toolbar-progress" data-progress></span>

@@ -13,7 +13,9 @@
     const checkButton = root.querySelector('[data-check]');
     const playersList = root.querySelector('[data-word-rings-player-list]');
     const startButton = root.querySelector('[data-start-room]');
-    const copyButton = root.querySelector('[data-copy-room-link]');
+    const copyButton = root.querySelector('[data-copy-room-code]');
+    const toggleCodeButton = root.querySelector('[data-toggle-room-code]');
+    const roomCodeLabel = root.querySelector('[data-room-code-label]');
     const joinDialog = root.querySelector('[data-join-room-dialog]');
     const joinForm = root.querySelector('[data-join-room-form]');
     const joinName = root.querySelector('[data-join-room-name]');
@@ -42,6 +44,8 @@
     let polling = false;
     let resultShown = false;
     let topZIndex = 100;
+    let roomCodeVisible = false;
+    let copyFeedbackTimer = null;
 
     const format = (template, ...values) => values.reduce(
         (result, value, index) => result.replace(`{${index}}`, String(value)),
@@ -135,6 +139,85 @@
             x: Math.max(3, Math.min(97, ((clientX - rect.left) / rect.width) * 100)),
             y: Math.max(3, Math.min(97, ((clientY - rect.top) / rect.height) * 100))
         };
+    };
+
+    const buildRingGeometry = () => ringElements.map(([name, ring]) => {
+        if (!ring) return [name, null];
+        const rect = ring.getBoundingClientRect();
+        return [name, {
+            centerX: rect.left + rect.width / 2,
+            centerY: rect.top + rect.height / 2,
+            radius: Math.min(rect.width, rect.height) / 2
+        }];
+    });
+
+    const membershipFromGeometry = (clientX, clientY, geometry) => canonical(
+        geometry
+            .filter(([, item]) => item && Math.hypot(clientX - item.centerX, clientY - item.centerY) <= item.radius)
+            .map(([name]) => name)
+            .join(''));
+
+    const overlapArea = (left, right) => {
+        const width = Math.max(0, Math.min(left.right, right.right) - Math.max(left.left, right.left));
+        const height = Math.max(0, Math.min(left.bottom, right.bottom) - Math.max(left.top, right.top));
+        return width * height;
+    };
+
+    const placementAnchors = {
+        A: [27, 28],
+        B: [73, 28],
+        C: [50, 76],
+        AB: [50, 19],
+        AC: [35, 54],
+        BC: [65, 54],
+        ABC: [50, 43],
+        '': [8, 88]
+    };
+
+    const findBestAutomaticPlacement = (token, membership) => {
+        if (!(token instanceof HTMLElement)) return null;
+        const targetMembership = canonical(membership);
+        const stageRect = stage.getBoundingClientRect();
+        const tokenRect = token.getBoundingClientRect();
+        const width = Math.max(1, tokenRect.width);
+        const height = Math.max(1, tokenRect.height);
+        const geometry = buildRingGeometry();
+        const occupied = [...placedLayer.querySelectorAll('.word-rings-word')]
+            .filter(other => other !== token)
+            .map(other => other.getBoundingClientRect());
+        const anchor = placementAnchors[targetMembership] || [50, 50];
+
+        let best = null;
+        for (let y = 5; y <= 95; y += 2.5) {
+            for (let x = 5; x <= 95; x += 2.5) {
+                const clientX = stageRect.left + stageRect.width * x / 100;
+                const clientY = stageRect.top + stageRect.height * y / 100;
+                if (membershipFromGeometry(clientX, clientY, geometry) !== targetMembership) continue;
+
+                const candidate = {
+                    left: clientX - width / 2,
+                    right: clientX + width / 2,
+                    top: clientY - height / 2,
+                    bottom: clientY + height / 2
+                };
+                if (candidate.left < stageRect.left + 4 ||
+                    candidate.right > stageRect.right - 4 ||
+                    candidate.top < stageRect.top + 4 ||
+                    candidate.bottom > stageRect.bottom - 4) continue;
+
+                const overlap = occupied.reduce((sum, rect) => sum + overlapArea(candidate, rect), 0);
+                const minimumDistance = occupied.length === 0
+                    ? 999
+                    : Math.min(...occupied.map(rect => Math.hypot(
+                        clientX - (rect.left + rect.width / 2),
+                        clientY - (rect.top + rect.height / 2))));
+                const anchorDistance = Math.hypot(x - anchor[0], y - anchor[1]);
+                const score = overlap * 10000 + anchorDistance - Math.min(minimumDistance, 300) * 0.04;
+                if (best === null || score < best.score) best = { x, y, overlap, score };
+            }
+        }
+
+        return best;
     };
 
     const createBankWord = word => {
@@ -316,13 +399,22 @@
     }
 
     const renderPlacements = placements => {
-        placedLayer.querySelectorAll('[data-room-server-placement]').forEach(token => token.remove());
+        const livePlacementIds = new Set();
         for (const placement of placements || []) {
-            const token = document.createElement('button');
-            token.type = 'button';
-            token.disabled = false;
-            token.className = 'word-rings-word is-on-stage is-room-server-placement';
-            token.dataset.roomServerPlacement = String(placement.id);
+            const placementId = String(placement.id);
+            livePlacementIds.add(placementId);
+            let token = placedLayer.querySelector(`[data-room-server-placement="${placementId}"]`);
+            if (!(token instanceof HTMLButtonElement)) {
+                token = document.createElement('button');
+                token.type = 'button';
+                token.disabled = false;
+                token.className = 'word-rings-word is-on-stage is-room-server-placement';
+                token.dataset.roomServerPlacement = placementId;
+                placedLayer.append(token);
+                wireWord?.(token);
+            }
+
+            token.dataset.word = placement.word;
             token.dataset.membership = canonical(placement.membership);
             token.style.left = `${placement.x}%`;
             token.style.top = `${placement.y}%`;
@@ -335,9 +427,41 @@
             token.classList.toggle(
                 'is-wrong',
                 placement.isCorrect !== true && !(placement.isPartial === true && Number(placement.pointsAwarded) > 0));
-            placedLayer.append(token);
-            wireWord?.(token);
         }
+
+        placedLayer.querySelectorAll('[data-room-server-placement]').forEach(token => {
+            if (!livePlacementIds.has(token.dataset.roomServerPlacement || '')) token.remove();
+        });
+    };
+
+    const repositionPartialPlacementIfNeeded = async result => {
+        if (!result?.isPartial || Number(result.pointsAwarded) <= 0 || !result.state) return result?.state || null;
+        const placement = [...(result.state.placements || [])]
+            .reverse()
+            .find(item => item.word === result.word && item.playerId === result.state.playerId);
+        if (!placement) return result.state;
+
+        const token = placedLayer.querySelector(`[data-room-server-placement="${String(placement.id)}"]`);
+        if (!(token instanceof HTMLElement)) return result.state;
+        const occupied = [...placedLayer.querySelectorAll('.word-rings-word')]
+            .filter(other => other !== token)
+            .map(other => other.getBoundingClientRect());
+        const currentRect = token.getBoundingClientRect();
+        const currentOverlap = occupied.reduce((sum, rect) => sum + overlapArea(currentRect, rect), 0);
+        if (currentOverlap <= 0) return result.state;
+
+        const best = findBestAutomaticPlacement(token, placement.membership);
+        if (!best || best.overlap >= currentOverlap - 0.5) return result.state;
+
+        const payload = await post('MoveRoomPlacement', {
+            roomCode,
+            playerToken: session.token,
+            placementId: placement.id,
+            membership: placement.membership,
+            x: best.x,
+            y: best.y
+        });
+        return payload.success ? payload.state : result.state;
     };
 
     const renderPlayers = players => {
@@ -527,16 +651,35 @@
     });
 
     copyButton?.addEventListener('click', async () => {
-        const url = new URL(window.location.href);
-        url.search = '';
-        url.searchParams.set('room', roomCode);
         try {
-            await navigator.clipboard.writeText(url.toString());
+            await navigator.clipboard.writeText(roomCode);
             copyButton.classList.add('is-copied');
-            window.setTimeout(() => copyButton.classList.remove('is-copied'), 1200);
+            copyButton.textContent = '✓';
+            const copiedLabel = root.dataset.roomCodeCopied || root.dataset.roomCopyCode || '';
+            copyButton.title = copiedLabel;
+            copyButton.setAttribute('aria-label', copiedLabel);
+            if (copyFeedbackTimer !== null) window.clearTimeout(copyFeedbackTimer);
+            copyFeedbackTimer = window.setTimeout(() => {
+                copyButton.classList.remove('is-copied');
+                copyButton.textContent = '⧉';
+                const copyLabel = root.dataset.roomCopyCode || '';
+                copyButton.title = copyLabel;
+                copyButton.setAttribute('aria-label', copyLabel);
+                copyFeedbackTimer = null;
+            }, 1400);
         } catch (error) {
-            console.error('Could not copy Word Rings room link.', error);
+            console.error('Could not copy Word Rings room code.', error);
         }
+    });
+
+    toggleCodeButton?.addEventListener('click', () => {
+        roomCodeVisible = !roomCodeVisible;
+        if (roomCodeLabel) roomCodeLabel.textContent = roomCodeVisible ? roomCode : '••••••';
+        toggleCodeButton.textContent = roomCodeVisible ? '🙈' : '👁';
+        toggleCodeButton.setAttribute('aria-pressed', roomCodeVisible ? 'true' : 'false');
+        const label = roomCodeVisible ? root.dataset.roomHideCode : root.dataset.roomShowCode;
+        toggleCodeButton.title = label || '';
+        toggleCodeButton.setAttribute('aria-label', label || '');
     });
 
     revealButton?.addEventListener('click', () => {
@@ -587,6 +730,10 @@
 
             const result = payload.result;
             renderState(result.state);
+            if (result.isPartial && Number(result.pointsAwarded) > 0) {
+                const settledState = await repositionPartialPlacementIfNeeded(result);
+                if (settledState && settledState !== result.state) renderState(settledState);
+            }
             if (result.isCorrect) {
                 setStatus(
                     Number(result.pointsAwarded) > 0

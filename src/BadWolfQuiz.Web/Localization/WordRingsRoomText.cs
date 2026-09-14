@@ -12,7 +12,10 @@ public sealed record WordRingsRoomText
     public string PartialScore { get; init; } = "Award 0.5 points for a partially correct placement";
     public string PartialDescription { get; init; } = "A placement that matches at least one required ring but not the whole region is worth half a point.";
     public string RoomCode { get; init; } = "Room";
-    public string CopyLink { get; init; } = "Copy room link";
+    public string CopyLink { get; init; } = "Copy room code";
+    public string CodeCopied { get; init; } = "Room code copied";
+    public string ShowCode { get; init; } = "Show room code";
+    public string HideCode { get; init; } = "Hide room code";
     public string StartGame { get; init; } = "Start game";
     public string WaitingForPlayers { get; init; } = "Waiting for players. The host can start when at least two players are in the room.";
     public string YourTurn { get; init; } = "Your turn";
@@ -62,7 +65,10 @@ public sealed record WordRingsRoomText
         PartialScore = "Давати 0,5 бала за частково правильне розміщення",
         PartialDescription = "Якщо область збігається хоча б з одним потрібним кільцем, але не повністю, гравець отримує пів бала.",
         RoomCode = "Кімната",
-        CopyLink = "Скопіювати посилання на кімнату",
+        CopyLink = "Скопіювати код кімнати",
+        CodeCopied = "Код кімнати скопійовано",
+        ShowCode = "Показати код кімнати",
+        HideCode = "Приховати код кімнати",
         StartGame = "Почати гру",
         WaitingForPlayers = "Очікування гравців. Власник може почати гру, коли в кімнаті буде щонайменше двоє гравців.",
         YourTurn = "Ваш хід",
@@ -102,7 +108,10 @@ public sealed record WordRingsRoomText
         PartialScore = "Assegna 0,5 punti per un posizionamento parzialmente corretto",
         PartialDescription = "Se la posizione corrisponde ad almeno un cerchio richiesto ma non all'intera area, vale mezzo punto.",
         RoomCode = "Stanza",
-        CopyLink = "Copia link della stanza",
+        CopyLink = "Copia codice stanza",
+        CodeCopied = "Codice stanza copiato",
+        ShowCode = "Mostra codice stanza",
+        HideCode = "Nascondi codice stanza",
         StartGame = "Avvia partita",
         WaitingForPlayers = "In attesa dei giocatori. L'host può iniziare con almeno due giocatori.",
         YourTurn = "Il tuo turno",
@@ -143,6 +152,9 @@ public sealed record WordRingsRoomText
         PartialDescription = "Україна",
         RoomCode = "Україна",
         CopyLink = "Україна",
+        CodeCopied = "Україна",
+        ShowCode = "Україна",
+        HideCode = "Україна",
         StartGame = "Україна",
         WaitingForPlayers = "Україна",
         YourTurn = "Україна",
