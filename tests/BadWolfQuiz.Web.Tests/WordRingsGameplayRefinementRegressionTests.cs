@@ -6,14 +6,25 @@ public sealed class WordRingsGameplayRefinementRegressionTests
     public void Gameplay_uses_full_viewport_toolbar_right_word_bank_and_at_most_ten_words()
     {
         var page = ReadWebFile("Pages", "WordRings.cshtml");
+        var model = ReadWebFile("Pages", "WordRings.cshtml.cs");
         var styles = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
+        var script = ReadWebFile("wwwroot", "js", "word-rings.js");
 
         Assert.Contains("~/css/minigames.css", page, StringComparison.Ordinal);
         Assert.Contains("minigames-toolbar word-rings-toolbar", page, StringComparison.Ordinal);
         Assert.Contains("data-game-mode=\"solo\"", page, StringComparison.Ordinal);
-        Assert.Contains("Math.Min(8, matchingWords.Count)", page, StringComparison.Ordinal);
-        Assert.Contains("selectedMatchingCount / 4", page, StringComparison.Ordinal);
-        Assert.Contains("Take(10)", page, StringComparison.Ordinal);
+        Assert.Contains("minigames-refresh-button", page, StringComparison.Ordinal);
+        Assert.Contains("<span aria-hidden=\"true\">↻</span>", page, StringComparison.Ordinal);
+        Assert.Contains("Model.DisplayedWords", page, StringComparison.Ordinal);
+        Assert.Contains("MaximumDisplayedWords = 10", model, StringComparison.Ordinal);
+        Assert.Contains("Math.Ceiling(targetCount * 0.8)", model, StringComparison.Ordinal);
+        Assert.Contains("PickFreshPuzzle", model, StringComparison.Ordinal);
+        Assert.Contains("PuzzleRefreshAttempts = 24", model, StringComparison.Ordinal);
+        Assert.Contains("previousWords", model, StringComparison.Ordinal);
+        Assert.Contains("window.location.assign", script, StringComparison.Ordinal);
+        Assert.Contains("previousBlueRule", script, StringComparison.Ordinal);
+        Assert.Contains("previousYellowRule", script, StringComparison.Ordinal);
+        Assert.Contains("previousRedRule", script, StringComparison.Ordinal);
         Assert.Contains("data-check disabled", page, StringComparison.Ordinal);
         Assert.Contains("data-word-rings-players hidden", page, StringComparison.Ordinal);
         Assert.True(

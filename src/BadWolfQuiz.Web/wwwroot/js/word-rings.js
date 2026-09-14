@@ -326,20 +326,23 @@
     });
 
     resetButton.addEventListener('click', () => {
-        assignments.clear();
-        verdicts.clear();
-        lockedMemberships.clear();
-        pendingWord = null;
-        placedLayer.innerHTML = '';
-        outsideList.innerHTML = '';
-        wordList.querySelectorAll('.word-rings-word').forEach(word => {
-            word.hidden = false;
-            word.draggable = false;
-            word.style.zIndex = '';
-            word.classList.remove('is-correct', 'is-wrong', 'is-placed', 'is-dragging');
+        const refreshUrl = new URL(window.location.href);
+        const currentRules = {
+            previousBlueRule: rules.querySelector('.word-rings-rule-a span')?.textContent?.trim() || '',
+            previousYellowRule: rules.querySelector('.word-rings-rule-b span')?.textContent?.trim() || '',
+            previousRedRule: rules.querySelector('.word-rings-rule-c span')?.textContent?.trim() || ''
+        };
+        Object.entries(currentRules).forEach(([name, value]) => {
+            if (value) refreshUrl.searchParams.set(name, value);
+            else refreshUrl.searchParams.delete(name);
         });
-        clearStatus();
-        updateProgress();
+
+        const currentWords = [...wordList.querySelectorAll('.word-rings-word[data-word]')]
+            .map(token => token.dataset.word)
+            .filter(Boolean);
+        refreshUrl.searchParams.set('previousWords', currentWords.join('|'));
+        refreshUrl.searchParams.set('refresh', Date.now().toString());
+        window.location.assign(refreshUrl.toString());
     });
 
     checkButton.addEventListener('click', () => {

@@ -4,36 +4,6 @@
 @{
     ViewData["Title"] = WordRingsLocalizer["Title"];
     ViewData["HidePortalFooter"] = true;
-
-    var matchingWords = Model.Puzzle.Words
-        .Where(word => Model.Puzzle.Expected.TryGetValue(word, out var membership) && !string.IsNullOrEmpty(membership))
-        .OrderBy(_ => Random.Shared.Next())
-        .ToList();
-    var outsideWords = Model.Puzzle.Words
-        .Where(word => !Model.Puzzle.Expected.TryGetValue(word, out var membership) || string.IsNullOrEmpty(membership))
-        .OrderBy(_ => Random.Shared.Next())
-        .ToList();
-
-    var selectedMatchingCount = Math.Min(8, matchingWords.Count);
-    var displayedWordList = matchingWords.Take(selectedMatchingCount).ToList();
-    var maximumDistractors = Math.Min(2, selectedMatchingCount / 4);
-    displayedWordList.AddRange(outsideWords.Take(maximumDistractors));
-
-    if (displayedWordList.Count < 10)
-    {
-        displayedWordList.AddRange(
-            matchingWords
-                .Skip(selectedMatchingCount)
-                .Take(10 - displayedWordList.Count));
-    }
-
-    var displayedWords = displayedWordList
-        .OrderBy(_ => Random.Shared.Next())
-        .Take(10)
-        .ToArray();
-    var displayedExpected = Model.Puzzle.Expected
-        .Where(item => displayedWords.Contains(item.Key))
-        .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
 }
 
 @section Styles {
@@ -51,7 +21,7 @@
      data-place-all="@WordRingsLocalizer["PlaceAll"]"
      data-reveal-rules="@WordRingsLocalizer["RevealRules"]"
      data-hide-rules="@WordRingsLocalizer["HideRules"]">
-    <script type="application/json" data-word-rings-puzzle>@Html.Raw(System.Text.Json.JsonSerializer.Serialize(displayedExpected))</script>
+    <script type="application/json" data-word-rings-puzzle>@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DisplayedExpected))</script>
 
     <header class="minigames-toolbar word-rings-toolbar">
         <div class="minigames-toolbar-title word-rings-toolbar-title">
@@ -60,7 +30,13 @@
         </div>
         <div class="minigames-toolbar-actions word-rings-actions">
             <button class="button" type="button" data-reveal-rules>@WordRingsLocalizer["RevealRules"]</button>
-            <button class="button" type="button" data-reset>@WordRingsLocalizer["Reset"]</button>
+            <button class="button minigames-refresh-button"
+                    type="button"
+                    data-reset
+                    title="@WordRingsLocalizer["Reset"]"
+                    aria-label="@WordRingsLocalizer["Reset"]">
+                <span aria-hidden="true">↻</span>
+            </button>
             <button class="button button-primary" type="button" data-check disabled>@WordRingsLocalizer["Check"]</button>
         </div>
     </header>
@@ -88,7 +64,7 @@
                 <h2>@WordRingsLocalizer["WordBank"]</h2>
             </div>
             <div class="word-rings-word-list" data-word-list>
-                @foreach (var word in displayedWords)
+                @foreach (var word in Model.DisplayedWords)
                 {
                     <button class="word-rings-word" type="button" data-word="@word">@word</button>
                 }
