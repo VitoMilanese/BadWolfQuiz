@@ -18,6 +18,10 @@ public sealed class WordRingsGameplayRefinementRegressionTests
         Assert.Contains("Model.DisplayedWords", page, StringComparison.Ordinal);
         Assert.Contains("MaximumDisplayedWords = 10", model, StringComparison.Ordinal);
         Assert.Contains("Math.Ceiling(targetCount * 0.8)", model, StringComparison.Ordinal);
+        Assert.Contains("SelectBalancedMatchingWords", model, StringComparison.Ordinal);
+        Assert.Contains("currentMax - ringUse[ring]", model, StringComparison.Ordinal);
+        Assert.Contains(">= 3 => 360.0", model, StringComparison.Ordinal);
+        Assert.Contains("2 => 220.0", model, StringComparison.Ordinal);
         Assert.Contains("PickFreshPuzzle", model, StringComparison.Ordinal);
         Assert.Contains("PuzzleRefreshAttempts = 24", model, StringComparison.Ordinal);
         Assert.Contains("previousWords", model, StringComparison.Ordinal);
@@ -38,13 +42,17 @@ public sealed class WordRingsGameplayRefinementRegressionTests
     }
 
     [Fact]
-    public void Rings_are_thicker_outlined_and_checked_words_keep_contrast_feedback_fill()
+    public void Rings_are_transparent_gapless_outlined_and_stage_has_no_inner_frame()
     {
         var styles = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
 
+        Assert.Contains("border: 0;", styles, StringComparison.Ordinal);
+        Assert.Contains("background: transparent;", styles, StringComparison.Ordinal);
         Assert.Contains("border-width: clamp(4px, .56vw, 8px)", styles, StringComparison.Ordinal);
-        Assert.Contains("outline: 1px solid", styles, StringComparison.Ordinal);
+        Assert.Contains("outline: 0;", styles, StringComparison.Ordinal);
+        Assert.Contains("0 0 0 1px color-mix", styles, StringComparison.Ordinal);
         Assert.Contains("inset 0 0 0 1px", styles, StringComparison.Ordinal);
+        Assert.DoesNotContain("outline-offset: 1px", styles, StringComparison.Ordinal);
         Assert.Contains("#33c46f 30%", styles, StringComparison.Ordinal);
         Assert.Contains("#e85d5d 30%", styles, StringComparison.Ordinal);
         Assert.Contains("left 240ms ease", styles, StringComparison.Ordinal);
@@ -52,7 +60,7 @@ public sealed class WordRingsGameplayRefinementRegressionTests
     }
 
     [Fact]
-    public void Gameplay_checks_one_new_word_at_a_time_auto_corrects_solo_errors_and_raises_clicked_words()
+    public void Gameplay_checks_one_new_word_at_a_time_auto_corrects_solo_errors_and_keeps_drag_preview_under_pointer()
     {
         var script = ReadWebFile("wwwroot", "js", "word-rings.js");
         var pointerDrag = ReadWebFile("wwwroot", "js", "word-rings-pointer-drag.js");
@@ -77,6 +85,10 @@ public sealed class WordRingsGameplayRefinementRegressionTests
         Assert.Contains("canReturnToBank", pointerDrag, StringComparison.Ordinal);
         Assert.Contains("bringToFront(word)", pointerDrag, StringComparison.Ordinal);
         Assert.Contains("!drag.moved", pointerDrag, StringComparison.Ordinal);
+        Assert.Contains("const clickRatioX", pointerDrag, StringComparison.Ordinal);
+        Assert.Contains("const clickRatioY", pointerDrag, StringComparison.Ordinal);
+        Assert.Contains("previewRect.width * clickRatioX", pointerDrag, StringComparison.Ordinal);
+        Assert.Contains("previewRect.height * clickRatioY", pointerDrag, StringComparison.Ordinal);
     }
 
     [Fact]

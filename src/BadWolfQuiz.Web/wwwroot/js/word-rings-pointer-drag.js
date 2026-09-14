@@ -30,6 +30,11 @@
 
         const createPreview = (source, event) => {
             const rect = source.getBoundingClientRect();
+            const sourceOffsetX = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+            const sourceOffsetY = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+            const clickRatioX = rect.width > 0 ? sourceOffsetX / rect.width : 0.5;
+            const clickRatioY = rect.height > 0 ? sourceOffsetY / rect.height : 0.5;
+
             const preview = source.cloneNode(true);
             preview.hidden = false;
             preview.tabIndex = -1;
@@ -40,10 +45,11 @@
             copyRingVariables(preview);
             document.body.append(preview);
 
+            const previewRect = preview.getBoundingClientRect();
             return {
                 preview,
-                offsetX: Math.max(0, Math.min(rect.width, event.clientX - rect.left)),
-                offsetY: Math.max(0, Math.min(rect.height, event.clientY - rect.top))
+                offsetX: previewRect.width * clickRatioX,
+                offsetY: previewRect.height * clickRatioY
             };
         };
 

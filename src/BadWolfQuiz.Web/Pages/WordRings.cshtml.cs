@@ -99,9 +99,12 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         for (var attempt = 0; attempt < 10; attempt++)
         {
             var matchingWords = puzzle.Words
-                .Where(word =>
-                    puzzle.Expected.TryGetValue(word, out var membership) &&
-                    !string.IsNullOrEmpty(membership))
+                .Select(word => new MatchingWordCandidate(
+                    word,
+                    puzzle.Expected.TryGetValue(word, out var membership)
+                        ? membership
+                        : string.Empty))
+                .Where(candidate => !string.IsNullOrEmpty(candidate.Membership))
                 .OrderBy(_ => Random.Shared.Next())
                 .ToList();
             var outsideWords = puzzle.Words
@@ -115,7 +118,11 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
             var minimumMatchingCount = Math.Min(
                 matchingWords.Count,
                 (int)Math.Ceiling(targetCount * 0.8));
-            var selected = matchingWords.Take(minimumMatchingCount).ToList();
+            var selected = SelectBalancedMatchingWords(
+                    matchingWords,
+                    minimumMatchingCount)
+                .ToList();
+            var selectedSet = selected.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             selected.AddRange(
                 outsideWords.Take(Math.Max(0, targetCount - selected.Count)));
@@ -123,7 +130,8 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
             {
                 selected.AddRange(
                     matchingWords
-                        .Skip(minimumMatchingCount)
+                        .Where(candidate => !selectedSet.Contains(candidate.Word))
+                        .Select(candidate => candidate.Word)
                         .Take(targetCount - selected.Count));
             }
 
@@ -147,6 +155,69 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         return last;
     }
 
+    private static IReadOnlyList<string> SelectBalancedMatchingWords(
+        IReadOnlyList<MatchingWordCandidate> candidates,
+        int count)
+    {
+        if (count <= 0 || candidates.Count == 0)
+        {
+            return [];
+        }
+
+        var remaining = candidates
+            .OrderBy(_ => Random.Shared.Next())
+            .ToList();
+        var selected = new List<string>(Math.Min(count, remaining.Count));
+        var ringUse = new Dictionary<char, int>
+        {
+            ['A'] = 0,
+            ['B'] = 0,
+            ['C'] = 0
+        };
+
+        while (selected.Count < count && remaining.Count > 0)
+        {
+            var currentMax = ringUse.Values.Max();
+            MatchingWordCandidate? best = null;
+            var bestScore = double.MinValue;
+
+            foreach (var candidate in remaining)
+            {
+                var balanceBonus = candidate.Membership
+                    .Where(ringUse.ContainsKey)
+                    .Sum(ring => (currentMax - ringUse[ring]) * 55.0);
+                var overlapBonus = candidate.Membership.Length switch
+                {
+                    >= 3 => 360.0,
+                    2 => 220.0,
+                    _ => 100.0
+                };
+                var score = overlapBonus + balanceBonus + (Random.Shared.NextDouble() * 12.0);
+                if (score <= bestScore)
+                {
+                    continue;
+                }
+
+                best = candidate;
+                bestScore = score;
+            }
+
+            if (best is null)
+            {
+                break;
+            }
+
+            selected.Add(best.Word);
+            foreach (var ring in best.Membership.Where(ringUse.ContainsKey))
+            {
+                ringUse[ring]++;
+            }
+            remaining.Remove(best);
+        }
+
+        return selected;
+    }
+
     private static IReadOnlyList<string> ParsePreviousWords(string? value) =>
         string.IsNullOrWhiteSpace(value)
             ? []
@@ -167,4 +238,6 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         var comparer = StringComparer.OrdinalIgnoreCase;
         return left.All(word => right.Contains(word, comparer));
     }
+
+    private sealed record MatchingWordCandidate(string Word, string Membership);
 }

@@ -134,13 +134,22 @@ body:has(.word-rings-page) .page-shell {
     max-height: 100%;
     aspect-ratio: 1.32 / 1;
     margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.word-rings-stage.is-drop-target {
+    border-color: transparent;
+    background: transparent;
 }
 
 .word-rings-circle {
     border-width: clamp(4px, .56vw, 8px);
-    outline: 1px solid color-mix(in srgb, var(--text) 58%, var(--bg));
-    outline-offset: 1px;
+    outline: 0;
+    background: transparent;
     box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--text) 58%, var(--bg)),
         inset 0 0 0 1px color-mix(in srgb, var(--text) 42%, transparent),
         0 0 18px color-mix(in srgb, currentColor 20%, transparent);
 }
