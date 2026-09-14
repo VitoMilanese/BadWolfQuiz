@@ -53,7 +53,8 @@ public sealed record WordRingsRoomSnapshot(
     string Outcome,
     int TargetScore,
     bool PartialScoreEnabled,
-    double TeamScore,
+    double PlayerScore,
+    Guid? WinnerPlayerId,
     Guid PlayerId,
     Guid? CurrentPlayerId,
     bool IsHost,
@@ -64,7 +65,11 @@ public sealed record WordRingsRoomSnapshot(
     IReadOnlyList<WordRingsRoomPlayerSnapshot> Players,
     IReadOnlyList<string> BankWords,
     IReadOnlyList<string> QueuedWords,
-    IReadOnlyList<WordRingsRoomPlacementSnapshot> Placements);
+    IReadOnlyList<WordRingsRoomPlacementSnapshot> Placements)
+{
+    [System.Text.Json.Serialization.JsonIgnore]
+    public double TeamScore => PlayerScore;
+}
 
 public sealed record WordRingsRoomConnection(
     string RoomCode,
@@ -209,7 +214,7 @@ public sealed class WordRingsRoomStore
             {
                 throw new WordRingsRoomException(WordRingsRoomError.NotHost);
             }
-            if (room.Phase != RoomPhase.Waiting)
+            if (room.Phase == RoomPhase.Playing)
             {
                 throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
             }
@@ -225,7 +230,7 @@ public sealed class WordRingsRoomStore
             }
 
             room.Puzzle = puzzle;
-            room.TeamScore = 0;
+            room.WinnerPlayerId = null;
             room.CurrentPlayerIndex = 0;
             room.OutsidePointAwardedThisTurn = false;
             room.Outcome = RoomOutcome.None;
@@ -323,13 +328,21 @@ public sealed class WordRingsRoomStore
 
             player.RemainingWords.Remove(actualWord);
             player.Score += points;
-            room.TeamScore += points;
+            var placementMembership = actualMembership;
+            var placementX = Math.Clamp(x, 3, 97);
+            var placementY = Math.Clamp(y, 3, 97);
+            if (room.PartialScoreEnabled && isPartial)
+            {
+                placementMembership = expectedMembership;
+                (placementX, placementY) = GetCorrectedPlacementAnchor(expectedMembership);
+            }
+
             room.Placements.Add(new PlacementState(
                 room.NextPlacementId++,
                 actualWord,
-                actualMembership,
-                Math.Clamp(x, 3, 97),
-                Math.Clamp(y, 3, 97),
+                placementMembership,
+                placementX,
+                placementY,
                 isCorrect,
                 isPartial,
                 points,
@@ -341,10 +354,11 @@ public sealed class WordRingsRoomStore
             }
 
             var turnContinues = isCorrect;
-            if (room.TeamScore >= room.TargetScore)
+            if (player.Score >= room.TargetScore)
             {
                 room.Phase = RoomPhase.Finished;
                 room.Outcome = RoomOutcome.Won;
+                room.WinnerPlayerId = player.Id;
                 turnContinues = false;
             }
             else if (room.Players.All(item => item.RemainingWords.Count == 0))
@@ -385,7 +399,7 @@ public sealed class WordRingsRoomStore
             var now = _timeProvider.GetUtcNow();
             var room = GetActiveRoom(roomCode, now);
             var player = GetPlayer(room, playerToken);
-            if (room.Phase != RoomPhase.Playing)
+            if (room.Phase == RoomPhase.Waiting)
             {
                 throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
             }
@@ -596,19 +610,23 @@ public sealed class WordRingsRoomStore
                 item.PlayerId,
                 item.PlayerName))
             .ToArray();
+        var playerOutcome = room.Phase == RoomPhase.Finished && room.WinnerPlayerId is Guid winnerId
+            ? (winnerId == player.Id ? RoomOutcome.Won : RoomOutcome.Lost)
+            : room.Outcome;
 
         return new WordRingsRoomSnapshot(
             room.Code,
             room.Version,
             room.Phase.ToString().ToLowerInvariant(),
-            room.Outcome.ToString().ToLowerInvariant(),
+            playerOutcome.ToString().ToLowerInvariant(),
             room.TargetScore,
             room.PartialScoreEnabled,
-            room.TeamScore,
+            player.Score,
+            room.WinnerPlayerId,
             player.Id,
             currentPlayerId,
             player.IsHost,
-            player.IsHost && room.Phase == RoomPhase.Waiting && room.Players.Count >= 2,
+            player.IsHost && room.Phase != RoomPhase.Playing && room.Players.Count >= 2,
             room.Puzzle.BlueRuleText,
             room.Puzzle.YellowRuleText,
             room.Puzzle.RedRuleText,
@@ -718,6 +736,19 @@ public sealed class WordRingsRoomStore
         return selected;
     }
 
+    private static (double X, double Y) GetCorrectedPlacementAnchor(string membership) =>
+        CanonicalMembership(membership) switch
+        {
+            "A" => (27, 28),
+            "B" => (73, 28),
+            "C" => (50, 76),
+            "AB" => (50, 19),
+            "AC" => (35, 54),
+            "BC" => (65, 54),
+            "ABC" => (50, 43),
+            _ => (8, 88)
+        };
+
     private static bool IsPartialPlacement(string expected, string actual)
     {
         if (expected.Length == 0 || actual.Length == 0)
@@ -806,7 +837,7 @@ public sealed class WordRingsRoomStore
         public List<PlacementState> Placements { get; } = [];
         public RoomPhase Phase { get; set; } = RoomPhase.Waiting;
         public RoomOutcome Outcome { get; set; } = RoomOutcome.None;
-        public double TeamScore { get; set; }
+        public Guid? WinnerPlayerId { get; set; }
         public int CurrentPlayerIndex { get; set; } = -1;
         public bool OutsidePointAwardedThisTurn { get; set; }
         public long NextPlacementId { get; set; } = 1;

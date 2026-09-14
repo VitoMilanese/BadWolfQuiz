@@ -18,23 +18,23 @@ The solo selector strongly prefers words that satisfy one or more selected rules
 
 When a solo game ends, a custom animated victory/defeat dialog is shown instead of a browser alert.
 
-## Cooperative rooms
+## Multiplayer rooms
 
-The Word Rings toolbar can create or join a cooperative room. The creator chooses a target score from **5 to 15** and can optionally enable **0.5-point partial placement scoring**. Partial scoring is disabled by default. Rooms use six-character shareable codes and can be joined through `/minigames/word-rings?room=CODE`.
+The Word Rings toolbar can create or join a multiplayer room. The creator chooses a target score from **5 to 15** and can optionally enable **0.5-point partial placement scoring**. Partial scoring is disabled by default. Rooms use six-character shareable codes and can be joined through `/minigames/word-rings?room=CODE`.
 
-The host can start after at least two players have joined. Each participant receives a personal, separately randomized word queue of up to 20 words with at most 10 visible at once. The left side of the game shows the room players, each player's score contribution, remaining-word count, host marker, and the current turn.
+The host can start after at least two players have joined. Each participant receives a personal, separately randomized word queue of up to 20 words with at most 10 visible at once. The left side of the game shows every player's independent score, remaining-word count, host marker, and the current turn. The toolbar score is also personal to the viewer; there is no shared team score.
 
-Cooperative scoring and turn progression are server-authoritative:
+Multiplayer scoring and turn progression are server-authoritative:
 
-- a fully correct placement awards **1 point**;
-- when partial scoring is enabled, a non-exact placement that overlaps at least one required ring awards **0.5 points**;
+- a fully correct placement awards **1 point** to the player who placed it;
+- when partial scoring is enabled, a non-exact placement that overlaps at least one required ring awards **0.5 points** to that player and is automatically moved into its fully correct Venn region while retaining partial/yellow feedback;
 - a fully correct placement keeps the turn with the same player;
 - an incorrect or partially correct placement passes the turn to the next player;
 - a correctly placed word outside all rings can award only **1 point per continuing turn**; additional correct outside-ring words in that same turn remain correct but award 0 points until the turn changes;
-- the room wins when the shared team score reaches the configured target;
-- if every player's personal queue is exhausted before reaching the target, the room loses.
+- the first player whose own score reaches the configured target is the single winner; every other player receives a defeat result;
+- if every player's personal queue is exhausted before anyone reaches the target, every player loses.
 
-The browser submits the word, detected Venn membership, and board coordinates, while the server calculates correctness, points, turn ownership, and the final outcome. Room state is kept in memory and expires after inactivity. Cooperative victory and defeat use the same animated result-dialog system as solo play.
+The browser submits the word, detected Venn membership, and board coordinates, while the server calculates correctness, personal points, turn ownership, the winner, and the final per-player outcome. Checked placements remain draggable inside their locked Venn membership even after the round finishes. The host can start another round in the same room after a result; scores, placements, queues, winner state, and puzzle data are reset, while finished clients keep polling so they observe the restart. Room state is kept in memory and expires after inactivity. Multiplayer victory and defeat use the same animated result-dialog system as solo play.
 
 ## Rule selection
 

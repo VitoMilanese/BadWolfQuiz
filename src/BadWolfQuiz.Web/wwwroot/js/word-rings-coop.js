@@ -275,7 +275,7 @@
 
     const canBegin = (word, source) => {
         if (isServerPlacementToken(source)) {
-            return !requestInFlight && state?.phase === 'playing';
+            return !requestInFlight && (state?.phase === 'playing' || state?.phase === 'finished');
         }
         return !requestInFlight && isOwnTurn() &&
             (pending === null || pending.word === word);
@@ -386,11 +386,14 @@
         resultShown = true;
         const won = nextState.outcome === 'won';
         const template = won ? root.dataset.coopWinTemplate : root.dataset.coopLoseTemplate;
+        const playerScore = nextState.players?.find(player => player.id === nextState.playerId)?.score
+            ?? nextState.playerScore
+            ?? 0;
         root.dispatchEvent(new CustomEvent('wordrings:game-ended', {
             detail: {
                 won,
                 title: won ? root.dataset.winTitle : root.dataset.loseTitle,
-                message: format(template, formatScore(nextState.teamScore), nextState.targetScore)
+                message: format(template, formatScore(playerScore), nextState.targetScore)
             }
         }));
     };
@@ -405,7 +408,7 @@
         root.classList.toggle('is-not-own-turn', playing && !ownTurn);
 
         if (startButton instanceof HTMLButtonElement) {
-            startButton.hidden = state?.isHost !== true || state?.phase !== 'waiting';
+            startButton.hidden = state?.isHost !== true || state?.phase === 'playing';
             startButton.disabled = state?.canStart !== true || requestInFlight;
         }
 
@@ -417,9 +420,13 @@
     const renderState = (nextState, { preservePending = false } = {}) => {
         if (!nextState) return;
         state = nextState;
+        if (nextState.phase === 'playing') resultShown = false;
+        const ownScore = nextState.players?.find(player => player.id === nextState.playerId)?.score
+            ?? nextState.playerScore
+            ?? 0;
         progress.textContent = format(
             root.dataset.roomScoreTemplate,
-            formatScore(nextState.teamScore),
+            formatScore(ownScore),
             nextState.targetScore);
         renderPlayers(nextState.players);
         renderRules(nextState);
@@ -612,7 +619,6 @@
     window.setInterval(() => {
         if (!session?.token ||
             requestInFlight ||
-            state?.phase === 'finished' ||
             root.querySelector('.word-rings-word.is-dragging')) return;
         requestState({ preservePending: pending !== null });
     }, 900);

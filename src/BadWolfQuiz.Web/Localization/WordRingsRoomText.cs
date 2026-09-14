@@ -4,8 +4,8 @@ namespace BadWolfQuiz.Web.Localization;
 
 public sealed record WordRingsRoomText
 {
-    public string Cooperative { get; init; } = "Co-op";
-    public string CreateRoom { get; init; } = "Create co-op room";
+    public string Cooperative { get; init; } = "Multiplayer";
+    public string CreateRoom { get; init; } = "Create multiplayer room";
     public string JoinRoom { get; init; } = "Join room";
     public string PlayerName { get; init; } = "Player name";
     public string TargetScore { get; init; } = "Play to";
@@ -17,7 +17,7 @@ public sealed record WordRingsRoomText
     public string WaitingForPlayers { get; init; } = "Waiting for players. The host can start when at least two players are in the room.";
     public string YourTurn { get; init; } = "Your turn";
     public string OtherTurn { get; init; } = "Turn: {0}";
-    public string TeamScoreTemplate { get; init; } = "Team: {0} / {1}";
+    public string TeamScoreTemplate { get; init; } = "Score: {0} / {1}";
     public string Players { get; init; } = "Players";
     public string Host { get; init; } = "Host";
     public string Close { get; init; } = "Close";
@@ -30,8 +30,8 @@ public sealed record WordRingsRoomText
     public string LoseTitle { get; init; } = "Defeat";
     public string SoloWinTemplate { get; init; } = "You placed {0} words correctly and reached the target of {1}.";
     public string SoloLoseTemplate { get; init; } = "The 20-word limit is over. Correct placements: {0} of {1}.";
-    public string CoopWinTemplate { get; init; } = "The team scored {0} of {1} points.";
-    public string CoopLoseTemplate { get; init; } = "All player word sets are exhausted. The team scored {0} of {1} points.";
+    public string CoopWinTemplate { get; init; } = "You reached {0} points first. Target: {1}.";
+    public string CoopLoseTemplate { get; init; } = "You scored {0} of {1} points.";
     public string PartialAwardTemplate { get; init; } = "Partially correct: +0.5";
     public string CorrectNoPointTemplate { get; init; } = "Correct. An outside-rings point was already awarded this turn.";
     public string ScoreAwardTemplate { get; init; } = "Correct: +{0}";
@@ -54,8 +54,8 @@ public sealed record WordRingsRoomText
 
     private static WordRingsRoomText Ukrainian { get; } = new()
     {
-        Cooperative = "Кооператив",
-        CreateRoom = "Створити кооперативну кімнату",
+        Cooperative = "Мультиплеєр",
+        CreateRoom = "Створити кімнату",
         JoinRoom = "Приєднатися до кімнати",
         PlayerName = "Ім'я гравця",
         TargetScore = "Грати до",
@@ -67,7 +67,7 @@ public sealed record WordRingsRoomText
         WaitingForPlayers = "Очікування гравців. Власник може почати гру, коли в кімнаті буде щонайменше двоє гравців.",
         YourTurn = "Ваш хід",
         OtherTurn = "Хід: {0}",
-        TeamScoreTemplate = "Команда: {0} / {1}",
+        TeamScoreTemplate = "Бали: {0} / {1}",
         Players = "Гравці",
         Host = "Власник",
         Close = "Закрити",
@@ -80,8 +80,8 @@ public sealed record WordRingsRoomText
         LoseTitle = "Поразка",
         SoloWinTemplate = "Правильно розставлено {0} слів. Ціль {1} досягнута.",
         SoloLoseTemplate = "20 слів закінчилися. Правильно розставлено {0} з потрібних {1}.",
-        CoopWinTemplate = "Команда набрала {0} з {1} балів.",
-        CoopLoseTemplate = "Усі набори слів гравців закінчилися. Команда набрала {0} з {1} балів.",
+        CoopWinTemplate = "Ви першим набрали {0} балів. Ціль: {1}.",
+        CoopLoseTemplate = "Ви набрали {0} з {1} балів.",
         PartialAwardTemplate = "Частково правильно: +0,5",
         CorrectNoPointTemplate = "Правильно. Бал за слово поза кільцями в цьому ході вже був отриманий.",
         ScoreAwardTemplate = "Правильно: +{0}",
@@ -94,8 +94,8 @@ public sealed record WordRingsRoomText
 
     private static WordRingsRoomText Italian { get; } = new()
     {
-        Cooperative = "Cooperativa",
-        CreateRoom = "Crea stanza cooperativa",
+        Cooperative = "Multiplayer",
+        CreateRoom = "Crea stanza multiplayer",
         JoinRoom = "Entra nella stanza",
         PlayerName = "Nome giocatore",
         TargetScore = "Gioca fino a",
@@ -107,7 +107,7 @@ public sealed record WordRingsRoomText
         WaitingForPlayers = "In attesa dei giocatori. L'host può iniziare con almeno due giocatori.",
         YourTurn = "Il tuo turno",
         OtherTurn = "Turno: {0}",
-        TeamScoreTemplate = "Squadra: {0} / {1}",
+        TeamScoreTemplate = "Punti: {0} / {1}",
         Players = "Giocatori",
         Host = "Host",
         Close = "Chiudi",
@@ -120,8 +120,8 @@ public sealed record WordRingsRoomText
         LoseTitle = "Sconfitta",
         SoloWinTemplate = "Hai posizionato correttamente {0} parole e raggiunto l'obiettivo di {1}.",
         SoloLoseTemplate = "Le 20 parole sono terminate. Posizionamenti corretti: {0} su {1}.",
-        CoopWinTemplate = "La squadra ha ottenuto {0} punti su {1}.",
-        CoopLoseTemplate = "Tutti i set di parole sono terminati. La squadra ha ottenuto {0} punti su {1}.",
+        CoopWinTemplate = "Hai raggiunto per primo {0} punti. Obiettivo: {1}.",
+        CoopLoseTemplate = "Hai ottenuto {0} punti su {1}.",
         PartialAwardTemplate = "Parzialmente corretto: +0,5",
         CorrectNoPointTemplate = "Corretto. Il punto fuori dai cerchi è già stato assegnato in questo turno.",
         ScoreAwardTemplate = "Corretto: +{0}",
