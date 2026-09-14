@@ -19,7 +19,7 @@
 
 <div class="page-heading minigame-editor-heading word-rings-editor-heading">
     <div>
-        <p class="eyebrow">BAD WOLF / MINIGAME EDITOR</p>
+        <p class="eyebrow">@WordRingsLocalizer["EditorBrandEyebrow"]</p>
         <h1>@WordRingsLocalizer["EditorTitle"]</h1>
         <p class="muted">@WordRingsLocalizer["EditorPlaceholder"]</p>
     </div>
@@ -28,7 +28,7 @@
         <span class="word-rings-editor-ring word-rings-editor-ring-a"></span>
         <span class="word-rings-editor-ring word-rings-editor-ring-b"></span>
         <span class="word-rings-editor-ring word-rings-editor-ring-c"></span>
-        <span class="word-rings-editor-mark-caption">WORD / RINGS</span>
+        <span class="word-rings-editor-mark-caption">@WordRingsLocalizer["EditorBrandMark"]</span>
     </div>
 </div>
 
@@ -265,7 +265,10 @@
                 <span class="word-rings-editor-ring-chip" aria-hidden="true"></span>
                 <div>
                     <p class="word-rings-editor-section-kicker">@WordRingsLocalizer["EditorRulesLabel"]</p>
-                    <h2>@activeRingTitle</h2>
+                    <div class="word-rings-editor-ring-heading">
+              <h2>@activeRingTitle</h2>
+              <span class="muted word-rings-editor-ring-stats">@WordRingsLocalizer["EditorRingStats", Model.Rules.Count, Model.Rules.Count(rule => rule.IsEnabled)]</span>
+          </div>
                 </div>
             </div>
             <div class="word-rings-editor-rule-toolbar-actions">

@@ -23,8 +23,9 @@ public sealed class WordRingsEditorAssetsTagHelper : TagHelper
             "<link rel=\"stylesheet\" href=\"/css/word-rings-words.css?v=2\" />" +
             "<link rel=\"stylesheet\" href=\"/css/word-rings-editor-followup.css?v=3\" />" +
             "<link rel=\"stylesheet\" href=\"/css/word-rings-import-filters.css?v=1\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/word-rings-editor-search.css?v=1\" />" +
             "<script defer src=\"/js/word-rings-import-filters.js?v=1\"></script>" +
             "<script defer src=\"/js/word-rings-editor-followup.js?v=7\"></script>" +
-            "<script defer src=\"/js/word-rings-editor-catalog-paging.js?v=1\"></script>");
+            "<script defer src=\"/js/word-rings-editor-catalog-paging.js?v=2\"></script>");
     }
 }

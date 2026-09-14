@@ -13,336 +13,336 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Title" xml:space="preserve">
-    <value>Parola nel cerchio</value>
+    <value>Україна</value>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>Scopri tre regole nascoste e sistema ogni parola nelle corrette intersezioni dei cerchi.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorMenu" xml:space="preserve">
-    <value>Editor Parola nel cerchio</value>
+    <value>Україна</value>
   </data>
   <data name="EditorTitle" xml:space="preserve">
-    <value>Editor Parola nel cerchio</value>
+    <value>Україна</value>
   </data>
   <data name="EditorPlaceholder" xml:space="preserve">
-    <value>Gestisci i gruppi di regole usati dai cerchi blu, giallo e rosso.</value>
+    <value>Україна</value>
   </data>
   <data name="Instructions" xml:space="preserve">
-    <value>Ogni cerchio segue una regola nascosta. Trascina ogni parola nell'area i cui cerchi corrispondono alla parola. Una parola può appartenere a uno, due, tutti e tre o nessun cerchio.</value>
+    <value>Україна</value>
   </data>
   <data name="WordBank" xml:space="preserve">
-    <value>Parole</value>
+    <value>Україна</value>
   </data>
   <data name="Outside" xml:space="preserve">
-    <value>Fuori da tutti i cerchi</value>
+    <value>Україна</value>
   </data>
   <data name="Check" xml:space="preserve">
-    <value>Controlla</value>
+    <value>Україна</value>
   </data>
   <data name="Reset" xml:space="preserve">
-    <value>Reimposta</value>
+    <value>Україна</value>
   </data>
   <data name="RevealRules" xml:space="preserve">
-    <value>Mostra regole</value>
+    <value>Україна</value>
   </data>
   <data name="HideRules" xml:space="preserve">
-    <value>Nascondi regole</value>
+    <value>Україна</value>
   </data>
   <data name="RuleA" xml:space="preserve">
-    <value>La parola indica un animale</value>
+    <value>Україна</value>
   </data>
   <data name="RuleB" xml:space="preserve">
-    <value>La parola contiene la lettera “a”</value>
+    <value>Україна</value>
   </data>
   <data name="RuleC" xml:space="preserve">
-    <value>La parola ha esattamente 5 lettere</value>
+    <value>Україна</value>
   </data>
   <data name="Progress" xml:space="preserve">
-    <value>{0} parole su {1} posizionate</value>
+    <value>Україна</value>
   </data>
   <data name="AllCorrect" xml:space="preserve">
-    <value>Perfetto! Tutte le parole sono nell'area corretta.</value>
+    <value>Україна</value>
   </data>
   <data name="HasErrors" xml:space="preserve">
-    <value>Parole nell'area sbagliata: {0}.</value>
+    <value>Україна</value>
   </data>
   <data name="PlaceAll" xml:space="preserve">
-    <value>Posiziona tutte le parole prima di controllare.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorAllWordsTab" xml:space="preserve">
-    <value>Tutte le parole</value>
+    <value>Україна</value>
   </data>
   <data name="EditorBlueTab" xml:space="preserve">
-    <value>Cerchio blu</value>
+    <value>Україна</value>
   </data>
   <data name="EditorYellowTab" xml:space="preserve">
-    <value>Cerchio giallo</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRedTab" xml:space="preserve">
-    <value>Cerchio rosso</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRulesLabel" xml:space="preserve">
-    <value>Regole</value>
+    <value>Україна</value>
   </data>
   <data name="EditorAddRule" xml:space="preserve">
-    <value>Nuova regola</value>
+    <value>Україна</value>
   </data>
   <data name="EditorConditionLabel" xml:space="preserve">
-    <value>Condizione</value>
+    <value>Україна</value>
   </data>
   <data name="EditorWordsLabel" xml:space="preserve">
-    <value>Parole</value>
+    <value>Україна</value>
   </data>
   <data name="EditorWordCount" xml:space="preserve">
-    <value>{0} parole</value>
+    <value>Україна</value>
   </data>
   <data name="EditorTotalWords" xml:space="preserve">
-    <value>Parole totali: {0}</value>
+    <value>Україна</value>
   </data>
   <data name="EditorNoRules" xml:space="preserve">
-    <value>Non ci sono ancora regole per questo cerchio.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorNoWords" xml:space="preserve">
-    <value>Non ci sono ancora parole associate ad almeno una regola.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorUseInGames" xml:space="preserve">
-    <value>Usa nel gioco</value>
+    <value>Україна</value>
   </data>
   <data name="EditorEnabledAria" xml:space="preserve">
-    <value>Usa questa regola nelle partite</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCreateRuleTitle" xml:space="preserve">
-    <value>Crea regola</value>
+    <value>Україна</value>
   </data>
   <data name="EditorEditRuleTitle" xml:space="preserve">
-    <value>Modifica regola</value>
+    <value>Україна</value>
   </data>
   <data name="EditorEditAria" xml:space="preserve">
-    <value>Modifica regola</value>
+    <value>Україна</value>
   </data>
   <data name="EditorWordsHint" xml:space="preserve">
-    <value>Separa le parole solo con virgole, punti e virgola o spazi.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorInvalidSeparators" xml:space="preserve">
-    <value>Le parole possono essere separate solo da virgole, punti e virgola o spazi.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCreate" xml:space="preserve">
-    <value>Crea</value>
+    <value>Україна</value>
   </data>
   <data name="EditorSave" xml:space="preserve">
-    <value>Salva</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCancel" xml:space="preserve">
-    <value>Annulla</value>
+    <value>Україна</value>
   </data>
   <data name="EditorClose" xml:space="preserve">
-    <value>Chiudi</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteRuleTitle" xml:space="preserve">
-    <value>Eliminare la regola?</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteRulePrompt" xml:space="preserve">
-    <value>La regola verrà rimossa da questo cerchio. L'azione non può essere annullata.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDelete" xml:space="preserve">
-    <value>Elimina</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteAria" xml:space="preserve">
-    <value>Elimina regola</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRuleCreated" xml:space="preserve">
-    <value>Regola creata.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRuleUpdated" xml:space="preserve">
-    <value>Regola aggiornata.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRuleDeleted" xml:space="preserve">
-    <value>Regola eliminata.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRuleEnabled" xml:space="preserve">
-    <value>Regola abilitata per le partite.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRuleDisabled" xml:space="preserve">
-    <value>Regola disabilitata per le partite.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRuleDuplicate" xml:space="preserve">
-    <value>Esiste già una regola con questo testo per il cerchio selezionato.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRuleInvalidText" xml:space="preserve">
-    <value>Inserisci un testo della regola di massimo 300 caratteri.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRuleInvalidWords" xml:space="preserve">
-    <value>Inserisci almeno una parola valida. Sono consentiti solo virgole, punti e virgola e spazi come separatori.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRuleNotFound" xml:space="preserve">
-    <value>Regola non trovata.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorLastRuleCannotDelete" xml:space="preserve">
-    <value>Ogni cerchio deve mantenere almeno una regola. Creane un'altra prima di eliminare questa.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorLastEnabledRule" xml:space="preserve">
-    <value>Ogni cerchio deve mantenere almeno una regola non vuota abilitata per le partite.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRequestFailed" xml:space="preserve">
-    <value>Impossibile completare l'operazione. Riprova.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorAddWord" xml:space="preserve">
-    <value>Aggiungi parola</value>
+    <value>Україна</value>
   </data>
   <data name="EditorAddWordTitle" xml:space="preserve">
-    <value>Aggiungi parola</value>
+    <value>Україна</value>
   </data>
   <data name="EditorEditWordTitle" xml:space="preserve">
-    <value>Modifica parola</value>
+    <value>Україна</value>
   </data>
   <data name="EditorEditWordAria" xml:space="preserve">
-    <value>Modifica la parola {0}</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteWordAria" xml:space="preserve">
-    <value>Elimina la parola {0}</value>
+    <value>Україна</value>
   </data>
   <data name="EditorWordLabel" xml:space="preserve">
-    <value>Parola</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRingLabel" xml:space="preserve">
-    <value>Cerchio</value>
+    <value>Україна</value>
   </data>
   <data name="EditorLoadingRules" xml:space="preserve">
-    <value>Caricamento regole…</value>
+    <value>Україна</value>
   </data>
   <data name="EditorWordMembershipHint" xml:space="preserve">
-    <value>Seleziona un cerchio e scegli le regole che devono contenere questa parola. Le modifiche su pagine e cerchi diversi vengono salvate insieme.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorWordMembershipSaved" xml:space="preserve">
-    <value>Associazioni della parola aggiornate.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorWordDeleted" xml:space="preserve">
-    <value>Parola rimossa da tutte le regole.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorWordInvalid" xml:space="preserve">
-    <value>Inserisci una sola parola valida senza spazi o separatori.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteWordTitle" xml:space="preserve">
-    <value>Eliminare la parola?</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteWordPrompt" xml:space="preserve">
-    <value>La parola verrà rimossa da tutte le regole dei tre cerchi. L'azione non può essere annullata.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorExportCsv" xml:space="preserve">
-    <value>Esporta CSV</value>
+    <value>Україна</value>
   </data>
   <data name="EditorImportCsv" xml:space="preserve">
-    <value>Importa CSV</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvFileRequired" xml:space="preserve">
-    <value>Seleziona un file CSV da importare.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvFileTooLarge" xml:space="preserve">
-    <value>Il file CSV è troppo grande. Dimensione massima: 5 MB.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvInvalid" xml:space="preserve">
-    <value>File CSV non valido. Usa il formato esportato Ring, Rule, Enabled, Words.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorImportCompleted" xml:space="preserve">
-    <value>Unione CSV completata.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorImportSummaryTitle" xml:space="preserve">
-    <value>Riepilogo importazione</value>
+    <value>Україна</value>
   </data>
   <data name="EditorImportNothingAdded" xml:space="preserve">
-    <value>Non è stato aggiunto nulla. Tutte le regole e le parole importate esistono già.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorImportWordsAdded" xml:space="preserve">
-    <value>Parole aggiunte alle regole:</value>
+    <value>Україна</value>
   </data>
   <data name="EditorImportRulesCreated" xml:space="preserve">
-    <value>Regole create:</value>
+    <value>Україна</value>
   </data>
   <data name="EditorPagination" xml:space="preserve">
-    <value>Pagine delle parole</value>
+    <value>Україна</value>
   </data>
   <data name="EditorPreviousPage" xml:space="preserve">
-    <value>Precedente</value>
+    <value>Україна</value>
   </data>
   <data name="EditorNextPage" xml:space="preserve">
-    <value>Successiva</value>
+    <value>Україна</value>
   </data>
   <data name="EditorPageStatus" xml:space="preserve">
-    <value>Pagina {0} di {1}</value>
+    <value>Україна</value>
   </data>
   <data name="EditorMembershipIncludedOnly" xml:space="preserve">
-    <value>Mostra solo le regole che contengono questa parola</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteAllWordsAria" xml:space="preserve">
-    <value>Elimina tutte le parole</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteAllWordsTitle" xml:space="preserve">
-    <value>Eliminare tutte le parole?</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteAllWordsPrompt" xml:space="preserve">
-    <value>Tutte le parole saranno rimosse da ogni regola dei tre anelli. Le regole rimarranno. Questa azione non può essere annullata.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorAllWordsDeleted" xml:space="preserve">
-    <value>Tutte le parole sono state rimosse da ogni regola.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteAllRulesAria" xml:space="preserve">
-    <value>Elimina tutte le regole di questo anello</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteAllRulesTitle" xml:space="preserve">
-    <value>Eliminare tutte le regole dell’anello?</value>
+    <value>Україна</value>
   </data>
   <data name="EditorDeleteAllRulesPrompt" xml:space="preserve">
-    <value>Tutte le regole di questo anello saranno eliminate. Questa azione non può essere annullata.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorAllRulesDeleted" xml:space="preserve">
-    <value>Tutte le regole dell’anello sono state eliminate.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorImportErrorTitle" xml:space="preserve">
-    <value>Errore di importazione CSV</value>
+    <value>Україна</value>
   </data>
   <data name="EditorImportErrorLine" xml:space="preserve">
-    <value>Riga {0}</value>
+    <value>Україна</value>
   </data>
   <data name="EditorImportErrorFile" xml:space="preserve">
-    <value>File CSV</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvErrorEmptyFile" xml:space="preserve">
-    <value>Il file è vuoto o non contiene dati.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvErrorInvalidHeader" xml:space="preserve">
-    <value>L'intestazione non è valida. La prima riga deve contenere Ring, Rule, Enabled, Words.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvErrorTooManyRows" xml:space="preserve">
-    <value>Il CSV contiene più di 10.000 righe di dati non vuote.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvErrorMalformedRow" xml:space="preserve">
-    <value>La riga ha una sintassi CSV non valida, ad esempio virgolette non chiuse.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvErrorInvalidColumnCount" xml:space="preserve">
-    <value>Sono richieste esattamente 4 colonne, ma questa riga ne contiene {0}.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvErrorInvalidRing" xml:space="preserve">
-    <value>Valore Ring non valido “{0}”. Sono ammessi solo blue, yellow o red.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvErrorInvalidRuleText" xml:space="preserve">
-    <value>La colonna Rule è vuota o supera 300 caratteri.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvErrorInvalidEnabled" xml:space="preserve">
-    <value>Valore Enabled non valido “{0}”. Usa true, false, 1 o 0.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvErrorInvalidWords" xml:space="preserve">
-    <value>La colonna Words contiene una parola o un separatore non valido. Le parole importate con meno di 3 caratteri vengono ignorate; le altre devono contenere 3–120 caratteri.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorCsvErrorUnplayable" xml:space="preserve">
-    <value>Dopo l'importazione, “{0}” non avrebbe alcuna regola non vuota abilitata per il gioco.</value>
+    <value>Україна</value>
   </data>
   <data name="EditorBrandEyebrow" xml:space="preserve">
-    <value>BAD WOLF / EDITOR MINIGIOCO</value>
+    <value>Україна</value>
   </data>
   <data name="EditorBrandMark" xml:space="preserve">
-    <value>PAROLE / ANELLI</value>
+    <value>Україна</value>
   </data>
   <data name="EditorRingStats" xml:space="preserve">
-    <value>Regole: {0} · Attive: {1}</value>
+    <value>Україна</value>
   </data>
 </root>

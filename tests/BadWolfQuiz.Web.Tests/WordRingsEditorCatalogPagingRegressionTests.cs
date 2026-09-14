@@ -13,12 +13,15 @@ public sealed class WordRingsEditorCatalogPagingRegressionTests
         Assert.Contains("rulePageSize = 25", script, StringComparison.Ordinal);
         Assert.Contains("word-rings-editor-word-usage-total", script, StringComparison.Ordinal);
         Assert.Contains("usage.prepend(badge)", script, StringComparison.Ordinal);
-        Assert.Contains("makePager(ring, 'top')", script, StringComparison.Ordinal);
-        Assert.Contains("makePager(ring, 'bottom')", script, StringComparison.Ordinal);
+        Assert.Contains("makePager('top'", script, StringComparison.Ordinal);
+        Assert.Contains("makePager('bottom'", script, StringComparison.Ordinal);
         Assert.Contains("word-rings-editor-word-pager-top", script, StringComparison.Ordinal);
         Assert.Contains("ringPages", script, StringComparison.Ordinal);
-        Assert.Contains("card.hidden = index < start || index >= end", script, StringComparison.Ordinal);
-        Assert.Contains("word-rings-editor-catalog-paging.js?v=1", assets, StringComparison.Ordinal);
+        Assert.Contains("renderRingRules", script, StringComparison.Ordinal);
+        Assert.Contains("data-word-rings-catalog-search", script, StringComparison.Ordinal);
+        Assert.Contains("sort === 'usage'", script, StringComparison.Ordinal);
+        Assert.Contains("wordCatalogUrl = '/Admin/WordRingsWordCatalog'", script, StringComparison.Ordinal);
+        Assert.Contains("word-rings-editor-catalog-paging.js?v=2", assets, StringComparison.Ordinal);
     }
 
     private static string ReadWebFile(params string[] parts)

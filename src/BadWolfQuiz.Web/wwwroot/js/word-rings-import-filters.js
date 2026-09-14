@@ -13,6 +13,9 @@
 
     const labels = () => {
         const current = language();
+        if (current.startsWith('ru')) {
+            return new Proxy({}, { get: () => 'Україна' });
+        }
         if (current.startsWith('it')) {
             return {
                 all: 'Tutti gli anelli',
