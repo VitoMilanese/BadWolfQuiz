@@ -1,0 +1,448 @@
+.word-rings-room-code {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 34px;
+    padding: 0 9px 0 11px;
+    border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--bg) 58%, transparent);
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.word-rings-room-code strong {
+    color: var(--text);
+    letter-spacing: .09em;
+}
+
+.word-rings-room-link {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
+    border-radius: 7px;
+    background: color-mix(in srgb, var(--panel-2) 88%, transparent);
+    color: var(--text);
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.word-rings-room-link:hover,
+.word-rings-room-link.is-copied {
+    border-color: color-mix(in srgb, #33c46f 68%, var(--line));
+    background: color-mix(in srgb, #33c46f 20%, var(--panel-2));
+    transform: translateY(-1px);
+}
+
+.word-rings-players {
+    padding: 14px;
+}
+
+.word-rings-players-heading {
+    margin-bottom: 10px;
+}
+
+.word-rings-players-heading h2 {
+    margin: 0;
+    font-size: clamp(1rem, 1.4vw, 1.3rem);
+}
+
+.word-rings-player-list {
+    display: grid;
+    gap: 8px;
+}
+
+.word-rings-player-card {
+    display: grid;
+    gap: 7px;
+    padding: 10px 11px;
+    border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-2) 88%, transparent);
+    box-shadow: 0 7px 18px rgb(0 0 0 / 10%);
+    transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.word-rings-player-card.is-current {
+    border-color: color-mix(in srgb, var(--gold) 78%, var(--line));
+    background: color-mix(in srgb, var(--gold) 12%, var(--panel-2));
+    box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--gold) 20%, transparent),
+        0 10px 26px rgb(0 0 0 / 16%);
+    transform: translateX(3px);
+}
+
+.word-rings-player-card.is-self .word-rings-player-main strong {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.word-rings-player-main,
+.word-rings-player-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.word-rings-player-main strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.word-rings-player-badge {
+    flex: 0 0 auto;
+    color: var(--gold);
+    font-size: .82rem;
+}
+
+.word-rings-player-meta {
+    color: var(--muted);
+    font-size: .74rem;
+    font-weight: 800;
+}
+
+.word-rings-page.is-not-own-turn .word-rings-word-list .word-rings-word {
+    opacity: .46;
+    cursor: not-allowed;
+}
+
+.word-rings-page.is-room-waiting .word-rings-word-list::after {
+    content: "…";
+    display: block;
+    padding: 14px;
+    color: var(--muted);
+    font-size: 1.4rem;
+    font-weight: 900;
+    text-align: center;
+}
+
+.word-rings-word.is-partial {
+    --word-token-fill: color-mix(in srgb, #e0b43c 34%, var(--panel-2));
+    box-shadow:
+        inset 0 0 0 1px rgb(224 180 60 / 32%),
+        0 0 0 2px rgb(224 180 60 / 60%),
+        0 7px 18px rgb(0 0 0 / 16%);
+}
+
+.word-rings-word.is-room-server-placement:disabled {
+    opacity: 1;
+    cursor: default;
+}
+
+.word-rings-word.is-room-pending {
+    box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--gold) 62%, transparent),
+        0 9px 22px rgb(0 0 0 / 20%);
+}
+
+.word-rings-status.is-partial {
+    color: color-mix(in srgb, var(--gold) 84%, var(--text));
+}
+
+.word-rings-room-dialog {
+    width: min(94vw, 560px);
+    max-width: 560px;
+    max-height: min(88dvh, 760px);
+    padding: 0;
+    overflow: auto;
+}
+
+.word-rings-room-dialog > form {
+    display: grid;
+    gap: 14px;
+    padding: 24px;
+}
+
+.word-rings-room-dialog h2 {
+    margin: 0;
+}
+
+.word-rings-room-dialog label:not(.minigames-checkbox-row) {
+    display: grid;
+    gap: 7px;
+    color: var(--muted);
+    font-size: .82rem;
+    font-weight: 850;
+}
+
+.word-rings-room-dialog input[type="text"],
+.word-rings-room-dialog input[type="number"] {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 11px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-weight: 800;
+}
+
+.word-rings-room-checkbox {
+    align-items: flex-start;
+}
+
+.word-rings-room-checkbox small {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    line-height: 1.35;
+}
+
+.word-rings-room-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    margin-top: 4px;
+}
+
+.word-rings-room-form-error {
+    min-height: 20px;
+    margin: 0;
+    color: #ff7b84;
+    font-size: .82rem;
+    font-weight: 800;
+}
+
+.word-rings-room-join-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 24px;
+    color: var(--muted);
+    font-size: .74rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.word-rings-room-join-divider::before,
+.word-rings-room-join-divider::after {
+    content: "";
+    height: 1px;
+    flex: 1 1 auto;
+    background: var(--line);
+}
+
+.word-rings-result-dialog {
+    width: min(92vw, 560px);
+    max-width: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    overflow: visible;
+}
+
+.word-rings-result-dialog::backdrop {
+    background: rgb(1 12 26 / 72%);
+    backdrop-filter: blur(7px) saturate(.85);
+    animation: word-rings-backdrop-in 280ms ease both;
+}
+
+.word-rings-result-card {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    min-height: 310px;
+    padding: 42px 36px 34px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    border-radius: 28px;
+    background:
+        radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--result-accent) 22%, transparent), transparent 55%),
+        linear-gradient(155deg, color-mix(in srgb, var(--panel-2) 98%, transparent), color-mix(in srgb, var(--panel) 96%, #071524));
+    box-shadow:
+        0 28px 100px rgb(0 0 0 / 52%),
+        0 0 70px color-mix(in srgb, var(--result-accent) 22%, transparent),
+        inset 0 1px 0 rgb(255 255 255 / 7%);
+    text-align: center;
+    --result-accent: #33c46f;
+}
+
+.word-rings-result-dialog.is-loss .word-rings-result-card {
+    --result-accent: #e85d5d;
+}
+
+.word-rings-result-card.is-animating {
+    animation: word-rings-result-card-in 620ms cubic-bezier(.2, .9, .24, 1.18) both;
+}
+
+.word-rings-result-icon {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 94px;
+    height: 94px;
+    border: 2px solid color-mix(in srgb, var(--result-accent) 78%, white);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--result-accent) 16%, var(--panel-2));
+    color: color-mix(in srgb, var(--result-accent) 76%, white);
+    box-shadow:
+        0 0 0 9px color-mix(in srgb, var(--result-accent) 8%, transparent),
+        0 0 40px color-mix(in srgb, var(--result-accent) 42%, transparent);
+    font-size: 3rem;
+    font-weight: 1000;
+    line-height: 1;
+    animation: word-rings-result-icon-in 760ms 120ms cubic-bezier(.12, .84, .22, 1.35) both;
+}
+
+.word-rings-result-card h2 {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(2rem, 5vw, 3.1rem);
+    line-height: 1;
+    text-shadow: 0 0 26px color-mix(in srgb, var(--result-accent) 25%, transparent);
+}
+
+.word-rings-result-card p {
+    position: relative;
+    z-index: 2;
+    max-width: 430px;
+    margin: 0;
+    color: color-mix(in srgb, var(--text) 86%, var(--muted));
+    font-size: 1.02rem;
+    font-weight: 760;
+    line-height: 1.5;
+}
+
+.word-rings-result-card .button {
+    position: relative;
+    z-index: 2;
+    min-width: 140px;
+    margin-top: 4px;
+}
+
+.word-rings-result-burst {
+    position: absolute;
+    left: 50%;
+    top: 44%;
+    width: 1px;
+    height: 1px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.word-rings-result-burst::before,
+.word-rings-result-burst::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 250px;
+    height: 250px;
+    border: 1px solid color-mix(in srgb, var(--result-accent) 34%, transparent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(.4);
+    animation: word-rings-result-ripple 1.15s 130ms ease-out both;
+}
+
+.word-rings-result-burst::after {
+    animation-delay: 300ms;
+}
+
+.word-rings-result-particle {
+    --angle: calc((360deg / var(--particle-count)) * var(--particle-index));
+    position: absolute;
+    left: -4px;
+    top: -4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--result-accent) 82%, white);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--result-accent) 66%, transparent);
+    opacity: 0;
+    transform: rotate(var(--angle)) translateY(0) scale(.2);
+    animation: word-rings-result-particle 900ms var(--particle-delay) cubic-bezier(.16, .84, .22, 1) both;
+}
+
+@keyframes word-rings-backdrop-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes word-rings-result-card-in {
+    0% { opacity: 0; transform: translateY(34px) scale(.78) rotateX(9deg); filter: blur(8px); }
+    62% { opacity: 1; transform: translateY(-5px) scale(1.025) rotateX(0); filter: blur(0); }
+    100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes word-rings-result-icon-in {
+    0% { opacity: 0; transform: scale(.2) rotate(-35deg); }
+    65% { opacity: 1; transform: scale(1.14) rotate(7deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+@keyframes word-rings-result-ripple {
+    0% { opacity: .7; transform: translate(-50%, -50%) scale(.28); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.55); }
+}
+
+@keyframes word-rings-result-particle {
+    0% { opacity: 0; transform: rotate(var(--angle)) translateY(0) scale(.15); }
+    18% { opacity: 1; }
+    75% { opacity: .92; }
+    100% { opacity: 0; transform: rotate(var(--angle)) translateY(-165px) scale(1); }
+}
+
+@media (max-width: 1050px) {
+    .word-rings-layout.has-players {
+        grid-template-columns: clamp(170px, 21vw, 230px) minmax(0, 1fr) clamp(180px, 22vw, 235px);
+        gap: 7px;
+    }
+
+    .word-rings-players,
+    .word-rings-bank {
+        padding: 9px;
+    }
+}
+
+@media (max-width: 760px) {
+    .word-rings-layout.has-players {
+        grid-template-columns: 140px minmax(0, 1fr) 150px;
+    }
+
+    .word-rings-player-card {
+        padding: 8px;
+    }
+
+    .word-rings-player-meta {
+        display: grid;
+        gap: 3px;
+    }
+
+    .word-rings-result-card {
+        min-height: 280px;
+        padding: 34px 22px 28px;
+        border-radius: 22px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .word-rings-result-dialog::backdrop,
+    .word-rings-result-card.is-animating,
+    .word-rings-result-icon,
+    .word-rings-result-burst::before,
+    .word-rings-result-burst::after,
+    .word-rings-result-particle {
+        animation-duration: 1ms !important;
+        animation-delay: 0ms !important;
+    }
+}
