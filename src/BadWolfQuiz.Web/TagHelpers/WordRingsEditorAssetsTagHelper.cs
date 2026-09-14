@@ -21,7 +21,7 @@ public sealed class WordRingsEditorAssetsTagHelper : TagHelper
 
         output.PostContent.AppendHtml(
             "<link rel=\"stylesheet\" href=\"/css/word-rings-words.css?v=1\" />" +
-            "<link rel=\"stylesheet\" href=\"/css/word-rings-editor-followup.css?v=2\" />" +
-            "<script defer src=\"/js/word-rings-editor-followup.js?v=2\"></script>");
+            "<link rel=\"stylesheet\" href=\"/css/word-rings-editor-followup.css?v=3\" />" +
+            "<script defer src=\"/js/word-rings-editor-followup.js?v=3\"></script>");
     }
 }

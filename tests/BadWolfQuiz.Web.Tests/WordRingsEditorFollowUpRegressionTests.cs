@@ -28,14 +28,20 @@ public sealed class WordRingsEditorFollowUpRegressionTests
         Assert.Contains("response.clone().json()", script);
         Assert.Contains("data-word-rings-import-detail", script);
         Assert.Contains("word-rings-editor-import-details-dialog", script);
+        Assert.Contains("importDetailPageSize = 5", script);
+        Assert.Contains("word-rings-editor-import-detail-eye", script);
+        Assert.Contains("data-word-rings-import-details-page=\"last\"", script);
+        Assert.Contains("changeImportDetailsPage", script);
         Assert.Contains("word-rings-editor-word-pager-top", styles);
         Assert.Contains("text-transform: uppercase", styles);
         Assert.Contains("[data-word-rings-membership-word]", styles);
         Assert.Contains("[data-word-rings-delete-word-target]", styles);
         Assert.Contains("word-rings-editor-import-detail-actions", styles);
+        Assert.Contains("word-rings-editor-import-detail-eye", styles);
+        Assert.Contains("word-rings-editor-import-details-pager", styles);
         Assert.Contains("word-rings-editor-import-rule-detail-blue", styles);
-        Assert.Contains("word-rings-editor-followup.css?v=2", assets);
-        Assert.Contains("word-rings-editor-followup.js?v=2", assets);
+        Assert.Contains("word-rings-editor-followup.css?v=3", assets);
+        Assert.Contains("word-rings-editor-followup.js?v=3", assets);
     }
 
     [Fact]

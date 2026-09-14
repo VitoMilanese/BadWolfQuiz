@@ -3,8 +3,11 @@
 
     const rootSelector = '[data-word-rings-editor-shell]';
     const minimumWordLength = 3;
+    const importDetailPageSize = 5;
     const originalFetch = window.fetch.bind(window);
     let lastImportDetails = emptyImportDetails();
+    let activeImportDetailType = '';
+    let activeImportDetailPage = 1;
 
     const membershipInput = () =>
         document.querySelector('[data-word-rings-membership-word]');
@@ -46,7 +49,7 @@
                 newWords: 'Parole nuove',
                 newRules: 'Regole nuove',
                 updatedRules: 'Regole esistenti aggiornate',
-                show: 'Mostra',
+                view: 'Visualizza',
                 newWordsTitle: 'Nuove parole aggiunte',
                 newRulesTitle: 'Nuove regole aggiunte',
                 updatedRulesTitle: 'Regole esistenti con nuove parole',
@@ -57,7 +60,13 @@
                 empty: 'Nessun elemento.',
                 blue: 'Anello blu',
                 yellow: 'Anello giallo',
-                red: 'Anello rosso'
+                red: 'Anello rosso',
+                page: 'Pagina',
+                of: 'di',
+                firstPage: 'Prima pagina',
+                previousPage: 'Pagina precedente',
+                nextPage: 'Pagina successiva',
+                lastPage: 'Ultima pagina'
             };
         }
         if (current.startsWith('en')) {
@@ -65,7 +74,7 @@
                 newWords: 'New words',
                 newRules: 'New rules',
                 updatedRules: 'Existing rules updated',
-                show: 'Show',
+                view: 'View',
                 newWordsTitle: 'New words added',
                 newRulesTitle: 'New rules added',
                 updatedRulesTitle: 'Existing rules with new words',
@@ -76,14 +85,20 @@
                 empty: 'No items.',
                 blue: 'Blue ring',
                 yellow: 'Yellow ring',
-                red: 'Red ring'
+                red: 'Red ring',
+                page: 'Page',
+                of: 'of',
+                firstPage: 'First page',
+                previousPage: 'Previous page',
+                nextPage: 'Next page',
+                lastPage: 'Last page'
             };
         }
         return {
             newWords: 'Нових слів',
             newRules: 'Нових правил',
             updatedRules: 'Старих правил доповнено',
-            show: 'Показати',
+            view: 'Переглянути',
             newWordsTitle: 'Нові слова, додані під час імпорту',
             newRulesTitle: 'Нові правила, додані під час імпорту',
             updatedRulesTitle: 'Старі правила, в які додано нові слова',
@@ -94,7 +109,13 @@
             empty: 'Немає елементів.',
             blue: 'Синє кільце',
             yellow: 'Жовте кільце',
-            red: 'Червоне кільце'
+            red: 'Червоне кільце',
+            page: 'Сторінка',
+            of: 'з',
+            firstPage: 'Перша сторінка',
+            previousPage: 'Попередня сторінка',
+            nextPage: 'Наступна сторінка',
+            lastPage: 'Остання сторінка'
         };
     };
 
@@ -300,6 +321,12 @@
 
     const upper = value => String(value ?? '').toLocaleUpperCase(document.documentElement.lang || 'uk');
 
+    const eyeIcon = `
+        <svg class="word-rings-editor-import-detail-eye" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M2.5 12s3.6-6 9.5-6 9.5 6 9.5 6-3.6 6-9.5 6-9.5-6-9.5-6Z"></path>
+            <circle cx="12" cy="12" r="2.6"></circle>
+        </svg>`;
+
     const ensureDetailDialog = () => {
         let dialog = document.querySelector('[data-word-rings-import-details-dialog]');
         if (dialog instanceof HTMLDialogElement) return dialog;
@@ -315,6 +342,13 @@
                     <button class="dialog-close" type="button" data-word-rings-import-details-close aria-label="${text.close}">×</button>
                 </div>
                 <div class="word-rings-editor-import-details-body" data-word-rings-import-details-body></div>
+                <div class="word-rings-editor-import-details-pager" data-word-rings-import-details-pager hidden>
+                    <button class="button button-secondary word-rings-editor-import-details-page-button" type="button" data-word-rings-import-details-page="first" aria-label="${text.firstPage}" title="${text.firstPage}">«</button>
+                    <button class="button button-secondary word-rings-editor-import-details-page-button" type="button" data-word-rings-import-details-page="previous" aria-label="${text.previousPage}" title="${text.previousPage}">‹</button>
+                    <span class="word-rings-editor-import-details-page-status" data-word-rings-import-details-page-status></span>
+                    <button class="button button-secondary word-rings-editor-import-details-page-button" type="button" data-word-rings-import-details-page="next" aria-label="${text.nextPage}" title="${text.nextPage}">›</button>
+                    <button class="button button-secondary word-rings-editor-import-details-page-button" type="button" data-word-rings-import-details-page="last" aria-label="${text.lastPage}" title="${text.lastPage}">»</button>
+                </div>
                 <div class="form-actions dialog-actions">
                     <button class="button button-primary" type="button" data-word-rings-import-details-close>${text.close}</button>
                 </div>
@@ -353,75 +387,128 @@
             wrapper.className = 'word-rings-editor-import-detail-action';
             wrapper.innerHTML = `
                 <span>${card.label}: <b>${card.count}</b></span>
-                <button class="button button-secondary" type="button" data-word-rings-import-detail="${card.type}" ${card.count === 0 ? 'disabled' : ''}>
-                    ${text.show}
+                <button class="button button-secondary word-rings-editor-import-detail-view" type="button"
+                        data-word-rings-import-detail="${card.type}"
+                        aria-label="${text.view}"
+                        title="${text.view}"
+                        ${card.count === 0 ? 'disabled' : ''}>
+                    ${eyeIcon}
                 </button>`;
             return wrapper;
         }));
     };
 
+    const renderImportDetailItem = (type, item, text) => {
+        if (type === 'newWords') {
+            const chip = document.createElement('span');
+            chip.textContent = upper(item);
+            return chip;
+        }
+
+        const card = document.createElement('article');
+        card.className = `word-rings-editor-import-rule-detail word-rings-editor-import-rule-detail-${item.ring}`;
+
+        const header = document.createElement('div');
+        const ring = document.createElement('span');
+        ring.textContent = ringLabel(item.ring);
+        const state = document.createElement('span');
+        state.textContent = item.enabled ? text.active : text.inactive;
+        header.append(ring, state);
+
+        const heading = document.createElement('strong');
+        heading.textContent = item.text ?? '';
+        card.append(header, heading);
+
+        if (type === 'updatedExistingRules') {
+            const added = document.createElement('p');
+            added.innerHTML = `<span>${text.addedWords}: <b>${item.wordsAdded?.length ?? 0}</b></span>`;
+            const words = document.createElement('small');
+            words.textContent = (item.wordsAdded ?? []).map(upper).join(', ');
+            added.appendChild(words);
+            card.appendChild(added);
+        }
+
+        return card;
+    };
+
+    const renderImportDetailsPage = () => {
+        const dialog = ensureDetailDialog();
+        const body = dialog.querySelector('[data-word-rings-import-details-body]');
+        const pager = dialog.querySelector('[data-word-rings-import-details-pager]');
+        const status = dialog.querySelector('[data-word-rings-import-details-page-status]');
+        if (!(body instanceof HTMLElement) || !(pager instanceof HTMLElement) || !(status instanceof HTMLElement)) return;
+
+        const text = labels();
+        const items = Array.isArray(lastImportDetails[activeImportDetailType])
+            ? lastImportDetails[activeImportDetailType]
+            : [];
+        const totalPages = Math.max(1, Math.ceil(items.length / importDetailPageSize));
+        activeImportDetailPage = Math.min(Math.max(activeImportDetailPage, 1), totalPages);
+        const start = (activeImportDetailPage - 1) * importDetailPageSize;
+        const pageItems = items.slice(start, start + importDetailPageSize);
+
+        body.replaceChildren();
+        if (pageItems.length === 0) {
+            const empty = document.createElement('p');
+            empty.className = 'muted';
+            empty.textContent = text.empty;
+            body.appendChild(empty);
+        } else {
+            const list = document.createElement('div');
+            list.className = activeImportDetailType === 'newWords'
+                ? 'word-rings-editor-import-word-list'
+                : 'word-rings-editor-import-rule-list';
+            pageItems.forEach(item => list.appendChild(
+                renderImportDetailItem(activeImportDetailType, item, text)));
+            body.appendChild(list);
+        }
+
+        const first = pager.querySelector('[data-word-rings-import-details-page="first"]');
+        const previous = pager.querySelector('[data-word-rings-import-details-page="previous"]');
+        const next = pager.querySelector('[data-word-rings-import-details-page="next"]');
+        const last = pager.querySelector('[data-word-rings-import-details-page="last"]');
+        const isFirst = activeImportDetailPage <= 1;
+        const isLast = activeImportDetailPage >= totalPages;
+        if (first instanceof HTMLButtonElement) first.disabled = isFirst;
+        if (previous instanceof HTMLButtonElement) previous.disabled = isFirst;
+        if (next instanceof HTMLButtonElement) next.disabled = isLast;
+        if (last instanceof HTMLButtonElement) last.disabled = isLast;
+        status.textContent = `${text.page} ${activeImportDetailPage} ${text.of} ${totalPages}`;
+        pager.hidden = items.length <= importDetailPageSize;
+    };
+
     const openImportDetails = type => {
         const dialog = ensureDetailDialog();
         const title = dialog.querySelector('[data-word-rings-import-details-title]');
-        const body = dialog.querySelector('[data-word-rings-import-details-body]');
-        if (!(title instanceof HTMLElement) || !(body instanceof HTMLElement)) return;
+        if (!(title instanceof HTMLElement)) return;
 
         const text = labels();
-        const items = Array.isArray(lastImportDetails[type]) ? lastImportDetails[type] : [];
+        activeImportDetailType = type;
+        activeImportDetailPage = 1;
         title.textContent = type === 'newWords'
             ? text.newWordsTitle
             : type === 'newRules'
                 ? text.newRulesTitle
                 : text.updatedRulesTitle;
-        body.replaceChildren();
-
-        if (items.length === 0) {
-            const empty = document.createElement('p');
-            empty.className = 'muted';
-            empty.textContent = text.empty;
-            body.appendChild(empty);
-        } else if (type === 'newWords') {
-            const list = document.createElement('div');
-            list.className = 'word-rings-editor-import-word-list';
-            items.forEach(word => {
-                const chip = document.createElement('span');
-                chip.textContent = upper(word);
-                list.appendChild(chip);
-            });
-            body.appendChild(list);
-        } else {
-            const list = document.createElement('div');
-            list.className = 'word-rings-editor-import-rule-list';
-            items.forEach(rule => {
-                const card = document.createElement('article');
-                card.className = `word-rings-editor-import-rule-detail word-rings-editor-import-rule-detail-${rule.ring}`;
-
-                const header = document.createElement('div');
-                const ring = document.createElement('span');
-                ring.textContent = ringLabel(rule.ring);
-                const state = document.createElement('span');
-                state.textContent = rule.enabled ? text.active : text.inactive;
-                header.append(ring, state);
-
-                const heading = document.createElement('strong');
-                heading.textContent = rule.text ?? '';
-                card.append(header, heading);
-
-                if (type === 'updatedExistingRules') {
-                    const added = document.createElement('p');
-                    added.innerHTML = `<span>${text.addedWords}: <b>${rule.wordsAdded?.length ?? 0}</b></span>`;
-                    const words = document.createElement('small');
-                    words.textContent = (rule.wordsAdded ?? []).map(upper).join(', ');
-                    added.appendChild(words);
-                    card.appendChild(added);
-                }
-
-                list.appendChild(card);
-            });
-            body.appendChild(list);
-        }
+        renderImportDetailsPage();
 
         if (!dialog.open) dialog.showModal();
+    };
+
+    const changeImportDetailsPage = action => {
+        if (!activeImportDetailType) return;
+        const items = Array.isArray(lastImportDetails[activeImportDetailType])
+            ? lastImportDetails[activeImportDetailType]
+            : [];
+        const totalPages = Math.max(1, Math.ceil(items.length / importDetailPageSize));
+
+        if (action === 'first') activeImportDetailPage = 1;
+        else if (action === 'previous') activeImportDetailPage = Math.max(1, activeImportDetailPage - 1);
+        else if (action === 'next') activeImportDetailPage = Math.min(totalPages, activeImportDetailPage + 1);
+        else if (action === 'last') activeImportDetailPage = totalPages;
+        else return;
+
+        renderImportDetailsPage();
     };
 
     window.fetch = async (input, init) => {
@@ -457,6 +544,12 @@
     }
 
     document.addEventListener('click', event => {
+        const pageButton = event.target.closest('[data-word-rings-import-details-page]');
+        if (pageButton instanceof HTMLButtonElement) {
+            changeImportDetailsPage(pageButton.dataset.wordRingsImportDetailsPage ?? '');
+            return;
+        }
+
         const detailButton = event.target.closest('[data-word-rings-import-detail]');
         if (detailButton instanceof HTMLButtonElement) {
             openImportDetails(detailButton.dataset.wordRingsImportDetail ?? '');
