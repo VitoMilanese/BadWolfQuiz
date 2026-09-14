@@ -9,8 +9,10 @@ public sealed class WordRingsEditorFollowUpRegressionTests
     public void Editor_defaults_to_all_words_and_enhances_word_catalog_ui()
     {
         var model = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml.cs");
+        var page = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml");
         var assets = ReadWebFile("TagHelpers", "WordRingsEditorAssetsTagHelper.cs");
         var script = ReadWebFile("wwwroot", "js", "word-rings-editor-followup.js");
+        var editorScript = ReadWebFile("wwwroot", "js", "word-rings-editor.js");
         var styles = ReadWebFile("wwwroot", "css", "word-rings-editor-followup.css");
 
         Assert.Contains("string.IsNullOrWhiteSpace(ring)", model);
@@ -43,6 +45,13 @@ public sealed class WordRingsEditorFollowUpRegressionTests
         Assert.Contains("word-rings-editor-import-rule-detail-blue", styles);
         Assert.Contains("word-rings-editor-followup.css?v=3", assets);
         Assert.Contains("word-rings-editor-followup.js?v=5", assets);
+        Assert.Contains("data-word-rings-import-error-dialog", page);
+        Assert.Contains("data-word-rings-import-error-location", page);
+        Assert.Contains("data-word-rings-import-error-message", page);
+        Assert.Contains("showImportError", editorScript);
+        Assert.Contains("result.error", editorScript);
+        Assert.Contains("CsvImportErrorLocation", model);
+        Assert.Contains("CsvImportErrorMessage", model);
     }
 
     [Fact]
@@ -122,6 +131,57 @@ public sealed class WordRingsEditorFollowUpRegressionTests
             Assert.True(store.GetRules(WordRingColor.Blue)
                 .Single(rule => rule.Id == originalBlue.Id)
                 .IsEnabled);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task Csv_import_reports_the_exact_physical_line_and_specific_error()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-csv-errors-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            var store = WordRingsRuleStore.Get(new TestWebHostEnvironment(root));
+            var invalidRingCsv =
+                "Ring,Rule,Enabled,Words\n" +
+                "\n" +
+                "\"blue\",\"Коректне правило\",\"true\",\"слово\"\n" +
+                "\"purple\",\"Погане правило\",\"true\",\"слово\"\n";
+
+            var invalidRing = await store.ImportCsvAsync(invalidRingCsv, CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.InvalidCsv, invalidRing.Result);
+            Assert.NotNull(invalidRing.Error);
+            Assert.Equal(4, invalidRing.Error.LineNumber);
+            Assert.Equal(WordRingsCsvImportErrorKind.InvalidRing, invalidRing.Error.Kind);
+            Assert.Equal("purple", invalidRing.Error.Value);
+
+            var invalidEnabledCsv =
+                "Ring,Rule,Enabled,Words\n" +
+                "\"blue\",\"Погане Enabled\",\"maybe\",\"слово\"\n";
+            var invalidEnabled = await store.ImportCsvAsync(invalidEnabledCsv, CancellationToken.None);
+            Assert.Equal(2, invalidEnabled.Error?.LineNumber);
+            Assert.Equal(WordRingsCsvImportErrorKind.InvalidEnabled, invalidEnabled.Error?.Kind);
+            Assert.Equal("maybe", invalidEnabled.Error?.Value);
+
+            var invalidWordsCsv =
+                "Ring,Rule,Enabled,Words\n" +
+                "\"blue\",\"Закоротке слово\",\"true\",\"ab\"\n";
+            var invalidWords = await store.ImportCsvAsync(invalidWordsCsv, CancellationToken.None);
+            Assert.Equal(2, invalidWords.Error?.LineNumber);
+            Assert.Equal(WordRingsCsvImportErrorKind.InvalidWords, invalidWords.Error?.Kind);
+
+            var malformedCsv =
+                "Ring,Rule,Enabled,Words\n" +
+                "\n" +
+                "\"blue\",\"Незакриті лапки,\"true\",\"слово\"\n";
+            var malformed = await store.ImportCsvAsync(malformedCsv, CancellationToken.None);
+            Assert.Equal(3, malformed.Error?.LineNumber);
+            Assert.Equal(WordRingsCsvImportErrorKind.MalformedRow, malformed.Error?.Kind);
         }
         finally
         {

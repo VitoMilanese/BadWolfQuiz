@@ -99,4 +99,18 @@
   <data name="EditorDeleteAllRulesTitle" xml:space="preserve"><value>Видалити всі правила кільця?</value></data>
   <data name="EditorDeleteAllRulesPrompt" xml:space="preserve"><value>Усі правила цього кільця будуть видалені. Цю дію неможливо скасувати.</value></data>
   <data name="EditorAllRulesDeleted" xml:space="preserve"><value>Усі правила кільця видалено.</value></data>
+  <data name="EditorImportErrorTitle" xml:space="preserve"><value>Помилка імпорту CSV</value></data>
+  <data name="EditorImportErrorLine" xml:space="preserve"><value>Рядок {0}</value></data>
+  <data name="EditorImportErrorFile" xml:space="preserve"><value>CSV-файл</value></data>
+  <data name="EditorCsvErrorEmptyFile" xml:space="preserve"><value>Файл порожній або не містить даних.</value></data>
+  <data name="EditorCsvErrorInvalidHeader" xml:space="preserve"><value>Неправильний заголовок. Перший рядок повинен містити колонки Ring, Rule, Enabled, Words.</value></data>
+  <data name="EditorCsvErrorTooManyRows" xml:space="preserve"><value>CSV містить більше 10 000 непорожніх рядків даних.</value></data>
+  <data name="EditorCsvErrorMalformedRow" xml:space="preserve"><value>Рядок має некоректний CSV-синтаксис, наприклад незакриті лапки.</value></data>
+  <data name="EditorCsvErrorInvalidColumnCount" xml:space="preserve"><value>Очікується рівно 4 колонки, але в цьому рядку знайдено: {0}.</value></data>
+  <data name="EditorCsvErrorInvalidRing" xml:space="preserve"><value>Некоректне значення Ring «{0}». Дозволено тільки blue, yellow або red.</value></data>
+  <data name="EditorCsvErrorInvalidRuleText" xml:space="preserve"><value>Колонка Rule порожня або містить більше 300 символів.</value></data>
+  <data name="EditorCsvErrorInvalidEnabled" xml:space="preserve"><value>Некоректне значення Enabled «{0}». Дозволено true, false, 1 або 0.</value></data>
+  <data name="EditorCsvErrorInvalidWords" xml:space="preserve"><value>Некоректна колонка Words. Потрібне хоча б одне слово від 3 до 120 символів; слова можна розділяти лише комою, крапкою з комою або пробілом.</value></data>
+  <data name="EditorCsvErrorTooManyWords" xml:space="preserve"><value>Для одного правила дозволено не більше 250 унікальних слів.</value></data>
+  <data name="EditorCsvErrorUnplayable" xml:space="preserve"><value>Після імпорту «{0}» не матиме жодного непорожнього правила, увімкненого для гри.</value></data>
 </root>

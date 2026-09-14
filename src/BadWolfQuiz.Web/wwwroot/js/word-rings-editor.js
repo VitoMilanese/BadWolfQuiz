@@ -355,6 +355,25 @@
         return true;
     };
 
+    const showImportError = error => {
+        const dialog = document.querySelector('[data-word-rings-import-error-dialog]');
+        if (!(dialog instanceof HTMLDialogElement)) {
+            showStatus(error?.message || requestFailedMessage(), true);
+            return;
+        }
+
+        const location = dialog.querySelector('[data-word-rings-import-error-location]');
+        const message = dialog.querySelector('[data-word-rings-import-error-message]');
+        if (location instanceof HTMLElement) {
+            location.textContent = error?.location ?? '';
+            location.hidden = !error?.location;
+        }
+        if (message instanceof HTMLElement) {
+            message.textContent = error?.message || requestFailedMessage();
+        }
+        if (!dialog.open) dialog.showModal();
+    };
+
     const showImportSummary = summary => {
         const dialog = document.querySelector('[data-word-rings-import-summary-dialog]');
         if (!(dialog instanceof HTMLDialogElement)) return;
@@ -522,7 +541,10 @@
             if (!response.ok) throw new Error(`Import failed: ${response.status}`);
             const result = await response.json();
             if (!result.success) {
-                showStatus(result.message || requestFailedMessage(), true);
+                showImportError(result.error ?? {
+                    location: '',
+                    message: result.message || requestFailedMessage()
+                });
                 return;
             }
 

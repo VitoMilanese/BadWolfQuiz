@@ -574,6 +574,22 @@
     </form>
 </dialog>
 
+<dialog class="app-dialog word-rings-editor-dialog" data-word-rings-import-error-dialog>
+    <div class="dialog-card dialog-card-danger word-rings-editor-dialog-card">
+        <div class="dialog-heading">
+            <div><h2>@WordRingsLocalizer["EditorImportErrorTitle"]</h2></div>
+            <button class="dialog-close" type="button" data-close-word-rings-dialog aria-label="@WordRingsLocalizer["EditorClose"]">×</button>
+        </div>
+
+        <p class="dialog-target" data-word-rings-import-error-location></p>
+        <p class="dialog-warning" data-word-rings-import-error-message></p>
+
+        <div class="form-actions dialog-actions">
+            <button class="button button-primary" type="button" data-close-word-rings-dialog>@WordRingsLocalizer["EditorClose"]</button>
+        </div>
+    </div>
+</dialog>
+
 <dialog class="app-dialog word-rings-editor-dialog" data-word-rings-import-summary-dialog>
     <div class="dialog-card word-rings-editor-dialog-card">
         <div class="dialog-heading">

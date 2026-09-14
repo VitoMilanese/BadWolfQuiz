@@ -72,9 +72,32 @@ public sealed record WordRingsImportSummary(
         new WordRingsImportRingSummary(0, 0));
 }
 
+public enum WordRingsCsvImportErrorKind
+{
+    FileRequired,
+    FileTooLarge,
+    EmptyFile,
+    InvalidHeader,
+    TooManyRows,
+    MalformedRow,
+    InvalidColumnCount,
+    InvalidRing,
+    InvalidRuleText,
+    InvalidEnabled,
+    InvalidWords,
+    TooManyWords,
+    UnplayableConfiguration
+}
+
+public sealed record WordRingsCsvImportError(
+    int? LineNumber,
+    WordRingsCsvImportErrorKind Kind,
+    string? Value = null);
+
 public sealed record WordRingsImportResult(
     WordRingRuleMutationResult Result,
-    WordRingsImportSummary Summary);
+    WordRingsImportSummary Summary,
+    WordRingsCsvImportError? Error = null);
 
 public sealed record WordRingsPuzzle(
     string BlueRuleText,
@@ -670,12 +693,12 @@ public sealed class WordRingsRuleStore
         string? content,
         CancellationToken cancellationToken)
     {
-        var parsed = ParseCsv(content);
-        if (parsed is null)
+        if (!TryParseCsv(content, out var parsed, out var parseError))
         {
             return new WordRingsImportResult(
                 WordRingRuleMutationResult.InvalidCsv,
-                WordRingsImportSummary.Empty);
+                WordRingsImportSummary.Empty,
+                parseError);
         }
 
         await _gate.WaitAsync(cancellationToken);
@@ -706,7 +729,10 @@ public sealed class WordRingsRuleStore
                     {
                         return new WordRingsImportResult(
                             WordRingRuleMutationResult.InvalidWords,
-                            WordRingsImportSummary.Empty);
+                            WordRingsImportSummary.Empty,
+                            new WordRingsCsvImportError(
+                                row.SourceLineNumber,
+                                WordRingsCsvImportErrorKind.TooManyWords));
                     }
 
                     var enabledChanged = existing.IsEnabled != row.Enabled;
@@ -743,12 +769,37 @@ public sealed class WordRingsRuleStore
 
             if (changed)
             {
+                var unplayableRing = Enum.GetValues<WordRingColor>()
+                    .Where(ring => !next.Any(rule =>
+                        rule.Ring == ring &&
+                        rule.IsEnabled &&
+                        rule.Words.Count > 0))
+                    .Select(ring => (WordRingColor?)ring)
+                    .FirstOrDefault();
+                if (unplayableRing.HasValue)
+                {
+                    var sourceLine = parsed
+                        .Where(row => row.Ring == unplayableRing.Value)
+                        .Select(row => (int?)row.SourceLineNumber)
+                        .Max();
+                    return new WordRingsImportResult(
+                        WordRingRuleMutationResult.LastEnabledRule,
+                        WordRingsImportSummary.Empty,
+                        new WordRingsCsvImportError(
+                            sourceLine,
+                            WordRingsCsvImportErrorKind.UnplayableConfiguration,
+                            ToRingKey(unplayableRing.Value)));
+                }
+
                 var playableResult = NormalizePlayableRules(next, out var normalized);
                 if (playableResult != WordRingRuleMutationResult.Success)
                 {
                     return new WordRingsImportResult(
                         playableResult,
-                        WordRingsImportSummary.Empty);
+                        WordRingsImportSummary.Empty,
+                        new WordRingsCsvImportError(
+                            null,
+                            WordRingsCsvImportErrorKind.UnplayableConfiguration));
                 }
 
                 await PersistAsync(normalized);
@@ -1004,65 +1055,130 @@ public sealed class WordRingsRuleStore
         File.Move(temporaryPath, _path, overwrite: true);
     }
 
-    private static IReadOnlyList<CsvRuleRow>? ParseCsv(string? content)
+    private static bool TryParseCsv(
+        string? content,
+        out IReadOnlyList<CsvRuleRow> parsedRows,
+        out WordRingsCsvImportError? error)
     {
+        parsedRows = [];
+        error = null;
         if (string.IsNullOrWhiteSpace(content))
         {
-            return null;
+            error = new WordRingsCsvImportError(
+                1,
+                WordRingsCsvImportErrorKind.EmptyFile);
+            return false;
         }
 
         using var reader = new StringReader(content);
         var headerLine = reader.ReadLine();
         if (headerLine is null)
         {
-            return null;
+            error = new WordRingsCsvImportError(
+                1,
+                WordRingsCsvImportErrorKind.EmptyFile);
+            return false;
         }
 
         var header = ParseCsvLine(headerLine);
-        if (header is null ||
-            header.Length != 4 ||
+        if (header is null)
+        {
+            error = new WordRingsCsvImportError(
+                1,
+                WordRingsCsvImportErrorKind.MalformedRow);
+            return false;
+        }
+        if (header.Length != 4 ||
             !string.Equals(header[0].TrimStart('\uFEFF'), "Ring", StringComparison.OrdinalIgnoreCase) ||
             !string.Equals(header[1], "Rule", StringComparison.OrdinalIgnoreCase) ||
             !string.Equals(header[2], "Enabled", StringComparison.OrdinalIgnoreCase) ||
             !string.Equals(header[3], "Words", StringComparison.OrdinalIgnoreCase))
         {
-            return null;
+            error = new WordRingsCsvImportError(
+                1,
+                WordRingsCsvImportErrorKind.InvalidHeader);
+            return false;
         }
 
         var rows = new Dictionary<string, CsvRuleRow>(StringComparer.OrdinalIgnoreCase);
-        var rowCount = 0;
+        var dataRowCount = 0;
+        var lineNumber = 1;
         string? line;
         while ((line = reader.ReadLine()) is not null)
         {
+            lineNumber += 1;
             if (string.IsNullOrWhiteSpace(line))
             {
                 continue;
             }
 
-            rowCount += 1;
-            if (rowCount > MaximumCsvRows)
+            dataRowCount += 1;
+            if (dataRowCount > MaximumCsvRows)
             {
-                return null;
+                error = new WordRingsCsvImportError(
+                    lineNumber,
+                    WordRingsCsvImportErrorKind.TooManyRows);
+                return false;
             }
 
             var fields = ParseCsvLine(line);
-            if (fields is null || fields.Length != 4 ||
-                !TryParseRingKey(fields[0], out var ring))
+            if (fields is null)
             {
-                return null;
+                error = new WordRingsCsvImportError(
+                    lineNumber,
+                    WordRingsCsvImportErrorKind.MalformedRow);
+                return false;
+            }
+            if (fields.Length != 4)
+            {
+                error = new WordRingsCsvImportError(
+                    lineNumber,
+                    WordRingsCsvImportErrorKind.InvalidColumnCount,
+                    fields.Length.ToString(CultureInfo.InvariantCulture));
+                return false;
+            }
+            if (!TryParseRingKey(fields[0], out var ring))
+            {
+                error = new WordRingsCsvImportError(
+                    lineNumber,
+                    WordRingsCsvImportErrorKind.InvalidRing,
+                    fields[0].Trim());
+                return false;
             }
 
             var text = NormalizeText(fields[1]);
-            var words = ParseWords(fields[3]);
-            if (text is null || words is null || !TryParseBoolean(fields[2], out var enabled))
+            if (text is null)
             {
-                return null;
+                error = new WordRingsCsvImportError(
+                    lineNumber,
+                    WordRingsCsvImportErrorKind.InvalidRuleText);
+                return false;
+            }
+            if (!TryParseBoolean(fields[2], out var enabled))
+            {
+                error = new WordRingsCsvImportError(
+                    lineNumber,
+                    WordRingsCsvImportErrorKind.InvalidEnabled,
+                    fields[2].Trim());
+                return false;
+            }
+            if (!TryParseCsvWords(fields[3], out var words, out var wordsError))
+            {
+                error = new WordRingsCsvImportError(
+                    lineNumber,
+                    wordsError);
+                return false;
             }
 
             var key = $"{(int)ring}\u001f{text}";
             if (!rows.TryGetValue(key, out var existing))
             {
-                rows[key] = new CsvRuleRow(ring, text, enabled, words);
+                rows[key] = new CsvRuleRow(
+                    ring,
+                    text,
+                    enabled,
+                    words,
+                    lineNumber);
                 continue;
             }
 
@@ -1072,17 +1188,69 @@ public sealed class WordRingsRuleStore
                 .ToArray();
             if (mergedWords.Length > MaximumWordsPerRule)
             {
-                return null;
+                error = new WordRingsCsvImportError(
+                    lineNumber,
+                    WordRingsCsvImportErrorKind.TooManyWords);
+                return false;
             }
 
             rows[key] = existing with
             {
                 Enabled = enabled,
-                Words = mergedWords
+                Words = mergedWords,
+                SourceLineNumber = lineNumber
             };
         }
 
-        return rows.Values.ToArray();
+        parsedRows = rows.Values.ToArray();
+        return true;
+    }
+
+    private static bool TryParseCsvWords(
+        string? value,
+        out IReadOnlyList<string> words,
+        out WordRingsCsvImportErrorKind errorKind)
+    {
+        words = [];
+        errorKind = WordRingsCsvImportErrorKind.InvalidWords;
+        var input = value ?? string.Empty;
+        if (input.Length == 0 ||
+            input.Length > MaximumWordsInputLength ||
+            !WordListPattern.IsMatch(input))
+        {
+            return false;
+        }
+
+        var candidates = WordSeparatorPattern
+            .Split(input)
+            .Where(word => !string.IsNullOrWhiteSpace(word))
+            .ToArray();
+        var normalizedWords = new List<string>(candidates.Length);
+        foreach (var candidate in candidates)
+        {
+            var normalizedWord = NormalizeSingleWord(candidate);
+            if (normalizedWord is null)
+            {
+                return false;
+            }
+            normalizedWords.Add(normalizedWord);
+        }
+
+        var distinct = normalizedWords
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        if (distinct.Length == 0)
+        {
+            return false;
+        }
+        if (distinct.Length > MaximumWordsPerRule)
+        {
+            errorKind = WordRingsCsvImportErrorKind.TooManyWords;
+            return false;
+        }
+
+        words = distinct;
+        return true;
     }
 
     private static string[]? ParseCsvLine(string line)
@@ -1188,7 +1356,8 @@ public sealed class WordRingsRuleStore
         WordRingColor Ring,
         string Text,
         bool Enabled,
-        IReadOnlyList<string> Words);
+        IReadOnlyList<string> Words,
+        int SourceLineNumber);
 
     private sealed class WordUsageBuilder(string word)
     {

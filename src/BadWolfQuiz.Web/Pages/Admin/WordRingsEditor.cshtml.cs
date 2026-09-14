@@ -225,18 +225,26 @@ public sealed class WordRingsEditorModel(
     {
         if (csvFile is null || csvFile.Length <= 0)
         {
+            var error = new WordRingsCsvImportError(
+                null,
+                WordRingsCsvImportErrorKind.FileRequired);
             return ImportResponse(
                 success: false,
                 WordRingsImportSummary.Empty,
-                localizer["EditorCsvFileRequired"].Value);
+                CsvImportErrorMessage(error),
+                error);
         }
 
         if (csvFile.Length > MaximumCsvImportBytes)
         {
+            var error = new WordRingsCsvImportError(
+                null,
+                WordRingsCsvImportErrorKind.FileTooLarge);
             return ImportResponse(
                 success: false,
                 WordRingsImportSummary.Empty,
-                localizer["EditorCsvFileTooLarge"].Value);
+                CsvImportErrorMessage(error),
+                error);
         }
 
         string content;
@@ -253,12 +261,16 @@ public sealed class WordRingsEditorModel(
 
         var result = await Store.ImportCsvAsync(content, cancellationToken);
         var success = result.Result == WordRingRuleMutationResult.Success;
+        var message = success
+            ? localizer["EditorImportCompleted"].Value
+            : result.Error is not null
+                ? CsvImportErrorMessage(result.Error)
+                : localizer["EditorCsvInvalid"].Value;
         return ImportResponse(
             success,
             success ? result.Summary : WordRingsImportSummary.Empty,
-            success
-                ? localizer["EditorImportCompleted"].Value
-                : localizer["EditorCsvInvalid"].Value);
+            message,
+            result.Error);
     }
 
     private void LoadRing(string? ring)
@@ -323,14 +335,27 @@ public sealed class WordRingsEditorModel(
     private IActionResult ImportResponse(
         bool success,
         WordRingsImportSummary summary,
-        string message)
+        string message,
+        WordRingsCsvImportError? error = null)
     {
         if (IsAjaxRequest())
         {
+            object? errorPayload = null;
+            if (error is not null)
+            {
+                errorPayload = new
+                {
+                    lineNumber = error.LineNumber,
+                    location = CsvImportErrorLocation(error),
+                    message = CsvImportErrorMessage(error)
+                };
+            }
+
             return new JsonResult(new
             {
                 success,
                 message,
+                error = errorPayload,
                 summary = new
                 {
                     hasChanges = summary.HasChanges,
@@ -356,6 +381,41 @@ public sealed class WordRingsEditorModel(
         TempData[success ? "StatusMessage" : "ErrorMessage"] = message;
         return RedirectToPage(new { ring = "words" });
     }
+
+    private string CsvImportErrorLocation(WordRingsCsvImportError error) =>
+        error.LineNumber is int lineNumber
+            ? localizer["EditorImportErrorLine", lineNumber].Value
+            : localizer["EditorImportErrorFile"].Value;
+
+    private string CsvImportErrorMessage(WordRingsCsvImportError error) => error.Kind switch
+    {
+        WordRingsCsvImportErrorKind.FileRequired => localizer["EditorCsvFileRequired"].Value,
+        WordRingsCsvImportErrorKind.FileTooLarge => localizer["EditorCsvFileTooLarge"].Value,
+        WordRingsCsvImportErrorKind.EmptyFile => localizer["EditorCsvErrorEmptyFile"].Value,
+        WordRingsCsvImportErrorKind.InvalidHeader => localizer["EditorCsvErrorInvalidHeader"].Value,
+        WordRingsCsvImportErrorKind.TooManyRows => localizer["EditorCsvErrorTooManyRows"].Value,
+        WordRingsCsvImportErrorKind.MalformedRow => localizer["EditorCsvErrorMalformedRow"].Value,
+        WordRingsCsvImportErrorKind.InvalidColumnCount =>
+            localizer["EditorCsvErrorInvalidColumnCount", error.Value ?? "?"].Value,
+        WordRingsCsvImportErrorKind.InvalidRing =>
+            localizer["EditorCsvErrorInvalidRing", error.Value ?? string.Empty].Value,
+        WordRingsCsvImportErrorKind.InvalidRuleText => localizer["EditorCsvErrorInvalidRuleText"].Value,
+        WordRingsCsvImportErrorKind.InvalidEnabled =>
+            localizer["EditorCsvErrorInvalidEnabled", error.Value ?? string.Empty].Value,
+        WordRingsCsvImportErrorKind.InvalidWords => localizer["EditorCsvErrorInvalidWords"].Value,
+        WordRingsCsvImportErrorKind.TooManyWords => localizer["EditorCsvErrorTooManyWords"].Value,
+        WordRingsCsvImportErrorKind.UnplayableConfiguration =>
+            localizer["EditorCsvErrorUnplayable", CsvRingName(error.Value)].Value,
+        _ => localizer["EditorCsvInvalid"].Value
+    };
+
+    private string CsvRingName(string? ring) => ring?.Trim().ToLowerInvariant() switch
+    {
+        "yellow" => localizer["EditorYellowTab"].Value,
+        "red" => localizer["EditorRedTab"].Value,
+        "blue" => localizer["EditorBlueTab"].Value,
+        _ => localizer["EditorRulesLabel"].Value
+    };
 
     private string ErrorMessage(WordRingRuleMutationResult result) => result switch
     {

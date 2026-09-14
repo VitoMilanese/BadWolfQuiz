@@ -99,4 +99,18 @@
   <data name="EditorDeleteAllRulesTitle" xml:space="preserve"><value>Eliminare tutte le regole dell’anello?</value></data>
   <data name="EditorDeleteAllRulesPrompt" xml:space="preserve"><value>Tutte le regole di questo anello saranno eliminate. Questa azione non può essere annullata.</value></data>
   <data name="EditorAllRulesDeleted" xml:space="preserve"><value>Tutte le regole dell’anello sono state eliminate.</value></data>
+  <data name="EditorImportErrorTitle" xml:space="preserve"><value>Errore di importazione CSV</value></data>
+  <data name="EditorImportErrorLine" xml:space="preserve"><value>Riga {0}</value></data>
+  <data name="EditorImportErrorFile" xml:space="preserve"><value>File CSV</value></data>
+  <data name="EditorCsvErrorEmptyFile" xml:space="preserve"><value>Il file è vuoto o non contiene dati.</value></data>
+  <data name="EditorCsvErrorInvalidHeader" xml:space="preserve"><value>L'intestazione non è valida. La prima riga deve contenere Ring, Rule, Enabled, Words.</value></data>
+  <data name="EditorCsvErrorTooManyRows" xml:space="preserve"><value>Il CSV contiene più di 10.000 righe di dati non vuote.</value></data>
+  <data name="EditorCsvErrorMalformedRow" xml:space="preserve"><value>La riga ha una sintassi CSV non valida, ad esempio virgolette non chiuse.</value></data>
+  <data name="EditorCsvErrorInvalidColumnCount" xml:space="preserve"><value>Sono richieste esattamente 4 colonne, ma questa riga ne contiene {0}.</value></data>
+  <data name="EditorCsvErrorInvalidRing" xml:space="preserve"><value>Valore Ring non valido “{0}”. Sono ammessi solo blue, yellow o red.</value></data>
+  <data name="EditorCsvErrorInvalidRuleText" xml:space="preserve"><value>La colonna Rule è vuota o supera 300 caratteri.</value></data>
+  <data name="EditorCsvErrorInvalidEnabled" xml:space="preserve"><value>Valore Enabled non valido “{0}”. Usa true, false, 1 o 0.</value></data>
+  <data name="EditorCsvErrorInvalidWords" xml:space="preserve"><value>La colonna Words non è valida. Serve almeno una parola di 3–120 caratteri; le parole possono essere separate solo da virgole, punti e virgola o spazi.</value></data>
+  <data name="EditorCsvErrorTooManyWords" xml:space="preserve"><value>Una regola può contenere al massimo 250 parole univoche.</value></data>
+  <data name="EditorCsvErrorUnplayable" xml:space="preserve"><value>Dopo l'importazione, “{0}” non avrebbe alcuna regola non vuota abilitata per il gioco.</value></data>
 </root>

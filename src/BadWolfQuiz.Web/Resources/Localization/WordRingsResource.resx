@@ -99,4 +99,18 @@
   <data name="EditorDeleteAllRulesTitle" xml:space="preserve"><value>Delete all ring rules?</value></data>
   <data name="EditorDeleteAllRulesPrompt" xml:space="preserve"><value>All rules for this ring will be deleted. This action cannot be undone.</value></data>
   <data name="EditorAllRulesDeleted" xml:space="preserve"><value>All rules for the ring were deleted.</value></data>
+  <data name="EditorImportErrorTitle" xml:space="preserve"><value>CSV import error</value></data>
+  <data name="EditorImportErrorLine" xml:space="preserve"><value>Line {0}</value></data>
+  <data name="EditorImportErrorFile" xml:space="preserve"><value>CSV file</value></data>
+  <data name="EditorCsvErrorEmptyFile" xml:space="preserve"><value>The file is empty or contains no data.</value></data>
+  <data name="EditorCsvErrorInvalidHeader" xml:space="preserve"><value>The header is invalid. The first line must contain Ring, Rule, Enabled, Words.</value></data>
+  <data name="EditorCsvErrorTooManyRows" xml:space="preserve"><value>The CSV contains more than 10,000 non-empty data rows.</value></data>
+  <data name="EditorCsvErrorMalformedRow" xml:space="preserve"><value>The row has invalid CSV syntax, such as an unclosed quote.</value></data>
+  <data name="EditorCsvErrorInvalidColumnCount" xml:space="preserve"><value>Exactly 4 columns are required, but this row contains {0}.</value></data>
+  <data name="EditorCsvErrorInvalidRing" xml:space="preserve"><value>Invalid Ring value “{0}”. Only blue, yellow, or red are allowed.</value></data>
+  <data name="EditorCsvErrorInvalidRuleText" xml:space="preserve"><value>The Rule column is empty or longer than 300 characters.</value></data>
+  <data name="EditorCsvErrorInvalidEnabled" xml:space="preserve"><value>Invalid Enabled value “{0}”. Use true, false, 1, or 0.</value></data>
+  <data name="EditorCsvErrorInvalidWords" xml:space="preserve"><value>The Words column is invalid. At least one 3–120 character word is required; words may be separated only by commas, semicolons, or spaces.</value></data>
+  <data name="EditorCsvErrorTooManyWords" xml:space="preserve"><value>A rule may contain no more than 250 unique words.</value></data>
+  <data name="EditorCsvErrorUnplayable" xml:space="preserve"><value>After import, “{0}” would have no non-empty rule enabled for games.</value></data>
 </root>
