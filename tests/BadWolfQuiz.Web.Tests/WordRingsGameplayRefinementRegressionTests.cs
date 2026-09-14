@@ -16,7 +16,7 @@ public sealed class WordRingsGameplayRefinementRegressionTests
 
         Assert.Contains("~/css/minigames.css", page, StringComparison.Ordinal);
         Assert.Contains("minigames-toolbar word-rings-toolbar", page, StringComparison.Ordinal);
-        Assert.Contains("data-game-mode=\"solo\"", page, StringComparison.Ordinal);
+        Assert.Contains("data-game-mode=\"@(isCooperativeRoom ? \"cooperative\" : \"solo\")\"", page, StringComparison.Ordinal);
         Assert.Contains("minigames-refresh-button", page, StringComparison.Ordinal);
         Assert.Contains("<span aria-hidden=\"true\">↻</span>", page, StringComparison.Ordinal);
         Assert.Contains("Model.InitialWords", page, StringComparison.Ordinal);
