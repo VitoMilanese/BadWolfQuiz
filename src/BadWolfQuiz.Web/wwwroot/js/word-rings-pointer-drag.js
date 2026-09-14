@@ -10,6 +10,11 @@
         assignToStage,
         assignOutside,
         returnToBank,
+        canBegin = () => true,
+        canDropStage = () => true,
+        canDropOutside = () => true,
+        canReturnToBank = () => true,
+        bringToFront = () => {},
         onChanged
     }) => {
         const wiredWords = new WeakSet();
@@ -49,35 +54,42 @@
 
         const clearDropTargets = () => {
             stage.classList.remove('is-drop-target');
-            outsideZone.classList.remove('is-drop-target');
+            outsideZone?.classList.remove('is-drop-target');
             wordList.classList.remove('is-drop-target');
         };
 
         const refreshPreview = (drag, clientX, clientY) => {
             const element = document.elementFromPoint(clientX, clientY);
             clearDropTargets();
+            drag.preview.classList.remove('is-drop-blocked');
 
             if (element && stage.contains(element)) {
                 const membership = membershipAt(clientX, clientY).membership;
+                const allowed = canDropStage(drag.word, membership);
                 drag.preview.classList.add('is-on-stage');
                 drag.preview.classList.remove('is-outside');
                 drag.preview.dataset.membership = membership;
-                stage.classList.add('is-drop-target');
+                drag.preview.classList.toggle('is-drop-blocked', !allowed);
+                if (allowed) stage.classList.add('is-drop-target');
                 return;
             }
 
             drag.preview.classList.remove('is-on-stage');
             drag.preview.dataset.membership = '';
 
-            if (element && outsideZone.contains(element)) {
+            if (element && outsideZone?.contains(element)) {
+                const allowed = canDropOutside(drag.word);
                 drag.preview.classList.add('is-outside');
-                outsideZone.classList.add('is-drop-target');
+                drag.preview.classList.toggle('is-drop-blocked', !allowed);
+                if (allowed) outsideZone.classList.add('is-drop-target');
                 return;
             }
 
             drag.preview.classList.remove('is-outside');
             if (element && wordList.contains(element)) {
-                wordList.classList.add('is-drop-target');
+                const allowed = canReturnToBank(drag.word);
+                drag.preview.classList.toggle('is-drop-blocked', !allowed);
+                if (allowed) wordList.classList.add('is-drop-target');
             }
         };
 
@@ -106,21 +118,24 @@
             active = null;
             clearActive(drag);
 
-            if (cancelled || !dropTarget) return;
+            if (cancelled || !drag.moved || !dropTarget) return;
 
             if (stage.contains(dropTarget)) {
+                const membership = membershipAt(event.clientX, event.clientY).membership;
+                if (!canDropStage(drag.word, membership)) return;
                 assignToStage(drag.word, event.clientX, event.clientY);
                 onChanged();
                 return;
             }
 
-            if (outsideZone.contains(dropTarget)) {
+            if (outsideZone?.contains(dropTarget)) {
+                if (!canDropOutside(drag.word)) return;
                 assignOutside(drag.word);
                 onChanged();
                 return;
             }
 
-            if (wordList.contains(dropTarget)) {
+            if (wordList.contains(dropTarget) && canReturnToBank(drag.word)) {
                 returnToBank(drag.word);
                 onChanged();
             }
@@ -131,13 +146,17 @@
             if (event.pointerType === 'mouse' && event.button !== 0) return;
 
             const value = word.dataset.word;
-            if (!value) return;
+            if (!value || !canBegin(value)) return;
 
+            bringToFront(word);
             const previewState = createPreview(word, event);
             active = {
                 word: value,
                 source: word,
                 pointerId: event.pointerId,
+                startX: event.clientX,
+                startY: event.clientY,
+                moved: false,
                 ...previewState
             };
 
@@ -162,6 +181,9 @@
 
         document.addEventListener('pointermove', event => {
             if (!active || active.pointerId !== event.pointerId) return;
+            if (!active.moved && Math.hypot(event.clientX - active.startX, event.clientY - active.startY) > 3) {
+                active.moved = true;
+            }
             positionPreview(active, event.clientX, event.clientY);
             refreshPreview(active, event.clientX, event.clientY);
             event.preventDefault();

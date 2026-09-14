@@ -4,14 +4,20 @@
 @{
     ViewData["Title"] = WordRingsLocalizer["Title"];
     ViewData["HidePortalFooter"] = true;
+
+    var displayedWords = Model.Puzzle.Words.Take(10).ToArray();
+    var displayedExpected = Model.Puzzle.Expected
+        .Where(item => displayedWords.Contains(item.Key))
+        .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
 }
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/minigames.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/word-rings.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/word-rings-refinements.css" asp-append-version="true" />
 }
 
-<div class="word-rings-page"
+<div class="minigames-page word-rings-page"
      data-word-rings-root
      data-progress-template="@WordRingsLocalizer["Progress"]"
      data-all-correct="@WordRingsLocalizer["AllCorrect"]"
@@ -19,38 +25,22 @@
      data-place-all="@WordRingsLocalizer["PlaceAll"]"
      data-reveal-rules="@WordRingsLocalizer["RevealRules"]"
      data-hide-rules="@WordRingsLocalizer["HideRules"]">
-    <script type="application/json" data-word-rings-puzzle>@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Puzzle.Expected))</script>
+    <script type="application/json" data-word-rings-puzzle>@Html.Raw(System.Text.Json.JsonSerializer.Serialize(displayedExpected))</script>
 
-    <header class="word-rings-header">
-        <div>
-            <p class="word-rings-kicker">BAD WOLF / MINIGAME 02</p>
+    <header class="minigames-toolbar word-rings-toolbar">
+        <div class="minigames-toolbar-title word-rings-toolbar-title">
             <h1>@WordRingsLocalizer["Title"]</h1>
-            <p class="word-rings-lead">@WordRingsLocalizer["Instructions"]</p>
+            <span class="word-rings-toolbar-progress" data-progress></span>
         </div>
-        <div class="word-rings-actions">
+        <div class="minigames-toolbar-actions word-rings-actions">
             <button class="button" type="button" data-reveal-rules>@WordRingsLocalizer["RevealRules"]</button>
             <button class="button" type="button" data-reset>@WordRingsLocalizer["Reset"]</button>
-            <button class="button button-primary" type="button" data-check>@WordRingsLocalizer["Check"]</button>
+            <button class="button button-primary" type="button" data-check disabled>@WordRingsLocalizer["Check"]</button>
         </div>
     </header>
 
     <div class="word-rings-layout">
-        <aside class="word-rings-bank" data-word-bank>
-            <div class="word-rings-bank-heading">
-                <h2>@WordRingsLocalizer["WordBank"]</h2>
-                <span data-progress></span>
-            </div>
-            <div class="word-rings-word-list" data-word-list>
-                @foreach (var word in Model.Puzzle.Words)
-                {
-                    <button class="word-rings-word" type="button" data-word="@word">@word</button>
-                }
-            </div>
-            <div class="word-rings-outside" data-outside-zone>
-                <strong>@WordRingsLocalizer["Outside"]</strong>
-                <div data-outside-list></div>
-            </div>
-        </aside>
+        <aside class="word-rings-players" data-word-rings-players hidden></aside>
 
         <main class="word-rings-stage-wrap">
             <div class="word-rings-stage" data-ring-stage aria-label="@WordRingsLocalizer["Title"]">
@@ -66,6 +56,22 @@
             </div>
             <p class="word-rings-status" data-status aria-live="polite"></p>
         </main>
+
+        <aside class="word-rings-bank" data-word-bank>
+            <div class="word-rings-bank-heading">
+                <h2>@WordRingsLocalizer["WordBank"]</h2>
+            </div>
+            <div class="word-rings-word-list" data-word-list>
+                @foreach (var word in displayedWords)
+                {
+                    <button class="word-rings-word" type="button" data-word="@word">@word</button>
+                }
+            </div>
+            <div class="word-rings-outside" data-outside-zone hidden>
+                <strong>@WordRingsLocalizer["Outside"]</strong>
+                <div data-outside-list></div>
+            </div>
+        </aside>
     </div>
 </div>
 

@@ -40,7 +40,7 @@ public sealed class WordRingsEditorSearchAndRussianRegressionTests
     }
 
     [Fact]
-    public void Ring_tabs_support_condition_word_and_enabled_state_filtering()
+    public void Ring_tabs_support_separate_condition_word_and_enabled_state_filtering()
     {
         var editor = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml");
         var pagingScript = ReadWebFile("wwwroot", "js", "word-rings-editor-catalog-paging.js");
@@ -51,16 +51,22 @@ public sealed class WordRingsEditorSearchAndRussianRegressionTests
         Assert.Contains("EditorRingStats", editor, StringComparison.Ordinal);
         Assert.Contains("Model.Rules.Count(rule => rule.IsEnabled)", editor, StringComparison.Ordinal);
         Assert.Contains("searchRules", pagingScript, StringComparison.Ordinal);
+        Assert.Contains("wordRingsRuleConditionSearch", refinements, StringComparison.Ordinal);
+        Assert.Contains("wordRingsRuleWordSearch", refinements, StringComparison.Ordinal);
+        Assert.Contains("conditionQuery", refinements, StringComparison.Ordinal);
+        Assert.Contains("wordQuery", refinements, StringComparison.Ordinal);
         Assert.Contains(".word-rings-editor-rule-words p", refinements, StringComparison.Ordinal);
         Assert.Contains("['all', text.all]", refinements, StringComparison.Ordinal);
         Assert.Contains("['active', text.active]", refinements, StringComparison.Ordinal);
         Assert.Contains("['inactive', text.inactive]", refinements, StringComparison.Ordinal);
         Assert.Contains("wordRingsRuleStatus", refinements, StringComparison.Ordinal);
         Assert.Contains("wordRingsWordDirection", refinements, StringComparison.Ordinal);
+        Assert.Contains(".word-rings-editor-total-words", styles, StringComparison.Ordinal);
+        Assert.Contains("font-weight: 900", styles, StringComparison.Ordinal);
         Assert.Contains("display: grid", styles, StringComparison.Ordinal);
         Assert.Contains(".word-rings-editor-mark-caption", styles, StringComparison.Ordinal);
         Assert.Contains("display: none !important", styles, StringComparison.Ordinal);
-        Assert.Contains("word-rings-editor-catalog-refinements.js?v=1", assets, StringComparison.Ordinal);
+        Assert.Contains("word-rings-editor-catalog-refinements.js?v=2", assets, StringComparison.Ordinal);
     }
 
     private static string ReadWebFile(params string[] parts) => File.ReadAllText(FindWebFile(parts));
