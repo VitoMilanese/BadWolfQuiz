@@ -85,7 +85,6 @@ public enum WordRingsCsvImportErrorKind
     InvalidRuleText,
     InvalidEnabled,
     InvalidWords,
-    TooManyWords,
     UnplayableConfiguration
 }
 
@@ -109,8 +108,6 @@ public sealed record WordRingsPuzzle(
 public sealed class WordRingsRuleStore
 {
     private const int MaximumRuleTextLength = 300;
-    private const int MaximumWordsInputLength = 12_000;
-    private const int MaximumWordsPerRule = 250;
     private const int MinimumSingleWordLength = 3;
     private const int MaximumSingleWordLength = 120;
     private const int MaximumCsvRows = 10_000;
@@ -534,11 +531,6 @@ public sealed class WordRingsRuleStore
 
                 if (include)
                 {
-                    if (rule.Words.Count >= MaximumWordsPerRule)
-                    {
-                        return WordRingRuleMutationResult.InvalidWords;
-                    }
-
                     candidate.Add(rule with
                     {
                         Words = rule.Words.Append(normalizedWord).ToArray()
@@ -725,16 +717,6 @@ public sealed class WordRingsRuleStore
                             word,
                             StringComparer.OrdinalIgnoreCase))
                         .ToArray();
-                    if (existing.Words.Count + additions.Length > MaximumWordsPerRule)
-                    {
-                        return new WordRingsImportResult(
-                            WordRingRuleMutationResult.InvalidWords,
-                            WordRingsImportSummary.Empty,
-                            new WordRingsCsvImportError(
-                                row.SourceLineNumber,
-                                WordRingsCsvImportErrorKind.TooManyWords));
-                    }
-
                     var enabledChanged = existing.IsEnabled != row.Enabled;
                     if (additions.Length == 0 && !enabledChanged)
                     {
@@ -840,7 +822,6 @@ public sealed class WordRingsRuleStore
     {
         var input = value ?? string.Empty;
         if (input.Length == 0 ||
-            input.Length > MaximumWordsInputLength ||
             !WordListPattern.IsMatch(input))
         {
             return null;
@@ -865,7 +846,7 @@ public sealed class WordRingsRuleStore
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
-        return words.Length is > 0 and <= MaximumWordsPerRule
+        return words.Length > 0
             ? words
             : null;
     }
@@ -895,7 +876,6 @@ public sealed class WordRingsRuleStore
                         .Select(word => word.Trim())
                         .Where(word => NormalizeSingleWord(word) is not null)
                         .Distinct(StringComparer.OrdinalIgnoreCase)
-                        .Take(MaximumWordsPerRule)
                         .ToArray()
                 })
                 .ToArray();
@@ -1186,14 +1166,6 @@ public sealed class WordRingsRuleStore
                 .Concat(words)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
-            if (mergedWords.Length > MaximumWordsPerRule)
-            {
-                error = new WordRingsCsvImportError(
-                    lineNumber,
-                    WordRingsCsvImportErrorKind.TooManyWords);
-                return false;
-            }
-
             rows[key] = existing with
             {
                 Enabled = enabled,
@@ -1214,9 +1186,11 @@ public sealed class WordRingsRuleStore
         words = [];
         errorKind = WordRingsCsvImportErrorKind.InvalidWords;
         var input = value ?? string.Empty;
-        if (input.Length == 0 ||
-            input.Length > MaximumWordsInputLength ||
-            !WordListPattern.IsMatch(input))
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return true;
+        }
+        if (!WordListPattern.IsMatch(input))
         {
             return false;
         }
@@ -1228,7 +1202,13 @@ public sealed class WordRingsRuleStore
         var normalizedWords = new List<string>(candidates.Length);
         foreach (var candidate in candidates)
         {
-            var normalizedWord = NormalizeSingleWord(candidate);
+            var trimmed = candidate.Trim();
+            if (trimmed.Length < MinimumSingleWordLength)
+            {
+                continue;
+            }
+
+            var normalizedWord = NormalizeSingleWord(trimmed);
             if (normalizedWord is null)
             {
                 return false;
@@ -1236,20 +1216,9 @@ public sealed class WordRingsRuleStore
             normalizedWords.Add(normalizedWord);
         }
 
-        var distinct = normalizedWords
+        words = normalizedWords
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
-        if (distinct.Length == 0)
-        {
-            return false;
-        }
-        if (distinct.Length > MaximumWordsPerRule)
-        {
-            errorKind = WordRingsCsvImportErrorKind.TooManyWords;
-            return false;
-        }
-
-        words = distinct;
         return true;
     }
 

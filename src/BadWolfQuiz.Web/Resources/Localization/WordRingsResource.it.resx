@@ -110,7 +110,6 @@
   <data name="EditorCsvErrorInvalidRing" xml:space="preserve"><value>Valore Ring non valido “{0}”. Sono ammessi solo blue, yellow o red.</value></data>
   <data name="EditorCsvErrorInvalidRuleText" xml:space="preserve"><value>La colonna Rule è vuota o supera 300 caratteri.</value></data>
   <data name="EditorCsvErrorInvalidEnabled" xml:space="preserve"><value>Valore Enabled non valido “{0}”. Usa true, false, 1 o 0.</value></data>
-  <data name="EditorCsvErrorInvalidWords" xml:space="preserve"><value>La colonna Words non è valida. Serve almeno una parola di 3–120 caratteri; le parole possono essere separate solo da virgole, punti e virgola o spazi.</value></data>
-  <data name="EditorCsvErrorTooManyWords" xml:space="preserve"><value>Una regola può contenere al massimo 250 parole univoche.</value></data>
+  <data name="EditorCsvErrorInvalidWords" xml:space="preserve"><value>La colonna Words contiene una parola o un separatore non valido. Le parole importate con meno di 3 caratteri vengono ignorate; le altre devono contenere 3–120 caratteri.</value></data>
   <data name="EditorCsvErrorUnplayable" xml:space="preserve"><value>Dopo l'importazione, “{0}” non avrebbe alcuna regola non vuota abilitata per il gioco.</value></data>
 </root>

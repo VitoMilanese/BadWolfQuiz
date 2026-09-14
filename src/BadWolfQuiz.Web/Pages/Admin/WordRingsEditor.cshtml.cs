@@ -403,7 +403,6 @@ public sealed class WordRingsEditorModel(
         WordRingsCsvImportErrorKind.InvalidEnabled =>
             localizer["EditorCsvErrorInvalidEnabled", error.Value ?? string.Empty].Value,
         WordRingsCsvImportErrorKind.InvalidWords => localizer["EditorCsvErrorInvalidWords"].Value,
-        WordRingsCsvImportErrorKind.TooManyWords => localizer["EditorCsvErrorTooManyWords"].Value,
         WordRingsCsvImportErrorKind.UnplayableConfiguration =>
             localizer["EditorCsvErrorUnplayable", CsvRingName(error.Value)].Value,
         _ => localizer["EditorCsvInvalid"].Value

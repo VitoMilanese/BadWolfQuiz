@@ -110,7 +110,6 @@
   <data name="EditorCsvErrorInvalidRing" xml:space="preserve"><value>Некоректне значення Ring «{0}». Дозволено тільки blue, yellow або red.</value></data>
   <data name="EditorCsvErrorInvalidRuleText" xml:space="preserve"><value>Колонка Rule порожня або містить більше 300 символів.</value></data>
   <data name="EditorCsvErrorInvalidEnabled" xml:space="preserve"><value>Некоректне значення Enabled «{0}». Дозволено true, false, 1 або 0.</value></data>
-  <data name="EditorCsvErrorInvalidWords" xml:space="preserve"><value>Некоректна колонка Words. Потрібне хоча б одне слово від 3 до 120 символів; слова можна розділяти лише комою, крапкою з комою або пробілом.</value></data>
-  <data name="EditorCsvErrorTooManyWords" xml:space="preserve"><value>Для одного правила дозволено не більше 250 унікальних слів.</value></data>
+  <data name="EditorCsvErrorInvalidWords" xml:space="preserve"><value>Колонка Words містить некоректне слово або розділювач. Слова коротші за 3 символи під час імпорту ігноруються; для інших слів дозволено 3–120 символів.</value></data>
   <data name="EditorCsvErrorUnplayable" xml:space="preserve"><value>Після імпорту «{0}» не матиме жодного непорожнього правила, увімкненого для гри.</value></data>
 </root>

@@ -29,7 +29,7 @@ public sealed class WordRingsEditorAccessAndImportSortingRegressionTests
         Assert.Contains("compareAlphabetically(left.text, right.text)", script, StringComparison.Ordinal);
         Assert.Contains("? sortWords(sourceItems)", script, StringComparison.Ordinal);
         Assert.Contains(": sortRules(sourceItems)", script, StringComparison.Ordinal);
-        Assert.Contains("word-rings-editor-followup.js?v=5", assets, StringComparison.Ordinal);
+        Assert.Contains("word-rings-editor-followup.js?v=6", assets, StringComparison.Ordinal);
     }
 
     private static string ReadWebFile(params string[] parts)

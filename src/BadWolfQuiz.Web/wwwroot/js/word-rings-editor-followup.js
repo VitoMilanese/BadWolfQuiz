@@ -166,7 +166,7 @@
     const splitWords = value => String(value ?? '')
         .split(/[ ,;]+/u)
         .map(word => word.trim())
-        .filter(Boolean);
+        .filter(word => word.length >= minimumWordLength);
 
     const parseConfigurationCsv = text => {
         if (!text) return null;

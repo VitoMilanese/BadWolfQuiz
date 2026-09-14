@@ -110,7 +110,6 @@
   <data name="EditorCsvErrorInvalidRing" xml:space="preserve"><value>Invalid Ring value “{0}”. Only blue, yellow, or red are allowed.</value></data>
   <data name="EditorCsvErrorInvalidRuleText" xml:space="preserve"><value>The Rule column is empty or longer than 300 characters.</value></data>
   <data name="EditorCsvErrorInvalidEnabled" xml:space="preserve"><value>Invalid Enabled value “{0}”. Use true, false, 1, or 0.</value></data>
-  <data name="EditorCsvErrorInvalidWords" xml:space="preserve"><value>The Words column is invalid. At least one 3–120 character word is required; words may be separated only by commas, semicolons, or spaces.</value></data>
-  <data name="EditorCsvErrorTooManyWords" xml:space="preserve"><value>A rule may contain no more than 250 unique words.</value></data>
+  <data name="EditorCsvErrorInvalidWords" xml:space="preserve"><value>The Words column contains an invalid word or separator. Imported words shorter than 3 characters are ignored; all other words must contain 3–120 characters.</value></data>
   <data name="EditorCsvErrorUnplayable" xml:space="preserve"><value>After import, “{0}” would have no non-empty rule enabled for games.</value></data>
 </root>
