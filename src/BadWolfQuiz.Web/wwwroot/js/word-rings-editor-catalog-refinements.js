@@ -19,7 +19,8 @@
         if (current.startsWith('it')) {
             return {
                 direction: 'Ordine', ascending: 'Crescente', descending: 'Decrescente',
-                search: 'Cerca', searchRulesAndWords: 'Cerca condizione o parola',
+                conditionSearch: 'Condizione', conditionPlaceholder: 'Cerca nel testo della condizione',
+                wordSearch: 'Parola', wordPlaceholder: 'Cerca nelle parole della regola',
                 status: 'Stato', all: 'Tutte', active: 'Attive', inactive: 'Inattive',
                 previous: 'Indietro', next: 'Avanti', page: 'Pagina', of: 'di', pagination: 'Pagine',
                 noMatches: 'Nessun risultato.'
@@ -28,7 +29,8 @@
         if (current.startsWith('en')) {
             return {
                 direction: 'Order', ascending: 'Ascending', descending: 'Descending',
-                search: 'Search', searchRulesAndWords: 'Search condition or word',
+                conditionSearch: 'Condition', conditionPlaceholder: 'Search condition text',
+                wordSearch: 'Word', wordPlaceholder: 'Search rule words',
                 status: 'Status', all: 'All', active: 'Active', inactive: 'Inactive',
                 previous: 'Previous', next: 'Next', page: 'Page', of: 'of', pagination: 'Pages',
                 noMatches: 'No matches.'
@@ -36,7 +38,8 @@
         }
         return {
             direction: 'Порядок', ascending: 'За зростанням', descending: 'За спаданням',
-            search: 'Пошук', searchRulesAndWords: 'Пошук умови або слова',
+            conditionSearch: 'Пошук за умовою', conditionPlaceholder: 'Пошук у тексті умови правила',
+            wordSearch: 'Пошук за словом', wordPlaceholder: 'Пошук у списку слів правила',
             status: 'Статус', all: 'Усі', active: 'Активні', inactive: 'Неактивні',
             previous: 'Назад', next: 'Далі', page: 'Сторінка', of: 'з', pagination: 'Сторінки',
             noMatches: 'Нічого не знайдено.'
@@ -127,6 +130,23 @@
         return { label, select };
     };
 
+    const makeSearchControl = (captionText, placeholderText, dataName, value) => {
+        const label = document.createElement('label');
+        label.className = 'word-rings-editor-catalog-control';
+
+        const caption = document.createElement('span');
+        caption.textContent = captionText;
+
+        const input = document.createElement('input');
+        input.type = 'search';
+        input.autocomplete = 'off';
+        input.placeholder = placeholderText;
+        input.value = value;
+        input.dataset[dataName] = '';
+        label.append(caption, input);
+        return { label, input };
+    };
+
     window.fetch = (input, init) => {
         try {
             const requestUrl = input instanceof URL
@@ -183,24 +203,26 @@
         return checkbox instanceof HTMLInputElement ? checkbox.checked : !card.classList.contains('is-disabled');
     };
 
-    const ruleMatches = (card, query, status) => {
+    const ruleMatches = (card, conditionQuery, wordQuery, status) => {
         if (status === 'active' && !isRuleActive(card)) return false;
         if (status === 'inactive' && isRuleActive(card)) return false;
-        if (!query) return true;
 
-        const condition = card.querySelector('h3')?.textContent || '';
-        const words = card.querySelector('.word-rings-editor-rule-words p')?.textContent || '';
-        return fold(condition).includes(query) || fold(words).includes(query);
+        const condition = fold(card.querySelector('h3')?.textContent || '');
+        const words = fold(card.querySelector('.word-rings-editor-rule-words p')?.textContent || '');
+        if (conditionQuery && !condition.includes(conditionQuery)) return false;
+        if (wordQuery && !words.includes(wordQuery)) return false;
+        return true;
     };
 
-    const renderRingRules = (root, ring, cards, state) => {
+    const renderRingRules = (root, cards, state) => {
         root.querySelectorAll('.word-rings-editor-rule-pager').forEach(node => node.remove());
         root.querySelectorAll('.word-rings-editor-rule-filter-empty').forEach(node => node.remove());
         const list = root.querySelector('.word-rings-editor-rule-list');
         if (!(list instanceof HTMLElement)) return;
 
-        const query = fold(state.query);
-        const filtered = cards.filter(card => ruleMatches(card, query, state.status));
+        const conditionQuery = fold(state.conditionQuery);
+        const wordQuery = fold(state.wordQuery);
+        const filtered = cards.filter(card => ruleMatches(card, conditionQuery, wordQuery, state.status));
         const totalPages = Math.max(1, Math.ceil(filtered.length / rulePageSize));
         state.page = Math.min(Math.max(state.page, 1), totalPages);
         cards.forEach(card => { card.hidden = true; });
@@ -221,7 +243,7 @@
         if (filtered.length > rulePageSize) {
             const go = target => {
                 state.page = target;
-                renderRingRules(root, ring, cards, state);
+                renderRingRules(root, cards, state);
             };
             list.before(makePager('top', state.page, totalPages, go));
             list.after(makePager('bottom', state.page, totalPages, go));
@@ -248,46 +270,54 @@
         if (cards.length === 0) return;
 
         const text = labels();
-        const state = ringStates.get(ring) || { query: '', status: 'all', page: 1 };
+        const state = ringStates.get(ring) || {
+            conditionQuery: '',
+            wordQuery: '',
+            status: 'all',
+            page: 1
+        };
         ringStates.set(ring, state);
 
         const controls = document.createElement('div');
         controls.className = 'word-rings-editor-catalog-controls';
         controls.dataset.wordRingsRingRefinementControls = '';
 
-        const searchLabel = document.createElement('label');
-        searchLabel.className = 'word-rings-editor-catalog-control';
-        const searchCaption = document.createElement('span');
-        searchCaption.textContent = text.search;
-        const searchInput = document.createElement('input');
-        searchInput.type = 'search';
-        searchInput.autocomplete = 'off';
-        searchInput.placeholder = text.searchRulesAndWords;
-        searchInput.value = state.query;
-        searchInput.dataset.wordRingsRuleSearch = '';
-        searchLabel.append(searchCaption, searchInput);
-        controls.appendChild(searchLabel);
-
+        const conditionControl = makeSearchControl(
+            text.conditionSearch,
+            text.conditionPlaceholder,
+            'wordRingsRuleConditionSearch',
+            state.conditionQuery);
+        const wordControl = makeSearchControl(
+            text.wordSearch,
+            text.wordPlaceholder,
+            'wordRingsRuleWordSearch',
+            state.wordQuery);
         const statusControl = makeSelectControl(
             text.status,
             'wordRingsRuleStatus',
             [['all', text.all], ['active', text.active], ['inactive', text.inactive]],
             state.status);
-        controls.appendChild(statusControl.label);
+
+        controls.append(conditionControl.label, wordControl.label, statusControl.label);
         toolbar.after(controls);
 
-        searchInput.addEventListener('input', () => {
-            state.query = searchInput.value;
+        conditionControl.input.addEventListener('input', () => {
+            state.conditionQuery = conditionControl.input.value;
             state.page = 1;
-            renderRingRules(root, ring, cards, state);
+            renderRingRules(root, cards, state);
+        });
+        wordControl.input.addEventListener('input', () => {
+            state.wordQuery = wordControl.input.value;
+            state.page = 1;
+            renderRingRules(root, cards, state);
         });
         statusControl.select.addEventListener('change', () => {
             state.status = statusControl.select.value;
             state.page = 1;
-            renderRingRules(root, ring, cards, state);
+            renderRingRules(root, cards, state);
         });
 
-        renderRingRules(root, ring, cards, state);
+        renderRingRules(root, cards, state);
     };
 
     const enhance = () => {

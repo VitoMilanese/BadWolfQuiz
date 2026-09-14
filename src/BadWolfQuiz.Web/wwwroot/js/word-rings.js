@@ -29,22 +29,44 @@
     }
 
     const assignments = new Map();
+    const verdicts = new Map();
+    const lockedMemberships = new Map();
+    let pendingWord = null;
     let wireWord = null;
+    let topZIndex = 10;
 
-    const canonical = value => [...value].sort().join('');
+    const canonical = value => [...String(value ?? '')].sort().join('');
     const progressText = () => root.dataset.progressTemplate
-        .replace('{0}', assignments.size)
+        .replace('{0}', verdicts.size)
         .replace('{1}', expected.size);
+
+    const bringToFront = token => {
+        if (!(token instanceof HTMLElement)) return;
+        topZIndex += 1;
+        token.style.zIndex = String(topZIndex);
+    };
 
     const updateProgress = () => {
         progress.textContent = progressText();
-        checkButton.disabled = assignments.size !== expected.size;
+        checkButton.disabled = pendingWord === null;
+        root.classList.toggle('has-pending-word', pendingWord !== null);
     };
 
-    const resetFeedback = () => {
+    const clearStatus = () => {
         status.textContent = '';
         status.classList.remove('is-success', 'is-error');
-        root.querySelectorAll('.word-rings-word').forEach(word => word.classList.remove('is-correct', 'is-wrong'));
+    };
+
+    const applyVerdict = (token, word) => {
+        if (!(token instanceof HTMLElement)) return;
+        if (!verdicts.has(word)) {
+            token.classList.remove('is-correct', 'is-wrong');
+            return;
+        }
+
+        const correct = verdicts.get(word) === true;
+        token.classList.toggle('is-correct', correct);
+        token.classList.toggle('is-wrong', !correct);
     };
 
     const createPlacedWord = (word, x, y, membership) => {
@@ -62,6 +84,8 @@
         token.style.left = `${x}%`;
         token.style.top = `${y}%`;
         token.draggable = false;
+        applyVerdict(token, word);
+        bringToFront(token);
         placedLayer.append(token);
         wireWord?.(token);
     };
@@ -107,11 +131,18 @@
         };
     };
 
+    const markPending = word => {
+        if (!verdicts.has(word)) {
+            pendingWord = word;
+        }
+    };
+
     const assignToStage = (word, clientX, clientY) => {
         removePlacedWord(word);
         const target = membershipAt(clientX, clientY);
         assignments.set(word, target.membership);
         createPlacedWord(word, target.x, target.y, target.membership);
+        markPending(word);
     };
 
     const assignOutside = word => {
@@ -128,17 +159,36 @@
         token.classList.add('is-outside');
         token.dataset.membership = '';
         token.draggable = false;
+        applyVerdict(token, word);
         outsideList.append(token);
         wireWord?.(token);
+        markPending(word);
     };
 
     const returnToBank = word => {
+        if (verdicts.has(word)) return;
         assignments.delete(word);
         removePlacedWord(word);
+        if (pendingWord === word) {
+            pendingWord = null;
+        }
     };
 
+    const canBegin = word => verdicts.has(word) || pendingWord === null || pendingWord === word;
+
+    const canDropStage = (word, membership) => {
+        const normalized = canonical(membership);
+        if (verdicts.has(word)) {
+            return lockedMemberships.get(word) === normalized;
+        }
+        return pendingWord === null || pendingWord === word;
+    };
+
+    const canDropOutside = word => canDropStage(word, '');
+    const canReturnToBank = word => !verdicts.has(word);
+
     const onPlacementChanged = () => {
-        resetFeedback();
+        clearStatus();
         updateProgress();
     };
 
@@ -151,6 +201,11 @@
             assignToStage,
             assignOutside,
             returnToBank,
+            canBegin,
+            canDropStage,
+            canDropOutside,
+            canReturnToBank,
+            bringToFront,
             onChanged: onPlacementChanged
         });
     }
@@ -167,39 +222,51 @@
 
     resetButton.addEventListener('click', () => {
         assignments.clear();
+        verdicts.clear();
+        lockedMemberships.clear();
+        pendingWord = null;
         placedLayer.innerHTML = '';
         outsideList.innerHTML = '';
         wordList.querySelectorAll('.word-rings-word').forEach(word => {
             word.hidden = false;
             word.draggable = false;
+            word.style.zIndex = '';
             word.classList.remove('is-correct', 'is-wrong', 'is-placed', 'is-dragging');
         });
-        resetFeedback();
+        clearStatus();
         updateProgress();
     });
 
     checkButton.addEventListener('click', () => {
-        if (assignments.size !== expected.size) {
-            status.textContent = root.dataset.placeAll;
-            status.classList.add('is-error');
-            return;
-        }
+        if (pendingWord === null || !assignments.has(pendingWord)) return;
 
-        let errors = 0;
-        assignments.forEach((actual, word) => {
-            const correct = canonical(expected.get(word) ?? '') === canonical(actual);
-            if (!correct) errors += 1;
-            root.querySelectorAll(`.word-rings-word[data-word="${CSS.escape(word)}"]`).forEach(token => {
-                token.classList.toggle('is-correct', correct);
-                token.classList.toggle('is-wrong', !correct);
-            });
+        const word = pendingWord;
+        const actual = canonical(assignments.get(word));
+        const correct = canonical(expected.get(word) ?? '') === actual;
+        verdicts.set(word, correct);
+        lockedMemberships.set(word, actual);
+
+        root.querySelectorAll(`.word-rings-word[data-word="${CSS.escape(word)}"]`).forEach(token => {
+            token.classList.toggle('is-correct', correct);
+            token.classList.toggle('is-wrong', !correct);
         });
 
-        status.classList.toggle('is-success', errors === 0);
-        status.classList.toggle('is-error', errors !== 0);
-        status.textContent = errors === 0
-            ? root.dataset.allCorrect
-            : root.dataset.hasErrorsTemplate.replace('{0}', errors);
+        pendingWord = null;
+        const errors = [...verdicts.values()].filter(result => !result).length;
+        status.classList.toggle('is-success', verdicts.size === expected.size && errors === 0);
+        status.classList.toggle('is-error', errors > 0);
+
+        if (verdicts.size === expected.size) {
+            status.textContent = errors === 0
+                ? root.dataset.allCorrect
+                : root.dataset.hasErrorsTemplate.replace('{0}', errors);
+        } else if (correct) {
+            status.textContent = '';
+        } else {
+            status.textContent = root.dataset.hasErrorsTemplate.replace('{0}', errors);
+        }
+
+        updateProgress();
     });
 
     updateProgress();
