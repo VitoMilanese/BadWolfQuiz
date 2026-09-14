@@ -38,7 +38,8 @@ public sealed class WordRingsEditorModel(
 
     public void OnGet(string? ring, int pageNumber = 1)
     {
-        if (string.Equals(ring?.Trim(), "words", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(ring) ||
+            string.Equals(ring.Trim(), "words", StringComparison.OrdinalIgnoreCase))
         {
             IsAllWords = true;
             var totalWords = Store.GetWordCount();

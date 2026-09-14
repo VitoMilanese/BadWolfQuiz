@@ -88,6 +88,7 @@ public sealed class WordRingsRuleStore
     private const int MaximumRuleTextLength = 300;
     private const int MaximumWordsInputLength = 12_000;
     private const int MaximumWordsPerRule = 250;
+    private const int MinimumSingleWordLength = 3;
     private const int MaximumSingleWordLength = 120;
     private const int MaximumCsvRows = 10_000;
 
@@ -640,14 +641,16 @@ public sealed class WordRingsRuleStore
                             WordRingsImportSummary.Empty);
                     }
 
-                    if (additions.Length == 0)
+                    var enabledChanged = existing.IsEnabled != row.Enabled;
+                    if (additions.Length == 0 && !enabledChanged)
                     {
                         continue;
                     }
 
                     next[index] = existing with
                     {
-                        Words = existing.Words.Concat(additions).ToArray()
+                        Words = existing.Words.Concat(additions).ToArray(),
+                        Enabled = row.Enabled
                     };
                     wordsAdded[ringIndex] += additions.Length;
                     changed = true;
@@ -672,7 +675,15 @@ public sealed class WordRingsRuleStore
 
             if (changed)
             {
-                await PersistAsync(next.ToArray());
+                var playableResult = NormalizePlayableRules(next, out var normalized);
+                if (playableResult != WordRingRuleMutationResult.Success)
+                {
+                    return new WordRingsImportResult(
+                        playableResult,
+                        WordRingsImportSummary.Empty);
+                }
+
+                await PersistAsync(normalized);
             }
 
             return new WordRingsImportResult(
@@ -696,7 +707,8 @@ public sealed class WordRingsRuleStore
     private static string? NormalizeSingleWord(string? value)
     {
         var normalized = value?.Trim() ?? string.Empty;
-        if (normalized.Length is <= 0 or > MaximumSingleWordLength ||
+        if (normalized.Length < MinimumSingleWordLength ||
+            normalized.Length > MaximumSingleWordLength ||
             !SingleWordPattern.IsMatch(normalized))
         {
             return null;
@@ -715,9 +727,22 @@ public sealed class WordRingsRuleStore
             return null;
         }
 
-        var words = WordSeparatorPattern
+        var candidates = WordSeparatorPattern
             .Split(input)
             .Where(word => !string.IsNullOrWhiteSpace(word))
+            .ToArray();
+        var normalizedWords = new List<string>(candidates.Length);
+        foreach (var candidate in candidates)
+        {
+            var normalizedWord = NormalizeSingleWord(candidate);
+            if (normalizedWord is null)
+            {
+                return null;
+            }
+            normalizedWords.Add(normalizedWord);
+        }
+
+        var words = normalizedWords
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
@@ -982,7 +1007,7 @@ public sealed class WordRingsRuleStore
 
             rows[key] = existing with
             {
-                Enabled = existing.Enabled || enabled,
+                Enabled = enabled,
                 Words = mergedWords
             };
         }
