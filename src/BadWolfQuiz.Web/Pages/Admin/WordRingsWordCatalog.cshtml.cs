@@ -16,7 +16,11 @@ public sealed class WordRingsWordCatalogModel(IWebHostEnvironment environment) :
     private static readonly StringComparer AlphabeticalComparer =
         StringComparer.Create(CultureInfo.GetCultureInfo("uk-UA"), ignoreCase: true);
 
-    public IActionResult OnGet(string? search, string? sort, int pageNumber = 1)
+    public IActionResult OnGet(
+        string? search,
+        string? sort,
+        string? direction,
+        int pageNumber = 1)
     {
         var query = (search ?? string.Empty).Trim();
         if (query.Length > MaximumSearchLength)
@@ -42,11 +46,21 @@ public sealed class WordRingsWordCatalogModel(IWebHostEnvironment environment) :
         var sortMode = string.Equals(sort, "usage", StringComparison.OrdinalIgnoreCase)
             ? "usage"
             : "alphabetical";
-        words = sortMode == "usage"
-            ? words
+        var directionMode = string.Equals(direction, "desc", StringComparison.OrdinalIgnoreCase)
+            ? "desc"
+            : "asc";
+
+        words = (sortMode, directionMode) switch
+        {
+            ("usage", "desc") => words
                 .OrderByDescending(item => item.TotalRuleCount)
-                .ThenBy(item => item.Word, AlphabeticalComparer)
-            : words.OrderBy(item => item.Word, AlphabeticalComparer);
+                .ThenBy(item => item.Word, AlphabeticalComparer),
+            ("usage", _) => words
+                .OrderBy(item => item.TotalRuleCount)
+                .ThenBy(item => item.Word, AlphabeticalComparer),
+            (_, "desc") => words.OrderByDescending(item => item.Word, AlphabeticalComparer),
+            _ => words.OrderBy(item => item.Word, AlphabeticalComparer)
+        };
 
         var filtered = words.ToArray();
         var totalPages = Math.Max(1, (filtered.Length + PageSize - 1) / PageSize);
@@ -61,6 +75,7 @@ public sealed class WordRingsWordCatalogModel(IWebHostEnvironment environment) :
             success = true,
             search = query,
             sort = sortMode,
+            direction = directionMode,
             pageNumber = currentPage,
             totalPages,
             totalCount = filtered.Length,

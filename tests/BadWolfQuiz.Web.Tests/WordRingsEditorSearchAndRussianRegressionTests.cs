@@ -5,7 +5,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class WordRingsEditorSearchAndRussianRegressionTests
 {
     [Fact]
-    public void Word_catalog_endpoint_is_master_host_only_and_supports_search_and_usage_sorting()
+    public void Word_catalog_endpoint_is_master_host_only_and_supports_search_sort_and_direction()
     {
         var page = ReadWebFile("Pages", "Admin", "WordRingsWordCatalog.cshtml");
         var model = ReadWebFile("Pages", "Admin", "WordRingsWordCatalog.cshtml.cs");
@@ -13,7 +13,11 @@ public sealed class WordRingsEditorSearchAndRussianRegressionTests
         Assert.Contains("/Admin/WordRingsWordCatalog", page, StringComparison.Ordinal);
         Assert.Contains("Authorize(Policy = \"MasterHost\")", model, StringComparison.Ordinal);
         Assert.Contains("CompareOptions.IgnoreCase", model, StringComparison.Ordinal);
+        Assert.Contains("string? direction", model, StringComparison.Ordinal);
+        Assert.Contains("OrderBy(item => item.TotalRuleCount)", model, StringComparison.Ordinal);
         Assert.Contains("OrderByDescending(item => item.TotalRuleCount)", model, StringComparison.Ordinal);
+        Assert.Contains("OrderBy(item => item.Word, AlphabeticalComparer)", model, StringComparison.Ordinal);
+        Assert.Contains("OrderByDescending(item => item.Word, AlphabeticalComparer)", model, StringComparison.Ordinal);
         Assert.Contains("PageSize = 25", model, StringComparison.Ordinal);
     }
 
@@ -36,16 +40,27 @@ public sealed class WordRingsEditorSearchAndRussianRegressionTests
     }
 
     [Fact]
-    public void Ring_tabs_show_rule_statistics_and_rule_filtering()
+    public void Ring_tabs_support_condition_word_and_enabled_state_filtering()
     {
         var editor = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml");
-        var script = ReadWebFile("wwwroot", "js", "word-rings-editor-catalog-paging.js");
+        var pagingScript = ReadWebFile("wwwroot", "js", "word-rings-editor-catalog-paging.js");
+        var refinements = ReadWebFile("wwwroot", "js", "word-rings-editor-catalog-refinements.js");
+        var styles = ReadWebFile("wwwroot", "css", "word-rings-editor-search.css");
+        var assets = ReadWebFile("TagHelpers", "WordRingsEditorAssetsTagHelper.cs");
 
         Assert.Contains("EditorRingStats", editor, StringComparison.Ordinal);
         Assert.Contains("Model.Rules.Count(rule => rule.IsEnabled)", editor, StringComparison.Ordinal);
-        Assert.Contains("searchRules", script, StringComparison.Ordinal);
-        Assert.Contains("filtered = cards.filter", script, StringComparison.Ordinal);
-        Assert.Contains("ringFilters", script, StringComparison.Ordinal);
+        Assert.Contains("searchRules", pagingScript, StringComparison.Ordinal);
+        Assert.Contains(".word-rings-editor-rule-words p", refinements, StringComparison.Ordinal);
+        Assert.Contains("['all', text.all]", refinements, StringComparison.Ordinal);
+        Assert.Contains("['active', text.active]", refinements, StringComparison.Ordinal);
+        Assert.Contains("['inactive', text.inactive]", refinements, StringComparison.Ordinal);
+        Assert.Contains("wordRingsRuleStatus", refinements, StringComparison.Ordinal);
+        Assert.Contains("wordRingsWordDirection", refinements, StringComparison.Ordinal);
+        Assert.Contains("display: grid", styles, StringComparison.Ordinal);
+        Assert.Contains(".word-rings-editor-mark-caption", styles, StringComparison.Ordinal);
+        Assert.Contains("display: none !important", styles, StringComparison.Ordinal);
+        Assert.Contains("word-rings-editor-catalog-refinements.js?v=1", assets, StringComparison.Ordinal);
     }
 
     private static string ReadWebFile(params string[] parts) => File.ReadAllText(FindWebFile(parts));
