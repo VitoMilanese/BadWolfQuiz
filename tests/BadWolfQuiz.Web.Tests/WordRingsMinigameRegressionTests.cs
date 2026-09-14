@@ -347,7 +347,7 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("OnPostDeleteWordAsync", model);
         Assert.Contains("OnPostImportCsvAsync", model);
         Assert.Contains("WordPageSize = 25", model);
-        Assert.Contains("MembershipRulePageSize = 50", model);
+        Assert.Contains("MembershipRulePageSize = 10", model);
         Assert.Contains("MaximumCsvImportBytes = 5L * 1024 * 1024", model);
         Assert.Contains("GetWordsPage", store);
         Assert.Contains("ApplyWordMembershipChangesAsync", store);
@@ -361,7 +361,7 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("word-rings-editor-tabs", styles);
         Assert.Contains("repeat(4, minmax(0, 1fr))", styles);
         Assert.Contains("word-rings-editor-inline-spinner", styles);
-        Assert.Contains("word-rings-words.css?v=1", assets);
+        Assert.Contains("word-rings-words.css?v=2", assets);
         Assert.Contains("WordRingsEditorAssetsTagHelper", imports);
         Assert.Contains("523.25", script);
         Assert.Contains("659.25", script);

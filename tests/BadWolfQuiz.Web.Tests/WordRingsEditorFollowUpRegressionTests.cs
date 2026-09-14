@@ -28,7 +28,8 @@ public sealed class WordRingsEditorFollowUpRegressionTests
         Assert.Contains("response.clone().json()", script);
         Assert.Contains("data-word-rings-import-detail", script);
         Assert.Contains("word-rings-editor-import-details-dialog", script);
-        Assert.Contains("importDetailPageSize = 5", script);
+        Assert.Contains("importRuleDetailPageSize = 5", script);
+        Assert.Contains("importNewWordDetailPageSize = 50", script);
         Assert.Contains("word-rings-editor-import-detail-eye", script);
         Assert.Contains("data-word-rings-import-details-page=\"last\"", script);
         Assert.Contains("changeImportDetailsPage", script);
@@ -41,7 +42,7 @@ public sealed class WordRingsEditorFollowUpRegressionTests
         Assert.Contains("word-rings-editor-import-details-pager", styles);
         Assert.Contains("word-rings-editor-import-rule-detail-blue", styles);
         Assert.Contains("word-rings-editor-followup.css?v=3", assets);
-        Assert.Contains("word-rings-editor-followup.js?v=4", assets);
+        Assert.Contains("word-rings-editor-followup.js?v=5", assets);
     }
 
     [Fact]
@@ -71,6 +72,7 @@ public sealed class WordRingsEditorFollowUpRegressionTests
             var blueMembership = store.GetRuleMembershipPage(
                 WordRingColor.Blue,
                 "КІТ",
+                includedOnly: false,
                 0,
                 25);
             Assert.Contains(blueMembership, item => item.ContainsWord);

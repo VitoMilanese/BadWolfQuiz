@@ -3,7 +3,10 @@
 
     const rootSelector = '[data-word-rings-editor-shell]';
     const minimumWordLength = 3;
-    const importDetailPageSize = 5;
+    const importRuleDetailPageSize = 5;
+    const importNewWordDetailPageSize = 50;
+    const importDetailPageSize = type =>
+        type === 'newWords' ? importNewWordDetailPageSize : importRuleDetailPageSize;
     const originalFetch = window.fetch.bind(window);
     let lastImportDetails = emptyImportDetails();
     let activeImportDetailType = '';
@@ -447,10 +450,11 @@
         const items = activeImportDetailType === 'newWords'
             ? sortWords(sourceItems)
             : sortRules(sourceItems);
-        const totalPages = Math.max(1, Math.ceil(items.length / importDetailPageSize));
+        const pageSize = importDetailPageSize(activeImportDetailType);
+        const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
         activeImportDetailPage = Math.min(Math.max(activeImportDetailPage, 1), totalPages);
-        const start = (activeImportDetailPage - 1) * importDetailPageSize;
-        const pageItems = items.slice(start, start + importDetailPageSize);
+        const start = (activeImportDetailPage - 1) * pageSize;
+        const pageItems = items.slice(start, start + pageSize);
 
         body.replaceChildren();
         if (pageItems.length === 0) {
@@ -479,7 +483,7 @@
         if (next instanceof HTMLButtonElement) next.disabled = isLast;
         if (last instanceof HTMLButtonElement) last.disabled = isLast;
         status.textContent = `${text.page} ${activeImportDetailPage} ${text.of} ${totalPages}`;
-        pager.hidden = items.length <= importDetailPageSize;
+        pager.hidden = items.length <= pageSize;
     };
 
     const openImportDetails = type => {
@@ -505,7 +509,8 @@
         const items = Array.isArray(lastImportDetails[activeImportDetailType])
             ? lastImportDetails[activeImportDetailType]
             : [];
-        const totalPages = Math.max(1, Math.ceil(items.length / importDetailPageSize));
+        const totalPages = Math.max(1, Math.ceil(
+            items.length / importDetailPageSize(activeImportDetailType)));
 
         if (action === 'first') activeImportDetailPage = 1;
         else if (action === 'previous') activeImportDetailPage = Math.max(1, activeImportDetailPage - 1);

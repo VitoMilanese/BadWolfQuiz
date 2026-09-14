@@ -90,4 +90,13 @@
   <data name="EditorPreviousPage" xml:space="preserve"><value>Precedente</value></data>
   <data name="EditorNextPage" xml:space="preserve"><value>Successiva</value></data>
   <data name="EditorPageStatus" xml:space="preserve"><value>Pagina {0} di {1}</value></data>
+  <data name="EditorMembershipIncludedOnly" xml:space="preserve"><value>Mostra solo le regole che contengono questa parola</value></data>
+  <data name="EditorDeleteAllWordsAria" xml:space="preserve"><value>Elimina tutte le parole</value></data>
+  <data name="EditorDeleteAllWordsTitle" xml:space="preserve"><value>Eliminare tutte le parole?</value></data>
+  <data name="EditorDeleteAllWordsPrompt" xml:space="preserve"><value>Tutte le parole saranno rimosse da ogni regola dei tre anelli. Le regole rimarranno. Questa azione non può essere annullata.</value></data>
+  <data name="EditorAllWordsDeleted" xml:space="preserve"><value>Tutte le parole sono state rimosse da ogni regola.</value></data>
+  <data name="EditorDeleteAllRulesAria" xml:space="preserve"><value>Elimina tutte le regole di questo anello</value></data>
+  <data name="EditorDeleteAllRulesTitle" xml:space="preserve"><value>Eliminare tutte le regole dell’anello?</value></data>
+  <data name="EditorDeleteAllRulesPrompt" xml:space="preserve"><value>Tutte le regole di questo anello saranno eliminate. Questa azione non può essere annullata.</value></data>
+  <data name="EditorAllRulesDeleted" xml:space="preserve"><value>Tutte le regole dell’anello sono state eliminate.</value></data>
 </root>

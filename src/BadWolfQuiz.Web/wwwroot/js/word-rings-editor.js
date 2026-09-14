@@ -8,6 +8,7 @@
     let membershipRequestId = 0;
     let membershipRing = 'blue';
     let membershipPage = 1;
+    let membershipIncludedOnly = false;
     const membershipOriginal = new Map();
     const membershipPending = new Map();
     let transferRunning = false;
@@ -196,6 +197,9 @@
         membershipRequestId += 1;
         membershipRing = 'blue';
         membershipPage = 1;
+        membershipIncludedOnly = false;
+        const includedOnly = membershipDialog()?.querySelector('[data-word-rings-membership-included-only]');
+        if (includedOnly instanceof HTMLInputElement) includedOnly.checked = false;
         membershipOriginal.clear();
         membershipPending.clear();
     };
@@ -274,6 +278,9 @@
         const url = new URL(root.dataset.wordRulesUrl, window.location.origin);
         url.searchParams.set('ring', realRing(ring));
         url.searchParams.set('pageNumber', String(Math.max(1, pageNumber)));
+        if (membershipIncludedOnly) {
+            url.searchParams.set('includedOnly', 'true');
+        }
         if (input instanceof HTMLInputElement && input.value.trim()) {
             url.searchParams.set('word', input.value.trim());
         }
@@ -307,6 +314,8 @@
         const input = membershipWordInput();
         const title = dialog?.querySelector('[data-word-rings-membership-title]');
         const ringSelect = dialog?.querySelector('[data-word-rings-membership-ring]');
+        const filterWrap = dialog?.querySelector('[data-word-rings-membership-filter-wrap]');
+        const includedOnly = dialog?.querySelector('[data-word-rings-membership-included-only]');
         const root = editorRoot();
         if (!(dialog instanceof HTMLDialogElement) || !(input instanceof HTMLInputElement)) return;
 
@@ -322,6 +331,9 @@
         if (ringSelect instanceof HTMLSelectElement) {
             ringSelect.value = 'blue';
         }
+        if (filterWrap instanceof HTMLElement) filterWrap.hidden = mode !== 'edit';
+        if (includedOnly instanceof HTMLInputElement) includedOnly.checked = false;
+        membershipIncludedOnly = false;
 
         if (!dialog.open) dialog.showModal();
         if (mode === 'add') input.focus();
@@ -618,6 +630,22 @@
             return;
         }
 
+        const deleteAllWordsButton = event.target.closest('[data-delete-all-word-rings-words]');
+        if (deleteAllWordsButton instanceof HTMLButtonElement) {
+            const dialog = document.querySelector('[data-word-rings-delete-all-words-dialog]');
+            if (dialog instanceof HTMLDialogElement && !dialog.open) dialog.showModal();
+            return;
+        }
+
+        const deleteAllRulesButton = event.target.closest('[data-delete-all-word-rings-rules]');
+        if (deleteAllRulesButton instanceof HTMLButtonElement) {
+            const dialog = document.querySelector('[data-word-rings-delete-all-rules-dialog]');
+            const ring = dialog?.querySelector('[data-word-rings-delete-all-rules-ring]');
+            if (ring instanceof HTMLInputElement) ring.value = realRing(activeTab());
+            if (dialog instanceof HTMLDialogElement && !dialog.open) dialog.showModal();
+            return;
+        }
+
         const editWordButton = event.target.closest('[data-edit-word-rings-word]');
         if (editWordButton instanceof HTMLButtonElement) {
             openMembershipEditor('edit', editWordButton.dataset.word ?? '');
@@ -672,6 +700,13 @@
         if (checkbox instanceof HTMLInputElement) {
             const form = checkbox.form;
             if (form) void submitMutation(form);
+            return;
+        }
+
+        const includedOnly = event.target.closest('[data-word-rings-membership-included-only]');
+        if (includedOnly instanceof HTMLInputElement) {
+            membershipIncludedOnly = includedOnly.checked;
+            void loadMembershipRules(membershipRing, 1);
             return;
         }
 

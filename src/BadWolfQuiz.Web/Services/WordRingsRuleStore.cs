@@ -148,8 +148,7 @@ public sealed class WordRingsRuleStore
     private WordRingsRuleStore(string contentRootPath)
     {
         _path = Path.Combine(contentRootPath, "App_Data", "word-rings-rules.json");
-        var rules = EnsureEveryRingHasRule(LoadFromDisk());
-        _state = BuildState(rules);
+        _state = BuildState(LoadFromDisk());
     }
 
     public static WordRingsRuleStore Get(IWebHostEnvironment environment)
@@ -173,6 +172,19 @@ public sealed class WordRingsRuleStore
     public int GetRuleCount(WordRingColor ring) =>
         Snapshot.Rules.Count(rule => rule.Ring == ring);
 
+    public int GetRuleMembershipCount(
+        WordRingColor ring,
+        string? word,
+        bool includedOnly)
+    {
+        var normalizedWord = NormalizeSingleWord(word);
+        return Snapshot.Rules.Count(rule =>
+            rule.Ring == ring &&
+            (!includedOnly ||
+             (normalizedWord is not null &&
+              rule.Words.Contains(normalizedWord, StringComparer.OrdinalIgnoreCase))));
+    }
+
     public int GetWordCount() => Snapshot.Words.Count;
 
     public IReadOnlyList<WordRingsWordItem> GetWordsPage(int skip, int take)
@@ -185,6 +197,7 @@ public sealed class WordRingsRuleStore
     public IReadOnlyList<WordRingRuleMembershipItem> GetRuleMembershipPage(
         WordRingColor ring,
         string? word,
+        bool includedOnly,
         int skip,
         int take)
     {
@@ -194,6 +207,10 @@ public sealed class WordRingsRuleStore
         var normalizedWord = NormalizeSingleWord(word);
         return Snapshot.Rules
             .Where(rule => rule.Ring == ring)
+            .Where(rule =>
+                !includedOnly ||
+                (normalizedWord is not null &&
+                 rule.Words.Contains(normalizedWord, StringComparer.OrdinalIgnoreCase)))
             .OrderBy(rule => rule.Text, StringComparer.CurrentCultureIgnoreCase)
             .Skip(skip)
             .Take(take)
@@ -208,13 +225,21 @@ public sealed class WordRingsRuleStore
 
     public WordRingsPuzzle CreatePuzzle()
     {
-        var snapshot = EnsureEveryRingHasRule(Snapshot.Rules);
-        var activeSnapshot = snapshot
+        var activeSnapshot = Snapshot.Rules
             .Where(rule => rule.IsEnabled && rule.Words.Count > 0)
             .ToArray();
         var blue = Pick(activeSnapshot, WordRingColor.Blue);
         var yellow = Pick(activeSnapshot, WordRingColor.Yellow);
         var red = Pick(activeSnapshot, WordRingColor.Red);
+        if (blue is null || yellow is null || red is null)
+        {
+            return new WordRingsPuzzle(
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                [],
+                new Dictionary<string, string>(StringComparer.Ordinal));
+        }
         var selected = new[] { blue, yellow, red };
 
         var comparer = StringComparer.OrdinalIgnoreCase;
@@ -522,6 +547,49 @@ public sealed class WordRingsRuleStore
                 return playableResult;
             }
 
+            await PersistAsync(next);
+            return WordRingRuleMutationResult.Success;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<WordRingRuleMutationResult> DeleteAllWordsAsync(
+        CancellationToken cancellationToken)
+    {
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            var rules = Snapshot.Rules;
+            if (!rules.Any(rule => rule.Words.Count > 0))
+            {
+                return WordRingRuleMutationResult.Success;
+            }
+
+            var next = rules
+                .Select(rule => rule with { Words = Array.Empty<string>() })
+                .ToArray();
+            await PersistAsync(next);
+            return WordRingRuleMutationResult.Success;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<WordRingRuleMutationResult> DeleteAllRulesAsync(
+        WordRingColor ring,
+        CancellationToken cancellationToken)
+    {
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            var next = Snapshot.Rules
+                .Where(rule => rule.Ring != ring)
+                .ToArray();
             await PersistAsync(next);
             return WordRingRuleMutationResult.Success;
         }
@@ -858,7 +926,7 @@ public sealed class WordRingsRuleStore
         return WordRingRuleMutationResult.Success;
     }
 
-    private static WordRingRule Pick(
+    private static WordRingRule? Pick(
         IReadOnlyList<WordRingRule> rules,
         WordRingColor ring)
     {
@@ -868,7 +936,9 @@ public sealed class WordRingsRuleStore
                 rule.IsEnabled &&
                 rule.Words.Count > 0)
             .ToArray();
-        return candidates[Random.Shared.Next(candidates.Length)];
+        return candidates.Length == 0
+            ? null
+            : candidates[Random.Shared.Next(candidates.Length)];
     }
 
     private static void Shuffle<T>(IList<T> items)

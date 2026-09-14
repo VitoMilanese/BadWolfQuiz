@@ -355,3 +355,46 @@
         grid-row: 1;
     }
 }
+
+
+.word-rings-editor-rule-toolbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.word-rings-editor-membership-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-2) 72%, transparent);
+    cursor: pointer;
+    font-weight: 850;
+}
+
+.word-rings-editor-membership-filter[hidden] {
+    display: none;
+}
+
+.word-rings-editor-membership-filter input {
+    width: 19px;
+    height: 19px;
+    margin: 0;
+    accent-color: var(--gold);
+}
+
+.word-rings-editor-delete-all-button {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 600px) {
+    .word-rings-editor-word-toolbar-actions .word-rings-editor-delete-all-button {
+        width: 48px;
+        justify-self: end;
+    }
+}

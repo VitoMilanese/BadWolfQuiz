@@ -30,15 +30,15 @@ The Master Host editor is available at `/Admin/WordRingsEditor`. Its first tab i
 
 The **All words** tab derives one case-insensitive catalog from every word referenced by any rule. The catalog is sorted alphabetically using Ukrainian collation and displayed in pages of 25, with the same pager shown above and below the list. Each row also shows how many rules in each ring currently contain the word.
 
-Every word row provides edit and delete actions. Edit opens a styled dialog where the host selects a ring and browses that ring's rules in pages of 25. A checkbox is checked when the current word belongs to that rule. Changes can be made across multiple rule pages and rings, then saved as one batched mutation so the JSON rule file is written only once. The **Add word** action uses the same membership dialog with an editable word field; a word must contain at least three characters and becomes part of the catalog once it is assigned to at least one rule.
+Every word row provides edit and delete actions. Edit opens a styled dialog where the host selects a ring and browses that ring's rules in pages of 10. A checkbox is checked when the current word belongs to that rule, and an optional filter shows only rules that already contain the word. Changes can be made across multiple rule pages and rings, then saved as one batched mutation so the JSON rule file is written only once. The **Add word** action uses the same membership dialog with an editable word field; a word must contain at least three characters and becomes part of the catalog once it is assigned to at least one rule.
 
 Words are presented in uppercase throughout the All Words list, rule word lists, word add/edit field, and delete confirmation, while comparisons and de-duplication remain case-insensitive.
 
-Deleting a word removes it from every rule in all three rings. Empty rules are automatically disabled when possible. An operation is rejected if it would leave a ring without any enabled non-empty rule, because such a ring could no longer generate a playable game.
+Deleting a single word removes it from every rule in all three rings. The All Words toolbar also has a destructive delete-all action, guarded by a styled confirmation dialog, that clears every word from every rule while keeping the rules themselves. If the configuration no longer has a playable enabled rule for each color, the game opens with an empty puzzle instead of failing.
 
 ### Ring rule tabs
 
-Each color tab lists the persistent rules for that ring and provides a **New rule** action. A rule contains the condition text, a set of words, and an enabled/disabled game-participation flag.
+Each color tab lists the persistent rules for that ring and provides a **New rule** action plus a destructive delete-all action for that ring, guarded by a styled confirmation dialog. A rule contains the condition text, a set of words, and an enabled/disabled game-participation flag.
 
 Rules can be created, edited, enabled/disabled, and deleted without a full page refresh. The pencil action between the enabled checkbox and trash action opens the same styled editor dialog pattern and allows both the condition text and attached words to be changed. All rule mutations are submitted through AJAX and the visible rule list is refreshed in-place.
 
@@ -67,3 +67,5 @@ Import and export use the same three-note Web Audio completion tone as quiz impo
 ## Performance notes
 
 The rule store keeps one immutable in-memory snapshot containing both rules and a precomputed unique-word index. Read-only word paging therefore does not repeatedly flatten and sort every rule. Mutations are serialized through the existing store gate, build a new snapshot only after a successful write, and publish it atomically. Word membership edits are batched, and a CSV merge performs a single persistence write regardless of how many rows changed.
+
+New-word import details use pages of 50 entries, while imported-rule detail dialogs keep their five-item pages.

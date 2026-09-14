@@ -137,6 +137,15 @@
                         @WordRingsLocalizer["EditorImportCsv"]
                     </button>
                 </form>
+                <button class="button word-rings-rule-delete word-rings-editor-delete-all-button"
+                        type="button"
+                        data-delete-all-word-rings-words
+                        aria-label="@WordRingsLocalizer["EditorDeleteAllWordsAria"]"
+                        title="@WordRingsLocalizer["EditorDeleteAllWordsAria"]">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5" />
+                    </svg>
+                </button>
             </div>
         </section>
 
@@ -259,9 +268,20 @@
                     <h2>@activeRingTitle</h2>
                 </div>
             </div>
-            <button class="button button-primary" type="button" data-open-word-rings-create>
-                + @WordRingsLocalizer["EditorAddRule"]
-            </button>
+            <div class="word-rings-editor-rule-toolbar-actions">
+                <button class="button button-primary" type="button" data-open-word-rings-create>
+                    + @WordRingsLocalizer["EditorAddRule"]
+                </button>
+                <button class="button word-rings-rule-delete word-rings-editor-delete-all-button"
+                        type="button"
+                        data-delete-all-word-rings-rules
+                        aria-label="@WordRingsLocalizer["EditorDeleteAllRulesAria"]"
+                        title="@WordRingsLocalizer["EditorDeleteAllRulesAria"]">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5" />
+                    </svg>
+                </button>
+            </div>
         </section>
 
         @if (Model.Rules.Count == 0)
@@ -466,6 +486,13 @@
             </select>
         </label>
 
+        <label class="word-rings-editor-membership-filter"
+               data-word-rings-membership-filter-wrap
+               hidden>
+            <input type="checkbox" data-word-rings-membership-included-only />
+            <span>@WordRingsLocalizer["EditorMembershipIncludedOnly"]</span>
+        </label>
+
         <div class="word-rings-editor-membership-list-wrap">
             <div class="word-rings-editor-membership-loading" data-word-rings-membership-loading hidden>
                 <span class="word-rings-editor-inline-spinner" aria-hidden="true"></span>
@@ -505,6 +532,41 @@
         <p class="dialog-target" data-word-rings-delete-word-target></p>
         <p class="dialog-warning">@WordRingsLocalizer["EditorDeleteWordPrompt"]</p>
 
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary" type="button" data-close-word-rings-dialog>@WordRingsLocalizer["EditorCancel"]</button>
+            <button class="button word-rings-rule-delete-confirm" type="submit">@WordRingsLocalizer["EditorDelete"]</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog class="app-dialog word-rings-editor-dialog" data-word-rings-delete-all-words-dialog>
+    <form method="post"
+          asp-page-handler="DeleteAllWords"
+          class="dialog-card dialog-card-danger word-rings-editor-dialog-card"
+          data-word-rings-ajax-form>
+        <div class="dialog-heading">
+            <div><h2>@WordRingsLocalizer["EditorDeleteAllWordsTitle"]</h2></div>
+            <button class="dialog-close" type="button" data-close-word-rings-dialog aria-label="@WordRingsLocalizer["EditorCancel"]">×</button>
+        </div>
+        <p class="dialog-warning">@WordRingsLocalizer["EditorDeleteAllWordsPrompt"]</p>
+        <div class="form-actions dialog-actions">
+            <button class="button button-secondary" type="button" data-close-word-rings-dialog>@WordRingsLocalizer["EditorCancel"]</button>
+            <button class="button word-rings-rule-delete-confirm" type="submit">@WordRingsLocalizer["EditorDelete"]</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog class="app-dialog word-rings-editor-dialog" data-word-rings-delete-all-rules-dialog>
+    <form method="post"
+          asp-page-handler="DeleteAllRules"
+          class="dialog-card dialog-card-danger word-rings-editor-dialog-card"
+          data-word-rings-ajax-form>
+        <input type="hidden" name="ring" data-word-rings-delete-all-rules-ring />
+        <div class="dialog-heading">
+            <div><h2>@WordRingsLocalizer["EditorDeleteAllRulesTitle"]</h2></div>
+            <button class="dialog-close" type="button" data-close-word-rings-dialog aria-label="@WordRingsLocalizer["EditorCancel"]">×</button>
+        </div>
+        <p class="dialog-warning">@WordRingsLocalizer["EditorDeleteAllRulesPrompt"]</p>
         <div class="form-actions dialog-actions">
             <button class="button button-secondary" type="button" data-close-word-rings-dialog>@WordRingsLocalizer["EditorCancel"]</button>
             <button class="button word-rings-rule-delete-confirm" type="submit">@WordRingsLocalizer["EditorDelete"]</button>

@@ -9,7 +9,7 @@ public sealed class WordRingsEditorCatalogPagingRegressionTests
         var assets = ReadWebFile("TagHelpers", "WordRingsEditorAssetsTagHelper.cs");
         var script = ReadWebFile("wwwroot", "js", "word-rings-editor-catalog-paging.js");
 
-        Assert.Contains("MembershipRulePageSize = 50", model, StringComparison.Ordinal);
+        Assert.Contains("MembershipRulePageSize = 10", model, StringComparison.Ordinal);
         Assert.Contains("rulePageSize = 25", script, StringComparison.Ordinal);
         Assert.Contains("word-rings-editor-word-usage-total", script, StringComparison.Ordinal);
         Assert.Contains("usage.prepend(badge)", script, StringComparison.Ordinal);

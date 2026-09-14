@@ -90,4 +90,13 @@
   <data name="EditorPreviousPage" xml:space="preserve"><value>Previous</value></data>
   <data name="EditorNextPage" xml:space="preserve"><value>Next</value></data>
   <data name="EditorPageStatus" xml:space="preserve"><value>Page {0} of {1}</value></data>
+  <data name="EditorMembershipIncludedOnly" xml:space="preserve"><value>Show only rules that contain this word</value></data>
+  <data name="EditorDeleteAllWordsAria" xml:space="preserve"><value>Delete all words</value></data>
+  <data name="EditorDeleteAllWordsTitle" xml:space="preserve"><value>Delete all words?</value></data>
+  <data name="EditorDeleteAllWordsPrompt" xml:space="preserve"><value>All words will be removed from every rule in all three rings. The rules themselves will remain. This action cannot be undone.</value></data>
+  <data name="EditorAllWordsDeleted" xml:space="preserve"><value>All words were removed from every rule.</value></data>
+  <data name="EditorDeleteAllRulesAria" xml:space="preserve"><value>Delete all rules for this ring</value></data>
+  <data name="EditorDeleteAllRulesTitle" xml:space="preserve"><value>Delete all ring rules?</value></data>
+  <data name="EditorDeleteAllRulesPrompt" xml:space="preserve"><value>All rules for this ring will be deleted. This action cannot be undone.</value></data>
+  <data name="EditorAllRulesDeleted" xml:space="preserve"><value>All rules for the ring were deleted.</value></data>
 </root>

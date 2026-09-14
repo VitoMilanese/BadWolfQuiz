@@ -15,7 +15,7 @@ public sealed class WordRingsEditorModel(
     IStringLocalizer<WordRingsResource> localizer) : PageModel
 {
     private const int WordPageSize = 25;
-    private const int MembershipRulePageSize = 50;
+    private const int MembershipRulePageSize = 10;
     private const long MaximumCsvImportBytes = 5L * 1024 * 1024;
     private const int MaximumMembershipChanges = 2_000;
 
@@ -57,10 +57,11 @@ public sealed class WordRingsEditorModel(
     public IActionResult OnGetWordRules(
         string? word,
         string? ring,
-        int pageNumber = 1)
+        int pageNumber = 1,
+        bool includedOnly = false)
     {
         var color = ParseRing(ring);
-        var totalRules = Store.GetRuleCount(color);
+        var totalRules = Store.GetRuleMembershipCount(color, word, includedOnly);
         var pagination = MinigameEditorPagination.Create(
             pageNumber,
             totalRules,
@@ -68,6 +69,7 @@ public sealed class WordRingsEditorModel(
         var items = Store.GetRuleMembershipPage(
             color,
             word,
+            includedOnly,
             pagination.Skip,
             MembershipRulePageSize);
 
@@ -199,6 +201,22 @@ public sealed class WordRingsEditorModel(
     {
         var result = await Store.DeleteWordAsync(word, cancellationToken);
         return WordMutationResponse(result, "EditorWordDeleted");
+    }
+
+    public async Task<IActionResult> OnPostDeleteAllWordsAsync(
+        CancellationToken cancellationToken)
+    {
+        var result = await Store.DeleteAllWordsAsync(cancellationToken);
+        return WordMutationResponse(result, "EditorAllWordsDeleted");
+    }
+
+    public async Task<IActionResult> OnPostDeleteAllRulesAsync(
+        string? ring,
+        CancellationToken cancellationToken)
+    {
+        var color = ParseRing(ring);
+        var result = await Store.DeleteAllRulesAsync(color, cancellationToken);
+        return MutationResponse(result, ToKey(color), "EditorAllRulesDeleted");
     }
 
     public async Task<IActionResult> OnPostImportCsvAsync(
