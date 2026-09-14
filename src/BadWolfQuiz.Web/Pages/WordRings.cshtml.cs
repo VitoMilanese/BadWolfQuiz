@@ -5,13 +5,21 @@ namespace BadWolfQuiz.Web.Pages;
 
 public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
 {
-    private const int MaximumDisplayedWords = 10;
+    private const int MaximumBankWords = 10;
+    private const int MaximumGameWords = 20;
+    private const int CorrectWordsToWin = 10;
     private const int PuzzleSelectionAttempts = 32;
 
     public WordRingsPuzzle Puzzle { get; private set; } = null!;
     public IReadOnlyList<string> DisplayedWords { get; private set; } = [];
+    public IReadOnlyList<string> InitialWords { get; private set; } = [];
+    public IReadOnlyList<string> QueuedWords { get; private set; } = [];
     public IReadOnlyDictionary<string, string> DisplayedExpected { get; private set; } =
         new Dictionary<string, string>(StringComparer.Ordinal);
+
+    public int BankWordLimit => MaximumBankWords;
+    public int GameWordLimit => MaximumGameWords;
+    public int CorrectWordTarget => CorrectWordsToWin;
 
     public void OnGet(
         string? previousBlueRule,
@@ -30,6 +38,8 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
 
         Puzzle = selection.Puzzle;
         DisplayedWords = selection.Words;
+        InitialWords = DisplayedWords.Take(MaximumBankWords).ToArray();
+        QueuedWords = DisplayedWords.Skip(MaximumBankWords).ToArray();
         DisplayedExpected = Puzzle.Expected
             .Where(item => DisplayedWords.Contains(item.Key, StringComparer.Ordinal))
             .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
@@ -196,30 +206,29 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
                 .OrderBy(_ => Random.Shared.Next())
                 .ToList();
 
-            var targetCount = Math.Min(MaximumDisplayedWords, puzzle.Words.Count);
+            var targetCount = Math.Min(MaximumGameWords, puzzle.Words.Count);
             var minimumMatchingCount = Math.Min(
                 matchingWords.Count,
                 (int)Math.Ceiling(targetCount * 0.8));
-            var selected = SelectBalancedMatchingWords(
+            var outsideCount = Math.Min(
+                outsideWords.Count,
+                Math.Max(0, targetCount - minimumMatchingCount));
+            var matchingCount = Math.Min(
+                matchingWords.Count,
+                targetCount - outsideCount);
+
+            var selectedMatching = SelectBalancedMatchingWords(
                     matchingWords,
-                    minimumMatchingCount)
-                .ToList();
-            var selectedSet = selected.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                    matchingCount)
+                .ToArray();
+            var selectedOutside = outsideWords
+                .Take(Math.Max(0, targetCount - selectedMatching.Length))
+                .ToArray();
 
-            selected.AddRange(
-                outsideWords.Take(Math.Max(0, targetCount - selected.Count)));
-            if (selected.Count < targetCount)
-            {
-                selected.AddRange(
-                    matchingWords
-                        .Where(candidate => !selectedSet.Contains(candidate.Word))
-                        .Select(candidate => candidate.Word)
-                        .Take(targetCount - selected.Count));
-            }
-
-            last = selected
-                .OrderBy(_ => Random.Shared.Next())
-                .Take(MaximumDisplayedWords)
+            last = InterleaveOutsideWords(
+                    selectedMatching,
+                    selectedOutside,
+                    targetCount)
                 .ToArray();
 
             if (!HaveSameWords(last, previousWords))
@@ -235,6 +244,51 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         }
 
         return last;
+    }
+
+    private static IReadOnlyList<string> InterleaveOutsideWords(
+        IReadOnlyList<string> matching,
+        IReadOnlyList<string> outside,
+        int targetCount)
+    {
+        var totalCount = Math.Min(targetCount, matching.Count + outside.Count);
+        if (totalCount == 0)
+        {
+            return [];
+        }
+
+        var result = new List<string>(totalCount);
+        var matchingIndex = 0;
+        var outsideIndex = 0;
+        var outsideCount = Math.Min(outside.Count, totalCount);
+
+        for (var index = 0; index < totalCount; index++)
+        {
+            var outsideBefore = (index * outsideCount) / totalCount;
+            var outsideAfter = ((index + 1) * outsideCount) / totalCount;
+            var shouldUseOutside =
+                outsideAfter > outsideBefore &&
+                outsideIndex < outside.Count;
+
+            if (shouldUseOutside)
+            {
+                result.Add(outside[outsideIndex++]);
+                continue;
+            }
+
+            if (matchingIndex < matching.Count)
+            {
+                result.Add(matching[matchingIndex++]);
+                continue;
+            }
+
+            if (outsideIndex < outside.Count)
+            {
+                result.Add(outside[outsideIndex++]);
+            }
+        }
+
+        return result;
     }
 
     private static IReadOnlyList<string> SelectBalancedMatchingWords(
@@ -321,7 +375,7 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
             ? []
             : value
                 .Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .Take(MaximumDisplayedWords)
+                .Take(MaximumGameWords)
                 .ToArray();
 
     private static bool HaveSameWords(

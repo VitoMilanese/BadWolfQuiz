@@ -14,6 +14,7 @@
     const checkButton = root.querySelector('[data-check]');
     const resetButton = root.querySelector('[data-reset]');
     const puzzleConfig = root.querySelector('[data-word-rings-puzzle]');
+    const queueConfig = root.querySelector('[data-word-rings-queue]');
     const isSoloMode = (root.dataset.gameMode || 'solo').toLowerCase() === 'solo';
 
     const ringElements = [
@@ -29,17 +30,40 @@
         console.error('Failed to read word-rings puzzle config.', error);
     }
 
+    let queuedWords = [];
+    try {
+        const parsedQueue = JSON.parse(queueConfig?.textContent || '[]');
+        if (Array.isArray(parsedQueue)) {
+            queuedWords = parsedQueue.filter(word => typeof word === 'string' && expected.has(word));
+        }
+    } catch (error) {
+        console.error('Failed to read word-rings queue config.', error);
+    }
+
+    const positiveInteger = (value, fallback) => {
+        const parsed = Number.parseInt(value, 10);
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+    };
+    const maximumBankWords = positiveInteger(root.dataset.bankWordLimit, 10);
+    const configuredGameWordLimit = positiveInteger(root.dataset.gameWordLimit, 20);
+    const maximumAttempts = Math.min(configuredGameWordLimit, expected.size);
+    const configuredCorrectWordTarget = positiveInteger(root.dataset.correctWordTarget, 10);
+    const correctWordTarget = Math.min(configuredCorrectWordTarget, maximumAttempts);
+
     const assignments = new Map();
     const verdicts = new Map();
     const lockedMemberships = new Map();
     let pendingWord = null;
     let wireWord = null;
     let topZIndex = 10;
+    let gameOver = maximumAttempts === 0;
 
     const canonical = value => [...String(value ?? '')].sort().join('');
-    const progressText = () => root.dataset.progressTemplate
-        .replace('{0}', verdicts.size)
-        .replace('{1}', expected.size);
+    const correctCount = () => [...verdicts.values()].filter(result => result === true).length;
+    const attemptedCount = () => Math.min(
+        maximumAttempts,
+        verdicts.size + (pendingWord === null ? 0 : 1));
+    const progressText = () => `✓ ${correctCount()}/${correctWordTarget} · ${attemptedCount()}/${maximumAttempts}`;
 
     const bringToFront = token => {
         if (!(token instanceof HTMLElement)) return;
@@ -47,13 +71,22 @@
         token.style.zIndex = String(topZIndex);
     };
 
+    const disableAllWords = () => {
+        root.querySelectorAll('.word-rings-word').forEach(token => {
+            if (token instanceof HTMLButtonElement) token.disabled = true;
+        });
+    };
+
     const updateProgress = () => {
         progress.textContent = progressText();
-        checkButton.disabled = pendingWord === null;
-        root.classList.toggle('has-pending-word', pendingWord !== null);
+        checkButton.disabled = gameOver || pendingWord === null;
+        root.classList.toggle('has-pending-word', !gameOver && pendingWord !== null);
+        root.classList.toggle('is-game-over', gameOver);
+        if (gameOver) disableAllWords();
     };
 
     const clearStatus = () => {
+        if (gameOver) return;
         status.textContent = '';
         status.classList.remove('is-success', 'is-error');
     };
@@ -70,6 +103,49 @@
         token.classList.toggle('is-wrong', !correct);
     };
 
+    const createBankWord = word => {
+        if (!word || wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`)) return null;
+
+        const token = document.createElement('button');
+        token.className = 'word-rings-word';
+        token.type = 'button';
+        token.dataset.word = word;
+        token.dataset.runtimeWord = 'true';
+        token.textContent = word;
+        token.draggable = false;
+        wordList.append(token);
+        wireWord?.(token);
+        return token;
+    };
+
+    const visibleBankWords = () => [...wordList.querySelectorAll('.word-rings-word[data-word]')]
+        .filter(token => !token.hidden);
+
+    const replenishWordBank = () => {
+        if (gameOver) return;
+
+        while (visibleBankWords().length < maximumBankWords && queuedWords.length > 0) {
+            const nextWord = queuedWords.shift();
+            if (!nextWord || !expected.has(nextWord)) continue;
+            createBankWord(nextWord);
+        }
+    };
+
+    const trimWordBankToLimit = returnedWord => {
+        let visible = visibleBankWords();
+        while (visible.length > maximumBankWords) {
+            const removable = [...visible]
+                .reverse()
+                .find(token => token.dataset.word !== returnedWord);
+            if (!(removable instanceof HTMLElement)) break;
+
+            const word = removable.dataset.word;
+            removable.remove();
+            if (word) queuedWords.unshift(word);
+            visible = visibleBankWords();
+        }
+    };
+
     const createPlacedWord = (word, x, y, membership) => {
         const source = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
         if (!source) return;
@@ -79,6 +155,7 @@
 
         const token = source.cloneNode(true);
         token.hidden = false;
+        token.disabled = false;
         token.classList.remove('is-placed', 'is-dragging', 'is-correct', 'is-wrong');
         token.classList.add('is-on-stage');
         token.dataset.membership = canonical(membership);
@@ -243,14 +320,21 @@
     };
 
     const assignToStage = (word, clientX, clientY) => {
+        const bankSource = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
+        const movedFromBank = bankSource instanceof HTMLElement && !bankSource.hidden;
+
         removePlacedWord(word);
         const target = membershipAt(clientX, clientY);
         assignments.set(word, target.membership);
         createPlacedWord(word, target.x, target.y, target.membership);
         markPending(word);
+        if (movedFromBank) replenishWordBank();
     };
 
     const assignOutside = word => {
+        const bankSource = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
+        const movedFromBank = bankSource instanceof HTMLElement && !bankSource.hidden;
+
         removePlacedWord(word);
         assignments.set(word, '');
         const source = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
@@ -260,6 +344,7 @@
         source.classList.add('is-placed');
         const token = source.cloneNode(true);
         token.hidden = false;
+        token.disabled = false;
         token.classList.remove('is-placed', 'is-dragging', 'is-correct', 'is-wrong');
         token.classList.add('is-outside');
         token.dataset.membership = '';
@@ -268,20 +353,24 @@
         outsideList.append(token);
         wireWord?.(token);
         markPending(word);
+        if (movedFromBank) replenishWordBank();
     };
 
     const returnToBank = word => {
-        if (verdicts.has(word)) return;
+        if (gameOver || verdicts.has(word)) return;
         assignments.delete(word);
         removePlacedWord(word);
+        trimWordBankToLimit(word);
         if (pendingWord === word) {
             pendingWord = null;
         }
     };
 
-    const canBegin = word => verdicts.has(word) || pendingWord === null || pendingWord === word;
+    const canBegin = word => !gameOver &&
+        (verdicts.has(word) || pendingWord === null || pendingWord === word);
 
     const canDropStage = (word, membership) => {
+        if (gameOver) return false;
         const normalized = canonical(membership);
         if (verdicts.has(word)) {
             return lockedMemberships.get(word) === normalized;
@@ -290,7 +379,7 @@
     };
 
     const canDropOutside = word => canDropStage(word, '');
-    const canReturnToBank = word => !verdicts.has(word);
+    const canReturnToBank = word => !gameOver && !verdicts.has(word);
 
     const onPlacementChanged = () => {
         clearStatus();
@@ -337,16 +426,32 @@
             else refreshUrl.searchParams.delete(name);
         });
 
-        const currentWords = [...wordList.querySelectorAll('.word-rings-word[data-word]')]
-            .map(token => token.dataset.word)
-            .filter(Boolean);
-        refreshUrl.searchParams.set('previousWords', currentWords.join('|'));
+        refreshUrl.searchParams.set('previousWords', [...expected.keys()].join('|'));
         refreshUrl.searchParams.set('refresh', Date.now().toString());
         window.location.assign(refreshUrl.toString());
     });
 
+    const finishGameIfNeeded = () => {
+        const successful = correctCount();
+        const attempts = verdicts.size;
+        if (successful < correctWordTarget && attempts < maximumAttempts) {
+            return false;
+        }
+
+        gameOver = true;
+        pendingWord = null;
+        const won = successful >= correctWordTarget;
+        status.classList.toggle('is-success', won);
+        status.classList.toggle('is-error', !won);
+        status.textContent = won
+            ? `✓ ${successful}/${correctWordTarget}`
+            : `✓ ${successful}/${correctWordTarget} · ${attempts}/${maximumAttempts}`;
+        updateProgress();
+        return true;
+    };
+
     checkButton.addEventListener('click', () => {
-        if (pendingWord === null || !assignments.has(pendingWord)) return;
+        if (gameOver || pendingWord === null || !assignments.has(pendingWord)) return;
 
         const word = pendingWord;
         const actual = canonical(assignments.get(word));
@@ -368,19 +473,14 @@
         }
 
         pendingWord = null;
-        const errors = [...verdicts.values()].filter(result => !result).length;
-        status.classList.toggle('is-success', verdicts.size === expected.size && errors === 0);
-        status.classList.toggle('is-error', errors > 0);
+        if (finishGameIfNeeded()) return;
 
-        if (verdicts.size === expected.size) {
-            status.textContent = errors === 0
-                ? root.dataset.allCorrect
-                : root.dataset.hasErrorsTemplate.replace('{0}', errors);
-        } else if (correct) {
-            status.textContent = '';
-        } else {
-            status.textContent = root.dataset.hasErrorsTemplate.replace('{0}', errors);
-        }
+        const errors = [...verdicts.values()].filter(result => !result).length;
+        status.classList.remove('is-success');
+        status.classList.toggle('is-error', errors > 0);
+        status.textContent = correct
+            ? ''
+            : root.dataset.hasErrorsTemplate.replace('{0}', errors);
 
         updateProgress();
     });

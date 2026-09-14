@@ -15,6 +15,9 @@
 <div class="minigames-page word-rings-page"
      data-word-rings-root
      data-game-mode="solo"
+     data-bank-word-limit="@Model.BankWordLimit"
+     data-game-word-limit="@Model.GameWordLimit"
+     data-correct-word-target="@Model.CorrectWordTarget"
      data-progress-template="@WordRingsLocalizer["Progress"]"
      data-all-correct="@WordRingsLocalizer["AllCorrect"]"
      data-has-errors-template="@WordRingsLocalizer["HasErrors"]"
@@ -22,6 +25,7 @@
      data-reveal-rules="@WordRingsLocalizer["RevealRules"]"
      data-hide-rules="@WordRingsLocalizer["HideRules"]">
     <script type="application/json" data-word-rings-puzzle>@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DisplayedExpected))</script>
+    <script type="application/json" data-word-rings-queue>@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.QueuedWords))</script>
 
     <header class="minigames-toolbar word-rings-toolbar">
         <div class="minigames-toolbar-title word-rings-toolbar-title">
@@ -64,7 +68,7 @@
                 <h2>@WordRingsLocalizer["WordBank"]</h2>
             </div>
             <div class="word-rings-word-list" data-word-list>
-                @foreach (var word in Model.DisplayedWords)
+                @foreach (var word in Model.InitialWords)
                 {
                     <button class="word-rings-word" type="button" data-word="@word">@word</button>
                 }
