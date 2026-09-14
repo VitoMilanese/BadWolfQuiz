@@ -76,14 +76,16 @@ public sealed class WordRingsCooperativeRoomRegressionTests
                 WordRingsRoomStore.MaximumPlayerWords);
 
             var hostWords = state.BankWords.Concat(state.QueuedWords).ToArray();
-            Assert.Contains("дім", hostWords, StringComparer.OrdinalIgnoreCase);
-            Assert.Contains("сир", hostWords, StringComparer.OrdinalIgnoreCase);
-            Assert.Contains("панда", hostWords, StringComparer.OrdinalIgnoreCase);
+            var outsideWords = hostWords
+                .Where(word => GetDefaultMembership(word).Length == 0)
+                .Take(2)
+                .ToArray();
+            Assert.Equal(2, outsideWords.Length);
 
             var firstOutside = store.SubmitPlacement(
                 host.RoomCode,
                 host.PlayerToken,
-                "дім",
+                outsideWords[0],
                 string.Empty,
                 5,
                 90);
@@ -95,7 +97,7 @@ public sealed class WordRingsCooperativeRoomRegressionTests
             var secondOutside = store.SubmitPlacement(
                 host.RoomCode,
                 host.PlayerToken,
-                "сир",
+                outsideWords[1],
                 string.Empty,
                 7,
                 88);
@@ -104,18 +106,19 @@ public sealed class WordRingsCooperativeRoomRegressionTests
             Assert.True(secondOutside.TurnContinues);
             Assert.Equal(secondOutside.State.PlayerId, secondOutside.State.CurrentPlayerId);
 
+            var wrongWord = secondOutside.State.BankWords
+                .Concat(secondOutside.State.QueuedWords)
+                .First(word => GetDefaultMembership(word).Length > 0);
             var wrong = store.SubmitPlacement(
                 host.RoomCode,
                 host.PlayerToken,
-                "панда",
+                wrongWord,
                 string.Empty,
                 9,
                 86);
             Assert.False(wrong.IsCorrect);
             Assert.False(wrong.TurnContinues);
-            Assert.Equal(
-                guest.State.PlayerId,
-                wrong.State.CurrentPlayerId);
+            Assert.Equal(guest.State.PlayerId, wrong.State.CurrentPlayerId);
         }
         finally
         {
@@ -135,13 +138,17 @@ public sealed class WordRingsCooperativeRoomRegressionTests
             var host = store.CreateRoom("Host", 10, partialScoreEnabled: true);
             var guest = store.JoinRoom(host.RoomCode, "Guest");
             var state = store.StartGame(host.RoomCode, host.PlayerToken);
-            Assert.Contains("панда", state.BankWords.Concat(state.QueuedWords), StringComparer.OrdinalIgnoreCase);
+            var partialWord = state.BankWords
+                .Concat(state.QueuedWords)
+                .First(word => GetDefaultMembership(word).Length >= 2);
+            var expected = GetDefaultMembership(partialWord);
+            var partialMembership = expected[0].ToString();
 
             var partial = store.SubmitPlacement(
                 host.RoomCode,
                 host.PlayerToken,
-                "панда",
-                "A",
+                partialWord,
+                partialMembership,
                 25,
                 25);
 
@@ -156,6 +163,23 @@ public sealed class WordRingsCooperativeRoomRegressionTests
         {
             Directory.Delete(root, recursive: true);
         }
+    }
+
+    private static string GetDefaultMembership(string word)
+    {
+        var blue = new HashSet<string>(
+            ["кіт", "вовк", "жаба", "собака", "песик", "олень", "панда", "коала"],
+            StringComparer.OrdinalIgnoreCase);
+        var yellow = new HashSet<string>(
+            ["ракета", "машина", "жаба", "собака", "лампа", "банка", "панда", "коала"],
+            StringComparer.OrdinalIgnoreCase);
+        var red = new HashSet<string>(
+            ["лісок", "човен", "песик", "олень", "лампа", "банка", "панда", "коала"],
+            StringComparer.OrdinalIgnoreCase);
+        return string.Concat(
+            blue.Contains(word) ? "A" : string.Empty,
+            yellow.Contains(word) ? "B" : string.Empty,
+            red.Contains(word) ? "C" : string.Empty);
     }
 
     private static string ReadWebFile(params string[] parts) => File.ReadAllText(FindWebFile(parts));
