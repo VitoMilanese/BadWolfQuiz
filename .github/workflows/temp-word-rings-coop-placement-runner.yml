@@ -43,6 +43,25 @@ jobs:
           text = text.replace('Assert.Contains("content: "½"", styles, StringComparison.Ordinal);', r'Assert.Contains("content: \"½\"", styles, StringComparison.Ordinal);')
           path.write_text(text, encoding='utf-8')
           PY
+      - name: Fix API regression null assertion
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('tests/BadWolfQuiz.Web.Tests/WordRingsCooperativeRoomRegressionTests.cs')
+          text = path.read_text(encoding='utf-8')
+          old = '''            var payload = Assert.NotNull(json.Value);
+                      var resultProperty = Assert.NotNull(payload.GetType().GetProperty("result"));
+                      var result = Assert.IsType<WordRingsRoomPlacementResult>(resultProperty.GetValue(payload));'''
+          new = '''            Assert.NotNull(json.Value);
+                      var payload = json.Value!;
+                      var resultProperty = payload.GetType().GetProperty("result");
+                      Assert.NotNull(resultProperty);
+                      var result = Assert.IsType<WordRingsRoomPlacementResult>(resultProperty!.GetValue(payload));'''
+          if old not in text:
+              raise SystemExit('Expected API assertion block was not found.')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
       - name: JavaScript syntax checks
         run: |
           node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings.js
