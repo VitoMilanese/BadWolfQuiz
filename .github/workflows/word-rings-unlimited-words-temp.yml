@@ -1,0 +1,10 @@
+name: Word Rings unlimited words validation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo placeholder
