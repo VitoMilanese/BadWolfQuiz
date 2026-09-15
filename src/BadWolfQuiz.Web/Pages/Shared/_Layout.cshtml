@@ -43,9 +43,11 @@
     var customThemeStyle = siteThemeId == "custom"
         ? SiteThemeCatalog.BuildCssVariables(settings?.CustomThemeColors)
         : null;
-    var hasBrandLogo = isAuthenticated &&
-        settings?.BrandLogoData is not null &&
-        !string.IsNullOrWhiteSpace(settings.BrandLogoContentType);
+    var headerBrandLogoUrl = ViewData["HeaderBrandLogoUrl"] as string;
+    var hasBrandLogo = !string.IsNullOrWhiteSpace(headerBrandLogoUrl) ||
+        (isAuthenticated &&
+         settings?.BrandLogoData is not null &&
+         !string.IsNullOrWhiteSpace(settings.BrandLogoContentType));
     var hidePortalFooter = ViewData["HidePortalFooter"] is true;
     var isEmbeddedDiscordSettings = ViewData["EmbeddedDiscordSettings"] is true;
     var productVersion = ProductVersionInfo.Current;
@@ -172,7 +174,7 @@
             @if (hasBrandLogo)
             {
                 <img class="brand-logo"
-                     src="@Url.Page("/Admin/Settings/Index", "BrandLogo")"
+                     src="@(headerBrandLogoUrl ?? Url.Page("/Admin/Settings/Index", "BrandLogo"))"
                      alt="BAD WOLF QUIZ" />
             }
             else

@@ -112,3 +112,13 @@ Solo rounds and multiplayer rooms where the creator also plays now start with no
 Dedicated non-playing hosts instead receive four setup words after their selected rules are applied. No player owns the turn during this setup phase. The host places the four examples anywhere on the Venn board and confirms them; only then does the first playing participant receive the turn. The confirmed examples remain visible as starter associations and never score points.
 
 The multiplayer turn/status line below the board is collapsed completely because the current player is already indicated in the player list. Non-host clients send a departure hint on page shutdown/navigation. The server keeps a five-second grace period so an ordinary refresh can reconnect with the same token instead of being treated as a leave; if the page does not come back, another client removes that player and emits the normal leave event. A longer heartbeat timeout is retained as a fallback for abrupt connection loss without falsely ejecting briefly backgrounded tabs.
+
+### Room UX follow-up
+
+Room creation is single-flight: once **Create** has started, the submit button remains locked until an error is returned or navigation to the new room has begun, preventing repeated room creation from rapid clicks. The same navigation path uses the shared busy overlay.
+
+The multiplayer board keeps turn ownership exclusively in the player list, but room-operation errors are shown in a fixed feedback banner that does not change board layout. In particular, pressing **Start game** without another playable participant now returns the localized “more players required” message instead of silently doing nothing.
+
+After a multiplayer round finishes, closing the Victory/Defeat dialog exposes a **Show result** toolbar action. It reopens the same result and rule hints until another round begins; the action is hidden before the first result and during active play.
+
+When an authenticated room creator has a custom header logo in site settings, the room snapshots that logo into room metadata. The room page serves it through the Word Rings room endpoint and overrides the normal header brand for every visitor to that room, including anonymous joined players and signed-in players with their own account branding.

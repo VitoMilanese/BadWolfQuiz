@@ -15,6 +15,7 @@ public sealed record WordRingsRoomHostPendingPlacement(
     Guid PlayerId,
     string PlayerName,
     bool WasMoved);
+public sealed record WordRingsRoomBrandLogo(byte[] Data, string ContentType);
 public sealed record WordRingsRoomHostSnapshot(
     string RoomCode,
     long Version,
@@ -65,17 +66,40 @@ public sealed class WordRingsRoomHostCoordinator
         bool partialScoreEnabled,
         bool hostChoosesRules,
         string? previousRoomCode = null,
-        string? previousPlayerToken = null)
+        string? previousPlayerToken = null,
+        byte[]? brandLogoData = null,
+        string? brandLogoContentType = null)
     {
         var connection = _store.CreateRoom(playerName, targetScore, partialScoreEnabled, previousRoomCode, previousPlayerToken);
         lock (_metaSync)
         {
             _rooms.Remove(Normalize(previousRoomCode));
-            var meta = new RoomMeta(connection.PlayerToken, hostChoosesRules);
+            var meta = new RoomMeta(
+                connection.PlayerToken,
+                hostChoosesRules,
+                brandLogoData,
+                brandLogoContentType);
             if (hostChoosesRules) PrepareChoices(meta);
             _rooms[connection.RoomCode] = meta;
         }
         return connection with { State = DecorateRoomState(connection.State, hostChoosesRules) };
+    }
+
+    public WordRingsRoomBrandLogo? GetBrandLogo(string? roomCode)
+    {
+        lock (_metaSync)
+        {
+            if (!_rooms.TryGetValue(Normalize(roomCode), out var meta) ||
+                meta.BrandLogoData is null ||
+                string.IsNullOrWhiteSpace(meta.BrandLogoContentType))
+            {
+                return null;
+            }
+
+            return new WordRingsRoomBrandLogo(
+                meta.BrandLogoData.ToArray(),
+                meta.BrandLogoContentType);
+        }
     }
 
     public WordRingsRoomConnection JoinRoom(string? roomCode, string? playerName)
@@ -567,10 +591,18 @@ public sealed class WordRingsRoomHostCoordinator
     private static void Set(object instance, string property, object? value) => instance.GetType().GetProperty(property, BindingFlags.Instance | BindingFlags.Public)!.SetValue(instance, value);
     private static void IncrementVersion(object room) => Set(room, "Version", (long)Get(room, "Version")! + 1);
 
-    private sealed class RoomMeta(string hostToken, bool hostChoosesRules)
+    private sealed class RoomMeta(
+        string hostToken,
+        bool hostChoosesRules,
+        byte[]? brandLogoData = null,
+        string? brandLogoContentType = null)
     {
         public string HostToken { get; } = hostToken;
         public bool HostChoosesRules { get; } = hostChoosesRules;
+        public byte[]? BrandLogoData { get; } = brandLogoData?.ToArray();
+        public string? BrandLogoContentType { get; } = string.IsNullOrWhiteSpace(brandLogoContentType)
+            ? null
+            : brandLogoContentType.Trim();
         public bool JoinLocked { get; set; }
         public long Revision { get; set; }
         public bool RoundFinishedPrepared { get; set; }

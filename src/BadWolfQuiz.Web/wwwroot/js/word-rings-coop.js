@@ -8,6 +8,7 @@
     const outsideZone = root.querySelector('[data-outside-zone]');
     const progress = root.querySelector('[data-progress]');
     const status = root.querySelector('[data-status]');
+    const roomFeedback = root.querySelector('[data-room-feedback]');
     const rules = root.querySelector('[data-rules]');
     const revealButton = root.querySelector('[data-reveal-rules]');
     const checkButton = root.querySelector('[data-check]');
@@ -49,6 +50,7 @@
     let roomCodeVisible = false;
     let copyFeedbackTimer = null;
     let linkCopyFeedbackTimer = null;
+    let roomFeedbackTimer = null;
     let roomEventCursor = null;
     let roomAudioContext = null;
 
@@ -182,6 +184,18 @@
 
     const setJoinError = message => {
         if (joinError) joinError.textContent = message || '';
+    };
+
+    const showRoomFeedback = message => {
+        if (!(roomFeedback instanceof HTMLElement)) return;
+        if (roomFeedbackTimer !== null) window.clearTimeout(roomFeedbackTimer);
+        roomFeedback.textContent = message || root.dataset.roomError || '';
+        roomFeedback.hidden = false;
+        roomFeedbackTimer = window.setTimeout(() => {
+            roomFeedback.hidden = true;
+            roomFeedback.textContent = '';
+            roomFeedbackTimer = null;
+        }, 4200);
     };
 
     const loadSession = () => {
@@ -791,7 +805,7 @@
             showJoinDialog();
             return;
         }
-        setStatus(root.dataset.roomError, 'error');
+        showRoomFeedback(root.dataset.roomError);
     };
 
     const requestState = async ({ preservePending = false } = {}) => {
@@ -952,15 +966,14 @@
         try {
             const payload = await post('StartRoom', { roomCode, playerToken: session.token });
             if (!payload.success) {
-                setStatus(
-                    payload.error === 'NeedMorePlayers' ? root.dataset.roomNeedPlayers : root.dataset.roomError,
-                    'error');
+                showRoomFeedback(
+                    payload.error === 'NeedMorePlayers' ? root.dataset.roomNeedPlayers : root.dataset.roomError);
                 return;
             }
             renderState(payload.state);
         } catch (error) {
             console.error('Could not start Word Rings room.', error);
-            setStatus(root.dataset.roomError, 'error');
+            showRoomFeedback(root.dataset.roomError);
         } finally {
             requestInFlight = false;
             updateControls();

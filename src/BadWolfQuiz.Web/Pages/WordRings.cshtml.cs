@@ -27,8 +27,10 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         string? previousBlueRule,
         string? previousYellowRule,
         string? previousRedRule,
-        string? previousWords)
+        string? previousWords,
+        string? room)
     {
+        ApplyRoomBranding(room);
         var store = WordRingsRuleStore.Get(environment);
         var previousWordList = ParsePreviousWords(previousWords);
         var selection = PickFreshPuzzle(
@@ -46,6 +48,26 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         DisplayedExpected = Puzzle.Expected
             .Where(item => DisplayedWords.Contains(item.Key, StringComparer.Ordinal))
             .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
+    }
+
+    private void ApplyRoomBranding(string? roomCode)
+    {
+        var normalized = (roomCode ?? string.Empty).Trim().ToUpperInvariant();
+        if (normalized.Length != 6 || !normalized.All(char.IsLetterOrDigit))
+        {
+            return;
+        }
+
+        var logo = WordRingsRoomHostCoordinator.Get(environment).GetBrandLogo(normalized);
+        if (logo is null)
+        {
+            return;
+        }
+
+        ViewData["HeaderBrandLogoUrl"] = Url.Page(
+            "/WordRingsRoomApi",
+            "RoomBrandLogo",
+            new { roomCode = normalized });
     }
 
     public IActionResult OnGetNewPuzzle(

@@ -20,6 +20,8 @@
     const apiUrl = root.dataset.roomApiUrl;
     const nicknameKey = 'badwolf.wordrings.nickname';
     const hostRoomKey = 'badwolf.wordrings.host-room';
+    let createInFlight = false;
+    let joinInFlight = false;
 
     if (!(dialog instanceof HTMLDialogElement) || !apiUrl) return;
 
@@ -93,6 +95,7 @@
         const url = new URL(window.location.href);
         url.search = '';
         url.searchParams.set('room', normalizeCode(code));
+        if (window.BadWolfBusy?.navigate?.(url.toString())) return;
         window.location.assign(url.toString());
     };
 
@@ -115,6 +118,7 @@
 
     createForm?.addEventListener('submit', async event => {
         event.preventDefault();
+        if (createInFlight) return;
         const name = createName?.value?.trim() || '';
         const targetScore = Number.parseInt(createTarget?.value || '10', 10);
         if (!name) {
@@ -124,6 +128,8 @@
         }
 
         const submit = createForm.querySelector('[type="submit"]');
+        createInFlight = true;
+        let navigationStarted = false;
         if (submit instanceof HTMLButtonElement) submit.disabled = true;
         setError(createError, '');
         try {
@@ -143,17 +149,22 @@
             if (previousHostRoom && previousHostRoom.code !== nextCode) {
                 localStorage.removeItem(sessionKey(previousHostRoom.code));
             }
+            navigationStarted = true;
             goToRoom(nextCode);
         } catch (error) {
             console.error('Could not create Word Rings room.', error);
             setError(createError, root.dataset.roomError);
         } finally {
-            if (submit instanceof HTMLButtonElement) submit.disabled = false;
+            if (!navigationStarted) {
+                createInFlight = false;
+                if (submit instanceof HTMLButtonElement) submit.disabled = false;
+            }
         }
     });
 
     joinForm?.addEventListener('submit', async event => {
         event.preventDefault();
+        if (joinInFlight) return;
         const code = normalizeCode(joinCode?.value);
         const name = joinName?.value?.trim() || '';
         if (code.length !== 6 || !name) {
@@ -162,6 +173,8 @@
         }
 
         const submit = joinForm.querySelector('[type="submit"]');
+        joinInFlight = true;
+        let navigationStarted = false;
         if (submit instanceof HTMLButtonElement) submit.disabled = true;
         setError(joinShortcutError, '');
         try {
@@ -170,12 +183,16 @@
                 setError(joinShortcutError, friendlyError(payload.error));
                 return;
             }
+            navigationStarted = true;
             goToRoom(code);
         } catch (error) {
             console.error('Could not join Word Rings room.', error);
             setError(joinShortcutError, root.dataset.roomError);
         } finally {
-            if (submit instanceof HTMLButtonElement) submit.disabled = false;
+            if (!navigationStarted) {
+                joinInFlight = false;
+                if (submit instanceof HTMLButtonElement) submit.disabled = false;
+            }
         }
     });
 })();

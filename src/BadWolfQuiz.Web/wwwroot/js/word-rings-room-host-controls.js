@@ -209,7 +209,7 @@
         if (!hostState) return;
         if (startButton instanceof HTMLButtonElement) {
             startButton.hidden = hostState.isHost !== true || hostState.phase === 'playing';
-            startButton.disabled = busy || hostState.canStart !== true;
+            startButton.disabled = busy;
         }
         if (chooseRulesButton instanceof HTMLButtonElement) {
             const canOpenRules = canChooseRules();
@@ -255,16 +255,16 @@
             event.stopImmediatePropagation();
             return;
         }
-        if (hostState.hostChoosesRules === true && hostState.canStart !== true) {
+        if (hostState.hostChoosesRules === true && !rulesComplete()) {
             event.preventDefault();
             event.stopImmediatePropagation();
-            if (!rulesComplete() && ruleDialog instanceof HTMLDialogElement && !ruleDialog.open) {
+            if (ruleDialog instanceof HTMLDialogElement && !ruleDialog.open) {
                 renderRulePicker();
                 ruleDialog.showModal();
             }
             return;
         }
-        if (hostState.canStart === true && startButton instanceof HTMLButtonElement) {
+        if (startButton instanceof HTMLButtonElement) {
             startButton.disabled = true;
         }
     }, true);

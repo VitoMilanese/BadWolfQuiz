@@ -11,6 +11,7 @@
     const apiUrl = root.dataset.roomApiUrl;
     const nicknameKey = 'badwolf.wordrings.nickname';
     const hostRoomKey = 'badwolf.wordrings.host-room';
+    let createInFlight = false;
 
     if (!(form instanceof HTMLFormElement) || !apiUrl) return;
 
@@ -71,6 +72,7 @@
         const url = new URL(window.location.href);
         url.search = '';
         url.searchParams.set('room', normalizeCode(code));
+        if (window.BadWolfBusy?.navigate?.(url.toString())) return;
         window.location.assign(url.toString());
     };
 
@@ -79,6 +81,7 @@
 
         event.preventDefault();
         event.stopImmediatePropagation();
+        if (createInFlight) return;
 
         const name = nameInput?.value?.trim() || '';
         const targetScore = Number.parseInt(targetInput?.value || '10', 10);
@@ -89,6 +92,8 @@
         }
 
         const submit = form.querySelector('[type="submit"]');
+        createInFlight = true;
+        let navigationStarted = false;
         if (submit instanceof HTMLButtonElement) submit.disabled = true;
         if (errorElement) errorElement.textContent = '';
 
@@ -112,12 +117,16 @@
             if (previousHostRoom && previousHostRoom.code !== nextCode) {
                 localStorage.removeItem(sessionKey(previousHostRoom.code));
             }
+            navigationStarted = true;
             goToRoom(nextCode);
         } catch (error) {
             console.error('Could not create hosted Word Rings room.', error);
             if (errorElement) errorElement.textContent = root.dataset.roomError || '';
         } finally {
-            if (submit instanceof HTMLButtonElement) submit.disabled = false;
+            if (!navigationStarted) {
+                createInFlight = false;
+                if (submit instanceof HTMLButtonElement) submit.disabled = false;
+            }
         }
     }, true);
 })();

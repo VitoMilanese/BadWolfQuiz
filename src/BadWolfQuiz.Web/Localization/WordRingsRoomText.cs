@@ -21,6 +21,7 @@ public sealed record WordRingsRoomText
     public string ShowCode { get; init; } = "Show room code";
     public string HideCode { get; init; } = "Hide room code";
     public string StartGame { get; init; } = "Start game";
+    public string ShowResult { get; init; } = "Show result";
     public string WaitingForPlayers { get; init; } = "Waiting for players. The host can start when at least one other player is in the room.";
     public string YourTurn { get; init; } = "Your turn";
     public string OtherTurn { get; init; } = "Turn: {0}";
@@ -87,6 +88,7 @@ public sealed record WordRingsRoomText
         ShowCode = "Показати код кімнати",
         HideCode = "Приховати код кімнати",
         StartGame = "Почати гру",
+        ShowResult = "Показати результат",
         WaitingForPlayers = "Очікування гравців. Власник може почати гру, коли до кімнати приєднається хоча б ще один гравець.",
         YourTurn = "Ваш хід",
         OtherTurn = "Хід: {0}",
@@ -143,6 +145,7 @@ public sealed record WordRingsRoomText
         ShowCode = "Mostra codice stanza",
         HideCode = "Nascondi codice stanza",
         StartGame = "Avvia partita",
+        ShowResult = "Mostra risultato",
         WaitingForPlayers = "In attesa dei giocatori. L'host può iniziare quando entra almeno un altro giocatore.",
         YourTurn = "Il tuo turno",
         OtherTurn = "Turno: {0}",
@@ -199,6 +202,7 @@ public sealed record WordRingsRoomText
         ShowCode = "Україна",
         HideCode = "Україна",
         StartGame = "Україна",
+        ShowResult = "Україна",
         WaitingForPlayers = "Україна",
         YourTurn = "Україна",
         OtherTurn = "Україна",

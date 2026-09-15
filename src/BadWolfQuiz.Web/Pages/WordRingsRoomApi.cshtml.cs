@@ -10,14 +10,31 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
     private WordRingsRoomStore Store => WordRingsRoomStore.Get(environment);
     private WordRingsRoomHostCoordinator HostCoordinator => WordRingsRoomHostCoordinator.Get(environment);
 
-    public IActionResult OnPostCreateRoom(
+    public async Task<IActionResult> OnPostCreateRoom(
         string? playerName,
         int targetScore,
         bool partialScoreEnabled,
         bool hostChoosesRules,
         string? previousRoomCode,
-        string? previousPlayerToken) =>
-        Execute(() => new
+        string? previousPlayerToken,
+        CancellationToken cancellationToken)
+    {
+        byte[]? brandLogoData = null;
+        string? brandLogoContentType = null;
+        var currentHost = HttpContext.RequestServices.GetService(typeof(CurrentHost)) as CurrentHost;
+        var settingsStore = HttpContext.RequestServices.GetService(typeof(GameSettingsStore)) as GameSettingsStore;
+        if (currentHost?.Id is { Length: > 0 } hostId && settingsStore is not null)
+        {
+            var settings = await settingsStore.LoadAsync(hostId, cancellationToken);
+            if (settings.BrandLogoData is not null &&
+                !string.IsNullOrWhiteSpace(settings.BrandLogoContentType))
+            {
+                brandLogoData = settings.BrandLogoData;
+                brandLogoContentType = settings.BrandLogoContentType;
+            }
+        }
+
+        return Execute(() => new
         {
             success = true,
             connection = HostCoordinator.CreateRoom(
@@ -26,8 +43,23 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
                 partialScoreEnabled,
                 hostChoosesRules,
                 previousRoomCode,
-                previousPlayerToken)
+                previousPlayerToken,
+                brandLogoData,
+                brandLogoContentType)
         });
+    }
+
+    public IActionResult OnGetRoomBrandLogo(string? roomCode)
+    {
+        var logo = HostCoordinator.GetBrandLogo(roomCode);
+        if (logo is null)
+        {
+            return NotFound();
+        }
+
+        Response.Headers.CacheControl = "no-store";
+        return File(logo.Data, logo.ContentType);
+    }
 
     public IActionResult OnPostJoinRoom(string? roomCode, string? playerName) =>
         Execute(() => new

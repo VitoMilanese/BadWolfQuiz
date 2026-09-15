@@ -520,3 +520,26 @@
         filter: brightness(1.16);
     }
 }
+
+.word-rings-room-feedback {
+    position: fixed;
+    z-index: 2600;
+    top: 76px;
+    left: 50%;
+    width: min(90vw, 560px);
+    padding: 11px 16px;
+    transform: translateX(-50%);
+    border: 1px solid color-mix(in srgb, #ff5f6d 76%, var(--line));
+    border-radius: 11px;
+    background: color-mix(in srgb, #7d1019 86%, var(--panel));
+    color: #fff;
+    box-shadow: 0 12px 34px rgb(0 0 0 / 35%);
+    font-size: .88rem;
+    font-weight: 900;
+    text-align: center;
+    pointer-events: none;
+}
+
+.word-rings-room-feedback[hidden] {
+    display: none;
+}

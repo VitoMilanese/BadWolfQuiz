@@ -102,6 +102,7 @@
             <span class="word-rings-toolbar-progress" data-progress></span>
         </div>
         <div class="minigames-toolbar-actions word-rings-actions">
+            <button class="button" type="button" data-reopen-result hidden>@roomText.ShowResult</button>
             @if (!isCooperativeRoom)
             {
                 <button class="button" type="button" data-open-coop-room>👥 @roomText.Cooperative</button>
@@ -118,6 +119,11 @@
             }
         </div>
     </header>
+
+    @if (isCooperativeRoom)
+    {
+        <div class="word-rings-room-feedback" data-room-feedback role="alert" aria-live="assertive" hidden></div>
+    }
 
     <div class="word-rings-layout @(isCooperativeRoom ? "has-players" : string.Empty)">
         @if (isCooperativeRoom)

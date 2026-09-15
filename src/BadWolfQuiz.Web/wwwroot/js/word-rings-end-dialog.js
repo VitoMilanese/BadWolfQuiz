@@ -8,8 +8,10 @@
     const title = dialog.querySelector('[data-result-title]');
     const message = dialog.querySelector('[data-result-message]');
     const closeButton = dialog.querySelector('[data-close-result]');
+    const reopenButton = root.querySelector('[data-reopen-result]');
     const burst = dialog.querySelector('.word-rings-result-burst');
     let shown = false;
+    let lastResult = null;
 
     const format = (template, ...values) => values.reduce(
         (result, value, index) => result.replace(`{${index}}`, String(value)),
@@ -29,9 +31,25 @@
         }
     };
 
-    const show = ({ won, titleText, messageText }) => {
-        if (shown) return;
+    const syncReopenButton = () => {
+        if (!(reopenButton instanceof HTMLButtonElement)) return;
+        reopenButton.hidden = !(lastResult && shown && !dialog.open && root.classList.contains('is-game-over'));
+    };
+
+    const clearResult = () => {
+        shown = false;
+        lastResult = null;
+        if (dialog.open) dialog.close();
+        dialog.classList.remove('is-win', 'is-loss');
+        if (card instanceof HTMLElement) card.classList.remove('is-animating');
+        if (burst instanceof HTMLElement) burst.replaceChildren();
+        syncReopenButton();
+    };
+
+    const show = ({ won, titleText, messageText }, { repeat = false } = {}) => {
+        if (shown && !repeat) return;
         shown = true;
+        lastResult = { won, titleText, messageText };
         dialog.classList.toggle('is-win', won);
         dialog.classList.toggle('is-loss', !won);
         if (card instanceof HTMLElement) {
@@ -44,6 +62,7 @@
         if (message) message.textContent = messageText || '';
         addParticles(won);
         if (!dialog.open) dialog.showModal();
+        syncReopenButton();
     };
 
     root.addEventListener('wordrings:game-ended', event => {
@@ -55,13 +74,7 @@
         });
     });
 
-    root.addEventListener('wordrings:game-reset', () => {
-        shown = false;
-        if (dialog.open) dialog.close();
-        dialog.classList.remove('is-win', 'is-loss');
-        if (card instanceof HTMLElement) card.classList.remove('is-animating');
-        if (burst instanceof HTMLElement) burst.replaceChildren();
-    });
+    root.addEventListener('wordrings:game-reset', clearResult);
 
     const maybeShowSoloResult = () => {
         if (shown || root.dataset.gameMode !== 'solo' || !root.classList.contains('is-game-over')) return;
@@ -79,13 +92,26 @@
         });
     };
 
-    new MutationObserver(maybeShowSoloResult).observe(root, {
+    const handleRootState = () => {
+        if (root.dataset.gameMode === 'cooperative' && lastResult && !root.classList.contains('is-game-over')) {
+            clearResult();
+            return;
+        }
+        maybeShowSoloResult();
+        syncReopenButton();
+    };
+
+    new MutationObserver(handleRootState).observe(root, {
         attributes: true,
         attributeFilter: ['class']
     });
     maybeShowSoloResult();
 
+    reopenButton?.addEventListener('click', () => {
+        if (lastResult) show(lastResult, { repeat: true });
+    });
     closeButton?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('close', syncReopenButton);
     dialog.addEventListener('cancel', event => {
         event.preventDefault();
         dialog.close();
