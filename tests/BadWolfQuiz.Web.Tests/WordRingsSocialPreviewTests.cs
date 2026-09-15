@@ -13,7 +13,6 @@ public sealed class WordRingsSocialPreviewTests
     [InlineData("uk-UA", "Слівце в кільце — Bad Wolf Quiz", "word-rings-uk", "uk_UA")]
     [InlineData("it-IT", "Parola nel cerchio — Bad Wolf Quiz", "word-rings-it", "it_IT")]
     [InlineData("en-US", "Word into the ring — Bad Wolf Quiz", "word-rings-en", "en_US")]
-    [InlineData("ru-RU", "Україна", "word-rings-ru", "ru_RU")]
     public void Word_rings_page_uses_specific_localized_social_metadata(
         string culture,
         string expectedTitle,
@@ -28,11 +27,19 @@ public sealed class WordRingsSocialPreviewTests
         Assert.False(string.IsNullOrWhiteSpace(preview.Description));
     }
 
+    [Fact]
+    public void Russian_ui_does_not_create_a_dedicated_word_rings_variant()
+    {
+        var preview = SocialPreviewMetadataCatalog.Resolve("/WordRings", "ru-RU");
+
+        Assert.Equal("site", preview.ImageVariant);
+        Assert.Equal("Україна", preview.Title);
+    }
+
     [Theory]
     [InlineData("word-rings-uk")]
     [InlineData("word-rings-it")]
     [InlineData("word-rings-en")]
-    [InlineData("word-rings-ru")]
     public void Dedicated_word_rings_renderer_returns_a_1200_by_630_png(string variant)
     {
         var png = WordRingsSocialPreviewRenderer.Render(variant);

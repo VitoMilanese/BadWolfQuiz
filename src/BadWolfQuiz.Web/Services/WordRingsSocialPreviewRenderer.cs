@@ -204,10 +204,6 @@ public static class WordRingsSocialPreviewRenderer
                 "PAROLA NEL",
                 "CERCHIO",
                 "3 REGOLE NASCOSTE  •  3 CERCHI"),
-            "word-rings-ru" => new PreviewCopy(
-                "УКРАЇНА",
-                string.Empty,
-                "УКРАЇНА"),
             _ => new PreviewCopy(
                 "WORD INTO",
                 "THE RING",

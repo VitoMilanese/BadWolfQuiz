@@ -36,14 +36,13 @@ Minigame room links use the existing large Bad Wolf Quiz social-preview image pi
 
 The **Слівце в кільце / Word Rings** page at `/minigames/word-rings` uses a dedicated social preview instead of the generic site card. Room links on the same page, including `?room=CODE`, use the same Word Rings-specific card while keeping the exact room URL as `og:url`.
 
-The title and description are localized for Ukrainian, English and Italian. The repository-wide Russian novelty convention remains `Україна`.
+The title and description are localized for Ukrainian, English and Italian.
 
 The generated 1200x630 artwork mirrors the minigame itself with the blue, yellow and red overlapping rings and dedicated Minigame 02 branding. The preview variants are:
 
 - `/social-preview.png?variant=word-rings-uk`
 - `/social-preview.png?variant=word-rings-en`
 - `/social-preview.png?variant=word-rings-it`
-- `/social-preview.png?variant=word-rings-ru`
 
 The room code is not placed in the preview title, description, or artwork, so a shared multiplayer link gets the dedicated Word Rings identity without exposing its code in the rendered card.
 

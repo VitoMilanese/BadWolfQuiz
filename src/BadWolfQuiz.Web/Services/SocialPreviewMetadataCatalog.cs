@@ -11,7 +11,10 @@ public static class SocialPreviewMetadataCatalog
 
         if (string.Equals(page, "/WordRings", StringComparison.OrdinalIgnoreCase))
         {
-            return GetWordRings(culture);
+            var normalizedCulture = NormalizeCulture(culture);
+            return normalizedCulture == "ru"
+                ? GetDefault(culture)
+                : GetWordRings(culture);
         }
 
         return GetDefault(culture);
@@ -75,11 +78,6 @@ public static class SocialPreviewMetadataCatalog
                 "Scopri tre regole nascoste e sistema ogni parola nelle corrette intersezioni dei cerchi.",
                 "it_IT",
                 "word-rings-it"),
-            "ru" => new SocialPreviewMetadata(
-                "Україна",
-                "Україна",
-                "ru_RU",
-                "word-rings-ru"),
             _ => new SocialPreviewMetadata(
                 "Word into the ring — Bad Wolf Quiz",
                 "Discover three hidden rules and place every word into the correct ring intersections.",
