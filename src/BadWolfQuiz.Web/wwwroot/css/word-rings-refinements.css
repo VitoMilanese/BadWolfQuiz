@@ -62,6 +62,7 @@ body:has(.word-rings-page) .page-shell {
 }
 
 .word-rings-layout.has-players {
+    grid-template-columns: minmax(220px, 1fr) minmax(0, 980px) minmax(230px, 1fr);
     grid-template-areas: "players stage bank";
 }
 
@@ -335,14 +336,8 @@ body:has(.word-rings-page) .page-shell {
 }
 
 @media (max-width: 920px) {
-    .word-rings-layout,
-    .word-rings-layout.has-players {
+    .word-rings-layout {
         grid-template-columns: minmax(0, 1fr) minmax(190px, 26vw);
-        grid-template-areas: "stage bank";
-    }
-
-    .word-rings-layout.has-players .word-rings-players {
-        display: none;
     }
 
     .word-rings-toolbar-progress {
@@ -356,10 +351,8 @@ body:has(.word-rings-page) .page-shell {
         gap: 6px;
     }
 
-    .word-rings-layout,
-    .word-rings-layout.has-players {
+    .word-rings-layout {
         grid-template-columns: minmax(0, 1fr) 170px;
-        grid-template-areas: "stage bank";
         gap: 6px;
     }
 
