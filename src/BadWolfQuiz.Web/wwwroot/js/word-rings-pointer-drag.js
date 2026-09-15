@@ -181,11 +181,25 @@
         };
 
         const wireWord = word => {
-            if (wiredWords.has(word)) return;
+            if (!(word instanceof HTMLElement) || wiredWords.has(word)) return;
             wiredWords.add(word);
             word.draggable = false;
             word.addEventListener('pointerdown', event => begin(word, event));
         };
+
+        const wireAddedWords = node => {
+            if (!(node instanceof HTMLElement)) return;
+            if (node.matches('.word-rings-word[data-word]')) wireWord(node);
+            node.querySelectorAll?.('.word-rings-word[data-word]').forEach(wireWord);
+        };
+
+        wordList.querySelectorAll('.word-rings-word[data-word]').forEach(wireWord);
+        const observer = new MutationObserver(records => {
+            for (const record of records) {
+                record.addedNodes.forEach(wireAddedWords);
+            }
+        });
+        observer.observe(wordList, { childList: true, subtree: true });
 
         document.addEventListener('pointermove', event => {
             if (!active || active.pointerId !== event.pointerId) return;
