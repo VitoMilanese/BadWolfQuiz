@@ -1,0 +1,269 @@
+name: Temporary Word Rings interaction patch v8
+
+on:
+  push:
+    branches:
+      - tmp/patch-678-action-card-fixes-v8
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-push:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/678-word-rings-action-cards
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Apply requested interaction fixes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def rep(path, old, new, count=1):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              found = text.count(old)
+              if found < count:
+                  raise SystemExit(f"{path}: expected at least {count} occurrence(s), found {found}: {old[:100]!r}")
+              text = text.replace(old, new, count)
+              p.write_text(text, encoding='utf-8')
+
+          service = 'src/BadWolfQuiz.Web/Services/WordRingsActionCardCoordinator.cs'
+          rep(service,
+              '    string? TimeoutNoticePlayerName);',
+              '''    string? TimeoutNoticePlayerName)\n{\n    public IReadOnlyList<string> MaskedWords { get; init; } = [];\n    public IReadOnlyList<string> AnagrammedWords { get; init; } = [];\n}''')
+          rep(service,
+              '''    private static readonly HashSet<WordRingsActionCardKind> ShieldedCards =\n        [WordRingsActionCardKind.Block, WordRingsActionCardKind.Timeout, WordRingsActionCardKind.Mask, WordRingsActionCardKind.Anagram];''',
+              '''    private static readonly HashSet<WordRingsActionCardKind> ShieldedCards =\n        [\n            WordRingsActionCardKind.Replace,\n            WordRingsActionCardKind.Block,\n            WordRingsActionCardKind.Shuffle,\n            WordRingsActionCardKind.Timeout,\n            WordRingsActionCardKind.Mask,\n            WordRingsActionCardKind.Anagram\n        ];''')
+          rep(service,
+              '''            case WordRingsActionCardKind.Mask:\n                lock (_metaSync)\n                {\n                    RequirePlayer(RequireMeta(code), targetId).Masked = true;\n                }\n                break;\n            case WordRingsActionCardKind.Anagram:\n                lock (_metaSync)\n                {\n                    RequirePlayer(RequireMeta(code), targetId).Anagrammed = true;\n                }\n                break;''',
+              '''            case WordRingsActionCardKind.Mask:\n                ApplyWordObfuscation(code, targetId, mask: true);\n                break;\n            case WordRingsActionCardKind.Anagram:\n                ApplyWordObfuscation(code, targetId, mask: false);\n                break;''')
+          rep(service,
+              '''            own.Cards.Contains(WordRingsActionCardKind.Shield),\n            own.Masked,\n            own.Anagrammed,\n            meta.Revision,\n            meta.TimeoutNoticeRevision,\n            meta.TimeoutNoticePlayerName);''',
+              '''            own.Cards.Contains(WordRingsActionCardKind.Shield),\n            own.MaskedWords.Count > 0,\n            own.AnagrammedWords.Count > 0,\n            meta.Revision,\n            meta.TimeoutNoticeRevision,\n            meta.TimeoutNoticePlayerName)\n        {\n            MaskedWords = own.MaskedWords.ToArray(),\n            AnagrammedWords = own.AnagrammedWords.ToArray()\n        };''')
+          rep(service,
+              '''            UpdateTemporaryWord(actorMeta, actorWord, targetWord);\n            UpdateTemporaryWord(targetMeta, targetWord, actorWord);\n            actorMeta.BlockedWords.Remove(actorWord);''',
+              '''            UpdateTemporaryWord(actorMeta, actorWord, targetWord);\n            UpdateTemporaryWord(targetMeta, targetWord, actorWord);\n            SwapWordEffect(actorMeta.MaskedWords, targetMeta.MaskedWords, actorWord, targetWord);\n            SwapWordEffect(actorMeta.AnagrammedWords, targetMeta.AnagrammedWords, actorWord, targetWord);\n            actorMeta.BlockedWords.Remove(actorWord);''')
+          rep(service,
+              '''            var targetMeta = RequirePlayer(RequireMeta(code), targetId);\n            UpdateTemporaryWord(targetMeta, discarded, replacement);\n            targetMeta.BlockedWords.Remove(discarded);''',
+              '''            var targetMeta = RequirePlayer(RequireMeta(code), targetId);\n            UpdateTemporaryWord(targetMeta, discarded, replacement);\n            ReplaceWordEffect(targetMeta.MaskedWords, discarded, replacement);\n            ReplaceWordEffect(targetMeta.AnagrammedWords, discarded, replacement);\n            targetMeta.BlockedWords.Remove(discarded);''')
+          rep(service,
+              '''    private void ApplyCleanse(string code, WordRingsRoomSnapshot state, Guid targetId)\n    {''',
+              '''    private void ApplyWordObfuscation(string code, Guid targetId, bool mask)\n    {\n        HashSet<string> temporaryWords;\n        lock (_metaSync)\n        {\n            temporaryWords = RequirePlayer(RequireMeta(code), targetId)\n                .TemporaryWords\n                .Select(item => item.Word)\n                .ToHashSet(StringComparer.OrdinalIgnoreCase);\n        }\n\n        string[] visibleWords;\n        lock (SyncField.GetValue(_store)!)\n        {\n            var room = GetRoomObject(code);\n            var target = FindPlayer(Players(room), targetId)\n                ?? throw new WordRingsRoomException(WordRingsRoomError.InvalidPlayer);\n            var remaining = RemainingWords(target).Cast<string>().ToArray();\n            var regular = remaining\n                .Where(word => !temporaryWords.Contains(word))\n                .Take(WordRingsRoomStore.MaximumBankWords);\n            var liveTemporary = remaining.Where(temporaryWords.Contains);\n            visibleWords = regular\n                .Concat(liveTemporary)\n                .Distinct(StringComparer.OrdinalIgnoreCase)\n                .ToArray();\n        }\n\n        lock (_metaSync)\n        {\n            var target = RequirePlayer(RequireMeta(code), targetId);\n            var affected = mask ? target.MaskedWords : target.AnagrammedWords;\n            foreach (var word in visibleWords) affected.Add(word);\n        }\n    }\n\n    private void ApplyCleanse(string code, WordRingsRoomSnapshot state, Guid targetId)\n    {''')
+          rep(service,
+              '''            var hadNegative = target.BlockedWords.Count > 0 || target.BlockAwaitingTurn || target.BlockExpiresAtTurnEnd ||\n                              target.Masked || target.Anagrammed || target.SkipTurns > 0;\n            target.BlockedWords.Clear();\n            target.BlockAwaitingTurn = false;\n            target.BlockExpiresAtTurnEnd = false;\n            target.Masked = false;\n            target.Anagrammed = false;''',
+              '''            var hadNegative = target.BlockedWords.Count > 0 || target.BlockAwaitingTurn || target.BlockExpiresAtTurnEnd ||\n                              target.MaskedWords.Count > 0 || target.AnagrammedWords.Count > 0 || target.SkipTurns > 0;\n            target.BlockedWords.Clear();\n            target.BlockAwaitingTurn = false;\n            target.BlockExpiresAtTurnEnd = false;\n            target.MaskedWords.Clear();\n            target.AnagrammedWords.Clear();''')
+          rep(service,
+              '''    private static void ConsumeAttemptEffects(PlayerActionState player, string? word, bool consumeTemporaryWord)\n    {\n        player.Masked = false;\n        player.Anagrammed = false;\n        if (!string.IsNullOrWhiteSpace(word) &&\n            string.Equals(player.HintWord, word.Trim(), StringComparison.OrdinalIgnoreCase))\n        {\n            player.HintWord = null;\n        }\n        if (consumeTemporaryWord && !string.IsNullOrWhiteSpace(word))\n        {\n            player.TemporaryWords.RemoveAll(item =>\n                string.Equals(item.Word, word.Trim(), StringComparison.OrdinalIgnoreCase));\n        }\n    }''',
+              '''    private static void ConsumeAttemptEffects(PlayerActionState player, string? word, bool consumeTemporaryWord)\n    {\n        var attemptedWord = word?.Trim() ?? string.Empty;\n        if (attemptedWord.Length == 0) return;\n\n        player.MaskedWords.Remove(attemptedWord);\n        player.AnagrammedWords.Remove(attemptedWord);\n        if (string.Equals(player.HintWord, attemptedWord, StringComparison.OrdinalIgnoreCase))\n        {\n            player.HintWord = null;\n        }\n        if (consumeTemporaryWord)\n        {\n            player.TemporaryWords.RemoveAll(item =>\n                string.Equals(item.Word, attemptedWord, StringComparison.OrdinalIgnoreCase));\n        }\n    }''')
+          rep(service,
+              '''    private static void UpdateTemporaryWord(PlayerActionState player, string oldWord, string newWord)\n    {''',
+              '''    private static void SwapWordEffect(\n        HashSet<string> actorEffects,\n        HashSet<string> targetEffects,\n        string actorWord,\n        string targetWord)\n    {\n        var actorWordAffected = actorEffects.Remove(actorWord);\n        var targetWordAffected = targetEffects.Remove(targetWord);\n        if (targetWordAffected) actorEffects.Add(targetWord);\n        if (actorWordAffected) targetEffects.Add(actorWord);\n    }\n\n    private static void ReplaceWordEffect(HashSet<string> effects, string oldWord, string newWord)\n    {\n        if (effects.Remove(oldWord)) effects.Add(newWord);\n    }\n\n    private static void UpdateTemporaryWord(PlayerActionState player, string oldWord, string newWord)\n    {''')
+          rep(service,
+              '''        player.TemporaryWords.RemoveAll(item => item.Lifetime == lifetime);''',
+              '''        player.TemporaryWords.RemoveAll(item => item.Lifetime == lifetime);\n        foreach (var word in expired)\n        {\n            player.MaskedWords.Remove(word);\n            player.AnagrammedWords.Remove(word);\n        }''')
+          rep(service,
+              '''        public string? HintWord { get; set; }\n        public bool Masked { get; set; }\n        public bool Anagrammed { get; set; }\n        public int SkipTurns { get; set; }''',
+              '''        public string? HintWord { get; set; }\n        public HashSet<string> MaskedWords { get; } = new(StringComparer.OrdinalIgnoreCase);\n        public HashSet<string> AnagrammedWords { get; } = new(StringComparer.OrdinalIgnoreCase);\n        public int SkipTurns { get; set; }''')
+
+          action_js = 'src/BadWolfQuiz.Web/wwwroot/js/word-rings-action-cards-v2.js'
+          rep(action_js,
+              "['Shield', 'Passive: while held, blocks Block, Time-out, Mask and Anagram used against you.']",
+              "['Shield', 'Passive: while held, blocks Replace, Block, Shuffle, Time-out, Mask and Anagram used against you.']")
+          rep(action_js,
+              "['Щит', 'Пасивна: поки картка в інвентарі, блокує Блокування, Тайм-аут, Маскування та Анаграму проти вас.']",
+              "['Щит', 'Пасивна: поки картка в інвентарі, блокує Заміну, Блокування, Перетасовку, Тайм-аут, Маскування та Анаграму проти вас.']")
+          rep(action_js,
+              "['Scudo', 'Passiva: finché è in mano blocca Blocco, Time-out, Mascheramento e Anagramma contro di te.']",
+              "['Scudo', 'Passiva: finché è in mano blocca Sostituzione, Blocco, Rimescola, Time-out, Mascheramento e Anagramma contro di te.']")
+          rep(action_js,
+              '''    let selectedCard = null;\n    let carouselOffset = 0;''',
+              '''    let selectedCard = null;\n    let carouselOffset = 0;\n    let lastRenderedCardSignature = '';''')
+          rep(action_js,
+              '''    const renderCards = () => {''',
+              '''    const syncRenderedCards = cards => {\n        const signature = cards\n            .map(card => `${Number(card.id)}:${card.isTemporary === true ? 1 : 0}`)\n            .join('|');\n        if (signature !== lastRenderedCardSignature)\n        {\n            carousel.replaceChildren();\n            cards.forEach(card => carousel.append(makeCard(card)));\n            lastRenderedCardSignature = signature;\n            return;\n        }\n\n        carousel.querySelectorAll('.word-rings-action-card[data-action-card-id]').forEach(button => {\n            const id = Number(button.dataset.actionCardId || 0);\n            button.classList.toggle('is-passive', passiveCards.has(id));\n            button.classList.toggle('is-unusable', !cardUsable(id));\n        });\n    };\n\n    const renderCards = () => {''')
+          rep(action_js,
+              '''        carousel.replaceChildren();\n        cards.forEach(card => carousel.append(makeCard(card)));''',
+              '''        syncRenderedCards(cards);''')
+          rep(action_js, '        }, 1150);', '        }, 2150);')
+          rep(action_js,
+              '''        const blocked = new Set((snapshot.blockedWords || []).map(word => String(word).toLocaleLowerCase()));\n        const temporary = new Set((snapshot.temporaryWords || []).map(word => String(word).toLocaleLowerCase()));\n        const hint = String(snapshot.hintWord || '').toLocaleLowerCase();''',
+              '''        const blocked = new Set((snapshot.blockedWords || []).map(word => String(word).toLocaleLowerCase()));\n        const temporary = new Set((snapshot.temporaryWords || []).map(word => String(word).toLocaleLowerCase()));\n        const maskedWords = new Set((snapshot.maskedWords || []).map(word => String(word).toLocaleLowerCase()));\n        const anagrammedWords = new Set((snapshot.anagrammedWords || []).map(word => String(word).toLocaleLowerCase()));\n        const legacyMasked = !Array.isArray(snapshot.maskedWords) && snapshot.masked === true;\n        const legacyAnagrammed = !Array.isArray(snapshot.anagrammedWords) && snapshot.anagrammed === true;\n        const hint = String(snapshot.hintWord || '').toLocaleLowerCase();''')
+          rep(action_js,
+              '''            if (isBlocked) {\n                token.dataset.actionBlockedManaged = 'true';\n                token.disabled = true;\n            } else if (token.dataset.actionBlockedManaged === 'true') {\n                delete token.dataset.actionBlockedManaged;\n                if (isSolo || (snapshot.isOwnTurn === true && !root.classList.contains('is-awaiting-host-judgement'))) token.disabled = false;\n            }\n            let display = original;\n            if (snapshot.masked === true) display = maskWord(original);\n            else if (snapshot.anagrammed === true) display = anagramWord(original);''',
+              '''            if (isBlocked) {\n                token.dataset.actionBlockedManaged = 'true';\n                if (!token.disabled) token.disabled = true;\n            } else if (token.dataset.actionBlockedManaged === 'true') {\n                delete token.dataset.actionBlockedManaged;\n                const shouldEnable = isSolo ||\n                    (snapshot.isOwnTurn === true && !root.classList.contains('is-awaiting-host-judgement'));\n                if (shouldEnable && token.disabled) token.disabled = false;\n            }\n            let display = original;\n            if (legacyMasked || maskedWords.has(normalized)) display = maskWord(original);\n            else if (legacyAnagrammed || anagrammedWords.has(normalized)) display = anagramWord(original);''')
+
+          action_css = 'src/BadWolfQuiz.Web/wwwroot/css/word-rings-action-cards-v2.css'
+          rep(action_css,
+              '''    transform: translateZ(0);\n    transform-origin: center center;''',
+              '''    transform: translateZ(0);\n    transform-origin: center center;\n    will-change: transform;''')
+          rep(action_css, '    z-index: 100 !important;', '    z-index: 100;')
+          rep(action_css,
+              '    animation: word-rings-action-timeout-pop 1.05s cubic-bezier(.2, .85, .24, 1) both;',
+              '    animation: word-rings-action-timeout-pop 2.05s cubic-bezier(.2, .85, .24, 1) both;')
+          rep(action_css,
+              '''@media (max-width: 1180px) {''',
+              '''.word-rings-sound-toggle {\n    display: inline-flex;\n    align-items: center;\n    gap: 6px;\n    flex: 0 0 auto;\n    min-height: 34px;\n    padding: 0 8px;\n    border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);\n    border-radius: 9px;\n    background: color-mix(in srgb, var(--bg) 58%, transparent);\n    color: var(--text);\n    cursor: pointer;\n    user-select: none;\n}\n\n.word-rings-sound-toggle input {\n    width: 16px;\n    height: 16px;\n    margin: 0;\n    accent-color: var(--gold);\n}\n\n.word-rings-sound-toggle span {\n    font-size: .9rem;\n    line-height: 1;\n}\n\n@media (max-width: 1180px) {''')
+
+          coop = 'src/BadWolfQuiz.Web/wwwroot/js/word-rings-coop.js'
+          rep(coop,
+              '''    const roomCodeLabel = root.querySelector('[data-room-code-label]');\n    const joinDialog = root.querySelector('[data-join-room-dialog]');''',
+              '''    const roomCodeLabel = root.querySelector('[data-room-code-label]');\n    const soundToggle = root.querySelector('[data-room-sound-enabled]');\n    const soundIcon = root.querySelector('[data-room-sound-icon]');\n    const joinDialog = root.querySelector('[data-join-room-dialog]');''')
+          rep(coop,
+              '''    const storageKey = `badwolf.wordrings.room.${roomCode}`;\n    const maximumBankWords''',
+              '''    const storageKey = `badwolf.wordrings.room.${roomCode}`;\n    const soundStorageKey = 'badwolf.wordrings.sound-enabled';\n    const maximumBankWords''')
+          rep(coop,
+              '''    let roomAudioContext = null;\n    let lastTimerTickSlot = null;''',
+              '''    let roomAudioContext = null;\n    let soundEffectsEnabled = true;\n    try {\n        soundEffectsEnabled = localStorage.getItem(soundStorageKey) !== 'false';\n    } catch {\n        soundEffectsEnabled = true;\n    }\n    let lastTimerTickSlot = null;''')
+          rep(coop,
+              '''    const defaultWordBankHeading = wordBankHeading?.textContent || '';\n\n    const format =''',
+              '''    const defaultWordBankHeading = wordBankHeading?.textContent || '';\n\n    const renderSoundToggle = () => {\n        if (soundToggle instanceof HTMLInputElement) soundToggle.checked = soundEffectsEnabled;\n        if (soundIcon instanceof HTMLElement) soundIcon.textContent = soundEffectsEnabled ? '🔊' : '🔇';\n    };\n    renderSoundToggle();\n    soundToggle?.addEventListener('change', () => {\n        soundEffectsEnabled = soundToggle instanceof HTMLInputElement ? soundToggle.checked : true;\n        try {\n            localStorage.setItem(soundStorageKey, String(soundEffectsEnabled));\n        } catch {\n            // Local persistence is optional.\n        }\n        renderSoundToggle();\n        if (!soundEffectsEnabled && roomAudioContext?.state === 'running') {\n            void roomAudioContext.suspend().catch(() => {});\n        } else if (soundEffectsEnabled) {\n            unlockRoomAudio();\n        }\n    });\n\n    const format =''')
+          rep(coop,
+              '''    const unlockRoomAudio = () => {\n        const context = createRoomAudioContext();''',
+              '''    const unlockRoomAudio = () => {\n        if (!soundEffectsEnabled) return;\n        const context = createRoomAudioContext();''')
+          rep(coop,
+              '''    const playRoomSignal = type => {\n        const context = createRoomAudioContext();''',
+              '''    const playRoomSignal = type => {\n        if (!soundEffectsEnabled) return;\n        const context = createRoomAudioContext();''')
+          rep(coop,
+              '''    const playTimerTick = slot => {\n        const context = createRoomAudioContext();''',
+              '''    const playTimerTick = slot => {\n        if (!soundEffectsEnabled) return;\n        const context = createRoomAudioContext();''')
+          rep(coop,
+              '''    const bringToFront = token => {\n        if (!(token instanceof HTMLElement)) return;\n        topZIndex += 1;\n        token.style.zIndex = String(topZIndex);\n    };''',
+              '''    const bringToFront = token => {\n        if (!(token instanceof HTMLElement)) return;\n        topZIndex += 1;\n        token.style.zIndex = String(topZIndex);\n    };\n\n    placedLayer.addEventListener('pointerdown', event => {\n        const token = event.target instanceof Element\n            ? event.target.closest('.word-rings-word')\n            : null;\n        if (token instanceof HTMLElement && placedLayer.contains(token)) bringToFront(token);\n    }, true);''')
+          rep(coop,
+              '''    const canBegin = (word, source) => {\n        if (isServerPlacementToken(source)) {\n            if (source.dataset.roomSeed === 'true') return !requestInFlight && isHostSeedSetup();\n            if (source.dataset.roomHostedPending === 'true') {\n                return !requestInFlight && canJudgePendingPlacement();\n            }\n            return !requestInFlight && (state?.phase === 'playing' || state?.phase === 'finished');\n        }\n        if (isHostSeedSetup()) return !requestInFlight;\n        return !requestInFlight && serverPendingPlacement() === null && isOwnTurn() &&\n            (pending === null || pending.word === word);\n    };\n    const canDropStage = (word, membership, source) => {\n        if (isServerPlacementToken(source)) {\n            if (source.dataset.roomSeed === 'true') return canBegin(word, source);\n            if (source.dataset.roomHostedPending === 'true') return canBegin(word, source);\n            return canBegin(word, source) &&\n                canonical(membership) === canonical(source.dataset.membership);\n        }\n        return canBegin(word, source);\n    };\n    const canDropOutside = (word, source) => {\n        if (isServerPlacementToken(source)) {\n            if (source.dataset.roomSeed === 'true') return canBegin(word, source);\n            if (source.dataset.roomHostedPending === 'true') return canBegin(word, source);\n            return canBegin(word, source) && canonical(source.dataset.membership) === '';\n        }\n        return canBegin(word, source);\n    };''',
+              '''    const canBegin = (word, source) => {\n        if (isServerPlacementToken(source)) {\n            if (source.dataset.roomSeed === 'true') {\n                if (state?.seedSetupPending === true) return !requestInFlight && isHostSeedSetup();\n                return !requestInFlight && state?.phase === 'playing';\n            }\n            if (source.dataset.roomHostedPending === 'true') {\n                return !requestInFlight && canJudgePendingPlacement();\n            }\n            return !requestInFlight && (state?.phase === 'playing' || state?.phase === 'finished');\n        }\n        if (isHostSeedSetup()) return !requestInFlight;\n        return !requestInFlight && serverPendingPlacement() === null && isOwnTurn() &&\n            (pending === null || pending.word === word);\n    };\n    const canDropStage = (word, membership, source) => {\n        if (isServerPlacementToken(source)) {\n            if (source.dataset.roomSeed === 'true') {\n                if (!canBegin(word, source)) return false;\n                return isHostSeedSetup() ||\n                    canonical(membership) === canonical(source.dataset.membership);\n            }\n            if (source.dataset.roomHostedPending === 'true') return canBegin(word, source);\n            return canBegin(word, source) &&\n                canonical(membership) === canonical(source.dataset.membership);\n        }\n        return canBegin(word, source);\n    };\n    const canDropOutside = (word, source) => {\n        if (isServerPlacementToken(source)) {\n            if (source.dataset.roomSeed === 'true') {\n                if (!canBegin(word, source)) return false;\n                return isHostSeedSetup() || canonical(source.dataset.membership) === '';\n            }\n            if (source.dataset.roomHostedPending === 'true') return canBegin(word, source);\n            return canBegin(word, source) && canonical(source.dataset.membership) === '';\n        }\n        return canBegin(word, source);\n    };''')
+          rep(coop,
+              '''            const awaitingHost = placement.isPending === true;\n            const seedExample = placement.isSeed === true;\n            if (awaitingHost && placementHistory.get(placementId)?.isPending !== true) {\n                bringToFront(token);\n            }''',
+              '''            const awaitingHost = placement.isPending === true;\n            const seedExample = placement.isSeed === true;\n            const previousPlacement = placementHistory.get(placementId);\n            if ((placementHistoryInitialized && previousPlacement === undefined) ||\n                (awaitingHost && previousPlacement?.isPending !== true)) {\n                bringToFront(token);\n            }''')
+          rep(coop,
+              '''            const previous = placementHistory.get(placementId);''',
+              '''            const previous = previousPlacement;''')
+
+          solo = 'src/BadWolfQuiz.Web/wwwroot/js/word-rings.js'
+          rep(solo,
+              '''    const bringToFront = token => {\n        if (!(token instanceof HTMLElement)) return;\n        topZIndex += 1;\n        token.style.zIndex = String(topZIndex);\n    };''',
+              '''    const bringToFront = token => {\n        if (!(token instanceof HTMLElement)) return;\n        topZIndex += 1;\n        token.style.zIndex = String(topZIndex);\n    };\n\n    placedLayer.addEventListener('pointerdown', event => {\n        const token = event.target instanceof Element\n            ? event.target.closest('.word-rings-word')\n            : null;\n        if (token instanceof HTMLElement && placedLayer.contains(token)) bringToFront(token);\n    }, true);''')
+          rep(solo,
+              '''            token.disabled = true;\n            token.draggable = false;\n            placedLayer.append(token);\n            bringToFront(token);''',
+              '''            token.disabled = false;\n            token.draggable = false;\n            placedLayer.append(token);\n            bringToFront(token);\n            wireWord?.(token);''')
+          rep(solo,
+              '''    const assignToStage = (word, clientX, clientY) => {\n        const bankSource = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);''',
+              '''    const assignToStage = (word, clientX, clientY, dragSource) => {\n        if (dragSource instanceof HTMLElement && dragSource.dataset.seedExample === 'true') {\n            const target = membershipAt(clientX, clientY);\n            dragSource.style.left = `${target.x}%`;\n            dragSource.style.top = `${target.y}%`;\n            bringToFront(dragSource);\n            return;\n        }\n\n        const bankSource = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);''')
+          rep(solo,
+              '''    const assignOutside = word => {''',
+              '''    const assignOutside = (word, dragSource) => {''')
+          rep(solo,
+              '''        assignOutside(word);''',
+              '''        assignOutside(word, dragSource);''', count=0) if False else None
+          # assignOutside has its own body; keep the existing body and let pointer drag pass dragSource.
+          rep(solo,
+              '''    const returnToBank = word => {\n        if (gameOver || verdicts.has(word)) return;''',
+              '''    const returnToBank = (word, dragSource) => {\n        if (dragSource instanceof HTMLElement && dragSource.dataset.seedExample === 'true') return;\n        if (gameOver || verdicts.has(word)) return;''')
+          rep(solo,
+              '''    const canBegin = word => !gameOver &&\n        (verdicts.has(word) || pendingWord === null || pendingWord === word);\n\n    const canDropStage = (word, membership) => {\n        if (gameOver) return false;\n        const normalized = canonical(membership);''',
+              '''    const canBegin = (word, source) => {\n        if (source instanceof HTMLElement && source.dataset.seedExample === 'true') return !gameOver;\n        return !gameOver && (verdicts.has(word) || pendingWord === null || pendingWord === word);\n    };\n\n    const canDropStage = (word, membership, source) => {\n        if (gameOver) return false;\n        const normalized = canonical(membership);\n        if (source instanceof HTMLElement && source.dataset.seedExample === 'true') {\n            return normalized === canonical(source.dataset.membership);\n        }''')
+          rep(solo,
+              '''    const canDropOutside = word => canDropStage(word, '');\n    const canReturnToBank = word => !gameOver && !verdicts.has(word);''',
+              '''    const canDropOutside = (word, source) => canDropStage(word, '', source);\n    const canReturnToBank = (word, source) =>\n        !(source instanceof HTMLElement && source.dataset.seedExample === 'true') &&\n        !gameOver && !verdicts.has(word);''')
+
+          store = 'src/BadWolfQuiz.Web/Services/WordRingsRoomStore.cs'
+          rep(store,
+              '''            var placement = room.Placements[placementIndex];\n            if (placement.IsSeed)\n            {\n                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);\n            }\n            if (!string.Equals(''',
+              '''            var placement = room.Placements[placementIndex];\n            if (!string.Equals(''')
+          rep(store,
+              '''            if (placement.IsSeed)\n            {\n                if (!player.IsHost || room.Phase != RoomPhase.Playing)\n                {\n                    throw new WordRingsRoomException(WordRingsRoomError.NotHost);\n                }\n            }\n            else if (placement.IsPending)''',
+              '''            if (placement.IsSeed)\n            {\n                if (room.Phase != RoomPhase.Playing)\n                {\n                    throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);\n                }\n            }\n            else if (placement.IsPending)''')
+
+          host = 'src/BadWolfQuiz.Web/Services/WordRingsRoomHostCoordinator.cs'
+          rep(host,
+              '''            if (placement?.IsSeed == true && !IsSeedSetupPending(code))\n            {\n                throw new InvalidOperationException("SeedSetupFinished");\n            }''',
+              '''            if (placement?.IsSeed == true)\n            {\n                if (IsSeedSetupPending(code))\n                {\n                    if (!current.IsHost) throw new WordRingsRoomException(WordRingsRoomError.NotHost);\n                }\n                else\n                {\n                    membership = placement.Membership;\n                }\n            }''')
+
+          page = 'src/BadWolfQuiz.Web/Pages/WordRings.cshtml'
+          rep(page,
+              '''        <div class="minigames-toolbar-title word-rings-toolbar-title">\n            <h1>@WordRingsLocalizer["Title"]</h1>''',
+              '''        <div class="minigames-toolbar-title word-rings-toolbar-title">\n            @if (isCooperativeRoom)\n            {\n                <label class="word-rings-sound-toggle" title="@roomText.SoundEffects">\n                    <input type="checkbox" data-room-sound-enabled aria-label="@roomText.SoundEffects" checked />\n                    <span data-room-sound-icon aria-hidden="true">🔊</span>\n                </label>\n            }\n            <h1>@WordRingsLocalizer["Title"]</h1>''')
+
+          room_text = 'src/BadWolfQuiz.Web/Localization/WordRingsRoomText.cs'
+          rep(room_text,
+              '''    public string HideCode { get; init; } = "Hide room code";\n    public string StartGame''',
+              '''    public string HideCode { get; init; } = "Hide room code";\n    public string SoundEffects { get; init; } = "Sound effects";\n    public string StartGame''')
+          rep(room_text,
+              '''        HideCode = "Приховати код кімнати",\n        StartGame''',
+              '''        HideCode = "Приховати код кімнати",\n        SoundEffects = "Звукові ефекти",\n        StartGame''')
+          rep(room_text,
+              '''        HideCode = "Nascondi codice stanza",\n        StartGame''',
+              '''        HideCode = "Nascondi codice stanza",\n        SoundEffects = "Effetti sonori",\n        StartGame''')
+          rep(room_text,
+              '''        HideCode = "Україна",\n        StartGame''',
+              '''        HideCode = "Україна",\n        SoundEffects = "Україна",\n        StartGame''')
+
+          tag = 'src/BadWolfQuiz.Web/TagHelpers/WordRingsActionCardsAssetsTagHelper.cs'
+          rep(tag, 'word-rings-action-cards-v2.css?v=2', 'word-rings-action-cards-v2.css?v=3')
+          rep(tag, 'word-rings-action-cards-v2.js?v=2', 'word-rings-action-cards-v2.js?v=3')
+
+          tests = 'tests/BadWolfQuiz.Web.Tests/WordRingsActionCardsRegressionTests.cs'
+          rep(tests,
+              '''        var tuningApi = ReadWebFile("Pages", "WordRingsRoomTuningApi.cshtml.cs");''',
+              '''        var tuningApi = ReadWebFile("Pages", "WordRingsRoomTuningApi.cshtml.cs");\n        var coopScript = ReadWebFile("wwwroot", "js", "word-rings-coop.js");\n        var soloScript = ReadWebFile("wwwroot", "js", "word-rings.js");\n        var page = ReadWebFile("Pages", "WordRings.cshtml");''')
+          rep(tests,
+              '''        Assert.Contains("syncMultiplayerVisibleWords", script, StringComparison.Ordinal);\n        Assert.Contains("new MutationObserver", pointerDrag, StringComparison.Ordinal);''',
+              '''        Assert.Contains("syncMultiplayerVisibleWords", script, StringComparison.Ordinal);\n        Assert.Contains("lastRenderedCardSignature", script, StringComparison.Ordinal);\n        Assert.Contains("if (!token.disabled) token.disabled = true;", script, StringComparison.Ordinal);\n        Assert.Contains("maskedWords.has(normalized)", script, StringComparison.Ordinal);\n        Assert.Contains("anagrammedWords.has(normalized)", script, StringComparison.Ordinal);\n        Assert.Contains("}, 2150);", script, StringComparison.Ordinal);\n        Assert.Contains("new MutationObserver", pointerDrag, StringComparison.Ordinal);\n        Assert.Contains("soundEffectsEnabled", coopScript, StringComparison.Ordinal);\n        Assert.Contains("data-room-sound-enabled", page, StringComparison.Ordinal);\n        Assert.Contains("state?.seedSetupPending === true", coopScript, StringComparison.Ordinal);\n        Assert.Contains("source?.dataset.seedExample", soloScript, StringComparison.Ordinal);''')
+          rep(tests,
+              '''        Assert.Contains("word-rings-action-pending-pulse", css, StringComparison.Ordinal);''',
+              '''        Assert.Contains("word-rings-action-pending-pulse", css, StringComparison.Ordinal);\n        Assert.Contains("word-rings-action-timeout-pop 2.05s", css, StringComparison.Ordinal);\n        Assert.Contains("word-rings-sound-toggle", css, StringComparison.Ordinal);''')
+          rep(tests,
+              '''        Assert.Contains("word-rings-action-cards-v2.css?v=2", tagHelper, StringComparison.Ordinal);\n        Assert.Contains("word-rings-action-cards-v2.js?v=2", tagHelper, StringComparison.Ordinal);''',
+              '''        Assert.Contains("word-rings-action-cards-v2.css?v=3", tagHelper, StringComparison.Ordinal);\n        Assert.Contains("word-rings-action-cards-v2.js?v=3", tagHelper, StringComparison.Ordinal);''')
+          rep(tests,
+              '''        Assert.Contains("target.Cards.Contains(WordRingsActionCardKind.Shield)", service, StringComparison.Ordinal);''',
+              '''        Assert.Contains("target.Cards.Contains(WordRingsActionCardKind.Shield)", service, StringComparison.Ordinal);\n        Assert.Contains("WordRingsActionCardKind.Replace,", service, StringComparison.Ordinal);\n        Assert.Contains("WordRingsActionCardKind.Shuffle,", service, StringComparison.Ordinal);\n        Assert.Contains("MaskedWords", service, StringComparison.Ordinal);\n        Assert.Contains("AnagrammedWords", service, StringComparison.Ordinal);\n        Assert.Contains("SwapWordEffect", service, StringComparison.Ordinal);''')
+          PY
+
+      - name: Restore Web tests
+        run: dotnet restore tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-action-cards-v2.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-coop.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-pointer-drag.js
+
+      - name: Check whitespace
+        run: git diff --check
+
+      - name: Run action-card regressions
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore --configuration Release --filter "FullyQualifiedName~WordRingsActionCardsRegressionTests"
+
+      - name: Run full Web test suite
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore --configuration Release
+
+      - name: Commit and push feature fixes
+        shell: bash
+        run: |
+          git config user.name "Vitalii Hanych"
+          git config user.email "64318287+VitoMilanese@users.noreply.github.com"
+          git add \
+            src/BadWolfQuiz.Web/Services/WordRingsActionCardCoordinator.cs \
+            src/BadWolfQuiz.Web/Services/WordRingsRoomStore.cs \
+            src/BadWolfQuiz.Web/Services/WordRingsRoomHostCoordinator.cs \
+            src/BadWolfQuiz.Web/Pages/WordRings.cshtml \
+            src/BadWolfQuiz.Web/Localization/WordRingsRoomText.cs \
+            src/BadWolfQuiz.Web/TagHelpers/WordRingsActionCardsAssetsTagHelper.cs \
+            src/BadWolfQuiz.Web/wwwroot/js/word-rings-action-cards-v2.js \
+            src/BadWolfQuiz.Web/wwwroot/js/word-rings-coop.js \
+            src/BadWolfQuiz.Web/wwwroot/js/word-rings.js \
+            src/BadWolfQuiz.Web/wwwroot/css/word-rings-action-cards-v2.css \
+            tests/BadWolfQuiz.Web.Tests/WordRingsActionCardsRegressionTests.cs
+          git commit -m "Fix Word Rings action card interactions"
+          git push origin HEAD:feature/678-word-rings-action-cards
