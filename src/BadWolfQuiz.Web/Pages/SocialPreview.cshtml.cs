@@ -40,7 +40,10 @@ public sealed class SocialPreviewModel : PageModel
     }
 
     private static bool IsWordRingsVariant(string? variant) =>
-        variant?.StartsWith("word-rings-", StringComparison.OrdinalIgnoreCase) == true;
+        variant?.Trim().ToLowerInvariant() is
+            "word-rings-uk" or
+            "word-rings-en" or
+            "word-rings-it";
 
     private static SiteThemeColors? TryBuildCustomColors(
         string? theme,

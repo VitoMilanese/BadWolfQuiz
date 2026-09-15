@@ -75,4 +75,22 @@ public sealed class WordRingsSocialPreviewTests
         Assert.Equal(expected, result.FileContents);
         Assert.Equal("public, max-age=86400", httpContext.Response.Headers.CacheControl.ToString());
     }
+
+    [Fact]
+    public void Unsupported_word_rings_variant_does_not_use_the_dedicated_renderer()
+    {
+        var httpContext = new DefaultHttpContext();
+        var model = new SocialPreviewModel
+        {
+            PageContext = new PageContext
+            {
+                HttpContext = httpContext
+            }
+        };
+
+        var result = Assert.IsType<FileContentResult>(model.OnGet("word-rings-ru"));
+        var expected = SocialPreviewImageRenderer.Render("word-rings-ru");
+
+        Assert.Equal(expected, result.FileContents);
+    }
 }
