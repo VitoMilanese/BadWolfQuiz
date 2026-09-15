@@ -12,10 +12,11 @@
     const unknownRetryLimit = 10;
     const registeredRooms = new Set();
     const unknownRetries = new Map();
-    let resizeTimer = null;
     let activeContextKey = '';
     let synchronizationGeneration = 0;
     let starfieldHost = null;
+    let particlesBuilt = false;
+    let hostRefreshFrame = 0;
 
     const isEnabled = () => body.dataset.animatedStars !== 'false';
 
@@ -88,10 +89,17 @@
         const hostGameplayView = document.querySelector('[data-host-gameplay-view]');
         if (hostGameplayView instanceof HTMLElement) {
             const activeGameplayRoot = Array.from(hostGameplayView.children)
-                .find(isVisibleElement);
+                .find(element =>
+                    isVisibleElement(element) &&
+                    !['LINK', 'SCRIPT', 'STYLE'].includes(element.tagName));
             if (activeGameplayRoot instanceof HTMLElement) {
                 return activeGameplayRoot;
             }
+        }
+
+        const answerKeyRoot = document.querySelector('.answer-key-page');
+        if (isVisibleElement(answerKeyRoot)) {
+            return answerKeyRoot;
         }
 
         const visibleHostBoard = document.querySelector(
@@ -104,8 +112,11 @@
         const pageShell = document.querySelector('main.page-shell');
         if (pageShell instanceof HTMLElement) {
             const visualChildren = Array.from(pageShell.children).filter(element =>
-                element !== field && isVisibleElement(element));
-            const viewportRoot = visualChildren.find(fillsViewport);
+                element !== field &&
+                isVisibleElement(element) &&
+                !['LINK', 'SCRIPT', 'STYLE'].includes(element.tagName));
+            const viewportRoot = visualChildren.find(element =>
+                element.classList.contains('game-intro-page') && fillsViewport(element));
             if (viewportRoot instanceof HTMLElement) {
                 return viewportRoot;
             }
@@ -118,33 +129,34 @@
     const ensureStarfieldHost = () => {
         const nextHost = resolveStarfieldHost();
         if (!(nextHost instanceof HTMLElement)) {
-            return;
+            return false;
         }
 
-        if (starfieldHost !== nextHost) {
-            if (starfieldHost && starfieldHost !== body) {
-                starfieldHost.classList.remove('site-starfield-host');
-            }
-            if (nextHost !== body) {
-                nextHost.classList.add('site-starfield-host');
-            }
-            starfieldHost = nextHost;
+        const changed = starfieldHost !== nextHost || field.parentElement !== nextHost;
+        if (!changed) {
+            return false;
         }
+
+        if (starfieldHost && starfieldHost !== body) {
+            starfieldHost.classList.remove('site-starfield-host');
+        }
+        if (nextHost !== body) {
+            nextHost.classList.add('site-starfield-host');
+        }
+        starfieldHost = nextHost;
 
         if (field.parentElement !== nextHost) {
             nextHost.append(field);
         }
+        return true;
     };
 
-    const renderStars = () => {
-        ensureStarfieldHost();
-        updateStarfieldTone();
-        field.replaceChildren();
-        const enabled = isEnabled();
-        field.hidden = !enabled;
-        if (!enabled) {
+    const buildParticles = () => {
+        if (particlesBuilt) {
             return;
         }
+        particlesBuilt = true;
+        field.replaceChildren();
 
         const width = Math.max(window.innerWidth, 320);
         const height = Math.max(window.innerHeight, 480);
@@ -158,7 +170,6 @@
         const points = [];
         const fragment = document.createDocumentFragment();
         const maximumAttempts = requestedCount * 48;
-        const lightTone = field.dataset.starfieldTone === 'light';
 
         for (let attempt = 0; attempt < maximumAttempts && points.length < requestedCount; attempt++) {
             const x = 8 + Math.random() * Math.max(1, width - 16);
@@ -168,53 +179,76 @@
             }
 
             points.push({ x, y });
-            const star = document.createElement('span');
-            const bright = Math.random() < (lightTone ? 0.08 : 0.13);
-            const size = lightTone
-                ? bright
-                    ? 1.6 + Math.random() * 0.8
-                    : 0.85 + Math.random() * 1.15
-                : bright
-                    ? 2.2 + Math.random() * 1.25
-                    : 1 + Math.random() * 1.65;
-            const duration = 3.1 + Math.random() * 4.7;
-            const minOpacity = lightTone
-                ? 0.07 + Math.random() * 0.10
-                : 0.08 + Math.random() * 0.20;
-            const maxOpacity = lightTone
-                ? 0.26 + Math.random() * 0.20
-                : 0.52 + Math.random() * 0.43;
+            const particle = document.createElement('span');
+            const bright = Math.random() < 0.14;
+            const ring = Math.random() < 0.46;
+            const colorIndex = Math.floor(Math.random() * 5);
+            const starSize = bright
+                ? 2.2 + Math.random() * 1.25
+                : 1 + Math.random() * 1.65;
+            const bubbleSize = bright
+                ? 9 + Math.random() * 5
+                : 5 + Math.random() * 6;
+            const duration = 3.8 + Math.random() * 5.4;
+            const starMinOpacity = 0.08 + Math.random() * 0.20;
+            const starMaxOpacity = 0.52 + Math.random() * 0.43;
+            const bubbleMinOpacity = 0.24 + Math.random() * 0.18;
+            const bubbleMaxOpacity = 0.52 + Math.random() * 0.30;
+            const driftX = -5 + Math.random() * 10;
+            const driftY = -4 + Math.random() * 8;
 
-            star.className = bright
-                ? 'site-starfield-star is-bright'
-                : 'site-starfield-star';
-            star.style.left = `${(x / width) * 100}%`;
-            star.style.top = `${(y / height) * 100}%`;
-            star.style.setProperty('--star-size', `${size.toFixed(2)}px`);
-            star.style.setProperty('--star-duration', `${duration.toFixed(2)}s`);
-            star.style.setProperty('--star-delay', `${(-Math.random() * duration).toFixed(2)}s`);
-            star.style.setProperty('--star-min-opacity', minOpacity.toFixed(2));
-            star.style.setProperty('--star-max-opacity', maxOpacity.toFixed(2));
-            fragment.appendChild(star);
+            particle.className = [
+                'site-starfield-star',
+                bright ? 'is-bright' : '',
+                ring ? 'is-ring' : 'is-orb',
+                `is-color-${colorIndex + 1}`
+            ].filter(Boolean).join(' ');
+            particle.style.left = `${(x / width) * 100}%`;
+            particle.style.top = `${(y / height) * 100}%`;
+            particle.style.setProperty('--star-size', `${starSize.toFixed(2)}px`);
+            particle.style.setProperty('--bubble-size', `${bubbleSize.toFixed(2)}px`);
+            particle.style.setProperty('--particle-duration', `${duration.toFixed(2)}s`);
+            particle.style.setProperty('--particle-delay', `${(-Math.random() * duration).toFixed(2)}s`);
+            particle.style.setProperty('--star-min-opacity', starMinOpacity.toFixed(2));
+            particle.style.setProperty('--star-max-opacity', starMaxOpacity.toFixed(2));
+            particle.style.setProperty('--bubble-min-opacity', bubbleMinOpacity.toFixed(2));
+            particle.style.setProperty('--bubble-max-opacity', bubbleMaxOpacity.toFixed(2));
+            particle.style.setProperty('--bubble-drift-x', `${driftX.toFixed(2)}px`);
+            particle.style.setProperty('--bubble-drift-y', `${driftY.toFixed(2)}px`);
+            fragment.appendChild(particle);
         }
 
         field.appendChild(fragment);
     };
 
+    const refreshPresentation = () => {
+        ensureStarfieldHost();
+        updateStarfieldTone();
+        buildParticles();
+        field.hidden = !isEnabled();
+    };
+
     const setEnabled = enabled => {
         const normalized = enabled !== false;
-        if ((body.dataset.animatedStars !== 'false') === normalized && field.childElementCount > 0) {
+        body.dataset.animatedStars = normalized ? 'true' : 'false';
+        buildParticles();
+        field.hidden = !normalized;
+    };
+
+    const scheduleHostRefresh = () => {
+        if (hostRefreshFrame !== 0) {
             return;
         }
-
-        body.dataset.animatedStars = normalized ? 'true' : 'false';
-        renderStars();
+        hostRefreshFrame = window.requestAnimationFrame(() => {
+            hostRefreshFrame = 0;
+            ensureStarfieldHost();
+        });
     };
 
     window.BadWolfStarfield = Object.freeze({
         setEnabled,
         isEnabled,
-        refresh: renderStars
+        refresh: refreshPresentation
     });
 
     const settingsToggle = document.getElementById('Input_AnimatedStarsEnabled');
@@ -384,14 +418,6 @@
         void loadAppearance(context, generation);
     };
 
-    const refreshHost = () => {
-        const previousHost = starfieldHost;
-        ensureStarfieldHost();
-        if (previousHost !== starfieldHost) {
-            renderStars();
-        }
-    };
-
     for (const methodName of ['pushState', 'replaceState']) {
         const original = history[methodName];
         if (typeof original !== 'function') {
@@ -400,11 +426,15 @@
         history[methodName] = function (...args) {
             const result = original.apply(this, args);
             window.setTimeout(() => synchronizeAppearance(true), 0);
+            window.setTimeout(scheduleHostRefresh, 0);
             return result;
         };
     }
 
-    window.addEventListener('popstate', () => synchronizeAppearance(true));
+    window.addEventListener('popstate', () => {
+        synchronizeAppearance(true);
+        scheduleHostRefresh();
+    });
     window.addEventListener('storage', event => {
         if (event.key?.startsWith('badwolf-minigame-player:') ||
             event.key?.startsWith('badwolf.wordrings.room.')) {
@@ -412,41 +442,24 @@
         }
     });
 
-    window.addEventListener('resize', () => {
-        if (resizeTimer !== null) {
-            window.clearTimeout(resizeTimer);
-        }
-        resizeTimer = window.setTimeout(() => {
-            resizeTimer = null;
-            renderStars();
-        }, 180);
-    });
-
-    new MutationObserver(() => renderStars()).observe(document.documentElement, {
+    new MutationObserver(() => {
+        updateStarfieldTone();
+    }).observe(document.documentElement, {
         attributes: true,
-        attributeFilter: ['data-theme', 'style']
+        attributeFilter: ['data-theme']
     });
 
     const pageShell = document.querySelector('main.page-shell');
     if (pageShell instanceof HTMLElement) {
-        new MutationObserver(refreshHost).observe(pageShell, { childList: true });
+        new MutationObserver(scheduleHostRefresh).observe(pageShell, { childList: true });
     }
 
     const hostGameplayView = document.querySelector('[data-host-gameplay-view]');
     if (hostGameplayView instanceof HTMLElement) {
-        new MutationObserver(refreshHost).observe(hostGameplayView, { childList: true });
+        new MutationObserver(scheduleHostRefresh).observe(hostGameplayView, { childList: true });
     }
 
-    const hostGameBoard = document.querySelector('.host-game-board');
-    if (hostGameBoard instanceof HTMLElement) {
-        new MutationObserver(refreshHost).observe(hostGameBoard, {
-            attributes: true,
-            subtree: true,
-            attributeFilter: ['hidden', 'data-game-status']
-        });
-    }
-
-    renderStars();
+    refreshPresentation();
     synchronizeAppearance(true);
     window.setInterval(() => synchronizeAppearance(true), 12000);
 })();

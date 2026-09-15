@@ -73,13 +73,44 @@ public sealed class BackgroundStarsRegressionTests : IDisposable
         Assert.Contains("data-site-starfield", tagHelper, StringComparison.Ordinal);
         Assert.Contains("Input.AnimatedStarsEnabled", tagHelper, StringComparison.Ordinal);
         Assert.Contains("GameThemeSettings", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("background-stars.css?v=2", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("background-stars.js?v=2", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("background-stars.css?v=3", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("background-stars.js?v=3", tagHelper, StringComparison.Ordinal);
         Assert.Contains("@keyframes badwolf-star-pulse", css, StringComparison.Ordinal);
+        Assert.Contains("@keyframes badwolf-bubble-float", css, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
         Assert.Contains("Math.random()", script, StringComparison.Ordinal);
         Assert.Contains("minimumDistance", script, StringComparison.Ordinal);
         Assert.Contains("maxStars = 52", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Light_themes_use_colored_bubbles_and_rings()
+    {
+        var css = ReadWebFile("wwwroot", "css", "background-stars.css");
+        var script = ReadWebFile("wwwroot", "js", "background-stars.js");
+
+        Assert.Contains("[data-starfield-tone=\"light\"]", css, StringComparison.Ordinal);
+        Assert.Contains(".site-starfield-star.is-ring", css, StringComparison.Ordinal);
+        Assert.Contains(".site-starfield-star.is-color-5", css, StringComparison.Ordinal);
+        Assert.Contains("--bubble-size", css, StringComparison.Ordinal);
+        Assert.Contains("ring ? 'is-ring' : 'is-orb'", script, StringComparison.Ordinal);
+        Assert.Contains("`is-color-${colorIndex + 1}`", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Starfield_particles_are_built_once_and_rehosting_does_not_randomize_them()
+    {
+        var script = ReadWebFile("wwwroot", "js", "background-stars.js");
+
+        Assert.Contains("let particlesBuilt = false", script, StringComparison.Ordinal);
+        Assert.Contains("const buildParticles = () =>", script, StringComparison.Ordinal);
+        Assert.Contains("if (particlesBuilt)", script, StringComparison.Ordinal);
+        Assert.Contains("particlesBuilt = true", script, StringComparison.Ordinal);
+        Assert.Contains("const scheduleHostRefresh = () =>", script, StringComparison.Ordinal);
+        Assert.Contains("ensureStarfieldHost();", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("resizeTimer", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("new MutationObserver(() => renderStars())", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("renderStars();", script, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -89,18 +120,20 @@ public sealed class BackgroundStarsRegressionTests : IDisposable
         var script = ReadWebFile("wwwroot", "js", "background-stars.js");
 
         Assert.Contains(".site-starfield-host", css, StringComparison.Ordinal);
-        Assert.Contains("isolation: isolate", css, StringComparison.Ordinal);
-        Assert.Contains("[data-starfield-tone=\"light\"]", css, StringComparison.Ordinal);
-        Assert.Contains("body .host-settings-hero-mark > i", css, StringComparison.Ordinal);
+        Assert.Contains("position: fixed !important", css, StringComparison.Ordinal);
+        Assert.Contains("body:has(.minigame-editor-heading) > .page-shell.site-starfield-host > .site-starfield", css, StringComparison.Ordinal);
+        Assert.Contains(".answer-key-page.site-starfield-host > .site-starfield", css, StringComparison.Ordinal);
+        Assert.Contains(".player-lobby.site-starfield-host:is(", css, StringComparison.Ordinal);
         Assert.Contains("resolveStarfieldHost", script, StringComparison.Ordinal);
         Assert.Contains("main.page-shell", script, StringComparison.Ordinal);
         Assert.Contains("[data-game-code][data-player-id][data-final-status]", script, StringComparison.Ordinal);
         Assert.Contains("[data-host-gameplay-view]", script, StringComparison.Ordinal);
+        Assert.Contains(".answer-key-page", script, StringComparison.Ordinal);
         Assert.Contains("[data-host-gameplay-board]:not([hidden])", script, StringComparison.Ordinal);
-        Assert.Contains("const viewportRoot = visualChildren.find(fillsViewport);", script, StringComparison.Ordinal);
         Assert.Contains("nextHost.append(field)", script, StringComparison.Ordinal);
-        Assert.Contains("new MutationObserver(refreshHost).observe(hostGameplayView", script, StringComparison.Ordinal);
-        Assert.Contains("updateStarfieldTone", script, StringComparison.Ordinal);
+        Assert.Contains("new MutationObserver(scheduleHostRefresh).observe(hostGameplayView", script, StringComparison.Ordinal);
+        Assert.Contains("attributeFilter: ['data-theme']", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("attributeFilter: ['hidden', 'data-game-status']", script, StringComparison.Ordinal);
         Assert.DoesNotContain("pageShell?.firstElementChild", script, StringComparison.Ordinal);
         Assert.DoesNotContain("nextHost.prepend(field)", script, StringComparison.Ordinal);
     }
