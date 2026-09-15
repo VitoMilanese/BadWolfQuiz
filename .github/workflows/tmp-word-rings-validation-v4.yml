@@ -1,0 +1,39 @@
+name: Temporary Word Rings validation v4
+
+on:
+  push:
+    branches:
+      - tmp/678-word-rings-validation-v4
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-action-cards-patch.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-action-cards-v2.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-coop.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-pointer-drag.js
+
+      - name: Check whitespace
+        run: git diff --check 2a8bcd84ba1054b75459dc4c02acc2ff68339573..HEAD
+
+      - name: Restore web tests
+        run: dotnet restore tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
+
+      - name: Focused Word Rings action-card tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore --filter FullyQualifiedName~WordRingsActionCards
+
+      - name: Full web test suite
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore
