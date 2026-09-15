@@ -10,8 +10,8 @@ public sealed class WordRingsActionCardsAssetsTagHelper : TagHelper
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
         output.PreElement.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/word-rings-action-cards.css?v=1\" />");
+            "<link rel=\"stylesheet\" href=\"/css/word-rings-action-cards-v2.css?v=2\" />");
         output.PostElement.AppendHtml(
-            "<script src=\"/js/word-rings-action-cards.js?v=1\" defer></script>");
+            "<script src=\"/js/word-rings-action-cards-v2.js?v=2\" defer></script>");
     }
 }
