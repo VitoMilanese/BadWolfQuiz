@@ -7,6 +7,7 @@
     var requestedRoomCode = Request.Query["room"].ToString().Trim().ToUpperInvariant();
     var isCooperativeRoom = requestedRoomCode.Length == 6 && requestedRoomCode.All(char.IsLetterOrDigit);
     var roomText = WordRingsRoomText.ForCulture(CultureInfo.CurrentUICulture);
+    var hostText = WordRingsRoomHostText.ForCulture(CultureInfo.CurrentUICulture);
     ViewData["Title"] = WordRingsLocalizer["Title"];
     ViewData["HidePortalFooter"] = true;
 }
@@ -16,6 +17,7 @@
     <link rel="stylesheet" href="~/css/word-rings.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/word-rings-refinements.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/word-rings-room.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/word-rings-host-controls.css" asp-append-version="true" />
 }
 
 <div class="minigames-page word-rings-page"
@@ -53,7 +55,13 @@
      data-room-hide-code="@roomText.HideCode"
      data-room-score-award="@roomText.ScoreAwardTemplate"
      data-room-partial-award="@roomText.PartialAwardTemplate"
-     data-room-outside-no-point="@roomText.CorrectNoPointTemplate">
+     data-room-outside-no-point="@roomText.CorrectNoPointTemplate"
+     data-room-pass-turn="@hostText.PassTurn"
+     data-room-kick-player="@hostText.KickPlayer"
+     data-room-lock-joining="@hostText.LockJoining"
+     data-room-unlock-joining="@hostText.UnlockJoining"
+     data-room-locked="@hostText.RoomLocked"
+     data-room-rules-required="@hostText.RulesRequired">
 
     @if (!isCooperativeRoom)
     {
@@ -81,24 +89,16 @@
             @if (!isCooperativeRoom)
             {
                 <button class="button" type="button" data-open-coop-room>👥 @roomText.Cooperative</button>
+                <button class="button" type="button" data-reveal-rules>@WordRingsLocalizer["RevealRules"]</button>
+                <button class="button minigames-refresh-button" type="button" data-reset title="@WordRingsLocalizer["Reset"]" aria-label="@WordRingsLocalizer["Reset"]"><span aria-hidden="true">↻</span></button>
             }
             else
             {
                 <button class="button button-primary" type="button" data-start-room hidden>@roomText.StartGame</button>
+                <button class="button" type="button" data-open-room-rule-picker hidden>@hostText.ChooseRules</button>
+                <button class="button word-rings-host-toolbar-icon" type="button" data-toggle-room-lock title="@hostText.LockJoining" aria-label="@hostText.LockJoining" hidden>🔒</button>
                 <button class="button" type="button" data-leave-room>@roomText.LeaveRoom</button>
             }
-            <button class="button" type="button" data-reveal-rules>@WordRingsLocalizer["RevealRules"]</button>
-            @if (!isCooperativeRoom)
-            {
-                <button class="button minigames-refresh-button"
-                        type="button"
-                        data-reset
-                        title="@WordRingsLocalizer["Reset"]"
-                        aria-label="@WordRingsLocalizer["Reset"]">
-                    <span aria-hidden="true">↻</span>
-                </button>
-            }
-            <button class="button button-primary" type="button" data-check disabled>@WordRingsLocalizer["Check"]</button>
         </div>
     </header>
 
@@ -106,9 +106,7 @@
         @if (isCooperativeRoom)
         {
             <aside class="word-rings-players" data-word-rings-players>
-                <div class="word-rings-players-heading">
-                    <h2>@roomText.Players</h2>
-                </div>
+                <div class="word-rings-players-heading"><h2>@roomText.Players</h2></div>
                 <div class="word-rings-player-list" data-word-rings-player-list></div>
             </aside>
         }
@@ -133,9 +131,7 @@
         </main>
 
         <aside class="word-rings-bank" data-word-bank>
-            <div class="word-rings-bank-heading">
-                <h2>@WordRingsLocalizer["WordBank"]</h2>
-            </div>
+            <div class="word-rings-bank-heading"><h2>@WordRingsLocalizer["WordBank"]</h2></div>
             <div class="word-rings-word-list" data-word-list>
                 @if (!isCooperativeRoom)
                 {
@@ -145,10 +141,8 @@
                     }
                 }
             </div>
-            <div class="word-rings-outside" data-outside-zone hidden>
-                <strong>@WordRingsLocalizer["Outside"]</strong>
-                <div data-outside-list></div>
-            </div>
+            <div class="word-rings-outside" data-outside-zone hidden><strong>@WordRingsLocalizer["Outside"]</strong><div data-outside-list></div></div>
+            <button class="button button-primary word-rings-check-button" type="button" data-check disabled>@WordRingsLocalizer["Check"]</button>
         </aside>
     </div>
 
@@ -157,34 +151,21 @@
         <dialog class="minigames-dialog word-rings-room-dialog" data-create-room-dialog>
             <form data-create-room-form>
                 <h2>@roomText.CreateRoom</h2>
-                <label>
-                    <span>@roomText.PlayerName</span>
-                    <input type="text" maxlength="30" required data-create-room-name />
-                </label>
-                <label>
-                    <span>@roomText.TargetScore</span>
-                    <input type="number" min="5" max="15" value="10" required data-create-room-target />
-                </label>
-                <label class="minigames-checkbox-row word-rings-room-checkbox">
-                    <input type="checkbox" data-create-room-partial />
-                    <span><strong>@roomText.PartialScore</strong><small>@roomText.PartialDescription</small></span>
-                </label>
+                <label><span>@roomText.PlayerName</span><input type="text" maxlength="30" required data-create-room-name /></label>
+                <label><span>@roomText.TargetScore</span><input type="number" min="5" max="15" value="10" required data-create-room-target /></label>
+                <fieldset class="word-rings-room-role-fieldset">
+                    <legend>@hostText.RoomRole</legend>
+                    <label class="word-rings-room-role-option"><input type="radio" name="roomRole" value="player" data-create-room-role checked /><span><strong>@hostText.PlayerRole</strong><small>@hostText.PlayerRoleDescription</small></span></label>
+                    <label class="word-rings-room-role-option"><input type="radio" name="roomRole" value="host" data-create-room-role /><span><strong>@hostText.HostOnlyRole</strong><small>@hostText.HostOnlyRoleDescription</small></span></label>
+                </fieldset>
+                <label class="minigames-checkbox-row word-rings-room-checkbox"><input type="checkbox" data-create-room-partial /><span><strong>@roomText.PartialScore</strong><small>@roomText.PartialDescription</small></span></label>
                 <p class="word-rings-room-form-error" data-create-room-error></p>
-                <div class="word-rings-room-dialog-actions">
-                    <button class="button" type="button" data-close-create-room>@roomText.Cancel</button>
-                    <button class="button button-primary" type="submit">@roomText.CreateAction</button>
-                </div>
+                <div class="word-rings-room-dialog-actions"><button class="button" type="button" data-close-create-room>@roomText.Cancel</button><button class="button button-primary" type="submit">@roomText.CreateAction</button></div>
             </form>
             <div class="word-rings-room-join-divider"><span>@roomText.JoinExisting</span></div>
             <form data-room-join-shortcut-form>
-                <label>
-                    <span>@roomText.EnterCode</span>
-                    <input type="text" maxlength="6" autocomplete="off" spellcheck="false" data-room-join-code />
-                </label>
-                <label>
-                    <span>@roomText.PlayerName</span>
-                    <input type="text" maxlength="30" required data-room-join-name />
-                </label>
+                <label><span>@roomText.EnterCode</span><input type="text" maxlength="6" autocomplete="off" spellcheck="false" data-room-join-code /></label>
+                <label><span>@roomText.PlayerName</span><input type="text" maxlength="30" required data-room-join-name /></label>
                 <button class="button" type="submit">@roomText.JoinAction</button>
             </form>
         </dialog>
@@ -195,25 +176,34 @@
             <form data-join-room-form>
                 <h2>@roomText.JoinRoom</h2>
                 <p><strong>@roomText.RoomCode:</strong> @requestedRoomCode</p>
-                <label>
-                    <span>@roomText.PlayerName</span>
-                    <input type="text" maxlength="30" required data-join-room-name />
-                </label>
+                <label><span>@roomText.PlayerName</span><input type="text" maxlength="30" required data-join-room-name /></label>
                 <p class="word-rings-room-form-error" data-join-room-error></p>
-                <div class="word-rings-room-dialog-actions">
-                    <button class="button" type="button" data-leave-room>@roomText.Cancel</button>
-                    <button class="button button-primary" type="submit">@roomText.JoinAction</button>
-                </div>
+                <div class="word-rings-room-dialog-actions"><button class="button" type="button" data-leave-room>@roomText.Cancel</button><button class="button button-primary" type="submit">@roomText.JoinAction</button></div>
             </form>
+        </dialog>
+
+        <dialog class="minigames-dialog word-rings-rule-picker-dialog" data-room-rule-picker-dialog>
+            <div class="word-rings-rule-picker-shell">
+                <div class="word-rings-rule-picker-heading"><div><h2>@hostText.ChooseRules</h2><p>@hostText.ChooseRulesHint</p></div><button class="button" type="button" data-close-room-rule-picker>@roomText.Close</button></div>
+                <div class="word-rings-rule-picker-grid">
+                    <section class="word-rings-rule-group" data-room-rule-group="A"><h3>@hostText.BlueRing</h3><div class="word-rings-rule-options" data-room-rule-options></div><button class="button word-rings-rule-refresh" type="button" data-refresh-room-rules>@hostText.OtherRules</button></section>
+                    <section class="word-rings-rule-group" data-room-rule-group="B"><h3>@hostText.YellowRing</h3><div class="word-rings-rule-options" data-room-rule-options></div><button class="button word-rings-rule-refresh" type="button" data-refresh-room-rules>@hostText.OtherRules</button></section>
+                    <section class="word-rings-rule-group" data-room-rule-group="C"><h3>@hostText.RedRing</h3><div class="word-rings-rule-options" data-room-rule-options></div><button class="button word-rings-rule-refresh" type="button" data-refresh-room-rules>@hostText.OtherRules</button></section>
+                </div>
+            </div>
         </dialog>
     }
 
     <dialog class="word-rings-result-dialog" data-word-rings-result-dialog>
         <div class="word-rings-result-card" data-word-rings-result-card>
-            <div class="word-rings-result-burst" aria-hidden="true"></div>
-            <div class="word-rings-result-icon" data-result-icon aria-hidden="true">★</div>
-            <h2 data-result-title></h2>
-            <p data-result-message></p>
+            <div class="word-rings-result-burst" aria-hidden="true"></div><div class="word-rings-result-icon" data-result-icon aria-hidden="true">★</div>
+            <h2 data-result-title></h2><p data-result-message></p>
+            <div class="word-rings-result-rules" data-result-rules hidden>
+                <strong>@hostText.ResultRules</strong>
+                <div class="word-rings-result-rule"><span data-result-rule-a></span></div>
+                <div class="word-rings-result-rule is-yellow"><span data-result-rule-b></span></div>
+                <div class="word-rings-result-rule is-red"><span data-result-rule-c></span></div>
+            </div>
             <button class="button button-primary" type="button" data-close-result>@roomText.Close</button>
         </div>
     </dialog>
@@ -222,13 +212,16 @@
 @section Scripts {
     <script src="~/js/word-rings-pointer-drag.js" asp-append-version="true"></script>
     <script src="~/js/word-rings-end-dialog.js" asp-append-version="true"></script>
+    <script src="~/js/word-rings-result-rules.js" asp-append-version="true"></script>
     @if (isCooperativeRoom)
     {
         <script src="~/js/word-rings-coop.js" asp-append-version="true"></script>
+        <script src="~/js/word-rings-room-host-controls.js" asp-append-version="true"></script>
     }
     else
     {
         <script src="~/js/word-rings.js" asp-append-version="true"></script>
+        <script src="~/js/word-rings-room-create-options.js" asp-append-version="true"></script>
         <script src="~/js/word-rings-room-entry.js" asp-append-version="true"></script>
     }
 }
