@@ -336,8 +336,9 @@ body:has(.word-rings-page) .page-shell {
 }
 
 @media (max-width: 920px) {
-    .word-rings-layout {
+    .word-rings-layout:not(.has-players) {
         grid-template-columns: minmax(0, 1fr) minmax(190px, 26vw);
+        grid-template-areas: "stage bank";
     }
 
     .word-rings-toolbar-progress {
@@ -351,8 +352,9 @@ body:has(.word-rings-page) .page-shell {
         gap: 6px;
     }
 
-    .word-rings-layout {
+    .word-rings-layout:not(.has-players) {
         grid-template-columns: minmax(0, 1fr) 170px;
+        grid-template-areas: "stage bank";
         gap: 6px;
     }
 
