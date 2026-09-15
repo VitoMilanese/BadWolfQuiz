@@ -89,8 +89,15 @@
 .word-rings-player-meta {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 8px;
+}
+
+.word-rings-player-main {
+    justify-content: flex-start;
+}
+
+.word-rings-player-meta {
+    justify-content: space-between;
 }
 
 .word-rings-player-main strong {
@@ -352,9 +359,9 @@
     max-width: 430px;
     margin: 0;
     color: color-mix(in srgb, var(--text) 86%, var(--muted));
-    font-size: 1.02rem;
+    font-size: 1.12rem;
     font-weight: 760;
-    line-height: 1.5;
+    line-height: 1.52;
 }
 
 .word-rings-result-card .button {

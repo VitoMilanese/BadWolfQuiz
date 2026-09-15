@@ -46,9 +46,9 @@
     };
     const maximumBankWords = positiveInteger(root.dataset.bankWordLimit, 10);
     const configuredGameWordLimit = positiveInteger(root.dataset.gameWordLimit, 20);
-    const maximumAttempts = Math.min(configuredGameWordLimit, expected.size);
+    let maximumAttempts = Math.min(configuredGameWordLimit, expected.size);
     const configuredCorrectWordTarget = positiveInteger(root.dataset.correctWordTarget, 10);
-    const correctWordTarget = Math.min(configuredCorrectWordTarget, maximumAttempts);
+    let correctWordTarget = Math.min(configuredCorrectWordTarget, maximumAttempts);
 
     const assignments = new Map();
     const verdicts = new Map();
@@ -414,21 +414,100 @@
         revealButton.textContent = hidden ? root.dataset.revealRules : root.dataset.hideRules;
     });
 
-    resetButton.addEventListener('click', () => {
-        const refreshUrl = new URL(window.location.href);
-        const currentRules = {
-            previousBlueRule: rules.querySelector('.word-rings-rule-a span')?.textContent?.trim() || '',
-            previousYellowRule: rules.querySelector('.word-rings-rule-b span')?.textContent?.trim() || '',
-            previousRedRule: rules.querySelector('.word-rings-rule-c span')?.textContent?.trim() || ''
-        };
-        Object.entries(currentRules).forEach(([name, value]) => {
-            if (value) refreshUrl.searchParams.set(name, value);
-            else refreshUrl.searchParams.delete(name);
-        });
+    const legacyResetQueryKeys = [
+        'previousBlueRule',
+        'previousYellowRule',
+        'previousRedRule',
+        'previousWords',
+        'refresh'
+    ];
 
-        refreshUrl.searchParams.set('previousWords', [...expected.keys()].join('|'));
-        refreshUrl.searchParams.set('refresh', Date.now().toString());
-        window.location.assign(refreshUrl.toString());
+    const clearLegacyResetQuery = () => {
+        const cleanUrl = new URL(window.location.href);
+        let changed = false;
+        for (const key of legacyResetQueryKeys) {
+            if (!cleanUrl.searchParams.has(key)) continue;
+            cleanUrl.searchParams.delete(key);
+            changed = true;
+        }
+        if (!changed) return;
+        window.history.replaceState(
+            window.history.state,
+            '',
+            `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
+    };
+
+    const currentRuleValues = () => ({
+        previousBlueRule: rules.querySelector('.word-rings-rule-a span')?.textContent?.trim() || '',
+        previousYellowRule: rules.querySelector('.word-rings-rule-b span')?.textContent?.trim() || '',
+        previousRedRule: rules.querySelector('.word-rings-rule-c span')?.textContent?.trim() || ''
+    });
+
+    const applyFreshPuzzle = payload => {
+        const words = Array.isArray(payload?.words)
+            ? payload.words.filter(word => typeof word === 'string')
+            : [];
+        expected = new Map(Object.entries(payload?.expected || {}));
+        const playableWords = words.filter(word => expected.has(word));
+        queuedWords = playableWords.slice(maximumBankWords);
+        maximumAttempts = Math.min(configuredGameWordLimit, expected.size);
+        correctWordTarget = Math.min(configuredCorrectWordTarget, maximumAttempts);
+
+        assignments.clear();
+        verdicts.clear();
+        lockedMemberships.clear();
+        pendingWord = null;
+        topZIndex = 10;
+        gameOver = maximumAttempts === 0;
+
+        placedLayer.replaceChildren();
+        outsideList.replaceChildren();
+        wordList.replaceChildren();
+        for (const word of playableWords.slice(0, maximumBankWords)) createBankWord(word);
+
+        const setRuleText = (selector, value) => {
+            const target = rules.querySelector(selector);
+            if (target) target.textContent = value || '';
+        };
+        setRuleText('.word-rings-rule-a span', payload?.blueRuleText);
+        setRuleText('.word-rings-rule-b span', payload?.yellowRuleText);
+        setRuleText('.word-rings-rule-c span', payload?.redRuleText);
+        rules.classList.add('is-hidden');
+        revealButton.textContent = root.dataset.revealRules || revealButton.textContent;
+
+        status.textContent = '';
+        status.classList.remove('is-success', 'is-error');
+        root.classList.remove('has-pending-word', 'is-game-over');
+        updateProgress();
+        root.dispatchEvent(new CustomEvent('wordrings:game-reset'));
+    };
+
+    resetButton.addEventListener('click', async () => {
+        if (resetButton.disabled) return;
+        const requestUrl = new URL(window.location.href);
+        requestUrl.search = '';
+        requestUrl.hash = '';
+        requestUrl.searchParams.set('handler', 'NewPuzzle');
+        Object.entries(currentRuleValues()).forEach(([name, value]) => {
+            if (value) requestUrl.searchParams.set(name, value);
+        });
+        requestUrl.searchParams.set('previousWords', [...expected.keys()].join('|'));
+
+        resetButton.disabled = true;
+        try {
+            const response = await fetch(requestUrl.toString(), {
+                headers: { Accept: 'application/json' }
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            applyFreshPuzzle(await response.json());
+            clearLegacyResetQuery();
+        } catch (error) {
+            console.error('Could not reset Word Rings without reloading.', error);
+            status.classList.add('is-error');
+            status.textContent = root.dataset.roomError || '';
+        } finally {
+            resetButton.disabled = false;
+        }
     });
 
     const finishGameIfNeeded = () => {
@@ -486,5 +565,6 @@
         updateProgress();
     });
 
+    clearLegacyResetQuery();
     updateProgress();
 })();

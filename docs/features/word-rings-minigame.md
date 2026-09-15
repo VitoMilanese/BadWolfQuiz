@@ -16,13 +16,13 @@ Solo play uses a maximum 20-word session pool with at most 10 words visible in t
 
 The solo selector strongly prefers words that satisfy one or more selected rules, prioritizes three-ring and two-ring overlaps, and balances coverage across all three rings. Incorrect checked words are moved automatically into their correct region while retaining red error feedback. A solo game ends after 10 correct placements or when all 20 available words have been attempted.
 
-When a solo game ends, a custom animated victory/defeat dialog is shown instead of a browser alert.
+When a solo game ends, a custom animated victory/defeat dialog is shown instead of a browser alert. Reset requests a fresh puzzle in-place, clears the completed board, and keeps the browser on the same clean URL instead of performing a full page navigation or exposing internal previous-rule/word query parameters.
 
 ## Multiplayer rooms
 
 The Word Rings toolbar can create or join a multiplayer room. The creator chooses a target score from **5 to 15** and can optionally enable **0.5-point partial placement scoring**. Partial scoring is disabled by default. Rooms use six-character shareable codes and can be joined through `/minigames/word-rings?room=CODE`.
 
-The host can start after at least two players have joined. Each participant receives a personal, separately randomized word queue of up to 20 words with at most 10 visible at once. The left side of the game shows every player's independent score, remaining-word count, host marker, and the current turn. The toolbar score is also personal to the viewer; there is no shared team score.
+A creator who plays can start after one other player joins. A dedicated non-playing host can start with one connected playing participant after selecting all three rules. Each participant receives a personal, separately randomized word queue of up to 20 words with at most 10 visible at once. The left side of the game shows every player's independent score, the host marker immediately before the host name, and the current turn; the raw remaining server-queue count is not exposed. The toolbar score is also personal to the viewer; there is no shared team score.
 
 Multiplayer scoring and turn progression are server-authoritative:
 
@@ -44,7 +44,7 @@ When the game page is opened, one enabled, non-empty rule is selected independen
 
 The default installation seeds the original three conditions so the minigame remains immediately playable. At least one rule must remain for each ring, and at least one non-empty rule per ring must remain enabled for games.
 
-The player can reset the board and reveal or hide the selected rules. Revealed rules appear beside their matching rings and are identified by color only. Validation happens one newly placed word at a time and marks correct and incorrect placements without replacing the membership-colored border.
+The player can reset the board in-place and reveal or hide the selected rules. Revealed rules appear beside their matching rings and are identified by color only. Validation happens one newly placed word at a time and marks correct and incorrect placements without replacing the membership-colored border.
 
 The public `/minigames` catalog exposes the game as the second minigame.
 

@@ -67,9 +67,14 @@
     const selection = ring => hostState?.ruleSelections?.find(item => item.ring === ring) || null;
     const rulesComplete = () => ['A', 'B', 'C'].every(ring => selection(ring)?.selectedRuleId);
     const isHostController = () => hostState?.isHost === true && hostState?.hostChoosesRules === true;
+    const canChooseRules = () => isHostController() && hostState?.phase !== 'playing';
 
     const renderRulePicker = () => {
         if (!(ruleDialog instanceof HTMLDialogElement) || !hostState) return;
+        if (!canChooseRules()) {
+            if (ruleDialog.open) ruleDialog.close();
+            return;
+        }
         for (const ring of ['A', 'B', 'C']) {
             const group = ruleDialog.querySelector(`[data-room-rule-group="${ring}"]`);
             const options = group?.querySelector('[data-room-rule-options]');
@@ -178,8 +183,10 @@
             startButton.disabled = busy || hostState.canStart !== true;
         }
         if (chooseRulesButton instanceof HTMLButtonElement) {
-            chooseRulesButton.hidden = !(hostState.isHost === true && hostState.hostChoosesRules === true && hostState.phase !== 'playing');
-            chooseRulesButton.disabled = busy;
+            const canOpenRules = canChooseRules();
+            chooseRulesButton.hidden = !canOpenRules;
+            chooseRulesButton.classList.toggle('is-hidden', !canOpenRules);
+            chooseRulesButton.disabled = busy || !canOpenRules;
         }
         if (lockButton instanceof HTMLButtonElement) {
             lockButton.hidden = !(hostState.isHost === true && hostState.phase === 'waiting');
@@ -200,7 +207,7 @@
         renderRulePicker();
         renderPlayerActions();
         applyHandLimit();
-        if (hostState?.isHost === true && hostState.hostChoosesRules === true && hostState.phase !== 'playing' && !rulesComplete()) {
+        if (canChooseRules() && !rulesComplete()) {
             if (lastAutoOpenedVersion !== hostState.version && ruleDialog instanceof HTMLDialogElement && !ruleDialog.open) {
                 lastAutoOpenedVersion = hostState.version;
                 ruleDialog.showModal();
@@ -235,6 +242,10 @@
     }, true);
 
     chooseRulesButton?.addEventListener('click', () => {
+        if (!canChooseRules()) {
+            if (ruleDialog instanceof HTMLDialogElement && ruleDialog.open) ruleDialog.close();
+            return;
+        }
         renderRulePicker();
         if (ruleDialog instanceof HTMLDialogElement && !ruleDialog.open) ruleDialog.showModal();
     });

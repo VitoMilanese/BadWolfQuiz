@@ -92,6 +92,33 @@ public sealed class WordRingsRoomHostControlRegressionTests
     }
 
     [Fact]
+    public void Creating_replacement_room_removes_previous_owned_room_immediately()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-room-replace-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        try
+        {
+            var env = new TestEnvironment(root);
+            var coordinator = WordRingsRoomHostCoordinator.Get(env);
+            var store = WordRingsRoomStore.Get(env);
+            var first = coordinator.CreateRoom("Host", 5, false, false);
+            var replacement = coordinator.CreateRoom(
+                "Host",
+                5,
+                false,
+                false,
+                first.RoomCode,
+                first.PlayerToken);
+
+            var exception = Assert.Throws<WordRingsRoomException>(() =>
+                store.GetState(first.RoomCode, first.PlayerToken));
+            Assert.Equal(WordRingsRoomError.RoomNotFound, exception.Error);
+            Assert.NotEqual(first.RoomCode, replacement.RoomCode);
+        }
+        finally { Directory.Delete(root, true); }
+    }
+
+    [Fact]
     public void Playing_creator_uses_target_as_visible_hand_limit_below_ten()
     {
         var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-hand-{Guid.NewGuid():N}");
@@ -103,6 +130,7 @@ public sealed class WordRingsRoomHostControlRegressionTests
             _ = coordinator.JoinRoom(host.RoomCode, "Guest");
             var waiting = coordinator.GetHostState(host.RoomCode, host.PlayerToken);
             Assert.False(waiting.HostChoosesRules);
+            Assert.Empty(waiting.RuleSelections);
             Assert.Equal(7, waiting.HandLimit);
             Assert.True(Assert.Single(waiting.Players, p => p.Id == waiting.PlayerId).IsPlayingParticipant);
             Assert.Equal(host.State.PlayerId, coordinator.StartGame(host.RoomCode, host.PlayerToken).CurrentPlayerId);
@@ -121,6 +149,9 @@ public sealed class WordRingsRoomHostControlRegressionTests
         var styles = Read("wwwroot", "css", "word-rings-host-controls.css");
         var roomStyles = Read("wwwroot", "css", "word-rings-room.css");
         var entry = Read("wwwroot", "js", "word-rings-room-entry.js");
+        var solo = Read("wwwroot", "js", "word-rings.js");
+        var endDialog = Read("wwwroot", "js", "word-rings-end-dialog.js");
+        var pageModel = Read("Pages", "WordRings.cshtml.cs");
         var roomText = Read("Localization", "WordRingsRoomText.cs");
         var hostText = Read("Localization", "WordRingsRoomHostText.cs");
         var coordinator = Read("Services", "WordRingsRoomHostCoordinator.cs");
@@ -140,7 +171,9 @@ public sealed class WordRingsRoomHostControlRegressionTests
         foreach (var value in new[] { "RoomHostState", "SelectRoomRule", "RefreshRoomRules", "SetRoomTurn", "KickRoomPlayer", "SetRoomJoinLock", "hostState.handLimit" }) Assert.Contains(value, host);
         Assert.Contains("data-result-rule-a", result);
         Assert.Contains("startButton.hidden = hostState.isHost !== true || hostState.phase === 'playing';", host);
-        Assert.Contains("chooseRulesButton.hidden = !(hostState.isHost === true && hostState.hostChoosesRules === true", host);
+        Assert.Contains("const canChooseRules = () => isHostController()", host);
+        Assert.Contains("if (!canChooseRules())", host);
+        Assert.Contains("chooseRulesButton.classList.toggle('is-hidden', !canOpenRules);", host);
         Assert.Contains("lockButton.hidden = !(hostState.isHost === true && hostState.phase === 'waiting');", host);
         Assert.Contains("lockButton.textContent = locked ? '🔒' : '🔓';", host);
         Assert.Contains("const needsRebuild = existingButtons.length !== ruleOptions.length", host);
@@ -149,7 +182,8 @@ public sealed class WordRingsRoomHostControlRegressionTests
         Assert.Contains("flex-direction: column;", styles);
         Assert.Contains("background: #b4232f;", styles);
         Assert.DoesNotContain(".word-rings-room-role-option:has(input:checked)", styles);
-        Assert.Contains("grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
+        Assert.Contains("grid-template-columns: minmax(0, 1fr);", styles);
+        Assert.DoesNotContain("grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
         Assert.Contains("input[type=\"radio\"]:focus", styles);
         Assert.Contains("box-shadow: none;", styles);
         Assert.Contains("font-size: clamp(1rem, .85vw, 1.12rem);", styles);
@@ -163,6 +197,17 @@ public sealed class WordRingsRoomHostControlRegressionTests
         Assert.Contains("Math.Clamp(state.TargetScore, 5, 10)", coordinator);
         Assert.Contains("IsPlayingParticipant) >= 1", coordinator);
         Assert.Contains("!player.IsHost) < 1", coordinator);
+        Assert.True(
+            coop.IndexOf("main.append(badge);", StringComparison.Ordinal) <
+            coop.IndexOf("main.append(name);", StringComparison.Ordinal));
+        Assert.Contains("font-size: 1.12rem;", roomStyles);
+        Assert.Contains("font-size: .95rem;", styles);
+        Assert.Contains("requestUrl.searchParams.set('handler', 'NewPuzzle');", solo);
+        Assert.Contains("window.history.replaceState", solo);
+        Assert.Contains("wordrings:game-reset", solo);
+        Assert.DoesNotContain("window.location.assign(refreshUrl.toString())", solo);
+        Assert.Contains("wordrings:game-reset", endDialog);
+        Assert.Contains("OnGetNewPuzzle", pageModel);
     }
 
     private static int Count(string value, string needle)

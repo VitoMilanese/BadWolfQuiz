@@ -49,7 +49,9 @@ public sealed class WordRingsGameplayRefinementRegressionTests
         Assert.Contains("correctCount()", script, StringComparison.Ordinal);
         Assert.Contains("finishGameIfNeeded", script, StringComparison.Ordinal);
         Assert.Contains("successful < correctWordTarget && attempts < maximumAttempts", script, StringComparison.Ordinal);
-        Assert.Contains("window.location.assign", script, StringComparison.Ordinal);
+        Assert.Contains("requestUrl.searchParams.set('handler', 'NewPuzzle');", script, StringComparison.Ordinal);
+        Assert.Contains("window.history.replaceState", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.location.assign", script, StringComparison.Ordinal);
         Assert.Contains("previousBlueRule", script, StringComparison.Ordinal);
         Assert.Contains("previousYellowRule", script, StringComparison.Ordinal);
         Assert.Contains("previousRedRule", script, StringComparison.Ordinal);

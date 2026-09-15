@@ -55,6 +55,14 @@
         });
     });
 
+    root.addEventListener('wordrings:game-reset', () => {
+        shown = false;
+        if (dialog.open) dialog.close();
+        dialog.classList.remove('is-win', 'is-loss');
+        if (card instanceof HTMLElement) card.classList.remove('is-animating');
+        if (burst instanceof HTMLElement) burst.replaceChildren();
+    });
+
     const maybeShowSoloResult = () => {
         if (shown || root.dataset.gameMode !== 'solo' || !root.classList.contains('is-game-over')) return;
         const progress = root.querySelector('[data-progress]')?.textContent || '';

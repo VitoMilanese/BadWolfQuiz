@@ -477,15 +477,15 @@
 
             const main = document.createElement('div');
             main.className = 'word-rings-player-main';
-            const name = document.createElement('strong');
-            name.textContent = player.name;
-            main.append(name);
             if (player.isHost) {
                 const badge = document.createElement('span');
                 badge.className = 'word-rings-player-badge';
                 badge.textContent = '★';
                 main.append(badge);
             }
+            const name = document.createElement('strong');
+            name.textContent = player.name;
+            main.append(name);
 
             const meta = document.createElement('div');
             meta.className = 'word-rings-player-meta';

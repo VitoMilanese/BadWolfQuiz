@@ -1,4 +1,5 @@
 using BadWolfQuiz.Web.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BadWolfQuiz.Web.Pages;
@@ -43,6 +44,33 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         DisplayedExpected = Puzzle.Expected
             .Where(item => DisplayedWords.Contains(item.Key, StringComparer.Ordinal))
             .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
+    }
+
+    public IActionResult OnGetNewPuzzle(
+        string? previousBlueRule,
+        string? previousYellowRule,
+        string? previousRedRule,
+        string? previousWords)
+    {
+        var store = WordRingsRuleStore.Get(environment);
+        var selection = PickFreshPuzzle(
+            store,
+            previousBlueRule,
+            previousYellowRule,
+            previousRedRule,
+            ParsePreviousWords(previousWords));
+        var expected = selection.Puzzle.Expected
+            .Where(item => selection.Words.Contains(item.Key, StringComparer.Ordinal))
+            .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
+
+        return new JsonResult(new
+        {
+            blueRuleText = selection.Puzzle.BlueRuleText,
+            yellowRuleText = selection.Puzzle.YellowRuleText,
+            redRuleText = selection.Puzzle.RedRuleText,
+            words = selection.Words,
+            expected
+        });
     }
 
     private static PuzzleSelection PickFreshPuzzle(
