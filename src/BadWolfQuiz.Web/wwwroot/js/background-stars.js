@@ -5,7 +5,7 @@
         return;
     }
 
-    const personalPreference = body.dataset.animatedStars !== 'false';
+    let personalPreference = body.dataset.animatedStars !== 'false';
     const appearanceEndpoint = '/api/background-stars';
     const minStars = 16;
     const maxStars = 52;
@@ -17,21 +17,74 @@
     let synchronizationGeneration = 0;
     let starfieldHost = null;
 
+    const isEnabled = () => body.dataset.animatedStars !== 'false';
+
+    const parseColor = value => {
+        const normalized = String(value || '').trim();
+        const shortHex = /^#([0-9a-f]{3})$/i.exec(normalized);
+        if (shortHex) {
+            return shortHex[1].split('').map(part => Number.parseInt(part + part, 16));
+        }
+
+        const hex = /^#([0-9a-f]{6})$/i.exec(normalized);
+        if (hex) {
+            return [
+                Number.parseInt(hex[1].slice(0, 2), 16),
+                Number.parseInt(hex[1].slice(2, 4), 16),
+                Number.parseInt(hex[1].slice(4, 6), 16)
+            ];
+        }
+
+        const rgb = /^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/i.exec(normalized);
+        return rgb
+            ? [Number(rgb[1]), Number(rgb[2]), Number(rgb[3])]
+            : null;
+    };
+
+    const isLightTheme = () => {
+        const rootStyle = getComputedStyle(document.documentElement);
+        const bodyStyle = getComputedStyle(body);
+        const rgb = parseColor(rootStyle.getPropertyValue('--bg')) ??
+            parseColor(bodyStyle.getPropertyValue('--bg'));
+        if (!rgb) {
+            return false;
+        }
+
+        const linear = rgb.map(channel => {
+            const value = Math.max(0, Math.min(255, channel)) / 255;
+            return value <= 0.04045
+                ? value / 12.92
+                : Math.pow((value + 0.055) / 1.055, 2.4);
+        });
+        const luminance =
+            (0.2126 * linear[0]) +
+            (0.7152 * linear[1]) +
+            (0.0722 * linear[2]);
+        return luminance >= 0.48;
+    };
+
+    const updateStarfieldTone = () => {
+        field.dataset.starfieldTone = isLightTheme() ? 'light' : 'dark';
+    };
+
+    const fillsViewport = element => {
+        const rect = element.getBoundingClientRect();
+        return rect.width >= window.innerWidth * 0.88 &&
+            rect.height >= window.innerHeight * 0.62;
+    };
+
     const resolveStarfieldHost = () => {
         const pageShell = document.querySelector('main.page-shell');
-        const pageRoot = pageShell?.firstElementChild;
-        if (pageRoot instanceof HTMLElement) {
-            return pageRoot;
-        }
         if (pageShell instanceof HTMLElement) {
+            const visualChildren = Array.from(pageShell.children).filter(element =>
+                element !== field && element instanceof HTMLElement);
+            if (visualChildren.length === 1 && fillsViewport(visualChildren[0])) {
+                return visualChildren[0];
+            }
             return pageShell;
         }
 
-        const standaloneRoot = Array.from(body.children).find(element =>
-            element !== field &&
-            element instanceof HTMLElement &&
-            !['SCRIPT', 'STYLE', 'LINK'].includes(element.tagName));
-        return standaloneRoot instanceof HTMLElement ? standaloneRoot : body;
+        return body;
     };
 
     const ensureStarfieldHost = () => {
@@ -41,20 +94,23 @@
         }
 
         if (starfieldHost !== nextHost) {
-            starfieldHost?.classList.remove('site-starfield-host');
-            nextHost.classList.add('site-starfield-host');
+            if (starfieldHost && starfieldHost !== body) {
+                starfieldHost.classList.remove('site-starfield-host');
+            }
+            if (nextHost !== body) {
+                nextHost.classList.add('site-starfield-host');
+            }
             starfieldHost = nextHost;
         }
 
         if (field.parentElement !== nextHost) {
-            nextHost.prepend(field);
+            nextHost.append(field);
         }
     };
 
-    const isEnabled = () => body.dataset.animatedStars !== 'false';
-
     const renderStars = () => {
         ensureStarfieldHost();
+        updateStarfieldTone();
         field.replaceChildren();
         const enabled = isEnabled();
         field.hidden = !enabled;
@@ -74,6 +130,7 @@
         const points = [];
         const fragment = document.createDocumentFragment();
         const maximumAttempts = requestedCount * 48;
+        const lightTone = field.dataset.starfieldTone === 'light';
 
         for (let attempt = 0; attempt < maximumAttempts && points.length < requestedCount; attempt++) {
             const x = 8 + Math.random() * Math.max(1, width - 16);
@@ -84,13 +141,21 @@
 
             points.push({ x, y });
             const star = document.createElement('span');
-            const bright = Math.random() < 0.13;
-            const size = bright
-                ? 2.2 + Math.random() * 1.25
-                : 1 + Math.random() * 1.65;
+            const bright = Math.random() < (lightTone ? 0.08 : 0.13);
+            const size = lightTone
+                ? bright
+                    ? 1.6 + Math.random() * 0.8
+                    : 0.85 + Math.random() * 1.15
+                : bright
+                    ? 2.2 + Math.random() * 1.25
+                    : 1 + Math.random() * 1.65;
             const duration = 3.1 + Math.random() * 4.7;
-            const minOpacity = 0.08 + Math.random() * 0.20;
-            const maxOpacity = 0.52 + Math.random() * 0.43;
+            const minOpacity = lightTone
+                ? 0.07 + Math.random() * 0.10
+                : 0.08 + Math.random() * 0.20;
+            const maxOpacity = lightTone
+                ? 0.26 + Math.random() * 0.20
+                : 0.52 + Math.random() * 0.43;
 
             star.className = bright
                 ? 'site-starfield-star is-bright'
@@ -124,6 +189,16 @@
         refresh: renderStars
     });
 
+    const settingsToggle = document.getElementById('Input_AnimatedStarsEnabled');
+    if (settingsToggle instanceof HTMLInputElement) {
+        settingsToggle.addEventListener('change', () => {
+            personalPreference = settingsToggle.checked;
+            activeContextKey = '';
+            synchronizationGeneration += 1;
+            setEnabled(personalPreference);
+        });
+    }
+
     const normalizeCode = value => String(value || '').trim().toUpperCase();
 
     const readGuessWhatToken = code => {
@@ -145,6 +220,7 @@
 
     const getAppearanceContext = () => {
         const path = window.location.pathname.replace(/\/+$/, '').toLowerCase();
+        const pathSegments = path.split('/').filter(Boolean);
         const query = new URLSearchParams(window.location.search);
 
         if (path === '/minigames/guess-what-i-play') {
@@ -161,7 +237,19 @@
                 : null;
         }
 
-        if (path === '/join' || path === '/player/lobby') {
+        if (path === '/join') {
+            const code = normalizeCode(query.get('code'));
+            return code ? { kind: 'quiz', code, playerToken: '' } : null;
+        }
+
+        if (pathSegments.length >= 3 &&
+            pathSegments[0] === 'player' &&
+            pathSegments[1] === 'lobby') {
+            const code = normalizeCode(pathSegments[2]);
+            return code ? { kind: 'quiz', code, playerToken: '' } : null;
+        }
+
+        if (path === '/player/lobby') {
             const code = normalizeCode(query.get('code'));
             return code ? { kind: 'quiz', code, playerToken: '' } : null;
         }
@@ -296,6 +384,11 @@
             resizeTimer = null;
             renderStars();
         }, 180);
+    });
+
+    new MutationObserver(() => renderStars()).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme', 'style']
     });
 
     const pageShell = document.querySelector('main.page-shell');

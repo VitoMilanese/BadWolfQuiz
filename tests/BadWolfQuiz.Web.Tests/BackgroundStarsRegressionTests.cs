@@ -73,6 +73,8 @@ public sealed class BackgroundStarsRegressionTests : IDisposable
         Assert.Contains("data-site-starfield", tagHelper, StringComparison.Ordinal);
         Assert.Contains("Input.AnimatedStarsEnabled", tagHelper, StringComparison.Ordinal);
         Assert.Contains("GameThemeSettings", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("background-stars.css?v=2", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("background-stars.js?v=2", tagHelper, StringComparison.Ordinal);
         Assert.Contains("@keyframes badwolf-star-pulse", css, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
         Assert.Contains("Math.random()", script, StringComparison.Ordinal);
@@ -81,19 +83,33 @@ public sealed class BackgroundStarsRegressionTests : IDisposable
     }
 
     [Fact]
-    public void Global_starfield_is_layered_inside_the_current_visual_page_root()
+    public void Global_starfield_uses_layout_safe_host_and_adapts_to_light_themes()
     {
         var css = ReadWebFile("wwwroot", "css", "background-stars.css");
         var script = ReadWebFile("wwwroot", "js", "background-stars.js");
 
         Assert.Contains(".site-starfield-host", css, StringComparison.Ordinal);
         Assert.Contains("isolation: isolate", css, StringComparison.Ordinal);
+        Assert.Contains("[data-starfield-tone=\"light\"]", css, StringComparison.Ordinal);
+        Assert.Contains("body .host-settings-hero-mark > i", css, StringComparison.Ordinal);
         Assert.Contains("resolveStarfieldHost", script, StringComparison.Ordinal);
         Assert.Contains("main.page-shell", script, StringComparison.Ordinal);
-        Assert.Contains("pageShell?.firstElementChild", script, StringComparison.Ordinal);
-        Assert.Contains("site-starfield-host", script, StringComparison.Ordinal);
-        Assert.Contains("nextHost.prepend(field)", script, StringComparison.Ordinal);
-        Assert.Contains("MutationObserver", script, StringComparison.Ordinal);
+        Assert.Contains("visualChildren.length === 1 && fillsViewport", script, StringComparison.Ordinal);
+        Assert.Contains("nextHost.append(field)", script, StringComparison.Ordinal);
+        Assert.Contains("updateStarfieldTone", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("pageShell?.firstElementChild", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("nextHost.prepend(field)", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Settings_toggle_updates_the_starfield_without_a_reload()
+    {
+        var script = ReadWebFile("wwwroot", "js", "background-stars.js");
+
+        Assert.Contains("getElementById('Input_AnimatedStarsEnabled')", script, StringComparison.Ordinal);
+        Assert.Contains("settingsToggle.addEventListener('change'", script, StringComparison.Ordinal);
+        Assert.Contains("personalPreference = settingsToggle.checked", script, StringComparison.Ordinal);
+        Assert.Contains("setEnabled(personalPreference)", script, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -110,7 +126,9 @@ public sealed class BackgroundStarsRegressionTests : IDisposable
         Assert.Contains("currentHost.Id", api, StringComparison.Ordinal);
         Assert.Contains("/minigames/guess-what-i-play", script, StringComparison.Ordinal);
         Assert.Contains("/minigames/word-rings", script, StringComparison.Ordinal);
-        Assert.Contains("/player/lobby", script, StringComparison.Ordinal);
+        Assert.Contains("pathSegments[0] === 'player'", script, StringComparison.Ordinal);
+        Assert.Contains("pathSegments[1] === 'lobby'", script, StringComparison.Ordinal);
+        Assert.Contains("normalizeCode(pathSegments[2])", script, StringComparison.Ordinal);
         Assert.Contains("badwolf-minigame-player:", script, StringComparison.Ordinal);
         Assert.Contains("badwolf.wordrings.room.", script, StringComparison.Ordinal);
         Assert.Contains("setInterval(() => synchronizeAppearance(true), 12000)", script, StringComparison.Ordinal);
