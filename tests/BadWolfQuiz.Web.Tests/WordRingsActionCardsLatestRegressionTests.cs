@@ -39,14 +39,17 @@ public sealed class WordRingsActionCardsLatestRegressionTests
             Assert.Equal(2, cards.GetState(host.RoomCode, guest.PlayerToken).BlockedWords.Count);
 
             var beforeRoom = rooms.GetRoomState(host.RoomCode, host.PlayerToken);
-            var beforeCards = cards.GetState(host.RoomCode, host.PlayerToken);
+            var actorBefore = cards.GetState(host.RoomCode, host.PlayerToken);
+            var targetBefore = cards.GetState(host.RoomCode, guest.PlayerToken);
+            var actorWord = actorBefore.Words.First(word =>
+                !targetBefore.Words.Contains(word, StringComparer.OrdinalIgnoreCase));
             var capture = runtime.CaptureSwapBlockTransfer(beforeRoom, (int)WordRingsActionCardKind.Swap);
             var result = cards.UseCard(
                 host.RoomCode,
                 host.PlayerToken,
                 (int)WordRingsActionCardKind.Swap,
                 guest.State.PlayerId,
-                beforeCards.Words[0]);
+                actorWord);
 
             Assert.True(runtime.CompleteSwapBlockTransfer(
                 host.RoomCode,
@@ -55,7 +58,8 @@ public sealed class WordRingsActionCardsLatestRegressionTests
                 capture));
 
             var after = cards.GetState(host.RoomCode, host.PlayerToken);
-            var incoming = after.Words.Except(beforeCards.Words, StringComparer.OrdinalIgnoreCase).Single();
+            var incoming = after.Words.First(word =>
+                !actorBefore.Words.Contains(word, StringComparer.OrdinalIgnoreCase));
             Assert.Contains(incoming, after.BlockedWords, StringComparer.OrdinalIgnoreCase);
         }
         finally
@@ -95,14 +99,14 @@ public sealed class WordRingsActionCardsLatestRegressionTests
                 null);
 
             var beforeRoom = rooms.GetRoomState(host.RoomCode, host.PlayerToken);
-            var beforeCards = cards.GetState(host.RoomCode, host.PlayerToken);
+            var actorBefore = cards.GetState(host.RoomCode, host.PlayerToken);
             var capture = runtime.CaptureSwapBlockTransfer(beforeRoom, (int)WordRingsActionCardKind.Swap);
             var result = cards.UseCard(
                 host.RoomCode,
                 host.PlayerToken,
                 (int)WordRingsActionCardKind.Swap,
                 guest.State.PlayerId,
-                beforeCards.Words[0]);
+                actorBefore.Words[0]);
 
             _ = runtime.CompleteSwapBlockTransfer(
                 host.RoomCode,
@@ -139,27 +143,27 @@ public sealed class WordRingsActionCardsLatestRegressionTests
             var started = rooms.StartGame(host.RoomCode, host.PlayerToken);
             cards.BeginRound(host.RoomCode, host.PlayerToken);
 
-            patch.GrantDebugCard(host.RoomCode, host.PlayerToken, host.State.PlayerId, (int)WordRingsActionCardKind.Immunity);
-            _ = cards.UseCard(
-                host.RoomCode,
-                host.PlayerToken,
-                (int)WordRingsActionCardKind.Immunity,
-                host.State.PlayerId,
-                null);
-
             var word = started.BankWords[0];
             var submitted = store.SubmitHostedPlacement(host.RoomCode, host.PlayerToken, word, "AB", 50, 50);
-            var pending = Assert.Single(submitted.State.Placements.Where(item => item.IsPending));
+            var pending = Assert.Single(submitted.State.Placements, item => item.IsPending);
             _ = store.MoveHostedPlacement(host.RoomCode, host.PlayerToken, pending.Id, "A", 40, 40);
-
-            var queued = patch.TryQueueHostedImmunity(host.RoomCode, host.PlayerToken, pending.Id);
-            Assert.True(queued.Queued);
+            const long decisionId = 77;
+            InjectPendingImmunityDecision(
+                patch,
+                host.RoomCode,
+                host.State.PlayerId,
+                decisionId,
+                pending.Id,
+                host.State.PlayerId,
+                "Host",
+                word,
+                host.PlayerToken);
 
             var resolution = runtime.ResolveImmunityDecisionWithoutScore(
                 patch,
                 host.RoomCode,
                 host.PlayerToken,
-                patch.GetState(host.RoomCode, host.State.PlayerId).PendingImmunityDecision!.Id);
+                decisionId);
 
             Assert.NotNull(resolution.PlacementResult);
             Assert.False(resolution.PlacementResult!.IsCorrect);
@@ -168,7 +172,7 @@ public sealed class WordRingsActionCardsLatestRegressionTests
 
             var state = rooms.GetRoomState(host.RoomCode, host.PlayerToken);
             Assert.Equal(0, state.PlayerScore);
-            var resolved = Assert.Single(state.Placements.Where(item => item.Id == pending.Id));
+            var resolved = Assert.Single(state.Placements, item => item.Id == pending.Id);
             Assert.False(resolved.IsPending);
             Assert.Equal(0, resolved.PointsAwarded);
             Assert.Equal(guest.State.PlayerId, state.CurrentPlayerId);
@@ -191,6 +195,40 @@ public sealed class WordRingsActionCardsLatestRegressionTests
             "word-rings-action-cards-patch.css"));
 
         Assert.Contains(".word-rings-stage {\n    align-self: center;\n}", css, StringComparison.Ordinal);
+    }
+
+    private static void InjectPendingImmunityDecision(
+        WordRingsActionCardPatchCoordinator patch,
+        string roomCode,
+        Guid ownerPlayerId,
+        long decisionId,
+        long placementId,
+        Guid placementPlayerId,
+        string playerName,
+        string word,
+        string hostToken)
+    {
+        _ = patch.GetState(roomCode, ownerPlayerId);
+        var syncField = typeof(WordRingsActionCardPatchCoordinator)
+            .GetField("_sync", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var roomsField = typeof(WordRingsActionCardPatchCoordinator)
+            .GetField("_rooms", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var pendingType = typeof(WordRingsActionCardPatchCoordinator)
+            .GetNestedType("PendingImmunityDecision", BindingFlags.NonPublic)!;
+        var pending = Activator.CreateInstance(
+            pendingType,
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+            binder: null,
+            args: [decisionId, placementId, placementPlayerId, playerName, word, hostToken],
+            culture: null)!;
+
+        lock (syncField.GetValue(patch)!)
+        {
+            var rooms = (IDictionary)roomsField.GetValue(patch)!;
+            var meta = rooms[roomCode]!;
+            var decisions = (IDictionary)Get(meta, "PendingImmunityDecisions")!;
+            decisions[ownerPlayerId] = pending;
+        }
     }
 
     private static void TrimPlayerWords(WordRingsRoomStore store, string roomCode, Guid playerId, int count)

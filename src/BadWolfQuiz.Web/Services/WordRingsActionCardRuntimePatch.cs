@@ -104,14 +104,13 @@ public sealed class WordRingsActionCardRuntimePatch
             return false;
         }
 
-        var actorBefore = actorBeforeWords.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var actorAfter = actorAfterWords.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var actorIncoming = actorAfter.Except(actorBefore, StringComparer.OrdinalIgnoreCase).SingleOrDefault();
-        var actorOutgoing = actorBefore.Except(actorAfter, StringComparer.OrdinalIgnoreCase).SingleOrDefault();
-        if (string.IsNullOrWhiteSpace(actorIncoming) || string.IsNullOrWhiteSpace(actorOutgoing))
+        var actorReplacement = FindReplacement(actorBeforeWords, actorAfterWords);
+        if (actorReplacement is null)
         {
             return false;
         }
+        var actorOutgoing = actorReplacement.Value.Before;
+        var actorIncoming = actorReplacement.Value.After;
 
         var targetId = ResolveSwapTarget(
             snapshot,
@@ -238,6 +237,19 @@ public sealed class WordRingsActionCardRuntimePatch
         return result;
     }
 
+    private static (string Before, string After)? FindReplacement(
+        IReadOnlyList<string> before,
+        IReadOnlyList<string> after)
+    {
+        if (before.Count != after.Count) return null;
+        for (var index = 0; index < before.Count; index++)
+        {
+            if (string.Equals(before[index], after[index], StringComparison.OrdinalIgnoreCase)) continue;
+            return (before[index], after[index]);
+        }
+        return null;
+    }
+
     private static Guid? ResolveSwapTarget(
         WordRingsSwapBlockTransferSnapshot snapshot,
         IReadOnlyDictionary<Guid, string[]> afterWords,
@@ -268,12 +280,10 @@ public sealed class WordRingsActionCardRuntimePatch
                 continue;
             }
 
-            var beforeSet = before.ToHashSet(StringComparer.OrdinalIgnoreCase);
-            var afterSet = pair.Value.ToHashSet(StringComparer.OrdinalIgnoreCase);
-            if (beforeSet.Contains(actorIncoming) &&
-                !afterSet.Contains(actorIncoming) &&
-                !beforeSet.Contains(actorOutgoing) &&
-                afterSet.Contains(actorOutgoing))
+            var replacement = FindReplacement(before, pair.Value);
+            if (replacement is not null &&
+                string.Equals(replacement.Value.Before, actorIncoming, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(replacement.Value.After, actorOutgoing, StringComparison.OrdinalIgnoreCase))
             {
                 return pair.Key;
             }
