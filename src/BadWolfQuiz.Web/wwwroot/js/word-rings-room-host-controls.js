@@ -11,7 +11,7 @@
     const chooseRulesButton = root.querySelector('[data-open-room-rule-picker]');
     const lockButton = root.querySelector('[data-toggle-room-lock]');
     const ruleDialog = root.querySelector('[data-room-rule-picker-dialog]');
-    const closeRuleDialog = root.querySelector('[data-close-room-rule-picker]');
+    const confirmRuleDialog = root.querySelector('[data-confirm-room-rule-picker]');
     const resultDialog = root.querySelector('[data-word-rings-result-dialog]');
     const storageKey = `badwolf.wordrings.room.${roomCode}`;
     if (!apiUrl || !roomCode) return;
@@ -36,11 +36,11 @@
         return response.json();
     };
 
-    const action = async (handler, fields = {}) => {
+    const action = async (handler, fields = {}, { renderBusy = true } = {}) => {
         const token = loadToken();
         if (!token || busy) return;
         busy = true;
-        render();
+        if (renderBusy) render();
         try {
             const payload = await post(handler, { roomCode, playerToken: token, ...fields });
             if (payload.success && payload.state) hostState = payload.state;
@@ -66,6 +66,7 @@
 
     const selection = ring => hostState?.ruleSelections?.find(item => item.ring === ring) || null;
     const rulesComplete = () => ['A', 'B', 'C'].every(ring => selection(ring)?.selectedRuleId);
+    const isHostController = () => hostState?.isHost === true && hostState?.hostChoosesRules === true;
 
     const renderRulePicker = () => {
         if (!(ruleDialog instanceof HTMLDialogElement) || !hostState) return;
@@ -75,22 +76,45 @@
             const refresh = group?.querySelector('[data-refresh-room-rules]');
             const current = selection(ring);
             if (!(options instanceof HTMLElement)) continue;
-            options.replaceChildren();
-            for (const option of current?.options || []) {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'word-rings-rule-option';
+
+            const ruleOptions = current?.options || [];
+            const existingButtons = [...options.querySelectorAll('.word-rings-rule-option[data-rule-id]')];
+            const needsRebuild = existingButtons.length !== ruleOptions.length ||
+                ruleOptions.some((option, index) => existingButtons[index]?.dataset.ruleId !== String(option.id));
+
+            if (needsRebuild) {
+                options.replaceChildren();
+                for (const option of ruleOptions) {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'word-rings-rule-option';
+                    button.dataset.ruleId = String(option.id);
+                    button.addEventListener('click', () =>
+                        void action('SelectRoomRule', { ring, ruleId: option.id }, { renderBusy: false }));
+                    options.append(button);
+                }
+            }
+
+            const buttonsById = new Map(
+                [...options.querySelectorAll('.word-rings-rule-option[data-rule-id]')]
+                    .map(button => [button.dataset.ruleId, button]));
+            for (const option of ruleOptions) {
+                const button = buttonsById.get(String(option.id));
+                if (!(button instanceof HTMLButtonElement)) continue;
+                if (button.textContent !== option.text) button.textContent = option.text;
                 button.classList.toggle('is-selected', option.isSelected === true);
-                button.textContent = option.text;
                 button.disabled = busy || hostState.phase === 'playing';
                 button.setAttribute('aria-pressed', option.isSelected === true ? 'true' : 'false');
-                button.addEventListener('click', () => void action('SelectRoomRule', { ring, ruleId: option.id }));
-                options.append(button);
             }
+
             if (refresh instanceof HTMLButtonElement) {
                 refresh.dataset.ring = ring;
                 refresh.disabled = busy || current?.canRefresh !== true || hostState.phase === 'playing';
             }
+        }
+
+        if (confirmRuleDialog instanceof HTMLButtonElement) {
+            confirmRuleDialog.disabled = busy || hostState.phase === 'playing' || !rulesComplete();
         }
     };
 
@@ -162,7 +186,7 @@
             lockButton.disabled = busy;
             const locked = hostState.joinLocked === true;
             const label = locked ? root.dataset.roomUnlockJoining : root.dataset.roomLockJoining;
-            lockButton.textContent = locked ? '🔓' : '🔒';
+            lockButton.textContent = locked ? '🔒' : '🔓';
             lockButton.title = label || '';
             lockButton.setAttribute('aria-label', label || '');
             lockButton.setAttribute('aria-pressed', locked ? 'true' : 'false');
@@ -185,12 +209,22 @@
     };
 
     startButton?.addEventListener('click', event => {
-        if (hostState?.hostChoosesRules !== true || hostState.canStart === true) return;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        if (!rulesComplete() && ruleDialog instanceof HTMLDialogElement && !ruleDialog.open) {
-            renderRulePicker();
-            ruleDialog.showModal();
+        if (hostState?.isHost !== true) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return;
+        }
+        if (hostState.hostChoosesRules === true && hostState.canStart !== true) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (!rulesComplete() && ruleDialog instanceof HTMLDialogElement && !ruleDialog.open) {
+                renderRulePicker();
+                ruleDialog.showModal();
+            }
+            return;
+        }
+        if (hostState.canStart === true && startButton instanceof HTMLButtonElement) {
+            startButton.disabled = true;
         }
     }, true);
 
@@ -204,12 +238,14 @@
         renderRulePicker();
         if (ruleDialog instanceof HTMLDialogElement && !ruleDialog.open) ruleDialog.showModal();
     });
-    closeRuleDialog?.addEventListener('click', () => ruleDialog instanceof HTMLDialogElement && ruleDialog.close());
+    confirmRuleDialog?.addEventListener('click', () => {
+        if (rulesComplete() && ruleDialog instanceof HTMLDialogElement) ruleDialog.close();
+    });
     ruleDialog?.addEventListener('cancel', event => { event.preventDefault(); ruleDialog.close(); });
     ruleDialog?.querySelectorAll('[data-refresh-room-rules]').forEach(button => {
         button.addEventListener('click', () => {
             const ring = button.dataset.ring || button.closest('[data-room-rule-group]')?.dataset.roomRuleGroup;
-            if (ring) void action('RefreshRoomRules', { ring });
+            if (ring) void action('RefreshRoomRules', { ring }, { renderBusy: false });
         });
     });
     lockButton?.addEventListener('click', () => void action('SetRoomJoinLock', { locked: hostState?.joinLocked !== true }));

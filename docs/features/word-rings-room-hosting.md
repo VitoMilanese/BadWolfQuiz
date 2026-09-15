@@ -9,9 +9,9 @@ Multiplayer players never receive a reveal-rules control during an active round.
 
 ## Host-selected rules
 
-For a hosted room, the server returns up to nine enabled, non-empty rule options for each ring. The host selects exactly one option per ring before the round can start.
+For a hosted room, the server returns up to six enabled, non-empty rule options for each ring. The host selects exactly one option per ring before the round can start.
 
-Each ring has its own **Other options** action. That action can replace the current set with another set of up to nine rules only once for that ring during the round setup. The selected rule IDs are kept server-side and validated against the options that were actually offered to the host.
+Each ring has its own **Other options** action. That action can replace the current set with another set of up to six rules only once for that ring during the round setup. The selected rule IDs are kept server-side and validated against the options that were actually offered to the host.
 
 When the round starts, the puzzle and its expected Venn memberships are built from exactly those three selected rules. After the hosted round finishes, fresh choices are prepared for the next round.
 

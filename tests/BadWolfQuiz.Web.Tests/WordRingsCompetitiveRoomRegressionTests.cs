@@ -147,7 +147,7 @@ public sealed class WordRingsCompetitiveRoomRegressionTests
 
         Assert.Contains("nextState.playerScore", script, StringComparison.Ordinal);
         Assert.Contains("state?.phase === 'finished'", script, StringComparison.Ordinal);
-        Assert.Contains("startButton.hidden = state?.isHost !== true || state?.phase === 'playing';", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("startButton.hidden = state?.isHost !== true || state?.phase === 'playing';", script, StringComparison.Ordinal);
         Assert.DoesNotContain("nextState.teamScore", script, StringComparison.Ordinal);
         Assert.DoesNotContain("state?.phase === 'finished' ||\n            root.querySelector", script, StringComparison.Ordinal);
         Assert.Contains("Мультиплеєр", roomText, StringComparison.Ordinal);

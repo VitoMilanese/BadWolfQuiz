@@ -10,8 +10,9 @@ public sealed record WordRingsRoomHostText
     public string HostOnlyRole { get; init; } = "Host the game";
     public string HostOnlyRoleDescription { get; init; } = "The host manages the room and chooses the ring rules, but receives no words and does not take turns.";
     public string ChooseRules { get; init; } = "Choose rules";
-    public string ChooseRulesHint { get; init; } = "Choose one rule for each ring. Each group of nine options can be replaced only once.";
+    public string ChooseRulesHint { get; init; } = "Choose one rule for each ring. Each set of six options can be replaced only once.";
     public string OtherRules { get; init; } = "Other options";
+    public string ConfirmRules { get; init; } = "Confirm";
     public string BlueRing { get; init; } = "Blue ring";
     public string YellowRing { get; init; } = "Yellow ring";
     public string RedRing { get; init; } = "Red ring";
@@ -42,8 +43,9 @@ public sealed record WordRingsRoomHostText
         HostOnlyRole = "Бути хостом",
         HostOnlyRoleDescription = "Хост керує кімнатою та сам обирає правила, але не отримує слова і не бере участі в ходах.",
         ChooseRules = "Обрати правила",
-        ChooseRulesHint = "Оберіть по одному правилу для кожного кільця. Кожну дев’ятку можна замінити лише один раз.",
+        ChooseRulesHint = "Оберіть по одному правилу для кожного кільця. Набір із шести варіантів для кожного кільця можна замінити лише один раз.",
         OtherRules = "Інші варіанти",
+        ConfirmRules = "Підтвердити",
         BlueRing = "Синє кільце",
         YellowRing = "Жовте кільце",
         RedRing = "Червоне кільце",
@@ -64,8 +66,9 @@ public sealed record WordRingsRoomHostText
         HostOnlyRole = "Fai da host",
         HostOnlyRoleDescription = "L'host gestisce la stanza e sceglie le regole degli anelli, ma non riceve parole e non gioca turni.",
         ChooseRules = "Scegli le regole",
-        ChooseRulesHint = "Scegli una regola per ogni anello. Ogni gruppo di nove opzioni può essere sostituito una sola volta.",
+        ChooseRulesHint = "Scegli una regola per ogni anello. Ogni gruppo di sei opzioni può essere sostituito una sola volta.",
         OtherRules = "Altre opzioni",
+        ConfirmRules = "Conferma",
         BlueRing = "Anello blu",
         YellowRing = "Anello giallo",
         RedRing = "Anello rosso",
@@ -88,6 +91,7 @@ public sealed record WordRingsRoomHostText
         ChooseRules = "Україна",
         ChooseRulesHint = "Україна",
         OtherRules = "Україна",
+        ConfirmRules = "Україна",
         BlueRing = "Україна",
         YellowRing = "Україна",
         RedRing = "Україна",

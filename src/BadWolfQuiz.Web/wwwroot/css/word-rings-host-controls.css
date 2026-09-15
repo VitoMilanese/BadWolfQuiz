@@ -35,12 +35,6 @@
     cursor: pointer;
 }
 
-.word-rings-room-dialog .word-rings-room-role-option:has(input:checked) {
-    border-color: color-mix(in srgb, var(--gold) 68%, var(--line));
-    background: color-mix(in srgb, var(--gold) 10%, var(--panel-2));
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 13%, transparent);
-}
-
 .word-rings-room-dialog .word-rings-room-role-option input {
     margin-top: 3px;
 }
@@ -66,11 +60,20 @@
     font-size: 1rem;
 }
 
+.word-rings-player-card {
+    position: relative;
+    padding-right: 50px;
+}
+
 .word-rings-player-actions {
+    position: absolute;
+    top: 50%;
+    right: 10px;
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
     gap: 6px;
-    margin-top: 2px;
+    margin: 0;
+    transform: translateY(-50%);
 }
 
 .word-rings-player-action {
@@ -94,9 +97,15 @@
     background: color-mix(in srgb, var(--gold) 12%, var(--panel));
 }
 
+.word-rings-player-action.is-danger {
+    border-color: #d34a55;
+    background: #b4232f;
+    color: #fff;
+}
+
 .word-rings-player-action.is-danger:hover:not(:disabled) {
-    border-color: #c94752;
-    background: color-mix(in srgb, #9f101b 32%, var(--panel));
+    border-color: #f06a73;
+    background: #941a25;
 }
 
 .word-rings-player-action:disabled {
@@ -105,17 +114,17 @@
 }
 
 .word-rings-rule-picker-dialog {
-    width: min(96vw, 1380px);
+    width: min(98vw, 1500px);
     max-width: none;
-    max-height: 90dvh;
+    max-height: 94dvh;
     padding: 0;
     overflow: auto;
 }
 
 .word-rings-rule-picker-shell {
     display: grid;
-    gap: 18px;
-    padding: 24px;
+    gap: 20px;
+    padding: 28px;
 }
 
 .word-rings-rule-picker-heading {
@@ -130,26 +139,30 @@
     margin: 0;
 }
 
+.word-rings-rule-picker-heading h2 {
+    font-size: 1.5rem;
+}
+
 .word-rings-rule-picker-heading p {
-    margin-top: 6px;
+    margin-top: 7px;
     color: var(--muted);
-    font-size: .86rem;
+    font-size: .96rem;
     font-weight: 700;
 }
 
 .word-rings-rule-picker-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    gap: 18px;
 }
 
 .word-rings-rule-group {
     --ring-accent: var(--word-ring-a);
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
-    gap: 10px;
+    gap: 12px;
     min-width: 0;
-    padding: 14px;
+    padding: 18px;
     border: 1px solid color-mix(in srgb, var(--ring-accent) 48%, var(--line));
     border-radius: 18px;
     background: color-mix(in srgb, var(--panel) 80%, transparent);
@@ -166,28 +179,28 @@
 .word-rings-rule-group h3 {
     margin: 0;
     color: color-mix(in srgb, var(--ring-accent) 88%, white);
-    font-size: 1rem;
+    font-size: 1.1rem;
 }
 
 .word-rings-rule-options {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
     align-content: start;
 }
 
 .word-rings-rule-option {
     min-width: 0;
-    min-height: 76px;
-    padding: 9px;
+    min-height: 98px;
+    padding: 12px;
     border: 1px solid color-mix(in srgb, var(--ring-accent) 30%, var(--line));
     border-radius: 11px;
     background: color-mix(in srgb, var(--panel-2) 88%, transparent);
     color: var(--text);
     font: inherit;
-    font-size: .76rem;
+    font-size: .9rem;
     font-weight: 800;
-    line-height: 1.25;
+    line-height: 1.35;
     text-align: left;
     cursor: pointer;
     overflow-wrap: anywhere;
@@ -275,7 +288,7 @@
     }
 
     .word-rings-rule-options {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 

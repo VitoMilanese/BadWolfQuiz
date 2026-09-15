@@ -24,7 +24,7 @@ public sealed record WordRingsRoomHostSnapshot(
 
 public sealed class WordRingsRoomHostCoordinator
 {
-    private const int RuleOptionCount = 9;
+    private const int RuleOptionCount = 6;
     private static readonly ConcurrentDictionary<string, Lazy<WordRingsRoomHostCoordinator>> Instances = new(StringComparer.OrdinalIgnoreCase);
     private static readonly FieldInfo SyncField = typeof(WordRingsRoomStore).GetField("_sync", BindingFlags.Instance | BindingFlags.NonPublic)!;
     private static readonly FieldInfo RoomsField = typeof(WordRingsRoomStore).GetField("_rooms", BindingFlags.Instance | BindingFlags.NonPublic)!;

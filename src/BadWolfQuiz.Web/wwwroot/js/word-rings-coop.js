@@ -533,11 +533,6 @@
         root.classList.toggle('is-room-waiting', state?.phase === 'waiting');
         root.classList.toggle('is-not-own-turn', playing && !ownTurn);
 
-        if (startButton instanceof HTMLButtonElement) {
-            startButton.hidden = state?.isHost !== true || state?.phase === 'playing';
-            startButton.disabled = state?.canStart !== true || requestInFlight;
-        }
-
         wordList.querySelectorAll('.word-rings-word').forEach(token => {
             if (token instanceof HTMLButtonElement) token.disabled = !ownTurn || requestInFlight;
         });
