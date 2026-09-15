@@ -54,6 +54,10 @@
         console.error('Failed to read word-rings queue config.', error);
     }
 
+    let achievementSessionId = root.dataset.wordRingsAchievementSession || `${Date.now()}-${Math.random()}`;
+    const roomApiUrl = root.dataset.roomApiUrl || '/WordRingsRoomApi';
+    const antiForgery = root.querySelector('[data-word-rings-antiforgery] input[name="__RequestVerificationToken"]');
+
     const positiveInteger = (value, fallback) => {
         const parsed = Number.parseInt(value, 10);
         return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
@@ -486,6 +490,7 @@
             ? payload.words.filter(word => typeof word === 'string')
             : [];
         expected = new Map(Object.entries(payload?.expected || {}));
+        achievementSessionId = payload?.achievementSessionId || `${Date.now()}-${Math.random()}`;
         seedWords = normalizeSeeds(payload?.seeds);
         const playableWords = words.filter(word => expected.has(word));
         queuedWords = playableWords.slice(maximumBankWords);
@@ -550,6 +555,21 @@
         }
     });
 
+    const recordSoloAchievement = async (word, actualMembership, expectedMembership, eventId) => {
+        if (!isSoloMode) return;
+        try {
+            const data = new FormData();
+            if (antiForgery instanceof HTMLInputElement) data.append(antiForgery.name, antiForgery.value);
+            data.append('sessionId', achievementSessionId);
+            data.append('eventId', eventId);
+            data.append('actualMembership', actualMembership);
+            data.append('expectedMembership', expectedMembership);
+            await fetch(`${roomApiUrl}?handler=RecordSoloAchievement`, { method: 'POST', body: data, credentials: 'same-origin' });
+        } catch (error) {
+            console.debug('Word Rings achievement recording failed.', error);
+        }
+    };
+
     const finishGameIfNeeded = () => {
         const successful = correctCount();
         const attempts = verdicts.size;
@@ -577,6 +597,7 @@
         const expectedMembership = canonical(expected.get(word) ?? '');
         const correct = expectedMembership === actual;
         verdicts.set(word, correct);
+        void recordSoloAchievement(word, actual, expectedMembership, `${verdicts.size}:${word}`);
 
         root.querySelectorAll(`.word-rings-word[data-word="${CSS.escape(word)}"]`).forEach(token => {
             token.classList.toggle('is-correct', correct);

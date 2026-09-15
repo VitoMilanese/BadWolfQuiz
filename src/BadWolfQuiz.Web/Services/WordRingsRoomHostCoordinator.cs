@@ -16,6 +16,21 @@ public sealed record WordRingsRoomHostPendingPlacement(
     string PlayerName,
     bool WasMoved);
 public sealed record WordRingsRoomBrandLogo(byte[] Data, string ContentType);
+public sealed record WordRingsAchievementParticipant(
+    Guid PlayerId,
+    string PlayerName,
+    string? AccountId,
+    string? HostId,
+    bool IsHost,
+    bool DedicatedHostMode,
+    int RoundNumber);
+public sealed record WordRingsCompletedRoundAchievement(
+    string RoomCode,
+    int RoundNumber,
+    bool DedicatedHostMode,
+    WordRingsAchievementParticipant Host,
+    int PlayingParticipantCount,
+    Guid? WinnerPlayerId);
 public sealed record WordRingsRoomHostSnapshot(
     string RoomCode,
     long Version,
@@ -69,7 +84,8 @@ public sealed class WordRingsRoomHostCoordinator
         string? previousPlayerToken = null,
         byte[]? brandLogoData = null,
         string? brandLogoContentType = null,
-        int turnDurationSeconds = 0)
+        int turnDurationSeconds = 0,
+        string? hostAccountId = null)
     {
         var connection = _store.CreateRoom(
             playerName,
@@ -81,11 +97,15 @@ public sealed class WordRingsRoomHostCoordinator
         lock (_metaSync)
         {
             _rooms.Remove(Normalize(previousRoomCode));
+            var hostPlayer = connection.State.Players.Single(player => player.Id == connection.State.PlayerId);
             var meta = new RoomMeta(
                 connection.PlayerToken,
                 hostChoosesRules,
                 brandLogoData,
-                brandLogoContentType);
+                brandLogoContentType,
+                hostPlayer.Id,
+                hostPlayer.Name,
+                hostAccountId);
             if (hostChoosesRules) PrepareChoices(meta);
             _rooms[connection.RoomCode] = meta;
         }
@@ -109,7 +129,7 @@ public sealed class WordRingsRoomHostCoordinator
         }
     }
 
-    public WordRingsRoomConnection JoinRoom(string? roomCode, string? playerName)
+    public WordRingsRoomConnection JoinRoom(string? roomCode, string? playerName, string? accountId = null)
     {
         var code = Normalize(roomCode);
         lock (_metaSync)
@@ -120,6 +140,14 @@ public sealed class WordRingsRoomHostCoordinator
             }
         }
         var connection = _store.JoinRoom(code, playerName);
+        lock (_metaSync)
+        {
+            if (_rooms.TryGetValue(code, out var meta))
+            {
+                var player = connection.State.Players.Single(item => item.Id == connection.State.PlayerId);
+                meta.PlayerIdentities[player.Id] = new RoomPlayerIdentity(player.Name, NormalizeAccountId(accountId));
+            }
+        }
         return connection with { State = DecorateRoomState(connection.State, IsDedicatedHostRoom(code)) };
     }
 
@@ -162,6 +190,14 @@ public sealed class WordRingsRoomHostCoordinator
         }
 
         var started = _store.StartGame(code, playerToken);
+        lock (_metaSync)
+        {
+            if (meta is not null)
+            {
+                meta.RoundNumber++;
+                meta.RoundPlayingParticipantCount = started.Players.Count(player => !dedicatedHost || !player.IsHost);
+            }
+        }
         if (!dedicatedHost) return started;
 
         var puzzle = WordRingsRoomRuleSelection.CreatePuzzle(
@@ -267,7 +303,7 @@ public sealed class WordRingsRoomHostCoordinator
         return GetHostState(code, playerToken);
     }
 
-    public WordRingsRoomHostSnapshot ResolvePlacement(
+    public WordRingsRoomPlacementResult ResolvePlacementWithResult(
         string? roomCode,
         string? playerToken,
         long placementId)
@@ -279,8 +315,73 @@ public sealed class WordRingsRoomHostCoordinator
             EnsureHost(meta, playerToken);
             if (!meta.HostChoosesRules) throw new InvalidOperationException("HostJudgingDisabled");
         }
-        _ = _store.ResolveHostedPlacement(code, playerToken, placementId);
-        return GetHostState(code, playerToken);
+        var result = _store.ResolveHostedPlacement(code, playerToken, placementId);
+        return result with { State = DecorateRoomState(result.State, dedicatedHost: true) };
+    }
+
+    public WordRingsRoomHostSnapshot ResolvePlacement(
+        string? roomCode,
+        string? playerToken,
+        long placementId)
+    {
+        _ = ResolvePlacementWithResult(roomCode, playerToken, placementId);
+        return GetHostState(roomCode, playerToken);
+    }
+
+    public WordRingsAchievementParticipant? GetAchievementParticipant(string? roomCode, Guid playerId)
+    {
+        var code = Normalize(roomCode);
+        lock (_metaSync)
+        {
+            if (!_rooms.TryGetValue(code, out var meta) ||
+                !meta.PlayerIdentities.TryGetValue(playerId, out var identity))
+            {
+                return null;
+            }
+            return new WordRingsAchievementParticipant(
+                playerId,
+                identity.PlayerName,
+                identity.AccountId,
+                meta.HostAccountId,
+                playerId == meta.HostPlayerId,
+                meta.HostChoosesRules,
+                meta.RoundNumber);
+        }
+    }
+
+    public WordRingsCompletedRoundAchievement? TryClaimCompletedRoundAchievement(WordRingsRoomSnapshot state)
+    {
+        if (!string.Equals(state.Phase, "finished", StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        lock (_metaSync)
+        {
+            if (!_rooms.TryGetValue(state.RoomCode, out var meta) ||
+                meta.RoundNumber <= 0 ||
+                meta.LastAchievementRound >= meta.RoundNumber ||
+                !meta.PlayerIdentities.TryGetValue(meta.HostPlayerId, out var hostIdentity))
+            {
+                return null;
+            }
+            meta.LastAchievementRound = meta.RoundNumber;
+            var host = new WordRingsAchievementParticipant(
+                meta.HostPlayerId,
+                hostIdentity.PlayerName,
+                hostIdentity.AccountId,
+                meta.HostAccountId,
+                true,
+                meta.HostChoosesRules,
+                meta.RoundNumber);
+            return new WordRingsCompletedRoundAchievement(
+                state.RoomCode,
+                meta.RoundNumber,
+                meta.HostChoosesRules,
+                host,
+                meta.RoundPlayingParticipantCount,
+                state.WinnerPlayerId);
+        }
     }
 
     public WordRingsRoomHostSnapshot GetHostState(string? roomCode, string? playerToken)
@@ -490,6 +591,7 @@ public sealed class WordRingsRoomHostCoordinator
     private static string RingCode(WordRingColor color) => color switch { WordRingColor.Blue => "A", WordRingColor.Yellow => "B", _ => "C" };
     private static WordRingColor ParseRing(string? ring) => ring?.Trim().ToUpperInvariant() switch { "A" or "BLUE" => WordRingColor.Blue, "B" or "YELLOW" => WordRingColor.Yellow, "C" or "RED" => WordRingColor.Red, _ => throw new InvalidOperationException("InvalidRing") };
     private static string Normalize(string? code) => (code ?? string.Empty).Trim().ToUpperInvariant();
+    private static string? NormalizeAccountId(string? accountId) => string.IsNullOrWhiteSpace(accountId) ? null : accountId.Trim();
     private RoomMeta RequireMeta(string code) => _rooms.TryGetValue(code, out var meta) ? meta : throw new InvalidOperationException("RoomMetadataNotFound");
     private static void EnsureHost(RoomMeta meta, string? token) { if (!string.Equals(meta.HostToken, token, StringComparison.Ordinal)) throw new WordRingsRoomException(WordRingsRoomError.NotHost); }
     private bool EnsureCreator(string code, string? token)
@@ -605,10 +707,24 @@ public sealed class WordRingsRoomHostCoordinator
         string hostToken,
         bool hostChoosesRules,
         byte[]? brandLogoData = null,
-        string? brandLogoContentType = null)
+        string? brandLogoContentType = null,
+        Guid hostPlayerId = default,
+        string? hostPlayerName = null,
+        string? hostAccountId = null)
     {
         public string HostToken { get; } = hostToken;
         public bool HostChoosesRules { get; } = hostChoosesRules;
+        public Guid HostPlayerId { get; } = hostPlayerId;
+        public string? HostAccountId { get; } = NormalizeAccountId(hostAccountId);
+        public Dictionary<Guid, RoomPlayerIdentity> PlayerIdentities { get; } = hostPlayerId == Guid.Empty
+            ? new Dictionary<Guid, RoomPlayerIdentity>()
+            : new Dictionary<Guid, RoomPlayerIdentity>
+            {
+                [hostPlayerId] = new(hostPlayerName ?? string.Empty, NormalizeAccountId(hostAccountId))
+            };
+        public int RoundNumber { get; set; }
+        public int LastAchievementRound { get; set; }
+        public int RoundPlayingParticipantCount { get; set; }
         public byte[]? BrandLogoData { get; } = brandLogoData?.ToArray();
         public string? BrandLogoContentType { get; } = string.IsNullOrWhiteSpace(brandLogoContentType)
             ? null
@@ -624,5 +740,6 @@ public sealed class WordRingsRoomHostCoordinator
         public Dictionary<WordRingColor, bool> Refreshed { get; } = new();
     }
 
+    private sealed record RoomPlayerIdentity(string PlayerName, string? AccountId);
     private sealed record RuleOption(Guid Id, string Text);
 }

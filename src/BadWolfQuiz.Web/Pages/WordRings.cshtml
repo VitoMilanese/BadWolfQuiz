@@ -27,6 +27,7 @@
      data-game-mode="@(isCooperativeRoom ? "cooperative" : "solo")"
      data-room-code="@(isCooperativeRoom ? requestedRoomCode : string.Empty)"
      data-room-api-url="@Url.Page("/WordRingsRoomApi")"
+     data-word-rings-achievement-session="@Model.AchievementSessionId"
      data-bank-word-limit="@Model.BankWordLimit"
      data-game-word-limit="@Model.GameWordLimit"
      data-correct-word-target="@Model.CorrectWordTarget"
