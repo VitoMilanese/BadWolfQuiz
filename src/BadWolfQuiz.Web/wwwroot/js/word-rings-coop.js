@@ -398,28 +398,51 @@
 
     const visibleBankWords = () => [...wordList.querySelectorAll('.word-rings-word[data-word]')]
         .filter(token => !token.hidden);
+    const regularVisibleBankWords = () => visibleBankWords()
+        .filter(token => !token.classList.contains('is-action-temporary-word'));
 
     const replenishLocalBank = () => {
-        while (visibleBankWords().length < maximumBankWords && localQueuedWords.length > 0) {
+        while (regularVisibleBankWords().length < maximumBankWords && localQueuedWords.length > 0) {
             createBankWord(localQueuedWords.shift());
         }
     };
 
     const trimLocalBank = returnedWord => {
-        let visible = visibleBankWords();
+        let visible = regularVisibleBankWords();
         while (visible.length > maximumBankWords) {
             const removable = [...visible].reverse().find(item => item.dataset.word !== returnedWord);
             if (!(removable instanceof HTMLElement)) break;
             if (removable.dataset.word) localQueuedWords.unshift(removable.dataset.word);
             removable.remove();
-            visible = visibleBankWords();
+            visible = regularVisibleBankWords();
         }
     };
 
     const renderBank = nextState => {
+        const preservedOverflow = new Map(
+            [...wordList.querySelectorAll('.word-rings-word[data-action-overflow-word="true"]')]
+                .filter(token => token instanceof HTMLButtonElement)
+                .map(token => [String(token.dataset.word || '').toLocaleLowerCase(), token]));
+
         wordList.replaceChildren();
-        for (const word of nextState.bankWords || []) createBankWord(word);
+        for (const word of nextState.bankWords || []) {
+            const key = String(word).toLocaleLowerCase();
+            const preserved = preservedOverflow.get(key);
+            if (preserved) {
+                preservedOverflow.delete(key);
+                delete preserved.dataset.actionOverflowWord;
+                wordList.append(preserved);
+                wireWord?.(preserved);
+            } else {
+                createBankWord(word);
+            }
+        }
+        preservedOverflow.forEach(token => {
+            wordList.append(token);
+            wireWord?.(token);
+        });
         localQueuedWords = [...(nextState.queuedWords || [])];
+        root.dispatchEvent(new CustomEvent('wordrings:bank-rendered'));
     };
 
     const removePendingToken = () => {

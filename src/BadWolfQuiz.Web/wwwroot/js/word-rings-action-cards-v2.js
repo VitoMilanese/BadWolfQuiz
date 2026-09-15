@@ -33,8 +33,8 @@
                 ['Shuffle', 'Replace all held action cards with the same number of random other cards.'],
                 ['Time-out', 'The selected player skips their next turn.'],
                 ['Shield', 'Passive: while held, blocks Replace, Block, Shuffle, Time-out, Mask and Anagram used against you.'],
-                ['Mask', 'Hide some letters in the selected player’s words for one attempt.'],
-                ['Anagram', 'Shuffle letters in the selected player’s words for one attempt.'],
+                ['Mask', 'Hide some letters in the selected player’s visible words until each affected word is checked.'],
+                ['Anagram', 'Shuffle letters in the selected player’s visible words until each affected word is checked.'],
                 ['Cleanse', 'Remove Block, Time-out, Mask and Anagram effects; if none are active, grant one-turn immunity.']
             ]
         },
@@ -56,8 +56,8 @@
                 ['Перетасовка', 'Змінити всі свої картки дій на таку ж кількість випадкових інших.'],
                 ['Тайм-аут', 'Обраний гравець пропускає наступний хід.'],
                 ['Щит', 'Пасивна: поки картка в інвентарі, блокує Заміну, Блокування, Перетасовку, Тайм-аут, Маскування та Анаграму проти вас.'],
-                ['Маскування', 'Приховати частину літер у словах обраного гравця на одну спробу.'],
-                ['Анаграма', 'Перемішати літери в словах обраного гравця на одну спробу.'],
+                ['Маскування', 'Приховати частину літер у видимих словах обраного гравця, доки кожне з них не буде перевірене.'],
+                ['Анаграма', 'Перемішати літери у видимих словах обраного гравця, доки кожне з них не буде перевірене.'],
                 ['Очищення', 'Прибрати ефекти Блокування, Тайм-аут, Маскування й Анаграма; якщо їх немає — дати імунітет на один хід.']
             ]
         },
@@ -79,8 +79,8 @@
                 ['Rimescola', 'Sostituisci tutte le carte con lo stesso numero di carte casuali diverse.'],
                 ['Time-out', 'Il giocatore scelto salta il prossimo turno.'],
                 ['Scudo', 'Passiva: finché è in mano blocca Sostituzione, Blocco, Rimescola, Time-out, Mascheramento e Anagramma contro di te.'],
-                ['Mascheramento', 'Nascondi alcune lettere nelle parole del giocatore scelto per un tentativo.'],
-                ['Anagramma', 'Mescola le lettere nelle parole del giocatore scelto per un tentativo.'],
+                ['Mascheramento', 'Nascondi alcune lettere nelle parole visibili del giocatore scelto finché ogni parola interessata non viene verificata.'],
+                ['Anagramma', 'Mescola le lettere nelle parole visibili del giocatore scelto finché ogni parola interessata non viene verificata.'],
                 ['Purifica', 'Rimuove Blocco, Time-out, Mascheramento e Anagramma; altrimenti concede immunità per un turno.']
             ]
         },
@@ -924,6 +924,12 @@
         soloImmunityArmed = false;
         soloAttempt = null;
         renderCards();
+    });
+
+    root.addEventListener('wordrings:bank-rendered', () => {
+        if (isSolo) return;
+        syncMultiplayerVisibleWords();
+        applyWordEffects();
     });
 
     let wordSyncQueued = false;

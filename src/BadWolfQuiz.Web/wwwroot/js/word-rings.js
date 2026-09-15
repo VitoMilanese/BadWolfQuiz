@@ -148,19 +148,26 @@
 
     const visibleBankWords = () => [...wordList.querySelectorAll('.word-rings-word[data-word]')]
         .filter(token => !token.hidden);
+    const regularVisibleBankWords = () => visibleBankWords()
+        .filter(token => !token.classList.contains('is-action-temporary-word'));
 
     const replenishWordBank = () => {
         if (gameOver) return;
 
-        while (visibleBankWords().length < maximumBankWords && queuedWords.length > 0) {
+        let guard = queuedWords.length;
+        while (regularVisibleBankWords().length < maximumBankWords && queuedWords.length > 0 && guard-- > 0) {
             const nextWord = queuedWords.shift();
             if (!nextWord || !expected.has(nextWord)) continue;
-            createBankWord(nextWord);
+            const created = createBankWord(nextWord);
+            if (created) continue;
+
+            const existing = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(nextWord)}"]`);
+            if (existing?.classList.contains('is-action-temporary-word')) queuedWords.push(nextWord);
         }
     };
 
     const trimWordBankToLimit = returnedWord => {
-        let visible = visibleBankWords();
+        let visible = regularVisibleBankWords();
         while (visible.length > maximumBankWords) {
             const removable = [...visible]
                 .reverse()
@@ -170,7 +177,7 @@
             const word = removable.dataset.word;
             removable.remove();
             if (word) queuedWords.unshift(word);
-            visible = visibleBankWords();
+            visible = regularVisibleBankWords();
         }
     };
 

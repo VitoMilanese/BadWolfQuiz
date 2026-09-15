@@ -72,6 +72,62 @@ public sealed class WordRingsActionCardsRegressionTests
     }
 
     [Fact]
+    public void Mask_and_anagram_are_consumed_only_for_the_attempted_word()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-obfuscation-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            var environment = new TestWebHostEnvironment(root);
+            var rooms = WordRingsRoomHostCoordinator.Get(environment);
+            var cards = WordRingsActionCardCoordinator.Get(environment);
+            var host = rooms.CreateRoom("Host", 15, partialScoreEnabled: false, hostChoosesRules: false);
+            _ = rooms.JoinRoom(host.RoomCode, "Guest");
+            cards.RegisterRoom(host, enabled: true, correctWordsPerCard: 2, maximumCards: 3);
+            _ = rooms.StartGame(host.RoomCode, host.PlayerToken);
+            cards.BeginRound(host.RoomCode, host.PlayerToken);
+
+            var method = typeof(WordRingsActionCardCoordinator).GetMethod(
+                "ApplyWordObfuscation",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            Assert.NotNull(method);
+
+            method.Invoke(cards, [host.RoomCode, host.State.PlayerId, true]);
+            var maskedBefore = cards.GetState(host.RoomCode, host.PlayerToken);
+            Assert.True(maskedBefore.MaskedWords.Count >= 2);
+            var maskedAttempt = maskedBefore.MaskedWords[0];
+            var maskedUntouched = maskedBefore.MaskedWords[1];
+
+            cards.RecordPlacementAttempt(host.RoomCode, host.State.PlayerId, maskedAttempt, fullyCorrect: false);
+            var maskedAfter = cards.GetState(host.RoomCode, host.PlayerToken);
+            Assert.DoesNotContain(maskedAfter.MaskedWords, word =>
+                string.Equals(word, maskedAttempt, StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(maskedAfter.MaskedWords, word =>
+                string.Equals(word, maskedUntouched, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(maskedBefore.MaskedWords.Count - 1, maskedAfter.MaskedWords.Count);
+
+            method.Invoke(cards, [host.RoomCode, host.State.PlayerId, false]);
+            var anagramBefore = cards.GetState(host.RoomCode, host.PlayerToken);
+            Assert.True(anagramBefore.AnagrammedWords.Count >= 2);
+            var anagramAttempt = anagramBefore.AnagrammedWords[0];
+            var anagramUntouched = anagramBefore.AnagrammedWords[1];
+
+            cards.RecordPlacementAttempt(host.RoomCode, host.State.PlayerId, anagramAttempt, fullyCorrect: false);
+            var anagramAfter = cards.GetState(host.RoomCode, host.PlayerToken);
+            Assert.DoesNotContain(anagramAfter.AnagrammedWords, word =>
+                string.Equals(word, anagramAttempt, StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(anagramAfter.AnagrammedWords, word =>
+                string.Equals(word, anagramUntouched, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(anagramBefore.AnagrammedWords.Count - 1, anagramAfter.AnagrammedWords.Count);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Room_tuning_allows_the_host_to_raise_target_score_to_twenty()
     {
         var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-target-score-{Guid.NewGuid():N}");
@@ -123,6 +179,7 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("if (token.textContent !== display) token.textContent = display;", script, StringComparison.Ordinal);
         Assert.Contains("word-rings-action-timeout-notice", script, StringComparison.Ordinal);
         Assert.Contains("syncMultiplayerVisibleWords", script, StringComparison.Ordinal);
+        Assert.Contains("wordrings:bank-rendered", script, StringComparison.Ordinal);
         Assert.Contains("lastRenderedCardSignature", script, StringComparison.Ordinal);
         Assert.Contains("if (!token.disabled) token.disabled = true;", script, StringComparison.Ordinal);
         Assert.Contains("maskedWords.has(normalized)", script, StringComparison.Ordinal);
@@ -130,6 +187,10 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("}, 2150);", script, StringComparison.Ordinal);
         Assert.Contains("new MutationObserver", pointerDrag, StringComparison.Ordinal);
         Assert.Contains("soundEffectsEnabled", coopScript, StringComparison.Ordinal);
+        Assert.Contains("regularVisibleBankWords", coopScript, StringComparison.Ordinal);
+        Assert.Contains("data-action-overflow-word=\"true\"", coopScript, StringComparison.Ordinal);
+        Assert.Contains("wordrings:bank-rendered", coopScript, StringComparison.Ordinal);
+        Assert.Contains("regularVisibleBankWords", soloScript, StringComparison.Ordinal);
         Assert.Contains("data-room-sound-enabled", page, StringComparison.Ordinal);
         Assert.Contains("state?.seedSetupPending === true", coopScript, StringComparison.Ordinal);
         Assert.Contains("source.dataset.seedExample === 'true'", soloScript, StringComparison.Ordinal);
@@ -141,11 +202,13 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("word-rings-action-pending-pulse", css, StringComparison.Ordinal);
         Assert.Contains("word-rings-action-timeout-pop 2.05s", css, StringComparison.Ordinal);
         Assert.Contains("word-rings-sound-toggle", css, StringComparison.Ordinal);
+        Assert.Contains("width: auto !important;", css, StringComparison.Ordinal);
+        Assert.Contains("overflow-x: hidden;", css, StringComparison.Ordinal);
         Assert.Contains("word-rings-room-dialog[data-create-room-dialog]", css, StringComparison.Ordinal);
         Assert.Contains("max-width: 760px;", css, StringComparison.Ordinal);
 
-        Assert.Contains("word-rings-action-cards-v2.css?v=3", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("word-rings-action-cards-v2.js?v=3", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-cards-v2.css?v=4", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-cards-v2.js?v=4", tagHelper, StringComparison.Ordinal);
         Assert.Contains("targetScore is < 5 or > 20", tuningApi, StringComparison.Ordinal);
         Assert.Contains("if (!state.IsHost)", tuningApi, StringComparison.Ordinal);
         Assert.Contains("k__BackingField", tuningApi, StringComparison.Ordinal);
@@ -176,6 +239,8 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("TimeoutNoticeRevision", service, StringComparison.Ordinal);
         Assert.Contains("TimeoutNoticePlayerName", service, StringComparison.Ordinal);
         Assert.Contains("actorMeta.BlockedWords.Remove(actorWord);", service, StringComparison.Ordinal);
+        Assert.Contains("if (state.DedicatedHostMode)", service, StringComparison.Ordinal);
+        Assert.Contains("return null;", service, StringComparison.Ordinal);
         Assert.Contains("return false;", service, StringComparison.Ordinal);
     }
 

@@ -48,14 +48,25 @@
 }
 
 .word-rings-action-enable {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
     gap: 8px;
+    width: 100%;
+    min-width: 0;
     cursor: pointer;
 }
 
 .word-rings-action-enable input {
-    flex: 0 0 auto;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: auto !important;
+    margin: 0;
+}
+
+.word-rings-action-enable span {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .word-rings-action-config-fields,
@@ -82,6 +93,7 @@
 .word-rings-action-dialog-field select {
     box-sizing: border-box;
     width: 100%;
+    min-width: 0;
     min-height: 36px;
     padding: 6px 9px;
     border: 1px solid var(--line);
@@ -393,12 +405,25 @@
 
 .word-rings-action-settings-dialog {
     width: min(92vw, 520px);
+    max-width: calc(100vw - 20px);
+    overflow-x: hidden;
 }
 
 .word-rings-action-settings-card {
+    box-sizing: border-box;
     display: grid;
     gap: 14px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     padding: 18px;
+}
+
+.word-rings-action-settings-card .word-rings-action-config,
+.word-rings-action-settings-card .word-rings-action-config-fields,
+.word-rings-action-settings-card .word-rings-action-config-fields label {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .word-rings-action-settings-heading {

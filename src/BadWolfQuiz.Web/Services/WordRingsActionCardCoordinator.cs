@@ -178,6 +178,13 @@ public sealed class WordRingsActionCardCoordinator
         string? membership)
     {
         var state = SynchronizeTurnState(roomCode, playerToken);
+        if (state.DedicatedHostMode)
+        {
+            // In host-controlled rooms the host must always judge the placement first.
+            // Immunity is consumed only if the host marks the attempt as failed.
+            return null;
+        }
+
         var normalizedWord = word?.Trim() ?? string.Empty;
         string expectedMembership;
         lock (SyncField.GetValue(_store)!)
