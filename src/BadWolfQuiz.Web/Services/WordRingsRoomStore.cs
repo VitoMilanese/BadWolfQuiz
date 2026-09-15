@@ -33,6 +33,7 @@ public static class WordRingsRoomEventType
     public const string PlayerLeft = "player-left";
     public const string PlayerKicked = "player-kicked";
     public const string TurnTransferred = "turn-transferred";
+    public const string TurnTimedOut = "turn-timed-out";
     public const string CheckSubmitted = "check-submitted";
     public const string HostCorrect = "host-correct";
     public const string HostMoved = "host-moved";
@@ -175,7 +176,7 @@ public sealed class WordRingsRoomStore
         {
             throw new WordRingsRoomException(WordRingsRoomError.InvalidTargetScore);
         }
-        if (turnDurationSeconds is not (0 or 60 or 90 or 120))
+        if (turnDurationSeconds is not (0 or 15 or 60 or 90 or 120))
         {
             throw new WordRingsRoomException(WordRingsRoomError.InvalidTurnDuration);
         }
@@ -219,7 +220,7 @@ public sealed class WordRingsRoomStore
         {
             var now = _timeProvider.GetUtcNow();
             var room = GetActiveRoom(roomCode, now);
-            if (room.Phase != RoomPhase.Waiting)
+            if (room.Phase == RoomPhase.Playing)
             {
                 throw new WordRingsRoomException(WordRingsRoomError.RoomAlreadyStarted);
             }
@@ -1399,6 +1400,11 @@ public sealed class WordRingsRoomStore
         {
             AdvanceTurn(room);
             EnsureTurnDeadline(room, now);
+            if (room.CurrentPlayerIndex >= 0 && room.CurrentPlayerIndex < room.Players.Count)
+            {
+                var nextPlayer = room.Players[room.CurrentPlayerIndex];
+                AddRoomEvent(room, WordRingsRoomEventType.TurnTimedOut, nextPlayer.Id, nextPlayer.Name);
+            }
         }
         return true;
     }

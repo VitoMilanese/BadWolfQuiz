@@ -598,3 +598,124 @@
     text-align: center;
     pointer-events: none;
 }
+
+/* Word Rings is intentionally drag/click driven; browser text selection gets in the way. */
+.word-rings-page,
+.word-rings-page * {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+}
+
+.word-rings-room-compact-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.word-rings-rule-picker-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 9px;
+}
+
+.word-rings-word.is-feedback-correct {
+    animation: word-rings-word-confirm 650ms cubic-bezier(.2, .8, .25, 1) both;
+}
+
+.word-rings-word.is-feedback-partial {
+    animation: word-rings-word-partial 650ms cubic-bezier(.2, .8, .25, 1) both;
+}
+
+.word-rings-word.is-feedback-wrong {
+    animation: word-rings-word-wrong 620ms ease both;
+}
+
+.word-rings-placement-fx {
+    --fx-color: #33c46f;
+    position: fixed;
+    z-index: 5000;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.word-rings-placement-fx.is-partial { --fx-color: #e0b43c; }
+.word-rings-placement-fx.is-wrong { --fx-color: #e85d5d; }
+
+.word-rings-placement-fx::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    border: 2px solid color-mix(in srgb, var(--fx-color) 78%, white);
+    border-radius: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(.35);
+    animation: word-rings-placement-ring 620ms ease-out both;
+}
+
+.word-rings-placement-fx-particle {
+    position: absolute;
+    left: -3px;
+    top: -3px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--fx-color) 82%, white);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--fx-color) 70%, transparent);
+    opacity: 0;
+    animation: word-rings-placement-particle 700ms var(--fx-delay) cubic-bezier(.12, .72, .2, 1) both;
+}
+
+@keyframes word-rings-word-confirm {
+    0%, 100% { scale: 1; filter: brightness(1); }
+    35% { scale: 1.14; filter: brightness(1.45); }
+    62% { scale: .98; filter: brightness(1.12); }
+}
+
+@keyframes word-rings-word-partial {
+    0%, 100% { translate: 0 0; scale: 1; filter: brightness(1); }
+    18% { translate: -3px 0; scale: 1.04; }
+    36% { translate: 3px 0; scale: 1.06; filter: brightness(1.3); }
+    54% { translate: -2px 0; }
+    72% { translate: 2px 0; }
+}
+
+@keyframes word-rings-word-wrong {
+    0%, 100% { translate: 0 0; filter: brightness(1); }
+    12% { translate: -7px 1px; }
+    24% { translate: 7px -1px; }
+    36% { translate: -6px 0; filter: brightness(1.25); }
+    48% { translate: 6px 1px; }
+    60% { translate: -4px -1px; }
+    72% { translate: 4px 0; }
+    84% { translate: -2px 0; }
+}
+
+@keyframes word-rings-placement-ring {
+    0% { opacity: .9; transform: translate(-50%, -50%) scale(.3); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(4.3); }
+}
+
+@keyframes word-rings-placement-particle {
+    0% { opacity: 0; transform: translate(0, 0) scale(.4); }
+    15% { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--fx-x), var(--fx-y)) scale(.1); }
+}
+
+@media (max-width: 480px) {
+    .word-rings-room-compact-fields {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .word-rings-word.is-feedback-correct,
+    .word-rings-word.is-feedback-partial,
+    .word-rings-word.is-feedback-wrong {
+        animation: none;
+    }
+}

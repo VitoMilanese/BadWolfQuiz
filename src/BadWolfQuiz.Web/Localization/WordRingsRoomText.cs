@@ -13,6 +13,7 @@ public sealed record WordRingsRoomText
     public string TargetScore { get; init; } = "Play to";
     public string TurnTimer { get; init; } = "Turn timer";
     public string NoTurnTimer { get; init; } = "No timer";
+    public string FifteenSecondTimer { get; init; } = "15 seconds (debug)";
     public string OneMinuteTimer { get; init; } = "1 minute";
     public string NinetySecondTimer { get; init; } = "1.5 minutes";
     public string TwoMinuteTimer { get; init; } = "2 minutes";
@@ -85,6 +86,7 @@ public sealed record WordRingsRoomText
         TargetScore = "Грати до",
         TurnTimer = "Таймер ходу",
         NoTurnTimer = "Без таймера",
+        FifteenSecondTimer = "15 секунд (debug)",
         OneMinuteTimer = "1 хвилина",
         NinetySecondTimer = "1,5 хвилини",
         TwoMinuteTimer = "2 хвилини",
@@ -147,6 +149,7 @@ public sealed record WordRingsRoomText
         TargetScore = "Gioca fino a",
         TurnTimer = "Timer del turno",
         NoTurnTimer = "Senza timer",
+        FifteenSecondTimer = "15 secondi (debug)",
         OneMinuteTimer = "1 minuto",
         NinetySecondTimer = "1,5 minuti",
         TwoMinuteTimer = "2 minuti",
@@ -209,6 +212,7 @@ public sealed record WordRingsRoomText
         TargetScore = "Україна",
         TurnTimer = "Україна",
         NoTurnTimer = "Україна",
+        FifteenSecondTimer = "Україна",
         OneMinuteTimer = "Україна",
         NinetySecondTimer = "Україна",
         TwoMinuteTimer = "Україна",

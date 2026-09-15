@@ -20,6 +20,16 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
         int turnDurationSeconds,
         CancellationToken cancellationToken)
     {
+        var configuration = HttpContext.RequestServices.GetService(typeof(IConfiguration)) as IConfiguration;
+        if (turnDurationSeconds == 15 && configuration?.GetValue<bool>("DebugMode") != true)
+        {
+            return new JsonResult(new
+            {
+                success = false,
+                error = WordRingsRoomError.InvalidTurnDuration.ToString()
+            });
+        }
+
         byte[]? brandLogoData = null;
         string? brandLogoContentType = null;
         var currentHost = HttpContext.RequestServices.GetService(typeof(CurrentHost)) as CurrentHost;

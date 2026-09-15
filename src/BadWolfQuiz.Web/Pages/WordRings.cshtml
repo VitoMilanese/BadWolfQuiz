@@ -1,6 +1,7 @@
 @page "/minigames/word-rings"
 @model BadWolfQuiz.Web.Pages.WordRingsModel
 @inject IStringLocalizer<WordRingsResource> WordRingsLocalizer
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @using BadWolfQuiz.Web.Localization
 @using System.Globalization
 @{
@@ -8,6 +9,7 @@
     var isCooperativeRoom = requestedRoomCode.Length == 6 && requestedRoomCode.All(char.IsLetterOrDigit);
     var roomText = WordRingsRoomText.ForCulture(CultureInfo.CurrentUICulture);
     var hostText = WordRingsRoomHostText.ForCulture(CultureInfo.CurrentUICulture);
+    var debugMode = string.Equals(Configuration["DebugMode"], "true", StringComparison.OrdinalIgnoreCase);
     ViewData["Title"] = WordRingsLocalizer["Title"];
     ViewData["HidePortalFooter"] = true;
 }
@@ -69,17 +71,7 @@
      data-room-host-seed-title="@hostText.SeedWordsTitle"
      data-room-host-judgement-title="@hostText.JudgementTitle"
      data-room-waiting-host-seeds="@hostText.WaitingForHostSeeds"
-     data-room-awaiting-host="@hostText.AwaitingHostDecision"
-     data-room-voice-language="@CultureInfo.CurrentUICulture.Name"
-     data-room-voice-check="@roomText.VoiceCheck"
-     data-room-voice-correct="@roomText.VoiceCorrect"
-     data-room-voice-move="@roomText.VoiceMove"
-     data-room-voice-victory="@roomText.VoiceVictory"
-     data-room-voice-defeat="@roomText.VoiceDefeat"
-     data-room-voice-player-joined="@roomText.VoicePlayerJoinedTemplate"
-     data-room-voice-player-left="@roomText.VoicePlayerLeftTemplate"
-     data-room-voice-player-kicked="@roomText.VoicePlayerKickedTemplate"
-     data-room-voice-turn-transferred="@roomText.VoiceTurnTransferredTemplate">
+     data-room-awaiting-host="@hostText.AwaitingHostDecision">
 
     @if (!isCooperativeRoom)
     {
@@ -204,8 +196,22 @@
                 <form data-create-room-form>
                     <h2>@roomText.CreateRoom</h2>
                     <label><span>@roomText.PlayerName</span><input type="text" maxlength="30" required data-create-room-name /></label>
-                    <label><span>@roomText.TargetScore</span><input type="number" min="5" max="15" value="10" required data-create-room-target /></label>
-                    <label><span>@roomText.TurnTimer</span><select data-create-room-turn-timer><option value="0" selected>@roomText.NoTurnTimer</option><option value="60">@roomText.OneMinuteTimer</option><option value="90">@roomText.NinetySecondTimer</option><option value="120">@roomText.TwoMinuteTimer</option></select></label>
+                    <div class="word-rings-room-compact-fields">
+                        <label><span>@roomText.TargetScore</span><input type="number" min="5" max="15" value="10" required data-create-room-target /></label>
+                        <label>
+                            <span>@roomText.TurnTimer</span>
+                            <select data-create-room-turn-timer>
+                                <option value="0" selected>@roomText.NoTurnTimer</option>
+                                @if (debugMode)
+                                {
+                                    <option value="15">@roomText.FifteenSecondTimer</option>
+                                }
+                                <option value="60">@roomText.OneMinuteTimer</option>
+                                <option value="90">@roomText.NinetySecondTimer</option>
+                                <option value="120">@roomText.TwoMinuteTimer</option>
+                            </select>
+                        </label>
+                    </div>
                     <fieldset class="word-rings-room-role-fieldset">
                         <legend>@hostText.RoomRole</legend>
                         <label class="word-rings-room-role-option"><input type="radio" name="roomRole" value="player" data-create-room-role checked /><span><strong>@hostText.PlayerRole</strong><small>@hostText.PlayerRoleDescription</small></span></label>
@@ -241,7 +247,7 @@
 
         <dialog class="minigames-dialog word-rings-rule-picker-dialog" data-room-rule-picker-dialog>
             <div class="word-rings-rule-picker-shell">
-                <div class="word-rings-rule-picker-heading"><div><h2>@hostText.ChooseRules</h2><p>@hostText.ChooseRulesHint</p></div><button class="button button-primary" type="button" data-confirm-room-rule-picker>@hostText.ConfirmRules</button></div>
+                <div class="word-rings-rule-picker-heading"><div><h2>@hostText.ChooseRules</h2><p>@hostText.ChooseRulesHint</p></div><div class="word-rings-rule-picker-actions"><button class="button" type="button" data-close-room-rule-picker>@roomText.Close</button><button class="button button-primary" type="button" data-confirm-room-rule-picker>@hostText.ConfirmRules</button></div></div>
                 <div class="word-rings-rule-picker-grid">
                     <section class="word-rings-rule-group" data-room-rule-group="A"><h3>@hostText.BlueRing</h3><div class="word-rings-rule-options" data-room-rule-options></div><button class="button word-rings-rule-refresh" type="button" data-refresh-room-rules>@hostText.OtherRules</button></section>
                     <section class="word-rings-rule-group" data-room-rule-group="B"><h3>@hostText.YellowRing</h3><div class="word-rings-rule-options" data-room-rule-options></div><button class="button word-rings-rule-refresh" type="button" data-refresh-room-rules>@hostText.OtherRules</button></section>
@@ -268,6 +274,7 @@
 
 @section Scripts {
     <script src="~/js/word-rings-pointer-drag.js" asp-append-version="true"></script>
+    <script src="~/js/word-rings-placement-feedback.js" asp-append-version="true"></script>
     <script src="~/js/word-rings-end-dialog.js" asp-append-version="true"></script>
     <script src="~/js/word-rings-result-rules.js" asp-append-version="true"></script>
     @if (isCooperativeRoom)

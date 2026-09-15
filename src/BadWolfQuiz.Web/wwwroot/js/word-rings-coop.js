@@ -57,6 +57,12 @@
     let roomFeedbackTimer = null;
     let roomEventCursor = null;
     let roomAudioContext = null;
+    let lastTimerTickSlot = null;
+    let placementHistoryInitialized = false;
+    const placementHistory = new Map();
+    const placementFeedback = typeof window.BadWolfWordRingsPlacementFeedback === 'function'
+        ? window.BadWolfWordRingsPlacementFeedback({ root })
+        : null;
     const defaultWordBankHeading = wordBankHeading?.textContent || '';
 
     const format = (template, ...values) => values.reduce(
@@ -70,18 +76,6 @@
         const number = Number(value || 0);
         return Number.isInteger(number) ? String(number) : number.toFixed(1).replace('.', ',');
     };
-
-    const roomVoiceTemplate = type => ({
-        'check-submitted': root.dataset.roomVoiceCheck,
-        'host-correct': root.dataset.roomVoiceCorrect,
-        'host-moved': root.dataset.roomVoiceMove,
-        'victory': root.dataset.roomVoiceVictory,
-        'defeat': root.dataset.roomVoiceDefeat,
-        'player-joined': root.dataset.roomVoicePlayerJoined,
-        'player-left': root.dataset.roomVoicePlayerLeft,
-        'player-kicked': root.dataset.roomVoicePlayerKicked,
-        'turn-transferred': root.dataset.roomVoiceTurnTransferred
-    })[type] || '';
 
     const createRoomAudioContext = () => {
         const AudioContextType = window.AudioContext || window.webkitAudioContext;
@@ -101,11 +95,6 @@
             void context.resume().catch(error =>
                 console.debug('Word Rings audio context could not resume.', error));
         }
-        try {
-            if ('speechSynthesis' in window) window.speechSynthesis.resume();
-        } catch (error) {
-            console.debug('Word Rings speech synthesis could not resume.', error);
-        }
     };
 
     root.addEventListener('pointerdown', unlockRoomAudio, { capture: true });
@@ -122,7 +111,8 @@
             'player-joined': [620, 760],
             'player-left': [760, 560],
             'player-kicked': [420, 260],
-            'turn-transferred': [600, 720]
+            'turn-transferred': [600, 720],
+            'turn-timed-out': [420, 620, 760]
         };
         const frequencies = patterns[type] || [600];
         const startAt = context.currentTime + 0.01;
@@ -157,27 +147,24 @@
         play();
     };
 
-    const announceRoomSignal = (type, playerName = '') => {
-        const template = roomVoiceTemplate(type);
-        const message = format(template, playerName || '').trim();
-        if (!message) return;
-
-        // Always play an audible Web Audio cue. Speech is supplemental because
-        // browsers can accept speechSynthesis.speak() while producing no sound.
-        playRoomSignal(type);
-        try {
-            if ('speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function') {
-                window.speechSynthesis.resume();
-                const utterance = new window.SpeechSynthesisUtterance(message);
-                utterance.lang = root.dataset.roomVoiceLanguage || document.documentElement.lang || 'en';
-                utterance.rate = 1.05;
-                utterance.volume = 1;
-                window.setTimeout(() => window.speechSynthesis.speak(utterance), 160);
-            }
-        } catch (error) {
-            console.debug('Word Rings speech signal unavailable.', error);
-        }
+    const playTimerTick = slot => {
+        const context = createRoomAudioContext();
+        if (!context || context.state !== 'running') return;
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        const startAt = context.currentTime + 0.005;
+        oscillator.type = 'square';
+        oscillator.frequency.value = slot % 2 === 0 ? 920 : 680;
+        gain.gain.setValueAtTime(0.0001, startAt);
+        gain.gain.exponentialRampToValueAtTime(0.09, startAt + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.055);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(startAt);
+        oscillator.stop(startAt + 0.06);
     };
+
+    const announceRoomSignal = type => playRoomSignal(type);
 
     const setStatus = (message, kind = '') => {
         if (!status) return;
@@ -580,6 +567,7 @@
 
     const renderPlacements = placements => {
         const livePlacementIds = new Set();
+        const feedbackQueue = [];
         for (const placement of placements || []) {
             const placementId = String(placement.id);
             livePlacementIds.add(placementId);
@@ -619,11 +607,31 @@
             token.classList.toggle(
                 'is-wrong',
                 !seedExample && !awaitingHost && placement.isCorrect !== true && !(placement.isPartial === true && Number(placement.pointsAwarded) > 0));
+
+            const previous = placementHistory.get(placementId);
+            if (placementHistoryInitialized && !seedExample && !awaitingHost &&
+                (previous === undefined || previous.isPending === true)) {
+                const kind = placement.isCorrect === true
+                    ? 'correct'
+                    : placement.isPartial === true && Number(placement.pointsAwarded) > 0
+                        ? 'partial'
+                        : 'wrong';
+                feedbackQueue.push({ token, kind });
+            }
+            placementHistory.set(placementId, { isPending: awaitingHost, isSeed: seedExample });
         }
 
         placedLayer.querySelectorAll('[data-room-server-placement]').forEach(token => {
-            if (!livePlacementIds.has(token.dataset.roomServerPlacement || '')) token.remove();
+            const placementId = token.dataset.roomServerPlacement || '';
+            if (!livePlacementIds.has(placementId)) {
+                token.remove();
+                placementHistory.delete(placementId);
+            }
         });
+        placementHistoryInitialized = true;
+        if (feedbackQueue.length > 0) {
+            window.requestAnimationFrame(() => feedbackQueue.forEach(item => placementFeedback?.play(item.token, item.kind)));
+        }
     };
 
     const repositionIncorrectPlacementIfNeeded = async result => {
@@ -727,7 +735,7 @@
         for (const event of events) {
             const sequence = Number(event.sequence);
             if (sequence <= roomEventCursor) continue;
-            announceRoomSignal(event.type, event.playerName || '');
+            announceRoomSignal(event.type);
             roomEventCursor = Math.max(roomEventCursor, sequence);
         }
         roomEventCursor = Math.max(roomEventCursor, latest);
@@ -739,12 +747,23 @@
         if (state?.phase !== 'playing' || !Number.isFinite(deadline)) {
             turnTimer.hidden = true;
             turnTimer.textContent = '';
+            lastTimerTickSlot = null;
             return;
         }
-        const seconds = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+        const remainingMs = Math.max(0, deadline - Date.now());
+        const seconds = Math.max(0, Math.ceil(remainingMs / 1000));
         const minutes = Math.floor(seconds / 60);
         turnTimer.textContent = `⏱ ${minutes}:${String(seconds % 60).padStart(2, '0')}`;
         turnTimer.hidden = false;
+        if (remainingMs > 0 && remainingMs <= 10000) {
+            const tickSlot = Math.floor(Date.now() / 500);
+            if (tickSlot !== lastTimerTickSlot) {
+                lastTimerTickSlot = tickSlot;
+                playTimerTick(tickSlot);
+            }
+        } else {
+            lastTimerTickSlot = null;
+        }
     };
 
     const renderRoomContext = nextState => {
@@ -851,7 +870,7 @@
     const handleRoomError = payload => {
         if (payload?.error === 'InvalidPlayer') {
             if (state && session?.token) {
-                announceRoomSignal('player-kicked', ownPlayer()?.name || session?.name || '');
+                announceRoomSignal('player-kicked');
             }
             clearSession();
             showJoinDialog();
@@ -908,7 +927,7 @@
             saveSession(payload.connection);
             joinDialog.close();
             renderState(payload.connection.state);
-            announceRoomSignal('player-joined', name);
+            announceRoomSignal('player-joined');
         } catch (error) {
             console.error('Could not join Word Rings room.', error);
             setJoinError(root.dataset.roomError);

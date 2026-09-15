@@ -329,7 +329,7 @@ public sealed class WordRingsRoomHostControlRegressionTests
         Assert.Contains("data-room-rule-picker-dialog", page);
         Assert.Contains("data-confirm-room-rule-picker", page);
         Assert.Contains("@hostText.ConfirmRules", page);
-        Assert.DoesNotContain("data-close-room-rule-picker", page);
+        Assert.Contains("data-close-room-rule-picker", page);
         Assert.Contains("data-toggle-room-lock", page);
         Assert.Contains("data-result-rule-a", page);
         Assert.Equal(3, Count(page, "data-reveal-rules"));
@@ -343,7 +343,7 @@ public sealed class WordRingsRoomHostControlRegressionTests
         Assert.Contains("const canChooseRules = () => isHostController()", host);
         Assert.Contains("if (!canChooseRules())", host);
         Assert.Contains("chooseRulesButton.classList.toggle('is-hidden', !canOpenRules);", host);
-        Assert.Contains("lockButton.hidden = !(hostState.isHost === true && hostState.phase === 'waiting');", host);
+        Assert.Contains("lockButton.hidden = !(hostState.isHost === true && hostState.phase !== 'playing');", host);
         Assert.Contains("lockButton.textContent = locked ? '🔒' : '🔓';", host);
         Assert.Contains("const needsRebuild = existingButtons.length !== ruleOptions.length", host);
         Assert.Contains("{ renderBusy: false }", host);

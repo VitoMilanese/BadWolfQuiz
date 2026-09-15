@@ -253,8 +253,8 @@ public sealed class WordRingsCompetitiveRoomRegressionTests
             var script = ReadWebFile("wwwroot", "js", "word-rings-coop.js");
             var page = ReadWebFile("Pages", "WordRings.cshtml");
             var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
-            Assert.Contains("window.SpeechSynthesisUtterance", script, StringComparison.Ordinal);
-            Assert.Contains("window.speechSynthesis.speak", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("SpeechSynthesisUtterance", script, StringComparison.Ordinal);
+            Assert.DoesNotContain("speechSynthesis", script, StringComparison.Ordinal);
             Assert.Contains("root.addEventListener('pointerdown', unlockRoomAudio", script, StringComparison.Ordinal);
             Assert.Contains("context.resume()", script, StringComparison.Ordinal);
             Assert.Contains("playRoomSignal(type);", script, StringComparison.Ordinal);
@@ -267,7 +267,7 @@ public sealed class WordRingsCompetitiveRoomRegressionTests
             Assert.Contains("player-kicked", script, StringComparison.Ordinal);
             Assert.Contains("turn-transferred", script, StringComparison.Ordinal);
             Assert.Contains("nonPlayingHost", script, StringComparison.Ordinal);
-            Assert.Contains("data-room-voice-victory", page, StringComparison.Ordinal);
+            Assert.DoesNotContain("data-room-voice-victory", page, StringComparison.Ordinal);
             Assert.Contains("[data-start-room][hidden]", refinements, StringComparison.Ordinal);
             Assert.Contains("[data-toggle-room-lock][hidden]", refinements, StringComparison.Ordinal);
         }

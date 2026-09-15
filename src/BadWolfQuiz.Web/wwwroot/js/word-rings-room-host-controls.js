@@ -18,6 +18,7 @@
     const lockButton = root.querySelector('[data-toggle-room-lock]');
     const ruleDialog = root.querySelector('[data-room-rule-picker-dialog]');
     const confirmRuleDialog = root.querySelector('[data-confirm-room-rule-picker]');
+    const closeRuleDialog = root.querySelector('[data-close-room-rule-picker]');
     const resultDialog = root.querySelector('[data-word-rings-result-dialog]');
     const storageKey = `badwolf.wordrings.room.${roomCode}`;
     if (!apiUrl || !roomCode) return;
@@ -222,7 +223,7 @@
             revealButton.hidden = !canRevealRules;
         }
         if (lockButton instanceof HTMLButtonElement) {
-            lockButton.hidden = !(hostState.isHost === true && hostState.phase === 'waiting');
+            lockButton.hidden = !(hostState.isHost === true && hostState.phase !== 'playing');
             lockButton.disabled = busy;
             const locked = hostState.joinLocked === true;
             const label = locked ? root.dataset.roomUnlockJoining : root.dataset.roomLockJoining;
@@ -282,6 +283,9 @@
         }
         renderRulePicker();
         if (ruleDialog instanceof HTMLDialogElement && !ruleDialog.open) ruleDialog.showModal();
+    });
+    closeRuleDialog?.addEventListener('click', () => {
+        if (ruleDialog instanceof HTMLDialogElement) ruleDialog.close();
     });
     confirmRuleDialog?.addEventListener('click', () => {
         if (rulesComplete() && ruleDialog instanceof HTMLDialogElement) ruleDialog.close();

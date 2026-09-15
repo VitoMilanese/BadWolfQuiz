@@ -132,3 +132,12 @@ When an active deadline expires, the server takes one random word from the curre
 Dedicated-host UI uses the word-bank panel contextually: **Starter words** while the host places the four examples, **Judgement** while resolving a submitted word, and no empty panel when the host has neither words nor a pending judgement. Starter words remain visually active while draggable. Players waiting for starter setup see an in-board message explaining that play begins after the host places and confirms the four examples.
 
 The **Show result** action is author-CSS-hidden until an actual completed result exists and remains hidden throughout active play, including solo, automatic multiplayer, and dedicated-host rooms.
+
+## Placement feedback, between-round joining, and room audio
+
+- Every newly resolved placement receives local visual feedback at the token: a light spark/firework pulse for a correct verdict, an amber spark/wobble for a half-point partial verdict, and a red spark/shake for an incorrect or moved verdict. The same visual contract is used by solo automatic judging and multiplayer automatic/manual judging.
+- A room refuses new joins only while a round is actively `playing`. After the round reaches `finished`, new players may join before the next round starts; the host join-lock control is hidden during play and available again between rounds.
+- Browser speech synthesis is not used. Room lifecycle and turn events use short Web Audio cues only, preventing Edge/OS voices from speaking player names or event phrases.
+- During the final 10 seconds of an active turn timer, clients play a tick/tock cue every 0.5 seconds. A timer-forced turn transfer emits its own room event/cue.
+- `DebugMode=true` adds a 15-second timer choice to the room-creation dialog for testing; the API rejects that duration when debug mode is disabled.
+- The Word Rings surface disables mouse text selection, including its dialogs, to avoid accidental highlighting during drag-heavy play.

@@ -71,6 +71,9 @@
     let wireWord = null;
     let topZIndex = 10;
     let gameOver = maximumAttempts === 0;
+    const placementFeedback = typeof window.BadWolfWordRingsPlacementFeedback === 'function'
+        ? window.BadWolfWordRingsPlacementFeedback({ root })
+        : null;
 
     const canonical = value => [...String(value ?? '')].sort().join('');
     const correctCount = () => [...verdicts.values()].filter(result => result === true).length;
@@ -587,6 +590,10 @@
         } else {
             lockedMemberships.set(word, actual);
         }
+
+        const feedbackToken = placedLayer.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`)
+            || outsideList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
+        window.requestAnimationFrame(() => placementFeedback?.play(feedbackToken, correct ? 'correct' : 'wrong'));
 
         pendingWord = null;
         if (finishGameIfNeeded()) return;
