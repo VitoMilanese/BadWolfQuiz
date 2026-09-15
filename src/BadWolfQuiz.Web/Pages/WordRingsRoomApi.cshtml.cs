@@ -150,7 +150,14 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
         Execute(() =>
         {
             var state = HostCoordinator.StartGame(roomCode, playerToken);
-            ActionCards.BeginRound(roomCode, playerToken);
+            try
+            {
+                ActionCards.BeginRound(roomCode, playerToken);
+            }
+            catch (InvalidOperationException exception) when (IsUnconfiguredActionCards(exception))
+            {
+                // Backward-compatible rooms created outside the action-card-aware API simply keep cards disabled.
+            }
             return new { success = true, state };
         });
 
@@ -179,12 +186,21 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
         CancellationToken cancellationToken = default) =>
         ExecuteAsync(async () =>
         {
-            ActionCards.EnsureWordUsable(roomCode, playerToken, word);
-            var protectedFailure = ActionCards.TryInterceptFailedPlacement(
-                roomCode,
-                playerToken,
-                word,
-                membership);
+            WordRingsRoomPlacementResult? protectedFailure = null;
+            try
+            {
+                ActionCards.EnsureWordUsable(roomCode, playerToken, word);
+                protectedFailure = ActionCards.TryInterceptFailedPlacement(
+                    roomCode,
+                    playerToken,
+                    word,
+                    membership);
+            }
+            catch (InvalidOperationException exception) when (IsUnconfiguredActionCards(exception))
+            {
+                // Existing room flows without action-card metadata retain their previous behavior.
+            }
+
             if (protectedFailure is not null)
             {
                 return new
@@ -203,18 +219,28 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
                 ParseCoordinate(x),
                 ParseCoordinate(y));
 
-            if (result.IsPending)
+            try
             {
-                ActionCards.RecordHostedSubmission(result.State.RoomCode, result.State.PlayerId, result.Word);
+                if (result.IsPending)
+                {
+                    ActionCards.RecordHostedSubmission(result.State.RoomCode, result.State.PlayerId, result.Word);
+                }
+                else
+                {
+                    ActionCards.RecordPlacementAttempt(
+                        result.State.RoomCode,
+                        result.State.PlayerId,
+                        result.Word,
+                        result.IsCorrect);
+                }
             }
-            else
+            catch (InvalidOperationException exception) when (IsUnconfiguredActionCards(exception))
             {
-                ActionCards.RecordPlacementAttempt(
-                    result.State.RoomCode,
-                    result.State.PlayerId,
-                    result.Word,
-                    result.IsCorrect);
+                // Existing room flows without action-card metadata retain their previous behavior.
+            }
 
+            if (!result.IsPending)
+            {
                 var identity = HostCoordinator.GetAchievementParticipant(result.State.RoomCode, result.State.PlayerId);
                 var placement = result.State.Placements.LastOrDefault(item =>
                     item.PlayerId == result.State.PlayerId &&
@@ -288,7 +314,21 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
                 ? null
                 : HostCoordinator.GetAchievementParticipant(roomCode, pending.PlayerId);
 
-            if (ActionCards.TryCancelHostedFailureWithImmunity(roomCode, playerToken, placementId, pending))
+            var cancelledByImmunity = false;
+            try
+            {
+                cancelledByImmunity = ActionCards.TryCancelHostedFailureWithImmunity(
+                    roomCode,
+                    playerToken,
+                    placementId,
+                    pending);
+            }
+            catch (InvalidOperationException exception) when (IsUnconfiguredActionCards(exception))
+            {
+                // Existing room flows without action-card metadata retain their previous behavior.
+            }
+
+            if (cancelledByImmunity)
             {
                 return new
                 {
@@ -301,11 +341,18 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
             var result = HostCoordinator.ResolvePlacementWithResult(roomCode, playerToken, placementId);
             if (pending is not null)
             {
-                ActionCards.RecordPlacementAttempt(
-                    result.State.RoomCode,
-                    pending.PlayerId,
-                    pending.Word,
-                    result.IsCorrect);
+                try
+                {
+                    ActionCards.RecordPlacementAttempt(
+                        result.State.RoomCode,
+                        pending.PlayerId,
+                        pending.Word,
+                        result.IsCorrect);
+                }
+                catch (InvalidOperationException exception) when (IsUnconfiguredActionCards(exception))
+                {
+                    // Existing room flows without action-card metadata retain their previous behavior.
+                }
             }
             await RecordPlacementAchievementAsync(
                 result.State.RoomCode,
@@ -418,6 +465,9 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
                 cancellationToken: cancellationToken);
         }
     }
+
+    private static bool IsUnconfiguredActionCards(InvalidOperationException exception) =>
+        string.Equals(exception.Message, "ActionCardRoomNotConfigured", StringComparison.Ordinal);
 
     private static string CanonicalMembership(string? membership)
     {
