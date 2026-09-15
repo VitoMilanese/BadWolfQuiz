@@ -67,6 +67,11 @@
         field.dataset.starfieldTone = isLightTheme() ? 'light' : 'dark';
     };
 
+    const isVisibleElement = element =>
+        element instanceof HTMLElement &&
+        !element.hidden &&
+        getComputedStyle(element).display !== 'none';
+
     const fillsViewport = element => {
         const rect = element.getBoundingClientRect();
         return rect.width >= window.innerWidth * 0.88 &&
@@ -74,12 +79,35 @@
     };
 
     const resolveStarfieldHost = () => {
+        const playerGameRoot = document.querySelector(
+            '[data-game-code][data-player-id][data-final-status]');
+        if (isVisibleElement(playerGameRoot)) {
+            return playerGameRoot;
+        }
+
+        const hostGameplayView = document.querySelector('[data-host-gameplay-view]');
+        if (hostGameplayView instanceof HTMLElement) {
+            const activeGameplayRoot = Array.from(hostGameplayView.children)
+                .find(isVisibleElement);
+            if (activeGameplayRoot instanceof HTMLElement) {
+                return activeGameplayRoot;
+            }
+        }
+
+        const visibleHostBoard = document.querySelector(
+            '[data-host-gameplay-board]:not([hidden])');
+        const hostGameBoard = document.querySelector('.host-game-board');
+        if (isVisibleElement(visibleHostBoard) && isVisibleElement(hostGameBoard)) {
+            return hostGameBoard;
+        }
+
         const pageShell = document.querySelector('main.page-shell');
         if (pageShell instanceof HTMLElement) {
             const visualChildren = Array.from(pageShell.children).filter(element =>
-                element !== field && element instanceof HTMLElement);
-            if (visualChildren.length === 1 && fillsViewport(visualChildren[0])) {
-                return visualChildren[0];
+                element !== field && isVisibleElement(element));
+            const viewportRoot = visualChildren.find(fillsViewport);
+            if (viewportRoot instanceof HTMLElement) {
+                return viewportRoot;
             }
             return pageShell;
         }
@@ -356,6 +384,14 @@
         void loadAppearance(context, generation);
     };
 
+    const refreshHost = () => {
+        const previousHost = starfieldHost;
+        ensureStarfieldHost();
+        if (previousHost !== starfieldHost) {
+            renderStars();
+        }
+    };
+
     for (const methodName of ['pushState', 'replaceState']) {
         const original = history[methodName];
         if (typeof original !== 'function') {
@@ -393,13 +429,21 @@
 
     const pageShell = document.querySelector('main.page-shell');
     if (pageShell instanceof HTMLElement) {
-        new MutationObserver(() => {
-            const previousHost = starfieldHost;
-            ensureStarfieldHost();
-            if (previousHost !== starfieldHost) {
-                renderStars();
-            }
-        }).observe(pageShell, { childList: true });
+        new MutationObserver(refreshHost).observe(pageShell, { childList: true });
+    }
+
+    const hostGameplayView = document.querySelector('[data-host-gameplay-view]');
+    if (hostGameplayView instanceof HTMLElement) {
+        new MutationObserver(refreshHost).observe(hostGameplayView, { childList: true });
+    }
+
+    const hostGameBoard = document.querySelector('.host-game-board');
+    if (hostGameBoard instanceof HTMLElement) {
+        new MutationObserver(refreshHost).observe(hostGameBoard, {
+            attributes: true,
+            subtree: true,
+            attributeFilter: ['hidden', 'data-game-status']
+        });
     }
 
     renderStars();

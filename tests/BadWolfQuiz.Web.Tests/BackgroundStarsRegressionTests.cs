@@ -83,7 +83,7 @@ public sealed class BackgroundStarsRegressionTests : IDisposable
     }
 
     [Fact]
-    public void Global_starfield_uses_layout_safe_host_and_adapts_to_light_themes()
+    public void Global_starfield_uses_layout_safe_hosts_for_portal_and_gameplay_surfaces()
     {
         var css = ReadWebFile("wwwroot", "css", "background-stars.css");
         var script = ReadWebFile("wwwroot", "js", "background-stars.js");
@@ -94,8 +94,12 @@ public sealed class BackgroundStarsRegressionTests : IDisposable
         Assert.Contains("body .host-settings-hero-mark > i", css, StringComparison.Ordinal);
         Assert.Contains("resolveStarfieldHost", script, StringComparison.Ordinal);
         Assert.Contains("main.page-shell", script, StringComparison.Ordinal);
-        Assert.Contains("visualChildren.length === 1 && fillsViewport", script, StringComparison.Ordinal);
+        Assert.Contains("[data-game-code][data-player-id][data-final-status]", script, StringComparison.Ordinal);
+        Assert.Contains("[data-host-gameplay-view]", script, StringComparison.Ordinal);
+        Assert.Contains("[data-host-gameplay-board]:not([hidden])", script, StringComparison.Ordinal);
+        Assert.Contains("const viewportRoot = visualChildren.find(fillsViewport);", script, StringComparison.Ordinal);
         Assert.Contains("nextHost.append(field)", script, StringComparison.Ordinal);
+        Assert.Contains("new MutationObserver(refreshHost).observe(hostGameplayView", script, StringComparison.Ordinal);
         Assert.Contains("updateStarfieldTone", script, StringComparison.Ordinal);
         Assert.DoesNotContain("pageShell?.firstElementChild", script, StringComparison.Ordinal);
         Assert.DoesNotContain("nextHost.prepend(field)", script, StringComparison.Ordinal);
