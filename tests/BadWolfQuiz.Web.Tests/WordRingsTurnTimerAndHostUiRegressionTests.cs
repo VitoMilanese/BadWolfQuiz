@@ -150,6 +150,7 @@ public sealed class WordRingsTurnTimerAndHostUiRegressionTests
 
         Assert.Contains("BadWolfWordRingsPlacementFeedback", feedback, StringComparison.Ordinal);
         Assert.Contains("placementFeedback?.play", coop, StringComparison.Ordinal);
+        Assert.Contains("awaitingHost && placementHistory.get(placementId)?.isPending !== true", coop, StringComparison.Ordinal);
         Assert.Contains("placementFeedback?.play", solo, StringComparison.Ordinal);
         Assert.Contains("is-feedback-correct", roomCss, StringComparison.Ordinal);
         Assert.Contains("is-feedback-partial", roomCss, StringComparison.Ordinal);
@@ -162,6 +163,9 @@ public sealed class WordRingsTurnTimerAndHostUiRegressionTests
         Assert.Contains("remainingMs <= 10000", coop, StringComparison.Ordinal);
         Assert.Contains("'turn-timed-out'", coop, StringComparison.Ordinal);
         Assert.Contains("TurnTimedOut = \"turn-timed-out\"", store, StringComparison.Ordinal);
+        Assert.Contains("if (turnContinues) RestartTurnDeadline(room, now);", store, StringComparison.Ordinal);
+        Assert.Contains("private static void RestartTurnDeadline(RoomState room, DateTimeOffset now)", store, StringComparison.Ordinal);
+        Assert.DoesNotContain("ResumeTurnDeadline", store, StringComparison.Ordinal);
 
         Assert.Contains("data-close-room-rule-picker", page, StringComparison.Ordinal);
         Assert.Contains("word-rings-room-compact-fields", page, StringComparison.Ordinal);

@@ -125,7 +125,7 @@ When an authenticated room creator has a custom header logo in site settings, th
 
 ## Turn timer and dedicated-host context
 
-Multiplayer room creation optionally enables a server-authoritative turn timer of **1 minute**, **1.5 minutes**, or **2 minutes**; **No timer** remains the default. A configured timer is inactive whenever fewer than two playing participants are connected, and dedicated non-playing hosts never count as participants for that rule. Dedicated-host starter setup and the host's manual judgement pause the player timer; after judgement, the remaining time resumes when the same turn continues, while a transferred turn receives a fresh interval.
+Multiplayer room creation optionally enables a server-authoritative turn timer of **1 minute**, **1.5 minutes**, or **2 minutes**; **No timer** remains the default. A configured timer is inactive whenever fewer than two playing participants are connected, and dedicated non-playing hosts never count as participants for that rule. Dedicated-host starter setup and the host's manual judgement pause the player timer; after a **Correct** judgement that keeps the same player on turn, a fresh full turn interval starts, while a transferred turn also receives a fresh interval.
 
 When an active deadline expires, the server takes one random word from the current player's visible hand, places it into a random Venn region, explicitly records it as incorrect with **0 points** regardless of where it lands, and transfers the turn. The client countdown reflects the server deadline and clears any unsent local placement when the timed-out turn is replaced.
 

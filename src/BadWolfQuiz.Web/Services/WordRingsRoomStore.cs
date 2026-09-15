@@ -697,7 +697,7 @@ public sealed class WordRingsRoomStore
                 AdvanceTurn(room);
                 turnContinues = false;
             }
-            if (turnContinues) ResumeTurnDeadline(room, now);
+            if (turnContinues) RestartTurnDeadline(room, now);
             else EnsureTurnDeadline(room, now);
 
             Touch(room, now);
@@ -1333,18 +1333,11 @@ public sealed class WordRingsRoomStore
         room.TurnDeadlineUtc = null;
     }
 
-    private static void ResumeTurnDeadline(RoomState room, DateTimeOffset now)
+    private static void RestartTurnDeadline(RoomState room, DateTimeOffset now)
     {
-        var remaining = room.PausedTurnSeconds;
         room.PausedTurnSeconds = null;
-        if (!TurnTimerEligible(room))
-        {
-            room.TurnDeadlineUtc = null;
-            return;
-        }
-        room.TurnDeadlineUtc = remaining is > 0
-            ? now.AddSeconds(remaining.Value)
-            : now.AddSeconds(room.TurnDurationSeconds);
+        room.TurnDeadlineUtc = null;
+        EnsureTurnDeadline(room, now);
     }
 
     private static bool ProcessTurnTimeout(RoomState room, DateTimeOffset now)

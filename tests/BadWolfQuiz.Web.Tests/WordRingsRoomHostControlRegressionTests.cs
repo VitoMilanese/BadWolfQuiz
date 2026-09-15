@@ -306,6 +306,47 @@ public sealed class WordRingsRoomHostControlRegressionTests
     }
 
     [Fact]
+    public void Dedicated_host_correct_verdict_restarts_the_full_turn_timer()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-host-timer-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        try
+        {
+            var coordinator = WordRingsRoomHostCoordinator.Get(new TestEnvironment(root));
+            var host = coordinator.CreateRoom("Host", 15, false, true, turnDurationSeconds: 60);
+            var setup = coordinator.GetHostState(host.RoomCode, host.PlayerToken);
+            foreach (var ring in new[] { "A", "B", "C" })
+            {
+                var group = Assert.Single(setup.RuleSelections, item => item.Ring == ring);
+                setup = coordinator.SelectRule(host.RoomCode, host.PlayerToken, ring, group.Options.First().Id);
+            }
+
+            var first = coordinator.JoinRoom(host.RoomCode, "First");
+            _ = coordinator.JoinRoom(host.RoomCode, "Second");
+            _ = coordinator.StartGame(host.RoomCode, host.PlayerToken);
+            _ = CompleteHostSeedSetup(coordinator, host);
+
+            var before = coordinator.GetRoomState(host.RoomCode, first.PlayerToken);
+            Assert.Equal(first.State.PlayerId, before.CurrentPlayerId);
+            Assert.NotNull(before.TurnDeadlineUtc);
+            System.Threading.Thread.Sleep(2500);
+
+            var word = before.BankWords.First();
+            var submitted = coordinator.SubmitPlacement(host.RoomCode, first.PlayerToken, word, "A", 27, 28);
+            Assert.True(submitted.IsPending);
+            Assert.Null(submitted.State.TurnDeadlineUtc);
+            var pending = Assert.Single(submitted.State.Placements, item => item.IsPending);
+
+            _ = coordinator.ResolvePlacement(host.RoomCode, host.PlayerToken, pending.Id);
+            var after = coordinator.GetRoomState(host.RoomCode, first.PlayerToken);
+            Assert.Equal(first.State.PlayerId, after.CurrentPlayerId);
+            Assert.NotNull(after.TurnDeadlineUtc);
+            Assert.True((after.TurnDeadlineUtc.Value - DateTimeOffset.UtcNow).TotalSeconds > 58.5);
+        }
+        finally { Directory.Delete(root, true); }
+    }
+
+    [Fact]
     public void Ui_wires_check_result_rules_and_host_controls()
     {
         var page = Read("Pages", "WordRings.cshtml");

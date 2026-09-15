@@ -589,6 +589,9 @@
             token.textContent = placement.word;
             const awaitingHost = placement.isPending === true;
             const seedExample = placement.isSeed === true;
+            if (awaitingHost && placementHistory.get(placementId)?.isPending !== true) {
+                bringToFront(token);
+            }
             token.title = seedExample
                 ? ''
                 : awaitingHost
