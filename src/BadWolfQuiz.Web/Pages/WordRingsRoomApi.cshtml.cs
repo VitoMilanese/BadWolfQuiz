@@ -10,6 +10,7 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
 {
     private WordRingsRoomStore Store => WordRingsRoomStore.Get(environment);
     private WordRingsRoomHostCoordinator HostCoordinator => WordRingsRoomHostCoordinator.Get(environment);
+    private WordRingsActionCardCoordinator ActionCards => WordRingsActionCardCoordinator.Get(environment);
 
     public async Task<IActionResult> OnPostCreateRoom(
         string? playerName,
@@ -19,7 +20,10 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
         string? previousRoomCode,
         string? previousPlayerToken,
         int turnDurationSeconds,
-        CancellationToken cancellationToken)
+        bool actionCardsEnabled = false,
+        int actionCardCorrectWords = 3,
+        int actionCardMaxHand = 3,
+        CancellationToken cancellationToken = default)
     {
         var configuration = HttpContext.RequestServices.GetService(typeof(IConfiguration)) as IConfiguration;
         if (turnDurationSeconds == 15 && configuration?.GetValue<bool>("DebugMode") != true)
@@ -46,10 +50,9 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
             }
         }
 
-        return Execute(() => new
+        return Execute(() =>
         {
-            success = true,
-            connection = HostCoordinator.CreateRoom(
+            var connection = HostCoordinator.CreateRoom(
                 playerName,
                 targetScore,
                 partialScoreEnabled,
@@ -59,7 +62,18 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
                 brandLogoData,
                 brandLogoContentType,
                 turnDurationSeconds,
-                currentHost?.Id)
+                currentHost?.Id);
+            ActionCards.RegisterRoom(
+                connection,
+                actionCardsEnabled,
+                actionCardCorrectWords,
+                actionCardMaxHand,
+                previousRoomCode);
+            return new
+            {
+                success = true,
+                connection
+            };
         });
     }
 
@@ -96,6 +110,25 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
             return new { success = true, state };
         });
 
+    public IActionResult OnPostActionCardState(string? roomCode, string? playerToken) =>
+        Execute(() => new
+        {
+            success = true,
+            actionCards = ActionCards.GetState(roomCode, playerToken)
+        });
+
+    public IActionResult OnPostUseActionCard(
+        string? roomCode,
+        string? playerToken,
+        int cardId,
+        Guid? targetPlayerId,
+        string? word) =>
+        Execute(() => new
+        {
+            success = true,
+            result = ActionCards.UseCard(roomCode, playerToken, cardId, targetPlayerId, word)
+        });
+
     public IActionResult OnPostPrepareLeaveRoom(string? roomCode, string? playerToken) =>
         Execute(() =>
         {
@@ -114,7 +147,12 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
         Execute(() => new { success = true, state = HostCoordinator.GetHostState(roomCode, playerToken) });
 
     public IActionResult OnPostStartRoom(string? roomCode, string? playerToken) =>
-        Execute(() => new { success = true, state = HostCoordinator.StartGame(roomCode, playerToken) });
+        Execute(() =>
+        {
+            var state = HostCoordinator.StartGame(roomCode, playerToken);
+            ActionCards.BeginRound(roomCode, playerToken);
+            return new { success = true, state };
+        });
 
     public IActionResult OnPostSelectRoomRule(string? roomCode, string? playerToken, string? ring, Guid ruleId) =>
         Execute(() => new { success = true, state = HostCoordinator.SelectRule(roomCode, playerToken, ring, ruleId) });
@@ -141,6 +179,22 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
         CancellationToken cancellationToken = default) =>
         ExecuteAsync(async () =>
         {
+            ActionCards.EnsureWordUsable(roomCode, playerToken, word);
+            var protectedFailure = ActionCards.TryInterceptFailedPlacement(
+                roomCode,
+                playerToken,
+                word,
+                membership);
+            if (protectedFailure is not null)
+            {
+                return new
+                {
+                    success = true,
+                    result = protectedFailure,
+                    actionCardImmune = true
+                };
+            }
+
             var result = HostCoordinator.SubmitPlacement(
                 roomCode,
                 playerToken,
@@ -148,8 +202,19 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
                 membership,
                 ParseCoordinate(x),
                 ParseCoordinate(y));
-            if (!result.IsPending)
+
+            if (result.IsPending)
             {
+                ActionCards.RecordHostedSubmission(result.State.RoomCode, result.State.PlayerId, result.Word);
+            }
+            else
+            {
+                ActionCards.RecordPlacementAttempt(
+                    result.State.RoomCode,
+                    result.State.PlayerId,
+                    result.Word,
+                    result.IsCorrect);
+
                 var identity = HostCoordinator.GetAchievementParticipant(result.State.RoomCode, result.State.PlayerId);
                 var placement = result.State.Placements.LastOrDefault(item =>
                     item.PlayerId == result.State.PlayerId &&
@@ -222,7 +287,26 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
             var identity = pending is null
                 ? null
                 : HostCoordinator.GetAchievementParticipant(roomCode, pending.PlayerId);
+
+            if (ActionCards.TryCancelHostedFailureWithImmunity(roomCode, playerToken, placementId, pending))
+            {
+                return new
+                {
+                    success = true,
+                    state = HostCoordinator.GetHostState(roomCode, playerToken),
+                    actionCardImmune = true
+                };
+            }
+
             var result = HostCoordinator.ResolvePlacementWithResult(roomCode, playerToken, placementId);
+            if (pending is not null)
+            {
+                ActionCards.RecordPlacementAttempt(
+                    result.State.RoomCode,
+                    pending.PlayerId,
+                    pending.Word,
+                    result.IsCorrect);
+            }
             await RecordPlacementAchievementAsync(
                 result.State.RoomCode,
                 identity,

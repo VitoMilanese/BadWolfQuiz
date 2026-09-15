@@ -1,0 +1,313 @@
+.word-rings-action-config,
+.word-rings-action-create-config,
+.word-rings-action-shell {
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--panel) 84%, transparent);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .14);
+}
+
+.word-rings-action-config,
+.word-rings-action-create-config {
+    display: grid;
+    gap: .7rem;
+    padding: .8rem;
+    margin-top: .75rem;
+}
+
+.word-rings-action-config-title {
+    font-size: .88rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.word-rings-action-enable {
+    display: flex;
+    gap: .55rem;
+    align-items: center;
+    cursor: pointer;
+}
+
+.word-rings-action-config-fields,
+.word-rings-action-create-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .55rem;
+}
+
+.word-rings-action-config-fields label,
+.word-rings-action-create-fields label {
+    display: grid;
+    gap: .28rem;
+    font-size: .76rem;
+    color: var(--muted);
+}
+
+.word-rings-action-config-fields input,
+.word-rings-action-config-fields select,
+.word-rings-action-create-fields input,
+.word-rings-action-create-fields select,
+.word-rings-action-dialog-field select {
+    width: 100%;
+    min-height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-2);
+    color: var(--text);
+    padding: .45rem .55rem;
+}
+
+.word-rings-action-config-fields.is-disabled,
+.word-rings-action-create-fields.is-disabled {
+    opacity: .5;
+}
+
+.word-rings-action-shell {
+    position: relative;
+    display: grid;
+    gap: .55rem;
+    margin-top: .75rem;
+    padding: .7rem;
+    overflow: visible;
+}
+
+.word-rings-action-shell[hidden] {
+    display: none !important;
+}
+
+.word-rings-action-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .7rem;
+}
+
+.word-rings-action-header > strong {
+    font-size: .84rem;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+}
+
+.word-rings-action-meta {
+    color: var(--muted);
+    font-size: .72rem;
+    text-align: right;
+}
+
+.word-rings-action-carousel {
+    display: flex;
+    gap: .65rem;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: .75rem .35rem 1rem;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+}
+
+.word-rings-action-card {
+    --card-accent: var(--accent);
+    position: relative;
+    flex: 0 0 132px;
+    min-height: 176px;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    align-content: start;
+    gap: .42rem;
+    padding: .72rem;
+    border: 1px solid color-mix(in srgb, var(--card-accent) 62%, var(--line));
+    border-radius: 15px;
+    background:
+        radial-gradient(circle at 78% 12%, color-mix(in srgb, var(--card-accent) 35%, transparent), transparent 38%),
+        linear-gradient(155deg, color-mix(in srgb, var(--panel-2) 92%, transparent), color-mix(in srgb, var(--bg) 86%, transparent));
+    color: var(--text);
+    text-align: left;
+    box-shadow: 0 9px 24px rgba(0, 0, 0, .2);
+    scroll-snap-align: start;
+    cursor: pointer;
+    transform-origin: center bottom;
+    transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+    z-index: 1;
+}
+
+.word-rings-action-card:hover:not(:disabled),
+.word-rings-action-card:focus-visible:not(:disabled) {
+    transform: scale(1.16) translateY(-8px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .32);
+    z-index: 20;
+}
+
+.word-rings-action-card:disabled {
+    cursor: not-allowed;
+    opacity: .48;
+}
+
+.word-rings-action-card-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--card-accent) 24%, transparent);
+    color: var(--card-accent);
+    font-size: 1.45rem;
+    font-weight: 900;
+}
+
+.word-rings-action-card-name {
+    font-size: .86rem;
+    line-height: 1.08;
+}
+
+.word-rings-action-card-description {
+    color: var(--muted);
+    font-size: .68rem;
+    line-height: 1.28;
+}
+
+.word-rings-action-card-temporary {
+    position: absolute;
+    top: .45rem;
+    right: .45rem;
+    padding: .18rem .38rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--highlight) 24%, var(--panel));
+    color: var(--highlight);
+    font-size: .56rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.word-rings-action-card[data-action-card-id="1"],
+.word-rings-action-card[data-action-card-id="8"] { --card-accent: #5ac8fa; }
+.word-rings-action-card[data-action-card-id="2"],
+.word-rings-action-card[data-action-card-id="13"] { --card-accent: #66d18f; }
+.word-rings-action-card[data-action-card-id="3"],
+.word-rings-action-card[data-action-card-id="9"] { --card-accent: #ff6b6b; }
+.word-rings-action-card[data-action-card-id="4"],
+.word-rings-action-card[data-action-card-id="6"] { --card-accent: #ffd166; }
+.word-rings-action-card[data-action-card-id="5"],
+.word-rings-action-card[data-action-card-id="10"] { --card-accent: #9b8cff; }
+.word-rings-action-card[data-action-card-id="7"] { --card-accent: #f0a35e; }
+.word-rings-action-card[data-action-card-id="11"],
+.word-rings-action-card[data-action-card-id="12"] { --card-accent: #d96cff; }
+
+.word-rings-action-empty {
+    margin: 0;
+    color: var(--muted);
+    font-size: .72rem;
+}
+
+.word-rings-action-shell.is-inactive .word-rings-action-carousel {
+    opacity: .6;
+}
+
+.word-rings-action-dialog {
+    width: min(92vw, 520px);
+    max-height: 88vh;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--panel);
+    color: var(--text);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, .45);
+}
+
+.word-rings-action-dialog::backdrop {
+    background: rgba(0, 0, 0, .68);
+    backdrop-filter: blur(3px);
+}
+
+.word-rings-action-dialog-card {
+    display: grid;
+    gap: 1rem;
+    padding: 1.15rem;
+}
+
+.word-rings-action-dialog-preview {
+    display: grid;
+    place-items: center;
+}
+
+.word-rings-action-card.is-dialog-preview {
+    width: min(100%, 250px);
+    min-height: 300px;
+    flex-basis: auto;
+    transform: none !important;
+    cursor: default;
+    pointer-events: none;
+}
+
+.word-rings-action-card.is-dialog-preview .word-rings-action-card-icon {
+    width: 54px;
+    height: 54px;
+    font-size: 2rem;
+}
+
+.word-rings-action-card.is-dialog-preview .word-rings-action-card-name {
+    font-size: 1.2rem;
+}
+
+.word-rings-action-card.is-dialog-preview .word-rings-action-card-description {
+    font-size: .9rem;
+}
+
+.word-rings-action-dialog-field {
+    display: grid;
+    gap: .35rem;
+    color: var(--muted);
+    font-size: .8rem;
+}
+
+.word-rings-action-dialog-field[hidden] {
+    display: none;
+}
+
+.word-rings-action-dialog-message {
+    min-height: 1.2em;
+    margin: 0;
+    color: var(--muted);
+    font-size: .78rem;
+    text-align: center;
+}
+
+.word-rings-action-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .6rem;
+}
+
+.word-rings-word.is-action-blocked {
+    opacity: .38 !important;
+    filter: grayscale(.9);
+    text-decoration: line-through;
+}
+
+.word-rings-word.is-action-hint {
+    box-shadow: 0 0 0 3px color-mix(in srgb, #ffd166 70%, transparent), 0 0 24px rgba(255, 209, 102, .5) !important;
+    animation: word-rings-action-hint-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes word-rings-action-hint-pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.06); }
+}
+
+@media (max-width: 900px) {
+    .word-rings-action-config-fields,
+    .word-rings-action-create-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .word-rings-action-card {
+        flex-basis: 118px;
+        min-height: 164px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .word-rings-action-card,
+    .word-rings-word.is-action-hint {
+        transition: none;
+        animation: none;
+    }
+}
