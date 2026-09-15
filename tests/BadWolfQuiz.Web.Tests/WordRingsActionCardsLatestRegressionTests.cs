@@ -58,9 +58,9 @@ public sealed class WordRingsActionCardsLatestRegressionTests
                 capture));
 
             var after = cards.GetState(host.RoomCode, host.PlayerToken);
-            var incoming = after.Words.First(word =>
-                !actorBefore.Words.Contains(word, StringComparer.OrdinalIgnoreCase));
-            Assert.Contains(incoming, after.BlockedWords, StringComparer.OrdinalIgnoreCase);
+            var transferredBlockedWord = Assert.Single(after.BlockedWords);
+            Assert.Contains(transferredBlockedWord, after.Words, StringComparer.OrdinalIgnoreCase);
+            Assert.False(string.Equals(transferredBlockedWord, actorWord, StringComparison.OrdinalIgnoreCase));
         }
         finally
         {
