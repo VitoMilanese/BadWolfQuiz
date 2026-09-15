@@ -146,7 +146,7 @@ The achievement test suite covers catalog composition and ordering, the 15,000-p
 
 ## Word Rings achievements
 
-`Слівце в кільце` contributes ten built-in player achievements. Solo play unlocks the AI-play achievement after the player submits a checked word. Multiplayer room metadata keeps the creator/player account identity for achievement attribution, while the existing host-id + normalized nickname fallback is used when an account is not available but the room creator has an account identity.
+`Слівце в кільце` contributes ten built-in player achievements. Word Rings progress and unlocks are recorded only when at least one registered account anchors the session: either the room host is registered or the player earning the achievement is registered. The two conditions are independent and either one is sufficient; a guest player in a guest-hosted room does not create Word Rings achievement progress. A guest playing under a registered host uses the existing `HostId + normalized nickname` fallback identity, while a registered player can earn progress on their account even when the room host is not registered. Solo play has no separate host identity, so the player must be signed in to earn the solo and placement achievements; the AI-play achievement unlocks after the signed-in player submits a checked word.
 
 Word Rings records private `__WR...` progress events in the existing `PlayerAchievements` table, so no separate database schema is required. These internal rows are excluded from normal achievement lists but preserve cumulative progress across sessions for:
 
