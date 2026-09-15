@@ -72,50 +72,67 @@ public sealed class WordRingsActionCardsRegressionTests
     }
 
     [Fact]
-    public void Action_card_assets_cover_configuration_carousel_dialog_and_solo_subset()
+    public void Action_card_ui_covers_new_defaults_settings_carousel_and_discard_flow()
     {
-        var script = ReadWebFile("wwwroot", "js", "word-rings-action-cards.js");
-        var css = ReadWebFile("wwwroot", "css", "word-rings-action-cards.css");
+        var script = ReadWebFile("wwwroot", "js", "word-rings-action-cards-v2.js");
+        var css = ReadWebFile("wwwroot", "css", "word-rings-action-cards-v2.css");
         var pointerDrag = ReadWebFile("wwwroot", "js", "word-rings-pointer-drag.js");
-        var api = ReadWebFile("Pages", "WordRingsRoomApi.cshtml.cs");
-        var imports = ReadWebFile("Pages", "_ViewImports.cshtml");
-        var service = ReadWebFile("Services", "WordRingsActionCardCoordinator.cs");
+        var tagHelper = ReadWebFile("TagHelpers", "WordRingsActionCardsAssetsTagHelper.cs");
+        var tuningApi = ReadWebFile("Pages", "WordRingsRoomTuningApi.cshtml.cs");
 
-        Assert.Contains("createRoomActionCards", script, StringComparison.Ordinal);
-        Assert.Contains("actionCardCorrectWords", script, StringComparison.Ordinal);
-        Assert.Contains("actionCardMaxHand", script, StringComparison.Ordinal);
-        Assert.Contains("const soloPool = [2, 4, 5, 6, 8];", script, StringComparison.Ordinal);
-        Assert.Contains("const outOfTurn = new Set([8, 10, 13]);", script, StringComparison.Ordinal);
-        Assert.Contains("const passiveCards = new Set([5]);", script, StringComparison.Ordinal);
-        Assert.Contains("['Тимчасове слово'", script, StringComparison.Ordinal);
-        Assert.Contains("['Імунітет', 'Пасивна:", script, StringComparison.Ordinal);
-        Assert.Contains("word-rings-action-carousel", script, StringComparison.Ordinal);
-        Assert.Contains("word-rings-action-dialog", script, StringComparison.Ordinal);
-        Assert.Contains("transform: scale(1.16)", css, StringComparison.Ordinal);
-        Assert.Contains("is-passive:disabled", css, StringComparison.Ordinal);
+        Assert.Contains("const fallback = { enabled: false, kps: 2, max: 2 };", script, StringComparison.Ordinal);
+        Assert.Contains("kps.value = '2';", script, StringComparison.Ordinal);
+        Assert.Contains("option.selected = count === 2;", script, StringComparison.Ordinal);
+        Assert.Contains("targetScore.max = '20';", script, StringComparison.Ordinal);
+        Assert.Contains("kps: 'Правильних слів на картку'", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("Правильних слів на картку (КПС)", script, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-settings-button", script, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-carousel-nav", script, StringComparison.Ordinal);
+        Assert.Contains("cardId: -id", script, StringComparison.Ordinal);
+        Assert.Contains("randomPlayer: 'Випадковий гравець'", script, StringComparison.Ordinal);
+        Assert.Contains("const passiveCards = new Set([10]);", script, StringComparison.Ordinal);
+        Assert.Contains("const outOfTurn = new Set([8, 13]);", script, StringComparison.Ordinal);
+        Assert.Contains("closest('.word-rings-word.is-action-blocked')", script, StringComparison.Ordinal);
+        Assert.Contains("if (token.textContent !== display) token.textContent = display;", script, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-timeout-notice", script, StringComparison.Ordinal);
+        Assert.Contains("syncMultiplayerVisibleWords", script, StringComparison.Ordinal);
         Assert.Contains("new MutationObserver", pointerDrag, StringComparison.Ordinal);
-        Assert.Contains("OnPostUseActionCard", api, StringComparison.Ordinal);
-        Assert.Contains("OnPostActionCardState", api, StringComparison.Ordinal);
-        Assert.Contains("WordRingsActionCardsAssetsTagHelper", imports, StringComparison.Ordinal);
-        Assert.Contains("public enum WordRingsActionCardKind", service, StringComparison.Ordinal);
-        Assert.Contains("Temporary = 4", service, StringComparison.Ordinal);
-        Assert.Contains("MaximumCards = 4", service, StringComparison.Ordinal);
+
+        Assert.Contains("border: 0;", css, StringComparison.Ordinal);
+        Assert.Contains("overflow: visible;", css, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-carousel-nav", css, StringComparison.Ordinal);
+        Assert.Contains("transform: translateY(-5px) scale(1.09)", css, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-pending-pulse", css, StringComparison.Ordinal);
+        Assert.Contains("word-rings-room-dialog[data-create-room-dialog]", css, StringComparison.Ordinal);
+        Assert.Contains("max-width: 760px;", css, StringComparison.Ordinal);
+
+        Assert.Contains("word-rings-action-cards-v2.css?v=2", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-cards-v2.js?v=2", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("targetScore is < 5 or > 20", tuningApi, StringComparison.Ordinal);
+        Assert.Contains("if (!state.IsHost)", tuningApi, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Corrected_card_semantics_are_guarded_in_the_server_runtime()
+    public void Corrected_action_card_semantics_are_guarded_in_the_server_runtime()
     {
         var service = ReadWebFile("Services", "WordRingsActionCardCoordinator.cs");
 
-        Assert.Contains("private static readonly HashSet<WordRingsActionCardKind> ShieldedCards", service, StringComparison.Ordinal);
-        Assert.Contains("WordRingsActionCardKind.Block, WordRingsActionCardKind.Timeout, WordRingsActionCardKind.Mask, WordRingsActionCardKind.Anagram", service, StringComparison.Ordinal);
-        Assert.Contains("throw new InvalidOperationException(\"ActionCardPassive\")", service, StringComparison.Ordinal);
-        Assert.Contains("return player.Cards.Remove(WordRingsActionCardKind.Immunity);", service, StringComparison.Ordinal);
-        Assert.Contains("GrantTemporaryWord(code, state, targetId);", service, StringComparison.Ordinal);
-        Assert.Contains("RemainingWords(target).Insert(0, temporaryWord);", service, StringComparison.Ordinal);
-        Assert.Contains("target.SkipTurns = 0;", service, StringComparison.Ordinal);
-        Assert.DoesNotContain("public bool FailureImmunity { get; set; }", service, StringComparison.Ordinal);
-        Assert.DoesNotContain("TemporaryCard { get; set; }", service, StringComparison.Ordinal);
+        Assert.Contains("case WordRingsActionCardKind.Immunity:", service, StringComparison.Ordinal);
+        Assert.Contains("ActivatedFailureImmunity = true", service, StringComparison.Ordinal);
+        Assert.Contains("if (kind == WordRingsActionCardKind.Shield)", service, StringComparison.Ordinal);
+        Assert.Contains("target.Cards.Contains(WordRingsActionCardKind.Shield)", service, StringComparison.Ordinal);
+        Assert.DoesNotContain("target.Shield = false", service, StringComparison.Ordinal);
+        Assert.Contains("var discard = cardId < 0;", service, StringComparison.Ordinal);
+        Assert.Contains("actor.Cards.Remove(kind)", service, StringComparison.Ordinal);
+        Assert.Contains("if (requestedTargetId is null) return others[Random.Shared.Next(others.Length)];", service, StringComparison.Ordinal);
+        Assert.Contains("if (!others.Contains(requestedTargetId.Value))", service, StringComparison.Ordinal);
+        Assert.Contains("TemporaryWordLifetime.ExpireAtTurnEnd", service, StringComparison.Ordinal);
+        Assert.DoesNotContain("ExpireOnNextTurnStart", service, StringComparison.Ordinal);
+        Assert.Contains("regular.Concat(liveTemporary)", service, StringComparison.Ordinal);
+        Assert.Contains("TimeoutNoticeRevision", service, StringComparison.Ordinal);
+        Assert.Contains("TimeoutNoticePlayerName", service, StringComparison.Ordinal);
+        Assert.Contains("actorMeta.BlockedWords.Remove(actorWord);", service, StringComparison.Ordinal);
+        Assert.Contains("return false;", service, StringComparison.Ordinal);
     }
 
     private static string ReadWebFile(params string[] pathParts) =>
