@@ -176,7 +176,7 @@
 .player-achievements-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-    align-items: start;
+    align-items: stretch;
     gap: 12px;
 }
 
@@ -467,6 +467,7 @@
 
     .player-achievements-grid {
         grid-template-columns: 1fr;
+        align-items: start;
     }
 
     .player-achievement-card > p {

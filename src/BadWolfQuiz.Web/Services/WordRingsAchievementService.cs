@@ -18,10 +18,12 @@ public sealed class WordRingsAchievementService(QuizDbContext db)
     public Task<bool> UnlockSoloAiAsync(
         string? accountId,
         CancellationToken cancellationToken = default) =>
-        new PlayerAchievementService(db).UnlockAccountAsync(
-            accountId,
-            "WordRingsSoloAi",
-            cancellationToken: cancellationToken);
+        string.IsNullOrWhiteSpace(accountId)
+            ? Task.FromResult(false)
+            : new PlayerAchievementService(db).UnlockAccountAsync(
+                accountId,
+                "WordRingsSoloAi",
+                cancellationToken: cancellationToken);
 
     public async Task RecordPlacementAsync(
         string? accountId,
@@ -33,7 +35,9 @@ public sealed class WordRingsAchievementService(QuizDbContext db)
         string? membership,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(scopeKey) || string.IsNullOrWhiteSpace(eventKey))
+        if (!IsEligibleForAchievements(accountId, hostId) ||
+            string.IsNullOrWhiteSpace(scopeKey) ||
+            string.IsNullOrWhiteSpace(eventKey))
         {
             return;
         }
@@ -114,7 +118,8 @@ public sealed class WordRingsAchievementService(QuizDbContext db)
         string gameKey,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(gameKey))
+        if (!IsEligibleForAchievements(accountId, hostId) ||
+            string.IsNullOrWhiteSpace(gameKey))
         {
             return;
         }
@@ -249,6 +254,9 @@ public sealed class WordRingsAchievementService(QuizDbContext db)
                 cancellationToken: cancellationToken);
         }
     }
+
+    private static bool IsEligibleForAchievements(string? accountId, string? hostId) =>
+        !string.IsNullOrWhiteSpace(accountId) || !string.IsNullOrWhiteSpace(hostId);
 
     private static IEnumerable<PlayerAchievementIdentity> BuildIdentities(
         string? accountId,

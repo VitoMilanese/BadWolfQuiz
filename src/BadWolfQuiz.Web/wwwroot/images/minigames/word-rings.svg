@@ -7,7 +7,7 @@
     <filter id="glow"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
   <rect width="1600" height="900" fill="url(#bg)"/>
-  <g fill="none" stroke-width="28" filter="url(#glow)" opacity=".94">
+  <g fill="none" stroke-width="28" filter="url(#glow)" opacity=".94" transform="translate(0 -38)">
     <circle cx="610" cy="365" r="255" stroke="#5f86ee"/>
     <circle cx="990" cy="365" r="255" stroke="#e0b43c"/>
     <circle cx="800" cy="610" r="255" stroke="#e85d5d"/>
