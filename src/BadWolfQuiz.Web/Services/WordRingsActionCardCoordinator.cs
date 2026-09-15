@@ -35,13 +35,16 @@ public sealed record WordRingsActionCardSnapshot(
     IReadOnlyList<WordRingsActionCardItem> Cards,
     IReadOnlyList<WordRingsActionCardTarget> Players,
     IReadOnlyList<string> Words,
+    IReadOnlyList<string> TemporaryWords,
     IReadOnlyList<string> BlockedWords,
     string? HintWord,
     bool FailureImmunity,
     bool Shield,
     bool Masked,
     bool Anagrammed,
-    long Revision);
+    long Revision,
+    long TimeoutNoticeRevision,
+    string? TimeoutNoticePlayerName);
 
 public sealed record WordRingsActionCardUseResult(
     WordRingsActionCardSnapshot State,
@@ -59,7 +62,7 @@ public sealed class WordRingsActionCardCoordinator
         Enum.GetValues<WordRingsActionCardKind>();
 
     private static readonly HashSet<WordRingsActionCardKind> OutOfTurnCards =
-        [WordRingsActionCardKind.Shuffle, WordRingsActionCardKind.Shield, WordRingsActionCardKind.Cleanse];
+        [WordRingsActionCardKind.Shuffle, WordRingsActionCardKind.Cleanse];
 
     private static readonly HashSet<WordRingsActionCardKind> ShieldedCards =
         [WordRingsActionCardKind.Block, WordRingsActionCardKind.Timeout, WordRingsActionCardKind.Mask, WordRingsActionCardKind.Anagram];
@@ -125,6 +128,8 @@ public sealed class WordRingsActionCardCoordinator
             meta.Players.Clear();
             SynchronizePlayers(meta, state);
             meta.LastCurrentPlayerId = state.CurrentPlayerId;
+            meta.TimeoutNoticePlayerName = null;
+            meta.TimeoutNoticeRevision = 0;
             meta.Revision++;
         }
     }
@@ -305,20 +310,38 @@ public sealed class WordRingsActionCardCoordinator
         Guid? targetPlayerId,
         string? word)
     {
-        if (!Enum.IsDefined(typeof(WordRingsActionCardKind), cardId))
+        var discard = cardId < 0;
+        if (cardId == int.MinValue) throw new InvalidOperationException("InvalidActionCard");
+        var actualCardId = discard ? -cardId : cardId;
+        if (!Enum.IsDefined(typeof(WordRingsActionCardKind), actualCardId))
         {
             throw new InvalidOperationException("InvalidActionCard");
         }
 
-        var kind = (WordRingsActionCardKind)cardId;
-        if (kind == WordRingsActionCardKind.Immunity)
+        var kind = (WordRingsActionCardKind)actualCardId;
+        var state = SynchronizeTurnState(roomCode, playerToken);
+        var code = state.RoomCode;
+        var actorId = state.PlayerId;
+
+        if (discard)
+        {
+            lock (_metaSync)
+            {
+                var meta = RequireMeta(code);
+                SynchronizePlayers(meta, state);
+                var actor = RequirePlayer(meta, actorId);
+                if (!actor.Cards.Remove(kind)) throw new InvalidOperationException("ActionCardNotOwned");
+                meta.Revision++;
+                var actorName = state.Players.FirstOrDefault(player => player.Id == actorId)?.Name ?? string.Empty;
+                return new WordRingsActionCardUseResult(BuildSnapshot(meta, state), actorName, false);
+            }
+        }
+
+        if (kind == WordRingsActionCardKind.Shield)
         {
             throw new InvalidOperationException("ActionCardPassive");
         }
 
-        var state = SynchronizeTurnState(roomCode, playerToken);
-        var code = state.RoomCode;
-        var actorId = state.PlayerId;
         Guid targetId;
         string targetName;
         bool blockedByShield = false;
@@ -353,9 +376,8 @@ public sealed class WordRingsActionCardCoordinator
 
             actor.Cards.Remove(kind);
 
-            if (actorId != targetId && ShieldedCards.Contains(kind) && target.Shield)
+            if (actorId != targetId && ShieldedCards.Contains(kind) && target.Cards.Contains(WordRingsActionCardKind.Shield))
             {
-                target.Shield = false;
                 blockedByShield = true;
                 meta.Revision++;
                 return new WordRingsActionCardUseResult(
@@ -378,6 +400,12 @@ public sealed class WordRingsActionCardCoordinator
                 break;
             case WordRingsActionCardKind.Temporary:
                 GrantTemporaryWord(code, state, targetId);
+                break;
+            case WordRingsActionCardKind.Immunity:
+                lock (_metaSync)
+                {
+                    RequirePlayer(RequireMeta(code), targetId).ActivatedFailureImmunity = true;
+                }
                 break;
             case WordRingsActionCardKind.Hint:
                 ApplyHint(code, targetId);
@@ -403,12 +431,6 @@ public sealed class WordRingsActionCardCoordinator
                 lock (_metaSync)
                 {
                     RequirePlayer(RequireMeta(code), targetId).SkipTurns++;
-                }
-                break;
-            case WordRingsActionCardKind.Shield:
-                lock (_metaSync)
-                {
-                    RequirePlayer(RequireMeta(code), targetId).Shield = true;
                 }
                 break;
             case WordRingsActionCardKind.Mask:
@@ -461,6 +483,8 @@ public sealed class WordRingsActionCardCoordinator
                     meta.Players.TryGetValue(currentId, out var current) && current.SkipTurns > 0)
                 {
                     current.SkipTurns--;
+                    meta.TimeoutNoticePlayerName = state.Players.FirstOrDefault(player => player.Id == currentId)?.Name;
+                    meta.TimeoutNoticeRevision++;
                     meta.Revision++;
                     skipCurrent = true;
                 }
@@ -537,7 +561,6 @@ public sealed class WordRingsActionCardCoordinator
                 newPlayer.BlockAwaitingTurn = false;
                 newPlayer.BlockExpiresAtTurnEnd = true;
             }
-            ExpireTemporaryWords(state.RoomCode, newId, newPlayer, TemporaryWordLifetime.ExpireOnNextTurnStart);
             foreach (var lease in newPlayer.TemporaryWords.Where(item => item.Lifetime == TemporaryWordLifetime.AwaitNextTurnThenExpireAtEnd))
             {
                 lease.Lifetime = TemporaryWordLifetime.ExpireAtTurnEnd;
@@ -558,6 +581,8 @@ public sealed class WordRingsActionCardCoordinator
             .Where(player => IsParticipant(state, player.Id))
             .Select(player => new WordRingsActionCardTarget(player.Id, player.Name, player.Id == state.PlayerId))
             .ToArray();
+        var temporaryWords = GetLiveTemporaryWords(state.RoomCode, state.PlayerId, own);
+        var visibleWords = BuildVisibleWords(state.RoomCode, state.PlayerId, temporaryWords);
 
         return new WordRingsActionCardSnapshot(
             meta.Enabled,
@@ -568,14 +593,51 @@ public sealed class WordRingsActionCardCoordinator
             state.Phase == "playing" && state.CurrentPlayerId == state.PlayerId,
             cards,
             targets,
-            state.BankWords.ToArray(),
+            visibleWords,
+            temporaryWords,
             own.BlockedWords.ToArray(),
             own.HintWord,
-            own.TurnFailureImmunity || own.PendingTurnFailureImmunity || own.Cards.Contains(WordRingsActionCardKind.Immunity),
-            own.Shield,
+            own.TurnFailureImmunity || own.PendingTurnFailureImmunity || own.ActivatedFailureImmunity,
+            own.Cards.Contains(WordRingsActionCardKind.Shield),
             own.Masked,
             own.Anagrammed,
-            meta.Revision);
+            meta.Revision,
+            meta.TimeoutNoticeRevision,
+            meta.TimeoutNoticePlayerName);
+    }
+
+    private string[] GetLiveTemporaryWords(string roomCode, Guid playerId, PlayerActionState player)
+    {
+        HashSet<string> liveWords;
+        lock (SyncField.GetValue(_store)!)
+        {
+            var room = GetRoomObject(roomCode);
+            var target = FindPlayer(Players(room), playerId);
+            liveWords = target is null
+                ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                : RemainingWords(target).Cast<string>().ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+
+        player.TemporaryWords.RemoveAll(item => !liveWords.Contains(item.Word));
+        return player.TemporaryWords.Select(item => item.Word).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+    }
+
+    private string[] BuildVisibleWords(string roomCode, Guid playerId, IReadOnlyCollection<string> temporaryWords)
+    {
+        lock (SyncField.GetValue(_store)!)
+        {
+            var room = GetRoomObject(roomCode);
+            var target = FindPlayer(Players(room), playerId);
+            if (target is null) return [];
+            var temporary = temporaryWords.ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var remaining = RemainingWords(target).Cast<string>().ToArray();
+            var regular = remaining
+                .Where(word => !temporary.Contains(word))
+                .Take(WordRingsRoomStore.MaximumBankWords)
+                .ToArray();
+            var liveTemporary = remaining.Where(temporary.Contains).ToArray();
+            return regular.Concat(liveTemporary).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        }
     }
 
     private static bool IsActive(RoomActionMeta meta, WordRingsRoomSnapshot state) =>
@@ -604,7 +666,9 @@ public sealed class WordRingsActionCardCoordinator
         if (kind is WordRingsActionCardKind.Swap or WordRingsActionCardKind.Block)
         {
             if (others.Length == 0) throw new InvalidOperationException("ActionCardTargetUnavailable");
-            return others[Random.Shared.Next(others.Length)];
+            if (requestedTargetId is null) return others[Random.Shared.Next(others.Length)];
+            if (!others.Contains(requestedTargetId.Value)) throw new InvalidOperationException("ActionCardTargetUnavailable");
+            return requestedTargetId.Value;
         }
         if (kind == WordRingsActionCardKind.Rest) return actorId;
         if (kind == WordRingsActionCardKind.Timeout)
@@ -652,6 +716,8 @@ public sealed class WordRingsActionCardCoordinator
             var targetMeta = RequirePlayer(meta, targetId);
             UpdateTemporaryWord(actorMeta, actorWord, targetWord);
             UpdateTemporaryWord(targetMeta, targetWord, actorWord);
+            actorMeta.BlockedWords.Remove(actorWord);
+            targetMeta.BlockedWords.Remove(targetWord);
             if (string.Equals(actorMeta.HintWord, actorWord, StringComparison.OrdinalIgnoreCase)) actorMeta.HintWord = null;
             if (string.Equals(targetMeta.HintWord, targetWord, StringComparison.OrdinalIgnoreCase)) targetMeta.HintWord = null;
         }
@@ -681,6 +747,7 @@ public sealed class WordRingsActionCardCoordinator
         {
             var targetMeta = RequirePlayer(RequireMeta(code), targetId);
             UpdateTemporaryWord(targetMeta, discarded, replacement);
+            targetMeta.BlockedWords.Remove(discarded);
             if (string.Equals(targetMeta.HintWord, discarded, StringComparison.OrdinalIgnoreCase)) targetMeta.HintWord = null;
         }
     }
@@ -729,7 +796,7 @@ public sealed class WordRingsActionCardCoordinator
             target.TemporaryWords.Add(new TemporaryWordLease(
                 temporaryWord,
                 state.CurrentPlayerId == targetId
-                    ? TemporaryWordLifetime.ExpireOnNextTurnStart
+                    ? TemporaryWordLifetime.ExpireAtTurnEnd
                     : TemporaryWordLifetime.AwaitNextTurnThenExpireAtEnd));
         }
     }
@@ -799,7 +866,12 @@ public sealed class WordRingsActionCardCoordinator
             player.TurnFailureImmunity = false;
             return true;
         }
-        return player.Cards.Remove(WordRingsActionCardKind.Immunity);
+        if (player.ActivatedFailureImmunity)
+        {
+            player.ActivatedFailureImmunity = false;
+            return true;
+        }
+        return false;
     }
 
     private static void TryAwardNormalCard(RoomActionMeta meta, PlayerActionState player)
@@ -998,6 +1070,8 @@ public sealed class WordRingsActionCardCoordinator
         public Dictionary<Guid, PlayerActionState> Players { get; } = [];
         public Guid? LastCurrentPlayerId { get; set; }
         public long Revision { get; set; }
+        public long TimeoutNoticeRevision { get; set; }
+        public string? TimeoutNoticePlayerName { get; set; }
     }
 
     private sealed class PlayerActionState
@@ -1006,7 +1080,7 @@ public sealed class WordRingsActionCardCoordinator
         public int CorrectProgress { get; set; }
         public bool TurnFailureImmunity { get; set; }
         public bool PendingTurnFailureImmunity { get; set; }
-        public bool Shield { get; set; }
+        public bool ActivatedFailureImmunity { get; set; }
         public HashSet<string> BlockedWords { get; } = new(StringComparer.OrdinalIgnoreCase);
         public bool BlockAwaitingTurn { get; set; }
         public bool BlockExpiresAtTurnEnd { get; set; }
@@ -1025,7 +1099,6 @@ public sealed class WordRingsActionCardCoordinator
 
     private enum TemporaryWordLifetime
     {
-        ExpireOnNextTurnStart,
         AwaitNextTurnThenExpireAtEnd,
         ExpireAtTurnEnd
     }
