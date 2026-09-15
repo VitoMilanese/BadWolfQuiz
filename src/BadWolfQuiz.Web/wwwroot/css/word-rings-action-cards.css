@@ -129,8 +129,8 @@
     z-index: 1;
 }
 
-.word-rings-action-card:hover:not(:disabled),
-.word-rings-action-card:focus-visible:not(:disabled) {
+.word-rings-action-card:hover,
+.word-rings-action-card:focus-visible {
     transform: scale(1.16) translateY(-8px);
     box-shadow: 0 18px 40px rgba(0, 0, 0, .32);
     z-index: 20;
@@ -139,6 +139,11 @@
 .word-rings-action-card:disabled {
     cursor: not-allowed;
     opacity: .48;
+}
+
+.word-rings-action-card.is-passive:disabled {
+    cursor: default;
+    opacity: .9;
 }
 
 .word-rings-action-card-icon {
@@ -285,6 +290,10 @@
 .word-rings-word.is-action-hint {
     box-shadow: 0 0 0 3px color-mix(in srgb, #ffd166 70%, transparent), 0 0 24px rgba(255, 209, 102, .5) !important;
     animation: word-rings-action-hint-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.word-rings-word.is-action-temporary-word {
+    box-shadow: 0 0 0 2px color-mix(in srgb, #ffd166 66%, transparent);
 }
 
 @keyframes word-rings-action-hint-pulse {
