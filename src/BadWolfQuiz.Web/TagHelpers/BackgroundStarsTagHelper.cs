@@ -16,7 +16,7 @@ public sealed class BackgroundStarsAssetsTagHelper : TagHelper
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
         output.PostContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/background-stars.css?v=4\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/background-stars.css?v=4.2\" />" +
             "<script defer src=\"/js/background-stars.js?v=4\"></script>");
     }
 }

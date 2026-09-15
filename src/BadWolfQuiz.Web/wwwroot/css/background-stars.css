@@ -105,12 +105,35 @@ body:has(.minigame-editor-heading) > .page-shell.site-starfield-host > .site-sta
     [data-final-status="finalwagering"],
     [data-final-status="finalanswering"],
     [data-final-status="finaljudging"],
-    [data-final-status="completed"]) > .site-starfield {
+    [data-final-status="completed"]) > .site-starfield,
+.current-question-summary.site-starfield-host > .site-starfield,
+.final-question-panel.site-starfield-host > .site-starfield,
+.final-question-transition.site-starfield-host > .site-starfield {
     z-index: 0 !important;
 }
 
 .answer-key-page.site-starfield-host > :not(.site-starfield) {
     position: relative;
+    z-index: 1;
+}
+
+/*
+ * Live host question/answer surfaces are grid containers with an almost opaque
+ * panel background. Their particle layer must sit above that panel paint, while
+ * the actual question controls and content remain above the particles.
+ */
+.current-question-summary.site-starfield-host > :not(.site-starfield) {
+    z-index: 1;
+}
+
+/* Final host stages already isolate their own background. Keep the stars above
+ * that paint and the meaningful stage content one layer higher. */
+.final-question-panel.site-starfield-host > :not(.site-starfield) {
+    z-index: 1;
+}
+
+.final-question-transition.site-starfield-host > .final-question-transition-content,
+.final-question-transition.site-starfield-host > .final-question-transition-actions {
     z-index: 1;
 }
 
