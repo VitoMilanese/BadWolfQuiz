@@ -10,6 +10,7 @@
     const createForm = root.querySelector('[data-create-room-form]');
     const createName = root.querySelector('[data-create-room-name]');
     const createTarget = root.querySelector('[data-create-room-target]');
+    const createTurnTimer = root.querySelector('[data-create-room-turn-timer]');
     const createPartial = root.querySelector('[data-create-room-partial]');
     const createError = root.querySelector('[data-create-room-error]');
     const joinForm = root.querySelector('[data-room-join-shortcut-form]');
@@ -137,6 +138,7 @@
             const payload = await post('CreateRoom', {
                 playerName: name,
                 targetScore,
+                turnDurationSeconds: Number.parseInt(createTurnTimer?.value || '0', 10) || 0,
                 partialScoreEnabled: createPartial?.checked === true,
                 previousRoomCode: previousHostRoom?.code || '',
                 previousPlayerToken: previousHostRoom?.token || ''

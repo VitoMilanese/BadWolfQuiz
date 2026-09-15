@@ -5,6 +5,7 @@
     const form = root.querySelector('[data-create-room-form]');
     const nameInput = root.querySelector('[data-create-room-name]');
     const targetInput = root.querySelector('[data-create-room-target]');
+    const turnTimerInput = root.querySelector('[data-create-room-turn-timer]');
     const partialInput = root.querySelector('[data-create-room-partial]');
     const errorElement = root.querySelector('[data-create-room-error]');
     const antiForgery = root.querySelector('[data-word-rings-antiforgery] input[name="__RequestVerificationToken"]');
@@ -102,6 +103,7 @@
             const payload = await post({
                 playerName: name,
                 targetScore,
+                turnDurationSeconds: Number.parseInt(turnTimerInput?.value || '0', 10) || 0,
                 partialScoreEnabled: partialInput?.checked === true,
                 hostChoosesRules: true,
                 previousRoomCode: previousHostRoom?.code || '',

@@ -5,8 +5,12 @@
     const stage = root.querySelector('[data-ring-stage]');
     const placedLayer = root.querySelector('[data-placed-layer]');
     const wordList = root.querySelector('[data-word-list]');
+    const wordBank = root.querySelector('[data-word-bank]');
+    const wordBankHeading = root.querySelector('[data-word-bank-heading]');
     const outsideZone = root.querySelector('[data-outside-zone]');
     const progress = root.querySelector('[data-progress]');
+    const turnTimer = root.querySelector('[data-room-turn-timer]');
+    const stageMessage = root.querySelector('[data-room-stage-message]');
     const status = root.querySelector('[data-status]');
     const roomFeedback = root.querySelector('[data-room-feedback]');
     const rules = root.querySelector('[data-rules]');
@@ -53,6 +57,7 @@
     let roomFeedbackTimer = null;
     let roomEventCursor = null;
     let roomAudioContext = null;
+    const defaultWordBankHeading = wordBankHeading?.textContent || '';
 
     const format = (template, ...values) => values.reduce(
         (result, value, index) => result.replace(`{${index}}`, String(value)),
@@ -728,6 +733,46 @@
         roomEventCursor = Math.max(roomEventCursor, latest);
     };
 
+    const renderTurnTimer = () => {
+        if (!(turnTimer instanceof HTMLElement)) return;
+        const deadline = state?.turnDeadlineUtc ? Date.parse(state.turnDeadlineUtc) : Number.NaN;
+        if (state?.phase !== 'playing' || !Number.isFinite(deadline)) {
+            turnTimer.hidden = true;
+            turnTimer.textContent = '';
+            return;
+        }
+        const seconds = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+        const minutes = Math.floor(seconds / 60);
+        turnTimer.textContent = `⏱ ${minutes}:${String(seconds % 60).padStart(2, '0')}`;
+        turnTimer.hidden = false;
+    };
+
+    const renderRoomContext = nextState => {
+        const dedicatedHost = nextState?.dedicatedHostMode === true && nextState?.isHost === true;
+        const seedSetup = dedicatedHost && nextState?.seedSetupPending === true;
+        const judging = dedicatedHost && nextState?.phase === 'playing' &&
+            (nextState?.placements || []).some(item => item.isPending === true);
+        if (wordBankHeading) {
+            wordBankHeading.textContent = seedSetup
+                ? root.dataset.roomHostSeedTitle || defaultWordBankHeading
+                : judging
+                    ? root.dataset.roomHostJudgementTitle || defaultWordBankHeading
+                    : defaultWordBankHeading;
+        }
+        if (wordList instanceof HTMLElement) wordList.hidden = dedicatedHost && judging && !seedSetup;
+        if (wordBank instanceof HTMLElement) {
+            const hasWords = (nextState?.bankWords?.length || 0) + (nextState?.queuedWords?.length || 0) > 0;
+            wordBank.hidden = dedicatedHost && !seedSetup && !judging && !hasWords;
+        }
+        if (stageMessage instanceof HTMLElement) {
+            const waitingForHostSeeds = nextState?.dedicatedHostMode === true &&
+                nextState?.isHost !== true && nextState?.seedSetupPending === true && nextState?.phase === 'playing';
+            stageMessage.textContent = waitingForHostSeeds ? root.dataset.roomWaitingHostSeeds || '' : '';
+            stageMessage.hidden = !waitingForHostSeeds;
+        }
+        renderTurnTimer();
+    };
+
     const updateControls = () => {
         const playing = state?.phase === 'playing';
         const ownTurn = isOwnTurn();
@@ -737,7 +782,7 @@
         root.classList.toggle('is-awaiting-host-judgement', awaitingHost);
         root.classList.toggle('is-game-over', state?.phase === 'finished');
         root.classList.toggle('is-room-waiting', state?.phase === 'waiting');
-        root.classList.toggle('is-not-own-turn', playing && !ownTurn);
+        root.classList.toggle('is-not-own-turn', playing && !ownTurn && !isHostSeedSetup());
 
         const canUseBank = isHostSeedSetup() || ownTurn;
         wordList.querySelectorAll('.word-rings-word').forEach(token => {
@@ -747,6 +792,12 @@
 
     const renderState = (nextState, { preservePending = false } = {}) => {
         if (!nextState) return;
+        const previousDeadline = state?.turnDeadlineUtc || null;
+        const pendingStillAvailable = pending && [...(nextState.bankWords || []), ...(nextState.queuedWords || [])]
+            .some(word => String(word).toLocaleLowerCase() === String(pending.word).toLocaleLowerCase());
+        const keepPending = preservePending && pendingStillAvailable &&
+            nextState.phase === 'playing' && nextState.currentPlayerId === nextState.playerId &&
+            (previousDeadline === null || (nextState.turnDeadlineUtc || null) === previousDeadline);
         state = nextState;
         processRoomEvents(nextState);
         if (nextState.phase === 'playing') resultShown = false;
@@ -760,6 +811,7 @@
         renderPlayers(nextState.players);
         renderRules(nextState);
         renderPlacements(nextState.placements);
+        renderRoomContext(nextState);
         if (nextState.isHost !== true) {
             if (startButton instanceof HTMLButtonElement) startButton.hidden = true;
             if (lockButton instanceof HTMLButtonElement) lockButton.hidden = true;
@@ -774,7 +826,7 @@
             }
         }
 
-        if (!preservePending) {
+        if (!keepPending) {
             pending = null;
             removePendingToken();
             renderBank(nextState);
@@ -1040,6 +1092,7 @@
             root.querySelector('.word-rings-word.is-dragging')) return;
         requestState({ preservePending: pending !== null });
     }, 900);
+    window.setInterval(renderTurnTimer, 250);
 
     initialize();
 })();

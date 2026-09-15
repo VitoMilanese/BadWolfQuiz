@@ -68,9 +68,16 @@ public sealed class WordRingsRoomHostCoordinator
         string? previousRoomCode = null,
         string? previousPlayerToken = null,
         byte[]? brandLogoData = null,
-        string? brandLogoContentType = null)
+        string? brandLogoContentType = null,
+        int turnDurationSeconds = 0)
     {
-        var connection = _store.CreateRoom(playerName, targetScore, partialScoreEnabled, previousRoomCode, previousPlayerToken);
+        var connection = _store.CreateRoom(
+            playerName,
+            targetScore,
+            partialScoreEnabled,
+            previousRoomCode,
+            previousPlayerToken,
+            turnDurationSeconds);
         lock (_metaSync)
         {
             _rooms.Remove(Normalize(previousRoomCode));
@@ -430,6 +437,7 @@ public sealed class WordRingsRoomHostCoordinator
             foreach (var player in players)
             {
                 Set(player!, "Score", 0d);
+                Set(player!, "IsPlayingParticipant", !IsHost(player!));
                 var words = RemainingWords(player!);
                 words.Clear();
                 if (IsHost(player!))
@@ -447,6 +455,8 @@ public sealed class WordRingsRoomHostCoordinator
             }
             Set(room, "CurrentPlayerIndex", seedWords.Count > 0 ? -1 : FirstPlayableIndex(players, dedicatedHost: true));
             Set(room, "OutsidePointAwardedThisTurn", false);
+            Set(room, "TurnDeadlineUtc", null);
+            Set(room, "PausedTurnSeconds", null);
             IncrementVersion(room);
         });
         return seedWords.Count;

@@ -17,6 +17,7 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
         bool hostChoosesRules,
         string? previousRoomCode,
         string? previousPlayerToken,
+        int turnDurationSeconds,
         CancellationToken cancellationToken)
     {
         byte[]? brandLogoData = null;
@@ -45,7 +46,8 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
                 previousRoomCode,
                 previousPlayerToken,
                 brandLogoData,
-                brandLogoContentType)
+                brandLogoContentType,
+                turnDurationSeconds)
         });
     }
 

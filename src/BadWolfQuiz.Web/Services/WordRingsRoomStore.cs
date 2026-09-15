@@ -10,6 +10,7 @@ public enum WordRingsRoomError
     InvalidPlayer,
     InvalidPlayerName,
     InvalidTargetScore,
+    InvalidTurnDuration,
     RoomAlreadyStarted,
     NeedMorePlayers,
     NotHost,
@@ -92,6 +93,8 @@ public sealed record WordRingsRoomSnapshot(
 {
     public IReadOnlyList<WordRingsRoomEventSnapshot> Events { get; init; } = [];
     public bool SeedSetupPending { get; init; }
+    public int TurnDurationSeconds { get; init; }
+    public DateTimeOffset? TurnDeadlineUtc { get; init; }
 
     [System.Text.Json.Serialization.JsonIgnore]
     public double TeamScore => PlayerScore;
@@ -129,6 +132,7 @@ public sealed class WordRingsRoomStore
     private const int MaximumPlayerNameLength = 30;
     private const int MaximumSharedPlacements = 20;
     private const int MaximumRoomEvents = 64;
+    private static readonly string[] TimeoutMemberships = [string.Empty, "A", "B", "C", "AB", "AC", "BC", "ABC"];
 
     private static readonly ConcurrentDictionary<string, Lazy<WordRingsRoomStore>> Instances =
         new(StringComparer.OrdinalIgnoreCase);
@@ -159,7 +163,8 @@ public sealed class WordRingsRoomStore
         int targetScore,
         bool partialScoreEnabled,
         string? previousRoomCode = null,
-        string? previousPlayerToken = null)
+        string? previousPlayerToken = null,
+        int turnDurationSeconds = 0)
     {
         var normalizedName = NormalizePlayerName(playerName);
         if (normalizedName is null)
@@ -169,6 +174,10 @@ public sealed class WordRingsRoomStore
         if (targetScore is < MinimumTargetScore or > MaximumTargetScore)
         {
             throw new WordRingsRoomException(WordRingsRoomError.InvalidTargetScore);
+        }
+        if (turnDurationSeconds is not (0 or 60 or 90 or 120))
+        {
+            throw new WordRingsRoomException(WordRingsRoomError.InvalidTurnDuration);
         }
 
         lock (_sync)
@@ -188,6 +197,7 @@ public sealed class WordRingsRoomStore
                 code,
                 targetScore,
                 partialScoreEnabled,
+                turnDurationSeconds,
                 puzzle,
                 host,
                 now);
@@ -231,7 +241,9 @@ public sealed class WordRingsRoomStore
             var player = GetPlayer(room, playerToken);
             player.LastSeenUtc = now;
             player.DepartureRequestedUtc = null;
-            if (RemoveDisconnectedPlayers(room, now, player.Id))
+            var stateChanged = RemoveDisconnectedPlayers(room, now, player.Id);
+            stateChanged |= ProcessTurnTimeout(room, now);
+            if (stateChanged)
             {
                 Touch(room, now);
             }
@@ -274,6 +286,8 @@ public sealed class WordRingsRoomStore
             room.CurrentPlayerIndex = 0;
             room.OutsidePointAwardedThisTurn = false;
             room.Outcome = RoomOutcome.None;
+            room.TurnDeadlineUtc = null;
+            room.PausedTurnSeconds = null;
             room.Placements.Clear();
             room.NextPlacementId = 1;
 
@@ -314,6 +328,7 @@ public sealed class WordRingsRoomStore
                 room.Phase = RoomPhase.Finished;
                 room.Outcome = RoomOutcome.Lost;
             }
+            EnsureTurnDeadline(room, now);
 
             Touch(room, now);
             return CreateSnapshot(room, player);
@@ -333,6 +348,7 @@ public sealed class WordRingsRoomStore
             var now = _timeProvider.GetUtcNow();
             var room = GetActiveRoom(roomCode, now);
             var player = GetPlayer(room, playerToken);
+            if (ProcessTurnTimeout(room, now)) Touch(room, now);
             if (room.Phase != RoomPhase.Playing)
             {
                 throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
@@ -432,6 +448,7 @@ public sealed class WordRingsRoomStore
                 AdvanceTurn(room);
                 turnContinues = false;
             }
+            EnsureTurnDeadline(room, now);
 
             Touch(room, now);
             return new WordRingsRoomPlacementResult(
@@ -460,6 +477,7 @@ public sealed class WordRingsRoomStore
             var now = _timeProvider.GetUtcNow();
             var room = GetActiveRoom(roomCode, now);
             var player = GetPlayer(room, playerToken);
+            if (ProcessTurnTimeout(room, now)) Touch(room, now);
             if (room.Phase != RoomPhase.Playing)
             {
                 throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
@@ -503,6 +521,7 @@ public sealed class WordRingsRoomStore
                 actualMembership));
             TrimPlacements(room);
             AddRoomEvent(room, WordRingsRoomEventType.CheckSubmitted, player.Id, player.Name);
+            PauseTurnDeadline(room, now);
 
             Touch(room, now);
             return new WordRingsRoomPlacementResult(
@@ -677,6 +696,8 @@ public sealed class WordRingsRoomStore
                 AdvanceTurn(room);
                 turnContinues = false;
             }
+            if (turnContinues) ResumeTurnDeadline(room, now);
+            else EnsureTurnDeadline(room, now);
 
             Touch(room, now);
             return new WordRingsRoomPlacementResult(
@@ -826,11 +847,14 @@ public sealed class WordRingsRoomStore
 
             room.CurrentPlayerIndex = room.Players.FindIndex(item => !item.IsHost && item.RemainingWords.Count > 0);
             room.OutsidePointAwardedThisTurn = false;
+            room.TurnDeadlineUtc = null;
+            room.PausedTurnSeconds = null;
             if (room.CurrentPlayerIndex < 0)
             {
                 room.Phase = RoomPhase.Finished;
                 room.Outcome = RoomOutcome.Lost;
             }
+            EnsureTurnDeadline(room, now);
             Touch(room, now);
             return CreateSnapshot(room, host);
         }
@@ -869,6 +893,7 @@ public sealed class WordRingsRoomStore
 
             RemovePlayerAt(room, index);
             AddRoomEvent(room, WordRingsRoomEventType.PlayerLeft, player.Id, player.Name);
+            EnsureTurnDeadline(room, now);
             Touch(room, now);
         }
     }
@@ -906,6 +931,9 @@ public sealed class WordRingsRoomStore
 
             room.CurrentPlayerIndex = targetIndex;
             room.OutsidePointAwardedThisTurn = false;
+            room.TurnDeadlineUtc = null;
+            room.PausedTurnSeconds = null;
+            EnsureTurnDeadline(room, now);
             AddRoomEvent(room, WordRingsRoomEventType.TurnTransferred, target.Id, target.Name);
             Touch(room, now);
             return CreateSnapshot(room, host);
@@ -940,6 +968,7 @@ public sealed class WordRingsRoomStore
 
             RemovePlayerAt(room, index);
             AddRoomEvent(room, WordRingsRoomEventType.PlayerKicked, removed.Id, removed.Name);
+            EnsureTurnDeadline(room, now);
             Touch(room, now);
             return CreateSnapshot(room, host);
         }
@@ -1130,6 +1159,8 @@ public sealed class WordRingsRoomStore
         var removedCurrent = current == index;
         room.Players.RemoveAt(index);
 
+        room.TurnDeadlineUtc = null;
+        room.PausedTurnSeconds = null;
         if (room.Players.Count == 0)
         {
             room.CurrentPlayerIndex = -1;
@@ -1156,6 +1187,8 @@ public sealed class WordRingsRoomStore
     private static void AdvanceTurn(RoomState room)
     {
         room.OutsidePointAwardedThisTurn = false;
+        room.TurnDeadlineUtc = null;
+        room.PausedTurnSeconds = null;
         if (room.Players.Count == 0)
         {
             room.CurrentPlayerIndex = -1;
@@ -1260,8 +1293,114 @@ public sealed class WordRingsRoomStore
                     item.Type,
                     item.PlayerId,
                     item.PlayerName))
-                .ToArray()
+                .ToArray(),
+            TurnDurationSeconds = room.TurnDurationSeconds,
+            TurnDeadlineUtc = room.TurnDeadlineUtc
         };
+    }
+
+    private static bool TurnTimerEligible(RoomState room)
+    {
+        if (room.Phase != RoomPhase.Playing || room.TurnDurationSeconds <= 0 ||
+            room.CurrentPlayerIndex < 0 || room.CurrentPlayerIndex >= room.Players.Count ||
+            room.Placements.Any(item => item.IsPending))
+        {
+            return false;
+        }
+        var current = room.Players[room.CurrentPlayerIndex];
+        return current.IsPlayingParticipant &&
+               current.RemainingWords.Count > 0 &&
+               room.Players.Count(item => item.IsPlayingParticipant) >= 2;
+    }
+
+    private static void EnsureTurnDeadline(RoomState room, DateTimeOffset now)
+    {
+        if (!TurnTimerEligible(room))
+        {
+            room.TurnDeadlineUtc = null;
+            if (room.Phase != RoomPhase.Playing) room.PausedTurnSeconds = null;
+            return;
+        }
+        room.TurnDeadlineUtc ??= now.AddSeconds(room.TurnDurationSeconds);
+    }
+
+    private static void PauseTurnDeadline(RoomState room, DateTimeOffset now)
+    {
+        room.PausedTurnSeconds = room.TurnDeadlineUtc is DateTimeOffset deadline
+            ? Math.Max(0, (deadline - now).TotalSeconds)
+            : null;
+        room.TurnDeadlineUtc = null;
+    }
+
+    private static void ResumeTurnDeadline(RoomState room, DateTimeOffset now)
+    {
+        var remaining = room.PausedTurnSeconds;
+        room.PausedTurnSeconds = null;
+        if (!TurnTimerEligible(room))
+        {
+            room.TurnDeadlineUtc = null;
+            return;
+        }
+        room.TurnDeadlineUtc = remaining is > 0
+            ? now.AddSeconds(remaining.Value)
+            : now.AddSeconds(room.TurnDurationSeconds);
+    }
+
+    private static bool ProcessTurnTimeout(RoomState room, DateTimeOffset now)
+    {
+        EnsureTurnDeadline(room, now);
+        if (room.TurnDeadlineUtc is not DateTimeOffset deadline || now < deadline || !TurnTimerEligible(room))
+        {
+            return false;
+        }
+
+        var player = room.Players[room.CurrentPlayerIndex];
+        var visibleCount = Math.Min(
+            player.RemainingWords.Count,
+            Math.Clamp(room.TargetScore, MinimumTargetScore, MaximumBankWords));
+        if (visibleCount <= 0)
+        {
+            AdvanceTurn(room);
+            EnsureTurnDeadline(room, now);
+            return true;
+        }
+
+        var word = player.RemainingWords[Random.Shared.Next(visibleCount)];
+        player.RemainingWords.Remove(word);
+        var membership = TimeoutMemberships[Random.Shared.Next(TimeoutMemberships.Length)];
+        var (anchorX, anchorY) = GetCorrectedPlacementAnchor(membership);
+        var x = Math.Clamp(anchorX + ((Random.Shared.NextDouble() - 0.5) * 2.0), 3, 97);
+        var y = Math.Clamp(anchorY + ((Random.Shared.NextDouble() - 0.5) * 2.0), 3, 97);
+        room.Placements.Add(new PlacementState(
+            room.NextPlacementId++,
+            word,
+            membership,
+            x,
+            y,
+            false,
+            false,
+            0,
+            player.Id,
+            player.Name,
+            false,
+            membership));
+        TrimPlacements(room);
+
+        if (room.Players.Where(item => item.IsPlayingParticipant).All(item => item.RemainingWords.Count == 0))
+        {
+            room.Phase = RoomPhase.Finished;
+            room.Outcome = RoomOutcome.Lost;
+            room.WinnerPlayerId = null;
+            room.CurrentPlayerIndex = -1;
+            room.TurnDeadlineUtc = null;
+            room.PausedTurnSeconds = null;
+        }
+        else
+        {
+            AdvanceTurn(room);
+            EnsureTurnDeadline(room, now);
+        }
+        return true;
     }
 
     private static IReadOnlyList<string> BuildPlayerWords(
@@ -1450,6 +1589,7 @@ public sealed class WordRingsRoomStore
             string code,
             int targetScore,
             bool partialScoreEnabled,
+            int turnDurationSeconds,
             WordRingsPuzzle puzzle,
             PlayerState host,
             DateTimeOffset now)
@@ -1457,6 +1597,7 @@ public sealed class WordRingsRoomStore
             Code = code;
             TargetScore = targetScore;
             PartialScoreEnabled = partialScoreEnabled;
+            TurnDurationSeconds = turnDurationSeconds;
             Puzzle = puzzle;
             Players.Add(host);
             LastActivityUtc = now;
@@ -1465,6 +1606,9 @@ public sealed class WordRingsRoomStore
         public string Code { get; }
         public int TargetScore { get; }
         public bool PartialScoreEnabled { get; }
+        public int TurnDurationSeconds { get; }
+        public DateTimeOffset? TurnDeadlineUtc { get; set; }
+        public double? PausedTurnSeconds { get; set; }
         public WordRingsPuzzle Puzzle { get; set; }
         public List<PlayerState> Players { get; } = [];
         public List<PlacementState> Placements { get; } = [];
@@ -1491,6 +1635,7 @@ public sealed class WordRingsRoomStore
         public string Token { get; } = token;
         public string Name { get; } = name;
         public bool IsHost { get; } = isHost;
+        public bool IsPlayingParticipant { get; set; } = true;
         public double Score { get; set; }
         public DateTimeOffset LastSeenUtc { get; set; } = lastSeenUtc;
         public DateTimeOffset? DepartureRequestedUtc { get; set; }

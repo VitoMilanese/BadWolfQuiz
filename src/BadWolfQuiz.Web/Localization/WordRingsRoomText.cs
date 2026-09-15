@@ -11,6 +11,11 @@ public sealed record WordRingsRoomText
     public string JoinTab { get; init; } = "Join";
     public string PlayerName { get; init; } = "Player name";
     public string TargetScore { get; init; } = "Play to";
+    public string TurnTimer { get; init; } = "Turn timer";
+    public string NoTurnTimer { get; init; } = "No timer";
+    public string OneMinuteTimer { get; init; } = "1 minute";
+    public string NinetySecondTimer { get; init; } = "1.5 minutes";
+    public string TwoMinuteTimer { get; init; } = "2 minutes";
     public string PartialScore { get; init; } = "Award 0.5 points for a partially correct placement";
     public string PartialDescription { get; init; } = "A placement that matches at least one required ring but not the whole region is worth half a point.";
     public string RoomCode { get; init; } = "Room";
@@ -78,6 +83,11 @@ public sealed record WordRingsRoomText
         JoinTab = "Приєднання",
         PlayerName = "Ім'я гравця",
         TargetScore = "Грати до",
+        TurnTimer = "Таймер ходу",
+        NoTurnTimer = "Без таймера",
+        OneMinuteTimer = "1 хвилина",
+        NinetySecondTimer = "1,5 хвилини",
+        TwoMinuteTimer = "2 хвилини",
         PartialScore = "Давати 0,5 бала за частково правильне розміщення",
         PartialDescription = "Якщо область збігається хоча б з одним потрібним кільцем, але не повністю, гравець отримує пів бала.",
         RoomCode = "Кімната",
@@ -135,6 +145,11 @@ public sealed record WordRingsRoomText
         JoinTab = "Partecipa",
         PlayerName = "Nome giocatore",
         TargetScore = "Gioca fino a",
+        TurnTimer = "Timer del turno",
+        NoTurnTimer = "Senza timer",
+        OneMinuteTimer = "1 minuto",
+        NinetySecondTimer = "1,5 minuti",
+        TwoMinuteTimer = "2 minuti",
         PartialScore = "Assegna 0,5 punti per un posizionamento parzialmente corretto",
         PartialDescription = "Se la posizione corrisponde ad almeno un cerchio richiesto ma non all'intera area, vale mezzo punto.",
         RoomCode = "Stanza",
@@ -192,6 +207,11 @@ public sealed record WordRingsRoomText
         JoinTab = "Україна",
         PlayerName = "Україна",
         TargetScore = "Україна",
+        TurnTimer = "Україна",
+        NoTurnTimer = "Україна",
+        OneMinuteTimer = "Україна",
+        NinetySecondTimer = "Україна",
+        TwoMinuteTimer = "Україна",
         PartialScore = "Україна",
         PartialDescription = "Україна",
         RoomCode = "Україна",

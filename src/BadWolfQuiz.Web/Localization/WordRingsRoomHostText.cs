@@ -26,6 +26,9 @@ public sealed record WordRingsRoomHostText
     public string CorrectPlacement { get; init; } = "Correct";
     public string MovePlacement { get; init; } = "Move";
     public string AwaitingHostDecision { get; init; } = "Waiting for the host's decision.";
+    public string SeedWordsTitle { get; init; } = "Starter words";
+    public string JudgementTitle { get; init; } = "Judgement";
+    public string WaitingForHostSeeds { get; init; } = "Waiting for the host to place and confirm the four starter words. The game will begin after that.";
     public string SeedExamplesHint { get; init; } = "Place the four example words, then confirm them before the players can begin.";
     public string ConfirmExamples { get; init; } = "Confirm examples";
 
@@ -64,6 +67,9 @@ public sealed record WordRingsRoomHostText
         CorrectPlacement = "Правильно",
         MovePlacement = "Перемістити",
         AwaitingHostDecision = "Очікування рішення хоста.",
+        SeedWordsTitle = "Стартові слова",
+        JudgementTitle = "Перевірка",
+        WaitingForHostSeeds = "Очікуємо, поки хост розставить і підтвердить 4 стартові слова. Після цього гра почнеться.",
         SeedExamplesHint = "Розставте 4 стартові слова-підказки та підтвердьте їх. До цього гравці не зможуть почати хід.",
         ConfirmExamples = "Підтвердити слова"
     };
@@ -92,6 +98,9 @@ public sealed record WordRingsRoomHostText
         CorrectPlacement = "Corretto",
         MovePlacement = "Sposta",
         AwaitingHostDecision = "In attesa della decisione dell'host.",
+        SeedWordsTitle = "Parole iniziali",
+        JudgementTitle = "Valutazione",
+        WaitingForHostSeeds = "In attesa che l'host posizioni e confermi le quattro parole iniziali. La partita inizierà subito dopo.",
         SeedExamplesHint = "Posiziona le quattro parole di esempio e confermale prima che i giocatori possano iniziare.",
         ConfirmExamples = "Conferma esempi"
     };
@@ -120,6 +129,9 @@ public sealed record WordRingsRoomHostText
         CorrectPlacement = "Україна",
         MovePlacement = "Україна",
         AwaitingHostDecision = "Україна",
+        SeedWordsTitle = "Україна",
+        JudgementTitle = "Україна",
+        WaitingForHostSeeds = "Україна",
         SeedExamplesHint = "Україна",
         ConfirmExamples = "Україна"
     };

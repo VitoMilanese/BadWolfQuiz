@@ -122,3 +122,13 @@ The multiplayer board keeps turn ownership exclusively in the player list, but r
 After a multiplayer round finishes, closing the Victory/Defeat dialog exposes a **Show result** toolbar action. It reopens the same result and rule hints until another round begins; the action is hidden before the first result and during active play.
 
 When an authenticated room creator has a custom header logo in site settings, the room snapshots that logo into room metadata. The room page serves it through the Word Rings room endpoint and overrides the normal header brand for every visitor to that room, including anonymous joined players and signed-in players with their own account branding.
+
+## Turn timer and dedicated-host context
+
+Multiplayer room creation optionally enables a server-authoritative turn timer of **1 minute**, **1.5 minutes**, or **2 minutes**; **No timer** remains the default. A configured timer is inactive whenever fewer than two playing participants are connected, and dedicated non-playing hosts never count as participants for that rule. Dedicated-host starter setup and the host's manual judgement pause the player timer; after judgement, the remaining time resumes when the same turn continues, while a transferred turn receives a fresh interval.
+
+When an active deadline expires, the server takes one random word from the current player's visible hand, places it into a random Venn region, explicitly records it as incorrect with **0 points** regardless of where it lands, and transfers the turn. The client countdown reflects the server deadline and clears any unsent local placement when the timed-out turn is replaced.
+
+Dedicated-host UI uses the word-bank panel contextually: **Starter words** while the host places the four examples, **Judgement** while resolving a submitted word, and no empty panel when the host has neither words nor a pending judgement. Starter words remain visually active while draggable. Players waiting for starter setup see an in-board message explaining that play begins after the host places and confirms the four examples.
+
+The **Show result** action is author-CSS-hidden until an actual completed result exists and remains hidden throughout active play, including solo, automatic multiplayer, and dedicated-host rooms.

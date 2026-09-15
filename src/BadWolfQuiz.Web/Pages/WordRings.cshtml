@@ -66,6 +66,9 @@
      data-room-host-move="@hostText.MovePlacement"
      data-room-host-confirm-examples="@hostText.ConfirmExamples"
      data-room-host-seed-hint="@hostText.SeedExamplesHint"
+     data-room-host-seed-title="@hostText.SeedWordsTitle"
+     data-room-host-judgement-title="@hostText.JudgementTitle"
+     data-room-waiting-host-seeds="@hostText.WaitingForHostSeeds"
      data-room-awaiting-host="@hostText.AwaitingHostDecision"
      data-room-voice-language="@CultureInfo.CurrentUICulture.Name"
      data-room-voice-check="@roomText.VoiceCheck"
@@ -100,6 +103,10 @@
                 </span>
             }
             <span class="word-rings-toolbar-progress" data-progress></span>
+            @if (isCooperativeRoom)
+            {
+                <span class="word-rings-turn-timer" data-room-turn-timer hidden></span>
+            }
         </div>
         <div class="minigames-toolbar-actions word-rings-actions">
             <button class="button" type="button" data-reopen-result hidden>@roomText.ShowResult</button>
@@ -149,6 +156,10 @@
                     <div class="word-rings-rule word-rings-rule-c"><span>@(isCooperativeRoom ? string.Empty : Model.Puzzle.RedRuleText)</span></div>
                 </section>
                 <div class="word-rings-placed" data-placed-layer></div>
+                @if (isCooperativeRoom)
+                {
+                    <div class="word-rings-stage-message" data-room-stage-message hidden></div>
+                }
             </div>
             @if (!isCooperativeRoom)
             {
@@ -157,7 +168,7 @@
         </main>
 
         <aside class="word-rings-bank" data-word-bank>
-            <div class="word-rings-bank-heading"><h2>@WordRingsLocalizer["WordBank"]</h2></div>
+            <div class="word-rings-bank-heading"><h2 data-word-bank-heading>@WordRingsLocalizer["WordBank"]</h2></div>
             <div class="word-rings-word-list" data-word-list>
                 @if (!isCooperativeRoom)
                 {
@@ -194,6 +205,7 @@
                     <h2>@roomText.CreateRoom</h2>
                     <label><span>@roomText.PlayerName</span><input type="text" maxlength="30" required data-create-room-name /></label>
                     <label><span>@roomText.TargetScore</span><input type="number" min="5" max="15" value="10" required data-create-room-target /></label>
+                    <label><span>@roomText.TurnTimer</span><select data-create-room-turn-timer><option value="0" selected>@roomText.NoTurnTimer</option><option value="60">@roomText.OneMinuteTimer</option><option value="90">@roomText.NinetySecondTimer</option><option value="120">@roomText.TwoMinuteTimer</option></select></label>
                     <fieldset class="word-rings-room-role-fieldset">
                         <legend>@hostText.RoomRole</legend>
                         <label class="word-rings-room-role-option"><input type="radio" name="roomRole" value="player" data-create-room-role checked /><span><strong>@hostText.PlayerRole</strong><small>@hostText.PlayerRoleDescription</small></span></label>
