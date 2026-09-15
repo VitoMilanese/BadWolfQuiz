@@ -72,6 +72,30 @@ public sealed class WordRingsActionCardsRegressionTests
     }
 
     [Fact]
+    public void Room_tuning_allows_the_host_to_raise_target_score_to_twenty()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-target-score-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            var environment = new TestWebHostEnvironment(root);
+            var rooms = WordRingsRoomHostCoordinator.Get(environment);
+            var host = rooms.CreateRoom("Host", 15, partialScoreEnabled: false, hostChoosesRules: false);
+            var page = new BadWolfQuiz.Web.Pages.WordRingsRoomTuningApiModel(environment);
+
+            _ = page.OnPostSetTargetScore(host.RoomCode, host.PlayerToken, 20);
+            var state = rooms.GetRoomState(host.RoomCode, host.PlayerToken);
+
+            Assert.Equal(20, state.TargetScore);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Action_card_ui_covers_new_defaults_settings_carousel_and_discard_flow()
     {
         var script = ReadWebFile("wwwroot", "js", "word-rings-action-cards-v2.js");
@@ -110,6 +134,7 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("word-rings-action-cards-v2.js?v=2", tagHelper, StringComparison.Ordinal);
         Assert.Contains("targetScore is < 5 or > 20", tuningApi, StringComparison.Ordinal);
         Assert.Contains("if (!state.IsHost)", tuningApi, StringComparison.Ordinal);
+        Assert.Contains("k__BackingField", tuningApi, StringComparison.Ordinal);
     }
 
     [Fact]
