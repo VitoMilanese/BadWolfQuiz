@@ -17,7 +17,8 @@ public sealed class BackgroundStarsAssetsTagHelper : TagHelper
     {
         output.PostContent.AppendHtml(
             "<link rel=\"stylesheet\" href=\"/css/background-stars.css?v=4.2\" />" +
-            "<script defer src=\"/js/background-stars.js?v=4\"></script>");
+            "<script defer src=\"/js/background-stars.js?v=4\"></script>" +
+            "<script defer src=\"/js/background-stars-gameplay-sync.js?v=1\"></script>");
     }
 }
 
