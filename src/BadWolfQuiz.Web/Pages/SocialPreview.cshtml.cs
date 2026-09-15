@@ -32,10 +32,18 @@ public sealed class SocialPreviewModel : PageModel
             accentBright,
             highlight);
 
-        return File(
-            SocialPreviewImageRenderer.Render(variant, theme, customColors),
-            "image/png");
+        var png = IsWordRingsVariant(variant)
+            ? WordRingsSocialPreviewRenderer.Render(variant)
+            : SocialPreviewImageRenderer.Render(variant, theme, customColors);
+
+        return File(png, "image/png");
     }
+
+    private static bool IsWordRingsVariant(string? variant) =>
+        variant?.Trim().ToLowerInvariant() is
+            "word-rings-uk" or
+            "word-rings-en" or
+            "word-rings-it";
 
     private static SiteThemeColors? TryBuildCustomColors(
         string? theme,
