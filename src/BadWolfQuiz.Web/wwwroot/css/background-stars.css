@@ -1,0 +1,207 @@
+body {
+    position: relative;
+    isolation: isolate;
+}
+
+.site-starfield-host {
+    position: relative;
+    isolation: isolate;
+}
+
+/*
+ * Keep the effect out of normal document flow regardless of page-specific
+ * "root > *" rules. Pages are free to move the layer between visual roots,
+ * but the particles themselves stay fixed to the viewport.
+ */
+.site-starfield,
+.site-starfield-host > .site-starfield {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: -1 !important;
+    overflow: hidden;
+    pointer-events: none;
+    contain: strict;
+}
+
+body[data-animated-stars="false"] .site-starfield {
+    display: none;
+}
+
+.site-starfield-star {
+    position: absolute;
+    box-sizing: border-box;
+    width: var(--star-size, 2px);
+    height: var(--star-size, 2px);
+    border: 0;
+    border-radius: 50%;
+    background: #f7fbff;
+    background: color-mix(in srgb, var(--text, #f4f7fb) 72%, white 28%);
+    opacity: var(--star-min-opacity, 0.18);
+    box-shadow:
+        0 0 calc(var(--star-size, 2px) * 2.4)
+            color-mix(in srgb, var(--text, #f4f7fb) 42%, transparent),
+        0 0 calc(var(--star-size, 2px) * 5.5)
+            color-mix(in srgb, var(--text, #f4f7fb) 16%, transparent);
+    transform: scale(0.72);
+    transform-origin: center;
+    animation: badwolf-star-pulse var(--particle-duration, 4.5s) ease-in-out
+        var(--particle-delay, 0s) infinite;
+    will-change: opacity, transform;
+}
+
+.site-starfield-star.is-bright {
+    box-shadow:
+        0 0 calc(var(--star-size, 2px) * 3.2)
+            color-mix(in srgb, var(--text, #f4f7fb) 58%, transparent),
+        0 0 calc(var(--star-size, 2px) * 7.5)
+            color-mix(in srgb, var(--text, #f4f7fb) 24%, transparent);
+}
+
+/* Light themes use visible colored bubbles/rings instead of white stars. */
+.site-starfield[data-starfield-tone="light"] .site-starfield-star {
+    width: var(--bubble-size, 8px);
+    height: var(--bubble-size, 8px);
+    opacity: var(--bubble-min-opacity, 0.32);
+    transform: translate3d(0, 0, 0) scale(0.88);
+    animation-name: badwolf-bubble-float;
+    animation-duration: var(--particle-duration, 6s);
+    animation-delay: var(--particle-delay, 0s);
+    animation-timing-function: ease-in-out;
+    background: var(--bubble-color, #2f7df4);
+    border: 1px solid color-mix(in srgb, var(--bubble-color, #2f7df4) 72%, white 28%);
+    box-shadow:
+        0 3px 10px color-mix(in srgb, var(--bubble-color, #2f7df4) 23%, transparent),
+        inset 0 1px 0 color-mix(in srgb, white 42%, transparent);
+}
+
+.site-starfield[data-starfield-tone="light"] .site-starfield-star.is-ring {
+    background: transparent;
+    border-width: 1.7px;
+    border-color: color-mix(in srgb, var(--bubble-color, #2f7df4) 86%, #1b2430 14%);
+    box-shadow:
+        0 2px 9px color-mix(in srgb, var(--bubble-color, #2f7df4) 20%, transparent),
+        inset 0 0 0 1px color-mix(in srgb, white 26%, transparent);
+}
+
+.site-starfield[data-starfield-tone="light"] .site-starfield-star.is-bright {
+    filter: saturate(1.12);
+}
+
+.site-starfield-star.is-color-1 { --bubble-color: #2f7df4; }
+.site-starfield-star.is-color-2 { --bubble-color: #e4a51f; }
+.site-starfield-star.is-color-3 { --bubble-color: #e45757; }
+.site-starfield-star.is-color-4 { --bubble-color: #28a96b; }
+.site-starfield-star.is-color-5 { --bubble-color: #8d61d6; }
+
+/*
+ * These roots paint their own opaque background. Put the particle layer above
+ * that background but below the page content. Their existing/direct-child
+ * content already lives at z-index 1, except Answer Key where we establish it
+ * explicitly below.
+ */
+body:has(.minigame-editor-heading) > .page-shell.site-starfield-host > .site-starfield,
+.answer-key-page.site-starfield-host > .site-starfield,
+.player-lobby.site-starfield-host:is(
+    [data-final-status="finalwagering"],
+    [data-final-status="finalanswering"],
+    [data-final-status="finaljudging"],
+    [data-final-status="completed"]) > .site-starfield,
+.current-question-summary.site-starfield-host > .site-starfield,
+.final-question-panel.site-starfield-host > .site-starfield,
+.final-question-transition.site-starfield-host > .site-starfield {
+    z-index: 0 !important;
+}
+
+.answer-key-page.site-starfield-host > :not(.site-starfield) {
+    position: relative;
+    z-index: 1;
+}
+
+/*
+ * Live host question/answer surfaces are grid containers with an almost opaque
+ * panel background. Their particle layer must sit above that panel paint, while
+ * the actual question controls and content remain above the particles.
+ */
+.current-question-summary.site-starfield-host > :not(.site-starfield) {
+    z-index: 1;
+}
+
+/* Final host stages already isolate their own background. Keep the stars above
+ * that paint and the meaningful stage content one layer higher. */
+.final-question-panel.site-starfield-host > :not(.site-starfield) {
+    z-index: 1;
+}
+
+.final-question-transition.site-starfield-host > .final-question-transition-content,
+.final-question-transition.site-starfield-host > .final-question-transition-actions {
+    z-index: 1;
+}
+
+body .host-settings-hero-mark > i {
+    z-index: 1;
+}
+
+@keyframes badwolf-star-pulse {
+    0%,
+    100% {
+        opacity: var(--star-min-opacity, 0.18);
+        transform: scale(0.72);
+    }
+
+    46% {
+        opacity: var(--star-max-opacity, 0.78);
+        transform: scale(1.18);
+    }
+
+    62% {
+        opacity: calc(var(--star-max-opacity, 0.78) * 0.76);
+        transform: scale(0.94);
+    }
+}
+
+@keyframes badwolf-bubble-float {
+    0%,
+    100% {
+        opacity: var(--bubble-min-opacity, 0.32);
+        transform: translate3d(0, 0, 0) scale(0.88);
+    }
+
+    48% {
+        opacity: var(--bubble-max-opacity, 0.68);
+        transform:
+            translate3d(
+                var(--bubble-drift-x, 3px),
+                var(--bubble-drift-y, -2px),
+                0)
+            scale(1.08);
+    }
+
+    72% {
+        opacity: calc(var(--bubble-max-opacity, 0.68) * 0.82);
+        transform:
+            translate3d(
+                calc(var(--bubble-drift-x, 3px) * -0.35),
+                calc(var(--bubble-drift-y, -2px) * -0.35),
+                0)
+            scale(0.96);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-starfield-star {
+        animation: none;
+        opacity: 0.38;
+        transform: none;
+    }
+
+    .site-starfield[data-starfield-tone="light"] .site-starfield-star {
+        opacity: 0.46;
+        transform: none;
+    }
+}
+
+@media print {
+    .site-starfield {
+        display: none !important;
+    }
+}

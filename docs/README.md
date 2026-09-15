@@ -40,6 +40,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Final question](features/final-question.md)
 - [Answer history editing](features/answer-history-editing.md)
 - [Game settings](features/game-settings.md)
+- [Animated backgrounds](features/animated-backgrounds.md)
 - [Player and host cards](features/player-and-host-cards.md)
 - [QR player join and player-device behavior](features/qr-player-join.md)
 - [Player admission controls](features/player-admission-controls.md)

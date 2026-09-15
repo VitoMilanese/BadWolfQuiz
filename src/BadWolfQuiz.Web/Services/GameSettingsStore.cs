@@ -129,7 +129,8 @@ public sealed class GameSettingsStore(
             !string.IsNullOrWhiteSpace(hostName),
             hostName,
             siteThemeId: _defaultSettings.SiteThemeId,
-            customThemeColors: _defaultSettings.CustomThemeColors);
+            customThemeColors: _defaultSettings.CustomThemeColors,
+            animatedStarsEnabled: _defaultSettings.AnimatedStarsEnabled);
         return SaveAsync(hostId, settings, cancellationToken);
     }
 
@@ -201,6 +202,7 @@ public sealed class GameSettingsStore(
         public SiteThemeColors CustomThemeColors { get; set; } = SiteThemeColors.Default;
 
         public bool CategoryColorsEnabled { get; set; } = true;
+        public bool AnimatedStarsEnabled { get; set; } = true;
 
         public bool AnswerRewardDecayEnabled { get; set; }
 
@@ -232,7 +234,8 @@ public sealed class GameSettingsStore(
             AnswerRewardDecayMinimumPercent,
             HostAvatarFrameEnabled,
             HostAvatarFrameId,
-            CategoryColorsEnabled);
+            CategoryColorsEnabled,
+            AnimatedStarsEnabled);
 
         public static StoredGameSettings From(GameSessionSettings settings) => new()
         {
@@ -256,6 +259,7 @@ public sealed class GameSettingsStore(
             CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors),
             AnswerRewardDecayEnabled = settings.AnswerRewardDecayEnabled,
             CategoryColorsEnabled = settings.CategoryColorsEnabled,
+            AnimatedStarsEnabled = settings.AnimatedStarsEnabled,
             AnswerRewardDecayStartAfterSeconds =
                 settings.AnswerRewardDecayStartAfterSeconds,
             AnswerRewardDecayMinimumPercent =
@@ -290,6 +294,7 @@ public sealed class GameSettingsInput
     public SiteThemeColors CustomThemeColors { get; set; } = SiteThemeColors.Default;
 
     public bool CategoryColorsEnabled { get; set; } = true;
+    public bool AnimatedStarsEnabled { get; set; } = true;
 
     public bool AnswerRewardDecayEnabled { get; set; }
 
@@ -361,7 +366,8 @@ public sealed class GameSettingsInput
             AnswerRewardDecayMinimumPercent,
             HostAvatarFrameEnabled,
             HostAvatarFrameId,
-            CategoryColorsEnabled);
+            CategoryColorsEnabled,
+            AnimatedStarsEnabled);
     }
 
     public static GameSettingsInput From(GameSessionSettings settings)
@@ -387,6 +393,7 @@ public sealed class GameSettingsInput
             CustomThemeColors = SiteThemeCatalog.Normalize(settings.CustomThemeColors),
             AnswerRewardDecayEnabled = settings.AnswerRewardDecayEnabled,
             CategoryColorsEnabled = settings.CategoryColorsEnabled,
+            AnimatedStarsEnabled = settings.AnimatedStarsEnabled,
             AnswerRewardDecayStartAfterSeconds = settings.AnswerRewardDecayStartAfterSeconds,
             AnswerRewardDecayMinimumPercent = settings.AnswerRewardDecayMinimumPercent
         };

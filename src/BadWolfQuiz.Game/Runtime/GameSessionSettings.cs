@@ -41,7 +41,8 @@ public sealed record GameSessionSettings
             DefaultAnswerRewardDecayMinimumPercent,
         bool hostAvatarFrameEnabled = false,
         string? hostAvatarFrameId = null,
-        bool categoryColorsEnabled = true)
+        bool categoryColorsEnabled = true,
+        bool animatedStarsEnabled = true)
     {
         if (buzzerDuration <= TimeSpan.Zero)
         {
@@ -103,6 +104,7 @@ public sealed record GameSessionSettings
         HostAvatarFrameEnabled = hostAvatarFrameEnabled;
         HostAvatarFrameId = hostAvatarFrameId?.Trim();
         CategoryColorsEnabled = categoryColorsEnabled;
+        AnimatedStarsEnabled = animatedStarsEnabled;
     }
 
     public TimeSpan BuzzerDuration { get; }
@@ -131,6 +133,7 @@ public sealed record GameSessionSettings
     public bool HostAvatarFrameEnabled { get; }
     public string? HostAvatarFrameId { get; }
     public bool CategoryColorsEnabled { get; }
+    public bool AnimatedStarsEnabled { get; }
     public byte[]? BrandLogoData { get; }
     public string? BrandLogoContentType { get; }
     public string SiteThemeId { get; }
