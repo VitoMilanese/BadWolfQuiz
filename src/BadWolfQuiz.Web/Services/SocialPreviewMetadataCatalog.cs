@@ -11,10 +11,7 @@ public static class SocialPreviewMetadataCatalog
 
         if (string.Equals(page, "/WordRings", StringComparison.OrdinalIgnoreCase))
         {
-            var normalizedCulture = NormalizeCulture(culture);
-            return normalizedCulture == "ru"
-                ? GetDefault(culture)
-                : GetWordRings(culture);
+            return GetWordRings(culture);
         }
 
         return GetDefault(culture);

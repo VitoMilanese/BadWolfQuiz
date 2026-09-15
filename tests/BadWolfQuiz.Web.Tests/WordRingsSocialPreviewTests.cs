@@ -27,15 +27,6 @@ public sealed class WordRingsSocialPreviewTests
         Assert.False(string.IsNullOrWhiteSpace(preview.Description));
     }
 
-    [Fact]
-    public void Russian_ui_does_not_create_a_dedicated_word_rings_variant()
-    {
-        var preview = SocialPreviewMetadataCatalog.Resolve("/WordRings", "ru-RU");
-
-        Assert.Equal("site", preview.ImageVariant);
-        Assert.Equal("Україна", preview.Title);
-    }
-
     [Theory]
     [InlineData("word-rings-uk")]
     [InlineData("word-rings-it")]
