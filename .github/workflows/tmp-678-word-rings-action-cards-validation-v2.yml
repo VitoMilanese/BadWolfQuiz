@@ -1,0 +1,27 @@
+name: Temporary Word Rings action cards validation v2
+
+on:
+  push:
+    branches:
+      - tmp/validate-678-word-rings-action-cards-v2
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore Web tests
+        run: dotnet restore tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
+      - name: Check JavaScript syntax
+        run: node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-action-cards.js
+      - name: Check whitespace
+        run: git diff --check origin/main...HEAD
+      - name: Run action card regressions
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore --configuration Release --filter "FullyQualifiedName~WordRingsActionCardsRegressionTests"
+      - name: Run full Web test suite
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore --configuration Release
