@@ -58,4 +58,4 @@ Telegram and other clients can cache already-fetched previews. When validating a
 
 ## Release
 
-Social previews were introduced in Web `1.22.35` (`web-v1.22.35`). Shareable Minigames room previews were added in Web `1.23.0` (`web-v1.23.0`). The dedicated Word Rings preview is tracked by issue #676; its release version is assigned during release preparation.
+Social previews were introduced in Web `1.22.35` (`web-v1.22.35`). Shareable Minigames room previews were added in Web `1.23.0` (`web-v1.23.0`). Dedicated Word Rings social previews ship in Web `1.44.0` (`web-v1.44.0`).
