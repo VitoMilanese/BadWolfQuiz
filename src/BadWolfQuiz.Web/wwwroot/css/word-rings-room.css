@@ -182,7 +182,7 @@
     overflow: auto;
 }
 
-.word-rings-room-dialog > form {
+.word-rings-room-dialog form {
     display: grid;
     gap: 14px;
     padding: 24px;
@@ -240,24 +240,34 @@
     font-weight: 800;
 }
 
-.word-rings-room-join-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 24px;
-    color: var(--muted);
-    font-size: .74rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: .06em;
+.word-rings-room-entry-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 18px 24px 0;
 }
 
-.word-rings-room-join-divider::before,
-.word-rings-room-join-divider::after {
-    content: "";
-    height: 1px;
-    flex: 1 1 auto;
-    background: var(--line);
+.word-rings-room-entry-tab {
+    min-height: 42px;
+    padding: 9px 12px;
+    border: 1px solid color-mix(in srgb, var(--line) 84%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+    color: var(--muted);
+    font: inherit;
+    font-size: .86rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.word-rings-room-entry-tab.is-active {
+    border-color: color-mix(in srgb, var(--gold) 68%, var(--line));
+    background: color-mix(in srgb, var(--gold) 12%, var(--panel-2));
+    color: var(--text);
+}
+
+.word-rings-room-entry-panel[hidden] {
+    display: none !important;
 }
 
 .word-rings-result-dialog {

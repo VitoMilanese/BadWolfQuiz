@@ -96,7 +96,7 @@ public sealed class WordRingsRoomHostCoordinator
         if (dedicatedHost)
         {
             var waitingState = _store.GetState(code, playerToken);
-            if (waitingState.Players.Count(player => !player.IsHost) < 2)
+            if (waitingState.Players.Count(player => !player.IsHost) < 1)
             {
                 throw new WordRingsRoomException(WordRingsRoomError.NeedMorePlayers);
             }
@@ -256,7 +256,7 @@ public sealed class WordRingsRoomHostCoordinator
                 !meta.Refreshed[color] && state.Phase != "playing")).ToArray()
             : Array.Empty<WordRingsRoomHostRuleGroup>();
         var canStart = state.IsHost && state.Phase != "playing" &&
-                       players.Count(player => player.IsPlayingParticipant) >= 2 &&
+                       players.Count(player => player.IsPlayingParticipant) >= 1 &&
                        (!dedicatedHost || AllRulesSelected(meta));
         return new WordRingsRoomHostSnapshot(
             state.RoomCode, state.Version + meta.Revision, state.Phase, state.TargetScore, state.PlayerId,

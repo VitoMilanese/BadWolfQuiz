@@ -35,8 +35,25 @@
     cursor: pointer;
 }
 
-.word-rings-room-dialog .word-rings-room-role-option input {
+.word-rings-room-dialog .word-rings-room-role-option input[type="radio"] {
+    box-sizing: border-box;
+    width: 20px;
+    min-width: 20px;
+    height: 20px;
+    min-height: 20px;
     margin-top: 3px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    outline: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.word-rings-room-dialog .word-rings-room-role-option input[type="radio"]:focus,
+.word-rings-room-dialog .word-rings-room-role-option input[type="radio"]:focus-visible {
+    outline: 0;
+    box-shadow: none;
 }
 
 .word-rings-room-dialog .word-rings-room-role-option strong,
@@ -198,9 +215,9 @@
     background: color-mix(in srgb, var(--panel-2) 88%, transparent);
     color: var(--text);
     font: inherit;
-    font-size: .9rem;
+    font-size: clamp(1rem, .85vw, 1.12rem);
     font-weight: 800;
-    line-height: 1.35;
+    line-height: 1.4;
     text-align: left;
     cursor: pointer;
     overflow-wrap: anywhere;

@@ -7,6 +7,8 @@ public sealed record WordRingsRoomText
     public string Cooperative { get; init; } = "Multiplayer";
     public string CreateRoom { get; init; } = "Create multiplayer room";
     public string JoinRoom { get; init; } = "Join room";
+    public string CreateTab { get; init; } = "New game";
+    public string JoinTab { get; init; } = "Join";
     public string PlayerName { get; init; } = "Player name";
     public string TargetScore { get; init; } = "Play to";
     public string PartialScore { get; init; } = "Award 0.5 points for a partially correct placement";
@@ -19,7 +21,7 @@ public sealed record WordRingsRoomText
     public string ShowCode { get; init; } = "Show room code";
     public string HideCode { get; init; } = "Hide room code";
     public string StartGame { get; init; } = "Start game";
-    public string WaitingForPlayers { get; init; } = "Waiting for players. The host can start when at least two players are in the room.";
+    public string WaitingForPlayers { get; init; } = "Waiting for players. The host can start when at least one other player is in the room.";
     public string YourTurn { get; init; } = "Your turn";
     public string OtherTurn { get; init; } = "Turn: {0}";
     public string TeamScoreTemplate { get; init; } = "Score: {0} / {1}";
@@ -29,7 +31,7 @@ public sealed record WordRingsRoomText
     public string Cancel { get; init; } = "Cancel";
     public string LeaveRoom { get; init; } = "Leave room";
     public string RoomError { get; init; } = "Could not complete the room operation.";
-    public string NeedMorePlayers { get; init; } = "At least two players are required.";
+    public string NeedMorePlayers { get; init; } = "At least one other player is required.";
     public string InvalidName { get; init; } = "Enter a player name.";
     public string WinTitle { get; init; } = "Victory!";
     public string LoseTitle { get; init; } = "Defeat";
@@ -62,6 +64,8 @@ public sealed record WordRingsRoomText
         Cooperative = "Мультиплеєр",
         CreateRoom = "Створити кімнату",
         JoinRoom = "Приєднатися до кімнати",
+        CreateTab = "Нова гра",
+        JoinTab = "Приєднання",
         PlayerName = "Ім'я гравця",
         TargetScore = "Грати до",
         PartialScore = "Давати 0,5 бала за частково правильне розміщення",
@@ -74,7 +78,7 @@ public sealed record WordRingsRoomText
         ShowCode = "Показати код кімнати",
         HideCode = "Приховати код кімнати",
         StartGame = "Почати гру",
-        WaitingForPlayers = "Очікування гравців. Власник може почати гру, коли в кімнаті буде щонайменше двоє гравців.",
+        WaitingForPlayers = "Очікування гравців. Власник може почати гру, коли до кімнати приєднається хоча б ще один гравець.",
         YourTurn = "Ваш хід",
         OtherTurn = "Хід: {0}",
         TeamScoreTemplate = "Бали: {0} / {1}",
@@ -84,7 +88,7 @@ public sealed record WordRingsRoomText
         Cancel = "Скасувати",
         LeaveRoom = "Вийти з кімнати",
         RoomError = "Не вдалося виконати операцію з кімнатою.",
-        NeedMorePlayers = "Для початку гри потрібно щонайменше двоє гравців.",
+        NeedMorePlayers = "Для початку гри потрібен хоча б ще один гравець.",
         InvalidName = "Введіть ім'я гравця.",
         WinTitle = "Перемога!",
         LoseTitle = "Поразка",
@@ -107,6 +111,8 @@ public sealed record WordRingsRoomText
         Cooperative = "Multiplayer",
         CreateRoom = "Crea stanza multiplayer",
         JoinRoom = "Entra nella stanza",
+        CreateTab = "Nuova partita",
+        JoinTab = "Partecipa",
         PlayerName = "Nome giocatore",
         TargetScore = "Gioca fino a",
         PartialScore = "Assegna 0,5 punti per un posizionamento parzialmente corretto",
@@ -119,7 +125,7 @@ public sealed record WordRingsRoomText
         ShowCode = "Mostra codice stanza",
         HideCode = "Nascondi codice stanza",
         StartGame = "Avvia partita",
-        WaitingForPlayers = "In attesa dei giocatori. L'host può iniziare con almeno due giocatori.",
+        WaitingForPlayers = "In attesa dei giocatori. L'host può iniziare quando entra almeno un altro giocatore.",
         YourTurn = "Il tuo turno",
         OtherTurn = "Turno: {0}",
         TeamScoreTemplate = "Punti: {0} / {1}",
@@ -129,7 +135,7 @@ public sealed record WordRingsRoomText
         Cancel = "Annulla",
         LeaveRoom = "Esci dalla stanza",
         RoomError = "Impossibile completare l'operazione della stanza.",
-        NeedMorePlayers = "Servono almeno due giocatori.",
+        NeedMorePlayers = "Serve almeno un altro giocatore.",
         InvalidName = "Inserisci il nome del giocatore.",
         WinTitle = "Vittoria!",
         LoseTitle = "Sconfitta",
@@ -152,6 +158,8 @@ public sealed record WordRingsRoomText
         Cooperative = "Україна",
         CreateRoom = "Україна",
         JoinRoom = "Україна",
+        CreateTab = "Україна",
+        JoinTab = "Україна",
         PlayerName = "Україна",
         TargetScore = "Україна",
         PartialScore = "Україна",

@@ -4,7 +4,9 @@
 
     const dialog = root.querySelector('[data-create-room-dialog]');
     const openButton = root.querySelector('[data-open-coop-room]');
-    const closeButton = root.querySelector('[data-close-create-room]');
+    const closeButtons = [...root.querySelectorAll('[data-close-create-room]')];
+    const entryTabs = [...root.querySelectorAll('[data-room-entry-tab]')];
+    const entryPanels = [...root.querySelectorAll('[data-room-entry-panel]')];
     const createForm = root.querySelector('[data-create-room-form]');
     const createName = root.querySelector('[data-create-room-name]');
     const createTarget = root.querySelector('[data-create-room-target]');
@@ -13,6 +15,7 @@
     const joinForm = root.querySelector('[data-room-join-shortcut-form]');
     const joinCode = root.querySelector('[data-room-join-code]');
     const joinName = root.querySelector('[data-room-join-name]');
+    const joinShortcutError = root.querySelector('[data-room-join-shortcut-error]');
     const antiForgery = root.querySelector('[data-word-rings-antiforgery] input[name="__RequestVerificationToken"]');
     const apiUrl = root.dataset.roomApiUrl;
     const nicknameKey = 'badwolf.wordrings.nickname';
@@ -41,6 +44,21 @@
 
     const setError = (element, message) => {
         if (element) element.textContent = message || '';
+    };
+
+    const activateEntryTab = name => {
+        entryTabs.forEach(tab => {
+            const active = tab.dataset.roomEntryTab === name;
+            tab.classList.toggle('is-active', active);
+            tab.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        entryPanels.forEach(panel => {
+            panel.hidden = panel.dataset.roomEntryPanel !== name;
+        });
+        setError(createError, '');
+        setError(joinShortcutError, '');
+        if (name === 'join') joinCode?.focus();
+        else createName?.focus();
     };
 
     const post = async (handler, fields) => {
@@ -84,12 +102,12 @@
     };
 
     openButton?.addEventListener('click', () => {
-        setError(createError, '');
+        activateEntryTab('create');
         if (!dialog.open) dialog.showModal();
-        createName?.focus();
     });
 
-    closeButton?.addEventListener('click', () => dialog.close());
+    entryTabs.forEach(tab => tab.addEventListener('click', () => activateEntryTab(tab.dataset.roomEntryTab || 'create')));
+    closeButtons.forEach(button => button.addEventListener('click', () => dialog.close()));
     dialog.addEventListener('cancel', event => {
         event.preventDefault();
         dialog.close();
@@ -139,23 +157,23 @@
         const code = normalizeCode(joinCode?.value);
         const name = joinName?.value?.trim() || '';
         if (code.length !== 6 || !name) {
-            setError(createError, !name ? root.dataset.roomInvalidName : root.dataset.roomError);
+            setError(joinShortcutError, !name ? root.dataset.roomInvalidName : root.dataset.roomError);
             return;
         }
 
         const submit = joinForm.querySelector('[type="submit"]');
         if (submit instanceof HTMLButtonElement) submit.disabled = true;
-        setError(createError, '');
+        setError(joinShortcutError, '');
         try {
             const payload = await post('JoinRoom', { roomCode: code, playerName: name });
             if (!payload.success || !saveConnection(payload.connection, name)) {
-                setError(createError, friendlyError(payload.error));
+                setError(joinShortcutError, friendlyError(payload.error));
                 return;
             }
             goToRoom(code);
         } catch (error) {
             console.error('Could not join Word Rings room.', error);
-            setError(createError, root.dataset.roomError);
+            setError(joinShortcutError, root.dataset.roomError);
         } finally {
             if (submit instanceof HTMLButtonElement) submit.disabled = false;
         }

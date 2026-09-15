@@ -63,6 +63,35 @@ public sealed class WordRingsRoomHostControlRegressionTests
     }
 
     [Fact]
+    public void Dedicated_host_can_start_with_one_playing_participant_after_rules_are_selected()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-one-player-host-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        try
+        {
+            var coordinator = WordRingsRoomHostCoordinator.Get(new TestEnvironment(root));
+            var host = coordinator.CreateRoom("Host", 5, false, true);
+            var state = coordinator.GetHostState(host.RoomCode, host.PlayerToken);
+            foreach (var ring in new[] { "A", "B", "C" })
+            {
+                var group = Assert.Single(state.RuleSelections, item => item.Ring == ring);
+                state = coordinator.SelectRule(host.RoomCode, host.PlayerToken, ring, group.Options.First().Id);
+            }
+
+            var player = coordinator.JoinRoom(host.RoomCode, "Player");
+            state = coordinator.GetHostState(host.RoomCode, host.PlayerToken);
+            Assert.True(state.CanStart);
+            Assert.Single(state.Players, item => item.IsPlayingParticipant);
+
+            var started = coordinator.StartGame(host.RoomCode, host.PlayerToken);
+            Assert.Equal("playing", started.Phase);
+            Assert.Equal(player.State.PlayerId, started.CurrentPlayerId);
+            Assert.Empty(started.BankWords);
+        }
+        finally { Directory.Delete(root, true); }
+    }
+
+    [Fact]
     public void Playing_creator_uses_target_as_visible_hand_limit_below_ten()
     {
         var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-hand-{Guid.NewGuid():N}");
@@ -90,9 +119,15 @@ public sealed class WordRingsRoomHostControlRegressionTests
         var result = Read("wwwroot", "js", "word-rings-result-rules.js");
         var coop = Read("wwwroot", "js", "word-rings-coop.js");
         var styles = Read("wwwroot", "css", "word-rings-host-controls.css");
+        var roomStyles = Read("wwwroot", "css", "word-rings-room.css");
+        var entry = Read("wwwroot", "js", "word-rings-room-entry.js");
+        var roomText = Read("Localization", "WordRingsRoomText.cs");
         var hostText = Read("Localization", "WordRingsRoomHostText.cs");
         var coordinator = Read("Services", "WordRingsRoomHostCoordinator.cs");
         Assert.Contains("data-create-room-role", page);
+        Assert.Contains("data-room-entry-tab=\"create\"", page);
+        Assert.Contains("data-room-entry-tab=\"join\"", page);
+        Assert.Contains("data-room-entry-panel=\"join\" hidden", page);
         Assert.Contains("data-room-rule-picker-dialog", page);
         Assert.Contains("data-confirm-room-rule-picker", page);
         Assert.Contains("@hostText.ConfirmRules", page);
@@ -115,10 +150,19 @@ public sealed class WordRingsRoomHostControlRegressionTests
         Assert.Contains("background: #b4232f;", styles);
         Assert.DoesNotContain(".word-rings-room-role-option:has(input:checked)", styles);
         Assert.Contains("grid-template-columns: repeat(2, minmax(0, 1fr));", styles);
+        Assert.Contains("input[type=\"radio\"]:focus", styles);
+        Assert.Contains("box-shadow: none;", styles);
+        Assert.Contains("font-size: clamp(1rem, .85vw, 1.12rem);", styles);
+        Assert.Contains("word-rings-room-entry-tabs", roomStyles);
+        Assert.Contains("activateEntryTab", entry);
+        Assert.Contains("CreateTab = \"Нова гра\"", roomText);
+        Assert.Contains("JoinTab = \"Приєднання\"", roomText);
         Assert.Contains("ConfirmRules = \"Підтвердити\"", hostText);
         Assert.DoesNotContain("дев’ятку", hostText);
         Assert.Contains("private const int RuleOptionCount = 6;", coordinator);
         Assert.Contains("Math.Clamp(state.TargetScore, 5, 10)", coordinator);
+        Assert.Contains("IsPlayingParticipant) >= 1", coordinator);
+        Assert.Contains("!player.IsHost) < 1", coordinator);
     }
 
     private static int Count(string value, string needle)

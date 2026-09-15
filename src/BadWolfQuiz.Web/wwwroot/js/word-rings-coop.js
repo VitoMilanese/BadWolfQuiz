@@ -436,8 +436,8 @@
         });
     };
 
-    const repositionPartialPlacementIfNeeded = async result => {
-        if (!result?.isPartial || Number(result.pointsAwarded) <= 0 || !result.state) return result?.state || null;
+    const repositionIncorrectPlacementIfNeeded = async result => {
+        if (result?.isCorrect === true || !result?.state) return result?.state || null;
         const placement = [...(result.state.placements || [])]
             .reverse()
             .find(item => item.word === result.word && item.playerId === result.state.playerId);
@@ -491,9 +491,7 @@
             meta.className = 'word-rings-player-meta';
             const score = document.createElement('span');
             score.textContent = `${formatScore(player.score)} pt`;
-            const words = document.createElement('span');
-            words.textContent = `${player.remainingWords}`;
-            meta.append(score, words);
+            meta.append(score);
             card.append(main, meta);
             playersList.append(card);
         }
@@ -753,8 +751,8 @@
 
             const result = payload.result;
             renderState(result.state);
-            if (result.isPartial && Number(result.pointsAwarded) > 0) {
-                const settledState = await repositionPartialPlacementIfNeeded(result);
+            if (!result.isCorrect) {
+                const settledState = await repositionIncorrectPlacementIfNeeded(result);
                 if (settledState && settledState !== result.state) renderState(settledState);
             }
             if (result.isCorrect) {

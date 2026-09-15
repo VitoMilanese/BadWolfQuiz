@@ -149,25 +149,34 @@
     @if (!isCooperativeRoom)
     {
         <dialog class="minigames-dialog word-rings-room-dialog" data-create-room-dialog>
-            <form data-create-room-form>
-                <h2>@roomText.CreateRoom</h2>
-                <label><span>@roomText.PlayerName</span><input type="text" maxlength="30" required data-create-room-name /></label>
-                <label><span>@roomText.TargetScore</span><input type="number" min="5" max="15" value="10" required data-create-room-target /></label>
-                <fieldset class="word-rings-room-role-fieldset">
-                    <legend>@hostText.RoomRole</legend>
-                    <label class="word-rings-room-role-option"><input type="radio" name="roomRole" value="player" data-create-room-role checked /><span><strong>@hostText.PlayerRole</strong><small>@hostText.PlayerRoleDescription</small></span></label>
-                    <label class="word-rings-room-role-option"><input type="radio" name="roomRole" value="host" data-create-room-role /><span><strong>@hostText.HostOnlyRole</strong><small>@hostText.HostOnlyRoleDescription</small></span></label>
-                </fieldset>
-                <label class="minigames-checkbox-row word-rings-room-checkbox"><input type="checkbox" data-create-room-partial /><span><strong>@roomText.PartialScore</strong><small>@roomText.PartialDescription</small></span></label>
-                <p class="word-rings-room-form-error" data-create-room-error></p>
-                <div class="word-rings-room-dialog-actions"><button class="button" type="button" data-close-create-room>@roomText.Cancel</button><button class="button button-primary" type="submit">@roomText.CreateAction</button></div>
-            </form>
-            <div class="word-rings-room-join-divider"><span>@roomText.JoinExisting</span></div>
-            <form data-room-join-shortcut-form>
-                <label><span>@roomText.EnterCode</span><input type="text" maxlength="6" autocomplete="off" spellcheck="false" data-room-join-code /></label>
-                <label><span>@roomText.PlayerName</span><input type="text" maxlength="30" required data-room-join-name /></label>
-                <button class="button" type="submit">@roomText.JoinAction</button>
-            </form>
+            <div class="word-rings-room-entry-tabs" role="tablist" aria-label="@roomText.Cooperative">
+                <button class="word-rings-room-entry-tab is-active" type="button" role="tab" aria-selected="true" data-room-entry-tab="create">@roomText.CreateTab</button>
+                <button class="word-rings-room-entry-tab" type="button" role="tab" aria-selected="false" data-room-entry-tab="join">@roomText.JoinTab</button>
+            </div>
+            <section class="word-rings-room-entry-panel" role="tabpanel" data-room-entry-panel="create">
+                <form data-create-room-form>
+                    <h2>@roomText.CreateRoom</h2>
+                    <label><span>@roomText.PlayerName</span><input type="text" maxlength="30" required data-create-room-name /></label>
+                    <label><span>@roomText.TargetScore</span><input type="number" min="5" max="15" value="10" required data-create-room-target /></label>
+                    <fieldset class="word-rings-room-role-fieldset">
+                        <legend>@hostText.RoomRole</legend>
+                        <label class="word-rings-room-role-option"><input type="radio" name="roomRole" value="player" data-create-room-role checked /><span><strong>@hostText.PlayerRole</strong><small>@hostText.PlayerRoleDescription</small></span></label>
+                        <label class="word-rings-room-role-option"><input type="radio" name="roomRole" value="host" data-create-room-role /><span><strong>@hostText.HostOnlyRole</strong><small>@hostText.HostOnlyRoleDescription</small></span></label>
+                    </fieldset>
+                    <label class="minigames-checkbox-row word-rings-room-checkbox"><input type="checkbox" data-create-room-partial /><span><strong>@roomText.PartialScore</strong><small>@roomText.PartialDescription</small></span></label>
+                    <p class="word-rings-room-form-error" data-create-room-error></p>
+                    <div class="word-rings-room-dialog-actions"><button class="button" type="button" data-close-create-room>@roomText.Cancel</button><button class="button button-primary" type="submit">@roomText.CreateAction</button></div>
+                </form>
+            </section>
+            <section class="word-rings-room-entry-panel" role="tabpanel" data-room-entry-panel="join" hidden>
+                <form data-room-join-shortcut-form>
+                    <h2>@roomText.JoinRoom</h2>
+                    <label><span>@roomText.EnterCode</span><input type="text" maxlength="6" autocomplete="off" spellcheck="false" data-room-join-code /></label>
+                    <label><span>@roomText.PlayerName</span><input type="text" maxlength="30" required data-room-join-name /></label>
+                    <p class="word-rings-room-form-error" data-room-join-shortcut-error></p>
+                    <div class="word-rings-room-dialog-actions"><button class="button" type="button" data-close-create-room>@roomText.Cancel</button><button class="button button-primary" type="submit">@roomText.JoinAction</button></div>
+                </form>
+            </section>
         </dialog>
     }
     else

@@ -328,12 +328,11 @@ public sealed class WordRingsRoomStore
 
             player.RemainingWords.Remove(actualWord);
             player.Score += points;
-            var placementMembership = actualMembership;
+            var placementMembership = isCorrect ? actualMembership : expectedMembership;
             var placementX = Math.Clamp(x, 3, 97);
             var placementY = Math.Clamp(y, 3, 97);
-            if (room.PartialScoreEnabled && isPartial)
+            if (!isCorrect)
             {
-                placementMembership = expectedMembership;
                 (placementX, placementY) = GetCorrectedPlacementAnchor(expectedMembership);
             }
 

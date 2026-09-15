@@ -9,7 +9,7 @@ Multiplayer players never receive a reveal-rules control during an active round.
 
 ## Host-selected rules
 
-For a hosted room, the server returns up to six enabled, non-empty rule options for each ring. The host selects exactly one option per ring before the round can start.
+For a hosted room, the server returns up to six enabled, non-empty rule options for each ring. The host selects exactly one option per ring before the round can start. Because the host is not a playing participant, one connected player is enough to start a dedicated-host round once all three rules are selected.
 
 Each ring has its own **Other options** action. That action can replace the current set with another set of up to six rules only once for that ring during the round setup. The selected rule IDs are kept server-side and validated against the options that were actually offered to the host.
 
@@ -37,6 +37,6 @@ A locked room rejects new join attempts. The creator cannot remove themselves. I
 
 ## Check button and results
 
-The **Check** action is displayed directly below the word bank instead of in the top toolbar. This keeps the action next to the word that is currently being placed.
+The **Check** action is displayed directly below the word bank instead of in the top toolbar. This keeps the action next to the word that is currently being placed. After validation, every incorrect word is moved automatically into its correct Venn region; partial scoring changes only the points/feedback, not whether the correction happens.
 
 The custom result dialog shows the three rules used by the completed round, color-matched to the blue, yellow, and red rings, in addition to the personal victory/defeat message.

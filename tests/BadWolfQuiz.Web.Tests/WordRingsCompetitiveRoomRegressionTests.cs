@@ -63,6 +63,37 @@ public sealed class WordRingsCompetitiveRoomRegressionTests
     }
 
     [Fact]
+    public void Incorrect_word_moves_to_correct_region_even_without_partial_scoring()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-wrong-autocorrect-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            var store = WordRingsRoomStore.Get(new TestWebHostEnvironment(root));
+            var host = store.CreateRoom("Host", 10, partialScoreEnabled: false);
+            _ = store.JoinRoom(host.RoomCode, "Guest");
+            var state = store.StartGame(host.RoomCode, host.PlayerToken);
+            var word = state.BankWords.Concat(state.QueuedWords).First(candidate => GetDefaultMembership(candidate).Length > 0);
+            var expected = GetDefaultMembership(word);
+
+            var result = store.SubmitPlacement(host.RoomCode, host.PlayerToken, word, string.Empty, 91, 91);
+
+            Assert.False(result.IsCorrect);
+            Assert.False(result.IsPartial);
+            Assert.Equal(0, result.PointsAwarded);
+            var placement = Assert.Single(result.State.Placements, item => item.Word == word);
+            Assert.Equal(expected, placement.Membership);
+            Assert.NotEqual(91, placement.X);
+            Assert.NotEqual(91, placement.Y);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void First_player_to_target_is_only_winner_and_host_can_restart_same_room()
     {
         var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-winner-restart-{Guid.NewGuid():N}");
@@ -156,7 +187,8 @@ public sealed class WordRingsCompetitiveRoomRegressionTests
         Assert.Contains("token.dataset.word = placement.word;", script, StringComparison.Ordinal);
         Assert.Contains("livePlacementIds", script, StringComparison.Ordinal);
         Assert.Contains("findBestAutomaticPlacement", script, StringComparison.Ordinal);
-        Assert.Contains("repositionPartialPlacementIfNeeded", script, StringComparison.Ordinal);
+        Assert.Contains("repositionIncorrectPlacementIfNeeded", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("words.textContent = `${player.remainingWords}`", script, StringComparison.Ordinal);
         Assert.Contains("navigator.clipboard.writeText(roomCode)", script, StringComparison.Ordinal);
         Assert.Contains("navigator.clipboard.writeText(url.toString())", script, StringComparison.Ordinal);
         Assert.Contains("data-copy-room-link", page, StringComparison.Ordinal);
