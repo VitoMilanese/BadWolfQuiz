@@ -3,6 +3,10 @@ body {
     isolation: isolate;
 }
 
+.site-starfield-host {
+    isolation: isolate;
+}
+
 .site-starfield {
     position: fixed;
     inset: 0;

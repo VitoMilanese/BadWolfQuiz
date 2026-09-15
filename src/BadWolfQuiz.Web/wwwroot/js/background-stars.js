@@ -15,10 +15,46 @@
     let resizeTimer = null;
     let activeContextKey = '';
     let synchronizationGeneration = 0;
+    let starfieldHost = null;
+
+    const resolveStarfieldHost = () => {
+        const pageShell = document.querySelector('main.page-shell');
+        const pageRoot = pageShell?.firstElementChild;
+        if (pageRoot instanceof HTMLElement) {
+            return pageRoot;
+        }
+        if (pageShell instanceof HTMLElement) {
+            return pageShell;
+        }
+
+        const standaloneRoot = Array.from(body.children).find(element =>
+            element !== field &&
+            element instanceof HTMLElement &&
+            !['SCRIPT', 'STYLE', 'LINK'].includes(element.tagName));
+        return standaloneRoot instanceof HTMLElement ? standaloneRoot : body;
+    };
+
+    const ensureStarfieldHost = () => {
+        const nextHost = resolveStarfieldHost();
+        if (!(nextHost instanceof HTMLElement)) {
+            return;
+        }
+
+        if (starfieldHost !== nextHost) {
+            starfieldHost?.classList.remove('site-starfield-host');
+            nextHost.classList.add('site-starfield-host');
+            starfieldHost = nextHost;
+        }
+
+        if (field.parentElement !== nextHost) {
+            nextHost.prepend(field);
+        }
+    };
 
     const isEnabled = () => body.dataset.animatedStars !== 'false';
 
     const renderStars = () => {
+        ensureStarfieldHost();
         field.replaceChildren();
         const enabled = isEnabled();
         field.hidden = !enabled;
@@ -261,6 +297,17 @@
             renderStars();
         }, 180);
     });
+
+    const pageShell = document.querySelector('main.page-shell');
+    if (pageShell instanceof HTMLElement) {
+        new MutationObserver(() => {
+            const previousHost = starfieldHost;
+            ensureStarfieldHost();
+            if (previousHost !== starfieldHost) {
+                renderStars();
+            }
+        }).observe(pageShell, { childList: true });
+    }
 
     renderStars();
     synchronizeAppearance(true);

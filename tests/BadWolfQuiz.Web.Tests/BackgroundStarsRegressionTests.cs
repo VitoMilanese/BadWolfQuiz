@@ -81,6 +81,22 @@ public sealed class BackgroundStarsRegressionTests : IDisposable
     }
 
     [Fact]
+    public void Global_starfield_is_layered_inside_the_current_visual_page_root()
+    {
+        var css = ReadWebFile("wwwroot", "css", "background-stars.css");
+        var script = ReadWebFile("wwwroot", "js", "background-stars.js");
+
+        Assert.Contains(".site-starfield-host", css, StringComparison.Ordinal);
+        Assert.Contains("isolation: isolate", css, StringComparison.Ordinal);
+        Assert.Contains("resolveStarfieldHost", script, StringComparison.Ordinal);
+        Assert.Contains("main.page-shell", script, StringComparison.Ordinal);
+        Assert.Contains("pageShell?.firstElementChild", script, StringComparison.Ordinal);
+        Assert.Contains("site-starfield-host", script, StringComparison.Ordinal);
+        Assert.Contains("nextHost.prepend(field)", script, StringComparison.Ordinal);
+        Assert.Contains("MutationObserver", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Quiz_and_both_minigames_synchronize_the_host_preference()
     {
         var api = ReadWebFile("Pages", "BackgroundStarsApi.cshtml.cs");
