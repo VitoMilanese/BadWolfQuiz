@@ -37,8 +37,16 @@ public sealed class WordRingsRoomHostControlRegressionTests
                 state = coordinator.SelectRule(host.RoomCode, host.PlayerToken, ring, option.Id);
             }
 
+            var waitingRules = coordinator.GetRoomState(host.RoomCode, host.PlayerToken);
+            Assert.Equal(selectedTexts["A"], waitingRules.BlueRuleText);
+            Assert.Equal(selectedTexts["B"], waitingRules.YellowRuleText);
+            Assert.Equal(selectedTexts["C"], waitingRules.RedRuleText);
+
             var first = coordinator.JoinRoom(host.RoomCode, "First");
             var second = coordinator.JoinRoom(host.RoomCode, "Second");
+            Assert.Equal(string.Empty, first.State.BlueRuleText);
+            Assert.Equal(string.Empty, first.State.YellowRuleText);
+            Assert.Equal(string.Empty, first.State.RedRuleText);
             Assert.True(coordinator.SetJoinLocked(host.RoomCode, host.PlayerToken, true).JoinLocked);
             Assert.Throws<WordRingsRoomException>(() => coordinator.JoinRoom(host.RoomCode, "Blocked"));
             _ = coordinator.SetJoinLocked(host.RoomCode, host.PlayerToken, false);
@@ -186,6 +194,49 @@ public sealed class WordRingsRoomHostControlRegressionTests
     }
 
     [Fact]
+    public void Dedicated_host_reveals_completed_round_rules_to_players_after_finish()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-host-finished-rules-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        try
+        {
+            var coordinator = WordRingsRoomHostCoordinator.Get(new TestEnvironment(root));
+            var host = coordinator.CreateRoom("Host", 5, false, true);
+            var setup = coordinator.GetHostState(host.RoomCode, host.PlayerToken);
+            var selectedTexts = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var ring in new[] { "A", "B", "C" })
+            {
+                var group = Assert.Single(setup.RuleSelections, item => item.Ring == ring);
+                var option = group.Options.First();
+                selectedTexts[ring] = option.Text;
+                setup = coordinator.SelectRule(host.RoomCode, host.PlayerToken, ring, option.Id);
+            }
+
+            var player = coordinator.JoinRoom(host.RoomCode, "Player");
+            _ = coordinator.StartGame(host.RoomCode, host.PlayerToken);
+            var playerState = coordinator.GetRoomState(host.RoomCode, player.PlayerToken);
+            Assert.Equal(string.Empty, playerState.BlueRuleText);
+            Assert.Equal(string.Empty, playerState.YellowRuleText);
+            Assert.Equal(string.Empty, playerState.RedRuleText);
+
+            for (var i = 0; i < 5; i++)
+            {
+                var word = playerState.BankWords.First();
+                var submitted = coordinator.SubmitPlacement(host.RoomCode, player.PlayerToken, word, "A", 27, 28);
+                var pending = Assert.Single(submitted.State.Placements, item => item.IsPending);
+                _ = coordinator.ResolvePlacement(host.RoomCode, host.PlayerToken, pending.Id);
+                playerState = coordinator.GetRoomState(host.RoomCode, player.PlayerToken);
+            }
+
+            Assert.Equal("finished", playerState.Phase);
+            Assert.Equal(selectedTexts["A"], playerState.BlueRuleText);
+            Assert.Equal(selectedTexts["B"], playerState.YellowRuleText);
+            Assert.Equal(selectedTexts["C"], playerState.RedRuleText);
+        }
+        finally { Directory.Delete(root, true); }
+    }
+
+    [Fact]
     public void Creating_replacement_room_removes_previous_owned_room_immediately()
     {
         var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-room-replace-{Guid.NewGuid():N}");
@@ -301,6 +352,10 @@ public sealed class WordRingsRoomHostControlRegressionTests
         Assert.Contains("is-host-judgement-pending", coop);
         Assert.Contains("placement.isPending === true", coop);
         Assert.Contains("state?.dedicatedHostMode === true", coop);
+        Assert.Contains("nextState.isHost === true && nextState.phase !== 'finished'", coop);
+        Assert.Contains("hostState.phase !== 'finished'", host);
+        Assert.Contains("SelectedRuleText", coordinator);
+        Assert.Contains("!state.IsHost && !finished", coordinator);
         Assert.Contains("result?.isPending === true", coop);
         Assert.Contains("data-room-awaiting-host", page);
         Assert.Contains("CorrectPlacement = \"Правильно\"", hostText);

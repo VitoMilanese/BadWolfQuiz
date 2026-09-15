@@ -34,6 +34,10 @@ body:has(.word-rings-page) .page-shell {
     min-width: 0;
 }
 
+.word-rings-toolbar [data-reveal-rules][hidden] {
+    display: none !important;
+}
+
 .word-rings-toolbar-progress {
     display: inline-flex;
     align-items: center;
@@ -50,8 +54,9 @@ body:has(.word-rings-page) .page-shell {
 
 .word-rings-layout {
     display: grid;
-    grid-template-columns: minmax(230px, 1fr) minmax(0, 980px) minmax(230px, 1fr);
+    grid-template-columns: minmax(190px, 280px) minmax(0, 1280px) minmax(200px, 300px);
     grid-template-areas: ". stage bank";
+    justify-content: center;
     gap: clamp(8px, 1vw, 14px);
     width: 100%;
     max-width: none;
@@ -62,7 +67,7 @@ body:has(.word-rings-page) .page-shell {
 }
 
 .word-rings-layout.has-players {
-    grid-template-columns: minmax(220px, 1fr) minmax(0, 980px) minmax(230px, 1fr);
+    grid-template-columns: minmax(190px, 280px) minmax(0, 1280px) minmax(200px, 300px);
     grid-template-areas: "players stage bank";
 }
 
@@ -140,6 +145,7 @@ body:has(.word-rings-page) .page-shell {
     height: 100%;
     padding: 0;
     overflow: hidden;
+    container-type: size;
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -151,7 +157,7 @@ body:has(.word-rings-page) .page-shell {
     box-sizing: border-box;
     align-self: center;
     justify-self: center;
-    width: min(100%, 980px);
+    width: min(100%, 1280px);
     max-width: 100%;
     height: auto;
     aspect-ratio: 1.32 / 1;
@@ -164,12 +170,19 @@ body:has(.word-rings-page) .page-shell {
     -webkit-backdrop-filter: blur(6px);
 }
 
+@supports (width: 1cqh) {
+    .word-rings-stage {
+        width: min(100cqw, calc((100cqh - 30px) * 1.32), 1280px);
+    }
+}
+
 .word-rings-stage.is-drop-target {
     border-color: transparent;
     background: transparent;
 }
 
 .word-rings-circle {
+    width: 53%;
     border-width: clamp(4px, .56vw, 8px);
     outline: 0;
     background: transparent;
@@ -180,18 +193,18 @@ body:has(.word-rings-page) .page-shell {
 }
 
 .word-rings-circle-a {
-    left: 16%;
-    top: 4.5%;
+    left: 11%;
+    top: 2%;
 }
 
 .word-rings-circle-b {
-    right: 16%;
-    top: 4.5%;
+    right: 11%;
+    top: 2%;
 }
 
 .word-rings-circle-c {
-    left: 26%;
-    bottom: 9%;
+    left: 23.5%;
+    bottom: 2.5%;
 }
 
 .word-rings-word {
@@ -335,7 +348,24 @@ body:has(.word-rings-page) .page-shell {
     display: none !important;
 }
 
+@media (max-width: 1180px) {
+    .word-rings-layout.has-players {
+        grid-template-columns: minmax(150px, 200px) minmax(0, 1fr) minmax(160px, 210px);
+        gap: 8px;
+    }
+
+    .word-rings-layout.has-players .word-rings-players,
+    .word-rings-layout.has-players .word-rings-bank {
+        width: 100%;
+    }
+}
+
 @media (max-width: 920px) {
+    .word-rings-layout.has-players {
+        grid-template-columns: minmax(135px, 175px) minmax(0, 1fr) minmax(145px, 185px);
+        gap: 6px;
+    }
+
     .word-rings-layout:not(.has-players) {
         grid-template-columns: minmax(0, 1fr) minmax(190px, 26vw);
         grid-template-areas: "stage bank";
@@ -356,6 +386,16 @@ body:has(.word-rings-page) .page-shell {
         grid-template-columns: minmax(0, 1fr) 170px;
         grid-template-areas: "stage bank";
         gap: 6px;
+    }
+
+    .word-rings-layout.has-players {
+        grid-template-columns: minmax(105px, 125px) minmax(0, 1fr) minmax(115px, 135px);
+        gap: 5px;
+    }
+
+    .word-rings-layout.has-players .word-rings-players,
+    .word-rings-layout.has-players .word-rings-bank {
+        padding: 8px;
     }
 
     .word-rings-bank,

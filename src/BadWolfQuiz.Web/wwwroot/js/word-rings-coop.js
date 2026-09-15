@@ -570,7 +570,7 @@
         renderRules(nextState);
         renderPlacements(nextState.placements);
         const hostCanRevealRules = nextState.dedicatedHostMode === true &&
-            nextState.isHost === true && nextState.phase === 'playing';
+            nextState.isHost === true && nextState.phase !== 'finished';
         if (revealButton instanceof HTMLButtonElement) {
             revealButton.hidden = !hostCanRevealRules;
             if (!hostCanRevealRules && rules) {

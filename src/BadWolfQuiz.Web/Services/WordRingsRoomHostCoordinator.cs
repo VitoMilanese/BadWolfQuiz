@@ -416,7 +416,7 @@ public sealed class WordRingsRoomHostCoordinator
         }
     }
 
-    private static WordRingsRoomSnapshot DecorateRoomState(
+    private WordRingsRoomSnapshot DecorateRoomState(
         WordRingsRoomSnapshot state,
         bool dedicatedHost)
     {
@@ -425,13 +425,43 @@ public sealed class WordRingsRoomHostCoordinator
             return state with { DedicatedHostMode = false };
         }
 
-        return state with
+        var finished = string.Equals(state.Phase, "finished", StringComparison.Ordinal);
+        if (!state.IsHost && !finished)
         {
-            DedicatedHostMode = true,
-            BlueRuleText = state.IsHost ? state.BlueRuleText : string.Empty,
-            YellowRuleText = state.IsHost ? state.YellowRuleText : string.Empty,
-            RedRuleText = state.IsHost ? state.RedRuleText : string.Empty
-        };
+            return state with
+            {
+                DedicatedHostMode = true,
+                BlueRuleText = string.Empty,
+                YellowRuleText = string.Empty,
+                RedRuleText = string.Empty
+            };
+        }
+
+        if (state.IsHost && string.Equals(state.Phase, "waiting", StringComparison.Ordinal))
+        {
+            lock (_metaSync)
+            {
+                if (_rooms.TryGetValue(state.RoomCode, out var meta) && meta.HostChoosesRules)
+                {
+                    return state with
+                    {
+                        DedicatedHostMode = true,
+                        BlueRuleText = SelectedRuleText(meta, WordRingColor.Blue),
+                        YellowRuleText = SelectedRuleText(meta, WordRingColor.Yellow),
+                        RedRuleText = SelectedRuleText(meta, WordRingColor.Red)
+                    };
+                }
+            }
+        }
+
+        return state with { DedicatedHostMode = true };
+    }
+
+    private static string SelectedRuleText(RoomMeta meta, WordRingColor color)
+    {
+        var selectedId = meta.Selected[color];
+        if (!selectedId.HasValue) return string.Empty;
+        return meta.Options[color].FirstOrDefault(option => option.Id == selectedId.Value)?.Text ?? string.Empty;
     }
 
     private IWebHostEnvironment GetEnvironmentFromStore() =>

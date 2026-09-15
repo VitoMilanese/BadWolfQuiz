@@ -209,7 +209,8 @@
             chooseRulesButton.disabled = busy || !canOpenRules;
         }
         if (revealButton instanceof HTMLButtonElement) {
-            revealButton.hidden = !(isHostController() && hostState.phase === 'playing');
+            const canRevealRules = isHostController() && hostState.phase !== 'finished';
+            revealButton.hidden = !canRevealRules;
         }
         if (lockButton instanceof HTMLButtonElement) {
             lockButton.hidden = !(hostState.isHost === true && hostState.phase === 'waiting');

@@ -44,6 +44,6 @@ The custom result dialog shows the three rules used by the completed round, colo
 
 ## Manual adjudication for dedicated hosts
 
-When the creator chooses the non-playing host role, the three selected rules are host-private during the round. Players never receive those rule texts from room-state responses. The host can reveal or hide the rules locally with **Show rules**.
+When the creator chooses the non-playing host role, the three selected rules are host-private during the active round. Player room-state responses redact all three rule texts while play is in progress. When the round finishes, the completed-round rules are included again so every player's victory/defeat dialog can show them. The host can reveal or hide the selected rules locally before and during the round with **Show rules**.
 
 Player placements are not checked against the rule catalog in this mode. Pressing **Check** publishes one enlarged, pulsing pending token to every client and blocks that player's next submission. The host may keep the token in its submitted Venn region and press **Correct**, or drag it to another region and press **Move**. Correct awards 1 point and keeps the turn; outside-ring Correct can award that point only once per uninterrupted turn. Move awards 0.5 point when the final region shares at least one ring with the submitted region, otherwise 0 points, and always passes the turn. Resolving the token removes its pending pulse/scale treatment.

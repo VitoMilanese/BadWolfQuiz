@@ -193,7 +193,11 @@ public sealed class WordRingsCompetitiveRoomRegressionTests
         Assert.Contains("navigator.clipboard.writeText(url.toString())", script, StringComparison.Ordinal);
         Assert.Contains("data-copy-room-link", page, StringComparison.Ordinal);
         Assert.Contains("data-toggle-room-code", page, StringComparison.Ordinal);
-        Assert.Contains("grid-template-columns: minmax(220px, 1fr) minmax(0, 980px) minmax(230px, 1fr);", refinements, StringComparison.Ordinal);
+        Assert.Contains("grid-template-columns: minmax(190px, 280px) minmax(0, 1280px) minmax(200px, 300px);", refinements, StringComparison.Ordinal);
+        Assert.Contains("container-type: size;", refinements, StringComparison.Ordinal);
+        Assert.Contains("100cqh", refinements, StringComparison.Ordinal);
+        Assert.Contains("width: 53%;", refinements, StringComparison.Ordinal);
+        Assert.Contains("[data-reveal-rules][hidden]", refinements, StringComparison.Ordinal);
         Assert.Contains("width: min(100%, 280px);", refinements, StringComparison.Ordinal);
         Assert.Contains("width: min(100%, 300px);", refinements, StringComparison.Ordinal);
         Assert.Contains("border: 1px solid var(--line);", refinements, StringComparison.Ordinal);
