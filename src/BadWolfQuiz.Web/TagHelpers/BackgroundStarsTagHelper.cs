@@ -48,7 +48,7 @@ public sealed class BackgroundStarsBodyTagHelper(
         output.Attributes.SetAttribute(
             "data-animated-stars",
             enabled ? "true" : "false");
-        output.PreContent.PrependHtml(
+        output.PreContent.AppendHtml(
             "<div class=\"site-starfield\" data-site-starfield aria-hidden=\"true\"></div>");
     }
 }
