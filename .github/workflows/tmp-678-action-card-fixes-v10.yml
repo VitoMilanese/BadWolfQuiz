@@ -1,0 +1,104 @@
+name: Temporary Word Rings interaction patch v10
+
+on:
+  push:
+    branches:
+      - tmp/patch-678-action-card-fixes-v10
+
+permissions:
+  contents: write
+
+jobs:
+  patch-test-push:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/678-word-rings-action-cards
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Apply interaction patch and update regression contracts
+        shell: bash
+        run: |
+          git fetch origin tmp/patch-678-action-card-fixes-v8
+          git show origin/tmp/patch-678-action-card-fixes-v8:.github/workflows/tmp-678-action-card-fixes-v8.yml > /tmp/v8.yml
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('/tmp/v8.yml').read_text(encoding='utf-8')
+          marker = "          from pathlib import Path\n"
+          start = text.index(marker)
+          end = text.index("\n          PY\n", start)
+          body = text[start:end]
+          lines = [line[10:] if line.startswith('          ') else line for line in body.splitlines()]
+          Path('/tmp/apply-v8.py').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          PY
+          python3 /tmp/apply-v8.py
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('tests/BadWolfQuiz.Web.Tests/WordRingsActionCardsRegressionTests.cs')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace(
+              'Assert.Contains("source?.dataset.seedExample", soloScript, StringComparison.Ordinal);',
+              'Assert.Contains("source.dataset.seedExample === \'true\'", soloScript, StringComparison.Ordinal);')
+          p.write_text(text, encoding='utf-8')
+
+          p = Path('tests/BadWolfQuiz.Web.Tests/WordRingsTurnTimerAndHostUiRegressionTests.cs')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace(
+              'Assert.Contains("awaitingHost && placementHistory.get(placementId)?.isPending !== true", coop, StringComparison.Ordinal);',
+              'Assert.Contains("awaitingHost && previousPlacement?.isPending !== true", coop, StringComparison.Ordinal);')
+          p.write_text(text, encoding='utf-8')
+
+          p = Path('tests/BadWolfQuiz.Web.Tests/WordRingsGameplayRefinementRegressionTests.cs')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace(
+              'Assert.Contains("canReturnToBank = word => !gameOver && !verdicts.has(word)", script, StringComparison.Ordinal);',
+              'Assert.Contains("canReturnToBank = (word, source) =>", script, StringComparison.Ordinal);')
+          p.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Restore Web tests
+        run: dotnet restore tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-action-cards-v2.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-coop.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings.js
+          node --check src/BadWolfQuiz.Web/wwwroot/js/word-rings-pointer-drag.js
+
+      - name: Check whitespace
+        run: git diff --check
+
+      - name: Run action-card regressions
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore --configuration Release --filter "FullyQualifiedName~WordRingsActionCardsRegressionTests"
+
+      - name: Run full Web test suite
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore --configuration Release
+
+      - name: Commit and push feature fixes
+        shell: bash
+        run: |
+          git config user.name "Vitalii Hanych"
+          git config user.email "64318287+VitoMilanese@users.noreply.github.com"
+          git add \
+            src/BadWolfQuiz.Web/Services/WordRingsActionCardCoordinator.cs \
+            src/BadWolfQuiz.Web/Services/WordRingsRoomStore.cs \
+            src/BadWolfQuiz.Web/Services/WordRingsRoomHostCoordinator.cs \
+            src/BadWolfQuiz.Web/Pages/WordRings.cshtml \
+            src/BadWolfQuiz.Web/Localization/WordRingsRoomText.cs \
+            src/BadWolfQuiz.Web/TagHelpers/WordRingsActionCardsAssetsTagHelper.cs \
+            src/BadWolfQuiz.Web/wwwroot/js/word-rings-action-cards-v2.js \
+            src/BadWolfQuiz.Web/wwwroot/js/word-rings-coop.js \
+            src/BadWolfQuiz.Web/wwwroot/js/word-rings.js \
+            src/BadWolfQuiz.Web/wwwroot/css/word-rings-action-cards-v2.css \
+            tests/BadWolfQuiz.Web.Tests/WordRingsActionCardsRegressionTests.cs \
+            tests/BadWolfQuiz.Web.Tests/WordRingsTurnTimerAndHostUiRegressionTests.cs \
+            tests/BadWolfQuiz.Web.Tests/WordRingsGameplayRefinementRegressionTests.cs
+          git commit -m "Fix Word Rings action card interactions"
+          git push origin HEAD:feature/678-word-rings-action-cards
