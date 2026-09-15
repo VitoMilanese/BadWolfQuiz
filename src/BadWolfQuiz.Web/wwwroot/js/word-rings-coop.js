@@ -76,61 +76,100 @@
         'turn-transferred': root.dataset.roomVoiceTurnTransferred
     })[type] || '';
 
-    const playFallbackRoomSignal = type => {
+    const createRoomAudioContext = () => {
         const AudioContextType = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextType) return;
+        if (!AudioContextType) return null;
         try {
             roomAudioContext ||= new AudioContextType();
-            const context = roomAudioContext;
-            const patterns = {
-                'check-submitted': [620],
-                'host-correct': [660, 880],
-                'host-moved': [520, 420],
-                'victory': [660, 880, 1100],
-                'defeat': [440, 330],
-                'player-joined': [620, 760],
-                'player-left': [760, 560],
-                'player-kicked': [420, 260],
-                'turn-transferred': [600, 720]
-            };
-            const frequencies = patterns[type] || [600];
-            const start = context.currentTime;
-            frequencies.forEach((frequency, index) => {
-                const oscillator = context.createOscillator();
-                const gain = context.createGain();
-                const noteStart = start + index * 0.12;
-                oscillator.frequency.value = frequency;
-                oscillator.type = 'sine';
-                gain.gain.setValueAtTime(0.0001, noteStart);
-                gain.gain.exponentialRampToValueAtTime(0.12, noteStart + 0.015);
-                gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.1);
-                oscillator.connect(gain);
-                gain.connect(context.destination);
-                oscillator.start(noteStart);
-                oscillator.stop(noteStart + 0.11);
-            });
+            return roomAudioContext;
         } catch (error) {
-            console.debug('Word Rings fallback signal unavailable.', error);
+            console.debug('Word Rings audio context unavailable.', error);
+            return null;
         }
+    };
+
+    const unlockRoomAudio = () => {
+        const context = createRoomAudioContext();
+        if (context?.state === 'suspended') {
+            void context.resume().catch(error =>
+                console.debug('Word Rings audio context could not resume.', error));
+        }
+        try {
+            if ('speechSynthesis' in window) window.speechSynthesis.resume();
+        } catch (error) {
+            console.debug('Word Rings speech synthesis could not resume.', error);
+        }
+    };
+
+    root.addEventListener('pointerdown', unlockRoomAudio, { capture: true });
+    root.addEventListener('keydown', unlockRoomAudio, { capture: true });
+    root.addEventListener('touchstart', unlockRoomAudio, { capture: true, passive: true });
+
+    const scheduleRoomSignal = (context, type) => {
+        const patterns = {
+            'check-submitted': [620],
+            'host-correct': [660, 880],
+            'host-moved': [520, 420],
+            'victory': [660, 880, 1100],
+            'defeat': [440, 330],
+            'player-joined': [620, 760],
+            'player-left': [760, 560],
+            'player-kicked': [420, 260],
+            'turn-transferred': [600, 720]
+        };
+        const frequencies = patterns[type] || [600];
+        const startAt = context.currentTime + 0.01;
+        frequencies.forEach((frequency, index) => {
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
+            const noteStart = startAt + index * 0.13;
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gain.gain.setValueAtTime(0.0001, noteStart);
+            gain.gain.exponentialRampToValueAtTime(0.22, noteStart + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.115);
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+            oscillator.start(noteStart);
+            oscillator.stop(noteStart + 0.125);
+        });
+    };
+
+    const playRoomSignal = type => {
+        const context = createRoomAudioContext();
+        if (!context) return;
+        const play = () => {
+            if (context.state === 'running') scheduleRoomSignal(context, type);
+        };
+        if (context.state === 'suspended') {
+            void context.resume()
+                .then(play)
+                .catch(error => console.debug('Word Rings room signal was blocked.', error));
+            return;
+        }
+        play();
     };
 
     const announceRoomSignal = (type, playerName = '') => {
         const template = roomVoiceTemplate(type);
         const message = format(template, playerName || '').trim();
         if (!message) return;
+
+        // Always play an audible Web Audio cue. Speech is supplemental because
+        // browsers can accept speechSynthesis.speak() while producing no sound.
+        playRoomSignal(type);
         try {
             if ('speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function') {
+                window.speechSynthesis.resume();
                 const utterance = new window.SpeechSynthesisUtterance(message);
                 utterance.lang = root.dataset.roomVoiceLanguage || document.documentElement.lang || 'en';
                 utterance.rate = 1.05;
                 utterance.volume = 1;
-                window.speechSynthesis.speak(utterance);
-                return;
+                window.setTimeout(() => window.speechSynthesis.speak(utterance), 160);
             }
         } catch (error) {
             console.debug('Word Rings speech signal unavailable.', error);
         }
-        playFallbackRoomSignal(type);
     };
 
     const setStatus = (message, kind = '') => {
@@ -241,13 +280,13 @@
     };
 
     const placementAnchors = {
-        A: [27, 28],
-        B: [73, 28],
-        C: [50, 76],
-        AB: [50, 19],
-        AC: [35, 54],
-        BC: [65, 54],
-        ABC: [50, 43],
+        A: [26.5, 27.25],
+        B: [73.5, 27.25],
+        C: [50, 84],
+        AB: [50, 16.75],
+        AC: [32, 61],
+        BC: [68, 61],
+        ABC: [50, 46.25],
         '': [8, 88]
     };
 

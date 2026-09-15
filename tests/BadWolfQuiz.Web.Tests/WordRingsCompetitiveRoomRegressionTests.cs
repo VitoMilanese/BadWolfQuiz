@@ -196,7 +196,7 @@ public sealed class WordRingsCompetitiveRoomRegressionTests
         Assert.Contains("grid-template-columns: minmax(170px, 240px) minmax(0, 1640px) minmax(180px, 270px);", refinements, StringComparison.Ordinal);
         Assert.Contains("container-type: size;", refinements, StringComparison.Ordinal);
         Assert.Contains("100cqh", refinements, StringComparison.Ordinal);
-        Assert.Contains("width: 56%;", refinements, StringComparison.Ordinal);
+        Assert.Contains("width: 50%;", refinements, StringComparison.Ordinal);
         Assert.Contains("[data-reveal-rules][hidden]", refinements, StringComparison.Ordinal);
         Assert.Contains("width: min(100%, 240px);", refinements, StringComparison.Ordinal);
         Assert.Contains("width: min(100%, 270px);", refinements, StringComparison.Ordinal);
@@ -254,6 +254,10 @@ public sealed class WordRingsCompetitiveRoomRegressionTests
             var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
             Assert.Contains("window.SpeechSynthesisUtterance", script, StringComparison.Ordinal);
             Assert.Contains("window.speechSynthesis.speak", script, StringComparison.Ordinal);
+            Assert.Contains("root.addEventListener('pointerdown', unlockRoomAudio", script, StringComparison.Ordinal);
+            Assert.Contains("context.resume()", script, StringComparison.Ordinal);
+            Assert.Contains("playRoomSignal(type);", script, StringComparison.Ordinal);
+            Assert.Contains("gain.gain.exponentialRampToValueAtTime(0.22", script, StringComparison.Ordinal);
             Assert.Contains("check-submitted", script, StringComparison.Ordinal);
             Assert.Contains("host-correct", script, StringComparison.Ordinal);
             Assert.Contains("host-moved", script, StringComparison.Ordinal);

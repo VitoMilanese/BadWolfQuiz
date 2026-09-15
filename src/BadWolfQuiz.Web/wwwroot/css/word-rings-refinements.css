@@ -185,7 +185,7 @@ body:has(.word-rings-page) .page-shell {
 }
 
 .word-rings-circle {
-    width: 56%;
+    width: 50%;
     border-width: clamp(4px, .56vw, 8px);
     outline: 0;
     background: transparent;
@@ -196,18 +196,18 @@ body:has(.word-rings-page) .page-shell {
 }
 
 .word-rings-circle-a {
-    left: 8%;
-    top: 1.5%;
+    left: 15.5%;
+    top: 3.5%;
 }
 
 .word-rings-circle-b {
-    right: 8%;
-    top: 1.5%;
+    right: 15.5%;
+    top: 3.5%;
 }
 
 .word-rings-circle-c {
-    left: 22%;
-    bottom: 1.5%;
+    left: 25%;
+    bottom: 3.5%;
 }
 
 .word-rings-word {

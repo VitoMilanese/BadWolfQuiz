@@ -1162,13 +1162,13 @@ public sealed class WordRingsRoomStore
     private static (double X, double Y) GetCorrectedPlacementAnchor(string membership) =>
         CanonicalMembership(membership) switch
         {
-            "A" => (27, 28),
-            "B" => (73, 28),
-            "C" => (50, 76),
-            "AB" => (50, 19),
-            "AC" => (35, 54),
-            "BC" => (65, 54),
-            "ABC" => (50, 43),
+            "A" => (26.5, 27.25),
+            "B" => (73.5, 27.25),
+            "C" => (50, 84),
+            "AB" => (50, 16.75),
+            "AC" => (32, 61),
+            "BC" => (68, 61),
+            "ABC" => (50, 46.25),
             _ => (8, 88)
         };
 
