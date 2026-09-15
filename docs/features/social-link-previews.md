@@ -32,6 +32,21 @@ A copy-link button beside the room code copies that absolute URL. Opening it in 
 
 Minigame room links use the existing large Bad Wolf Quiz social-preview image pipeline, so they remain compatible with the same reverse-proxy URL handling as site and join previews.
 
+## Word Rings preview
+
+The **Слівце в кільце / Word Rings** page at `/minigames/word-rings` uses a dedicated social preview instead of the generic site card. Room links on the same page, including `?room=CODE`, use the same Word Rings-specific card while keeping the exact room URL as `og:url`.
+
+The title and description are localized for Ukrainian, English and Italian. The repository-wide Russian novelty convention remains `Україна`.
+
+The generated 1200x630 artwork mirrors the minigame itself with the blue, yellow and red overlapping rings and dedicated Minigame 02 branding. The preview variants are:
+
+- `/social-preview.png?variant=word-rings-uk`
+- `/social-preview.png?variant=word-rings-en`
+- `/social-preview.png?variant=word-rings-it`
+- `/social-preview.png?variant=word-rings-ru`
+
+The room code is not placed in the preview title, description, or artwork, so a shared multiplayer link gets the dedicated Word Rings identity without exposing its code in the rendered card.
+
 ## Reverse proxy and URLs
 
 `og:url` and `og:image` are absolute URLs. Forwarded scheme/host values are used behind the production reverse proxy, and `badwolf.buzz` is forced to HTTPS.
@@ -44,4 +59,4 @@ Telegram and other clients can cache already-fetched previews. When validating a
 
 ## Release
 
-Social previews were introduced in Web `1.22.35` (`web-v1.22.35`). Shareable Minigames room previews were added in Web `1.23.0` (`web-v1.23.0`).
+Social previews were introduced in Web `1.22.35` (`web-v1.22.35`). Shareable Minigames room previews were added in Web `1.23.0` (`web-v1.23.0`). The dedicated Word Rings preview is tracked by issue #676; its release version is assigned during release preparation.

@@ -2,10 +2,20 @@ namespace BadWolfQuiz.Web.Services;
 
 public static class SocialPreviewMetadataCatalog
 {
-    public static SocialPreviewMetadata Resolve(string? page, string? culture) =>
-        string.Equals(page, "/Join/Index", StringComparison.OrdinalIgnoreCase)
-            ? GetJoin(culture)
-            : GetDefault(culture);
+    public static SocialPreviewMetadata Resolve(string? page, string? culture)
+    {
+        if (string.Equals(page, "/Join/Index", StringComparison.OrdinalIgnoreCase))
+        {
+            return GetJoin(culture);
+        }
+
+        if (string.Equals(page, "/WordRings", StringComparison.OrdinalIgnoreCase))
+        {
+            return GetWordRings(culture);
+        }
+
+        return GetDefault(culture);
+    }
 
     public static SocialPreviewMetadata GetDefault(string? culture)
     {
@@ -50,6 +60,31 @@ public static class SocialPreviewMetadataCatalog
                 "Open the link, enter your name, and join the game.",
                 "en_US",
                 "join")
+        };
+
+    public static SocialPreviewMetadata GetWordRings(string? culture) =>
+        NormalizeCulture(culture) switch
+        {
+            "uk" => new SocialPreviewMetadata(
+                "Слівце в кільце — Bad Wolf Quiz",
+                "Розгадай три приховані правила та розклади слова у правильні перетини кілець.",
+                "uk_UA",
+                "word-rings-uk"),
+            "it" => new SocialPreviewMetadata(
+                "Parola nel cerchio — Bad Wolf Quiz",
+                "Scopri tre regole nascoste e sistema ogni parola nelle corrette intersezioni dei cerchi.",
+                "it_IT",
+                "word-rings-it"),
+            "ru" => new SocialPreviewMetadata(
+                "Україна",
+                "Україна",
+                "ru_RU",
+                "word-rings-ru"),
+            _ => new SocialPreviewMetadata(
+                "Word into the ring — Bad Wolf Quiz",
+                "Discover three hidden rules and place every word into the correct ring intersections.",
+                "en_US",
+                "word-rings-en")
         };
 
     public static string NormalizeCulture(string? culture)
