@@ -193,19 +193,126 @@ public sealed class WordRingsCompetitiveRoomRegressionTests
         Assert.Contains("navigator.clipboard.writeText(url.toString())", script, StringComparison.Ordinal);
         Assert.Contains("data-copy-room-link", page, StringComparison.Ordinal);
         Assert.Contains("data-toggle-room-code", page, StringComparison.Ordinal);
-        Assert.Contains("grid-template-columns: minmax(190px, 280px) minmax(0, 1280px) minmax(200px, 300px);", refinements, StringComparison.Ordinal);
+        Assert.Contains("grid-template-columns: minmax(170px, 240px) minmax(0, 1640px) minmax(180px, 270px);", refinements, StringComparison.Ordinal);
         Assert.Contains("container-type: size;", refinements, StringComparison.Ordinal);
         Assert.Contains("100cqh", refinements, StringComparison.Ordinal);
-        Assert.Contains("width: 53%;", refinements, StringComparison.Ordinal);
+        Assert.Contains("width: 56%;", refinements, StringComparison.Ordinal);
         Assert.Contains("[data-reveal-rules][hidden]", refinements, StringComparison.Ordinal);
-        Assert.Contains("width: min(100%, 280px);", refinements, StringComparison.Ordinal);
-        Assert.Contains("width: min(100%, 300px);", refinements, StringComparison.Ordinal);
+        Assert.Contains("width: min(100%, 240px);", refinements, StringComparison.Ordinal);
+        Assert.Contains("width: min(100%, 270px);", refinements, StringComparison.Ordinal);
         Assert.Contains("border: 1px solid var(--line);", refinements, StringComparison.Ordinal);
         Assert.Contains("box-shadow: none;", refinements, StringComparison.Ordinal);
         Assert.Contains("••••••", page, StringComparison.Ordinal);
         Assert.True(
             pointerDrag.IndexOf("bringToFront(word);", StringComparison.Ordinal) <
             pointerDrag.IndexOf("if (!canBegin(value, word)) return;", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Multiplayer_room_events_drive_voice_signals_and_player_departure()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-room-signals-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            var environment = new TestWebHostEnvironment(root);
+            var coordinator = WordRingsRoomHostCoordinator.Get(environment);
+            var host = coordinator.CreateRoom("Host", 5, partialScoreEnabled: false, hostChoosesRules: false);
+            var guest = coordinator.JoinRoom(host.RoomCode, "Guest");
+            var leaver = coordinator.JoinRoom(host.RoomCode, "Leaver");
+
+            var joined = coordinator.GetRoomState(host.RoomCode, host.PlayerToken);
+            Assert.Contains(joined.Events, item => item.Type == WordRingsRoomEventType.PlayerJoined && item.PlayerId == guest.State.PlayerId);
+            Assert.Contains(joined.Events, item => item.Type == WordRingsRoomEventType.PlayerJoined && item.PlayerId == leaver.State.PlayerId);
+
+            var started = coordinator.StartGame(host.RoomCode, host.PlayerToken);
+            var word = started.BankWords.First();
+            var submitted = coordinator.SubmitPlacement(
+                host.RoomCode,
+                host.PlayerToken,
+                word,
+                GetDefaultMembership(word),
+                50,
+                43);
+            Assert.Contains(submitted.State.Events, item => item.Type == WordRingsRoomEventType.CheckSubmitted);
+
+            _ = coordinator.SetCurrentPlayer(host.RoomCode, host.PlayerToken, guest.State.PlayerId);
+            var transferred = coordinator.GetRoomState(host.RoomCode, host.PlayerToken);
+            Assert.Contains(transferred.Events, item => item.Type == WordRingsRoomEventType.TurnTransferred && item.PlayerId == guest.State.PlayerId);
+
+            _ = coordinator.KickPlayer(host.RoomCode, host.PlayerToken, guest.State.PlayerId);
+            var kicked = coordinator.GetRoomState(host.RoomCode, host.PlayerToken);
+            Assert.Contains(kicked.Events, item => item.Type == WordRingsRoomEventType.PlayerKicked && item.PlayerId == guest.State.PlayerId);
+
+            coordinator.LeaveRoom(host.RoomCode, leaver.PlayerToken);
+            var left = coordinator.GetRoomState(host.RoomCode, host.PlayerToken);
+            Assert.Contains(left.Events, item => item.Type == WordRingsRoomEventType.PlayerLeft && item.PlayerId == leaver.State.PlayerId);
+
+            var script = ReadWebFile("wwwroot", "js", "word-rings-coop.js");
+            var page = ReadWebFile("Pages", "WordRings.cshtml");
+            var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
+            Assert.Contains("window.SpeechSynthesisUtterance", script, StringComparison.Ordinal);
+            Assert.Contains("window.speechSynthesis.speak", script, StringComparison.Ordinal);
+            Assert.Contains("check-submitted", script, StringComparison.Ordinal);
+            Assert.Contains("host-correct", script, StringComparison.Ordinal);
+            Assert.Contains("host-moved", script, StringComparison.Ordinal);
+            Assert.Contains("player-joined", script, StringComparison.Ordinal);
+            Assert.Contains("player-left", script, StringComparison.Ordinal);
+            Assert.Contains("player-kicked", script, StringComparison.Ordinal);
+            Assert.Contains("turn-transferred", script, StringComparison.Ordinal);
+            Assert.Contains("nonPlayingHost", script, StringComparison.Ordinal);
+            Assert.Contains("data-room-voice-victory", page, StringComparison.Ordinal);
+            Assert.Contains("[data-start-room][hidden]", refinements, StringComparison.Ordinal);
+            Assert.Contains("[data-toggle-room-lock][hidden]", refinements, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Dedicated_host_resolution_events_distinguish_correct_and_move()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-host-signals-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            var environment = new TestWebHostEnvironment(root);
+            var coordinator = WordRingsRoomHostCoordinator.Get(environment);
+            var host = coordinator.CreateRoom("Referee", 5, partialScoreEnabled: false, hostChoosesRules: true);
+            var player = coordinator.JoinRoom(host.RoomCode, "Player");
+
+            var choices = coordinator.GetHostState(host.RoomCode, host.PlayerToken);
+            foreach (var group in choices.RuleSelections)
+            {
+                _ = coordinator.SelectRule(host.RoomCode, host.PlayerToken, group.Ring, group.Options.First().Id);
+            }
+
+            _ = coordinator.StartGame(host.RoomCode, host.PlayerToken);
+            var playerState = coordinator.GetRoomState(host.RoomCode, player.PlayerToken);
+            Assert.True(playerState.BankWords.Count >= 2);
+
+            var first = coordinator.SubmitPlacement(host.RoomCode, player.PlayerToken, playerState.BankWords[0], "A", 35, 35);
+            var firstPending = Assert.Single(first.State.Placements, item => item.IsPending);
+            _ = coordinator.ResolvePlacement(host.RoomCode, host.PlayerToken, firstPending.Id);
+            var afterCorrect = coordinator.GetRoomState(host.RoomCode, player.PlayerToken);
+            Assert.Contains(afterCorrect.Events, item => item.Type == WordRingsRoomEventType.HostCorrect);
+
+            var secondWord = afterCorrect.BankWords.First();
+            var second = coordinator.SubmitPlacement(host.RoomCode, player.PlayerToken, secondWord, "A", 35, 35);
+            var secondPending = Assert.Single(second.State.Placements, item => item.IsPending);
+            _ = coordinator.MovePlacement(host.RoomCode, host.PlayerToken, secondPending.Id, "B", 65, 35);
+            _ = coordinator.ResolvePlacement(host.RoomCode, host.PlayerToken, secondPending.Id);
+            var afterMove = coordinator.GetRoomState(host.RoomCode, player.PlayerToken);
+            Assert.Contains(afterMove.Events, item => item.Type == WordRingsRoomEventType.HostMoved);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
     }
 
     private static string GetDefaultMembership(string word)

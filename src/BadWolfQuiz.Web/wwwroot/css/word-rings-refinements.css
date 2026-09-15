@@ -34,7 +34,10 @@ body:has(.word-rings-page) .page-shell {
     min-width: 0;
 }
 
-.word-rings-toolbar [data-reveal-rules][hidden] {
+.word-rings-toolbar [data-start-room][hidden],
+.word-rings-toolbar [data-open-room-rule-picker][hidden],
+.word-rings-toolbar [data-reveal-rules][hidden],
+.word-rings-toolbar [data-toggle-room-lock][hidden] {
     display: none !important;
 }
 
@@ -54,8 +57,8 @@ body:has(.word-rings-page) .page-shell {
 
 .word-rings-layout {
     display: grid;
-    grid-template-columns: minmax(190px, 280px) minmax(0, 1280px) minmax(200px, 300px);
-    grid-template-areas: ". stage bank";
+    grid-template-columns: minmax(0, 1640px) minmax(200px, 270px);
+    grid-template-areas: "stage bank";
     justify-content: center;
     gap: clamp(8px, 1vw, 14px);
     width: 100%;
@@ -67,7 +70,7 @@ body:has(.word-rings-page) .page-shell {
 }
 
 .word-rings-layout.has-players {
-    grid-template-columns: minmax(190px, 280px) minmax(0, 1280px) minmax(200px, 300px);
+    grid-template-columns: minmax(170px, 240px) minmax(0, 1640px) minmax(180px, 270px);
     grid-template-areas: "players stage bank";
 }
 
@@ -90,7 +93,7 @@ body:has(.word-rings-page) .page-shell {
 
 .word-rings-layout.has-players .word-rings-players {
     box-sizing: border-box;
-    width: min(100%, 280px);
+    width: min(100%, 240px);
     max-height: calc(100% - 16px);
     align-self: center;
     justify-self: center;
@@ -99,7 +102,7 @@ body:has(.word-rings-page) .page-shell {
 .word-rings-bank {
     grid-area: bank;
     box-sizing: border-box;
-    width: min(100%, 300px);
+    width: min(100%, 270px);
     max-height: calc(100% - 16px);
     align-self: center;
     justify-self: center;
@@ -157,10 +160,10 @@ body:has(.word-rings-page) .page-shell {
     box-sizing: border-box;
     align-self: center;
     justify-self: center;
-    width: min(100%, 1280px);
+    width: min(100%, 1640px);
     max-width: 100%;
     height: auto;
-    aspect-ratio: 1.32 / 1;
+    aspect-ratio: 1.4 / 1;
     margin: 0;
     border: 1px solid var(--line);
     border-radius: 20px;
@@ -172,7 +175,7 @@ body:has(.word-rings-page) .page-shell {
 
 @supports (width: 1cqh) {
     .word-rings-stage {
-        width: min(100cqw, calc((100cqh - 30px) * 1.32), 1280px);
+        width: min(100cqw, calc((100cqh - 24px) * 1.4), 1640px);
     }
 }
 
@@ -182,7 +185,7 @@ body:has(.word-rings-page) .page-shell {
 }
 
 .word-rings-circle {
-    width: 53%;
+    width: 56%;
     border-width: clamp(4px, .56vw, 8px);
     outline: 0;
     background: transparent;
@@ -193,18 +196,18 @@ body:has(.word-rings-page) .page-shell {
 }
 
 .word-rings-circle-a {
-    left: 11%;
-    top: 2%;
+    left: 8%;
+    top: 1.5%;
 }
 
 .word-rings-circle-b {
-    right: 11%;
-    top: 2%;
+    right: 8%;
+    top: 1.5%;
 }
 
 .word-rings-circle-c {
-    left: 23.5%;
-    bottom: 2.5%;
+    left: 22%;
+    bottom: 1.5%;
 }
 
 .word-rings-word {

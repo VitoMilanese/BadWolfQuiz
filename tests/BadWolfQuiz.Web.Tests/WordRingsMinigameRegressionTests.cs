@@ -223,9 +223,9 @@ public sealed class WordRingsMinigameRegressionTests
         Assert.Contains("--word-ring-a: #5f86ee", styles);
         Assert.Contains("--word-ring-b: #e0b43c", styles);
         Assert.Contains("--word-ring-c: #e85d5d", styles);
-        Assert.Contains("left: 11%", refinements);
-        Assert.Contains("right: 11%", refinements);
-        Assert.Contains("bottom: 2.5%", refinements);
+        Assert.Contains("left: 8%", refinements);
+        Assert.Contains("right: 8%", refinements);
+        Assert.Contains("bottom: 1.5%", refinements);
         Assert.Contains("data-membership=\"AB\"", styles);
         Assert.Contains("data-membership=\"AC\"", styles);
         Assert.Contains("data-membership=\"BC\"", styles);

@@ -39,6 +39,13 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
     public IActionResult OnPostRoomState(string? roomCode, string? playerToken) =>
         Execute(() => new { success = true, state = HostCoordinator.GetRoomState(roomCode, playerToken) });
 
+    public IActionResult OnPostLeaveRoom(string? roomCode, string? playerToken) =>
+        Execute(() =>
+        {
+            HostCoordinator.LeaveRoom(roomCode, playerToken);
+            return new { success = true };
+        });
+
     public IActionResult OnPostRoomHostState(string? roomCode, string? playerToken) =>
         Execute(() => new { success = true, state = HostCoordinator.GetHostState(roomCode, playerToken) });
 

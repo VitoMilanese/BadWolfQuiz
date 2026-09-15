@@ -64,7 +64,17 @@
      data-room-rules-required="@hostText.RulesRequired"
      data-room-host-correct="@hostText.CorrectPlacement"
      data-room-host-move="@hostText.MovePlacement"
-     data-room-awaiting-host="@hostText.AwaitingHostDecision">
+     data-room-awaiting-host="@hostText.AwaitingHostDecision"
+     data-room-voice-language="@CultureInfo.CurrentUICulture.Name"
+     data-room-voice-check="@roomText.VoiceCheck"
+     data-room-voice-correct="@roomText.VoiceCorrect"
+     data-room-voice-move="@roomText.VoiceMove"
+     data-room-voice-victory="@roomText.VoiceVictory"
+     data-room-voice-defeat="@roomText.VoiceDefeat"
+     data-room-voice-player-joined="@roomText.VoicePlayerJoinedTemplate"
+     data-room-voice-player-left="@roomText.VoicePlayerLeftTemplate"
+     data-room-voice-player-kicked="@roomText.VoicePlayerKickedTemplate"
+     data-room-voice-turn-transferred="@roomText.VoiceTurnTransferredTemplate">
 
     @if (!isCooperativeRoom)
     {

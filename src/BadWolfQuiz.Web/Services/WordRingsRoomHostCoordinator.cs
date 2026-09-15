@@ -94,6 +94,9 @@ public sealed class WordRingsRoomHostCoordinator
         return DecorateRoomState(state, IsDedicatedHostRoom(state.RoomCode));
     }
 
+    public void LeaveRoom(string? roomCode, string? playerToken) =>
+        _store.LeaveRoom(roomCode, playerToken);
+
     public WordRingsRoomSnapshot StartGame(string? roomCode, string? playerToken)
     {
         var code = Normalize(roomCode);
@@ -263,20 +266,7 @@ public sealed class WordRingsRoomHostCoordinator
         {
             throw new InvalidOperationException("PlacementPending");
         }
-        MutateRoom(code, room =>
-        {
-            var players = Players(room);
-            var index = IndexOfPlayer(players, playerId);
-            if (index < 0 ||
-                (dedicatedHost && IsHost(players[index]!)) ||
-                RemainingWords(players[index]!).Count == 0)
-            {
-                throw new InvalidOperationException("InvalidPlayer");
-            }
-            Set(room, "CurrentPlayerIndex", index);
-            Set(room, "OutsidePointAwardedThisTurn", false);
-            IncrementVersion(room);
-        });
+        _ = _store.SetCurrentPlayer(code, playerToken, playerId, dedicatedHost);
         return GetHostState(code, playerToken);
     }
 
@@ -288,30 +278,7 @@ public sealed class WordRingsRoomHostCoordinator
         {
             throw new InvalidOperationException("PlacementPending");
         }
-        MutateRoom(code, room =>
-        {
-            var players = Players(room);
-            var index = IndexOfPlayer(players, playerId);
-            if (index < 0) throw new InvalidOperationException("InvalidPlayer");
-            if (IsHost(players[index]!)) throw new InvalidOperationException("CannotKickHost");
-            var current = (int)Get(room, "CurrentPlayerIndex")!;
-            var removedCurrent = current == index;
-            players.RemoveAt(index);
-            if (players.Count == 0)
-            {
-                Set(room, "CurrentPlayerIndex", -1);
-            }
-            else if (removedCurrent)
-            {
-                Set(room, "CurrentPlayerIndex", FirstPlayableIndex(players, dedicatedHost));
-                Set(room, "OutsidePointAwardedThisTurn", false);
-            }
-            else if (current > index)
-            {
-                Set(room, "CurrentPlayerIndex", current - 1);
-            }
-            IncrementVersion(room);
-        });
+        _ = _store.KickPlayer(code, playerToken, playerId);
         return GetHostState(code, playerToken);
     }
 
