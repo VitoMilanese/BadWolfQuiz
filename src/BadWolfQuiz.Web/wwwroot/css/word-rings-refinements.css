@@ -50,8 +50,8 @@ body:has(.word-rings-page) .page-shell {
 
 .word-rings-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) clamp(230px, 20vw, 320px);
-    grid-template-areas: "stage bank";
+    grid-template-columns: minmax(230px, 1fr) minmax(0, 980px) minmax(230px, 1fr);
+    grid-template-areas: ". stage bank";
     gap: clamp(8px, 1vw, 14px);
     width: 100%;
     max-width: none;
@@ -62,7 +62,6 @@ body:has(.word-rings-page) .page-shell {
 }
 
 .word-rings-layout.has-players {
-    grid-template-columns: minmax(220px, 1fr) minmax(0, 980px) minmax(230px, 1fr);
     grid-template-areas: "players stage bank";
 }
 
@@ -91,16 +90,13 @@ body:has(.word-rings-page) .page-shell {
     justify-self: center;
 }
 
-.word-rings-layout.has-players .word-rings-bank {
+.word-rings-bank {
+    grid-area: bank;
     box-sizing: border-box;
     width: min(100%, 300px);
     max-height: calc(100% - 16px);
     align-self: center;
     justify-self: center;
-}
-
-.word-rings-bank {
-    grid-area: bank;
     min-width: 0;
     min-height: 0;
     padding: 14px;
@@ -339,8 +335,14 @@ body:has(.word-rings-page) .page-shell {
 }
 
 @media (max-width: 920px) {
-    .word-rings-layout {
+    .word-rings-layout,
+    .word-rings-layout.has-players {
         grid-template-columns: minmax(0, 1fr) minmax(190px, 26vw);
+        grid-template-areas: "stage bank";
+    }
+
+    .word-rings-layout.has-players .word-rings-players {
+        display: none;
     }
 
     .word-rings-toolbar-progress {
@@ -354,8 +356,10 @@ body:has(.word-rings-page) .page-shell {
         gap: 6px;
     }
 
-    .word-rings-layout {
+    .word-rings-layout,
+    .word-rings-layout.has-players {
         grid-template-columns: minmax(0, 1fr) 170px;
+        grid-template-areas: "stage bank";
         gap: 6px;
     }
 
@@ -365,6 +369,7 @@ body:has(.word-rings-page) .page-shell {
     }
 
     .word-rings-bank {
+        width: 100%;
         padding: 8px;
     }
 
