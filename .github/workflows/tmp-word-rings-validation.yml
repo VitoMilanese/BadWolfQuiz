@@ -29,8 +29,8 @@ jobs:
       - name: Check whitespace
         run: git diff --check 2a8bcd84ba1054b75459dc4c02acc2ff68339573..HEAD
 
-      - name: Restore
-        run: dotnet restore BadWolfQuiz.sln
+      - name: Restore web tests
+        run: dotnet restore tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
 
       - name: Focused Word Rings action-card tests
         run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --no-restore --filter FullyQualifiedName~WordRingsActionCardsRegressionTests
