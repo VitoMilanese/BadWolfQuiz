@@ -26,7 +26,9 @@ jobs:
         run: |
           git fetch origin tmp/patch-678-action-card-fixes-v11
           git show origin/tmp/patch-678-action-card-fixes-v11:.github/tmp/apply-678-v11.py > /tmp/apply-678-v11.py
+          git show origin/tmp/patch-678-action-card-fixes-v11:.github/tmp/apply-678-v11-tests.py > /tmp/apply-678-v11-tests.py
           python3 /tmp/apply-678-v11.py
+          python3 /tmp/apply-678-v11-tests.py
 
       - name: Restore Web tests
         run: dotnet restore tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj
@@ -59,7 +61,8 @@ jobs:
             src/BadWolfQuiz.Web/wwwroot/js/word-rings-action-cards-v2.js \
             src/BadWolfQuiz.Web/wwwroot/js/word-rings-coop.js \
             src/BadWolfQuiz.Web/wwwroot/js/word-rings.js \
-            tests/BadWolfQuiz.Web.Tests/WordRingsActionCardsRegressionTests.cs
+            tests/BadWolfQuiz.Web.Tests/WordRingsActionCardsRegressionTests.cs \
+            tests/BadWolfQuiz.Web.Tests/WordRingsGameplayRefinementRegressionTests.cs
           git diff --cached --quiet && exit 0
           git commit -m "Fix Word Rings temporary words and host effects"
           git push origin HEAD:feature/678-word-rings-action-cards
