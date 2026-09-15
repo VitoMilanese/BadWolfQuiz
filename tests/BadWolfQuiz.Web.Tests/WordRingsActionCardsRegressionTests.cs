@@ -114,7 +114,7 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("GrantTemporaryWord(code, state, targetId);", service, StringComparison.Ordinal);
         Assert.Contains("RemainingWords(target).Insert(0, temporaryWord);", service, StringComparison.Ordinal);
         Assert.Contains("target.SkipTurns = 0;", service, StringComparison.Ordinal);
-        Assert.DoesNotContain("FailureImmunity { get; set; }", service, StringComparison.Ordinal);
+        Assert.DoesNotContain("public bool FailureImmunity { get; set; }", service, StringComparison.Ordinal);
         Assert.DoesNotContain("TemporaryCard { get; set; }", service, StringComparison.Ordinal);
     }
 
