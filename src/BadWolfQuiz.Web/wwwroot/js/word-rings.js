@@ -92,6 +92,13 @@
         token.style.zIndex = String(topZIndex);
     };
 
+    placedLayer.addEventListener('pointerdown', event => {
+        const token = event.target instanceof Element
+            ? event.target.closest('.word-rings-word')
+            : null;
+        if (token instanceof HTMLElement && placedLayer.contains(token)) bringToFront(token);
+    }, true);
+
     const disableAllWords = () => {
         root.querySelectorAll('.word-rings-word').forEach(token => {
             if (token instanceof HTMLButtonElement) token.disabled = true;
@@ -277,10 +284,11 @@
             token.textContent = seed.word;
             token.style.left = `${anchor[0]}%`;
             token.style.top = `${anchor[1]}%`;
-            token.disabled = true;
+            token.disabled = false;
             token.draggable = false;
             placedLayer.append(token);
             bringToFront(token);
+            wireWord?.(token);
         }
     };
 
@@ -361,7 +369,15 @@
         }
     };
 
-    const assignToStage = (word, clientX, clientY) => {
+    const assignToStage = (word, clientX, clientY, dragSource) => {
+        if (dragSource instanceof HTMLElement && dragSource.dataset.seedExample === 'true') {
+            const target = membershipAt(clientX, clientY);
+            dragSource.style.left = `${target.x}%`;
+            dragSource.style.top = `${target.y}%`;
+            bringToFront(dragSource);
+            return;
+        }
+
         const bankSource = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
         const movedFromBank = bankSource instanceof HTMLElement && !bankSource.hidden;
 
@@ -373,7 +389,7 @@
         if (movedFromBank) replenishWordBank();
     };
 
-    const assignOutside = word => {
+    const assignOutside = (word, dragSource) => {
         const bankSource = wordList.querySelector(`.word-rings-word[data-word="${CSS.escape(word)}"]`);
         const movedFromBank = bankSource instanceof HTMLElement && !bankSource.hidden;
 
@@ -398,7 +414,8 @@
         if (movedFromBank) replenishWordBank();
     };
 
-    const returnToBank = word => {
+    const returnToBank = (word, dragSource) => {
+        if (dragSource instanceof HTMLElement && dragSource.dataset.seedExample === 'true') return;
         if (gameOver || verdicts.has(word)) return;
         assignments.delete(word);
         removePlacedWord(word);
@@ -408,20 +425,27 @@
         }
     };
 
-    const canBegin = word => !gameOver &&
-        (verdicts.has(word) || pendingWord === null || pendingWord === word);
+    const canBegin = (word, source) => {
+        if (source instanceof HTMLElement && source.dataset.seedExample === 'true') return !gameOver;
+        return !gameOver && (verdicts.has(word) || pendingWord === null || pendingWord === word);
+    };
 
-    const canDropStage = (word, membership) => {
+    const canDropStage = (word, membership, source) => {
         if (gameOver) return false;
         const normalized = canonical(membership);
+        if (source instanceof HTMLElement && source.dataset.seedExample === 'true') {
+            return normalized === canonical(source.dataset.membership);
+        }
         if (verdicts.has(word)) {
             return lockedMemberships.get(word) === normalized;
         }
         return pendingWord === null || pendingWord === word;
     };
 
-    const canDropOutside = word => canDropStage(word, '');
-    const canReturnToBank = word => !gameOver && !verdicts.has(word);
+    const canDropOutside = (word, source) => canDropStage(word, '', source);
+    const canReturnToBank = (word, source) =>
+        !(source instanceof HTMLElement && source.dataset.seedExample === 'true') &&
+        !gameOver && !verdicts.has(word);
 
     const onPlacementChanged = () => {
         clearStatus();

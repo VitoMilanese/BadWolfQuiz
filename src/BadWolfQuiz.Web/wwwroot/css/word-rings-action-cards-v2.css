@@ -223,6 +223,7 @@
     cursor: pointer;
     transform: translateZ(0);
     transform-origin: center center;
+    will-change: transform;
     transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
     z-index: 1;
 }
@@ -471,7 +472,7 @@
 .word-rings-page.has-pending-word .word-rings-placed .word-rings-word:not(.is-correct):not(.is-wrong):not(.is-partial):not(.is-seed-example),
 .word-rings-word.is-room-pending,
 .word-rings-word.is-host-judgement-pending {
-    z-index: 100 !important;
+    z-index: 100;
     animation: word-rings-action-pending-pulse 650ms ease-in-out infinite alternate;
 }
 
@@ -501,7 +502,7 @@
 }
 
 .word-rings-action-timeout-notice.is-visible {
-    animation: word-rings-action-timeout-pop 1.05s cubic-bezier(.2, .85, .24, 1) both;
+    animation: word-rings-action-timeout-pop 2.05s cubic-bezier(.2, .85, .24, 1) both;
 }
 
 @keyframes word-rings-action-hint-pulse {
@@ -604,6 +605,33 @@
 
 .word-rings-room-dialog[data-create-room-dialog] .word-rings-room-dialog-actions {
     margin-top: 0;
+}
+
+.word-rings-sound-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 0 8px;
+    border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--bg) 58%, transparent);
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+}
+
+.word-rings-sound-toggle input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--gold);
+}
+
+.word-rings-sound-toggle span {
+    font-size: .9rem;
+    line-height: 1;
 }
 
 @media (max-width: 1180px) {

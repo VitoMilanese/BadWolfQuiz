@@ -32,7 +32,7 @@
                 ['Rest', 'Skip your turn and receive immunity for your next turn.'],
                 ['Shuffle', 'Replace all held action cards with the same number of random other cards.'],
                 ['Time-out', 'The selected player skips their next turn.'],
-                ['Shield', 'Passive: while held, blocks Block, Time-out, Mask and Anagram used against you.'],
+                ['Shield', 'Passive: while held, blocks Replace, Block, Shuffle, Time-out, Mask and Anagram used against you.'],
                 ['Mask', 'Hide some letters in the selected player’s words for one attempt.'],
                 ['Anagram', 'Shuffle letters in the selected player’s words for one attempt.'],
                 ['Cleanse', 'Remove Block, Time-out, Mask and Anagram effects; if none are active, grant one-turn immunity.']
@@ -55,7 +55,7 @@
                 ['Перепочинок', 'Пропустити хід, але отримати імунітет на наступний.'],
                 ['Перетасовка', 'Змінити всі свої картки дій на таку ж кількість випадкових інших.'],
                 ['Тайм-аут', 'Обраний гравець пропускає наступний хід.'],
-                ['Щит', 'Пасивна: поки картка в інвентарі, блокує Блокування, Тайм-аут, Маскування та Анаграму проти вас.'],
+                ['Щит', 'Пасивна: поки картка в інвентарі, блокує Заміну, Блокування, Перетасовку, Тайм-аут, Маскування та Анаграму проти вас.'],
                 ['Маскування', 'Приховати частину літер у словах обраного гравця на одну спробу.'],
                 ['Анаграма', 'Перемішати літери в словах обраного гравця на одну спробу.'],
                 ['Очищення', 'Прибрати ефекти Блокування, Тайм-аут, Маскування й Анаграма; якщо їх немає — дати імунітет на один хід.']
@@ -78,7 +78,7 @@
                 ['Pausa', 'Salta il turno e ottieni immunità per il turno successivo.'],
                 ['Rimescola', 'Sostituisci tutte le carte con lo stesso numero di carte casuali diverse.'],
                 ['Time-out', 'Il giocatore scelto salta il prossimo turno.'],
-                ['Scudo', 'Passiva: finché è in mano blocca Blocco, Time-out, Mascheramento e Anagramma contro di te.'],
+                ['Scudo', 'Passiva: finché è in mano blocca Sostituzione, Blocco, Rimescola, Time-out, Mascheramento e Anagramma contro di te.'],
                 ['Mascheramento', 'Nascondi alcune lettere nelle parole del giocatore scelto per un tentativo.'],
                 ['Anagramma', 'Mescola le lettere nelle parole del giocatore scelto per un tentativo.'],
                 ['Purifica', 'Rimuove Blocco, Time-out, Mascheramento e Anagramma; altrimenti concede immunità per un turno.']
@@ -130,6 +130,7 @@
     let soloAttempt = null;
     let selectedCard = null;
     let carouselOffset = 0;
+    let lastRenderedCardSignature = '';
 
     try {
         const config = root.querySelector('[data-word-rings-puzzle]');
@@ -493,7 +494,26 @@
             timeoutNotice.classList.remove('is-visible');
             timeoutNotice.hidden = true;
             timeoutNoticeTimer = null;
-        }, 1150);
+        }, 2150);
+    };
+
+    const syncRenderedCards = cards => {
+        const signature = cards
+            .map(card => `${Number(card.id)}:${card.isTemporary === true ? 1 : 0}`)
+            .join('|');
+        if (signature !== lastRenderedCardSignature)
+        {
+            carousel.replaceChildren();
+            cards.forEach(card => carousel.append(makeCard(card)));
+            lastRenderedCardSignature = signature;
+            return;
+        }
+
+        carousel.querySelectorAll('.word-rings-action-card[data-action-card-id]').forEach(button => {
+            const id = Number(button.dataset.actionCardId || 0);
+            button.classList.toggle('is-passive', passiveCards.has(id));
+            button.classList.toggle('is-unusable', !cardUsable(id));
+        });
     };
 
     const renderCards = () => {
@@ -513,8 +533,7 @@
         const kps = isSolo ? soloSettings.kps : (multiplayerSnapshot?.correctWordsPerCard || 2);
         const max = isSolo ? soloSettings.max : (multiplayerSnapshot?.maximumCards || 2);
         shellMeta.textContent = format(text.progress, progressValue, kps, cards.length, max);
-        carousel.replaceChildren();
-        cards.forEach(card => carousel.append(makeCard(card)));
+        syncRenderedCards(cards);
         emptyMessage.hidden = cards.length > 0;
         carouselFrame.hidden = cards.length === 0;
         carouselOffset = Math.min(carouselOffset, Math.max(0, cards.length - 1));
@@ -772,6 +791,10 @@
         if (!snapshot) return;
         const blocked = new Set((snapshot.blockedWords || []).map(word => String(word).toLocaleLowerCase()));
         const temporary = new Set((snapshot.temporaryWords || []).map(word => String(word).toLocaleLowerCase()));
+        const maskedWords = new Set((snapshot.maskedWords || []).map(word => String(word).toLocaleLowerCase()));
+        const anagrammedWords = new Set((snapshot.anagrammedWords || []).map(word => String(word).toLocaleLowerCase()));
+        const legacyMasked = !Array.isArray(snapshot.maskedWords) && snapshot.masked === true;
+        const legacyAnagrammed = !Array.isArray(snapshot.anagrammedWords) && snapshot.anagrammed === true;
         const hint = String(snapshot.hintWord || '').toLocaleLowerCase();
         wordList.querySelectorAll('.word-rings-word[data-word]').forEach(token => {
             if (!(token instanceof HTMLButtonElement)) return;
@@ -783,14 +806,16 @@
             token.classList.toggle('is-action-temporary-word', temporary.has(normalized));
             if (isBlocked) {
                 token.dataset.actionBlockedManaged = 'true';
-                token.disabled = true;
+                if (!token.disabled) token.disabled = true;
             } else if (token.dataset.actionBlockedManaged === 'true') {
                 delete token.dataset.actionBlockedManaged;
-                if (isSolo || (snapshot.isOwnTurn === true && !root.classList.contains('is-awaiting-host-judgement'))) token.disabled = false;
+                const shouldEnable = isSolo ||
+                    (snapshot.isOwnTurn === true && !root.classList.contains('is-awaiting-host-judgement'));
+                if (shouldEnable && token.disabled) token.disabled = false;
             }
             let display = original;
-            if (snapshot.masked === true) display = maskWord(original);
-            else if (snapshot.anagrammed === true) display = anagramWord(original);
+            if (legacyMasked || maskedWords.has(normalized)) display = maskWord(original);
+            else if (legacyAnagrammed || anagrammedWords.has(normalized)) display = anagramWord(original);
             if (token.textContent !== display) token.textContent = display;
         });
     };

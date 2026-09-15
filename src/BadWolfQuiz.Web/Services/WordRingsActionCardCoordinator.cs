@@ -44,7 +44,11 @@ public sealed record WordRingsActionCardSnapshot(
     bool Anagrammed,
     long Revision,
     long TimeoutNoticeRevision,
-    string? TimeoutNoticePlayerName);
+    string? TimeoutNoticePlayerName)
+{
+    public IReadOnlyList<string> MaskedWords { get; init; } = [];
+    public IReadOnlyList<string> AnagrammedWords { get; init; } = [];
+}
 
 public sealed record WordRingsActionCardUseResult(
     WordRingsActionCardSnapshot State,
@@ -65,7 +69,14 @@ public sealed class WordRingsActionCardCoordinator
         [WordRingsActionCardKind.Shuffle, WordRingsActionCardKind.Cleanse];
 
     private static readonly HashSet<WordRingsActionCardKind> ShieldedCards =
-        [WordRingsActionCardKind.Block, WordRingsActionCardKind.Timeout, WordRingsActionCardKind.Mask, WordRingsActionCardKind.Anagram];
+        [
+            WordRingsActionCardKind.Replace,
+            WordRingsActionCardKind.Block,
+            WordRingsActionCardKind.Shuffle,
+            WordRingsActionCardKind.Timeout,
+            WordRingsActionCardKind.Mask,
+            WordRingsActionCardKind.Anagram
+        ];
 
     private static readonly ConcurrentDictionary<string, Lazy<WordRingsActionCardCoordinator>> Instances =
         new(StringComparer.OrdinalIgnoreCase);
@@ -434,16 +445,10 @@ public sealed class WordRingsActionCardCoordinator
                 }
                 break;
             case WordRingsActionCardKind.Mask:
-                lock (_metaSync)
-                {
-                    RequirePlayer(RequireMeta(code), targetId).Masked = true;
-                }
+                ApplyWordObfuscation(code, targetId, mask: true);
                 break;
             case WordRingsActionCardKind.Anagram:
-                lock (_metaSync)
-                {
-                    RequirePlayer(RequireMeta(code), targetId).Anagrammed = true;
-                }
+                ApplyWordObfuscation(code, targetId, mask: false);
                 break;
             case WordRingsActionCardKind.Cleanse:
                 ApplyCleanse(code, state, targetId);
@@ -599,11 +604,15 @@ public sealed class WordRingsActionCardCoordinator
             own.HintWord,
             own.TurnFailureImmunity || own.PendingTurnFailureImmunity || own.ActivatedFailureImmunity,
             own.Cards.Contains(WordRingsActionCardKind.Shield),
-            own.Masked,
-            own.Anagrammed,
+            own.MaskedWords.Count > 0,
+            own.AnagrammedWords.Count > 0,
             meta.Revision,
             meta.TimeoutNoticeRevision,
-            meta.TimeoutNoticePlayerName);
+            meta.TimeoutNoticePlayerName)
+        {
+            MaskedWords = own.MaskedWords.ToArray(),
+            AnagrammedWords = own.AnagrammedWords.ToArray()
+        };
     }
 
     private string[] GetLiveTemporaryWords(string roomCode, Guid playerId, PlayerActionState player)
@@ -716,6 +725,8 @@ public sealed class WordRingsActionCardCoordinator
             var targetMeta = RequirePlayer(meta, targetId);
             UpdateTemporaryWord(actorMeta, actorWord, targetWord);
             UpdateTemporaryWord(targetMeta, targetWord, actorWord);
+            SwapWordEffect(actorMeta.MaskedWords, targetMeta.MaskedWords, actorWord, targetWord);
+            SwapWordEffect(actorMeta.AnagrammedWords, targetMeta.AnagrammedWords, actorWord, targetWord);
             actorMeta.BlockedWords.Remove(actorWord);
             targetMeta.BlockedWords.Remove(targetWord);
             if (string.Equals(actorMeta.HintWord, actorWord, StringComparison.OrdinalIgnoreCase)) actorMeta.HintWord = null;
@@ -747,6 +758,8 @@ public sealed class WordRingsActionCardCoordinator
         {
             var targetMeta = RequirePlayer(RequireMeta(code), targetId);
             UpdateTemporaryWord(targetMeta, discarded, replacement);
+            ReplaceWordEffect(targetMeta.MaskedWords, discarded, replacement);
+            ReplaceWordEffect(targetMeta.AnagrammedWords, discarded, replacement);
             targetMeta.BlockedWords.Remove(discarded);
             if (string.Equals(targetMeta.HintWord, discarded, StringComparison.OrdinalIgnoreCase)) targetMeta.HintWord = null;
         }
@@ -822,18 +835,54 @@ public sealed class WordRingsActionCardCoordinator
         }
     }
 
+    private void ApplyWordObfuscation(string code, Guid targetId, bool mask)
+    {
+        HashSet<string> temporaryWords;
+        lock (_metaSync)
+        {
+            temporaryWords = RequirePlayer(RequireMeta(code), targetId)
+                .TemporaryWords
+                .Select(item => item.Word)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+
+        string[] visibleWords;
+        lock (SyncField.GetValue(_store)!)
+        {
+            var room = GetRoomObject(code);
+            var target = FindPlayer(Players(room), targetId)
+                ?? throw new WordRingsRoomException(WordRingsRoomError.InvalidPlayer);
+            var remaining = RemainingWords(target).Cast<string>().ToArray();
+            var regular = remaining
+                .Where(word => !temporaryWords.Contains(word))
+                .Take(WordRingsRoomStore.MaximumBankWords);
+            var liveTemporary = remaining.Where(temporaryWords.Contains);
+            visibleWords = regular
+                .Concat(liveTemporary)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        lock (_metaSync)
+        {
+            var target = RequirePlayer(RequireMeta(code), targetId);
+            var affected = mask ? target.MaskedWords : target.AnagrammedWords;
+            foreach (var word in visibleWords) affected.Add(word);
+        }
+    }
+
     private void ApplyCleanse(string code, WordRingsRoomSnapshot state, Guid targetId)
     {
         lock (_metaSync)
         {
             var target = RequirePlayer(RequireMeta(code), targetId);
             var hadNegative = target.BlockedWords.Count > 0 || target.BlockAwaitingTurn || target.BlockExpiresAtTurnEnd ||
-                              target.Masked || target.Anagrammed || target.SkipTurns > 0;
+                              target.MaskedWords.Count > 0 || target.AnagrammedWords.Count > 0 || target.SkipTurns > 0;
             target.BlockedWords.Clear();
             target.BlockAwaitingTurn = false;
             target.BlockExpiresAtTurnEnd = false;
-            target.Masked = false;
-            target.Anagrammed = false;
+            target.MaskedWords.Clear();
+            target.AnagrammedWords.Clear();
             target.SkipTurns = 0;
             if (!hadNegative)
             {
@@ -845,17 +894,19 @@ public sealed class WordRingsActionCardCoordinator
 
     private static void ConsumeAttemptEffects(PlayerActionState player, string? word, bool consumeTemporaryWord)
     {
-        player.Masked = false;
-        player.Anagrammed = false;
-        if (!string.IsNullOrWhiteSpace(word) &&
-            string.Equals(player.HintWord, word.Trim(), StringComparison.OrdinalIgnoreCase))
+        var attemptedWord = word?.Trim() ?? string.Empty;
+        if (attemptedWord.Length == 0) return;
+
+        player.MaskedWords.Remove(attemptedWord);
+        player.AnagrammedWords.Remove(attemptedWord);
+        if (string.Equals(player.HintWord, attemptedWord, StringComparison.OrdinalIgnoreCase))
         {
             player.HintWord = null;
         }
-        if (consumeTemporaryWord && !string.IsNullOrWhiteSpace(word))
+        if (consumeTemporaryWord)
         {
             player.TemporaryWords.RemoveAll(item =>
-                string.Equals(item.Word, word.Trim(), StringComparison.OrdinalIgnoreCase));
+                string.Equals(item.Word, attemptedWord, StringComparison.OrdinalIgnoreCase));
         }
     }
 
@@ -898,6 +949,23 @@ public sealed class WordRingsActionCardCoordinator
         player.Cards.AddRange(candidates);
     }
 
+    private static void SwapWordEffect(
+        HashSet<string> actorEffects,
+        HashSet<string> targetEffects,
+        string actorWord,
+        string targetWord)
+    {
+        var actorWordAffected = actorEffects.Remove(actorWord);
+        var targetWordAffected = targetEffects.Remove(targetWord);
+        if (targetWordAffected) actorEffects.Add(targetWord);
+        if (actorWordAffected) targetEffects.Add(actorWord);
+    }
+
+    private static void ReplaceWordEffect(HashSet<string> effects, string oldWord, string newWord)
+    {
+        if (effects.Remove(oldWord)) effects.Add(newWord);
+    }
+
     private static void UpdateTemporaryWord(PlayerActionState player, string oldWord, string newWord)
     {
         var lease = player.TemporaryWords.FirstOrDefault(item =>
@@ -937,6 +1005,11 @@ public sealed class WordRingsActionCardCoordinator
         }
 
         player.TemporaryWords.RemoveAll(item => item.Lifetime == lifetime);
+        foreach (var word in expired)
+        {
+            player.MaskedWords.Remove(word);
+            player.AnagrammedWords.Remove(word);
+        }
     }
 
     private void AdvanceTurnUnderlying(string code)
@@ -1085,8 +1158,8 @@ public sealed class WordRingsActionCardCoordinator
         public bool BlockAwaitingTurn { get; set; }
         public bool BlockExpiresAtTurnEnd { get; set; }
         public string? HintWord { get; set; }
-        public bool Masked { get; set; }
-        public bool Anagrammed { get; set; }
+        public HashSet<string> MaskedWords { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> AnagrammedWords { get; } = new(StringComparer.OrdinalIgnoreCase);
         public int SkipTurns { get; set; }
         public List<TemporaryWordLease> TemporaryWords { get; } = [];
     }

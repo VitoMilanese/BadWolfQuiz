@@ -103,6 +103,9 @@ public sealed class WordRingsActionCardsRegressionTests
         var pointerDrag = ReadWebFile("wwwroot", "js", "word-rings-pointer-drag.js");
         var tagHelper = ReadWebFile("TagHelpers", "WordRingsActionCardsAssetsTagHelper.cs");
         var tuningApi = ReadWebFile("Pages", "WordRingsRoomTuningApi.cshtml.cs");
+        var coopScript = ReadWebFile("wwwroot", "js", "word-rings-coop.js");
+        var soloScript = ReadWebFile("wwwroot", "js", "word-rings.js");
+        var page = ReadWebFile("Pages", "WordRings.cshtml");
 
         Assert.Contains("const fallback = { enabled: false, kps: 2, max: 2 };", script, StringComparison.Ordinal);
         Assert.Contains("kps.value = '2';", script, StringComparison.Ordinal);
@@ -120,18 +123,29 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("if (token.textContent !== display) token.textContent = display;", script, StringComparison.Ordinal);
         Assert.Contains("word-rings-action-timeout-notice", script, StringComparison.Ordinal);
         Assert.Contains("syncMultiplayerVisibleWords", script, StringComparison.Ordinal);
+        Assert.Contains("lastRenderedCardSignature", script, StringComparison.Ordinal);
+        Assert.Contains("if (!token.disabled) token.disabled = true;", script, StringComparison.Ordinal);
+        Assert.Contains("maskedWords.has(normalized)", script, StringComparison.Ordinal);
+        Assert.Contains("anagrammedWords.has(normalized)", script, StringComparison.Ordinal);
+        Assert.Contains("}, 2150);", script, StringComparison.Ordinal);
         Assert.Contains("new MutationObserver", pointerDrag, StringComparison.Ordinal);
+        Assert.Contains("soundEffectsEnabled", coopScript, StringComparison.Ordinal);
+        Assert.Contains("data-room-sound-enabled", page, StringComparison.Ordinal);
+        Assert.Contains("state?.seedSetupPending === true", coopScript, StringComparison.Ordinal);
+        Assert.Contains("source.dataset.seedExample === 'true'", soloScript, StringComparison.Ordinal);
 
         Assert.Contains("border: 0;", css, StringComparison.Ordinal);
         Assert.Contains("overflow: visible;", css, StringComparison.Ordinal);
         Assert.Contains("word-rings-action-carousel-nav", css, StringComparison.Ordinal);
         Assert.Contains("transform: translateY(-5px) scale(1.09)", css, StringComparison.Ordinal);
         Assert.Contains("word-rings-action-pending-pulse", css, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-timeout-pop 2.05s", css, StringComparison.Ordinal);
+        Assert.Contains("word-rings-sound-toggle", css, StringComparison.Ordinal);
         Assert.Contains("word-rings-room-dialog[data-create-room-dialog]", css, StringComparison.Ordinal);
         Assert.Contains("max-width: 760px;", css, StringComparison.Ordinal);
 
-        Assert.Contains("word-rings-action-cards-v2.css?v=2", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("word-rings-action-cards-v2.js?v=2", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-cards-v2.css?v=3", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-cards-v2.js?v=3", tagHelper, StringComparison.Ordinal);
         Assert.Contains("targetScore is < 5 or > 20", tuningApi, StringComparison.Ordinal);
         Assert.Contains("if (!state.IsHost)", tuningApi, StringComparison.Ordinal);
         Assert.Contains("k__BackingField", tuningApi, StringComparison.Ordinal);
@@ -146,6 +160,11 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("ActivatedFailureImmunity = true", service, StringComparison.Ordinal);
         Assert.Contains("if (kind == WordRingsActionCardKind.Shield)", service, StringComparison.Ordinal);
         Assert.Contains("target.Cards.Contains(WordRingsActionCardKind.Shield)", service, StringComparison.Ordinal);
+        Assert.Contains("WordRingsActionCardKind.Replace,", service, StringComparison.Ordinal);
+        Assert.Contains("WordRingsActionCardKind.Shuffle,", service, StringComparison.Ordinal);
+        Assert.Contains("MaskedWords", service, StringComparison.Ordinal);
+        Assert.Contains("AnagrammedWords", service, StringComparison.Ordinal);
+        Assert.Contains("SwapWordEffect", service, StringComparison.Ordinal);
         Assert.DoesNotContain("target.Shield = false", service, StringComparison.Ordinal);
         Assert.Contains("var discard = cardId < 0;", service, StringComparison.Ordinal);
         Assert.Contains("actor.Cards.Remove(kind)", service, StringComparison.Ordinal);
