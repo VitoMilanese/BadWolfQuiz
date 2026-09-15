@@ -1,12 +1,16 @@
 @page "/minigames"
 @model BadWolfQuiz.Web.Pages.MinigamesModel
 @inject IStringLocalizer<MinigameCatalogResource> MinigameCatalogLocalizer
+@inject IStringLocalizer<WordRingsResource> WordRingsLocalizer
 @{
     ViewData["Title"] = Localizer["Minigames_Title"];
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/minigames-catalog.css" asp-append-version="true" />
+    <style>
+        .minigames-catalog-card.word-rings-card .minigames-catalog-content::before { content: "02"; }
+    </style>
 }
 
 <div class="minigames-catalog-page">
@@ -22,8 +26,8 @@
             <span class="minigames-catalog-hero-word">PLAY</span>
             <span class="minigames-catalog-hero-slash"></span>
             <strong>
-                01
-                <small>MINIGAME</small>
+                02
+                <small>MINIGAMES</small>
             </strong>
         </div>
     </section>
@@ -34,28 +38,34 @@
                 <span>BAD WOLF / MINIGAMES</span>
                 <em>ARCADE CATALOG</em>
             </div>
-            <strong>01</strong>
         </div>
 
         <div class="minigames-catalog-grid">
             <a class="minigames-catalog-card" asp-page="/GuessWhatIPlay">
                 <div class="minigames-catalog-image">
                     <span class="minigames-catalog-card-index" aria-hidden="true">01</span>
-                    <img src="~/images/minigames/guess-what-i-play.svg"
-                         alt=""
-                         loading="eager" />
+                    <img src="~/images/minigames/guess-what-i-play.svg" alt="" loading="eager" />
                     <span class="minigames-catalog-image-label" aria-hidden="true">FEATURED</span>
                 </div>
-
                 <div class="minigames-catalog-content">
                     <span class="minigames-catalog-card-kicker" aria-hidden="true">MINIGAME / 01</span>
                     <h2>@MinigameCatalogLocalizer["GuessWhatIPlay_Title"]</h2>
                     <p>@MinigameCatalogLocalizer["GuessWhatIPlay_Description"]</p>
+                    <span class="minigames-catalog-card-action" aria-hidden="true"><span>PLAY</span><strong>→</strong></span>
+                </div>
+            </a>
 
-                    <span class="minigames-catalog-card-action" aria-hidden="true">
-                        <span>PLAY</span>
-                        <strong>→</strong>
-                    </span>
+            <a class="minigames-catalog-card word-rings-card" asp-page="/WordRings">
+                <div class="minigames-catalog-image">
+                    <span class="minigames-catalog-card-index" aria-hidden="true">02</span>
+                    <img src="~/images/minigames/word-rings.svg" asp-append-version="true" alt="" loading="lazy" />
+                    <span class="minigames-catalog-image-label" aria-hidden="true">NEW</span>
+                </div>
+                <div class="minigames-catalog-content">
+                    <span class="minigames-catalog-card-kicker" aria-hidden="true">MINIGAME / 02</span>
+                    <h2>@WordRingsLocalizer["Title"]</h2>
+                    <p>@WordRingsLocalizer["Description"]</p>
+                    <span class="minigames-catalog-card-action" aria-hidden="true"><span>PLAY</span><strong>→</strong></span>
                 </div>
             </a>
         </div>

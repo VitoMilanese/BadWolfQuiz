@@ -1,0 +1,348 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Слівце в кільце</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Розгадай три приховані правила та розклади слова у правильні перетини кілець.</value>
+  </data>
+  <data name="EditorMenu" xml:space="preserve">
+    <value>Редактор «Слівце в кільце»</value>
+  </data>
+  <data name="EditorTitle" xml:space="preserve">
+    <value>Редактор «Слівце в кільце»</value>
+  </data>
+  <data name="EditorPlaceholder" xml:space="preserve">
+    <value>Керуй наборами правил для синього, жовтого та червоного кілець.</value>
+  </data>
+  <data name="Instructions" xml:space="preserve">
+    <value>Кожне кільце має приховану умову. Перетягни кожне слово в область, кільця якої йому відповідають. Слово може належати одному, двом, усім трьом кільцям або жодному.</value>
+  </data>
+  <data name="WordBank" xml:space="preserve">
+    <value>Слова</value>
+  </data>
+  <data name="Outside" xml:space="preserve">
+    <value>Поза всіма кільцями</value>
+  </data>
+  <data name="Check" xml:space="preserve">
+    <value>Перевірити</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Скинути</value>
+  </data>
+  <data name="RevealRules" xml:space="preserve">
+    <value>Показати правила</value>
+  </data>
+  <data name="HideRules" xml:space="preserve">
+    <value>Сховати правила</value>
+  </data>
+  <data name="RuleA" xml:space="preserve">
+    <value>Слово означає тварину</value>
+  </data>
+  <data name="RuleB" xml:space="preserve">
+    <value>У слові є літера «а»</value>
+  </data>
+  <data name="RuleC" xml:space="preserve">
+    <value>У слові рівно 5 літер</value>
+  </data>
+  <data name="Progress" xml:space="preserve">
+    <value>Розкладено {0} з {1} слів</value>
+  </data>
+  <data name="AllCorrect" xml:space="preserve">
+    <value>Ідеально! Усі слова розкладені правильно.</value>
+  </data>
+  <data name="HasErrors" xml:space="preserve">
+    <value>Неправильно розкладено слів: {0}.</value>
+  </data>
+  <data name="PlaceAll" xml:space="preserve">
+    <value>Спочатку розклади всі слова.</value>
+  </data>
+  <data name="EditorAllWordsTab" xml:space="preserve">
+    <value>Усі слова</value>
+  </data>
+  <data name="EditorBlueTab" xml:space="preserve">
+    <value>Синє кільце</value>
+  </data>
+  <data name="EditorYellowTab" xml:space="preserve">
+    <value>Жовте кільце</value>
+  </data>
+  <data name="EditorRedTab" xml:space="preserve">
+    <value>Червоне кільце</value>
+  </data>
+  <data name="EditorRulesLabel" xml:space="preserve">
+    <value>Правила</value>
+  </data>
+  <data name="EditorAddRule" xml:space="preserve">
+    <value>Нове правило</value>
+  </data>
+  <data name="EditorConditionLabel" xml:space="preserve">
+    <value>Умова</value>
+  </data>
+  <data name="EditorWordsLabel" xml:space="preserve">
+    <value>Слова</value>
+  </data>
+  <data name="EditorWordCount" xml:space="preserve">
+    <value>Слів: {0}</value>
+  </data>
+  <data name="EditorTotalWords" xml:space="preserve">
+    <value>Усього слів: {0}</value>
+  </data>
+  <data name="EditorNoRules" xml:space="preserve">
+    <value>Для цього кільця ще немає правил.</value>
+  </data>
+  <data name="EditorNoWords" xml:space="preserve">
+    <value>Ще немає слів, доданих хоча б до одного правила.</value>
+  </data>
+  <data name="EditorUseInGames" xml:space="preserve">
+    <value>У грі</value>
+  </data>
+  <data name="EditorEnabledAria" xml:space="preserve">
+    <value>Використовувати це правило в іграх</value>
+  </data>
+  <data name="EditorCreateRuleTitle" xml:space="preserve">
+    <value>Створити правило</value>
+  </data>
+  <data name="EditorEditRuleTitle" xml:space="preserve">
+    <value>Редагувати правило</value>
+  </data>
+  <data name="EditorEditAria" xml:space="preserve">
+    <value>Редагувати правило</value>
+  </data>
+  <data name="EditorWordsHint" xml:space="preserve">
+    <value>Розділяй слова лише комами, крапками з комою або пробілами.</value>
+  </data>
+  <data name="EditorInvalidSeparators" xml:space="preserve">
+    <value>Для розділення слів дозволені лише кома, крапка з комою або пробіл.</value>
+  </data>
+  <data name="EditorCreate" xml:space="preserve">
+    <value>Створити</value>
+  </data>
+  <data name="EditorSave" xml:space="preserve">
+    <value>Зберегти</value>
+  </data>
+  <data name="EditorCancel" xml:space="preserve">
+    <value>Скасувати</value>
+  </data>
+  <data name="EditorClose" xml:space="preserve">
+    <value>Закрити</value>
+  </data>
+  <data name="EditorDeleteRuleTitle" xml:space="preserve">
+    <value>Видалити правило?</value>
+  </data>
+  <data name="EditorDeleteRulePrompt" xml:space="preserve">
+    <value>Правило буде видалене з цього кільця. Цю дію неможливо скасувати.</value>
+  </data>
+  <data name="EditorDelete" xml:space="preserve">
+    <value>Видалити</value>
+  </data>
+  <data name="EditorDeleteAria" xml:space="preserve">
+    <value>Видалити правило</value>
+  </data>
+  <data name="EditorRuleCreated" xml:space="preserve">
+    <value>Правило створено.</value>
+  </data>
+  <data name="EditorRuleUpdated" xml:space="preserve">
+    <value>Правило оновлено.</value>
+  </data>
+  <data name="EditorRuleDeleted" xml:space="preserve">
+    <value>Правило видалено.</value>
+  </data>
+  <data name="EditorRuleEnabled" xml:space="preserve">
+    <value>Правило увімкнено для ігор.</value>
+  </data>
+  <data name="EditorRuleDisabled" xml:space="preserve">
+    <value>Правило вимкнено для ігор.</value>
+  </data>
+  <data name="EditorRuleDuplicate" xml:space="preserve">
+    <value>Правило з таким текстом уже існує для цього кільця.</value>
+  </data>
+  <data name="EditorRuleInvalidText" xml:space="preserve">
+    <value>Введи текст правила довжиною до 300 символів.</value>
+  </data>
+  <data name="EditorRuleInvalidWords" xml:space="preserve">
+    <value>Додай хоча б одне коректне слово. Слова можна розділяти лише комами, крапками з комою або пробілами.</value>
+  </data>
+  <data name="EditorRuleNotFound" xml:space="preserve">
+    <value>Правило не знайдено.</value>
+  </data>
+  <data name="EditorLastRuleCannotDelete" xml:space="preserve">
+    <value>Для кожного кільця потрібно залишити щонайменше одне правило. Спочатку створи інше правило.</value>
+  </data>
+  <data name="EditorLastEnabledRule" xml:space="preserve">
+    <value>Для кожного кільця потрібно залишити щонайменше одне непусте правило, увімкнене для ігор.</value>
+  </data>
+  <data name="EditorRequestFailed" xml:space="preserve">
+    <value>Не вдалося виконати операцію. Спробуй ще раз.</value>
+  </data>
+  <data name="EditorAddWord" xml:space="preserve">
+    <value>Додати слово</value>
+  </data>
+  <data name="EditorAddWordTitle" xml:space="preserve">
+    <value>Додати слово</value>
+  </data>
+  <data name="EditorEditWordTitle" xml:space="preserve">
+    <value>Редагувати слово</value>
+  </data>
+  <data name="EditorEditWordAria" xml:space="preserve">
+    <value>Редагувати слово «{0}»</value>
+  </data>
+  <data name="EditorDeleteWordAria" xml:space="preserve">
+    <value>Видалити слово «{0}»</value>
+  </data>
+  <data name="EditorWordLabel" xml:space="preserve">
+    <value>Слово</value>
+  </data>
+  <data name="EditorRingLabel" xml:space="preserve">
+    <value>Кільце</value>
+  </data>
+  <data name="EditorLoadingRules" xml:space="preserve">
+    <value>Завантаження правил…</value>
+  </data>
+  <data name="EditorWordMembershipHint" xml:space="preserve">
+    <value>Обери кільце та познач правила, до яких має входити слово. Зміни з різних сторінок і кілець зберігаються разом.</value>
+  </data>
+  <data name="EditorWordMembershipSaved" xml:space="preserve">
+    <value>Прив’язки слова до правил оновлено.</value>
+  </data>
+  <data name="EditorWordDeleted" xml:space="preserve">
+    <value>Слово видалено з усіх правил.</value>
+  </data>
+  <data name="EditorWordInvalid" xml:space="preserve">
+    <value>Введи одне коректне слово без пробілів і розділювачів.</value>
+  </data>
+  <data name="EditorDeleteWordTitle" xml:space="preserve">
+    <value>Видалити слово?</value>
+  </data>
+  <data name="EditorDeleteWordPrompt" xml:space="preserve">
+    <value>Слово буде видалене з усіх правил усіх трьох кілець. Цю дію неможливо скасувати.</value>
+  </data>
+  <data name="EditorExportCsv" xml:space="preserve">
+    <value>Експорт CSV</value>
+  </data>
+  <data name="EditorImportCsv" xml:space="preserve">
+    <value>Імпорт CSV</value>
+  </data>
+  <data name="EditorCsvFileRequired" xml:space="preserve">
+    <value>Обери CSV-файл для імпорту.</value>
+  </data>
+  <data name="EditorCsvFileTooLarge" xml:space="preserve">
+    <value>CSV-файл завеликий. Максимальний розмір — 5 МБ.</value>
+  </data>
+  <data name="EditorCsvInvalid" xml:space="preserve">
+    <value>Некоректний CSV-файл. Використовуй формат експорту Ring, Rule, Enabled, Words.</value>
+  </data>
+  <data name="EditorImportCompleted" xml:space="preserve">
+    <value>Злиття CSV завершено.</value>
+  </data>
+  <data name="EditorImportSummaryTitle" xml:space="preserve">
+    <value>Підсумок імпорту</value>
+  </data>
+  <data name="EditorImportNothingAdded" xml:space="preserve">
+    <value>Нічого не було додано. Усі імпортовані правила та слова вже існують.</value>
+  </data>
+  <data name="EditorImportWordsAdded" xml:space="preserve">
+    <value>Додано слів до правил:</value>
+  </data>
+  <data name="EditorImportRulesCreated" xml:space="preserve">
+    <value>Створено правил:</value>
+  </data>
+  <data name="EditorPagination" xml:space="preserve">
+    <value>Сторінки слів</value>
+  </data>
+  <data name="EditorPreviousPage" xml:space="preserve">
+    <value>Назад</value>
+  </data>
+  <data name="EditorNextPage" xml:space="preserve">
+    <value>Далі</value>
+  </data>
+  <data name="EditorPageStatus" xml:space="preserve">
+    <value>Сторінка {0} з {1}</value>
+  </data>
+  <data name="EditorMembershipIncludedOnly" xml:space="preserve">
+    <value>Показувати тільки правила, в яких є це слово</value>
+  </data>
+  <data name="EditorDeleteAllWordsAria" xml:space="preserve">
+    <value>Видалити всі слова</value>
+  </data>
+  <data name="EditorDeleteAllWordsTitle" xml:space="preserve">
+    <value>Видалити всі слова?</value>
+  </data>
+  <data name="EditorDeleteAllWordsPrompt" xml:space="preserve">
+    <value>Усі слова будуть видалені з усіх правил усіх трьох кілець. Самі правила залишаться. Цю дію неможливо скасувати.</value>
+  </data>
+  <data name="EditorAllWordsDeleted" xml:space="preserve">
+    <value>Усі слова видалено з усіх правил.</value>
+  </data>
+  <data name="EditorDeleteAllRulesAria" xml:space="preserve">
+    <value>Видалити всі правила цього кільця</value>
+  </data>
+  <data name="EditorDeleteAllRulesTitle" xml:space="preserve">
+    <value>Видалити всі правила кільця?</value>
+  </data>
+  <data name="EditorDeleteAllRulesPrompt" xml:space="preserve">
+    <value>Усі правила цього кільця будуть видалені. Цю дію неможливо скасувати.</value>
+  </data>
+  <data name="EditorAllRulesDeleted" xml:space="preserve">
+    <value>Усі правила кільця видалено.</value>
+  </data>
+  <data name="EditorImportErrorTitle" xml:space="preserve">
+    <value>Помилка імпорту CSV</value>
+  </data>
+  <data name="EditorImportErrorLine" xml:space="preserve">
+    <value>Рядок {0}</value>
+  </data>
+  <data name="EditorImportErrorFile" xml:space="preserve">
+    <value>CSV-файл</value>
+  </data>
+  <data name="EditorCsvErrorEmptyFile" xml:space="preserve">
+    <value>Файл порожній або не містить даних.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidHeader" xml:space="preserve">
+    <value>Неправильний заголовок. Перший рядок повинен містити колонки Ring, Rule, Enabled, Words.</value>
+  </data>
+  <data name="EditorCsvErrorTooManyRows" xml:space="preserve">
+    <value>CSV містить більше 10 000 непорожніх рядків даних.</value>
+  </data>
+  <data name="EditorCsvErrorMalformedRow" xml:space="preserve">
+    <value>Рядок має некоректний CSV-синтаксис, наприклад незакриті лапки.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidColumnCount" xml:space="preserve">
+    <value>Очікується рівно 4 колонки, але в цьому рядку знайдено: {0}.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidRing" xml:space="preserve">
+    <value>Некоректне значення Ring «{0}». Дозволено тільки blue, yellow або red.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidRuleText" xml:space="preserve">
+    <value>Колонка Rule порожня або містить більше 300 символів.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidEnabled" xml:space="preserve">
+    <value>Некоректне значення Enabled «{0}». Дозволено true, false, 1 або 0.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidWords" xml:space="preserve">
+    <value>Колонка Words містить некоректне слово або розділювач. Слова коротші за 3 символи під час імпорту ігноруються; для інших слів дозволено 3–120 символів.</value>
+  </data>
+  <data name="EditorCsvErrorUnplayable" xml:space="preserve">
+    <value>Після імпорту «{0}» не матиме жодного непорожнього правила, увімкненого для гри.</value>
+  </data>
+  <data name="EditorBrandEyebrow" xml:space="preserve">
+    <value>BAD WOLF / РЕДАКТОР МІНІГРИ</value>
+  </data>
+  <data name="EditorBrandMark" xml:space="preserve">
+    <value>СЛОВА / КІЛЬЦЯ</value>
+  </data>
+  <data name="EditorRingStats" xml:space="preserve">
+    <value>Правил: {0} · Активних: {1}</value>
+  </data>
+</root>

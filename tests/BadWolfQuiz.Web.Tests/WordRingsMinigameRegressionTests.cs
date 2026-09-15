@@ -1,0 +1,424 @@
+using BadWolfQuiz.Web.Services;
+using Microsoft.AspNetCore.Hosting;
+
+namespace BadWolfQuiz.Web.Tests;
+
+public sealed class WordRingsMinigameRegressionTests
+{
+    [Fact]
+    public void Catalog_and_header_expose_word_rings_game_and_editor()
+    {
+        var catalog = ReadWebFile("Pages", "Minigames.cshtml");
+        var layout = ReadWebFile("Pages", "Shared", "_Layout.cshtml");
+        var navigation = ReadWebFile("TagHelpers", "HeaderSeoNavigationTagHelper.cs");
+        var game = ReadWebFile("Pages", "WordRings.cshtml");
+        var editor = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml");
+        var editorStyles = ReadWebFile("wwwroot", "css", "word-rings-editor.css");
+
+        Assert.Contains("asp-page=\"/WordRings\"", catalog);
+        Assert.DoesNotContain("<strong>02</strong>", catalog);
+        Assert.Contains("asp-page=\"/Admin/WordRingsEditor\"", layout);
+        Assert.Contains("wordRingsLocalizer", navigation);
+        Assert.Contains("output.SuppressOutput()", navigation);
+        Assert.True(
+            navigation.LastIndexOf("href=\\\"/Admin/MinigameEditor\\\"", StringComparison.Ordinal) <
+            navigation.LastIndexOf("href=\\\"/Admin/WordRingsEditor\\\"", StringComparison.Ordinal));
+        Assert.Contains("@model BadWolfQuiz.Web.Pages.WordRingsModel", game);
+        Assert.Contains("data-word-rings-puzzle", game);
+        Assert.Contains("word-rings-pointer-drag.js", game);
+        Assert.Contains("@model BadWolfQuiz.Web.Pages.Admin.WordRingsEditorModel", editor);
+        Assert.Contains("Authorize(Policy = \"MasterHost\")", editor);
+        Assert.Contains("word-rings-editor-tabs", editor);
+        Assert.Contains("data-open-word-rings-create", editor);
+        Assert.Contains("data-word-rings-edit-dialog", editor);
+        Assert.Contains("data-word-rings-delete-dialog", editor);
+        Assert.DoesNotContain("word-rings-editor-coming-soon", editor);
+        Assert.DoesNotContain("word-rings-editor-coming-soon", editorStyles);
+        Assert.Contains("width: min(27vw, 390px)", editorStyles);
+        Assert.Contains("@media (max-width: 600px)", editorStyles);
+    }
+
+    [Fact]
+    public void Runtime_uses_server_generated_puzzle_and_real_ring_geometry()
+    {
+        var script = ReadWebFile("wwwroot", "js", "word-rings.js");
+        var pageModel = ReadWebFile("Pages", "WordRings.cshtml.cs");
+        var store = ReadWebFile("Services", "WordRingsRuleStore.cs");
+
+        Assert.Contains("Object.entries(JSON.parse", script);
+        Assert.Contains("membershipAt", script);
+        Assert.Contains("ring.getBoundingClientRect()", script);
+        Assert.Contains("Math.hypot", script);
+        Assert.DoesNotContain("['панда', 'ABC']", script);
+        Assert.Contains("CreatePuzzle()", pageModel);
+        Assert.Contains("Random.Shared", store);
+        Assert.Contains("WordRingColor.Blue", store);
+        Assert.Contains("WordRingColor.Yellow", store);
+        Assert.Contains("WordRingColor.Red", store);
+        Assert.Contains("activeSnapshot", store);
+        Assert.Contains("rule.IsEnabled && rule.Words.Count > 0", store);
+        Assert.Contains("DefaultOutsideWords", store);
+        Assert.Contains("assignOutside", script);
+        Assert.Contains("errors === 0", script);
+    }
+
+    [Fact]
+    public async Task Rule_store_supports_editing_excludes_disabled_rules_and_keeps_one_enabled_rule_per_ring()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            var store = WordRingsRuleStore.Get(new TestWebHostEnvironment(root));
+            var originalBlue = Assert.Single(store.GetRules(WordRingColor.Blue));
+
+            var addResult = await store.AddAsync(
+                WordRingColor.Blue,
+                "Тестове активне правило",
+                "альфа, бета",
+                CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.Success, addResult);
+
+            var addedBlue = store.GetRules(WordRingColor.Blue)
+                .Single(rule => rule.Id != originalBlue.Id);
+            Assert.True(addedBlue.IsEnabled);
+
+            var updateResult = await store.UpdateAsync(
+                addedBlue.Id,
+                "Тестове відредаговане правило",
+                "гамма; дельта",
+                CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.Success, updateResult);
+
+            var updatedBlue = store.GetRules(WordRingColor.Blue)
+                .Single(rule => rule.Id == addedBlue.Id);
+            Assert.Equal("Тестове відредаговане правило", updatedBlue.Text);
+            Assert.Equal(["гамма", "дельта"], updatedBlue.Words);
+
+            var disableOriginal = await store.SetEnabledAsync(
+                originalBlue.Id,
+                enabled: false,
+                CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.Success, disableOriginal);
+
+            for (var attempt = 0; attempt < 8; attempt++)
+            {
+                var puzzle = store.CreatePuzzle();
+                Assert.Equal("Тестове відредаговане правило", puzzle.BlueRuleText);
+                Assert.Contains("гамма", puzzle.Words);
+                Assert.Contains("дельта", puzzle.Words);
+                Assert.DoesNotContain("кіт", puzzle.Words);
+                Assert.DoesNotContain("вовк", puzzle.Words);
+            }
+
+            var disableLastEnabled = await store.SetEnabledAsync(
+                addedBlue.Id,
+                enabled: false,
+                CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.LastEnabledRule, disableLastEnabled);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task All_words_catalog_supports_membership_changes_global_deletion_and_merge_only_csv_import()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-words-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+
+        try
+        {
+            var store = WordRingsRuleStore.Get(new TestWebHostEnvironment(root));
+            var catalog = store.GetWordsPage(0, 1000);
+            Assert.NotEmpty(catalog);
+            Assert.Equal(store.GetWordCount(), catalog.Count);
+            Assert.Equal(catalog.Count, catalog.Select(item => item.Word).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+
+            var yellow = Assert.Single(store.GetRules(WordRingColor.Yellow));
+            var addMembership = await store.ApplyWordMembershipChangesAsync(
+                "вовк",
+                new Dictionary<Guid, bool> { [yellow.Id] = true },
+                CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.Success, addMembership);
+            Assert.Contains(
+                "вовк",
+                store.GetRules(WordRingColor.Yellow).Single().Words,
+                StringComparer.OrdinalIgnoreCase);
+
+            var removeMembership = await store.ApplyWordMembershipChangesAsync(
+                "вовк",
+                new Dictionary<Guid, bool> { [yellow.Id] = false },
+                CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.Success, removeMembership);
+            Assert.DoesNotContain(
+                "вовк",
+                store.GetRules(WordRingColor.Yellow).Single().Words,
+                StringComparer.OrdinalIgnoreCase);
+
+            var deleteWord = await store.DeleteWordAsync("коала", CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.Success, deleteWord);
+            foreach (var ring in Enum.GetValues<WordRingColor>())
+            {
+                Assert.DoesNotContain(
+                    store.GetRules(ring).SelectMany(rule => rule.Words),
+                    word => string.Equals(word, "коала", StringComparison.OrdinalIgnoreCase));
+            }
+
+            var exported = store.ExportCsv();
+            Assert.StartsWith("Ring,Rule,Enabled,Words", exported, StringComparison.Ordinal);
+            Assert.Contains("\"blue\"", exported, StringComparison.Ordinal);
+            Assert.Contains("\"yellow\"", exported, StringComparison.Ordinal);
+            Assert.Contains("\"red\"", exported, StringComparison.Ordinal);
+
+            const string mergeCsv =
+                "Ring,Rule,Enabled,Words\n" +
+                "\"blue\",\"Слово означає тварину\",\"true\",\"новинка\"\n" +
+                "\"yellow\",\"CSV тестове правило\",\"true\",\"новинка; інше\"\n";
+
+            var imported = await store.ImportCsvAsync(mergeCsv, CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.Success, imported.Result);
+            Assert.True(imported.Summary.HasChanges);
+            Assert.Equal(1, imported.Summary.Blue.WordsAdded);
+            Assert.Equal(0, imported.Summary.Blue.RulesCreated);
+            Assert.Equal(2, imported.Summary.Yellow.WordsAdded);
+            Assert.Equal(1, imported.Summary.Yellow.RulesCreated);
+            Assert.Contains(
+                "кіт",
+                store.GetRules(WordRingColor.Blue)
+                    .Single(rule => rule.Text == "Слово означає тварину")
+                    .Words,
+                StringComparer.OrdinalIgnoreCase);
+            Assert.Contains(
+                "новинка",
+                store.GetRules(WordRingColor.Blue)
+                    .Single(rule => rule.Text == "Слово означає тварину")
+                    .Words,
+                StringComparer.OrdinalIgnoreCase);
+            Assert.Contains(
+                store.GetRules(WordRingColor.Yellow),
+                rule => rule.Text == "CSV тестове правило" &&
+                    rule.Words.Contains("інше", StringComparer.OrdinalIgnoreCase));
+
+            var duplicateImport = await store.ImportCsvAsync(mergeCsv, CancellationToken.None);
+            Assert.Equal(WordRingRuleMutationResult.Success, duplicateImport.Result);
+            Assert.False(duplicateImport.Summary.HasChanges);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Board_uses_centered_symmetric_ring_geometry_and_membership_colored_word_borders()
+    {
+        var styles = ReadWebFile("wwwroot", "css", "word-rings.css");
+        var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
+        var editorStyles = ReadWebFile("wwwroot", "css", "word-rings-editor.css");
+
+        Assert.Contains("--word-ring-a: #5f86ee", styles);
+        Assert.Contains("--word-ring-b: #e0b43c", styles);
+        Assert.Contains("--word-ring-c: #e85d5d", styles);
+        Assert.Contains("width: 50%", refinements);
+        Assert.Contains("left: 15.5%", refinements);
+        Assert.Contains("right: 15.5%", refinements);
+        Assert.Contains("left: 25%", refinements);
+        Assert.Contains("top: 3.5%", refinements);
+        Assert.Contains("bottom: 3.5%", refinements);
+        Assert.Contains("data-membership=\"AB\"", styles);
+        Assert.Contains("data-membership=\"AC\"", styles);
+        Assert.Contains("data-membership=\"BC\"", styles);
+        Assert.Contains("data-membership=\"ABC\"", styles);
+        Assert.Contains("color: #5f86ee", editorStyles);
+        Assert.Contains("color: #e0b43c", editorStyles);
+        Assert.Contains("color: #e85d5d", editorStyles);
+    }
+
+    [Fact]
+    public void Dragging_uses_pointer_events_instead_of_native_browser_drag_images()
+    {
+        var game = ReadWebFile("Pages", "WordRings.cshtml");
+        var script = ReadWebFile("wwwroot", "js", "word-rings.js");
+        var pointerDrag = ReadWebFile("wwwroot", "js", "word-rings-pointer-drag.js");
+        var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
+
+        Assert.DoesNotContain("draggable=\"true\"", game);
+        Assert.DoesNotContain("dragstart", script);
+        Assert.DoesNotContain("dataTransfer", script);
+        Assert.Contains("pointerdown", pointerDrag);
+        Assert.Contains("pointermove", pointerDrag);
+        Assert.Contains("pointerup", pointerDrag);
+        Assert.Contains("pointercancel", pointerDrag);
+        Assert.Contains("setPointerCapture", pointerDrag);
+        Assert.Contains("document.elementFromPoint", pointerDrag);
+        Assert.Contains("word-rings-pointer-preview", pointerDrag);
+        Assert.Contains("-webkit-user-drag: none", refinements);
+        Assert.Contains("touch-action: none", refinements);
+    }
+
+    [Fact]
+    public void Editor_mutations_and_tabs_are_ajax_and_rules_can_be_edited()
+    {
+        var editor = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml");
+        var model = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml.cs");
+        var store = ReadWebFile("Services", "WordRingsRuleStore.cs");
+        var script = ReadWebFile("wwwroot", "js", "word-rings-editor.js");
+        var overlay = ReadWebFile("wwwroot", "js", "editor-save-overlay.js");
+        var styles = ReadWebFile("wwwroot", "css", "word-rings-editor.css");
+
+        Assert.Contains("App_Data", store);
+        Assert.Contains("word-rings-rules.json", store);
+        Assert.Contains("[ ,;]+", store);
+        Assert.DoesNotContain("[\\s,;]+", store);
+        Assert.Contains("bool? Enabled = null", store);
+        Assert.Contains("public bool IsEnabled => Enabled is not false", store);
+        Assert.Contains("UpdateAsync", store);
+        Assert.Contains("SetEnabledAsync", store);
+        Assert.Contains("WordRingRuleMutationResult.LastRule", store);
+        Assert.Contains("WordRingRuleMutationResult.LastEnabledRule", store);
+        Assert.Contains("OnPostCreateRuleAsync", model);
+        Assert.Contains("OnPostUpdateRuleAsync", model);
+        Assert.Contains("OnPostSetRuleEnabledAsync", model);
+        Assert.Contains("OnPostDeleteRuleAsync", model);
+        Assert.Contains("X-Requested-With", model);
+        Assert.Contains("new JsonResult", model);
+        Assert.Contains("asp-page-handler=\"CreateRule\"", editor);
+        Assert.Contains("asp-page-handler=\"UpdateRule\"", editor);
+        Assert.Contains("data-edit-word-rings-rule", editor);
+        Assert.Contains("data-word-rings-edit-dialog", editor);
+        Assert.Contains("asp-page-handler=\"SetRuleEnabled\"", editor);
+        Assert.Contains("data-word-rings-rule-enabled", editor);
+        Assert.Contains("type=\"checkbox\"", editor);
+        Assert.Contains("asp-page-handler=\"DeleteRule\"", editor);
+        Assert.Contains("dialog-card-danger", editor);
+        Assert.Contains("data-editor-save-status", editor);
+        Assert.Contains("data-editor-save-overlay-root", editor);
+        Assert.Contains("~/js/editor-save-overlay.js", editor);
+        Assert.Contains("[data-editor-save-overlay-root]", overlay);
+        Assert.Contains("badWolfShowEditorStatus", overlay);
+        Assert.Contains("showModal()", script);
+        Assert.Contains("fetch(", script);
+        Assert.Contains("window.history.pushState", script);
+        Assert.Contains("event.preventDefault()", script);
+        Assert.Contains("X-Requested-With", script);
+        Assert.DoesNotContain("requestSubmit()", script);
+        Assert.DoesNotContain("location.reload", script);
+        Assert.Contains("[ ,;]+", script);
+        Assert.DoesNotContain("[\\s,;]+", script);
+        Assert.DoesNotContain("window.confirm", script);
+        Assert.DoesNotContain("alert(", script);
+        Assert.Contains("background: #9f101b !important", styles);
+        Assert.Contains("border-color: #ff5b66 !important", styles);
+        Assert.Contains(".word-rings-rule-edit", styles);
+        Assert.Contains(".word-rings-editor-rule-controls", styles);
+        Assert.Contains("top: 16px", styles);
+        Assert.Contains("right: 16px", styles);
+        Assert.Contains("overflow-x: hidden", styles);
+        Assert.Contains("box-sizing: border-box", styles);
+        Assert.Contains("stroke: currentColor", styles);
+    }
+
+    [Fact]
+    public void Editor_all_words_tab_uses_ajax_paging_csv_transfer_busy_feedback_and_quiz_transfer_sound()
+    {
+        var editor = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml");
+        var model = ReadWebFile("Pages", "Admin", "WordRingsEditor.cshtml.cs");
+        var store = ReadWebFile("Services", "WordRingsRuleStore.cs");
+        var script = ReadWebFile("wwwroot", "js", "word-rings-editor.js");
+        var styles = ReadWebFile("wwwroot", "css", "word-rings-words.css");
+        var assets = ReadWebFile("TagHelpers", "WordRingsEditorAssetsTagHelper.cs");
+        var imports = ReadWebFile("Pages", "_ViewImports.cshtml");
+
+        Assert.True(
+            editor.IndexOf("data-ring=\"words\"", StringComparison.Ordinal) <
+            editor.IndexOf("data-ring=\"blue\"", StringComparison.Ordinal));
+        Assert.Contains("EditorAllWordsTab", editor);
+        Assert.Contains("data-word-rings-word-page", editor);
+        Assert.Contains("data-edit-word-rings-word", editor);
+        Assert.Contains("data-delete-word-rings-word", editor);
+        Assert.Contains("data-word-rings-membership-dialog", editor);
+        Assert.Contains("data-word-rings-import-summary-dialog", editor);
+        Assert.Contains("asp-page-handler=\"ExportCsv\"", editor);
+        Assert.Contains("asp-page-handler=\"ImportCsv\"", editor);
+        Assert.Contains("OnGetWordRules", model);
+        Assert.Contains("OnGetExportCsv", model);
+        Assert.Contains("OnPostSaveWordMembershipsAsync", model);
+        Assert.Contains("OnPostDeleteWordAsync", model);
+        Assert.Contains("OnPostImportCsvAsync", model);
+        Assert.Contains("WordPageSize = 25", model);
+        Assert.Contains("MembershipRulePageSize = 10", model);
+        Assert.Contains("MaximumCsvImportBytes = 5L * 1024 * 1024", model);
+        Assert.Contains("GetWordsPage", store);
+        Assert.Contains("ApplyWordMembershipChangesAsync", store);
+        Assert.Contains("DeleteWordAsync", store);
+        Assert.Contains("ExportCsv", store);
+        Assert.Contains("ImportCsvAsync", store);
+        Assert.Contains("StoreState", store);
+        Assert.Contains("Volatile.Read", store);
+        Assert.Contains("Volatile.Write", store);
+        Assert.Contains("Ring,Rule,Enabled,Words", store);
+        Assert.Contains("word-rings-editor-tabs", styles);
+        Assert.Contains("repeat(4, minmax(0, 1fr))", styles);
+        Assert.Contains("word-rings-editor-inline-spinner", styles);
+        Assert.Contains("word-rings-words.css?v=2", assets);
+        Assert.Contains("WordRingsEditorAssetsTagHelper", imports);
+        Assert.Contains("523.25", script);
+        Assert.Contains("659.25", script);
+        Assert.Contains("783.99", script);
+        Assert.Contains("window.BadWolfBusy?.show?.()", script);
+        Assert.Contains("window.BadWolfBusy?.hide?.()", script);
+        Assert.Contains("response.blob()", script);
+        Assert.Contains("playCompletionSound()", script);
+        Assert.Contains("data-word-rings-import-summary-dialog", editor);
+        Assert.DoesNotContain("window.location.reload", script);
+    }
+
+    [Fact]
+    public void Revealed_rules_are_positioned_by_color_without_visible_ring_letters()
+    {
+        var game = ReadWebFile("Pages", "WordRings.cshtml");
+        var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
+
+        Assert.Contains("word-rings-rule-a", game);
+        Assert.Contains("word-rings-rule-b", game);
+        Assert.Contains("word-rings-rule-c", game);
+        Assert.Contains("Model.Puzzle.BlueRuleText", game);
+        Assert.Contains("Model.Puzzle.YellowRuleText", game);
+        Assert.Contains("Model.Puzzle.RedRuleText", game);
+        Assert.Contains("border-color: var(--word-ring-a)", refinements);
+        Assert.Contains("border-color: var(--word-ring-b)", refinements);
+        Assert.Contains("border-color: var(--word-ring-c)", refinements);
+        Assert.DoesNotContain("<span>A</span>", game);
+        Assert.DoesNotContain("<span>B</span>", game);
+        Assert.DoesNotContain("<span>C</span>", game);
+    }
+
+    private static string ReadWebFile(params string[] parts)
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(new[] { directory.FullName, "src", "BadWolfQuiz.Web" }.Concat(parts).ToArray());
+            if (File.Exists(candidate)) return File.ReadAllText(candidate);
+            directory = directory.Parent;
+        }
+
+        throw new FileNotFoundException($"Could not locate BadWolfQuiz.Web file: {Path.Combine(parts)}");
+    }
+
+    private sealed class TestWebHostEnvironment(string root) : IWebHostEnvironment
+    {
+        public string ApplicationName { get; set; } = "BadWolfQuiz.Web.Tests";
+        public Microsoft.Extensions.FileProviders.IFileProvider WebRootFileProvider { get; set; } =
+            new Microsoft.Extensions.FileProviders.NullFileProvider();
+        public string WebRootPath { get; set; } = root;
+        public string EnvironmentName { get; set; } = "Development";
+        public string ContentRootPath { get; set; } = root;
+        public Microsoft.Extensions.FileProviders.IFileProvider ContentRootFileProvider { get; set; } =
+            new Microsoft.Extensions.FileProviders.NullFileProvider();
+    }
+}

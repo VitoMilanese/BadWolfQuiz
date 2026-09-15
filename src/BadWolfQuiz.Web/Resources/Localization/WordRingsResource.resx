@@ -1,0 +1,348 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Word into the ring</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Discover three hidden rules and place every word into the correct ring intersections.</value>
+  </data>
+  <data name="EditorMenu" xml:space="preserve">
+    <value>Word-rings editor</value>
+  </data>
+  <data name="EditorTitle" xml:space="preserve">
+    <value>Word-rings editor</value>
+  </data>
+  <data name="EditorPlaceholder" xml:space="preserve">
+    <value>Manage the rule pools used by the blue, yellow, and red rings.</value>
+  </data>
+  <data name="Instructions" xml:space="preserve">
+    <value>Each ring follows a hidden rule. Drag every word into the area whose rings match that word. Words may belong to one, two, all three, or none of the rings.</value>
+  </data>
+  <data name="WordBank" xml:space="preserve">
+    <value>Words</value>
+  </data>
+  <data name="Outside" xml:space="preserve">
+    <value>Outside all rings</value>
+  </data>
+  <data name="Check" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="RevealRules" xml:space="preserve">
+    <value>Reveal rules</value>
+  </data>
+  <data name="HideRules" xml:space="preserve">
+    <value>Hide rules</value>
+  </data>
+  <data name="RuleA" xml:space="preserve">
+    <value>The word names an animal</value>
+  </data>
+  <data name="RuleB" xml:space="preserve">
+    <value>The word contains the letter “a”</value>
+  </data>
+  <data name="RuleC" xml:space="preserve">
+    <value>The word has exactly 5 letters</value>
+  </data>
+  <data name="Progress" xml:space="preserve">
+    <value>{0} of {1} words placed</value>
+  </data>
+  <data name="AllCorrect" xml:space="preserve">
+    <value>Perfect! Every word is in the correct area.</value>
+  </data>
+  <data name="HasErrors" xml:space="preserve">
+    <value>{0} word(s) are in the wrong area.</value>
+  </data>
+  <data name="PlaceAll" xml:space="preserve">
+    <value>Place all words before checking.</value>
+  </data>
+  <data name="EditorAllWordsTab" xml:space="preserve">
+    <value>All words</value>
+  </data>
+  <data name="EditorBlueTab" xml:space="preserve">
+    <value>Blue ring</value>
+  </data>
+  <data name="EditorYellowTab" xml:space="preserve">
+    <value>Yellow ring</value>
+  </data>
+  <data name="EditorRedTab" xml:space="preserve">
+    <value>Red ring</value>
+  </data>
+  <data name="EditorRulesLabel" xml:space="preserve">
+    <value>Rules</value>
+  </data>
+  <data name="EditorAddRule" xml:space="preserve">
+    <value>New rule</value>
+  </data>
+  <data name="EditorConditionLabel" xml:space="preserve">
+    <value>Condition</value>
+  </data>
+  <data name="EditorWordsLabel" xml:space="preserve">
+    <value>Words</value>
+  </data>
+  <data name="EditorWordCount" xml:space="preserve">
+    <value>{0} words</value>
+  </data>
+  <data name="EditorTotalWords" xml:space="preserve">
+    <value>Total words: {0}</value>
+  </data>
+  <data name="EditorNoRules" xml:space="preserve">
+    <value>No rules have been created for this ring yet.</value>
+  </data>
+  <data name="EditorNoWords" xml:space="preserve">
+    <value>No words have been added to any rule yet.</value>
+  </data>
+  <data name="EditorUseInGames" xml:space="preserve">
+    <value>Use in games</value>
+  </data>
+  <data name="EditorEnabledAria" xml:space="preserve">
+    <value>Use this rule in games</value>
+  </data>
+  <data name="EditorCreateRuleTitle" xml:space="preserve">
+    <value>Create rule</value>
+  </data>
+  <data name="EditorEditRuleTitle" xml:space="preserve">
+    <value>Edit rule</value>
+  </data>
+  <data name="EditorEditAria" xml:space="preserve">
+    <value>Edit rule</value>
+  </data>
+  <data name="EditorWordsHint" xml:space="preserve">
+    <value>Separate words only with commas, semicolons, or spaces.</value>
+  </data>
+  <data name="EditorInvalidSeparators" xml:space="preserve">
+    <value>Words may be separated only by commas, semicolons, or spaces.</value>
+  </data>
+  <data name="EditorCreate" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="EditorSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="EditorCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="EditorClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="EditorDeleteRuleTitle" xml:space="preserve">
+    <value>Delete rule?</value>
+  </data>
+  <data name="EditorDeleteRulePrompt" xml:space="preserve">
+    <value>The rule will be removed from this ring. This action cannot be undone.</value>
+  </data>
+  <data name="EditorDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="EditorDeleteAria" xml:space="preserve">
+    <value>Delete rule</value>
+  </data>
+  <data name="EditorRuleCreated" xml:space="preserve">
+    <value>Rule created.</value>
+  </data>
+  <data name="EditorRuleUpdated" xml:space="preserve">
+    <value>Rule updated.</value>
+  </data>
+  <data name="EditorRuleDeleted" xml:space="preserve">
+    <value>Rule deleted.</value>
+  </data>
+  <data name="EditorRuleEnabled" xml:space="preserve">
+    <value>Rule enabled for games.</value>
+  </data>
+  <data name="EditorRuleDisabled" xml:space="preserve">
+    <value>Rule disabled for games.</value>
+  </data>
+  <data name="EditorRuleDuplicate" xml:space="preserve">
+    <value>A rule with this text already exists for the selected ring.</value>
+  </data>
+  <data name="EditorRuleInvalidText" xml:space="preserve">
+    <value>Enter a rule text up to 300 characters.</value>
+  </data>
+  <data name="EditorRuleInvalidWords" xml:space="preserve">
+    <value>Enter at least one valid word. Only commas, semicolons, and spaces may separate words.</value>
+  </data>
+  <data name="EditorRuleNotFound" xml:space="preserve">
+    <value>The rule could not be found.</value>
+  </data>
+  <data name="EditorLastRuleCannotDelete" xml:space="preserve">
+    <value>Each ring must keep at least one rule. Create another rule before deleting this one.</value>
+  </data>
+  <data name="EditorLastEnabledRule" xml:space="preserve">
+    <value>Each ring must keep at least one non-empty rule enabled for games.</value>
+  </data>
+  <data name="EditorRequestFailed" xml:space="preserve">
+    <value>The operation could not be completed. Try again.</value>
+  </data>
+  <data name="EditorAddWord" xml:space="preserve">
+    <value>Add word</value>
+  </data>
+  <data name="EditorAddWordTitle" xml:space="preserve">
+    <value>Add word</value>
+  </data>
+  <data name="EditorEditWordTitle" xml:space="preserve">
+    <value>Edit word</value>
+  </data>
+  <data name="EditorEditWordAria" xml:space="preserve">
+    <value>Edit word {0}</value>
+  </data>
+  <data name="EditorDeleteWordAria" xml:space="preserve">
+    <value>Delete word {0}</value>
+  </data>
+  <data name="EditorWordLabel" xml:space="preserve">
+    <value>Word</value>
+  </data>
+  <data name="EditorRingLabel" xml:space="preserve">
+    <value>Ring</value>
+  </data>
+  <data name="EditorLoadingRules" xml:space="preserve">
+    <value>Loading rules…</value>
+  </data>
+  <data name="EditorWordMembershipHint" xml:space="preserve">
+    <value>Select a ring and choose the rules that should contain this word. Changes across pages and rings are saved together.</value>
+  </data>
+  <data name="EditorWordMembershipSaved" xml:space="preserve">
+    <value>Word memberships updated.</value>
+  </data>
+  <data name="EditorWordDeleted" xml:space="preserve">
+    <value>Word removed from all rules.</value>
+  </data>
+  <data name="EditorWordInvalid" xml:space="preserve">
+    <value>Enter one valid word without separators or spaces.</value>
+  </data>
+  <data name="EditorDeleteWordTitle" xml:space="preserve">
+    <value>Delete word?</value>
+  </data>
+  <data name="EditorDeleteWordPrompt" xml:space="preserve">
+    <value>The word will be removed from every rule in all three rings. This action cannot be undone.</value>
+  </data>
+  <data name="EditorExportCsv" xml:space="preserve">
+    <value>Export CSV</value>
+  </data>
+  <data name="EditorImportCsv" xml:space="preserve">
+    <value>Import CSV</value>
+  </data>
+  <data name="EditorCsvFileRequired" xml:space="preserve">
+    <value>Select a CSV file to import.</value>
+  </data>
+  <data name="EditorCsvFileTooLarge" xml:space="preserve">
+    <value>The CSV file is too large. Maximum size is 5 MB.</value>
+  </data>
+  <data name="EditorCsvInvalid" xml:space="preserve">
+    <value>The CSV file is invalid. Use the exported Ring, Rule, Enabled, Words format.</value>
+  </data>
+  <data name="EditorImportCompleted" xml:space="preserve">
+    <value>CSV merge completed.</value>
+  </data>
+  <data name="EditorImportSummaryTitle" xml:space="preserve">
+    <value>Import summary</value>
+  </data>
+  <data name="EditorImportNothingAdded" xml:space="preserve">
+    <value>Nothing was added. All imported rules and words already exist.</value>
+  </data>
+  <data name="EditorImportWordsAdded" xml:space="preserve">
+    <value>Words added to rules:</value>
+  </data>
+  <data name="EditorImportRulesCreated" xml:space="preserve">
+    <value>Rules created:</value>
+  </data>
+  <data name="EditorPagination" xml:space="preserve">
+    <value>Word pages</value>
+  </data>
+  <data name="EditorPreviousPage" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="EditorNextPage" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="EditorPageStatus" xml:space="preserve">
+    <value>Page {0} of {1}</value>
+  </data>
+  <data name="EditorMembershipIncludedOnly" xml:space="preserve">
+    <value>Show only rules that contain this word</value>
+  </data>
+  <data name="EditorDeleteAllWordsAria" xml:space="preserve">
+    <value>Delete all words</value>
+  </data>
+  <data name="EditorDeleteAllWordsTitle" xml:space="preserve">
+    <value>Delete all words?</value>
+  </data>
+  <data name="EditorDeleteAllWordsPrompt" xml:space="preserve">
+    <value>All words will be removed from every rule in all three rings. The rules themselves will remain. This action cannot be undone.</value>
+  </data>
+  <data name="EditorAllWordsDeleted" xml:space="preserve">
+    <value>All words were removed from every rule.</value>
+  </data>
+  <data name="EditorDeleteAllRulesAria" xml:space="preserve">
+    <value>Delete all rules for this ring</value>
+  </data>
+  <data name="EditorDeleteAllRulesTitle" xml:space="preserve">
+    <value>Delete all ring rules?</value>
+  </data>
+  <data name="EditorDeleteAllRulesPrompt" xml:space="preserve">
+    <value>All rules for this ring will be deleted. This action cannot be undone.</value>
+  </data>
+  <data name="EditorAllRulesDeleted" xml:space="preserve">
+    <value>All rules for the ring were deleted.</value>
+  </data>
+  <data name="EditorImportErrorTitle" xml:space="preserve">
+    <value>CSV import error</value>
+  </data>
+  <data name="EditorImportErrorLine" xml:space="preserve">
+    <value>Line {0}</value>
+  </data>
+  <data name="EditorImportErrorFile" xml:space="preserve">
+    <value>CSV file</value>
+  </data>
+  <data name="EditorCsvErrorEmptyFile" xml:space="preserve">
+    <value>The file is empty or contains no data.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidHeader" xml:space="preserve">
+    <value>The header is invalid. The first line must contain Ring, Rule, Enabled, Words.</value>
+  </data>
+  <data name="EditorCsvErrorTooManyRows" xml:space="preserve">
+    <value>The CSV contains more than 10,000 non-empty data rows.</value>
+  </data>
+  <data name="EditorCsvErrorMalformedRow" xml:space="preserve">
+    <value>The row has invalid CSV syntax, such as an unclosed quote.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidColumnCount" xml:space="preserve">
+    <value>Exactly 4 columns are required, but this row contains {0}.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidRing" xml:space="preserve">
+    <value>Invalid Ring value “{0}”. Only blue, yellow, or red are allowed.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidRuleText" xml:space="preserve">
+    <value>The Rule column is empty or longer than 300 characters.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidEnabled" xml:space="preserve">
+    <value>Invalid Enabled value “{0}”. Use true, false, 1, or 0.</value>
+  </data>
+  <data name="EditorCsvErrorInvalidWords" xml:space="preserve">
+    <value>The Words column contains an invalid word or separator. Imported words shorter than 3 characters are ignored; all other words must contain 3–120 characters.</value>
+  </data>
+  <data name="EditorCsvErrorUnplayable" xml:space="preserve">
+    <value>After import, “{0}” would have no non-empty rule enabled for games.</value>
+  </data>
+  <data name="EditorBrandEyebrow" xml:space="preserve">
+    <value>BAD WOLF / MINIGAME EDITOR</value>
+  </data>
+  <data name="EditorBrandMark" xml:space="preserve">
+    <value>WORD / RINGS</value>
+  </data>
+  <data name="EditorRingStats" xml:space="preserve">
+    <value>Rules: {0} · Active: {1}</value>
+  </data>
+</root>

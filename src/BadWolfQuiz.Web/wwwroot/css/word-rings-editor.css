@@ -1,0 +1,447 @@
+.word-rings-editor-heading {
+    min-height: clamp(320px, 42dvh, 470px);
+}
+
+.word-rings-editor-mark {
+    position: relative;
+    min-height: 280px;
+    isolation: isolate;
+}
+
+.word-rings-editor-mark::before,
+.word-rings-editor-mark::after {
+    content: "";
+    position: absolute;
+    inset: 50% auto auto 50%;
+    pointer-events: none;
+}
+
+.word-rings-editor-mark::before {
+    z-index: -3;
+    width: min(27vw, 390px);
+    aspect-ratio: 1;
+    border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at center, color-mix(in srgb, var(--panel-2) 82%, transparent) 0 43%, transparent 44%),
+        repeating-conic-gradient(from -8deg, color-mix(in srgb, var(--line) 18%, transparent) 0 1deg, transparent 1deg 18deg);
+    box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.28);
+    transform: translate(-50%, -50%);
+}
+
+.word-rings-editor-mark::after {
+    z-index: -2;
+    width: 10px;
+    height: min(23vw, 270px);
+    background: #e85d5d;
+    box-shadow: 9px 8px 0 color-mix(in srgb, #e0b43c 72%, transparent);
+    transform: translate(-50%, -50%) rotate(18deg);
+}
+
+.word-rings-editor-ring {
+    position: absolute;
+    width: clamp(115px, 11vw, 165px);
+    aspect-ratio: 1;
+    border: 8px solid currentColor;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--panel) 42%, transparent);
+    box-shadow: inset 0 0 34px rgba(0, 0, 0, 0.2), 0 14px 30px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(4px);
+}
+
+.word-rings-editor-ring-a {
+    top: 34px;
+    left: 14%;
+    color: #5f86ee;
+}
+
+.word-rings-editor-ring-b {
+    top: 34px;
+    right: 14%;
+    color: #e0b43c;
+}
+
+.word-rings-editor-ring-c {
+    left: 50%;
+    bottom: 22px;
+    color: #e85d5d;
+    transform: translateX(-50%);
+}
+
+.word-rings-editor-mark-caption {
+    position: absolute;
+    right: 8%;
+    bottom: 10px;
+    color: color-mix(in srgb, var(--muted) 86%, var(--text));
+    font-size: .62rem;
+    font-weight: 1000;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+}
+
+.word-rings-editor-shell {
+    width: min(1500px, calc(100% - 56px));
+    margin: -20px auto 80px;
+    transition: opacity .14s ease;
+}
+
+.word-rings-editor-shell.is-loading {
+    opacity: .62;
+    pointer-events: none;
+}
+
+.word-rings-editor-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.word-rings-editor-tab {
+    --ring-color: var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 12px 18px;
+    border: 1px solid color-mix(in srgb, var(--ring-color) 52%, var(--line));
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--panel) 94%, transparent);
+    color: var(--text);
+    font-weight: 900;
+    text-decoration: none;
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+}
+
+.word-rings-editor-tab:hover,
+.word-rings-editor-tab.is-active {
+    transform: translateY(-1px);
+    border-color: var(--ring-color);
+    background: color-mix(in srgb, var(--ring-color) 12%, var(--panel));
+}
+
+.word-rings-editor-tab-blue { --ring-color: #5f86ee; }
+.word-rings-editor-tab-yellow { --ring-color: #e0b43c; }
+.word-rings-editor-tab-red { --ring-color: #e85d5d; }
+
+.word-rings-editor-tab-dot,
+.word-rings-editor-ring-chip {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    border-radius: 999px;
+    background: var(--ring-color);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--ring-color) 45%, transparent);
+}
+
+.word-rings-editor-toolbar {
+    --ring-color: #5f86ee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+    padding: 18px 20px;
+    border: 1px solid color-mix(in srgb, var(--ring-color) 42%, var(--line));
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--panel) 96%, transparent);
+}
+
+.word-rings-editor-toolbar > div {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.word-rings-editor-toolbar h2,
+.word-rings-editor-rule-card h3 {
+    margin: 0;
+}
+
+.word-rings-editor-section-kicker,
+.word-rings-editor-rule-label {
+    margin: 0 0 4px;
+    color: var(--muted);
+    font-size: .7rem;
+    font-weight: 900;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.word-rings-editor-ring-blue { --ring-color: #5f86ee; }
+.word-rings-editor-ring-yellow { --ring-color: #e0b43c; }
+.word-rings-editor-ring-red { --ring-color: #e85d5d; }
+
+.word-rings-editor-rule-list {
+    --ring-color: #5f86ee;
+    display: grid;
+    gap: 14px;
+}
+
+.word-rings-editor-rule-card {
+    position: relative;
+    padding: 20px 270px 20px 20px;
+    border: 1px solid color-mix(in srgb, var(--ring-color) 34%, var(--line));
+    border-left: 5px solid var(--ring-color);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--panel) 96%, transparent);
+    box-shadow: 0 14px 34px rgb(0 0 0 / 16%);
+    transition: opacity .15s ease, border-color .15s ease;
+}
+
+.word-rings-editor-rule-card.is-disabled .word-rings-editor-rule-content {
+    opacity: .5;
+}
+
+.word-rings-editor-rule-content h3 {
+    font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+}
+
+.word-rings-editor-rule-words {
+    margin-top: 12px;
+    padding: 11px 13px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+}
+
+.word-rings-editor-rule-words span {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.word-rings-editor-rule-words p {
+    margin: 0;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.word-rings-editor-rule-count {
+    display: inline-block;
+    margin-top: 9px;
+    color: var(--muted);
+    font-size: .8rem;
+}
+
+.word-rings-editor-rule-controls {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.word-rings-editor-enabled-form {
+    margin: 0;
+}
+
+.word-rings-editor-enabled-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 11px;
+    border: 1px solid color-mix(in srgb, var(--ring-color) 34%, var(--line));
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--panel-2) 75%, transparent);
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 850;
+    cursor: pointer;
+    user-select: none;
+}
+
+.word-rings-editor-enabled-toggle input[type="checkbox"] {
+    width: 19px;
+    height: 19px;
+    margin: 0;
+    accent-color: var(--ring-color);
+    cursor: pointer;
+}
+
+.word-rings-rule-edit,
+.word-rings-rule-delete {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    padding: 0;
+}
+
+.word-rings-rule-edit {
+    border-color: #4d91e8 !important;
+    background: #123b63 !important;
+    color: #fff !important;
+}
+
+.word-rings-rule-edit:hover {
+    background: #174d80 !important;
+}
+
+.word-rings-rule-delete,
+.word-rings-rule-delete-confirm {
+    background: #9f101b !important;
+    border-color: #ff5b66 !important;
+    color: #fff !important;
+}
+
+.word-rings-rule-edit svg,
+.word-rings-rule-delete svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    overflow: visible;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.word-rings-editor-empty {
+    text-align: center;
+}
+
+.word-rings-editor-dialog {
+    width: min(680px, calc(100vw - 32px));
+    max-width: min(680px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 0;
+    border: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    background: transparent;
+}
+
+.word-rings-editor-dialog-card {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.word-rings-editor-dialog .dialog-heading,
+.word-rings-editor-dialog .dialog-actions {
+    min-width: 0;
+}
+
+.word-rings-editor-dialog .dialog-heading > div {
+    min-width: 0;
+}
+
+.word-rings-editor-dialog .dialog-heading h2 {
+    overflow-wrap: anywhere;
+}
+
+.word-rings-editor-dialog .dialog-actions {
+    flex-wrap: wrap;
+}
+
+.word-rings-editor-field {
+    display: grid;
+    gap: 7px;
+    min-width: 0;
+    margin-top: 14px;
+}
+
+.word-rings-editor-field > span {
+    font-weight: 850;
+}
+
+.word-rings-editor-field input,
+.word-rings-editor-field textarea {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.word-rings-editor-field textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.word-rings-editor-words-hint {
+    margin: 8px 0 0;
+    font-size: .84rem;
+}
+
+@media (max-width: 900px) {
+    .word-rings-editor-mark {
+        min-height: 240px;
+    }
+
+    .word-rings-editor-ring {
+        width: clamp(108px, 20vw, 145px);
+    }
+
+    .word-rings-editor-tabs {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .word-rings-editor-rule-card {
+        padding-right: 20px;
+        padding-top: 78px;
+    }
+
+    .word-rings-editor-rule-controls {
+        top: 14px;
+        right: 14px;
+    }
+
+    .word-rings-editor-enabled-toggle {
+        min-height: 42px;
+    }
+}
+
+@media (max-width: 600px) {
+    .word-rings-editor-heading {
+        min-height: auto;
+    }
+
+    .word-rings-editor-mark {
+        min-height: 210px;
+    }
+
+    .word-rings-editor-ring {
+        width: 108px;
+        border-width: 6px;
+    }
+
+    .word-rings-editor-shell {
+        width: calc(100% - 32px);
+        margin-top: 18px;
+    }
+
+    .word-rings-editor-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .word-rings-editor-dialog {
+        width: calc(100vw - 20px);
+        max-width: calc(100vw - 20px);
+        max-height: calc(100dvh - 20px);
+    }
+
+    .word-rings-editor-dialog-card {
+        padding: 20px;
+    }
+
+    .word-rings-editor-dialog .dialog-actions > .button {
+        flex: 1 1 140px;
+        min-width: 0;
+    }
+}

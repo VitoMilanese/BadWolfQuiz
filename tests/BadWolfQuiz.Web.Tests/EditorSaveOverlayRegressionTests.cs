@@ -82,7 +82,7 @@ public sealed class EditorSaveOverlayRegressionTests
             gameplayBootstrap,
             StringComparison.Ordinal);
 
-        Assert.Contains("editorSaveOverlayDurationMs = 1500", overlayScript, StringComparison.Ordinal);
+        Assert.Contains("editorSaveOverlayDurationMs = 3500", overlayScript, StringComparison.Ordinal);
         Assert.Contains(
             "form.quiz-board-form, form.question-editor",
             overlayScript,

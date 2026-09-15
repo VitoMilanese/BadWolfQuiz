@@ -71,7 +71,7 @@ Export uses the same line-for-line format, so assigned and unassigned values rou
 
 ### Busy indicator
 
-Editor navigation and potentially slow writes use the shared `BadWolfBusy` overlay. This includes section/game navigation, image uploads/replacements, large answer saves, TXT imports, and destructive editor submissions.
+Launching any game card from `/minigames` uses the shared `BadWolfBusy` overlay while the browser navigates to the selected minigame. Editor navigation and potentially slow writes use the same overlay, including section/game navigation, image uploads/replacements, large answer saves, TXT imports, and destructive editor submissions.
 
 ## Rooms
 

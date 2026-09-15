@@ -3,6 +3,7 @@
         quizzes: "/admin/quizzes",
         quizCreate: "/admin/quizzes/create",
         publicQuizzes: "/public-quizzes",
+        minigames: "/minigames",
         editor: "/admin/quizzes/editor",
         questionEditor: "/admin/quizzes/questioneditor",
         finalQuestionEditor: "/admin/quizzes/finalquestioneditor",
@@ -619,6 +620,10 @@
 
         const currentPath = normalisePath(window.location.pathname);
         const targetPath = normalisePath(target.pathname);
+
+        if (currentPath === routes.minigames) {
+            return link.matches(".minigames-catalog-card") && targetPath !== currentPath;
+        }
 
         if (isQuizzesIndex(currentPath)) {
             return pathMatches(targetPath, routes.editor);

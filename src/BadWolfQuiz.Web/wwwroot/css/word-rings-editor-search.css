@@ -1,0 +1,72 @@
+.word-rings-editor-ring-heading {
+    display: grid;
+    align-items: start;
+    gap: 0.28rem;
+}
+
+.word-rings-editor-ring-heading h2 {
+    margin: 0;
+}
+
+.word-rings-editor-ring-stats {
+    display: block;
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
+.word-rings-editor-total-words {
+    font-weight: 900;
+}
+
+.word-rings-editor-mark-caption {
+    display: none !important;
+}
+
+.word-rings-editor-catalog-controls {
+    display: flex;
+    align-items: end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin: 0.8rem 0 1rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid rgba(116, 174, 235, 0.28);
+    border-radius: 14px;
+    background: rgba(7, 34, 63, 0.34);
+}
+
+.word-rings-editor-catalog-control {
+    display: grid;
+    gap: 0.35rem;
+    min-width: min(280px, 100%);
+}
+
+.word-rings-editor-catalog-control-compact {
+    min-width: min(190px, 100%);
+}
+
+.word-rings-editor-catalog-control span {
+    font-size: 0.78rem;
+    font-weight: 800;
+    opacity: 0.78;
+}
+
+.word-rings-editor-catalog-control input,
+.word-rings-editor-catalog-control select {
+    min-height: 42px;
+    border-radius: 10px;
+}
+
+.word-rings-editor-catalog-empty {
+    margin: 1rem 0;
+}
+
+.word-rings-editor-rule-filter-empty {
+    margin: 1rem 0;
+}
+
+@media (max-width: 720px) {
+    .word-rings-editor-catalog-control,
+    .word-rings-editor-catalog-control-compact {
+        width: 100%;
+    }
+}

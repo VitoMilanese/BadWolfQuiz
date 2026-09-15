@@ -1,0 +1,348 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorMenu" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorPlaceholder" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Instructions" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="WordBank" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Outside" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Check" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="RevealRules" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HideRules" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="RuleA" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="RuleB" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="RuleC" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Progress" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="AllCorrect" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="HasErrors" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="PlaceAll" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorAllWordsTab" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorBlueTab" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorYellowTab" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRedTab" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRulesLabel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorAddRule" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorConditionLabel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorWordsLabel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorWordCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorTotalWords" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorNoRules" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorNoWords" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorUseInGames" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorEnabledAria" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCreateRuleTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorEditRuleTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorEditAria" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorWordsHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorInvalidSeparators" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCreate" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorSave" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCancel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorClose" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteRuleTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteRulePrompt" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDelete" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteAria" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRuleCreated" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRuleUpdated" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRuleDeleted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRuleEnabled" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRuleDisabled" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRuleDuplicate" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRuleInvalidText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRuleInvalidWords" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRuleNotFound" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorLastRuleCannotDelete" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorLastEnabledRule" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRequestFailed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorAddWord" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorAddWordTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorEditWordTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorEditWordAria" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteWordAria" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorWordLabel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRingLabel" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorLoadingRules" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorWordMembershipHint" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorWordMembershipSaved" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorWordDeleted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorWordInvalid" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteWordTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteWordPrompt" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorExportCsv" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorImportCsv" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvFileRequired" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvFileTooLarge" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvInvalid" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorImportCompleted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorImportSummaryTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorImportNothingAdded" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorImportWordsAdded" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorImportRulesCreated" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorPagination" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorPreviousPage" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorNextPage" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorPageStatus" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorMembershipIncludedOnly" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteAllWordsAria" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteAllWordsTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteAllWordsPrompt" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorAllWordsDeleted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteAllRulesAria" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteAllRulesTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorDeleteAllRulesPrompt" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorAllRulesDeleted" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorImportErrorTitle" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorImportErrorLine" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorImportErrorFile" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvErrorEmptyFile" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvErrorInvalidHeader" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvErrorTooManyRows" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvErrorMalformedRow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvErrorInvalidColumnCount" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvErrorInvalidRing" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvErrorInvalidRuleText" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvErrorInvalidEnabled" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvErrorInvalidWords" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorCsvErrorUnplayable" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorBrandEyebrow" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorBrandMark" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="EditorRingStats" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+</root>
