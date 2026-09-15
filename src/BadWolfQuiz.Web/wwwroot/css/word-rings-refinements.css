@@ -73,8 +73,10 @@ body:has(.word-rings-page) .page-shell {
     overflow: auto;
     border: 1px solid var(--line);
     border-radius: 20px;
-    background: color-mix(in srgb, var(--panel) 95%, transparent);
+    background: color-mix(in srgb, var(--panel) 72%, transparent);
     box-shadow: 0 20px 54px rgb(0 0 0 / 18%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
 .word-rings-players[hidden] {
@@ -103,6 +105,9 @@ body:has(.word-rings-page) .page-shell {
     min-height: 0;
     padding: 14px;
     overflow: auto;
+    background: color-mix(in srgb, var(--panel) 72%, transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
 .word-rings-bank-heading {
@@ -149,16 +154,17 @@ body:has(.word-rings-page) .page-shell {
     box-sizing: border-box;
     align-self: center;
     justify-self: center;
-    width: auto;
+    width: min(100%, 980px);
     max-width: 100%;
-    height: 100%;
-    max-height: 100%;
+    height: auto;
     aspect-ratio: 1.32 / 1;
     margin: 0;
     border: 1px solid var(--line);
     border-radius: 20px;
-    background: color-mix(in srgb, var(--panel) 95%, transparent);
+    background: color-mix(in srgb, var(--panel) 72%, transparent);
     box-shadow: 0 20px 54px rgb(0 0 0 / 18%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
 .word-rings-stage.is-drop-target {
