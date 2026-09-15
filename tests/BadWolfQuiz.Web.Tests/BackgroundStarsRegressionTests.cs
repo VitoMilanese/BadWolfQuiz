@@ -73,8 +73,8 @@ public sealed class BackgroundStarsRegressionTests : IDisposable
         Assert.Contains("data-site-starfield", tagHelper, StringComparison.Ordinal);
         Assert.Contains("Input.AnimatedStarsEnabled", tagHelper, StringComparison.Ordinal);
         Assert.Contains("GameThemeSettings", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("background-stars.css?v=3", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("background-stars.js?v=3", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("background-stars.css?v=4", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("background-stars.js?v=4", tagHelper, StringComparison.Ordinal);
         Assert.Contains("@keyframes badwolf-star-pulse", css, StringComparison.Ordinal);
         Assert.Contains("@keyframes badwolf-bubble-float", css, StringComparison.Ordinal);
         Assert.Contains("prefers-reduced-motion", css, StringComparison.Ordinal);
@@ -130,6 +130,11 @@ public sealed class BackgroundStarsRegressionTests : IDisposable
         Assert.Contains("[data-host-gameplay-view]", script, StringComparison.Ordinal);
         Assert.Contains(".answer-key-page", script, StringComparison.Ordinal);
         Assert.Contains("[data-host-gameplay-board]:not([hidden])", script, StringComparison.Ordinal);
+        Assert.Contains("const hasPaintedBackground = element =>", script, StringComparison.Ordinal);
+        Assert.Contains("const isPageChrome = element =>", script, StringComparison.Ordinal);
+        Assert.Contains("const paintedViewportRoot = visualChildren.find", script, StringComparison.Ordinal);
+        Assert.Contains("!isPageChrome(element)", script, StringComparison.Ordinal);
+        Assert.Contains("hasPaintedBackground(element)", script, StringComparison.Ordinal);
         Assert.Contains("nextHost.append(field)", script, StringComparison.Ordinal);
         Assert.Contains("new MutationObserver(scheduleHostRefresh).observe(hostGameplayView", script, StringComparison.Ordinal);
         Assert.Contains("attributeFilter: ['data-theme']", script, StringComparison.Ordinal);
