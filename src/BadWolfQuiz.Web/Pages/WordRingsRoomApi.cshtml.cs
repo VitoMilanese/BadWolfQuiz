@@ -39,6 +39,13 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
     public IActionResult OnPostRoomState(string? roomCode, string? playerToken) =>
         Execute(() => new { success = true, state = HostCoordinator.GetRoomState(roomCode, playerToken) });
 
+    public IActionResult OnPostPrepareLeaveRoom(string? roomCode, string? playerToken) =>
+        Execute(() =>
+        {
+            Store.PrepareToLeave(roomCode, playerToken);
+            return new { success = true };
+        });
+
     public IActionResult OnPostLeaveRoom(string? roomCode, string? playerToken) =>
         Execute(() =>
         {
@@ -103,6 +110,32 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
                 membership,
                 ParseCoordinate(x),
                 ParseCoordinate(y))
+        });
+
+    public IActionResult OnPostPlaceRoomSeed(
+        string? roomCode,
+        string? playerToken,
+        string? word,
+        string? membership,
+        string? x,
+        string? y) =>
+        Execute(() => new
+        {
+            success = true,
+            state = HostCoordinator.PlaceSeedWord(
+                roomCode,
+                playerToken,
+                word,
+                membership,
+                ParseCoordinate(x),
+                ParseCoordinate(y))
+        });
+
+    public IActionResult OnPostConfirmRoomSeeds(string? roomCode, string? playerToken) =>
+        Execute(() => new
+        {
+            success = true,
+            state = HostCoordinator.ConfirmSeedSetup(roomCode, playerToken)
         });
 
     public IActionResult OnPostResolveRoomPlacement(

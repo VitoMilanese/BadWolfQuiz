@@ -53,7 +53,11 @@ public sealed class WordRingsRoomHostControlRegressionTests
 
             var started = coordinator.StartGame(host.RoomCode, host.PlayerToken);
             Assert.Equal("playing", started.Phase);
-            Assert.NotEqual(host.State.PlayerId, started.CurrentPlayerId);
+            Assert.Null(started.CurrentPlayerId);
+            Assert.Equal(4, started.BankWords.Count + started.QueuedWords.Count);
+            Assert.True(started.SeedSetupPending);
+            started = CompleteHostSeedSetup(coordinator, host);
+            Assert.Equal(first.State.PlayerId, started.CurrentPlayerId);
             Assert.Empty(started.BankWords);
             Assert.Equal(selectedTexts["A"], started.BlueRuleText);
             Assert.Equal(selectedTexts["B"], started.YellowRuleText);
@@ -93,6 +97,9 @@ public sealed class WordRingsRoomHostControlRegressionTests
 
             var started = coordinator.StartGame(host.RoomCode, host.PlayerToken);
             Assert.Equal("playing", started.Phase);
+            Assert.Null(started.CurrentPlayerId);
+            Assert.Equal(4, started.BankWords.Count + started.QueuedWords.Count);
+            started = CompleteHostSeedSetup(coordinator, host);
             Assert.Equal(player.State.PlayerId, started.CurrentPlayerId);
             Assert.Empty(started.BankWords);
         }
@@ -120,6 +127,7 @@ public sealed class WordRingsRoomHostControlRegressionTests
             var hostRoom = coordinator.StartGame(host.RoomCode, host.PlayerToken);
             Assert.True(hostRoom.DedicatedHostMode);
             Assert.False(string.IsNullOrWhiteSpace(hostRoom.BlueRuleText));
+            hostRoom = CompleteHostSeedSetup(coordinator, host);
 
             var firstState = coordinator.GetRoomState(host.RoomCode, first.PlayerToken);
             Assert.True(firstState.DedicatedHostMode);
@@ -214,6 +222,7 @@ public sealed class WordRingsRoomHostControlRegressionTests
 
             var player = coordinator.JoinRoom(host.RoomCode, "Player");
             _ = coordinator.StartGame(host.RoomCode, host.PlayerToken);
+            _ = CompleteHostSeedSetup(coordinator, host);
             var playerState = coordinator.GetRoomState(host.RoomCode, player.PlayerToken);
             Assert.Equal(string.Empty, playerState.BlueRuleText);
             Assert.Equal(string.Empty, playerState.YellowRuleText);
@@ -234,6 +243,19 @@ public sealed class WordRingsRoomHostControlRegressionTests
             Assert.Equal(selectedTexts["C"], playerState.RedRuleText);
         }
         finally { Directory.Delete(root, true); }
+    }
+
+    private static WordRingsRoomSnapshot CompleteHostSeedSetup(
+        WordRingsRoomHostCoordinator coordinator,
+        WordRingsRoomConnection host)
+    {
+        var state = coordinator.GetRoomState(host.RoomCode, host.PlayerToken);
+        foreach (var word in state.BankWords.Concat(state.QueuedWords).ToArray())
+        {
+            state = coordinator.PlaceSeedWord(host.RoomCode, host.PlayerToken, word, "A", 26.5, 27.25);
+        }
+        _ = coordinator.ConfirmSeedSetup(host.RoomCode, host.PlayerToken);
+        return coordinator.GetRoomState(host.RoomCode, host.PlayerToken);
     }
 
     [Fact]

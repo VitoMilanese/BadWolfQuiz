@@ -29,7 +29,11 @@ public sealed record WordRingsRoomHostSnapshot(
     int HandLimit,
     IReadOnlyList<WordRingsRoomHostPlayer> Players,
     IReadOnlyList<WordRingsRoomHostRuleGroup> RuleSelections,
-    WordRingsRoomHostPendingPlacement? PendingPlacement);
+    WordRingsRoomHostPendingPlacement? PendingPlacement)
+{
+    public bool SeedSetupPending { get; init; }
+    public int SeedWordsRemaining { get; init; }
+}
 
 public sealed class WordRingsRoomHostCoordinator
 {
@@ -134,7 +138,13 @@ public sealed class WordRingsRoomHostCoordinator
             meta!.Selected[WordRingColor.Blue]!.Value,
             meta.Selected[WordRingColor.Yellow]!.Value,
             meta.Selected[WordRingColor.Red]!.Value);
-        InjectHostedRound(code, puzzle);
+        var seedCount = InjectHostedRound(code, puzzle);
+        lock (_metaSync)
+        {
+            meta.SeedWordCount = seedCount;
+            meta.SeedSetupPending = seedCount > 0;
+            meta.Revision++;
+        }
         return GetRoomState(code, playerToken);
     }
 
@@ -164,10 +174,66 @@ public sealed class WordRingsRoomHostCoordinator
     {
         var code = Normalize(roomCode);
         var dedicatedHost = IsDedicatedHostRoom(code);
+        if (dedicatedHost)
+        {
+            var current = GetRoomState(code, playerToken);
+            var placement = current.Placements.FirstOrDefault(item => item.Id == placementId);
+            if (placement?.IsSeed == true && !IsSeedSetupPending(code))
+            {
+                throw new InvalidOperationException("SeedSetupFinished");
+            }
+        }
         var state = dedicatedHost
             ? _store.MoveHostedPlacement(code, playerToken, placementId, membership, x, y)
             : _store.MovePlacement(code, playerToken, placementId, membership, x, y);
         return DecorateRoomState(state, dedicatedHost);
+    }
+
+    public WordRingsRoomSnapshot PlaceSeedWord(
+        string? roomCode,
+        string? playerToken,
+        string? word,
+        string? membership,
+        double x,
+        double y)
+    {
+        var code = Normalize(roomCode);
+        lock (_metaSync)
+        {
+            var meta = RequireMeta(code);
+            EnsureHost(meta, playerToken);
+            if (!meta.HostChoosesRules || !meta.SeedSetupPending)
+            {
+                throw new InvalidOperationException("SeedSetupUnavailable");
+            }
+        }
+        var state = _store.PlaceHostSeedWord(code, playerToken, word, membership, x, y);
+        return DecorateRoomState(state, dedicatedHost: true);
+    }
+
+    public WordRingsRoomHostSnapshot ConfirmSeedSetup(string? roomCode, string? playerToken)
+    {
+        var code = Normalize(roomCode);
+        int requiredCount;
+        lock (_metaSync)
+        {
+            var meta = RequireMeta(code);
+            EnsureHost(meta, playerToken);
+            if (!meta.HostChoosesRules || !meta.SeedSetupPending)
+            {
+                throw new InvalidOperationException("SeedSetupUnavailable");
+            }
+            requiredCount = meta.SeedWordCount;
+        }
+
+        _ = _store.ConfirmHostSeedSetup(code, playerToken, requiredCount);
+        lock (_metaSync)
+        {
+            var meta = RequireMeta(code);
+            meta.SeedSetupPending = false;
+            meta.Revision++;
+        }
+        return GetHostState(code, playerToken);
     }
 
     public WordRingsRoomHostSnapshot ResolvePlacement(
@@ -262,6 +328,10 @@ public sealed class WordRingsRoomHostCoordinator
     {
         var code = Normalize(roomCode);
         var dedicatedHost = EnsureCreator(code, playerToken);
+        if (dedicatedHost && IsSeedSetupPending(code))
+        {
+            throw new InvalidOperationException("SeedSetupPending");
+        }
         if (dedicatedHost && GetRoomState(code, playerToken).Placements.Any(item => item.IsPending))
         {
             throw new InvalidOperationException("PlacementPending");
@@ -314,31 +384,54 @@ public sealed class WordRingsRoomHostCoordinator
         return new WordRingsRoomHostSnapshot(
             state.RoomCode, state.Version + meta.Revision, state.Phase, state.TargetScore, state.PlayerId,
             state.CurrentPlayerId, state.IsHost, canStart, dedicatedHost, meta.JoinLocked,
-            Math.Clamp(state.TargetScore, 5, 10), players, groups, pendingPlacement);
+            Math.Clamp(state.TargetScore, 5, 10), players, groups, pendingPlacement)
+        {
+            SeedSetupPending = state.IsHost && dedicatedHost && meta.SeedSetupPending,
+            SeedWordsRemaining = state.IsHost && dedicatedHost && meta.SeedSetupPending
+                ? state.BankWords.Count + state.QueuedWords.Count
+                : 0
+        };
     }
 
-    private void InjectHostedRound(string code, WordRingsPuzzle puzzle)
+    private int InjectHostedRound(string code, WordRingsPuzzle puzzle)
     {
+        var seedWords = WordRingsSeedWordSelector.SelectHostSetup(puzzle, 4);
+        var excluded = seedWords.Select(item => item.Word).ToHashSet(StringComparer.OrdinalIgnoreCase);
         MutateRoom(code, room =>
         {
             Set(room, "Puzzle", puzzle);
+            ((IList)Get(room, "Placements")!).Clear();
+            Set(room, "NextPlacementId", 1L);
             var players = Players(room);
             foreach (var player in players)
             {
                 Set(player!, "Score", 0d);
                 var words = RemainingWords(player!);
                 words.Clear();
-                if (IsHost(player!)) continue;
-                foreach (var word in puzzle.Words.OrderBy(_ => Random.Shared.Next()).Take(WordRingsRoomStore.MaximumPlayerWords)) words.Add(word);
+                if (IsHost(player!))
+                {
+                    foreach (var seed in seedWords) words.Add(seed.Word);
+                    continue;
+                }
+                foreach (var word in puzzle.Words
+                             .Where(word => !excluded.Contains(word))
+                             .OrderBy(_ => Random.Shared.Next())
+                             .Take(WordRingsRoomStore.MaximumPlayerWords))
+                {
+                    words.Add(word);
+                }
             }
-            Set(room, "CurrentPlayerIndex", FirstPlayableIndex(players, dedicatedHost: true));
+            Set(room, "CurrentPlayerIndex", seedWords.Count > 0 ? -1 : FirstPlayableIndex(players, dedicatedHost: true));
             Set(room, "OutsidePointAwardedThisTurn", false);
             IncrementVersion(room);
         });
+        return seedWords.Count;
     }
 
     private void PrepareChoices(RoomMeta meta)
     {
+        meta.SeedSetupPending = false;
+        meta.SeedWordCount = 0;
         foreach (var color in Enum.GetValues<WordRingColor>())
         {
             meta.Options[color] = PickOptions(color, new HashSet<Guid>());
@@ -383,6 +476,14 @@ public sealed class WordRingsRoomHostCoordinator
         }
     }
 
+    private bool IsSeedSetupPending(string? roomCode)
+    {
+        lock (_metaSync)
+        {
+            return _rooms.TryGetValue(Normalize(roomCode), out var meta) && meta.SeedSetupPending;
+        }
+    }
+
     private WordRingsRoomSnapshot DecorateRoomState(
         WordRingsRoomSnapshot state,
         bool dedicatedHost)
@@ -392,12 +493,14 @@ public sealed class WordRingsRoomHostCoordinator
             return state with { DedicatedHostMode = false };
         }
 
+        var seedSetupPending = IsSeedSetupPending(state.RoomCode);
         var finished = string.Equals(state.Phase, "finished", StringComparison.Ordinal);
         if (!state.IsHost && !finished)
         {
             return state with
             {
                 DedicatedHostMode = true,
+                SeedSetupPending = seedSetupPending,
                 BlueRuleText = string.Empty,
                 YellowRuleText = string.Empty,
                 RedRuleText = string.Empty
@@ -413,6 +516,7 @@ public sealed class WordRingsRoomHostCoordinator
                     return state with
                     {
                         DedicatedHostMode = true,
+                        SeedSetupPending = seedSetupPending,
                         BlueRuleText = SelectedRuleText(meta, WordRingColor.Blue),
                         YellowRuleText = SelectedRuleText(meta, WordRingColor.Yellow),
                         RedRuleText = SelectedRuleText(meta, WordRingColor.Red)
@@ -421,7 +525,7 @@ public sealed class WordRingsRoomHostCoordinator
             }
         }
 
-        return state with { DedicatedHostMode = true };
+        return state with { DedicatedHostMode = true, SeedSetupPending = seedSetupPending };
     }
 
     private static string SelectedRuleText(RoomMeta meta, WordRingColor color)
@@ -470,6 +574,8 @@ public sealed class WordRingsRoomHostCoordinator
         public bool JoinLocked { get; set; }
         public long Revision { get; set; }
         public bool RoundFinishedPrepared { get; set; }
+        public bool SeedSetupPending { get; set; }
+        public int SeedWordCount { get; set; }
         public Dictionary<WordRingColor, List<RuleOption>> Options { get; } = new();
         public Dictionary<WordRingColor, HashSet<Guid>> Offered { get; } = new();
         public Dictionary<WordRingColor, Guid?> Selected { get; } = new();

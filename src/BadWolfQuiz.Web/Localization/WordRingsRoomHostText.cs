@@ -8,7 +8,7 @@ public sealed record WordRingsRoomHostText
     public string PlayerRole { get; init; } = "Play with everyone";
     public string PlayerRoleDescription { get; init; } = "The creator receives words, takes turns, and can win like every other player.";
     public string HostOnlyRole { get; init; } = "Host the game";
-    public string HostOnlyRoleDescription { get; init; } = "The host manages the room and chooses the ring rules, but receives no words and does not take turns.";
+    public string HostOnlyRoleDescription { get; init; } = "The host manages the room and chooses the ring rules. Before player turns begin, the host places four starter example words but does not participate in scoring.";
     public string ChooseRules { get; init; } = "Choose rules";
     public string ChooseRulesHint { get; init; } = "Choose one rule for each ring. Each set of six options can be replaced only once.";
     public string OtherRules { get; init; } = "Other options";
@@ -26,6 +26,8 @@ public sealed record WordRingsRoomHostText
     public string CorrectPlacement { get; init; } = "Correct";
     public string MovePlacement { get; init; } = "Move";
     public string AwaitingHostDecision { get; init; } = "Waiting for the host's decision.";
+    public string SeedExamplesHint { get; init; } = "Place the four example words, then confirm them before the players can begin.";
+    public string ConfirmExamples { get; init; } = "Confirm examples";
 
     public static WordRingsRoomHostText ForCulture(CultureInfo culture) =>
         culture.TwoLetterISOLanguageName.ToLowerInvariant() switch
@@ -44,7 +46,7 @@ public sealed record WordRingsRoomHostText
         PlayerRole = "Грати разом",
         PlayerRoleDescription = "Власник також отримує слова, ходить і може перемогти, як інші гравці.",
         HostOnlyRole = "Бути хостом",
-        HostOnlyRoleDescription = "Хост керує кімнатою, сам обирає правила та вручну оцінює кожне слово, але не отримує слова і не бере участі в ходах.",
+        HostOnlyRoleDescription = "Хост керує кімнатою, сам обирає правила та вручну оцінює кожне слово. Перед ходами гравців він розставляє 4 стартові слова-підказки, але сам не бере участі в грі.",
         ChooseRules = "Обрати правила",
         ChooseRulesHint = "Оберіть по одному правилу для кожного кільця. Набір із шести варіантів для кожного кільця можна замінити лише один раз.",
         OtherRules = "Інші варіанти",
@@ -61,7 +63,9 @@ public sealed record WordRingsRoomHostText
         ResultRules = "Загадані правила",
         CorrectPlacement = "Правильно",
         MovePlacement = "Перемістити",
-        AwaitingHostDecision = "Очікування рішення хоста."
+        AwaitingHostDecision = "Очікування рішення хоста.",
+        SeedExamplesHint = "Розставте 4 стартові слова-підказки та підтвердьте їх. До цього гравці не зможуть почати хід.",
+        ConfirmExamples = "Підтвердити слова"
     };
 
     private static WordRingsRoomHostText Italian { get; } = new()
@@ -70,7 +74,7 @@ public sealed record WordRingsRoomHostText
         PlayerRole = "Gioca con tutti",
         PlayerRoleDescription = "Il creatore riceve le parole, gioca i turni e può vincere come gli altri giocatori.",
         HostOnlyRole = "Fai da host",
-        HostOnlyRoleDescription = "L'host gestisce la stanza, sceglie le regole e valuta manualmente ogni parola, ma non riceve parole e non gioca turni.",
+        HostOnlyRoleDescription = "L'host gestisce la stanza, sceglie le regole e valuta manualmente ogni parola. Prima dei turni dei giocatori dispone quattro parole di esempio, ma non partecipa alla partita.",
         ChooseRules = "Scegli le regole",
         ChooseRulesHint = "Scegli una regola per ogni anello. Ogni gruppo di sei opzioni può essere sostituito una sola volta.",
         OtherRules = "Altre opzioni",
@@ -87,7 +91,9 @@ public sealed record WordRingsRoomHostText
         ResultRules = "Regole degli anelli",
         CorrectPlacement = "Corretto",
         MovePlacement = "Sposta",
-        AwaitingHostDecision = "In attesa della decisione dell'host."
+        AwaitingHostDecision = "In attesa della decisione dell'host.",
+        SeedExamplesHint = "Posiziona le quattro parole di esempio e confermale prima che i giocatori possano iniziare.",
+        ConfirmExamples = "Conferma esempi"
     };
 
     private static WordRingsRoomHostText Russian { get; } = new()
@@ -113,6 +119,8 @@ public sealed record WordRingsRoomHostText
         ResultRules = "Україна",
         CorrectPlacement = "Україна",
         MovePlacement = "Україна",
-        AwaitingHostDecision = "Україна"
+        AwaitingHostDecision = "Україна",
+        SeedExamplesHint = "Україна",
+        ConfirmExamples = "Україна"
     };
 }

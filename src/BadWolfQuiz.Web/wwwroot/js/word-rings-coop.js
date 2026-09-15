@@ -228,6 +228,8 @@
     const ownPlayer = () => state?.players?.find(player => player.id === state.playerId) || null;
     const serverPendingPlacement = () => state?.placements?.find(placement => placement.isPending === true) || null;
     const isOwnTurn = () => state?.phase === 'playing' && state.currentPlayerId === state.playerId;
+    const isHostSeedSetup = () => state?.phase === 'playing' &&
+        state?.dedicatedHostMode === true && state?.isHost === true && state?.seedSetupPending === true;
     const canJudgePendingPlacement = () =>
         state?.phase === 'playing' && state?.dedicatedHostMode === true && state?.isHost === true;
 
@@ -440,10 +442,41 @@
         }
     };
 
+    const placeHostSeed = async (word, placement) => {
+        if (!session?.token || !isHostSeedSetup() || requestInFlight) return;
+        requestInFlight = true;
+        updateControls();
+        try {
+            const payload = await post('PlaceRoomSeed', {
+                roomCode,
+                playerToken: session.token,
+                word,
+                membership: placement.membership,
+                x: placement.x,
+                y: placement.y
+            });
+            if (!payload.success) {
+                setStatus(root.dataset.roomError, 'error');
+                return;
+            }
+            renderState(payload.state);
+        } catch (error) {
+            console.error('Could not place Word Rings host seed.', error);
+            setStatus(root.dataset.roomError, 'error');
+        } finally {
+            requestInFlight = false;
+            updateControls();
+        }
+    };
+
     const assignToStage = (word, clientX, clientY, dragSource) => {
         const placement = membershipAt(clientX, clientY);
         if (isServerPlacementToken(dragSource)) {
             void moveServerPlacement(dragSource, placement);
+            return;
+        }
+        if (isHostSeedSetup()) {
+            void placeHostSeed(word, placement);
             return;
         }
 
@@ -477,16 +510,19 @@
 
     const canBegin = (word, source) => {
         if (isServerPlacementToken(source)) {
+            if (source.dataset.roomSeed === 'true') return !requestInFlight && isHostSeedSetup();
             if (source.dataset.roomHostedPending === 'true') {
                 return !requestInFlight && canJudgePendingPlacement();
             }
             return !requestInFlight && (state?.phase === 'playing' || state?.phase === 'finished');
         }
+        if (isHostSeedSetup()) return !requestInFlight;
         return !requestInFlight && serverPendingPlacement() === null && isOwnTurn() &&
             (pending === null || pending.word === word);
     };
     const canDropStage = (word, membership, source) => {
         if (isServerPlacementToken(source)) {
+            if (source.dataset.roomSeed === 'true') return canBegin(word, source);
             if (source.dataset.roomHostedPending === 'true') return canBegin(word, source);
             return canBegin(word, source) &&
                 canonical(membership) === canonical(source.dataset.membership);
@@ -495,6 +531,7 @@
     };
     const canDropOutside = (word, source) => {
         if (isServerPlacementToken(source)) {
+            if (source.dataset.roomSeed === 'true') return canBegin(word, source);
             if (source.dataset.roomHostedPending === 'true') return canBegin(word, source);
             return canBegin(word, source) && canonical(source.dataset.membership) === '';
         }
@@ -544,19 +581,25 @@
             token.style.top = `${placement.y}%`;
             token.textContent = placement.word;
             const awaitingHost = placement.isPending === true;
-            token.title = awaitingHost
-                ? placement.playerName
-                : `${placement.playerName} · +${formatScore(placement.pointsAwarded)}`;
+            const seedExample = placement.isSeed === true;
+            token.title = seedExample
+                ? ''
+                : awaitingHost
+                    ? placement.playerName
+                    : `${placement.playerName} · +${formatScore(placement.pointsAwarded)}`;
             token.classList.toggle('is-host-judgement-pending', awaitingHost);
+            token.classList.toggle('is-seed-example', seedExample);
+            if (seedExample) token.dataset.roomSeed = 'true';
+            else delete token.dataset.roomSeed;
             if (awaitingHost) token.dataset.roomHostedPending = 'true';
             else delete token.dataset.roomHostedPending;
-            token.classList.toggle('is-correct', !awaitingHost && placement.isCorrect === true);
+            token.classList.toggle('is-correct', !seedExample && !awaitingHost && placement.isCorrect === true);
             token.classList.toggle(
                 'is-partial',
-                !awaitingHost && placement.isCorrect !== true && placement.isPartial === true && Number(placement.pointsAwarded) > 0);
+                !seedExample && !awaitingHost && placement.isCorrect !== true && placement.isPartial === true && Number(placement.pointsAwarded) > 0);
             token.classList.toggle(
                 'is-wrong',
-                !awaitingHost && placement.isCorrect !== true && !(placement.isPartial === true && Number(placement.pointsAwarded) > 0));
+                !seedExample && !awaitingHost && placement.isCorrect !== true && !(placement.isPartial === true && Number(placement.pointsAwarded) > 0));
         }
 
         placedLayer.querySelectorAll('[data-room-server-placement]').forEach(token => {
@@ -682,8 +725,9 @@
         root.classList.toggle('is-room-waiting', state?.phase === 'waiting');
         root.classList.toggle('is-not-own-turn', playing && !ownTurn);
 
+        const canUseBank = isHostSeedSetup() || ownTurn;
         wordList.querySelectorAll('.word-rings-word').forEach(token => {
-            if (token instanceof HTMLButtonElement) token.disabled = !ownTurn || awaitingHost || requestInFlight;
+            if (token instanceof HTMLButtonElement) token.disabled = !canUseBank || awaitingHost || requestInFlight;
         });
     };
 
@@ -806,6 +850,19 @@
             if (submit instanceof HTMLButtonElement) submit.disabled = false;
         }
     });
+
+    const sendDepartureBeacon = () => {
+        const token = session?.token;
+        if (!token || state?.isHost === true || typeof navigator.sendBeacon !== 'function') return;
+        const data = new FormData();
+        if (antiForgery instanceof HTMLInputElement) {
+            data.set('__RequestVerificationToken', antiForgery.value);
+        }
+        data.set('roomCode', roomCode);
+        data.set('playerToken', token);
+        navigator.sendBeacon(`${apiUrl}?handler=PrepareLeaveRoom`, data);
+    };
+    window.addEventListener('pagehide', sendDepartureBeacon);
 
     root.querySelectorAll('[data-leave-room]').forEach(button => {
         button.addEventListener('click', async event => {

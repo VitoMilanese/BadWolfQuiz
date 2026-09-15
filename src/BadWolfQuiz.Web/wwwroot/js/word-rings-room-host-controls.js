@@ -13,6 +13,8 @@
     const checkButton = root.querySelector('[data-check]');
     const judgePanel = root.querySelector('[data-room-host-judge]');
     const judgeButton = root.querySelector('[data-room-host-resolve]');
+    const seedSetupPanel = root.querySelector('[data-room-host-seed-setup]');
+    const seedConfirmButton = root.querySelector('[data-room-host-seed-confirm]');
     const lockButton = root.querySelector('[data-toggle-room-lock]');
     const ruleDialog = root.querySelector('[data-room-rule-picker-dialog]');
     const confirmRuleDialog = root.querySelector('[data-confirm-room-rule-picker]');
@@ -137,7 +139,7 @@
 
             const actions = document.createElement('div');
             actions.className = 'word-rings-player-actions';
-            if (hostState.phase === 'playing' && player.isPlayingParticipant && Number(player.remainingWords) > 0 && player.id !== hostState.currentPlayerId) {
+            if (hostState.phase === 'playing' && hostState.seedSetupPending !== true && player.isPlayingParticipant && Number(player.remainingWords) > 0 && player.id !== hostState.currentPlayerId) {
                 const pass = document.createElement('button');
                 pass.type = 'button';
                 pass.className = 'word-rings-player-action';
@@ -192,6 +194,13 @@
                 ? root.dataset.roomHostMove || ''
                 : root.dataset.roomHostCorrect || '';
             judgeButton.dataset.placementId = pending ? String(pending.id) : '';
+        }
+        if (seedSetupPanel instanceof HTMLElement) {
+            seedSetupPanel.hidden = !(isHostController() && hostState?.seedSetupPending === true);
+        }
+        if (seedConfirmButton instanceof HTMLButtonElement) {
+            seedConfirmButton.hidden = !(isHostController() && hostState?.seedSetupPending === true);
+            seedConfirmButton.disabled = busy || Number(hostState?.seedWordsRemaining || 0) > 0;
         }
         if (checkButton instanceof HTMLButtonElement) checkButton.hidden = isHostController();
     };
@@ -284,6 +293,7 @@
             if (ring) void action('RefreshRoomRules', { ring }, { renderBusy: false });
         });
     });
+    seedConfirmButton?.addEventListener('click', () => void action('ConfirmRoomSeeds'));
     judgeButton?.addEventListener('click', () => {
         const placementId = Number.parseInt(judgeButton.dataset.placementId || '', 10);
         if (Number.isFinite(placementId)) void action('ResolveRoomPlacement', { placementId });

@@ -64,6 +64,8 @@
      data-room-rules-required="@hostText.RulesRequired"
      data-room-host-correct="@hostText.CorrectPlacement"
      data-room-host-move="@hostText.MovePlacement"
+     data-room-host-confirm-examples="@hostText.ConfirmExamples"
+     data-room-host-seed-hint="@hostText.SeedExamplesHint"
      data-room-awaiting-host="@hostText.AwaitingHostDecision"
      data-room-voice-language="@CultureInfo.CurrentUICulture.Name"
      data-room-voice-check="@roomText.VoiceCheck"
@@ -80,6 +82,7 @@
     {
         <script type="application/json" data-word-rings-puzzle>@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DisplayedExpected))</script>
         <script type="application/json" data-word-rings-queue>@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.QueuedWords))</script>
+        <script type="application/json" data-word-rings-seeds>@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SeedWords.Select(seed => new { word = seed.Word, membership = seed.Membership })))</script>
     }
 
     <form data-word-rings-antiforgery hidden>@Html.AntiForgeryToken()</form>
@@ -141,7 +144,10 @@
                 </section>
                 <div class="word-rings-placed" data-placed-layer></div>
             </div>
-            <p class="word-rings-status" data-status aria-live="polite"></p>
+            @if (!isCooperativeRoom)
+            {
+                <p class="word-rings-status" data-status aria-live="polite"></p>
+            }
         </main>
 
         <aside class="word-rings-bank" data-word-bank>
@@ -157,6 +163,10 @@
             </div>
             @if (isCooperativeRoom)
             {
+                <div class="word-rings-host-seed-setup" data-room-host-seed-setup hidden>
+                    <p>@hostText.SeedExamplesHint</p>
+                    <button class="button button-primary" type="button" data-room-host-seed-confirm>@hostText.ConfirmExamples</button>
+                </div>
                 <div class="word-rings-host-judge" data-room-host-judge hidden>
                     <button class="button button-primary" type="button" data-room-host-resolve></button>
                 </div>

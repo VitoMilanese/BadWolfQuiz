@@ -63,7 +63,10 @@ public sealed record WordRingsRoomPlacementSnapshot(
     Guid PlayerId,
     string PlayerName,
     bool IsPending,
-    string SubmittedMembership);
+    string SubmittedMembership)
+{
+    public bool IsSeed { get; init; }
+}
 
 public sealed record WordRingsRoomSnapshot(
     string RoomCode,
@@ -88,6 +91,7 @@ public sealed record WordRingsRoomSnapshot(
     IReadOnlyList<WordRingsRoomPlacementSnapshot> Placements)
 {
     public IReadOnlyList<WordRingsRoomEventSnapshot> Events { get; init; } = [];
+    public bool SeedSetupPending { get; init; }
 
     [System.Text.Json.Serialization.JsonIgnore]
     public double TeamScore => PlayerScore;
@@ -116,6 +120,8 @@ public sealed class WordRingsRoomStore
     public const int MaximumBankWords = 10;
     public const int MaximumPlayerWords = 20;
     public static readonly TimeSpan InactivityTimeout = TimeSpan.FromHours(2);
+    public static readonly TimeSpan PlayerPresenceTimeout = TimeSpan.FromMinutes(2);
+    public static readonly TimeSpan PlayerDepartureGracePeriod = TimeSpan.FromSeconds(5);
 
     private const string CodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private const int CodeLength = 6;
@@ -170,14 +176,14 @@ public sealed class WordRingsRoomStore
             var now = _timeProvider.GetUtcNow();
             RemoveExpiredCore(now);
 
-            var puzzle = WordRingsRuleStore.Get(_environment).CreatePuzzle();
+            var puzzle = CreateSeedFriendlyPuzzle();
             if (!IsPlayable(puzzle))
             {
                 throw new WordRingsRoomException(WordRingsRoomError.ConfigurationUnavailable);
             }
 
             var code = AllocateRoomCode();
-            var host = new PlayerState(Guid.NewGuid(), CreatePlayerToken(), normalizedName, isHost: true);
+            var host = new PlayerState(Guid.NewGuid(), CreatePlayerToken(), normalizedName, isHost: true, now);
             var room = new RoomState(
                 code,
                 targetScore,
@@ -208,7 +214,7 @@ public sealed class WordRingsRoomStore
                 throw new WordRingsRoomException(WordRingsRoomError.RoomAlreadyStarted);
             }
 
-            var player = new PlayerState(Guid.NewGuid(), CreatePlayerToken(), normalizedName, isHost: false);
+            var player = new PlayerState(Guid.NewGuid(), CreatePlayerToken(), normalizedName, isHost: false, now);
             room.Players.Add(player);
             AddRoomEvent(room, WordRingsRoomEventType.PlayerJoined, player.Id, player.Name);
             Touch(room, now);
@@ -223,7 +229,16 @@ public sealed class WordRingsRoomStore
             var now = _timeProvider.GetUtcNow();
             var room = GetActiveRoom(roomCode, now);
             var player = GetPlayer(room, playerToken);
-            room.LastActivityUtc = now;
+            player.LastSeenUtc = now;
+            player.DepartureRequestedUtc = null;
+            if (RemoveDisconnectedPlayers(room, now, player.Id))
+            {
+                Touch(room, now);
+            }
+            else
+            {
+                room.LastActivityUtc = now;
+            }
             return CreateSnapshot(room, player);
         }
     }
@@ -248,7 +263,7 @@ public sealed class WordRingsRoomStore
                 throw new WordRingsRoomException(WordRingsRoomError.NeedMorePlayers);
             }
 
-            var puzzle = WordRingsRuleStore.Get(_environment).CreatePuzzle();
+            var puzzle = CreateSeedFriendlyPuzzle();
             if (!IsPlayable(puzzle))
             {
                 throw new WordRingsRoomException(WordRingsRoomError.ConfigurationUnavailable);
@@ -262,12 +277,33 @@ public sealed class WordRingsRoomStore
             room.Placements.Clear();
             room.NextPlacementId = 1;
 
-            var globallyUsed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var seedWords = WordRingsSeedWordSelector.SelectAutomatic(puzzle);
+            var seedWordSet = seedWords.Select(item => item.Word).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            foreach (var seed in seedWords)
+            {
+                var (seedX, seedY) = GetCorrectedPlacementAnchor(seed.Membership);
+                room.Placements.Add(new PlacementState(
+                    room.NextPlacementId++,
+                    seed.Word,
+                    seed.Membership,
+                    seedX,
+                    seedY,
+                    true,
+                    false,
+                    0,
+                    Guid.Empty,
+                    string.Empty,
+                    false,
+                    seed.Membership,
+                    true));
+            }
+
+            var globallyUsed = new HashSet<string>(seedWordSet, StringComparer.OrdinalIgnoreCase);
             foreach (var roomPlayer in room.Players)
             {
                 roomPlayer.Score = 0;
                 roomPlayer.RemainingWords.Clear();
-                roomPlayer.RemainingWords.AddRange(BuildPlayerWords(puzzle, globallyUsed));
+                roomPlayer.RemainingWords.AddRange(BuildPlayerWords(puzzle, globallyUsed, seedWordSet));
                 globallyUsed.UnionWith(roomPlayer.RemainingWords);
             }
 
@@ -374,10 +410,7 @@ public sealed class WordRingsRoomStore
                 player.Name,
                 false,
                 actualMembership));
-            if (room.Placements.Count > MaximumSharedPlacements)
-            {
-                room.Placements.RemoveRange(0, room.Placements.Count - MaximumSharedPlacements);
-            }
+            TrimPlacements(room);
             AddRoomEvent(room, WordRingsRoomEventType.CheckSubmitted, player.Id, player.Name);
 
             var turnContinues = isCorrect;
@@ -468,10 +501,7 @@ public sealed class WordRingsRoomStore
                 player.Name,
                 true,
                 actualMembership));
-            if (room.Placements.Count > MaximumSharedPlacements)
-            {
-                room.Placements.RemoveRange(0, room.Placements.Count - MaximumSharedPlacements);
-            }
+            TrimPlacements(room);
             AddRoomEvent(room, WordRingsRoomEventType.CheckSubmitted, player.Id, player.Name);
 
             Touch(room, now);
@@ -519,7 +549,14 @@ public sealed class WordRingsRoomStore
             }
 
             var placement = room.Placements[placementIndex];
-            if (placement.IsPending)
+            if (placement.IsSeed)
+            {
+                if (!player.IsHost || room.Phase != RoomPhase.Playing)
+                {
+                    throw new WordRingsRoomException(WordRingsRoomError.NotHost);
+                }
+            }
+            else if (placement.IsPending)
             {
                 if (!player.IsHost)
                 {
@@ -540,7 +577,7 @@ public sealed class WordRingsRoomStore
 
             room.Placements[placementIndex] = placement with
             {
-                Membership = placement.IsPending ? normalizedMembership : placement.Membership,
+                Membership = placement.IsPending || placement.IsSeed ? normalizedMembership : placement.Membership,
                 X = Math.Clamp(x, 3, 97),
                 Y = Math.Clamp(y, 3, 97)
             };
@@ -686,6 +723,10 @@ public sealed class WordRingsRoomStore
             }
 
             var placement = room.Placements[placementIndex];
+            if (placement.IsSeed)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+            }
             if (!string.Equals(
                     placement.Membership,
                     normalizedMembership,
@@ -701,6 +742,110 @@ public sealed class WordRingsRoomStore
             };
             Touch(room, now);
             return CreateSnapshot(room, player);
+        }
+    }
+
+    internal WordRingsRoomSnapshot PlaceHostSeedWord(
+        string? roomCode,
+        string? playerToken,
+        string? word,
+        string? membership,
+        double x,
+        double y)
+    {
+        lock (_sync)
+        {
+            var now = _timeProvider.GetUtcNow();
+            var room = GetActiveRoom(roomCode, now);
+            var host = GetPlayer(room, playerToken);
+            if (!host.IsHost)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.NotHost);
+            }
+            if (room.Phase != RoomPhase.Playing)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
+            }
+
+            var actualWord = host.RemainingWords.FirstOrDefault(item =>
+                string.Equals(item, word?.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (actualWord is null)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidWord);
+            }
+            var actualMembership = NormalizeMembership(membership);
+            if (actualMembership is null)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+            }
+
+            host.RemainingWords.Remove(actualWord);
+            room.Placements.Add(new PlacementState(
+                room.NextPlacementId++,
+                actualWord,
+                actualMembership,
+                Math.Clamp(x, 3, 97),
+                Math.Clamp(y, 3, 97),
+                true,
+                false,
+                0,
+                host.Id,
+                host.Name,
+                false,
+                actualMembership,
+                true));
+            TrimPlacements(room);
+            Touch(room, now);
+            return CreateSnapshot(room, host);
+        }
+    }
+
+    internal WordRingsRoomSnapshot ConfirmHostSeedSetup(
+        string? roomCode,
+        string? playerToken,
+        int requiredSeedCount)
+    {
+        lock (_sync)
+        {
+            var now = _timeProvider.GetUtcNow();
+            var room = GetActiveRoom(roomCode, now);
+            var host = GetPlayer(room, playerToken);
+            if (!host.IsHost)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.NotHost);
+            }
+            if (room.Phase != RoomPhase.Playing || host.RemainingWords.Count > 0)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
+            }
+            var placedSeedCount = room.Placements.Count(item => item.IsSeed && item.PlayerId == host.Id);
+            if (placedSeedCount < requiredSeedCount)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
+            }
+
+            room.CurrentPlayerIndex = room.Players.FindIndex(item => !item.IsHost && item.RemainingWords.Count > 0);
+            room.OutsidePointAwardedThisTurn = false;
+            if (room.CurrentPlayerIndex < 0)
+            {
+                room.Phase = RoomPhase.Finished;
+                room.Outcome = RoomOutcome.Lost;
+            }
+            Touch(room, now);
+            return CreateSnapshot(room, host);
+        }
+    }
+
+    public void PrepareToLeave(string? roomCode, string? playerToken)
+    {
+        lock (_sync)
+        {
+            var now = _timeProvider.GetUtcNow();
+            var room = GetActiveRoom(roomCode, now);
+            var player = GetPlayer(room, playerToken);
+            if (player.IsHost) return;
+            player.DepartureRequestedUtc = now;
+            room.LastActivityUtc = now;
         }
     }
 
@@ -836,6 +981,33 @@ public sealed class WordRingsRoomStore
         _rooms.Remove(normalizedCode);
     }
 
+    private WordRingsPuzzle CreateSeedFriendlyPuzzle()
+    {
+        WordRingsPuzzle? best = null;
+        var bestScore = int.MinValue;
+        var ruleStore = WordRingsRuleStore.Get(_environment);
+        for (var attempt = 0; attempt < 32; attempt++)
+        {
+            var candidate = ruleStore.CreatePuzzle();
+            if (!IsPlayable(candidate)) continue;
+            var seeds = WordRingsSeedWordSelector.SelectAutomatic(candidate);
+            var memberships = seeds.Select(item => item.Membership).ToHashSet(StringComparer.Ordinal);
+            var primaryCount = new[] { "A", "B", "C", string.Empty }.Count(memberships.Contains);
+            var sharedScore = memberships.Contains("ABC")
+                ? 20
+                : memberships.Any(item => item.Length == 2) ? 10 : 0;
+            var score = (primaryCount * 100) + sharedScore;
+            if (score > bestScore)
+            {
+                best = candidate;
+                bestScore = score;
+            }
+            if (primaryCount == 4 && memberships.Contains("ABC")) break;
+        }
+
+        return best ?? ruleStore.CreatePuzzle();
+    }
+
     private static bool IsPlayable(WordRingsPuzzle puzzle) =>
         !string.IsNullOrWhiteSpace(puzzle.BlueRuleText) &&
         !string.IsNullOrWhiteSpace(puzzle.YellowRuleText) &&
@@ -908,6 +1080,36 @@ public sealed class WordRingsRoomStore
     {
         room.LastActivityUtc = now;
         room.Version++;
+    }
+
+    private static void TrimPlacements(RoomState room)
+    {
+        while (room.Placements.Count > MaximumSharedPlacements)
+        {
+            var removable = room.Placements.FindIndex(item => !item.IsSeed);
+            if (removable < 0) break;
+            room.Placements.RemoveAt(removable);
+        }
+    }
+
+    private static bool RemoveDisconnectedPlayers(RoomState room, DateTimeOffset now, Guid keepPlayerId)
+    {
+        var removedAny = false;
+        for (var index = room.Players.Count - 1; index >= 0; index--)
+        {
+            var player = room.Players[index];
+            if (player.IsHost || player.Id == keepPlayerId) continue;
+            var departureExpired = player.DepartureRequestedUtc is DateTimeOffset departureRequestedUtc &&
+                                   now - departureRequestedUtc >= PlayerDepartureGracePeriod;
+            var presenceExpired = now - player.LastSeenUtc > PlayerPresenceTimeout;
+            if (!departureExpired && !presenceExpired) continue;
+            var removedId = player.Id;
+            var removedName = player.Name;
+            RemovePlayerAt(room, index);
+            AddRoomEvent(room, WordRingsRoomEventType.PlayerLeft, removedId, removedName);
+            removedAny = true;
+        }
+        return removedAny;
     }
 
     private void RemoveExpiredCore(DateTimeOffset now)
@@ -1021,7 +1223,10 @@ public sealed class WordRingsRoomStore
                 item.PlayerId,
                 item.PlayerName,
                 item.IsPending,
-                item.SubmittedMembership))
+                item.SubmittedMembership)
+            {
+                IsSeed = item.IsSeed
+            })
             .ToArray();
         var playerOutcome = room.Phase == RoomPhase.Finished && room.WinnerPlayerId is Guid winnerId
             ? (winnerId == player.Id ? RoomOutcome.Won : RoomOutcome.Lost)
@@ -1061,21 +1266,26 @@ public sealed class WordRingsRoomStore
 
     private static IReadOnlyList<string> BuildPlayerWords(
         WordRingsPuzzle puzzle,
-        IReadOnlySet<string> globallyUsed)
+        IReadOnlySet<string> globallyUsed,
+        IReadOnlySet<string>? excludedWords = null)
     {
-        var targetCount = Math.Min(MaximumPlayerWords, puzzle.Words.Count);
+        excludedWords ??= new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var availableWords = puzzle.Words
+            .Where(word => !excludedWords.Contains(word))
+            .ToArray();
+        var targetCount = Math.Min(MaximumPlayerWords, availableWords.Length);
         if (targetCount == 0)
         {
             return [];
         }
 
-        var preferred = puzzle.Words
+        var preferred = availableWords
             .Where(word => !globallyUsed.Contains(word))
             .OrderBy(_ => Random.Shared.Next())
             .ToList();
         if (preferred.Count < targetCount)
         {
-            preferred.AddRange(puzzle.Words
+            preferred.AddRange(availableWords
                 .Where(word => !preferred.Contains(word, StringComparer.OrdinalIgnoreCase))
                 .OrderBy(_ => Random.Shared.Next()));
         }
@@ -1274,13 +1484,16 @@ public sealed class WordRingsRoomStore
         Guid id,
         string token,
         string name,
-        bool isHost)
+        bool isHost,
+        DateTimeOffset lastSeenUtc)
     {
         public Guid Id { get; } = id;
         public string Token { get; } = token;
         public string Name { get; } = name;
         public bool IsHost { get; } = isHost;
         public double Score { get; set; }
+        public DateTimeOffset LastSeenUtc { get; set; } = lastSeenUtc;
+        public DateTimeOffset? DepartureRequestedUtc { get; set; }
         public List<string> RemainingWords { get; } = [];
     }
 
@@ -1296,7 +1509,8 @@ public sealed class WordRingsRoomStore
         Guid PlayerId,
         string PlayerName,
         bool IsPending,
-        string SubmittedMembership);
+        string SubmittedMembership,
+        bool IsSeed = false);
 
     private sealed record RoomEventState(
         long Sequence,

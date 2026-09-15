@@ -103,3 +103,12 @@ Import and export use the same three-note Web Audio completion tone as quiz impo
 The rule store keeps one immutable in-memory snapshot containing both rules and a precomputed unique-word index. Read-only word paging therefore does not repeatedly flatten and sort every rule. Mutations are serialized through the existing store gate, build a new snapshot only after a successful write, and publish it atomically. Word membership edits are batched, and a CSV merge performs a single persistence write regardless of how many rows changed.
 
 New-word import details use responsive pages containing as many chips as fit into nine visual rows at the current dialog width; imported-rule detail dialogs keep their five-item pages. The nine-row layout is measured once per width and recalculated after a resize.
+
+
+### Starter examples and room presence
+
+Solo rounds and multiplayer rooms where the creator also plays now start with non-scoring example tokens already positioned on the board. The automatic selector prefers one A-only, B-only, C-only, and outside-all-rings word, plus an ABC word; when ABC is unavailable it uses a two-ring overlap when possible. These examples are excluded from the playable word pool and do not count as attempts, answers, or points.
+
+Dedicated non-playing hosts instead receive four setup words after their selected rules are applied. No player owns the turn during this setup phase. The host places the four examples anywhere on the Venn board and confirms them; only then does the first playing participant receive the turn. The confirmed examples remain visible as starter associations and never score points.
+
+The multiplayer turn/status line below the board is collapsed completely because the current player is already indicated in the player list. Non-host clients send a departure hint on page shutdown/navigation. The server keeps a five-second grace period so an ordinary refresh can reconnect with the same token instead of being treated as a leave; if the page does not come back, another client removes that player and emits the normal leave event. A longer heartbeat timeout is retained as a fallback for abrupt connection loss without falsely ejecting briefly backgrounded tabs.

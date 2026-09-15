@@ -153,7 +153,7 @@ public sealed class WordRingsRuleStore
             true)
     ];
 
-    private static readonly string[] DefaultOutsideWords = ["дім", "сир"];
+    private static readonly string[] DefaultOutsideWords = ["дім", "сир", "чай"];
     private static readonly ConcurrentDictionary<string, Lazy<WordRingsRuleStore>> Instances =
         new(StringComparer.OrdinalIgnoreCase);
 
@@ -275,12 +275,12 @@ public sealed class WordRingsRuleStore
             .Distinct(comparer)
             .Where(word => !selectedWords.Contains(word, comparer))
             .OrderBy(_ => Random.Shared.Next())
-            .Take(2)
+            .Take(3)
             .ToList();
 
         foreach (var fallback in DefaultOutsideWords)
         {
-            if (outsideWords.Count >= 2)
+            if (outsideWords.Count >= 3)
             {
                 break;
             }

@@ -15,6 +15,7 @@
     const resetButton = root.querySelector('[data-reset]');
     const puzzleConfig = root.querySelector('[data-word-rings-puzzle]');
     const queueConfig = root.querySelector('[data-word-rings-queue]');
+    const seedConfig = root.querySelector('[data-word-rings-seeds]');
     const isSoloMode = (root.dataset.gameMode || 'solo').toLowerCase() === 'solo';
 
     const ringElements = [
@@ -28,6 +29,19 @@
         expected = new Map(Object.entries(JSON.parse(puzzleConfig?.textContent || '{}')));
     } catch (error) {
         console.error('Failed to read word-rings puzzle config.', error);
+    }
+
+    const normalizeSeeds = value => Array.isArray(value)
+        ? value
+            .filter(seed => seed && typeof seed.word === 'string')
+            .map(seed => ({ word: seed.word, membership: String(seed.membership || '') }))
+        : [];
+
+    let seedWords = [];
+    try {
+        seedWords = normalizeSeeds(JSON.parse(seedConfig?.textContent || '[]'));
+    } catch (error) {
+        console.error('Failed to read word-rings seed config.', error);
     }
 
     let queuedWords = [];
@@ -232,14 +246,35 @@
     };
 
     const placementAnchors = {
-        A: [27, 28],
-        B: [73, 28],
-        C: [50, 76],
-        AB: [50, 19],
-        AC: [35, 54],
-        BC: [65, 54],
-        ABC: [50, 43],
+        A: [26.5, 27.25],
+        B: [73.5, 27.25],
+        C: [50, 84],
+        AB: [50, 16.75],
+        AC: [32, 61],
+        BC: [68, 61],
+        ABC: [50, 46.25],
         '': [8, 88]
+    };
+
+    const renderSeedWords = seeds => {
+        for (const seed of seeds) {
+            const membership = canonical(seed.membership);
+            const anchor = placementAnchors[membership];
+            if (!anchor) continue;
+            const token = document.createElement('button');
+            token.type = 'button';
+            token.className = 'word-rings-word is-on-stage is-seed-example';
+            token.dataset.word = seed.word;
+            token.dataset.membership = membership;
+            token.dataset.seedExample = 'true';
+            token.textContent = seed.word;
+            token.style.left = `${anchor[0]}%`;
+            token.style.top = `${anchor[1]}%`;
+            token.disabled = true;
+            token.draggable = false;
+            placedLayer.append(token);
+            bringToFront(token);
+        }
     };
 
     const findBestPlacement = (word, membership) => {
@@ -448,6 +483,7 @@
             ? payload.words.filter(word => typeof word === 'string')
             : [];
         expected = new Map(Object.entries(payload?.expected || {}));
+        seedWords = normalizeSeeds(payload?.seeds);
         const playableWords = words.filter(word => expected.has(word));
         queuedWords = playableWords.slice(maximumBankWords);
         maximumAttempts = Math.min(configuredGameWordLimit, expected.size);
@@ -464,6 +500,7 @@
         outsideList.replaceChildren();
         wordList.replaceChildren();
         for (const word of playableWords.slice(0, maximumBankWords)) createBankWord(word);
+        renderSeedWords(seedWords);
 
         const setRuleText = (selector, value) => {
             const target = rules.querySelector(selector);
@@ -565,6 +602,7 @@
         updateProgress();
     });
 
+    renderSeedWords(seedWords);
     clearLegacyResetQuery();
     updateProgress();
 })();

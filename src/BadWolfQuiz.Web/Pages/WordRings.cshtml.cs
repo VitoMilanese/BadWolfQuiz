@@ -15,6 +15,7 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
     public IReadOnlyList<string> DisplayedWords { get; private set; } = [];
     public IReadOnlyList<string> InitialWords { get; private set; } = [];
     public IReadOnlyList<string> QueuedWords { get; private set; } = [];
+    public IReadOnlyList<WordRingsSeedWord> SeedWords { get; private set; } = [];
     public IReadOnlyDictionary<string, string> DisplayedExpected { get; private set; } =
         new Dictionary<string, string>(StringComparer.Ordinal);
 
@@ -41,6 +42,7 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         DisplayedWords = selection.Words;
         InitialWords = DisplayedWords.Take(MaximumBankWords).ToArray();
         QueuedWords = DisplayedWords.Skip(MaximumBankWords).ToArray();
+        SeedWords = selection.SeedWords;
         DisplayedExpected = Puzzle.Expected
             .Where(item => DisplayedWords.Contains(item.Key, StringComparer.Ordinal))
             .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
@@ -69,6 +71,7 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
             yellowRuleText = selection.Puzzle.YellowRuleText,
             redRuleText = selection.Puzzle.RedRuleText,
             words = selection.Words,
+            seeds = selection.SeedWords,
             expected
         });
     }
@@ -91,9 +94,11 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         for (var attempt = 0; attempt < PuzzleSelectionAttempts; attempt++)
         {
             var candidate = store.CreatePuzzle();
-            var candidateWords = BuildDisplayedWords(candidate, previousWords);
+            var seedWords = WordRingsSeedWordSelector.SelectAutomatic(candidate);
+            var excludedWords = seedWords.Select(item => item.Word).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var candidateWords = BuildDisplayedWordsExcludingSeeds(candidate, previousWords, excludedWords);
             var differenceCount = CountRuleDifferences(candidate, previousRules);
-            var qualityScore = ScoreDisplayedWords(candidate, candidateWords);
+            var qualityScore = ScoreDisplayedWords(candidate, candidateWords) + ScoreSeedWords(seedWords);
 
             if (best is null ||
                 differenceCount > best.RuleDifferenceCount ||
@@ -102,6 +107,7 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
                 best = new PuzzleSelection(
                     candidate,
                     candidateWords,
+                    seedWords,
                     differenceCount,
                     qualityScore);
             }
@@ -113,9 +119,12 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         }
 
         var fallback = store.CreatePuzzle();
+        var fallbackSeeds = WordRingsSeedWordSelector.SelectAutomatic(fallback);
+        var fallbackExcluded = fallbackSeeds.Select(item => item.Word).ToHashSet(StringComparer.OrdinalIgnoreCase);
         return new PuzzleSelection(
             fallback,
-            BuildDisplayedWords(fallback, previousWords),
+            BuildDisplayedWordsExcludingSeeds(fallback, previousWords, fallbackExcluded),
+            fallbackSeeds,
             0,
             int.MinValue);
     }
@@ -206,9 +215,28 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
             (spread * 350);
     }
 
+    private static int ScoreSeedWords(IReadOnlyList<WordRingsSeedWord> seeds)
+    {
+        var memberships = seeds.Select(item => item.Membership).ToHashSet(StringComparer.Ordinal);
+        var primary = new[] { "A", "B", "C", string.Empty }.Count(memberships.Contains);
+        var shared = memberships.Contains("ABC")
+            ? 2
+            : memberships.Any(item => item.Length == 2) ? 1 : 0;
+        return (primary * 5000) + (shared * 2500);
+    }
+
     private static IReadOnlyList<string> BuildDisplayedWords(
         WordRingsPuzzle puzzle,
-        IReadOnlyList<string> previousWords)
+        IReadOnlyList<string> previousWords) =>
+        BuildDisplayedWordsExcludingSeeds(
+            puzzle,
+            previousWords,
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+    private static IReadOnlyList<string> BuildDisplayedWordsExcludingSeeds(
+        WordRingsPuzzle puzzle,
+        IReadOnlyList<string> previousWords,
+        IReadOnlySet<string> excludedWords)
     {
         if (puzzle.Words.Count == 0)
         {
@@ -219,6 +247,7 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
         for (var attempt = 0; attempt < 10; attempt++)
         {
             var matchingWords = puzzle.Words
+                .Where(word => !excludedWords.Contains(word))
                 .Select(word => new MatchingWordCandidate(
                     word,
                     puzzle.Expected.TryGetValue(word, out var membership)
@@ -228,13 +257,16 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
                 .OrderBy(_ => Random.Shared.Next())
                 .ToList();
             var outsideWords = puzzle.Words
+                .Where(word => !excludedWords.Contains(word))
                 .Where(word =>
                     !puzzle.Expected.TryGetValue(word, out var membership) ||
                     string.IsNullOrEmpty(membership))
                 .OrderBy(_ => Random.Shared.Next())
                 .ToList();
 
-            var targetCount = Math.Min(MaximumGameWords, puzzle.Words.Count);
+            var targetCount = Math.Min(
+                MaximumGameWords,
+                puzzle.Words.Count(word => !excludedWords.Contains(word)));
             var minimumMatchingCount = Math.Min(
                 matchingWords.Count,
                 (int)Math.Ceiling(targetCount * 0.8));
@@ -424,6 +456,7 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
     private sealed record PuzzleSelection(
         WordRingsPuzzle Puzzle,
         IReadOnlyList<string> Words,
+        IReadOnlyList<WordRingsSeedWord> SeedWords,
         int RuleDifferenceCount,
         int QualityScore);
 }
