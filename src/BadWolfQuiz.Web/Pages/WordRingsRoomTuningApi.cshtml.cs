@@ -63,6 +63,21 @@ public sealed class WordRingsRoomTuningApiModel(IWebHostEnvironment environment)
     private static object? Get(object instance, string property) =>
         instance.GetType().GetProperty(property, BindingFlags.Instance | BindingFlags.Public)!.GetValue(instance);
 
-    private static void Set(object instance, string property, object? value) =>
-        instance.GetType().GetProperty(property, BindingFlags.Instance | BindingFlags.Public)!.SetValue(instance, value);
+    private static void Set(object instance, string property, object? value)
+    {
+        var type = instance.GetType();
+        var propertyInfo = type.GetProperty(property, BindingFlags.Instance | BindingFlags.Public)
+            ?? throw new InvalidOperationException($"Missing room property: {property}");
+        if (propertyInfo.SetMethod is not null)
+        {
+            propertyInfo.SetValue(instance, value);
+            return;
+        }
+
+        var backingField = type.GetField(
+            $"<{property}>k__BackingField",
+            BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException($"Missing room backing field: {property}");
+        backingField.SetValue(instance, value);
+    }
 }
