@@ -30,7 +30,7 @@ public sealed class PlayerAchievementExpansion3Tests
     [Fact]
     public void Requested_achievements_are_the_catalog_tail_in_exact_order()
     {
-        Assert.Equal(80, PlayerAchievementService.Catalog.Count);
+        Assert.Equal(90, PlayerAchievementService.Catalog.Count);
         Assert.Equal(
             ExpectedTail,
             PlayerAchievementService.Catalog.TakeLast(ExpectedTail.Length).Select(item => item.Code));

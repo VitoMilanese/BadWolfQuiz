@@ -143,3 +143,19 @@ The 15 achievements added in Web `1.32.0` use user-facing English, Ukrainian, an
 ## Regression coverage
 
 The achievement test suite covers catalog composition and ordering, the 15,000-point Big Game threshold, history metrics, duplicate prevention, account/nickname adoption, manual host-confirmed pending-history adoption, conflicting-account protection, current-game highlighting, persistence/recovery, gameplay-specific direct unlocks, explicit double/half reward modifiers, consecutive wins, previous-winner competition, peer five-star rating progress, completed playing months, topic-tag normalization, correct-answer-only topic/media progress, Audio/Video/YouTube block detection, migration compatibility, player/host UI wiring, PNG artwork and cache-busted asset wiring, compact card layout, alpha-margin trimming, unlocked/public/secret card ordering, locked-artwork grayscale presentation, secret reveal state rendering, achievement-reset persistence and re-earning semantics, and localization-resource completeness.
+
+## Word Rings achievements
+
+`Слівце в кільце` contributes ten built-in player achievements. Word Rings progress and unlocks are recorded only when at least one registered account anchors the session: either the room host is registered or the player earning the achievement is registered. The two conditions are independent and either one is sufficient; a guest player in a guest-hosted room does not create Word Rings achievement progress. A guest playing under a registered host uses the existing `HostId + normalized nickname` fallback identity, while a registered player can earn progress on their account even when the room host is not registered. Solo play has no separate host identity, so the player must be signed in to earn the solo and placement achievements; the AI-play achievement unlocks after the signed-in player submits a checked word.
+
+Word Rings records private `__WR...` progress events in the existing `PlayerAchievements` table, so no separate database schema is required. These internal rows are excluded from normal achievement lists but preserve cumulative progress across sessions for:
+
+- 50 fully correct placements in any ring/intersection;
+- 50 fully correct placements involving the blue ring;
+- 50 fully correct placements involving the yellow ring;
+- 50 fully correct placements involving the red ring;
+- 10 completed games as a dedicated non-playing host/referee.
+
+A fully correct `ABC` placement unlocks the three-ring achievement. Three consecutive fully correct placements outside every ring unlock the outside-streak achievement; any partial or wrong adjudication breaks that streak. In dedicated-host mode the host's final manual verdict is authoritative: only **Correct** counts as fully correct, while a host-moved 0.5-point or 0-point placement does not contribute to the fully-correct counters.
+
+A playing room creator unlocks the host-win achievement only when the room started with at least one other playing participant and the creator is the winner. Dedicated-host achievements are recorded when a hosted round actually finishes, not merely when the room is created.

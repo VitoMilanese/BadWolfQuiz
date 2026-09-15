@@ -175,7 +175,7 @@ public sealed class WordRingsCooperativeRoomRegressionTests
                 word,
                 membership,
                 "47.5",
-                "62.25"));
+                "62.25").GetAwaiter().GetResult());
             Assert.NotNull(json.Value);
             var payload = json.Value!;
             var resultProperty = payload.GetType().GetProperty("result");

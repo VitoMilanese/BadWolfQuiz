@@ -173,4 +173,25 @@
   <data name="PlaySixMonths_Description" xml:space="preserve"><value>Keep playing Bad Wolf for at least six full months.</value></data>
   <data name="PlayOneYear_Name" xml:space="preserve"><value>One Year</value></data>
   <data name="PlayOneYear_Description" xml:space="preserve"><value>Keep playing Bad Wolf for at least one full year.</value></data>
+
+  <data name="WordRingsSoloAi_Name" xml:space="preserve"><value>Word Rings vs AI</value></data>
+  <data name="WordRingsSoloAi_Description" xml:space="preserve"><value>Play “Word Rings” against AI.</value></data>
+  <data name="WordRingsPlayingHostWin_Name" xml:space="preserve"><value>Ring room champion</value></data>
+  <data name="WordRingsPlayingHostWin_Description" xml:space="preserve"><value>Create a “Word Rings” room, play as the host with another player, and win.</value></data>
+  <data name="WordRingsReferee_Name" xml:space="preserve"><value>Ring referee</value></data>
+  <data name="WordRingsReferee_Description" xml:space="preserve"><value>Run a “Word Rings” game as a non-playing host who chooses rules and judges words.</value></data>
+  <data name="WordRingsTripleCorrect_Name" xml:space="preserve"><value>Three rings, one word</value></data>
+  <data name="WordRingsTripleCorrect_Description" xml:space="preserve"><value>Correctly place one word in all three rings at once.</value></data>
+  <data name="WordRingsOutsideThree_Name" xml:space="preserve"><value>Outside streak</value></data>
+  <data name="WordRingsOutsideThree_Description" xml:space="preserve"><value>Correctly place three consecutive words outside all rings.</value></data>
+  <data name="WordRingsCorrect50_Name" xml:space="preserve"><value>Fifty in the rings</value></data>
+  <data name="WordRingsCorrect50_Description" xml:space="preserve"><value>Correctly place 50 words cumulatively in any ring or ring intersection.</value></data>
+  <data name="WordRingsBlue50_Name" xml:space="preserve"><value>Blue fifty</value></data>
+  <data name="WordRingsBlue50_Description" xml:space="preserve"><value>Correctly place 50 words cumulatively in the blue ring.</value></data>
+  <data name="WordRingsYellow50_Name" xml:space="preserve"><value>Yellow fifty</value></data>
+  <data name="WordRingsYellow50_Description" xml:space="preserve"><value>Correctly place 50 words cumulatively in the yellow ring.</value></data>
+  <data name="WordRingsRed50_Name" xml:space="preserve"><value>Red fifty</value></data>
+  <data name="WordRingsRed50_Description" xml:space="preserve"><value>Correctly place 50 words cumulatively in the red ring.</value></data>
+  <data name="WordRingsHost10_Name" xml:space="preserve"><value>Veteran referee</value></data>
+  <data name="WordRingsHost10_Description" xml:space="preserve"><value>Run 10 “Word Rings” games as a non-playing host who judges the words.</value></data>
 </root>

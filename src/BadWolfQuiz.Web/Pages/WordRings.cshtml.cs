@@ -22,6 +22,7 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
     public int BankWordLimit => MaximumBankWords;
     public int GameWordLimit => MaximumGameWords;
     public int CorrectWordTarget => CorrectWordsToWin;
+    public string AchievementSessionId { get; private set; } = Guid.NewGuid().ToString("N");
 
     public void OnGet(
         string? previousBlueRule,
@@ -89,6 +90,7 @@ public sealed class WordRingsModel(IWebHostEnvironment environment) : PageModel
 
         return new JsonResult(new
         {
+            achievementSessionId = Guid.NewGuid().ToString("N"),
             blueRuleText = selection.Puzzle.BlueRuleText,
             yellowRuleText = selection.Puzzle.YellowRuleText,
             redRuleText = selection.Puzzle.RedRuleText,

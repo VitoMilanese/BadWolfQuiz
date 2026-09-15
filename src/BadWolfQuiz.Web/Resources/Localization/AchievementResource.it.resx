@@ -173,4 +173,25 @@
   <data name="PlaySixMonths_Description" xml:space="preserve"><value>Continua a giocare a Bad Wolf per almeno sei mesi interi.</value></data>
   <data name="PlayOneYear_Name" xml:space="preserve"><value>Un anno</value></data>
   <data name="PlayOneYear_Description" xml:space="preserve"><value>Continua a giocare a Bad Wolf per almeno un anno intero.</value></data>
+
+  <data name="WordRingsSoloAi_Name" xml:space="preserve"><value>Anelli contro IA</value></data>
+  <data name="WordRingsSoloAi_Description" xml:space="preserve"><value>Gioca a “Parole negli anelli” contro l’IA.</value></data>
+  <data name="WordRingsPlayingHostWin_Name" xml:space="preserve"><value>Campione della stanza</value></data>
+  <data name="WordRingsPlayingHostWin_Description" xml:space="preserve"><value>Crea una stanza di “Parole negli anelli”, gioca come host con un altro giocatore e vinci.</value></data>
+  <data name="WordRingsReferee_Name" xml:space="preserve"><value>Arbitro degli anelli</value></data>
+  <data name="WordRingsReferee_Description" xml:space="preserve"><value>Gestisci una partita come host non giocante, scegli le regole e giudica le parole.</value></data>
+  <data name="WordRingsTripleCorrect_Name" xml:space="preserve"><value>Tre anelli, una parola</value></data>
+  <data name="WordRingsTripleCorrect_Description" xml:space="preserve"><value>Posiziona correttamente una parola in tutti e tre gli anelli contemporaneamente.</value></data>
+  <data name="WordRingsOutsideThree_Name" xml:space="preserve"><value>Serie fuori dagli anelli</value></data>
+  <data name="WordRingsOutsideThree_Description" xml:space="preserve"><value>Posiziona correttamente tre parole consecutive fuori da tutti gli anelli.</value></data>
+  <data name="WordRingsCorrect50_Name" xml:space="preserve"><value>Cinquanta negli anelli</value></data>
+  <data name="WordRingsCorrect50_Description" xml:space="preserve"><value>Posiziona correttamente 50 parole complessive in uno o più anelli.</value></data>
+  <data name="WordRingsBlue50_Name" xml:space="preserve"><value>Cinquanta blu</value></data>
+  <data name="WordRingsBlue50_Description" xml:space="preserve"><value>Posiziona correttamente 50 parole complessive nell’anello blu.</value></data>
+  <data name="WordRingsYellow50_Name" xml:space="preserve"><value>Cinquanta gialle</value></data>
+  <data name="WordRingsYellow50_Description" xml:space="preserve"><value>Posiziona correttamente 50 parole complessive nell’anello giallo.</value></data>
+  <data name="WordRingsRed50_Name" xml:space="preserve"><value>Cinquanta rosse</value></data>
+  <data name="WordRingsRed50_Description" xml:space="preserve"><value>Posiziona correttamente 50 parole complessive nell’anello rosso.</value></data>
+  <data name="WordRingsHost10_Name" xml:space="preserve"><value>Arbitro veterano</value></data>
+  <data name="WordRingsHost10_Description" xml:space="preserve"><value>Gestisci 10 partite come host non giocante che giudica le parole.</value></data>
 </root>

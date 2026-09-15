@@ -141,3 +141,7 @@ The **Show result** action is author-CSS-hidden until an actual completed result
 - During the final 10 seconds of an active turn timer, clients play a tick/tock cue every 0.5 seconds. A timer-forced turn transfer emits its own room event/cue.
 - `DebugMode=true` adds a 15-second timer choice to the room-creation dialog for testing; the API rejects that duration when debug mode is disabled.
 - The Word Rings surface disables mouse text selection, including its dialogs, to avoid accidental highlighting during drag-heavy play.
+
+## Player achievements
+
+Word Rings reports achievement events for solo checks, automatic multiplayer adjudication, dedicated-host manual verdicts, playing-host wins, and completed dedicated-host rounds. Cumulative fully-correct placement counters persist across sessions and track overall ring placements plus blue/yellow/red membership independently. `ABC` increments all three per-ring counters. Correct placements outside every ring do not increment the 50-word ring counters, but three consecutive confirmed-correct outside placements have their own achievement.

@@ -173,4 +173,25 @@
   <data name="PlaySixMonths_Description" xml:space="preserve"><value>Грати в Bad Wolf протягом щонайменше шести повних місяців.</value></data>
   <data name="PlayOneYear_Name" xml:space="preserve"><value>Рік у грі</value></data>
   <data name="PlayOneYear_Description" xml:space="preserve"><value>Грати в Bad Wolf протягом щонайменше одного повного року.</value></data>
+
+  <data name="WordRingsSoloAi_Name" xml:space="preserve"><value>Кільця проти ШІ</value></data>
+  <data name="WordRingsSoloAi_Description" xml:space="preserve"><value>Зіграти у «Слівце в кільце» проти ШІ.</value></data>
+  <data name="WordRingsPlayingHostWin_Name" xml:space="preserve"><value>Господар кілець</value></data>
+  <data name="WordRingsPlayingHostWin_Description" xml:space="preserve"><value>Створити кімнату «Слівце в кільце», взяти участь у грі, зіграти з іншим гравцем і перемогти.</value></data>
+  <data name="WordRingsReferee_Name" xml:space="preserve"><value>Суддя кілець</value></data>
+  <data name="WordRingsReferee_Description" xml:space="preserve"><value>Провести гру «Слівце в кільце» як хост, який не грає, а обирає правила та перевіряє слова.</value></data>
+  <data name="WordRingsTripleCorrect_Name" xml:space="preserve"><value>У самісінький центр</value></data>
+  <data name="WordRingsTripleCorrect_Description" xml:space="preserve"><value>Помістити слово у всі три кільця одночасно та отримати підтвердження «Правильно».</value></data>
+  <data name="WordRingsOutsideThree_Name" xml:space="preserve"><value>За межами</value></data>
+  <data name="WordRingsOutsideThree_Description" xml:space="preserve"><value>Тричі підряд правильно помістити слово поза всі кільця.</value></data>
+  <data name="WordRingsCorrect50_Name" xml:space="preserve"><value>Півсотні в кільцях</value></data>
+  <data name="WordRingsCorrect50_Description" xml:space="preserve"><value>Правильно помістити сумарно 50 слів у будь-які кільця.</value></data>
+  <data name="WordRingsBlue50_Name" xml:space="preserve"><value>Синя півсотня</value></data>
+  <data name="WordRingsBlue50_Description" xml:space="preserve"><value>Правильно помістити сумарно 50 слів у синє кільце.</value></data>
+  <data name="WordRingsYellow50_Name" xml:space="preserve"><value>Жовта півсотня</value></data>
+  <data name="WordRingsYellow50_Description" xml:space="preserve"><value>Правильно помістити сумарно 50 слів у жовте кільце.</value></data>
+  <data name="WordRingsRed50_Name" xml:space="preserve"><value>Червона півсотня</value></data>
+  <data name="WordRingsRed50_Description" xml:space="preserve"><value>Правильно помістити сумарно 50 слів у червоне кільце.</value></data>
+  <data name="WordRingsHost10_Name" xml:space="preserve"><value>Головний суддя</value></data>
+  <data name="WordRingsHost10_Description" xml:space="preserve"><value>Провести 10 ігор «Слівце в кільце» як хост, який не бере участі у грі та перевіряє слова.</value></data>
 </root>

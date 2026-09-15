@@ -33,6 +33,16 @@ public sealed class PlayerAchievementService(QuizDbContext db)
         new("PublicQuizGuest", "🌐", false, PlayerAchievementMetric.PublicQuizGuest, 1),
         new("SoloAi", "🤖", false, PlayerAchievementMetric.DirectUnlock, 1),
         new("RoomCreatorWin", "🎮", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsSoloAi", "🤖", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsPlayingHostWin", "🏆", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsReferee", "🎛️", false, PlayerAchievementMetric.WordRingsHostedGames, 1),
+        new("WordRingsTripleCorrect", "🔵🟡🔴", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsOutsideThree", "⭕", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsCorrect50", "🎯", false, PlayerAchievementMetric.WordRingsCorrectPlacements, 50),
+        new("WordRingsBlue50", "🔵", false, PlayerAchievementMetric.WordRingsBlueCorrectPlacements, 50),
+        new("WordRingsYellow50", "🟡", false, PlayerAchievementMetric.WordRingsYellowCorrectPlacements, 50),
+        new("WordRingsRed50", "🔴", false, PlayerAchievementMetric.WordRingsRedCorrectPlacements, 50),
+        new("WordRingsHost10", "🎛️", false, PlayerAchievementMetric.WordRingsHostedGames, 10),
         new("GitHubVisitor", "💻", false, PlayerAchievementMetric.DirectUnlock, 1),
         new("QuizRated", "⭐", false, PlayerAchievementMetric.QuizRated, 1),
         new("AllInCorrect", "🎰", false, PlayerAchievementMetric.DirectUnlock, 1),
@@ -547,6 +557,11 @@ public sealed class PlayerAchievementService(QuizDbContext db)
         var history = identity.AccountId is not null
             ? await LoadAccountHistoryAsync(identity.AccountId, cancellationToken)
             : await LoadHostHistoryAsync(identity.HostId!, identity.PlayerKey!, cancellationToken);
+        history = await WordRingsAchievementService.ApplyProgressAsync(
+            db,
+            identity,
+            history,
+            cancellationToken);
         var persistedUnlocks = await QueryForIdentity(identity)
             .Where(item => !item.AchievementCode.StartsWith("__"))
             .ToListAsync(cancellationToken);
@@ -1076,6 +1091,11 @@ public sealed class PlayerAchievementService(QuizDbContext db)
             PlayerAchievementMetric.BestWinStreak => history.BestWinStreak,
             PlayerAchievementMetric.PeerMaximumRatingsReceived => history.PeerMaximumRatingsReceived,
             PlayerAchievementMetric.PlayingMonths => history.PlayingMonths,
+            PlayerAchievementMetric.WordRingsCorrectPlacements => history.WordRingsCorrectPlacements,
+            PlayerAchievementMetric.WordRingsBlueCorrectPlacements => history.WordRingsBlueCorrectPlacements,
+            PlayerAchievementMetric.WordRingsYellowCorrectPlacements => history.WordRingsYellowCorrectPlacements,
+            PlayerAchievementMetric.WordRingsRedCorrectPlacements => history.WordRingsRedCorrectPlacements,
+            PlayerAchievementMetric.WordRingsHostedGames => history.WordRingsHostedGames,
             PlayerAchievementMetric.DirectUnlock => 0,
             _ => 0
         };
@@ -1122,6 +1142,11 @@ public enum PlayerAchievementMetric
     BestWinStreak,
     PeerMaximumRatingsReceived,
     PlayingMonths,
+    WordRingsCorrectPlacements,
+    WordRingsBlueCorrectPlacements,
+    WordRingsYellowCorrectPlacements,
+    WordRingsRedCorrectPlacements,
+    WordRingsHostedGames,
     DirectUnlock
 }
 
@@ -1183,7 +1208,12 @@ public sealed record PlayerAchievementHistory(
     int VideoQuestionAnswers = 0,
     int BestWinStreak = 0,
     int PeerMaximumRatingsReceived = 0,
-    int PlayingMonths = 0)
+    int PlayingMonths = 0,
+    int WordRingsCorrectPlacements = 0,
+    int WordRingsBlueCorrectPlacements = 0,
+    int WordRingsYellowCorrectPlacements = 0,
+    int WordRingsRedCorrectPlacements = 0,
+    int WordRingsHostedGames = 0)
 {
     public static PlayerAchievementHistory Empty { get; } = new(0, 0, 0, 0, 0, 0, false);
 }

@@ -173,4 +173,25 @@
   <data name="PlaySixMonths_Description" xml:space="preserve"><value>Україна</value></data>
   <data name="PlayOneYear_Name" xml:space="preserve"><value>Україна</value></data>
   <data name="PlayOneYear_Description" xml:space="preserve"><value>Україна</value></data>
+
+  <data name="WordRingsSoloAi_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsSoloAi_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsPlayingHostWin_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsPlayingHostWin_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsReferee_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsReferee_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsTripleCorrect_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsTripleCorrect_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsOutsideThree_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsOutsideThree_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsCorrect50_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsCorrect50_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsBlue50_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsBlue50_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsYellow50_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsYellow50_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsRed50_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsRed50_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsHost10_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsHost10_Description" xml:space="preserve"><value>Україна</value></data>
 </root>
