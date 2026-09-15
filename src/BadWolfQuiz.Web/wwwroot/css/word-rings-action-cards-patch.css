@@ -11,8 +11,10 @@
 }
 
 .word-rings-stage {
-    align-self: end;
+    align-self: center;
 }
+
+/* The previous patch forced `align-self: end;`, which pushed the entire playfield to the bottom. */
 
 @supports (width: 1cqh) {
     .word-rings-stage {

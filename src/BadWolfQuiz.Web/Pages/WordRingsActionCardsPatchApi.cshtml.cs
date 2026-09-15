@@ -13,6 +13,7 @@ public sealed class WordRingsActionCardsPatchApiModel(
     private WordRingsRoomHostCoordinator Host => WordRingsRoomHostCoordinator.Get(environment);
     private WordRingsActionCardCoordinator Cards => WordRingsActionCardCoordinator.Get(environment);
     private WordRingsActionCardPatchCoordinator Patch => WordRingsActionCardPatchCoordinator.Get(environment);
+    private WordRingsActionCardRuntimePatch RuntimePatch => WordRingsActionCardRuntimePatch.Get(environment);
 
     public IActionResult OnPostState(string? roomCode, string? playerToken) =>
         Execute(() =>
@@ -52,7 +53,16 @@ public sealed class WordRingsActionCardsPatchApiModel(
         Execute(() =>
         {
             var before = Host.GetRoomState(roomCode, playerToken);
+            var swapBlockTransfer = RuntimePatch.CaptureSwapBlockTransfer(before, cardId);
             var result = Cards.UseCard(roomCode, playerToken, cardId, targetPlayerId, word);
+            if (RuntimePatch.CompleteSwapBlockTransfer(
+                    before.RoomCode,
+                    targetPlayerId,
+                    result.TargetName,
+                    swapBlockTransfer))
+            {
+                result = result with { State = Cards.GetState(before.RoomCode, playerToken) };
+            }
             Patch.RecordCardUse(before, cardId, result);
             _ = Patch.EnsureTargetReachable(roomCode, playerToken);
             return new { success = true, result };
@@ -115,7 +125,13 @@ public sealed class WordRingsActionCardsPatchApiModel(
         CancellationToken cancellationToken = default) =>
         await ExecuteAsync(async () =>
         {
-            var resolution = Patch.ResolveImmunityDecision(roomCode, playerToken, decisionId, returnWord);
+            var resolution = returnWord
+                ? Patch.ResolveImmunityDecision(roomCode, playerToken, decisionId, returnWord: true)
+                : RuntimePatch.ResolveImmunityDecisionWithoutScore(
+                    Patch,
+                    roomCode,
+                    playerToken,
+                    decisionId);
             if (resolution.PlacementResult is { } result)
             {
                 await RecordPlacementAchievementAsync(
