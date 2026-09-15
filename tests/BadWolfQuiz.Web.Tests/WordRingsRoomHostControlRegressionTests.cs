@@ -92,6 +92,100 @@ public sealed class WordRingsRoomHostControlRegressionTests
     }
 
     [Fact]
+    public void Dedicated_host_manually_judges_pending_words_and_players_never_receive_rules()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-host-judge-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        try
+        {
+            var coordinator = WordRingsRoomHostCoordinator.Get(new TestEnvironment(root));
+            var host = coordinator.CreateRoom("Host", 15, false, true);
+            var setup = coordinator.GetHostState(host.RoomCode, host.PlayerToken);
+            foreach (var ring in new[] { "A", "B", "C" })
+            {
+                var group = Assert.Single(setup.RuleSelections, item => item.Ring == ring);
+                setup = coordinator.SelectRule(host.RoomCode, host.PlayerToken, ring, group.Options.First().Id);
+            }
+
+            var first = coordinator.JoinRoom(host.RoomCode, "First");
+            var second = coordinator.JoinRoom(host.RoomCode, "Second");
+            var hostRoom = coordinator.StartGame(host.RoomCode, host.PlayerToken);
+            Assert.True(hostRoom.DedicatedHostMode);
+            Assert.False(string.IsNullOrWhiteSpace(hostRoom.BlueRuleText));
+
+            var firstState = coordinator.GetRoomState(host.RoomCode, first.PlayerToken);
+            Assert.True(firstState.DedicatedHostMode);
+            Assert.Equal(string.Empty, firstState.BlueRuleText);
+            Assert.Equal(string.Empty, firstState.YellowRuleText);
+            Assert.Equal(string.Empty, firstState.RedRuleText);
+
+            var firstWord = Assert.Single(firstState.BankWords.Take(1));
+            var submitted = coordinator.SubmitPlacement(
+                host.RoomCode, first.PlayerToken, firstWord, "A", 27, 28);
+            Assert.True(submitted.IsPending);
+            Assert.Equal(0, submitted.PointsAwarded);
+            var pending = Assert.Single(submitted.State.Placements, item => item.IsPending);
+            Assert.Equal("A", pending.Membership);
+            Assert.Equal("A", pending.SubmittedMembership);
+            Assert.Equal(0, Assert.Single(submitted.State.Players, item => item.Id == first.State.PlayerId).Score);
+            Assert.Throws<WordRingsRoomException>(() => coordinator.SubmitPlacement(
+                host.RoomCode,
+                first.PlayerToken,
+                submitted.State.BankWords.First(),
+                "B",
+                73,
+                28));
+
+            var hostPending = coordinator.GetHostState(host.RoomCode, host.PlayerToken).PendingPlacement;
+            Assert.NotNull(hostPending);
+            Assert.False(hostPending.WasMoved);
+            Assert.Throws<WordRingsRoomException>(() => coordinator.MovePlacement(
+                host.RoomCode, first.PlayerToken, pending.Id, "AB", 50, 19));
+
+            var moved = coordinator.MovePlacement(host.RoomCode, host.PlayerToken, pending.Id, "AB", 50, 19);
+            Assert.Equal("AB", Assert.Single(moved.Placements, item => item.IsPending).Membership);
+            Assert.True(coordinator.GetHostState(host.RoomCode, host.PlayerToken).PendingPlacement!.WasMoved);
+            _ = coordinator.ResolvePlacement(host.RoomCode, host.PlayerToken, pending.Id);
+
+            firstState = coordinator.GetRoomState(host.RoomCode, first.PlayerToken);
+            Assert.Equal(0.5, Assert.Single(firstState.Players, item => item.Id == first.State.PlayerId).Score);
+            Assert.Equal(second.State.PlayerId, firstState.CurrentPlayerId);
+            var partial = Assert.Single(firstState.Placements, item => item.Id == pending.Id);
+            Assert.False(partial.IsPending);
+            Assert.True(partial.IsPartial);
+            Assert.False(partial.IsCorrect);
+
+            var secondState = coordinator.GetRoomState(host.RoomCode, second.PlayerToken);
+            var secondWord = Assert.Single(secondState.BankWords.Take(1));
+            var wrong = coordinator.SubmitPlacement(host.RoomCode, second.PlayerToken, secondWord, "A", 27, 28);
+            var wrongPending = Assert.Single(wrong.State.Placements, item => item.IsPending);
+            _ = coordinator.MovePlacement(host.RoomCode, host.PlayerToken, wrongPending.Id, "C", 50, 76);
+            _ = coordinator.ResolvePlacement(host.RoomCode, host.PlayerToken, wrongPending.Id);
+            secondState = coordinator.GetRoomState(host.RoomCode, second.PlayerToken);
+            Assert.Equal(0, Assert.Single(secondState.Players, item => item.Id == second.State.PlayerId).Score);
+            Assert.Equal(first.State.PlayerId, secondState.CurrentPlayerId);
+
+            firstState = coordinator.GetRoomState(host.RoomCode, first.PlayerToken);
+            var outsideOne = coordinator.SubmitPlacement(
+                host.RoomCode, first.PlayerToken, firstState.BankWords.First(), string.Empty, 8, 88);
+            var outsideOnePending = Assert.Single(outsideOne.State.Placements, item => item.IsPending);
+            _ = coordinator.ResolvePlacement(host.RoomCode, host.PlayerToken, outsideOnePending.Id);
+            firstState = coordinator.GetRoomState(host.RoomCode, first.PlayerToken);
+            Assert.Equal(1.5, Assert.Single(firstState.Players, item => item.Id == first.State.PlayerId).Score);
+            Assert.Equal(first.State.PlayerId, firstState.CurrentPlayerId);
+
+            var outsideTwo = coordinator.SubmitPlacement(
+                host.RoomCode, first.PlayerToken, firstState.BankWords.First(), string.Empty, 8, 88);
+            var outsideTwoPending = Assert.Single(outsideTwo.State.Placements, item => item.IsPending);
+            _ = coordinator.ResolvePlacement(host.RoomCode, host.PlayerToken, outsideTwoPending.Id);
+            firstState = coordinator.GetRoomState(host.RoomCode, first.PlayerToken);
+            Assert.Equal(1.5, Assert.Single(firstState.Players, item => item.Id == first.State.PlayerId).Score);
+            Assert.Equal(first.State.PlayerId, firstState.CurrentPlayerId);
+        }
+        finally { Directory.Delete(root, true); }
+    }
+
+    [Fact]
     public void Creating_replacement_room_removes_previous_owned_room_immediately()
     {
         var root = Path.Combine(Path.GetTempPath(), $"badwolf-word-rings-room-replace-{Guid.NewGuid():N}");
@@ -165,10 +259,12 @@ public sealed class WordRingsRoomHostControlRegressionTests
         Assert.DoesNotContain("data-close-room-rule-picker", page);
         Assert.Contains("data-toggle-room-lock", page);
         Assert.Contains("data-result-rule-a", page);
-        Assert.Equal(2, Count(page, "data-reveal-rules"));
+        Assert.Equal(3, Count(page, "data-reveal-rules"));
+        Assert.Contains("data-room-host-judge", page);
+        Assert.Contains("data-room-host-resolve", page);
         Assert.True(page.IndexOf("data-word-bank", StringComparison.Ordinal) < page.IndexOf("word-rings-check-button", StringComparison.Ordinal));
         Assert.Contains("hostChoosesRules: true", create);
-        foreach (var value in new[] { "RoomHostState", "SelectRoomRule", "RefreshRoomRules", "SetRoomTurn", "KickRoomPlayer", "SetRoomJoinLock", "hostState.handLimit" }) Assert.Contains(value, host);
+        foreach (var value in new[] { "RoomHostState", "SelectRoomRule", "RefreshRoomRules", "SetRoomTurn", "KickRoomPlayer", "SetRoomJoinLock", "ResolveRoomPlacement", "hostState.handLimit", "hostState.pendingPlacement" }) Assert.Contains(value, host);
         Assert.Contains("data-result-rule-a", result);
         Assert.Contains("startButton.hidden = hostState.isHost !== true || hostState.phase === 'playing';", host);
         Assert.Contains("const canChooseRules = () => isHostController()", host);
@@ -202,6 +298,15 @@ public sealed class WordRingsRoomHostControlRegressionTests
             coop.IndexOf("main.append(name);", StringComparison.Ordinal));
         Assert.Contains("font-size: 1.12rem;", roomStyles);
         Assert.Contains("font-size: .95rem;", styles);
+        Assert.Contains("is-host-judgement-pending", coop);
+        Assert.Contains("placement.isPending === true", coop);
+        Assert.Contains("state?.dedicatedHostMode === true", coop);
+        Assert.Contains("result?.isPending === true", coop);
+        Assert.Contains("data-room-awaiting-host", page);
+        Assert.Contains("CorrectPlacement = \"Правильно\"", hostText);
+        Assert.Contains("MovePlacement = \"Перемістити\"", hostText);
+        Assert.Contains("AwaitingHostDecision = \"Очікування рішення хоста.\"", hostText);
+        Assert.Contains("partialRow.hidden = dedicatedHost", create);
         Assert.Contains("requestUrl.searchParams.set('handler', 'NewPuzzle');", solo);
         Assert.Contains("window.history.replaceState", solo);
         Assert.Contains("wordrings:game-reset", solo);

@@ -115,7 +115,10 @@
 
     const currentPlayer = () => state?.players?.find(player => player.id === state.currentPlayerId) || null;
     const ownPlayer = () => state?.players?.find(player => player.id === state.playerId) || null;
+    const serverPendingPlacement = () => state?.placements?.find(placement => placement.isPending === true) || null;
     const isOwnTurn = () => state?.phase === 'playing' && state.currentPlayerId === state.playerId;
+    const canJudgePendingPlacement = () =>
+        state?.phase === 'playing' && state?.dedicatedHostMode === true && state?.isHost === true;
 
     const bringToFront = token => {
         if (!(token instanceof HTMLElement)) return;
@@ -313,6 +316,9 @@
                 return;
             }
             renderState(payload.state, { preservePending: pending !== null });
+            if (source.dataset.roomHostedPending === 'true') {
+                root.dispatchEvent(new CustomEvent('wordrings:host-pending-moved'));
+            }
         } catch (error) {
             console.error('Could not move checked Word Rings placement.', error);
             setStatus(root.dataset.roomError, 'error');
@@ -360,13 +366,17 @@
 
     const canBegin = (word, source) => {
         if (isServerPlacementToken(source)) {
+            if (source.dataset.roomHostedPending === 'true') {
+                return !requestInFlight && canJudgePendingPlacement();
+            }
             return !requestInFlight && (state?.phase === 'playing' || state?.phase === 'finished');
         }
-        return !requestInFlight && isOwnTurn() &&
+        return !requestInFlight && serverPendingPlacement() === null && isOwnTurn() &&
             (pending === null || pending.word === word);
     };
     const canDropStage = (word, membership, source) => {
         if (isServerPlacementToken(source)) {
+            if (source.dataset.roomHostedPending === 'true') return canBegin(word, source);
             return canBegin(word, source) &&
                 canonical(membership) === canonical(source.dataset.membership);
         }
@@ -374,6 +384,7 @@
     };
     const canDropOutside = (word, source) => {
         if (isServerPlacementToken(source)) {
+            if (source.dataset.roomHostedPending === 'true') return canBegin(word, source);
             return canBegin(word, source) && canonical(source.dataset.membership) === '';
         }
         return canBegin(word, source);
@@ -421,14 +432,20 @@
             token.style.left = `${placement.x}%`;
             token.style.top = `${placement.y}%`;
             token.textContent = placement.word;
-            token.title = `${placement.playerName} · +${formatScore(placement.pointsAwarded)}`;
-            token.classList.toggle('is-correct', placement.isCorrect === true);
+            const awaitingHost = placement.isPending === true;
+            token.title = awaitingHost
+                ? placement.playerName
+                : `${placement.playerName} · +${formatScore(placement.pointsAwarded)}`;
+            token.classList.toggle('is-host-judgement-pending', awaitingHost);
+            if (awaitingHost) token.dataset.roomHostedPending = 'true';
+            else delete token.dataset.roomHostedPending;
+            token.classList.toggle('is-correct', !awaitingHost && placement.isCorrect === true);
             token.classList.toggle(
                 'is-partial',
-                placement.isCorrect !== true && placement.isPartial === true && Number(placement.pointsAwarded) > 0);
+                !awaitingHost && placement.isCorrect !== true && placement.isPartial === true && Number(placement.pointsAwarded) > 0);
             token.classList.toggle(
                 'is-wrong',
-                placement.isCorrect !== true && !(placement.isPartial === true && Number(placement.pointsAwarded) > 0));
+                !awaitingHost && placement.isCorrect !== true && !(placement.isPartial === true && Number(placement.pointsAwarded) > 0));
         }
 
         placedLayer.querySelectorAll('[data-room-server-placement]').forEach(token => {
@@ -437,7 +454,7 @@
     };
 
     const repositionIncorrectPlacementIfNeeded = async result => {
-        if (result?.isCorrect === true || !result?.state) return result?.state || null;
+        if (result?.isPending === true || result?.isCorrect === true || !result?.state) return result?.state || null;
         const placement = [...(result.state.placements || [])]
             .reverse()
             .find(item => item.word === result.word && item.playerId === result.state.playerId);
@@ -525,14 +542,16 @@
     const updateControls = () => {
         const playing = state?.phase === 'playing';
         const ownTurn = isOwnTurn();
-        checkButton.disabled = !playing || !ownTurn || pending === null || requestInFlight;
+        const awaitingHost = serverPendingPlacement() !== null;
+        checkButton.disabled = !playing || !ownTurn || awaitingHost || pending === null || requestInFlight;
         root.classList.toggle('has-pending-word', pending !== null);
+        root.classList.toggle('is-awaiting-host-judgement', awaitingHost);
         root.classList.toggle('is-game-over', state?.phase === 'finished');
         root.classList.toggle('is-room-waiting', state?.phase === 'waiting');
         root.classList.toggle('is-not-own-turn', playing && !ownTurn);
 
         wordList.querySelectorAll('.word-rings-word').forEach(token => {
-            if (token instanceof HTMLButtonElement) token.disabled = !ownTurn || requestInFlight;
+            if (token instanceof HTMLButtonElement) token.disabled = !ownTurn || awaitingHost || requestInFlight;
         });
     };
 
@@ -550,6 +569,15 @@
         renderPlayers(nextState.players);
         renderRules(nextState);
         renderPlacements(nextState.placements);
+        const hostCanRevealRules = nextState.dedicatedHostMode === true &&
+            nextState.isHost === true && nextState.phase === 'playing';
+        if (revealButton instanceof HTMLButtonElement) {
+            revealButton.hidden = !hostCanRevealRules;
+            if (!hostCanRevealRules && rules) {
+                rules.classList.add('is-hidden');
+                revealButton.textContent = root.dataset.revealRules || revealButton.textContent;
+            }
+        }
 
         if (!preservePending) {
             pending = null;
@@ -562,9 +590,11 @@
         } else if (nextState.phase === 'playing') {
             const current = currentPlayer();
             setStatus(
-                isOwnTurn()
-                    ? root.dataset.roomYourTurn
-                    : format(root.dataset.roomOtherTurn, current?.name || ''));
+                serverPendingPlacement() !== null
+                    ? root.dataset.roomAwaitingHost
+                    : isOwnTurn()
+                        ? root.dataset.roomYourTurn
+                        : format(root.dataset.roomOtherTurn, current?.name || ''));
         }
 
         updateControls();

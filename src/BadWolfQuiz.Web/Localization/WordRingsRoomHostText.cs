@@ -23,6 +23,9 @@ public sealed record WordRingsRoomHostText
     public string RoomLocked { get; init; } = "The room is closed to new players.";
     public string RulesRequired { get; init; } = "Choose one rule for each ring before starting.";
     public string ResultRules { get; init; } = "Ring rules";
+    public string CorrectPlacement { get; init; } = "Correct";
+    public string MovePlacement { get; init; } = "Move";
+    public string AwaitingHostDecision { get; init; } = "Waiting for the host's decision.";
 
     public static WordRingsRoomHostText ForCulture(CultureInfo culture) =>
         culture.TwoLetterISOLanguageName.ToLowerInvariant() switch
@@ -41,7 +44,7 @@ public sealed record WordRingsRoomHostText
         PlayerRole = "Грати разом",
         PlayerRoleDescription = "Власник також отримує слова, ходить і може перемогти, як інші гравці.",
         HostOnlyRole = "Бути хостом",
-        HostOnlyRoleDescription = "Хост керує кімнатою та сам обирає правила, але не отримує слова і не бере участі в ходах.",
+        HostOnlyRoleDescription = "Хост керує кімнатою, сам обирає правила та вручну оцінює кожне слово, але не отримує слова і не бере участі в ходах.",
         ChooseRules = "Обрати правила",
         ChooseRulesHint = "Оберіть по одному правилу для кожного кільця. Набір із шести варіантів для кожного кільця можна замінити лише один раз.",
         OtherRules = "Інші варіанти",
@@ -55,7 +58,10 @@ public sealed record WordRingsRoomHostText
         UnlockJoining = "Дозволити підключення",
         RoomLocked = "Кімната закрита для нових гравців.",
         RulesRequired = "Оберіть по одному правилу для кожного кільця перед початком гри.",
-        ResultRules = "Загадані правила"
+        ResultRules = "Загадані правила",
+        CorrectPlacement = "Правильно",
+        MovePlacement = "Перемістити",
+        AwaitingHostDecision = "Очікування рішення хоста."
     };
 
     private static WordRingsRoomHostText Italian { get; } = new()
@@ -64,7 +70,7 @@ public sealed record WordRingsRoomHostText
         PlayerRole = "Gioca con tutti",
         PlayerRoleDescription = "Il creatore riceve le parole, gioca i turni e può vincere come gli altri giocatori.",
         HostOnlyRole = "Fai da host",
-        HostOnlyRoleDescription = "L'host gestisce la stanza e sceglie le regole degli anelli, ma non riceve parole e non gioca turni.",
+        HostOnlyRoleDescription = "L'host gestisce la stanza, sceglie le regole e valuta manualmente ogni parola, ma non riceve parole e non gioca turni.",
         ChooseRules = "Scegli le regole",
         ChooseRulesHint = "Scegli una regola per ogni anello. Ogni gruppo di sei opzioni può essere sostituito una sola volta.",
         OtherRules = "Altre opzioni",
@@ -78,7 +84,10 @@ public sealed record WordRingsRoomHostText
         UnlockJoining = "Consenti nuovi ingressi",
         RoomLocked = "La stanza è chiusa ai nuovi giocatori.",
         RulesRequired = "Scegli una regola per ogni anello prima di iniziare.",
-        ResultRules = "Regole degli anelli"
+        ResultRules = "Regole degli anelli",
+        CorrectPlacement = "Corretto",
+        MovePlacement = "Sposta",
+        AwaitingHostDecision = "In attesa della decisione dell'host."
     };
 
     private static WordRingsRoomHostText Russian { get; } = new()
@@ -101,6 +110,9 @@ public sealed record WordRingsRoomHostText
         UnlockJoining = "Україна",
         RoomLocked = "Україна",
         RulesRequired = "Україна",
-        ResultRules = "Україна"
+        ResultRules = "Україна",
+        CorrectPlacement = "Україна",
+        MovePlacement = "Україна",
+        AwaitingHostDecision = "Україна"
     };
 }

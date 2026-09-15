@@ -9,6 +9,10 @@
     const wordList = root.querySelector('[data-word-list]');
     const startButton = root.querySelector('[data-start-room]');
     const chooseRulesButton = root.querySelector('[data-open-room-rule-picker]');
+    const revealButton = root.querySelector('[data-reveal-rules]');
+    const checkButton = root.querySelector('[data-check]');
+    const judgePanel = root.querySelector('[data-room-host-judge]');
+    const judgeButton = root.querySelector('[data-room-host-resolve]');
     const lockButton = root.querySelector('[data-toggle-room-lock]');
     const ruleDialog = root.querySelector('[data-room-rule-picker-dialog]');
     const confirmRuleDialog = root.querySelector('[data-confirm-room-rule-picker]');
@@ -140,7 +144,7 @@
                 pass.textContent = '➜';
                 pass.title = root.dataset.roomPassTurn || '';
                 pass.setAttribute('aria-label', pass.title);
-                pass.disabled = busy;
+                pass.disabled = busy || Boolean(hostState.pendingPlacement);
                 pass.addEventListener('click', () => void action('SetRoomTurn', { playerId: player.id }));
                 actions.append(pass);
             }
@@ -151,7 +155,7 @@
                 kick.textContent = '×';
                 kick.title = root.dataset.roomKickPlayer || '';
                 kick.setAttribute('aria-label', kick.title);
-                kick.disabled = busy;
+                kick.disabled = busy || Boolean(hostState.pendingPlacement);
                 kick.addEventListener('click', () => void action('KickRoomPlayer', { playerId: player.id }));
                 actions.append(kick);
             }
@@ -176,6 +180,22 @@
         });
     };
 
+    const renderHostJudgement = () => {
+        const pending = isHostController() && hostState?.phase === 'playing'
+            ? hostState.pendingPlacement
+            : null;
+        if (judgePanel instanceof HTMLElement) judgePanel.hidden = !pending;
+        if (judgeButton instanceof HTMLButtonElement) {
+            judgeButton.hidden = !pending;
+            judgeButton.disabled = busy || !pending;
+            judgeButton.textContent = pending?.wasMoved
+                ? root.dataset.roomHostMove || ''
+                : root.dataset.roomHostCorrect || '';
+            judgeButton.dataset.placementId = pending ? String(pending.id) : '';
+        }
+        if (checkButton instanceof HTMLButtonElement) checkButton.hidden = isHostController();
+    };
+
     const renderToolbar = () => {
         if (!hostState) return;
         if (startButton instanceof HTMLButtonElement) {
@@ -187,6 +207,9 @@
             chooseRulesButton.hidden = !canOpenRules;
             chooseRulesButton.classList.toggle('is-hidden', !canOpenRules);
             chooseRulesButton.disabled = busy || !canOpenRules;
+        }
+        if (revealButton instanceof HTMLButtonElement) {
+            revealButton.hidden = !(isHostController() && hostState.phase === 'playing');
         }
         if (lockButton instanceof HTMLButtonElement) {
             lockButton.hidden = !(hostState.isHost === true && hostState.phase === 'waiting');
@@ -206,6 +229,7 @@
         renderToolbar();
         renderRulePicker();
         renderPlayerActions();
+        renderHostJudgement();
         applyHandLimit();
         if (canChooseRules() && !rulesComplete()) {
             if (lastAutoOpenedVersion !== hostState.version && ruleDialog instanceof HTMLDialogElement && !ruleDialog.open) {
@@ -259,6 +283,11 @@
             if (ring) void action('RefreshRoomRules', { ring }, { renderBusy: false });
         });
     });
+    judgeButton?.addEventListener('click', () => {
+        const placementId = Number.parseInt(judgeButton.dataset.placementId || '', 10);
+        if (Number.isFinite(placementId)) void action('ResolveRoomPlacement', { placementId });
+    });
+    root.addEventListener('wordrings:host-pending-moved', () => void fetchState());
     lockButton?.addEventListener('click', () => void action('SetRoomJoinLock', { locked: hostState?.joinLocked !== true }));
 
     if (playersList) new MutationObserver(renderPlayerActions).observe(playersList, { childList: true });

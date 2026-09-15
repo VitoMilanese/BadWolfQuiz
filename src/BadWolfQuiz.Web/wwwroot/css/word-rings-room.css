@@ -487,3 +487,36 @@
         animation-delay: 0ms !important;
     }
 }
+
+
+.word-rings-host-judge {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.word-rings-host-judge[hidden] {
+    display: none !important;
+}
+
+.word-rings-host-judge .button {
+    width: 100%;
+    min-height: 48px;
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+.word-rings-word.is-host-judgement-pending {
+    animation: word-rings-host-judgement-pulse 1s ease-in-out infinite;
+}
+
+@keyframes word-rings-host-judgement-pulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1.08);
+        filter: brightness(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.16);
+        filter: brightness(1.16);
+    }
+}

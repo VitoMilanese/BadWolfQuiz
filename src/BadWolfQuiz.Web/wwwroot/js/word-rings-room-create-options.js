@@ -20,6 +20,16 @@
     const selectedRole = () =>
         form.querySelector('[data-create-room-role]:checked')?.value || 'player';
 
+    const syncRoleOptions = () => {
+        const dedicatedHost = selectedRole() === 'host';
+        const partialRow = partialInput?.closest('.word-rings-room-checkbox');
+        if (partialRow instanceof HTMLElement) partialRow.hidden = dedicatedHost;
+        if (dedicatedHost && partialInput instanceof HTMLInputElement) partialInput.checked = false;
+    };
+    form.querySelectorAll('[data-create-room-role]').forEach(input =>
+        input.addEventListener('change', syncRoleOptions));
+    syncRoleOptions();
+
     const loadPreviousHostRoom = () => {
         try {
             const parsed = JSON.parse(localStorage.getItem(hostRoomKey) || 'null');

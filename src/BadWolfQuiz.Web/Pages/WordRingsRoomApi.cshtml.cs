@@ -37,7 +37,7 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
         });
 
     public IActionResult OnPostRoomState(string? roomCode, string? playerToken) =>
-        Execute(() => new { success = true, state = Store.GetState(roomCode, playerToken) });
+        Execute(() => new { success = true, state = HostCoordinator.GetRoomState(roomCode, playerToken) });
 
     public IActionResult OnPostRoomHostState(string? roomCode, string? playerToken) =>
         Execute(() => new { success = true, state = HostCoordinator.GetHostState(roomCode, playerToken) });
@@ -70,7 +70,7 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
         Execute(() => new
         {
             success = true,
-            result = Store.SubmitPlacement(
+            result = HostCoordinator.SubmitPlacement(
                 roomCode,
                 playerToken,
                 word,
@@ -89,13 +89,23 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
         Execute(() => new
         {
             success = true,
-            state = Store.MovePlacement(
+            state = HostCoordinator.MovePlacement(
                 roomCode,
                 playerToken,
                 placementId,
                 membership,
                 ParseCoordinate(x),
                 ParseCoordinate(y))
+        });
+
+    public IActionResult OnPostResolveRoomPlacement(
+        string? roomCode,
+        string? playerToken,
+        long placementId) =>
+        Execute(() => new
+        {
+            success = true,
+            state = HostCoordinator.ResolvePlacement(roomCode, playerToken, placementId)
         });
 
     private static double ParseCoordinate(string? value)

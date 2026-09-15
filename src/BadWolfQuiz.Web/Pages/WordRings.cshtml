@@ -61,7 +61,10 @@
      data-room-lock-joining="@hostText.LockJoining"
      data-room-unlock-joining="@hostText.UnlockJoining"
      data-room-locked="@hostText.RoomLocked"
-     data-room-rules-required="@hostText.RulesRequired">
+     data-room-rules-required="@hostText.RulesRequired"
+     data-room-host-correct="@hostText.CorrectPlacement"
+     data-room-host-move="@hostText.MovePlacement"
+     data-room-awaiting-host="@hostText.AwaitingHostDecision">
 
     @if (!isCooperativeRoom)
     {
@@ -96,6 +99,7 @@
             {
                 <button class="button button-primary" type="button" data-start-room hidden>@roomText.StartGame</button>
                 <button class="button" type="button" data-open-room-rule-picker hidden>@hostText.ChooseRules</button>
+                <button class="button" type="button" data-reveal-rules hidden>@WordRingsLocalizer["RevealRules"]</button>
                 <button class="button word-rings-host-toolbar-icon" type="button" data-toggle-room-lock title="@hostText.LockJoining" aria-label="@hostText.LockJoining" hidden>🔒</button>
                 <button class="button" type="button" data-leave-room>@roomText.LeaveRoom</button>
             }
@@ -141,6 +145,12 @@
                     }
                 }
             </div>
+            @if (isCooperativeRoom)
+            {
+                <div class="word-rings-host-judge" data-room-host-judge hidden>
+                    <button class="button button-primary" type="button" data-room-host-resolve></button>
+                </div>
+            }
             <div class="word-rings-outside" data-outside-zone hidden><strong>@WordRingsLocalizer["Outside"]</strong><div data-outside-list></div></div>
             <button class="button button-primary word-rings-check-button" type="button" data-check disabled>@WordRingsLocalizer["Check"]</button>
         </aside>

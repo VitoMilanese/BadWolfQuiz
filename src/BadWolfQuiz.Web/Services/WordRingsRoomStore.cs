@@ -44,7 +44,9 @@ public sealed record WordRingsRoomPlacementSnapshot(
     bool IsPartial,
     double PointsAwarded,
     Guid PlayerId,
-    string PlayerName);
+    string PlayerName,
+    bool IsPending,
+    string SubmittedMembership);
 
 public sealed record WordRingsRoomSnapshot(
     string RoomCode,
@@ -58,6 +60,7 @@ public sealed record WordRingsRoomSnapshot(
     Guid PlayerId,
     Guid? CurrentPlayerId,
     bool IsHost,
+    bool DedicatedHostMode,
     bool CanStart,
     string BlueRuleText,
     string YellowRuleText,
@@ -84,7 +87,8 @@ public sealed record WordRingsRoomPlacementResult(
     bool IsCorrect,
     bool IsPartial,
     double PointsAwarded,
-    bool TurnContinues);
+    bool TurnContinues,
+    bool IsPending);
 
 public sealed class WordRingsRoomStore
 {
@@ -346,7 +350,9 @@ public sealed class WordRingsRoomStore
                 isPartial,
                 points,
                 player.Id,
-                player.Name));
+                player.Name,
+                false,
+                actualMembership));
             if (room.Placements.Count > MaximumSharedPlacements)
             {
                 room.Placements.RemoveRange(0, room.Placements.Count - MaximumSharedPlacements);
@@ -381,7 +387,243 @@ public sealed class WordRingsRoomStore
                 isCorrect,
                 isPartial,
                 points,
-                turnContinues);
+                turnContinues,
+                false);
+        }
+    }
+
+    public WordRingsRoomPlacementResult SubmitHostedPlacement(
+        string? roomCode,
+        string? playerToken,
+        string? word,
+        string? membership,
+        double x,
+        double y)
+    {
+        lock (_sync)
+        {
+            var now = _timeProvider.GetUtcNow();
+            var room = GetActiveRoom(roomCode, now);
+            var player = GetPlayer(room, playerToken);
+            if (room.Phase != RoomPhase.Playing)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
+            }
+            if (room.CurrentPlayerIndex < 0 ||
+                room.Players[room.CurrentPlayerIndex].Id != player.Id)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.NotYourTurn);
+            }
+            if (room.Placements.Any(item => item.IsPending))
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
+            }
+
+            var actualWord = player.RemainingWords.FirstOrDefault(item =>
+                string.Equals(item, word?.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (actualWord is null)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidWord);
+            }
+
+            var actualMembership = NormalizeMembership(membership);
+            if (actualMembership is null)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+            }
+
+            player.RemainingWords.Remove(actualWord);
+            room.Placements.Add(new PlacementState(
+                room.NextPlacementId++,
+                actualWord,
+                actualMembership,
+                Math.Clamp(x, 3, 97),
+                Math.Clamp(y, 3, 97),
+                false,
+                false,
+                0,
+                player.Id,
+                player.Name,
+                true,
+                actualMembership));
+            if (room.Placements.Count > MaximumSharedPlacements)
+            {
+                room.Placements.RemoveRange(0, room.Placements.Count - MaximumSharedPlacements);
+            }
+
+            Touch(room, now);
+            return new WordRingsRoomPlacementResult(
+                CreateSnapshot(room, player),
+                actualWord,
+                actualMembership,
+                actualMembership,
+                false,
+                false,
+                0,
+                false,
+                true);
+        }
+    }
+
+    public WordRingsRoomSnapshot MoveHostedPlacement(
+        string? roomCode,
+        string? playerToken,
+        long placementId,
+        string? membership,
+        double x,
+        double y)
+    {
+        lock (_sync)
+        {
+            var now = _timeProvider.GetUtcNow();
+            var room = GetActiveRoom(roomCode, now);
+            var player = GetPlayer(room, playerToken);
+            if (room.Phase == RoomPhase.Waiting)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
+            }
+
+            var normalizedMembership = NormalizeMembership(membership);
+            if (normalizedMembership is null)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+            }
+
+            var placementIndex = room.Placements.FindIndex(item => item.Id == placementId);
+            if (placementIndex < 0)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+            }
+
+            var placement = room.Placements[placementIndex];
+            if (placement.IsPending)
+            {
+                if (!player.IsHost)
+                {
+                    throw new WordRingsRoomException(WordRingsRoomError.NotHost);
+                }
+                if (room.Phase != RoomPhase.Playing)
+                {
+                    throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
+                }
+            }
+            else if (!string.Equals(
+                         placement.Membership,
+                         normalizedMembership,
+                         StringComparison.Ordinal))
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+            }
+
+            room.Placements[placementIndex] = placement with
+            {
+                Membership = placement.IsPending ? normalizedMembership : placement.Membership,
+                X = Math.Clamp(x, 3, 97),
+                Y = Math.Clamp(y, 3, 97)
+            };
+            Touch(room, now);
+            return CreateSnapshot(room, player);
+        }
+    }
+
+    public WordRingsRoomPlacementResult ResolveHostedPlacement(
+        string? roomCode,
+        string? playerToken,
+        long placementId)
+    {
+        lock (_sync)
+        {
+            var now = _timeProvider.GetUtcNow();
+            var room = GetActiveRoom(roomCode, now);
+            var host = GetPlayer(room, playerToken);
+            if (!host.IsHost)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.NotHost);
+            }
+            if (room.Phase != RoomPhase.Playing)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
+            }
+
+            var placementIndex = room.Placements.FindIndex(item => item.Id == placementId && item.IsPending);
+            if (placementIndex < 0)
+            {
+                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
+            }
+
+            var placement = room.Placements[placementIndex];
+            var player = room.Players.FirstOrDefault(item => item.Id == placement.PlayerId)
+                ?? throw new WordRingsRoomException(WordRingsRoomError.InvalidPlayer);
+            var submittedMembership = CanonicalMembership(placement.SubmittedMembership);
+            var finalMembership = CanonicalMembership(placement.Membership);
+            var stayedInSubmittedRegion = string.Equals(
+                submittedMembership,
+                finalMembership,
+                StringComparison.Ordinal);
+            var intersectsSubmittedRegion = !stayedInSubmittedRegion &&
+                IsPartialPlacement(submittedMembership, finalMembership);
+
+            double points = 0;
+            if (stayedInSubmittedRegion)
+            {
+                if (finalMembership.Length == 0)
+                {
+                    if (!room.OutsidePointAwardedThisTurn)
+                    {
+                        points = 1;
+                        room.OutsidePointAwardedThisTurn = true;
+                    }
+                }
+                else
+                {
+                    points = 1;
+                }
+            }
+            else if (intersectsSubmittedRegion)
+            {
+                points = 0.5;
+            }
+
+            player.Score += points;
+            room.Placements[placementIndex] = placement with
+            {
+                IsPending = false,
+                IsCorrect = stayedInSubmittedRegion,
+                IsPartial = intersectsSubmittedRegion,
+                PointsAwarded = points
+            };
+
+            var turnContinues = stayedInSubmittedRegion;
+            if (player.Score >= room.TargetScore)
+            {
+                room.Phase = RoomPhase.Finished;
+                room.Outcome = RoomOutcome.Won;
+                room.WinnerPlayerId = player.Id;
+                turnContinues = false;
+            }
+            else if (room.Players.All(item => item.RemainingWords.Count == 0))
+            {
+                room.Phase = RoomPhase.Finished;
+                room.Outcome = RoomOutcome.Lost;
+                turnContinues = false;
+            }
+            else if (!stayedInSubmittedRegion || player.RemainingWords.Count == 0)
+            {
+                AdvanceTurn(room);
+                turnContinues = false;
+            }
+
+            Touch(room, now);
+            return new WordRingsRoomPlacementResult(
+                CreateSnapshot(room, host),
+                placement.Word,
+                submittedMembership,
+                finalMembership,
+                stayedInSubmittedRegion,
+                intersectsSubmittedRegion,
+                points,
+                turnContinues,
+                false);
         }
     }
 
@@ -607,7 +849,9 @@ public sealed class WordRingsRoomStore
                 item.IsPartial,
                 item.PointsAwarded,
                 item.PlayerId,
-                item.PlayerName))
+                item.PlayerName,
+                item.IsPending,
+                item.SubmittedMembership))
             .ToArray();
         var playerOutcome = room.Phase == RoomPhase.Finished && room.WinnerPlayerId is Guid winnerId
             ? (winnerId == player.Id ? RoomOutcome.Won : RoomOutcome.Lost)
@@ -625,6 +869,7 @@ public sealed class WordRingsRoomStore
             player.Id,
             currentPlayerId,
             player.IsHost,
+            false,
             player.IsHost && room.Phase != RoomPhase.Playing && room.Players.Count >= 2,
             room.Puzzle.BlueRuleText,
             room.Puzzle.YellowRuleText,
@@ -868,7 +1113,9 @@ public sealed class WordRingsRoomStore
         bool IsPartial,
         double PointsAwarded,
         Guid PlayerId,
-        string PlayerName);
+        string PlayerName,
+        bool IsPending,
+        string SubmittedMembership);
 
     private sealed record WordCandidate(string Word, string Membership);
 }
