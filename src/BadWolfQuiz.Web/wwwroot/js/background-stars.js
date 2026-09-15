@@ -79,6 +79,31 @@
             rect.height >= window.innerHeight * 0.62;
     };
 
+    const hasPaintedBackground = element => {
+        if (!(element instanceof HTMLElement)) {
+            return false;
+        }
+
+        const style = getComputedStyle(element);
+        const backgroundImage = String(style.backgroundImage || '').trim();
+        if (backgroundImage && backgroundImage !== 'none') {
+            return true;
+        }
+
+        const backgroundColor = String(style.backgroundColor || '').trim();
+        if (!backgroundColor || backgroundColor === 'transparent') {
+            return false;
+        }
+
+        const alphaMatch = /rgba?\([^)]*(?:,|\/)\s*([\d.]+)\s*\)$/i.exec(backgroundColor);
+        const alpha = alphaMatch ? Number(alphaMatch[1]) : 1;
+        return Number.isFinite(alpha) && alpha > 0.04;
+    };
+
+    const isPageChrome = element =>
+        element instanceof HTMLElement &&
+        element.matches('.page-heading, header, footer, nav, dialog, .topbar');
+
     const resolveStarfieldHost = () => {
         const playerGameRoot = document.querySelector(
             '[data-game-code][data-player-id][data-final-status]');
@@ -115,11 +140,21 @@
                 element !== field &&
                 isVisibleElement(element) &&
                 !['LINK', 'SCRIPT', 'STYLE'].includes(element.tagName));
-            const viewportRoot = visualChildren.find(element =>
+
+            const gameIntroRoot = visualChildren.find(element =>
                 element.classList.contains('game-intro-page') && fillsViewport(element));
-            if (viewportRoot instanceof HTMLElement) {
-                return viewportRoot;
+            if (gameIntroRoot instanceof HTMLElement) {
+                return gameIntroRoot;
             }
+
+            const paintedViewportRoot = visualChildren.find(element =>
+                !isPageChrome(element) &&
+                fillsViewport(element) &&
+                hasPaintedBackground(element));
+            if (paintedViewportRoot instanceof HTMLElement) {
+                return paintedViewportRoot;
+            }
+
             return pageShell;
         }
 
