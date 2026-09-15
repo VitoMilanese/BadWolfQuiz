@@ -14,6 +14,8 @@ public sealed record WordRingsRoomText
     public string RoomCode { get; init; } = "Room";
     public string CopyLink { get; init; } = "Copy room code";
     public string CodeCopied { get; init; } = "Room code copied";
+    public string CopyRoomLink { get; init; } = "Copy room link";
+    public string LinkCopied { get; init; } = "Room link copied";
     public string ShowCode { get; init; } = "Show room code";
     public string HideCode { get; init; } = "Hide room code";
     public string StartGame { get; init; } = "Start game";
@@ -67,6 +69,8 @@ public sealed record WordRingsRoomText
         RoomCode = "Кімната",
         CopyLink = "Скопіювати код кімнати",
         CodeCopied = "Код кімнати скопійовано",
+        CopyRoomLink = "Скопіювати посилання на кімнату",
+        LinkCopied = "Посилання на кімнату скопійовано",
         ShowCode = "Показати код кімнати",
         HideCode = "Приховати код кімнати",
         StartGame = "Почати гру",
@@ -110,6 +114,8 @@ public sealed record WordRingsRoomText
         RoomCode = "Stanza",
         CopyLink = "Copia codice stanza",
         CodeCopied = "Codice stanza copiato",
+        CopyRoomLink = "Copia link della stanza",
+        LinkCopied = "Link della stanza copiato",
         ShowCode = "Mostra codice stanza",
         HideCode = "Nascondi codice stanza",
         StartGame = "Avvia partita",
@@ -153,6 +159,8 @@ public sealed record WordRingsRoomText
         RoomCode = "Україна",
         CopyLink = "Україна",
         CodeCopied = "Україна",
+        CopyRoomLink = "Україна",
+        LinkCopied = "Україна",
         ShowCode = "Україна",
         HideCode = "Україна",
         StartGame = "Україна",

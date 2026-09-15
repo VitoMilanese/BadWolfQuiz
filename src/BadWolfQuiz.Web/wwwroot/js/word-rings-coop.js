@@ -14,6 +14,7 @@
     const playersList = root.querySelector('[data-word-rings-player-list]');
     const startButton = root.querySelector('[data-start-room]');
     const copyButton = root.querySelector('[data-copy-room-code]');
+    const copyLinkButton = root.querySelector('[data-copy-room-link]');
     const toggleCodeButton = root.querySelector('[data-toggle-room-code]');
     const roomCodeLabel = root.querySelector('[data-room-code-label]');
     const joinDialog = root.querySelector('[data-join-room-dialog]');
@@ -46,6 +47,7 @@
     let topZIndex = 100;
     let roomCodeVisible = false;
     let copyFeedbackTimer = null;
+    let linkCopyFeedbackTimer = null;
 
     const format = (template, ...values) => values.reduce(
         (result, value, index) => result.replace(`{${index}}`, String(value)),
@@ -671,6 +673,32 @@
             console.error('Could not copy Word Rings room code.', error);
         }
     });
+
+    copyLinkButton?.addEventListener('click', async () => {
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    url.searchParams.set('room', roomCode);
+    try {
+        await navigator.clipboard.writeText(url.toString());
+        copyLinkButton.classList.add('is-copied');
+        copyLinkButton.textContent = '✓';
+        const copiedLabel = root.dataset.roomLinkCopied || root.dataset.roomCopyLink || '';
+        copyLinkButton.title = copiedLabel;
+        copyLinkButton.setAttribute('aria-label', copiedLabel);
+        if (linkCopyFeedbackTimer !== null) window.clearTimeout(linkCopyFeedbackTimer);
+        linkCopyFeedbackTimer = window.setTimeout(() => {
+            copyLinkButton.classList.remove('is-copied');
+            copyLinkButton.textContent = '↗';
+            const copyLabel = root.dataset.roomCopyLink || '';
+            copyLinkButton.title = copyLabel;
+            copyLinkButton.setAttribute('aria-label', copyLabel);
+            linkCopyFeedbackTimer = null;
+        }, 1400);
+    } catch (error) {
+        console.error('Could not copy Word Rings room link.', error);
+    }
+});
 
     toggleCodeButton?.addEventListener('click', () => {
         roomCodeVisible = !roomCodeVisible;

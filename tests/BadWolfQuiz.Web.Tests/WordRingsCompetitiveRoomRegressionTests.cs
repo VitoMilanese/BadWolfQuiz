@@ -143,6 +143,7 @@ public sealed class WordRingsCompetitiveRoomRegressionTests
         var roomText = ReadWebFile("Localization", "WordRingsRoomText.cs");
         var page = ReadWebFile("Pages", "WordRings.cshtml");
         var pointerDrag = ReadWebFile("wwwroot", "js", "word-rings-pointer-drag.js");
+        var refinements = ReadWebFile("wwwroot", "css", "word-rings-refinements.css");
 
         Assert.Contains("nextState.playerScore", script, StringComparison.Ordinal);
         Assert.Contains("state?.phase === 'finished'", script, StringComparison.Ordinal);
@@ -157,7 +158,14 @@ public sealed class WordRingsCompetitiveRoomRegressionTests
         Assert.Contains("findBestAutomaticPlacement", script, StringComparison.Ordinal);
         Assert.Contains("repositionPartialPlacementIfNeeded", script, StringComparison.Ordinal);
         Assert.Contains("navigator.clipboard.writeText(roomCode)", script, StringComparison.Ordinal);
+        Assert.Contains("navigator.clipboard.writeText(url.toString())", script, StringComparison.Ordinal);
+        Assert.Contains("data-copy-room-link", page, StringComparison.Ordinal);
         Assert.Contains("data-toggle-room-code", page, StringComparison.Ordinal);
+        Assert.Contains("grid-template-columns: minmax(220px, 1fr) minmax(0, 980px) minmax(230px, 1fr);", refinements, StringComparison.Ordinal);
+        Assert.Contains("width: min(100%, 280px);", refinements, StringComparison.Ordinal);
+        Assert.Contains("width: min(100%, 300px);", refinements, StringComparison.Ordinal);
+        Assert.Contains("border: 1px solid var(--line);", refinements, StringComparison.Ordinal);
+        Assert.Contains("box-shadow: none;", refinements, StringComparison.Ordinal);
         Assert.Contains("••••••", page, StringComparison.Ordinal);
         Assert.True(
             pointerDrag.IndexOf("bringToFront(word);", StringComparison.Ordinal) <

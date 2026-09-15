@@ -62,7 +62,7 @@ body:has(.word-rings-page) .page-shell {
 }
 
 .word-rings-layout.has-players {
-    grid-template-columns: clamp(220px, 18vw, 300px) minmax(0, 1fr) clamp(230px, 20vw, 320px);
+    grid-template-columns: minmax(220px, 1fr) minmax(0, 980px) minmax(230px, 1fr);
     grid-template-areas: "players stage bank";
 }
 
@@ -79,6 +79,22 @@ body:has(.word-rings-page) .page-shell {
 
 .word-rings-players[hidden] {
     display: none !important;
+}
+
+.word-rings-layout.has-players .word-rings-players {
+    box-sizing: border-box;
+    width: min(100%, 280px);
+    max-height: calc(100% - 16px);
+    align-self: center;
+    justify-self: center;
+}
+
+.word-rings-layout.has-players .word-rings-bank {
+    box-sizing: border-box;
+    width: min(100%, 300px);
+    max-height: calc(100% - 16px);
+    align-self: center;
+    justify-self: center;
 }
 
 .word-rings-bank {
@@ -120,12 +136,17 @@ body:has(.word-rings-page) .page-shell {
     min-width: 0;
     min-height: 0;
     height: 100%;
-    padding: clamp(8px, 1vw, 14px);
+    padding: 0;
     overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .word-rings-stage {
     position: relative;
+    box-sizing: border-box;
     align-self: center;
     justify-self: center;
     width: auto;
@@ -134,9 +155,10 @@ body:has(.word-rings-page) .page-shell {
     max-height: 100%;
     aspect-ratio: 1.32 / 1;
     margin: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--panel) 95%, transparent);
+    box-shadow: 0 20px 54px rgb(0 0 0 / 18%);
 }
 
 .word-rings-stage.is-drop-target {
