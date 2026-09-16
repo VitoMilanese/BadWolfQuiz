@@ -47,6 +47,32 @@ public sealed class FinalQuestionTransitionStylesRegressionTests
     }
 
     [Fact]
+    public void Transition_description_uses_the_open_round_intro_layout_without_an_inner_scroll_card()
+    {
+        var markup = File.ReadAllText(FindWebFile(
+                "Pages",
+                "Admin",
+                "Games",
+                "FinalQuestionTransition.cshtml"))
+            .ReplaceLineEndings("\n");
+        var roundIntro = File.ReadAllText(FindWebFile(
+                "Pages",
+                "Admin",
+                "Games",
+                "RoundIntro.cshtml"))
+            .ReplaceLineEndings("\n");
+
+        Assert.DoesNotContain("final-question-transition-card", markup);
+        Assert.DoesNotContain("overflow: auto;", markup);
+        Assert.Contains(
+            ".final-question-transition-blocks {\n    width: min(980px, 100%);",
+            markup);
+        Assert.Contains("max-height: 52vh;", markup);
+        Assert.Contains("width: min(980px, 100%);", roundIntro);
+        Assert.Contains("max-height: 52vh;", roundIntro);
+    }
+
+    [Fact]
     public void Transition_guard_is_installed_synchronously_with_host_controls()
     {
         var script = File.ReadAllText(FindWebFile(

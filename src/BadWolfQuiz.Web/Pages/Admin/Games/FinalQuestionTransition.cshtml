@@ -17,35 +17,33 @@
 
         @if (Model.Blocks.Count > 0)
         {
-            <div class="final-question-transition-card">
-                <div class="final-question-transition-blocks">
-                    @foreach (var block in Model.Blocks)
+            <div class="final-question-transition-blocks">
+                @foreach (var block in Model.Blocks)
+                {
+                    if (block.Kind == ContentBlockKind.Text && !string.IsNullOrWhiteSpace(block.TextContent))
                     {
-                        if (block.Kind == ContentBlockKind.Text && !string.IsNullOrWhiteSpace(block.TextContent))
-                        {
-                            <div class="game-content-block game-content-text final-question-transition-text">@block.TextContent</div>
-                        }
-                        else if (block.Kind == ContentBlockKind.Image &&
-                                 (block.FileData is { Length: > 0 } || !string.IsNullOrWhiteSpace(block.MediaPath)))
-                        {
-                            <figure class="game-content-block final-question-transition-image-block">
-                                @if (!string.IsNullOrWhiteSpace(block.TopCaption))
-                                {
-                                    <figcaption class="final-question-transition-caption">@block.TopCaption</figcaption>
-                                }
-                                <img class="final-question-transition-image"
-                                     src="@(block.FileData is { Length: > 0 }
-                                         ? Url.Page("FinalQuestionTransition", "ContentBlock", new { id = Model.GameId, sourceContentBlockId = block.SourceContentBlockId })
-                                         : block.MediaPath)"
-                                     alt="@(block.FileName ?? Model.Heading)" />
-                                @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
-                                {
-                                    <figcaption class="final-question-transition-caption">@block.BottomCaption</figcaption>
-                                }
-                            </figure>
-                        }
+                        <div class="game-content-block game-content-text final-question-transition-text">@block.TextContent</div>
                     }
-                </div>
+                    else if (block.Kind == ContentBlockKind.Image &&
+                             (block.FileData is { Length: > 0 } || !string.IsNullOrWhiteSpace(block.MediaPath)))
+                    {
+                        <figure class="game-content-block final-question-transition-image-block">
+                            @if (!string.IsNullOrWhiteSpace(block.TopCaption))
+                            {
+                                <figcaption class="final-question-transition-caption">@block.TopCaption</figcaption>
+                            }
+                            <img class="final-question-transition-image"
+                                 src="@(block.FileData is { Length: > 0 }
+                                     ? Url.Page("FinalQuestionTransition", "ContentBlock", new { id = Model.GameId, sourceContentBlockId = block.SourceContentBlockId })
+                                     : block.MediaPath)"
+                                 alt="@(block.FileName ?? Model.Heading)" />
+                            @if (!string.IsNullOrWhiteSpace(block.BottomCaption))
+                            {
+                                <figcaption class="final-question-transition-caption">@block.BottomCaption</figcaption>
+                            }
+                        </figure>
+                    }
+                }
             </div>
         }
     </div>
@@ -95,7 +93,7 @@ body.gameplay-layout:has(.final-question-transition) > .page-shell {
     display: grid;
     grid-template-rows: minmax(0, 1fr) auto;
     gap: clamp(24px, 4vh, 48px);
-    padding: clamp(24px, 4vw, 64px);
+    padding: clamp(24px, 5vw, 72px);
     overflow: hidden;
     background:
         radial-gradient(circle at 50% 34%, color-mix(in srgb, var(--red-bright) 18%, transparent), transparent 34%),
@@ -142,8 +140,8 @@ body.gameplay-layout:has(.final-question-transition) > .page-shell {
     justify-self: stretch;
     display: grid;
     justify-items: center;
-    gap: clamp(20px, 3vh, 34px);
-    width: min(1160px, 100%);
+    gap: clamp(20px, 3vh, 36px);
+    width: min(1100px, 100%);
     margin-inline: auto;
     min-height: 0;
 }
@@ -168,9 +166,9 @@ body.gameplay-layout:has(.final-question-transition) > .page-shell {
     margin: 0;
     max-width: 1000px;
     text-align: center;
-    font-size: clamp(2.5rem, 6vw, 5.8rem);
-    line-height: .94;
-    letter-spacing: .045em;
+    font-size: clamp(2.8rem, 7vw, 7rem);
+    line-height: .95;
+    letter-spacing: .04em;
     font-weight: 950;
     text-transform: uppercase;
     text-wrap: balance;
@@ -180,28 +178,11 @@ body.gameplay-layout:has(.final-question-transition) > .page-shell {
     animation: final-question-enter 420ms cubic-bezier(.2,.85,.3,1) both;
 }
 
-.final-question-transition-card {
-    width: min(980px, 100%);
-    max-height: min(48vh, 560px);
-    overflow: auto;
-    box-sizing: border-box;
-    padding: clamp(18px, 2.5vw, 30px);
-    border: 1px solid color-mix(in srgb, var(--gold) 26%, var(--line));
-    border-radius: clamp(18px, 2vw, 28px);
-    background:
-        linear-gradient(180deg, color-mix(in srgb, var(--panel) 92%, transparent), color-mix(in srgb, var(--panel-2) 94%, transparent));
-    box-shadow:
-        inset 0 1px 0 color-mix(in srgb, var(--text) 9%, transparent),
-        0 24px 64px rgba(0, 0, 0, .34),
-        0 0 0 1px color-mix(in srgb, var(--red) 10%, transparent);
-    backdrop-filter: blur(12px);
-}
-
 .final-question-transition-blocks {
-    width: 100%;
+    width: min(980px, 100%);
     display: grid;
     justify-items: center;
-    gap: clamp(16px, 2vh, 26px);
+    gap: clamp(18px, 2.5vh, 30px);
 }
 
 .final-question-transition-text {
@@ -210,7 +191,7 @@ body.gameplay-layout:has(.final-question-transition) > .page-shell {
     margin: 0;
     text-align: center;
     white-space: pre-wrap;
-    font-size: clamp(1.15rem, 2vw, 1.65rem);
+    font-size: clamp(1.2rem, 2.2vw, 2rem);
     line-height: 1.45;
 }
 
@@ -225,10 +206,9 @@ body.gameplay-layout:has(.final-question-transition) > .page-shell {
 .final-question-transition-image {
     display: block;
     max-width: min(900px, 100%);
-    max-height: 36vh;
+    max-height: 52vh;
     object-fit: contain;
-    border-radius: 14px;
-    box-shadow: 0 14px 40px rgba(0, 0, 0, .34);
+    border-radius: 12px;
 }
 
 .final-question-transition-caption {
@@ -291,12 +271,6 @@ body.gameplay-layout:has(.final-question-transition) > .page-shell {
         font-size: clamp(2.1rem, 12vw, 4rem);
     }
 
-    .final-question-transition-card {
-        max-height: 50vh;
-        padding: 16px;
-        border-radius: 18px;
-    }
-
     .final-question-transition-primary {
         width: 100%;
         min-width: 0;
@@ -315,10 +289,6 @@ body.gameplay-layout:has(.final-question-transition) > .page-shell {
 
     .final-question-transition h1 {
         font-size: clamp(2.2rem, 5vw, 4.4rem);
-    }
-
-    .final-question-transition-card {
-        max-height: 40vh;
     }
 }
 
