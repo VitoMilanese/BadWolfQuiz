@@ -5,6 +5,7 @@
     const layout = root.querySelector('.word-rings-layout');
     const players = root.querySelector('[data-word-rings-players]');
     const actionShell = root.querySelector('[data-action-cards-shell]');
+    const theftPreview = root.querySelector('[data-action-theft-preview]');
     if (!(layout instanceof HTMLElement) ||
         !(players instanceof HTMLElement) ||
         !(actionShell instanceof HTMLElement)) return;
@@ -26,8 +27,33 @@
         layout.classList.toggle('has-action-left-column', !leftColumn.hidden);
     };
 
-    const observer = new MutationObserver(syncVisibility);
+    const syncTheftPlaceholder = () => {
+        if (!(theftPreview instanceof HTMLElement)) return;
+        const current = theftPreview.querySelector('.word-rings-action-theft-placeholder');
+        const revealedCard = theftPreview.querySelector('.word-rings-action-card.is-theft-preview');
+        if (theftPreview.hidden || revealedCard) {
+            current?.remove();
+            return;
+        }
+        if (current instanceof HTMLElement) return;
+
+        const placeholder = document.createElement('div');
+        placeholder.className = 'word-rings-action-theft-placeholder';
+        placeholder.setAttribute('aria-hidden', 'true');
+        const status = theftPreview.querySelector('.word-rings-action-theft-status');
+        theftPreview.insertBefore(placeholder, status);
+    };
+
+    const syncLayout = () => {
+        syncVisibility();
+        syncTheftPlaceholder();
+    };
+
+    const observer = new MutationObserver(syncLayout);
     observer.observe(players, { attributes: true, attributeFilter: ['hidden'] });
     observer.observe(actionShell, { attributes: true, attributeFilter: ['hidden'] });
-    syncVisibility();
+    if (theftPreview instanceof HTMLElement) {
+        observer.observe(theftPreview, { childList: true, attributes: true, attributeFilter: ['hidden'] });
+    }
+    syncLayout();
 })();
