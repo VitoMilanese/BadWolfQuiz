@@ -571,9 +571,9 @@ public sealed class WordRingsRoomStore
             var placement = room.Placements[placementIndex];
             if (placement.IsSeed)
             {
-                if (!player.IsHost || room.Phase != RoomPhase.Playing)
+                if (room.Phase != RoomPhase.Playing)
                 {
-                    throw new WordRingsRoomException(WordRingsRoomError.NotHost);
+                    throw new WordRingsRoomException(WordRingsRoomError.InvalidPhase);
                 }
             }
             else if (placement.IsPending)
@@ -745,10 +745,6 @@ public sealed class WordRingsRoomStore
             }
 
             var placement = room.Placements[placementIndex];
-            if (placement.IsSeed)
-            {
-                throw new WordRingsRoomException(WordRingsRoomError.InvalidPlacement);
-            }
             if (!string.Equals(
                     placement.Membership,
                     normalizedMembership,

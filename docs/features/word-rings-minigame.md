@@ -22,7 +22,7 @@ When a solo game ends, a custom animated victory/defeat dialog is shown instead 
 
 The Word Rings toolbar can create or join a multiplayer room. The creator chooses a target score from **5 to 15** and can optionally enable **0.5-point partial placement scoring**. Partial scoring is disabled by default. Rooms use six-character shareable codes and can be joined through `/minigames/word-rings?room=CODE`.
 
-A creator who plays can start after one other player joins. A dedicated non-playing host can start with one connected playing participant after selecting all three rules. During play those rules are visible only to the host; player room-state responses redact all three rule texts. Each participant receives a personal, separately randomized word queue of up to 20 words with at most 10 visible at once. The left side of the game shows every player's independent score, the host marker immediately before the host name, and the current turn; the raw remaining server-queue count is not exposed. The toolbar score is also personal to the viewer; there is no shared team score.
+A creator who plays can start after one other player joins. A dedicated non-playing host can start with one connected playing participant after selecting all three rules. During play those rules are visible only to the host; player room-state responses redact all three rule texts. Each participant receives a personal, separately randomized word queue of up to 20 words with at most 10 visible at once. The left side of the game shows every playing participant's independent score, the host marker immediately before the host name, and the current turn; the raw remaining server-queue count is not exposed. A dedicated non-playing host remains visible in the player list but has no score there, and that host also sees no score in the toolbar. For playing viewers the toolbar score remains personal; there is no shared team score.
 
 The multiplayer board scales against both viewport width and height. On large displays the board can grow to 1640 px wide with a 1.4:1 play area, while the player and word-bank columns stay bounded and compress at smaller breakpoints. The three equal circles use an equilateral-center layout so the AB, AC, and BC intersections are symmetric instead of squeezing the upper AB region; automatic-placement anchors are aligned with that geometry. Host-only Start, room-lock, and rule controls remain hidden for ordinary players even before the first polling response arrives.
 
@@ -41,6 +41,14 @@ For automatically judged rooms:
 - if every player's personal queue is exhausted before anyone reaches the target, every player loses.
 
 The browser submits the word, detected Venn membership, and board coordinates, while the server calculates correctness, personal points, turn ownership, the winner, and the final per-player outcome. Checked placements remain draggable inside their locked Venn membership even after the round finishes. The host can start another round in the same room after a result; scores, placements, queues, winner state, and puzzle data are reset, while finished clients keep polling so they observe the restart. Room state is kept in memory and expires after inactivity. Multiplayer victory and defeat use the same animated result-dialog system as solo play.
+
+## Action cards
+
+Word Rings can optionally award action cards after a configurable number of fully correct placements. Multiplayer rooms configure both the correct-word threshold and a hand limit of 2–4 cards. A hand normally contains unique card types; cards may also be discarded. Solo play uses only **Replace**, **Immunity**, **Hint**, and **Shuffle**, while multiplayer exposes the full card set. Card artwork is served from `wwwroot/images/word-rings/action-cards/`.
+
+The multiplayer cards are **Swap**, **Replace**, **Block**, **Theft**, **Immunity**, **Hint**, **Rest**, **Shuffle**, **Time-out**, **Shield**, **Mask**, **Anagram**, and **Cleanse**. **Shield** is passive and also blocks **Theft** when another player tries to use it against its owner.
+
+**Theft** replaces the former temporary-word card. Opening Theft shows only opponents who currently hold at least one action card. Selecting an opponent reveals exactly one of that opponent's cards; all of their other cards stay hidden. The reveal is server-authoritative and remains the same for that viewer and target across repeated dialog openings until the revealed card leaves that target's hand. The target list is rebuilt on every opening, so players appear when they acquire a card and disappear when their hand becomes empty. Using Theft transfers the revealed card to the thief and consumes the Theft card.
 
 ## Rule selection
 
