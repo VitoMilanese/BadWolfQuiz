@@ -14,6 +14,7 @@ public sealed class WordRingsActionCardsPatchApiModel(
     private WordRingsActionCardCoordinator Cards => WordRingsActionCardCoordinator.Get(environment);
     private WordRingsActionCardPatchCoordinator Patch => WordRingsActionCardPatchCoordinator.Get(environment);
     private WordRingsActionCardRuntimePatch RuntimePatch => WordRingsActionCardRuntimePatch.Get(environment);
+    private WordRingsActionAchievementTracker AchievementTracker => WordRingsActionAchievementTracker.Get(environment);
 
     public IActionResult OnPostState(string? roomCode, string? playerToken) =>
         Execute(() =>
@@ -44,15 +45,17 @@ public sealed class WordRingsActionCardsPatchApiModel(
             };
         });
 
-    public IActionResult OnPostUseActionCard(
+    public async Task<IActionResult> OnPostUseActionCard(
         string? roomCode,
         string? playerToken,
         int cardId,
         Guid? targetPlayerId,
-        string? word) =>
-        Execute(() =>
+        string? word,
+        CancellationToken cancellationToken = default) =>
+        await ExecuteAsync(async () =>
         {
             var before = Host.GetRoomState(roomCode, playerToken);
+            var achievementCapture = AchievementTracker.CaptureAction(before, cardId, targetPlayerId);
             var swapBlockTransfer = RuntimePatch.CaptureSwapBlockTransfer(before, cardId);
             var result = Cards.UseCard(roomCode, playerToken, cardId, targetPlayerId, word);
             if (RuntimePatch.CompleteSwapBlockTransfer(
@@ -65,6 +68,19 @@ public sealed class WordRingsActionCardsPatchApiModel(
             }
             Patch.RecordCardUse(before, cardId, result);
             _ = Patch.EnsureTargetReachable(roomCode, playerToken);
+
+            var db = HttpContext.RequestServices.GetService(typeof(QuizDbContext)) as QuizDbContext;
+            if (db is not null)
+            {
+                await AchievementTracker.RecordActionAsync(
+                    db,
+                    before,
+                    cardId,
+                    targetPlayerId,
+                    result,
+                    achievementCapture,
+                    cancellationToken);
+            }
             return new { success = true, result };
         });
 
@@ -115,6 +131,39 @@ public sealed class WordRingsActionCardsPatchApiModel(
         {
             success = true,
             state = Patch.EnsureTargetReachable(roomCode, playerToken)
+        });
+
+    public IActionResult OnPostCapturePlacementAchievement(
+        string? roomCode,
+        string? playerToken,
+        long? placementId,
+        string? word) =>
+        Execute(() => new
+        {
+            success = true,
+            captureId = AchievementTracker.CapturePlacement(roomCode, playerToken, placementId, word)
+        });
+
+    public async Task<IActionResult> OnPostFinalizePlacementAchievement(
+        string? roomCode,
+        string? playerToken,
+        Guid captureId,
+        long? placementId,
+        CancellationToken cancellationToken = default) =>
+        await ExecuteAsync(async () =>
+        {
+            var db = HttpContext.RequestServices.GetService(typeof(QuizDbContext)) as QuizDbContext;
+            if (db is not null)
+            {
+                await AchievementTracker.FinalizePlacementAsync(
+                    db,
+                    roomCode,
+                    playerToken,
+                    captureId,
+                    placementId,
+                    cancellationToken);
+            }
+            return new { success = true };
         });
 
     public async Task<IActionResult> OnPostResolveImmunityDecision(
