@@ -14,6 +14,10 @@
     align-self: center;
 }
 
+.word-rings-toolbar-progress[hidden] {
+    display: none !important;
+}
+
 /* The previous patch forced `align-self: end;`, which pushed the entire playfield to the bottom. */
 
 @supports (width: 1cqh) {
