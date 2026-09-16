@@ -217,7 +217,7 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("OnPostEnsureTargetWords", patchApi, StringComparison.Ordinal);
 
         Assert.Contains("word-rings-action-cards-patch.css?v=3", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("word-rings-action-cards-v2.css?v=6", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-cards-v2.css?v=7", tagHelper, StringComparison.Ordinal);
         Assert.Contains("word-rings-action-cards-patch.js?v=2", tagHelper, StringComparison.Ordinal);
         Assert.True(
             tagHelper.IndexOf("word-rings-action-cards-patch.js?v=2", StringComparison.Ordinal) <
@@ -264,15 +264,17 @@ public sealed class WordRingsActionCardsRegressionTests
 
         Assert.Contains("border: 0;", css, StringComparison.Ordinal);
         Assert.Contains("overflow: visible;", css, StringComparison.Ordinal);
-        Assert.Contains("transform: translateY(-5px) scale(1.09)", css, StringComparison.Ordinal);
+        Assert.Contains("transform: translateY(-5px) scale(1.34)", css, StringComparison.Ordinal);
+        Assert.Contains(":has(.word-rings-action-theft-preview:not([hidden]))", css, StringComparison.Ordinal);
+        Assert.Contains("grid-template-areas:", css, StringComparison.Ordinal);
         Assert.Contains("word-rings-action-timeout-pop 2.05s", css, StringComparison.Ordinal);
         Assert.Contains("width: auto !important;", css, StringComparison.Ordinal);
         Assert.Contains("overflow-x: hidden;", css, StringComparison.Ordinal);
         Assert.Contains("max-width: 136px;", css, StringComparison.Ordinal);
         Assert.Contains("object-fit: cover;", css, StringComparison.Ordinal);
         Assert.Contains("word-rings-action-card-name,", css, StringComparison.Ordinal);
-        Assert.Contains("width: min(92vw, 430px);", css, StringComparison.Ordinal);
-        Assert.Contains("width: min(100%, 280px);", css, StringComparison.Ordinal);
+        Assert.Contains("width: min(94vw, 475px);", css, StringComparison.Ordinal);
+        Assert.Contains("width: min(100%, 308px);", css, StringComparison.Ordinal);
 
         Assert.Contains("targetScore is < 5 or > 20", tuningApi, StringComparison.Ordinal);
         Assert.Contains("if (!state.IsHost)", tuningApi, StringComparison.Ordinal);
