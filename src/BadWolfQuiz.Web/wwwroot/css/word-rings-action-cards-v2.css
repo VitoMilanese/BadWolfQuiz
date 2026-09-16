@@ -216,14 +216,11 @@
     flex: 1 1 0;
     width: 100%;
     min-width: 0;
-    max-width: 170px;
-    min-height: 184px;
-    display: grid;
-    grid-template-rows: auto auto 1fr;
-    align-content: start;
-    gap: 6px;
-    padding: 11px;
-    overflow: visible;
+    max-width: 136px;
+    min-height: 0;
+    display: block;
+    padding: 0;
+    overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--card-accent) 62%, var(--line));
     border-radius: 14px;
     background:
@@ -262,11 +259,17 @@
 
 .word-rings-action-card-image {
     box-sizing: border-box;
+    display: block;
     width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: contain;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--card-accent) 12%, var(--panel-2));
+    height: auto;
+    object-fit: cover;
+    border-radius: inherit;
+    background: transparent;
+}
+
+.word-rings-action-card-image[hidden],
+.word-rings-action-card-icon[hidden] {
+    display: none !important;
 }
 
 .word-rings-action-card-icon {
@@ -290,6 +293,12 @@
     color: var(--muted);
     font-size: .66rem;
     line-height: 1.3;
+}
+
+.word-rings-action-card-name,
+.word-rings-action-card-description,
+.word-rings-action-card-passive {
+    display: none !important;
 }
 
 .word-rings-action-card-passive {
@@ -337,8 +346,8 @@
 }
 
 .word-rings-action-dialog {
-    width: min(92vw, 540px);
-    max-height: 90dvh;
+    width: min(92vw, 430px);
+    max-height: 92dvh;
 }
 
 .word-rings-action-dialog::backdrop,
@@ -360,9 +369,9 @@
 }
 
 .word-rings-action-card.is-dialog-preview {
-    width: min(100%, 250px);
-    min-height: 300px;
-    max-width: 250px;
+    width: min(100%, 280px);
+    min-height: 0;
+    max-width: 280px;
     transform: none !important;
     cursor: default;
     pointer-events: none;
@@ -399,7 +408,7 @@
 
 .word-rings-action-card.is-theft-preview {
     width: min(100%, 200px);
-    min-height: 240px;
+    min-height: 0;
     max-width: 200px;
     transform: none !important;
     cursor: default;
@@ -718,8 +727,8 @@
     }
 
     .word-rings-action-card {
-        min-height: 160px;
-        padding: 9px;
+        min-height: 0;
+        padding: 0;
     }
 
     .word-rings-action-card-description {
