@@ -12,8 +12,10 @@ public sealed class WordRingsActionCardsAssetsTagHelper : TagHelper
         output.PreElement.AppendHtml(
             "<link rel=\"stylesheet\" href=\"/css/word-rings-action-cards-v2.css?v=7\" />" +
             "<link rel=\"stylesheet\" href=\"/css/word-rings-action-cards-patch.css?v=4\" />" +
-            "<link rel=\"stylesheet\" href=\"/css/word-rings-action-cards-layout.css?v=3\" />");
+            "<link rel=\"stylesheet\" href=\"/css/word-rings-action-cards-layout.css?v=3\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/word-rings-gameplay-options.css?v=1\" />");
         output.PostElement.AppendHtml(
+            "<script src=\"/js/word-rings-gameplay-options.js?v=1\" defer></script>" +
             "<script src=\"/js/word-rings-action-cards-patch.js?v=2\" defer></script>" +
             "<script src=\"/js/word-rings-action-cards-v2.js?v=5\" defer></script>" +
             "<script src=\"/js/word-rings-action-cards-layout.js?v=2\" defer></script>" +
