@@ -7,6 +7,7 @@ namespace BadWolfQuiz.Web.Pages;
 public sealed class WordRingsGameplayOptionsApiModel(IWebHostEnvironment environment) : PageModel
 {
     private WordRingsGameplayOptionsCoordinator Gameplay => WordRingsGameplayOptionsCoordinator.Get(environment);
+    private WordRingsExhaustionWinOverride Exhaustion => new(environment);
 
     public IActionResult OnPostConfigureRoom(
         string? roomCode,
@@ -69,20 +70,28 @@ public sealed class WordRingsGameplayOptionsApiModel(IWebHostEnvironment environ
         string? roomCode,
         string? playerToken,
         Guid playerId) =>
-        Execute(() => new
+        Execute(() =>
         {
-            success = true,
-            state = Gameplay.FinalizePlayerExhaustion(roomCode, playerToken, playerId)
+            Exhaustion.ApplyForPlayer(roomCode, playerToken, playerId);
+            return new
+            {
+                success = true,
+                state = Gameplay.FinalizePlayerExhaustion(roomCode, playerToken, playerId)
+            };
         });
 
     public IActionResult OnPostFinalizePlacementExhaustion(
         string? roomCode,
         string? playerToken,
         long placementId) =>
-        Execute(() => new
+        Execute(() =>
         {
-            success = true,
-            state = Gameplay.FinalizePlacementExhaustion(roomCode, playerToken, placementId)
+            Exhaustion.ApplyForPlacement(roomCode, playerToken, placementId);
+            return new
+            {
+                success = true,
+                state = Gameplay.FinalizePlacementExhaustion(roomCode, playerToken, placementId)
+            };
         });
 
     public IActionResult OnPostNormalizeActionCard(
