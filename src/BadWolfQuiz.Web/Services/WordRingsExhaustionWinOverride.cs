@@ -22,10 +22,6 @@ public sealed class WordRingsExhaustionWinOverride
     public void ApplyForPlayer(string? roomCode, string? playerToken, Guid playerId)
     {
         var caller = _host.GetRoomState(roomCode, playerToken);
-        if (!caller.IsHost && caller.PlayerId != playerId)
-        {
-            throw new WordRingsRoomException(WordRingsRoomError.InvalidPlayer);
-        }
         Apply(caller.RoomCode, playerId);
     }
 
