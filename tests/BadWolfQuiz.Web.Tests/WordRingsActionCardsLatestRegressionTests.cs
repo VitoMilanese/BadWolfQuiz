@@ -260,7 +260,8 @@ public sealed class WordRingsActionCardsLatestRegressionTests
             "BadWolfQuiz.Web",
             "wwwroot",
             "css",
-            "word-rings-action-cards-patch.css"));
+            "word-rings-action-cards-patch.css"))
+            .ReplaceLineEndings("\n");
 
         Assert.Contains(".word-rings-stage {\n    align-self: center;\n}", css, StringComparison.Ordinal);
     }
