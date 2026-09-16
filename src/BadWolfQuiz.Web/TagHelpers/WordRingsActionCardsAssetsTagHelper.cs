@@ -16,6 +16,7 @@ public sealed class WordRingsActionCardsAssetsTagHelper : TagHelper
             "<link rel=\"stylesheet\" href=\"/css/word-rings-gameplay-options.css?v=1\" />");
         output.PostElement.AppendHtml(
             "<script src=\"/js/word-rings-gameplay-options.js?v=1\" defer></script>" +
+            "<script src=\"/js/word-rings-gameplay-options-followup.js?v=1\" defer></script>" +
             "<script src=\"/js/word-rings-action-cards-patch.js?v=2\" defer></script>" +
             "<script src=\"/js/word-rings-action-cards-v2.js?v=5\" defer></script>" +
             "<script src=\"/js/word-rings-action-cards-layout.js?v=2\" defer></script>" +
