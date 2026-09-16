@@ -8,6 +8,7 @@ public sealed class WordRingsGameplayOptionsApiModel(IWebHostEnvironment environ
 {
     private WordRingsGameplayOptionsCoordinator Gameplay => WordRingsGameplayOptionsCoordinator.Get(environment);
     private WordRingsExhaustionWinOverride Exhaustion => new(environment);
+    private WordRingsThemeSyncCoordinator Theme => WordRingsThemeSyncCoordinator.Get(environment);
 
     public IActionResult OnPostConfigureRoom(
         string? roomCode,
@@ -103,6 +104,17 @@ public sealed class WordRingsGameplayOptionsApiModel(IWebHostEnvironment environ
         {
             success = true,
             actionCards = Gameplay.NormalizeActionCardEffects(roomCode, playerToken, cardId, targetName)
+        });
+
+    public IActionResult OnPostSynchronizeTheme(
+        string? roomCode,
+        string? playerToken,
+        string? themeId,
+        string? variablesJson) =>
+        Execute(() => new
+        {
+            success = true,
+            theme = Theme.Synchronize(roomCode, playerToken, themeId, variablesJson)
         });
 
     private IActionResult Execute(Func<object> operation)
