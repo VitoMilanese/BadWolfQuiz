@@ -1,0 +1,106 @@
+/* Layout follow-up for the action-card rail and Theft dialog. */
+
+.word-rings-action-left-column {
+    grid-area: players;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: min(100%, 240px);
+    max-height: calc(100% - 16px);
+    min-width: 0;
+    min-height: 0;
+    align-self: center;
+    justify-self: center;
+    overflow: visible;
+}
+
+.word-rings-action-left-column[hidden] {
+    display: none !important;
+}
+
+.word-rings-action-left-column > .word-rings-players {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    width: 100% !important;
+    max-height: none !important;
+    min-height: 0;
+    align-self: stretch !important;
+    justify-self: stretch !important;
+    overflow: auto;
+}
+
+.word-rings-action-left-column > .word-rings-action-shell {
+    flex: 0 0 auto;
+    width: 100%;
+}
+
+.word-rings-layout.has-action-left-column:not(.has-players) {
+    grid-template-columns: minmax(170px, 240px) minmax(0, 1640px) minmax(180px, 270px);
+    grid-template-areas: "players stage bank";
+}
+
+/* Keep the revealed Theft card level with the source card and the same visual size. */
+.word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) {
+    width: min(96vw, 820px);
+}
+
+.word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-dialog-card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 18px;
+}
+
+.word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-theft-preview {
+    align-self: start;
+    align-content: start;
+    min-height: 0;
+    padding: 2px 14px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-card.is-theft-preview {
+    width: min(100%, 308px);
+    max-width: 308px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+@media (max-width: 1180px) {
+    .word-rings-layout.has-action-left-column:not(.has-players) {
+        grid-template-columns: minmax(150px, 200px) minmax(0, 1fr) minmax(160px, 210px);
+        gap: 8px;
+    }
+
+    .word-rings-action-left-column {
+        width: 100%;
+    }
+}
+
+@media (max-width: 920px) {
+    .word-rings-layout.has-action-left-column:not(.has-players) {
+        grid-template-columns: minmax(135px, 175px) minmax(0, 1fr) minmax(145px, 185px);
+        grid-template-areas: "players stage bank";
+        gap: 6px;
+    }
+}
+
+@media (max-width: 680px) {
+    .word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) {
+        width: min(94vw, 475px);
+    }
+
+    .word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-theft-preview {
+        padding: 2px 14px;
+    }
+}
+
+@media (max-width: 640px) {
+    .word-rings-layout.has-action-left-column:not(.has-players) {
+        grid-template-columns: minmax(105px, 125px) minmax(0, 1fr) minmax(115px, 135px);
+        grid-template-areas: "players stage bank";
+        gap: 5px;
+    }
+}
