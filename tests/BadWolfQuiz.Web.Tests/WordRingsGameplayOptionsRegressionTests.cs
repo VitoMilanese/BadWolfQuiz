@@ -27,8 +27,10 @@ public sealed class WordRingsGameplayOptionsRegressionTests
 
             SetPlayerScore(store, host.RoomCode, host.State.PlayerId, 3.5);
             Assert.Equal(2, gameplay.GetEffectiveHandSize(host.RoomCode, host.State.PlayerId));
+            Assert.Equal(2, gameplay.GetDecoratedRoomState(host.RoomCode, host.PlayerToken).BankWords.Count);
             SetPlayerScore(store, host.RoomCode, host.State.PlayerId, 4.5);
             Assert.Equal(1, gameplay.GetEffectiveHandSize(host.RoomCode, host.State.PlayerId));
+            Assert.Single(gameplay.GetDecoratedRoomState(host.RoomCode, host.PlayerToken).BankWords);
 
             ClearPlayerWords(store, host.RoomCode, host.State.PlayerId);
             var finished = gameplay.FinalizePlayerExhaustion(host.RoomCode, host.PlayerToken, host.State.PlayerId);
@@ -43,11 +45,45 @@ public sealed class WordRingsGameplayOptionsRegressionTests
     }
 
     [Fact]
+    public void Exhausted_hand_overrides_the_core_terminal_loss()
+    {
+        var root = CreateRoot();
+        try
+        {
+            var environment = new TestWebHostEnvironment(root);
+            var rooms = WordRingsRoomHostCoordinator.Get(environment);
+            var gameplay = WordRingsGameplayOptionsCoordinator.Get(environment);
+            var store = WordRingsRoomStore.Get(environment);
+            var exhaustion = new WordRingsExhaustionWinOverride(environment);
+
+            var host = rooms.CreateRoom("Host", 5, partialScoreEnabled: false, hostChoosesRules: false);
+            _ = rooms.JoinRoom(host.RoomCode, "Guest");
+            _ = gameplay.ConfigureRoom(host.RoomCode, host.PlayerToken, 5, 5);
+            _ = rooms.StartGame(host.RoomCode, host.PlayerToken);
+
+            ClearPlayerWords(store, host.RoomCode, host.State.PlayerId);
+            SetRoomTerminalLoss(store, host.RoomCode);
+            exhaustion.ApplyForPlayer(host.RoomCode, host.PlayerToken, host.State.PlayerId);
+
+            var state = rooms.GetRoomState(host.RoomCode, host.PlayerToken);
+            Assert.Equal("finished", state.Phase);
+            Assert.Equal("won", state.Outcome);
+            Assert.Equal(host.State.PlayerId, state.WinnerPlayerId);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Gameplay_patch_exposes_five_word_defaults_settings_and_first_turn_roulette()
     {
         var script = ReadWebFile("wwwroot", "js", "word-rings-gameplay-options.js");
         var css = ReadWebFile("wwwroot", "css", "word-rings-gameplay-options.css");
         var service = ReadWebFile("Services", "WordRingsGameplayOptionsCoordinator.cs");
+        var exhaustion = ReadWebFile("Services", "WordRingsExhaustionWinOverride.cs");
+        var api = ReadWebFile("Pages", "WordRingsGameplayOptionsApi.cshtml.cs");
         var tagHelper = ReadWebFile("TagHelpers", "WordRingsActionCardsAssetsTagHelper.cs");
 
         Assert.Contains("targetInput.value = '5';", script, StringComparison.Ordinal);
@@ -70,6 +106,10 @@ public sealed class WordRingsGameplayOptionsRegressionTests
         Assert.Contains("Math.Ceiling(remaining)", service, StringComparison.Ordinal);
         Assert.Contains("dedicatedHostMode && (bool)Get(player, \"IsHost\")!", service, StringComparison.Ordinal);
         Assert.Contains("WinnerPlayerId", service, StringComparison.Ordinal);
+        Assert.Contains("string.Equals(phase, \"Finished\"", exhaustion, StringComparison.Ordinal);
+        Assert.Contains("string.Equals(outcome, \"Lost\"", exhaustion, StringComparison.Ordinal);
+        Assert.Contains("Exhaustion.ApplyForPlayer", api, StringComparison.Ordinal);
+        Assert.Contains("Exhaustion.ApplyForPlacement", api, StringComparison.Ordinal);
 
         Assert.Contains("word-rings-first-turn-winner", css, StringComparison.Ordinal);
         Assert.Contains("grid-template-columns: repeat(3", css, StringComparison.Ordinal);
@@ -97,13 +137,29 @@ public sealed class WordRingsGameplayOptionsRegressionTests
         }
     }
 
+    private static void SetRoomTerminalLoss(WordRingsRoomStore store, string roomCode)
+    {
+        lock (StoreSync(store))
+        {
+            var room = FindRoom(store, roomCode);
+            SetEnum(room, "Phase", "Finished");
+            SetEnum(room, "Outcome", "Lost");
+            Set(room, "WinnerPlayerId", null);
+        }
+    }
+
     private static object FindPlayer(WordRingsRoomStore store, string roomCode, Guid playerId)
+    {
+        var room = FindRoom(store, roomCode);
+        var players = (IList)Get(room, "Players")!;
+        return players.Cast<object>().Single(player => (Guid)Get(player, "Id")! == playerId);
+    }
+
+    private static object FindRoom(WordRingsRoomStore store, string roomCode)
     {
         var roomsField = typeof(WordRingsRoomStore).GetField("_rooms", BindingFlags.Instance | BindingFlags.NonPublic)!;
         var rooms = (IDictionary)roomsField.GetValue(store)!;
-        var room = rooms[roomCode]!;
-        var players = (IList)Get(room, "Players")!;
-        return players.Cast<object>().Single(player => (Guid)Get(player, "Id")! == playerId);
+        return rooms[roomCode]!;
     }
 
     private static object StoreSync(WordRingsRoomStore store) =>
@@ -114,6 +170,12 @@ public sealed class WordRingsGameplayOptionsRegressionTests
 
     private static void Set(object instance, string property, object? value) =>
         instance.GetType().GetProperty(property, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!.SetValue(instance, value);
+
+    private static void SetEnum(object instance, string property, string value)
+    {
+        var propertyInfo = instance.GetType().GetProperty(property, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
+        propertyInfo.SetValue(instance, Enum.Parse(propertyInfo.PropertyType, value));
+    }
 
     private static string ReadWebFile(params string[] pathParts) =>
         File.ReadAllText(Path.Combine(FindRepositoryRoot(), "src", "BadWolfQuiz.Web", Path.Combine(pathParts)));
