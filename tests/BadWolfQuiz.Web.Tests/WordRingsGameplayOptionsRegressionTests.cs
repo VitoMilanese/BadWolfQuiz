@@ -65,10 +65,15 @@ public sealed class WordRingsGameplayOptionsRegressionTests
             SetRoomTerminalLoss(store, host.RoomCode);
             exhaustion.ApplyForPlayer(host.RoomCode, guest.PlayerToken, host.State.PlayerId);
 
-            var state = rooms.GetRoomState(host.RoomCode, guest.PlayerToken);
-            Assert.Equal("finished", state.Phase);
-            Assert.Equal("won", state.Outcome);
-            Assert.Equal(host.State.PlayerId, state.WinnerPlayerId);
+            var guestState = rooms.GetRoomState(host.RoomCode, guest.PlayerToken);
+            Assert.Equal("finished", guestState.Phase);
+            Assert.Equal("lost", guestState.Outcome);
+            Assert.Equal(host.State.PlayerId, guestState.WinnerPlayerId);
+
+            var hostState = rooms.GetRoomState(host.RoomCode, host.PlayerToken);
+            Assert.Equal("finished", hostState.Phase);
+            Assert.Equal("won", hostState.Outcome);
+            Assert.Equal(host.State.PlayerId, hostState.WinnerPlayerId);
         }
         finally
         {
@@ -121,10 +126,10 @@ public sealed class WordRingsGameplayOptionsRegressionTests
 
         Assert.Contains("word-rings-first-turn-winner", css, StringComparison.Ordinal);
         Assert.Contains("grid-template-columns: repeat(3", css, StringComparison.Ordinal);
-        Assert.Contains("word-rings-gameplay-options.js?v=1", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("word-rings-gameplay-options.js?v=2", tagHelper, StringComparison.Ordinal);
         Assert.Contains("word-rings-gameplay-options-followup.js?v=1", tagHelper, StringComparison.Ordinal);
         Assert.True(
-            tagHelper.IndexOf("word-rings-gameplay-options.js?v=1", StringComparison.Ordinal) <
+            tagHelper.IndexOf("word-rings-gameplay-options.js?v=2", StringComparison.Ordinal) <
             tagHelper.IndexOf("word-rings-gameplay-options-followup.js?v=1", StringComparison.Ordinal));
         Assert.True(
             tagHelper.IndexOf("word-rings-gameplay-options-followup.js?v=1", StringComparison.Ordinal) <
