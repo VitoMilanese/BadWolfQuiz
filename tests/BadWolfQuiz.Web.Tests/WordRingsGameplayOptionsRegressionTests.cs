@@ -45,7 +45,7 @@ public sealed class WordRingsGameplayOptionsRegressionTests
     }
 
     [Fact]
-    public void Exhausted_hand_overrides_the_core_terminal_loss()
+    public void Exhausted_hand_overrides_the_core_terminal_loss_from_any_room_polling_client()
     {
         var root = CreateRoot();
         try
@@ -57,15 +57,15 @@ public sealed class WordRingsGameplayOptionsRegressionTests
             var exhaustion = new WordRingsExhaustionWinOverride(environment);
 
             var host = rooms.CreateRoom("Host", 5, partialScoreEnabled: false, hostChoosesRules: false);
-            _ = rooms.JoinRoom(host.RoomCode, "Guest");
+            var guest = rooms.JoinRoom(host.RoomCode, "Guest");
             _ = gameplay.ConfigureRoom(host.RoomCode, host.PlayerToken, 5, 5);
             _ = rooms.StartGame(host.RoomCode, host.PlayerToken);
 
             ClearPlayerWords(store, host.RoomCode, host.State.PlayerId);
             SetRoomTerminalLoss(store, host.RoomCode);
-            exhaustion.ApplyForPlayer(host.RoomCode, host.PlayerToken, host.State.PlayerId);
+            exhaustion.ApplyForPlayer(host.RoomCode, guest.PlayerToken, host.State.PlayerId);
 
-            var state = rooms.GetRoomState(host.RoomCode, host.PlayerToken);
+            var state = rooms.GetRoomState(host.RoomCode, guest.PlayerToken);
             Assert.Equal("finished", state.Phase);
             Assert.Equal("won", state.Outcome);
             Assert.Equal(host.State.PlayerId, state.WinnerPlayerId);
@@ -80,6 +80,7 @@ public sealed class WordRingsGameplayOptionsRegressionTests
     public void Gameplay_patch_exposes_five_word_defaults_settings_and_first_turn_roulette()
     {
         var script = ReadWebFile("wwwroot", "js", "word-rings-gameplay-options.js");
+        var followup = ReadWebFile("wwwroot", "js", "word-rings-gameplay-options-followup.js");
         var css = ReadWebFile("wwwroot", "css", "word-rings-gameplay-options.css");
         var service = ReadWebFile("Services", "WordRingsGameplayOptionsCoordinator.cs");
         var exhaustion = ReadWebFile("Services", "WordRingsExhaustionWinOverride.cs");
@@ -101,6 +102,13 @@ public sealed class WordRingsGameplayOptionsRegressionTests
         Assert.Contains("CaptureWordCounts", script, StringComparison.Ordinal);
         Assert.Contains("RestoreWordCounts", script, StringComparison.Ordinal);
 
+        Assert.Contains("handler !== 'RoomState'", followup, StringComparison.Ordinal);
+        Assert.Contains("findExhaustedPlayer", followup, StringComparison.Ordinal);
+        Assert.Contains("FinalizePlayerExhaustion", followup, StringComparison.Ordinal);
+        Assert.Contains("event.stopImmediatePropagation()", followup, StringComparison.Ordinal);
+        Assert.Contains("syncCreateHandMaximum", followup, StringComparison.Ordinal);
+        Assert.Contains("syncSoloHandMaximum", followup, StringComparison.Ordinal);
+
         Assert.Contains("MinimumHandSize = 5", service, StringComparison.Ordinal);
         Assert.Contains("MaximumHandSize = 10", service, StringComparison.Ordinal);
         Assert.Contains("Math.Ceiling(remaining)", service, StringComparison.Ordinal);
@@ -114,8 +122,12 @@ public sealed class WordRingsGameplayOptionsRegressionTests
         Assert.Contains("word-rings-first-turn-winner", css, StringComparison.Ordinal);
         Assert.Contains("grid-template-columns: repeat(3", css, StringComparison.Ordinal);
         Assert.Contains("word-rings-gameplay-options.js?v=1", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("word-rings-gameplay-options-followup.js?v=1", tagHelper, StringComparison.Ordinal);
         Assert.True(
             tagHelper.IndexOf("word-rings-gameplay-options.js?v=1", StringComparison.Ordinal) <
+            tagHelper.IndexOf("word-rings-gameplay-options-followup.js?v=1", StringComparison.Ordinal));
+        Assert.True(
+            tagHelper.IndexOf("word-rings-gameplay-options-followup.js?v=1", StringComparison.Ordinal) <
             tagHelper.IndexOf("word-rings-action-cards-patch.js?v=2", StringComparison.Ordinal));
     }
 
