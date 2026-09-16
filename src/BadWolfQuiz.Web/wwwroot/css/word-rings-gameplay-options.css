@@ -1,0 +1,61 @@
+.word-rings-room-compact-fields:has([data-create-room-hand-size]) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.word-rings-gameplay-options {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid rgba(87, 166, 226, 0.35);
+    border-radius: 14px;
+    background: rgba(10, 43, 78, 0.38);
+}
+
+.word-rings-gameplay-option-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.word-rings-gameplay-option-fields label {
+    display: grid;
+    gap: 6px;
+}
+
+.word-rings-gameplay-option-fields input {
+    width: 100%;
+}
+
+.word-rings-player-card.is-first-turn-roulette,
+.word-rings-player-card.is-first-turn-selected {
+    position: relative;
+    z-index: 3;
+    outline: 3px solid #ffd84d;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba(255, 216, 77, 0.22), 0 0 24px rgba(255, 216, 77, 0.7);
+    transform: translateY(-1px) scale(1.025);
+}
+
+.word-rings-player-card.is-first-turn-roulette {
+    transition: outline-color 80ms ease, box-shadow 80ms ease, transform 80ms ease;
+}
+
+.word-rings-player-card.is-first-turn-selected {
+    animation: word-rings-first-turn-winner 0.55s ease-in-out 2 alternate;
+}
+
+@keyframes word-rings-first-turn-winner {
+    from {
+        box-shadow: 0 0 0 2px rgba(255, 216, 77, 0.28), 0 0 20px rgba(255, 216, 77, 0.6);
+    }
+    to {
+        box-shadow: 0 0 0 4px rgba(255, 216, 77, 0.42), 0 0 38px rgba(255, 216, 77, 0.95);
+    }
+}
+
+@media (max-width: 760px) {
+    .word-rings-room-compact-fields:has([data-create-room-hand-size]),
+    .word-rings-gameplay-option-fields {
+        grid-template-columns: 1fr;
+    }
+}

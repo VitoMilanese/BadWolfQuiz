@@ -1,0 +1,177 @@
+/* Latest action-card behavior fixes. Loaded after the base Word Rings styles. */
+
+.word-rings-page {
+    padding-top: clamp(12px, 1.25vw, 18px);
+    padding-bottom: clamp(4px, .55vw, 8px);
+    row-gap: clamp(12px, 1.25vw, 18px);
+}
+
+.word-rings-stage-wrap {
+    box-sizing: border-box;
+    padding-top: clamp(12px, 1.35vh, 18px);
+}
+
+.word-rings-stage {
+    align-self: center;
+}
+
+.word-rings-toolbar-progress[hidden] {
+    display: none !important;
+}
+
+/* Keep enough vertical breathing room below the toolbar while preserving the centered playfield. */
+@supports (width: 1cqh) {
+    .word-rings-stage {
+        width: min(100cqw, calc((100cqh - 4px) * 1.4), 1640px);
+    }
+}
+
+.word-rings-bank-column {
+    max-height: 100%;
+}
+
+.word-rings-action-effect-notice {
+    position: fixed;
+    left: 50%;
+    top: 20%;
+    z-index: 2147483001;
+    min-width: min(88vw, 440px);
+    max-width: min(88vw, 720px);
+    padding: 17px 26px;
+    border: 2px solid color-mix(in srgb, var(--notice-accent) 72%, white);
+    border-radius: 19px;
+    background: color-mix(in srgb, var(--notice-surface) 88%, var(--panel));
+    color: white;
+    box-shadow: 0 22px 72px rgb(0 0 0 / 52%), 0 0 44px color-mix(in srgb, var(--notice-accent) 30%, transparent);
+    font-size: clamp(1.05rem, 2.4vw, 1.75rem);
+    font-weight: 1000;
+    line-height: 1.2;
+    text-align: center;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(.72);
+    opacity: 0;
+}
+
+.word-rings-action-effect-notice[hidden] {
+    display: none !important;
+}
+
+.word-rings-action-effect-notice.is-negative {
+    --notice-accent: #ff6b6b;
+    --notice-surface: #8d2030;
+}
+
+.word-rings-action-effect-notice.is-positive {
+    --notice-accent: #66d18f;
+    --notice-surface: #17633a;
+}
+
+.word-rings-action-effect-notice.is-neutral {
+    --notice-accent: #9eb0c7;
+    --notice-surface: #3c4b60;
+}
+
+.word-rings-action-effect-notice.is-visible {
+    animation: word-rings-action-effect-pop 3s cubic-bezier(.2, .85, .24, 1) both;
+}
+
+@keyframes word-rings-action-effect-pop {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(.72) rotate(-1deg); }
+    13% { opacity: 1; transform: translate(-50%, -50%) scale(1.08) rotate(.4deg); }
+    28% { transform: translate(-50%, -50%) scale(.99) rotate(0); }
+    78% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(.9); }
+}
+
+.word-rings-action-patch-dialog {
+    width: min(92vw, 520px);
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--panel);
+    color: var(--text);
+    box-shadow: 0 28px 80px rgb(0 0 0 / 45%);
+}
+
+.word-rings-action-patch-dialog::backdrop {
+    background: rgb(0 0 0 / 68%);
+    backdrop-filter: blur(3px);
+}
+
+.word-rings-action-patch-card {
+    display: grid;
+    gap: 14px;
+    padding: 20px;
+}
+
+.word-rings-action-patch-card h2,
+.word-rings-action-patch-card p {
+    margin: 0;
+}
+
+.word-rings-action-patch-card label {
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: .82rem;
+    font-weight: 850;
+}
+
+.word-rings-action-patch-card select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 40px;
+    padding: 7px 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-weight: 800;
+}
+
+.word-rings-action-patch-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.word-rings-action-patch-error {
+    min-height: 1.2em;
+    color: #ff8b8b;
+    font-size: .8rem;
+}
+
+.word-rings-action-debug-button {
+    display: inline-grid;
+    place-items: center;
+}
+
+.word-rings-action-debug-button[hidden] {
+    display: none !important;
+}
+
+.word-rings-word[data-action-seed-optimistic="true"] {
+    display: none !important;
+}
+
+@media (max-width: 640px) {
+    .word-rings-page {
+        padding-top: 8px;
+        padding-bottom: 4px;
+        row-gap: 8px;
+    }
+
+    .word-rings-stage-wrap {
+        padding-top: 8px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .word-rings-action-effect-notice.is-visible {
+        animation: none;
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}

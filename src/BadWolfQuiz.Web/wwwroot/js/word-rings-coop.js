@@ -23,6 +23,8 @@
     const copyLinkButton = root.querySelector('[data-copy-room-link]');
     const toggleCodeButton = root.querySelector('[data-toggle-room-code]');
     const roomCodeLabel = root.querySelector('[data-room-code-label]');
+    const soundToggle = root.querySelector('[data-room-sound-enabled]');
+    const soundIcon = root.querySelector('[data-room-sound-icon]');
     const joinDialog = root.querySelector('[data-join-room-dialog]');
     const joinForm = root.querySelector('[data-join-room-form]');
     const joinName = root.querySelector('[data-join-room-name]');
@@ -32,6 +34,7 @@
     const apiUrl = root.dataset.roomApiUrl;
     const nicknameKey = 'badwolf.wordrings.nickname';
     const storageKey = `badwolf.wordrings.room.${roomCode}`;
+    const soundStorageKey = 'badwolf.wordrings.sound-enabled';
     const maximumBankWords = Number.parseInt(root.dataset.bankWordLimit || '10', 10) || 10;
 
     if (!stage || !placedLayer || !wordList || !progress || !checkButton || !roomCode || !apiUrl) return;
@@ -57,6 +60,12 @@
     let roomFeedbackTimer = null;
     let roomEventCursor = null;
     let roomAudioContext = null;
+    let soundEffectsEnabled = true;
+    try {
+        soundEffectsEnabled = localStorage.getItem(soundStorageKey) !== 'false';
+    } catch {
+        soundEffectsEnabled = true;
+    }
     let lastTimerTickSlot = null;
     let placementHistoryInitialized = false;
     const placementHistory = new Map();
@@ -64,6 +73,26 @@
         ? window.BadWolfWordRingsPlacementFeedback({ root })
         : null;
     const defaultWordBankHeading = wordBankHeading?.textContent || '';
+
+    const renderSoundToggle = () => {
+        if (soundToggle instanceof HTMLInputElement) soundToggle.checked = soundEffectsEnabled;
+        if (soundIcon instanceof HTMLElement) soundIcon.textContent = soundEffectsEnabled ? '🔊' : '🔇';
+    };
+    renderSoundToggle();
+    soundToggle?.addEventListener('change', () => {
+        soundEffectsEnabled = soundToggle instanceof HTMLInputElement ? soundToggle.checked : true;
+        try {
+            localStorage.setItem(soundStorageKey, String(soundEffectsEnabled));
+        } catch {
+            // Local persistence is optional.
+        }
+        renderSoundToggle();
+        if (!soundEffectsEnabled && roomAudioContext?.state === 'running') {
+            void roomAudioContext.suspend().catch(() => {});
+        } else if (soundEffectsEnabled) {
+            unlockRoomAudio();
+        }
+    });
 
     const format = (template, ...values) => values.reduce(
         (result, value, index) => result.replace(`{${index}}`, String(value)),
@@ -90,6 +119,7 @@
     };
 
     const unlockRoomAudio = () => {
+        if (!soundEffectsEnabled) return;
         const context = createRoomAudioContext();
         if (context?.state === 'suspended') {
             void context.resume().catch(error =>
@@ -133,6 +163,7 @@
     };
 
     const playRoomSignal = type => {
+        if (!soundEffectsEnabled) return;
         const context = createRoomAudioContext();
         if (!context) return;
         const play = () => {
@@ -148,6 +179,7 @@
     };
 
     const playTimerTick = slot => {
+        if (!soundEffectsEnabled) return;
         const context = createRoomAudioContext();
         if (!context || context.state !== 'running') return;
         const oscillator = context.createOscillator();
@@ -244,6 +276,13 @@
         topZIndex += 1;
         token.style.zIndex = String(topZIndex);
     };
+
+    placedLayer.addEventListener('pointerdown', event => {
+        const token = event.target instanceof Element
+            ? event.target.closest('.word-rings-word')
+            : null;
+        if (token instanceof HTMLElement && placedLayer.contains(token)) bringToFront(token);
+    }, true);
 
     const pointIsInsideRing = (clientX, clientY, ring) => {
         if (!ring) return false;
@@ -359,28 +398,51 @@
 
     const visibleBankWords = () => [...wordList.querySelectorAll('.word-rings-word[data-word]')]
         .filter(token => !token.hidden);
+    const regularVisibleBankWords = () => visibleBankWords()
+        .filter(token => !token.classList.contains('is-action-temporary-word'));
 
     const replenishLocalBank = () => {
-        while (visibleBankWords().length < maximumBankWords && localQueuedWords.length > 0) {
+        while (regularVisibleBankWords().length < maximumBankWords && localQueuedWords.length > 0) {
             createBankWord(localQueuedWords.shift());
         }
     };
 
     const trimLocalBank = returnedWord => {
-        let visible = visibleBankWords();
+        let visible = regularVisibleBankWords();
         while (visible.length > maximumBankWords) {
             const removable = [...visible].reverse().find(item => item.dataset.word !== returnedWord);
             if (!(removable instanceof HTMLElement)) break;
             if (removable.dataset.word) localQueuedWords.unshift(removable.dataset.word);
             removable.remove();
-            visible = visibleBankWords();
+            visible = regularVisibleBankWords();
         }
     };
 
     const renderBank = nextState => {
+        const preservedOverflow = new Map(
+            [...wordList.querySelectorAll('.word-rings-word[data-action-overflow-word="true"]')]
+                .filter(token => token instanceof HTMLButtonElement)
+                .map(token => [String(token.dataset.word || '').toLocaleLowerCase(), token]));
+
         wordList.replaceChildren();
-        for (const word of nextState.bankWords || []) createBankWord(word);
+        for (const word of nextState.bankWords || []) {
+            const key = String(word).toLocaleLowerCase();
+            const preserved = preservedOverflow.get(key);
+            if (preserved) {
+                preservedOverflow.delete(key);
+                delete preserved.dataset.actionOverflowWord;
+                wordList.append(preserved);
+                wireWord?.(preserved);
+            } else {
+                createBankWord(word);
+            }
+        }
+        preservedOverflow.forEach(token => {
+            wordList.append(token);
+            wireWord?.(token);
+        });
         localQueuedWords = [...(nextState.queuedWords || [])];
+        root.dispatchEvent(new CustomEvent('wordrings:bank-rendered'));
     };
 
     const removePendingToken = () => {
@@ -516,7 +578,10 @@
 
     const canBegin = (word, source) => {
         if (isServerPlacementToken(source)) {
-            if (source.dataset.roomSeed === 'true') return !requestInFlight && isHostSeedSetup();
+            if (source.dataset.roomSeed === 'true') {
+                if (state?.seedSetupPending === true) return !requestInFlight && isHostSeedSetup();
+                return !requestInFlight && state?.phase === 'playing';
+            }
             if (source.dataset.roomHostedPending === 'true') {
                 return !requestInFlight && canJudgePendingPlacement();
             }
@@ -528,7 +593,11 @@
     };
     const canDropStage = (word, membership, source) => {
         if (isServerPlacementToken(source)) {
-            if (source.dataset.roomSeed === 'true') return canBegin(word, source);
+            if (source.dataset.roomSeed === 'true') {
+                if (!canBegin(word, source)) return false;
+                return isHostSeedSetup() ||
+                    canonical(membership) === canonical(source.dataset.membership);
+            }
             if (source.dataset.roomHostedPending === 'true') return canBegin(word, source);
             return canBegin(word, source) &&
                 canonical(membership) === canonical(source.dataset.membership);
@@ -537,7 +606,10 @@
     };
     const canDropOutside = (word, source) => {
         if (isServerPlacementToken(source)) {
-            if (source.dataset.roomSeed === 'true') return canBegin(word, source);
+            if (source.dataset.roomSeed === 'true') {
+                if (!canBegin(word, source)) return false;
+                return isHostSeedSetup() || canonical(source.dataset.membership) === '';
+            }
             if (source.dataset.roomHostedPending === 'true') return canBegin(word, source);
             return canBegin(word, source) && canonical(source.dataset.membership) === '';
         }
@@ -589,7 +661,9 @@
             token.textContent = placement.word;
             const awaitingHost = placement.isPending === true;
             const seedExample = placement.isSeed === true;
-            if (awaitingHost && placementHistory.get(placementId)?.isPending !== true) {
+            const previousPlacement = placementHistory.get(placementId);
+            if ((placementHistoryInitialized && previousPlacement === undefined) ||
+                (awaitingHost && previousPlacement?.isPending !== true)) {
                 bringToFront(token);
             }
             token.title = seedExample
@@ -611,7 +685,7 @@
                 'is-wrong',
                 !seedExample && !awaitingHost && placement.isCorrect !== true && !(placement.isPartial === true && Number(placement.pointsAwarded) > 0));
 
-            const previous = placementHistory.get(placementId);
+            const previous = previousPlacement;
             if (placementHistoryInitialized && !seedExample && !awaitingHost &&
                 (previous === undefined || previous.isPending === true)) {
                 const kind = placement.isCorrect === true
@@ -688,12 +762,16 @@
             name.textContent = player.name;
             main.append(name);
 
-            const meta = document.createElement('div');
-            meta.className = 'word-rings-player-meta';
-            const score = document.createElement('span');
-            score.textContent = `${formatScore(player.score)} pt`;
-            meta.append(score);
-            card.append(main, meta);
+            card.append(main);
+            const dedicatedHostCard = state?.dedicatedHostMode === true && player.isHost === true;
+            if (!dedicatedHostCard) {
+                const meta = document.createElement('div');
+                meta.className = 'word-rings-player-meta';
+                const score = document.createElement('span');
+                score.textContent = `${formatScore(player.score)} pt`;
+                meta.append(score);
+                card.append(meta);
+            }
             playersList.append(card);
         }
     };
@@ -823,13 +901,14 @@
         state = nextState;
         processRoomEvents(nextState);
         if (nextState.phase === 'playing') resultShown = false;
+        const dedicatedHostViewer = nextState.dedicatedHostMode === true && nextState.isHost === true;
         const ownScore = nextState.players?.find(player => player.id === nextState.playerId)?.score
             ?? nextState.playerScore
             ?? 0;
-        progress.textContent = format(
-            root.dataset.roomScoreTemplate,
-            formatScore(ownScore),
-            nextState.targetScore);
+        progress.hidden = dedicatedHostViewer;
+        progress.textContent = dedicatedHostViewer
+            ? ''
+            : format(root.dataset.roomScoreTemplate, formatScore(ownScore), nextState.targetScore);
         renderPlayers(nextState.players);
         renderRules(nextState);
         renderPlacements(nextState.placements);

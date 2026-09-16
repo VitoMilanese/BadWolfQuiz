@@ -9,7 +9,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class WordRingsAchievementRegressionTests
 {
     [Fact]
-    public void Catalog_contains_the_ten_Word_Rings_achievements_with_expected_targets()
+    public void Catalog_contains_the_nineteen_Word_Rings_achievements_with_expected_targets()
     {
         var expected = new Dictionary<string, int>
         {
@@ -22,7 +22,16 @@ public sealed class WordRingsAchievementRegressionTests
             ["WordRingsBlue50"] = 50,
             ["WordRingsYellow50"] = 50,
             ["WordRingsRed50"] = 50,
-            ["WordRingsHost10"] = 10
+            ["WordRingsHost10"] = 10,
+            ["WordRingsCleanseImmediate"] = 1,
+            ["WordRingsShieldSave"] = 1,
+            ["WordRingsMaskedCorrect"] = 1,
+            ["WordRingsAnagramCorrect"] = 1,
+            ["WordRingsHintTripleCorrect"] = 1,
+            ["WordRingsStealMaskedWord"] = 1,
+            ["WordRingsStealAnagramWord"] = 1,
+            ["WordRingsStealBlockedWord"] = 1,
+            ["WordRingsFirstEmptyActionHand"] = 1
         };
 
         foreach (var pair in expected)
@@ -148,7 +157,7 @@ public sealed class WordRingsAchievementRegressionTests
             .Where(item => item.Code.StartsWith("WordRings", StringComparison.Ordinal))
             .Select(item => item.Code)
             .ToArray();
-        Assert.Equal(10, codes.Length);
+        Assert.Equal(19, codes.Length);
 
         foreach (var suffix in new[] { "AchievementResource.resx", "AchievementResource.uk.resx", "AchievementResource.it.resx", "AchievementResource.ru.resx" })
         {

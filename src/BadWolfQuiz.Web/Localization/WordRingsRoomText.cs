@@ -26,6 +26,7 @@ public sealed record WordRingsRoomText
     public string LinkCopied { get; init; } = "Room link copied";
     public string ShowCode { get; init; } = "Show room code";
     public string HideCode { get; init; } = "Hide room code";
+    public string SoundEffects { get; init; } = "Sound effects";
     public string StartGame { get; init; } = "Start game";
     public string ShowResult { get; init; } = "Show result";
     public string WaitingForPlayers { get; init; } = "Waiting for players. The host can start when at least one other player is in the room.";
@@ -99,6 +100,7 @@ public sealed record WordRingsRoomText
         LinkCopied = "Посилання на кімнату скопійовано",
         ShowCode = "Показати код кімнати",
         HideCode = "Приховати код кімнати",
+        SoundEffects = "Звукові ефекти",
         StartGame = "Почати гру",
         ShowResult = "Показати результат",
         WaitingForPlayers = "Очікування гравців. Власник може почати гру, коли до кімнати приєднається хоча б ще один гравець.",
@@ -162,6 +164,7 @@ public sealed record WordRingsRoomText
         LinkCopied = "Link della stanza copiato",
         ShowCode = "Mostra codice stanza",
         HideCode = "Nascondi codice stanza",
+        SoundEffects = "Effetti sonori",
         StartGame = "Avvia partita",
         ShowResult = "Mostra risultato",
         WaitingForPlayers = "In attesa dei giocatori. L'host può iniziare quando entra almeno un altro giocatore.",
@@ -225,6 +228,7 @@ public sealed record WordRingsRoomText
         LinkCopied = "Україна",
         ShowCode = "Україна",
         HideCode = "Україна",
+        SoundEffects = "Україна",
         StartGame = "Україна",
         ShowResult = "Україна",
         WaitingForPlayers = "Україна",

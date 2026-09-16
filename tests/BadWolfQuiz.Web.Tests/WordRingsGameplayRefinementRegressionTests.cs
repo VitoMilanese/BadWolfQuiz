@@ -43,7 +43,7 @@ public sealed class WordRingsGameplayRefinementRegressionTests
         Assert.Contains("PuzzleSelectionAttempts = 32", model, StringComparison.Ordinal);
         Assert.Contains("previousWords", model, StringComparison.Ordinal);
         Assert.Contains("replenishWordBank", script, StringComparison.Ordinal);
-        Assert.Contains("visibleBankWords().length < maximumBankWords", script, StringComparison.Ordinal);
+        Assert.Contains("regularVisibleBankWords().length < maximumBankWords", script, StringComparison.Ordinal);
         Assert.Contains("queuedWords.shift()", script, StringComparison.Ordinal);
         Assert.Contains("trimWordBankToLimit", script, StringComparison.Ordinal);
         Assert.Contains("correctCount()", script, StringComparison.Ordinal);
@@ -195,7 +195,7 @@ public sealed class WordRingsGameplayRefinementRegressionTests
         Assert.Contains("moveWordToCorrectMembership(word, expectedMembership)", script, StringComparison.Ordinal);
         Assert.Contains("lockedMemberships.set(word, expectedMembership)", script, StringComparison.Ordinal);
         Assert.Contains("lockedMemberships.get(word) === normalized", script, StringComparison.Ordinal);
-        Assert.Contains("canReturnToBank = word => !gameOver && !verdicts.has(word)", script, StringComparison.Ordinal);
+        Assert.Contains("canReturnToBank = (word, source) =>", script, StringComparison.Ordinal);
         Assert.Contains("bringToFront", script, StringComparison.Ordinal);
 
         Assert.Contains("canBegin", pointerDrag, StringComparison.Ordinal);

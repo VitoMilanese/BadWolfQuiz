@@ -9,9 +9,9 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class PlayerAchievementServiceTests
 {
     [Fact]
-    public void Catalog_contains_all_ninety_achievements()
+    public void Catalog_contains_all_ninety_nine_achievements()
     {
-        Assert.Equal(90, PlayerAchievementService.Catalog.Count);
+        Assert.Equal(99, PlayerAchievementService.Catalog.Count);
 
         var expectedCodes = new[]
         {
@@ -30,6 +30,15 @@ public sealed class PlayerAchievementServiceTests
             "WordRingsYellow50",
             "WordRingsRed50",
             "WordRingsHost10",
+            "WordRingsCleanseImmediate",
+            "WordRingsShieldSave",
+            "WordRingsMaskedCorrect",
+            "WordRingsAnagramCorrect",
+            "WordRingsHintTripleCorrect",
+            "WordRingsStealMaskedWord",
+            "WordRingsStealAnagramWord",
+            "WordRingsStealBlockedWord",
+            "WordRingsFirstEmptyActionHand",
             "GitHubVisitor",
             "QuizRated",
             "AllInCorrect",
@@ -102,7 +111,7 @@ public sealed class PlayerAchievementServiceTests
             PlayerTagAchievementCatalog.Definitions.Where(item => item.Target == 25),
             item => Assert.False(item.IsSecret));
         Assert.All(
-            PlayerTagAchievementCatalog.Definitions.Where(item => item.Target == 1),
+            PlayerTagAchievementCatalog.Definitions.Where(item => item.Target == 1 && item.TagGroup is not null),
             item => Assert.True(item.IsSecret));
     }
 

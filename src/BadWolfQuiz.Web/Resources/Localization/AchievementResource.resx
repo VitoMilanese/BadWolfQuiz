@@ -194,4 +194,22 @@
   <data name="WordRingsRed50_Description" xml:space="preserve"><value>Correctly place 50 words cumulatively in the red ring.</value></data>
   <data name="WordRingsHost10_Name" xml:space="preserve"><value>Veteran referee</value></data>
   <data name="WordRingsHost10_Description" xml:space="preserve"><value>Run 10 “Word Rings” games as a non-playing host who judges the words.</value></data>
+  <data name="WordRingsCleanseImmediate_Name" xml:space="preserve"><value>Instant Cleanse</value></data>
+  <data name="WordRingsCleanseImmediate_Description" xml:space="preserve"><value>Apply a negative effect to a player and immediately remove it with Cleanse.</value></data>
+  <data name="WordRingsShieldSave_Name" xml:space="preserve"><value>Under the Shield</value></data>
+  <data name="WordRingsShieldSave_Description" xml:space="preserve"><value>Avoid a negative effect thanks to Shield.</value></data>
+  <data name="WordRingsMaskedCorrect_Name" xml:space="preserve"><value>Through the Mask</value></data>
+  <data name="WordRingsMaskedCorrect_Description" xml:space="preserve"><value>Correctly place a word while some of its letters are hidden by Mask.</value></data>
+  <data name="WordRingsAnagramCorrect_Name" xml:space="preserve"><value>Solved Anagram</value></data>
+  <data name="WordRingsAnagramCorrect_Description" xml:space="preserve"><value>Correctly place a word while it is affected by Anagram.</value></data>
+  <data name="WordRingsHintTripleCorrect_Name" xml:space="preserve"><value>Hint on Target</value></data>
+  <data name="WordRingsHintTripleCorrect_Description" xml:space="preserve"><value>Place a Hint-highlighted word in the intersection of all three rings and have it accepted as correct.</value></data>
+  <data name="WordRingsStealMaskedWord_Name" xml:space="preserve"><value>Masked Steal</value></data>
+  <data name="WordRingsStealMaskedWord_Description" xml:space="preserve"><value>Steal a word currently affected by Mask.</value></data>
+  <data name="WordRingsStealAnagramWord_Name" xml:space="preserve"><value>Stolen Anagram</value></data>
+  <data name="WordRingsStealAnagramWord_Description" xml:space="preserve"><value>Steal a word currently affected by Anagram.</value></data>
+  <data name="WordRingsStealBlockedWord_Name" xml:space="preserve"><value>Steal the Forbidden</value></data>
+  <data name="WordRingsStealBlockedWord_Description" xml:space="preserve"><value>Steal a word currently blocked by Block.</value></data>
+  <data name="WordRingsFirstEmptyActionHand_Name" xml:space="preserve"><value>Play Them All</value></data>
+  <data name="WordRingsFirstEmptyActionHand_Description" xml:space="preserve"><value>In multiplayer, be the first player to use every action card in your hand.</value></data>
 </root>

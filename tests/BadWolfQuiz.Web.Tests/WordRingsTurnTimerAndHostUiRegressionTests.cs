@@ -150,7 +150,7 @@ public sealed class WordRingsTurnTimerAndHostUiRegressionTests
 
         Assert.Contains("BadWolfWordRingsPlacementFeedback", feedback, StringComparison.Ordinal);
         Assert.Contains("placementFeedback?.play", coop, StringComparison.Ordinal);
-        Assert.Contains("awaitingHost && placementHistory.get(placementId)?.isPending !== true", coop, StringComparison.Ordinal);
+        Assert.Contains("awaitingHost && previousPlacement?.isPending !== true", coop, StringComparison.Ordinal);
         Assert.Contains("placementFeedback?.play", solo, StringComparison.Ordinal);
         Assert.Contains("is-feedback-correct", roomCss, StringComparison.Ordinal);
         Assert.Contains("is-feedback-partial", roomCss, StringComparison.Ordinal);

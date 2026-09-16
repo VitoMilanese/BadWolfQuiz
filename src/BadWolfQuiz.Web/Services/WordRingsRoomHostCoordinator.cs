@@ -245,9 +245,16 @@ public sealed class WordRingsRoomHostCoordinator
         {
             var current = GetRoomState(code, playerToken);
             var placement = current.Placements.FirstOrDefault(item => item.Id == placementId);
-            if (placement?.IsSeed == true && !IsSeedSetupPending(code))
+            if (placement?.IsSeed == true)
             {
-                throw new InvalidOperationException("SeedSetupFinished");
+                if (IsSeedSetupPending(code))
+                {
+                    if (!current.IsHost) throw new WordRingsRoomException(WordRingsRoomError.NotHost);
+                }
+                else
+                {
+                    membership = placement.Membership;
+                }
             }
         }
         var state = dedicatedHost

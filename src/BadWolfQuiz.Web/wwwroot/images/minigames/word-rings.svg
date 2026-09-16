@@ -1,15 +1,159 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-hidden="true">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Three glowing rings with clean icons for word, attribute, and context">
   <defs>
     <radialGradient id="bg" cx="50%" cy="44%" r="72%">
       <stop offset="0" stop-color="#242936"/>
       <stop offset="1" stop-color="#0b0d12"/>
     </radialGradient>
-    <filter id="glow"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+
+    <filter id="ringGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="iconShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+
+    <filter id="softGlowBlue" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#7ea7ff" flood-opacity="0.45"/>
+    </filter>
+
+    <filter id="softGlowGold" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#ffd76b" flood-opacity="0.45"/>
+    </filter>
+
+    <filter id="softGlowRed" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#ff8e8e" flood-opacity="0.45"/>
+    </filter>
+
+    <linearGradient id="bookCover" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#93b3ff"/>
+      <stop offset="1" stop-color="#4b73e9"/>
+    </linearGradient>
+    <linearGradient id="page" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dde7ff"/>
+    </linearGradient>
+    <linearGradient id="bookSpine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dbe6ff"/>
+      <stop offset="1" stop-color="#acc3ff"/>
+    </linearGradient>
+
+    <linearGradient id="goldPanel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe287"/>
+      <stop offset="1" stop-color="#d09a13"/>
+    </linearGradient>
+    <linearGradient id="goldInner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff7d7"/>
+      <stop offset="1" stop-color="#ffe49e"/>
+    </linearGradient>
+
+    <linearGradient id="mapPaper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff7f7"/>
+      <stop offset="1" stop-color="#ffdede"/>
+    </linearGradient>
+    <linearGradient id="pinFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff9f9f"/>
+      <stop offset="1" stop-color="#e14d4d"/>
+    </linearGradient>
   </defs>
+
   <rect width="1600" height="900" fill="url(#bg)"/>
-  <g fill="none" stroke-width="28" filter="url(#glow)" opacity=".94" transform="translate(0 -38)">
+
+  <g fill="none" stroke-width="28" filter="url(#ringGlow)" opacity=".95" transform="translate(0 -38)">
     <circle cx="610" cy="365" r="255" stroke="#5f86ee"/>
     <circle cx="990" cy="365" r="255" stroke="#e0b43c"/>
     <circle cx="800" cy="610" r="255" stroke="#e85d5d"/>
+  </g>
+
+  <!-- Blue ring: dictionary / book -->
+  <g transform="translate(610 327)" filter="url(#iconShadow)">
+    <g filter="url(#softGlowBlue)">
+      <!-- covers -->
+      <path d="M-150 -96 Q-70 -110 -8 -82 V106 Q-72 78 -150 96 Z" fill="url(#bookCover)" stroke="#e6eeff" stroke-width="5"/>
+      <path d="M8 -82 Q70 -110 150 -96 V96 Q72 78 8 106 Z" fill="url(#bookCover)" stroke="#e6eeff" stroke-width="5"/>
+
+      <!-- pages -->
+      <path d="M-126 -70 Q-67 -82 -16 -58 V82 Q-68 58 -126 70 Z" fill="url(#page)"/>
+      <path d="M16 -58 Q67 -82 126 -70 V70 Q68 58 16 82 Z" fill="url(#page)"/>
+
+      <!-- spine -->
+      <path d="M-8 -88 C-16 -55 -16 69 -8 104 H8 C16 69 16 -55 8 -88 Z" fill="url(#bookSpine)" stroke="#ffffff" stroke-width="4"/>
+
+      <!-- page lines -->
+      <g stroke="#8aa3e3" stroke-width="6" stroke-linecap="round" opacity="0.92">
+        <path d="M-106 -28 H-42"/>
+        <path d="M-106 -2 H-28"/>
+        <path d="M-106 24 H-48"/>
+        <path d="M-106 50 H-34"/>
+        <path d="M42 -28 H106"/>
+        <path d="M28 -2 H106"/>
+        <path d="M48 24 H106"/>
+        <path d="M34 50 H106"/>
+      </g>
+
+      <!-- bookmark -->
+      <path d="M104 -88 V-6 L79 -24 L54 -6 V-88 Z" fill="#2f53c6" opacity="0.9"/>
+      <!-- small badge on cover -->
+      <g transform="translate(0 -20)">
+        <circle cx="0" cy="0" r="22" fill="#5f86ee" stroke="#ffffff" stroke-width="4"/>
+        <polygon points="0,-14 3.5,-4.9 13.3,-4.3 5.7,1.9 8.2,11.3 0,6 -8.2,11.3 -5.7,1.9 -13.3,-4.3 -3.5,-4.9" fill="#ffffff" opacity="0.98"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Yellow ring: attribute / property panel -->
+  <g transform="translate(990 365)" filter="url(#iconShadow)">
+    <g filter="url(#softGlowGold)">
+      <rect x="-138" y="-95" width="276" height="190" rx="34" fill="url(#goldPanel)" stroke="#fff2c8" stroke-width="6"/>
+      <rect x="-112" y="-68" width="224" height="136" rx="24" fill="url(#goldInner)" opacity="0.96"/>
+
+      <!-- sparkle / trait emblem -->
+      <g transform="translate(0 -12)">
+        <circle cx="0" cy="0" r="27" fill="#fff6d8" stroke="#d9a117" stroke-width="4"/>
+        <path d="M0 -17 L6 -5 L18 0 L6 5 L0 17 L-6 5 L-18 0 L-6 -5 Z" fill="#e0b43c"/>
+      </g>
+
+      <!-- sliders -->
+      <g stroke="#bb8609" stroke-width="8" stroke-linecap="round" fill="none">
+        <path d="M-72 28 H72"/>
+        <path d="M-72 54 H72"/>
+      </g>
+      <g>
+        <circle cx="-12" cy="28" r="12" fill="#e0b43c" stroke="#9b6f05" stroke-width="4"/>
+        <circle cx="32" cy="54" r="12" fill="#e0b43c" stroke="#9b6f05" stroke-width="4"/>
+      </g>
+
+      <!-- tiny edge sparkles -->
+      <g fill="#fff7d7" opacity="0.95">
+        <circle cx="-96" cy="-36" r="5"/>
+        <circle cx="98" cy="-26" r="4"/>
+        <circle cx="-88" cy="60" r="4"/>
+        <circle cx="88" cy="62" r="5"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Red ring: context / place -->
+  <g transform="translate(800 592)" filter="url(#iconShadow)">
+    <g filter="url(#softGlowRed)">
+      <!-- folded map -->
+      <path d="M-170 84 L-92 -78 L-10 -24 L78 -86 L170 76 L86 124 L-4 70 L-92 126 Z" fill="url(#mapPaper)" stroke="#ffe1e1" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M-92 -78 L-92 126" stroke="#efb2b2" stroke-width="5"/>
+      <path d="M-10 -24 L-4 70" stroke="#efb2b2" stroke-width="5"/>
+      <path d="M78 -86 L86 124" stroke="#efb2b2" stroke-width="5"/>
+      <path d="M-124 -8 Q-68 18 -10 -24 Q38 4 78 -86" stroke="#efb2b2" stroke-width="5" fill="none"/>
+      <path d="M-92 58 Q-46 26 -4 70 Q44 38 86 124" stroke="#efb2b2" stroke-width="5" fill="none"/>
+
+      <!-- location pin -->
+      <g transform="translate(18 -10)">
+        <path d="M0 -116 C58 -116 104 -71 104 -18 C104 60 0 146 0 146 C0 146 -104 60 -104 -18 C-104 -71 -58 -116 0 -116 Z" fill="url(#pinFill)" stroke="#ffe2e2" stroke-width="6"/>
+        <circle cx="0" cy="-22" r="36" fill="#fff7f7" opacity="0.96"/>
+        <circle cx="0" cy="-22" r="14" fill="#e85d5d"/>
+      </g>
+    </g>
   </g>
 </svg>

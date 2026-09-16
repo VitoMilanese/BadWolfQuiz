@@ -85,6 +85,13 @@
 
     <header class="minigames-toolbar word-rings-toolbar">
         <div class="minigames-toolbar-title word-rings-toolbar-title">
+            @if (isCooperativeRoom)
+            {
+                <label class="word-rings-sound-toggle" title="@roomText.SoundEffects">
+                    <input type="checkbox" data-room-sound-enabled aria-label="@roomText.SoundEffects" checked />
+                    <span data-room-sound-icon aria-hidden="true">🔊</span>
+                </label>
+            }
             <h1>@WordRingsLocalizer["Title"]</h1>
             @if (isCooperativeRoom)
             {

@@ -21,7 +21,16 @@ public static class PlayerTagAchievementCatalog
         new("DoctorWhoTag", "🕰️", true, PlayerAchievementMetric.TaggedAnswers, 1, "DoctorWhoTag"),
         new("RobocopTag", "🤖", true, PlayerAchievementMetric.TaggedAnswers, 1, "RobocopTag"),
         new("TerminatorTag", "🦾", true, PlayerAchievementMetric.TaggedAnswers, 1, "TerminatorTag"),
-        new("MafiaGodfatherTag", "🤵", true, PlayerAchievementMetric.TaggedAnswers, 1, "MafiaGodfatherTag")
+        new("MafiaGodfatherTag", "🤵", true, PlayerAchievementMetric.TaggedAnswers, 1, "MafiaGodfatherTag"),
+        new("WordRingsCleanseImmediate", "🧼", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsShieldSave", "🛡️", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsMaskedCorrect", "🎭", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsAnagramCorrect", "🔀", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsHintTripleCorrect", "💡", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsStealMaskedWord", "🥷", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsStealAnagramWord", "🌀", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsStealBlockedWord", "🔒", false, PlayerAchievementMetric.DirectUnlock, 1),
+        new("WordRingsFirstEmptyActionHand", "🃏", false, PlayerAchievementMetric.DirectUnlock, 1)
     ];
 
     private static readonly IReadOnlyDictionary<string, HashSet<string>> TagGroups =

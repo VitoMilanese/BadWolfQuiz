@@ -38,7 +38,7 @@ Direct events that need the result of the current game are tracked as pending ru
 
 ## Catalog
 
-The initial catalog in Web `1.27.0` contained 47 achievements. Web `1.29.0` expanded the catalog to 65 achievements, and Web `1.32.0` expands it again to 80. The source of truth for codes, secrecy, metrics, and numeric targets is `PlayerAchievementService.Catalog`.
+The initial catalog in Web `1.27.0` contained 47 achievements. Web `1.29.0` expanded the catalog to 65 achievements, Web `1.32.0` expanded it to 80, and the current Word Rings action-card expansion brings the built-in catalog to **99 achievements**. The source of truth for codes, secrecy, metrics, and numeric targets is `PlayerAchievementService.Catalog`.
 
 Long-term progression includes the first completed game, first correct answer, 5 and 25 completed games, 25 and 100 correct answers, first and fifth wins, a five-answer correct streak, score milestones, flawless play, recovery from a negative score, consecutive wins, and one-month / six-month / one-year participation spans. `BigGame` unlocks at a final score of at least **15,000** points; additional score milestones cover 30,000 in one game and 100,000 / 500,000 / 1,000,000 accumulated points.
 
@@ -146,7 +146,7 @@ The achievement test suite covers catalog composition and ordering, the 15,000-p
 
 ## Word Rings achievements
 
-`Слівце в кільце` contributes ten built-in player achievements. Word Rings progress and unlocks are recorded only when at least one registered account anchors the session: either the room host is registered or the player earning the achievement is registered. The two conditions are independent and either one is sufficient; a guest player in a guest-hosted room does not create Word Rings achievement progress. A guest playing under a registered host uses the existing `HostId + normalized nickname` fallback identity, while a registered player can earn progress on their account even when the room host is not registered. Solo play has no separate host identity, so the player must be signed in to earn the solo and placement achievements; the AI-play achievement unlocks after the signed-in player submits a checked word.
+`Слівце в кільце` contributes **19 built-in player achievements**. Word Rings progress and unlocks are recorded only when at least one registered account anchors the session: either the room host is registered or the player earning the achievement is registered. The two conditions are independent and either one is sufficient; a guest player in a guest-hosted room does not create Word Rings achievement progress. A guest playing under a registered host uses the existing `HostId + normalized nickname` fallback identity, while a registered player can earn progress on their account even when the room host is not registered. Solo play has no separate host identity, so the player must be signed in to earn the solo and placement achievements; the AI-play achievement unlocks after the signed-in player submits a checked word.
 
 Word Rings records private `__WR...` progress events in the existing `PlayerAchievements` table, so no separate database schema is required. These internal rows are excluded from normal achievement lists but preserve cumulative progress across sessions for:
 
@@ -155,6 +155,8 @@ Word Rings records private `__WR...` progress events in the existing `PlayerAchi
 - 50 fully correct placements involving the yellow ring;
 - 50 fully correct placements involving the red ring;
 - 10 completed games as a dedicated non-playing host/referee.
+
+The action-card expansion adds nine public direct-unlock achievements: immediate Cleanse after applying a negative effect, Shield blocking a negative effect, a correct Masked word, a correct Anagrammed word, a Hint-highlighted correct `ABC` placement, stealing a Masked word, stealing an Anagrammed word, stealing a Blocked word, and being the first multiplayer participant to use every action card in hand. Their codes are `WordRingsCleanseImmediate`, `WordRingsShieldSave`, `WordRingsMaskedCorrect`, `WordRingsAnagramCorrect`, `WordRingsHintTripleCorrect`, `WordRingsStealMaskedWord`, `WordRingsStealAnagramWord`, `WordRingsStealBlockedWord`, and `WordRingsFirstEmptyActionHand`.
 
 A fully correct `ABC` placement unlocks the three-ring achievement. Three consecutive fully correct placements outside every ring unlock the outside-streak achievement; any partial or wrong adjudication breaks that streak. In dedicated-host mode the host's final manual verdict is authoritative: only **Correct** counts as fully correct, while a host-moved 0.5-point or 0-point placement does not contribute to the fully-correct counters.
 
